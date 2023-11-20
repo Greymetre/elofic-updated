@@ -1,0 +1,72 @@
+<?php
+
+namespace App\Models;
+
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Passport\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
+
+class User extends Authenticatable
+{
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+          'active','name', 'first_name', 'last_name', 'mobile', 'email', 'email_verified_at', 'password', 'notification_id', 'device_type', 'gender', 'profile_image', 'latitude', 'longitude', 'region_id', 'remember_token', 'deleted_at', 'created_at', 'updated_at','location' , 'reportingid' 
+    ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
+
+    protected $guard_name = 'users';
+
+    public function createdbyname()
+    {
+        return $this->belongsTo('App\Models\User', 'created_by', 'id')->select('id','name');
+    }
+
+    public function userinfo()
+    {
+        return $this->belongsTo('App\Models\UserDetails','id','user_id');
+    }
+
+    public function userbeats()
+    {
+        return $this->hasMany('App\Models\BeatUser','user_id','id')->select('beat_id','user_id');
+    } 
+
+    public function cities()
+    {
+        return $this->hasMany('App\Models\UserCityAssign','userid','id')->select('city_id','userid');
+    }
+
+    public function reportinginfo()
+    {
+        return $this->belongsTo('App\Models\User', 'reportingid', 'id')->select('id','name');
+    }
+
+    
+}

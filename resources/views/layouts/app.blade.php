@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+
+        <title>{{ config('app.name', 'Laravel') }}</title>
+        <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+        <!-- CSS Files -->
+        <link href="{{ url('/').'/'.asset('assets/css/material-dashboard2.css') }}" rel="stylesheet" />
+        <link href="{{ url('/').'/'.asset('assets/css/custom1.css') }}" rel="stylesheet" />
+        <!-- CSS Just for demo purpose, don't include it in your project -->
+        <link href="{{ url('/').'/'.asset('assets/demo/demo.css') }}" rel="stylesheet" />
+        <!-- <link href="{{ url('/').'/'.asset('assets/css/jquery-ui.css') }}" rel="stylesheet" /> -->
+        <link href="{{ url('/').'/'.asset('assets/css/responsive.bootstrap4.css') }}" rel="stylesheet" />
+        <link rel="stylesheet" href="{{ url('/').'/'.asset('assets/plugins/select2/css/select2.css') }}">
+        <link href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css" rel="stylesheet">
+        <script src="{{ url('/').'/'.asset('assets/js/core/jquery.min.js') }}"></script>
+        <script src="{{ url('/').'/'.asset('assets/js/core/jquery-ui.js') }}"></script>
+        <meta http-equiv="Cache-Control" content="no-store" />
+        <style>
+            .toggle.ios, .toggle-on.ios, .toggle-off.ios { border-radius: 20px; }
+            .toggle.ios .toggle-handle { border-radius: 20px; }
+            </style>
+        <!-- Scripts -->
+    </head>
+    <body class="" style="background-color: #f2fbff;">
+  <div class="wrapper">
+    <div class="sidebar" data-color="yellow" data-background-color="black">
+      <div class="logo"><a href="{{ url('dashboard') }}" class="simple-text logo-normal">
+          <!-- GAJRA GEARS -->
+          <div class="text-center logo-main">
+              <img src="{{ url('/').'/'.asset('assets/img/brand_logo.jpg') }}" class="rounded" alt="...">
+          </div>
+
+        </a>
+      </div>
+      <div class="sidebar-wrapper">
+        <div class="user">
+          <div class="photo">
+            <img src="{!! (Auth::user()->profile_image) ? env('IMAGE_UPLOADS').Auth::user()->profile_image : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" >
+          </div>
+          <div class="user-info">
+            <a data-toggle="collapse" href="#collapseExample" class="username">
+              <span>
+                {!! Auth::user()->name !!}
+                <b class="caret"></b>
+              </span>
+            </a>
+          </div>
+        </div>
+        <ul class="nav">
+          @if(auth()->user()->can(['dashboard_access']))
+          <li class="nav-item {{ request()->is('dashboard') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ url('dashboard') }}">
+              <i class="material-icons">dashboard</i>
+              <p>{!! trans('panel.sidemenu.dashboard') !!}</p>
+            </a>
+          </li>
+          @endif    
+          @if(auth()->user()->can(['customer_access']))
+          <li class="nav-item ">
+            <a class="nav-link collapsed" data-toggle="collapse" href="#customerMenu" aria-expanded="false">
+              <i class="material-icons">store</i>
+              <p> {!! trans('panel.sidemenu.customers_master') !!}
+                
+              </p>
+            </a>
+            <div class="collapse" id="customerMenu" style="">
+              <ul class="nav">
+                @if(auth()->user()->can(['customer_access']))
+                <li class="nav-item {{ request()->is('customers*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('customers') }}">
+                    <i class="material-icons">store</i>
+                    <p>{!! trans('panel.sidemenu.customers') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can(['distributor_access']))
+                <li class="nav-item {{ request()->is('distributors*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('distributors') }}">
+                    <i class="material-icons">store</i>
+                    <p>{!! trans('panel.sidemenu.distributors') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('customertype_access'))
+                <li class="nav-item {{ request()->is('customertype*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('customertype') }}">
+                    <i class="material-icons">library_books</i>
+                    <p>{!! trans('panel.sidemenu.customertype') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('firmtype_access'))
+                <li class="nav-item {{ request()->is('firmtype*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('firmtype') }}">
+                    <i class="material-icons">bubble_chart</i>
+                    <p>{!! trans('panel.sidemenu.firmtype') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('customer_login'))
+                <li class="nav-item {{ request()->is('customersLogin*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('customersLogin') }}">
+                    <i class="material-icons">location_ons</i>
+                    <p>{!! trans('panel.sidemenu.customersLogin') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('survey_access'))
+                <li class="nav-item {{ request()->is('customers-survey*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('customers-survey') }}">
+                    <i class="material-icons">location_ons</i>
+                    <p>Customers Survey</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('field_access'))
+                <li class="nav-item {{ request()->is('fields*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('fields') }}">
+                    <i class="material-icons">location_ons</i>
+                    <p>Servey Field</p>
+                  </a>
+                </li>
+                @endif
+              </ul>
+            </div>
+          </li>
+          @endif
+          @if(auth()->user()->can('country_access'))
+           <li class="nav-item ">
+            <a class="nav-link collapsed" data-toggle="collapse" href="#addressMenu" aria-expanded="false">
+              <i class="material-icons">room</i>
+              <p> {!! trans('panel.sidemenu.address_master') !!}
+                
+              </p>
+            </a>
+            <div class="collapse" id="addressMenu" style="">
+              <ul class="nav">
+                 @if(auth()->user()->can('country_access'))
+                <li class="nav-item {{ request()->is('country*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('country') }}">
+                    <i class="material-icons">room</i>
+                    <p>{!! trans('panel.sidemenu.address_country') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('state_access'))
+                <li class="nav-item {{ request()->is('state*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('state') }}">
+                    <i class="material-icons">room</i>
+                    <p>{!! trans('panel.sidemenu.address_state') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('district_access'))
+                <li class="nav-item {{ request()->is('district*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('district') }}">
+                    <i class="material-icons">room</i>
+                    <p>{!! trans('panel.sidemenu.address_district') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('city_access'))
+                <li class="nav-item {{ request()->is('city') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('city') }}">
+                    <i class="material-icons">room</i>
+                    <p>{!! trans('panel.sidemenu.address_city') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('pincode_access'))
+                <li class="nav-item {{ request()->is('pincode*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('pincode') }}">
+                    <i class="material-icons">room</i>
+                    <p>{!! trans('panel.sidemenu.address_pincode') !!}</p>
+                  </a>
+                </li>
+                @endif
+              </ul>
+            </div>
+          </li>
+          @endif
+          @if(auth()->user()->can('user_access'))
+         <li class="nav-item ">
+            <a class="nav-link collapsed" data-toggle="collapse" href="#userMenu" aria-expanded="false">
+              <i class="material-icons">people</i>
+              <p> {!! trans('panel.sidemenu.users_master') !!}
+                
+              </p>
+            </a>
+            <div class="collapse" id="userMenu" style="">
+              <ul class="nav">
+                @if(auth()->user()->can('user_access'))
+                <li class="nav-item {{ request()->is('users*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('users') }}">
+                    <i class="material-icons">verified_user</i>
+                    <p>{!! trans('panel.sidemenu.users') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('target_access'))
+                <li class="nav-item {{ request()->is('targets*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('targets') }}">
+                    <i class="material-icons">verified_user</i>
+                    <p>User Target</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('role_access'))
+                <li class="nav-item {{ request()->is('roles*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('roles') }}">
+                    <i class="material-icons">role</i>
+                    <p>{!! trans('panel.sidemenu.roles') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('permission_access'))
+                <li class="nav-item {{ request()->is('permissions*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('permissions') }}">
+                    <i class="material-icons">check_circle</i>
+                    <p>{!! trans('panel.sidemenu.permissions') !!}</p>
+                  </a>
+                </li>
+                @endif
+                <li class="nav-item {{ request()->is('tours*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('tours') }}">
+                    <i class="material-icons">flight</i>
+                    <p>Tours</p>
+                  </a>
+                </li>
+                <li class="nav-item {{ request()->is('usercity*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('usercity') }}">
+                    <i class="material-icons">flight</i>
+                    <p>City Assigned</p>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </li>
+          @endif
+          @if(auth()->user()->can('product_access'))
+          <li class="nav-item ">
+            <a class="nav-link collapsed" data-toggle="collapse" href="#productMenu" aria-expanded="false">
+              <i class="material-icons">star</i>
+              <p>  {!! trans('panel.sidemenu.product_master') !!}
+                
+              </p>
+            </a>
+            <div class="collapse" id="productMenu" style="">
+              <ul class="nav">
+                @if(auth()->user()->can('category_access'))
+                <li class="nav-item {{ request()->is('categories*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('categories') }}">
+                    <i class="material-icons">outlet</i>
+                    <p>{!! trans('panel.sidemenu.categories') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('subcategory_access'))
+                <li class="nav-item {{ request()->is('subcategories*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('subcategories') }}">
+                    <i class="material-icons">flaky</i>
+                    <p>{!! trans('panel.sidemenu.subcategories') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('brand_access'))
+                <li class="nav-item {{ request()->is('brands*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('brands') }}">
+                    <i class="material-icons">group_work</i>
+                    <p>{!! trans('panel.sidemenu.brands') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('product_access'))
+                <li class="nav-item {{ request()->is('products*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('products') }}">
+                    <i class="material-icons">play_for_work</i>
+                    <p>{!! trans('panel.sidemenu.products') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('gift_access'))
+                <li class="nav-item {{ request()->is('gifts*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('gifts') }}">
+                    <i class="material-icons">donut_large</i>
+                    <p>{!! trans('panel.sidemenu.gifts') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('unit_access'))
+                <li class="nav-item {{ request()->is('units*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('units') }}">
+                    <i class="material-icons">donut_small</i>
+                    <p>{!! trans('panel.sidemenu.units') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('stockdetails_access'))
+                <li class="nav-item {{ request()->is('production*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('production') }}">
+                    <i class="material-icons">donut_small</i>
+                    <p>Production</p>
+                  </a>
+                </li>
+                 @endif
+              </ul>
+            </div>
+          </li>
+          @endif
+          @if(auth()->user()->can('order_access'))
+            <li class="nav-item {{ request()->is('orders*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('orders') }}">
+                <i class="material-icons">shopping_bag</i>
+                <p>{!! trans('panel.sidemenu.orders') !!}</p>
+              </a>
+            </li>
+          @endif
+          @if(auth()->user()->can('payments_access'))
+          <li class="nav-item ">
+            <a class="nav-link collapsed" data-toggle="collapse" href="#paymentManu" aria-expanded="false">
+              <i class="material-icons">paid</i>
+              <p>Payments</p>
+            </a>
+            <div class="collapse" id="paymentManu" style="">
+              <ul class="nav">
+                @if(auth()->user()->can('payments_create'))
+                  <li class="nav-item {{ request()->is('payments*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('payments/create') }}">
+                      <i class="material-icons">currency_exchange</i>
+                      <p>Payment Recieved</p>
+                    </a>
+                  </li>
+                  @endif
+                  <li class="nav-item {{ request()->is('payments*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('payments') }}">
+                      <i class="material-icons">currency_rupee</i>
+                      <p>Payments</p>
+                    </a>
+                  </li>
+                </ul>
+            </div>
+          </li>
+          @endif
+          @if(auth()->user()->can('sale_access'))
+            <li class="nav-item {{ request()->is('sales*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('sales') }}">
+                <i class="material-icons">shopping_cart</i>
+                <p>{!! trans('panel.sidemenu.sales') !!}</p>
+              </a>
+            </li>
+          @endif
+
+          @if(auth()->user()->can('wallet_access'))
+          <li class="nav-item ">
+            <a class="nav-link collapsed" data-toggle="collapse" href="#walletMenu" aria-expanded="false">
+              <i class="material-icons">account_balance_wallet</i>
+              <p> {!! trans('panel.sidemenu.wallet_master') !!}
+                
+              </p>
+            </a>
+            <div class="collapse" id="walletMenu" style="">
+              <ul class="nav">
+                @if(auth()->user()->can('wallet_access'))
+                <li class="nav-item ">
+                  <a class="nav-link" href="{{ url('wallets') }}">
+                    <i class="material-icons">account_balance_wallet</i>
+                    <p>{!! trans('panel.sidemenu.wallet') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('redeemedpoint_access'))
+                <li class="nav-item ">
+                  <a class="nav-link" href="{{ url('redeemedPoint') }}">
+                    <i class="material-icons">redeem</i>
+                    <p>{!! trans('panel.sidemenu.redeemedPoint') !!}</p>
+                  </a>
+                </li>
+                @endif
+              </ul>
+            </div>
+          </li>
+          @endif
+          @if(auth()->user()->can('scheme_access'))
+            <li class="nav-item ">
+              <a class="nav-link" href="{{ url('schemes') }}">
+                <i class="material-icons">loyalty</i>
+                <p>{!! trans('panel.sidemenu.scheme_master') !!}</p>
+              </a>
+            </li>
+          @endif
+          @if(auth()->user()->can('status_access'))
+          <li class="nav-item ">
+            <a class="nav-link collapsed" data-toggle="collapse" href="#settingMenu" aria-expanded="false">
+              <i class="material-icons">settings</i>
+              <p> {!! trans('panel.sidemenu.setting_master') !!}
+                
+              </p>
+            </a>
+            <div class="collapse" id="settingMenu" style="">
+              <ul class="nav">
+                @if(auth()->user()->can('setting_access'))
+                <li class="nav-item ">
+                  <a class="nav-link" href="{{ url('settings') }}">
+                    <i class="material-icons">settings</i>
+                    <p>{!! trans('panel.sidemenu.setting') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('status_access'))
+                <li class="nav-item {{ request()->is('status*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('status') }}">
+                    <i class="material-icons">reorder</i>
+                    <p>{!! trans('panel.sidemenu.status') !!}</p>
+                  </a>
+                </li>
+                @endif
+              </ul>
+            </div>
+          </li>
+          @endif
+          @if(auth()->user()->can('visitreport_access') || auth()->user()->can('beat_access'))
+          <li class="nav-item ">
+            <a class="nav-link collapsed" data-toggle="collapse" href="#beatMenu" aria-expanded="false">
+              <i class="material-icons">schedule</i>
+              <p>  Beats
+              </p>
+            </a>
+            <div class="collapse" id="beatMenu" style="">
+              <ul class="nav">
+                @if(auth()->user()->can('beat_access'))
+                <li class="nav-item {{ request()->is('beats*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('beats') }}">
+                    <i class="material-icons">rowing</i>
+                    <p>{!! trans('panel.sidemenu.beats') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('beatdetail_access'))
+                <li class="nav-item {{ request()->is('beatdetail*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('beatdetail') }}">
+                    <i class="material-icons">opacity</i>
+                    <p>{!! trans('panel.sidemenu.beatdetail') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('checkin_access'))
+                <li class="nav-item {{ request()->is('checkin*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('checkin') }}">
+                    <i class="material-icons">assignment_turned_in</i>
+                    <p>{!! trans('panel.sidemenu.checkin') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('visitreport_access'))
+                <li class="nav-item {{ request()->is('visitreports*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('visitreports') }}">
+                    <i class="material-icons">analytics</i>
+                    <p>{!! trans('panel.sidemenu.visitreport') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('visittype_access'))
+                <li class="nav-item {{ request()->is('visittypes*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('visittypes') }}">
+                    <i class="material-icons">input</i>
+                    <p>{!! trans('panel.sidemenu.visittype') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('user_location'))
+                <li class="nav-item {{ request()->is('livelocation*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('livelocation') }}">
+                    <i class="material-icons">input</i>
+                    <p>User Live Location</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('visitreport_access'))
+                <li class="nav-item ">
+                  <a class="nav-link" href="{{ url('mastervisitreport') }}">
+                    <i class="material-icons">store</i>
+                    <p>Master VisitReport</p>
+                  </a>
+                </li>
+                @endif
+              </ul>
+            </div>
+          </li>
+          @endif
+
+          @if(auth()->user()->can('tasks_access'))
+          <li class="nav-item {{ request()->is('tasks*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ url('tasks') }}">
+              <i class="material-icons">check_circle</i>
+              <p>{!! trans('panel.sidemenu.task') !!}</p>
+            </a>
+          </li>
+          @endif
+          @if(auth()->user()->can('supports_access'))
+          <li class="nav-item ">
+            <a class="nav-link collapsed" data-toggle="collapse" href="#supportMenu" aria-expanded="false">
+              <i class="material-icons">headset</i>
+              <p>  {!! trans('panel.sidemenu.support_master') !!}
+              </p>
+            </a>
+            <div class="collapse" id="supportMenu" style="">
+              <ul class="nav">
+                @if(auth()->user()->can('supports_access'))
+                <li class="nav-item ">
+                  <a class="nav-link" href="{{ url('supports') }}">
+                    <i class="material-icons">headset_mic</i>
+                    <p>{!! trans('panel.sidemenu.support') !!}</p>
+                  </a>
+                </li>
+                @endif
+              </ul>
+            </div>
+          </li>
+          @endif
+          <li class="nav-item ">
+            <a class="nav-link collapsed" data-toggle="collapse" href="#tasksMenu" aria-expanded="false">
+              <i class="material-icons">airplay</i>
+              <p>  Reports
+              </p>
+            </a>
+            <div class="collapse" id="tasksMenu" style="">
+              <ul class="nav">
+                @if(auth()->user()->can('attendance_report'))
+                <li class="nav-item {{ request()->is('reports/attendancereport*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('reports/attendancereport') }}">
+                    <i class="material-icons">check_circle</i>
+                    <p>Attendance Report</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('adherence_report'))
+                <li class="nav-item {{ request()->is('reports/beatadherence*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('reports/beatadherence') }}">
+                    <i class="material-icons">check_circle</i>
+                    <p>Beat Adherence </p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('summary_report'))
+                <li class="nav-item {{ request()->is('reports/adherencesummary*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('reports/adherencesummary') }}">
+                    <i class="material-icons">check_circle</i>
+                    <p>Adherence Summary</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('visit_report'))
+                <li class="nav-item {{ request()->is('reports/customervisit*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('reports/customervisit') }}">
+                    <i class="material-icons">check_circle</i>
+                    <p>Customer Visit</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('customers_report'))
+                <li class="nav-item ">
+                  <a class="nav-link" href="{{ url('reports/customersreport') }}">
+                    <i class="material-icons">store</i>
+                    <p>Customer Master</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('daily_visit_report'))
+                <li class="nav-item ">
+                  <a class="nav-link" href="{{ url('reports/per_day_counter_visit_report') }}">
+                    <i class="material-icons">store</i>
+                    <p>Perday Counter Visit Report</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('fielda_ctivity_report'))
+              <li class="nav-item ">
+                  <a class="nav-link" href="{{ url('reports/fieldactivity') }}">
+                    <i class="material-icons">store</i>
+                    <p>Field Activity Report</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('tour_programme_report'))
+                <li class="nav-item ">
+                  <a class="nav-link" href="{{ url('reports/tourprogramme') }}">
+                    <i class="material-icons">store</i>
+                    <p>Tour Programme Report</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('monthly_movement_report'))
+                <li class="nav-item ">
+                  <a class="nav-link" href="{{ url('reports/monthlymovement') }}">
+                    <i class="material-icons">store</i>
+                    <p>Monthly Movement Report</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('point_collections_report'))
+                <li class="nav-item ">
+                  <a class="nav-link" href="{{ url('reports/pointcollections') }}">
+                    <i class="material-icons">store</i>
+                    <p>Point Collections Report</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('territory_coverage_report'))
+                <li class="nav-item ">
+                  <a class="nav-link" href="{{ url('reports/territorycoverage') }}">
+                    <i class="material-icons">store</i>
+                    <p>Territory Coverage Report</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('performance_parameter_report'))
+                <li class="nav-item ">
+                  <a class="nav-link" href="{{ url('reports/performanceparameter') }}">
+                    <i class="material-icons">store</i>
+                    <p>Performance Parameter</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('mechanics_points_report'))
+                <li class="nav-item ">
+                  <a class="nav-link" href="{{ url('reports/asmwisemechanicspoints') }}">
+                    <i class="material-icons">store</i>
+                    <p>Mechanics Points Report</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('targetvs_sales_report'))
+                <li class="nav-item ">
+                  <a class="nav-link" href="{{ url('reports/targetvssales') }}">
+                    <i class="material-icons">store</i>
+                    <p>Target Vs Sales Report</p>
+                  </a>
+                </li>
+                @endif
+                <li class="nav-item ">
+                  <a class="nav-link" href="{{ url('reports/surveyanalysis') }}">
+                    <i class="material-icons">store</i>
+                    <p>Survey Analysis Report</p>
+                  </a>
+                </li>
+                <li class="nav-item ">
+                  <a class="nav-link" href="{{ url('notes') }}">
+                    <i class="material-icons">store</i>
+                    <p>Calling Report</p>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="main-panel">
+      <!-- Navbar -->
+      <nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top ">
+        <div class="container-fluid bg-theme p-2" style="background: #fff !important">
+        <img src="{!! url('/').'/'.asset('assets/img/bediya.jpg') !!}" width="100">
+        <img src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" width="100">
+        <!-- <img src="{!! url('/').'/'.asset('assets/img/logo.png') !!}" width="50"> -->
+          <div class="navbar-wrapper">
+            <div class="navbar-minimize">
+<!--               <button id="minimizeSidebar" class="btn btn-just-icon btn-white btn-fab btn-round">
+                <i class="material-icons text_align-center visible-on-sidebar-regular">more_vert</i>
+                <i class="material-icons design_bullet-list-67 visible-on-sidebar-mini">view_list</i>
+              <div class="ripple-container"></div></button> -->
+            </div>
+          </div>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="navbar-toggler-icon icon-bar"></span>
+            <span class="navbar-toggler-icon icon-bar"></span>
+            <span class="navbar-toggler-icon icon-bar"></span>
+          </button>
+          @auth
+          <div class="collapse navbar-collapse justify-content-end">            
+            <ul class="navbar-nav">              
+              <li class="nav-item dropdown">
+                <a class="nav-link" href="http://example.com" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="material-icons">notifications</i>
+                  <span class="notification">5</span>
+                  <p class="d-lg-none d-md-block">
+                    Some Actions
+                  </p>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
+                  <a class="dropdown-item" href="#">Mike John responded to your email</a>
+                  <a class="dropdown-item" href="#">You have 5 new tasks</a>
+                  <a class="dropdown-item" href="#">You're now friend with Andrew</a>
+                  <a class="dropdown-item" href="#">Another Notification</a>
+                  <a class="dropdown-item" href="#">Another One</a>
+                </div>
+              </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link" href="javascript:;" id="navbarDropdownProfile" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="material-icons">person</i>
+                  <p class="d-lg-none d-md-block">
+                    Account
+                  </p>
+                </a>
+                @auth
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownProfile">
+                  <a class="dropdown-item" href="{{ url('change-password') }}">Change Password</a>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" href="{{ url('logout') }}">Log out</a>
+                </div>
+                @endauth
+              </li>
+            </ul>
+          </div>
+          @endauth
+        </div>
+      </nav>
+     <!-- End Navbar -->
+      <div class="content">
+        <div class="container-fluid">
+        {{ $slot }}
+        </div>
+      </div>
+      <footer class="footer">
+        <div class="baseurl" data-baseurl="{{ url('/')}}"></div>
+        <div class="token" data-token="{{ csrf_token() }}"></div>
+        <div class="container-fluid">
+          <nav class="float-left">
+            
+          </nav>
+          <div class="copyright float-right">
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+  <div class="modal fade bd-example-modal-lg" id="previewimageInModel" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content card">
+        <div class="card-header">
+            <span class="pull-right" >
+              <a href="javascript:void(0)" class="btn btn-just-icon btn-danger" data-dismiss="modal"><i class="material-icons">clear</i></a>
+            </span>
+        </div>
+        <div class="modal-body"> <img class="modal-content" id="img01"> </div>
+      </div>
+    </div>
+  </div>
+
+    <script src="{{ url('/').'/'.asset('assets/js/core/jquery.validate.js') }}"></script>
+    <!-- Bootstrap -->
+    <script src="{{ url('/').'/'.asset('assets/js/core/popper.min.js') }}"></script>
+    <!-- overlayScrollbars -->
+    <script src="{{ url('/').'/'.asset('assets/js/core/bootstrap-material-design.min.js') }}"></script>
+    <!-- DataTables -->
+    <script src="{{ url('/').'/'.asset('assets/js/plugins/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ url('/').'/'.asset('assets/js/plugins/dataTables.responsive.min.js') }}"></script>
+    <script src="{{ url('/').'/'.asset('assets/js/plugins/bootstrap-tagsinput.js') }}"></script>
+
+     <!-- OPTIONAL SCRIPTS -->
+     <!-- Select2 -->
+    <script src="{{ url('/').'/'.asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
+
+    <script src="{{ url('/').'/'.asset('assets/js/plugins/perfect-scrollbar.jquery.min.js') }}"></script>
+    <script src="{{ url('/').'/'.asset('assets/js/plugins/moment.min.js') }}"></script>
+    <script src="{{ url('/').'/'.asset('assets/js/plugins/sweetalert2.js') }}"></script>
+    <script src="{{ url('/').'/'.asset('assets/js/plugins/jquery.validate.min.js') }}"></script>
+    <!-- jquery-validation -->
+    <script src="{{ url('/').'/'.asset('assets/js/plugins/jquery.bootstrap-wizard.js') }}"></script>
+    <script src="{{ url('/').'/'.asset('assets/js/plugins/bootstrap-selectpicker.js') }}"></script>
+    <script src="{{ url('/').'/'.asset('assets/js/plugins/bootstrap-datetimepicker.min.js') }}"></script>
+    <!-- OPTIONAL SCRIPTS -->
+
+    <script src="{{ url('/').'/'.asset('assets/js/plugins/chartist.min.js') }}"></script>
+
+    <script src="{{ url('/').'/'.asset('assets/js/plugins/bootstrap-notify.js') }}"></script>
+
+    <script src="{{ url('/').'/'.asset('assets/js/material-dashboard.js?v=2.1.2') }}"></script>
+
+    <script src="{{ url('/').'/'.asset('assets/demo/demo.js') }}"></script>
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+    <script>
+      $(function() {
+          $('#toggle-one').bootstrapToggle();
+         $('.datetimepicker').datetimepicker({format: 'YYYY-MM-DD HH:mm'});
+         $(".datepicker" ).datepicker({ createButton:false,
+          displayClose:true,
+          closeOnSelect:false,
+          selectMultiple:true,
+          dateFormat: 'yy-mm-dd',
+          beforeShow: function (input) {
+              $(input).css({
+                  "position": "relative",
+                  "z-index": 999999
+              });
+          },
+          onClose: function () { $('.ui-datepicker').css({ 'z-index': 0  } ); } 
+          });
+
+        //Initialize Select2 Elements
+          $('.select2').select2()
+
+          //Initialize Select2 Elements
+          $('.select2bs4').select2({
+            theme: 'bootstrap4'
+          })
+         $('.timepicker').datetimepicker({format: 'HH:mm'});
+      })
+      $('body').on('click', '.imageDisplayModel', function () {
+        var imgPath = $(this).attr("src");
+        var modal = document.getElementById('previewimageInModel');
+        $('#previewimageInModel').modal('show');
+        document.getElementById("img01").src = imgPath;
+      });
+    </script>
+    </body>
+</html>
