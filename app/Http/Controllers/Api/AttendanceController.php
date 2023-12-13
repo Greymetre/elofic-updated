@@ -84,8 +84,8 @@ class AttendanceController extends Controller
         { 
             $user = $request->user();
             $validator = Validator::make($request->all(), [
-                'punchin_longitude' => 'required',
                 'punchin_latitude' => 'required',
+                'punchin_longitude' => 'required',
             ]); 
             if ($validator->fails()) {
                 return response()->json(['status' => 'error','message' =>  $validator->errors()], $this->badrequest); 
@@ -97,16 +97,19 @@ class AttendanceController extends Controller
                 $request['punchin_image'] = fileupload($image, $this->path, $filename);
             }
             $punchin_date = getcurentDate();
-            // $request['punchin_address'] = getLatLongToAddress($request['punchin_longitude'], $request['punchin_latitude']);
-            $request['punchin_address'] = '';
+             // $request['punchin_address'] = getLatLongToAddress($request['punchin_latitude'],$request['punchin_longitude']);
+             $request['punchin_address'] = getLatLongToAddress($request['punchin_longitude'],$request['punchin_latitude']);
+             //$request['punchin_address'] = '';
             if($punchin = $this->attendances->updateOrCreate([
                 'user_id' => $user->id, 'punchin_date' => $punchin_date],[
                 'active' => 'Y',
                 'user_id' => $user->id,
                 'punchin_date' => $punchin_date,
                 'punchin_time' => getcurentTime(),
-                'punchin_longitude' => !empty($request['punchin_longitude']) ? $request['punchin_longitude'] :'',
-                'punchin_latitude' => !empty($request['punchin_latitude']) ? $request['punchin_latitude'] :'',
+                // 'punchin_longitude' => !empty($request['punchin_longitude']) ? $request['punchin_longitude'] :'',
+                // 'punchin_latitude' => !empty($request['punchin_latitude']) ? $request['punchin_latitude'] :'',
+                'punchin_longitude' => !empty($request['punchin_latitude']) ? $request['punchin_latitude'] :'',
+                'punchin_latitude' => !empty($request['punchin_longitude']) ? $request['punchin_longitude'] :'',
                 'punchin_address' => !empty($request['punchin_address']) ? $request['punchin_address'] :'',
                 'punchin_image' => !empty($request['punchin_image']) ? $request['punchin_image'] :'',
                 'punchin_summary' => !empty($request['punchin_summary']) ? $request['punchin_summary'] :'',

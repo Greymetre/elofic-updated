@@ -18199,7 +18199,8 @@ a .material-icons {
 }
 
 .sidebar[data-background-color="black"] .nav .nav-item i {
-  color: rgba(255, 255, 255, 0.8);
+/*  color: rgba(255, 255, 255, 0.8);*/
+  color: rgba(76 70 70 / 80%);
 }
 
 .sidebar[data-background-color="black"] .nav .nav-item.active [data-toggle="collapse"],

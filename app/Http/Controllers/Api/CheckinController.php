@@ -105,6 +105,12 @@ class CheckinController extends Controller
             //     $distance = distance($request['checkin_latitude'] , $request['checkin_longitude'],$request['customer_id']);
             // }
 
+             if(!empty($request['checkin_latitude']) && !empty($request['checkin_longitude']))
+            {
+                $distance = distance($request['checkin_latitude'] , $request['checkin_longitude'],$request['customer_id']);
+            }
+
+
             if(empty($request['beatScheduleId']))
             {
                 $request['beatScheduleId'] = BeatSchedule::where('user_id', $user->id) 
@@ -115,7 +121,10 @@ class CheckinController extends Controller
                         ->pluck('id')->first();
             }
 
-            // $request['checkin_address'] = getLatLongToAddress($request['checkin_latitude'], $request['checkin_longitude']);
+             // $request['checkin_address'] = getLatLongToAddress($request['checkin_latitude'], $request['checkin_longitude']);
+
+            $request['checkin_address'] = getLatLongToAddress($request['checkin_latitude'], $request['checkin_longitude']);
+
             if($checkin_id = $this->checkin->insertGetId([
                 'active' => 'Y',
                 'customer_id' => isset($request['customer_id']) ? $request['customer_id'] :null,
@@ -178,6 +187,9 @@ class CheckinController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => 'error','message' =>  $validator->errors()], $this->badrequest); 
             }
+
+             $request['checkout_address'] = getLatLongToAddress($request['checkout_latitude'], $request['checkout_longitude']);
+
              if($this->checkin->where('id','=',$request['checkin_id'])->update([
                 'checkout_date' => getcurentDate(),
                 'checkout_time' => getcurentTime(),

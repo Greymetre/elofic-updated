@@ -11,7 +11,7 @@ class Product extends Model
 
     protected $table = 'products';
 
-    protected $fillable = ['active', 'ranking' ,'product_name', 'display_name', 'description', 'subcategory_id', 'category_id', 'brand_id', 'product_image', 'unit_id', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at', 'specification', 'part_no', 'product_no', 'model_no'];
+    protected $fillable = ['active', 'ranking' ,'product_name', 'display_name', 'description', 'subcategory_id', 'category_id', 'brand_id', 'product_image', 'unit_id', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at', 'specification', 'part_no', 'product_no', 'model_no','suc_del'];
 
     public function categories()
     {

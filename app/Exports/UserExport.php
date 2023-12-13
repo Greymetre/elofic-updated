@@ -3,6 +3,9 @@
 namespace App\Exports;
 
 use App\Models\User;
+use App\Models\Branch;
+use App\Models\Division;
+use App\Models\Designation;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -28,12 +31,12 @@ class UserExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
                                 {
                                     $query->whereIn('id', $this->userids);
                                 }
-                            })->select('id','name', 'first_name', 'last_name', 'mobile', 'email', 'gender', 'profile_image','reportingid')->latest()->get();   
+                            })->select('id','name', 'first_name', 'last_name', 'mobile', 'email', 'gender', 'profile_image','reportingid','employee_codes','branch_id','department_id','designation_id')->latest()->get();   
     }
 
     public function headings(): array
     {
-        return ['id','name', 'first_name', 'last_name', 'mobile', 'email', 'gender', 'profile_image', 'role', 'Reporting'];
+        return ['id','name', 'first_name', 'last_name', 'mobile', 'email', 'gender', 'profile_image', 'role', 'Reporting','Employees Code','Branch Name','Division','Designation'];
     }
 
     public function map($data): array
@@ -48,7 +51,11 @@ class UserExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
             $data['gender'],
             $data['profile_image'],
             isset($data['roles']['name']) ? $data['roles']['name'] :'',
-            isset($data['reportinginfo']['name']) ? $data['reportinginfo']['name'] :''
+            isset($data['reportinginfo']['name']) ? $data['reportinginfo']['name'] :'',
+            $data['employee_codes'],
+            isset($data['getbranch']['branch_name']) ? $data['getbranch']['branch_name'] :'',
+            isset($data['getdepartment']['division_name']) ? $data['getdepartment']['division_name'] :'',
+            isset($data['getdesignation']['designation_name']) ? $data['getdesignation']['designation_name'] :'',
         ];
     }
 }

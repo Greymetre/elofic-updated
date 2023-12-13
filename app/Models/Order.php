@@ -11,7 +11,7 @@ class Order extends Model
 
     protected $table = 'orders';
 
-    protected $fillable = [ 'active', 'buyer_id', 'seller_id', 'total_qty', 'shipped_qty', 'orderno', 'order_date', 'completed_date', 'total_gst', 'sub_total', 'grand_total', 'order_taking','status_id', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at','beatscheduleid'];
+    protected $fillable = [ 'active', 'buyer_id', 'seller_id', 'total_qty', 'shipped_qty', 'orderno', 'order_date', 'completed_date', 'total_gst', 'sub_total', 'grand_total', 'order_taking','status_id', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at','beatscheduleid' , 'suc_del'];
 
     public function message()
     {
@@ -44,21 +44,22 @@ class Order extends Model
         try
         {
             
-
             $created_at = getcurentDateTime();
             $request['orderno'] = !empty($request['orderno']) ? $request['orderno'] : date('Y').'_'.$request['seller_id'].'_'.autoIncrementId('Order','id');
             if( $order_id = Order::insertGetId([
                 'active' => 'Y',
                 'buyer_id' => isset($request['buyer_id'])? $request['buyer_id']:null,
                 'seller_id' => isset($request['seller_id'])? $request['seller_id']:null,
-                'total_qty' => 0,
+                 'total_qty' => 0,
+                 //'total_qty' => isset($request['quantity'])? $request['quantity']:0,
                 'shipped_qty' => 0,
                 'orderno' => isset($request['orderno'])? $request['orderno'] :'',
                 'order_date' => isset($request['order_date'])? $request['order_date']:getcurentDate(),
                 'total_gst' => isset($request['total_gst'])? $request['total_gst']:0.00,
                 'sub_total' => isset($request['sub_total'])? $request['sub_total']:0.00,
                 'grand_total' => isset($request['grand_total'])?  $request['grand_total']:0.00,
-                'order_taking' => isset($request['order_taking'])?  $request['order_taking']:'MobileApp',   
+                'order_taking' => isset($request['order_taking'])?  $request['order_taking']:'MobileApp',
+                'suc_del' => isset($request['suc_del'])?  $request['suc_del']:'',  
                 'beatscheduleid' => isset($request['beatscheduleid']) ? $request['beatscheduleid'] :null,   
                 'created_by' => isset($request['created_by']) ? $request['created_by'] :null,         
                 'created_at' => $created_at ,
@@ -112,4 +113,13 @@ class Order extends Model
     {
         return $this->belongsTo('App\Models\Status', 'status_id', 'id')->select('id','status_name','display_name');
     }
+
+
+    public function getuserdetails()
+    {
+        return $this->belongsTo('App\Models\User', 'created_by', 'id');
+    }
+
+
+
 }

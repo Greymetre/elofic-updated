@@ -15,12 +15,12 @@ class OrderTemplate implements FromCollection,WithHeadings,ShouldAutoSize
 {
     public function collection()
     {
-        return Order::select('buyer_id', 'seller_id', 'total_qty', 'shipped_qty', 'orderno', 'order_date', 'completed_date', 'total_gst', 'sub_total', 'grand_total', 'status_id')->limit(0)->get();   
+        return Order::select('buyer_id', 'seller_id','total_qty', 'shipped_qty', 'orderno', 'order_date', 'completed_date', 'total_gst', 'sub_total', 'grand_total', 'status_id' , 'suc_del')->limit(0)->get();   
     }
 
     public function headings(): array
     {
-        return ['buyer_id', 'seller_id', 'total_qty', 'shipped_qty', 'orderno', 'order_date', 'completed_date', 'total_gst', 'sub_total', 'grand_total', 'status_id'];
+        return ['buyer_id', 'seller_id','total_qty', 'shipped_qty', 'orderno', 'order_date', 'completed_date', 'total_gst', 'sub_total', 'grand_total', 'status_id' , 'suc_del'];
     }
 
 }

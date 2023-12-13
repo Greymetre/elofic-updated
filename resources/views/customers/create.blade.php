@@ -145,7 +145,7 @@
                 <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.customertype') !!}<span class="text-danger"> *</span></label>
                 <div class="col-md-9">
                   <div class="form-group has-default bmd-form-group">
-                    <select class="form-control select2" name="customertype" style="width: 100%;" required>
+                    <select class="form-control select2" name="customertype" style="width: 100%;" required id="type">
                         <option value="">Select {!! trans('panel.customers.fields.customertype') !!}</option>
                         @if(@isset($customertype ))
                         @foreach($customertype as $type)
@@ -206,6 +206,51 @@
                 </div>
               </div>
             </div>
+
+
+            <!-- new field -->
+
+            <div class="col-md-6">
+              <div class="row">
+                <label class="col-md-3 col-form-label">{!! trans('panel.global.contact_number_two') !!}<span class="text-danger"> *</span></label>
+                <div class="col-md-9">
+                  <div class="form-group has-default bmd-form-group">
+                    <input type="text" name="contact_number" id="contact_number" class="form-control" value="{!! old( 'contact_number', $customers['contact_number']) !!}" maxlength="13" minlength="10">
+                  </div>
+                  @if ($errors->has('contact_number'))
+                    <label class="error">{{ $errors->first('contact_number') }}</label>
+                  @endif
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6" id="parentcustomer" style="display:none;">
+                <div class="row">
+                  <label class="col-md-3 col-form-label">{!! trans('panel.global.parentcustomer') !!}</label>
+
+                  <div class="col-md-9">
+                    <div class="form-group has-default bmd-form-group">
+                      <select class="form-control select2 customer_parent" name="parent_id"  style="width: 100%;">
+                         <option value="">Select {!! trans('panel.global.parentcustomer') !!}</option>
+                          @if(@isset($parentcustomers ))
+                            @foreach($parentcustomers as $parentcustomer)
+                            <option value="{!! $parentcustomer['id'] !!}" {{ old( 'parent_id' , (!empty($customers->parent_id))?($customers->parent_id):('') ) == $parentcustomer['id'] ? 'selected' : '' }}>{!! $parentcustomer['first_name'] !!}{!! $parentcustomer['last_name'] !!}</option>
+                            @endforeach
+                          @endif
+
+                      </select>
+                    </div>
+                    @if ($errors->has('parent_id'))
+                     <div class="error col-lg-12">
+                        <p class="text-danger">{{ $errors->first('parent_id') }}</p>
+                     </div>
+                    @endif
+                  </div>
+                </div>
+              </div>
+
+             <!-- end new feld -->
+
           </div>
           <hr class="my-3">
             <h4 class="section-heading mb-3  h4 mt-0 text-center text-theme2">{!! trans('panel.customers.title_address') !!}</h4> 
@@ -670,4 +715,32 @@
     })
  
 </script>
+
+<script>
+$(document).ready(function(){
+
+ // $(document).on('change','#type',function(e){
+
+    $('#type').change(function() {
+
+    var type = $('#type').val();
+    if(type == '3'){
+    $('#parentcustomer').hide()
+    $('#parentcustomer').prop("disabled", true)
+    }else if(type == '1'){
+    $('#parentcustomer').hide()
+    $('#parentcustomer').prop("disabled", true) 
+    }else if(type == '2'){
+    $('#parentcustomer').show()
+    $('#parentcustomer').prop("disabled", false)
+    }else{
+    $('#parentcustomer').hide()
+    $('#parentcustomer').prop("disabled", true) 
+    }
+
+ }).trigger('change');
+
+});
+</script>
+
 </x-app-layout>

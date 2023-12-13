@@ -52,7 +52,7 @@ class CustomerController extends Controller
     }
 
     public function storeCustomer(Request $request)
-    {
+    { 
         try
         { 
             $user = $request->user();
@@ -66,6 +66,19 @@ class CustomerController extends Controller
                 return response()->json(['status' => 'error','message' => $validator->messages()->all()],$this->badrequest);
             }
             //$request['fordelete'] = implode(',', $request->getContent());
+
+            
+
+             $customerdetails = Customers::where('mobile', $request['mobile'])->first();
+             if(!empty($customerdetails)){  
+               return response(['status' => 'error', 'message' => 'Mobile Number Already Exist'],400);   
+             }else{
+       
+             $customergst = CustomerDetails::where('gstin_no', '=', $request['gstin_no'])->first();
+             
+             if(!empty($customergst)){
+              return response(['status' => 'error', 'message' => 'GST Number Already Exist'],400);   
+             }else{
            
             $name = explode(" ", $request['full_name']);
             $request['last_name'] = isset($request['last_name']) ? $request['last_name'] : array_pop($name);
@@ -109,6 +122,8 @@ class CustomerController extends Controller
                 'created_by' =>  !empty($request['created_by'])? $request['created_by'] :null,
                 'manager_name' => !empty($request['manager_name'])? $request['manager_name'] :'',
                 'manager_phone' => !empty($request['manager_phone'])? $request['manager_phone'] :'',
+                'contact_number' => !empty($request['contact_number'])? $request['contact_number'] :'',
+                'parent_id' => !empty($request['parent_id'])? $request['parent_id'] :null,
                 'created_at' => getcurentDateTime(),
                 'updated_at' => getcurentDateTime()
             ]))
@@ -122,6 +137,18 @@ class CustomerController extends Controller
                 //     'description' => $user->name.' Created to '.$request['name'],
                 // );
                 // submitUserActivity($useractivity);
+
+                 $useractivity = array(
+                    'userid' => $user->id, 
+                    'customer_id' => $customer->id,
+                    'latitude' => $request['latitude']??NULL, 
+                    'longitude' => $request['longitude']??NULL, 
+                    //'type' => 'Counter Created',
+                    //'description' => $user->name.' Created to '.$request['name'],
+                );
+                submitUserActivity($useractivity);
+
+
                 $request['customer_id'] = $customer->id;
                 $pincodes = Pincode::with('cityname','cityname.districtname')->where('pincode','=',$request['zipcode'])->first();
                 $request['state_id'] = !empty($pincodes['cityname']['districtname']['state_id']) ? $pincodes['cityname']['districtname']['state_id']:$request['state_id'];
@@ -299,7 +326,11 @@ class CustomerController extends Controller
                 sendNotification($user->id,$asmnotify);
                 return response()->json(['status' => 'success','message' => 'Data inserted successfully.'], $this->successStatus);
             }
-            return response(['status' => 'error', 'message' => 'No Record inserted.'],200);   
+            return response(['status' => 'error', 'message' => 'No Record inserted.'],200);  
+
+          }    
+          }
+
         }
         catch(\Exception $e)
         {
@@ -495,7 +526,7 @@ class CustomerController extends Controller
          try
         { 
             $validator = Validator::make($request->all(), [
-                'customer_id' => 'nullable|exists:customers,id',
+                 'customer_id' => 'nullable|exists:customers,id',
             ]); 
             if ($validator->fails()) {
                 return response()->json(['status' => 'error','message' => $validator->messages()->all()],$this->badrequest);

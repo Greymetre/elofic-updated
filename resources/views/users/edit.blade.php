@@ -259,9 +259,91 @@
                   </div>
                </div>
             </div>
+
+
+            <div class="col-md-6">
+               <div class="row">
+                  <label class="col-md-3 col-form-label">{{ trans('panel.user.employee_codes') }}</label>
+                  <div class="col-md-9">
+                     <div class="form-group has-default bmd-form-group">
+                        <input type="text" name="employee_codes" class="form-control" value="{!! old( 'employee_codes', !empty($user['employee_codes']) ? $user['employee_codes']:'') !!}">
+                        @if ($errors->has('employee_codes'))
+                        <div class="error col-lg-12">
+                           <p class="text-danger">{{ $errors->first('employee_codes') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+             <div class="col-md-6">
+               <div class="row">
+                  <label class="col-md-3 col-form-label">{{ trans('panel.user.branch_name') }}</label>
+                  <div class="col-md-9">
+                     <div class="form-group has-default bmd-form-group">
+                          <select class="form-control" name="branch_id" required>
+                                <option value="" disabled selected>Select Branch</option>
+                              @foreach($branches as $branche)  
+                                <option value="{{$branche->id}}" <?php if($user->branch_id == $branche->id){echo "selected";} ?> >{{$branche->branch_name}}</option>
+                              @endforeach  
+                           </select>
+                        @if ($errors->has('branch_id'))
+                        <div class="error col-lg-12">
+                           <p class="text-danger">{{ $errors->first('branch_id') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+            <div class="col-md-6">
+               <div class="row">
+                  <label class="col-md-3 col-form-label">{{ trans('panel.user.designation') }}</label>
+                  <div class="col-md-9">
+                     <div class="form-group has-default bmd-form-group">
+                          <select class="form-control" name="designation_id">
+                                <option value="" disabled selected>Select {!! trans('panel.user.designation') !!}</option>
+                                @foreach($designations as $designation)
+                                <option value="{{$designation->id}}"  <?php if($user->designation_id == $designation->id){echo "selected";} ?>> {{$designation->designation_name}}</option>
+                                @endforeach
+                             </select>
+                        @if ($errors->has('designation_id'))
+                        <div class="error col-lg-12">
+                           <p class="text-danger">{{ $errors->first('designation_id') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+               </div>
+            </div>
+          
+            <br><br>
+           <div class="col-md-6">
+               <div class="row">
+                  <label class="col-md-3 col-form-label">{{ trans('panel.user.department') }}</label>
+                  <div class="col-md-9">
+                     <div class="form-group has-default bmd-form-group">
+                           <select class="form-control" name="department_id">
+                                <option value="" disabled selected>Select {!! trans('panel.user.department') !!}</option>
+                               @foreach($divisions as $division)
+                                <option value="{{$division->id}}" <?php if($user->department_id == $division->id){echo "selected";} ?>>{{$division->division_name}}</option>
+                               @endforeach
+                           </select>
+                        @if ($errors->has('department_id'))
+                        <div class="error col-lg-12">
+                           <p class="text-danger">{{ $errors->first('department_id') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+               </div>
+            </div>
+
          </div>
          {{ Form::submit('Submit', array('class' => 'btn btn-theme pull-right submituser')) }}
-         {{ Form::close() }} 
+        {{ Form::close() }} 
       </div>
    </div>
 </div>

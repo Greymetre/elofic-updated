@@ -6,7 +6,7 @@
         <div class="card-icon">
           <i class="material-icons">perm_identity</i>
         </div>
-        <h4 class="card-title ">{{ trans('panel.global.create') }} {!! trans('panel.product.title_singular') !!}
+        <h4 class="card-title ">{{ trans('panel.global.create') }} {!! trans('panel.product.title_singular') !!} 
           <span class="pull-right">
             <div class="btn-group">
               @if(auth()->user()->can(['product_access']))
@@ -39,7 +39,7 @@
           <div class="row">
             <div class="col-md-6">
               <div class="row">
-                <label class="col-md-3 col-form-label">GG No.<span class="text-danger"> *</span></label>
+                <label class="col-md-3 col-form-label">Product Stage<span class="text-danger"> *</span></label>
                 <div class="col-md-9">
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="product_no" class="form-control" value="{!! old( 'product_no', $products['product_no']) !!}" maxlength="200" required>
@@ -52,7 +52,7 @@
             </div>
             <div class="col-md-6">
               <div class="row">
-                <label class="col-md-3 col-form-label">OE Part No.<span class="text-danger"> *</span></label>
+                <label class="col-md-3 col-form-label">kW<span class="text-danger"> *</span></label>
                 <div class="col-md-9">
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="part_no" class="form-control" value="{!! old( 'part_no', $products['part_no']) !!}" maxlength="200" required>
@@ -78,7 +78,7 @@
             </div>
             <div class="col-md-6">
                 <div class="row">
-                <label class="col-md-3 col-form-label">Specification<span class="text-danger"> *</span></label>
+                <label class="col-md-3 col-form-label">HP<span class="text-danger"> *</span></label>
                 <div class="col-md-9">
                   <div class="form-group has-default bmd-form-group">
                     <textarea name="specification" class="form-control" rows="4" maxlength="200" required>{!! old( 'specification', $products['specification']) !!}</textarea>
@@ -211,6 +211,19 @@
               </div>
             </div>
             <div class="col-md-6">
+                <div class="row">
+                <label class="col-md-3 col-form-label">{!! trans('panel.product.fields.suc-del') !!} <span class="text-danger"> *</span></label>
+                <div class="col-md-9">
+                  <div class="form-group has-default bmd-form-group">
+                    <input type="text" name="suc_del" class="form-control" value="{!! old( 'suc_del', $products['suc_del']) !!}" maxlength="200" required>
+                    @if ($errors->has('suc_del'))
+                      <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('suc_del') }}</p></div>
+                    @endif
+                  </div>
+                </div>
+              </div>
+            </div>
+                        <div class="col-md-6">
                 <div class="row">
                 <label class="col-md-3 col-form-label">{!! trans('panel.product.fields.product_name') !!} <span class="text-danger"> *</span></label>
                 <div class="col-md-9">

@@ -32,12 +32,12 @@ class UsersDataTable extends DataTable
                           <i class="material-icons">edit</i>
                         </a>';
                   }
-                  if(auth()->user()->can(['user_show']))
-                  {
-                    $btn = $btn.'<a href="'.url("users/".encrypt($query->id)).'" class="btn btn-theme btn-just-icon btn-sm show" id="'.encrypt($query->id).'" title="'.trans('panel.global.show').' '.trans('panel.user.title_singular').'">
-                          <i class="material-icons">visibility</i>
-                        </a>';
-                  }
+                  // if(auth()->user()->can(['user_show']))
+                  // {
+                  //   $btn = $btn.'<a href="'.url("users/".encrypt($query->id)).'" class="btn btn-theme btn-just-icon btn-sm show" id="'.encrypt($query->id).'" title="'.trans('panel.global.show').' '.trans('panel.user.title_singular').'">
+                  //         <i class="material-icons">visibility</i>
+                  //       </a>';
+                  // }
                   if(auth()->user()->can(['user_delete']))
                   {
                     $btn = $btn.' <a href="" class="btn btn-danger btn-just-icon btn-sm delete" value="'.$query->id.'" title="'.trans('panel.global.delete').' '.trans('panel.user.title_singular').'">

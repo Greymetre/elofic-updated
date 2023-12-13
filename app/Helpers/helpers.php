@@ -265,20 +265,38 @@ if (! function_exists('amountConversion')) {
 if (! function_exists('submitUserActivity')) { 
     function submitUserActivity($data)
     {
-        //$address = getLatLongToAddress($data['latitude'] , $data['longitude']);
+        // $address = getLatLongToAddress($data['latitude'] , $data['longitude']);
+        // return UserActivity::insert([
+        //     "active"   =>  "Y",
+        //     "userid" => isset($data['userid']) ? $data['userid'] : $data['user_id'] , 
+        //     "customerid" => isset($data['customer_id']) ? $data['customer_id'] : null ,
+        //     'latitude' => isset($data['latitude']) ? $data['latitude'] : null , 
+        //     'longitude' => isset($data['longitude']) ? $data['longitude'] : null , 
+        //     'time' => isset($data['time']) ? date('Y-m-d H:i:s',strtotime($data['time'])) : date('Y-m-d H:i:s') , 
+        //     // 'address' => isset($address) ? $address : '' ,
+        //     'address' => '', 
+        //     'description' => isset($data['description']) ? $data['description'] : '' , 
+        //     'type' => isset($data['type']) ? $data['type'] : '' , 
+        //     'created_at' => date('Y-m-d H:i:s')
+
+        // ]);
+
+        $address = getLatLongToAddress($data['latitude'] , $data['longitude']);
+
         return UserActivity::insert([
             "active"   =>  "Y",
             "userid" => isset($data['userid']) ? $data['userid'] : $data['user_id'] , 
             "customerid" => isset($data['customer_id']) ? $data['customer_id'] : null ,
             'latitude' => isset($data['latitude']) ? $data['latitude'] : null , 
             'longitude' => isset($data['longitude']) ? $data['longitude'] : null , 
-            'time' => isset($data['time']) ? date('Y-m-d H:i:s',strtotime($data['time'])) : date('Y-m-d H:i:s') , 
-            // 'address' => isset($address) ? $address : '' ,
-            'address' => '', 
-            'description' => isset($data['description']) ? $data['description'] : '' , 
-            'type' => isset($data['type']) ? $data['type'] : '' , 
+            //'time' => isset($data['time']) ? date('Y-m-d H:i:s',strtotime($data['time'])) : date('Y-m-d H:i:s') , 
+            'address' => isset($address) ? $address : '' ,
+            //'address' => '', 
+            //'description' => isset($data['description']) ? $data['description'] : '' , 
+            //'type' => isset($data['type']) ? $data['type'] : '' , 
             'created_at' => date('Y-m-d H:i:s')
         ]);
+
     }
 }
 if (! function_exists('getLatLongToAddress')) { 

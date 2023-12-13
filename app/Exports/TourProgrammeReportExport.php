@@ -15,14 +15,14 @@ use Illuminate\Support\Facades\Auth;
 class TourProgrammeReportExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapping
 {
     public function __construct($request)
-    {
+    { 
         $this->fromdate = date("Y-m-01");
         $this->todate = date("Y-m-t");
         $this->userid = isset($request->user_id) ? $request->user_id : Auth::user()->id;
     }
 
     public function collection()
-    {
+    {  
         return TourProgramme::with('tourdetails')->where('userid','=',$this->userid)
                                     ->where('date', '>=', $this->fromdate)
                                     ->where('date', '<=', $this->todate)

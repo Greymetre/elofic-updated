@@ -34,12 +34,12 @@ class TourProgrammeDataTable extends DataTable
                           <i class="material-icons">edit</i>
                         </a>';
                   // }
-                  if(auth()->user()->can(['tour_delete']))
-                  {
+                  // if(auth()->user()->can(['tour_delete']))
+                  // {
                     $btn = $btn.' <a href="" class="btn btn-danger btn-just-icon btn-sm delete" value="'.$query->id.'" title="'.trans('panel.global.delete').' '.trans('panel.category.title_singular').'">
                                 <i class="material-icons">clear</i>
                               </a>';
-                  }
+                  // }
                   return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
                                 '.$btn.'
                             </div>';

@@ -25,3 +25,13 @@ Stack trace:
 #0 /home/expertfr/public_html/bediya/adminer.php(171): remove_slashes()
 #1 {main}
   thrown in /home/expertfr/public_html/bediya/adminer.php on line 20
+[27-Nov-2023 09:54:40 UTC] PHP Fatal error:  Unparenthesized `a ? b : c ? d : e` is not supported. Use either `(a ? b : c) ? d : e` or `a ? b : (c ? d : e)` in /home/expertfr/public_html/bediya/app/Http/Controllers/Api/CustomController.php on line 233
+[29-Nov-2023 13:29:34 UTC] PHP Fatal error:  Unparenthesized `a ? b : c ? d : e` is not supported. Use either `(a ? b : c) ? d : e` or `a ? b : (c ? d : e)` in /home/expertfr/public_html/bediya/app/Exports/CustomersExport.php on line 96
+[04-Dec-2023 07:06:00 UTC] PHP Fatal error:  Cannot use isset() on the result of an expression (you can use "null !== expression" instead) in /home/expertfr/public_html/bediya/app/Exports/CheckinExport.php on line 75
+[04-Dec-2023 11:20:36 UTC] PHP Fatal error:  Cannot declare class App\DataTables\DeginationDataTable, because the name is already in use in /home/expertfr/public_html/bediya/app/DataTables/DesignationDataTable.php on line 14
+[04-Dec-2023 11:21:11 UTC] PHP Fatal error:  Cannot declare class App\DataTables\DeginationDataTable, because the name is already in use in /home/expertfr/public_html/bediya/app/DataTables/DesignationDataTable.php on line 14
+[04-Dec-2023 11:50:17 UTC] PHP Fatal error:  Cannot declare class App\DataTables\DesinationDataTable, because the name is already in use in /home/expertfr/public_html/bediya/app/DataTables/DesignationDataTable.php on line 14
+[05-Dec-2023 07:21:38 UTC] PHP Fatal error:  Cannot redeclare App\Models\Order::statusname() in /home/expertfr/public_html/bediya/app/Models/Order.php on line 117
+[05-Dec-2023 07:22:07 UTC] PHP Fatal error:  Cannot redeclare App\Models\Order::statusname() in /home/expertfr/public_html/bediya/app/Models/Order.php on line 117
+[05-Dec-2023 07:22:40 UTC] PHP Fatal error:  Cannot redeclare App\Models\Order::statusname() in /home/expertfr/public_html/bediya/app/Models/Order.php on line 117
+[05-Dec-2023 07:22:43 UTC] PHP Fatal error:  Cannot redeclare App\Models\Order::statusname() in /home/expertfr/public_html/bediya/app/Models/Order.php on line 117

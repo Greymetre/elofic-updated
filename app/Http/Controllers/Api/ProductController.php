@@ -175,6 +175,7 @@ class ProductController extends Controller
                         'part_no' => isset($value['part_no']) ? $value['part_no'] : '',
                         'product_no' => isset($value['product_no']) ? $value['product_no'] : '',
                         'model_no' => isset($value['model_no']) ? $value['model_no'] : '',
+                        'hp'=> isset($value['specification']) ? $value['specification'] : '',
 
                     ]);
                 }

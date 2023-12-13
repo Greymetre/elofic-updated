@@ -36,7 +36,7 @@
             'files'=>true
             ]) !!}
                <div class="row">
-                  <div class="col-md-4">
+                  <div class="col-md-2">
                      <img src="{!! asset('assets/img/logo.png') !!}" class="brand-image" width="70px" alt="Logo"> <span> {!! config('app.name') !!}</span>
                   </div>
                   <div class="col-md-4">
@@ -65,6 +65,21 @@
                              @if($errors->has('estimated_date'))
                               <div class="invalid-feedback">
                                  {{ $errors->first('estimated_date') }}
+                              </div>
+                              @endif
+                           </div>
+                         </div>
+                       </div>
+                  </div>
+                  <div class="col-md-2">
+                     <div class="row">
+                        <label class="col-md-4 col-form-label">{!! trans('panel.product.fields.suc-del') !!}</label>
+                         <div class="col-md-8">
+                           <div class="form-group has-default bmd-form-group">
+                             <input type="text" name="suc_del" class="form-control" id="suc_del"  value="{!! $orders['suc_del'] !!}">
+                             @if($errors->has('suc_del'))
+                              <div class="invalid-feedback">
+                                 {{ $errors->first('suc_del') }}
                               </div>
                               @endif
                            </div>
@@ -179,6 +194,34 @@
                     </div>
                   </div>
               </div>
+
+              <!-- new dropdown -->
+              
+            <div class="col-md-6">
+              <div class="row">
+                <label class="col-md-3 col-form-label">Employee</label>
+                <div class="col-md-9">
+                  <div class="form-group has-default bmd-form-group">
+                    <select class="form-control select2" name="executive_id" style="width: 100%;">
+                        <option value="">Select Employee</option>
+                        @if(@isset($users ))
+                        @foreach($users as $user)
+                        <option value="{!! $user['id'] !!}" {{ old( 'executive_id' , (!empty($orders->executive_id))?($orders->executive_id):('') ) == $user['id'] ? 'selected' : '' }}>{!! $user['name'] !!}</option>
+                        @endforeach
+                        @endif
+                     </select>
+                  </div>
+                  @if ($errors->has('executive_id'))
+                   <div class="error col-lg-12">
+                      <p class="text-danger">{{ $errors->first('executive_id') }}</p>
+                   </div>
+                  @endif
+                </div>
+              </div>
+            </div>
+
+              <!-- new dropdown -->
+
                <!-- Table row -->
                <div class="row">
                   <div class="container-fluid mt-5 d-flex justify-content-center w-100">
@@ -201,22 +244,26 @@
                               @foreach($orders['orderdetails'] as $key => $rows )
                               <tr id='addr{{ $key }}' value="{{ $key +1 }}">
                                  <td>{{ $key + 1 }}</td>
-                                 <td>
-                                    <select class="form-control product rowchange select2" name="orderdetail[{{ $key }}][product_id]">
-                                       <option value="{!! $rows['product_id'] !!}">{!! $rows['products']['display_name'] !!}</option>
-                                    </select>
-                                    <div class="error-product"></div>
-                                 </td>
-                                 <td>
-                                    <select class="form-control productdetails rowchange select2" name="orderdetail[{{ $key }}][product_detail]" onchange="getproductdetailinfo(this)" >
-                                       <option value="{!! $rows['product_detail_id'] !!}">{!! $rows['productdetails']['detail_title'] !!}</option>
-                                    </select>
-                                    <span class="gst_percent" style="display:none;">{!! isset($rows['productdetails']['gst']) ? $rows['productdetails']['gst'] : '' !!}</span> <br>
-                                    <span class="gstamount" style="display:none;">{!! $rows['tax_amount'] !!}</span> <br>
-                                    <span class="linediscount" style="display:none;"></span>
-                                    <input type="hidden" name="orderdetail[{{ $key }}][tax_amount]" class="form-control tax_amount" value="{!! $rows['tax_amount'] !!}" readonly/>
-                                    <input type="hidden" name="orderdetail[{{ $key }}][discount_amount]" class="form-control discountamount" value="{!! $rows['discount_amount'] !!}" readonly/>
-                                 </td>
+                                <td>
+				    <select class="form-control product rowchange select2" name="orderdetail[{{ $key }}][product_id]">
+					@if ($rows['product_id'] !== null)
+					    <option value="{!! $rows['product_id'] !!}">{!! $rows['products']['display_name'] !!}</option>
+					@endif
+				    </select>
+				    <div class="error-product"></div>
+				</td>
+				<td>
+				    <select class="form-control productdetails rowchange select2" name="orderdetail[{{ $key }}][product_detail]" onchange="getproductdetailinfo(this)">
+					@if ($rows['product_detail_id'] !== null)
+					    <option value="{!! $rows['product_detail_id'] !!}">{!! $rows['productdetails']['detail_title'] !!}</option>
+					@endif
+				    </select>
+				    <span class="gst_percent" style="display:none;">{!! isset($rows['productdetails']['gst']) ? $rows['productdetails']['gst'] : '' !!}</span> <br>
+				    <span class="gstamount" style="display:none;">{!! $rows['tax_amount'] !!}</span> <br>
+				    <span class="linediscount" style="display:none;"></span>
+				    <input type="hidden" name="orderdetail[{{ $key }}][tax_amount]" class="form-control tax_amount" value="{!! $rows['tax_amount'] !!}" readonly/>
+				    <input type="hidden" name="orderdetail[{{ $key }}][discount_amount]" class="form-control discountamount" value="{!! $rows['discount_amount'] !!}" readonly/>
+				</td>
                                  <td>
                                     <input type="number" name="orderdetail[{{ $key }}][price]" class="form-control price rowchange" step="0.00" min="0" value="{!! $rows['price'] !!}" />
                                     <div class='error-price'></div>

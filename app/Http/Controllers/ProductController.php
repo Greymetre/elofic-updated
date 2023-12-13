@@ -193,6 +193,7 @@ class ProductController extends Controller
             $product->part_no = !empty($request['part_no']) ? $request['part_no'] :'';
             $product->product_no = !empty($request['product_no']) ? $request['product_no'] :'';
             $product->model_no = !empty($request['model_no']) ? $request['model_no'] :'';
+            $product->suc_del  = !empty($request['suc_del']) ? $request['suc_del'] :'';
             if($request->file('image')){
                 $image = $request->file('image');
                 $filename = 'category'.$id;

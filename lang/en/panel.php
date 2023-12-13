@@ -28,6 +28,7 @@ return [
         'products'          => 'Products',
         'gifts'             => 'Gifts',
         'brands'            => 'Brand',
+        'branches'          => 'Branch',
         'units'             => 'Units',
         'order_master'      => 'Orders',
         'orders'            => 'Orders',
@@ -366,6 +367,8 @@ return [
         'no_alerts'                            => 'No alerts',
         'calendar'                             => 'Calendar',
         'messenger'                            => 'Messenger',
+        'parentcustomer'                       => 'Parent Customer',
+        'contact_number_two'                   => 'Contact Number-2',
     ],
     'datatables'   => [
         'copy'          => 'Copy',
@@ -597,6 +600,7 @@ return [
         'date_of_birth'     => 'Date of Birth',
         'date_of_joining'   => 'Joining Date',
         'employee_code'     => 'Employee Code',
+        'employee_codes'    => 'Employee Code',
         'biometric_code'    => 'Biometric Code',
         'emergency_number'  => 'Emergency Number',
         'photo'             => 'Photo',
@@ -625,6 +629,9 @@ return [
         'university_name'   => 'University Name',
         'point'             => 'Point',
         'year'              => 'Year',
+        'branch_name'       => 'Branch Name',
+        'division'          => 'Division',
+
         'fields'         => [
             'id'                       => 'ID',
             'id_helper'                => '',
@@ -677,6 +684,35 @@ return [
             'brand_image'        => 'Image',
         ],
     ],
+    
+   'division'           => [
+        'title'          => 'Divisions',
+        'title_singular' => 'Division',
+        'fields'         => [
+            'id'                       => 'ID',
+            'division_name'        => 'Division Name',
+            'division_image'        => 'Image',
+        ],
+    ],
+    
+    'designation'           => [
+        'title'          => 'Designations',
+        'title_singular' => 'Designation',
+        'fields'         => [
+            'id'                       => 'ID',
+            'designation_name'        => 'Designation Name',
+            'designation_image'        => 'Image',
+        ],
+    ],
+
+    'branch'           => [
+        'title'          => 'Branches',
+        'title_singular' => 'Branch',
+        'fields'         => [
+            'id'                 => 'ID',
+            'branch_name'        => 'Branch Name',
+        ],
+    ],
     'unit'           => [
         'title'          => 'Units',
         'title_singular' => 'Unit',
@@ -715,6 +751,7 @@ return [
              'unit_name'         =>   'Unit Name',
              'mrp'         =>   'MRP',
              'price'         =>   'Price',
+             'suc-del'=> 'Suc x Del',
              'selling_price'         =>   'Selling Price',
              'gst'         =>   'GST %',
              'discount'         =>   'Discount %',

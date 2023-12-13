@@ -73,6 +73,7 @@
               <th>{!! trans('panel.order.order_date') !!}</th>
               <th>{!! trans('panel.order.completed_date') !!}</th>
               <th>{!! trans('panel.order.total_gst') !!}</th>
+              <th>{!! trans('panel.product.fields.suc-del') !!}</th>
               <th>{!! trans('panel.order.sub_total') !!}</th>
               <th>{!! trans('panel.order.grand_total') !!}</th>
               <th>{!! trans('panel.order.status_id') !!}</th>
@@ -108,6 +109,7 @@
             {data: 'order_date', name: 'order_date',"defaultContent": ''},
             {data: 'completed_date', name: 'completed_date',"defaultContent": ''},
             {data: 'total_gst', name: 'total_gst',"defaultContent": ''},
+            {data: 'suc_del', name: 'suc_del',"defaultContent": ''},
             {data: 'sub_total', name: 'sub_total',"defaultContent": ''},
             {data: 'grand_total', name: 'grand_total',"defaultContent": ''},
             {data: 'statusname.status_name', name: 'statusname.status_name',"defaultContent": ''},

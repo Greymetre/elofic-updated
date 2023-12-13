@@ -19,7 +19,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-          'active','name', 'first_name', 'last_name', 'mobile', 'email', 'email_verified_at', 'password', 'notification_id', 'device_type', 'gender', 'profile_image', 'latitude', 'longitude', 'region_id', 'remember_token', 'deleted_at', 'created_at', 'updated_at','location' , 'reportingid' 
+          'active','name', 'first_name', 'last_name', 'mobile', 'email', 'email_verified_at', 'password', 'notification_id', 'device_type', 'gender', 'profile_image', 'latitude', 'longitude', 'region_id', 'remember_token', 'deleted_at', 'created_at', 'updated_at','location' , 'reportingid','branch_id','designation_id','employee_codes','department_id' 
     ];
 
     /**
@@ -66,6 +66,21 @@ class User extends Authenticatable
     public function reportinginfo()
     {
         return $this->belongsTo('App\Models\User', 'reportingid', 'id')->select('id','name');
+    }
+
+    public function getbranch()
+    {
+        return $this->belongsTo('App\Models\Branch', 'branch_id', 'id');
+    }
+
+    public function getdepartment()
+    {
+        return $this->belongsTo('App\Models\Division', 'department_id', 'id')->select('id','division_name');
+    }
+
+    public function getdesignation()
+    {
+        return $this->belongsTo('App\Models\Designation', 'designation_id', 'id')->select('id','designation_name'); 
     }
 
     

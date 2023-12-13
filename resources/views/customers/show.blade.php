@@ -1,5 +1,6 @@
 <x-app-layout>
 <div class="row">
+   <div class="col">
   <div class="card card-body">
      <div class="row">
         <div class="col-md-12">
@@ -390,6 +391,7 @@
         </div>
      </div>
   </div>
+   </div>
 </div>
 <script src="http://maps.google.com/maps/api/js?key=AIzaSyAVSDwHbKULnZa93kYpYINTqX4eaWy9q18" type="text/javascript"></script>
 <script type="text/javascript">

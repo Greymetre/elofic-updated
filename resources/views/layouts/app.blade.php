@@ -320,6 +320,34 @@
               </a>
             </li>
           @endif
+          
+         @if(auth()->user())
+            <li class="nav-item {{ request()->is('branch*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('branches') }}">
+                <i class="material-icons">shopping_bag</i>
+                <p>Branch</p>
+              </a>
+            </li>
+          @endif         
+          
+          @if(auth()->user())
+            <li class="nav-item {{ request()->is('division*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('division') }}">
+                <i class="material-icons">shopping_bag</i>
+                <p>Division</p>
+              </a>
+            </li>
+          @endif
+          
+          @if(auth()->user())
+            <li class="nav-item {{ request()->is('designation*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('designation') }}">
+                <i class="material-icons">shopping_bag</i>
+                <p>Designation</p>
+              </a>
+            </li>
+          @endif
+          
           @if(auth()->user()->can('payments_access'))
           <li class="nav-item ">
             <a class="nav-link collapsed" data-toggle="collapse" href="#paymentManu" aria-expanded="false">

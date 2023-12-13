@@ -44,13 +44,19 @@ class ProductImport implements ToCollection,WithValidation,WithHeadingRow, WithB
                 'brand_id' => isset($row['brand_id'])? $row['brand_id']:null,
                 'product_image' => isset($row['product_image'])? $row['product_image']:'',
                 'unit_id' => isset($row['unit_id'])? $row['unit_id']:null,
+                'suc_del' => isset($row['suc_del'])? $row['suc_del']:null,
                 'created_by' => Auth::user()->id,
-                'created_at' => getcurentDateTime() ,
+                'created_at' => getcurentDateTime(),
                 'updated_at' => getcurentDateTime(),
-                'specification' => isset($row['specification']) ? $row['specification'] :null,
-                'part_no'       => isset($row['part_no']) ? $row['part_no'] :null,
-                'product_no'    => isset($row['product_no']) ? $row['product_no'] :null,
+                // 'specification' => isset($row['specification']) ? $row['specification'] :null,
+                // 'part_no'       => isset($row['part_no']) ? $row['part_no'] :null,
+                // 'product_no'    => isset($row['product_no']) ? $row['product_no'] :null,
+                // 'model_no'      => isset($row['model_no']) ? $row['model_no'] :null,
+                'specification' => isset($row['hp']) ? $row['hp'] :null,
+                'part_no'       => isset($row['kw']) ? $row['kw'] :null,
+                'product_no'    => isset($row['product_stage']) ? $row['product_stage'] :null,
                 'model_no'      => isset($row['model_no']) ? $row['model_no'] :null,
+
             ]) )
             {
                ProductDetails::updateOrCreate(['product_id' => $product['id'] ],[

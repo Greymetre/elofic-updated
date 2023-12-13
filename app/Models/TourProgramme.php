@@ -15,7 +15,8 @@ class TourProgramme extends Model
 
     public function userinfo()
     {
-        return $this->belongsTo('App\Models\User', 'userid', 'id')->select('id','name');
+        // return $this->belongsTo('App\Models\User', 'userid', 'id')->select('id','name');
+        return $this->belongsTo('App\Models\User', 'userid', 'id');
     }
 
     public function tourdetails()

@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\Customers;
 use App\Models\Status;
 use App\Models\City;
+use App\Models\User;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Auth;
@@ -73,7 +74,17 @@ class OrderController extends Controller
                             ->where('active','=','Y')
                             ->select('id', 'name','mobile')
                             ->get();
-        return view('orders.create',compact('products','sellers','buyers'))->with('orders',$this->orders);
+
+        $users = User::where(function($query) use($userids){
+                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
+                                {
+                                    $query->whereIn('id',$userids);
+                                }
+                            })->select('id','name')->orderBy('id','desc')->get();                    
+
+
+
+        return view('orders.create',compact('products','sellers','buyers','users'))->with('orders',$this->orders);
     }
 
     /**
@@ -173,7 +184,16 @@ class OrderController extends Controller
                             ->where('active','=','Y')
                             ->select('id', 'name','mobile')
                             ->get();
-        return view('orders.create',compact('products','sellers','buyers','orderdetail'))->with('orders',$orders);
+
+        $users = User::where(function($query) use($userids){
+                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
+                                {
+                                    $query->whereIn('id',$userids);
+                                }
+                            })->select('id','name')->orderBy('id','desc')->get();                        
+
+
+        return view('orders.create',compact('products','sellers','buyers','orderdetail','users'))->with('orders',$orders);
     }
 
     /**
@@ -197,6 +217,7 @@ class OrderController extends Controller
         $orders->sub_total = isset($request['sub_total']) ? $request['sub_total'] : 0.00 ;
         $orders->grand_total = isset($request['grand_total']) ? $request['grand_total'] : 0.00 ;
         $orders->order_taking = isset($request['order_taking']) ? $request['order_taking'] :'' ;
+        $orders->suc_del = isset($request['suc_del']) ? $request['suc_del'] :'' ;
         $orders->updated_by = Auth::user()->id ;
         if($orders->save())
         {

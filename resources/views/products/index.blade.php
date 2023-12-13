@@ -69,16 +69,17 @@
               <th>{!! trans('panel.global.action') !!}</th>
               <th>{!! trans('panel.product.fields.product_image') !!}</th>
               <th>{!! trans('panel.product.fields.product_name') !!}</th>
-              <th>GG No</th>
-              <th>OE Part No</th>
+              <th>Product Stage</th> 
+              <th>kW</th>
               <th>Description</th>
-              <th>Specification</th>
+              <th>HP</th>
               <th>{!! trans('panel.product.fields.brand_name') !!}</th>
               <th>{!! trans('panel.product.fields.mrp') !!}</th>
               <th>{!! trans('panel.product.fields.category_name') !!}</th>
               <th>{!! trans('panel.product.fields.subcategory_name') !!}</th>
               <th>{!! trans('panel.product.fields.unit_name') !!}</th>
               <th>{!! trans('panel.product.fields.price') !!}</th>
+               <th>{!! trans('panel.product.fields.suc-del') !!}</th>
               <th>{!! trans('panel.product.fields.selling_price') !!}</th>
               <th>{!! trans('panel.product.fields.gst') !!}</th>
               <th>{!! trans('panel.global.created_by') !!}</th>
@@ -127,6 +128,7 @@
             {data: 'subcategories.subcategory_name', name: 'subcategories.subcategory_name',"defaultContent": ''},
             {data: 'unitmeasures.unit_code', name: 'unitmeasures.unit_code',"defaultContent": ''},
             {data: 'productpriceinfo.price', name: 'productpriceinfo.price',"defaultContent": ''},
+            {data: 'suc_del', name: 'suc_del',"defaultContent": ''},
             {data: 'productpriceinfo.selling_price', name: 'productpriceinfo.selling_price',"defaultContent": ''},
             {data: 'productpriceinfo.gst', name: 'productpriceinfo.gst',"defaultContent": ''},
             {data: 'createdbyname.name', name: 'createdbyname.name',"defaultContent": ''},

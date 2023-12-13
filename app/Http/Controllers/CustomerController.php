@@ -212,7 +212,10 @@ class CustomerController extends Controller
                                 }
                             })->select('id','name')->orderBy('id','desc')->get();
         $deals = array();
-        return view('customers.create',compact('pincodes','customertype','firmtype','pincodes','countries','fields', 'users','deals'))->with('customers',$this->customers);
+
+        $parentcustomers = Customers::where('active','=','Y')->where('customertype', '!=', '2')->select('id','first_name','last_name')->orderBy('id','desc')->get();
+
+        return view('customers.create',compact('pincodes','customertype','firmtype','pincodes','countries','fields', 'users','deals','parentcustomers'))->with('customers',$this->customers);
     }
 
     public function createDistributor()
@@ -414,7 +417,9 @@ class CustomerController extends Controller
                                     $query->whereIn('id',$userids);
                                 }
                             })->select('id','name')->orderBy('id','desc')->get();
-        return view('customers.create',compact('pincodes','customertype','firmtype','pincodes','countries','fields','users','deals'))->with('customers',$customers);
+
+        $parentcustomers = Customers::where('active','=','Y')->where('customertype', '!=', '2')->select('id','first_name','last_name')->orderBy('id','desc')->get();
+        return view('customers.create',compact('pincodes','customertype','firmtype','pincodes','countries','fields','users','deals','parentcustomers'))->with('customers',$customers);
     }
 
     /**

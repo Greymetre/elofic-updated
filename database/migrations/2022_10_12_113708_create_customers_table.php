@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('first_name',250)->index()->default('');
             $table->string('last_name',250)->index()->default('');
             $table->string('mobile',15)->unique()->index()->nullable();
+            $table->string('contact_number',15)->index()->nullable();
             $table->string('email',250)->unique()->index()->nullable();
             $table->string('password')->default('');
             $table->string('notification_id',450)->default('');

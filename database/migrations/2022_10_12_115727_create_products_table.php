@@ -34,6 +34,7 @@ return new class extends Migration
             $table->string('part_no',250)->index()->default('');
             $table->string('product_no',250)->index()->default('');
             $table->string('model_no',250)->index()->default('');
+            $table->string('suc_del',250)->index()->default('');
             $table->foreign('created_by')->references('id')->on('users');
             $table->foreign('updated_by')->references('id')->on('users');
             $table->foreign('category_id')->references('id')->on('categories');

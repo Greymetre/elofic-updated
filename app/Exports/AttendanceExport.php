@@ -22,7 +22,7 @@ class AttendanceExport implements FromCollection,WithHeadings,ShouldAutoSize,Wit
 
     public function collection()
     {
-        return Attendance::where(function($query) {
+        return Attendance::with('users')->where(function($query) {
                         if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
                         {
                             $query->whereIn('user_id', getUsersReportingToAuth());
@@ -42,7 +42,7 @@ class AttendanceExport implements FromCollection,WithHeadings,ShouldAutoSize,Wit
 
     public function headings(): array
     {
-        return ['id','user_id', 'punchin_date', 'punchin_time', 'punchin_address', 'punchout_date', 'punchout_time', 'punchout_address', 'worked_time','punchin_summary','punchout_summary','punchin_longitude','punchin_latitude','punchout_latitude','punchout_longitude','Working Type'];
+        return ['id','user_id', 'punchin_date', 'punchin_time', 'punchin_address', 'punchout_date', 'punchout_time', 'punchout_address', 'worked_time','punchin_summary','punchout_summary','punchin_longitude','punchin_latitude','punchout_latitude','punchout_longitude','Working Type','Employee Code','Branch','Division','Designation'];
     }
 
     public function map($data): array
@@ -64,6 +64,10 @@ class AttendanceExport implements FromCollection,WithHeadings,ShouldAutoSize,Wit
             isset($data['punchout_latitude']) ? $data['punchout_latitude'] : '',
             isset($data['punchout_longitude']) ? $data['punchout_longitude'] : '',
             isset($data['working_type']) ? $data['working_type'] : '',
+            isset($data['users']['employee_codes'])? $data['users']['employee_codes'] :'',
+            isset($data['users']['getbranch']['branch_name'])? $data['users']['getbranch']['branch_name'] :'',
+            isset($data['users']['getdepartment']['division_name'])? $data['users']['getdepartment']['division_name'] :'',
+            isset($data['users']['getdesignation']['designation_name'])? $data['users']['getdesignation']['designation_name'] :'',
         ];
     }
 

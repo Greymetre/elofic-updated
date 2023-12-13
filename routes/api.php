@@ -51,7 +51,12 @@ Route::any('getCustomerTypeList', [ CustomController::class, 'getCustomerTypeLis
 Route::any('getPincodeInfo', [ AddressController::class, 'getPincodeInfo']);
 Route::any('getReportType', [ CustomController::class, 'getReportType']);
 Route::any('getWorkType', [ CustomController::class, 'getWorkType']);
+Route::any('getDevision', [ CustomController::class, 'getDevision']);
+
 Route::any('mobileNumberExists', [ CustomController::class, 'mobileNumberExists']);
+Route::any('gstNumberExists', [ CustomController::class, 'gstNumberExists']);
+Route::any('getRetailerList', [ CustomController::class, 'getRetailerList']);
+
 Route::any('emailExists', [ CustomController::class, 'emailExists']);
 /*================= Customer Routes ============================*/
 Route::group(['middleware' => ['auth:customers']], function () {

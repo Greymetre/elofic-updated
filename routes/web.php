@@ -41,6 +41,9 @@ use App\Http\Controllers\UsersController;
 use App\Http\Controllers\VisitReportController;
 use App\Http\Controllers\VisitTypeController;
 use App\Http\Controllers\WalletController;
+use App\Http\Controllers\BranchController;
+use App\Http\Controllers\DivisionController;
+use App\Http\Controllers\DesignationController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -128,7 +131,12 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('roles-download', [ RolesController::class, 'download'])->name('roles.download');
     Route::any('roles-template', [ RolesController::class, 'template'])->name('roles.template');
     Route::post('roles-upload', [ RolesController::class, 'upload'])->name('roles.upload');
-
+    //braches 
+    Route::resource('branches', BranchController::class);
+    //Division 
+    Route::resource('division', DivisionController::class);
+    //Designation 
+    Route::resource('designation', DesignationController::class);
     // Users
     Route::delete('users/destroy', [ UsersController::class, 'massDestroy'])->name('users.massDestroy');
     Route::resource('users', UsersController::class);

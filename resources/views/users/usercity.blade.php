@@ -9,7 +9,7 @@
         <h4 class="card-title ">User City List
               <span class="pull-right">
             <div class="btn-group">
-              <form action="{{ URL::to('admin/usercity-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
+              <form action="{{ URL::to('/usercity-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
               {{ csrf_field() }}
                 <div class="input-group">
                   <div class="fileinput fileinput-new text-center" data-provides="fileinput">
@@ -28,7 +28,7 @@
                 </div>
               </div>
             </form>
-            <a href="{{ URL::to('admin/usercity-download') }}" class="btn btn-just-icon btn-theme" title="User City Download"><i class="material-icons">cloud_download</i></a>
+            <a href="{{ URL::to('/usercity-download') }}" class="btn btn-just-icon btn-theme" title="User City Download"><i class="material-icons">cloud_download</i></a>
           </div>
           </span>
           </h4>

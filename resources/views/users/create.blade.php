@@ -317,7 +317,8 @@
                  </div>
               </div>
               <div class="row">
-                 <div class="col-md-6">
+
+<!--                  <div class="col-md-6">
                     <div class="row">
                        <label class="col-md-3 col-form-label">{!! trans('panel.user.employee_code') !!}</label>
                        <div class="col-md-9">
@@ -331,7 +332,24 @@
                           </div>
                        </div>
                     </div>
+                 </div> -->
+
+                  <div class="col-md-6">
+                    <div class="row">
+                       <label class="col-md-3 col-form-label">{!! trans('panel.user.employee_codes') !!}</label>
+                       <div class="col-md-9">
+                          <div class="form-group has-default bmd-form-group">
+                             <input type="text" name="employee_codes" id="employee_codes" class="form-control" value="{!! old( 'employee_codes', $user['employee_codes']) !!}" required>
+                             @if ($errors->has('employee_codes'))
+                             <div class="error col-lg-12">
+                                <p class="text-danger">{{ $errors->first('employee_codes') }}</p>
+                             </div>
+                             @endif
+                          </div>
+                       </div>
+                    </div>
                  </div>
+
                  <div class="col-md-6">
                     <div class="row">
                        <label class="col-md-3 col-form-label">{!! trans('panel.user.biometric_code') !!}</label>
@@ -348,6 +366,39 @@
                     </div>
                  </div>
               </div>
+
+
+            <!-- new field start -->
+              <div class="row">
+                  <div class="col-md-6">
+                    <div class="row">
+                       <label class="col-md-3 col-form-label">{!! trans('panel.user.branch_name') !!}</label>
+                       <div class="col-md-9">
+                          <div class="form-group has-default bmd-form-group">
+                           <div class="form-group has-default bmd-form-group">
+                             <select class="form-control" name="branch_id" required>
+                                <option value="" disabled selected>Select Branch</option>
+                              @foreach($branches as $branche)  
+                                <option value="{{$branche->id}}">{{$branche->branch_name}}</option>
+                              @endforeach  
+                             </select>
+                            </div>
+                             @if ($errors->has('branch_id'))
+                             <div class="error col-lg-12">
+                                <p class="text-danger">{{ $errors->first('branch_id') }}</p>
+                             </div>
+                             @endif
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+              </div> 
+              <!-- new field end -->
+
+
+
+
+
               <hr class="my-3">
               <h4 class="section-heading mb-3  h4 mt-0 text-center text-info">Bank Information </h4>
               <hr class="my-3">
@@ -462,6 +513,7 @@
                        </div>
                     </div>
                  </div>
+
                  <div class="col-md-6">
                     <div class="row">
                        <label class="col-md-3 col-form-label">{!! trans('panel.user.designation') !!}</label>
@@ -469,6 +521,9 @@
                           <div class="form-group has-default bmd-form-group">
                              <select class="form-control" name="designation_id">
                                 <option value="" disabled selected>Select {!! trans('panel.user.designation') !!}</option>
+                                @foreach($designations as $designation)
+                                <option value="{{$designation->id}}"> {{$designation->designation_name}}</option>
+                                @endforeach
                              </select>
                              @if($errors->has('designation_id'))
                              <div class="invalid-feedback">
@@ -486,6 +541,9 @@
                           <div class="form-group has-default bmd-form-group">
                              <select class="form-control" name="department_id">
                                 <option value="" disabled selected>Select {!! trans('panel.user.department') !!}</option>
+                               @foreach($divisions as $division)
+                                <option value="{{$division->id}}">{{$division->division_name}}</option>
+                               @endforeach
                              </select>
                              @if($errors->has('department_id'))
                              <div class="invalid-feedback">
@@ -496,6 +554,7 @@
                        </div>
                     </div>
                  </div>
+                 
                  <div class="col-md-6">
                     <div class="row">
                        <label class="col-md-3 col-form-label">{!! trans('panel.user.probation_period') !!}</label>

@@ -170,11 +170,20 @@ class TourController extends Controller
     public function destroy($id)
     {
         //abort_if(Gate::denies('tour_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        // $user = TourProgramme::find($id);
+        // if($user->delete())
+        // {
+        //     return response()->json(['status' => 'success','message' => 'TourProgramme deleted successfully!']);
+        // }
+        // return response()->json(['status' => 'error','message' => 'Error in TourProgramme Delete!']);
+
         $user = TourProgramme::find($id);
-        if($user->delete())
-        {
-            return response()->json(['status' => 'success','message' => 'TourProgramme deleted successfully!']);
-        }
+      if(!empty($user)){
+        TourDetail::where('tourid',$id)->delete();
+         $user->delete();
+         return response()->json(['status' => 'success','message' => 'TourProgramme deleted successfully!']);
+       }
+
         return response()->json(['status' => 'error','message' => 'Error in TourProgramme Delete!']);
     }
 
@@ -186,12 +195,12 @@ class TourController extends Controller
         Excel::import(new TourImport,request()->file('import_file'));
         return back();
     }
-    public function download()
+    public function download(Request $request)
     {
       //abort_if(Gate::denies('tour_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        return Excel::download(new TourExport, 'tours.xlsx');
+        return Excel::download(new TourExport($request), 'tours.xlsx');
     }
     public function template()
     {

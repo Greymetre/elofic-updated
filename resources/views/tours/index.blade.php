@@ -9,6 +9,33 @@
         <h4 class="card-title ">Tour List
               <span class="pull-right">
                 <div class="btn-group">
+
+
+                <form method="GET" action="{{ URL::to('tours-download') }}">
+                  <div class="d-flex flex-row">
+
+                  <div class="p-2">
+                      <select class="form-control" name="executive_id" id="executive_id" data-style="select-with-transition" title="Select User">
+                     <option value="">Select User</option>
+                    @if(@isset($users ))
+                    @foreach($users as $user)
+                     <option value="{!! $user['id'] !!}" {{ old( 'executive_id') == $user->id ? 'selected' : '' }}>{!! $user['name'] !!}</option>
+                    @endforeach
+                    @endif
+                   </select>
+                  </div>
+
+      
+
+                <div class="p-2"><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
+                    <div class="p-2"><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
+                    <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.tours.title') !!}"><i class="material-icons">cloud_download</i></button></div>
+                  </div>
+              </form>
+
+
+
+
                   <form action="{{ URL::to('tours-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                   {{ csrf_field() }}
                   <div class="input-group">
@@ -28,7 +55,7 @@
                     </div>
                   </div>
                   </form>
-                  <a href="{{ URL::to('tours-download') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.tour.title') !!}"><i class="material-icons">cloud_download</i></a>
+                  <!-- <a href="{{ URL::to('tours-download') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.tour.title') !!}"><i class="material-icons">cloud_download</i></a> -->
                   @if(auth()->user()->can(['tour_upload']))
 
                   @endif

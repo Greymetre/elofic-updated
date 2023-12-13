@@ -267,9 +267,17 @@ class UserController extends Controller
     {
         try
         { 
+            $cityname = $request->input('cityname');
             $user_id = $request->user()->id;
             $cityids = UserCityAssign::where('userid', '=', $user_id)->pluck('city_id')->toArray();
-            $data = City::whereIn('id',$cityids)->select('id','city_name', 'grade')->orderBy('city_name','asc')->get();
+            //$data = City::whereIn('id',$cityids)->select('id','city_name', 'grade')->orderBy('city_name','asc')->get();
+
+            $data = City::whereIn('id',$cityids)->select('id','city_name', 'grade');
+            if($cityname){
+                $data->where('city_name','LIKE',trim($cityname).'%');
+            }
+            $data = $data->orderBy('city_name','asc')->get();
+
             if($data->isNotEmpty())
             {
                 return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','data' => $data ], $this->successStatus);

@@ -11,7 +11,7 @@ class Customers extends Model
 
     protected $table = 'customers';
 
-    protected $fillable = [ 'active', 'name', 'first_name', 'last_name', 'mobile', 'email', 'password', 'notification_id', 'latitude', 'longitude', 'device_type', 'gender', 'profile_image', 'customer_code', 'status_id', 'region_id', 'customertype', 'firmtype', 'created_by', 'updated_by', 'executive_id', 'deleted_at', 'created_at', 'updated_at', 'beatscheduleid', 'manager_name', 'manager_phone'];
+    protected $fillable = [ 'active', 'name', 'first_name', 'last_name', 'mobile', 'email', 'password', 'notification_id', 'latitude', 'longitude', 'device_type', 'gender', 'profile_image', 'customer_code', 'status_id', 'region_id', 'customertype', 'firmtype', 'created_by', 'updated_by', 'executive_id', 'deleted_at', 'created_at', 'updated_at', 'beatscheduleid', 'manager_name', 'manager_phone','contact_number','parent_id'];
 
     public function message()
     {
@@ -56,6 +56,7 @@ class Customers extends Model
                 'mobile' => $request['mobile'],
                 'email' => !empty($request['email'])? $request['email']:null,
                 'password' => !empty($request['password'])? Hash::make($request['password']) :'',
+                'contact_number' => !empty($request['contact_number'])? $request['contact_number']:'',
                 'notification_id' => !empty($request['notification_id'])? $request['notification_id']:'',
                 'latitude' => !empty($request['latitude'])? $request['latitude']:null,
                 'longitude' => !empty($request['longitude'])? $request['longitude']:null,
@@ -67,6 +68,7 @@ class Customers extends Model
                 'customertype' =>  !empty($request['customertype'])? $request['customertype'] :1,
                 'firmtype' =>  !empty($request['firmtype'])? $request['firmtype'] :null,
                 'executive_id' =>  !empty($request['executive_id'])? $request['executive_id'] : $request['created_by'],
+                'parent_id' =>  !empty($request['parent_id'])? $request['parent_id'] : null,
                 'created_by' =>  !empty($request['created_by'])? $request['created_by'] :null,
                 'manager_name' => !empty($request['manager_name'])? $request['manager_name'] :'',
                 'manager_phone' => !empty($request['manager_phone'])? $request['manager_phone'] :'',
@@ -102,6 +104,7 @@ class Customers extends Model
             $customers->customertype =  !empty($request['customertype'])? $request['customertype'] :1;
             $customers->firmtype = !empty($request['firmtype'])? $request['firmtype']:null;
             $customers->executive_id = !empty($request['executive_id'])? $request['executive_id']:null;
+
             if($request['password'])
             {
                 $customers->password = !empty($request['password'])? Hash::make($request['password']) :'';
@@ -110,6 +113,17 @@ class Customers extends Model
             {
                 $customers->mobile = $request['mobile'];
             }
+
+             if(!empty($request['contact_number']))
+            {
+                $customers->contact_number = $request['contact_number'];
+            }
+
+             if(!empty($request['parent_id']))
+            {
+                $customers->parent_id = $request['parent_id'];
+            }
+
             if(!empty($request['email']))
             {
                 $customers->email = !empty($request['email'])? $request['email'] :null;
@@ -152,6 +166,12 @@ class Customers extends Model
     {
         return $this->belongsTo('App\Models\User', 'executive_id', 'id')->select('id','name');
     }
+
+    public function userdetails()
+    {
+        return $this->belongsTo('App\Models\User', 'executive_id', 'id');
+    }
+
 
     public function customertypes()
     {
@@ -205,4 +225,10 @@ class Customers extends Model
     {
         return $this->hasMany('App\Models\DealIn','customer_id','id')->select('customer_id', 'types', 'hcv', 'mav', 'lmv', 'lcv', 'other', 'tractor');
     }
+
+     // For get parent 
+    public function parentdetail(){
+        return $this->belongsTo(Customers::class, 'parent_id', 'id');
+    }
+
 }

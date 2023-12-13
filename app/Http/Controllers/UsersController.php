@@ -29,6 +29,10 @@ use App\Models\UserCityAssign;
 use App\Imports\UserCityImport;
 use App\Exports\UserCityMapedExport;
 
+use App\Models\Branch;
+use App\Models\Designation;
+use App\Models\Division;
+
 class UsersController extends Controller
 {
     public function __construct() 
@@ -52,7 +56,12 @@ class UsersController extends Controller
         $roles = Role::where('name','!=','super-admin')->pluck('name', 'id');
         $cities = City::where('active','=','Y')->pluck('city_name','id');
         $reportings = User::where('active','=','Y')->select('id','name')->get();
-        return view('users.create', compact('roles','cities','reportings'))->with('user',$this->user);
+
+        $branches = Branch::where('active','=','Y')->get();
+        $designations = Designation::where('active','=','Y')->get();
+        $divisions = Division::where('active','=','Y')->get();
+
+        return view('users.create', compact('roles','cities','reportings','branches','designations','divisions'))->with('user',$this->user);
     }
 
     public function store(UserRequest $request)
@@ -72,6 +81,10 @@ class UsersController extends Controller
             'latitude'   =>  isset($request['latitude']) ? $request['latitude'] :'',
             'longitude' => isset($request['longitude']) ? $request['longitude'] :'',
             'location' => !empty($request['location']) ? $request['location'] :'',
+            'branch_id' => isset($request['branch_id']) ? $request['branch_id'] :'',
+            'department_id' => isset($request['department_id']) ? $request['department_id'] :'',
+            'employee_codes' => isset($request['employee_codes']) ? $request['employee_codes'] :'',
+            'designation_id' => isset($request['designation_id']) ? $request['designation_id'] :'',
         ]);
         $user->roles()->sync($request->input('roles', []));
         $permissions = $user->getPermissionsViaRoles()->pluck('name');
@@ -112,12 +125,18 @@ class UsersController extends Controller
         $cities = City::where('active','=','Y')->pluck('city_name','id');
         $reportings = User::where('active','=','Y')->select('id','name')->get();
 
-        return view('users.edit', compact('roles', 'user','cities','reportings'));
+        $branches = Branch::where('active','=','Y')->get();
+        $designations = Designation::where('active','=','Y')->get();
+        $divisions = Division::where('active','=','Y')->get();
+
+
+        return view('users.edit', compact('roles', 'user','cities','reportings','branches','designations','divisions'));
     }
 
     //public function update(Request $request, User $user)
     public function update(Request $request, $id)
-    {
+    {  
+        
         if($request->file('image')){
             $image = $request->file('image');
             $filename = 'profile_'.$id;
@@ -148,6 +167,12 @@ class UsersController extends Controller
         $user->gender = isset($request['gender']) ? $request['gender'] :'';
         $user->reportingid = isset($request['reportingid']) ? $request['reportingid'] : null;
         $user->region_id = isset($request['region_id']) ? $request['region_id'] :null;
+
+        $user->branch_id = isset($request['branch_id']) ? $request['branch_id'] :null;
+        $user->department_id = isset($request['department_id']) ? $request['department_id'] :null;
+        $user->employee_codes = isset($request['employee_codes']) ? $request['employee_codes'] :null;
+        $user->designation_id = isset($request['designation_id']) ? $request['designation_id'] :null;
+
         if($user->save())
         {
             $user->roles()->sync($request->input('roles', []));

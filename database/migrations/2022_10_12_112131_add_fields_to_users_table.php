@@ -28,6 +28,10 @@ return new class extends Migration
             $table->string('location',250)->index()->default('');
             $table->unsignedBigInteger('reportingid')->unsigned()->index()->nullable();
             $table->bigInteger('region_id')->unsigned()->index()->nullable();
+            $table->string('employee_codes',250)->index()->nullable();
+            $table->unsignedBigInteger('branch_id')->unsigned()->index()->nullable();
+            $table->unsignedBigInteger('designation_id')->unsigned()->index()->nullable();
+            $table->unsignedBigInteger('department_id')->unsigned()->index()->nullable();
             $table->bigInteger('created_by')->unsigned()->index()->nullable();
             $table->softDeletes('deleted_at');
             $table->foreign('reportingid')->references('id')->on('users');

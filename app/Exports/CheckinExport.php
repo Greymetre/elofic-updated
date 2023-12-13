@@ -38,22 +38,28 @@ class CheckinExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMa
                                     $query->whereDate('checkin_date','<=',$this->enddate);
                                 }
                             })
-                            ->select('id','customer_id', 'user_id', 'checkin_date', 'checkin_time', 'checkout_date', 'checkout_time', 'beatscheduleid','created_at','checkin_address','checkout_address','distance')
+                            ->select('id','customer_id', 'user_id', 'checkin_date', 'checkin_time', 'checkout_date', 'checkout_time','checkin_address','checkout_address','distance', 'beatscheduleid','created_at')
                             ->latest()->limit(5000)->get();   
     }
 
     public function headings(): array
     {
-        return ['id','User ID', 'User Name','Checkin Date', 'Checkin Time','Checkout Time', 'Spend Time', 'Beat Name', 'Customer Id', 'Customer Name', 'Customer Mobile','District','City','Address','Existing','Order Qty','Order Value','Unique Orders','Visit Remark', 'Report Title', 'Visit Type', 'Checkin Address' , 'Checkout Address' , 'Distance'];
+        return ['id','User ID', 'User Name','Employee Code','Division','Branch','Customer Type','Designation','Checkin Date', 'Checkin Time','Checkout Time', 'Spend Time', 'Beat Name', 'Customer Id', 'Customer Name', 'Customer Mobile','District','City','Address','Existing','Order Qty','Order Value','Visit Remark', 'Visit Type', 'Checkin Address','Checkout Address','Distance'];
     }
 
     public function map($data): array
     {
         $interval = strtotime($data->checkout_time) - strtotime($data->checkin_time) ;
+
         return [
             $data['id'],
             isset($data['user_id']) ? $data['user_id'] :'',
             isset($data['users']['name']) ? $data['users']['name'] :'',
+            isset($data['users']['employee_codes']) ? $data['users']['employee_codes'] :'',
+            isset($data['users']['getdepartment']['division_name']) ? $data['users']['getdepartment']['division_name'] :'',
+            isset($data['users']['getbranch']['branch_name']) ? $data['users']['getbranch']['branch_name']:'',
+            isset($data['customers']['customertypes']['customertype_name']) ? $data['customers']['customertypes']['customertype_name']:'',
+            isset($data['users']['getdesignation']['designation_name']) ? $data['users']['getdesignation']['designation_name'] :'',
             isset($data['checkin_date']) ? $data['checkin_date'] :'',
             isset($data['checkin_time']) ? $data['checkin_time'] :'',
             isset($data['checkout_time']) ? $data['checkout_time'] :'',
@@ -66,11 +72,9 @@ class CheckinExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMa
             isset($data['customers']['customeraddress']['cityname']['city_name']) ? $data['customers']['customeraddress']['cityname']['city_name'] :'',
             isset($data['customers']['customeraddress']['address1']) ? $data['customers']['customeraddress']['address1'].' '.$data['customers']['customeraddress']['address2'] :'',
             (date("Y-m-d", strtotime($data['customers']['created_at'])) == date("Y-m-d", strtotime($data['checkin_date']))) ? 'New' : 'Existing', 
-            (!empty($data['orders'])) ? $data['orders']->sum('total_qty') : 0,
-            (!empty($data['orders'])) ? $data['orders']->sum('grand_total') : 0,
-            (!empty($data['orders'])) ? $data['orders']->count() : 0,
+            isset($data['orders']) ?$data['orders']->sum('total_qty') : 0,
+            isset($data['orders']) ? $data['orders']->sum('grand_total') : 0,
             isset($data['visitreports']['description']) ? $data['visitreports']['description'] :'',
-            isset($data['visitreports']['report_title']) ? $data['visitreports']['report_title'] :'',
             isset($data['visitreports']['visittypename']['type_name']) ? $data['visitreports']['visittypename']['type_name'] :'',
             isset($data['checkin_address']) ? $data['checkin_address'] :'',
             isset($data['checkout_address']) ? $data['checkout_address'] :'',

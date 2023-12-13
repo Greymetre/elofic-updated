@@ -15,7 +15,7 @@ class CheckIn extends Model
 
     public function users()
     {
-        return $this->belongsTo('App\Models\User', 'user_id', 'id')->select('id','name','mobile','profile_image');
+        return $this->belongsTo('App\Models\User', 'user_id', 'id');
     }
 
     public function customers()

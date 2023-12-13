@@ -15,12 +15,12 @@ class ProductExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMa
 {
     public function collection()
     {
-        return Product::with('productpriceinfo')->select('id','product_name', 'display_name', 'description', 'subcategory_id', 'category_id', 'brand_id', 'product_image', 'unit_id', 'specification', 'part_no', 'product_no', 'model_no')->latest()->get();   
+        return Product::with('productpriceinfo')->select('id','product_name', 'display_name', 'description', 'subcategory_id', 'category_id', 'brand_id', 'product_image', 'unit_id', 'specification', 'part_no','suc_del', 'product_no', 'model_no')->latest()->get();   
     }
 
     public function headings(): array
     {
-        return ['id','product_name', 'display_name', 'description', 'subcategory_id','subcategory','category_id','category','brand_id','brand','product_image', 'unit_id','unit_name','mrp','price','selling_price','gst','hsn_code','ean_code','discount','max_discount', 'specification', 'part_no', 'product_no', 'model_no'];
+        return ['product_id','product_name', 'display_name', 'description', 'subcategory_id','subcategory','category_id','category','brand_id','brand','product_image','unit_id','unit_name','mrp','price','selling_price','gst','hsn_code','ean_code','discount','max_discount', 'hp', 'kw', 'product_stage', 'model_no','suc_del',];
     }
 
     public function map($data): array
@@ -51,6 +51,7 @@ class ProductExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMa
             isset($data['part_no']) ? $data['part_no'] :'',
             isset($data['product_no']) ? $data['product_no'] :'',            
             isset($data['model_no']) ? $data['model_no'] :'',
+            $data['suc_del'],
         ];
     }
 

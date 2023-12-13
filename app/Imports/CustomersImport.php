@@ -67,13 +67,106 @@ class CustomersImport implements ToCollection,WithValidation,WithHeadingRow, Wit
             //     'visit_status' => !empty($row['visit_status'])? $row['visit_status']:null,
             // ]);
 
-            $user_id = User::where('user_code','=',$row['emp_code'])->pluck('id')->first();
+            //$user_id = User::where('user_code','=',$row['emp_code'])->pluck('id')->first();
+
+
+
+            if(!empty($row['customer_id'])){
+
+            // Customers::where('mobile','=',$row['mobile'])->update([
+            //     'name' => $row['firm_name'],
+            //     'first_name' => !empty($row['first_name']) ? $row['first_name'] : '',
+            //     'last_name' => !empty($row['last_name']) ? $row['last_name'] : '',
+            //     'contact_number' => !empty($row['contact_number2'])? $row['contact_number2'] :null,
+            //     'executive_id' => !empty($row['employee_id'])? $row['employee_id'] :null,
+            //     'parent_id' => !empty($row['parent_id'])? $row['parent_id'] :null,
+            // ]);
+
+            
+            //   Address::where('customer_id','=',$row['customer_id'])->update([
+            //     'pincode_id' => !empty($row['pincode_id'])? $row['pincode_id']:null,
+            //     'city_id' => !empty($row['city_id'])? $row['city_id']:null,
+            //     'district_id' => !empty($row['district_id'])? $row['district_id']:null,
+            //     'state_id' => !empty($row['state_id'])? $row['state_id']:null,
+            //     'address1' => !empty($row['address'])? $row['address']:null,
+            // ]);
+
+
+            Customers::where('id','=',$row['customer_id'])->update([
+                'name' => $row['firm_name'],
+                'first_name' => !empty($row['first_name']) ? $row['first_name'] : '',
+                'last_name' => !empty($row['last_name']) ? $row['last_name'] : '',
+                'contact_number' => !empty($row['contact_number2'])? $row['contact_number2'] :null,
+                'executive_id' => !empty($row['employee_id'])? $row['employee_id'] :null,
+                'parent_id' => !empty($row['parent_id'])? $row['parent_id'] :null,
+                'customer_code' => !empty($row['customer_code'])? $row['customer_code'] :null,
+                'email' => !empty($row['email'])? $row['email'] :null,
+                'customertype' => !empty($row['customer_type_id'])? $row['customer_type_id'] :null,
+
+
+            ]);
+
+
+
+            CustomerDetails::where('customer_id','=',$row['customer_id'])->update([
+                'gstin_no' => !empty($row['gstin_no'])? $row['gstin_no']:null,
+                'pan_no' => !empty($row['pan_no'])? $row['pan_no']:null,
+                'aadhar_no' => !empty($row['aadhar_no'])? $row['aadhar_no']:null,
+                'otherid_no' => !empty($row['other_no'])? $row['other_no']:null,
+                'grade' => !empty($row['grade'])? $row['grade']:null,
+                'visit_status' => !empty($row['visit_status'])? $row['visit_status']:null,
+
+            ]);
+
+
+              Address::where('customer_id','=',$row['customer_id'])->update([
+                'pincode_id' => !empty($row['pincode_id'])? $row['pincode_id']:null,
+                'city_id' => !empty($row['city_id'])? $row['city_id']:null,
+                'district_id' => !empty($row['district_id'])? $row['district_id']:null,
+                'state_id' => !empty($row['state_id'])? $row['state_id']:null,
+                'address1' => !empty($row['address'])? $row['address']:null,
+                'landmark' => !empty($row['market_place'])? $row['market_place']:null,
+
+
+            ]);
+
+
+
+            }else{
+
+
+
+            if(!empty($row['employee_id'])){
+             $executive_id = User::where('id','=',$row['employee_id'])->pluck('id')->first();
+             if(!empty($executive_id)){
+              $executive_id;
+             }else{
+              $executive_id = null;
+             }
+            }else{   
+            $executive_id = null;
+            } 
+
+
+            if(!empty($row['parent_id'])){
+             $parent_id = Customers::where('id','=',$row['parent_id'])->pluck('id')->first();
+             if(!empty($parent_id)){
+              $parent_id;
+             }else{
+              $parent_id = null;
+             }
+            }else{   
+            $parent_id = null;
+            } 
+
+
+
             if( $customer = Customers::create([
                 'active' => 'Y',
-                'name' => !empty($row['name'])? ucfirst($row['name']):'',
+                'name' => !empty($row['firm_name'])? ucfirst($row['firm_name']):'',
                 'first_name' => !empty($row['first_name'])? ucfirst($row['first_name']):'',
                 'last_name' => !empty($row['last_name'])? ucfirst($row['last_name']):'',
-                'mobile' => $row['mobile'],
+                'mobile' => (string)$row['mobile'], 
                 'email' => !empty($row['email'])? $row['email']:null,
                 'password' => !empty($row['password'])? Hash::make($row['password']) :'',
                 'notification_id' => !empty($row['notification_id'])? $row['notification_id']:'',
@@ -86,7 +179,11 @@ class CustomersImport implements ToCollection,WithValidation,WithHeadingRow, Wit
                 'status_id' =>  !empty($row['status_id'])? $row['status_id'] :2,
                 'customertype' =>  !empty($row['customertype'])? $row['customertype'] :1,
                 'firmtype' =>  !empty($row['firmtype'])? $row['firmtype'] :null,
-                'created_by' => $user_id,
+                // 'created_by' => $user_id,
+                'created_by' => Auth::user()->id,
+                'executive_id' => $executive_id,
+                'parent_id' => $parent_id,
+                'contact_number' => (string)!empty($row['contact_number'])? $row['contact_number'] :null,
                 'created_at' => getcurentDateTime() ,
                 'updated_at' => getcurentDateTime()
             ]) )
@@ -95,10 +192,10 @@ class CustomersImport implements ToCollection,WithValidation,WithHeadingRow, Wit
                $customerdetails->push([
                     'active' => 'Y',
                     'customer_id' => $customer['id'],
-                    'gstin_no' => !empty($row['gstin_no'])? $row['gstin_no']:null,
-                    'pan_no' => !empty($row['pan_no'])? $row['pan_no']:null,
-                    'aadhar_no' => !empty($row['aadhar_no'])? $row['aadhar_no']:null,
-                    'otherid_no' => !empty($row['otherid_no'])? $row['otherid_no']:null,
+                    // 'gstin_no' => !empty($row['gstin_no'])? $row['gstin_no']:null,
+                    // 'pan_no' => !empty($row['pan_no'])? $row['pan_no']:null,
+                    // 'aadhar_no' => !empty($row['aadhar_no'])? $row['aadhar_no']:null,
+                    // 'otherid_no' => !empty($row['otherid_no'])? $row['otherid_no']:null,
                     'enrollment_date' => !empty($row['enrollment_date'])? $row['enrollment_date']:null,
                     'approval_date' => !empty($row['approval_date'])? $row['approval_date']:null,
                     'created_at' => getcurentDateTime() ,
@@ -114,9 +211,12 @@ class CustomersImport implements ToCollection,WithValidation,WithHeadingRow, Wit
                     'locality' => !empty($row['locality'])? $row['locality']:'',
                     'country_id' => !empty($row['country_id'])? $row['country_id']:null,
                     'state_id' => !empty($row['state_id'])? $row['state_id']:null,
-                    'district_id' => !empty($city['district_id'])? $city['district_id']:null,
-                    'city_id' => !empty($pincode['city_id'])? $pincode['city_id']:null,
-                    'pincode_id' => !empty($pincode['id'])? $pincode['id']:null,
+                    // 'district_id' => !empty($city['district_id'])? $city['district_id']:null,
+                    'district_id' => !empty($row['district_id'])? $row['district_id']:null,
+                    // 'city_id' => !empty($pincode['city_id'])? $pincode['city_id']:null,
+                    // 'pincode_id' => !empty($pincode['id'])? $pincode['id']:null,
+                    'city_id' => !empty($row['city_id'])? $row['city_id']:null,
+                    'pincode_id' => !empty($row['pincode_id'])? $row['pincode_id']:null,
                     'created_by' => Auth::user()->id,
                     'created_at' => getcurentDateTime() ,
                     'updated_at' => getcurentDateTime()
@@ -153,51 +253,52 @@ class CustomersImport implements ToCollection,WithValidation,WithHeadingRow, Wit
 
 
 
-               if($row['gstin_image'])
-               {
-                    $attachments->push([
-                        'active' => 'Y',
-                        'customer_id' => $customer['id'],
-                        'file_path' => !empty($row['gstin_image'])? $row['gstin_image']:'',
-                        'document_name' =>  'gstin',
-                        'created_at' => getcurentDateTime(),
-                        'updated_at' => getcurentDateTime()
-                    ]);
-                }
-                if($row['pan_image'])
-                {
-                    $attachments->push([
-                        'active' => 'Y',
-                        'customer_id' => $customer['id'],
-                        'file_path' => !empty($row['pan_image'])? $row['pan_image']:'',
-                        'document_name' =>  'pan',
-                        'created_at' => getcurentDateTime() ,
-                        'updated_at' => getcurentDateTime()
-                    ]);
-                }
-                if($row['aadhar_image'])
-                {
-                    $attachments->push([
-                        'active' => 'Y',
-                        'customer_id' => $customer['id'],
-                        'file_path' => !empty($row['aadhar_image'])? $row['aadhar_image']:'',
-                        'document_name' =>  'aadhar',
-                        'created_at' => getcurentDateTime() ,
-                        'updated_at' => getcurentDateTime()
-                    ]);
-                }
-                if($row['other_image'])
-                {
-                    $attachments->push([
-                        'active' => 'Y',
-                        'customer_id' => $customer['id'],
-                        'file_path' => !empty($row['other_image'])? $row['other_image']:'',
-                        'document_name' =>  'other',
-                        'created_at' => getcurentDateTime() ,
-                        'updated_at' => getcurentDateTime()
-                    ]);
-                }
+               // if($row['gstin_image'])
+               // {
+               //      $attachments->push([
+               //          'active' => 'Y',
+               //          'customer_id' => $customer['id'],
+               //          'file_path' => !empty($row['gstin_image'])? $row['gstin_image']:'',
+               //          'document_name' =>  'gstin',
+               //          'created_at' => getcurentDateTime(),
+               //          'updated_at' => getcurentDateTime()
+               //      ]);
+               //  }
+               //  if($row['pan_image'])
+               //  {
+               //      $attachments->push([
+               //          'active' => 'Y',
+               //          'customer_id' => $customer['id'],
+               //          'file_path' => !empty($row['pan_image'])? $row['pan_image']:'',
+               //          'document_name' =>  'pan',
+               //          'created_at' => getcurentDateTime() ,
+               //          'updated_at' => getcurentDateTime()
+               //      ]);
+               //  }
+               //  if($row['aadhar_image'])
+               //  {
+               //      $attachments->push([
+               //          'active' => 'Y',
+               //          'customer_id' => $customer['id'],
+               //          'file_path' => !empty($row['aadhar_image'])? $row['aadhar_image']:'',
+               //          'document_name' =>  'aadhar',
+               //          'created_at' => getcurentDateTime() ,
+               //          'updated_at' => getcurentDateTime()
+               //      ]);
+               //  }
+               //  if($row['other_image'])
+               //  {
+               //      $attachments->push([
+               //          'active' => 'Y',
+               //          'customer_id' => $customer['id'],
+               //          'file_path' => !empty($row['other_image'])? $row['other_image']:'',
+               //          'document_name' =>  'other',
+               //          'created_at' => getcurentDateTime() ,
+               //          'updated_at' => getcurentDateTime()
+               //      ]);
+               //  }
             }
+          }
         }
         if($customerdetails->isNotEmpty())
         {

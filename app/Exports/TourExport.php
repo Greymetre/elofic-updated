@@ -14,26 +14,63 @@ use Illuminate\Support\Facades\Auth;
 
 class TourExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapping
 {
-    public function __construct()
+    public function __construct($request)
     {
         
         $this->userids = getUsersReportingToAuth();
+
+        $this->user_id = $request->input('executive_id');
+        $this->start_date = $request->input('start_date');
+        $this->end_date = $request->input('end_date');
+
     }
 
     public function collection()
-    {
-        return TourProgramme::with('tourdetails','userinfo')->where(function ($query)  {
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
+    {     
+        // return TourProgramme::with('tourdetails','userinfo')->where(function ($query)  {
+        //                         if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
 
+        //                         {
+        //                             $query->whereIn('executive_id', $this->userids);
+        //                         }
+        //                     })->select('id','date', 'userid', 'town', 'objectives', 'type', 'status')->latest()->get();
+
+        if(!empty($this->user_id) ||!empty($this->start_date) ||!empty($this->end_date)){
+            return TourProgramme::where(function ($query)  {
+                                if($this->user_id)
+                                {
+                                    $query->where('userid', $this->user_id);
+                                }
+                                if($this->start_date)
+                                {
+                                    $query->whereDate('date','>=',$this->start_date);
+                                }
+                                if($this->end_date)
+                                {
+                                    $query->whereDate('date','<=',$this->end_date);
+                                }
+                            })
+                        ->select('id','date', 'userid', 'town', 'objectives', 'type', 'status')
+                        ->latest()->get();   
+
+           }else{
+
+            return TourProgramme::with('tourdetails','userinfo')->where(function ($query)  {
+                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
                                 {
                                     $query->whereIn('executive_id', $this->userids);
                                 }
                             })->select('id','date', 'userid', 'town', 'objectives', 'type', 'status')->latest()->get();   
+
+           }
+
+
+
     }
 
     public function headings(): array
     {
-        return ['date','id','userid','username', 'town','Actual','objectives', 'type', 'city_id', 'visited_date','visited_cityid', 'last_visited'];
+        return ['date','id','userid','username', 'town','Actual','objectives', 'type', 'city_id', 'visited_date','visited_cityid', 'last_visited','Employee Code','Branch','Division','Designation'];
     }
 
     public function map($data): array
@@ -75,6 +112,10 @@ class TourExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
             $visited_date,
             $visited_cityid,
             $last_visited,
+            isset($data['userinfo']['employee_codes']) ? $data['userinfo']['employee_codes'] :'',
+            isset($data['userinfo']['getbranch']['branch_name']) ? $data['userinfo']['getbranch']['branch_name'] :'',
+            isset($data['userinfo']['getdepartment']['division_name']) ? $data['userinfo']['getdepartment']['division_name'] :'',
+            isset($data['userinfo']['getdesignation']['designation_name']) ? $data['userinfo']['getdesignation']['designation_name'] :'',
         ];
     }
 
