@@ -112,13 +112,13 @@ class RolesController extends Controller
         // $users = User::leftjoin('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
         //                     ->leftjoin('roles', 'model_has_roles.role_id', '=', 'roles.id')
         //                     ->where('role_id', '=', $role->id)->get();
+
         
-        
-        foreach ($permissions as $key => $rows) {
+        // foreach ($permissions as $key => $rows) {
             foreach ($users as $key => $user) {
-                $user->syncPermissions($rows['name']);
+                $user->syncPermissions($request['permissions']);
             }
-        }
+        // }
         $toremove = collect([]);
         $toinsert = collect([]);
         foreach ($changes as $key => $rows) {
