@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\FieldData;
 use App\Models\SurveyData;
 use App\Models\CustomerType;
+use App\Models\Division;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Auth;
@@ -39,7 +40,8 @@ class FieldController extends Controller
     public function create()
     {
         $customertype = CustomerType::select('id','customertype_name')->orderBy('id','desc')->get();
-        return view('fields.create',compact('customertype'))->with('fields',$this->fields);
+        $divisions = Division::select('id','division_name')->orderBy('id','desc')->get();
+        return view('fields.create',compact('customertype','divisions'))->with('fields',$this->fields);
     }
 
     /**
@@ -105,7 +107,8 @@ class FieldController extends Controller
         $id = decrypt($id);
         $fields = Field::find($id);
         $customertype = CustomerType::select('id','customertype_name')->orderBy('id','desc')->get();
-        return view('fields.create',compact('customertype'))->with('fields',$fields);
+        $divisions = Division::select('id','division_name')->orderBy('id','desc')->get();
+        return view('fields.create',compact('customertype','divisions'))->with('fields',$fields);
     }
 
     public function update(Request $request, $id)

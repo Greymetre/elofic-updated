@@ -44,7 +44,7 @@ class CheckinExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMa
 
     public function headings(): array
     {
-        return ['id','User ID', 'User Name','Employee Code','Division','Branch','Customer Type','Designation','Checkin Date', 'Checkin Time','Checkout Time', 'Spend Time', 'Beat Name', 'Customer Id', 'Customer Name', 'Customer Mobile','District','City','Address','Existing','Order Qty','Order Value','Visit Remark', 'Visit Type', 'Checkin Address','Checkout Address','Distance'];
+        return ['id','Checkin Date','User ID','Employee Code', 'User Name','Designation','Division','Branch', 'Checkin Time','Checkout Time', 'Spend Time', 'Checkin Address','Checkout Address','Distance','Customer Id','Customer Type', 'Customer Name', 'Customer Mobile','Beat Name','City','District','Address','Existing','Visit Type','Visit Remark','Order Qty','Order Value'];
     }
 
     public function map($data): array
@@ -53,32 +53,40 @@ class CheckinExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMa
 
         return [
             $data['id'],
+            isset($data['checkin_date']) ? $data['checkin_date'] :'',
             isset($data['user_id']) ? $data['user_id'] :'',
-            isset($data['users']['name']) ? $data['users']['name'] :'',
             isset($data['users']['employee_codes']) ? $data['users']['employee_codes'] :'',
+            isset($data['users']['name']) ? $data['users']['name'] :'',
+            isset($data['users']['getdesignation']['designation_name']) ? $data['users']['getdesignation']['designation_name'] :'',
             isset($data['users']['getdepartment']['division_name']) ? $data['users']['getdepartment']['division_name'] :'',
             isset($data['users']['getbranch']['branch_name']) ? $data['users']['getbranch']['branch_name']:'',
-            isset($data['customers']['customertypes']['customertype_name']) ? $data['customers']['customertypes']['customertype_name']:'',
-            isset($data['users']['getdesignation']['designation_name']) ? $data['users']['getdesignation']['designation_name'] :'',
-            isset($data['checkin_date']) ? $data['checkin_date'] :'',
+           
             isset($data['checkin_time']) ? $data['checkin_time'] :'',
             isset($data['checkout_time']) ? $data['checkout_time'] :'',
             date("H:i:s",($interval)),
-            isset($data['beatschedules']['beats']['beat_name']) ? $data['beatschedules']['beats']['beat_name'] :'',
-            isset($data['customer_id']) ? $data['customer_id'] :'',
-            isset($data['customers']['name']) ? $data['customers']['name'] :'',
-            isset($data['customers']['mobile']) ? $data['customers']['mobile'] :'',
-            isset($data['customers']['customeraddress']['districtname']['district_name']) ? $data['customers']['customeraddress']['districtname']['district_name'] :'',
-            isset($data['customers']['customeraddress']['cityname']['city_name']) ? $data['customers']['customeraddress']['cityname']['city_name'] :'',
-            isset($data['customers']['customeraddress']['address1']) ? $data['customers']['customeraddress']['address1'].' '.$data['customers']['customeraddress']['address2'] :'',
-            (date("Y-m-d", strtotime($data['customers']['created_at'])) == date("Y-m-d", strtotime($data['checkin_date']))) ? 'New' : 'Existing', 
-            isset($data['orders']) ?$data['orders']->sum('total_qty') : 0,
-            isset($data['orders']) ? $data['orders']->sum('grand_total') : 0,
-            isset($data['visitreports']['description']) ? $data['visitreports']['description'] :'',
-            isset($data['visitreports']['visittypename']['type_name']) ? $data['visitreports']['visittypename']['type_name'] :'',
             isset($data['checkin_address']) ? $data['checkin_address'] :'',
             isset($data['checkout_address']) ? $data['checkout_address'] :'',
             isset($data['distance']) ? $data['distance'] :'',
+
+            isset($data['customer_id']) ? $data['customer_id'] :'',
+            isset($data['customers']['customertypes']['customertype_name']) ? $data['customers']['customertypes']['customertype_name']:'',
+            isset($data['customers']['name']) ? $data['customers']['name'] :'',
+            isset($data['customers']['mobile']) ? $data['customers']['mobile'] :'',
+            isset($data['beatschedules']['beats']['beat_name']) ? $data['beatschedules']['beats']['beat_name'] :'',
+            isset($data['customers']['customeraddress']['cityname']['city_name']) ? $data['customers']['customeraddress']['cityname']['city_name'] :'',
+
+            isset($data['customers']['customeraddress']['districtname']['district_name']) ? $data['customers']['customeraddress']['districtname']['district_name'] :'',
+
+            
+            isset($data['customers']['customeraddress']['address1']) ? $data['customers']['customeraddress']['address1'].' '.$data['customers']['customeraddress']['address2'] :'',
+            (date("Y-m-d", strtotime($data['customers']['created_at'])) == date("Y-m-d", strtotime($data['checkin_date']))) ? 'New' : 'Existing', 
+            isset($data['visitreports']['visittypename']['type_name']) ? $data['visitreports']['visittypename']['type_name'] :'',
+            isset($data['visitreports']['description']) ? $data['visitreports']['description'] :'',
+            isset($data['orders']) ?$data['orders']->sum('total_qty') : 0,
+            isset($data['orders']) ? $data['orders']->sum('grand_total') : 0,
+           
+           
+
         ];
     }
 

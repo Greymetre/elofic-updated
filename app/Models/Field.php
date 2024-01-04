@@ -11,7 +11,7 @@ class Field extends Model
 
     protected $table = 'fields';
 
-    protected $fillable = [ 'active', 'field_name', 'field_type', 'label_name', 'placeholder', 'is_required', 'is_multiple', 'ranking', 'module','created_by', 'created_at', 'updated_at'];
+    protected $fillable = [ 'active', 'field_name', 'field_type', 'label_name', 'placeholder', 'is_required', 'is_multiple', 'ranking', 'module','created_by', 'created_at', 'updated_at','division_id'];
 
     public function createdbyname()
     {

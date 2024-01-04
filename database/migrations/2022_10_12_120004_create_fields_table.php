@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('placeholder',250)->index()->default('');
             $table->string('module',250)->index()->default('');
             $table->unsignedBigInteger('created_by')->unsigned()->index()->nullable();
+            $table->unsignedBigInteger('division_id')->nullable();
             $table->timestamps();
             $table->foreign('created_by')->references('id')->on('users');
         });

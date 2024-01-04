@@ -32,6 +32,8 @@ use App\Models\UserActivity;
 use App\Models\Tasks;
 use App\Models\Wallet;
 use App\Models\DealIn;
+use App\Models\OrderDetails;
+
 
 class CustomerController extends Controller
 {
@@ -362,6 +364,14 @@ class CustomerController extends Controller
 
     public function getRetailers(Request $request)
     {
+
+    
+        $cityid = $request->city_id;
+        $customer_id = array();
+        if(!empty($cityid) && $cityid[0]!=null){ 
+         $customer_id = Address::whereIn('city_id',$cityid)->pluck('customer_id');
+        }
+
         try
         { 
             $user = $request->user();
@@ -371,7 +381,7 @@ class CustomerController extends Controller
             $pageSize = $request->input('pageSize');
             $search = $request['search'] ;
             $query = $this->customers->with('customeraddress','customerdetails','customertypes')
-                            ->where(function($query) use($search, $userids) {
+                            ->where(function($query) use($search, $userids,$customer_id) {
                                 if(!empty($search))
                                 {
                                     $query->where('name', 'like', "%{$search}%")->whereIn('executive_id', $userids)
@@ -380,6 +390,11 @@ class CustomerController extends Controller
                                     ->Orwhere('email', 'like', "%{$search}%")
                                     ->Orwhere('mobile', 'like', "%{$search}%");
                                 }
+
+                                if(!empty($customer_id)){
+                                  $query->whereIn('id', $customer_id);
+                                }
+
                                 $query->whereIn('executive_id', $userids);
                                 $query->whereIn('customertype', ['2','3','4','5','6']);
                             })
@@ -523,6 +538,7 @@ class CustomerController extends Controller
 
     public function getCustomerInfo(Request $request)
     {
+         
          try
         { 
             $validator = Validator::make($request->all(), [
@@ -535,15 +551,33 @@ class CustomerController extends Controller
             $user_id = $user->id;
             $fromdate = isset($request->fromDate) ? $request->fromDate : null;
             $todate = isset($request->toDate) ? $request->toDate :null;
+              
             $customer_id = $request->input('customer_id');
+
             $orders = Order::where(function ($query) use($customer_id, $fromdate, $todate){
+
                 $query->where('buyer_id', '=', $customer_id);
+               
                 if(!empty($fromdate) && !empty($todate))
                 {
                     $query->whereBetween('order_date', [$fromdate, $todate]);
                 }
+
             })
             ->select('grand_total','id','total_qty')->get();
+
+            //nnn
+
+                $sum_quantity = 0;
+               foreach($orders as $order){
+                 $sum_quantity = OrderDetails::where('order_id',$order->id)->sum('quantity')??0;
+                 }
+        
+                $sum_quantity = (int)$sum_quantity;
+
+
+           ///nnn
+
             $sales = Sales::where(function ($query) use($customer_id, $fromdate, $todate){
                 $query->where('buyer_id', '=', $customer_id);
                 if(!empty($fromdate) && !empty($todate))
@@ -554,7 +588,7 @@ class CustomerController extends Controller
 
             $checkins = CheckIn::with('visitreports')->where('customer_id', '=', $customer_id)->select('checkin_date','checkin_time')->latest()->limit(10)->get();
             $last_order_date = Order::where('buyer_id', '=', $customer_id)->latest()->pluck('order_date')->first();
-            $data = $this->customers->with('customerdetails','customeraddress','customerdocuments','surveys','surveys.fields','customeraddress.cityname','customeraddress.districtname','customeraddress.statename','customeraddress.pincodename','customertypes','customerdeals')->where('id', $customer_id)->select('id','name','first_name','last_name','mobile','email','profile_image','customer_code','customertype', 
+            $data = $this->customers->with('customerdetails','parentdetail','customeraddress','customerdocuments','surveys','surveys.fields','customeraddress.cityname','customeraddress.districtname','customeraddress.statename','customeraddress.pincodename','customertypes','customerdeals')->where('id', $customer_id)->select('id','name','first_name','last_name','mobile','email','profile_image','customer_code','customertype','parent_id','contact_number', 
                    DB::raw('(SELECT SUM(grand_total) FROM sales WHERE sales.buyer_id = customers.id) as totalamount'), 
                    DB::raw('(SELECT SUM(paid_amount) FROM sales WHERE sales.buyer_id = id) as totalpaid'))->first();
        
@@ -564,11 +598,18 @@ class CustomerController extends Controller
                                 $query->where('customer_id','=',$customer_id);
                             })
                             ->select('beat_name','id')->first();
+
+
+             $data['parent_name'] = $data->parentdetail->name??'';
+          
+
             $data['beat_name'] = isset($beatinfo['beat_name']) ? $beatinfo['beat_name'] : '';
             $data['beat_id'] = isset($beatinfo['id']) ? $beatinfo['id'] : null;
             $data['outstanding'] = $data['totalamount']-$data['totalpaid'];
             $data['total_order_value'] = $total_value;
-            $data['total_order_quantity'] = $total_qty;
+            // $data['total_order_quantity'] = $total_qty; 
+            $data['total_order_quantity'] = $sum_quantity; 
+              
             $data['avg_order_value'] = ($total_value >= 1) ? number_format((float)$total_value/$orders->count(), 1, '.', '').' %'  : '';
             $data['avg_order_quantity'] = ($total_qty >= 1) ? number_format((float)$total_qty/$orders->count(), 1, '.', '').' %'  : '';
             $data['total_sales_value'] = $sales->sum('grand_total');
@@ -617,6 +658,8 @@ class CustomerController extends Controller
                 'longitude' => isset($request->longitude) ? $request->longitude : null,
                 'gender'    => isset($request->gender) ? $request->gender : '',
                 'firmtype'  => isset($request->firmtype) ? $request->firmtype : null,
+                'parent_id'  => isset($request->parent_id) ? $request->parent_id : null,
+                'contact_number'  => isset($request->contact_number) ? $request->contact_number : null,
             ])) {
 
                 Address::updateOrCreate(['id'   =>  $request['address_id'],'customer_id'   =>  $request->customer_id],[

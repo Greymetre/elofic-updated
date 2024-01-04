@@ -31,31 +31,42 @@ class UserExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
                                 {
                                     $query->whereIn('id', $this->userids);
                                 }
-                            })->select('id','name', 'first_name', 'last_name', 'mobile', 'email', 'gender', 'profile_image','reportingid','employee_codes','branch_id','department_id','designation_id')->latest()->get();   
+                            })->select('id','name', 'first_name', 'last_name', 'mobile', 'email', 'gender', 'profile_image','reportingid','employee_codes','branch_id','department_id','designation_id','active')->latest()->get();   
     }
 
     public function headings(): array
     {
-        return ['id','name', 'first_name', 'last_name', 'mobile', 'email', 'gender', 'profile_image', 'role', 'Reporting','Employees Code','Branch Name','Division','Designation'];
+        // return ['id','name', 'first_name', 'last_name', 'mobile', 'email', 'gender', 'profile_image', 'role', 'Reporting','Employees Code','Branch Name','Division','Designation','Status'];
+
+        return ['id','Employees Code','name','Designation','Branch Name','Division','Reporting','mobile', 'email', 'gender', 'Status','profile_image', 'role'];
     }
 
     public function map($data): array
     {
+           if($data['active'] =='Y'){
+                $status = 'ACTIVE';
+            }else{
+                $status = 'INACTIVE';
+            }
+
         return [
             $data['id'],
+            $data['employee_codes'],
             $data['name'],
-            $data['first_name'],
-            $data['last_name'],
+            isset($data['getdesignation']['designation_name']) ? $data['getdesignation']['designation_name'] :'',
+            isset($data['getbranch']['branch_name']) ? $data['getbranch']['branch_name'] :'',
+            isset($data['getdepartment']['division_name']) ? $data['getdepartment']['division_name'] :'',
+            isset($data['reportinginfo']['name']) ? $data['reportinginfo']['name'] :'',
+            //$data['first_name'],
+            //$data['last_name'],
             $data['mobile'],
             $data['email'],
             $data['gender'],
+            //$data['active'],
+            $status,
             $data['profile_image'],
             isset($data['roles']['name']) ? $data['roles']['name'] :'',
-            isset($data['reportinginfo']['name']) ? $data['reportinginfo']['name'] :'',
-            $data['employee_codes'],
-            isset($data['getbranch']['branch_name']) ? $data['getbranch']['branch_name'] :'',
-            isset($data['getdepartment']['division_name']) ? $data['getdepartment']['division_name'] :'',
-            isset($data['getdesignation']['designation_name']) ? $data['getdesignation']['designation_name'] :'',
+           
         ];
     }
 }

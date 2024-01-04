@@ -9,6 +9,22 @@
         <h4 class="card-title ">{!! trans('panel.order.title_singular') !!}{!! trans('panel.global.list') !!}
               <span class="pull-right">
                 <div class="btn-group">
+
+
+                  @if(auth()->user()->can(['order_download']))
+                <form method="GET" action="{{ URL::to('orders-download') }}">
+                  <div class="d-flex flex-row">
+
+                <div class="p-2"><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
+                    <div class="p-2"><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
+                    <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.order.title') !!}"><i class="material-icons">cloud_download</i></button></div>
+                  </div>
+               </form>
+                    @endif
+
+
+
+
                   @if(auth()->user()->can(['order_upload']))
                   <form action="{{ URL::to('orders-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                   {{ csrf_field() }}
@@ -30,9 +46,11 @@
                   </div>
                   </form>
                   @endif
-                  @if(auth()->user()->can(['order_download']))
+
+                  <!-- @if(auth()->user()->can(['order_download']))
                   <a href="{{ URL::to('orders-download') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.order.title') !!}"><i class="material-icons">cloud_download</i></a>
-                  @endif
+                  @endif -->
+
                   @if(auth()->user()->can(['order_template']))
                   <a href="{{ URL::to('orders-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.order.title_singular') !!}"><i class="material-icons">text_snippet</i></a>
                   @endif

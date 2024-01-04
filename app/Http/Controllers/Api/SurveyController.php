@@ -38,17 +38,28 @@ class SurveyController extends Controller
         try
         { 
             $user = $request->user();
+
+            $user_id = $user->id;
+            $division_id = $user->department_id;
+
             $pageSize = $request->input('pageSize');
             $customertype = $request->input('customer_type');
             $customer_id = $request->input('customer_id');
             $customersurvey = SurveyData::where('customer_id','=',$customer_id)->select('field_id','value')->get();
 
             $query = Field::with('fieldsData')
-                            ->where(function ($query) use($customertype) {
+                            ->where(function ($query) use($customertype,$division_id) {
                                 if(!empty($customertype))
                                 {
                                     $query->where('module', '=',$customertype);
                                 }
+
+                                if(!empty($division_id))
+                                {
+                                    $query->where('division_id', '=',$division_id);
+                                }
+
+
                                 $query->where('active', '=','Y');
                             })
                             ->select('id','field_name','field_type','label_name','placeholder','is_required','is_multiple')

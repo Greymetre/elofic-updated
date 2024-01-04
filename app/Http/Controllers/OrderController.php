@@ -269,12 +269,12 @@ class OrderController extends Controller
         Excel::import(new OrderImport,request()->file('import_file'));
         return back();
     }
-    public function download()
+    public function download(Request $request)
     {
         abort_if(Gate::denies('order_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        return Excel::download(new OrderExport, 'orders.xlsx');
+        return Excel::download(new OrderExport($request), 'orders.xlsx');
     }
     public function template()
     {

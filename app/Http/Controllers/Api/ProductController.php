@@ -143,7 +143,7 @@ class ProductController extends Controller
                             }
                             $query->where('active','=','Y');
                         })
-                        ->select('id','product_name','display_name','description','subcategory_id','category_id','brand_id','product_image','unit_id','specification','part_no','product_no','model_no')->latest();
+                        ->select('id','product_name','display_name','description','subcategory_id','category_id','brand_id','product_image','unit_id','specification','part_no','product_no','model_no','suc_del')->latest();
        
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
 
@@ -171,7 +171,7 @@ class ProductController extends Controller
                         'price' => isset($value['productpriceinfo']['price']) ? $value['productpriceinfo']['price'] : 0.00,
                         'selling_price' => isset($value['productpriceinfo']['selling_price']) ? $value['productpriceinfo']['selling_price'] : 0.00,
                         'gst' => isset($value['productpriceinfo']['gst']) ? $value['productpriceinfo']['gst'] : 0.00,
-                        'specification' => isset($value['specification']) ? $value['specification'] : '',
+                        'specification' => isset($value['suc_del']) ? $value['suc_del'] : '',
                         'part_no' => isset($value['part_no']) ? $value['part_no'] : '',
                         'product_no' => isset($value['product_no']) ? $value['product_no'] : '',
                         'model_no' => isset($value['model_no']) ? $value['model_no'] : '',
@@ -220,7 +220,7 @@ class ProductController extends Controller
                             }
                             $query->where('active','=','Y');
                         })
-                        ->select('id','product_name','display_name','description','subcategory_id','category_id','brand_id','product_image','unit_id','specification','part_no','product_no','model_no')->latest();
+                        ->select('id','product_name','display_name','description','subcategory_id','category_id','brand_id','product_image','unit_id','specification','part_no','product_no','model_no','suc_del')->latest();
        
             $product_data = (!empty($pageSize)) ? $query_product->paginate($pageSize) : $query_product->get();
 
@@ -272,10 +272,11 @@ class ProductController extends Controller
                             'price' => isset($product['productpriceinfo']['price']) ? $product['productpriceinfo']['price'] : 0.00,
                             'selling_price' => isset($product['productpriceinfo']['selling_price']) ? $product['productpriceinfo']['selling_price'] : 0.00,
                             'gst' => isset($product['productpriceinfo']['gst']) ? $product['productpriceinfo']['gst'] : 0.00,
-                            'specification' => isset($product['specification']) ? $product['specification'] : '',
+                            'specification' => isset($product['suc_del']) ? $product['suc_del'] : '',
                             'part_no' => isset($product['part_no']) ? $product['part_no'] : '',
                             'product_no' => isset($product['product_no']) ? $product['product_no'] : '',
                             'model_no'  => isset($product['model_no']) ? $product['model_no'] : '',
+                            'hp' => isset($product['specification']) ? $product['specification'] : '',
                         ]);
                     }
                 }
@@ -316,7 +317,7 @@ class ProductController extends Controller
                             }
                             $query->where('active','=','Y');
                         })
-                        ->select('id','product_name','display_name','description','subcategory_id','category_id','brand_id','product_image','unit_id','specification','part_no','product_no','model_no')->latest();
+                        ->select('id','product_name','display_name','description','subcategory_id','category_id','brand_id','product_image','unit_id','specification','part_no','product_no','model_no','suc_del')->latest();
        
             $product_data = (!empty($pageSize)) ? $query_product->paginate($pageSize) : $query_product->get();
 
@@ -360,10 +361,11 @@ class ProductController extends Controller
                             'price' => isset($product['productpriceinfo']['price']) ? $product['productpriceinfo']['price'] : 0.00,
                             'selling_price' => isset($product['productpriceinfo']['selling_price']) ? $product['productpriceinfo']['selling_price'] : 0.00,
                             'gst' => isset($product['productpriceinfo']['gst']) ? $product['productpriceinfo']['gst'] : 0.00,
-                            'specification' => isset($product['specification']) ? $product['specification'] : '',
+                            'specification' => isset($product['suc_del']) ? $product['suc_del'] : '',
                             'part_no' => isset($product['part_no']) ? $product['part_no'] : '',
                             'product_no' => isset($product['product_no']) ? $product['product_no'] : '',
                             'model_no'  => isset($product['model_no']) ? $product['model_no'] : '',
+                            'hp'  => isset($product['specification']) ? $product['specification'] : '',
                         ]);
                     }
                 }
@@ -389,7 +391,7 @@ class ProductController extends Controller
                             $query->where('active','=','Y');
                             $query->where('id','=',$product_id);
                         })
-                        ->select('id','product_name','display_name','description','subcategory_id','category_id','brand_id','product_image','unit_id','specification','part_no','product_no','model_no')
+                        ->select('id','product_name','display_name','description','subcategory_id','category_id','brand_id','product_image','unit_id','specification','part_no','product_no','model_no','suc_del')
                         ->first();
 
             $detail = collect([]);
@@ -436,10 +438,11 @@ class ProductController extends Controller
                     'gst' => isset($primary['gst']) ? $primary['gst'] : 0,
                     'discount' => isset($primary['discount']) ? $primary['discount'] : 0,
                     'max_discount' => isset($primary['max_discount']) ? $primary['max_discount'] : 0,
-                    'specification' => isset($query['specification']) ? $query['specification'] : '',
+                    'specification' => isset($query['suc_del']) ? $query['suc_del'] : '',
                     'part_no' => isset($query['part_no']) ? $query['part_no'] : '',
                     'product_no' => isset($query['product_no']) ? $query['product_no'] : '',
                     'model_no' => isset($query['model_no']) ? $query['model_no'] : '',
+                    'hp' => isset($query['specification']) ? $query['specification'] : '',
                     'details' => $detail
                 ]);
                 return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','data' => $data ], $this->successStatus);

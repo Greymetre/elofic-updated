@@ -36,7 +36,7 @@ class TourExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
         //                     })->select('id','date', 'userid', 'town', 'objectives', 'type', 'status')->latest()->get();
 
         if(!empty($this->user_id) ||!empty($this->start_date) ||!empty($this->end_date)){
-            return TourProgramme::where(function ($query)  {
+            return TourProgramme::with('tourdetails','userinfo')->where(function ($query)  {
                                 if($this->user_id)
                                 {
                                     $query->where('userid', $this->user_id);

@@ -13,6 +13,8 @@ use Validator;
 use Gate;
 use App\Models\{CustomerType , Customers};
 use App\Models\CustomerDetails;
+use App\Models\Division;
+
 
 class CustomController extends Controller
 {
@@ -89,8 +91,8 @@ class CustomController extends Controller
               collect(["type" => 'Holiday', "is_city" => false , "is_beat" => false , 'image' => false , 'summary' => false , 'city_required' => false , 'beat_required' => false ]), 
               collect(["type" => 'Leave', "is_city" => false , "is_beat" => false , 'image' => false , 'summary' => false , 'city_required' => false , 'beat_required' => false]),
               collect(["type" => 'Plumber Meet', "is_city" => true , "is_beat" => false , 'image' => false , 'summary' => false , 'city_required' => false , 'beat_required' => false]),
-              collect(["type" => 'Dealer Meet', "is_city" => true , "is_beat" => false , 'image' => false , 'summary' => false , 'city_required' => false , 'beat_required' => false]),
-              collect(["type" => 'Distributor Meet', "is_city" => true , "is_beat" => false , 'image' => false , 'summary' => false , 'city_required' => false , 'beat_required' => false]), 
+              collect(["type" => 'Service Center Visit', "is_city" => true , "is_beat" => false , 'image' => false , 'summary' => false , 'city_required' => false , 'beat_required' => false]),
+              collect(["type" => 'Local Market Visit', "is_city" => true , "is_beat" => false , 'image' => false , 'summary' => false , 'city_required' => false , 'beat_required' => false]), 
               collect(["type" => 'Retailer Meet', "is_city" => true , "is_beat" => false , 'image' => false , 'summary' => false , 'city_required' => false , 'beat_required' => false]), 
 
 
@@ -188,29 +190,58 @@ class CustomController extends Controller
 
     public function getDevision(Request $request)
     {
-        try
-        { 
-            $data = collect([
-              collect(["id" => "1", "title" => "Pumps"]), 
-              collect(["id" => "2", "title" => "Motors"]), 
-              collect(["id" => "3", "title" => "Fan & Appliance"]), 
-              collect(["id" => "4", "title" => "Agri"]), 
-              collect(["id" => "5", "title" => "Solar"]), 
-              collect(["id" => "6", "title" => "Tender"]), 
+        // try
+        // { 
+        //     $data = collect([
+        //       collect(["id" => "1", "title" => "Pumps"]), 
+        //       collect(["id" => "2", "title" => "Motors"]), 
+        //       collect(["id" => "3", "title" => "Fan & Appliance"]), 
+        //       collect(["id" => "4", "title" => "Agri"]), 
+        //       collect(["id" => "5", "title" => "Solar"]), 
+        //       collect(["id" => "6", "title" => "Tender"]), 
              
-            ]);
+        //     ]);
 
            
-            if($data->isNotEmpty())
+        //     if($data->isNotEmpty())
+        //     {
+        //         return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','data' => $data ], $this->successStatus);
+        //     }
+        //     return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data ],200); 
+        // }
+        // catch(\Exception $e)
+        // {
+        //     return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
+        // }
+
+        try
+        { 
+            $pageSize = $request->input('pageSize');
+            $query = Division::where(function ($query) {
+                                        $query->where('active', '=', 'Y');
+                                    })->select('id','division_name');
+
+            $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
+            $data = collect([]);
+            if($db_data->isNotEmpty())
             {
+                foreach ($db_data as $key => $value) {
+                    $data->push([
+                         'id' => isset($value['id']) ? $value['id'] : '',
+                         'title' => $value['division_name']??'',
+                        
+                    ]);
+                }
                 return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','data' => $data ], $this->successStatus);
             }
-            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data ],200); 
+            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data ],200);  
+            
         }
         catch(\Exception $e)
         {
             return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
-        }
+        } 
+
     }
 
 

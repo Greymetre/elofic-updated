@@ -156,13 +156,15 @@ class AttendanceController extends Controller
                             ->orderBy('city_id','asc')
                             ->pluck('city_id');
                     $cityids = $cityids->unique();
+
                     
-                    foreach ($cityids as $key => $city) {
+                  /*  foreach ($cityids as $key => $city) {
                         $updatecity = TourDetail::where('tourid','=',$request['tourid'])->whereNull('visited_cityid')->first();
                         if(!empty($updatecity))
                         {
                             $updatecity->update([
-                                'visited_cityid' => $city
+                                'visited_cityid' => $city,
+                                 'visited_date' => date('Y-m-d'),
                             ]);
                         }
                         else
@@ -170,10 +172,48 @@ class AttendanceController extends Controller
                             TourDetail::create([
                                 'tourid' => $request['tourid'],
                                 'city_id' => null, 
-                                'visited_cityid' => $city
+                                'visited_cityid' => $city,
+                                'visited_date' => date('Y-m-d'),
+                                'last_visited' => date('Y-m-d'),
                             ]); 
                         }
+                    }*/
+
+                    //start new
+
+                    if(!empty( $request['city'])){  
+
+                    $city_datas = explode(",", $request['city']);
+                    foreach ($city_datas as $key => $city) {
+                        $updatecity = TourDetail::where('tourid','=',$request['tourid'])->whereNull('visited_cityid')->first();
+                        if(!empty($updatecity))
+                        {  
+                            $updatecity->update([
+                                'visited_cityid' => $city,
+                                'visited_date' => date('Y-m-d'),
+                            ]);
+                        }
+                        else
+                        { 
+                            TourDetail::create([
+                                'tourid' => $request['tourid'],
+                                'city_id' => null, 
+                                'visited_cityid' => $city,
+                                'visited_date' => date('Y-m-d'),
+                                'last_visited' => date('Y-m-d'),
+                            ]); 
+                        }
+                     }
+
                     }
+
+                    ///end
+
+
+
+
+
+
                 }
                 // $zsmnotify = collect([
                 //     'title' => 'Successfully punched in',

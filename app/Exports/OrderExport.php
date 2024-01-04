@@ -14,21 +14,41 @@ use Illuminate\Support\Facades\Auth;
 
 class OrderExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapping
 {
-    public function __construct()
+    public function __construct($request)
     {
-        
+        $this->startdate = $request->input('start_date');
+        $this->enddate = $request->input('end_date');
+
         $this->userids = getUsersReportingToAuth();
     }
 
     public function collection()
     {
-        return OrderDetails::with('orders','orders.createdbyname')->whereHas('orders',function ($query)  {
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
+        // return OrderDetails::with('orders','orders.createdbyname')->whereHas('orders',function ($query)  {
+        //                         if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
 
-                                {
-                                    $query->whereIn('created_by', $this->userids);
-                                }
-                            })->select('id','order_id', 'product_id', 'product_detail_id', 'quantity', 'shipped_qty', 'price', 'discount', 'discount_amount', 'tax_amount', 'line_total', 'status_id', 'created_at')->latest()->get();   
+        //                         {
+        //                             $query->whereIn('created_by', $this->userids);
+        //                         }
+        //                     })->select('id','order_id', 'product_id', 'product_detail_id', 'quantity', 'shipped_qty', 'price', 'discount', 'discount_amount', 'tax_amount', 'line_total', 'status_id', 'created_at')->latest()->get();  
+
+      return OrderDetails::with('orders','orders.createdbyname')->whereHas('orders',function ($query)  {
+                    if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
+                    {
+                        $query->whereIn('created_by', $this->userids);
+                    }
+                    if($this->startdate)
+                    {
+                        $query->whereDate('created_at','>=',$this->startdate);
+                    }
+                    if($this->enddate)
+                    {
+                        $query->whereDate('created_at','<=',$this->enddate);
+                    }
+
+                })->select('id','order_id', 'product_id', 'product_detail_id', 'quantity', 'shipped_qty', 'price', 'discount', 'discount_amount', 'tax_amount', 'line_total', 'status_id', 'created_at')->latest()->get();  
+
+
     }
 
     public function headings(): array
@@ -48,7 +68,7 @@ class OrderExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapp
             isset($data['orders']['createdbyname']['name']) ? $data['orders']['createdbyname']['name'] :'',
             isset($data['orders']['orderno']) ? $data['orders']['orderno'] :'',
             isset($data['order_id']) ? $data['order_id'] :'',
-            isset($data['orders']['suc_del']) ? $data['orders']['suc_del'] :'',
+            isset($data['products']['suc_del']) ? $data['products']['suc_del'] :'',
             isset($data['orders']['sub_total']) ? $data['orders']['sub_total'] :'',
             isset($data['orders']['grand_total']) ? $data['orders']['grand_total'] :'',
             isset($data['orders']['statusname']['status_name']) ? $data['orders']['statusname']['status_name'] :'',

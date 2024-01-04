@@ -53,7 +53,7 @@ class CustomersExport implements FromCollection,WithHeadings,ShouldAutoSize,With
     {
         // return ['Created Date','Customer ID','Customer Type','Created by','Firm Name', 'First Name', 'Last Name', 'Mobile', 'Email','Address', 'Gmap address','Pin Code','Zip Code','Market Place','City','District','State','Beat Name', 'Latitude', 'Longitude','GST No','Adhar No','Pan No','Other No','Shop Image', 'Employee Name', 'Grade', 'Visit Status','Contact number -2','Customer Code','Employee Code','Branch Name','Department','Designation','Parent Customer'];
 
-    return ['Created Date','customer_id','Customer Type','Created by','firm_name', 'first_name', 'last_name', 'Mobile', 'email','address', 'Gmap address','Pin Code','Zip Code','market_place','City','District','State','Beat Name', 'Latitude', 'Longitude','gstin_no','aadhar_no','pan_no','other_no','Shop Image', 'Employee Name', 'grade','visit_status','contact_number2','customer_code','Employee Code','Branch Name','Department','Designation','Parent Customer','employee_id','parent_id','pincode_id','city_id','district_id','state_id','customer_type_id'];
+    return ['Created Date','customer_id','customer_code','Customer Type','Created by','firm_name','Parent Customer','first_name', 'last_name', 'Mobile','contact_number2', 'email','address', 'Gmap address','Pin Code','Zip Code','market_place','City','District','State','Beat Name','grade','visit_status','gstin_no','aadhar_no','pan_no','other_no','Shop Image','Employee Code','Employee Name','Designation','Branch Name','Department','Latitude', 'Longitude','employee_id','parent_id','pincode_id','city_id','district_id','state_id','customer_type_id'];
 
     }
 
@@ -64,12 +64,15 @@ class CustomersExport implements FromCollection,WithHeadings,ShouldAutoSize,With
         return [
             $data['created_at'] = isset($data['created_at']) ? date("d-m-Y", strtotime($data['created_at'])) :'',
             $data['id'],
+             $data['customer_code'], 
             isset($data['customertypes']['customertype_name']) ? $data['customertypes']['customertype_name'] :'',
             $data['createdbyname'] = isset($data['createdbyname']['name']) ? $data['createdbyname']['name'] : '',
             $data['name'],
+            $data->parentdetail->first_name??'',
             $data['first_name'],
             $data['last_name'],
             $data['mobile'],
+            $data['contact_number'],  
             $data['email'],
             isset($data['customeraddress']['address1']) ? $data['customeraddress']['address1'] : '',
             $data['gmap_address'] = isset($data['gmap_address']) ? $data['gmap_address'] :'',
@@ -80,24 +83,22 @@ class CustomersExport implements FromCollection,WithHeadings,ShouldAutoSize,With
             $data['district_name'] = isset($data['customeraddress']['districtname']['district_name']) ? $data['customeraddress']['districtname']['district_name'] :'',
             $data['state_name'] = isset($data['customeraddress']['statename']['state_name']) ? $data['customeraddress']['statename']['state_name'] :'',
             $data['beat_name'] = isset($data['beatdetails']['beats']['beat_name']) ? $data['beatdetails']['beats']['beat_name'] :'',
-            $data['latitude'],
-            $data['longitude'],
+            isset($data['customerdetails']['grade']) ? $data['customerdetails']['grade'] :'',
+            isset($data['customerdetails']['visit_status']) ? $data['customerdetails']['visit_status'] : '',
             isset($data['customerdetails']['gstin_no']) ? $data['customerdetails']['gstin_no'] :'',
             isset($data['customerdetails']['aadhar_no']) ? $data['customerdetails']['aadhar_no'] : '',
             isset($data['customerdetails']['pan_no']) ? $data['customerdetails']['pan_no'] :'',
             isset($data['customerdetails']['otherid_no']) ? $data['customerdetails']['otherid_no'] :'' ,
             $data['shop_image'] = isset($data['profile_image']) ? $data['profile_image'] :'',
             // $data['status_name'] = isset($data['statusname']['status_name']) ? $data['statusname']['status_name'] : '',
-            $data['employee_name'] = isset($data['employeename']['name']) ? $data['employeename']['name'] : '',
-            isset($data['customerdetails']['grade']) ? $data['customerdetails']['grade'] :'',
-            isset($data['customerdetails']['visit_status']) ? $data['customerdetails']['visit_status'] : '',
-            $data['contact_number'],
-            $data['customer_code'],   
+          
             isset($data['userdetails']['employee_codes']) ? $data['userdetails']['employee_codes'] : '',
+            $data['employee_name'] = isset($data['employeename']['name']) ? $data['employeename']['name'] : '',
+            isset($data['userdetails']['getdesignation']['designation_name']) ? $data['userdetails']['getdesignation']['designation_name'] : '',
             isset($data['userdetails']['getbranch']['branch_name']) ? $data['userdetails']['getbranch']['branch_name'] : '',
             isset($data['userdetails']['getdepartment']['division_name']) ? $data['userdetails']['getdepartment']['division_name'] : '',
-            isset($data['userdetails']['getdesignation']['designation_name']) ? $data['userdetails']['getdesignation']['designation_name'] : '',
-             $data->parentdetail->first_name??'',
+             $data['latitude'],
+             $data['longitude'],
              $data['executive_id']??NULL,
              $data['parent_id']??NULL,
              isset($data['customeraddress']['pincode_id']) ? $data['customeraddress']['pincode_id'] : '',

@@ -117,6 +117,36 @@
                   </div>
                 </div>
               </div>
+
+            <!-- nn -->
+
+              <div class="col-md-6">
+                <div class="row">
+                  <label class="col-md-3 col-form-label">Division <span class="text-danger"> *</span></label>
+                  <div class="col-md-9">
+                    <div class="form-group has-default bmd-form-group">
+                      <select class="form-control select2" name="division_id" id="division_id" style="width: 100%;" required>
+                        <option value="" selected disabled>Select Division</option>
+                      @if(@isset($divisions ))
+                        @foreach($divisions as $division)
+                        <option value="{!! $division['id'] !!}" {{ old( 'divisions' , (!empty($fields->division_id))?($fields->division_id):('') ) == $division['id'] ? 'selected' : '' }}>{!! $division['division_name'] !!}</option>
+                        @endforeach
+                        @endif
+                     </select>
+                      @if ($errors->has('division_id'))
+                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('division_id') }}</p></div>
+                      @endif
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- nn -->
+
+
+
+
+
               <div class="col-md-6">
                 <div class="row">
                   <label class="col-sm-3 col-form-label">Mandatory</label>
