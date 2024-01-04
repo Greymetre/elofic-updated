@@ -109,68 +109,11 @@ class RolesController extends Controller
         $permissions = Permission::whereIn('id',$request['permissions'])->select('name','guard_name')->get();
         $all_user_ids = DB::table('model_has_roles')->where('role_id', '=', $role->id)->pluck('model_id')->toArray();
         $users = User::whereIn('id', $all_user_ids)->get();
-        // $users = User::leftjoin('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
-        //                     ->leftjoin('roles', 'model_has_roles.role_id', '=', 'roles.id')
-        //                     ->where('role_id', '=', $role->id)->get();
-
         
-        // foreach ($permissions as $key => $rows) {
-            foreach ($users as $key => $user) {
-                $user->syncPermissions($request['permissions']);
-            }
-        // }
-        $toremove = collect([]);
-        $toinsert = collect([]);
-        foreach ($changes as $key => $rows) {
-            if (!in_array($rows, $request['permissions'])) {
-                $toinsert->push($rows);
-            }
-            else
-            {
-                $toremove->push($rows);
-            }
+        foreach ($users as $key => $user) {
+            $user->syncPermissions($request['permissions']);
         }
-
-        // if($toremove->isNotEmpty())
-        // {
-        //     $permissions = Permission::whereIn('id',$toremove)->pluck('name');
-        //     $role->revokePermissionTo($permissions);
-        //     foreach ($users as $key => $user) {
-        //         $user->revokePermissionTo($permissions);
-        //     }
-        // }
-
-        // if(!empty($changes))
-        // {
-        //     $toinsert = collect([]);
-        //     $toremove = collect([]);
-        //     foreach ($changes as $key => $rows) {
-        //         if (!in_array($rows, $request['permissions'])) {
-        //             $toinsert->push($rows);
-        //         }
-        //         else
-        //         {
-        //             $toremove->push($rows);
-        //         }
-        //     }
-        //     $users = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
-        //                     ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
-        //                     ->where('role_id', '=', $role->id)->get();
-            if($toinsert->isNotEmpty())
-            {
-                $permissions = Permission::whereIn('id',$toinsert)->pluck('name');
-                foreach ($users as $key => $user) {
-                    $user->givePermissionTo($permissions);
-                }
-            }
-            if($toremove->isNotEmpty())
-            {
-                $permissions = Permission::whereIn('id',$toremove)->pluck('name');
-                foreach ($users as $key => $user) {
-                    $user->revokePermissionTo($permissions);
-                }
-            }
-        // }
+        
         return redirect()->route('roles.index');
     }
     public function show(Role $role)
