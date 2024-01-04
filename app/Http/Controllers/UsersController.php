@@ -177,7 +177,7 @@ class UsersController extends Controller
         {
             $user->roles()->sync($request->input('roles', []));
             $permissions = $user->getPermissionsViaRoles()->pluck('name');
-            $user->givePermissionTo($permissions);
+            $user->syncPermissions($permissions);
             if(!empty($request['cities']))
             {
                 foreach ($request['cities'] as $key => $city) {
