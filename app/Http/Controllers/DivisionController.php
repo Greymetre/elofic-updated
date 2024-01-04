@@ -33,7 +33,7 @@ class DivisionController extends Controller
     
      public function index(DivisionDataTable $dataTable)
     {
-        abort_if(Gate::denies('brand_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('division'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         return $dataTable->render('division.index');
     }
     /**

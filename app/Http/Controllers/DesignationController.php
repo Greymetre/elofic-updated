@@ -32,7 +32,7 @@ class DesignationController extends Controller
     
      public function index(DesignationDataTable $dataTable)
     {
-        abort_if(Gate::denies('brand_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('designation'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         return $dataTable->render('designation.index');
     }
     /**

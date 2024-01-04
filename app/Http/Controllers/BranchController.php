@@ -34,7 +34,7 @@ class BranchController extends Controller
      */
     public function index(BranchDataTable $dataTable)
     {
-        // abort_if(Gate::denies('branch_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('branch'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         return $dataTable->render('branches.index');
     }
 
