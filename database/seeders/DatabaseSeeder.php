@@ -351,6 +351,8 @@ class DatabaseSeeder extends Seeder
                 ['name' => 'branch', 'guard_name' => 'users','created_at' => date('Y-m-d H:i:s'),'updated_at' => date('Y-m-d H:i:s')],
                 ['name' => 'division', 'guard_name' => 'users','created_at' => date('Y-m-d H:i:s'),'updated_at' => date('Y-m-d H:i:s')],
                 ['name' => 'designation', 'guard_name' => 'users','created_at' => date('Y-m-d H:i:s'),'updated_at' => date('Y-m-d H:i:s')],
+                ['name' => 'tours', 'guard_name' => 'users','created_at' => date('Y-m-d H:i:s'),'updated_at' => date('Y-m-d H:i:s')],
+                ['name' => 'city_assigned', 'guard_name' => 'users','created_at' => date('Y-m-d H:i:s'),'updated_at' => date('Y-m-d H:i:s')],
             ]);
         }
         if(DB::table('roles')->count() == 0)

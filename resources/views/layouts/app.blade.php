@@ -226,18 +226,22 @@
                   </a>
                 </li>
                 @endif
+                @if(auth()->user()->can('tours'))
                 <li class="nav-item {{ request()->is('tours*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('tours') }}">
                     <i class="material-icons">flight</i>
                     <p>Tours</p>
                   </a>
                 </li>
+                @endif
+                @if(auth()->user()->can('city_assigned'))
                 <li class="nav-item {{ request()->is('usercity*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('usercity') }}">
                     <i class="material-icons">flight</i>
                     <p>City Assigned</p>
                   </a>
                 </li>
+                @endif
               </ul>
             </div>
           </li>
@@ -321,7 +325,7 @@
             </li>
           @endif
           
-         @if(auth()->user())
+         @if(auth()->user()->can('branch'))
             <li class="nav-item {{ request()->is('branch*') ? 'active' : '' }}">
               <a class="nav-link" href="{{ url('branches') }}">
                 <i class="material-icons">shopping_bag</i>
@@ -330,7 +334,7 @@
             </li>
           @endif         
           
-          @if(auth()->user())
+          @if(auth()->user()->can('division'))
             <li class="nav-item {{ request()->is('division*') ? 'active' : '' }}">
               <a class="nav-link" href="{{ url('division') }}">
                 <i class="material-icons">shopping_bag</i>
@@ -339,7 +343,7 @@
             </li>
           @endif
           
-          @if(auth()->user())
+          @if(auth()->user()->can('designation'))
             <li class="nav-item {{ request()->is('designation*') ? 'active' : '' }}">
               <a class="nav-link" href="{{ url('designation') }}">
                 <i class="material-icons">shopping_bag</i>

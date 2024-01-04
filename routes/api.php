@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\SurveyController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\VisitReportController;
 use App\Http\Controllers\Api\WalletController;
+use App\Http\Controllers\Api\ReportingActivityController;
 
 /*
 |--------------------------------------------------------------------------
@@ -145,6 +146,8 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::any('getNotification', [ UserController::class, 'getNotification']);
     Route::any('masterStateCity', [ UserController::class, 'masterStateCity']);
     Route::any('getPunchinMasterData', [ UserController::class, 'getPunchinMasterData']);
+    //Reporting Activity
+    Route::get('reporting/users', [ReportingActivityController::class, 'allReportingUsers']);
 });
 
 
