@@ -54,7 +54,7 @@
             <div class="col-md-12">
               <div class="form-group">
                 <label class="bmd-label-floating required" for="display_name">{{ trans('panel.role.fields.display_name') }}</label>
-                <input class="form-control {{ $errors->has('display_name') ? 'is-invalid' : '' }}" type="text" name="display_name" id="display_name" value="{{ old('display_name', $role->display_name) }}" required>
+                <input class="form-control {{ $errors->has('display_name') ? 'is-invalid' : '' }}" type="text" name="display_name" id="display_name" value="{{ old('name', $role->name) }}" required>
                 @if($errors->has('display_name'))
                     <div class="invalid-feedback">
                         {{ $errors->first('display_name') }}

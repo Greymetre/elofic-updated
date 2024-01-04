@@ -107,13 +107,16 @@ class RolesController extends Controller
         $newpermissions = $request['permissions'];
         $changes = array_merge(array_diff($newpermissions, $oldpermissions), array_diff($oldpermissions, $newpermissions));
         $permissions = Permission::whereIn('id',$request['permissions'])->select('name','guard_name')->get();
-        $users = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
-                            ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
-                            ->where('role_id', '=', $role->id)->get();
-                            
+        $all_user_ids = DB::table('model_has_roles')->where('role_id', '=', $role->id)->pluck('model_id')->toArray();
+        $users = User::whereIn('id', $all_user_ids)->get();
+        // $users = User::leftjoin('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+        //                     ->leftjoin('roles', 'model_has_roles.role_id', '=', 'roles.id')
+        //                     ->where('role_id', '=', $role->id)->get();
+        
+        
         foreach ($permissions as $key => $rows) {
             foreach ($users as $key => $user) {
-                $user->givePermissionTo($rows['name']);
+                $user->syncPermissions($rows['name']);
             }
         }
         $toremove = collect([]);
