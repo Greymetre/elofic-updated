@@ -349,7 +349,7 @@ if (! function_exists('getLatLongToAddress')) {
 if (! function_exists('getUsersReportingToAuth')) { 
     function getUsersReportingToAuth($userid = '')
     {
-        $userid = !empty($userid) ? $userid : Auth::user()->id ;
+        $userid = !empty($userid) ? $userid : Auth::user()->id;
         $userinfo = User::where('id','=',$userid)->first();
         $users = User::where(function($query) use($userinfo){
                         if(!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin'))

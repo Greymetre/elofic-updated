@@ -52,7 +52,7 @@
            <option value="">Select User</option>
           @if(@isset($users ))
           @foreach($users as $user)
-           <option value="{!! $user['id'] !!}" {{ old( 'user_id') == $user->id ? 'selected' : '' }}>{!! $user['name'] !!}</option>
+           <option value="{!! $user['id'] !!}" {{ old( 'user_id') == $user->id ? 'selected' : '' }}>{!! $user['name'] !!} ({{(count($user->getRoleNames())>0)?$user->getRoleNames()[0]:''}})</option>
           @endforeach
           @endif
         </select>

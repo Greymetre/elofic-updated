@@ -22,7 +22,9 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         //abort_if(Gate::denies('dashboard_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        $users= User::where('active','=','Y')->select('id','name')->get();
+        $users_ids = getUsersReportingToAuth();
+        $users= User::where('active','=','Y')->whereIn('reportingid', $users_ids)->select('id','name')->get();
+        // dd($users);
         return view('dashboard.index',compact('users'));
     }
 
