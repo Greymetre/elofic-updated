@@ -22,7 +22,6 @@ class ReportingActivityController extends Controller
         $start_date = $request->input('start_date');
         $end_date = $request->input('end_date');
         $validator = Validator::make($request->all(), [
-            'start_date' => 'sometimes|required',
             'end_date' => 'required_with:start_date',
         ]); 
         if ($validator->fails()) {
@@ -40,7 +39,7 @@ class ReportingActivityController extends Controller
         $date_checkIn = Attendance::select('punchin_date', 'user_id')
         ->with('users')
         ->whereIn('user_id', $all_reporting_user_ids);
-        if($start_date){
+        if($start_date && $start_date != '' && $start_date != null){
             $start_date = date('Y-m-d', strtotime($start_date));
             $end_date = date('Y-m-d', strtotime($end_date));
             $date_checkIn->whereBetween('punchin_date', [$start_date, $end_date]);
@@ -50,13 +49,13 @@ class ReportingActivityController extends Controller
 
         $date_checkIn = (!empty($pageSize)) ? $date_checkIn->paginate($pageSize) : $date_checkIn->get();
 
-        $data = array();
-        foreach($date_checkIn as $key=>$checkIn){
-            $data[$key]['user_id'] = $checkIn->users->id;
-            $data[$key]['name'] = $checkIn->users->name;
-            $data[$key]['date'] = date('d/M/Y', strtotime($checkIn->punchin_date));
-        }
-        if(count($data) > 0){
+        if(count($date_checkIn) > 0){
+            $data = array();
+            foreach($date_checkIn as $key=>$checkIn){
+                $data[$key]['user_id'] = $checkIn->users->id;
+                $data[$key]['name'] = $checkIn->users->name;
+                $data[$key]['date'] = date('d/m/Y', strtotime($checkIn->punchin_date));
+            }
             return response()->json(['status' => 'success','message' => 'Data retrieved successfully.', 'page_count'=>$date_checkIn->lastPage(), 'data' => $data ], 200);
         }else{
             return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data ],200);
@@ -93,15 +92,15 @@ class ReportingActivityController extends Controller
             if($val->punchin_time != null){
                 $punchInData[$k]['title'] = 'Punch In';
                 $punchInData[$k]['time'] = $val->punchin_time;
-                $punchInData[$k]['latitude'] = $val->punchin_latitude;
-                $punchInData[$k]['longitude'] = $val->punchin_longitude;
+                $punchInData[$k]['latitude'] = $val->punchin_latitude!=null?$val->punchin_latitude:'';
+                $punchInData[$k]['longitude'] = $val->punchin_longitude!=null?$val->punchin_longitude:'';
                 $punchInData[$k]['msg'] = $val->punchin_summary;
             }
             if($val->punchout_time != null){
                 $punchOutData[$k]['title'] = 'Punch Out';
                 $punchOutData[$k]['time'] = $val->punchout_time;
-                $punchOutData[$k]['latitude'] = $val->punchout_latitude;
-                $punchOutData[$k]['longitude'] = $val->punchout_longitude;
+                $punchOutData[$k]['latitude'] = $val->punchout_latitude!=null?$val->punchout_latitude:'';
+                $punchOutData[$k]['longitude'] = $val->punchout_longitude!=null?$val->punchout_longitude:'';
                 $punchOutData[$k]['msg'] = $val->punchout_address;
             }
         }
@@ -110,15 +109,15 @@ class ReportingActivityController extends Controller
             if($val->checkin_time != null){
                 $checkInData[$k]['title'] = 'Check In';
                 $checkInData[$k]['time'] = $val->checkin_time;
-                $checkInData[$k]['latitude'] = $val->checkin_latitude;
-                $checkInData[$k]['longitude'] = $val->checkin_longitude;
+                $checkInData[$k]['latitude'] = $val->checkin_latitude!=null?$val->checkin_latitude:'';
+                $checkInData[$k]['longitude'] = $val->checkin_longitude!=null?$val->checkin_longitude:'';
                 $checkInData[$k]['msg'] = $val->customers->name;
             }
             if($val->checkout_time != null){
                 $checkOutData[$k]['title'] = 'Check Out';
                 $checkOutData[$k]['time'] = $val->checkout_time;
-                $checkOutData[$k]['latitude'] = $val->checkout_latitude;
-                $checkOutData[$k]['longitude'] = $val->checkout_longitude;
+                $checkOutData[$k]['latitude'] = $val->checkout_latitude!=null?$val->checkout_latitude:'';
+                $checkOutData[$k]['longitude'] = $val->checkout_longitude!=null?$val->checkout_longitude:'';
                 $checkOutData[$k]['msg'] = $val->customers->name.' Remark - '.$val->visitreports->description;
             }
         }
@@ -134,26 +133,28 @@ class ReportingActivityController extends Controller
         foreach ($customer_add as $k => $val) {
             $customerAddData[$k]['title'] = 'New Customer Registration';
             $customerAddData[$k]['time'] = date('H:i:s', strtotime($val->created_at));
-            $customerAddData[$k]['latitude'] = $val->latitude;
-            $customerAddData[$k]['longitude'] = $val->longitude;
+            $customerAddData[$k]['latitude'] = $val->latitude!=null?$val->latitude:'';
+            $customerAddData[$k]['longitude'] = $val->longitude!=null?$val->longitude:'';
             $customerAddData[$k]['msg'] = $val->name.' - '. $val->customeraddress->cityname->city_name;
         }
 
         foreach ($customer_update as $k => $val) {
             $customerUpdateData[$k]['title'] = 'Customer Edit';
             $customerUpdateData[$k]['time'] = date('H:i:s', strtotime($val->created_at));
-            $customerUpdateData[$k]['latitude'] = $val->latitude;
-            $customerUpdateData[$k]['longitude'] = $val->longitude;
+            $customerUpdateData[$k]['latitude'] = $val->latitude!=null?$val->latitude:'';
+            $customerUpdateData[$k]['longitude'] = $val->longitude!=null?$val->longitude:'';
             $customerUpdateData[$k]['msg'] = $val->name.' - '. $val->customeraddress->cityname->city_name;
         }
 
         $data = array_merge($punchInData, $punchOutData, $checkInData, $checkOutData, $orderData, $customerAddData, $customerUpdateData);
 
+        
         usort($data, function ($a, $b) {
             return strtotime($a['time']) - strtotime($b['time']);
         });
         foreach($data as $k=>$val){
             $data[$k]['time'] = date('h:i A', strtotime($val['time']));
+            $data[$k]['date'] = $request->input('date');
         }
     
         if(count($data) > 0){

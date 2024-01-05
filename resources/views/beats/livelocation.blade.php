@@ -67,7 +67,7 @@
 
 <script type="text/javascript">
     $( document ).ready(function() {
-        getActivityData();
+        // getActivityData();
     })
     function getLocationData(){
         var date = $("input[name=date]").val();
@@ -118,44 +118,47 @@
             type: "POST",
             data:{ _token: "{{csrf_token()}}", date:date,user_id:user_id },
             success: function(res){
-                console.log(res)
                 $("#todayActivity").empty();
-                $.each(res, function(index,item) {  
-                    var classname = 'success';
-                    switch(item.type) {
-                        case 'Punchin':
-                            var classname = 'primary';
-                            break;
-                        case 'Punchout':
-                            var classname = 'warning';
-                            break;
-                        case 'Checkin':
-                            var classname = 'info';
-                            break;
-                        case 'Checkout':
-                            var classname = 'danger';
-                            break;
-                        case 'Order':
-                            var classname = 'success';
-                            break;
-                        default:
-                            var classname = 'default';
-                    }
-                   $("#todayActivity").append('<li class="timeline-inverted">'+
-                      '<div class="timeline-badge '+classname+'">'+
-                         '<i class="material-icons">card_travel</i>'+
-                      '</div>'+
-                      '<div class="timeline-panel">'+
-                         '<div class="timeline-heading">'+
-                            '<span class="badge badge-pill badge-'+classname+'">'+item.users.name+' '+ item.time+'</span>'+
-                         '</div>'+
-                         '<div class="timeline-body">'+
-                            '<p>'+item.description+'</p>'+
-                         '</div>'+
-                         '<h6><i class="ti-time"></i> '+item.time+'</h6>'+
-                      '</div>'+
-                   '</li>');
-               });
+                if(res.length > 0){
+                    $.each(res, function(index,item) {  
+                        var classname = 'success';
+                        switch(item.title) {
+                            case 'Punchin':
+                                var classname = 'primary';
+                                break;
+                            case 'Punchout':
+                                var classname = 'warning';
+                                break;
+                            case 'Checkin':
+                                var classname = 'info';
+                                break;
+                            case 'Checkout':
+                                var classname = 'danger';
+                                break;
+                            case 'Order':
+                                var classname = 'success';
+                                break;
+                            default:
+                                var classname = 'default';
+                        }
+                        $("#todayActivity").append('<li class="timeline-inverted">'+
+                            '<div class="timeline-badge '+classname+'">'+
+                                '<i class="material-icons">card_travel</i>'+
+                            '</div>'+
+                            '<div class="timeline-panel">'+
+                                '<div class="timeline-heading">'+
+                                    '<span class="badge badge-pill badge-'+classname+'">'+ item.time+'</span>'+
+                                '</div>'+
+                                '<div class="timeline-body">'+
+                                    '<h5 style="font-weight: bold;">'+item.title+'</h5>'+
+                                '</div>'+
+                                '<h6><i class="ti-time"></i> '+item.msg+'</h6>'+
+                            '</div>'+
+                        '</li>');
+                    });
+                }else{
+                    $("#todayActivity").append('<h5 style="font-weight: bold;">No Activity Found</h5>');
+                }
 
             }
         });
