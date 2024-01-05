@@ -27,15 +27,10 @@ class ReportingActivityController extends Controller
         if ($validator->fails()) {
             return response()->json(['status' => 'error','message' =>  $validator->errors()], 400); 
         }
-        if($user->roles[0]->name == 'superadmin'){
-            $all_reporting_user_ids = User::query();
-            if($search_name){
-                $all_reporting_user_ids->where('name', 'LIKE', '%'.$search_name.'%');
-            }
-            $all_reporting_user_ids = $all_reporting_user_ids->pluck('id')->toArray();
-        }else{
-            $all_reporting_user_ids = User::where('reportingid', $user_id)->pluck('id')->toArray();
-        }
+        
+        $all_reporting_user_ids = getUsersReportingToAuth();
+        // $all_reporting_user_ids = User::whereIn('reportingid', $users_ids)->pluck('id')->toArray();
+
         $date_checkIn = Attendance::select('punchin_date', 'user_id')
         ->with('users')
         ->whereIn('user_id', $all_reporting_user_ids);
@@ -47,10 +42,10 @@ class ReportingActivityController extends Controller
         $date_checkIn->orderBy('punchin_date', 'desc');
 
 
-        $date_checkIn = (!empty($pageSize)) ? $date_checkIn->paginate($pageSize) : $date_checkIn->get();
+        $date_checkIn = (!empty($pageSize)) ? $date_checkIn->paginate($pageSize) : $date_checkIn->paginate(100);
 
+        $data = array();
         if(count($date_checkIn) > 0){
-            $data = array();
             foreach($date_checkIn as $key=>$checkIn){
                 $data[$key]['user_id'] = $checkIn->users->id;
                 $data[$key]['name'] = $checkIn->users->name;
