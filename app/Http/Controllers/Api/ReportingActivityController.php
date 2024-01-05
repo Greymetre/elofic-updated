@@ -128,7 +128,7 @@ class ReportingActivityController extends Controller
             $orderData[$k]['time'] = date('H:i:s', strtotime($val->created_at));
             $orderData[$k]['latitude'] = '';
             $orderData[$k]['longitude'] = '';
-            $orderData[$k]['msg'] = $val->buyers->name.', Qty : '.$val->total_qty.', Total : '.$val->grand_total;
+            $orderData[$k]['msg'] = $val->buyers->name.', Qty : '.$val->orderdetails->sum('quantity').', Total : '.$val->grand_total;
         }
 
         foreach ($customer_add as $k => $val) {
