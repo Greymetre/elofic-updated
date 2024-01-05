@@ -148,6 +148,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::any('getPunchinMasterData', [ UserController::class, 'getPunchinMasterData']);
     //Reporting Activity
     Route::get('reporting/users', [ReportingActivityController::class, 'allReportingUsers']);
+    Route::get('user/activity', [ReportingActivityController::class, 'userActivity']);
 });
 
 
