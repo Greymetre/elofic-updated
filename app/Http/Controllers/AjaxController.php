@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Order, Status, Settings, Tasks , ProductDetails, Sales, UserReporting, CheckIn, Notes};
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attendance, Order, Status, Settings, Tasks , ProductDetails, Sales, UserReporting, CheckIn, Notes};
 use App\Models\User;
 use Carbon\Carbon;
 use App\Models\UserLiveLocation;
@@ -533,14 +533,97 @@ class AjaxController extends Controller
     {
         try
         {
-            $users = !empty($request->input('user_id')) ? $request->input('user_id') :Auth::user()->id ;
-            $date = !empty($request->input('date')) ? $request->input('date') : date('Y-m-d');
-            $collections = UserActivity::with('customers','users')->where(function($query) use($users, $date) {
-                                    $query->whereDate('time','=', date('Y-m-d',strtotime($date)));
-                                    $query->where('userid', $users);
-                                })
-                                ->select('customerid','latitude','longitude','time','address','description','type','userid')
-                                ->get();
+            // $users = !empty($request->input('user_id')) ? $request->input('user_id') :Auth::user()->id ;
+            // $date = !empty($request->input('date')) ? $request->input('date') : date('Y-m-d');
+            // $collections = UserActivity::with('customers','users')->where(function($query) use($users, $date) {
+            //                         $query->whereDate('created_at','=', date('Y-m-d',strtotime($date)));
+            //                         $query->where('userid', $users);
+            //                     })
+            //                     ->select('customerid','latitude','longitude','time','address','description','type','userid')
+            //                     ->get();
+            $date = date('Y-m-d', strtotime($request->input('date')));
+            $user_id = $request->input('user_id');
+
+            $punchInOut = Attendance::where('user_id', $user_id)->where('punchin_date', $date)->get();
+            $checkInOut = CheckIn::with('visitreports')->with('customers')->where('user_id', $user_id)->where('checkin_date', $date)->get();
+            $orders = Order::with('buyers')->where('created_by', $user_id)->whereRaw('DATE(created_at)="'.$date.'"')->get();
+            $customer_add = Customers::with('customeraddress')->where('created_by', $user_id)->whereRaw('DATE(created_at)="'. $date.'"')->get();
+            $customer_update = Customers::with('customeraddress')->where('created_by', $user_id)->whereColumn('updated_at','>','created_at')->whereRaw('DATE(updated_at)="'. $date.'"')->get();
+
+            $punchInData = array();
+            $punchOutData = array();
+            $checkInData = array();
+            $checkOutData = array();
+            $orderData = array();
+            $customerAddData = array();
+            $customerUpdateData = array();
+
+            foreach($punchInOut as $k=>$val){
+                if($val->punchin_time != null){
+                    $punchInData[$k]['title'] = 'Punchin';
+                    $punchInData[$k]['time'] = $val->punchin_time;
+                    $punchInData[$k]['latitude'] = $val->punchin_latitude;
+                    $punchInData[$k]['longitude'] = $val->punchin_longitude;
+                    $punchInData[$k]['msg'] = $val->punchin_summary;
+                }
+                if($val->punchout_time != null){
+                    $punchOutData[$k]['title'] = 'Punchout';
+                    $punchOutData[$k]['time'] = $val->punchout_time;
+                    $punchOutData[$k]['latitude'] = $val->punchout_latitude;
+                    $punchOutData[$k]['longitude'] = $val->punchout_longitude;
+                    $punchOutData[$k]['msg'] = $val->punchout_address;
+                }
+            }
+
+            foreach($checkInOut as $k=>$val){
+                if($val->checkin_time != null){
+                    $checkInData[$k]['title'] = 'Checkin';
+                    $checkInData[$k]['time'] = $val->checkin_time;
+                    $checkInData[$k]['latitude'] = $val->checkin_latitude;
+                    $checkInData[$k]['longitude'] = $val->checkin_longitude;
+                    $checkInData[$k]['msg'] = $val->customers->name;
+                }
+                if($val->checkout_time != null){
+                    $checkOutData[$k]['title'] = 'Checkout';
+                    $checkOutData[$k]['time'] = $val->checkout_time;
+                    $checkOutData[$k]['latitude'] = $val->checkout_latitude;
+                    $checkOutData[$k]['longitude'] = $val->checkout_longitude;
+                    $checkOutData[$k]['msg'] = $val->customers->name.'<br>Remark - '.$val->visitreports->description;
+                }
+            }
+
+            foreach ($orders as $k => $val) {
+                $orderData[$k]['title'] = 'Order';
+                $orderData[$k]['time'] = date('H:i:s', strtotime($val->created_at));
+                $orderData[$k]['latitude'] = '';
+                $orderData[$k]['longitude'] = '';
+                $orderData[$k]['msg'] = $val->buyers->name.',<br>Qty : '.$val->orderdetails->sum('quantity').',<br>Total : '.$val->grand_total;
+            }
+
+            foreach ($customer_add as $k => $val) {
+                $customerAddData[$k]['title'] = 'New Customer Registration';
+                $customerAddData[$k]['time'] = date('H:i:s', strtotime($val->created_at));
+                $customerAddData[$k]['latitude'] = $val->latitude;
+                $customerAddData[$k]['longitude'] = $val->longitude;
+                $customerAddData[$k]['msg'] = $val->name.' - '. $val->customeraddress->cityname->city_name;
+            }
+
+            foreach ($customer_update as $k => $val) {
+                $customerUpdateData[$k]['title'] = 'Customer Edit';
+                $customerUpdateData[$k]['time'] = date('H:i:s', strtotime($val->created_at));
+                $customerUpdateData[$k]['latitude'] = $val->latitude;
+                $customerUpdateData[$k]['longitude'] = $val->longitude;
+                $customerUpdateData[$k]['msg'] = $val->name.' - '. $val->customeraddress->cityname->city_name;
+            }
+
+            $collections = array_merge($punchInData, $punchOutData, $checkInData, $checkOutData, $orderData, $customerAddData, $customerUpdateData);
+
+            usort($collections, function ($a, $b) {
+                return strtotime($a['time']) - strtotime($b['time']);
+            });
+            foreach($collections as $k=>$val){
+                $collections[$k]['time'] = date('h:i A', strtotime($val['time']));
+            }
             return response()->json($collections);
         }
         catch(\Exception $e){
