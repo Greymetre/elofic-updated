@@ -68,7 +68,7 @@
                     </div>
                     <div class="col-md-5">
                         <ul class="timeline timeline-simple" id="todayActivity">
-                            <img id="loader" width="50" src="assets/img/loader.gif">
+                            <img id="loader" width="50" src="{{asset('assets/img/loader.gif')}}">
                         </ul>
                     </div>
                </div>

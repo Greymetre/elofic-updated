@@ -278,6 +278,11 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('attendance-download', [ AttendanceController::class, 'download'])->name('attendance.download');
     Route::any('removePunchout', [ AttendanceController::class, 'removePunchout'])->name('removePunchout');
     Route::delete('attendances/{id}', [ AttendanceController::class, 'destroy'])->name('attendances.destroy');
+
+    Route::any('approveAttendance', [ AttendanceController::class, 'approveAttendance'])->name('approveAttendance');
+    Route::any('rejectAttendance', [ AttendanceController::class, 'rejectAttendance'])->name('rejectAttendance');
+
+
     
     //Checkin
     Route::any('checkin', [ CheckinController::class, 'index'])->name('checkin.index');

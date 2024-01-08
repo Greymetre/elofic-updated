@@ -18,12 +18,26 @@ class AttendanceExport implements FromCollection,WithHeadings,ShouldAutoSize,Wit
     {
         $this->start_date = $request->start_date;
         $this->end_date = $request->end_date;
+        $this->executive_id = $request->executive_id;
     }
 
     public function collection()
     {
         return Attendance::with('users')->where(function($query) {
-                        if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
+                        // if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
+                        // {
+                        //     $query->whereIn('user_id', getUsersReportingToAuth());
+                        // }
+                        // if($this->start_date)
+                        // {
+                        //     $query->whereDate('punchin_date','>=',$this->start_date);
+                        // }
+                        // if($this->end_date)
+                        // {
+                        //     $query->whereDate('punchin_date','<=',$this->end_date);
+                        // }
+
+                     if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
                         {
                             $query->whereIn('user_id', getUsersReportingToAuth());
                         }
@@ -35,8 +49,13 @@ class AttendanceExport implements FromCollection,WithHeadings,ShouldAutoSize,Wit
                         {
                             $query->whereDate('punchin_date','<=',$this->end_date);
                         }
+                         if($this->executive_id)
+                        {
+                            $query->where('user_id', $this->executive_id);
+                        }
+
                     })
-                    ->select('id','user_id', 'punchin_date', 'punchin_time', 'punchin_address', 'punchout_date', 'punchout_time', 'punchout_address', 'worked_time','punchin_summary','punchout_summary','punchin_longitude','punchin_latitude','punchout_latitude','punchout_longitude','working_type')
+                    ->select('id','user_id', 'punchin_date', 'punchin_time', 'punchin_address', 'punchout_date', 'punchout_time', 'punchout_address', 'worked_time','punchin_summary','punchout_summary','punchin_longitude','punchin_latitude','punchout_latitude','punchout_longitude','working_type','attendance_status','remark_status')
                     ->limit(5000)->latest()->get();   
     }
 

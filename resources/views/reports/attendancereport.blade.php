@@ -12,6 +12,18 @@
               @if(auth()->user()->can(['attendance_download']))
               <form method="GET" action="{{ URL::to('attendance-download') }}">
                   <div class="d-flex flex-row">
+
+                  <div class="p-2">
+                    <select class="form-control" name="executive_id" id="executive_id" data-style="select-with-transition" title="Select User">
+                     <option value="">Select User</option>
+                    @if(@isset($users ))
+                    @foreach($users as $user)
+                     <option value="{!! $user['id'] !!}" {{ old( 'executive_id') == $user->id ? 'selected' : '' }}>{!! $user['name'] !!}</option>
+                    @endforeach
+                    @endif
+                   </select>
+                  </div>
+
                     <div class="p-2">
                       <input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly>
                     </div>
@@ -54,6 +66,7 @@
             <thead class=" text-primary">
               <th>No</th>
               <th>User ID</th>
+              <th>Status</th>
               <th>User Name</th>
               <th>Punch in Date</th>
               <th>Punch In Time</th>
@@ -80,7 +93,7 @@
     </div>
   </div>
 </div>
-<!-- Modal -->
+<!-- Modal -->  
 <div class="modal fade bd-example-modal-lg" id="submitAttendance" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content card">
@@ -146,100 +159,110 @@
   </div>
 </div> 
 
+
+<!-- new model for reject attendance -->
+
+
+ <div class="modal fade bd-example-modal-lg" id="rejec_attendance" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content card">
+      <div class="card-header card-header-icon card-header-theme">
+        <div class="card-icon">
+          <i class="material-icons">perm_identity</i>
+        </div>
+        <h4 class="card-title">
+          <span class="modal-title">Submit </span> Remark <span class="pull-right">
+            <a href="javascript:void(0)" class="btn btn-just-icon btn-danger" data-dismiss="modal">
+              <i class="material-icons">clear</i>
+            </a>
+          </span>
+        </h4>
+      </div>
+      <div class="modal-body">
+        <form method="POST" action="{{ route('rejectAttendance') }}" enctype="multipart/form-data" id="createleadstagesForm_new"> @csrf 
+          <div class="row">
+            <div class="col-md-6">
+              <div class="input-group input-group-outline my-3">
+                <label class="form-label">Remark</label>
+                <input type="text" name="remark_status" id="remark_status" class="form-control" value="{!! old( 'remark_status') !!}" required> <br><br>
+                <input type="text" name="attendance_id" id="attendance_id" class="form-control" hidden>
+  
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-info save"> Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div> 
+
+<!-- end model for attendance -->
+
+
+
+
 <script type="text/javascript">
   $(document).ready(function() {
-    var token = $("meta[name='csrf-token']").attr("content");
-    oTable = $('#getattendance').DataTable({
-      "processing": true,
-      "serverSide": true,
-      "order": [
-        [0, 'desc']
-      ],
-      //"dom": 'Bfrtip',
-      //"ajax": "{{ url('reports/attendancereport') }}",
-      "ajax": {
-          'type': 'POST',
-          'url': "{{ url('reports/attendancereport') }}",
-          data: {
-            "_token": token,
+
+    //new user filters  starts
+
+    $.ajaxSetup({
+          headers: {
+              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
           }
-        },
-      "columns": [{
-          data: 'DT_RowIndex',
-          name: 'DT_RowIndex',
-          orderable: false,
-          searchable: false
-        }, {
-          data: 'user_id',
-          name: 'user_id',
-          "defaultContent": ''
-        }, {
-          data: 'users.name',
-          name: 'users.name',
-          "defaultContent": ''
-        }, {
-          data: 'punchin_date',
-          name: 'punchin_date',
-          "defaultContent": ''
-        }, {
-          data: 'punchin_time',
-          name: 'punchin_time',
-          "defaultContent": ''
-        },
-        // {data: 'punchin_address', name: 'punchin_address',"defaultContent": ''},
-        {
-          data: 'punchin',
-          name: 'punchin',
-          "defaultContent": ''
-        }, {
-          data: 'punchout_date',
-          name: 'punchout_date',
-          "defaultContent": ''
-        }, {
-          data: 'punchout_time',
-          name: 'punchout_time',
-          "defaultContent": ''
-        },
-        // {data: 'punchout_address', name: 'punchout_address',"defaultContent": ''},
-        {
-          data: 'worked_time',
-          name: 'worked_time',
-          "defaultContent": ''
-        },
-        // {data: 'district_name', name: 'district_name',"defaultContent": ''},
-        {
-          data: 'punchin_longitude',
-          name: 'punchin_longitude',
-          "defaultContent": ''
-        }, {
-          data: 'punchin_latitude',
-          name: 'punchin_latitude',
-          "defaultContent": ''
-        }, {
-          data: 'punchout_longitude',
-          name: 'punchout_longitude',
-          "defaultContent": ''
-        }, {
-          data: 'punchout_latitude',
-          name: 'punchout_latitude',
-          "defaultContent": ''
-        }, {
-          data: 'punchin_summary',
-          name: 'punchin_summary',
-          "defaultContent": ''
-        }, {
-          data: 'punchout_summary',
-          name: 'punchout_summary',
-          "defaultContent": ''
-        },
-        {
-          data: 'working_type',
-          name: 'working_type',
-          "defaultContent": ''
-        },
-        { data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
-      ]
     });
+    var table = $('#getattendance').DataTable({
+        processing: true,
+        serverSide: true,
+        "order": [ [0, 'desc'] ],
+        "retrieve": true,
+        ajax: {
+          url: "{{url('reports/attendancereport')}}",
+          data: function (d) {
+                d.executive_id = $('#executive_id').val(),
+                d.start_date = $('#start_date').val(),
+                d.end_date = $('#end_date').val()
+            }
+        },
+
+        columns: [
+            {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+            {data: 'user_id', name: 'user_id',"defaultContent": ''},
+            {data: 'action_status', name: 'action_status',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
+            {data: 'users.name', name: 'users.name',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'punchin_date', name: 'punchin_date',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'punchin_time', name: 'punchin_time',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'punchin', name: 'punchin',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'punchout_date', name: 'punchout_date',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'punchout_time', name: 'punchout_time',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'worked_time', name: 'worked_time',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'punchin_longitude', name: 'punchin_longitude',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'punchin_latitude', name: 'punchin_latitude',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'punchout_longitude', name: 'punchout_longitude',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'punchout_latitude', name: 'punchout_latitude',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'punchin_summary', name: 'punchin_summary',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'punchout_summary', name: 'punchout_summary',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'working_type', name: 'working_type',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
+        ]
+    });
+
+    $('#executive_id').change(function(){
+        table.draw();
+    });
+
+    $('#start_date').change(function(){
+        table.draw();
+    });
+    $('#end_date').change(function(){
+        table.draw();
+    });
+
+
+    //new user filters end
+
+
 
     $('body').on('click', '.removePunchout', function () {
         var id = $(this).attr("value");
@@ -263,7 +286,8 @@
                 $('.alert').addClass("alert-danger");
               }
               $('.message').append(data.message);
-              oTable.draw();
+              //oTable.draw();
+              table.draw();
             },
         });
     });
@@ -289,10 +313,59 @@
                 $('.alert').addClass("alert-danger");
               }
               $('.message').append(data.message);
-              oTable.draw();
+              //oTable.draw();
+              table.draw();
             },
         });
     });
+
+
+
+    //approve
+        $('body').on('click', '.approve_status', function () {
+        var id = $(this).attr("value");
+        var token = $("meta[name='csrf-token']").attr("content");
+        if(!confirm("Are You sure want Approve Attendance")) {
+           return false;
+        }
+
+        $.ajax({
+            url: "{{ url('approveAttendance')}}",
+            type: 'POST',
+            data: {_token: token,id: id},
+            success: function (data) {
+              $('.message').empty();
+              $('.alert').show();
+              if(data.status == 'success')
+              {
+                $('.alert').addClass("alert-success");
+              }
+              else
+              {
+                $('.alert').addClass("alert-danger");
+              }
+              $('.message').append(data.message);
+              //oTable.draw();
+              table.draw();
+            },
+        });
+    });
+
+
+    $('body').on('click', '.reject_status', function () {
+        var id = $(this).attr("value");
+        var token = $("meta[name='csrf-token']").attr("content");
+        if(!confirm("Are You sure want reject Attendance")) {
+           return false;
+        }else{
+          $('#attendance_id').val(id);
+          $("#rejec_attendance").modal();
+        }
+
+    });     
+
+
+
   });
 </script> 
 </x-app-layout>

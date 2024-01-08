@@ -157,4 +157,47 @@ class AttendanceController extends Controller
           return redirect()->back()->withErrors($e->getMessage())->withInput();
         }
     }
+
+    public function approveAttendance(Request $request)
+    { 
+        try
+        { 
+            if(Attendance::where('id','=',$request['id'])->update([
+                'attendance_status' => 1,
+                'remark_status' => null
+            ]))
+            {
+              return redirect()->back()->with('message_success', 'Attendance Approved Successfully');
+            }
+            return redirect()->back()->with('message_danger', 'Error in Attendance Approved')->withInput();  
+        }         
+        catch(\Exception $e)
+        {
+          return redirect()->back()->withErrors($e->getMessage())->withInput();
+        }
+    }
+
+
+    public function rejectAttendance(Request $request)
+    {
+        $remark_status  = $request['remark_status']??null;
+        try
+        { 
+            if(Attendance::where('id','=',$request['attendance_id'])->update([
+                'attendance_status' => 2,
+                'remark_status' => $remark_status??null,
+            ]))
+            {
+              return Redirect::to('reports/attendancereport')->with('message_success', 'Attendance Rejected Successfully');
+            }
+            return redirect()->back()->with('message_danger', 'Error in Attendance Rejected')->withInput();  
+        }         
+        catch(\Exception $e)
+        {
+          return redirect()->back()->withErrors($e->getMessage())->withInput();
+        }
+    }
+
+
+
 }

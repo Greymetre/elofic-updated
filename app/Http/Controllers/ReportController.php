@@ -348,22 +348,52 @@ class ReportController extends Controller
     }
 
     public function attendancereport(Request $request)
-    {
+    {    
         $userids = getUsersReportingToAuth();
         $users = User::where('active','=','Y')
                         // ->whereHas('roles', function($query){
                         //     $query->whereNotIn('name',['superadmin','Admin']);
                         // })
                         ->select('id','name','mobile')->get();
+
+        $user_filters = User::where(function($query) use($userids){
+                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
+                                {
+                                    $query->whereIn('id',$userids);
+                                }
+                            })->select('id','name')->orderBy('id','desc')->get();                
+
+
+
         if ($request->ajax()) {
+
             $data = Attendance::with('users:id,name')
-                ->where(function($query) use($userids){
+                ->where(function($query) use ($request , $userids){
+                    if(!empty($request['executive_id']))
+                        {
+                          $query->where('user_id', $request['executive_id']);
+                        }
+
+                        if(!empty($request['start_date']) && !empty($request['end_date']))
+                        {
+                          $query->whereBetween('punchin_date',[$request['start_date'],$request['end_date']]); 
+                        }
+
+                        if(!empty($request['search']) && is_array($request['search']) == false){
+                            $search = $request['search'] ;
+                            $query->where(function($query) use($search) {
+                                $query->where('punchin_date', 'like', "%{$search}%")
+                                ->Orwhere('punchin_time', 'like', "%{$search}%")
+                                ->Orwhere('working_type', 'like', "%{$search}%");
+                            });
+                        }
+
                     if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
                     {
                         $query->whereIn('user_id', $userids);
                     }
                 })
-                ->select('id','user_id','punchin_date','punchin_time','punchin_longitude','punchin_latitude','punchin_address','punchin_image','punchout_date','punchout_time','punchout_latitude','punchout_longitude','punchout_address','punchout_image','worked_time','punchin_summary','punchout_summary','working_type')
+                ->select('id','user_id','punchin_date','punchin_time','punchin_longitude','punchin_latitude','punchin_address','punchin_image','punchout_date','punchout_time','punchout_latitude','punchout_longitude','punchout_address','punchout_image','worked_time','punchin_summary','punchout_summary','working_type','attendance_status','remark_status')
                 ->latest();
             return Datatables::of($data)
                     ->addIndexColumn()
@@ -386,23 +416,64 @@ class ReportController extends Controller
                     })
                     ->addColumn('action', function ($query) {
                           $btn = '';
-                          if(auth()->user()->can(['attendance_delete'])  && $query->punchin_date == date('Y-m-d'))
-                          {
+                          // if(auth()->user()->can(['attendance_delete'])  && $query->punchin_date == date('Y-m-d'))
+                          // {
                             $btn = '<a href="" class="btn btn-danger btn-just-icon btn-sm deleteAttendance" value="'.$query->id.'" title="Delete Attendance">
                                         <i class="material-icons">clear</i>
                                       </a>
                                       <a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm removePunchout" value="'.$query->id.'" title="Remove Puncout">
                                     <i class="material-icons">schedule</i>
                                   </a>';
-                          }
+
+
+                         // }
                           return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
                                 '.$btn.'
                             </div>';
                     })
-                    ->rawColumns(['punchin','punchout','action'])
+
+                    ->addColumn('action_status', function ($query) {
+                          $btn = '';
+                          // if(auth()->user()->can(['attendance_delete'])  && $query->punchin_date == date('Y-m-d'))
+                          // {
+                                
+                              if($query->attendance_status == 0){
+ 
+                               $btn = '<a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm approve_status" value="'.$query->id.'" title="Approve Status">
+                                        <i class="material-icons">approval</i>
+                                      </a>
+                                      <a href="javascript:void(0)" class="btn btn-danger btn-just-icon btn-sm reject_status" value="'.$query->id.'" title="Reject Status">
+                                    <i class="material-icons">reject</i>
+                                  </a>';   
+                              
+                              }
+                              if($query->attendance_status == 1){
+
+                                $btn = '<a href="javascript:void(0)" class="btn btn-danger btn-just-icon btn-sm reject_status" value="'.$query->id.'" title="Reject Status">
+                                    <i class="material-icons">reject</i>
+                                  </a>';
+                              }
+                              if($query->attendance_status == 2){
+
+                                  $btn = '<a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm approve_status" value="'.$query->id.'" title="Approve Status">
+                                        <i class="material-icons">approval</i>
+                                      </a>';
+                              }  
+                                  
+
+                         // }
+                          return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
+                                '.$btn.'
+                            </div>';
+                    })
+
+
+
+
+                    ->rawColumns(['punchin','punchout','action','action_status'])
                     ->make(true);
         }
-        return view('reports.attendancereport',compact('users'));
+        return view('reports.attendancereport',compact('users','user_filters'));
     }
     public function counterVisitReportDownload(Request $request)
     {
