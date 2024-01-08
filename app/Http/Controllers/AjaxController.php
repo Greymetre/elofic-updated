@@ -560,35 +560,38 @@ class AjaxController extends Controller
 
             foreach($punchInOut as $k=>$val){
                 if($val->punchin_time != null){
+                    $punch_in_city = getLatLongToCity($val->punchin_latitude, $val->punchin_longitude);
                     $punchInData[$k]['title'] = 'Punchin';
                     $punchInData[$k]['time'] = $val->punchin_time;
-                    $punchInData[$k]['latitude'] = $val->punchin_latitude;
-                    $punchInData[$k]['longitude'] = $val->punchin_longitude;
-                    $punchInData[$k]['msg'] = $val->punchin_summary;
+                    $punchInData[$k]['latitude'] = $val->punchin_latitude!=null?$val->punchin_latitude:'';
+                    $punchInData[$k]['longitude'] = $val->punchin_longitude!=null?$val->punchin_longitude:'';
+                    $punchInData[$k]['msg'] = $val->punchin_summary.' - '.$punch_in_city;
                 }
                 if($val->punchout_time != null){
                     $punchOutData[$k]['title'] = 'Punchout';
                     $punchOutData[$k]['time'] = $val->punchout_time;
-                    $punchOutData[$k]['latitude'] = $val->punchout_latitude;
-                    $punchOutData[$k]['longitude'] = $val->punchout_longitude;
+                    $punchOutData[$k]['latitude'] = $val->punchout_latitude!=null?$val->punchout_latitude:'';
+                    $punchOutData[$k]['longitude'] = $val->punchout_longitude!=null?$val->punchout_longitude:'';
                     $punchOutData[$k]['msg'] = $val->punchout_address;
                 }
             }
-
+    
             foreach($checkInOut as $k=>$val){
                 if($val->checkin_time != null){
+                    $check_in_city = getLatLongToCity($val->checkin_latitude, $val->checkin_longitude);
                     $checkInData[$k]['title'] = 'Checkin';
                     $checkInData[$k]['time'] = $val->checkin_time;
-                    $checkInData[$k]['latitude'] = $val->checkin_latitude;
-                    $checkInData[$k]['longitude'] = $val->checkin_longitude;
-                    $checkInData[$k]['msg'] = $val->customers->name;
+                    $checkInData[$k]['latitude'] = $val->checkin_latitude!=null?$val->checkin_latitude:'';
+                    $checkInData[$k]['longitude'] = $val->checkin_longitude!=null?$val->checkin_longitude:'';
+                    $checkInData[$k]['msg'] = $val->customers->name.' - '.$check_in_city;
                 }
                 if($val->checkout_time != null){
+                    $check_out_city = getLatLongToCity($val->checkout_latitude, $val->checkout_longitude);
                     $checkOutData[$k]['title'] = 'Checkout';
                     $checkOutData[$k]['time'] = $val->checkout_time;
-                    $checkOutData[$k]['latitude'] = $val->checkout_latitude;
-                    $checkOutData[$k]['longitude'] = $val->checkout_longitude;
-                    $checkOutData[$k]['msg'] = $val->customers->name.'<br>Remark - '.$val->visitreports->description;
+                    $checkOutData[$k]['latitude'] = $val->checkout_latitude!=null?$val->checkout_latitude:'';
+                    $checkOutData[$k]['longitude'] = $val->checkout_longitude!=null?$val->checkout_longitude:'';
+                    $checkOutData[$k]['msg'] = $val->customers->name.' - '.$check_out_city.'<br>Remark - '.$val->visitreports->description;
                 }
             }
 
@@ -597,7 +600,7 @@ class AjaxController extends Controller
                 $orderData[$k]['time'] = date('H:i:s', strtotime($val->created_at));
                 $orderData[$k]['latitude'] = '';
                 $orderData[$k]['longitude'] = '';
-                $orderData[$k]['msg'] = $val->buyers->name.',<br>Qty : '.$val->orderdetails->sum('quantity').',<br>Total : '.$val->grand_total;
+                $orderData[$k]['msg'] = $val->buyers->name.' - '.$val->buyers->customeraddress->cityname->city_name.',<br>Qty : '.$val->orderdetails->sum('quantity').',<br>Total : '.$val->grand_total;
             }
 
             foreach ($customer_add as $k => $val) {

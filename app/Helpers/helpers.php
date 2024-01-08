@@ -364,7 +364,7 @@ if (! function_exists('getLatLongToCity')) {
         $results = json_decode($json, true);
         if(!empty($results['data']))
         {
-            $addressline = $results['data'][0]['name'];
+            $addressline = $results['data'][0]['county'];
             
         }
         return $addressline;
