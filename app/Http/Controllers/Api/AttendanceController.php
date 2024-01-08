@@ -17,6 +17,7 @@ use App\Models\TourProgramme;
 use App\Models\BeatSchedule;
 use App\Models\Beat;
 use App\Models\TourDetail;
+use App\Models\User;
 
 class AttendanceController extends Controller
 {
@@ -292,6 +293,76 @@ class AttendanceController extends Controller
         {
             return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
         }        
+    }
+
+    public function getAllUserPunchIn(Request $request){
+        $user = $request->user();
+        $user_id = $user->id;
+        $pageSize = $request->input('pageSize');
+        $search_name = $request->input('search_name');
+        $start_date = $request->input('start_date');
+        $end_date = $request->input('end_date');
+        $validator = Validator::make($request->all(), [
+            'end_date' => 'required_with:start_date',
+        ]); 
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error','message' =>  $validator->errors()], 400); 
+        }
+        $all_ids = getUsersReportingToAuth();
+        $all_reporting_user_ids = User::query();
+        if($search_name){
+            $all_reporting_user_ids->where('name', 'LIKE', '%'.$search_name.'%');
+        }
+        $all_reporting_user_ids = $all_reporting_user_ids->whereIn('id', $all_ids)->pluck('id')->toArray();
+
+        $all_punch_in_out = Attendance::with('users')
+        ->whereIn('user_id', $all_reporting_user_ids);
+        if($start_date && $start_date != '' && $start_date != null){
+            $start_date = date('Y-m-d', strtotime($start_date));
+            $end_date = date('Y-m-d', strtotime($end_date));
+            $all_punch_in_out->whereBetween('punchin_date', [$start_date, $end_date]);
+        }
+        $all_punch_in_out->orderBy('punchin_date', 'desc');
+
+
+        $all_punch_in_out = (!empty($pageSize)) ? $all_punch_in_out->paginate($pageSize) : $all_punch_in_out->paginate(100);
+
+        $all_user_details = User::with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
+        $branches= array();
+        $all_users= array();
+        $all_branch= array();
+        foreach ($all_user_details as $k => $val) {
+            if(!in_array($val->getbranch->id, $all_branch)){
+                $branches[$k]['id'] = $val->getbranch->id;
+                $branches[$k]['name'] = $val->getbranch->branch_name;
+                array_push($all_branch, $val->getbranch->id);
+            }
+            $all_users[$k]['id'] = $val->id;
+            $all_users[$k]['name'] = $val->name;
+        }
+
+        $data = array();
+        if(count($all_punch_in_out) > 0){
+            foreach($all_punch_in_out as $key=>$checkIn){
+                $data[$key]['user_id'] = $checkIn->users->id;
+                $data[$key]['name'] = $checkIn->users->name;
+                $data[$key]['date'] = date('d/m/Y', strtotime($checkIn->punchin_date));
+                $data[$key]['punch_in'] = $checkIn->punchin_time;
+                $data[$key]['punch_out'] = $checkIn->punchout_time!=null?$checkIn->punchout_time:'';
+                $data[$key]['status'] = ($checkIn->status == 1) ? 'Approve' : (($checkIn->status == 2) ? 'Rejected' : 'Pending');
+                if($checkIn->users->id == $user_id){
+                    $data[$key]['self'] = true;
+                }else{
+                    $data[$key]['self'] = false;
+                }
+            }
+            return response()->json(['status' => 'success','message' => 'Data retrieved successfully.', 'users'=>$all_users, 'branches'=>$branches, 'page_count'=>$all_punch_in_out->lastPage(), 'data' => $data ], 200);
+        }else{
+            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data ],200);
+        }
+
+        dd($all_punch_in_out);
+
     }
 
 }

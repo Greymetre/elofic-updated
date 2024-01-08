@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Address;
 use App\Models\Attendance;
+use App\Models\Branch;
 use App\Models\CheckIn;
 use App\Models\Customers;
 use App\Models\Order;
@@ -28,16 +29,14 @@ class ReportingActivityController extends Controller
             return response()->json(['status' => 'error','message' =>  $validator->errors()], 400); 
         }
 
-        if($user->roles[0]->name == 'superadmin'){
-            $all_reporting_user_ids = User::query();
-            if($search_name){
-                $all_reporting_user_ids->where('name', 'LIKE', '%'.$search_name.'%');
-            }
-            $all_reporting_user_ids = $all_reporting_user_ids->pluck('id')->toArray();
-        }else{
-            $all_reporting_user_ids = User::where('reportingid', $user_id)->pluck('id')->toArray();
+        $all_ids = getUsersReportingToAuth();
+        $all_reporting_user_ids = User::query();
+        if($search_name){
+            $all_reporting_user_ids->where('name', 'LIKE', '%'.$search_name.'%');
         }
+        $all_reporting_user_ids = $all_reporting_user_ids->whereIn('id', $all_ids)->pluck('id')->toArray();
 
+        
         $date_checkIn = Attendance::select('punchin_date', 'user_id')
         ->with('users')
         ->whereIn('user_id', $all_reporting_user_ids);
@@ -47,10 +46,24 @@ class ReportingActivityController extends Controller
             $date_checkIn->whereBetween('punchin_date', [$start_date, $end_date]);
         }
         $date_checkIn->orderBy('punchin_date', 'desc');
-
-
+        
+        
         $date_checkIn = (!empty($pageSize)) ? $date_checkIn->paginate($pageSize) : $date_checkIn->paginate(100);
-
+        
+        $all_user_details = User::with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
+        $branches= array();
+        $all_users= array();
+        $all_branch= array();
+        foreach ($all_user_details as $k => $val) {
+            if(!in_array($val->getbranch->id, $all_branch)){
+                array_push($all_branch, $val->getbranch->id);
+                $branches[$k]['id'] = $val->getbranch->id;
+                $branches[$k]['name'] = $val->getbranch->branch_name;
+            }
+            $all_users[$k]['id'] = $val->id;
+            $all_users[$k]['name'] = $val->name;
+        }
+        
         $data = array();
         if(count($date_checkIn) > 0){
             foreach($date_checkIn as $key=>$checkIn){
@@ -58,7 +71,7 @@ class ReportingActivityController extends Controller
                 $data[$key]['name'] = $checkIn->users->name;
                 $data[$key]['date'] = date('d/m/Y', strtotime($checkIn->punchin_date));
             }
-            return response()->json(['status' => 'success','message' => 'Data retrieved successfully.', 'page_count'=>$date_checkIn->lastPage(), 'data' => $data ], 200);
+            return response()->json(['status' => 'success','message' => 'Data retrieved successfully.', 'users'=>$all_users, 'branches'=>$branches, 'page_count'=>$date_checkIn->lastPage(), 'data' => $data ], 200);
         }else{
             return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data ],200);
         }
@@ -92,11 +105,12 @@ class ReportingActivityController extends Controller
 
         foreach($punchInOut as $k=>$val){
             if($val->punchin_time != null){
+                $punch_in_city = getLatLongToCity($val->punchin_latitude, $val->punchin_longitude);
                 $punchInData[$k]['title'] = 'Punch In';
                 $punchInData[$k]['time'] = $val->punchin_time;
                 $punchInData[$k]['latitude'] = $val->punchin_latitude!=null?$val->punchin_latitude:'';
                 $punchInData[$k]['longitude'] = $val->punchin_longitude!=null?$val->punchin_longitude:'';
-                $punchInData[$k]['msg'] = $val->punchin_summary;
+                $punchInData[$k]['msg'] = $val->punchin_summary.' - '.$punch_in_city;
             }
             if($val->punchout_time != null){
                 $punchOutData[$k]['title'] = 'Punch Out';
@@ -109,18 +123,20 @@ class ReportingActivityController extends Controller
 
         foreach($checkInOut as $k=>$val){
             if($val->checkin_time != null){
+                $check_in_city = getLatLongToCity($val->checkin_latitude, $val->checkin_longitude);
                 $checkInData[$k]['title'] = 'Check In';
                 $checkInData[$k]['time'] = $val->checkin_time;
                 $checkInData[$k]['latitude'] = $val->checkin_latitude!=null?$val->checkin_latitude:'';
                 $checkInData[$k]['longitude'] = $val->checkin_longitude!=null?$val->checkin_longitude:'';
-                $checkInData[$k]['msg'] = $val->customers->name;
+                $checkInData[$k]['msg'] = $val->customers->name.' - '.$check_in_city;
             }
             if($val->checkout_time != null){
+                $check_out_city = getLatLongToCity($val->checkout_latitude, $val->checkout_longitude);
                 $checkOutData[$k]['title'] = 'Check Out';
                 $checkOutData[$k]['time'] = $val->checkout_time;
                 $checkOutData[$k]['latitude'] = $val->checkout_latitude!=null?$val->checkout_latitude:'';
                 $checkOutData[$k]['longitude'] = $val->checkout_longitude!=null?$val->checkout_longitude:'';
-                $checkOutData[$k]['msg'] = $val->customers->name.' Remark - '.$val->visitreports->description;
+                $checkOutData[$k]['msg'] = $val->customers->name.' - '.$check_out_city.' Remark - '.$val->visitreports->description;
             }
         }
 
@@ -129,7 +145,7 @@ class ReportingActivityController extends Controller
             $orderData[$k]['time'] = date('H:i:s', strtotime($val->created_at));
             $orderData[$k]['latitude'] = '';
             $orderData[$k]['longitude'] = '';
-            $orderData[$k]['msg'] = $val->buyers->name.', Qty : '.$val->orderdetails->sum('quantity').', Total : '.$val->grand_total;
+            $orderData[$k]['msg'] = $val->buyers->name.' - '.$val->buyers->customeraddress->cityname->city_name.', Qty : '.$val->orderdetails->sum('quantity').', Total : '.$val->grand_total;
         }
 
         foreach ($customer_add as $k => $val) {
