@@ -28,7 +28,19 @@
                 @endif
                 <h5 class="font-weight-normal mt-4">User Live Location</h5>
                 <div class="row">
-                    <div class="col-md-5">
+                <div class="col-md-3">
+                        <div class="dropdown bootstrap-select show-tick">
+                            <select class="selectpicker" multiple id="branch_id" name="branch_id" data-style="select-with-transition" title="Choose Branch" data-size="10" tabindex="-98" >
+                              <option disabled=""> Select Brnch</option>
+                              @if(@isset($branches ))
+                                @foreach($branches as $branch)
+                                  <option value="{!! $branch['id'] !!}">{!! $branch['name'] !!}</option>
+                                @endforeach
+                              @endif
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
                         <div class="dropdown bootstrap-select show-tick">
                             <select class="selectpicker" id="user_id" name="user_id" data-style="select-with-transition" title="Choose User" data-size="10" tabindex="-98" >
                               <option disabled=""> Select Users</option>
@@ -40,7 +52,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="form-group has-default bmd-form-group">
                             <input type="text" class="form-control datepicker" id="date" name="date" placeholder="Select Date" autocomplete="off" readonly>
                         </div>
@@ -56,7 +68,7 @@
                     </div>
                     <div class="col-md-5">
                         <ul class="timeline timeline-simple" id="todayActivity">
-                           
+                            <img id="loader" width="50" src="assets/img/loader.gif">
                         </ul>
                     </div>
                </div>
@@ -68,6 +80,7 @@
 <script type="text/javascript">
     $( document ).ready(function() {
         // getActivityData();
+        $('#loader').hide();
     })
     function getLocationData(){
         var date = $("input[name=date]").val();
@@ -110,6 +123,7 @@
     }
 
     function getActivityData(){
+        $('#loader').show();
         var date = $("input[name=date]").val();
         var user_id = $("select[name=user_id]").val();
         $.ajax({
@@ -118,6 +132,7 @@
             type: "POST",
             data:{ _token: "{{csrf_token()}}", date:date,user_id:user_id },
             success: function(res){
+                $('#loader').hide();
                 $("#todayActivity").empty();
                 if(res.length > 0){
                     $.each(res, function(index,item) {  
@@ -163,5 +178,26 @@
             }
         });
     }
+
+    $("#branch_id").on('change', function(){
+        var search_branches = $(this).val();
+        $.ajax({
+            url: "{{ url('livelocation') }}",
+            data:{"search_branches": search_branches},
+            success: function(res){
+                if(res.status == true){
+                    var select = $('#user_id');
+                    select.empty();
+                    select.append('<option>Select User</option>');
+                    $.each(res.users, function(k, v) {
+                        select.append('<option value="'+v.id+'" >'+v.name+'</option>');
+                    });
+                    select.selectpicker('refresh');
+                }
+            }
+        });
+
+    })
+
   </script>
 </x-app-layout>

@@ -405,4 +405,23 @@ class AttendanceController extends Controller
         }
     }
 
+    public function showAttendance(Request $request){
+        $attendance_id = $request->input('attendance_id');
+
+        $validator = Validator::make($request->all(), [
+            'attendance_id' => 'required',
+        ]); 
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error','message' =>  $validator->errors()], 400); 
+        }
+
+        $attendance = Attendance::with('users')->find($attendance_id);
+
+        if($attendance){
+            return response()->json(['status' => 'success','message' => 'Status changed successfully.', 'data'=>$attendance ], $this->successStatus);
+        }else{
+            return response(['status' => 'error', 'message' => 'No Record Found.'], $this->badrequest);
+        }
+    }
+
 }
