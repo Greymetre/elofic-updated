@@ -346,6 +346,30 @@ if (! function_exists('getLatLongToAddress')) {
         return $addressline;
     }
 }
+if (! function_exists('getLatLongToCity')) { 
+    function getLatLongToCity($latitude, $longitude)
+    {
+        $addressline = '';
+        $queryString = http_build_query([
+          'access_key' => 'd342b3255ee297b500728db66a690965',
+          'query' => "$latitude,$longitude",
+          'output' => 'json',
+          'limit' => 1,
+        ]);
+
+        $ch = curl_init(sprintf('%s?%s', 'http://api.positionstack.com/v1/reverse', $queryString));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $json = curl_exec($ch);
+        curl_close($ch);
+        $results = json_decode($json, true);
+        if(!empty($results['data']))
+        {
+            $addressline = $results['data'][0]['name'];
+            
+        }
+        return $addressline;
+    }
+}
 if (! function_exists('getUsersReportingToAuth')) { 
     function getUsersReportingToAuth($userid = '')
     {
