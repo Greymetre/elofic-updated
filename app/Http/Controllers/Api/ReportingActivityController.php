@@ -20,6 +20,7 @@ class ReportingActivityController extends Controller
         $user_id = $user->id;
         $pageSize = $request->input('pageSize');
         $search_name = $request->input('search_name');
+        $search_branches = $request->input('search_branches');
         $start_date = $request->input('start_date');
         $end_date = $request->input('end_date');
         $validator = Validator::make($request->all(), [
@@ -29,12 +30,29 @@ class ReportingActivityController extends Controller
             return response()->json(['status' => 'error','message' =>  $validator->errors()], 400); 
         }
 
-        $all_ids = getUsersReportingToAuth();
-        $all_reporting_user_ids = User::query();
-        if($search_name){
-            $all_reporting_user_ids->where('name', 'LIKE', '%'.$search_name.'%');
+        
+        if($search_name && $search_name != ''){
+            $all_reporting_user_ids[] = $search_name;
+        }else{
+            $all_reporting_user_ids = getUsersReportingToAuth($user_id);
         }
-        $all_reporting_user_ids = $all_reporting_user_ids->whereIn('id', $all_ids)->pluck('id')->toArray();
+
+        $all_user_branches = User::with('getbranch')->whereIn('id', getUsersReportingToAuth($user_id))->orderBy('branch_id')->get();
+        $branches= array();
+        $all_branch= array();
+        $bkey = 0;
+        foreach ($all_user_branches as $k => $val) {
+            if(!in_array($val->getbranch->id, $all_branch)){
+                array_push($all_branch, $val->getbranch->id);
+                $branches[$bkey]['id'] = $val->getbranch->id;
+                $branches[$bkey]['name'] = $val->getbranch->branch_name;
+                $bkey++;
+            }
+        }
+
+        if($search_branches && count($search_branches) > 0 && $search_branches[0] != null){
+            $all_reporting_user_ids = User::whereIn('id', $all_reporting_user_ids)->whereIn('branch_id', $search_branches)->pluck('id')->toArray();
+        }
 
         
         $date_checkIn = Attendance::select('punchin_date', 'user_id')
@@ -51,17 +69,8 @@ class ReportingActivityController extends Controller
         $date_checkIn = (!empty($pageSize)) ? $date_checkIn->paginate($pageSize) : $date_checkIn->paginate(100);
         
         $all_user_details = User::with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
-        $branches= array();
         $all_users= array();
-        $all_branch= array();
-        $bkey = 0;
         foreach ($all_user_details as $k => $val) {
-            if(!in_array($val->getbranch->id, $all_branch)){
-                array_push($all_branch, $val->getbranch->id);
-                $branches[$bkey]['id'] = $val->getbranch->id;
-                $branches[$bkey]['name'] = $val->getbranch->branch_name;
-                $bkey++;
-            }
             $all_users[$k]['id'] = $val->id;
             $all_users[$k]['name'] = $val->name;
         }
