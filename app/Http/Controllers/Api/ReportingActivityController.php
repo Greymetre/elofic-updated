@@ -27,9 +27,16 @@ class ReportingActivityController extends Controller
         if ($validator->fails()) {
             return response()->json(['status' => 'error','message' =>  $validator->errors()], 400); 
         }
-        
-        $all_reporting_user_ids = getUsersReportingToAuth();
-        // $all_reporting_user_ids = User::whereIn('reportingid', $users_ids)->pluck('id')->toArray();
+
+        if($user->roles[0]->name == 'superadmin'){
+            $all_reporting_user_ids = User::query();
+            if($search_name){
+                $all_reporting_user_ids->where('name', 'LIKE', '%'.$search_name.'%');
+            }
+            $all_reporting_user_ids = $all_reporting_user_ids->pluck('id')->toArray();
+        }else{
+            $all_reporting_user_ids = User::where('reportingid', $user_id)->pluck('id')->toArray();
+        }
 
         $date_checkIn = Attendance::select('punchin_date', 'user_id')
         ->with('users')
