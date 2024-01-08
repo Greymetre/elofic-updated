@@ -141,7 +141,6 @@
                             default:
                                 var classname = 'default';
                         }
-                        if(res.length > 20000){
                         $("#todayActivity").append('<li class="timeline-inverted">'+
                             '<div class="timeline-badge '+classname+'">'+
                                 '<i class="material-icons">card_travel</i>'+
@@ -156,7 +155,6 @@
                                 '<h6><i class="ti-time"></i> '+item.msg+'</h6>'+
                             '</div>'+
                         '</li>');
-                        }
                     });
                 }else{
                     $("#todayActivity").append('<h5 style="font-weight: bold;">No Activity Found</h5>');
