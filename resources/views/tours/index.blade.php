@@ -211,7 +211,17 @@
         processing: true,
         serverSide: true,
         "order": [ [0, 'desc'] ],
-        ajax: "{{ route('tours.index') }}",
+        //ajax: "{{ route('tours.index') }}",
+
+        "retrieve": true,
+        ajax: {
+          url: "{{ route('tours.index') }}",
+          data: function (d) {
+                d.executive_id = $('#executive_id').val(),
+                d.start_date = $('#start_date').val(),
+                d.end_date = $('#end_date').val()
+            }
+        },
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
             {data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
@@ -222,6 +232,19 @@
             {data: 'type', name: 'type',"defaultContent": ''},
         ]
     });
+
+
+    $('#executive_id').change(function(){
+        table.draw();
+    });
+
+    $('#start_date').change(function(){
+        table.draw();
+    });
+    $('#end_date').change(function(){
+        table.draw();
+    });
+
          
     $(document).on('click', '.edit', function(){
       var base_url =$('.baseurl').data('baseurl');

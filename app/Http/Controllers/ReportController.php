@@ -287,7 +287,7 @@ class ReportController extends Controller
     {
         $userids = getUsersReportingToAuth();
         if ($request->ajax()) {
-            $data = CheckIn::with('users:id,name','customers:id,name,mobile','customers.customeraddress','beatschedules.beats','visitreports')
+            $data = CheckIn::with('users:id,name','customers:id,name,mobile','customers.customeraddress','beatschedules.beats','visitreports','orders_sum')
                 ->whereHas('users',function($query) use($userids){
                     if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
                     {
@@ -318,10 +318,22 @@ class ReportController extends Controller
                           return isset($query['customers']['customeraddress']['address1']) ? $query['customers']['customeraddress']['address1'] :'';
                     })
                     ->addColumn('ordersum', function ($query) {
-                          return $query['orders']->sum('grand_total');
+                          //return $query['orders']->sum('grand_total');
+                      $sum_qty = 0;
+                        if(!empty($query->orders_sum))
+                        {
+                                foreach($query->orders_sum as $key_new => $datas)
+                                {  
+                                $order_id = $datas->id;
+                                $sum_qty+= OrderDetails::where('order_id',$order_id)->sum('quantity')??0; 
+                                }
+                        } 
+                      return $sum_qty;
+
                     })
                     ->addColumn('uniquesku', function ($query) {
-                          return $query['orders']->sum('total_qty');
+                          //return $query['orders']->sum('total_qty');
+                         return $query->orders_sum->sum('grand_total')??0;
                     })
                     ->addColumn('uniqueorder', function ($query) {
                           return $query['orders']->count();

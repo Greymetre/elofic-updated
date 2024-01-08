@@ -35,4 +35,10 @@ class CheckIn extends Model
     {
         return $this->belongsTo('App\Models\VisitReport', 'id', 'checkin_id')->select('id','checkin_id', 'description','report_title','visit_image','visit_type_id');
     }
+
+    public function orders_sum()
+    {
+        return $this->hasMany(Order::class, 'created_by', 'user_id');
+    }
+
 }

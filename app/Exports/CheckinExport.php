@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\CheckIn;
+use App\Models\OrderDetails;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -23,7 +24,7 @@ class CheckinExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMa
     }
     public function collection()
     {
-        return CheckIn::with('beatschedules','customers','users','orders','visitreports','visitreports.visittypename')->where(function ($query)  {
+        return CheckIn::with('beatschedules','customers','users','orders','visitreports','visitreports.visittypename','orders_sum')->where(function ($query)  {
                                 if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
 
                                 {
@@ -49,6 +50,19 @@ class CheckinExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMa
 
     public function map($data): array
     {
+
+        $sum_qty = 0;
+        if(!empty($data['orders_sum']))
+        {
+                foreach($data['orders_sum'] as $key_new => $datas)
+                {  
+                $order_id = $datas->id;
+                $sum_qty+= OrderDetails::where('order_id',$order_id)->sum('quantity')??0; 
+                }
+        } 
+
+
+
         $interval = strtotime($data->checkout_time) - strtotime($data->checkin_time) ;
 
         return [
@@ -82,8 +96,10 @@ class CheckinExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMa
             (date("Y-m-d", strtotime($data['customers']['created_at'])) == date("Y-m-d", strtotime($data['checkin_date']))) ? 'New' : 'Existing', 
             isset($data['visitreports']['visittypename']['type_name']) ? $data['visitreports']['visittypename']['type_name'] :'',
             isset($data['visitreports']['description']) ? $data['visitreports']['description'] :'',
-            isset($data['orders']) ?$data['orders']->sum('total_qty') : 0,
-            isset($data['orders']) ? $data['orders']->sum('grand_total') : 0,
+            // isset($data['orders']) ?$data['orders']->sum('total_qty') : 0,
+            // isset($data['orders']) ? $data['orders']->sum('grand_total') : 0,
+             $sum_qty,
+            (!empty($data['orders_sum'])) ? $data['orders_sum']->sum('grand_total') : 0,
            
            
 

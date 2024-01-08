@@ -34,9 +34,26 @@ class TourController extends Controller
         
     }
     
-    public function index(TourProgrammeDataTable $dataTable)
+    // public function index(TourProgrammeDataTable $dataTable)
+    // {
+    //     //abort_if(Gate::denies('tour_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+    //     $userids = getUsersReportingToAuth();
+    //     $users = User::where(function($query) use($userids){
+    //                             if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
+    //                             {
+    //                                 $query->whereIn('id',$userids);
+    //                             }
+    //                         })->select('id','name')->orderBy('id','desc')->get();
+    //     return $dataTable->render('tours.index',compact('users'));
+    // }
+
+
+        public function index(Request $request)
     {
-        //abort_if(Gate::denies('tour_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        ////abort_if(Gate::denies('customer_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        $userids = getUsersReportingToAuth();
+       
         $userids = getUsersReportingToAuth();
         $users = User::where(function($query) use($userids){
                                 if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
@@ -44,8 +61,98 @@ class TourController extends Controller
                                     $query->whereIn('id',$userids);
                                 }
                             })->select('id','name')->orderBy('id','desc')->get();
-        return $dataTable->render('tours.index',compact('users'));
+
+    
+
+        if ($request->ajax()) {
+             // $data = TourProgramme::with('customertypes','firmtypes','createdbyname')
+               $data = TourProgramme::with('userinfo')->where(function ($query) use ($request , $userids) {
+                            if(!empty($request['executive_id']))
+                            {
+                                $query->where('userid', $request['executive_id']);
+                            }
+
+                            if(!empty($request['start_date']) && !empty($request['end_date']))
+                            {
+                              $query->whereBetween('date',[$request['start_date'],$request['end_date']]); 
+                            }
+
+                          
+                            if(!empty($request['search']) && is_array($request['search']) == false){
+                                $search = $request['search'] ;
+                                $query->where(function($query) use($search) {
+                                    $query->where('town', 'like', "%{$search}%")
+                                    ->Orwhere('objectives', 'like', "%{$search}%")
+                                    ->Orwhere('type', 'like', "%{$search}%");
+                                });
+                            }
+                            if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
+                            {
+                                $query->whereIn('userid',$userids);
+                            }
+                        })->latest();
+            return Datatables::of($data)
+                    ->addIndexColumn()
+                    // ->addColumn('checkbox', function ($item) {
+                    //     return '<input type="checkbox" id="manual_entry_'.$item->id.'" class="manual_entry_cb" value="'.$item->id.'" />';
+                    //     })
+                        ->editColumn('created_at', function($data)
+                        {
+                            return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
+                        })
+                        ->addColumn('action', function ($query) {
+                              $btn = '';
+                              $activebtn ='';
+                              // if(auth()->user()->can(['tour_edit']))
+                              // {
+
+                               $btn = $btn.'<a href"javascript:void(0)" class="btn btn-info btn-just-icon btn-sm edit" id="'.encrypt($query->id).'" title="'.trans('panel.global.edit').' '.trans('panel.category.title_singular').'">
+                               <i class="material-icons">edit</i>
+                                </a>';
+
+
+                              // }
+                              // if(auth()->user()->can(['customer_show']))
+                              // {
+                              //   $btn = $btn.'<a href="'.url("customers/".encrypt($query->id)).'" class="btn btn-theme btn-just-icon btn-sm" title="'.trans('panel.global.show').' '.trans('panel.customers.title_singular').'">
+                              //                   <i class="material-icons">visibility</i>
+                              //               </a>';
+                              // }
+                              // if(auth()->user()->can(['tour_delete']))
+                              // {
+
+                                $btn = $btn.' <a href="" class="btn btn-danger btn-just-icon btn-sm delete" value="'.$query->id.'" title="'.trans('panel.global.delete').' '.trans('panel.category.title_singular').'">
+                                <i class="material-icons">clear</i>
+                               </a>';
+
+                              //}
+                               
+                              // if(auth()->user()->can(['customer_active']))
+                              // {
+                              //   $active = ($query->active == 'Y') ? 'checked="" value="'.$query->active.'"' : 'value="'.$query->active.'"';
+                              //   $activebtn = '<div class="togglebutton">
+                              //               <label>
+                              //                 <input type="checkbox"'.$active.' id="'.$query->id.'" class="customerActive">
+                              //                 <span class="toggle"></span>
+                              //               </label>
+                              //             </div>';
+                              // }
+
+                              return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
+                                            '.$btn.'
+                                        </div>'.$activebtn;
+                        })
+                
+                        ->rawColumns(['action'])
+                    ->make(true);
+        }
+      
+       // return $dataTable->render('tours.index',compact('users','branches'));
+        return view('tours.index', compact('users'));
     }
+
+
+
 
     /**
      * Show the form for creating a new resource.
