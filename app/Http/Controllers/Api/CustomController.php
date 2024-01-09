@@ -252,8 +252,9 @@ class CustomController extends Controller
             $pageSize = $request->input('pageSize');
             $user = Auth::guard('users')->user();
             $user_id = $user->id;
-            $query = Customers::where(function ($query) use ($user_id) {
-                                        $query->where('active', '=', 'Y')->where('customertype','!=','2')->where('executive_id', $user_id);
+            $all_user_ids = getUsersReportingToAuth($user_id);
+            $query = Customers::where(function ($query) use ($all_user_ids) {
+                                        $query->where('active', '=', 'Y')->where('customertype','!=','2')->whereIn('executive_id', $all_user_ids);
                                     })->select('id','name');
 
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
