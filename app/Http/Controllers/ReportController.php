@@ -379,14 +379,14 @@ class ReportController extends Controller
                           $query->whereBetween('punchin_date',[$request['start_date'],$request['end_date']]); 
                         }
 
-                        if(!empty($request['search']) && is_array($request['search']) == false){
-                            $search = $request['search'] ;
-                            $query->where(function($query) use($search) {
-                                $query->where('punchin_date', 'like', "%{$search}%")
-                                ->Orwhere('punchin_time', 'like', "%{$search}%")
-                                ->Orwhere('working_type', 'like', "%{$search}%");
-                            });
-                        }
+                        // if(!empty($request['search']) && is_array($request['search']) == false){
+                        //     $search = $request['search'] ;
+                        //     $query->where(function($query) use($search) {
+                        //         $query->where('punchin_date', 'like', "%{$search}%")
+                        //         ->Orwhere('punchin_time', 'like', "%{$search}%")
+                        //         ->Orwhere('working_type', 'like', "%{$search}%");
+                        //     });
+                        // }
 
                     if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
                     {
