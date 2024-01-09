@@ -70,20 +70,22 @@
               <th>User Name</th>
               <th>Punch in Date</th>
               <th>Punch In Time</th>
-              <!-- <th>Punch  In Address</th> -->
-              <th>Punch Image</th>
-              <th>Punch Out Date</th>
+              <th>Punch  In Address</th>
+              <!-- <th>Punch Image</th>
+              <th>Punch Out Date</th> -->
               <th>Punch Out Time</th>
-              <!-- <th>Punch  Out Address</th> -->
+              <th>Punch  Out Address</th>
               <th>Working Time</th>
               <!-- <th>Status</th> -->
-              <th>Punch In Longitude</th>
+             <!--  <th>Punch In Longitude</th>
               <th>Punch In Letitude</th>
               <th>Punch Out Longitude</th>
-              <th>Punch Out Letitude</th>
+              <th>Punch Out Letitude</th> -->
               <th>Punch In summary</th>
-              <th>Punch Out summary</th>
+              <!-- <th>Punch Out summary</th> -->
               <th>Working Type</th>
+              <th>Attendance Status</th>
+              <th>Remark</th>
               <th>Action</th>
             </thead>
             <tbody></tbody>
@@ -233,17 +235,21 @@
             {data: 'users.name', name: 'users.name',"defaultContent": '', orderable: false, searchable: false},
             {data: 'punchin_date', name: 'punchin_date',"defaultContent": '', orderable: false, searchable: false},
             {data: 'punchin_time', name: 'punchin_time',"defaultContent": '', orderable: false, searchable: false},
-            {data: 'punchin', name: 'punchin',"defaultContent": '', orderable: false, searchable: false},
-            {data: 'punchout_date', name: 'punchout_date',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'punchin_address', name: 'punchin_address',"defaultContent": '', orderable: false, searchable: false},
+            // {data: 'punchin', name: 'punchin',"defaultContent": '', orderable: false, searchable: false},
+            // {data: 'punchout_date', name: 'punchout_date',"defaultContent": '', orderable: false, searchable: false},
             {data: 'punchout_time', name: 'punchout_time',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'punchout_address', name: 'punchout_address',"defaultContent": '', orderable: false, searchable: false},
             {data: 'worked_time', name: 'worked_time',"defaultContent": '', orderable: false, searchable: false},
-            {data: 'punchin_longitude', name: 'punchin_longitude',"defaultContent": '', orderable: false, searchable: false},
-            {data: 'punchin_latitude', name: 'punchin_latitude',"defaultContent": '', orderable: false, searchable: false},
-            {data: 'punchout_longitude', name: 'punchout_longitude',"defaultContent": '', orderable: false, searchable: false},
-            {data: 'punchout_latitude', name: 'punchout_latitude',"defaultContent": '', orderable: false, searchable: false},
+            // {data: 'punchin_longitude', name: 'punchin_longitude',"defaultContent": '', orderable: false, searchable: false},
+            // {data: 'punchin_latitude', name: 'punchin_latitude',"defaultContent": '', orderable: false, searchable: false},
+            // {data: 'punchout_longitude', name: 'punchout_longitude',"defaultContent": '', orderable: false, searchable: false},
+            // {data: 'punchout_latitude', name: 'punchout_latitude',"defaultContent": '', orderable: false, searchable: false},
             {data: 'punchin_summary', name: 'punchin_summary',"defaultContent": '', orderable: false, searchable: false},
-            {data: 'punchout_summary', name: 'punchout_summary',"defaultContent": '', orderable: false, searchable: false},
+            // {data: 'punchout_summary', name: 'punchout_summary',"defaultContent": '', orderable: false, searchable: false},
             {data: 'working_type', name: 'working_type',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'current_status', name: 'current_status',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'remark_status', name: 'remark_status',"defaultContent": '', orderable: false, searchable: false},
             {data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
         ]
     });

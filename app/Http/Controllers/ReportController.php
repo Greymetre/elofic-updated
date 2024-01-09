@@ -401,15 +401,30 @@ class ReportController extends Controller
                     {
                         return isset($data->punchin_date) ? stringtodate($data->punchin_date) : '';
                     })
-                    ->editColumn('punchout_date', function($data)
-                    {
-                        return isset($data->punchout_date) ? stringtodate($data->punchout_date) : stringtodate($data->punchin_date);
+
+                    ->addColumn('current_status', function ($query) {
+                           $status = '';
+                          if($query->attendance_status == '0'){
+                             $status ='pending';
+                          }elseif ($query->attendance_status == '1') {
+                               $status ='approved';
+                          }else{
+                            $status ='rejected';
+                          }
+                        return $status;
+                       
                     })
+
+
+                    // ->editColumn('punchout_date', function($data)
+                    // {
+                    //     return isset($data->punchout_date) ? stringtodate($data->punchout_date) : stringtodate($data->punchin_date);
+                    // })
                     
-                    ->addColumn('punchin', function ($query) {
-                        $punchin_image = !empty($query->punchin_image) ? env('IMAGE_UPLOADS').$query->punchin_image : asset('assets/img/placeholder.jpg') ;
-                            return '<img src="'.$punchin_image.'" border="0" width="70" class="img-rounded imageDisplayModel" align="center" />';
-                        })
+                    // ->addColumn('punchin', function ($query) {
+                    //     $punchin_image = !empty($query->punchin_image) ? env('IMAGE_UPLOADS').$query->punchin_image : asset('assets/img/placeholder.jpg') ;
+                    //         return '<img src="'.$punchin_image.'" border="0" width="70" class="img-rounded imageDisplayModel" align="center" />';
+                    //     })
                     ->addColumn('punchout', function ($query) {
                         $punchout_image = !empty($query->punchout_image) ? env('IMAGE_UPLOADS').$query->punchout_image : asset('assets/img/placeholder.jpg') ;
                         return '<img src="'.$punchout_image.'" border="0" width="70" class="img-rounded imageDisplayModel" align="center" />';
@@ -470,7 +485,7 @@ class ReportController extends Controller
 
 
 
-                    ->rawColumns(['punchin','punchout','action','action_status'])
+                    ->rawColumns(['punchin','punchout','action','action_status','current_status'])
                     ->make(true);
         }
         return view('reports.attendancereport',compact('users','user_filters'));
