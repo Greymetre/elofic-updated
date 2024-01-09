@@ -458,14 +458,18 @@ class ReportController extends Controller
                                         <i class="material-icons">approval</i>
                                       </a>
                                       <a href="javascript:void(0)" class="btn btn-danger btn-just-icon btn-sm reject_status" value="'.$query->id.'" title="Reject Status">
-                                    <i class="material-icons">reject</i>
-                                  </a>';   
+                                    <i class="material-icons">cancel</i>
+                                  </a>
+                                  <a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm pending" value="'.$query->id.'" title="Pending">
+                                    <i class="material-icons">pending</i>
+                                  </a>
+                                  ';   
                               
                               }
                               if($query->attendance_status == 1){
 
                                 $btn = '<a href="javascript:void(0)" class="btn btn-danger btn-just-icon btn-sm reject_status" value="'.$query->id.'" title="Reject Status">
-                                    <i class="material-icons">reject</i>
+                                    <i class="material-icons">cancel</i>
                                   </a>';
                               }
                               if($query->attendance_status == 2){
