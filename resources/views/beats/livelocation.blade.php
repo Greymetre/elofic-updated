@@ -68,7 +68,7 @@
                     </div>
                     <div class="col-md-5">
                         <ul class="timeline timeline-simple" id="todayActivity">
-                            <img id="loader" width="50" src="{{asset('assets/img/loader.gif')}}">
+                            
                         </ul>
                     </div>
                </div>
@@ -123,7 +123,8 @@
     }
 
     function getActivityData(){
-        $('#loader').show();
+        $("#todayActivity").empty();
+        $("#todayActivity").append('Please Wait...');
         var date = $("input[name=date]").val();
         var user_id = $("select[name=user_id]").val();
         $.ajax({
@@ -132,7 +133,6 @@
             type: "POST",
             data:{ _token: "{{csrf_token()}}", date:date,user_id:user_id },
             success: function(res){
-                $('#loader').hide();
                 $("#todayActivity").empty();
                 if(res.length > 0){
                     $.each(res, function(index,item) {  
