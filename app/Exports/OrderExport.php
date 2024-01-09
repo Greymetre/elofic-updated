@@ -53,7 +53,7 @@ class OrderExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapp
 
     public function headings(): array
     {
-        return ['id','Order Date','Retailer ID','Retailer Name', 'Dealer ID','Dealer Name', 'User Name' ,'Order No', 'Order ID','Suc x Del', 'Sub Total', 'Grand Total', 'Order Status', 'Product Name', 'Product ID', 'Product Detail', 'Product Stage', 'kW', 'HP','Category','Subcategory','Quantity', 'Shipped Qty', 'Price', 'Total', 'Status','Employee Code','Branch','Division','Designation'];
+        return ['id','Order Date','Retailer ID','Retailer Name', 'Dealer ID','Dealer Name', 'User Name' ,'Order No', 'Order ID', 'Sub Total', 'Grand Total', 'Order Status', 'Product Name', 'Product ID', 'Product Detail', 'Product Stage','kW', 'HP','Suc x Del','Category','Subcategory','Quantity', 'Shipped Qty', 'Price', 'Total', 'Status','Employee Code','Branch','Division','Designation'];
     }
 
     public function map($data): array
@@ -68,7 +68,7 @@ class OrderExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapp
             isset($data['orders']['createdbyname']['name']) ? $data['orders']['createdbyname']['name'] :'',
             isset($data['orders']['orderno']) ? $data['orders']['orderno'] :'',
             isset($data['order_id']) ? $data['order_id'] :'',
-            isset($data['products']['suc_del']) ? $data['products']['suc_del'] :'',
+         
             isset($data['orders']['sub_total']) ? $data['orders']['sub_total'] :'',
             isset($data['orders']['grand_total']) ? $data['orders']['grand_total'] :'',
             isset($data['orders']['statusname']['status_name']) ? $data['orders']['statusname']['status_name'] :'',
@@ -78,6 +78,7 @@ class OrderExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapp
             isset($data['products']['product_no']) ? $data['products']['product_no'] :'',
             isset($data['products']['part_no']) ? $data['products']['part_no'] :'',
             isset($data['products']['specification']) ? $data['products']['specification'] :'',
+            isset($data['products']['suc_del']) ? $data['products']['suc_del'] :'',
             isset($data['products']['categories']['category_name']) ? $data['products']['categories']['category_name'] :'',
             isset($data['products']['subcategories']['subcategory_name']) ? $data['products']['subcategories']['subcategory_name'] :'',
             isset($data['quantity'])? $data['quantity'] :'',

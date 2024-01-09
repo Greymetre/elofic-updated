@@ -55,14 +55,14 @@ class AttendanceExport implements FromCollection,WithHeadings,ShouldAutoSize,Wit
                         }
 
                     })
-                    ->select('id','user_id', 'punchin_date', 'punchin_time', 'punchin_address', 'punchout_date', 'punchout_time', 'punchout_address', 'worked_time','punchin_summary','punchout_summary','punchin_longitude','punchin_latitude','punchout_latitude','punchout_longitude','working_type','attendance_status','remark_status','attendance_status','remark_status')
+                    ->select('id','user_id', 'punchin_date', 'punchin_time', 'punchin_address', 'punchout_date', 'punchout_time', 'punchout_address', 'worked_time','punchin_summary','punchout_summary','punchin_longitude','punchin_latitude','punchout_latitude','punchout_longitude','working_type','attendance_status','remark_status','attendance_status')
                     ->limit(5000)->latest()->get();   
     }
 
     public function headings(): array
     {
         // return ['id','Employee Code','user_id','Designation','Branch','Division','punchin_date', 'punchin_time','punchout_time','worked_time','Working Type', 'punchin_address', 'punchout_date','punchout_address','punchin_summary','punchout_summary','punchin_longitude','punchin_latitude','punchout_latitude','punchout_longitude'];
-        return ['id','Employee Code','user_id','Designation','Branch','Division','punchin_date', 'punchin_time','punchout_time','worked_time','Working Type', 'punchin_address','punchout_address','punchin_summary','punchin_longitude','punchin_latitude','punchout_longitude','punchout_latitude','Attendance Status','Remark Status'];
+        return ['id','Employee Code','user_id','Designation','Branch','Division','punchin_date', 'punchin_time','punchout_time','worked_time','Working Type','Attendance Status','Remark Status', 'punchin_address','punchout_address','punchin_summary','punchin_longitude','punchin_latitude','punchout_longitude','punchout_latitude'];
     }
 
     public function map($data): array
@@ -90,6 +90,8 @@ class AttendanceExport implements FromCollection,WithHeadings,ShouldAutoSize,Wit
             isset($data['punchout_time']) ? $data['punchout_time'] :'21:00:00',
             $data['worked_time'],
             isset($data['working_type']) ? $data['working_type'] : '',
+            $status,
+            $data['remark_status'],
 
             $data['punchin_address'],
             //isset($data['punchout_date']) ? $data['punchout_date'] :$data['punchin_date'],
@@ -101,8 +103,7 @@ class AttendanceExport implements FromCollection,WithHeadings,ShouldAutoSize,Wit
             isset($data['punchin_latitude']) ? $data['punchin_latitude'] : '',
             isset($data['punchout_longitude']) ? $data['punchout_longitude'] : '',
             isset($data['punchout_latitude']) ? $data['punchout_latitude'] : '',
-            $status,
-            $data['remark_status'],
+
             
           
           
