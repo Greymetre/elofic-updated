@@ -79,12 +79,12 @@
                 </li>
                 @endif
                 @if(auth()->user()->can(['distributor_access']))
-                <li class="nav-item {{ request()->is('distributors*') ? 'active' : '' }}">
+                <!-- <li class="nav-item {{ request()->is('distributors*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('distributors') }}">
                     <i class="material-icons">store</i>
                     <p>{!! trans('panel.sidemenu.distributors') !!}</p>
                   </a>
-                </li>
+                </li> -->
                 @endif
                 @if(auth()->user()->can('customertype_access'))
                 <li class="nav-item {{ request()->is('customertype*') ? 'active' : '' }}">
