@@ -384,6 +384,7 @@ class AttendanceController extends Controller
         $user = $request->user();
         $user_id = $user->id;
         $status = $request->input('status');
+        $remark_status = $request->input('remark_status');
         $attendance_id = $request->input('attendance_id');
         
         $validator = Validator::make($request->all(), [
@@ -393,11 +394,22 @@ class AttendanceController extends Controller
         if ($validator->fails()) {
             return response()->json(['status' => 'error','message' =>  $validator->errors()], 400); 
         }
+        if($status == '2'){
+            $validator = Validator::make($request->all(), [
+                'remark_status' => 'required',
+            ]); 
+            if ($validator->fails()) {
+                return response()->json(['status' => 'error','message' =>  'If you want to reject the attendance please add a remark.'], 400); 
+            }
+        }
 
         $attendance = Attendance::find($attendance_id);
 
         if($attendance){
             $attendance->attendance_status = $status;
+            if($remark_status  && $remark_status != '' && $remark_status != null){
+                $attendance->remark_status = $remark_status;
+            }
             $attendance->save();
             return response()->json(['status' => 'success','message' => 'Status changed successfully.' ], $this->successStatus);
         }else{
