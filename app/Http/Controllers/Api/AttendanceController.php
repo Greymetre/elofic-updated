@@ -397,7 +397,7 @@ class AttendanceController extends Controller
         $attendance = Attendance::find($attendance_id);
 
         if($attendance){
-            $attendance->status = $status;
+            $attendance->attendance_status = $status;
             $attendance->save();
             return response()->json(['status' => 'success','message' => 'Status changed successfully.' ], $this->successStatus);
         }else{

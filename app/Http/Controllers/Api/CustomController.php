@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Auth;
+use Auth;
 use Illuminate\Support\Facades\DB;
 
 use Validator;
@@ -250,8 +250,10 @@ class CustomController extends Controller
         try
         { 
             $pageSize = $request->input('pageSize');
-            $query = Customers::where(function ($query) {
-                                        $query->where('active', '=', 'Y')->where('customertype','!=','2');
+            $user = Auth::guard('users')->user();
+            $user_id = $user->id;
+            $query = Customers::where(function ($query) use ($user_id) {
+                                        $query->where('active', '=', 'Y')->where('customertype','!=','2')->where('executive_id', $user_id);
                                     })->select('id','name');
 
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
