@@ -362,7 +362,7 @@ class AttendanceController extends Controller
                     $data[$key]['date'] = date('d/m/Y', strtotime($checkIn->punchin_date));
                     $data[$key]['punch_in'] = $checkIn->punchin_time;
                     $data[$key]['punch_out'] = $checkIn->punchout_time!=null?$checkIn->punchout_time:'';
-                    $data[$key]['status'] = ($checkIn->status == 1) ? 'Approve' : (($checkIn->status == 2) ? 'Rejected' : 'Pending');
+                    $data[$key]['status'] = ($checkIn->attendance_status == 1) ? 'Approve' : (($checkIn->attendance_status == 2) ? 'Rejected' : 'Pending');
                     if($checkIn->users->id == $user_id){
                         $data[$key]['self'] = true;
                     }else{
