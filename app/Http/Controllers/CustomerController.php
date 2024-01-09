@@ -64,7 +64,7 @@ class CustomerController extends Controller
                                     $query->whereIn('userid', $userids);
                                 }
                             })->select('id','city_name')->get();
-        $customertype = CustomerType::whereIn('id', ['2','3','4','5','6'])->select('id','customertype_name')->orderBy('id','desc')->get();
+        $customertype = CustomerType::select('id','customertype_name')->orderBy('id','desc')->get();
 
         if ($request->ajax()) {
             $data = Customers::with('customertypes','firmtypes','createdbyname')
@@ -109,7 +109,7 @@ class CustomerController extends Controller
                             {
                                 $query->whereIn('executive_id',$userids);
                             }
-                            $query->whereIn('customertype', ['2','3','4','5','6']);
+                            // $query->whereIn('customertype', ['2','3','4','5','6']);
                         })
                         ->latest();
             return Datatables::of($data)
@@ -202,7 +202,7 @@ class CustomerController extends Controller
                                 }
                             })
                             ->select('id','country_name')->orderBy('id','desc')->get();
-        $customertype = CustomerType::whereIn('id', ['2','3','4','5','6'])->select('id','customertype_name')->orderBy('id','desc')->get();
+        $customertype = CustomerType::select('id','customertype_name')->orderBy('id','desc')->get();
         $firmtype = FirmType::select('id','firmtype_name')->orderBy('id','desc')->get();
         $fields = Field::with('fieldsData')->whereIn('module',$customertype->pluck('id'))->where('active','=','Y')->get();
         $users = User::where(function($query) use($userids){

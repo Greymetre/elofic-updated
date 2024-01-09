@@ -375,17 +375,29 @@ if (! function_exists('getUsersReportingToAuth')) {
     {
         $userid = !empty($userid) ? $userid : Auth::user()->id;
         $userinfo = User::where('id','=',$userid)->first();
-        $users = User::where(function($query) use($userinfo){
-                        if(!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin'))
-                        {
-                            $query->where('reportingid','=',$userinfo->id)->orWhere('id',$userinfo->id);
-                        }
-                    })->pluck('id')->toArray();
-        if(count($users) >= 2)
+        if(!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin'))
         {
-            $users = User::whereIn('reportingid',$users)->orWhere('id',$userinfo->id)->pluck('id')->toArray();
+            $all_ids_array = array($userid);
+            $users = array($userid); 
+            while (count($users) > 0) {
+                $users = User::whereIn('reportingid', $users)->pluck('id')->toArray();
+                $all_ids_array = array_merge($all_ids_array, $users);
+            }
+        }else{
+            $all_ids_array = User::pluck('id')->toArray();
         }
-        return $users ;
+
+        // $users = User::where(function($query) use($userinfo){
+        //                 if(!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin'))
+        //                 {
+        //                     $query->where('reportingid','=',$userinfo->id)->orWhere('id',$userinfo->id);
+        //                 }
+        //             })->pluck('id')->toArray();
+        // if(count($users) >= 2)
+        // {
+        //     $users = User::whereIn('reportingid',$users)->orWhere('id',$userinfo->id)->pluck('id')->toArray();
+        // }
+        return $all_ids_array ;
     }
 }
 
