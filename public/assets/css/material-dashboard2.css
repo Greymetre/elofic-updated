@@ -15012,7 +15012,7 @@ label {
   display: flex;
   flex-flow: nowrap;
   align-items: center;
-  color: #333;
+  color: #333 !important;
   font-weight: normal;
   text-decoration: none;
   font-size: .8125rem;

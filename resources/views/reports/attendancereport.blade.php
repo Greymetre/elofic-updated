@@ -13,12 +13,23 @@
               <form method="GET" action="{{ URL::to('attendance-download') }}">
                   <div class="d-flex flex-row">
 
-                  <div class="p-2">
-                    <select class="form-control" name="executive_id" id="executive_id" data-style="select-with-transition" title="Select User">
+                  <div class="p-2" style="width: 250px;">
+                    <select class="selectpicker" multiple name="branch_id" id="branch_id" data-style="select-with-transition" title="Select Branch">
+                     <option value="">Select Branch</option>
+                    @if(@isset($branches ))
+                    @foreach($branches as $branche)
+                     <option value="{!! $branche['id'] !!}" {{ old( 'branch_id') == $branche['id'] ? 'selected' : '' }}>{!! $branche['name'] !!}</option>
+                    @endforeach
+                    @endif
+                   </select>
+                  </div>
+
+                  <div class="p-2" style="width: 250px;">
+                    <select class="selectpicker" name="executive_id" id="executive_id" data-style="select-with-transition" title="Select User">
                      <option value="">Select User</option>
                     @if(@isset($users ))
                     @foreach($users as $user)
-                     <option value="{!! $user['id'] !!}" {{ old( 'executive_id') == $user->id ? 'selected' : '' }}>{!! $user['name'] !!}</option>
+                     <option value="{!! $user['id'] !!}" {{ old( 'executive_id') == $user['id'] ? 'selected' : '' }}>{!! $user['name'] !!}</option>
                     @endforeach
                     @endif
                    </select>
@@ -373,5 +384,25 @@
 
 
   });
+
+  $("#branch_id").on('change', function(){
+        var search_branches = $(this).val();
+        $.ajax({
+            url: "{{ url('reports/attendancereport') }}",
+            data:{"search_branches": search_branches},
+            success: function(res){
+                if(res.status == true){
+                    var select = $('#executive_id');
+                    select.empty();
+                    select.append('<option>Select User</option>');
+                    $.each(res.users, function(k, v) {
+                        select.append('<option value="'+v.id+'" >'+v.name+'</option>');
+                    });
+                    select.selectpicker('refresh');
+                }
+            }
+        });
+
+    })
 </script> 
 </x-app-layout>

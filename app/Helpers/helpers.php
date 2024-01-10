@@ -375,18 +375,21 @@ if (! function_exists('getUsersReportingToAuth')) {
     {
         $userid = !empty($userid) ? $userid : Auth::user()->id;
         $userinfo = User::where('id','=',$userid)->first();
+
+        $all_users = User::get();
+     
         if(!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin'))
         {
             $all_ids_array = array($userid);
-            $users = array($userid); 
-            while (count($users) > 0) {
-                $users = User::whereIn('reportingid', $users)->pluck('id')->toArray();
-                $all_ids_array = array_merge($all_ids_array, $users);
+            $test = getAllChild(array($userid), $all_users);
+            while(count($test) > 0){
+                $all_ids_array = array_merge($all_ids_array, $test);
+                $test = getAllChild($test, $all_users);
             }
         }else{
             $all_ids_array = User::pluck('id')->toArray();
         }
-
+                
         // $users = User::where(function($query) use($userinfo){
         //                 if(!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin'))
         //                 {
@@ -773,4 +776,12 @@ if (! function_exists('totalDueAmount')) {
         $totalsales = Sales::where('buyer_id',$customer_id)->sum('grand_total');
         return $totalsales - $totalcredit; 
     }
+}
+
+
+function getAllChild($users_id, $all_user){
+   
+    $children = $all_user->whereIn('reportingid', $users_id)->pluck('id')->toArray();
+   
+    return $children;
 }
