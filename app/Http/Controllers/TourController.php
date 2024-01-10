@@ -52,8 +52,40 @@ class TourController extends Controller
     {
         ////abort_if(Gate::denies('customer_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
+
+        $search_branches = $request->input('search_branches');
+        $all_reporting_user_ids = getUsersReportingToAuth();
+        $all_user_branches = User::with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
+        $branches = array();
+        $all_branch = array();
+        $bkey = 0;
+        foreach ($all_user_branches as $k => $val) {
+            if (!in_array($val->getbranch->id, $all_branch)) {
+                array_push($all_branch, $val->getbranch->id);
+                $branches[$bkey]['id'] = $val->getbranch->id;
+                $branches[$bkey]['name'] = $val->getbranch->branch_name;
+                $bkey++;
+            }
+        }
+        if ($search_branches && count($search_branches) > 0 && $search_branches[0] != null) {
+            $all_reporting_user_ids = User::whereIn('id', $all_reporting_user_ids)->whereIn('branch_id', $search_branches)->pluck('id')->toArray();
+        }
+        $all_user_details = User::with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
+        $all_users = array();
+        foreach ($all_user_details as $k => $val) {
+            $users[$k]['id'] = $val->id;
+            $users[$k]['name'] = $val->name;
+        
+        }
+        if($search_branches && count($search_branches) > 0 && $search_branches[0] != null) {
+            if ($request->ajax()) {
+                $response = ["users"=>$users, "status"=>true];
+                return response()->json($response);
+            }
+        }
+
+
         $userids = getUsersReportingToAuth();
-       
         $userids = getUsersReportingToAuth();
         $users = User::where(function($query) use($userids){
                                 if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
@@ -63,10 +95,9 @@ class TourController extends Controller
                             })->select('id','name')->orderBy('id','desc')->get();
 
     
-
         if ($request->ajax()) {
              // $data = TourProgramme::with('customertypes','firmtypes','createdbyname')
-               $data = TourProgramme::with('userinfo')->where(function ($query) use ($request , $userids) {
+               $data = TourProgramme::with('userinfo')->where(function ($query) use ($request , $all_reporting_user_ids) {
                             if(!empty($request['executive_id']))
                             {
                                 $query->where('userid', $request['executive_id']);
@@ -88,7 +119,7 @@ class TourController extends Controller
                             }
                             if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
                             {
-                                $query->whereIn('userid',$userids);
+                                $query->whereIn('userid',$all_reporting_user_ids);
                             }
                         })->latest();
             return Datatables::of($data)
@@ -148,7 +179,7 @@ class TourController extends Controller
         }
       
        // return $dataTable->render('tours.index',compact('users','branches'));
-        return view('tours.index', compact('users'));
+        return view('tours.index', compact('users','branches'));
     }
 
 
