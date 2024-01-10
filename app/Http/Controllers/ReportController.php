@@ -41,11 +41,11 @@ use App\Exports\SurveyAnalysisExport;
 use App\Models\DealIn;
 use App\DataTables\GamificationDataTable;
 use App\Exports\CustomerAnalysisExport;
+
 class ReportController extends Controller
 {
     public function __construct()
     {
-        
     }
     public function beatadherence(Request $request)
     {
@@ -53,68 +53,64 @@ class ReportController extends Controller
         $start_date = $request->input('start_date');
         $end_date = $request->input('end_date');
         if ($request->ajax()) {
-            $data = BeatSchedule::with('users:id,name','beats','beatcustomers','beatcheckininfo','beatscheduleorders')
-                    ->where(function ($query) use($start_date, $end_date, $userids)  {
-                        if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                        {
-                            $query->whereHas('users',function($query) use($userids){
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                                    {
-                                        $query->whereIn('id', $userids);
-                                }
-                            });
-                        }
-                        if($start_date)
-                        {
-                        $query->where('beat_date', '>=', date('Y-m-d',strtotime($start_date)));
-                        }
-                        if($end_date)
-                        {
-                        $query->where('beat_date', '<=', date('Y-m-d',strtotime($end_date)));
-                        }
-                    })
-                ->select('id','beat_date','user_id','beat_id')
+            $data = BeatSchedule::with('users:id,name', 'beats', 'beatcustomers', 'beatcheckininfo', 'beatscheduleorders')
+                ->where(function ($query) use ($start_date, $end_date, $userids) {
+                    if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                        $query->whereHas('users', function ($query) use ($userids) {
+                            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                                $query->whereIn('id', $userids);
+                            }
+                        });
+                    }
+                    if ($start_date) {
+                        $query->where('beat_date', '>=', date('Y-m-d', strtotime($start_date)));
+                    }
+                    if ($end_date) {
+                        $query->where('beat_date', '<=', date('Y-m-d', strtotime($end_date)));
+                    }
+                })
+                ->select('id', 'beat_date', 'user_id', 'beat_id')
                 ->latest();
             return Datatables::of($data)
-                    ->addIndexColumn()
-                    ->addColumn('beatCounters', function ($query) {
-                          return !empty($query['beatcustomers']) ? $query['beatcustomers']->count() : 0 ;
-                    })
-                    ->addColumn('visitedcounter', function ($query) {
-                          return !empty($query['beatcheckininfo']) ? $query['beatcheckininfo']->unique('customer_id','checkin_date')->count() : 0 ;
-                    })
-                    ->addColumn('beatadherence', function ($query) {
-                        $totalcustomer = !empty($query['beatcustomers']) ? $query['beatcustomers']->count() : 0 ;
-                        $visitedcounter = !empty($query['beatcheckininfo']) ? $query['beatcheckininfo']->unique('customer_id','checkin_date')->count() : 0 ;
-                        //   return ($visitedcounter * 100) / $totalcustomer;
-                        return ($totalcustomer === 0) ? 0 : number_format((float)($visitedcounter * 100) / $totalcustomer, 1, '.', '').' %';
-                    })
-                    ->addColumn('totalorder', function ($query) {
-                        return !empty($query['beatscheduleorders']) ? $query['beatscheduleorders']->count() : 0 ;
-                    })
-                    ->addColumn('beatproductivity', function ($query) {
-                        $visitedcounter = !empty($query['beatcheckininfo']) ? $query['beatcheckininfo']->unique('customer_id','checkin_date')->count() : 0 ;
-                        $totalorder = !empty($query['beatscheduleorders']) ? $query['beatscheduleorders']->count() : 0 ;
-                        //   return ($totalorder * 100) / $totalcustomer;
-                        return ($visitedcounter === 0) ? 0 :  number_format((float)($totalorder * 100) / $visitedcounter, 1, '.', '').' %' ;
-                    })
-                    ->addColumn('newcounter', function ($query) {
-                        return !empty($query['beatschedulecustomer']) ? $query['beatschedulecustomer']->count() : 0 ;
-                    })
-                    ->addColumn('orderqty', function ($query) {
-                          return !empty($query['beatscheduleorders']) ? $query['beatscheduleorders']->sum('total_qty') : 0 ;
-                    })
-                    ->addColumn('uniqueskucount', function ($query) {
-                          return !empty($query['beatscheduleorders']['orderdetails']) ? $query['beatscheduleorders']['orderdetails']->sum('total_qty') : 0 ;
-                    })
-                    ->addColumn('ordervalue', function ($query) {
-                          return !empty($query['beatscheduleorders']) ? $query['beatscheduleorders']->sum('grand_total') : 0 ;
-                    })
-                    ->addColumn('dailyAvarageSales', function ($query) use($data) {
-                        return '';
-                    })
-                    ->rawColumns(['beatCounters','visitedcounter','beatadherence','totalorder','beatproductivity','newcounter','orderqty','uniqueskucount','ordervalue','dailyAvarageSales'])
-                    ->make(true);
+                ->addIndexColumn()
+                ->addColumn('beatCounters', function ($query) {
+                    return !empty($query['beatcustomers']) ? $query['beatcustomers']->count() : 0;
+                })
+                ->addColumn('visitedcounter', function ($query) {
+                    return !empty($query['beatcheckininfo']) ? $query['beatcheckininfo']->unique('customer_id', 'checkin_date')->count() : 0;
+                })
+                ->addColumn('beatadherence', function ($query) {
+                    $totalcustomer = !empty($query['beatcustomers']) ? $query['beatcustomers']->count() : 0;
+                    $visitedcounter = !empty($query['beatcheckininfo']) ? $query['beatcheckininfo']->unique('customer_id', 'checkin_date')->count() : 0;
+                    //   return ($visitedcounter * 100) / $totalcustomer;
+                    return ($totalcustomer === 0) ? 0 : number_format((float)($visitedcounter * 100) / $totalcustomer, 1, '.', '') . ' %';
+                })
+                ->addColumn('totalorder', function ($query) {
+                    return !empty($query['beatscheduleorders']) ? $query['beatscheduleorders']->count() : 0;
+                })
+                ->addColumn('beatproductivity', function ($query) {
+                    $visitedcounter = !empty($query['beatcheckininfo']) ? $query['beatcheckininfo']->unique('customer_id', 'checkin_date')->count() : 0;
+                    $totalorder = !empty($query['beatscheduleorders']) ? $query['beatscheduleorders']->count() : 0;
+                    //   return ($totalorder * 100) / $totalcustomer;
+                    return ($visitedcounter === 0) ? 0 :  number_format((float)($totalorder * 100) / $visitedcounter, 1, '.', '') . ' %';
+                })
+                ->addColumn('newcounter', function ($query) {
+                    return !empty($query['beatschedulecustomer']) ? $query['beatschedulecustomer']->count() : 0;
+                })
+                ->addColumn('orderqty', function ($query) {
+                    return !empty($query['beatscheduleorders']) ? $query['beatscheduleorders']->sum('total_qty') : 0;
+                })
+                ->addColumn('uniqueskucount', function ($query) {
+                    return !empty($query['beatscheduleorders']['orderdetails']) ? $query['beatscheduleorders']['orderdetails']->sum('total_qty') : 0;
+                })
+                ->addColumn('ordervalue', function ($query) {
+                    return !empty($query['beatscheduleorders']) ? $query['beatscheduleorders']->sum('grand_total') : 0;
+                })
+                ->addColumn('dailyAvarageSales', function ($query) use ($data) {
+                    return '';
+                })
+                ->rawColumns(['beatCounters', 'visitedcounter', 'beatadherence', 'totalorder', 'beatproductivity', 'newcounter', 'orderqty', 'uniqueskucount', 'ordervalue', 'dailyAvarageSales'])
+                ->make(true);
         }
         return view('reports.beatadherence');
     }
@@ -125,160 +121,142 @@ class ReportController extends Controller
         $start_date = $request->input('start_date');
         $end_date = $request->input('end_date');
         if ($request->ajax()) {
-            $data = User::where(function($query) use($userids){
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))                                    
-                                {
-                                        $query->whereIn('id', $userids);
-                                }
-                            })->whereHas('roles', function($query){
-                                $query->whereNotIn('name',['superadmin','Admin']);
-                            })->select('id','name', 'mobile','location')->latest();
+            $data = User::where(function ($query) use ($userids) {
+                if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                    $query->whereIn('id', $userids);
+                }
+            })->whereHas('roles', function ($query) {
+                $query->whereNotIn('name', ['superadmin', 'Admin']);
+            })->select('id', 'name', 'mobile', 'location')->latest();
             $users = $data->pluck('id')->toArray();
-            $schedules = BeatSchedule::with('beatcustomers','beatcheckininfo','beatscheduleorders')
-                    ->where(function ($query) use($start_date, $end_date, $userids)  {
-                        if($start_date)
-                        {
-                        $query->whereDate('beat_date', '>=', date('Y-m-d',strtotime($start_date)));
-                        }
-                        if($end_date)
-                        {
-                        $query->whereDate('beat_date', '<=', date('Y-m-d',strtotime($end_date)));
-                        }
-                        if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))                                    
-                        {
-                                $query->whereIn('user_id', $userids);
-                        }
-                    })
-                ->select('id','beat_date','user_id','beat_id')
+            $schedules = BeatSchedule::with('beatcustomers', 'beatcheckininfo', 'beatscheduleorders')
+                ->where(function ($query) use ($start_date, $end_date, $userids) {
+                    if ($start_date) {
+                        $query->whereDate('beat_date', '>=', date('Y-m-d', strtotime($start_date)));
+                    }
+                    if ($end_date) {
+                        $query->whereDate('beat_date', '<=', date('Y-m-d', strtotime($end_date)));
+                    }
+                    if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                        $query->whereIn('user_id', $userids);
+                    }
+                })
+                ->select('id', 'beat_date', 'user_id', 'beat_id')
                 ->latest()
                 ->get();
             $orders = Order::with('orderdetails')
-                    ->where(function ($query) use($start_date, $end_date, $userids)  {
-                        if($start_date)
-                        {
-                        $query->whereDate('order_date', '>=', date('Y-m-d',strtotime($start_date)));
-                        }
-                        if($end_date)
-                        {
-                        $query->whereDate('order_date', '<=', date('Y-m-d',strtotime($end_date)));
-                        }
-                        if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))                                    
-                        {
-                            $query->whereIn('created_by', $userids);
-                        }
+                ->where(function ($query) use ($start_date, $end_date, $userids) {
+                    if ($start_date) {
+                        $query->whereDate('order_date', '>=', date('Y-m-d', strtotime($start_date)));
+                    }
+                    if ($end_date) {
+                        $query->whereDate('order_date', '<=', date('Y-m-d', strtotime($end_date)));
+                    }
+                    if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                        $query->whereIn('created_by', $userids);
+                    }
+                })
+                ->select('id', 'grand_total', 'created_by', 'total_qty', 'buyer_id')
+                ->get();
 
-                    })
-                    ->select('id','grand_total','created_by','total_qty','buyer_id')
-                    ->get();
-
-            $orderdetaildata = OrderDetails::with('orders')->whereHas('orders',function ($query) use($start_date, $end_date, $userids)  {
-                        if($start_date)
-                        {
-                        $query->whereDate('order_date', '>=', date('Y-m-d',strtotime($start_date)));
-                        }
-                        if($end_date)
-                        {
-                        $query->whereDate('order_date', '<=', date('Y-m-d',strtotime($end_date)));
-                        }
-                        if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))                                    
-                        {
-                            $query->whereIn('created_by', $userids);
-                        }
-                    })
-                    ->select('id','order_id','product_id','quantity','line_total')
-                    ->get();
-            $customers = Customers::where(function ($query) use($start_date, $end_date, $userids)  {
-                        if($start_date)
-                        {
-                        $query->whereDate('created_at', '>=', date('Y-m-d',strtotime($start_date)));
-                        }
-                        if($end_date)
-                        {
-                        $query->whereDate('created_at', '<=', date('Y-m-d',strtotime($end_date)));
-                        }
-                        if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))                                    
-                        {
-                            $query->whereIn('executive_id', $userids);
-                        }
-                    })
-                    ->select('id','created_by','executive_id')
-                    ->get();
+            $orderdetaildata = OrderDetails::with('orders')->whereHas('orders', function ($query) use ($start_date, $end_date, $userids) {
+                if ($start_date) {
+                    $query->whereDate('order_date', '>=', date('Y-m-d', strtotime($start_date)));
+                }
+                if ($end_date) {
+                    $query->whereDate('order_date', '<=', date('Y-m-d', strtotime($end_date)));
+                }
+                if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                    $query->whereIn('created_by', $userids);
+                }
+            })
+                ->select('id', 'order_id', 'product_id', 'quantity', 'line_total')
+                ->get();
+            $customers = Customers::where(function ($query) use ($start_date, $end_date, $userids) {
+                if ($start_date) {
+                    $query->whereDate('created_at', '>=', date('Y-m-d', strtotime($start_date)));
+                }
+                if ($end_date) {
+                    $query->whereDate('created_at', '<=', date('Y-m-d', strtotime($end_date)));
+                }
+                if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                    $query->whereIn('executive_id', $userids);
+                }
+            })
+                ->select('id', 'created_by', 'executive_id')
+                ->get();
 
             return Datatables::of($data)
-                    ->addIndexColumn()
-                    ->addColumn('total_beat_counter', function ($query) use($schedules) {
-                        $userbeats = $schedules->where('user_id','=',$query->id);
-                        $total_beat_counter = 0;
-                        if(!empty($userbeats))
-                        {
-                            foreach ($userbeats as $key => $counter) {
-                                $total_beat_counter += count($counter['beatcustomers']);
-                            }
+                ->addIndexColumn()
+                ->addColumn('total_beat_counter', function ($query) use ($schedules) {
+                    $userbeats = $schedules->where('user_id', '=', $query->id);
+                    $total_beat_counter = 0;
+                    if (!empty($userbeats)) {
+                        foreach ($userbeats as $key => $counter) {
+                            $total_beat_counter += count($counter['beatcustomers']);
                         }
-                        return $total_beat_counter;
-                    })
-                    ->addColumn('total_visited_counter', function ($query) use($schedules) {
-                        $userbeats = $schedules->where('user_id','=',$query->id);
-                        $total_visited_counter = 0;
-                        if(!empty($userbeats))
-                        {
-                            foreach ($userbeats as $key => $counter) {
-                                $total_visited_counter += $counter['beatcheckininfo']->unique('customer_id','checkin_date')->count();
-                            }
+                    }
+                    return $total_beat_counter;
+                })
+                ->addColumn('total_visited_counter', function ($query) use ($schedules) {
+                    $userbeats = $schedules->where('user_id', '=', $query->id);
+                    $total_visited_counter = 0;
+                    if (!empty($userbeats)) {
+                        foreach ($userbeats as $key => $counter) {
+                            $total_visited_counter += $counter['beatcheckininfo']->unique('customer_id', 'checkin_date')->count();
                         }
-                        return $total_visited_counter;
-                    })
-                    ->addColumn('beat_adherence', function ($query) use($schedules) {
-                        $userbeats = $schedules->where('user_id','=',$query->id);
-                        $total_visited_counter = 0;
-                        $total_beat_counter = 0;
-                        if(!empty($userbeats))
-                        {
-                            foreach ($userbeats as $key => $counter) {
-                                $total_visited_counter += $counter['beatcheckininfo']->unique('customer_id','checkin_date')->count();
-                                $total_beat_counter += count($counter['beatcustomers']);
-                            }
+                    }
+                    return $total_visited_counter;
+                })
+                ->addColumn('beat_adherence', function ($query) use ($schedules) {
+                    $userbeats = $schedules->where('user_id', '=', $query->id);
+                    $total_visited_counter = 0;
+                    $total_beat_counter = 0;
+                    if (!empty($userbeats)) {
+                        foreach ($userbeats as $key => $counter) {
+                            $total_visited_counter += $counter['beatcheckininfo']->unique('customer_id', 'checkin_date')->count();
+                            $total_beat_counter += count($counter['beatcustomers']);
                         }
-                        return ($total_beat_counter >= 1) ? number_format((float)($total_visited_counter *100)/$total_beat_counter, 1, '.', '').' %'  : '';
-                    })
-                    ->addColumn('total_order_counter', function ($query) use($orders) {
-                        $userorders = $orders->where('created_by','=',$query->id);
-                        return !empty($userorders) ? $userorders->unique('buyer_id')->count() : 0;
-                    })
-                    ->addColumn('beat_productivity', function ($query) use($schedules, $orders) {
-                        $userbeats = $schedules->where('user_id','=',$query->id);
-                        $ordercount = $orders->where('created_by','=',$query->id)->count();
-                        $total_visited_counter = 0;
-                        if(!empty($userbeats))
-                        {
-                            foreach ($userbeats as $key => $counter) {
-                                $total_visited_counter += $counter['beatcheckininfo']->unique('customer_id','checkin_date')->count();
-                            }
+                    }
+                    return ($total_beat_counter >= 1) ? number_format((float)($total_visited_counter * 100) / $total_beat_counter, 1, '.', '') . ' %'  : '';
+                })
+                ->addColumn('total_order_counter', function ($query) use ($orders) {
+                    $userorders = $orders->where('created_by', '=', $query->id);
+                    return !empty($userorders) ? $userorders->unique('buyer_id')->count() : 0;
+                })
+                ->addColumn('beat_productivity', function ($query) use ($schedules, $orders) {
+                    $userbeats = $schedules->where('user_id', '=', $query->id);
+                    $ordercount = $orders->where('created_by', '=', $query->id)->count();
+                    $total_visited_counter = 0;
+                    if (!empty($userbeats)) {
+                        foreach ($userbeats as $key => $counter) {
+                            $total_visited_counter += $counter['beatcheckininfo']->unique('customer_id', 'checkin_date')->count();
                         }
-                        return ($total_visited_counter >= 1) ? number_format((float)($ordercount *100)/$total_visited_counter, 1, '.', '').' %'  : '';
-                    })
-                    ->addColumn('new_counter_added', function ($query) use($customers) {
-                          return $customers->where('created_by','=',$query->id)->count();
-                    })
-                    ->addColumn('total_order_qty', function ($query) use($orderdetaildata) {
-                        return $orderdetaildata->where('orders.created_by','=',$query->id)->sum('quantity');
-                    })
-                    ->addColumn('total_order_value', function ($query) use($orders) {
-                        return $orders->where('created_by','=',$query->id)->sum('grand_total');
-                    })
-                    ->addColumn('total_assign_counter', function ($query) {
-                        return Customers::where('executive_id','=',$query->id)->count();
-                  })
-                    ->addColumn('unique_sku_count', function ($query) use($orderdetaildata) {
-                        return $orderdetaildata->where('orders.created_by','=',$query->id)->unique('product_id')->count();
-                    })
-                    ->addColumn('active_counter', function ($query) use($orders) {
-                        return $orders->where('created_by','=',$query->id)->unique('buyer_id')->count();
-                  })
-                    ->addColumn('inactive_counter', function ($query) use($orders) {
-                        return Customers::where('executive_id','=',$query->id)->count() - $orders->where('created_by','=',$query->id)->unique('buyer_id')->count();
-                  })
-                    ->make(true);
+                    }
+                    return ($total_visited_counter >= 1) ? number_format((float)($ordercount * 100) / $total_visited_counter, 1, '.', '') . ' %'  : '';
+                })
+                ->addColumn('new_counter_added', function ($query) use ($customers) {
+                    return $customers->where('created_by', '=', $query->id)->count();
+                })
+                ->addColumn('total_order_qty', function ($query) use ($orderdetaildata) {
+                    return $orderdetaildata->where('orders.created_by', '=', $query->id)->sum('quantity');
+                })
+                ->addColumn('total_order_value', function ($query) use ($orders) {
+                    return $orders->where('created_by', '=', $query->id)->sum('grand_total');
+                })
+                ->addColumn('total_assign_counter', function ($query) {
+                    return Customers::where('executive_id', '=', $query->id)->count();
+                })
+                ->addColumn('unique_sku_count', function ($query) use ($orderdetaildata) {
+                    return $orderdetaildata->where('orders.created_by', '=', $query->id)->unique('product_id')->count();
+                })
+                ->addColumn('active_counter', function ($query) use ($orders) {
+                    return $orders->where('created_by', '=', $query->id)->unique('buyer_id')->count();
+                })
+                ->addColumn('inactive_counter', function ($query) use ($orders) {
+                    return Customers::where('executive_id', '=', $query->id)->count() - $orders->where('created_by', '=', $query->id)->unique('buyer_id')->count();
+                })
+                ->make(true);
         }
         return view('reports.adherencesummary');
     }
@@ -287,212 +265,215 @@ class ReportController extends Controller
     {
         $userids = getUsersReportingToAuth();
         if ($request->ajax()) {
-            $data = CheckIn::with('users:id,name','customers:id,name,mobile','customers.customeraddress','beatschedules.beats','visitreports','orders_sum')
-                ->whereHas('users',function($query) use($userids){
-                    if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                    {
+            $data = CheckIn::with('users:id,name', 'customers:id,name,mobile', 'customers.customeraddress', 'beatschedules.beats', 'visitreports', 'orders_sum')
+                ->whereHas('users', function ($query) use ($userids) {
+                    if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                         $query->whereIn('id', $userids);
                     }
                 })
-                ->select('id','checkin_date','checkin_time','user_id','customer_id','checkout_time','beatscheduleid')
+                ->select('id', 'checkin_date', 'checkin_time', 'user_id', 'customer_id', 'checkout_time', 'beatscheduleid')
                 ->latest();
             return Datatables::of($data)
-                    ->addIndexColumn()
-                    ->addColumn('visit_time', function ($query) {
-                        $interval = strtotime($query->checkout_time) - strtotime($query->checkin_time) ;
-                          return date("H:i:s",($interval));
-                    })
-                    ->addColumn('beat_name', function ($query) {
-                          return isset($query['beatschedules']['beats']['beat_name']) ? $query['beatschedules']['beats']['beat_name'] :'';
-                    })
-                    ->addColumn('district_name', function ($query) {
-                          return isset($query['customers']['customeraddress']['districtname']['district_name']) ? $query['customers']['customeraddress']['districtname']['district_name'] :'';
-                    })
-                    ->addColumn('city_name', function ($query) {
-                          return  isset($query['customers']['customeraddress']['cityname']['city_name']) ? $query['customers']['customeraddress']['cityname']['city_name'] :'';
-                    })
-                    ->addColumn('pincode', function ($query) {
-                          return isset($query['customers']['customeraddress']['zipcode']) ? $query['customers']['customeraddress']['zipcode'] :'';
-                    })
-                    ->addColumn('address', function ($query) {
-                          return isset($query['customers']['customeraddress']['address1']) ? $query['customers']['customeraddress']['address1'] :'';
-                    })
-                    ->addColumn('ordersum', function ($query) {
-                          //return $query['orders']->sum('grand_total');
-                      $sum_qty = 0;
-                        if(!empty($query->orders_sum))
-                        {
-                                foreach($query->orders_sum as $key_new => $datas)
-                                {  
-                                $order_id = $datas->id;
-                                $sum_qty+= OrderDetails::where('order_id',$order_id)->sum('quantity')??0; 
-                                }
-                        } 
-                      return $sum_qty;
-
-                    })
-                    ->addColumn('uniquesku', function ($query) {
-                          //return $query['orders']->sum('total_qty');
-                         return $query->orders_sum->sum('grand_total')??0;
-                    })
-                    ->addColumn('uniqueorder', function ($query) {
-                          return $query['orders']->count();
-                    })
-                    ->addColumn('remarks', function ($query) {
-                          return isset($query['visitreports']['description']) ? $query['visitreports']['description'] :'';
-                    })
-                    ->rawColumns(['visit_time','beat_name','district_name','city_name','pincode','address','ordersum','uniquesku','uniqueorder','remarks'])
-                    ->make(true);
+                ->addIndexColumn()
+                ->addColumn('visit_time', function ($query) {
+                    $interval = strtotime($query->checkout_time) - strtotime($query->checkin_time);
+                    return date("H:i:s", ($interval));
+                })
+                ->addColumn('beat_name', function ($query) {
+                    return isset($query['beatschedules']['beats']['beat_name']) ? $query['beatschedules']['beats']['beat_name'] : '';
+                })
+                ->addColumn('district_name', function ($query) {
+                    return isset($query['customers']['customeraddress']['districtname']['district_name']) ? $query['customers']['customeraddress']['districtname']['district_name'] : '';
+                })
+                ->addColumn('city_name', function ($query) {
+                    return  isset($query['customers']['customeraddress']['cityname']['city_name']) ? $query['customers']['customeraddress']['cityname']['city_name'] : '';
+                })
+                ->addColumn('pincode', function ($query) {
+                    return isset($query['customers']['customeraddress']['zipcode']) ? $query['customers']['customeraddress']['zipcode'] : '';
+                })
+                ->addColumn('address', function ($query) {
+                    return isset($query['customers']['customeraddress']['address1']) ? $query['customers']['customeraddress']['address1'] : '';
+                })
+                ->addColumn('ordersum', function ($query) {
+                    //return $query['orders']->sum('grand_total');
+                    $sum_qty = 0;
+                    if (!empty($query->orders_sum)) {
+                        foreach ($query->orders_sum as $key_new => $datas) {
+                            $order_id = $datas->id;
+                            $sum_qty += OrderDetails::where('order_id', $order_id)->sum('quantity') ?? 0;
+                        }
+                    }
+                    return $sum_qty;
+                })
+                ->addColumn('uniquesku', function ($query) {
+                    //return $query['orders']->sum('total_qty');
+                    return $query->orders_sum->sum('grand_total') ?? 0;
+                })
+                ->addColumn('uniqueorder', function ($query) {
+                    return $query['orders']->count();
+                })
+                ->addColumn('remarks', function ($query) {
+                    return isset($query['visitreports']['description']) ? $query['visitreports']['description'] : '';
+                })
+                ->rawColumns(['visit_time', 'beat_name', 'district_name', 'city_name', 'pincode', 'address', 'ordersum', 'uniquesku', 'uniqueorder', 'remarks'])
+                ->make(true);
         }
         return view('reports.customervisit');
     }
 
     public function attendancereport(Request $request)
-    {    
-        $userids = getUsersReportingToAuth();
-        $users = User::where('active','=','Y')
-                        // ->whereHas('roles', function($query){
-                        //     $query->whereNotIn('name',['superadmin','Admin']);
-                        // })
-                        ->select('id','name','mobile')->get();
-
-        $user_filters = User::where(function($query) use($userids){
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                                {
-                                    $query->whereIn('id',$userids);
-                                }
-                            })->select('id','name')->orderBy('id','desc')->get();                
-
-
-
+    {
+        $search_branches = $request->input('search_branches');
+        $all_reporting_user_ids = getUsersReportingToAuth();
+        $all_user_branches = User::with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
+        $branches = array();
+        $all_branch = array();
+        $bkey = 0;
+        foreach ($all_user_branches as $k => $val) {
+            if (!in_array($val->getbranch->id, $all_branch)) {
+                array_push($all_branch, $val->getbranch->id);
+                $branches[$bkey]['id'] = $val->getbranch->id;
+                $branches[$bkey]['name'] = $val->getbranch->branch_name;
+                $bkey++;
+            }
+        }
+        if ($search_branches && count($search_branches) > 0 && $search_branches[0] != null) {
+            $all_reporting_user_ids = User::whereIn('id', $all_reporting_user_ids)->whereIn('branch_id', $search_branches)->pluck('id')->toArray();
+        }
+        $all_user_details = User::with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
+        $all_users = array();
+        foreach ($all_user_details as $k => $val) {
+            $users[$k]['id'] = $val->id;
+            $users[$k]['name'] = $val->name;
+        
+        }
+        if ($search_branches && count($search_branches) > 0 && $search_branches[0] != null) {
+            if ($request->ajax()) {
+                $response = ["users"=>$users, "status"=>true];
+                return response()->json($response);
+            }
+        }
         if ($request->ajax()) {
-
             $data = Attendance::with('users:id,name')
-                ->where(function($query) use ($request , $userids){
-                    if(!empty($request['executive_id']))
-                        {
-                          $query->where('user_id', $request['executive_id']);
-                        }
+                ->where(function ($query) use ($request, $all_reporting_user_ids) {
+                    if (!empty($request['executive_id'])) {
+                        $query->where('user_id', $request['executive_id']);
+                    }
 
-                        if(!empty($request['start_date']) && !empty($request['end_date']))
-                        {
-                          $query->whereBetween('punchin_date',[$request['start_date'],$request['end_date']]); 
-                        }
+                    if (!empty($request['start_date']) && !empty($request['end_date'])) {
+                        $query->whereBetween('punchin_date', [$request['start_date'], $request['end_date']]);
+                    }
 
-                        // if(!empty($request['search']) && is_array($request['search']) == false){
-                        //     $search = $request['search'] ;
-                        //     $query->where(function($query) use($search) {
-                        //         $query->where('punchin_date', 'like', "%{$search}%")
-                        //         ->Orwhere('punchin_time', 'like', "%{$search}%")
-                        //         ->Orwhere('working_type', 'like', "%{$search}%");
-                        //     });
-                        // }
+                    // if(!empty($request['search']) && is_array($request['search']) == false){
+                    //     $search = $request['search'] ;
+                    //     $query->where(function($query) use($search) {
+                    //         $query->where('punchin_date', 'like', "%{$search}%")
+                    //         ->Orwhere('punchin_time', 'like', "%{$search}%")
+                    //         ->Orwhere('working_type', 'like', "%{$search}%");
+                    //     });
+                    // }
 
-                    if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                    {
-                        $query->whereIn('user_id', $userids);
+                    if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                        $query->whereIn('user_id', $all_reporting_user_ids);
                     }
                 })
-                ->select('id','user_id','punchin_date','punchin_time','punchin_longitude','punchin_latitude','punchin_address','punchin_image','punchout_date','punchout_time','punchout_latitude','punchout_longitude','punchout_address','punchout_image','worked_time','punchin_summary','punchout_summary','working_type','attendance_status','remark_status')
+                ->select('id', 'user_id', 'punchin_date', 'punchin_time', 'punchin_longitude', 'punchin_latitude', 'punchin_address', 'punchin_image', 'punchout_date', 'punchout_time', 'punchout_latitude', 'punchout_longitude', 'punchout_address', 'punchout_image', 'worked_time', 'punchin_summary', 'punchout_summary', 'working_type', 'attendance_status', 'remark_status')
                 ->latest();
             return Datatables::of($data)
-                    ->addIndexColumn()
-                    ->editColumn('punchin_date', function($data)
-                    {
-                        return isset($data->punchin_date) ? stringtodate($data->punchin_date) : '';
-                    })
+                ->addIndexColumn()
+                ->editColumn('punchin_date', function ($data) {
+                    return isset($data->punchin_date) ? stringtodate($data->punchin_date) : '';
+                })
 
-                    ->addColumn('current_status', function ($query) {
-                           $status = '';
-                          if($query->attendance_status == '0'){
-                             $status ='pending';
-                          }elseif ($query->attendance_status == '1') {
-                               $status ='approved';
-                          }else{
-                            $status ='rejected';
-                          }
-                        return $status;
-                       
-                    })
+                ->addColumn('current_status', function ($query) {
+                    $status = '';
+                    if ($query->attendance_status == '0') {
+                        $status = 'pending';
+                    } elseif ($query->attendance_status == '1') {
+                        $status = 'approved';
+                    } else {
+                        $status = 'rejected';
+                    }
+                    return $status;
+                })
 
 
-                    // ->editColumn('punchout_date', function($data)
+                // ->editColumn('punchout_date', function($data)
+                // {
+                //     return isset($data->punchout_date) ? stringtodate($data->punchout_date) : stringtodate($data->punchin_date);
+                // })
+
+                // ->addColumn('punchin', function ($query) {
+                //     $punchin_image = !empty($query->punchin_image) ? env('IMAGE_UPLOADS').$query->punchin_image : asset('assets/img/placeholder.jpg') ;
+                //         return '<img src="'.$punchin_image.'" border="0" width="70" class="img-rounded imageDisplayModel" align="center" />';
+                //     })
+                ->addColumn('punchout', function ($query) {
+                    $punchout_image = !empty($query->punchout_image) ? env('IMAGE_UPLOADS') . $query->punchout_image : asset('assets/img/placeholder.jpg');
+                    return '<img src="' . $punchout_image . '" border="0" width="70" class="img-rounded imageDisplayModel" align="center" />';
+                })
+                ->addColumn('action', function ($query) {
+                    $btn = '';
+                    // if(auth()->user()->can(['attendance_delete'])  && $query->punchin_date == date('Y-m-d'))
                     // {
-                    //     return isset($data->punchout_date) ? stringtodate($data->punchout_date) : stringtodate($data->punchin_date);
-                    // })
-                    
-                    // ->addColumn('punchin', function ($query) {
-                    //     $punchin_image = !empty($query->punchin_image) ? env('IMAGE_UPLOADS').$query->punchin_image : asset('assets/img/placeholder.jpg') ;
-                    //         return '<img src="'.$punchin_image.'" border="0" width="70" class="img-rounded imageDisplayModel" align="center" />';
-                    //     })
-                    ->addColumn('punchout', function ($query) {
-                        $punchout_image = !empty($query->punchout_image) ? env('IMAGE_UPLOADS').$query->punchout_image : asset('assets/img/placeholder.jpg') ;
-                        return '<img src="'.$punchout_image.'" border="0" width="70" class="img-rounded imageDisplayModel" align="center" />';
-                    })
-                    ->addColumn('action', function ($query) {
-                          $btn = '';
-                          // if(auth()->user()->can(['attendance_delete'])  && $query->punchin_date == date('Y-m-d'))
-                          // {
-                            $btn = '<a href="" class="btn btn-danger btn-just-icon btn-sm deleteAttendance" value="'.$query->id.'" title="Delete Attendance">
+                    $btn = '<a href="" class="btn btn-danger btn-just-icon btn-sm deleteAttendance" value="' . $query->id . '" title="Delete Attendance">
                                         <i class="material-icons">clear</i>
                                       </a>
-                                      <a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm removePunchout" value="'.$query->id.'" title="Remove Puncout">
+                                      <a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm removePunchout" value="' . $query->id . '" title="Remove Puncout">
                                     <i class="material-icons">schedule</i>
                                   </a>';
 
 
-                         // }
-                          return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
-                                '.$btn.'
+                    // }
+                    return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
+                                ' . $btn . '
                             </div>';
-                    })
+                })
 
-                    ->addColumn('action_status', function ($query) {
-                          $btn = '';
-                          // if(auth()->user()->can(['attendance_delete'])  && $query->punchin_date == date('Y-m-d'))
-                          // {
-                                
-                              if($query->attendance_status == 0){
- 
-                               $btn = '<a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm approve_status" value="'.$query->id.'" title="Approve Status">
+                ->addColumn('action_status', function ($query) {
+                    $btn = '';
+                    // if(auth()->user()->can(['attendance_delete'])  && $query->punchin_date == date('Y-m-d'))
+                    // {
+
+                    if ($query->attendance_status == 0) {
+
+                        $btn = '<a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm approve_status" value="' . $query->id . '" title="Approve Status">
                                         <i class="material-icons">approval</i>
                                       </a>
-                                      <a href="javascript:void(0)" class="btn btn-danger btn-just-icon btn-sm reject_status" value="'.$query->id.'" title="Reject Status">
+                                      <a href="javascript:void(0)" class="btn btn-danger btn-just-icon btn-sm reject_status" value="' . $query->id . '" title="Reject Status">
                                     <i class="material-icons">cancel</i>
                                   </a>
-                                  <a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm pending" value="'.$query->id.'" title="Pending">
+                                  <a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm pending" value="' . $query->id . '" title="Pending">
                                     <i class="material-icons">pending</i>
                                   </a>
-                                  ';   
-                              
-                              }
-                              if($query->attendance_status == 1){
+                                  ';
+                    }
+                    if ($query->attendance_status == 1) {
 
-                                $btn = '<a href="javascript:void(0)" class="btn btn-danger btn-just-icon btn-sm reject_status" value="'.$query->id.'" title="Reject Status">
+                        $btn = '<a href="javascript:void(0)" class="btn btn-danger btn-just-icon btn-sm reject_status" value="' . $query->id . '" title="Reject Status">
                                     <i class="material-icons">cancel</i>
                                   </a>';
-                              }
-                              if($query->attendance_status == 2){
+                    }
+                    if ($query->attendance_status == 2) {
 
-                                  $btn = '<a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm approve_status" value="'.$query->id.'" title="Approve Status">
+                        $btn = '<a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm approve_status" value="' . $query->id . '" title="Approve Status">
                                         <i class="material-icons">approval</i>
                                       </a>';
-                              }  
-                                  
+                    }
 
-                         // }
-                          return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
-                                '.$btn.'
+
+                    // }
+                    return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
+                                ' . $btn . '
                             </div>';
-                    })
+                })
 
 
 
 
-                    ->rawColumns(['punchin','punchout','action','action_status','current_status'])
-                    ->make(true);
+                ->rawColumns(['punchin', 'punchout', 'action', 'action_status', 'current_status'])
+                ->make(true);
         }
-        return view('reports.attendancereport',compact('users','user_filters'));
+        return view('reports.attendancereport', compact('users', 'branches'));
     }
     public function counterVisitReportDownload(Request $request)
     {
@@ -512,115 +493,111 @@ class ReportController extends Controller
     {
         $userids = getUsersReportingToAuth();
         if ($request->ajax()) {
-            $data = Customers::with('customertypes','firmtypes','createdbyname')
-                ->where(function($query) use($userids){
-                    if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                    {
+            $data = Customers::with('customertypes', 'firmtypes', 'createdbyname')
+                ->where(function ($query) use ($userids) {
+                    if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                         $query->whereIn('executive_id', $userids);
                     }
                 })
                 ->latest();
             return Datatables::of($item)
-                  ->addIndexColumn()
-                  ->editColumn('created_at', function($data)
-                  {
-                  return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
-                  })
+                ->addIndexColumn()
+                ->editColumn('created_at', function ($data) {
+                    return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
+                })
 
-                  ->addColumn('image', function ($query) {
-                        return '<img src="'.asset(!empty($query->profile_image) ? $query->profile_image : 'public/assets/img/placeholder.jpg').'" border="0" width="70" class="rounded-circle imageDisplayModel" align="center" />';
-                  })
-                  ->rawColumns(['image'])
-                  ->make(true);
+                ->addColumn('image', function ($query) {
+                    return '<img src="' . asset(!empty($query->profile_image) ? $query->profile_image : 'public/assets/img/placeholder.jpg') . '" border="0" width="70" class="rounded-circle imageDisplayModel" align="center" />';
+                })
+                ->rawColumns(['image'])
+                ->make(true);
         }
-        $users = User::where('active','=','Y')->where(function($query) use($userids){
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                                {
-                                    $query->whereIn('id',$userids);
-                                }
-                            })->select('id','name')->get();
-        return view('reports.customersreport',compact('users'));
+        $users = User::where('active', '=', 'Y')->where(function ($query) use ($userids) {
+            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                $query->whereIn('id', $userids);
+            }
+        })->select('id', 'name')->get();
+        return view('reports.customersreport', compact('users'));
     }
     public function perDayCounterVisitReport(Request $request)
     {
         $userids = getUsersReportingToAuth();
-        $start_date = !empty($request->input('start_date'))? $request->input('start_date') : date("Y-m-01");
-        $end_date = !empty($request->input('end_date'))? $request->input('end_date') : date("Y-m-t");
+        $start_date = !empty($request->input('start_date')) ? $request->input('start_date') : date("Y-m-01");
+        $end_date = !empty($request->input('end_date')) ? $request->input('end_date') : date("Y-m-t");
         if ($request->ajax()) {
-            $data = User::where(function($query) use($userids){
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                                {
-                                    $query->whereIn('id',$userids);
-                                }
-                            })->whereHas('roles', function($query){
-                                $query->whereNotIn('name',['superadmin','Admin']);
-                            })->select('id','name', 'mobile','location')->latest();
+            $data = User::where(function ($query) use ($userids) {
+                if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                    $query->whereIn('id', $userids);
+                }
+            })->whereHas('roles', function ($query) {
+                $query->whereNotIn('name', ['superadmin', 'Admin']);
+            })->select('id', 'name', 'mobile', 'location')->latest();
             $users = $data->pluck('id')->toArray();
-            $workings = Attendance::whereIn('user_id',$users)->select('id','punchin_date','worked_time','working_type','user_id')->get();
-            $attendances = $workings->map(function ($item) use($start_date, $end_date) {
+            $workings = Attendance::whereIn('user_id', $users)->select('id', 'punchin_date', 'worked_time', 'working_type', 'user_id')->get();
+            $attendances = $workings->map(function ($item) use ($start_date, $end_date) {
                 $days = 0;
                 switch ($item->worked_time) {
-                    case (date('H',strtotime($item->worked_time))  >= 4 && date('H',strtotime($item->worked_time)) < 7):
+                    case (date('H', strtotime($item->worked_time))  >= 4 && date('H', strtotime($item->worked_time)) < 7):
                         $days = 0.5;
                         break;
-                    case (date('H',strtotime($item->worked_time)) >= 7):
+                    case (date('H', strtotime($item->worked_time)) >= 7):
                         $days = 1;
                         break;
                     default:
                         break;
                 }
-                $item['field_working_days'] = ($item->working_type =='Tour' || $item->working_type =='Central Market' || $item->working_type =='Suburban') ? $days : 0 ;
-                $item['working_days'] = ($item->working_type != 'Tour' && $item->working_type !='Central Market' && $item->working_type !='Suburban') ? $days : 0 ;
-                $item['range_field_working_days'] = ((date('Y-m-d', strtotime($item->punchin_date)) >= date('Y-m-d', strtotime($start_date))) && (date('Y-m-d', strtotime($item->punchin_date)) <= date('Y-m-d', strtotime($end_date))) && $item->working_type =='Tour' || $item->working_type =='Central Market' || $item->working_type =='Suburban') ? $days : 0 ;
-                $item['range_working_days'] = (date('Y-m-d', strtotime($item->punchin_date)) >= date('Y-m-d', strtotime($start_date))) && (date('Y-m-d', strtotime($item->punchin_date)) <= date('Y-m-d', strtotime($end_date)) && $item->working_type != 'Tour' && $item->working_type !='Central Market' && $item->working_type !='Suburban') ? $days : 0 ;
-                return $item ;
+                $item['field_working_days'] = ($item->working_type == 'Tour' || $item->working_type == 'Central Market' || $item->working_type == 'Suburban') ? $days : 0;
+                $item['working_days'] = ($item->working_type != 'Tour' && $item->working_type != 'Central Market' && $item->working_type != 'Suburban') ? $days : 0;
+                $item['range_field_working_days'] = ((date('Y-m-d', strtotime($item->punchin_date)) >= date('Y-m-d', strtotime($start_date))) && (date('Y-m-d', strtotime($item->punchin_date)) <= date('Y-m-d', strtotime($end_date))) && $item->working_type == 'Tour' || $item->working_type == 'Central Market' || $item->working_type == 'Suburban') ? $days : 0;
+                $item['range_working_days'] = (date('Y-m-d', strtotime($item->punchin_date)) >= date('Y-m-d', strtotime($start_date))) && (date('Y-m-d', strtotime($item->punchin_date)) <= date('Y-m-d', strtotime($end_date)) && $item->working_type != 'Tour' && $item->working_type != 'Central Market' && $item->working_type != 'Suburban') ? $days : 0;
+                return $item;
             });
 
-            $counters = CheckIn::with('customers:id,created_at')->whereIn('user_id',$users)->select('customer_id', 'checkin_date','user_id')->get();
-            $revisited = $counters->map(function ($item) use($start_date, $end_date) {
-                $item['revisited_counters'] = (date("Y-m-d", strtotime($item['customers']['created_at'])) != date("Y-m-d", strtotime($item['checkin_date']))) ? 1 : 0 ;
-                $item['range_revisited_counters'] = (date('Y-m-d', strtotime($item->checkin_date)) >= date('Y-m-d', strtotime($start_date))) && (date('Y-m-d', strtotime($item->checkin_date)) <= date('Y-m-d', strtotime($end_date)) && (date("Y-m-d", strtotime($item['customers']['created_at'])) != date("Y-m-d", strtotime($item['checkin_date'])))) ? 1 : 0 ;
-                return $item ;
+            $counters = CheckIn::with('customers:id,created_at')->whereIn('user_id', $users)->select('customer_id', 'checkin_date', 'user_id')->get();
+            $revisited = $counters->map(function ($item) use ($start_date, $end_date) {
+                $item['revisited_counters'] = (date("Y-m-d", strtotime($item['customers']['created_at'])) != date("Y-m-d", strtotime($item['checkin_date']))) ? 1 : 0;
+                $item['range_revisited_counters'] = (date('Y-m-d', strtotime($item->checkin_date)) >= date('Y-m-d', strtotime($start_date))) && (date('Y-m-d', strtotime($item->checkin_date)) <= date('Y-m-d', strtotime($end_date)) && (date("Y-m-d", strtotime($item['customers']['created_at'])) != date("Y-m-d", strtotime($item['checkin_date'])))) ? 1 : 0;
+                return $item;
             });
-            $customers = Customers::whereIn('created_by',$users)->select('created_at','created_by');
+            $customers = Customers::whereIn('created_by', $users)->select('created_at', 'created_by');
             return Datatables::of($data)
-                    ->addIndexColumn()
-                    ->addColumn('non_field_working_days', function ($query) use($attendances ) {
-                        return $attendances->where('user_id',$query->id)->sum('working_days');
-                    })
-                    ->addColumn('field_working_days', function ($query) use($attendances) {
-                          return $attendances->where('user_id',$query->id)->sum('field_working_days');
-                    })
-                    ->addColumn('new_visit_counters', function ($query) use($customers) {
-                        return $customers->where('created_by',$query->id)->count();
-                    })
-                    ->addColumn('revisited_counters', function ($query) use($revisited) {
-                        return $revisited->where('user_id',$query->id)->sum('revisited_counters');  
-                    })
-                    ->addColumn('visits_per_day', function ($query) use($revisited, $attendances, $customers) {
-                        $visit_counters = $customers->where('created_by',$query->id)->count() + $revisited->where('user_id',$query->id)->sum('revisited_counters');
-                        $working_days = $attendances->where('user_id',$query->id)->sum('field_working_days');
-                        return !empty($visit_counters) ? floor($visit_counters/$working_days) : '';
-                    })
-                    ->addColumn('between_non_field_working_days', function ($query) use($attendances, $start_date, $end_date ) {
-                        return $attendances->where('user_id',$query->id)->where('punchin_date', '>=', date('Y-m-d',strtotime($start_date)))->where('punchin_date', '<=', date('Y-m-d',strtotime($end_date)))->sum('working_days');
-                    })
-                    ->addColumn('between_field_working_days', function ($query) use($attendances, $start_date, $end_date ) {
-                        return $attendances->where('user_id',$query->id)->where('punchin_date', '>=', date('Y-m-d',strtotime($start_date)))->where('punchin_date', '<=', date('Y-m-d',strtotime($end_date)))->sum('field_working_days');
-                    })
-                    ->addColumn('between_new_visit_counters', function ($query) use($customers, $start_date, $end_date ) {
-                        return $customers->where('created_by',$query->id)->where('created_at', '>=', date('Y-m-d',strtotime($start_date)))->whereDate('created_at', '<=', date('Y-m-d',strtotime($end_date)))->count();
-                    })
-                    ->addColumn('between_revisited_counters', function ($query) use($revisited, $start_date, $end_date ) {
-                        return $revisited->where('user_id',$query->id)->where('checkin_date', '>=', date('Y-m-d',strtotime($start_date)))->where('checkin_date', '<=', date('Y-m-d',strtotime($end_date)))->sum('revisited_counters');  
-                    })
-                    ->addColumn('between_visits_per_day', function ($query) use($revisited, $attendances, $customers, $start_date, $end_date ) {
-                        $visit_counters = $customers->where('created_by',$query->id)->whereDate('created_at', '>=', date('Y-m-d',strtotime($start_date)))->whereDate('created_at', '<=', date('Y-m-d',strtotime($end_date)))->count() + $revisited->where('user_id',$query->id)->where('checkin_date', '>=', date('Y-m-d',strtotime($start_date)))->where('checkin_date', '<=', date('Y-m-d',strtotime($end_date)))->sum('revisited_counters');
-                        $working_days = $attendances->where('user_id',$query->id)->where('punchin_date', '>=', date('Y-m-d',strtotime($start_date)))->where('punchin_date', '<=', date('Y-m-d',strtotime($end_date)))->sum('field_working_days');
-                        return !empty($visit_counters) ? floor($visit_counters/$working_days) : '';
-                    })
-                    ->rawColumns(['non_field_working_days','field_working_days','new_visit_counters','revisited_counters','visits_per_day','between_non_field_working_days','between_field_working_days','between_new_visit_counters','between_revisited_counters','between_visits_per_day'])
-                    ->make(true);
+                ->addIndexColumn()
+                ->addColumn('non_field_working_days', function ($query) use ($attendances) {
+                    return $attendances->where('user_id', $query->id)->sum('working_days');
+                })
+                ->addColumn('field_working_days', function ($query) use ($attendances) {
+                    return $attendances->where('user_id', $query->id)->sum('field_working_days');
+                })
+                ->addColumn('new_visit_counters', function ($query) use ($customers) {
+                    return $customers->where('created_by', $query->id)->count();
+                })
+                ->addColumn('revisited_counters', function ($query) use ($revisited) {
+                    return $revisited->where('user_id', $query->id)->sum('revisited_counters');
+                })
+                ->addColumn('visits_per_day', function ($query) use ($revisited, $attendances, $customers) {
+                    $visit_counters = $customers->where('created_by', $query->id)->count() + $revisited->where('user_id', $query->id)->sum('revisited_counters');
+                    $working_days = $attendances->where('user_id', $query->id)->sum('field_working_days');
+                    return !empty($visit_counters) ? floor($visit_counters / $working_days) : '';
+                })
+                ->addColumn('between_non_field_working_days', function ($query) use ($attendances, $start_date, $end_date) {
+                    return $attendances->where('user_id', $query->id)->where('punchin_date', '>=', date('Y-m-d', strtotime($start_date)))->where('punchin_date', '<=', date('Y-m-d', strtotime($end_date)))->sum('working_days');
+                })
+                ->addColumn('between_field_working_days', function ($query) use ($attendances, $start_date, $end_date) {
+                    return $attendances->where('user_id', $query->id)->where('punchin_date', '>=', date('Y-m-d', strtotime($start_date)))->where('punchin_date', '<=', date('Y-m-d', strtotime($end_date)))->sum('field_working_days');
+                })
+                ->addColumn('between_new_visit_counters', function ($query) use ($customers, $start_date, $end_date) {
+                    return $customers->where('created_by', $query->id)->where('created_at', '>=', date('Y-m-d', strtotime($start_date)))->whereDate('created_at', '<=', date('Y-m-d', strtotime($end_date)))->count();
+                })
+                ->addColumn('between_revisited_counters', function ($query) use ($revisited, $start_date, $end_date) {
+                    return $revisited->where('user_id', $query->id)->where('checkin_date', '>=', date('Y-m-d', strtotime($start_date)))->where('checkin_date', '<=', date('Y-m-d', strtotime($end_date)))->sum('revisited_counters');
+                })
+                ->addColumn('between_visits_per_day', function ($query) use ($revisited, $attendances, $customers, $start_date, $end_date) {
+                    $visit_counters = $customers->where('created_by', $query->id)->whereDate('created_at', '>=', date('Y-m-d', strtotime($start_date)))->whereDate('created_at', '<=', date('Y-m-d', strtotime($end_date)))->count() + $revisited->where('user_id', $query->id)->where('checkin_date', '>=', date('Y-m-d', strtotime($start_date)))->where('checkin_date', '<=', date('Y-m-d', strtotime($end_date)))->sum('revisited_counters');
+                    $working_days = $attendances->where('user_id', $query->id)->where('punchin_date', '>=', date('Y-m-d', strtotime($start_date)))->where('punchin_date', '<=', date('Y-m-d', strtotime($end_date)))->sum('field_working_days');
+                    return !empty($visit_counters) ? floor($visit_counters / $working_days) : '';
+                })
+                ->rawColumns(['non_field_working_days', 'field_working_days', 'new_visit_counters', 'revisited_counters', 'visits_per_day', 'between_non_field_working_days', 'between_field_working_days', 'between_new_visit_counters', 'between_revisited_counters', 'between_visits_per_day'])
+                ->make(true);
         }
         return view('reports.countervisitreport');
     }
@@ -633,81 +610,75 @@ class ReportController extends Controller
     public function tourProgramme(Request $request)
     {
         $userids = getUsersReportingToAuth();
-        $users = User::where('active','=','Y')->where(function($query) use($userids){
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                                {
-                                    $query->whereIn('id',$userids);
-                                }
-                            })->whereHas('roles', function($query){
-                                $query->whereNotIn('name',['superadmin','Admin']);
-                            })->select('id','name','mobile')->get();
+        $users = User::where('active', '=', 'Y')->where(function ($query) use ($userids) {
+            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                $query->whereIn('id', $userids);
+            }
+        })->whereHas('roles', function ($query) {
+            $query->whereNotIn('name', ['superadmin', 'Admin']);
+        })->select('id', 'name', 'mobile')->get();
         return view('reports.tourprogramme', compact('users'));
     }
 
     public function monthlyMovement(Request $request)
     {
         $userids = getUsersReportingToAuth();
-        $users = User::where('active','=','Y')->where(function($query) use($userids){
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                                {
-                                    $query->whereIn('id',$userids);
-                                }
-                            })->whereHas('roles', function($query){
-                                $query->whereNotIn('name',['superadmin','Admin']);
-                            })->select('id','name','mobile')->get();
+        $users = User::where('active', '=', 'Y')->where(function ($query) use ($userids) {
+            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                $query->whereIn('id', $userids);
+            }
+        })->whereHas('roles', function ($query) {
+            $query->whereNotIn('name', ['superadmin', 'Admin']);
+        })->select('id', 'name', 'mobile')->get();
         return view('reports.monthlymovement', compact('users'));
     }
 
     public function pointCollections(Request $request)
     {
         $userids = getUsersReportingToAuth();
-        $users = User::where('active','=','Y')->where(function($query) use($userids){
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                                {
-                                    $query->whereIn('id',$userids);
-                                }
-                            })->whereHas('roles', function($query){
-                                $query->whereNotIn('name',['superadmin','Admin']);
-                            })->select('id','name','mobile')->get();
+        $users = User::where('active', '=', 'Y')->where(function ($query) use ($userids) {
+            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                $query->whereIn('id', $userids);
+            }
+        })->whereHas('roles', function ($query) {
+            $query->whereNotIn('name', ['superadmin', 'Admin']);
+        })->select('id', 'name', 'mobile')->get();
         return view('reports.pointcollections', compact('users'));
     }
     public function territoryCoverage(Request $request)
     {
         $userids = getUsersReportingToAuth();
-        $users = User::where('active','=','Y')->where(function($query) use($userids){
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                                {
-                                    $query->whereIn('id',$userids);
-                                }
-                            })->whereHas('roles', function($query){
-                                $query->whereNotIn('name',['superadmin','Admin']);
-                            })->select('id','name','mobile')->get();
+        $users = User::where('active', '=', 'Y')->where(function ($query) use ($userids) {
+            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                $query->whereIn('id', $userids);
+            }
+        })->whereHas('roles', function ($query) {
+            $query->whereNotIn('name', ['superadmin', 'Admin']);
+        })->select('id', 'name', 'mobile')->get();
         return view('reports.territorycoverage', compact('users'));
     }
     public function performanceParameter(Request $request)
     {
         $userids = getUsersReportingToAuth();
-        $users = User::where('active','=','Y')->where(function($query) use($userids){
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                                {
-                                    $query->whereIn('id',$userids);
-                                }
-                            })->whereHas('roles', function($query){
-                                $query->whereNotIn('name',['superadmin','Admin']);
-                            })->select('id','name','mobile')->get();
+        $users = User::where('active', '=', 'Y')->where(function ($query) use ($userids) {
+            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                $query->whereIn('id', $userids);
+            }
+        })->whereHas('roles', function ($query) {
+            $query->whereNotIn('name', ['superadmin', 'Admin']);
+        })->select('id', 'name', 'mobile')->get();
         return view('reports.performanceparameter', compact('users'));
     }
     public function asmWiseMechanicsPoints(Request $request)
     {
         $userids = getUsersReportingToAuth();
-        $users = User::where('active','=','Y')->where(function($query) use($userids){
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                                {
-                                    $query->whereIn('id',$userids);
-                                }
-                            })->whereHas('roles', function($query){
-                                $query->whereNotIn('name',['superadmin','Admin']);
-                            })->select('id','name','mobile')->get();
+        $users = User::where('active', '=', 'Y')->where(function ($query) use ($userids) {
+            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                $query->whereIn('id', $userids);
+            }
+        })->whereHas('roles', function ($query) {
+            $query->whereNotIn('name', ['superadmin', 'Admin']);
+        })->select('id', 'name', 'mobile')->get();
         return view('reports.asmwisemechanicspoints', compact('users'));
     }
     public function targetVsSales(Request $request)
@@ -717,159 +688,140 @@ class ReportController extends Controller
 
     public function fieldActivityReportData(Request $request)
     {
-        try
-        {
+        try {
             $userids = getUsersReportingToAuth();
-            $threemonth = date("Y-m-d",strtotime("-3 Months"));
-            $sixmonth = date("Y-m-d",strtotime("-6 Months"));
+            $threemonth = date("Y-m-d", strtotime("-3 Months"));
+            $sixmonth = date("Y-m-d", strtotime("-6 Months"));
             $fromdate = date("Y-m-01");
             $todate = date("Y-m-t");
-            $users = User::with('cities','roles')->where(function($query) use($userids){
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                                {
-                                    $query->whereIn('id',$userids);
-                                }
-                            })
-                            ->whereHas('roles', function($query){
-                                $query->whereNotIn('name',['superadmin','Admin']);
-                            })->where('active','=','Y')->select('id','name','location')->get();
-            $data = $users->map(function ($item, $key) use($fromdate, $todate, $threemonth, $sixmonth) {
-                        $visited = collect([
-                            'new_dealer_visited' => 0,
-                            'existing_dealer_visited' => 0,
-                            'total_dealer_visited' => 0,
-                            'new_mechanic_visited' => 0,
-                            'existing_mechanic_visited' => 0,
-                            'total_mechanic_visited' => 0,
-                        ]);
-                        $cities = UserCityAssign::with('cityname')->where('userid','=',$item['id'])->select('city_id')->get();
-                        $tourdetails = TourDetail::with('visitedcities','tourinfo')->whereHas('tourinfo', function ($query) use($sixmonth, $todate, $item){
-                                                if($sixmonth)
-                                                {
-                                                $query->whereDate('date', '>=', date('Y-m-d',strtotime($sixmonth)));
-                                                }
-                                                if($todate)
-                                                {
-                                                $query->whereDate('date', '<=', date('Y-m-d',strtotime($todate)));
-                                                }
-                                                $query->where('userid','=',$item['id']);
-                                            })
-                                            ->whereNotNull('visited_cityid')
-                                            ->select('visited_cityid','tourid')
-                                            ->get();
-                        $checkins =  CheckIn::with('customers')->where(function ($query) use($fromdate, $todate, $item)  {
-                                                if($fromdate)
-                                                {
-                                                $query->where('checkin_date', '>=', date('Y-m-d',strtotime($fromdate)));
-                                                }
-                                                if($todate)
-                                                {
-                                                $query->where('checkin_date', '<=', date('Y-m-d',strtotime($todate)));
-                                                }
-                                                $query->where('user_id','=',$item['id']);
-                                            })
-                                            ->select('customer_id','checkin_date')->get();
+            $users = User::with('cities', 'roles')->where(function ($query) use ($userids) {
+                if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                    $query->whereIn('id', $userids);
+                }
+            })
+                ->whereHas('roles', function ($query) {
+                    $query->whereNotIn('name', ['superadmin', 'Admin']);
+                })->where('active', '=', 'Y')->select('id', 'name', 'location')->get();
+            $data = $users->map(function ($item, $key) use ($fromdate, $todate, $threemonth, $sixmonth) {
+                $visited = collect([
+                    'new_dealer_visited' => 0,
+                    'existing_dealer_visited' => 0,
+                    'total_dealer_visited' => 0,
+                    'new_mechanic_visited' => 0,
+                    'existing_mechanic_visited' => 0,
+                    'total_mechanic_visited' => 0,
+                ]);
+                $cities = UserCityAssign::with('cityname')->where('userid', '=', $item['id'])->select('city_id')->get();
+                $tourdetails = TourDetail::with('visitedcities', 'tourinfo')->whereHas('tourinfo', function ($query) use ($sixmonth, $todate, $item) {
+                    if ($sixmonth) {
+                        $query->whereDate('date', '>=', date('Y-m-d', strtotime($sixmonth)));
+                    }
+                    if ($todate) {
+                        $query->whereDate('date', '<=', date('Y-m-d', strtotime($todate)));
+                    }
+                    $query->where('userid', '=', $item['id']);
+                })
+                    ->whereNotNull('visited_cityid')
+                    ->select('visited_cityid', 'tourid')
+                    ->get();
+                $checkins =  CheckIn::with('customers')->where(function ($query) use ($fromdate, $todate, $item) {
+                    if ($fromdate) {
+                        $query->where('checkin_date', '>=', date('Y-m-d', strtotime($fromdate)));
+                    }
+                    if ($todate) {
+                        $query->where('checkin_date', '<=', date('Y-m-d', strtotime($todate)));
+                    }
+                    $query->where('user_id', '=', $item['id']);
+                })
+                    ->select('customer_id', 'checkin_date')->get();
 
-                        $checkins->map(function ($item2) use($visited) {
-                            if(date("Y-m-d", strtotime($item2['customers']['created_at'])) != date("Y-m-d", strtotime($item2['checkin_date'])))
-                            {
-                                if($item2['customers']['customertype'] == 2)
-                                {
-                                    $visited['existing_dealer_visited'] = $visited['existing_dealer_visited'] + 1;
-                                    $visited['total_dealer_visited'] = $visited['total_dealer_visited'] + 1;
-                                }
-                                if($item2['customers']['customertype'] == 4)
-                                {
-                                    $visited['existing_mechanic_visited'] = $visited['existing_mechanic_visited'] + 1;
-                                    $visited['total_mechanic_visited'] = $visited['total_mechanic_visited'] + 1;
-                                }
-                            }
-                            else
-                            {
-                                if($item2['customers']['customertype'] == 2)
-                                {
-                                    $visited['new_dealer_visited'] = $visited['new_dealer_visited'] + 1;
-                                    $visited['total_dealer_visited'] = $visited['total_dealer_visited'] + 1;
-                                }
-                                if($item2['customers']['customertype'] == 4)
-                                {
-                                    $visited['new_mechanic_visited'] = $visited['new_mechanic_visited']+ 1;
-                                    $visited['total_mechanic_visited'] = $visited['total_mechanic_visited'] + 1;
-                                }
-                            }
-                        });
+                $checkins->map(function ($item2) use ($visited) {
+                    if (date("Y-m-d", strtotime($item2['customers']['created_at'])) != date("Y-m-d", strtotime($item2['checkin_date']))) {
+                        if ($item2['customers']['customertype'] == 2) {
+                            $visited['existing_dealer_visited'] = $visited['existing_dealer_visited'] + 1;
+                            $visited['total_dealer_visited'] = $visited['total_dealer_visited'] + 1;
+                        }
+                        if ($item2['customers']['customertype'] == 4) {
+                            $visited['existing_mechanic_visited'] = $visited['existing_mechanic_visited'] + 1;
+                            $visited['total_mechanic_visited'] = $visited['total_mechanic_visited'] + 1;
+                        }
+                    } else {
+                        if ($item2['customers']['customertype'] == 2) {
+                            $visited['new_dealer_visited'] = $visited['new_dealer_visited'] + 1;
+                            $visited['total_dealer_visited'] = $visited['total_dealer_visited'] + 1;
+                        }
+                        if ($item2['customers']['customertype'] == 4) {
+                            $visited['new_mechanic_visited'] = $visited['new_mechanic_visited'] + 1;
+                            $visited['total_mechanic_visited'] = $visited['total_mechanic_visited'] + 1;
+                        }
+                    }
+                });
 
-                        $points = Wallet::with('customers')->where(function ($query) use($fromdate, $todate, $item)  {
-                                                if($fromdate)
-                                                {
-                                                $query->where('transaction_at', '>=', date('Y-m-d',strtotime($fromdate)));
-                                                }
-                                                if($todate)
-                                                {
-                                                $query->where('transaction_at', '<=', date('Y-m-d',strtotime($todate)));
-                                                }
-                                                $query->where('transaction_type','=','Cr');
-                                                $query->where('userid','=',$item['id']);
-                                            })
-                                            ->select('points','customer_id')->get();
-                        $item['month'] = date('M');
-                        $item['stations_in_territory_a'] = $cities->where('cityname.grade','=','A')->count();
-                        $item['stations_in_territory_b'] = $cities->where('cityname.grade','=','B')->count();
-                        $item['stations_in_territory_c'] = $cities->where('cityname.grade','=','C')->count();
-                        $item['stations_in_territory_total'] = $cities->count();
-                        $item['stations_visited_month_a'] = $tourdetails->where('tourinfo.date', '>=', date('Y-m-d',strtotime($fromdate)))->where('visitedcities.grade','=','A')->unique('visited_cityid')->count();
-                        $item['stations_visited_month_b'] = $tourdetails->where('tourinfo.date', '>=', date('Y-m-d',strtotime($fromdate)))->where('visitedcities.grade','=','B')->unique('visited_cityid')->count();
-                        $item['stations_visited_month_c'] = $tourdetails->where('tourinfo.date', '>=', date('Y-m-d',strtotime($fromdate)))->where('visitedcities.grade','=','C')->unique('visited_cityid')->count();
-                        $item['stations_visited_month_total'] = $tourdetails->where('tourinfo.date', '>=', date('Y-m-d',strtotime($fromdate)))->unique('visited_cityid')->count();
-                        $item['new_dealer_visited'] = $visited['new_dealer_visited'];
-                        $item['existing_dealer_visited'] = $visited['existing_dealer_visited'];
-                        $item['total_dealer_visited'] = $visited['total_dealer_visited'];
-                        $item['new_mechanic_visited'] = $visited['new_mechanic_visited'];
-                        $item['existing_mechanic_visited'] = $visited['existing_mechanic_visited'];
-                        $item['total_mechanic_visited'] = $visited['total_mechanic_visited'];
-                        $item['points_collected_garage'] = $points->where('customers.customertype','=',4)->sum('points');
-                        $item['points_collected_dealer'] = $points->where('customers.customertype','=',2)->sum('points');
-                        $item['stations_visited_last_three_months'] = $tourdetails->where('tourinfo.date', '>=', date('Y-m-d',strtotime($threemonth)))->unique('visited_cityid')->count();
-                        $item['stations_visited_last_three_months_abc'] = $tourdetails->where('tourinfo.date', '>=', date('Y-m-d',strtotime($threemonth)))->whereIn('visitedcities.grade',['A','B','C'])->unique('visited_cityid')->count();
-                        $item['stations_visited_last_six_months'] = $tourdetails->unique('visited_cityid')->count();
-                        $item['stations_visited_last_six_months_abc'] = $tourdetails->whereIn('visitedcities.grade',['A','B','C'])->unique('visited_cityid')->count();
-                        $item['stations_activity_name'] = isset($item['location']) ? $item['location'] :'';
-                        $item['sales_blitz_activity_date'] = '';
-                        $item['nukkad_activity_date'] = '';
-                        $item['road_show_activity_date'] = '';
-                        $item['van_campaign_activity_date'] = '';
-                        $item['activity_expenses'] = '';
-                        $item['remarks'] = '';
-                        return $item;
-                    });
+                $points = Wallet::with('customers')->where(function ($query) use ($fromdate, $todate, $item) {
+                    if ($fromdate) {
+                        $query->where('transaction_at', '>=', date('Y-m-d', strtotime($fromdate)));
+                    }
+                    if ($todate) {
+                        $query->where('transaction_at', '<=', date('Y-m-d', strtotime($todate)));
+                    }
+                    $query->where('transaction_type', '=', 'Cr');
+                    $query->where('userid', '=', $item['id']);
+                })
+                    ->select('points', 'customer_id')->get();
+                $item['month'] = date('M');
+                $item['stations_in_territory_a'] = $cities->where('cityname.grade', '=', 'A')->count();
+                $item['stations_in_territory_b'] = $cities->where('cityname.grade', '=', 'B')->count();
+                $item['stations_in_territory_c'] = $cities->where('cityname.grade', '=', 'C')->count();
+                $item['stations_in_territory_total'] = $cities->count();
+                $item['stations_visited_month_a'] = $tourdetails->where('tourinfo.date', '>=', date('Y-m-d', strtotime($fromdate)))->where('visitedcities.grade', '=', 'A')->unique('visited_cityid')->count();
+                $item['stations_visited_month_b'] = $tourdetails->where('tourinfo.date', '>=', date('Y-m-d', strtotime($fromdate)))->where('visitedcities.grade', '=', 'B')->unique('visited_cityid')->count();
+                $item['stations_visited_month_c'] = $tourdetails->where('tourinfo.date', '>=', date('Y-m-d', strtotime($fromdate)))->where('visitedcities.grade', '=', 'C')->unique('visited_cityid')->count();
+                $item['stations_visited_month_total'] = $tourdetails->where('tourinfo.date', '>=', date('Y-m-d', strtotime($fromdate)))->unique('visited_cityid')->count();
+                $item['new_dealer_visited'] = $visited['new_dealer_visited'];
+                $item['existing_dealer_visited'] = $visited['existing_dealer_visited'];
+                $item['total_dealer_visited'] = $visited['total_dealer_visited'];
+                $item['new_mechanic_visited'] = $visited['new_mechanic_visited'];
+                $item['existing_mechanic_visited'] = $visited['existing_mechanic_visited'];
+                $item['total_mechanic_visited'] = $visited['total_mechanic_visited'];
+                $item['points_collected_garage'] = $points->where('customers.customertype', '=', 4)->sum('points');
+                $item['points_collected_dealer'] = $points->where('customers.customertype', '=', 2)->sum('points');
+                $item['stations_visited_last_three_months'] = $tourdetails->where('tourinfo.date', '>=', date('Y-m-d', strtotime($threemonth)))->unique('visited_cityid')->count();
+                $item['stations_visited_last_three_months_abc'] = $tourdetails->where('tourinfo.date', '>=', date('Y-m-d', strtotime($threemonth)))->whereIn('visitedcities.grade', ['A', 'B', 'C'])->unique('visited_cityid')->count();
+                $item['stations_visited_last_six_months'] = $tourdetails->unique('visited_cityid')->count();
+                $item['stations_visited_last_six_months_abc'] = $tourdetails->whereIn('visitedcities.grade', ['A', 'B', 'C'])->unique('visited_cityid')->count();
+                $item['stations_activity_name'] = isset($item['location']) ? $item['location'] : '';
+                $item['sales_blitz_activity_date'] = '';
+                $item['nukkad_activity_date'] = '';
+                $item['road_show_activity_date'] = '';
+                $item['van_campaign_activity_date'] = '';
+                $item['activity_expenses'] = '';
+                $item['remarks'] = '';
+                return $item;
+            });
             return response()->json($data);
-        }
-        catch(\Exception $e){
+        } catch (\Exception $e) {
             return $e;
         }
     }
     public function tourProgrammeReportData(Request $request)
     {
-        try
-        {
-            $userid = !empty($request->input('user_id') ) ? $request->input('user_id') : Auth::user()->id;
+        try {
+            $userid = !empty($request->input('user_id')) ? $request->input('user_id') : Auth::user()->id;
             $fromdate = date("Y-m-01");
             $todate = date("Y-m-t");
-            $tours = TourProgramme::with('tourdetails')->where('userid','=',$userid)
-                                    ->where('date', '>=', date('Y-m-d',strtotime($fromdate)))
-                                    ->where('date', '<=', date('Y-m-d',strtotime($todate)))
-                                    ->select('id','date','objectives','town','type','status')
-                                    ->get();
+            $tours = TourProgramme::with('tourdetails')->where('userid', '=', $userid)
+                ->where('date', '>=', date('Y-m-d', strtotime($fromdate)))
+                ->where('date', '<=', date('Y-m-d', strtotime($todate)))
+                ->select('id', 'date', 'objectives', 'town', 'type', 'status')
+                ->get();
             $finaldata = $tours->map(function ($item, $key) {
                 $category = collect([]);
                 $visited_date = collect([]);
                 foreach ($item['tourdetails'] as $key => $detail) {
-                    if(!empty($detail['cityname']))
-                    {
+                    if (!empty($detail['cityname'])) {
                         $category->push($detail['cityname']['grade']);
                     }
-                    if(!empty($detail['visited_date']))
-                    {
+                    if (!empty($detail['visited_date'])) {
                         $visited_date->push($detail['visited_date']);
                     }
                 }
@@ -880,99 +832,95 @@ class ReportController extends Controller
                 return $item;
             });
             $collections['tours'] = $finaldata;
-            $collections['users'] = User::where('id', $userid)->select('name','location')->first();
+            $collections['users'] = User::where('id', $userid)->select('name', 'location')->first();
             return response()->json($collections);
-        }
-        catch(\Exception $e){
+        } catch (\Exception $e) {
             return $e;
         }
     }
     public function monthlyMovementReportData(Request $request)
     {
-        try
-        {
-            $userid = !empty($request->input('user_id') ) ? $request->input('user_id') : Auth::user()->id;
+        try {
+            $userid = !empty($request->input('user_id')) ? $request->input('user_id') : Auth::user()->id;
             $fromdate = date("Y-m-01");
             $todate = date("Y-m-t");
-            $tours = TourProgramme::with('tourdetails')->where('userid','=',$userid)
-                                    ->where('date', '>=', date('Y-m-d',strtotime($fromdate)))
-                                    ->where('date', '<=', date('Y-m-d',strtotime($todate)))
-                                    ->select('id','userid','date','objectives','type','town')
-                                    ->get();
+            $tours = TourProgramme::with('tourdetails')->where('userid', '=', $userid)
+                ->where('date', '>=', date('Y-m-d', strtotime($fromdate)))
+                ->where('date', '<=', date('Y-m-d', strtotime($todate)))
+                ->select('id', 'userid', 'date', 'objectives', 'type', 'town')
+                ->get();
             $finaldata = $tours->map(function ($item, $key) {
                 switch ($item['type']) {
                     case 'Tour':
-                        $item['type'] = 'T' ;
+                        $item['type'] = 'T';
                         break;
                     case 'Office Work':
-                        $item['type'] = 'O' ;
+                        $item['type'] = 'O';
                         break;
                     case 'Suburban':
-                        $item['type'] = 'S' ;
+                        $item['type'] = 'S';
                         break;
                     case 'Central Market':
-                        $item['type'] = 'C' ;
+                        $item['type'] = 'C';
                         break;
                     case 'Holiday':
-                        $item['type'] = 'H' ;
+                        $item['type'] = 'H';
                         break;
                     case 'Leave':
-                        $item['type'] = 'L' ;
+                        $item['type'] = 'L';
                         break;
                     default:
-                        $item['type'] = '' ;
+                        $item['type'] = '';
                         break;
                 }
                 $grade = collect([]);
                 $cityname = collect([]);
-                if(!empty($item['tourdetails']))
-                {
+                if (!empty($item['tourdetails'])) {
                     foreach ($item['tourdetails'] as $key => $detail) {
-                        if(!empty($detail['visited_cityid']))
-                        {
+                        if (!empty($detail['visited_cityid'])) {
                             $grade->push($detail['visitedcities']['grade']);
                             $cityname->push($detail['visitedcities']['city_name']);
                         }
                     }
-                }  
+                }
                 $item['actual_visited'] = implode(',', $cityname->unique()->toArray());
                 $item['grade'] = implode(',', $grade->unique()->toArray());
                 $item['dealer_visited'] = CheckIn::whereHas('customers', function ($query) {
-                                                        $query->where('customertype','=',2);
-                                                    })
-                                                    ->whereDate('checkin_date', '=', date('Y-m-d',strtotime($item['date'])))
-                                                    ->where('user_id','=',$item['userid'])
-                                                    ->count();
+                    $query->where('customertype', '=', 2);
+                })
+                    ->whereDate('checkin_date', '=', date('Y-m-d', strtotime($item['date'])))
+                    ->where('user_id', '=', $item['userid'])
+                    ->count();
                 $item['mechanic_visited'] = CheckIn::whereHas('customers', function ($query) {
-                                                        $query->where('customertype','=',4);
-                                                    })
-                                                    ->whereDate('checkin_date', '=', date('Y-m-d',strtotime($item['date'])))
-                                                    ->where('user_id','=',$item['userid'])
-                                                    ->count();
+                    $query->where('customertype', '=', 4);
+                })
+                    ->whereDate('checkin_date', '=', date('Y-m-d', strtotime($item['date'])))
+                    ->where('user_id', '=', $item['userid'])
+                    ->count();
                 $item['stu_visited'] = CheckIn::whereHas('customers', function ($query) {
-                                                        $query->where('customertype','=',5);
-                                                    })
-                                                    ->whereDate('checkin_date', '=', date('Y-m-d',strtotime($item['date'])))
-                                                    ->where('user_id','=',$item['userid'])
-                                                    ->count();
+                    $query->where('customertype', '=', 5);
+                })
+                    ->whereDate('checkin_date', '=', date('Y-m-d', strtotime($item['date'])))
+                    ->where('user_id', '=', $item['userid'])
+                    ->count();
                 $item['fleet_owner_visited'] = CheckIn::whereHas('customers', function ($query) {
-                                                        $query->where('customertype','=',6);
-                                                    })
-                                                    ->whereDate('checkin_date', '=', date('Y-m-d',strtotime($item['date'])))
-                                                    ->where('user_id','=',$item['userid'])
-                                                    ->count();
-                $item['total_visited'] = CheckIn::whereDate('checkin_date', '=', date('Y-m-d',strtotime($item['date'])))->where('user_id','=',$item['userid'])->count();
-                $points = Wallet::whereDate('transaction_at', '=', date('Y-m-d',strtotime($item['date'])))
-                                ->where('userid','=',$item['userid'])
-                                ->select('points','quantity','point_type')
-                                ->get();
-                $item['no_of_coupons'] = $points->where('point_type','=','coupons')->sum('quantity');
-                $item['total_points'] = $points->where('point_type','=','coupons')->sum('points');
-                $item['no_of_gifts'] = $points->where('point_type','=','gifts')->sum('quantity');
-                $item['gift_value'] = $points->where('point_type','=','gifts')->sum('points');
-                return $item ;
+                    $query->where('customertype', '=', 6);
+                })
+                    ->whereDate('checkin_date', '=', date('Y-m-d', strtotime($item['date'])))
+                    ->where('user_id', '=', $item['userid'])
+                    ->count();
+                $item['total_visited'] = CheckIn::whereDate('checkin_date', '=', date('Y-m-d', strtotime($item['date'])))->where('user_id', '=', $item['userid'])->count();
+                $points = Wallet::whereDate('transaction_at', '=', date('Y-m-d', strtotime($item['date'])))
+                    ->where('userid', '=', $item['userid'])
+                    ->select('points', 'quantity', 'point_type')
+                    ->get();
+                $item['no_of_coupons'] = $points->where('point_type', '=', 'coupons')->sum('quantity');
+                $item['total_points'] = $points->where('point_type', '=', 'coupons')->sum('points');
+                $item['no_of_gifts'] = $points->where('point_type', '=', 'gifts')->sum('quantity');
+                $item['gift_value'] = $points->where('point_type', '=', 'gifts')->sum('points');
+                return $item;
             });
-            $data['users'] = User::where('id', $userid)->select('name','location')->first();
+            $data['users'] = User::where('id', $userid)->select('name', 'location')->first();
             $data['tours'] = $finaldata;
             $data['total'] = collect([
                 'dealer_visited' => $finaldata->sum('dealer_visited'),
@@ -986,140 +934,136 @@ class ReportController extends Controller
                 'gift_value' => $finaldata->sum('gift_value'),
             ]);
             return response()->json($data);
-        }
-        catch(\Exception $e){
+        } catch (\Exception $e) {
             return $e;
         }
     }
     public function pointCollectionReportData(Request $request)
     {
-        try
-        {
-            $userid = !empty($request->input('user_id') ) ? $request->input('user_id') : Auth::user()->id;
+        try {
+            $userid = !empty($request->input('user_id')) ? $request->input('user_id') : Auth::user()->id;
             $fromdate = date("Y-m-01");
             $todate = date("Y-m-t");
-           $points = Wallet::with('customers','customers.customeraddress.cityname')->where('userid','=',$userid)
-                        ->where('transaction_at', '>=', date('Y-m-d',strtotime($fromdate)))
-                        ->where('transaction_at', '<=', date('Y-m-d',strtotime($todate)))
-                        ->where('transaction_type', '=', 'Cr')
-                        ->select(['customer_id',DB::raw("SUM(quantity) as total_quantity"), DB::raw("SUM(points) as total_points")])
-                        ->groupBy('customer_id')
-                        ->get();
+            $points = Wallet::with('customers', 'customers.customeraddress.cityname')->where('userid', '=', $userid)
+                ->where('transaction_at', '>=', date('Y-m-d', strtotime($fromdate)))
+                ->where('transaction_at', '<=', date('Y-m-d', strtotime($todate)))
+                ->where('transaction_type', '=', 'Cr')
+                ->select(['customer_id', DB::raw("SUM(quantity) as total_quantity"), DB::raw("SUM(points) as total_points")])
+                ->groupBy('customer_id')
+                ->get();
             $finaldata = $points->map(function ($item, $key) {
-                $item['city_name'] = isset($item['customers']['customeraddress']['cityname']['city_name']) ? $item['customers']['customeraddress']['cityname']['city_name'] :'';
+                $item['city_name'] = isset($item['customers']['customeraddress']['cityname']['city_name']) ? $item['customers']['customeraddress']['cityname']['city_name'] : '';
                 return $item;
             });
-            $data['users'] = User::where('id', $userid)->select('name','location')->first();
+            $data['users'] = User::where('id', $userid)->select('name', 'location')->first();
             $data['points'] = $finaldata;
             $data['total'] = collect([
                 'total_quantity' => $points->sum('total_quantity'),
                 'total_points' => $points->sum('total_points'),
             ]);
             return response()->json($data);
-        }
-        catch(\Exception $e){
+        } catch (\Exception $e) {
             return $e;
         }
     }
     public function territoryCoverageReportData(Request $request)
     {
-        try
-        {
-            $userid = !empty($request->input('user_id') ) ? $request->input('user_id') : Auth::user()->id;
+        try {
+            $userid = !empty($request->input('user_id')) ? $request->input('user_id') : Auth::user()->id;
             $fromdate = date("Y-m-01");
             $todate = date("Y-m-t");
             $cities = UserCityAssign::with('cityname')->where('userid', $userid)->select('city_id')->get();
-            $finaldata = $cities->map(function ($item, $key) use($fromdate , $todate, $userid) {
-                $item['city_name'] = isset($item['cityname']['city_name']) ? $item['cityname']['city_name'] :'';
-                $item['grade'] = isset($item['cityname']['grade']) ? $item['cityname']['grade'] :'';
-                $item['total_dealer'] = Customers::where('customertype','=','2')
-                                                    ->whereHas('customeraddress', function ($query) use($item) {
-                                                        $query->where('city_id','=',$item['city_id']);
-                                                    })->count();
-                $item['total_mechanic'] = Customers::where('customertype','=','4')
-                                                    ->whereHas('customeraddress', function ($query) use($item) {
-                                                        $query->where('city_id','=',$item['city_id']);
-                                                    })->count();
-                $item['dealer_visited'] = CheckIn::whereHas('customers', function ($query) use($item) {
-                                                        $query->where('customertype','=',2);
-                                                        $query->whereHas('customeraddress', function ($query) use($item) {
-                                                            $query->where('city_id','=',$item['city_id']);
-                                                        });
-                                                    })
-                                                    ->whereDate('checkin_date', '>=', date('Y-m-d',strtotime($fromdate)))
-                                                    ->whereDate('checkin_date', '<=', date('Y-m-d',strtotime($todate)))
-                                                    ->where('user_id','=',$item['userid'])
-                                                    ->count();
-                $item['mechanic_visited'] = CheckIn::whereHas('customers', function ($query) use($item) {
-                                                        $query->where('customertype','=',4);
-                                                        $query->whereHas('customeraddress', function ($query) use($item) {
-                                                            $query->where('city_id','=',$item['city_id']);
-                                                        });
-                                                    })
-                                                    ->whereDate('checkin_date', '>=', date('Y-m-d',strtotime($fromdate)))
-                                                    ->whereDate('checkin_date', '<=', date('Y-m-d',strtotime($todate)))
-                                                    ->where('user_id','=',$item['userid'])
-                                                    ->count();
-                $item['gift_coupons'] = Wallet::whereHas('customers', function ($query) use($item) {
-                                                        $query->whereHas('customeraddress', function ($query) use($item) {
-                                                            $query->where('city_id','=',$item['city_id']);
-                                                        });
-                                                    })
-                                                ->where('userid','=',$userid)
-                                                ->where('transaction_at', '>=', date('Y-m-d',strtotime($fromdate)))
-                                                ->where('transaction_at', '<=', date('Y-m-d',strtotime($todate)))
-                                                ->where('point_type','=','coupon')
-                                                ->where('transaction_type', '=', 'Cr')
-                                                ->sum('points');
-                $item['mrp_label'] = Wallet::whereHas('customers', function ($query) use($item) {
-                                                        $query->whereHas('customeraddress', function ($query) use($item) {
-                                                            $query->where('city_id','=',$item['city_id']);
-                                                        });
-                                                    })
-                                                ->where('userid','=',$userid)
-                                                ->where('transaction_at', '>=', date('Y-m-d',strtotime($fromdate)))
-                                                ->where('transaction_at', '<=', date('Y-m-d',strtotime($todate)))
-                                                ->where('point_type','=','mrp')
-                                                ->where('transaction_type', '=', 'Cr')
-                                                ->sum('points');
-                $item['total_dealer_visited'] = CheckIn::whereHas('customers', function ($query) use($item) {
-                                                        $query->where('customertype','=',2);
-                                                        $query->whereHas('customeraddress', function ($query) use($item) {
-                                                            $query->where('city_id','=',$item['city_id']);
-                                                        });
-                                                    })
-                                                    ->where('user_id','=',$item['userid'])
-                                                    ->count();
-                $item['total_mechanic_visited'] = CheckIn::whereHas('customers', function ($query) use($item) {
-                                                        $query->where('customertype','=',4);
-                                                        $query->whereHas('customeraddress', function ($query) use($item) {
-                                                            $query->where('city_id','=',$item['city_id']);
-                                                        });
-                                                    })
-                                                    ->where('user_id','=',$item['userid'])
-                                                    ->count();
-                $item['total_gift_coupons'] = Wallet::whereHas('customers', function ($query) use($item) {
-                                                        $query->whereHas('customeraddress', function ($query) use($item) {
-                                                            $query->where('city_id','=',$item['city_id']);
-                                                        });
-                                                    })
-                                                ->where('userid','=',$userid)
-                                                ->where('point_type','=','coupon')
-                                                ->where('transaction_type', '=', 'Cr')
-                                                ->sum('points');
-                $item['total_mrp_label'] = Wallet::whereHas('customers', function ($query) use($item) {
-                                                        $query->whereHas('customeraddress', function ($query) use($item) {
-                                                            $query->where('city_id','=',$item['city_id']);
-                                                        });
-                                                    })
-                                                ->where('userid','=',$userid)
-                                                ->where('point_type','=','mrp')
-                                                ->where('transaction_type', '=', 'Cr')
-                                                ->sum('points');
+            $finaldata = $cities->map(function ($item, $key) use ($fromdate, $todate, $userid) {
+                $item['city_name'] = isset($item['cityname']['city_name']) ? $item['cityname']['city_name'] : '';
+                $item['grade'] = isset($item['cityname']['grade']) ? $item['cityname']['grade'] : '';
+                $item['total_dealer'] = Customers::where('customertype', '=', '2')
+                    ->whereHas('customeraddress', function ($query) use ($item) {
+                        $query->where('city_id', '=', $item['city_id']);
+                    })->count();
+                $item['total_mechanic'] = Customers::where('customertype', '=', '4')
+                    ->whereHas('customeraddress', function ($query) use ($item) {
+                        $query->where('city_id', '=', $item['city_id']);
+                    })->count();
+                $item['dealer_visited'] = CheckIn::whereHas('customers', function ($query) use ($item) {
+                    $query->where('customertype', '=', 2);
+                    $query->whereHas('customeraddress', function ($query) use ($item) {
+                        $query->where('city_id', '=', $item['city_id']);
+                    });
+                })
+                    ->whereDate('checkin_date', '>=', date('Y-m-d', strtotime($fromdate)))
+                    ->whereDate('checkin_date', '<=', date('Y-m-d', strtotime($todate)))
+                    ->where('user_id', '=', $item['userid'])
+                    ->count();
+                $item['mechanic_visited'] = CheckIn::whereHas('customers', function ($query) use ($item) {
+                    $query->where('customertype', '=', 4);
+                    $query->whereHas('customeraddress', function ($query) use ($item) {
+                        $query->where('city_id', '=', $item['city_id']);
+                    });
+                })
+                    ->whereDate('checkin_date', '>=', date('Y-m-d', strtotime($fromdate)))
+                    ->whereDate('checkin_date', '<=', date('Y-m-d', strtotime($todate)))
+                    ->where('user_id', '=', $item['userid'])
+                    ->count();
+                $item['gift_coupons'] = Wallet::whereHas('customers', function ($query) use ($item) {
+                    $query->whereHas('customeraddress', function ($query) use ($item) {
+                        $query->where('city_id', '=', $item['city_id']);
+                    });
+                })
+                    ->where('userid', '=', $userid)
+                    ->where('transaction_at', '>=', date('Y-m-d', strtotime($fromdate)))
+                    ->where('transaction_at', '<=', date('Y-m-d', strtotime($todate)))
+                    ->where('point_type', '=', 'coupon')
+                    ->where('transaction_type', '=', 'Cr')
+                    ->sum('points');
+                $item['mrp_label'] = Wallet::whereHas('customers', function ($query) use ($item) {
+                    $query->whereHas('customeraddress', function ($query) use ($item) {
+                        $query->where('city_id', '=', $item['city_id']);
+                    });
+                })
+                    ->where('userid', '=', $userid)
+                    ->where('transaction_at', '>=', date('Y-m-d', strtotime($fromdate)))
+                    ->where('transaction_at', '<=', date('Y-m-d', strtotime($todate)))
+                    ->where('point_type', '=', 'mrp')
+                    ->where('transaction_type', '=', 'Cr')
+                    ->sum('points');
+                $item['total_dealer_visited'] = CheckIn::whereHas('customers', function ($query) use ($item) {
+                    $query->where('customertype', '=', 2);
+                    $query->whereHas('customeraddress', function ($query) use ($item) {
+                        $query->where('city_id', '=', $item['city_id']);
+                    });
+                })
+                    ->where('user_id', '=', $item['userid'])
+                    ->count();
+                $item['total_mechanic_visited'] = CheckIn::whereHas('customers', function ($query) use ($item) {
+                    $query->where('customertype', '=', 4);
+                    $query->whereHas('customeraddress', function ($query) use ($item) {
+                        $query->where('city_id', '=', $item['city_id']);
+                    });
+                })
+                    ->where('user_id', '=', $item['userid'])
+                    ->count();
+                $item['total_gift_coupons'] = Wallet::whereHas('customers', function ($query) use ($item) {
+                    $query->whereHas('customeraddress', function ($query) use ($item) {
+                        $query->where('city_id', '=', $item['city_id']);
+                    });
+                })
+                    ->where('userid', '=', $userid)
+                    ->where('point_type', '=', 'coupon')
+                    ->where('transaction_type', '=', 'Cr')
+                    ->sum('points');
+                $item['total_mrp_label'] = Wallet::whereHas('customers', function ($query) use ($item) {
+                    $query->whereHas('customeraddress', function ($query) use ($item) {
+                        $query->where('city_id', '=', $item['city_id']);
+                    });
+                })
+                    ->where('userid', '=', $userid)
+                    ->where('point_type', '=', 'mrp')
+                    ->where('transaction_type', '=', 'Cr')
+                    ->sum('points');
                 return $item;
             });
 
-            $data['users'] = User::where('id', $userid)->select('name','location')->first();
+            $data['users'] = User::where('id', $userid)->select('name', 'location')->first();
             $data['cities'] = $finaldata;
             $data['total'] = collect([
                 'total_dealer' => $finaldata->sum('total_dealer'),
@@ -1134,321 +1078,319 @@ class ReportController extends Controller
                 'total_mrp_label' => $finaldata->sum('total_mrp_label'),
             ]);
             return response()->json($data);
-        }
-        catch(\Exception $e){
+        } catch (\Exception $e) {
             return $e;
         }
     }
     public function performanceParameterReportData(Request $request)
     {
-        try
-        {
-            $userid = !empty($request->input('user_id') ) ? $request->input('user_id') : Auth::user()->id;
+        try {
+            $userid = !empty($request->input('user_id')) ? $request->input('user_id') : Auth::user()->id;
             $perameters = collect([
-              collect(["name" => "days_toured", "parameter" => "NO. OF DAYS TOURED"]), 
-              collect(["name" => "cities_covered", "parameter" => "NO. OF CITIES COVERED"]),
-              collect(["name" => "mechanic_visited", "parameter" => "NO. OF MECHANIC VISTED"]),
-              collect(["name" => "dealer_visited", "parameter" => "NO. OF DEALER VISITED"]),
-              collect(["name" => "gift_collected", "parameter" => "MECHANIC GIFT POINT COLLECTED"]),
-              collect(["name" => "mechanic_registered", "parameter" => "NO. OF MECHANIC REGISTERED"]),
-              collect(["name" => "gift_settled", "parameter" => "NOS. OF GIFT SETTLED"]),
-              collect(["name" => "mechanic_points", "parameter" => "NO. OF MECHANIC POINTS GIVEN"]),
-              collect(["name" => "order_collected", "parameter" => "ORDER COLLECTED(VALUE IN LAC)"])
+                collect(["name" => "days_toured", "parameter" => "NO. OF DAYS TOURED"]),
+                collect(["name" => "cities_covered", "parameter" => "NO. OF CITIES COVERED"]),
+                collect(["name" => "mechanic_visited", "parameter" => "NO. OF MECHANIC VISTED"]),
+                collect(["name" => "dealer_visited", "parameter" => "NO. OF DEALER VISITED"]),
+                collect(["name" => "gift_collected", "parameter" => "MECHANIC GIFT POINT COLLECTED"]),
+                collect(["name" => "mechanic_registered", "parameter" => "NO. OF MECHANIC REGISTERED"]),
+                collect(["name" => "gift_settled", "parameter" => "NOS. OF GIFT SETTLED"]),
+                collect(["name" => "mechanic_points", "parameter" => "NO. OF MECHANIC POINTS GIVEN"]),
+                collect(["name" => "order_collected", "parameter" => "ORDER COLLECTED(VALUE IN LAC)"])
             ]);
-             $tours = TourDetail::with('beatschedules')->whereHas('tourinfo', function ($query) use($userid) {
-                                $query->where('userid','=',$userid);
-                                $query->whereYear('date','=',date('Y'));
-                            })
-                            ->whereNotNull('visited_cityid')
-                            ->select('visited_date','visited_cityid');
+            $tours = TourDetail::with('beatschedules')->whereHas('tourinfo', function ($query) use ($userid) {
+                $query->where('userid', '=', $userid);
+                $query->whereYear('date', '=', date('Y'));
+            })
+                ->whereNotNull('visited_cityid')
+                ->select('visited_date', 'visited_cityid');
 
             $dealervisited = CheckIn::whereHas('customers', function ($query) {
-                                                        $query->where('customertype','=',2);
-                                                    })
-                                                    ->where('user_id','=',$userid)
-                                                    ->whereYear('checkin_date','=',date('Y'))
-                                                    ->select('checkin_date');
+                $query->where('customertype', '=', 2);
+            })
+                ->where('user_id', '=', $userid)
+                ->whereYear('checkin_date', '=', date('Y'))
+                ->select('checkin_date');
             $mechanicvisited = CheckIn::whereHas('customers', function ($query) {
-                                            $query->where('customertype','=',4);
-                                        })
-                                        ->where('user_id','=',$userid)
-                                        ->whereYear('checkin_date','=',date('Y'))
-                                        ->select('checkin_date','customer_id');
-            $points = Wallet::with('customers')->where('userid','=',$userid)
-                                        ->whereYear('transaction_at','=',date('Y'))
-                                        ->where('transaction_type','=','Cr')
-                                        ->select('transaction_at','points','point_type','quantity','transaction_type');
-            $customers = Customers::where('created_by','=',$userid)
-                                        ->whereYear('created_at','=',date('Y'))
-                                        ->where('customertype','=',4)
-                                        ->select('created_at');
-            $orders = Order::where('created_by','=',$userid)
-                                        ->whereYear('order_date','=',date('Y'))
-                                        ->select('order_date','grand_total');
+                $query->where('customertype', '=', 4);
+            })
+                ->where('user_id', '=', $userid)
+                ->whereYear('checkin_date', '=', date('Y'))
+                ->select('checkin_date', 'customer_id');
+            $points = Wallet::with('customers')->where('userid', '=', $userid)
+                ->whereYear('transaction_at', '=', date('Y'))
+                ->where('transaction_type', '=', 'Cr')
+                ->select('transaction_at', 'points', 'point_type', 'quantity', 'transaction_type');
+            $customers = Customers::where('created_by', '=', $userid)
+                ->whereYear('created_at', '=', date('Y'))
+                ->where('customertype', '=', 4)
+                ->select('created_at');
+            $orders = Order::where('created_by', '=', $userid)
+                ->whereYear('order_date', '=', date('Y'))
+                ->select('order_date', 'grand_total');
 
-            $finaldata = $perameters->map(function ($item, $key) use($userid, $tours, $dealervisited, $mechanicvisited, $points, $customers, $orders) {
+            $finaldata = $perameters->map(function ($item, $key) use ($userid, $tours, $dealervisited, $mechanicvisited, $points, $customers, $orders) {
                 switch ($item['name']) {
                     case 'days_toured':
-                        $item['jan'] = $tours->where('visited_date', '>=', date('Y-m-d',strtotime(date("Y-01-01"))))->where('visited_date', '<=', date('Y-m-d',strtotime(date("Y-01-31"))))->count();
-                        $item['feb'] = $tours->where('visited_date', '>=', date('Y-m-d',strtotime(date("Y-02-01"))))->where('visited_date', '<=', date('Y-m-d',strtotime(date("Y-02-29"))))->count();
-                        $item['mar'] = $tours->where('visited_date', '>=', date('Y-m-d',strtotime(date("Y-03-01"))))->where('visited_date', '<=', date('Y-m-d',strtotime(date("Y-03-31"))))->count();
-                        $item['apr'] = $tours->where('visited_date', '>=', date('Y-m-d',strtotime(date("Y-04-01"))))->where('visited_date', '<=', date('Y-m-d',strtotime(date("Y-04-30"))))->count();
-                        $item['may'] = $tours->where('visited_date', '>=', date('Y-m-d',strtotime(date("Y-05-01"))))->where('visited_date', '<=', date('Y-m-d',strtotime(date("Y-05-31"))))->count();
-                        $item['jun'] = $tours->where('visited_date', '>=', date('Y-m-d',strtotime(date("Y-06-01"))))->where('visited_date', '<=', date('Y-m-d',strtotime(date("Y-06-30"))))->count();
-                        $item['jul'] = $tours->where('visited_date', '>=', date('Y-m-d',strtotime(date("Y-07-01"))))->where('visited_date', '<=', date('Y-m-d',strtotime(date("Y-07-31"))))->count();
-                        $item['aug'] = $tours->where('visited_date', '>=', date('Y-m-d',strtotime(date("Y-08-01"))))->where('visited_date', '<=', date('Y-m-d',strtotime(date("Y-08-31"))))->count();
-                        $item['sep'] = $tours->where('visited_date', '>=', date('Y-m-d',strtotime(date("Y-09-01"))))->where('visited_date', '<=', date('Y-m-d',strtotime(date("Y-09-30"))))->count();
-                        $item['oct'] = $tours->where('visited_date', '>=', date('Y-m-d',strtotime(date("Y-10-01"))))->where('visited_date', '<=', date('Y-m-d',strtotime(date("Y-10-31"))))->count();
-                        $item['nov'] = $tours->where('visited_date', '>=', date('Y-m-d',strtotime(date("Y-11-01"))))->where('visited_date', '<=', date('Y-m-d',strtotime(date("Y-11-30"))))->count();
-                        $item['dec'] = $tours->where('visited_date', '>=', date('Y-m-d',strtotime(date("Y-12-01"))))->where('visited_date', '<=', date('Y-m-d',strtotime(date("Y-12-31"))))->count();
+                        $item['jan'] = $tours->where('visited_date', '>=', date('Y-m-d', strtotime(date("Y-01-01"))))->where('visited_date', '<=', date('Y-m-d', strtotime(date("Y-01-31"))))->count();
+                        $item['feb'] = $tours->where('visited_date', '>=', date('Y-m-d', strtotime(date("Y-02-01"))))->where('visited_date', '<=', date('Y-m-d', strtotime(date("Y-02-29"))))->count();
+                        $item['mar'] = $tours->where('visited_date', '>=', date('Y-m-d', strtotime(date("Y-03-01"))))->where('visited_date', '<=', date('Y-m-d', strtotime(date("Y-03-31"))))->count();
+                        $item['apr'] = $tours->where('visited_date', '>=', date('Y-m-d', strtotime(date("Y-04-01"))))->where('visited_date', '<=', date('Y-m-d', strtotime(date("Y-04-30"))))->count();
+                        $item['may'] = $tours->where('visited_date', '>=', date('Y-m-d', strtotime(date("Y-05-01"))))->where('visited_date', '<=', date('Y-m-d', strtotime(date("Y-05-31"))))->count();
+                        $item['jun'] = $tours->where('visited_date', '>=', date('Y-m-d', strtotime(date("Y-06-01"))))->where('visited_date', '<=', date('Y-m-d', strtotime(date("Y-06-30"))))->count();
+                        $item['jul'] = $tours->where('visited_date', '>=', date('Y-m-d', strtotime(date("Y-07-01"))))->where('visited_date', '<=', date('Y-m-d', strtotime(date("Y-07-31"))))->count();
+                        $item['aug'] = $tours->where('visited_date', '>=', date('Y-m-d', strtotime(date("Y-08-01"))))->where('visited_date', '<=', date('Y-m-d', strtotime(date("Y-08-31"))))->count();
+                        $item['sep'] = $tours->where('visited_date', '>=', date('Y-m-d', strtotime(date("Y-09-01"))))->where('visited_date', '<=', date('Y-m-d', strtotime(date("Y-09-30"))))->count();
+                        $item['oct'] = $tours->where('visited_date', '>=', date('Y-m-d', strtotime(date("Y-10-01"))))->where('visited_date', '<=', date('Y-m-d', strtotime(date("Y-10-31"))))->count();
+                        $item['nov'] = $tours->where('visited_date', '>=', date('Y-m-d', strtotime(date("Y-11-01"))))->where('visited_date', '<=', date('Y-m-d', strtotime(date("Y-11-30"))))->count();
+                        $item['dec'] = $tours->where('visited_date', '>=', date('Y-m-d', strtotime(date("Y-12-01"))))->where('visited_date', '<=', date('Y-m-d', strtotime(date("Y-12-31"))))->count();
                         $item['total'] = $tours->count();
                         $item['apm'] =  $tours->count();
                         break;
                     case 'cities_covered':
-                        $item['jan'] = $tours->where('visited_date', '>=', date('Y-m-d',strtotime(date("Y-01-01"))))->where('visited_date', '<=', date('Y-m-d',strtotime(date("Y-01-31"))))->distinct('visited_cityid')->count();
-                        $item['feb'] = $tours->where('visited_date', '>=', date('Y-m-d',strtotime(date("Y-02-01"))))->where('visited_date', '<=', date('Y-m-d',strtotime(date("Y-02-29"))))->distinct('visited_cityid')->count();
-                        $item['mar'] = $tours->where('visited_date', '>=', date('Y-m-d',strtotime(date("Y-03-01"))))->where('visited_date', '<=', date('Y-m-d',strtotime(date("Y-03-31"))))->distinct('visited_cityid')->count();
-                        $item['apr'] = $tours->where('visited_date', '>=', date('Y-m-d',strtotime(date("Y-04-01"))))->where('visited_date', '<=', date('Y-m-d',strtotime(date("Y-04-30"))))->distinct('visited_cityid')->count();
-                        $item['may'] = $tours->where('visited_date', '>=', date('Y-m-d',strtotime(date("Y-05-01"))))->where('visited_date', '<=', date('Y-m-d',strtotime(date("Y-05-31"))))->distinct('visited_cityid')->count();
-                        $item['jun'] = $tours->where('visited_date', '>=', date('Y-m-d',strtotime(date("Y-06-01"))))->where('visited_date', '<=', date('Y-m-d',strtotime(date("Y-06-30"))))->distinct('visited_cityid')->count();
-                        $item['jul'] = $tours->where('visited_date', '>=', date('Y-m-d',strtotime(date("Y-07-01"))))->where('visited_date', '<=', date('Y-m-d',strtotime(date("Y-07-31"))))->distinct('visited_cityid')->count();
-                        $item['aug'] = $tours->where('visited_date', '>=', date('Y-m-d',strtotime(date("Y-08-01"))))->where('visited_date', '<=', date('Y-m-d',strtotime(date("Y-08-31"))))->distinct('visited_cityid')->count();
-                        $item['sep'] = $tours->where('visited_date', '>=', date('Y-m-d',strtotime(date("Y-09-01"))))->where('visited_date', '<=', date('Y-m-d',strtotime(date("Y-09-30"))))->distinct('visited_cityid')->count();
-                        $item['oct'] = $tours->where('visited_date', '>=', date('Y-m-d',strtotime(date("Y-10-01"))))->where('visited_date', '<=', date('Y-m-d',strtotime(date("Y-10-31"))))->distinct('visited_cityid')->count();
-                        $item['nov'] = $tours->where('visited_date', '>=', date('Y-m-d',strtotime(date("Y-11-01"))))->where('visited_date', '<=', date('Y-m-d',strtotime(date("Y-11-30"))))->distinct('visited_cityid')->count();
-                        $item['dec'] = $tours->where('visited_date', '>=', date('Y-m-d',strtotime(date("Y-12-01"))))->where('visited_date', '<=', date('Y-m-d',strtotime(date("Y-12-31"))))->distinct('visited_cityid')->count();
+                        $item['jan'] = $tours->where('visited_date', '>=', date('Y-m-d', strtotime(date("Y-01-01"))))->where('visited_date', '<=', date('Y-m-d', strtotime(date("Y-01-31"))))->distinct('visited_cityid')->count();
+                        $item['feb'] = $tours->where('visited_date', '>=', date('Y-m-d', strtotime(date("Y-02-01"))))->where('visited_date', '<=', date('Y-m-d', strtotime(date("Y-02-29"))))->distinct('visited_cityid')->count();
+                        $item['mar'] = $tours->where('visited_date', '>=', date('Y-m-d', strtotime(date("Y-03-01"))))->where('visited_date', '<=', date('Y-m-d', strtotime(date("Y-03-31"))))->distinct('visited_cityid')->count();
+                        $item['apr'] = $tours->where('visited_date', '>=', date('Y-m-d', strtotime(date("Y-04-01"))))->where('visited_date', '<=', date('Y-m-d', strtotime(date("Y-04-30"))))->distinct('visited_cityid')->count();
+                        $item['may'] = $tours->where('visited_date', '>=', date('Y-m-d', strtotime(date("Y-05-01"))))->where('visited_date', '<=', date('Y-m-d', strtotime(date("Y-05-31"))))->distinct('visited_cityid')->count();
+                        $item['jun'] = $tours->where('visited_date', '>=', date('Y-m-d', strtotime(date("Y-06-01"))))->where('visited_date', '<=', date('Y-m-d', strtotime(date("Y-06-30"))))->distinct('visited_cityid')->count();
+                        $item['jul'] = $tours->where('visited_date', '>=', date('Y-m-d', strtotime(date("Y-07-01"))))->where('visited_date', '<=', date('Y-m-d', strtotime(date("Y-07-31"))))->distinct('visited_cityid')->count();
+                        $item['aug'] = $tours->where('visited_date', '>=', date('Y-m-d', strtotime(date("Y-08-01"))))->where('visited_date', '<=', date('Y-m-d', strtotime(date("Y-08-31"))))->distinct('visited_cityid')->count();
+                        $item['sep'] = $tours->where('visited_date', '>=', date('Y-m-d', strtotime(date("Y-09-01"))))->where('visited_date', '<=', date('Y-m-d', strtotime(date("Y-09-30"))))->distinct('visited_cityid')->count();
+                        $item['oct'] = $tours->where('visited_date', '>=', date('Y-m-d', strtotime(date("Y-10-01"))))->where('visited_date', '<=', date('Y-m-d', strtotime(date("Y-10-31"))))->distinct('visited_cityid')->count();
+                        $item['nov'] = $tours->where('visited_date', '>=', date('Y-m-d', strtotime(date("Y-11-01"))))->where('visited_date', '<=', date('Y-m-d', strtotime(date("Y-11-30"))))->distinct('visited_cityid')->count();
+                        $item['dec'] = $tours->where('visited_date', '>=', date('Y-m-d', strtotime(date("Y-12-01"))))->where('visited_date', '<=', date('Y-m-d', strtotime(date("Y-12-31"))))->distinct('visited_cityid')->count();
                         $item['total'] = $tours->distinct('visited_cityid')->count();
                         $item['apm'] =  $tours->distinct('visited_cityid')->count();
                         break;
                     case 'mechanic_visited':
-                        $item['jan'] = $mechanicvisited->where('checkin_date', '>=', date('Y-m-d',strtotime(date("Y-01-01"))))->where('checkin_date', '<=', date('Y-m-d',strtotime(date("Y-01-31"))))->distinct('customer_id')->count();
-                        $item['feb'] = $mechanicvisited->where('checkin_date', '>=', date('Y-m-d',strtotime(date("Y-02-01"))))->where('checkin_date', '<=', date('Y-m-d',strtotime(date("Y-02-29"))))->distinct('customer_id')->count();
-                        $item['mar'] = $mechanicvisited->where('checkin_date', '>=', date('Y-m-d',strtotime(date("Y-03-01"))))->where('checkin_date', '<=', date('Y-m-d',strtotime(date("Y-03-31"))))->distinct('customer_id')->count();
-                        $item['apr'] = $mechanicvisited->where('checkin_date', '>=', date('Y-m-d',strtotime(date("Y-04-01"))))->where('checkin_date', '<=', date('Y-m-d',strtotime(date("Y-04-30"))))->distinct('customer_id')->count();
-                        $item['may'] = $mechanicvisited->where('checkin_date', '>=', date('Y-m-d',strtotime(date("Y-05-01"))))->where('checkin_date', '<=', date('Y-m-d',strtotime(date("Y-05-31"))))->distinct('customer_id')->count();
-                        $item['jun'] = $mechanicvisited->where('checkin_date', '>=', date('Y-m-d',strtotime(date("Y-06-01"))))->where('checkin_date', '<=', date('Y-m-d',strtotime(date("Y-06-30"))))->distinct('customer_id')->count();
-                        $item['jul'] = $mechanicvisited->where('checkin_date', '>=', date('Y-m-d',strtotime(date("Y-07-01"))))->where('checkin_date', '<=', date('Y-m-d',strtotime(date("Y-07-31"))))->distinct('customer_id')->count();
-                        $item['aug'] = $mechanicvisited->where('checkin_date', '>=', date('Y-m-d',strtotime(date("Y-08-01"))))->where('checkin_date', '<=', date('Y-m-d',strtotime(date("Y-08-31"))))->distinct('customer_id')->count();
-                        $item['sep'] = $mechanicvisited->where('checkin_date', '>=', date('Y-m-d',strtotime(date("Y-09-01"))))->where('checkin_date', '<=', date('Y-m-d',strtotime(date("Y-09-30"))))->distinct('customer_id')->count();
-                        $item['oct'] = $mechanicvisited->where('checkin_date', '>=', date('Y-m-d',strtotime(date("Y-10-01"))))->where('checkin_date', '<=', date('Y-m-d',strtotime(date("Y-10-31"))))->distinct('customer_id')->count();
-                        $item['nov'] = $mechanicvisited->where('checkin_date', '>=', date('Y-m-d',strtotime(date("Y-11-01"))))->where('checkin_date', '<=', date('Y-m-d',strtotime(date("Y-11-30"))))->distinct('customer_id')->count();
-                        $item['dec'] = $mechanicvisited->where('checkin_date', '>=', date('Y-m-d',strtotime(date("Y-12-01"))))->where('checkin_date', '<=', date('Y-m-d',strtotime(date("Y-12-31"))))->distinct('customer_id')->count();
+                        $item['jan'] = $mechanicvisited->where('checkin_date', '>=', date('Y-m-d', strtotime(date("Y-01-01"))))->where('checkin_date', '<=', date('Y-m-d', strtotime(date("Y-01-31"))))->distinct('customer_id')->count();
+                        $item['feb'] = $mechanicvisited->where('checkin_date', '>=', date('Y-m-d', strtotime(date("Y-02-01"))))->where('checkin_date', '<=', date('Y-m-d', strtotime(date("Y-02-29"))))->distinct('customer_id')->count();
+                        $item['mar'] = $mechanicvisited->where('checkin_date', '>=', date('Y-m-d', strtotime(date("Y-03-01"))))->where('checkin_date', '<=', date('Y-m-d', strtotime(date("Y-03-31"))))->distinct('customer_id')->count();
+                        $item['apr'] = $mechanicvisited->where('checkin_date', '>=', date('Y-m-d', strtotime(date("Y-04-01"))))->where('checkin_date', '<=', date('Y-m-d', strtotime(date("Y-04-30"))))->distinct('customer_id')->count();
+                        $item['may'] = $mechanicvisited->where('checkin_date', '>=', date('Y-m-d', strtotime(date("Y-05-01"))))->where('checkin_date', '<=', date('Y-m-d', strtotime(date("Y-05-31"))))->distinct('customer_id')->count();
+                        $item['jun'] = $mechanicvisited->where('checkin_date', '>=', date('Y-m-d', strtotime(date("Y-06-01"))))->where('checkin_date', '<=', date('Y-m-d', strtotime(date("Y-06-30"))))->distinct('customer_id')->count();
+                        $item['jul'] = $mechanicvisited->where('checkin_date', '>=', date('Y-m-d', strtotime(date("Y-07-01"))))->where('checkin_date', '<=', date('Y-m-d', strtotime(date("Y-07-31"))))->distinct('customer_id')->count();
+                        $item['aug'] = $mechanicvisited->where('checkin_date', '>=', date('Y-m-d', strtotime(date("Y-08-01"))))->where('checkin_date', '<=', date('Y-m-d', strtotime(date("Y-08-31"))))->distinct('customer_id')->count();
+                        $item['sep'] = $mechanicvisited->where('checkin_date', '>=', date('Y-m-d', strtotime(date("Y-09-01"))))->where('checkin_date', '<=', date('Y-m-d', strtotime(date("Y-09-30"))))->distinct('customer_id')->count();
+                        $item['oct'] = $mechanicvisited->where('checkin_date', '>=', date('Y-m-d', strtotime(date("Y-10-01"))))->where('checkin_date', '<=', date('Y-m-d', strtotime(date("Y-10-31"))))->distinct('customer_id')->count();
+                        $item['nov'] = $mechanicvisited->where('checkin_date', '>=', date('Y-m-d', strtotime(date("Y-11-01"))))->where('checkin_date', '<=', date('Y-m-d', strtotime(date("Y-11-30"))))->distinct('customer_id')->count();
+                        $item['dec'] = $mechanicvisited->where('checkin_date', '>=', date('Y-m-d', strtotime(date("Y-12-01"))))->where('checkin_date', '<=', date('Y-m-d', strtotime(date("Y-12-31"))))->distinct('customer_id')->count();
                         $item['total'] = $mechanicvisited->distinct('customer_id')->count();
                         $item['apm'] =  $mechanicvisited->distinct('customer_id')->count();
                         break;
                     case 'dealer_visited':
-                        $item['jan'] = $dealervisited->where('checkin_date', '>=', date('Y-m-d',strtotime(date("Y-01-01"))))->where('checkin_date', '<=', date('Y-m-d',strtotime(date("Y-01-31"))))->distinct('customer_id')->count();
-                        $item['feb'] = $dealervisited->where('checkin_date', '>=', date('Y-m-d',strtotime(date("Y-02-01"))))->where('checkin_date', '<=', date('Y-m-d',strtotime(date("Y-02-29"))))->distinct('customer_id')->count();
-                        $item['mar'] = $dealervisited->where('checkin_date', '>=', date('Y-m-d',strtotime(date("Y-03-01"))))->where('checkin_date', '<=', date('Y-m-d',strtotime(date("Y-03-31"))))->distinct('customer_id')->count();
-                        $item['apr'] = $dealervisited->where('checkin_date', '>=', date('Y-m-d',strtotime(date("Y-04-01"))))->where('checkin_date', '<=', date('Y-m-d',strtotime(date("Y-04-30"))))->distinct('customer_id')->count();
-                        $item['may'] = $dealervisited->where('checkin_date', '>=', date('Y-m-d',strtotime(date("Y-05-01"))))->where('checkin_date', '<=', date('Y-m-d',strtotime(date("Y-05-31"))))->distinct('customer_id')->count();
-                        $item['jun'] = $dealervisited->where('checkin_date', '>=', date('Y-m-d',strtotime(date("Y-06-01"))))->where('checkin_date', '<=', date('Y-m-d',strtotime(date("Y-06-30"))))->distinct('customer_id')->count();
-                        $item['jul'] = $dealervisited->where('checkin_date', '>=', date('Y-m-d',strtotime(date("Y-07-01"))))->where('checkin_date', '<=', date('Y-m-d',strtotime(date("Y-07-31"))))->distinct('customer_id')->count();
-                        $item['aug'] = $dealervisited->where('checkin_date', '>=', date('Y-m-d',strtotime(date("Y-08-01"))))->where('checkin_date', '<=', date('Y-m-d',strtotime(date("Y-08-31"))))->distinct('customer_id')->count();
-                        $item['sep'] = $dealervisited->where('checkin_date', '>=', date('Y-m-d',strtotime(date("Y-09-01"))))->where('checkin_date', '<=', date('Y-m-d',strtotime(date("Y-09-30"))))->distinct('customer_id')->count();
-                        $item['oct'] = $dealervisited->where('checkin_date', '>=', date('Y-m-d',strtotime(date("Y-10-01"))))->where('checkin_date', '<=', date('Y-m-d',strtotime(date("Y-10-31"))))->distinct('customer_id')->count();
-                        $item['nov'] = $dealervisited->where('checkin_date', '>=', date('Y-m-d',strtotime(date("Y-11-01"))))->where('checkin_date', '<=', date('Y-m-d',strtotime(date("Y-11-30"))))->distinct('customer_id')->count();
-                        $item['dec'] = $dealervisited->where('checkin_date', '>=', date('Y-m-d',strtotime(date("Y-12-01"))))->where('checkin_date', '<=', date('Y-m-d',strtotime(date("Y-12-31"))))->distinct('customer_id')->count();
+                        $item['jan'] = $dealervisited->where('checkin_date', '>=', date('Y-m-d', strtotime(date("Y-01-01"))))->where('checkin_date', '<=', date('Y-m-d', strtotime(date("Y-01-31"))))->distinct('customer_id')->count();
+                        $item['feb'] = $dealervisited->where('checkin_date', '>=', date('Y-m-d', strtotime(date("Y-02-01"))))->where('checkin_date', '<=', date('Y-m-d', strtotime(date("Y-02-29"))))->distinct('customer_id')->count();
+                        $item['mar'] = $dealervisited->where('checkin_date', '>=', date('Y-m-d', strtotime(date("Y-03-01"))))->where('checkin_date', '<=', date('Y-m-d', strtotime(date("Y-03-31"))))->distinct('customer_id')->count();
+                        $item['apr'] = $dealervisited->where('checkin_date', '>=', date('Y-m-d', strtotime(date("Y-04-01"))))->where('checkin_date', '<=', date('Y-m-d', strtotime(date("Y-04-30"))))->distinct('customer_id')->count();
+                        $item['may'] = $dealervisited->where('checkin_date', '>=', date('Y-m-d', strtotime(date("Y-05-01"))))->where('checkin_date', '<=', date('Y-m-d', strtotime(date("Y-05-31"))))->distinct('customer_id')->count();
+                        $item['jun'] = $dealervisited->where('checkin_date', '>=', date('Y-m-d', strtotime(date("Y-06-01"))))->where('checkin_date', '<=', date('Y-m-d', strtotime(date("Y-06-30"))))->distinct('customer_id')->count();
+                        $item['jul'] = $dealervisited->where('checkin_date', '>=', date('Y-m-d', strtotime(date("Y-07-01"))))->where('checkin_date', '<=', date('Y-m-d', strtotime(date("Y-07-31"))))->distinct('customer_id')->count();
+                        $item['aug'] = $dealervisited->where('checkin_date', '>=', date('Y-m-d', strtotime(date("Y-08-01"))))->where('checkin_date', '<=', date('Y-m-d', strtotime(date("Y-08-31"))))->distinct('customer_id')->count();
+                        $item['sep'] = $dealervisited->where('checkin_date', '>=', date('Y-m-d', strtotime(date("Y-09-01"))))->where('checkin_date', '<=', date('Y-m-d', strtotime(date("Y-09-30"))))->distinct('customer_id')->count();
+                        $item['oct'] = $dealervisited->where('checkin_date', '>=', date('Y-m-d', strtotime(date("Y-10-01"))))->where('checkin_date', '<=', date('Y-m-d', strtotime(date("Y-10-31"))))->distinct('customer_id')->count();
+                        $item['nov'] = $dealervisited->where('checkin_date', '>=', date('Y-m-d', strtotime(date("Y-11-01"))))->where('checkin_date', '<=', date('Y-m-d', strtotime(date("Y-11-30"))))->distinct('customer_id')->count();
+                        $item['dec'] = $dealervisited->where('checkin_date', '>=', date('Y-m-d', strtotime(date("Y-12-01"))))->where('checkin_date', '<=', date('Y-m-d', strtotime(date("Y-12-31"))))->distinct('customer_id')->count();
                         $item['total'] = $dealervisited->distinct('customer_id')->count();
                         $item['apm'] =  $dealervisited->distinct('customer_id')->count();
                         break;
                     case 'gift_collected':
-                        $item['jan'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-01-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-01-31"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('quantity');
-                        $item['feb'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-02-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-02-29"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('quantity');
-                        $item['mar'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-03-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-03-31"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('quantity');
-                        $item['apr'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-04-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-04-30"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('quantity');
-                        $item['may'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-05-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-05-31"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('quantity');
-                        $item['jun'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-06-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-06-30"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('quantity');
-                        $item['jul'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-07-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-07-31"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('quantity');
-                        $item['aug'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-08-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-08-31"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('quantity');
-                        $item['sep'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-09-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-09-30"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('quantity');
-                        $item['oct'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-10-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-10-31"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('quantity');
-                        $item['nov'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-11-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-11-30"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('quantity');
-                        $item['dec'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-12-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-12-31"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('quantity');
-                        $item['total'] = $points->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('quantity');
-                        $item['apm'] =  $points->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('quantity');
+                        $item['jan'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-01-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-01-31"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('quantity');
+                        $item['feb'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-02-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-02-29"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('quantity');
+                        $item['mar'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-03-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-03-31"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('quantity');
+                        $item['apr'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-04-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-04-30"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('quantity');
+                        $item['may'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-05-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-05-31"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('quantity');
+                        $item['jun'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-06-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-06-30"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('quantity');
+                        $item['jul'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-07-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-07-31"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('quantity');
+                        $item['aug'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-08-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-08-31"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('quantity');
+                        $item['sep'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-09-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-09-30"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('quantity');
+                        $item['oct'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-10-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-10-31"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('quantity');
+                        $item['nov'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-11-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-11-30"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('quantity');
+                        $item['dec'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-12-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-12-31"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('quantity');
+                        $item['total'] = $points->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('quantity');
+                        $item['apm'] =  $points->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('quantity');
                         break;
                     case 'mechanic_registered':
-                        $item['jan'] = $customers->where('created_at', '>=', date('Y-m-d',strtotime(date("Y-01-01"))))->where('created_at', '<=', date('Y-m-d',strtotime(date("Y-01-31"))))->count();
-                        $item['feb'] = $customers->where('created_at', '>=', date('Y-m-d',strtotime(date("Y-02-01"))))->where('created_at', '<=', date('Y-m-d',strtotime(date("Y-02-29"))))->count();
-                        $item['mar'] = $customers->where('created_at', '>=', date('Y-m-d',strtotime(date("Y-03-01"))))->where('created_at', '<=', date('Y-m-d',strtotime(date("Y-03-31"))))->count();
-                        $item['apr'] = $customers->where('created_at', '>=', date('Y-m-d',strtotime(date("Y-04-01"))))->where('created_at', '<=', date('Y-m-d',strtotime(date("Y-04-30"))))->count();
-                        $item['may'] = $customers->where('created_at', '>=', date('Y-m-d',strtotime(date("Y-05-01"))))->where('created_at', '<=', date('Y-m-d',strtotime(date("Y-05-31"))))->count();
-                        $item['jun'] = $customers->where('created_at', '>=', date('Y-m-d',strtotime(date("Y-06-01"))))->where('created_at', '<=', date('Y-m-d',strtotime(date("Y-06-30"))))->count();
-                        $item['jul'] = $customers->where('created_at', '>=', date('Y-m-d',strtotime(date("Y-07-01"))))->where('created_at', '<=', date('Y-m-d',strtotime(date("Y-07-31"))))->count();
-                        $item['aug'] = $customers->where('created_at', '>=', date('Y-m-d',strtotime(date("Y-08-01"))))->where('created_at', '<=', date('Y-m-d',strtotime(date("Y-08-31"))))->count();
-                        $item['sep'] = $customers->where('created_at', '>=', date('Y-m-d',strtotime(date("Y-09-01"))))->where('created_at', '<=', date('Y-m-d',strtotime(date("Y-09-30"))))->count();
-                        $item['oct'] = $customers->where('created_at', '>=', date('Y-m-d',strtotime(date("Y-10-01"))))->where('created_at', '<=', date('Y-m-d',strtotime(date("Y-10-31"))))->count();
-                        $item['nov'] = $customers->where('created_at', '>=', date('Y-m-d',strtotime(date("Y-11-01"))))->where('created_at', '<=', date('Y-m-d',strtotime(date("Y-11-30"))))->count();
-                        $item['dec'] = $customers->where('created_at', '>=', date('Y-m-d',strtotime(date("Y-12-01"))))->where('created_at', '<=', date('Y-m-d',strtotime(date("Y-12-31"))))->count();
+                        $item['jan'] = $customers->where('created_at', '>=', date('Y-m-d', strtotime(date("Y-01-01"))))->where('created_at', '<=', date('Y-m-d', strtotime(date("Y-01-31"))))->count();
+                        $item['feb'] = $customers->where('created_at', '>=', date('Y-m-d', strtotime(date("Y-02-01"))))->where('created_at', '<=', date('Y-m-d', strtotime(date("Y-02-29"))))->count();
+                        $item['mar'] = $customers->where('created_at', '>=', date('Y-m-d', strtotime(date("Y-03-01"))))->where('created_at', '<=', date('Y-m-d', strtotime(date("Y-03-31"))))->count();
+                        $item['apr'] = $customers->where('created_at', '>=', date('Y-m-d', strtotime(date("Y-04-01"))))->where('created_at', '<=', date('Y-m-d', strtotime(date("Y-04-30"))))->count();
+                        $item['may'] = $customers->where('created_at', '>=', date('Y-m-d', strtotime(date("Y-05-01"))))->where('created_at', '<=', date('Y-m-d', strtotime(date("Y-05-31"))))->count();
+                        $item['jun'] = $customers->where('created_at', '>=', date('Y-m-d', strtotime(date("Y-06-01"))))->where('created_at', '<=', date('Y-m-d', strtotime(date("Y-06-30"))))->count();
+                        $item['jul'] = $customers->where('created_at', '>=', date('Y-m-d', strtotime(date("Y-07-01"))))->where('created_at', '<=', date('Y-m-d', strtotime(date("Y-07-31"))))->count();
+                        $item['aug'] = $customers->where('created_at', '>=', date('Y-m-d', strtotime(date("Y-08-01"))))->where('created_at', '<=', date('Y-m-d', strtotime(date("Y-08-31"))))->count();
+                        $item['sep'] = $customers->where('created_at', '>=', date('Y-m-d', strtotime(date("Y-09-01"))))->where('created_at', '<=', date('Y-m-d', strtotime(date("Y-09-30"))))->count();
+                        $item['oct'] = $customers->where('created_at', '>=', date('Y-m-d', strtotime(date("Y-10-01"))))->where('created_at', '<=', date('Y-m-d', strtotime(date("Y-10-31"))))->count();
+                        $item['nov'] = $customers->where('created_at', '>=', date('Y-m-d', strtotime(date("Y-11-01"))))->where('created_at', '<=', date('Y-m-d', strtotime(date("Y-11-30"))))->count();
+                        $item['dec'] = $customers->where('created_at', '>=', date('Y-m-d', strtotime(date("Y-12-01"))))->where('created_at', '<=', date('Y-m-d', strtotime(date("Y-12-31"))))->count();
                         $item['total'] = $customers->count();
                         $item['apm'] =  $customers->count();
                         break;
                     case 'gift_settled':
-                         $item['jan'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-01-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-01-31"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['jan'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-01-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-01-31"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
 
-                        $item['feb'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-02-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-02-29"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['feb'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-02-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-02-29"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
 
-                        $item['mar'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-03-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-03-31"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['mar'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-03-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-03-31"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
 
-                        $item['apr'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-04-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-04-30"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['apr'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-04-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-04-30"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
 
-                        $item['may'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-05-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-05-31"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['may'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-05-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-05-31"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
 
-                        $item['jun'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-06-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-06-30"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['jun'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-06-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-06-30"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
 
-                        $item['jul'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-07-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-07-31"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['jul'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-07-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-07-31"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
 
-                        $item['aug'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-08-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-08-31"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['aug'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-08-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-08-31"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
 
-                        $item['sep'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-09-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-09-30"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['sep'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-09-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-09-30"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
 
-                        $item['oct'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-10-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-10-31"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['oct'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-10-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-10-31"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
 
-                        $item['nov'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-11-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-11-30"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['nov'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-11-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-11-30"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
 
-                        $item['dec'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-12-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-12-31"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['dec'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-12-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-12-31"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
 
-                        $item['total'] = $points->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
-                        
-                        $item['apm'] =  $points->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['total'] = $points->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
+
+                        $item['apm'] =  $points->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
                         break;
                     case 'mechanic_points':
-                        $item['jan'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-01-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-01-31"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['jan'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-01-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-01-31"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
 
-                        $item['feb'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-02-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-02-29"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['feb'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-02-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-02-29"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
 
-                        $item['mar'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-03-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-03-31"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['mar'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-03-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-03-31"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
 
-                        $item['apr'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-04-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-04-30"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['apr'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-04-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-04-30"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
 
-                        $item['may'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-05-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-05-31"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['may'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-05-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-05-31"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
 
-                        $item['jun'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-06-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-06-30"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['jun'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-06-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-06-30"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
 
-                        $item['jul'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-07-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-07-31"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['jul'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-07-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-07-31"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
 
-                        $item['aug'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-08-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-08-31"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['aug'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-08-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-08-31"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
 
-                        $item['sep'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-09-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-09-30"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['sep'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-09-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-09-30"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
 
-                        $item['oct'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-10-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-10-31"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['oct'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-10-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-10-31"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
 
-                        $item['nov'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-11-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-11-30"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['nov'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-11-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-11-30"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
 
-                        $item['dec'] = $points->where('transaction_at', '>=', date('Y-m-d',strtotime(date("Y-12-01"))))->where('transaction_at', '<=', date('Y-m-d',strtotime(date("Y-12-31"))))->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['dec'] = $points->where('transaction_at', '>=', date('Y-m-d', strtotime(date("Y-12-01"))))->where('transaction_at', '<=', date('Y-m-d', strtotime(date("Y-12-31"))))->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
 
-                        $item['total'] = $points->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['total'] = $points->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
 
-                        $item['apm'] =  $points->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->sum('points');
+                        $item['apm'] =  $points->whereHas('customers', function ($query) {
+                            $query->where('customertype', '=', '4');
+                        })->sum('points');
                         break;
                     case 'order_collected':
-                        $item['jan'] = amountConversion($orders->where('order_date', '>=', date('Y-m-d',strtotime(date("Y-01-01"))))->where('order_date', '<=', date('Y-m-d',strtotime(date("Y-01-31"))))->sum('grand_total'));
+                        $item['jan'] = amountConversion($orders->where('order_date', '>=', date('Y-m-d', strtotime(date("Y-01-01"))))->where('order_date', '<=', date('Y-m-d', strtotime(date("Y-01-31"))))->sum('grand_total'));
 
-                        $item['feb'] = amountConversion($orders->where('order_date', '>=', date('Y-m-d',strtotime(date("Y-02-01"))))->where('order_date', '<=', date('Y-m-d',strtotime(date("Y-02-29"))))->sum('grand_total'));
+                        $item['feb'] = amountConversion($orders->where('order_date', '>=', date('Y-m-d', strtotime(date("Y-02-01"))))->where('order_date', '<=', date('Y-m-d', strtotime(date("Y-02-29"))))->sum('grand_total'));
 
-                        $item['mar'] = amountConversion($orders->where('order_date', '>=', date('Y-m-d',strtotime(date("Y-03-01"))))->where('order_date', '<=', date('Y-m-d',strtotime(date("Y-03-31"))))->sum('grand_total'));
+                        $item['mar'] = amountConversion($orders->where('order_date', '>=', date('Y-m-d', strtotime(date("Y-03-01"))))->where('order_date', '<=', date('Y-m-d', strtotime(date("Y-03-31"))))->sum('grand_total'));
 
-                        $item['apr'] = amountConversion($orders->where('order_date', '>=', date('Y-m-d',strtotime(date("Y-04-01"))))->where('order_date', '<=', date('Y-m-d',strtotime(date("Y-04-30"))))->sum('grand_total'));
-                        $item['may'] = amountConversion($orders->where('order_date', '>=', date('Y-m-d',strtotime(date("Y-05-01"))))->where('order_date', '<=', date('Y-m-d',strtotime(date("Y-05-31"))))->sum('grand_total'));
+                        $item['apr'] = amountConversion($orders->where('order_date', '>=', date('Y-m-d', strtotime(date("Y-04-01"))))->where('order_date', '<=', date('Y-m-d', strtotime(date("Y-04-30"))))->sum('grand_total'));
+                        $item['may'] = amountConversion($orders->where('order_date', '>=', date('Y-m-d', strtotime(date("Y-05-01"))))->where('order_date', '<=', date('Y-m-d', strtotime(date("Y-05-31"))))->sum('grand_total'));
 
-                        $item['jun'] = amountConversion($orders->where('order_date', '>=', date('Y-m-d',strtotime(date("Y-06-01"))))->where('order_date', '<=', date('Y-m-d',strtotime(date("Y-06-30"))))->sum('grand_total'));
+                        $item['jun'] = amountConversion($orders->where('order_date', '>=', date('Y-m-d', strtotime(date("Y-06-01"))))->where('order_date', '<=', date('Y-m-d', strtotime(date("Y-06-30"))))->sum('grand_total'));
 
-                        $item['jul'] = amountConversion($orders->where('order_date', '>=', date('Y-m-d',strtotime(date("Y-07-01"))))->where('order_date', '<=', date('Y-m-d',strtotime(date("Y-07-31"))))->sum('grand_total'));
+                        $item['jul'] = amountConversion($orders->where('order_date', '>=', date('Y-m-d', strtotime(date("Y-07-01"))))->where('order_date', '<=', date('Y-m-d', strtotime(date("Y-07-31"))))->sum('grand_total'));
 
-                        $item['aug'] = amountConversion($orders->where('order_date', '>=', date('Y-m-d',strtotime(date("Y-08-01"))))->where('order_date', '<=', date('Y-m-d',strtotime(date("Y-08-31"))))->sum('grand_total'));
+                        $item['aug'] = amountConversion($orders->where('order_date', '>=', date('Y-m-d', strtotime(date("Y-08-01"))))->where('order_date', '<=', date('Y-m-d', strtotime(date("Y-08-31"))))->sum('grand_total'));
 
-                        $item['sep'] = amountConversion($orders->where('order_date', '>=', date('Y-m-d',strtotime(date("Y-09-01"))))->where('order_date', '<=', date('Y-m-d',strtotime(date("Y-09-30"))))->sum('grand_total'));
+                        $item['sep'] = amountConversion($orders->where('order_date', '>=', date('Y-m-d', strtotime(date("Y-09-01"))))->where('order_date', '<=', date('Y-m-d', strtotime(date("Y-09-30"))))->sum('grand_total'));
 
-                        $item['oct'] = amountConversion($orders->where('order_date', '>=', date('Y-m-d',strtotime(date("Y-10-01"))))->where('order_date', '<=', date('Y-m-d',strtotime(date("Y-10-31"))))->sum('grand_total'));
+                        $item['oct'] = amountConversion($orders->where('order_date', '>=', date('Y-m-d', strtotime(date("Y-10-01"))))->where('order_date', '<=', date('Y-m-d', strtotime(date("Y-10-31"))))->sum('grand_total'));
 
-                        $item['nov'] = amountConversion($orders->where('order_date', '>=', date('Y-m-d',strtotime(date("Y-11-01"))))->where('order_date', '<=', date('Y-m-d',strtotime(date("Y-11-30"))))->sum('grand_total'));
+                        $item['nov'] = amountConversion($orders->where('order_date', '>=', date('Y-m-d', strtotime(date("Y-11-01"))))->where('order_date', '<=', date('Y-m-d', strtotime(date("Y-11-30"))))->sum('grand_total'));
 
-                        $item['dec'] = amountConversion($orders->where('order_date', '>=', date('Y-m-d',strtotime(date("Y-12-01"))))->where('order_date', '<=', date('Y-m-d',strtotime(date("Y-12-31"))))->sum('grand_total'));
+                        $item['dec'] = amountConversion($orders->where('order_date', '>=', date('Y-m-d', strtotime(date("Y-12-01"))))->where('order_date', '<=', date('Y-m-d', strtotime(date("Y-12-31"))))->sum('grand_total'));
 
                         $item['total'] = amountConversion($orders->sum('grand_total'));
 
@@ -1473,7 +1415,7 @@ class ReportController extends Controller
                 }
                 return $item;
             });
-            $data['users'] = User::where('id', $userid)->select('name','location')->first();
+            $data['users'] = User::where('id', $userid)->select('name', 'location')->first();
             $data['perams'] = $finaldata;
             $data['total'] = collect([
                 'jan' => $finaldata->sum('jan'),
@@ -1490,72 +1432,70 @@ class ReportController extends Controller
                 'dec' => $finaldata->sum('dec'),
             ]);
             return response()->json($data);
-        }
-        catch(\Exception $e){
+        } catch (\Exception $e) {
             return $e;
         }
     }
     public function asmWiseMechanicsPointsReportData(Request $request)
     {
-        try
-        {
-            $userid = !empty($request->input('user_id') ) ? $request->input('user_id') : Auth::user()->id;
-            $data['users'] = User::with('reportinginfo')->where('id', $userid)->select('name','location','reportingid')->first();
+        try {
+            $userid = !empty($request->input('user_id')) ? $request->input('user_id') : Auth::user()->id;
+            $data['users'] = User::with('reportinginfo')->where('id', $userid)->select('name', 'location', 'reportingid')->first();
             $perameters = collect([
-              collect(["month" => date("Y-01"), "user_name" => isset($data['users']['name']) ? $data['users']['name'] : '', "location" => isset($data['users']['location']) ? $data['users']['location'] : '' , "state" => isset($data['users']['location']) ? $data['users']['location'] : '' , "reporting" => isset($data['users']['reportinginfo']['name']) ? $data['users']['reportinginfo']['name'] : '' ]), 
-              collect(["month" => date("Y-02"), "user_name" => isset($data['users']['name']) ? $data['users']['name'] : '', "location" => isset($data['users']['location']) ? $data['users']['location'] : '' , "state" => isset($data['users']['location']) ? $data['users']['location'] : '' , "reporting" => isset($data['users']['reportinginfo']['name']) ? $data['users']['reportinginfo']['name'] : '' ]), 
-              collect(["month" => date("Y-03"), "user_name" => isset($data['users']['name']) ? $data['users']['name'] : '', "location" => isset($data['users']['location']) ? $data['users']['location'] : '' , "state" => isset($data['users']['location']) ? $data['users']['location'] : '' , "reporting" => isset($data['users']['reportinginfo']['name']) ? $data['users']['reportinginfo']['name'] : '' ]), 
-              collect(["month" => date("Y-04"), "user_name" => isset($data['users']['name']) ? $data['users']['name'] : '', "location" => isset($data['users']['location']) ? $data['users']['location'] : '' , "state" => isset($data['users']['location']) ? $data['users']['location'] : '' , "reporting" => isset($data['users']['reportinginfo']['name']) ? $data['users']['reportinginfo']['name'] : '' ]), 
-              collect(["month" => date("Y-05"), "user_name" => isset($data['users']['name']) ? $data['users']['name'] : '', "location" => isset($data['users']['location']) ? $data['users']['location'] : '' , "state" => isset($data['users']['location']) ? $data['users']['location'] : '' , "reporting" => isset($data['users']['reportinginfo']['name']) ? $data['users']['reportinginfo']['name'] : '' ]), 
-              collect(["month" => date("Y-06"), "user_name" => isset($data['users']['name']) ? $data['users']['name'] : '', "location" => isset($data['users']['location']) ? $data['users']['location'] : '' , "state" => isset($data['users']['location']) ? $data['users']['location'] : '' , "reporting" => isset($data['users']['reportinginfo']['name']) ? $data['users']['reportinginfo']['name'] : '' ]), 
-              collect(["month" => date("Y-07"), "user_name" => isset($data['users']['name']) ? $data['users']['name'] : '', "location" => isset($data['users']['location']) ? $data['users']['location'] : '' , "state" => isset($data['users']['location']) ? $data['users']['location'] : '' , "reporting" => isset($data['users']['reportinginfo']['name']) ? $data['users']['reportinginfo']['name'] : '' ]), 
-              collect(["month" => date("Y-08"), "user_name" => isset($data['users']['name']) ? $data['users']['name'] : '', "location" => isset($data['users']['location']) ? $data['users']['location'] : '' , "state" => isset($data['users']['location']) ? $data['users']['location'] : '' , "reporting" => isset($data['users']['reportinginfo']['name']) ? $data['users']['reportinginfo']['name'] : '' ]), 
-              collect(["month" => date("Y-09"), "user_name" => isset($data['users']['name']) ? $data['users']['name'] : '', "location" => isset($data['users']['location']) ? $data['users']['location'] : '' , "state" => isset($data['users']['location']) ? $data['users']['location'] : '' , "reporting" => isset($data['users']['reportinginfo']['name']) ? $data['users']['reportinginfo']['name'] : '' ]), 
-              collect(["month" => date("Y-10"), "user_name" => isset($data['users']['name']) ? $data['users']['name'] : '', "location" => isset($data['users']['location']) ? $data['users']['location'] : '' , "state" => isset($data['users']['location']) ? $data['users']['location'] : '' , "reporting" => isset($data['users']['reportinginfo']['name']) ? $data['users']['reportinginfo']['name'] : '' ]), 
-              collect(["month" => date("Y-11"), "user_name" => isset($data['users']['name']) ? $data['users']['name'] : '', "location" => isset($data['users']['location']) ? $data['users']['location'] : '' , "state" => isset($data['users']['location']) ? $data['users']['location'] : '' , "reporting" => isset($data['users']['reportinginfo']['name']) ? $data['users']['reportinginfo']['name'] : '' ]), 
-              collect(["month" => date("Y-12"), "user_name" => isset($data['users']['name']) ? $data['users']['name'] : '', "location" => isset($data['users']['location']) ? $data['users']['location'] : '' , "state" => isset($data['users']['location']) ? $data['users']['location'] : '' , "reporting" => isset($data['users']['reportinginfo']['name']) ? $data['users']['reportinginfo']['name'] : '' ]), 
+                collect(["month" => date("Y-01"), "user_name" => isset($data['users']['name']) ? $data['users']['name'] : '', "location" => isset($data['users']['location']) ? $data['users']['location'] : '', "state" => isset($data['users']['location']) ? $data['users']['location'] : '', "reporting" => isset($data['users']['reportinginfo']['name']) ? $data['users']['reportinginfo']['name'] : '']),
+                collect(["month" => date("Y-02"), "user_name" => isset($data['users']['name']) ? $data['users']['name'] : '', "location" => isset($data['users']['location']) ? $data['users']['location'] : '', "state" => isset($data['users']['location']) ? $data['users']['location'] : '', "reporting" => isset($data['users']['reportinginfo']['name']) ? $data['users']['reportinginfo']['name'] : '']),
+                collect(["month" => date("Y-03"), "user_name" => isset($data['users']['name']) ? $data['users']['name'] : '', "location" => isset($data['users']['location']) ? $data['users']['location'] : '', "state" => isset($data['users']['location']) ? $data['users']['location'] : '', "reporting" => isset($data['users']['reportinginfo']['name']) ? $data['users']['reportinginfo']['name'] : '']),
+                collect(["month" => date("Y-04"), "user_name" => isset($data['users']['name']) ? $data['users']['name'] : '', "location" => isset($data['users']['location']) ? $data['users']['location'] : '', "state" => isset($data['users']['location']) ? $data['users']['location'] : '', "reporting" => isset($data['users']['reportinginfo']['name']) ? $data['users']['reportinginfo']['name'] : '']),
+                collect(["month" => date("Y-05"), "user_name" => isset($data['users']['name']) ? $data['users']['name'] : '', "location" => isset($data['users']['location']) ? $data['users']['location'] : '', "state" => isset($data['users']['location']) ? $data['users']['location'] : '', "reporting" => isset($data['users']['reportinginfo']['name']) ? $data['users']['reportinginfo']['name'] : '']),
+                collect(["month" => date("Y-06"), "user_name" => isset($data['users']['name']) ? $data['users']['name'] : '', "location" => isset($data['users']['location']) ? $data['users']['location'] : '', "state" => isset($data['users']['location']) ? $data['users']['location'] : '', "reporting" => isset($data['users']['reportinginfo']['name']) ? $data['users']['reportinginfo']['name'] : '']),
+                collect(["month" => date("Y-07"), "user_name" => isset($data['users']['name']) ? $data['users']['name'] : '', "location" => isset($data['users']['location']) ? $data['users']['location'] : '', "state" => isset($data['users']['location']) ? $data['users']['location'] : '', "reporting" => isset($data['users']['reportinginfo']['name']) ? $data['users']['reportinginfo']['name'] : '']),
+                collect(["month" => date("Y-08"), "user_name" => isset($data['users']['name']) ? $data['users']['name'] : '', "location" => isset($data['users']['location']) ? $data['users']['location'] : '', "state" => isset($data['users']['location']) ? $data['users']['location'] : '', "reporting" => isset($data['users']['reportinginfo']['name']) ? $data['users']['reportinginfo']['name'] : '']),
+                collect(["month" => date("Y-09"), "user_name" => isset($data['users']['name']) ? $data['users']['name'] : '', "location" => isset($data['users']['location']) ? $data['users']['location'] : '', "state" => isset($data['users']['location']) ? $data['users']['location'] : '', "reporting" => isset($data['users']['reportinginfo']['name']) ? $data['users']['reportinginfo']['name'] : '']),
+                collect(["month" => date("Y-10"), "user_name" => isset($data['users']['name']) ? $data['users']['name'] : '', "location" => isset($data['users']['location']) ? $data['users']['location'] : '', "state" => isset($data['users']['location']) ? $data['users']['location'] : '', "reporting" => isset($data['users']['reportinginfo']['name']) ? $data['users']['reportinginfo']['name'] : '']),
+                collect(["month" => date("Y-11"), "user_name" => isset($data['users']['name']) ? $data['users']['name'] : '', "location" => isset($data['users']['location']) ? $data['users']['location'] : '', "state" => isset($data['users']['location']) ? $data['users']['location'] : '', "reporting" => isset($data['users']['reportinginfo']['name']) ? $data['users']['reportinginfo']['name'] : '']),
+                collect(["month" => date("Y-12"), "user_name" => isset($data['users']['name']) ? $data['users']['name'] : '', "location" => isset($data['users']['location']) ? $data['users']['location'] : '', "state" => isset($data['users']['location']) ? $data['users']['location'] : '', "reporting" => isset($data['users']['reportinginfo']['name']) ? $data['users']['reportinginfo']['name'] : '']),
             ]);
-            $customers = Customers::where('created_by','=',$userid)
-                                        ->whereYear('created_at','=',date('Y'))
-                                        ->where('customertype','=',4)
-                                        ->select('created_at');
-            $points = Wallet::with('customers')->where('userid','=',$userid)
-                                        ->whereYear('transaction_at','=',date('Y'))
-                                        ->select('transaction_at','points','point_type','quantity','transaction_type');
-            $sales = SalesDetails::with('products')->whereHas('sales',function($query) use($userid) {
-                                    $query->where('created_by','=',$userid);
-                                    $query->whereYear('invoice_date','=',date('Y'));
-                                })->select('product_id','price','quantity','line_total');
+            $customers = Customers::where('created_by', '=', $userid)
+                ->whereYear('created_at', '=', date('Y'))
+                ->where('customertype', '=', 4)
+                ->select('created_at');
+            $points = Wallet::with('customers')->where('userid', '=', $userid)
+                ->whereYear('transaction_at', '=', date('Y'))
+                ->select('transaction_at', 'points', 'point_type', 'quantity', 'transaction_type');
+            $sales = SalesDetails::with('products')->whereHas('sales', function ($query) use ($userid) {
+                $query->where('created_by', '=', $userid);
+                $query->whereYear('invoice_date', '=', date('Y'));
+            })->select('product_id', 'price', 'quantity', 'line_total');
 
-            $finaldata = $perameters->map(function ($item, $key) use($customers, $points, $sales) {
+            $finaldata = $perameters->map(function ($item, $key) use ($customers, $points, $sales) {
                 $item['mech_territory'] = $customers->count();
-                $item['under_coupon_scheme'] = $points->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->where('transaction_type','=','Dr')->where('point_type','=','coupon')->distinct('customer_id')->count();
-                $item['under_mrp_scheme'] = $points->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->where('transaction_type','=','Dr')->where('point_type','=','mrp')->distinct('customer_id')->count();
-                $item['total_coupon_value'] = $points->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->where('transaction_type','=','Dr')->where('point_type','=','coupon')->sum('quantity');
-                $item['total_mrp_value'] = $points->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->where('transaction_type','=','Dr')->where('point_type','=','mrp')->sum('quantity');
-                $item['collection_coupons_value'] = $points->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->where('transaction_type','=','Dr')->where('point_type','=','coupon')->where('transaction_at','=',date('m',strtotime($item['month'])))->sum('quantity');
-                $item['collection_mrp_value'] = $points->whereHas('customers',function($query) {
-                                    $query->where('customertype','=','4');
-                                })->where('transaction_type','=','Dr')->where('point_type','=','mrp')->where('transaction_at','=',date('m',strtotime($item['month'])))->sum('quantity');
-                $item['secondary_sales_ggl'] = $sales->whereHas('products',function($query) {
-                                    $query->where('category_id','=','3');
-                                })->sum('line_total');
-                $item['secondary_sales_gpd'] = $sales->whereHas('products',function($query) {
-                                    $query->where('category_id','=','2');
-                                })->sum('line_total');
-                $item['diff'] = $sales->whereHas('products',function($query) {
-                                    $query->where('category_id','=','1');
-                                })->sum('line_total');
+                $item['under_coupon_scheme'] = $points->whereHas('customers', function ($query) {
+                    $query->where('customertype', '=', '4');
+                })->where('transaction_type', '=', 'Dr')->where('point_type', '=', 'coupon')->distinct('customer_id')->count();
+                $item['under_mrp_scheme'] = $points->whereHas('customers', function ($query) {
+                    $query->where('customertype', '=', '4');
+                })->where('transaction_type', '=', 'Dr')->where('point_type', '=', 'mrp')->distinct('customer_id')->count();
+                $item['total_coupon_value'] = $points->whereHas('customers', function ($query) {
+                    $query->where('customertype', '=', '4');
+                })->where('transaction_type', '=', 'Dr')->where('point_type', '=', 'coupon')->sum('quantity');
+                $item['total_mrp_value'] = $points->whereHas('customers', function ($query) {
+                    $query->where('customertype', '=', '4');
+                })->where('transaction_type', '=', 'Dr')->where('point_type', '=', 'mrp')->sum('quantity');
+                $item['collection_coupons_value'] = $points->whereHas('customers', function ($query) {
+                    $query->where('customertype', '=', '4');
+                })->where('transaction_type', '=', 'Dr')->where('point_type', '=', 'coupon')->where('transaction_at', '=', date('m', strtotime($item['month'])))->sum('quantity');
+                $item['collection_mrp_value'] = $points->whereHas('customers', function ($query) {
+                    $query->where('customertype', '=', '4');
+                })->where('transaction_type', '=', 'Dr')->where('point_type', '=', 'mrp')->where('transaction_at', '=', date('m', strtotime($item['month'])))->sum('quantity');
+                $item['secondary_sales_ggl'] = $sales->whereHas('products', function ($query) {
+                    $query->where('category_id', '=', '3');
+                })->sum('line_total');
+                $item['secondary_sales_gpd'] = $sales->whereHas('products', function ($query) {
+                    $query->where('category_id', '=', '2');
+                })->sum('line_total');
+                $item['diff'] = $sales->whereHas('products', function ($query) {
+                    $query->where('category_id', '=', '1');
+                })->sum('line_total');
                 $item['total'] = $sales->sum('line_total');
                 return $item;
             });
@@ -1574,43 +1514,41 @@ class ReportController extends Controller
                 'total' => $finaldata->sum('total'),
             ]);
             return response()->json($data);
-        }
-        catch(\Exception $e){
+        } catch (\Exception $e) {
             return $e;
         }
     }
     public function targetvsSaleReportData(Request $request)
     {
-        try
-        {
-            $userid = !empty($request->input('user_id') ) ? $request->input('user_id') : Auth::user()->id;
+        try {
+            $userid = !empty($request->input('user_id')) ? $request->input('user_id') : Auth::user()->id;
             $userids = getUsersReportingToAuth();
-            $users = User::with('reportinginfo')->whereIn('id', $userids)->select('name','location','reportingid')->get();
-            $sales = SalesDetails::with('products','sales')
-                                ->whereHas('sales',function($query) use($userid) {
-                                    $query->where('created_by','=',$userid);
-                                    $query->whereMonth('invoice_date','=',date('m'));
-                                    $query->whereYear('invoice_date','=',date('Y'));
-                                })
-                                ->select('product_id','price','quantity','line_total')
-                                ->get();
-            $data = $users->map(function ($item, $key) use($sales) {
-                $targets = SalesTarget::where('userid','=',$item['id'])
-                                        ->whereMonth('startdate','=',date('m'))
-                                        ->whereYear('startdate','=',date('Y'))->sum('amount');
-                $item['zsm_name'] = isset($item['reportinginfo']['name']) ? $item['reportinginfo']['name'] :'';
+            $users = User::with('reportinginfo')->whereIn('id', $userids)->select('name', 'location', 'reportingid')->get();
+            $sales = SalesDetails::with('products', 'sales')
+                ->whereHas('sales', function ($query) use ($userid) {
+                    $query->where('created_by', '=', $userid);
+                    $query->whereMonth('invoice_date', '=', date('m'));
+                    $query->whereYear('invoice_date', '=', date('Y'));
+                })
+                ->select('product_id', 'price', 'quantity', 'line_total')
+                ->get();
+            $data = $users->map(function ($item, $key) use ($sales) {
+                $targets = SalesTarget::where('userid', '=', $item['id'])
+                    ->whereMonth('startdate', '=', date('m'))
+                    ->whereYear('startdate', '=', date('Y'))->sum('amount');
+                $item['zsm_name'] = isset($item['reportinginfo']['name']) ? $item['reportinginfo']['name'] : '';
                 $item['ggl_targets'] = $targets;
-                $item['ggl_achievement_10th'] = $sales->where('products.category_id','=','3')->where('sales.invoice_date', '>=', date("Y-m-01"))->where('sales.invoice_date', '<=', date("Y-m-10"))->sum('line_total');
-                $item['ggl_achievement_20th'] = $sales->where('products.category_id','=','3')->where('sales.invoice_date', '>=', date("Y-m-11"))->where('sales.invoice_date', '<=', date("Y-m-20"))->sum('line_total');
-                $item['ggl_achievement_30th'] = $sales->where('products.category_id','=','3')->where('sales.invoice_date', '>=', date("Y-m-21"))->where('sales.invoice_date', '<=', date("Y-m-t"))->sum('line_total');
+                $item['ggl_achievement_10th'] = $sales->where('products.category_id', '=', '3')->where('sales.invoice_date', '>=', date("Y-m-01"))->where('sales.invoice_date', '<=', date("Y-m-10"))->sum('line_total');
+                $item['ggl_achievement_20th'] = $sales->where('products.category_id', '=', '3')->where('sales.invoice_date', '>=', date("Y-m-11"))->where('sales.invoice_date', '<=', date("Y-m-20"))->sum('line_total');
+                $item['ggl_achievement_30th'] = $sales->where('products.category_id', '=', '3')->where('sales.invoice_date', '>=', date("Y-m-21"))->where('sales.invoice_date', '<=', date("Y-m-t"))->sum('line_total');
                 $item['gpd_targets'] = $targets;
-                $item['gpd_achievement_10th'] = $sales->where('products.category_id','=','2')->where('sales.invoice_date', '>=', date("Y-m-01"))->where('sales.invoice_date', '<=', date("Y-m-10"))->sum('line_total');
-                $item['gpd_achievement_20th'] = $sales->where('products.category_id','=','2')->where('sales.invoice_date', '>=', date("Y-m-11"))->where('sales.invoice_date', '<=', date("Y-m-20"))->sum('line_total');
-                $item['gpd_achievement_30th'] = $sales->where('products.category_id','=','2')->where('sales.invoice_date', '>=', date("Y-m-21"))->where('sales.invoice_date', '<=', date("Y-m-t"))->sum('line_total');
+                $item['gpd_achievement_10th'] = $sales->where('products.category_id', '=', '2')->where('sales.invoice_date', '>=', date("Y-m-01"))->where('sales.invoice_date', '<=', date("Y-m-10"))->sum('line_total');
+                $item['gpd_achievement_20th'] = $sales->where('products.category_id', '=', '2')->where('sales.invoice_date', '>=', date("Y-m-11"))->where('sales.invoice_date', '<=', date("Y-m-20"))->sum('line_total');
+                $item['gpd_achievement_30th'] = $sales->where('products.category_id', '=', '2')->where('sales.invoice_date', '>=', date("Y-m-21"))->where('sales.invoice_date', '<=', date("Y-m-t"))->sum('line_total');
                 $item['diff_targets'] = $targets;
-                $item['diff_achievement_10th'] = $sales->where('products.category_id','=','1')->where('sales.invoice_date', '>=', date("Y-m-01"))->where('sales.invoice_date', '<=', date("Y-m-10"))->sum('line_total');
-                $item['diff_achievement_20th'] = $sales->where('products.category_id','=','1')->where('sales.invoice_date', '>=', date("Y-m-11"))->where('sales.invoice_date', '<=', date("Y-m-20"))->sum('line_total');
-                $item['diff_achievement_30th'] = $sales->where('products.category_id','=','1')->where('sales.invoice_date', '>=', date("Y-m-21"))->where('sales.invoice_date', '<=', date("Y-m-t"))->sum('line_total');
+                $item['diff_achievement_10th'] = $sales->where('products.category_id', '=', '1')->where('sales.invoice_date', '>=', date("Y-m-01"))->where('sales.invoice_date', '<=', date("Y-m-10"))->sum('line_total');
+                $item['diff_achievement_20th'] = $sales->where('products.category_id', '=', '1')->where('sales.invoice_date', '>=', date("Y-m-11"))->where('sales.invoice_date', '<=', date("Y-m-20"))->sum('line_total');
+                $item['diff_achievement_30th'] = $sales->where('products.category_id', '=', '1')->where('sales.invoice_date', '>=', date("Y-m-21"))->where('sales.invoice_date', '<=', date("Y-m-t"))->sum('line_total');
                 $item['targets'] = $targets;
                 $item['achievement_10th'] = $sales->where('sales.invoice_date', '>=', date("Y-m-01"))->where('sales.invoice_date', '<=', date("Y-m-10"))->sum('line_total');
                 $item['achievement_20th'] = $sales->where('sales.invoice_date', '>=', date("Y-m-11"))->where('sales.invoice_date', '<=', date("Y-m-20"))->sum('line_total');
@@ -1618,8 +1556,7 @@ class ReportController extends Controller
                 return $item;
             });
             return response()->json($data);
-        }
-        catch(\Exception $e){
+        } catch (\Exception $e) {
             return $e;
         }
     }
@@ -1677,22 +1614,20 @@ class ReportController extends Controller
     public function surveyAnalysis(Request $request)
     {
         $userids = getUsersReportingToAuth();
-        $users = User::where('active','=','Y')->where(function($query) use($userids){
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                                {
-                                    $query->whereIn('id',$userids);
-                                }
-                            })->whereHas('roles', function($query){
-                                $query->whereNotIn('name',['superadmin','Admin']);
-                            })->select('id','name','mobile')->get();
-        
+        $users = User::where('active', '=', 'Y')->where(function ($query) use ($userids) {
+            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                $query->whereIn('id', $userids);
+            }
+        })->whereHas('roles', function ($query) {
+            $query->whereNotIn('name', ['superadmin', 'Admin']);
+        })->select('id', 'name', 'mobile')->get();
+
         return view('reports.surveyanalysis', compact('users'));
     }
     public function surveyAnalysisReportData(Request $request)
     {
-        try
-        {
-            $userid = !empty($request->input('user_id') ) ? $request->input('user_id') : Auth::user()->id;
+        try {
+            $userid = !empty($request->input('user_id')) ? $request->input('user_id') : Auth::user()->id;
             $userids = getUsersReportingToAuth();
             $data = DealIn::select('types', DB::raw('count(*) as total'), DB::raw('SUM(hcv) as total_hcv'), DB::raw('SUM(mav) as total_mav'), DB::raw('SUM(lmv) as total_lmv'), DB::raw('SUM(lcv) as total_lcv'), DB::raw('SUM(other) as total_other'), DB::raw('SUM(tractor) as total_tractor'))->groupBy('types')->get();
             // $data = $dealins->map(function ($item, $key) {
@@ -1711,9 +1646,8 @@ class ReportController extends Controller
             //     $item['reports'] = $reports;
             //     return $item;
             // });
-            return response()->json($data);            
-        }
-        catch(\Exception $e){
+            return response()->json($data);
+        } catch (\Exception $e) {
             return $e;
         }
     }
@@ -1735,5 +1669,4 @@ class ReportController extends Controller
         ob_start();
         return Excel::download(new CustomerAnalysisExport($request), 'customeranalysis.xlsx');
     }
-
 }

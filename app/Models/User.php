@@ -83,5 +83,22 @@ class User extends Authenticatable
         return $this->belongsTo('App\Models\Designation', 'designation_id', 'id')->select('id','designation_name'); 
     }
 
+    public static function tree($user_id){
+        $all_user = User::get();
+        $root_users = User::where('id', $user_id)->get();
+        self::formatTree($root_users, $all_user);
+
+        return $root_users;
+    }
+
+    private static function formatTree($root_users, $all_user){
+        foreach ($root_users as $root_user) {
+            $root_user->children = $all_user->where('reportingid', $root_user->id)->values();
+            if($root_user->children->isNotEmpty()){
+                self::formatTree($root_user->children, $all_user);
+            }
+        }
+    }
+
     
 }
