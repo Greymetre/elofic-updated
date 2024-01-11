@@ -131,6 +131,23 @@ class TourController extends Controller
                         {
                             return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
                         })
+                        ->addColumn('stauts', function ($query) {
+                            if($query->status == '0'){
+                                $btn = ' <button type="button" data-status="0" class="btn btn-warning btn-just-icon btn-sm change_status" value="'.$query->id.'" title="Change Status(Pending)">
+                                 <i class="material-icons">pending</i>
+                                </button>';
+                            }elseif($query->status == '1'){
+                                 $btn = ' <button type="button" data-status="1" class="btn btn-success btn-just-icon btn-sm change_status" value="'.$query->id.'" title="Change Status(Approved)">
+                                 <i class="material-icons">approval</i>
+                                 </button>';
+                            }else{
+                                 $btn = ' <button type="button" data-status="2" class="btn btn-danger btn-just-icon btn-sm change_status" value="'.$query->id.'" title="Change Status(Rejected)">
+                                 <i class="material-icons">circle</i>
+                                 </button>';
+                            }
+
+                            return $btn;
+                        })
                         ->addColumn('action', function ($query) {
                               $btn = '';
                               $activebtn ='';
@@ -156,19 +173,19 @@ class TourController extends Controller
                                 <i class="material-icons">clear</i>
                                </a>';
 
-                               if($query->status == '0'){
-                                   $btn = $btn.' <button type="button" data-status="0" class="btn btn-warning btn-just-icon btn-sm change_status" value="'.$query->id.'" title="Change Status(Pending)">
-                                    <i class="material-icons">pending</i>
-                                   </button>';
-                               }elseif($query->status == '1'){
-                                    $btn = $btn.' <button type="button" data-status="1" class="btn btn-success btn-just-icon btn-sm change_status" value="'.$query->id.'" title="Change Status(Approved)">
-                                    <i class="material-icons">approval</i>
-                                    </button>';
-                               }else{
-                                    $btn = $btn.' <button type="button" data-status="2" class="btn btn-danger btn-just-icon btn-sm change_status" value="'.$query->id.'" title="Change Status(Rejected)">
-                                    <i class="material-icons">circle</i>
-                                    </button>';
-                               }
+                            //    if($query->status == '0'){
+                            //        $btn = $btn.' <button type="button" data-status="0" class="btn btn-warning btn-just-icon btn-sm change_status" value="'.$query->id.'" title="Change Status(Pending)">
+                            //         <i class="material-icons">pending</i>
+                            //        </button>';
+                            //    }elseif($query->status == '1'){
+                            //         $btn = $btn.' <button type="button" data-status="1" class="btn btn-success btn-just-icon btn-sm change_status" value="'.$query->id.'" title="Change Status(Approved)">
+                            //         <i class="material-icons">approval</i>
+                            //         </button>';
+                            //    }else{
+                            //         $btn = $btn.' <button type="button" data-status="2" class="btn btn-danger btn-just-icon btn-sm change_status" value="'.$query->id.'" title="Change Status(Rejected)">
+                            //         <i class="material-icons">circle</i>
+                            //         </button>';
+                            //    }
 
 
                               //}
@@ -189,7 +206,7 @@ class TourController extends Controller
                                         </div>'.$activebtn;
                         })
                 
-                        ->rawColumns(['action'])
+                        ->rawColumns(['action', 'stauts'])
                     ->make(true);
         }
       
@@ -225,6 +242,19 @@ class TourController extends Controller
      */
     public function store(Request $request)
     {
+        foreach($request->detail as $datas){
+            $validator = Validator::make($datas, [
+                'date' => 'required',
+                'userid' => 'required',
+                'town' => 'required',
+                'objectives' => 'required',
+            ]); 
+            if ($validator->fails()) {
+                return redirect()->back()
+                            ->withErrors($validator)
+                            ->withInput();
+            }
+        }
         try
         { 
             $permission = !empty($request['id']) ? 'tour_edit' : 'tour_create' ;
