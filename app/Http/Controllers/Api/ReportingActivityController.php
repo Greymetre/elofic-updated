@@ -41,12 +41,15 @@ class ReportingActivityController extends Controller
         $branches= array();
         $all_branch= array();
         $bkey = 0;
+        // dd($all_user_branches);
         foreach ($all_user_branches as $k => $val) {
-            if(!in_array($val->getbranch->id, $all_branch)){
-                array_push($all_branch, $val->getbranch->id);
-                $branches[$bkey]['id'] = $val->getbranch->id;
-                $branches[$bkey]['name'] = $val->getbranch->branch_name;
-                $bkey++;
+            if($val->getbranch){
+                if(!in_array($val->getbranch->id, $all_branch)){
+                    array_push($all_branch, $val->getbranch->id);
+                    $branches[$bkey]['id'] = $val->getbranch->id;
+                    $branches[$bkey]['name'] = $val->getbranch->branch_name;
+                    $bkey++;
+                }
             }
         }
 
