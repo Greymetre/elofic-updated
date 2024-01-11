@@ -18,6 +18,15 @@
               </div>
               <!-- /.card-header -->
               <!-- form start -->
+              @if($errors->any())
+                  <div>
+                      <ul class="alert alert-danger">
+                          @foreach($errors->all() as $error)
+                              <li>{{ $error }}</li>
+                          @endforeach
+                      </ul>
+                  </div>
+              @endif
                 <div class="card-body ">
                   <div class="tab-content tab-space">
                     {!! Form::model($tours,[
@@ -91,12 +100,14 @@
           counter++;
           var newRow = 
               '<tr value="'+counter+'">'+
-                  '<td><input type="date" name="detail[' + counter + '][date]" class="form-control readonly"/></td>' +
+                  '<td><input type="text" name="detail[' + counter + '][date]" class="form-control datepicker" autocomplete="off"/></td>' +
                   '<td><select class="form-control user select2" name="detail[' + counter + '][userid]"></select></td>'+
                   '<td><input type="text" name="detail[' + counter + '][town]" class="form-control rowchange"/></td>' +
                   '<td><input type="text" name="detail[' + counter + '][objectives]" class="form-control rowchange"/></td>' +
                   '<td class="td-actions text-center"><a href="javascript:void(0)" class="remove-rows btn btn-danger btn-xs"> <i class="fa fa-minus"></i></a></td> </tr>';
           $table.append(newRow);
+          $('.datepicker').datepicker({ dateFormat: 'yy-mm-dd' });
+          $('.select2').select2();
       });
    
       $table.on('click', '.remove-rows', function() {

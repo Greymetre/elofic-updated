@@ -439,6 +439,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('tours-download', [ TourController::class, 'download'])->name('tours.download');
     Route::any('tours-template', [ TourController::class, 'template'])->name('tourss.template');
     Route::post('tours-upload', [ TourController::class, 'upload'])->name('tours.upload');
+    Route::post('tours-changeStatus', [ TourController::class, 'changeStatus'])->name('tours.changesttus');
 
     Route::get('logout', '\App\Http\Controllers\Auth\AuthenticatedSessionController@destroy');
 });

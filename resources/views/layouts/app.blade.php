@@ -210,6 +210,14 @@
                   </a>
                 </li>
                 @endif
+                @if(auth()->user()->can('user_location'))
+                <li class="nav-item {{ request()->is('livelocation*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('livelocation') }}">
+                    <i class="material-icons">input</i>
+                    <p>User Live Location</p>
+                  </a>
+                </li>
+                @endif
                 @if(auth()->user()->can('role_access'))
                 <li class="nav-item {{ request()->is('roles*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('roles') }}">
@@ -501,14 +509,6 @@
                   <a class="nav-link" href="{{ url('visittypes') }}">
                     <i class="material-icons">input</i>
                     <p>{!! trans('panel.sidemenu.visittype') !!}</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('user_location'))
-                <li class="nav-item {{ request()->is('livelocation*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('livelocation') }}">
-                    <i class="material-icons">input</i>
-                    <p>User Live Location</p>
                   </a>
                 </li>
                 @endif
@@ -815,8 +815,8 @@
     <script src="{{ url('/').'/'.asset('assets/js/material-dashboard.js?v=2.1.2') }}"></script>
 
     <script src="{{ url('/').'/'.asset('assets/demo/demo.js') }}"></script>
-    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
-    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" integrity="sha512-hievggED+/IcfxhYRSr4Auo1jbiOczpqpLZwfTVL/6hFACdbI3WQ8S9NCX50gsM9QVE+zLk/8wb9TlgriFbX+Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js" integrity="sha512-F636MAkMAhtTplahL9F6KmTfxTmYcAcjcCkyu0f0voT3N/6vzAuJ4Num55a0gEJ+hRLHhdz3vDvZpf6kqgEa5w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
       $(function() {
           $('#toggle-one').bootstrapToggle();

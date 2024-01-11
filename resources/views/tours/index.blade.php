@@ -111,6 +111,7 @@
               <th>{!! trans('panel.global.action') !!}</th>
               <th>User Name</th>
               <th>Date</th>
+              <th>Status</th>
               <th>Town</th>
               <th>Objectives</th>
               <th>Type</th>
@@ -239,6 +240,7 @@
             {data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
              {data: 'userinfo.name', name: 'userinfo.name',"defaultContent": '', orderable: false, searchable: false},
             {data: 'date', name: 'date',"defaultContent": ''},
+            {data: 'stauts', name: 'stauts'},
             {data: 'town', name: 'town',"defaultContent": ''},
             {data: 'objectives', name: 'objectives',"defaultContent": ''},
             {data: 'type', name: 'type',"defaultContent": ''},
@@ -346,6 +348,70 @@
               table.draw();
             },
         });
+    });
+
+    $('body').on('click', '.change_status', function () {
+        var id = $(this).attr("value");
+        var status = $(this).data("status");
+        var token = $("meta[name='csrf-token']").attr("content");
+        Swal.fire({
+            title: 'Change Status',
+            input: 'select',
+            inputOptions: {
+                '1': 'Approve',
+                '2': 'Reject',
+                '0': 'Pending'
+            },
+            inputPlaceholder: 'Select status',
+            inputValue: status,
+            showCancelButton: true,
+            confirmButtonText: 'Submit',
+            cancelButtonText: 'Cancel',
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'You must select a status';
+                }
+            }
+        }).then((result) => {
+          if (!result.dismiss) {
+              $.ajax({
+                  url: "{{ route('tours.changesttus') }}",
+                  method:"POST",
+                  data: {_token: token,id: id, status: result.value, id:id},
+                  success: function (data) {
+                    if(data.status == 'success')
+                    {
+                      Swal.fire('Status changed successfully!', '', 'success');
+                    }
+                    else
+                    {
+                      $('.alert').addClass("alert-danger");
+                    }
+                    $('.message').append(data.message);
+                    table.draw();
+                  },
+              });
+           
+            }
+        });
+    //     $.ajax({
+    //         url: "{{ url('tours') }}"+'/'+id,
+    //         type: 'DELETE',
+    //         data: {_token: token,id: id},
+    //         success: function (data) {
+    //           $('.alert').show();
+    //           if(data.status == 'success')
+    //           {
+    //             $('.alert').addClass("alert-success");
+    //           }
+    //           else
+    //           {
+    //             $('.alert').addClass("alert-danger");
+    //           }
+    //           $('.message').append(data.message);
+    //           table.draw();
+    //         },
+    //     });
     });
     });
 
