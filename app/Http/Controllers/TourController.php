@@ -152,9 +152,24 @@ class TourController extends Controller
                               // if(auth()->user()->can(['tour_delete']))
                               // {
 
-                                $btn = $btn.' <a href="" class="btn btn-danger btn-just-icon btn-sm delete" value="'.$query->id.'" title="'.trans('panel.global.delete').' '.trans('panel.category.title_singular').'">
+                                $btn = $btn.' <a href="" class="btn btn-danger btn-just-icon btn-sm delete" value="'.$query->id.'" title="Delete Tour Plan">
                                 <i class="material-icons">clear</i>
                                </a>';
+
+                               if($query->status == '0'){
+                                   $btn = $btn.' <button type="button" data-status="0" class="btn btn-warning btn-just-icon btn-sm change_status" value="'.$query->id.'" title="Change Status(Pending)">
+                                    <i class="material-icons">pending</i>
+                                   </button>';
+                               }elseif($query->status == '1'){
+                                    $btn = $btn.' <button type="button" data-status="1" class="btn btn-success btn-just-icon btn-sm change_status" value="'.$query->id.'" title="Change Status(Approved)">
+                                    <i class="material-icons">approval</i>
+                                    </button>';
+                               }else{
+                                    $btn = $btn.' <button type="button" data-status="2" class="btn btn-danger btn-just-icon btn-sm change_status" value="'.$query->id.'" title="Change Status(Rejected)">
+                                    <i class="material-icons">circle</i>
+                                    </button>';
+                               }
+
 
                               //}
                                
@@ -346,5 +361,17 @@ class TourController extends Controller
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         return Excel::download(new TourExport, 'tours.xlsx');
+    }
+
+
+    public function changeStatus(Request $request){
+        $tour = TourProgramme::find($request->id);
+        if($tour){
+            $tour->status = $request->status;
+            $tour->save();
+            return response()->json(["status"=>"success"]);
+        }else{
+            return response()->json(["status"=>false]);
+        }
     }
 }

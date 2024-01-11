@@ -210,6 +210,14 @@
                   </a>
                 </li>
                 @endif
+                @if(auth()->user()->can('user_location'))
+                <li class="nav-item {{ request()->is('livelocation*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('livelocation') }}">
+                    <i class="material-icons">input</i>
+                    <p>User Live Location</p>
+                  </a>
+                </li>
+                @endif
                 @if(auth()->user()->can('role_access'))
                 <li class="nav-item {{ request()->is('roles*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('roles') }}">
@@ -501,14 +509,6 @@
                   <a class="nav-link" href="{{ url('visittypes') }}">
                     <i class="material-icons">input</i>
                     <p>{!! trans('panel.sidemenu.visittype') !!}</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('user_location'))
-                <li class="nav-item {{ request()->is('livelocation*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('livelocation') }}">
-                    <i class="material-icons">input</i>
-                    <p>User Live Location</p>
                   </a>
                 </li>
                 @endif
