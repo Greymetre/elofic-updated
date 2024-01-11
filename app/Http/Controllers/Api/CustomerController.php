@@ -372,6 +372,14 @@ class CustomerController extends Controller
          $customer_id = Address::whereIn('city_id',$cityid)->pluck('customer_id');
         }
 
+        $branch_id = $request->branch_id;
+        $branch_user_id = array();
+        if(!empty($branch_id) && $branch_id[0]!=null){ 
+         $branch_user_id = User::whereIn('branch_id',$branch_id)->pluck('id');
+        }
+
+
+
         try
         { 
             $user = $request->user();
@@ -381,7 +389,7 @@ class CustomerController extends Controller
             $pageSize = $request->input('pageSize');
             $search = $request['search'] ;
             $query = $this->customers->with('customeraddress','customerdetails','customertypes')
-                            ->where(function($query) use($search, $userids,$customer_id) {
+                            ->where(function($query) use($search, $userids,$customer_id,$branch_user_id) {
                                 if(!empty($search))
                                 {
                                     $query->where('name', 'like', "%{$search}%")->whereIn('executive_id', $userids)
@@ -393,6 +401,9 @@ class CustomerController extends Controller
 
                                 if(!empty($customer_id)){
                                   $query->whereIn('id', $customer_id);
+                                }
+                                if(!empty($branch_user_id)){
+                                  $query->whereIn('executive_id', $branch_user_id);
                                 }
 
                                 $query->whereIn('executive_id', $userids);
