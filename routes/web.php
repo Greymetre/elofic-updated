@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AjaxController;
+use App\Http\Controllers\AppraisalController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\BeatController;
 use App\Http\Controllers\BrandController;
@@ -147,8 +148,13 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('usercity', [ UsersController::class, 'userCity'])->name('users.usercity');
     Route::post('usercity-upload', [ UsersController::class, 'userCityUpload'])->name('usercity.upload');
     Route::any('usercity-download', [ UsersController::class, 'userCitydownload'])->name('usercity.download');
-     //Targets
-     Route::resource('reportings', UserReportingController::class);
+    //Targets
+    Route::resource('reportings', UserReportingController::class);
+    //Appraisal
+    Route::get('appraisal/create', [AppraisalController::class, 'create']);
+    Route::get('appraisal/index', [AppraisalController::class, 'index'])->name('appraisal.index');
+    Route::post('appraisal/store', [AppraisalController::class, 'store'])->name('appraisal.store');
+    Route::post('appraisal/update', [AppraisalController::class, 'update'])->name('appraisal.update');
     // Permissions
     Route::delete('permissions/destroy', [ PermissionsController::class, 'massDestroy'])->name('permissions.massDestroy');
     Route::resource('permissions', PermissionsController::class);

@@ -157,6 +157,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::get('tour/userlist', [TourPlanController::class, 'user_list']);
     Route::get('tour/show', [TourPlanController::class, 'show']);
     Route::post('tour/add', [TourPlanController::class, 'add']);
+    Route::post('tour/edit', [TourPlanController::class, 'edit']);
 });
 
 
