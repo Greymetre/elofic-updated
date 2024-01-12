@@ -420,8 +420,7 @@ class AttendanceController extends Controller
     }
 
     public function showAttendance(Request $request){
-        $attendance_id = $request->input('attendance_id');
-
+        
         $validator = Validator::make($request->all(), [
             'attendance_id' => 'required',
         ]); 
@@ -429,6 +428,7 @@ class AttendanceController extends Controller
             return response()->json(['status' => 'error','message' =>  $validator->errors()], 400); 
         }
 
+        $attendance_id = $request->input('attendance_id');
         $attendance = Attendance::with('users')->find($attendance_id);
 
         if($attendance){
