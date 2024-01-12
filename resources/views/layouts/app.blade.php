@@ -194,6 +194,12 @@
             </a>
             <div class="collapse" id="userMenu" style="">
               <ul class="nav">
+                <!-- <li class="nav-item {{ request()->is('appraisal/create') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('appraisal/index') }}">
+                    <i class="material-icons">verified_user</i>
+                    <p>Appraisal(PMS)</p>
+                  </a>
+                </li> -->
                 @if(auth()->user()->can('user_access'))
                 <li class="nav-item {{ request()->is('users*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('users') }}">

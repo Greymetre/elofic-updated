@@ -19,8 +19,19 @@ class TourPlanController extends Controller
         }
 
         $user_id = $request->input('user_id');
+        $start_date = $request->input('start_date');
+        $end_date = $request->input('end_date');
 
-        $tour_plan = TourProgramme::where('userid', $user_id)->orderBy('date', 'desc')->get();
+        $tour_plan = TourProgramme::where('userid', $user_id)->orderBy('date', 'desc');
+        
+        if($start_date && $start_date != '' && $start_date != null){
+            $start_date = date('Y-m-d', strtotime($start_date));
+            $end_date = date('Y-m-d', strtotime($end_date));
+            $tour_plan = $tour_plan->whereBetween('date', [$start_date, $end_date]);
+        }
+        
+        
+        $tour_plan = $tour_plan->get();
 
         if(count($tour_plan) > 0){
             return response()->json(['status' => 'success','message' => 'Data retrieved successfully.', 'data' => $tour_plan ], 200);
@@ -115,6 +126,37 @@ class TourPlanController extends Controller
                 ]);
             }
             return response()->json(['status' => 'success','message' => 'Data added successfully.'], 200);
+        }else{
+            return response(['status' => 'error', 'message' => 'Something went wrong.'],400);
+        }
+
+    }
+
+    public function edit(Request $request){
+        $validator = Validator::make($request->all(), [
+            'tour_id' => 'required',
+            'user_id' => 'required',
+            'date' => 'required',
+            'town' => 'required',
+            'objectives' => 'required',
+        ]); 
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error','message' =>  $validator->errors()], 400); 
+        }
+        $tour_id = $request->input('tour_id');
+        $user_id = $request->input('user_id');
+        $date = $request->input('date');
+        $town = $request->input('town');
+        $objectives = $request->input('objectives');
+
+        $tour_plan = TourProgramme::find($tour_id);
+
+        if($tour_plan){
+            $tour_plan->date = $date;
+            $tour_plan->userid = $user_id;
+            $tour_plan->town = $town;
+            $tour_plan->objectives = $objectives;
+            return response()->json(['status' => 'success','message' => 'Data updated successfully.'], 200);
         }else{
             return response(['status' => 'error', 'message' => 'Something went wrong.'],400);
         }
