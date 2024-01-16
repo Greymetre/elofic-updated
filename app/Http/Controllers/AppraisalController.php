@@ -9,16 +9,17 @@ use Illuminate\Http\Request;
 use DataTables;
 use Auth;
 use Validator;
+use DB;
 
 class AppraisalController extends Controller
 {
-    public function __construct() 
-    {     
-        $this->middleware('auth');   
+    public function __construct()
+    {
+        $this->middleware('auth');
         $this->appraisal = new Appraisal();
-        
     }
-    public function index(Request $request){
+    public function index(Request $request)
+    {
         $search_branches = $request->input('search_branches');
         $all_reporting_user_ids = getUsersReportingToAuth();
         $all_user_branches = User::with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
@@ -26,8 +27,8 @@ class AppraisalController extends Controller
         $all_branch = array();
         $bkey = 0;
         foreach ($all_user_branches as $k => $val) {
-            if($val->getbranch){
-                if(!in_array($val->getbranch->id, $all_branch)){
+            if ($val->getbranch) {
+                if (!in_array($val->getbranch->id, $all_branch)) {
                     array_push($all_branch, $val->getbranch->id);
                     $branches[$bkey]['id'] = $val->getbranch->id;
                     $branches[$bkey]['name'] = $val->getbranch->branch_name;
@@ -45,81 +46,47 @@ class AppraisalController extends Controller
         foreach ($all_user_details as $k => $val) {
             $users[$k]['id'] = $val->id;
             $users[$k]['name'] = $val->name;
-            if($val->getdesignation){
-               if(!in_array($val->getdesignation->id, $all_designation_id)) {
-                array_push($all_designation_id,$val->getdesignation->id);
-                $all_designation[$k]['id'] = $val->getdesignation->id;
-                $all_designation[$k]['designation_name'] = $val->getdesignation->designation_name;
-               }
+            if ($val->getdesignation) {
+                if (!in_array($val->getdesignation->id, $all_designation_id)) {
+                    array_push($all_designation_id, $val->getdesignation->id);
+                    $all_designation[$k]['id'] = $val->getdesignation->id;
+                    $all_designation[$k]['designation_name'] = $val->getdesignation->designation_name;
+                }
             }
         }
         if ($search_branches && count($search_branches) > 0 && $search_branches[0] != null) {
             if ($request->ajax()) {
-                $response = ["users"=>$users, "status"=>true];
+                $response = ["users" => $users, "status" => true];
                 return response()->json($response);
             }
         }
+        if ($request->user_id && $request->user_id != null && $request->user_id != '') {
+            $all_reporting_user_ids = array();
+            $all_reporting_user_ids[] = $request->user_id;
+        }
         if ($request->ajax()) {
-            $data = Appraisal::whereIn('user_id', $all_reporting_user_ids)->latest();
+            $data = Appraisal::select('year', 'user_id', DB::raw('GROUP_CONCAT(created_at) as dates'))->whereIn('user_id', $all_reporting_user_ids)->groupBy('year', 'user_id');
+            
             return Datatables::of($data)
                 ->addIndexColumn()
-                ->addColumn('branch', function ($query) {
-                    return $query->users->getbranch?$query->users->getbranch->branch_name:'-';
+                ->addColumn('user_name', function ($query) {
+                    return $query->users ? $query->users->name : '-';
                 })
-                ->addColumn('department', function ($query) {
-                    return $query->users->department?$query->users->department->division_name:'-';
+                ->addColumn('financial_year', function ($query) {
+                    return str_replace('_', '-', $query->year);
                 })
-                ->addColumn('employee_code', function ($query) {
-                    return $query->users?$query->users->employee_codes:'-';
+                ->addColumn('date', function ($query) {
+                    $all_dates = explode(',', $query->dates);
+                    return date('d-M-y', strtotime($all_dates[0]));
                 })
-                ->addColumn('name', function ($query) {
-                    return $query->users?$query->users->name:'-';
-                })
-                ->addColumn('designation', function ($query) {
-                    return $query->users->getdesignation?$query->users->getdesignation->designation_name:'-';
-                })
-                ->addColumn('date_of_joining', function ($query) {
-                    return $query->users->userinfo?date('d/M/Y', strtotime($query->users->userinfo->date_of_joining)):'-';
-                })
-                ->addColumn('ctc', function ($query) {
-                    return $query->users->userinfo?$query->users->userinfo->salary:'-';
-                })
-                ->addColumn('last_increments', function ($query) {
-                    return $query->users->userinfo?$query->users->userinfo->last_year_increments:'-';
-                })
-                ->addColumn('last_promotion', function ($query) {
-                    return $query->users->userinfo?$query->users->userinfo->last_promotion:'-';
-                })
-                ->addColumn('target', function ($query) {
-                    return $query->target?$query->target:'-';
-                })
-                ->addColumn('achievement', function ($query) {
-                    return $query->achivment?$query->achivment:'-';
-                })
-                ->addColumn('sales_weightage', function ($query) {
-                    return $query->sales_weightage?$query->sales_weightage->name:'-';
-                })
-                ->addColumn('rating', function ($query) use ($all_reporting_user_ids) {
-                    if(in_array($query->rating_by, $all_reporting_user_ids)){
-                        return $query->rating;
-                    }else{
-                        return '-';
-                    }
-                })
-                ->addColumn('rating_by', function ($query) use ($all_reporting_user_ids) {
-                    if(in_array($query->rating_by, $all_reporting_user_ids)){
-                        return $query->rating_by_user?$query->rating_by_user->name.'('.$query->rating_by_user->getdesignation->designation_name.')':'-';
-                    }else{
-                        return '-';
-                    }
-                })
-                ->rawColumns(['branch', 'department', 'employee_code', 'name', 'designation', 'date_of_joining', 'ctc', 'last_increments', 'last_promotion', 'target', 'achievement', 'sales_weightage'])
+                ->rawColumns(['user_name', 'financial_year', 'date'])
                 ->make(true);
         }
         return view('appraisal.index', compact('branches', 'users', 'all_designation'));
     }
 
-    public function create(Request $request){
+    public function create(Request $request)
+    {
         $search_branches = $request->input('search_branches');
         $all_reporting_user_ids = getUsersReportingToAuth();
         $all_user_branches = User::with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
@@ -127,8 +94,8 @@ class AppraisalController extends Controller
         $all_branch = array();
         $bkey = 0;
         foreach ($all_user_branches as $k => $val) {
-            if($val->getbranch){
-                if(!in_array($val->getbranch->id, $all_branch)){
+            if ($val->getbranch) {
+                if (!in_array($val->getbranch->id, $all_branch)) {
                     array_push($all_branch, $val->getbranch->id);
                     $branches[$bkey]['id'] = $val->getbranch->id;
                     $branches[$bkey]['name'] = $val->getbranch->branch_name;
@@ -144,16 +111,15 @@ class AppraisalController extends Controller
         foreach ($all_user_details as $k => $val) {
             $users[$k]['id'] = $val->id;
             $users[$k]['name'] = $val->name;
-        
         }
         if ($search_branches && count($search_branches) > 0 && $search_branches[0] != null) {
             if ($request->ajax()) {
-                $response = ["users"=>$users, "status"=>true];
+                $response = ["users" => $users, "status" => true];
                 return response()->json($response);
             }
         }
         $sale_weightage = salesWeightage::get();
-        return view('appraisal.create',compact('users', 'branches', 'sale_weightage'))->with('appraisal',$this->appraisal);
+        return view('appraisal.create', compact('users', 'branches', 'sale_weightage'))->with('appraisal', $this->appraisal);
     }
 
     public function store(Request $request)
@@ -162,11 +128,11 @@ class AppraisalController extends Controller
             'executive_id' => 'required',
             'f_year' => 'required',
             'appraisal_type' => 'required',
-        ]); 
+        ]);
         if ($validator->fails()) {
             return redirect()->back()
-                        ->withErrors($validator)
-                        ->withInput();
+                ->withErrors($validator)
+                ->withInput();
         }
         $user_id = auth()->user()->id;
         $sale_weightage_id = $request->sale_weightage_id;
@@ -180,7 +146,13 @@ class AppraisalController extends Controller
         $rating = $request->rating;
         $remark = $request->remark;
         foreach ($sale_weightage_id as $key => $value) {
-            Appraisal::create([
+            Appraisal::updateOrCreate(
+                [
+                'weightage_id' => $value,
+                'user_id' => $executive_id,
+                'year' => $f_year,
+                ],
+                [
                 'weightage_id' => $value,
                 'user_id' => $executive_id,
                 'year' => $f_year,
@@ -192,10 +164,33 @@ class AppraisalController extends Controller
                 'appraisal_type' => $appraisal_type,
                 'appraisal_session' => $appraisal_session,
                 'remark' => $remark,
-            ]);
+                ]
+            );
         }
 
         return redirect(url('appraisal/index'));
-        
+    }
+
+    public function download(Request $request)
+    {
+        dd($request->all());
+    }
+
+    public function getappraisal(Request $request){
+        if($request->appraisal_type == 'quarterly' || $request->appraisal_type == 'half_yearly'){
+            $all_reporting_user_ids = getUsersReportingToAuth();
+            $appraisal = Appraisal::with('sales_weightage')->where('user_id', $request->executive_id)->where('year', $request->f_year)->where('appraisal_type', $request->appraisal_type)->where('appraisal_session', $request->appraisal_session)->whereIn('rating_by', $all_reporting_user_ids)->get();
+            foreach($appraisal as $k=>$val){
+                $appraisal[$k]->rating_by_user->getdesignation = $val->rating_by_user->getdesignation;
+            }
+        }else{
+            $all_reporting_user_ids = getUsersReportingToAuth();
+            $appraisal = Appraisal::with('sales_weightage')->where('user_id', $request->executive_id)->where('year', $request->f_year)->where('appraisal_type', $request->appraisal_type)->whereIn('rating_by', $all_reporting_user_ids)->get();
+            foreach($appraisal as $k=>$val){
+                $appraisal[$k]->rating_by_user->getdesignation = $val->rating_by_user->getdesignation;
+            }
+        }
+
+        return response()->json($appraisal);
     }
 }

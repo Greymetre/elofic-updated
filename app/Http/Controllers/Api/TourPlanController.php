@@ -8,7 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class TourPlanController extends Controller
+class   TourPlanController extends Controller
 {
     public function show(Request $request){
         $validator = Validator::make($request->all(), [
@@ -31,7 +31,18 @@ class TourPlanController extends Controller
         }
         
         
-        $tour_plan = $tour_plan->get();
+        $tour_plan = $tour_plan->latest()->take(30)->get();
+
+        foreach($tour_plan as $key => $val){
+            $tour_plan[$key]->date = date('d-m-Y', strtotime($val->date));
+            if($val->status == '0'){
+                $tour_plan[$key]->status = 'Pending';
+            }elseif($val->status == '1'){
+                $tour_plan[$key]->status = 'Approved';
+            }else{
+                $tour_plan[$key]->status = 'Rejected';
+            }
+        }
 
         if(count($tour_plan) > 0){
             return response()->json(['status' => 'success','message' => 'Data retrieved successfully.', 'data' => $tour_plan ], 200);
@@ -134,12 +145,13 @@ class TourPlanController extends Controller
 
     public function edit(Request $request){
         $validator = Validator::make($request->all(), [
-            'tour_id' => 'required',
+            'tour_id' => 'required|array',
             'user_id' => 'required',
-            'date' => 'required',
-            'town' => 'required',
-            'objectives' => 'required',
-        ]); 
+            'date' => 'required|array',
+            'town' => 'required|array',
+            'objectives' => 'required|array',
+            'status' => 'required|array',
+        ]);
         if ($validator->fails()) {
             return response()->json(['status' => 'error','message' =>  $validator->errors()], 400); 
         }
@@ -149,17 +161,19 @@ class TourPlanController extends Controller
         $town = $request->input('town');
         $objectives = $request->input('objectives');
 
-        $tour_plan = TourProgramme::find($tour_id);
+        foreach($tour_id as $k=>$val){
+            $tour_plan = TourProgramme::find($val);
+    
+            if($tour_plan){
+                $tour_plan->date = $date[$k];
+                $tour_plan->userid = $user_id;
+                $tour_plan->town = $town[$k];
+                $tour_plan->objectives = $objectives[$k];
+            }
 
-        if($tour_plan){
-            $tour_plan->date = $date;
-            $tour_plan->userid = $user_id;
-            $tour_plan->town = $town;
-            $tour_plan->objectives = $objectives;
-            return response()->json(['status' => 'success','message' => 'Data updated successfully.'], 200);
-        }else{
-            return response(['status' => 'error', 'message' => 'Something went wrong.'],400);
         }
 
+        return response()->json(['status' => 'success','message' => 'Data updated successfully.'], 200);
+        
     }
 }

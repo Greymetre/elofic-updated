@@ -159,7 +159,7 @@
                                 '<h5 style="font-weight: bold;">' + item.title + '</h5>' +
                                 '</div>' +
                                 '<h6><i class="ti-time"></i> ' + item.msg + '</h6>' +
-                                // '<button class="btn btn-info btn-sm" onclick="getLocationData(' + item.latitude + ',' + item.longitude +')">Location</button>' +
+                                '<button class="btn btn-info btn-sm" onclick="getLocationData(' + item.latitude + ',' + item.longitude +')">Location</button>' +
                                 '</div>' +
                                 '</li>');
                         });
