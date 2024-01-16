@@ -41,9 +41,9 @@
                         <table id="getattendance" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
                             <thead class=" text-primary">
                                 <th>{!! trans('panel.global.no') !!}</th>
+                                <th>{!! trans('panel.global.actions') !!}</th>
                                 <th>{!! trans('panel.sales_weightage.weightage_name') !!}</th>
                                 <th>{!! trans('panel.sales_weightage.weightage') !!}</th>
-                                <th>{!! trans('panel.global.actions') !!}</th>
                             </thead>
                             <tbody>
                             </tbody>
