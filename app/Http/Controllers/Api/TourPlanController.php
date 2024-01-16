@@ -160,15 +160,19 @@ class   TourPlanController extends Controller
         $date = $request->input('date');
         $town = $request->input('town');
         $objectives = $request->input('objectives');
+        $status = $request->input('status');
 
+        
         foreach($tour_id as $k=>$val){
             $tour_plan = TourProgramme::find($val);
     
             if($tour_plan){
-                $tour_plan->date = $date[$k];
+                $tour_plan->date = date('Y-m-d', strtotime($date[$k]));
                 $tour_plan->userid = $user_id;
                 $tour_plan->town = $town[$k];
                 $tour_plan->objectives = $objectives[$k];
+                $tour_plan->status = $status[$k];
+                $tour_plan->save();
             }
 
         }
