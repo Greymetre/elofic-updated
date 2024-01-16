@@ -130,6 +130,14 @@
             </div>
           </li>
           @endif
+          @if(auth()->user()->can(['dashboard_access']))
+          <li class="nav-item {{ request()->is('sales_weightage') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ url('sales_weightage') }}">
+              <i class="material-icons">check</i>
+              <p>{!! trans('panel.sales_weightage.title') !!}</p>
+            </a>
+          </li>
+          @endif  
           @if(auth()->user()->can('country_access'))
            <li class="nav-item ">
             <a class="nav-link collapsed" data-toggle="collapse" href="#addressMenu" aria-expanded="false">

@@ -112,3 +112,19 @@
   text-align: right;
   white-space: nowrap;
 }
+
+/* New css */
+
+td.tottal-td {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  border: 1px solid;
+}
+
+span.rat-err{
+  font-size: 12px;
+  padding: 2px;
+  font-weight: 600;
+  display: none;
+}
