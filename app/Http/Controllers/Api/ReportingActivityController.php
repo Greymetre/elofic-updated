@@ -41,7 +41,6 @@ class ReportingActivityController extends Controller
         $branches= array();
         $all_branch= array();
         $bkey = 0;
-        // dd($all_user_branches);
         foreach ($all_user_branches as $k => $val) {
             if($val->getbranch){
                 if(!in_array($val->getbranch->id, $all_branch)){

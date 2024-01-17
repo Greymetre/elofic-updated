@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\VisitReportController;
 use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\Api\ReportingActivityController;
+use App\Http\Controllers\Api\TourPlanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -152,6 +153,11 @@ Route::group(['middleware' => ['auth:users']], function () {
     //Reporting Activity
     Route::get('reporting/users', [ReportingActivityController::class, 'allReportingUsers']);
     Route::get('user/activity', [ReportingActivityController::class, 'userActivity']);
+    //Tour Plan
+    Route::get('tour/userlist', [TourPlanController::class, 'user_list']);
+    Route::get('tour/show', [TourPlanController::class, 'show']);
+    Route::post('tour/add', [TourPlanController::class, 'add']);
+    Route::post('tour/edit', [TourPlanController::class, 'edit']);
 });
 
 

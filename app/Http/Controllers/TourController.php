@@ -123,7 +123,7 @@ class TourController extends Controller
                             {
                                 $query->whereIn('userid',$all_reporting_user_ids);
                             }
-                        })->latest();
+                        })->orderBy(DB::raw('YEAR(date)'), 'DESC')->orderBy(DB::raw('DATE(date)'), 'ASC');
             return Datatables::of($data)
                     ->addIndexColumn()
                     // ->addColumn('checkbox', function ($item) {
