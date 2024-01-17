@@ -32,7 +32,7 @@
                                 {!! Form::model($appraisal,[
                                 'route' => $appraisal->exists ? ['appraisal.update', $appraisal->id] : 'appraisal.store',
                                 'method' => $appraisal->exists ? 'PUT' : 'POST',
-                                'id' => 'createCompany',
+                                'id' => 'appraisalCreateForm',
                                 'files'=>true
                                 ]) !!}
                                 <div class="row">
@@ -61,6 +61,7 @@
                                     <div class="p-2" style="width: 250px;">
                                         <select class="selectpicker" name="f_year" id="f_year" data-style="select-with-transition" title="Select Financial Year">
                                             <option value="">Select Financial Year</option>
+                                            <option value="{{Carbon\Carbon::now()->format('Y')-2}}_{{Carbon\Carbon::now()->format('y')-1}}">{{Carbon\Carbon::now()->format('Y')-2}}-{{Carbon\Carbon::now()->format('y')-1}}</option>
                                             <option value="{{Carbon\Carbon::now()->format('Y')-1}}_{{Carbon\Carbon::now()->format('y')}}">{{Carbon\Carbon::now()->format('Y')-1}}-{{Carbon\Carbon::now()->format('y')}}</option>
                                         </select>
                                     </div>
@@ -80,7 +81,7 @@
                                     </div>
 
                                     <div class="table-responsive w-100">
-                                        <table class="table kvcodes-dynamic-rows-example" id="tab_logic">
+                                        <table class="table kvcodes-dynamic-rows-example" id="table_appraisal">
                                             <thead>
                                                 <tr class="card-header-warning text-white" id="headings">
                                                     <th class="text-center">Sale Weightage </th>
@@ -113,10 +114,10 @@
                                                     </td>
                                                     <td>10</td>
                                                     <td>
-                                                        <input name="rating[]" class="all_rating"  max="10" type="number">
-                                                        <span class="alert alert-danger rat-err"></span>
+                                                        <input name="rating[]" class="all_rating" max="10" type="number">
+                                                        <p class="rat-err"></p>
                                                     </td>
-                                                    
+
                                                 </tr>
                                                 @endforeach
                                             </tbody>
@@ -160,6 +161,8 @@
         })
 
         $("#executive_id").on("change", function() {
+            $('#appraisalCreateForm').find("input").val('');
+            $(".appended").remove();
             var executive_id = $(this).val();
             var f_year = $("#f_year").val();
             var appraisal_type = $("#appraisal_type").val();
@@ -174,16 +177,19 @@
                                 "executive_id": executive_id,
                                 "f_year": f_year,
                                 "appraisal_type": appraisal_type,
-                                "appraisal_session": appraisal_session
                             },
                             success: function(res) {
                                 if (res.length > 0) {
+                                    var old_data = '';
+                                    var tttr = '<tr class="appended"><td colspan="6" class="tottal-td">Total</td><td class="tottal-td" id="auth-user-per"></td>';
+                                    var tttr2 = '<tr class="appended"><td colspan="6" class="tottal-td">Grade</td><td class="tottal-td" id="auth-user-grade"></td>';
                                     var totalPer = 0;
-                                    var tttr = '';
+                                    var selftotalPer = 0;
                                     $.each(res, function(i, item) {
                                         var tdElement = $('td:contains(' + item.sales_weightage.name + ')');
                                         var trElement = tdElement.closest('tr');
                                         if ('{{auth()->user()->id}}' == item.rating_by) {
+                                            $("#remark").val(item.remark);
                                             $(trElement).find('td').each(function() {
                                                 var targetInputtarget = $(this).find('input[name="target[]"]');
                                                 var targetInputachivment = $(this).find('input[name="achivment[]"]');
@@ -203,24 +209,77 @@
                                                     targetInputrating.val(item.rating);
                                                 }
                                             });
+                                            selftotalPer += (parseInt(item.rating) * parseInt(item.sales_weightage.weightage) / 10);
                                         } else if ('{{auth()->user()->id}}' != item.rating_by) {
-                                            var NewTh = '<th class="text-center">';
-                                            NewTh += item.rating_by_user.getdesignation.designation_name;
-                                            NewTh += '</th>';
-                                            trElement.append('<td>' + item.rating + '</td>');
-                                            totalPer += item.rating;
-                                            if (old_data != item.rating_by_user.getdesignation.designation_name) {
+                                            $(trElement).find('td').each(function() {
+                                                var targetInputtarget = $(this).find('input[name="target[]"]');
+                                                var targetInputachivment = $(this).find('input[name="achivment[]"]');
+                                                var targetInputacual = $(this).find('input[name="acual[]"]');
+
+                                                if (targetInputtarget.length > 0) {
+                                                    targetInputtarget.val(item.target);
+                                                }
+                                                if (targetInputachivment.length > 0) {
+                                                    targetInputachivment.val(item.achivment);
+                                                }
+                                                if (targetInputacual.length > 0) {
+                                                    targetInputacual.val(item.acual);
+                                                }
+                                            });
+                                            var NewTh = '<th class="text-center appended">';
+                                            if (item.user_id != item.rating_by_user.id) {
+                                                NewTh += item.rating_by_user.name+'('+item.rating_by_user.getdesignation.designation_name+')';
+                                            } else {
+                                                NewTh += 'Self';
+                                            }
+                                            NewTh += '  Rating</th>';
+                                            trElement.append('<td class="appended">' + item.rating + '</td>');
+                                            if (old_data != item.rating_by_user.roles[0].id) {
                                                 $("#headings").append(NewTh);
-                                                old_data = item.rating_by_user.getdesignation.designation_name;
+                                                old_data = item.rating_by_user.roles[0].id;
+                                            }
+                                            if (item.sales_weightage.id == 6) {
+                                                if (totalPer < 51) {
+                                                    tttr2 += '<td class="tottal-td">GRADE-C(Poor)</td>';
+                                                } else if (totalPer > 50 && totalPer < 61) {
+                                                    tttr2 += '<td class="tottal-td">GRADE - B(Average)</td>';
+                                                } else if (totalPer > 60 && totalPer < 71) {
+                                                    tttr2 += '<td class="tottal-td">GRADE-B+(Good)</td>';
+                                                } else if (totalPer > 70 && totalPer < 81) {
+                                                    tttr2 += '<td class="tottal-td">GRADE-A(EXCELLENT)</td>';
+                                                } else if (totalPer > 80) {
+                                                    tttr2 += '<td class="tottal-td">GRADE-A+(SPECIAL)</td>';
+                                                }
+                                                tttr += '<td class="tottal-td">' + totalPer + '%</td>';
+                                                totalPer = 0;
                                             }
                                         }
-                                        tttr += '<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td>';
-                                        tttr += '<td>'+totalPer/100+'%</td>';
                                     });
                                     tttr += '</tr>';
-                                    $('#tab_logic').append(tttr);
+                                    tttr2 += '</tr>';
+                                    $('#table_appraisal').append(tttr);
+                                    $('#table_appraisal').append(tttr2);
+                                    if (selftotalPer < 51) {
+                                        $("#auth-user-grade").html("GRADE-C(Poor)");
+                                    } else if (selftotalPer > 50 && selftotalPer < 61) {
+                                        $("#auth-user-grade").html("GRADE-B(Average)");
+                                    } else if (selftotalPer > 60 && selftotalPer < 71) {
+                                        $("#auth-user-grade").html("GRADE-B+(Good)");
+                                    } else if (selftotalPer > 70 && selftotalPer < 81) {
+                                        $("#auth-user-grade").html("GRADE-A(EXCELLENT)");
+                                    } else if (selftotalPer > 80) {
+                                        $("#auth-user-grade").html("GRADE-A+(SPECIAL)");
+                                    }
+                                    $("#auth-user-per").html(selftotalPer+"%");
                                 } else {
                                     $('input[name="target[]"], input[name="achivment[]"], input[name="acual[]"], input[name="rating[]"]').val('');
+                                    const rows = document.querySelectorAll('tr');
+                                    rows.forEach(row => {
+                                        if (row.classList.contains('appended')) {
+                                            row.remove();
+                                        }
+                                    });
+                                    $(".appended").remove();
                                 }
                             }
                         });
@@ -238,13 +297,15 @@
                         success: function(res) {
                             if (res.length > 0) {
                                 var old_data = '';
-                                var tttr = '<tr><td colspan="6" class="tottal-td">Total</td>';
-                                var tttr2 = '<tr><td colspan="6" class="tottal-td">Grade</td>';
+                                var tttr = '<tr class="appended"><td colspan="6" class="tottal-td">Total</td><td class="tottal-td" id="auth-user-per"></td>';
+                                var tttr2 = '<tr class="appended"><td colspan="6" class="tottal-td">Grade</td><td class="tottal-td" id="auth-user-grade"></td>';
                                 var totalPer = 0;
+                                var selftotalPer = 0;
                                 $.each(res, function(i, item) {
                                     var tdElement = $('td:contains(' + item.sales_weightage.name + ')');
                                     var trElement = tdElement.closest('tr');
                                     if ('{{auth()->user()->id}}' == item.rating_by) {
+                                        $("#remark").val(item.remark);
                                         $(trElement).find('td').each(function() {
                                             var targetInputtarget = $(this).find('input[name="target[]"]');
                                             var targetInputachivment = $(this).find('input[name="achivment[]"]');
@@ -264,96 +325,97 @@
                                                 targetInputrating.val(item.rating);
                                             }
                                         });
-                                        totalPer += (parseInt(item.rating)*parseInt(item.sales_weightage.weightage)/10);
-                                        console.log(totalPer);
-                                        if(i == 5){
-                                                if(totalPer < 51){
-                                                    tttr2 += '<td class="tottal-td">GRADE-C(Poor)</td>';
-                                                }else if(totalPer > 50 && totalPer < 61){
-                                                    tttr2 += '<td class="tottal-td">GRADE-B(Average)</td>';
-                                                }else if(totalPer > 60 && totalPer < 71){
-                                                    tttr2 += '<td class="tottal-td">GRADE-B+(Good)</td>';
-                                                }else if(totalPer > 70 && totalPer < 81){
-                                                    tttr2 += '<td class="tottal-td">GRADE-A(EXCELLENT)</td>';
-                                                }else if(totalPer > 80){
-                                                    tttr2 += '<td class="tottal-td">GRADE-A+(SPECIAL)</td>';
-                                                }
-                                                tttr += '<td class="tottal-td">'+totalPer+'%</td>';
-                                                totalPer = 0;
-                                            }                                            
-                                        if(i == res.length-1){
-                                            if(totalPer < 51){
-                                                    tttr2 += '<td class="tottal-td">GRADE-C(Poor)</td>';
-                                            }else if(totalPer > 50 && totalPer < 61){
+                                        selftotalPer += (parseInt(item.rating) * parseInt(item.sales_weightage.weightage) / 10);
+                                    } else if ('{{auth()->user()->id}}' != item.rating_by) {
+                                        $(trElement).find('td').each(function() {
+                                            var targetInputtarget = $(this).find('input[name="target[]"]');
+                                            var targetInputachivment = $(this).find('input[name="achivment[]"]');
+                                            var targetInputacual = $(this).find('input[name="acual[]"]');
+
+                                            if (targetInputtarget.length > 0) {
+                                                targetInputtarget.val(item.target);
+                                            }
+                                            if (targetInputachivment.length > 0) {
+                                                targetInputachivment.val(item.achivment);
+                                            }
+                                            if (targetInputacual.length > 0) {
+                                                targetInputacual.val(item.acual);
+                                            }
+                                        });
+                                        var NewTh = '<th class="text-center appended">';
+                                        if (item.user_id != item.rating_by_user.id) {
+                                             NewTh += item.rating_by_user.name+'('+item.rating_by_user.getdesignation.designation_name+')';
+                                        } else {
+                                            NewTh += 'Self';
+                                        }
+                                        NewTh += '  Rating</th>';
+                                        trElement.append('<td class="appended">' + item.rating + '</td>');
+                                        if (old_data != item.rating_by_user.roles[0].id) {
+                                            $("#headings").append(NewTh);
+                                            old_data = item.rating_by_user.roles[0].id;
+                                        }
+                                        totalPer += (parseInt(item.rating) * parseInt(item.sales_weightage.weightage) / 10);
+                                        if (item.sales_weightage.id == 6) {
+                                            if (totalPer < 51) {
+                                                tttr2 += '<td class="tottal-td">GRADE-C(Poor)</td>';
+                                            } else if (totalPer > 50 && totalPer < 61) {
                                                 tttr2 += '<td class="tottal-td">GRADE - B(Average)</td>';
-                                            }else if(totalPer > 60 && totalPer < 71){
+                                            } else if (totalPer > 60 && totalPer < 71) {
                                                 tttr2 += '<td class="tottal-td">GRADE-B+(Good)</td>';
-                                            }else if(totalPer > 70 && totalPer < 81){
+                                            } else if (totalPer > 70 && totalPer < 81) {
                                                 tttr2 += '<td class="tottal-td">GRADE-A(EXCELLENT)</td>';
-                                            }else if(totalPer > 80){
+                                            } else if (totalPer > 80) {
                                                 tttr2 += '<td class="tottal-td">GRADE-A+(SPECIAL)</td>';
                                             }
-                                            tttr += '<td class="tottal-td">'+totalPer+'%</td>';
+                                            tttr += '<td class="tottal-td">' + totalPer + '%</td>';
                                             totalPer = 0;
                                         }
-                                    } else if ('{{auth()->user()->id}}' != item.rating_by) {
-                                            var NewTh = '<th class="text-center">';
-                                            NewTh += item.rating_by_user.getdesignation.designation_name;
-                                            NewTh += '</th>';
-                                            trElement.append('<td>' + item.rating + '</td>');
-                                            totalPer += (parseInt(item.rating)*parseInt(item.sales_weightage.weightage)/10);
-                                            if (old_data != item.rating_by_user.getdesignation.designation_name) {
-                                                if(i != 6){
-                                                    if(totalPer < 51){
-                                                        tttr2 += '<td class="tottal-td">GRADE-C(Poor)</td>';
-                                                    }else if(totalPer > 50 && totalPer < 61){
-                                                        tttr2 += '<td class="tottal-td">GRADE-B(Average)</td>';
-                                                    }else if(totalPer > 60 && totalPer < 71){
-                                                        tttr2 += '<td class="tottal-td">GRADE-B+(Good)</td>';
-                                                    }else if(totalPer > 70 && totalPer < 81){
-                                                        tttr2 += '<td class="tottal-td">GRADE-A(EXCELLENT)</td>';
-                                                    }else if(totalPer > 80){
-                                                        tttr2 += '<td class="tottal-td">GRADE-A+(SPECIAL)</td>';
-                                                    }
-                                                    tttr += '<td class="tottal-td">'+totalPer+'%</td>';
-                                                    totalPer = 0;
-                                                }
-                                                $("#headings").append(NewTh);
-                                                old_data = item.rating_by_user.getdesignation.designation_name;
-                                            }
-                                            if(i == res.length-1){
-                                                if(totalPer < 51){
-                                                        tttr2 += '<td class="tottal-td">GRADE-C(Poor)</td>';
-                                                }else if(totalPer > 50 && totalPer < 61){
-                                                    tttr2 += '<td class="tottal-td">GRADE - B(Average)</td>';
-                                                }else if(totalPer > 60 && totalPer < 71){
-                                                    tttr2 += '<td class="tottal-td">GRADE-B+(Good)</td>';
-                                                }else if(totalPer > 70 && totalPer < 81){
-                                                    tttr2 += '<td class="tottal-td">GRADE-A(EXCELLENT)</td>';
-                                                }else if(totalPer > 80){
-                                                    tttr2 += '<td class="tottal-td">GRADE-A+(SPECIAL)</td>';
-                                                }
-                                                tttr += '<td class="tottal-td">'+totalPer+'%</td>';
-                                                totalPer = 0;
-                                            }
-                                        }
-                                    });
+                                    }
+                                });
                                 tttr += '</tr>';
                                 tttr2 += '</tr>';
-                                $('#tab_logic').append(tttr);
-                                $('#tab_logic').append(tttr2);
+                                $('#table_appraisal').append(tttr);
+                                $('#table_appraisal').append(tttr2);
+                                if (selftotalPer < 51) {
+                                        $("#auth-user-grade").html("GRADE-C(Poor)");
+                                    } else if (selftotalPer > 50 && selftotalPer < 61) {
+                                        $("#auth-user-grade").html("GRADE-B(Average)");
+                                    } else if (selftotalPer > 60 && selftotalPer < 71) {
+                                        $("#auth-user-grade").html("GRADE-B+(Good)");
+                                    } else if (selftotalPer > 70 && selftotalPer < 81) {
+                                        $("#auth-user-grade").html("GRADE-A(EXCELLENT)");
+                                    } else if (selftotalPer > 80) {
+                                        $("#auth-user-grade").html("GRADE-A+(SPECIAL)");
+                                    }
+                                    $("#auth-user-per").html(selftotalPer+"%");
                             } else {
                                 $('input[name="target[]"], input[name="achivment[]"], input[name="acual[]"], input[name="rating[]"]').val('');
+                                const rows = document.querySelectorAll('tr');
+                                rows.forEach(row => {
+                                    if (row.classList.contains('appended')) {
+                                        row.remove();
+                                    }
+                                });
+                                $(".appended").remove();
                             }
                         }
                     });
                 }
             } else {
                 $('input[name="target[]"], input[name="achivment[]"], input[name="acual[]"], input[name="rating[]"]').val('');
+                const rows = document.querySelectorAll('tr');
+                rows.forEach(row => {
+                    if (row.classList.contains('appended')) {
+                        row.remove();
+                    }
+                });
+                $(".appended").remove();
             }
         })
 
         $("#f_year").on("change", function() {
+            $(".appended").remove();
+            $('#appraisalCreateForm').find("input").val('');
             var executive_id = $("#executive_id").val();
             var f_year = $(this).val();
             var appraisal_type = $("#appraisal_type").val();
@@ -368,16 +430,19 @@
                                 "executive_id": executive_id,
                                 "f_year": f_year,
                                 "appraisal_type": appraisal_type,
-                                "appraisal_session": appraisal_session
                             },
                             success: function(res) {
                                 if (res.length > 0) {
+                                    var old_data = '';
+                                    var tttr = '<tr class="appended"><td colspan="6" class="tottal-td">Total</td><td class="tottal-td" id="auth-user-per"></td>';
+                                    var tttr2 = '<tr class="appended"><td colspan="6" class="tottal-td">Grade</td><td class="tottal-td" id="auth-user-grade"></td>';
                                     var totalPer = 0;
-                                    var tttr = '';
+                                    var selftotalPer = 0;
                                     $.each(res, function(i, item) {
                                         var tdElement = $('td:contains(' + item.sales_weightage.name + ')');
                                         var trElement = tdElement.closest('tr');
                                         if ('{{auth()->user()->id}}' == item.rating_by) {
+                                            $("#remark").val(item.remark);
                                             $(trElement).find('td').each(function() {
                                                 var targetInputtarget = $(this).find('input[name="target[]"]');
                                                 var targetInputachivment = $(this).find('input[name="achivment[]"]');
@@ -397,24 +462,78 @@
                                                     targetInputrating.val(item.rating);
                                                 }
                                             });
+                                            selftotalPer += (parseInt(item.rating) * parseInt(item.sales_weightage.weightage) / 10);
                                         } else if ('{{auth()->user()->id}}' != item.rating_by) {
-                                            var NewTh = '<th class="text-center">';
-                                            NewTh += item.rating_by_user.getdesignation.designation_name;
-                                            NewTh += '</th>';
-                                            trElement.append('<td>' + item.rating + '</td>');
-                                            totalPer += item.rating;
-                                            if (old_data != item.rating_by_user.getdesignation.designation_name) {
+                                            $(trElement).find('td').each(function() {
+                                                var targetInputtarget = $(this).find('input[name="target[]"]');
+                                                var targetInputachivment = $(this).find('input[name="achivment[]"]');
+                                                var targetInputacual = $(this).find('input[name="acual[]"]');
+
+                                                if (targetInputtarget.length > 0) {
+                                                    targetInputtarget.val(item.target);
+                                                }
+                                                if (targetInputachivment.length > 0) {
+                                                    targetInputachivment.val(item.achivment);
+                                                }
+                                                if (targetInputacual.length > 0) {
+                                                    targetInputacual.val(item.acual);
+                                                }
+                                            });
+                                            var NewTh = '<th class="text-center appended">';
+                                            if (item.user_id != item.rating_by_user.id) {
+                                                 NewTh += item.rating_by_user.name+'('+item.rating_by_user.getdesignation.designation_name+')';
+                                            } else {
+                                                NewTh += 'Self';
+                                            }
+                                            NewTh += '  Rating</th>';
+                                            trElement.append('<td class="appended">' + item.rating + '</td>');
+                                            if (old_data != item.rating_by_user.roles[0].id) {
                                                 $("#headings").append(NewTh);
-                                                old_data = item.rating_by_user.getdesignation.designation_name;
+                                                old_data = item.rating_by_user.roles[0].id;
+                                            }
+                                            totalPer += (parseInt(item.rating) * parseInt(item.sales_weightage.weightage) / 10);
+                                            if (item.sales_weightage.id == 6) {
+                                                if (totalPer < 51) {
+                                                    tttr2 += '<td class="tottal-td">GRADE-C(Poor)</td>';
+                                                } else if (totalPer > 50 && totalPer < 61) {
+                                                    tttr2 += '<td class="tottal-td">GRADE - B(Average)</td>';
+                                                } else if (totalPer > 60 && totalPer < 71) {
+                                                    tttr2 += '<td class="tottal-td">GRADE-B+(Good)</td>';
+                                                } else if (totalPer > 70 && totalPer < 81) {
+                                                    tttr2 += '<td class="tottal-td">GRADE-A(EXCELLENT)</td>';
+                                                } else if (totalPer > 80) {
+                                                    tttr2 += '<td class="tottal-td">GRADE-A+(SPECIAL)</td>';
+                                                }
+                                                tttr += '<td class="tottal-td">' + totalPer + '%</td>';
+                                                totalPer = 0;
                                             }
                                         }
-                                        tttr += '<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td>';
-                                        tttr += '<td>'+totalPer/100+'%</td>';
                                     });
                                     tttr += '</tr>';
-                                    $('#tab_logic').append(tttr);
+                                    tttr2 += '</tr>';
+                                    $('#table_appraisal').append(tttr);
+                                    $('#table_appraisal').append(tttr2);
+                                    if (selftotalPer < 51) {
+                                        $("#auth-user-grade").html("GRADE-C(Poor)");
+                                    } else if (selftotalPer > 50 && selftotalPer < 61) {
+                                        $("#auth-user-grade").html("GRADE-B(Average)");
+                                    } else if (selftotalPer > 60 && selftotalPer < 71) {
+                                        $("#auth-user-grade").html("GRADE-B+(Good)");
+                                    } else if (selftotalPer > 70 && selftotalPer < 81) {
+                                        $("#auth-user-grade").html("GRADE-A(EXCELLENT)");
+                                    } else if (selftotalPer > 80) {
+                                        $("#auth-user-grade").html("GRADE-A+(SPECIAL)");
+                                    }
+                                    $("#auth-user-per").html(selftotalPer+"%");
                                 } else {
                                     $('input[name="target[]"], input[name="achivment[]"], input[name="acual[]"], input[name="rating[]"]').val('');
+                                    const rows = document.querySelectorAll('tr');
+                                    rows.forEach(row => {
+                                        if (row.classList.contains('appended')) {
+                                            row.remove();
+                                        }
+                                    });
+                                    $(".appended").remove();
                                 }
                             }
                         });
@@ -432,13 +551,15 @@
                         success: function(res) {
                             if (res.length > 0) {
                                 var old_data = '';
-                                var tttr = '<tr><td colspan="6" class="tottal-td">Total</td>';
-                                var tttr2 = '<tr><td colspan="6" class="tottal-td">Grade</td>';
+                                var tttr = '<tr class="appended"><td colspan="6" class="tottal-td">Total</td><td class="tottal-td" id="auth-user-per"></td>';
+                                var tttr2 = '<tr class="appended"><td colspan="6" class="tottal-td">Grade</td><td class="tottal-td" id="auth-user-grade"></td>';
                                 var totalPer = 0;
+                                var selftotalPer = 0;
                                 $.each(res, function(i, item) {
                                     var tdElement = $('td:contains(' + item.sales_weightage.name + ')');
                                     var trElement = tdElement.closest('tr');
                                     if ('{{auth()->user()->id}}' == item.rating_by) {
+                                        $("#remark").val(item.remark);
                                         $(trElement).find('td').each(function() {
                                             var targetInputtarget = $(this).find('input[name="target[]"]');
                                             var targetInputachivment = $(this).find('input[name="achivment[]"]');
@@ -458,92 +579,91 @@
                                                 targetInputrating.val(item.rating);
                                             }
                                         });
-                                        totalPer += (parseInt(item.rating)*parseInt(item.sales_weightage.weightage)/10);
-                                        console.log(totalPer);
-                                        if(i == 5){
-                                                if(totalPer < 51){
-                                                    tttr2 += '<td class="tottal-td">GRADE-C(Poor)</td>';
-                                                }else if(totalPer > 50 && totalPer < 61){
-                                                    tttr2 += '<td class="tottal-td">GRADE-B(Average)</td>';
-                                                }else if(totalPer > 60 && totalPer < 71){
-                                                    tttr2 += '<td class="tottal-td">GRADE-B+(Good)</td>';
-                                                }else if(totalPer > 70 && totalPer < 81){
-                                                    tttr2 += '<td class="tottal-td">GRADE-A(EXCELLENT)</td>';
-                                                }else if(totalPer > 80){
-                                                    tttr2 += '<td class="tottal-td">GRADE-A+(SPECIAL)</td>';
-                                                }
-                                                tttr += '<td class="tottal-td">'+totalPer+'%</td>';
-                                                totalPer = 0;
-                                            }                                            
-                                        if(i == res.length-1){
-                                            if(totalPer < 51){
-                                                    tttr2 += '<td class="tottal-td">GRADE-C(Poor)</td>';
-                                            }else if(totalPer > 50 && totalPer < 61){
+                                        selftotalPer += (parseInt(item.rating) * parseInt(item.sales_weightage.weightage) / 10);
+                                    } else if ('{{auth()->user()->id}}' != item.rating_by) {
+                                        $(trElement).find('td').each(function() {
+                                            var targetInputtarget = $(this).find('input[name="target[]"]');
+                                            var targetInputachivment = $(this).find('input[name="achivment[]"]');
+                                            var targetInputacual = $(this).find('input[name="acual[]"]');
+
+                                            if (targetInputtarget.length > 0) {
+                                                targetInputtarget.val(item.target);
+                                            }
+                                            if (targetInputachivment.length > 0) {
+                                                targetInputachivment.val(item.achivment);
+                                            }
+                                            if (targetInputacual.length > 0) {
+                                                targetInputacual.val(item.acual);
+                                            }
+                                        });
+                                        var NewTh = '<th class="text-center appended">';
+                                        if (item.user_id != item.rating_by_user.id) {
+                                             NewTh += item.rating_by_user.name+'('+item.rating_by_user.getdesignation.designation_name+')';
+                                        } else {
+                                            NewTh += 'Self';
+                                        }
+                                        NewTh += '  Rating</th>';
+                                        trElement.append('<td class="appended">' + item.rating + '</td>');
+                                        if (old_data != item.rating_by_user.roles[0].id) {
+                                            $("#headings").append(NewTh);
+                                            old_data = item.rating_by_user.roles[0].id;
+                                        }
+                                        totalPer += (parseInt(item.rating) * parseInt(item.sales_weightage.weightage) / 10);
+                                        if (item.sales_weightage.id == 6) {
+                                            if (totalPer < 51) {
+                                                tttr2 += '<td class="tottal-td">GRADE-C(Poor)</td>';
+                                            } else if (totalPer > 50 && totalPer < 61) {
                                                 tttr2 += '<td class="tottal-td">GRADE - B(Average)</td>';
-                                            }else if(totalPer > 60 && totalPer < 71){
+                                            } else if (totalPer > 60 && totalPer < 71) {
                                                 tttr2 += '<td class="tottal-td">GRADE-B+(Good)</td>';
-                                            }else if(totalPer > 70 && totalPer < 81){
+                                            } else if (totalPer > 70 && totalPer < 81) {
                                                 tttr2 += '<td class="tottal-td">GRADE-A(EXCELLENT)</td>';
-                                            }else if(totalPer > 80){
+                                            } else if (totalPer > 80) {
                                                 tttr2 += '<td class="tottal-td">GRADE-A+(SPECIAL)</td>';
                                             }
-                                            tttr += '<td class="tottal-td">'+totalPer+'%</td>';
+                                            tttr += '<td class="tottal-td">' + totalPer + '%</td>';
                                             totalPer = 0;
                                         }
-                                    } else if ('{{auth()->user()->id}}' != item.rating_by) {
-                                            var NewTh = '<th class="text-center">';
-                                            NewTh += item.rating_by_user.getdesignation.designation_name;
-                                            NewTh += '</th>';
-                                            trElement.append('<td>' + item.rating + '</td>');
-                                            totalPer += (parseInt(item.rating)*parseInt(item.sales_weightage.weightage)/10);
-                                            if (old_data != item.rating_by_user.getdesignation.designation_name) {
-                                                if(i != 6){
-                                                    if(totalPer < 51){
-                                                        tttr2 += '<td class="tottal-td">GRADE-C(Poor)</td>';
-                                                    }else if(totalPer > 50 && totalPer < 61){
-                                                        tttr2 += '<td class="tottal-td">GRADE-B(Average)</td>';
-                                                    }else if(totalPer > 60 && totalPer < 71){
-                                                        tttr2 += '<td class="tottal-td">GRADE-B+(Good)</td>';
-                                                    }else if(totalPer > 70 && totalPer < 81){
-                                                        tttr2 += '<td class="tottal-td">GRADE-A(EXCELLENT)</td>';
-                                                    }else if(totalPer > 80){
-                                                        tttr2 += '<td class="tottal-td">GRADE-A+(SPECIAL)</td>';
-                                                    }
-                                                    tttr += '<td class="tottal-td">'+totalPer+'%</td>';
-                                                    totalPer = 0;
-                                                }
-                                                $("#headings").append(NewTh);
-                                                old_data = item.rating_by_user.getdesignation.designation_name;
-                                            }
-                                            if(i == res.length-1){
-                                                if(totalPer < 51){
-                                                        tttr2 += '<td class="tottal-td">GRADE-C(Poor)</td>';
-                                                }else if(totalPer > 50 && totalPer < 61){
-                                                    tttr2 += '<td class="tottal-td">GRADE - B(Average)</td>';
-                                                }else if(totalPer > 60 && totalPer < 71){
-                                                    tttr2 += '<td class="tottal-td">GRADE-B+(Good)</td>';
-                                                }else if(totalPer > 70 && totalPer < 81){
-                                                    tttr2 += '<td class="tottal-td">GRADE-A(EXCELLENT)</td>';
-                                                }else if(totalPer > 80){
-                                                    tttr2 += '<td class="tottal-td">GRADE-A+(SPECIAL)</td>';
-                                                }
-                                                tttr += '<td class="tottal-td">'+totalPer+'%</td>';
-                                                totalPer = 0;
-                                            }
-                                        }
-                                    });
+                                    }
+                                });
                                 tttr += '</tr>';
                                 tttr2 += '</tr>';
-                                $('#tab_logic').append(tttr);
-                                $('#tab_logic').append(tttr2);
+                                $('#table_appraisal').append(tttr);
+                                $('#table_appraisal').append(tttr2);
+                                if (selftotalPer < 51) {
+                                        $("#auth-user-grade").html("GRADE-C(Poor)");
+                                    } else if (selftotalPer > 50 && selftotalPer < 61) {
+                                        $("#auth-user-grade").html("GRADE-B(Average)");
+                                    } else if (selftotalPer > 60 && selftotalPer < 71) {
+                                        $("#auth-user-grade").html("GRADE-B+(Good)");
+                                    } else if (selftotalPer > 70 && selftotalPer < 81) {
+                                        $("#auth-user-grade").html("GRADE-A(EXCELLENT)");
+                                    } else if (selftotalPer > 80) {
+                                        $("#auth-user-grade").html("GRADE-A+(SPECIAL)");
+                                    }
+                                    $("#auth-user-per").html(selftotalPer+"%");
                             } else {
                                 $('input[name="target[]"], input[name="achivment[]"], input[name="acual[]"], input[name="rating[]"]').val('');
+                                const rows = document.querySelectorAll('tr');
+                                rows.forEach(row => {
+                                    if (row.classList.contains('appended')) {
+                                        row.remove();
+                                    }
+                                });
+                                $(".appended").remove();
                             }
                         }
                     });
                 }
             } else {
                 $('input[name="target[]"], input[name="achivment[]"], input[name="acual[]"], input[name="rating[]"]').val('');
+                const rows = document.querySelectorAll('tr');
+                rows.forEach(row => {
+                    if (row.classList.contains('appended')) {
+                        row.remove();
+                    }
+                });
+                $(".appended").remove();
             }
         })
 
@@ -552,6 +672,8 @@
         })
 
         $("#appraisal_type").on('change', function() {
+            $(".appended").remove();
+            $('#appraisalCreateForm').find("input").val('');
             var appraisal_type = $(this).val();
             var executive_id = $("#executive_id").val();
             var f_year = $("#f_year").val();
@@ -566,16 +688,19 @@
                                 "executive_id": executive_id,
                                 "f_year": f_year,
                                 "appraisal_type": appraisal_type,
-                                "appraisal_session": appraisal_session
                             },
                             success: function(res) {
                                 if (res.length > 0) {
+                                    var old_data = '';
+                                    var tttr = '<tr class="appended"><td colspan="6" class="tottal-td">Total</td><td class="tottal-td" id="auth-user-per"></td>';
+                                    var tttr2 = '<tr class="appended"><td colspan="6" class="tottal-td">Grade</td><td class="tottal-td" id="auth-user-grade"></td>';
                                     var totalPer = 0;
-                                    var tttr = '';
+                                    var selftotalPer = 0;
                                     $.each(res, function(i, item) {
                                         var tdElement = $('td:contains(' + item.sales_weightage.name + ')');
                                         var trElement = tdElement.closest('tr');
                                         if ('{{auth()->user()->id}}' == item.rating_by) {
+                                            $("#remark").val(item.remark);
                                             $(trElement).find('td').each(function() {
                                                 var targetInputtarget = $(this).find('input[name="target[]"]');
                                                 var targetInputachivment = $(this).find('input[name="achivment[]"]');
@@ -595,24 +720,90 @@
                                                     targetInputrating.val(item.rating);
                                                 }
                                             });
+                                            selftotalPer += (parseInt(item.rating) * parseInt(item.sales_weightage.weightage) / 10);
                                         } else if ('{{auth()->user()->id}}' != item.rating_by) {
-                                            var NewTh = '<th class="text-center">';
-                                            NewTh += item.rating_by_user.getdesignation.designation_name;
-                                            NewTh += '</th>';
-                                            trElement.append('<td>' + item.rating + '</td>');
-                                            totalPer += item.rating;
-                                            if (old_data != item.rating_by_user.getdesignation.designation_name) {
+                                            $(trElement).find('td').each(function() {
+                                                var targetInputtarget = $(this).find('input[name="target[]"]');
+                                                var targetInputachivment = $(this).find('input[name="achivment[]"]');
+                                                var targetInputacual = $(this).find('input[name="acual[]"]');
+
+                                                if (targetInputtarget.length > 0) {
+                                                    targetInputtarget.val(item.target);
+                                                }
+                                                if (targetInputachivment.length > 0) {
+                                                    targetInputachivment.val(item.achivment);
+                                                }
+                                                if (targetInputacual.length > 0) {
+                                                    targetInputacual.val(item.acual);
+                                                }
+                                            });
+                                            var NewTh = '<th class="text-center appended">';
+                                            if (item.user_id != item.rating_by_user.id) {
+                                                 NewTh += item.rating_by_user.name+'('+item.rating_by_user.getdesignation.designation_name+')';
+                                            } else {
+                                                NewTh += 'Self';
+                                            }
+                                            NewTh += '  Rating</th>';
+                                            trElement.append('<td class="appended">' + item.rating + '</td>');
+                                            if (old_data != item.rating_by_user.roles[0].id) {
                                                 $("#headings").append(NewTh);
-                                                old_data = item.rating_by_user.getdesignation.designation_name;
+                                                old_data = item.rating_by_user.roles[0].id;
+                                            }
+                                            totalPer += (parseInt(item.rating) * parseInt(item.sales_weightage.weightage) / 10);
+                                            if (item.sales_weightage.id == 6) {
+                                                if (totalPer < 51) {
+                                                    tttr2 += '<td class="tottal-td">GRADE-C(Poor)</td>';
+                                                } else if (totalPer > 50 && totalPer < 61) {
+                                                    tttr2 += '<td class="tottal-td">GRADE - B(Average)</td>';
+                                                } else if (totalPer > 60 && totalPer < 71) {
+                                                    tttr2 += '<td class="tottal-td">GRADE-B+(Good)</td>';
+                                                } else if (totalPer > 70 && totalPer < 81) {
+                                                    tttr2 += '<td class="tottal-td">GRADE-A(EXCELLENT)</td>';
+                                                } else if (totalPer > 80) {
+                                                    tttr2 += '<td class="tottal-td">GRADE-A+(SPECIAL)</td>';
+                                                }
+                                                tttr += '<td class="tottal-td">' + totalPer + '%</td>';
+                                                totalPer = 0;
                                             }
                                         }
-                                        tttr += '<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td>';
-                                        tttr += '<td>'+totalPer/100+'%</td>';
                                     });
                                     tttr += '</tr>';
-                                    $('#tab_logic').append(tttr);
+                                    tttr2 += '</tr>';
+                                    $('#table_appraisal').append(tttr);
+                                    $('#table_appraisal').append(tttr2);
+                                    if (selftotalPer < 51) {
+                                        $("#auth-user-grade").html("GRADE-C(Poor)");
+                                    } else if (selftotalPer > 50 && selftotalPer < 61) {
+                                        $("#auth-user-grade").html("GRADE-B(Average)");
+                                    } else if (selftotalPer > 60 && selftotalPer < 71) {
+                                        $("#auth-user-grade").html("GRADE-B+(Good)");
+                                    } else if (selftotalPer > 70 && selftotalPer < 81) {
+                                        $("#auth-user-grade").html("GRADE-A(EXCELLENT)");
+                                    } else if (selftotalPer > 80) {
+                                        $("#auth-user-grade").html("GRADE-A+(SPECIAL)");
+                                    }
+                                    $("#auth-user-per").html(selftotalPer+"%");
+                                    if (selftotalPer < 51) {
+                                        $("#auth-user-grade").html("GRADE-C(Poor)");
+                                    } else if (selftotalPer > 50 && selftotalPer < 61) {
+                                        $("#auth-user-grade").html("GRADE-B(Average)");
+                                    } else if (selftotalPer > 60 && selftotalPer < 71) {
+                                        $("#auth-user-grade").html("GRADE-B+(Good)");
+                                    } else if (selftotalPer > 70 && selftotalPer < 81) {
+                                        $("#auth-user-grade").html("GRADE-A(EXCELLENT)");
+                                    } else if (selftotalPer > 80) {
+                                        $("#auth-user-grade").html("GRADE-A+(SPECIAL)");
+                                    }
+                                    $("#auth-user-per").html(selftotalPer+"%");
                                 } else {
                                     $('input[name="target[]"], input[name="achivment[]"], input[name="acual[]"], input[name="rating[]"]').val('');
+                                    const rows = document.querySelectorAll('tr');
+                                    rows.forEach(row => {
+                                        if (row.classList.contains('appended')) {
+                                            row.remove();
+                                        }
+                                    });
+                                    $(".appended").remove();
                                 }
                             }
                         });
@@ -630,13 +821,15 @@
                         success: function(res) {
                             if (res.length > 0) {
                                 var old_data = '';
-                                var tttr = '<tr><td colspan="6" class="tottal-td">Total</td>';
-                                var tttr2 = '<tr><td colspan="6" class="tottal-td">Grade</td>';
+                                var tttr = '<tr class="appended"><td colspan="6" class="tottal-td">Total</td><td class="tottal-td" id="auth-user-per"></td>';
+                                    var tttr2 = '<tr class="appended"><td colspan="6" class="tottal-td">Grade</td><td class="tottal-td" id="auth-user-grade"></td>';
                                 var totalPer = 0;
+                                var selftotalPer = 0;
                                 $.each(res, function(i, item) {
                                     var tdElement = $('td:contains(' + item.sales_weightage.name + ')');
                                     var trElement = tdElement.closest('tr');
                                     if ('{{auth()->user()->id}}' == item.rating_by) {
+                                        $("#remark").val(item.remark);
                                         $(trElement).find('td').each(function() {
                                             var targetInputtarget = $(this).find('input[name="target[]"]');
                                             var targetInputachivment = $(this).find('input[name="achivment[]"]');
@@ -656,92 +849,91 @@
                                                 targetInputrating.val(item.rating);
                                             }
                                         });
-                                        totalPer += (parseInt(item.rating)*parseInt(item.sales_weightage.weightage)/10);
-                                        console.log(totalPer);
-                                        if(i == 5){
-                                                if(totalPer < 51){
-                                                    tttr2 += '<td class="tottal-td">GRADE-C(Poor)</td>';
-                                                }else if(totalPer > 50 && totalPer < 61){
-                                                    tttr2 += '<td class="tottal-td">GRADE-B(Average)</td>';
-                                                }else if(totalPer > 60 && totalPer < 71){
-                                                    tttr2 += '<td class="tottal-td">GRADE-B+(Good)</td>';
-                                                }else if(totalPer > 70 && totalPer < 81){
-                                                    tttr2 += '<td class="tottal-td">GRADE-A(EXCELLENT)</td>';
-                                                }else if(totalPer > 80){
-                                                    tttr2 += '<td class="tottal-td">GRADE-A+(SPECIAL)</td>';
-                                                }
-                                                tttr += '<td class="tottal-td">'+totalPer+'%</td>';
-                                                totalPer = 0;
-                                            }                                            
-                                        if(i == res.length-1){
-                                            if(totalPer < 51){
-                                                    tttr2 += '<td class="tottal-td">GRADE-C(Poor)</td>';
-                                            }else if(totalPer > 50 && totalPer < 61){
+                                        selftotalPer += (parseInt(item.rating) * parseInt(item.sales_weightage.weightage) / 10);
+                                    } else if ('{{auth()->user()->id}}' != item.rating_by) {
+                                        $(trElement).find('td').each(function() {
+                                            var targetInputtarget = $(this).find('input[name="target[]"]');
+                                            var targetInputachivment = $(this).find('input[name="achivment[]"]');
+                                            var targetInputacual = $(this).find('input[name="acual[]"]');
+
+                                            if (targetInputtarget.length > 0) {
+                                                targetInputtarget.val(item.target);
+                                            }
+                                            if (targetInputachivment.length > 0) {
+                                                targetInputachivment.val(item.achivment);
+                                            }
+                                            if (targetInputacual.length > 0) {
+                                                targetInputacual.val(item.acual);
+                                            }
+                                        });
+                                        var NewTh = '<th class="text-center appended">';
+                                        if (item.user_id != item.rating_by_user.id) {
+                                             NewTh += item.rating_by_user.name+'('+item.rating_by_user.getdesignation.designation_name+')';
+                                        } else {
+                                            NewTh += 'Self';
+                                        }
+                                        NewTh += '  Rating</th>';
+                                        trElement.append('<td class="appended">' + item.rating + '</td>');
+                                        if (old_data != item.rating_by_user.roles[0].id) {
+                                            $("#headings").append(NewTh);
+                                            old_data = item.rating_by_user.roles[0].id;
+                                        }
+                                        totalPer += (parseInt(item.rating) * parseInt(item.sales_weightage.weightage) / 10);
+                                        if (item.sales_weightage.id == 6) {
+                                            if (totalPer < 51) {
+                                                tttr2 += '<td class="tottal-td">GRADE-C(Poor)</td>';
+                                            } else if (totalPer > 50 && totalPer < 61) {
                                                 tttr2 += '<td class="tottal-td">GRADE - B(Average)</td>';
-                                            }else if(totalPer > 60 && totalPer < 71){
+                                            } else if (totalPer > 60 && totalPer < 71) {
                                                 tttr2 += '<td class="tottal-td">GRADE-B+(Good)</td>';
-                                            }else if(totalPer > 70 && totalPer < 81){
+                                            } else if (totalPer > 70 && totalPer < 81) {
                                                 tttr2 += '<td class="tottal-td">GRADE-A(EXCELLENT)</td>';
-                                            }else if(totalPer > 80){
+                                            } else if (totalPer > 80) {
                                                 tttr2 += '<td class="tottal-td">GRADE-A+(SPECIAL)</td>';
                                             }
-                                            tttr += '<td class="tottal-td">'+totalPer+'%</td>';
+                                            tttr += '<td class="tottal-td">' + totalPer + '%</td>';
                                             totalPer = 0;
                                         }
-                                    } else if ('{{auth()->user()->id}}' != item.rating_by) {
-                                            var NewTh = '<th class="text-center">';
-                                            NewTh += item.rating_by_user.getdesignation.designation_name;
-                                            NewTh += '</th>';
-                                            trElement.append('<td>' + item.rating + '</td>');
-                                            totalPer += (parseInt(item.rating)*parseInt(item.sales_weightage.weightage)/10);
-                                            if (old_data != item.rating_by_user.getdesignation.designation_name) {
-                                                if(i != 6){
-                                                    if(totalPer < 51){
-                                                        tttr2 += '<td class="tottal-td">GRADE-C(Poor)</td>';
-                                                    }else if(totalPer > 50 && totalPer < 61){
-                                                        tttr2 += '<td class="tottal-td">GRADE-B(Average)</td>';
-                                                    }else if(totalPer > 60 && totalPer < 71){
-                                                        tttr2 += '<td class="tottal-td">GRADE-B+(Good)</td>';
-                                                    }else if(totalPer > 70 && totalPer < 81){
-                                                        tttr2 += '<td class="tottal-td">GRADE-A(EXCELLENT)</td>';
-                                                    }else if(totalPer > 80){
-                                                        tttr2 += '<td class="tottal-td">GRADE-A+(SPECIAL)</td>';
-                                                    }
-                                                    tttr += '<td class="tottal-td">'+totalPer+'%</td>';
-                                                    totalPer = 0;
-                                                }
-                                                $("#headings").append(NewTh);
-                                                old_data = item.rating_by_user.getdesignation.designation_name;
-                                            }
-                                            if(i == res.length-1){
-                                                if(totalPer < 51){
-                                                        tttr2 += '<td class="tottal-td">GRADE-C(Poor)</td>';
-                                                }else if(totalPer > 50 && totalPer < 61){
-                                                    tttr2 += '<td class="tottal-td">GRADE - B(Average)</td>';
-                                                }else if(totalPer > 60 && totalPer < 71){
-                                                    tttr2 += '<td class="tottal-td">GRADE-B+(Good)</td>';
-                                                }else if(totalPer > 70 && totalPer < 81){
-                                                    tttr2 += '<td class="tottal-td">GRADE-A(EXCELLENT)</td>';
-                                                }else if(totalPer > 80){
-                                                    tttr2 += '<td class="tottal-td">GRADE-A+(SPECIAL)</td>';
-                                                }
-                                                tttr += '<td class="tottal-td">'+totalPer+'%</td>';
-                                                totalPer = 0;
-                                            }
-                                        }
-                                    });
+                                    }
+                                });
                                 tttr += '</tr>';
                                 tttr2 += '</tr>';
-                                $('#tab_logic').append(tttr);
-                                $('#tab_logic').append(tttr2);
+                                $('#table_appraisal').append(tttr);
+                                $('#table_appraisal').append(tttr2);
+                                if (selftotalPer < 51) {
+                                    $("#auth-user-grade").html("GRADE-C(Poor)");
+                                } else if (selftotalPer > 50 && selftotalPer < 61) {
+                                    $("#auth-user-grade").html("GRADE-B(Average)");
+                                } else if (selftotalPer > 60 && selftotalPer < 71) {
+                                    $("#auth-user-grade").html("GRADE-B+(Good)");
+                                } else if (selftotalPer > 70 && selftotalPer < 81) {
+                                    $("#auth-user-grade").html("GRADE-A(EXCELLENT)");
+                                } else if (selftotalPer > 80) {
+                                    $("#auth-user-grade").html("GRADE-A+(SPECIAL)");
+                                }
+                                $("#auth-user-per").html(selftotalPer+"%");
                             } else {
                                 $('input[name="target[]"], input[name="achivment[]"], input[name="acual[]"], input[name="rating[]"]').val('');
+                                const rows = document.querySelectorAll('tr');
+                                rows.forEach(row => {
+                                    if (row.classList.contains('appended')) {
+                                        row.remove();
+                                    }
+                                });
+                                $(".appended").remove();
                             }
                         }
                     });
                 }
             } else {
                 $('input[name="target[]"], input[name="achivment[]"], input[name="acual[]"], input[name="rating[]"]').val('');
+                const rows = document.querySelectorAll('tr');
+                rows.forEach(row => {
+                    if (row.classList.contains('appended')) {
+                        row.remove();
+                    }
+                });
+                $(".appended").remove();
             }
             var select = $('#appraisal_session');
             if (appraisal_type == 'quarterly' || appraisal_type == 'half_yearly') {
@@ -773,7 +965,7 @@
             if (achivment > 0 && target > 0) {
                 let acual = ((achivment / target) * 100).toFixed(2);
                 acualInput.val(acual + "%");
-            }else{
+            } else {
                 acualInput.val("");
             }
         })
@@ -787,16 +979,16 @@
             if (achivment > 0 && target > 0) {
                 let acual = ((achivment / target) * 100).toFixed(2);
                 acualInput.val(acual + "%");
-            }else{
+            } else {
                 acualInput.val("");
             }
         })
-        $(".all_rating").on('keyup', function(){
+        $(".all_rating").on('keyup', function() {
             $ival = $(this).val();
-            if(parseInt($ival) > 10){
+            if (parseInt($ival) > 10) {
                 $(this).closest('tr').find('.rat-err').show();
-                $(this).closest('tr').find('.rat-err').html('Don"t rating more then 10');
-            }else{
+                $(this).closest('tr').find('.rat-err').html('*Rating not greater than to max rating');
+            } else {
                 $(this).closest('tr').find('.rat-err').hide();
                 $(this).closest('tr').find('.rat-err').html('');
             }

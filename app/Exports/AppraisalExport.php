@@ -18,8 +18,7 @@ class AppraisalExport implements WithHeadings, WithStyles, FromCollection, WithE
     protected $cons_count;
 
     public function __construct(array $data, $headings, $cons_count)
-    {
-        
+    { 
         $this->data = $data;
         $this->headings = $headings;
         $this->cons_count = $cons_count;
@@ -47,23 +46,6 @@ class AppraisalExport implements WithHeadings, WithStyles, FromCollection, WithE
                 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
             ],
         ]);
-        $sheet->getStyle('A2:ZZ2')->applyFromArray([
-            'font' => [
-                'bold' => true,
-            ],
-            'alignment' => [
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-            ],
-        ]);
-
-        $fr_srt = 'I';
-        for($i = $this->cons_count; $i>=0; $i--){
-            $fr_srt = ++$fr_srt;
-        }
-
-        // Merge cells in the header
-        $sheet->mergeCells('C1:I1');
 
         foreach (range('A', 'Z') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);

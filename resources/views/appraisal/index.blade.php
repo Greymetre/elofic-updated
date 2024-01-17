@@ -32,7 +32,7 @@
                                             @endif
                                         </select>
                                     </div>
-                                    <button type="submit" style="border-right: 1px solid;" href="" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.appraisal.title') !!}"><i class="material-icons">cloud_download</i></button>
+                                    <!-- <button type="submit" style="border-right: 1px solid;" href="" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.appraisal.title') !!}"><i class="material-icons">cloud_download</i></button> -->
                                 </form>
                                 <a href="{{url('appraisal/create')}}" class="btn btn-just-icon btn-theme create" title="Add Appraisal">
                                     <i class="material-icons">add_circle</i>

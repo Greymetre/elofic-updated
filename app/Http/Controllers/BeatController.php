@@ -451,12 +451,14 @@ class BeatController extends Controller
         $all_branch= array();
         $bkey = 0;
         foreach ($all_user_branches as $k => $val) {
+          if($val->getbranch){
             if(!in_array($val->getbranch->id, $all_branch)){
                 array_push($all_branch, $val->getbranch->id);
                 $branches[$bkey]['id'] = $val->getbranch->id;
                 $branches[$bkey]['name'] = $val->getbranch->branch_name;
                 $bkey++;
             }
+          }
         }
         if($search_branches && count($search_branches) > 0 && $search_branches[0] != null){
           $all_reporting_user_ids = User::whereIn('id', $all_reporting_user_ids)->whereIn('branch_id', $search_branches)->pluck('id')->toArray();

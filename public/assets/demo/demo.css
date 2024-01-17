@@ -122,9 +122,20 @@ td.tottal-td {
   border: 1px solid;
 }
 
-span.rat-err{
+p.rat-err{
   font-size: 12px;
   padding: 2px;
-  font-weight: 600;
+  color: red;
+  font-weight: 500;
   display: none;
+}
+
+table#table_appraisal input {
+  width: 100px;
+  text-align: center;
+}
+
+table#table_appraisal td {
+  border: 1px solid gray;
+  text-align: center;
 }
