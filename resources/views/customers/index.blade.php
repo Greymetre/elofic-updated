@@ -12,8 +12,60 @@
               @if(auth()->user()->can(['customer_download']))
               <form method="GET" action="{{ URL::to('customers-download') }}">
                   <div class="d-flex flex-row">
-                    <div class="p-2"><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
-                    <div class="p-2"><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
+
+                  <div class="p-2" style="width:160px;">
+                    <select class="selectpicker" name="executive_id" id="executive_id" data-style="select-with-transition" title="Select User">
+                       <option value="">Select User</option>
+                      @if(@isset($users ))
+                      @foreach($users as $user)
+                       <option value="{!! $user['id'] !!}" {{ old( 'executive_id') == $user->id ? 'selected' : '' }}>{!! $user['name'] !!}</option>
+                      @endforeach
+                      @endif
+                    </select>
+                  </div>
+                  <div class="p-2" style="width:150px;">
+                    <select class="selectpicker" multiple name="branch_id[]" id="branch_id" data-style="select-with-transition" title="Select Branch">
+                     <option value="">Select Branch</option>
+                    @if(@isset($branches ))
+                        @foreach($branches as $branch)
+                          <option value="{!! $branch['id'] !!}">{!! $branch['name'] !!}</option>
+                        @endforeach
+                    @endif
+                   </select>
+                  </div>
+                  <div class="p-2" style="width:145px;">
+                    <select class="selectpicker" name="state_id" id="state_id" data-style="select-with-transition" title="Select State">
+                       <option value="">Select State</option>
+                      @if(@isset($states ))
+                      @foreach($states as $state)
+                       <option value="{!! $state->id !!}" {{ old( 'state_id') == $state->id ? 'selected' : '' }}>{!! $state->state_name !!}</option>
+                      @endforeach
+                      @endif
+                    </select>
+                  </div>
+                  <div class="p-2" style="width:140px;">
+                    <select class="selectpicker" name="city_id" id="city_id" data-style="select-with-transition" title="Select City">
+                       <option value="">Select City</option>
+                      @if(@isset($cities ))
+                      @foreach($cities as $city)
+                       <option value="{!! $city->id !!}" {{ old( 'city_id') == $city->id ? 'selected' : '' }}>{!! $city->city_name !!}</option>
+                      @endforeach
+                      @endif
+                    </select>
+                  </div>
+                   <div class="p-2" style="width:150px;">
+                    <select class="selectpicker" name="customertype" id="customertype" data-style="select-with-transition" title="Select Type">
+                       <option value="">Select Customer Type</option>
+                      @if(@isset($customertype ))
+                      @foreach($customertype as $type)
+                       <option value="{!! $type->id !!}" {{ old( 'customertype') == $type->id ? 'selected' : '' }}>{!! $type->customertype_name !!}</option>
+                      @endforeach
+                      @endif
+                    </select>
+                   </div> 
+
+                    <div class="p-2" style="width:130px;"><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
+                    <div class="p-2" style="width:130px;"><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
                     <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.customers.title') !!}"><i class="material-icons">cloud_download</i></button></div>
                   </div>
               </form>
@@ -68,7 +120,7 @@
           </button>
           <span class="message"></span>
         </div>
-        <div class="row">
+       <!-- <div class="row">
         <div class="col col1">
             <label class="bmd-label-floating">User</label>
             <div class="form-group has-default bmd-form-group">
@@ -82,19 +134,23 @@
               </select>
             </div>
           </div>
+
+
           <div class="col col2">
-            <label class="bmd-label-floating">Beat</label>
+            <label class="bmd-label-floating">Branch</label>
             <div class="form-group has-default bmd-form-group">
-              <select class="form-control" name="beat_id" id="beat_id" data-style="select-with-transition" title="Select Beat">
-                 <option value="">Select Beat</option>
-                @if(@isset($beats ))
-                @foreach($beats as $beat)
-                 <option value="{!! $beat['id'] !!}" {{ old( 'beat_id') == $beat->id ? 'selected' : '' }}>{!! $beat['beat_name'] !!}</option>
+              <select class="selectpicker" multiple name="branch_id" id="branch_id" data-style="select-with-transition" title="Select Branch">
+                 <option value="">Select Branch</option>
+                @if(@isset($branches ))
+                @foreach($branches as $branch)
+                  <option value="{!! $branch['id'] !!}">{!! $branch['name'] !!}</option>
                 @endforeach
                 @endif
               </select>
             </div>
           </div>
+
+
           <div class="col col3">
             <label class="bmd-label-floating">State</label>
             <div class="form-group has-default bmd-form-group">
@@ -134,7 +190,8 @@
               </select>
             </div>
           </div>
-        </div>
+
+        </div>-->
         <div class="table-responsive">
             <table id="getcustomers" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
             <thead class=" text-primary">
@@ -179,7 +236,8 @@
           url: "{{ route('customers.index') }}",
           data: function (d) {
                 d.executive_id = $('#executive_id').val(),
-                d.beat_id = $('#beat_id').val(),
+                //d.beat_id = $('#beat_id').val(),
+                d.branch_id = $('#branch_id').val(),
                 d.state_id = $('#state_id').val(),
                 d.city_id = $('#city_id').val(),
                 d.customertype = $('#customertype').val(),
@@ -205,9 +263,9 @@
     $('#executive_id').change(function(){
         table.draw();
     });
-    $('#beat_id').change(function(){
-        table.draw();
-    });
+    // $('#beat_id').change(function(){
+    //     table.draw();
+    // });
     $('#state_id').change(function(){
         table.draw();
     });
@@ -215,6 +273,9 @@
         table.draw();
     });
     $('#customertype').change(function(){
+        table.draw();
+    });
+    $('#branch_id').change(function(){
         table.draw();
     });
          

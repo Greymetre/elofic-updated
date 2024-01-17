@@ -5,6 +5,7 @@ namespace App\Exports;
 use App\Models\Customers;
 use App\Models\UserActivity;
 use App\Models\Branch;
+use App\Models\User;
 use App\Models\Division;
 use App\Models\Designation;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -19,23 +20,56 @@ use Illuminate\Support\Facades\Auth;
 class CustomersExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapping
 {
     public function __construct($request)
-    {
+    {    
         $this->startdate = $request->input('start_date');
         $this->enddate = $request->input('end_date');
-        $this->userid = !empty($request->input('executive_id')) ? $request->input('executive_id') : Auth::user()->id;
+        $this->customertype = $request->input('customertype');
+        $this->branch_id = $request->input('branch_id');   
+        $this->state_id = $request->input('state_id');
+        $this->city_id = $request->input('city_id'); 
 
-        
-        $this->userids = getUsersReportingToAuth($this->userid);
+        //$this->userid = !empty($request->input('executive_id')) ? $request->input('executive_id') : Auth::user()->id;
+        //$this->userids = getUsersReportingToAuth($this->userid); 
+
+        // $this->userid = Auth::user()->id;
+        // $this->userids = getUsersReportingToAuth($this->userid); 
+        $this->userids = getUsersReportingToAuth(); 
+        $this->user_new_id = $request->input('executive_id');
+
+      
     }
 
     public function collection()
     {
-        return Customers::where(function ($query)  {
-                                if($this->userids)
+        // return Customers::where(function ($query)  {
+        //                         if($this->userids)
 
+        //                         {
+        //                             $query->whereIn('executive_id', $this->userids);
+        //                         }
+        //                         if($this->startdate)
+        //                         {
+        //                             $query->whereDate('created_at','>=',$this->startdate);
+        //                         }
+        //                         if($this->enddate)
+        //                         {
+        //                             $query->whereDate('created_at','<=',$this->enddate);
+        //                         }
+        //                     })
+        //                 ->select('id','name', 'first_name', 'last_name', 'mobile', 'email', 'latitude', 'longitude', 'customertype', 'created_at','created_by','executive_id','customer_code','contact_number','parent_id')
+        //                 ->limit(5000)->latest()->get();   
+
+
+        return Customers::with('customertypes','firmtypes','createdbyname')->where(function ($query)  {
+                                if(!empty($this->user_new_id)){
+                                    $query->where('executive_id', $this->user_new_id);
+                                 }
+                                 
+                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
                                 {
-                                    $query->whereIn('executive_id', $this->userids);
+                                    $query->whereIn('executive_id',$userids);
                                 }
+
                                 if($this->startdate)
                                 {
                                     $query->whereDate('created_at','>=',$this->startdate);
@@ -44,16 +78,46 @@ class CustomersExport implements FromCollection,WithHeadings,ShouldAutoSize,With
                                 {
                                     $query->whereDate('created_at','<=',$this->enddate);
                                 }
+                                if(!empty($this->customertype))
+                                {
+                                    $query->where('customertype', $this->customertype);
+                                }
+                                if(!empty($this->branch_id))
+                                {
+                                   $branch_user_id = User::whereIn('branch_id',$this->branch_id)->pluck('id');
+                                if(!empty($branch_user_id)){
+                                    $query->whereIn('executive_id', $branch_user_id);  
+                                   }
+                                }
+                                if(!empty($this->state_id))
+                                {  $state = $this->state_id;
+                                 $query->whereHas('customeraddress',function($q) use($state){
+                                    $q->where('state_id', $state);
+                                 });
+                                }
+                                if(!empty($this->city_id))
+                                {  $city = $this->city_id;
+                                 $query->whereHas('customeraddress',function($q) use($city){
+                                    $q->where('city_id', $city);
+                                 });
+                                }
+
+
                             })
                         ->select('id','name', 'first_name', 'last_name', 'mobile', 'email', 'latitude', 'longitude', 'customertype', 'created_at','created_by','executive_id','customer_code','contact_number','parent_id')
                         ->limit(5000)->latest()->get();   
+
+
+
+
+
     }
 
     public function headings(): array
     {
         // return ['Created Date','Customer ID','Customer Type','Created by','Firm Name', 'First Name', 'Last Name', 'Mobile', 'Email','Address', 'Gmap address','Pin Code','Zip Code','Market Place','City','District','State','Beat Name', 'Latitude', 'Longitude','GST No','Adhar No','Pan No','Other No','Shop Image', 'Employee Name', 'Grade', 'Visit Status','Contact number -2','Customer Code','Employee Code','Branch Name','Department','Designation','Parent Customer'];
 
-    return ['Created Date','customer_id','customer_code','Customer Type','Created by','firm_name','Parent Customer','first_name', 'last_name', 'Mobile','contact_number2', 'email','address', 'Gmap address','Pin Code','Zip Code','market_place','City','District','State','Beat Name','grade','visit_status','gstin_no','aadhar_no','pan_no','other_no','Shop Image','Employee Code','Employee Name','Designation','Branch Name','Department','Latitude', 'Longitude','employee_id','parent_id','pincode_id','city_id','district_id','state_id','customer_type_id'];
+    return ['Created Date','customer_id','customer_code','Customer Type','Created by','firm_name','Parent Customer','first_name', 'last_name', 'Mobile','contact_number2', 'email','address', 'Gmap address','Pin Code','Zip Code','market_place','City','District','State','grade','visit_status','gstin_no','aadhar_no','pan_no','other_no','Shop Image','Employee Code','Employee Name','Designation','Branch Name','Department','Latitude', 'Longitude','employee_id','parent_id','pincode_id','city_id','district_id','state_id','customer_type_id'];
 
     }
 
@@ -82,7 +146,7 @@ class CustomersExport implements FromCollection,WithHeadings,ShouldAutoSize,With
             $data['city_name'] = isset($data['customeraddress']['cityname']['city_name']) ? $data['customeraddress']['cityname']['city_name'] : '',
             $data['district_name'] = isset($data['customeraddress']['districtname']['district_name']) ? $data['customeraddress']['districtname']['district_name'] :'',
             $data['state_name'] = isset($data['customeraddress']['statename']['state_name']) ? $data['customeraddress']['statename']['state_name'] :'',
-            $data['beat_name'] = isset($data['beatdetails']['beats']['beat_name']) ? $data['beatdetails']['beats']['beat_name'] :'',
+            // $data['beat_name'] = isset($data['beatdetails']['beats']['beat_name']) ? $data['beatdetails']['beats']['beat_name'] :'',
             isset($data['customerdetails']['grade']) ? $data['customerdetails']['grade'] :'',
             isset($data['customerdetails']['visit_status']) ? $data['customerdetails']['visit_status'] : '',
             isset($data['customerdetails']['gstin_no']) ? $data['customerdetails']['gstin_no'] :'',
@@ -108,5 +172,8 @@ class CustomersExport implements FromCollection,WithHeadings,ShouldAutoSize,With
              $data['customertype'],
         ];
     }
+
+
+
 
 }

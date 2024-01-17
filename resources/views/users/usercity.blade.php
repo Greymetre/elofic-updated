@@ -9,6 +9,19 @@
         <h4 class="card-title ">User City List
               <span class="pull-right">
             <div class="btn-group">
+
+              <form method="GET" action="{{ URL::to('/usercity-download') }}">
+                  <div class="d-flex flex-row">
+                  <input type="text" name="page_number" id="tableInfo" value="1" hidden>
+                  <input type="text" name="page_length" id="page_length" value="10" hidden>
+
+              <div class="p-2"></div>
+                    <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('User City') !!}"><i class="material-icons">cloud_download</i></button></div>
+                  </div>
+              </form>
+
+
+
               <form action="{{ URL::to('/usercity-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
               {{ csrf_field() }}
                 <div class="input-group">
@@ -28,7 +41,7 @@
                 </div>
               </div>
             </form>
-            <a href="{{ URL::to('/usercity-download') }}" class="btn btn-just-icon btn-theme" title="User City Download"><i class="material-icons">cloud_download</i></a>
+            <!-- <a href="{{ URL::to('/usercity-download') }}" class="btn btn-just-icon btn-theme" title="User City Download"><i class="material-icons">cloud_download</i></a> -->
           </div>
           </span>
           </h4>
@@ -85,6 +98,11 @@
         serverSide: true,
         "order": [ [0, 'desc'] ],
         ajax: "{{ route('users.usercity') }}",
+        lengthMenu: [
+                [10, 25, 50, 100,500,1000,5000],
+                [10, 25, 50,100,500,1000,5000]
+            ],
+
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
             {data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
@@ -97,5 +115,28 @@
         ]
     }); 
 });
+
+
+
+  $(document).ready(function() {
+
+ var table = $('#getaward').DataTable();
+ var info = table.page.info();
+ $('#getaward').on('page.dt', function () {
+  var info = table.page.info();
+   //$('#tableInfo').html(info.page+1);
+  $('#tableInfo').val(info.page+1);
+});
+
+table.on( 'length', function ( e, settings, len ) {
+    table.ajax.reload( null, false ); // user paging is not reset on reload
+    $('#page_length').val(len);
+} );
+});
+
+
+
+
+
 </script>
 </x-app-layout>

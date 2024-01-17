@@ -41,6 +41,51 @@ class UserImport implements ToCollection,WithValidation,WithHeadingRow, WithBatc
         $userdetails = collect([]);
         $addressdetails = collect([]);
         foreach ($rows as $row) {
+
+
+            if(!empty($row['id'])){  
+              
+              $name = trim($row['name']);
+              $last_name = (strpos($name, ' ') === false) ? '' : preg_replace('#.*\s([\w-]*)$#', '$1', $name);
+              $first_name = trim( preg_replace('#'.preg_quote($last_name,'#').'#', '', $name ) );
+
+              User::where('id','=',$row['id'])->update([
+                'name' => !empty($name)? ucfirst(strtolower($name)):'',
+                //'first_name' => !empty($first_name)? ucfirst(strtolower($first_name)):'',
+                //'last_name' => !empty($last_name)? ucfirst(strtolower($last_name)):'',
+                //'mobile' => $row['mobile'],
+                'mobile' => !empty($row['mobile'])? $row['mobile']:null,
+                'email' => !empty($row['email'])? $row['email']:null,
+                //'password' => !empty($row['password'])? Hash::make($row['password']) :'',
+                'gender' => !empty($row['gender'])? $row['gender']:'',
+                //'profile_image' => !empty($row['profile_image'])? $row['profile_image']:'',
+                'user_code' => !empty($row['user_code'])? $row['user_code']:'',
+                'location' => !empty($row['Location'])? $row['Location']:'',
+                'employee_codes' => !empty($row['employees_code'])? $row['employees_code']:'',
+                'branch_id' => !empty($row['branch_id'])? $row['branch_id']:'',
+                'designation_id' => !empty($row['designation_id'])? $row['designation_id']:'',
+                'department_id' => !empty($row['division_id'])? $row['division_id']:'',
+                //'created_at' => getcurentDateTime(),
+                //'updated_at' => getcurentDateTime()
+              ]);
+
+
+               UserDetails::where('user_id','=',$row['id'])->update([
+                //'date_of_birth' => !empty($row['date_of_birth'])? $row['date_of_birth']:null,
+                'date_of_joining' => !empty($row['date_of_joining'])? $row['date_of_joining']:null,
+                'marital_status' => !empty($row['marital_status'])? $row['marital_status']:'',
+                'salary' => !empty($row['ctc'])? $row['ctc']:0.00,
+                'last_year_increments' => !empty($row['last_year_increments'])? $row['last_year_increments']:0.00,
+                'last_promotion' => !empty($row['last_promotion'])? $row['last_promotion']:'',
+                //'created_at' => getcurentDateTime(),
+                //'updated_at' => getcurentDateTime()
+              ]);
+
+           
+
+
+            }else{
+             
             $name = trim($row['name']);
             $last_name = (strpos($name, ' ') === false) ? '' : preg_replace('#.*\s([\w-]*)$#', '$1', $name);
             $first_name = trim( preg_replace('#'.preg_quote($last_name,'#').'#', '', $name ) );
@@ -66,6 +111,10 @@ class UserImport implements ToCollection,WithValidation,WithHeadingRow, WithBatc
                 $user->givePermissionTo($permissions);
                 $userdetails->push([
                     'user_id' => $user['id'],
+                    //'date_of_joining' => !empty($row['date_of_joining'])? $row['date_of_joining']:null,
+                    'salary' => !empty($row['ctc'])? $row['ctc']:null,
+                    'last_year_increments' => !empty($row['last_year_increments'])? $row['last_year_increments']:null,
+                    'last_promotion' => !empty($row['last_promotion'])? $row['last_promotion']:null,
                     'created_at' => getcurentDateTime() ,
                     'updated_at' => getcurentDateTime()
                 ]);
@@ -88,7 +137,13 @@ class UserImport implements ToCollection,WithValidation,WithHeadingRow, WithBatc
                     'updated_at' => getcurentDateTime()
                 ]);
            }
+
+         }
+
+
         }
+
+
         if($userdetails->isNotEmpty())
         {
             UserDetails::insert($userdetails->toArray());

@@ -66,6 +66,26 @@ class CustomerController extends Controller
                             })->select('id','city_name')->get();
         $customertype = CustomerType::select('id','customertype_name')->orderBy('id','desc')->get();
 
+
+
+       
+        $all_reporting_user_ids = getUsersReportingToAuth();
+        $all_user_branches = User::with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
+        $branches = array();
+        $all_branch = array();
+        $bkey = 0;
+        foreach ($all_user_branches as $k => $val) {
+            if (!in_array($val->getbranch->id, $all_branch)) {
+                array_push($all_branch, $val->getbranch->id);
+                $branches[$bkey]['id'] = $val->getbranch->id;
+                $branches[$bkey]['name'] = $val->getbranch->branch_name;
+                $bkey++;
+            }
+        }
+
+
+
+
         if ($request->ajax()) {
             $data = Customers::with('customertypes','firmtypes','createdbyname')
                         ->where(function ($query) use ($request , $userids) {
@@ -77,12 +97,23 @@ class CustomerController extends Controller
                             {
                                 $query->where('customertype', $request['customertype']);
                             }
-                            if(!empty($request['beat_id']))
+                            // if(!empty($request['beat_id']))
+                            // {
+                            //     $query->whereHas('beatdetails',function($q) use($request){
+                            //         $q->where('beat_id', $request['beat_id']);
+                            //     });
+                            // }
+
+                            if(!empty($request['branch_id']))
                             {
-                                $query->whereHas('beatdetails',function($q) use($request){
-                                    $q->where('beat_id', $request['beat_id']);
-                                });
+                               $branch_user_id = User::whereIn('branch_id',$request['branch_id'])->pluck('id');
+                                if(!empty($branch_user_id)){
+                                   $query->whereIn('executive_id', $branch_user_id);  
+                                }
+
                             }
+
+
                             if(!empty($request['state_id']))
                             {
                                 $query->whereHas('customeraddress',function($q) use($request){
@@ -163,7 +194,7 @@ class CustomerController extends Controller
                         ->rawColumns(['action','image','checkbox'])
                     ->make(true);
         }
-        return view('customers.index', compact('beats','users','states','cities','customertype'));
+        return view('customers.index', compact('beats','users','states','cities','customertype','branches'));
     }
 
     public function distributors(DistributorDataTable $dataTable)
@@ -625,7 +656,7 @@ class CustomerController extends Controller
         return back();
     }
     public function download(Request $request)
-    {
+    {     
         ////abort_if(Gate::denies('customer_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();

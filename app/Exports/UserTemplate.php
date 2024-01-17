@@ -20,7 +20,7 @@ class UserTemplate implements FromCollection,WithHeadings,ShouldAutoSize
 
     public function headings(): array
     {
-        return ['id','name', 'first_name', 'last_name', 'mobile', 'email', 'password','gender', 'profile_image','role'];
+        return ['id','name', 'first_name', 'last_name', 'mobile', 'email', 'password','gender','profile_image','role','ctc','last_year_increments','last_promotion'];
     }
 
 }
