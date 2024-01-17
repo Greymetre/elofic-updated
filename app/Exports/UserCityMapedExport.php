@@ -15,24 +15,45 @@ use Illuminate\Support\Facades\DB;
 
 class UserCityMapedExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapping
 {
-    public function __construct()
+    public function __construct($request)
     {
         
+        $this->page_number = $request->input('page_number');
+        $this->page_length = $request->input('page_length'); 
         $this->userids = getUsersReportingToAuth();
     }
 
     public function collection()
     {
-        return UserCityAssign::where(function ($query)  {
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
+        // return UserCityAssign::where(function ($query)  {
+        //                         if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
 
+        //                         {
+        //                             $query->whereIn('userid', $this->userids);
+        //                         }
+        //                     })
+        //                     ->select('userid','reportingid','city_id')
+        //                     ->orderBy('userid','asc')
+        //                     ->get();
+
+        $results_per_page = $this->page_length;
+        $page_number = intval($this->page_number);
+        $page_result = ($page_number-1) * $results_per_page;
+
+        return UserCityAssign::with('userinfo','reportinginfo','cityname','cityname.districtname','cityname.districtname.statename')->where(function ($query)  {
+                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
                                 {
                                     $query->whereIn('userid', $this->userids);
                                 }
                             })
-                            ->select('userid','reportingid','city_id')
-                            ->orderBy('userid','asc')
+                            //->select('userid','reportingid','city_id')
+                            ->orderBy('userid')
+                            ->skip($page_result)
+                            ->take($results_per_page)
                             ->get();
+
+
+
     }
 
     public function headings(): array
