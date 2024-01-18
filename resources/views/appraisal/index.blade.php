@@ -32,7 +32,14 @@
                                             @endif
                                         </select>
                                     </div>
-                                    <!-- <button type="submit" style="border-right: 1px solid;" href="" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.appraisal.title') !!}"><i class="material-icons">cloud_download</i></button> -->
+                                    <div class="p-2" style="width: 250px;">
+                                        <select class="selectpicker" name="financial_year" id="financial_year" data-style="select-with-transition" title="Select Financial Year">
+                                            <option value="">Select Financial Year</option>
+                                            <option value="{{Carbon\Carbon::now()->format('Y')-2}}_{{Carbon\Carbon::now()->format('y')-1}}">{{Carbon\Carbon::now()->format('Y')-2}}-{{Carbon\Carbon::now()->format('y')-1}}</option>
+                                            <option value="{{Carbon\Carbon::now()->format('Y')-1}}_{{Carbon\Carbon::now()->format('y')}}">{{Carbon\Carbon::now()->format('Y')-1}}-{{Carbon\Carbon::now()->format('y')}}</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" style="border-right: 1px solid;" href="" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.appraisal.title') !!}"><i class="material-icons">cloud_download</i></button>
                                 </form>
                                 <a href="{{url('appraisal/create')}}" class="btn btn-just-icon btn-theme create" title="Add Appraisal">
                                     <i class="material-icons">add_circle</i>

@@ -70,7 +70,7 @@ class TourExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
 
     public function headings(): array
     {
-        return ['date','id','userid','username', 'town','Actual','objectives', 'type', 'city_id', 'visited_date','visited_cityid', 'last_visited','Employee Code','Branch','Division','Designation'];
+        return ['date','id','userid','username', 'town','Actual','objectives', 'type', 'city_id', 'visited_date','visited_cityid', 'last_visited','Employee Code','Branch','Division','Designation', 'Status'];
     }
 
     public function map($data): array
@@ -81,9 +81,17 @@ class TourExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
         $visited_cityid = '';
         $visited_cityname = '';
         $last_visited = '';
+        if($data->status == '0'){
+            $status = "Pending";
+        }elseif($data->status == '1'){
+            $status = "Approved";
+        }else{
+            $status = "Rejected";
+        }
         if(!empty($data['tourdetails']))
         {
             foreach ($data['tourdetails'] as $key => $detail) {
+
 
                 $rowcityname = isset($detail['cityname']['city_name']) ? $detail['cityname']['city_name'].' , ' : '';
                 $rowcityid = isset($detail['city_id']) ? $detail['city_id'].' , ' : '';
@@ -116,6 +124,7 @@ class TourExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
             isset($data['userinfo']['getbranch']['branch_name']) ? $data['userinfo']['getbranch']['branch_name'] :'',
             isset($data['userinfo']['getdepartment']['division_name']) ? $data['userinfo']['getdepartment']['division_name'] :'',
             isset($data['userinfo']['getdesignation']['designation_name']) ? $data['userinfo']['getdesignation']['designation_name'] :'',
+            $status,
         ];
     }
 
