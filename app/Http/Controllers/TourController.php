@@ -264,12 +264,18 @@ class TourController extends Controller
             if(!empty($request['detail']))
             {
                 foreach ($request['detail'] as $key => $value) {
-                    $tours = TourProgramme::create([
-                        'date' => isset($value['date']) ? $value['date'] : null, 
-                        'userid' => isset($value['userid']) ? $value['userid'] : null,
-                        'town' => isset($value['town']) ? $value['town'] : '',
-                        'objectives' => isset($value['objectives']) ? $value['objectives'] : '',
-                    ]);
+                    $tours = TourProgramme::updateOrCreate(
+                        [
+                            'date' => isset($value['date']) ? $value['date'] : null, 
+                            'userid' => isset($value['userid']) ? $value['userid'] : null,
+                        ],
+                        [
+                            'date' => isset($value['date']) ? $value['date'] : null, 
+                            'userid' => isset($value['userid']) ? $value['userid'] : null,
+                            'town' => isset($value['town']) ? $value['town'] : '',
+                            'objectives' => isset($value['objectives']) ? $value['objectives'] : '',
+                        ]
+                    );
                     $towns = explode(',', $value['town']);
                     foreach ($towns as $key => $town) {
                         $cityid = City::where('city_name','=',$town)->pluck('id')->first();

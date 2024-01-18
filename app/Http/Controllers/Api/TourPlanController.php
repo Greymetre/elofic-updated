@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\City;
+use App\Models\TourDetail;
 use App\Models\TourProgramme;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -128,13 +130,38 @@ class   TourPlanController extends Controller
 
         if($created_by){
             foreach($all_date as $k=>$date){
-                TourProgramme::create([
-                    'date' => $date,
-                    'userid' => $user_id,
-                    'town' => $all_town[$k],
-                    'objectives' => $all_objectives[$k],
-                    'created_by' => $created_by,
-                ]);
+                $tours = TourProgramme::updateOrCreate(
+                    [
+                        'date' => $date,
+                        'userid' => $user_id,
+                    ],
+                    [
+                        'date' => $date,
+                        'userid' => $user_id,
+                        'town' => $all_town[$k],
+                        'objectives' => $all_objectives[$k],
+                        'created_by' => $created_by,
+                    ]
+                );
+                $towns = explode(',', $all_town);
+                foreach ($towns as $key => $town) {
+                    $cityid = City::where('city_name','=',$town)->pluck('id')->first();
+
+                    $visited = TourDetail::whereHas('tourinfo',function($query) use($user_id){
+                                            $query->where('userid','=',$user_id);
+                                        })
+                                        ->where('visited_cityid','=',$cityid)
+                                        ->whereNotNull('visited_date')
+                                        ->select('visited_date')
+                                        ->latest()
+                                        ->first();                
+                    $lastvisited = (isset($cityid) && !empty($visited)) ? $visited['visited_date'] : null;
+                    TourDetail::create([
+                        'tourid' => isset($tours->id) ? $tours->id : null,
+                        'city_id' => isset($cityid) ? $cityid : null, 
+                        'last_visited' => isset($lastvisited) ? $lastvisited : null,
+                    ]); 
+                }
             }
             return response()->json(['status' => 'success','message' => 'Data added successfully.'], 200);
         }else{
