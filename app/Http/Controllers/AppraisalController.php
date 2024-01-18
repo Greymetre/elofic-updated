@@ -176,7 +176,17 @@ class AppraisalController extends Controller
 
     public function download(Request $request)
     {
+        $all_sales_weight = salesWeightage::get();
+        $validator = Validator::make($request->all(), [
+            'financial_year' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
         $executive_id = $request->input('executive_id');
+        $f_year = $request->input('financial_year');
         if ($executive_id && $executive_id != '' && $executive_id != null) {
             $all_reporting_user_ids = array($executive_id);
         } else {
@@ -191,12 +201,11 @@ class AppraisalController extends Controller
             DB::raw('GROUP_CONCAT(achivment) as achivment'),
             DB::raw('GROUP_CONCAT(rating) as rating'),
             DB::raw('GROUP_CONCAT(rating_by) as rating_by'),
-        )->whereIn('user_id', $all_reporting_user_ids)->groupBy('year', 'user_id')->get();
+        )->whereIn('user_id', $all_reporting_user_ids)->where('year', $f_year)->groupBy('year', 'user_id')->orderBy('year')->get();
 
-        $rportingByArray = Appraisal::whereIn('user_id', $all_reporting_user_ids)->groupBy('year', 'rating_by')->pluck('year', 'rating_by')->toArray();
-        
-        $userlistArray = Appraisal::whereIn('user_id', $all_reporting_user_ids)->groupBy('year', 'user_id')->pluck('user_id')->toArray();
-        
+        $rportingByArray = Appraisal::select('year', 'rating_by')->whereIn('user_id', $all_reporting_user_ids)->groupBy('year', 'rating_by')->where('year', $f_year)->orderBy('year')->get();
+
+
         $all_grades =  array('Grtade By Self');
 
 
@@ -211,17 +220,34 @@ class AppraisalController extends Controller
             'CTC',
             'Last Yr Increments',
             'Last Promotion',
-            'Sale Target',
-            'Sale Achivment',
-            'New Dealer Target',
-            'New Dealer Achivment',
-            'Saarthi Accu Point',
-            'Plumbers Meet Nos of Meets',
-            'Discipline',
-            '>60 Days OS',
+            // 'Sale Target',
+            // 'Sale Achivment',
+            // 'New Dealer Target',
+            // 'New Dealer Achivment',
+            // 'Saarthi Accu target',
+            // 'Saarthi Accu Point',
+            // 'target',
+            // 'Plumbers Meet Nos of Meets',
+            // 'target',
+            // 'Discipline',
+            // 'target',
+            // '>60 Days OS',
         ];
+        $second_head = array();
+        foreach ($all_sales_weight as $wtg) {
+            array_push($second_head, $wtg->name." target");
+            array_push($second_head, $wtg->name." Achivment");
+        }
         if (count($appraisal) > 0) {
+            $rids = array();
             foreach ($appraisal as $k => $val) {
+                $allWId = explode(',', $val->weightage_id);
+                $final_arr = array();
+                foreach($allWId as $wid){
+                    if(!in_array($wid, $final_arr)){
+                        array_push($final_arr, $wid);
+                    }
+                }
                 $data[$k][0] = ++$k;
                 $data[$k][1] = $val->users->getbranch->branch_name;
                 $data[$k][2] = $val->users->getdepartment->division_name;
@@ -234,15 +260,21 @@ class AppraisalController extends Controller
                 $data[$k][9] = $val->users->userinfo->last_promotion ?? "-";
                 $all_tr = explode(',', $val->target);
                 $all_ach = explode(',', $val->achivment);
+                
+                $tr = 0;
+                for($i = count($final_arr); $i > 0; $i--){
+                    $data[$k][10+$tr] = $all_tr[count($all_tr) - $i] ?? "0";
+                    $data[$k][11+$tr] = $all_ach[count($all_ach) - $i] ?? "0";
+                    $tr++;
+                    $tr++;
+                }
 
-                $data[$k][10] = $all_tr[count($all_tr) - 6] ?? "0";
-                $data[$k][11] = $all_ach[count($all_ach) - 6] ?? "0";
-                $data[$k][12] = $all_tr[count($all_tr) - 5] ?? "0";
-                $data[$k][13] = $all_ach[count($all_ach) - 5] ?? "0";
-                $data[$k][14] = $all_ach[count($all_ach) - 4] ?? "0";
-                $data[$k][15] = $all_ach[count($all_ach) - 3] ?? "0";
-                $data[$k][16] = $all_ach[count($all_ach) - 2] ?? "0";
-                $data[$k][17] = $all_ach[count($all_ach) - 1] ?? "0";
+                // $data[$k][12] = $all_tr[count($all_tr) - 5] ?? "0";
+                // $data[$k][13] = $all_ach[count($all_ach) - 5] ?? "0";
+                // $data[$k][14] = $all_ach[count($all_ach) - 4] ?? "0";
+                // $data[$k][15] = $all_ach[count($all_ach) - 3] ?? "0";
+                // $data[$k][16] = $all_ach[count($all_ach) - 2] ?? "0";
+                // $data[$k][17] = $all_ach[count($all_ach) - 1] ?? "0";
 
                 $all_reporting_by = explode(',', $val->rating_by);
                 $all_reporting_by = array_unique($all_reporting_by);
@@ -254,79 +286,75 @@ class AppraisalController extends Controller
                             $totalper += ($calcu->sales_weightage->weightage * $calcu->rating) / 10;
                         }
                         if ($totalper < 51) {
-                            $data[$k][18] = 'C';
+                            $data[$k][12+$tr] = 'C';
                         } else if ($totalper > 50 && $totalper < 61) {
-                            $data[$k][18] = 'B';
+                            $data[$k][12+$tr] = 'B';
                         } else if ($totalper > 60 && $totalper < 71) {
-                            $data[$k][18] = 'B+';
+                            $data[$k][12+$tr] = 'B+';
                         } else if ($totalper > 70 && $totalper < 81) {
-                            $data[$k][18] = 'A';
+                            $data[$k][12+$tr] = 'A';
                         } else if ($totalper > 80) {
-                            $data[$k][18] = 'A+';
+                            $data[$k][12+$tr] = 'A+';
                         }
                     }
                 } else {
-                    $data[$k][18] = '-';
+                    $data[$k][12+$tr] = '-';
                 }
-            }
-        }
-        $rids = array();
-        foreach($userlistArray as $k=>$val){
-            $main_user = User::find($val);
-            ++$k;
-            $i = 0;
-            $remark = '-';
-            $Increment = 0;
-            foreach($rportingByArray as $k2=>$val2){
-                $rp_user = User::find($k2);
-                if($k2 != $val && $rp_user->roles[0]->id != $main_user->roles[0]->id){
-                    if(!in_array($rp_user->id, $rids)){
-                        array_push($all_grades, $rp_user->name.'('.$rp_user->roles[0]->name.')');
-                        array_push($rids, $rp_user->id);
-                    }
-                    $rats = Appraisal::where('year', $val2)->where('user_id', $val)->where('rating_by', $k2)->get();
-                    if(count($rats) > 0){
-                        $totalper = 0;
-                        foreach($rats as $fn){
-                            $totalper += ($fn->sales_weightage->weightage * $fn->rating) / 10;
-                            if ($totalper < 51) {
-                                $data[$k][19+$i] = 'C';
-                            } else if ($totalper > 50 && $totalper < 61) {
-                                $data[$k][19+$i] = 'B';
-                                if($rp_user->hasRole('Head office')){
-                                    $remark = $rats[0]->remark;
-                                    $Increment = '8%';
-                                }
-                            } else if ($totalper > 60 && $totalper < 71) {
-                                $data[$k][19+$i] = 'B+';
-                                if($rp_user->hasRole('Head office')){
-                                    $remark = $rats[0]->remark;
-                                    $Increment = '10%';
-                                }
-                            } else if ($totalper > 70 && $totalper < 81) {
-                                $data[$k][19+$i] = 'A';
-                                if($rp_user->hasRole('Head office')){
-                                    $remark = $rats[0]->remark;
-                                    $Increment = '12%';
-                                }
-                            } else if ($totalper > 80) {
-                                $data[$k][19+$i] = 'A+';
-                                if($rp_user->hasRole('Head office')){
-                                    $remark = $rats[0]->remark;
-                                    $Increment = '14%';
-                                }
-                            }
+                $i = 0;
+                $remark = "-";
+                $Increment = "-";
+                foreach($rportingByArray as $k2=>$val2){
+                    $main_user = User::find(explode(',', $val->user_id)[0]);
+                    $rp_user = User::find($val2->rating_by);
+                    if($val2->rating_by != $val->user_id && $rp_user->roles[0]->id != $main_user->roles[0]->id){
+                        if(!in_array($rp_user->id, $rids)){
+                            array_push($all_grades, $rp_user->name.'('.$rp_user->roles[0]->name.')');
+                            array_push($rids, $rp_user->id);
                         }
-                    }else{
-                        $data[$k][19+$i] = "-";
+                        $rats = Appraisal::where('year', $val2->year)->where('user_id', $main_user->id)->where('rating_by', $val2->rating_by)->get();
+                        if(count($rats) > 0){
+                            $totalper = 0;
+                            foreach($rats as $fn){
+                                $totalper += ($fn->sales_weightage->weightage * $fn->rating) / 10;
+                                if ($totalper < 51) {
+                                    $data[$k][13+$tr+$i] = 'C';
+                                } else if ($totalper > 50 && $totalper < 61) {
+                                    $data[$k][13+$tr+$i] = 'B';
+                                    if($rp_user->hasRole('Head office')){
+                                        $remark = $rats[0]->remark;
+                                        $Increment = '8%';
+                                    }
+                                } else if ($totalper > 60 && $totalper < 71) {
+                                    $data[$k][13+$tr+$i] = 'B+';
+                                    if($rp_user->hasRole('Head office')){
+                                        $remark = $rats[0]->remark;
+                                        $Increment = '10%';
+                                    }
+                                } else if ($totalper > 70 && $totalper < 81) {
+                                    $data[$k][13+$tr+$i] = 'A';
+                                    if($rp_user->hasRole('Head office')){
+                                            $remark = $rats[0]->remark;
+                                        $Increment = '12%';
+                                    }
+                                } else if ($totalper > 80) {
+                                    $data[$k][13+$tr+$i] = 'A+';
+                                    if($rp_user->hasRole('Head office')){
+                                        $remark = $rats[0]->remark;
+                                        $Increment = '14%';
+                                    }
+                                }   
+                            }
+                        }else{
+                            $data[$k][13+$tr+$i] = "-";
+                        }
+                        $i++;
                     }
-                    $i++;
                 }
+                $data[$k][14+$tr+$i] = $Increment;
+                $data[$k][15+$tr+$i] = " ";
+                $data[$k][16+$tr+$i] = " ";
+                $data[$k][17+$tr+$i] = $remark;
             }
-            $data[$k][20+$i] = $Increment;
-            $data[$k][21+$i] = " ";
-            $data[$k][22+$i] = " ";
-            $data[$k][23+$i] = $remark;
         }
         $last_head = [
             'Increment %',
@@ -336,6 +364,7 @@ class AppraisalController extends Controller
         ];
         $headings = array_merge(
             $first_head,
+            $second_head,
             $all_grades,
             $last_head,
         );
@@ -353,12 +382,11 @@ class AppraisalController extends Controller
             $all_reporting_user_ids = getUsersReportingToAuth();
             $appraisal = Appraisal::with('sales_weightage')->where('user_id', $request->executive_id)->where('year', $request->f_year)->where('appraisal_type', $request->appraisal_type)->whereIn('rating_by', $all_reporting_user_ids)->get();
         }
-        if(count($appraisal) > 0){
+        if (count($appraisal) > 0) {
             foreach ($appraisal as $k => $val) {
                 $appraisal[$k]->rating_by_user->getdesignation = $val->rating_by_user->getdesignation;
                 $appraisal[$k]->rating_by_user->roles = $val->rating_by_user->roles;
             }
-
         }
 
         return response()->json($appraisal);
