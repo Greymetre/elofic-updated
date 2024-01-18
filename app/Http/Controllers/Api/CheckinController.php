@@ -57,6 +57,7 @@ class CheckinController extends Controller
                         'checkin_id' => isset($value['id']) ? $value['id'] : 0,
                         'customer_id' => isset($value['customer_id']) ? $value['customer_id'] : null,
                         'customer_name' => isset($value['customers']['name']) ? $value['customers']['name'] : $value['leads']['name'],
+                        'customer_type' => isset($value['customers']['customertypes']['customertype_name']) ? $value['customers']['customertypes']['customertype_name'] : '',
                         'checkin_date' => isset($value['checkin_date']) ? $value['checkin_date'] : '',
                         'checkin_time' => isset($value['checkin_time']) ? $value['checkin_time'] : '',
                         'checkin_latitude' => isset($value['checkin_latitude']) ? $value['checkin_latitude'] : '',
@@ -157,7 +158,10 @@ class CheckinController extends Controller
                 //     'body' =>  'You have successfully Checked In at '.$customername
                 // ]);
                 // sendNotification($user->id,$asmnotify);
-                return response()->json(['status' => 'success','message' => 'Check In successfully','checkin_id' => $checkin_id ], $this->successStatus); 
+                $customername = Customers::with(['customertypes'])->where('id','=',$request['customer_id'])->first();
+                $cutomertype = $customername['customertypes']['customertype_name']??'';
+
+                return response()->json(['status' => 'success','message' => 'Check In successfully','checkin_id' => $checkin_id,'customer_type'=> $cutomertype], $this->successStatus);
             }
             return response()->json(['status' => 'error','message' => 'Error in Check In' ], $this->badrequest);
         }
