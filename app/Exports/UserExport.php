@@ -25,7 +25,7 @@ class UserExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
 
     public function collection()
     {
-        return User::with('reportinginfo')->where(function ($query)  {
+        return User::with(['reportinginfo','userinfo'])->where(function ($query)  {
                                 if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
 
                                 {
@@ -38,11 +38,12 @@ class UserExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
     {
         // return ['id','name', 'first_name', 'last_name', 'mobile', 'email', 'gender', 'profile_image', 'role', 'Reporting','Employees Code','Branch Name','Division','Designation','Status'];
 
-        return ['id','Employees Code','name','Designation','Branch Name','Division','Reporting','mobile', 'email', 'gender', 'Status','profile_image', 'role'];
+        return ['id','employees_code','name','Designation','Branch Name','Division','Reporting','mobile', 'email', 'gender', 'Status','profile_image', 'role','designation_id','branch_id','division_id','ctc','date_of_joining','last_year_increments','last_promotion'];
     }
 
     public function map($data): array
     {
+         
            if($data['active'] =='Y'){
                 $status = 'ACTIVE';
             }else{
@@ -65,8 +66,16 @@ class UserExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
             //$data['active'],
             $status,
             $data['profile_image'],
-            isset($data['roles']['name']) ? $data['roles']['name'] :'',
-           
+            //isset($data['roles']['name']) ? $data['roles']['name'] :'',
+            str_replace(str_split('[/]/"'), '', $data->getRoleNames()),
+            $data['designation_id']??NULL,
+            $data['branch_id']??NULL,
+            $data['department_id']??NULL,
+            isset($data['userinfo']['salary']) ? $data['userinfo']['salary'] :'',
+            isset($data['userinfo']['date_of_joining']) ? $data['userinfo']['date_of_joining'] :'',
+            isset($data['userinfo']['last_year_increments']) ? $data['userinfo']['last_year_increments'] :'',
+            isset($data['userinfo']['last_promotion']) ? $data['userinfo']['last_promotion'] :'',
+                       
         ];
     }
 }

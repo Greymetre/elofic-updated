@@ -600,6 +600,38 @@
                        </div>
                     </div>
                  </div>
+
+                 <div class="col-md-6">
+                    <div class="row">
+                       <label class="col-md-3 col-form-label">{!! trans('panel.user.last_year_increments') !!}</label>
+                       <div class="col-md-9">
+                          <div class="form-group has-default bmd-form-group">
+                             <input type="text" name="last_year_increments" class="form-control" value="{!! old( 'last_year_increments', $user['last_year_increments']) !!}">
+                             @if ($errors->has('last_year_increments'))
+                             <div class="error col-lg-12">
+                                <p class="text-danger">{{ $errors->first('last_year_increments') }}</p>
+                             </div>
+                             @endif
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+                 <div class="col-md-6">
+                    <div class="row">
+                       <label class="col-md-3 col-form-label">{!! trans('panel.user.last_promotion') !!}</label>
+                       <div class="col-md-9">
+                          <div class="form-group has-default bmd-form-group">
+                             <input type="text" name="last_promotion" class="form-control datepicker" value="{!! old( 'last_promotion', $user['last_promotion']) !!}">
+                             @if ($errors->has('last_promotion'))
+                             <div class="error col-lg-12">
+                                <p class="text-danger">{{ $errors->first('last_promotion') }}</p>
+                             </div>
+                             @endif
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+
               </div>
               <hr class="my-3">
               <h4 class="section-heading mb-3  h4 mt-0 text-center text-info">Educational Information </h4>

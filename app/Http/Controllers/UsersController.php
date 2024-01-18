@@ -85,6 +85,7 @@ class UsersController extends Controller
             'department_id' => isset($request['department_id']) ? $request['department_id'] :'',
             'employee_codes' => isset($request['employee_codes']) ? $request['employee_codes'] :'',
             'designation_id' => isset($request['designation_id']) ? $request['designation_id'] :'',
+            'reportingid' => isset($request['reportingid']) ? $request['reportingid'] :'',
         ]);
         $user->roles()->sync($request->input('roles', []));
         $permissions = $user->getPermissionsViaRoles()->pluck('name');
@@ -108,6 +109,24 @@ class UsersController extends Controller
             'date_of_birth'   =>  isset($request['date_of_birth']) ? $request['date_of_birth'] :null,
             'date_of_joining'   =>  isset($request['date_of_joining']) ? $request['date_of_joining'] :null,
             'marital_status'   =>  isset($request['marital_status']) ? $request['marital_status'] :null,
+            'last_year_increments'  =>  isset($request['last_year_increments']) ? $request['last_year_increments'] :null,
+            'last_promotion'   =>  isset($request['last_promotion']) ? $request['last_promotion'] :null,
+            'salary'   =>  isset($request['salary']) ? $request['salary'] :0.00,
+
+            // 'probation_period'   =>  isset($request['probation_period']) ? $request['probation_period'] :null,
+            // 'date_of_confirmation'   =>  isset($request['date_of_confirmation']) ? $request['date_of_confirmation'] :null,
+            // 'notice_period'   =>  isset($request['notice_period']) ? $request['notice_period'] :null,
+            // 'father_name'   =>  isset($request['father_name']) ? $request['father_name'] :null,
+            // 'pan_number'   =>  isset($request['pan_number']) ? $request['pan_number'] :null,
+            // 'emergency_number'   =>  isset($request['emergency_number']) ? $request['emergency_number'] :null,
+            // 'current_address'   =>  isset($request['current_address']) ? $request['current_address'] :null,
+            // 'permanent_address'   =>  isset($request['permanent_address']) ? $request['permanent_address'] :null,
+            // 'biometric_code'   =>  isset($request['biometric_code']) ? $request['biometric_code'] :null,
+            // 'account_number'   =>  isset($request['account_number']) ? $request['account_number'] :null,
+            // 'bank_name'   =>  isset($request['bank_name']) ? $request['bank_name'] :null,
+            // 'ifsc_code'   =>  isset($request['ifsc_code']) ? $request['ifsc_code'] :null,
+            // 'pf_number'   =>  isset($request['pf_number']) ? $request['pf_number'] :null,
+            // 'un_number'   =>  isset($request['un_number']) ? $request['un_number'] :null,
         ]);
         return redirect()->route('users.index');
 
@@ -148,6 +167,24 @@ class UsersController extends Controller
             'date_of_birth'   =>  isset($request['date_of_birth']) ? $request['date_of_birth'] :null,
             'date_of_joining'   =>  isset($request['date_of_joining']) ? $request['date_of_joining'] :null,
             'marital_status'   =>  isset($request['marital_status']) ? $request['marital_status'] :'',
+            'last_year_increments'  =>  isset($request['last_year_increments']) ? $request['last_year_increments'] :null,
+            'last_promotion'   =>  isset($request['last_promotion']) ? $request['last_promotion'] :null,
+            'salary'   =>  isset($request['salary']) ? $request['salary'] :0.00,
+            
+            // 'probation_period'   =>  isset($request['probation_period']) ? $request['probation_period'] :null,
+            // 'date_of_confirmation'   =>  isset($request['date_of_confirmation']) ? $request['date_of_confirmation'] :null,
+            // 'notice_period'   =>  isset($request['notice_period']) ? $request['notice_period'] :null,
+            // 'father_name'   =>  isset($request['father_name']) ? $request['father_name'] :null,
+            // 'pan_number'   =>  isset($request['pan_number']) ? $request['pan_number'] :null,
+            // 'emergency_number'   =>  isset($request['emergency_number']) ? $request['emergency_number'] :null,
+            // 'current_address'   =>  isset($request['current_address']) ? $request['current_address'] :null,
+            // 'permanent_address'   =>  isset($request['permanent_address']) ? $request['permanent_address'] :null,
+            // 'biometric_code'   =>  isset($request['biometric_code']) ? $request['biometric_code'] :null,
+            // 'account_number'   =>  isset($request['account_number']) ? $request['account_number'] :null,
+            // 'bank_name'   =>  isset($request['bank_name']) ? $request['bank_name'] :null,
+            // 'ifsc_code'   =>  isset($request['ifsc_code']) ? $request['ifsc_code'] :null,
+            // 'pf_number'   =>  isset($request['pf_number']) ? $request['pf_number'] :null,
+            // 'un_number'   =>  isset($request['un_number']) ? $request['un_number'] :null,
         ]);   
         $user = User::where('id',$id)->first();
         $user->name = isset($request['name']) ? $request['first_name'].' '.$request['last_name'] :'';
@@ -264,11 +301,11 @@ class UsersController extends Controller
         Excel::import(new UserCityImport,request()->file('import_file'));
         return back();
     }
-    public function userCitydownload()
+    public function userCitydownload(Request $request)
     {
         abort_if(Gate::denies('user_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        return Excel::download(new UserCityMapedExport, 'users.xlsx');
+        return Excel::download(new UserCityMapedExport($request), 'users.xlsx');
     }
 }

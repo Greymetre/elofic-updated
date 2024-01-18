@@ -148,6 +148,24 @@
                   </div>
                </div>
             </div>
+
+           <div class="col-md-6">
+              <div class="row">
+                 <label class="col-md-3 col-form-label">{!! trans('panel.user.salary') !!}</label>
+                 <div class="col-md-9">
+                    <div class="form-group has-default bmd-form-group">
+                       <input type="text" name="salary" class="form-control" value="{!! old( 'salary', !empty($user['userinfo']['salary']) ? $user['userinfo']['salary']:'') !!}">
+                       @if ($errors->has('salary'))
+                       <div class="error col-lg-12">
+                          <p class="text-danger">{{ $errors->first('salary') }}</p>
+                       </div>
+                       @endif
+                    </div>
+                 </div>
+              </div>
+          </div> 
+
+
             <div class="col-md-6">
                <div class="row">
                   <label class="col-md-3 col-form-label">{{ trans('panel.user.fields.gender') }}</label>
@@ -340,6 +358,41 @@
                   </div>
                </div>
             </div>
+
+         <div class="col-md-6">
+           <div class="row">
+              <label class="col-md-3 col-form-label">{!! trans('panel.user.last_year_increments') !!}</label>
+              <div class="col-md-9">
+                 <div class="form-group has-default bmd-form-group">
+                    <input type="text" name="last_year_increments" class="form-control"  value="{!! old( 'last_year_increments', !empty($user['userinfo']['last_year_increments']) ? $user['userinfo']['last_year_increments']:'') !!}">
+                    @if ($errors->has('last_year_increments'))
+                    <div class="error col-lg-12">
+                       <p class="text-danger">{{ $errors->first('last_year_increments') }}</p>
+                    </div>
+                    @endif
+                 </div>
+              </div>
+           </div>
+        </div>
+
+         <div class="col-md-6">
+           <div class="row">
+              <label class="col-md-3 col-form-label">{!! trans('panel.user.last_promotion') !!}</label>
+              <div class="col-md-9">
+                 <div class="form-group has-default bmd-form-group">
+                    <input type="text" name="last_promotion" class="form-control" value="{!! old( 'last_promotion', !empty($user['userinfo']['last_promotion']) ? $user['userinfo']['last_promotion']:'') !!}">
+                    @if ($errors->has('last_promotion'))
+                    <div class="error col-lg-12">
+                       <p class="text-danger">{{ $errors->first('last_promotion') }}</p>
+                    </div>
+                    @endif
+                 </div>
+              </div>
+           </div>
+        </div>
+
+
+
 
          </div>
          {{ Form::submit('Submit', array('class' => 'btn btn-theme pull-right submituser')) }}
