@@ -143,7 +143,7 @@ class   TourPlanController extends Controller
                         'created_by' => $created_by,
                     ]
                 );
-                $towns = explode(',', $all_town);
+                $towns = $all_town;
                 foreach ($towns as $key => $town) {
                     $cityid = City::where('city_name','=',$town)->pluck('id')->first();
 
