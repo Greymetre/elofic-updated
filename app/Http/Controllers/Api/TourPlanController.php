@@ -24,6 +24,12 @@ class   TourPlanController extends Controller
         $start_date = $request->input('start_date');
         $end_date = $request->input('end_date');
 
+        if($user_id == auth()->user()->id){
+            $self = "true";
+        }else{
+            $self = "false";
+        }
+
         $tour_plan = TourProgramme::where('userid', $user_id)->orderBy('date', 'desc');
         
         if($start_date && $start_date != '' && $start_date != null){
@@ -47,7 +53,7 @@ class   TourPlanController extends Controller
         }
 
         if(count($tour_plan) > 0){
-            return response()->json(['status' => 'success','message' => 'Data retrieved successfully.', 'data' => $tour_plan ], 200);
+            return response()->json(['status' => 'success', 'self'=>$self,'message' => 'Data retrieved successfully.', 'data' => $tour_plan], 200);
         }else{
             return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $tour_plan ],400);
         }
