@@ -157,7 +157,7 @@ Route::group(['middleware' => ['auth']], function () {
     //Appraisal
     Route::get('appraisal/create', [AppraisalController::class, 'create']);
     Route::get('appraisal/index', [AppraisalController::class, 'index'])->name('appraisal.index');
-    Route::post('appraisal/store', [AppraisalController::class, 'store'])->name('appraisal.store');
+    Route::any('appraisal/store', [AppraisalController::class, 'store'])->name('appraisal.store');
     Route::post('appraisal/update', [AppraisalController::class, 'update'])->name('appraisal.update');
     Route::any('appraisal-download', [ AppraisalController::class, 'download'])->name('appraisal.download');
     Route::any('getappraisal', [ AppraisalController::class, 'getappraisal'])->name('appraisal.getappraisal');

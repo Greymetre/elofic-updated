@@ -161,7 +161,7 @@
         })
 
         $("#executive_id").on("change", function() {
-            $('#appraisalCreateForm').find("input").not(":submit").val('');
+            $('#appraisalCreateForm').find("input:not(:submit, :hidden)").val('');
             $(".appended").remove();
             var executive_id = $(this).val();
             var f_year = $("#f_year").val();
@@ -173,7 +173,7 @@
 
         $("#f_year").on("change", function() {
             $(".appended").remove();
-            $('#appraisalCreateForm').find("input").not(":submit").val('');
+            $('#appraisalCreateForm').find("input:not(:submit, :hidden)").val('');
             var executive_id = $("#executive_id").val();
             var f_year = $(this).val();
             var appraisal_type = $("#appraisal_type").val();
@@ -188,7 +188,7 @@
 
         $("#appraisal_type").on('change', function() {
             $(".appended").remove();
-            $('#appraisalCreateForm').find("input").not(":submit").val('');
+            $('#appraisalCreateForm').find("input:not(:submit, :hidden)").val('');
             var appraisal_type = $(this).val();
             var executive_id = $("#executive_id").val();
             var f_year = $("#f_year").val();
