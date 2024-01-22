@@ -63,6 +63,7 @@ class CustomerController extends Controller
                 'mobile'  => 'required|numeric|unique:customers,mobile',
                 // 'email'  => 'email|unique:customers,email',
                 'customertype'       => 'nullable|exists:customer_types,id',
+               // 'gstin_no'  => 'unique:customer_details,gstin_no',
             ]); 
             if ($validator->fails()) {
                 return response()->json(['status' => 'error','message' => $validator->messages()->all()],$this->badrequest);
@@ -76,7 +77,7 @@ class CustomerController extends Controller
                return response(['status' => 'error', 'message' => 'Mobile Number Already Exist'],400);   
              }else{
        
-             $customergst = CustomerDetails::where('gstin_no', '=', $request['gstin_no'])->first();
+             $customergst = CustomerDetails::where('gstin_no', $request['gstin_no'])->whereNotNull('gstin_no')->first();
              
              if(!empty($customergst)){
               return response(['status' => 'error', 'message' => 'GST Number Already Exist'],400);   

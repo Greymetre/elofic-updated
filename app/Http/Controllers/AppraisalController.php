@@ -147,7 +147,10 @@ class AppraisalController extends Controller
         $acual = $request->acual;
         $rating = $request->rating;
         $remark = $request->remark;
+        $totalper = 0;
         foreach ($sale_weightage_id as $key => $value) {
+            $weightages = salesWeightage::find($value);
+            $totalper += ($weightages->weightage * $rating[$key]) / 10;
             Appraisal::updateOrCreate(
                 [
                     'weightage_id' => $value,
@@ -203,7 +206,7 @@ class AppraisalController extends Controller
             DB::raw('GROUP_CONCAT(rating_by) as rating_by'),
         )->whereIn('user_id', $all_reporting_user_ids)->where('year', $f_year)->groupBy('year', 'user_id')->orderBy('year')->get();
 
-        $rportingByArray = Appraisal::select('year', 'rating_by')->whereIn('user_id', $all_reporting_user_ids)->groupBy('year', 'rating_by')->where('year', $f_year)->orderBy('year')->get();
+        $rportingByArray = Appraisal::select(DB::raw('GROUP_CONCAT(user_id) as user_id'),'year', 'rating_by')->whereIn('user_id', $all_reporting_user_ids)->groupBy('year', 'rating_by')->where('year', $f_year)->orderBy('year')->get();
 
 
         $all_grades =  array('Grtade By Self');
@@ -239,8 +242,13 @@ class AppraisalController extends Controller
             array_push($second_head, $wtg->name." Achivment");
         }
         if (count($appraisal) > 0) {
+            foreach ($appraisal as $k => $val) {
+
+            }
             $rids = array();
             foreach ($appraisal as $k => $val) {
+                $check_same_user = explode(',', $val->user_id);
+                $year_array = explode(',', $val->year);
                 $allWId = explode(',', $val->weightage_id);
                 $final_arr = array();
                 foreach($allWId as $wid){
@@ -262,13 +270,16 @@ class AppraisalController extends Controller
                 $all_ach = explode(',', $val->achivment);
                 
                 $tr = 0;
-                for($i = count($final_arr); $i > 0; $i--){
-                    $data[$k][10+$tr] = $all_tr[count($all_tr) - $i] ?? "0";
-                    $data[$k][11+$tr] = $all_ach[count($all_ach) - $i] ?? "0";
+                foreach ($all_sales_weight as $i=>$wtg) {
+                    $tr_ac_data = Appraisal::where('weightage_id', $wtg->id)->where('user_id', $check_same_user[0])->where('year', $year_array[0])->orderBy('id', 'desc')->first();
+                    
+                    $data[$k][10+$tr] = $tr_ac_data->target ?? "0";
+                    $data[$k][11+$tr] = $tr_ac_data->achivment ?? "0";
                     $tr++;
                     $tr++;
                 }
 
+                
                 // $data[$k][12] = $all_tr[count($all_tr) - 5] ?? "0";
                 // $data[$k][13] = $all_ach[count($all_ach) - 5] ?? "0";
                 // $data[$k][14] = $all_ach[count($all_ach) - 4] ?? "0";
@@ -300,13 +311,15 @@ class AppraisalController extends Controller
                 } else {
                     $data[$k][12+$tr] = '-';
                 }
+                
                 $i = 0;
                 $remark = "-";
                 $Increment = "-";
                 foreach($rportingByArray as $k2=>$val2){
-                    $main_user = User::find(explode(',', $val->user_id)[0]);
+                    $check_same_user2 = explode(',', $val2->user_id);
+                    $main_user = User::find($check_same_user[0]);
                     $rp_user = User::find($val2->rating_by);
-                    if($val2->rating_by != $val->user_id && $rp_user->roles[0]->id != $main_user->roles[0]->id){
+                    if(!in_array($val2->rating_by, $check_same_user) && in_array($main_user->id, $check_same_user2) && $rp_user->roles[0]->id != $main_user->roles[0]->id){
                         if(!in_array($rp_user->id, $rids)){
                             array_push($all_grades, $rp_user->name.'('.$rp_user->roles[0]->name.')');
                             array_push($rids, $rp_user->id);
@@ -318,6 +331,10 @@ class AppraisalController extends Controller
                                 $totalper += ($fn->sales_weightage->weightage * $fn->rating) / 10;
                                 if ($totalper < 51) {
                                     $data[$k][13+$tr+$i] = 'C';
+                                    if($rp_user->hasRole('Head office')){
+                                        $remark = $rats[0]->remark;
+                                        $Increment = 'NIL';
+                                    }
                                 } else if ($totalper > 50 && $totalper < 61) {
                                     $data[$k][13+$tr+$i] = 'B';
                                     if($rp_user->hasRole('Head office')){
@@ -348,6 +365,11 @@ class AppraisalController extends Controller
                             $data[$k][13+$tr+$i] = "-";
                         }
                         $i++;
+                    }else{
+                        if(in_array($rp_user->id, $rids)){
+                            $data[$k][13+$tr+$i] = "-";   
+                            $i++;
+                        }
                     }
                 }
                 $data[$k][14+$tr+$i] = $Increment;

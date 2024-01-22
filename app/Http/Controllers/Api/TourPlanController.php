@@ -139,11 +139,11 @@ class   TourPlanController extends Controller
             foreach($all_date as $k=>$date){
                 $tours = TourProgramme::updateOrCreate(
                     [
-                        'date' => $date,
+                        'date' => date('Y-m-d', strtotime($date)),
                         'userid' => $user_id,
                     ],
                     [
-                        'date' => $date,
+                        'date' => date('Y-m-d', strtotime($date)),
                         'userid' => $user_id,
                         'town' => $all_town[$k],
                         'objectives' => $all_objectives[$k],
