@@ -385,6 +385,7 @@ class CustomerController extends Controller
         { 
             $user = $request->user();
             $userids = getUsersReportingToAuth($user->id);
+            
             // $user_id = $user->id;
             
             $pageSize = $request->input('pageSize');
@@ -408,7 +409,7 @@ class CustomerController extends Controller
                                 }
 
                                 $query->whereIn('executive_id', $userids);
-                                $query->whereIn('customertype', ['2','3','4','5','6']);
+                                $query->whereIn('customertype', ['1','2','3','4','5','6']);
                             })
 
                             // ->whereHas('customertypes', function($query) use($user){
@@ -462,7 +463,7 @@ class CustomerController extends Controller
          try
         { 
             $user = $request->user();
-            $userids = getUsersReportingToAuth($user->reportingid);
+            $userids = getUsersReportingToAuth($user->id);
             $pageSize = $request->input('pageSize');
             $query = $this->customers
                             // ->whereHas('customertypes', function($query) use($user){
@@ -472,7 +473,7 @@ class CustomerController extends Controller
                             ->whereHas('customertypes', function($query){
                                 $query->where('type_name', '=', 'distributor')->orWhere('type_name', '=', 'Dealer');
                             })
-                            ->whereIn('customertype', ['1'])
+                            ->whereIn('customertype', ['1', '3'])
                             ->whereIn('executive_id', $userids)
                             ->select('id','name','first_name','last_name','mobile','email','profile_image','customer_code')->orderBy('name','asc');
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();

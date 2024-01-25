@@ -185,6 +185,14 @@ $(document).ready(function () {
         number: true,
         maxlength: 50,
       },
+      order_mails:
+      {
+        required:true,
+      },
+      order_mails_type:
+      {
+        required:true,
+      },
       designation_id:
       {
         number: true,

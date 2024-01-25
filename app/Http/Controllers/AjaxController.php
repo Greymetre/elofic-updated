@@ -608,7 +608,11 @@ class AjaxController extends Controller
                 $customerAddData[$k]['time'] = date('H:i:s', strtotime($val->created_at));
                 $customerAddData[$k]['latitude'] = $val->latitude;
                 $customerAddData[$k]['longitude'] = $val->longitude;
-                $customerAddData[$k]['msg'] = $val->name.' - '. $val->customeraddress->cityname->city_name;
+                if($val->customeraddress->cityname != null){
+                    $customerAddData[$k]['msg'] = $val->name.' - '. $val->customeraddress->cityname->city_name;
+                }else{
+                    $customerAddData[$k]['msg'] = $val->name.' - City not enter';
+                }
             }
 
             foreach ($customer_update as $k => $val) {

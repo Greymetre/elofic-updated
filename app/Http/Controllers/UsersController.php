@@ -30,6 +30,7 @@ use App\Imports\UserCityImport;
 use App\Exports\UserCityMapedExport;
 
 use App\Models\Branch;
+use App\Models\CustomerType;
 use App\Models\Designation;
 use App\Models\Division;
 
@@ -56,12 +57,13 @@ class UsersController extends Controller
         $roles = Role::where('name','!=','super-admin')->pluck('name', 'id');
         $cities = City::where('active','=','Y')->pluck('city_name','id');
         $reportings = User::where('active','=','Y')->select('id','name')->get();
+        $customertype = CustomerType::select('id','customertype_name')->orderBy('id','desc')->get();
 
         $branches = Branch::where('active','=','Y')->get();
         $designations = Designation::where('active','=','Y')->get();
         $divisions = Division::where('active','=','Y')->get();
 
-        return view('users.create', compact('roles','cities','reportings','branches','designations','divisions'))->with('user',$this->user);
+        return view('users.create', compact('roles','cities','reportings','branches','designations','divisions', 'customertype'))->with('user',$this->user);
     }
 
     public function store(UserRequest $request)
@@ -112,6 +114,8 @@ class UsersController extends Controller
             'last_year_increments'  =>  isset($request['last_year_increments']) ? $request['last_year_increments'] :null,
             'last_promotion'   =>  isset($request['last_promotion']) ? $request['last_promotion'] :null,
             'salary'   =>  isset($request['salary']) ? $request['salary'] :0.00,
+            'order_mails'   =>  isset($request['order_mails']) ? $request['order_mails'] :'',
+            'order_mails_type'   =>  isset($request['order_mails_type']) ? implode(',', $request['order_mails_type']) :'',
 
             // 'probation_period'   =>  isset($request['probation_period']) ? $request['probation_period'] :null,
             // 'date_of_confirmation'   =>  isset($request['date_of_confirmation']) ? $request['date_of_confirmation'] :null,
@@ -137,10 +141,12 @@ class UsersController extends Controller
         //abort_if(Gate::denies('user_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $id = decrypt($id);
         $user = User::with('userinfo')->where('id',$id)->first();
+        // dd($user->userinfo);
         $roles = Role::where('name','!=','super-admin')->pluck('name', 'id');
         $user->load('roles');
         $user['cities'] = UserCityAssign::where('userid','=',$id)->pluck('city_id');
         //$user['reportingid'] = UserCityAssign::where('userid','=',$id)->pluck('reportingid')->first();
+        $customertype = CustomerType::select('id','customertype_name')->orderBy('id','desc')->get();
         $cities = City::where('active','=','Y')->pluck('city_name','id');
         $reportings = User::where('active','=','Y')->select('id','name')->get();
 
@@ -149,13 +155,12 @@ class UsersController extends Controller
         $divisions = Division::where('active','=','Y')->get();
 
 
-        return view('users.edit', compact('roles', 'user','cities','reportings','branches','designations','divisions'));
+        return view('users.edit', compact('roles', 'user','cities','reportings','branches','designations','divisions', 'customertype'));
     }
 
     //public function update(Request $request, User $user)
     public function update(Request $request, $id)
     {  
-        
         if($request->file('image')){
             $image = $request->file('image');
             $filename = 'profile_'.$id;
@@ -170,6 +175,8 @@ class UsersController extends Controller
             'last_year_increments'  =>  isset($request['last_year_increments']) ? $request['last_year_increments'] :null,
             'last_promotion'   =>  isset($request['last_promotion']) ? $request['last_promotion'] :null,
             'salary'   =>  isset($request['salary']) ? $request['salary'] :0.00,
+            'order_mails'   =>  isset($request['order_mails']) ? $request['order_mails'] :'',
+            'order_mails_type'   =>  isset($request['order_mails_type']) ? implode(',', $request['order_mails_type']) :'',
             
             // 'probation_period'   =>  isset($request['probation_period']) ? $request['probation_period'] :null,
             // 'date_of_confirmation'   =>  isset($request['date_of_confirmation']) ? $request['date_of_confirmation'] :null,

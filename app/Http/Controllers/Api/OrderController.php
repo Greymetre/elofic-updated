@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exports\OrderEmailExport;
 use App\Http\Controllers\Controller;
+use App\Mail\OrderMailWithAttachment;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Redirect;
@@ -16,6 +18,10 @@ use App\Models\OrderDetails;
 use App\Models\Attachment;
 use App\Models\Cart;
 use App\Models\Customers;
+use App\Models\User;
+use Excel;
+use Illuminate\Support\Facades\Mail;
+use stdClass;
 
 class OrderController extends Controller
 {
@@ -110,9 +116,10 @@ class OrderController extends Controller
                         'tax_amount'  =>  isset($value['tax_amount']) ? $value['tax_amount'] : 0.00,
                         'line_total'  =>  isset($value['line_total']) ? $value['line_total'] : 0.00,
                         'status_id'  =>  isset($value['status_id']) ? $value['status_id'] : 0,
-                        'specification' => isset($value['products']['specification']) ? $value['products']['specification'] : '',
+                        'specification' => isset($value['products']['suc_del']) ? $value['products']['suc_del'] : '',
                         'part_no' => isset($value['products']['part_no']) ? $value['products']['part_no'] : '',
                         'product_no' => isset($value['products']['product_no']) ? $value['products']['product_no'] : '',
+                        'hp' => isset($value['products']['specification']) ? $value['products']['specification'] : '',
                     ]);
                 }
                 unset($data['orderdetails']);
@@ -164,6 +171,22 @@ class OrderController extends Controller
                 if($orderdetail->isNotEmpty())
                 {
                     OrderDetails::insert($orderdetail->toArray());
+                    $exportData = new Request();
+                    $exportData->merge([
+                        'order_id' => $response['order_id'],
+                    ]);
+    
+                    Excel::store(new OrderEmailExport($exportData), '/assets/orderDetails.xlsx', 'local');
+    
+                    if($user->userinfo->order_mails  && $user->userinfo->order_mails != null && $user->userinfo->order_mails != ''){
+                        $mail_id_array = explode(',', $user->userinfo->order_mails);
+                        $buyer = Customers::find($request['buyer_id']);
+                        $seller = Customers::find($request['seller_id']);
+                        $attachmentPath = base_path('storage/app/assets/orderDetails.xlsx');
+                        foreach ($mail_id_array as $k => $val) {
+                            // Mail::to($val)->send(new OrderMailWithAttachment($attachmentPath, $orderdetail, Order::find($response['order_id'])));
+                        }
+                    }
                 }
                 // $useractivity = array(
                 //     'userid' => $user->id, 

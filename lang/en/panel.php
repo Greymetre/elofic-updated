@@ -602,6 +602,7 @@ return [
         'date_of_joining'   => 'Joining Date',
         'last_year_increments' => 'Last Year Increament',
         'last_promotion' => 'Last Promostion',
+        'order_mail' => 'Order Mail Id"s',
         'employee_code'     => 'Employee Code',
         'employee_codes'    => 'Employee Code',
         'biometric_code'    => 'Biometric Code',

@@ -200,7 +200,7 @@
                     <p>Appraisal(PMS)</p>
                   </a>
                 </li>
-                @if(auth()->user()->hasRole('superadmin') || auth()->user()->hasRole('Admin'))
+                @if(auth()->user()->can('sales_weightage'))
                 <li class="nav-item {{ request()->is('sales_weightage') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('sales_weightage') }}">
                     <i class="material-icons">check</i>
