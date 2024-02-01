@@ -595,6 +595,18 @@ return [
             'deleted_at_helper'  => '',
         ],
     ],
+    'expenses_type'           => [
+        'title'          => 'Expenses Type',
+        'title_singular' => 'Expenses Type',
+        'fields'         => [
+            'id'                 => 'ID',
+            'id_helper'          => '',
+            'name'              => 'Type Name',
+            'display_name'      => 'Display Name',
+            'rate'       => 'Rate',
+            'allowance_type' => 'Allowance Type'
+        ],
+    ],
     'user'           => [
         'title'          => 'Users',
         'title_singular'    => 'User',

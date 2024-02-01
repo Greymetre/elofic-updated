@@ -1,38 +1,47 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
-        <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
-        <!-- CSS Files -->
-        <link href="{{ url('/').'/'.asset('assets/css/material-dashboard2.css') }}" rel="stylesheet" />
-        <link href="{{ url('/').'/'.asset('assets/css/custom1.css') }}" rel="stylesheet" />
-        <!-- CSS Just for demo purpose, don't include it in your project -->
-        <link href="{{ url('/').'/'.asset('assets/demo/demo.css') }}" rel="stylesheet" />
-        <!-- <link href="{{ url('/').'/'.asset('assets/css/jquery-ui.css') }}" rel="stylesheet" /> -->
-        <link href="{{ url('/').'/'.asset('assets/css/responsive.bootstrap4.css') }}" rel="stylesheet" />
-        <link rel="stylesheet" href="{{ url('/').'/'.asset('assets/plugins/select2/css/select2.css') }}">
-        <link href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css" rel="stylesheet">
-        <script src="{{ url('/').'/'.asset('assets/js/core/jquery.min.js') }}"></script>
-        <script src="{{ url('/').'/'.asset('assets/js/core/jquery-ui.js') }}"></script>
-        <meta http-equiv="Cache-Control" content="no-store" />
-        <style>
-            .toggle.ios, .toggle-on.ios, .toggle-off.ios { border-radius: 20px; }
-            .toggle.ios .toggle-handle { border-radius: 20px; }
-            </style>
-        <!-- Scripts -->
-    </head>
-    <body class="" style="background-color: #f2fbff;">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+
+  <title>{{ config('app.name', 'Laravel') }}</title>
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+  <!-- CSS Files -->
+  <link href="{{ url('/').'/'.asset('assets/css/material-dashboard2.css') }}" rel="stylesheet" />
+  <link href="{{ url('/').'/'.asset('assets/css/custom1.css') }}" rel="stylesheet" />
+  <!-- CSS Just for demo purpose, don't include it in your project -->
+  <link href="{{ url('/').'/'.asset('assets/demo/demo.css') }}" rel="stylesheet" />
+  <!-- <link href="{{ url('/').'/'.asset('assets/css/jquery-ui.css') }}" rel="stylesheet" /> -->
+  <link href="{{ url('/').'/'.asset('assets/css/responsive.bootstrap4.css') }}" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url('/').'/'.asset('assets/plugins/select2/css/select2.css') }}">
+  <link href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css" rel="stylesheet">
+  <script src="{{ url('/').'/'.asset('assets/js/core/jquery.min.js') }}"></script>
+  <script src="{{ url('/').'/'.asset('assets/js/core/jquery-ui.js') }}"></script>
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <style>
+    .toggle.ios,
+    .toggle-on.ios,
+    .toggle-off.ios {
+      border-radius: 20px;
+    }
+
+    .toggle.ios .toggle-handle {
+      border-radius: 20px;
+    }
+  </style>
+  <!-- Scripts -->
+</head>
+
+<body class="" style="background-color: #f2fbff;">
   <div class="wrapper">
     <div class="sidebar" data-color="yellow" data-background-color="black">
       <div class="logo"><a href="{{ url('dashboard') }}" class="simple-text logo-normal">
           <!-- GAJRA GEARS -->
           <div class="text-center logo-main">
-              <img src="{{ url('/').'/'.asset('assets/img/brand_logo.jpg') }}" class="rounded" alt="...">
+            <img src="{{ url('/').'/'.asset('assets/img/brand_logo.jpg') }}" class="rounded" alt="...">
           </div>
 
         </a>
@@ -40,7 +49,7 @@
       <div class="sidebar-wrapper">
         <div class="user">
           <div class="photo">
-            <img src="{!! (Auth::user()->profile_image) ? env('IMAGE_UPLOADS').Auth::user()->profile_image : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" >
+            <img src="{!! (Auth::user()->profile_image) ? env('IMAGE_UPLOADS').Auth::user()->profile_image : url('/').'/'.asset('assets/img/placeholder.jpg') !!}">
           </div>
           <div class="user-info">
             <a data-toggle="collapse" href="#collapseExample" class="username">
@@ -59,13 +68,13 @@
               <p>{!! trans('panel.sidemenu.dashboard') !!}</p>
             </a>
           </li>
-          @endif    
+          @endif
           @if(auth()->user()->can(['customer_access']))
           <li class="nav-item ">
             <a class="nav-link collapsed" data-toggle="collapse" href="#customerMenu" aria-expanded="false">
               <i class="material-icons">store</i>
               <p> {!! trans('panel.sidemenu.customers_master') !!}
-                
+
               </p>
             </a>
             <div class="collapse" id="customerMenu" style="">
@@ -131,16 +140,16 @@
           </li>
           @endif
           @if(auth()->user()->can('country_access'))
-           <li class="nav-item ">
+          <li class="nav-item ">
             <a class="nav-link collapsed" data-toggle="collapse" href="#addressMenu" aria-expanded="false">
               <i class="material-icons">room</i>
               <p> {!! trans('panel.sidemenu.address_master') !!}
-                
+
               </p>
             </a>
             <div class="collapse" id="addressMenu" style="">
               <ul class="nav">
-                 @if(auth()->user()->can('country_access'))
+                @if(auth()->user()->can('country_access'))
                 <li class="nav-item {{ request()->is('country*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('country') }}">
                     <i class="material-icons">room</i>
@@ -185,16 +194,16 @@
           </li>
           @endif
           @if(auth()->user()->can('user_access'))
-         <li class="nav-item ">
+          <li class="nav-item ">
             <a class="nav-link collapsed" data-toggle="collapse" href="#userMenu" aria-expanded="false">
               <i class="material-icons">people</i>
               <p> {!! trans('panel.sidemenu.users_master') !!}
-                
+
               </p>
             </a>
             <div class="collapse" id="userMenu" style="">
               <ul class="nav">
-              @if(auth()->user()->can('appraisal_pms'))
+                @if(auth()->user()->can('appraisal_pms'))
                 <li class="nav-item {{ request()->is('appraisal/create') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('appraisal/index') }}">
                     <i class="material-icons">verified_user</i>
@@ -270,12 +279,20 @@
             </div>
           </li>
           @endif
+          @if(auth()->user()->can(['expenses_type']))
+          <!-- <li class="nav-item {{ request()->is('expenses_type') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ url('expenses_type') }}">
+              <i class="material-icons">dashboard</i>
+              <p>{!! trans('panel.sidemenu.expenses_type') !!}</p>
+            </a>
+          </li> -->
+          @endif 
           @if(auth()->user()->can('product_access'))
           <li class="nav-item ">
             <a class="nav-link collapsed" data-toggle="collapse" href="#productMenu" aria-expanded="false">
               <i class="material-icons">star</i>
-              <p>  {!! trans('panel.sidemenu.product_master') !!}
-                
+              <p> {!! trans('panel.sidemenu.product_master') !!}
+
               </p>
             </a>
             <div class="collapse" id="productMenu" style="">
@@ -335,47 +352,47 @@
                     <p>Production</p>
                   </a>
                 </li>
-                 @endif
+                @endif
               </ul>
             </div>
           </li>
           @endif
           @if(auth()->user()->can('order_access'))
-            <li class="nav-item {{ request()->is('orders*') ? 'active' : '' }}">
-              <a class="nav-link" href="{{ url('orders') }}">
-                <i class="material-icons">shopping_bag</i>
-                <p>{!! trans('panel.sidemenu.orders') !!}</p>
-              </a>
-            </li>
+          <li class="nav-item {{ request()->is('orders*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ url('orders') }}">
+              <i class="material-icons">shopping_bag</i>
+              <p>{!! trans('panel.sidemenu.orders') !!}</p>
+            </a>
+          </li>
           @endif
-          
-         @if(auth()->user()->can('branch'))
-            <li class="nav-item {{ request()->is('branch*') ? 'active' : '' }}">
-              <a class="nav-link" href="{{ url('branches') }}">
-                <i class="material-icons">shopping_bag</i>
-                <p>Branch</p>
-              </a>
-            </li>
-          @endif         
-          
+
+          @if(auth()->user()->can('branch'))
+          <li class="nav-item {{ request()->is('branch*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ url('branches') }}">
+              <i class="material-icons">shopping_bag</i>
+              <p>Branch</p>
+            </a>
+          </li>
+          @endif
+
           @if(auth()->user()->can('division'))
-            <li class="nav-item {{ request()->is('division*') ? 'active' : '' }}">
-              <a class="nav-link" href="{{ url('division') }}">
-                <i class="material-icons">shopping_bag</i>
-                <p>Division</p>
-              </a>
-            </li>
+          <li class="nav-item {{ request()->is('division*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ url('division') }}">
+              <i class="material-icons">shopping_bag</i>
+              <p>Division</p>
+            </a>
+          </li>
           @endif
-          
+
           @if(auth()->user()->can('designation'))
-            <li class="nav-item {{ request()->is('designation*') ? 'active' : '' }}">
-              <a class="nav-link" href="{{ url('designation') }}">
-                <i class="material-icons">shopping_bag</i>
-                <p>Designation</p>
-              </a>
-            </li>
+          <li class="nav-item {{ request()->is('designation*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ url('designation') }}">
+              <i class="material-icons">shopping_bag</i>
+              <p>Designation</p>
+            </a>
+          </li>
           @endif
-          
+
           @if(auth()->user()->can('payments_access'))
           <li class="nav-item ">
             <a class="nav-link collapsed" data-toggle="collapse" href="#paymentManu" aria-expanded="false">
@@ -385,30 +402,30 @@
             <div class="collapse" id="paymentManu" style="">
               <ul class="nav">
                 @if(auth()->user()->can('payments_create'))
-                  <li class="nav-item {{ request()->is('payments*') ? 'active' : '' }}">
-                    <a class="nav-link" href="{{ url('payments/create') }}">
-                      <i class="material-icons">currency_exchange</i>
-                      <p>Payment Recieved</p>
-                    </a>
-                  </li>
-                  @endif
-                  <li class="nav-item {{ request()->is('payments*') ? 'active' : '' }}">
-                    <a class="nav-link" href="{{ url('payments') }}">
-                      <i class="material-icons">currency_rupee</i>
-                      <p>Payments</p>
-                    </a>
-                  </li>
-                </ul>
+                <li class="nav-item {{ request()->is('payments*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('payments/create') }}">
+                    <i class="material-icons">currency_exchange</i>
+                    <p>Payment Recieved</p>
+                  </a>
+                </li>
+                @endif
+                <li class="nav-item {{ request()->is('payments*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('payments') }}">
+                    <i class="material-icons">currency_rupee</i>
+                    <p>Payments</p>
+                  </a>
+                </li>
+              </ul>
             </div>
           </li>
           @endif
           @if(auth()->user()->can('sale_access'))
-            <li class="nav-item {{ request()->is('sales') ? 'active' : '' }}">
-              <a class="nav-link" href="{{ url('sales') }}">
-                <i class="material-icons">shopping_cart</i>
-                <p>{!! trans('panel.sidemenu.sales') !!}</p>
-              </a>
-            </li>
+          <li class="nav-item {{ request()->is('sales') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ url('sales') }}">
+              <i class="material-icons">shopping_cart</i>
+              <p>{!! trans('panel.sidemenu.sales') !!}</p>
+            </a>
+          </li>
           @endif
 
           @if(auth()->user()->can('wallet_access'))
@@ -416,7 +433,7 @@
             <a class="nav-link collapsed" data-toggle="collapse" href="#walletMenu" aria-expanded="false">
               <i class="material-icons">account_balance_wallet</i>
               <p> {!! trans('panel.sidemenu.wallet_master') !!}
-                
+
               </p>
             </a>
             <div class="collapse" id="walletMenu" style="">
@@ -442,19 +459,19 @@
           </li>
           @endif
           @if(auth()->user()->can('scheme_access'))
-            <li class="nav-item ">
-              <a class="nav-link" href="{{ url('schemes') }}">
-                <i class="material-icons">loyalty</i>
-                <p>{!! trans('panel.sidemenu.scheme_master') !!}</p>
-              </a>
-            </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="{{ url('schemes') }}">
+              <i class="material-icons">loyalty</i>
+              <p>{!! trans('panel.sidemenu.scheme_master') !!}</p>
+            </a>
+          </li>
           @endif
           @if(auth()->user()->can('status_access'))
           <li class="nav-item ">
             <a class="nav-link collapsed" data-toggle="collapse" href="#settingMenu" aria-expanded="false">
               <i class="material-icons">settings</i>
               <p> {!! trans('panel.sidemenu.setting_master') !!}
-                
+
               </p>
             </a>
             <div class="collapse" id="settingMenu" style="">
@@ -483,7 +500,7 @@
           <li class="nav-item ">
             <a class="nav-link collapsed" data-toggle="collapse" href="#beatMenu" aria-expanded="false">
               <i class="material-icons">schedule</i>
-              <p>  Beats
+              <p> Beats
               </p>
             </a>
             <div class="collapse" id="beatMenu" style="">
@@ -553,7 +570,7 @@
           <li class="nav-item ">
             <a class="nav-link collapsed" data-toggle="collapse" href="#supportMenu" aria-expanded="false">
               <i class="material-icons">headset</i>
-              <p>  {!! trans('panel.sidemenu.support_master') !!}
+              <p> {!! trans('panel.sidemenu.support_master') !!}
               </p>
             </a>
             <div class="collapse" id="supportMenu" style="">
@@ -574,7 +591,7 @@
           <li class="nav-item ">
             <a class="nav-link collapsed" data-toggle="collapse" href="#tasksMenu" aria-expanded="false">
               <i class="material-icons">airplay</i>
-              <p>  Reports
+              <p> Reports
               </p>
             </a>
             <div class="collapse" id="tasksMenu" style="">
@@ -628,7 +645,7 @@
                 </li>
                 @endif
                 @if(auth()->user()->can('fielda_ctivity_report'))
-              <li class="nav-item ">
+                <li class="nav-item ">
                   <a class="nav-link" href="{{ url('reports/fieldactivity') }}">
                     <i class="material-icons">store</i>
                     <p>Field Activity Report</p>
@@ -718,12 +735,12 @@
       <!-- Navbar -->
       <nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top ">
         <div class="container-fluid bg-theme p-2" style="background: #fff !important">
-        <img src="{!! url('/').'/'.asset('assets/img/bediya.jpg') !!}" width="100">
-        <img src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" width="100">
-        <!-- <img src="{!! url('/').'/'.asset('assets/img/logo.png') !!}" width="50"> -->
+          <img src="{!! url('/').'/'.asset('assets/img/bediya.jpg') !!}" width="100">
+          <img src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" width="100">
+          <!-- <img src="{!! url('/').'/'.asset('assets/img/logo.png') !!}" width="50"> -->
           <div class="navbar-wrapper">
             <div class="navbar-minimize">
-<!--               <button id="minimizeSidebar" class="btn btn-just-icon btn-white btn-fab btn-round">
+              <!--               <button id="minimizeSidebar" class="btn btn-just-icon btn-white btn-fab btn-round">
                 <i class="material-icons text_align-center visible-on-sidebar-regular">more_vert</i>
                 <i class="material-icons design_bullet-list-67 visible-on-sidebar-mini">view_list</i>
               <div class="ripple-container"></div></button> -->
@@ -736,8 +753,8 @@
             <span class="navbar-toggler-icon icon-bar"></span>
           </button>
           @auth
-          <div class="collapse navbar-collapse justify-content-end">            
-            <ul class="navbar-nav">              
+          <div class="collapse navbar-collapse justify-content-end">
+            <ul class="navbar-nav">
               <li class="nav-item dropdown">
                 <a class="nav-link" href="http://example.com" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   <i class="material-icons">notifications</i>
@@ -774,10 +791,10 @@
           @endauth
         </div>
       </nav>
-     <!-- End Navbar -->
+      <!-- End Navbar -->
       <div class="content">
         <div class="container-fluid">
-        {{ $slot }}
+          {{ $slot }}
         </div>
       </div>
       <footer class="footer">
@@ -785,7 +802,7 @@
         <div class="token" data-token="{{ csrf_token() }}"></div>
         <div class="container-fluid">
           <nav class="float-left">
-            
+
           </nav>
           <div class="copyright float-right">
           </div>
@@ -797,81 +814,91 @@
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content card">
         <div class="card-header">
-            <span class="pull-right" >
-              <a href="javascript:void(0)" class="btn btn-just-icon btn-danger" data-dismiss="modal"><i class="material-icons">clear</i></a>
-            </span>
+          <span class="pull-right">
+            <a href="javascript:void(0)" class="btn btn-just-icon btn-danger" data-dismiss="modal"><i class="material-icons">clear</i></a>
+          </span>
         </div>
         <div class="modal-body"> <img class="modal-content" id="img01"> </div>
       </div>
     </div>
   </div>
 
-    <script src="{{ url('/').'/'.asset('assets/js/core/jquery.validate.js') }}"></script>
-    <!-- Bootstrap -->
-    <script src="{{ url('/').'/'.asset('assets/js/core/popper.min.js') }}"></script>
-    <!-- overlayScrollbars -->
-    <script src="{{ url('/').'/'.asset('assets/js/core/bootstrap-material-design.min.js') }}"></script>
-    <!-- DataTables -->
-    <script src="{{ url('/').'/'.asset('assets/js/plugins/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ url('/').'/'.asset('assets/js/plugins/dataTables.responsive.min.js') }}"></script>
-    <script src="{{ url('/').'/'.asset('assets/js/plugins/bootstrap-tagsinput.js') }}"></script>
+  <script src="{{ url('/').'/'.asset('assets/js/core/jquery.validate.js') }}"></script>
+  <!-- Bootstrap -->
+  <script src="{{ url('/').'/'.asset('assets/js/core/popper.min.js') }}"></script>
+  <!-- overlayScrollbars -->
+  <script src="{{ url('/').'/'.asset('assets/js/core/bootstrap-material-design.min.js') }}"></script>
+  <!-- DataTables -->
+  <script src="{{ url('/').'/'.asset('assets/js/plugins/jquery.dataTables.min.js') }}"></script>
+  <script src="{{ url('/').'/'.asset('assets/js/plugins/dataTables.responsive.min.js') }}"></script>
+  <script src="{{ url('/').'/'.asset('assets/js/plugins/bootstrap-tagsinput.js') }}"></script>
 
-     <!-- OPTIONAL SCRIPTS -->
-     <!-- Select2 -->
-    <script src="{{ url('/').'/'.asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
+  <!-- OPTIONAL SCRIPTS -->
+  <!-- Select2 -->
+  <script src="{{ url('/').'/'.asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
 
-    <script src="{{ url('/').'/'.asset('assets/js/plugins/perfect-scrollbar.jquery.min.js') }}"></script>
-    <script src="{{ url('/').'/'.asset('assets/js/plugins/moment.min.js') }}"></script>
-    <script src="{{ url('/').'/'.asset('assets/js/plugins/sweetalert2.js') }}"></script>
-    <script src="{{ url('/').'/'.asset('assets/js/plugins/jquery.validate.min.js') }}"></script>
-    <!-- jquery-validation -->
-    <script src="{{ url('/').'/'.asset('assets/js/plugins/jquery.bootstrap-wizard.js') }}"></script>
-    <script src="{{ url('/').'/'.asset('assets/js/plugins/bootstrap-selectpicker.js') }}"></script>
-    <script src="{{ url('/').'/'.asset('assets/js/plugins/bootstrap-datetimepicker.min.js') }}"></script>
-    <!-- OPTIONAL SCRIPTS -->
+  <script src="{{ url('/').'/'.asset('assets/js/plugins/perfect-scrollbar.jquery.min.js') }}"></script>
+  <script src="{{ url('/').'/'.asset('assets/js/plugins/moment.min.js') }}"></script>
+  <script src="{{ url('/').'/'.asset('assets/js/plugins/sweetalert2.js') }}"></script>
+  <script src="{{ url('/').'/'.asset('assets/js/plugins/jquery.validate.min.js') }}"></script>
+  <!-- jquery-validation -->
+  <script src="{{ url('/').'/'.asset('assets/js/plugins/jquery.bootstrap-wizard.js') }}"></script>
+  <script src="{{ url('/').'/'.asset('assets/js/plugins/bootstrap-selectpicker.js') }}"></script>
+  <script src="{{ url('/').'/'.asset('assets/js/plugins/bootstrap-datetimepicker.min.js') }}"></script>
+  <!-- OPTIONAL SCRIPTS -->
 
-    <script src="{{ url('/').'/'.asset('assets/js/plugins/chartist.min.js') }}"></script>
+  <script src="{{ url('/').'/'.asset('assets/js/plugins/chartist.min.js') }}"></script>
 
-    <script src="{{ url('/').'/'.asset('assets/js/plugins/bootstrap-notify.js') }}"></script>
+  <script src="{{ url('/').'/'.asset('assets/js/plugins/bootstrap-notify.js') }}"></script>
 
-    <script src="{{ url('/').'/'.asset('assets/js/material-dashboard.js?v=2.1.2') }}"></script>
+  <script src="{{ url('/').'/'.asset('assets/js/material-dashboard.js?v=2.1.2') }}"></script>
 
-    <script src="{{ url('/').'/'.asset('assets/demo/demo.js') }}"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" integrity="sha512-hievggED+/IcfxhYRSr4Auo1jbiOczpqpLZwfTVL/6hFACdbI3WQ8S9NCX50gsM9QVE+zLk/8wb9TlgriFbX+Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js" integrity="sha512-F636MAkMAhtTplahL9F6KmTfxTmYcAcjcCkyu0f0voT3N/6vzAuJ4Num55a0gEJ+hRLHhdz3vDvZpf6kqgEa5w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script>
-      $(function() {
-          $('#toggle-one').bootstrapToggle();
-         $('.datetimepicker').datetimepicker({format: 'YYYY-MM-DD HH:mm'});
-         $(".datepicker" ).datepicker({ createButton:false,
-          displayClose:true,
-          closeOnSelect:false,
-          selectMultiple:true,
-          dateFormat: 'yy-mm-dd',
-          beforeShow: function (input) {
-              $(input).css({
-                  "position": "relative",
-                  "z-index": 999999
-              });
-          },
-          onClose: function () { $('.ui-datepicker').css({ 'z-index': 0  } ); } 
-          });
-
-        //Initialize Select2 Elements
-          $('.select2').select2()
-
-          //Initialize Select2 Elements
-          $('.select2bs4').select2({
-            theme: 'bootstrap4'
-          })
-         $('.timepicker').datetimepicker({format: 'HH:mm'});
-      })
-      $('body').on('click', '.imageDisplayModel', function () {
-        var imgPath = $(this).attr("src");
-        var modal = document.getElementById('previewimageInModel');
-        $('#previewimageInModel').modal('show');
-        document.getElementById("img01").src = imgPath;
+  <script src="{{ url('/').'/'.asset('assets/demo/demo.js') }}"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" integrity="sha512-hievggED+/IcfxhYRSr4Auo1jbiOczpqpLZwfTVL/6hFACdbI3WQ8S9NCX50gsM9QVE+zLk/8wb9TlgriFbX+Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js" integrity="sha512-F636MAkMAhtTplahL9F6KmTfxTmYcAcjcCkyu0f0voT3N/6vzAuJ4Num55a0gEJ+hRLHhdz3vDvZpf6kqgEa5w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script>
+    $(function() {
+      $('#toggle-one').bootstrapToggle();
+      $('.datetimepicker').datetimepicker({
+        format: 'YYYY-MM-DD HH:mm'
       });
-    </script>
-    </body>
+      $(".datepicker").datepicker({
+        createButton: false,
+        displayClose: true,
+        closeOnSelect: false,
+        selectMultiple: true,
+        dateFormat: 'yy-mm-dd',
+        beforeShow: function(input) {
+          $(input).css({
+            "position": "relative",
+            "z-index": 999999
+          });
+        },
+        onClose: function() {
+          $('.ui-datepicker').css({
+            'z-index': 0
+          });
+        }
+      });
+
+      //Initialize Select2 Elements
+      $('.select2').select2()
+
+      //Initialize Select2 Elements
+      $('.select2bs4').select2({
+        theme: 'bootstrap4'
+      })
+      $('.timepicker').datetimepicker({
+        format: 'HH:mm'
+      });
+    })
+    $('body').on('click', '.imageDisplayModel', function() {
+      var imgPath = $(this).attr("src");
+      var modal = document.getElementById('previewimageInModel');
+      $('#previewimageInModel').modal('show');
+      document.getElementById("img01").src = imgPath;
+    });
+  </script>
+</body>
+
 </html>

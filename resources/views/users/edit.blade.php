@@ -396,13 +396,12 @@
                            </div>
                         </div>
                      </div>
-
                      <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.order_mail') !!}<span class="text-danger"> *</span></label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="order_mails" id="order_mails" class="form-control" value="{!! old( 'order_mails', $user['userinfo']['order_mails']) !!}">
+                                 <input type="text" name="order_mails" id="order_mails" class="form-control" value="{{$user['userinfo']?$user['userinfo']['order_mails']:'' }}">
                                  @if ($errors->has('order_mails'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('order_mails') }}</p>
@@ -422,7 +421,7 @@
                                     <option value="">Select {!! trans('panel.customers.fields.customertype') !!}</option>
                                     @if(@isset($customertype ))
                                     @foreach($customertype as $type)
-                                    @if(in_array($type['id'],explode(',', $user['userinfo']['order_mails_type'])))
+                                    @if(in_array($type['id'],explode(',', $user['userinfo']?$user['userinfo']['order_mails_type']:'')))
                                     <option value="{!! $type['id'] !!}" selected>{!! $type['customertype_name'] !!}</option>
                                     @else
                                     <option value="{!! $type['id'] !!}" >{!! $type['customertype_name'] !!}</option>

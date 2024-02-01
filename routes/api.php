@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\CouponController;
 use App\Http\Controllers\Api\CustomController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\ExpensesTypeController;
 use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
@@ -158,6 +159,8 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::get('tour/show', [TourPlanController::class, 'show']);
     Route::post('tour/add', [TourPlanController::class, 'add']);
     Route::post('tour/edit', [TourPlanController::class, 'edit']);
+    //Expenses Type
+    Route::get('/getExpensesType', [ExpensesTypeController::class, 'getExpensesType']);
 });
 
 

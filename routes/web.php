@@ -45,6 +45,7 @@ use App\Http\Controllers\WalletController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\DivisionController;
 use App\Http\Controllers\DesignationController;
+use App\Http\Controllers\ExpensesTypeController;
 use App\Http\Controllers\SalesWeightageController;
 
 /*
@@ -452,6 +453,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('tours-template', [ TourController::class, 'template'])->name('tourss.template');
     Route::post('tours-upload', [ TourController::class, 'upload'])->name('tours.upload');
     Route::post('tours-changeStatus', [ TourController::class, 'changeStatus'])->name('tours.changesttus');
+
+    // /Expenses Type
+    Route::resource('expenses_type', ExpensesTypeController::class);
 
     Route::get('logout', '\App\Http\Controllers\Auth\AuthenticatedSessionController@destroy');
 });
