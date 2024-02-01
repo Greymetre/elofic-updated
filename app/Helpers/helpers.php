@@ -436,7 +436,8 @@ if (! function_exists('insertSales')) {
                             'sub_total'=> isset($item['sub_total']) ? $item['sub_total'] : 0.00 ,
                             'grand_total' => isset($item['grand_total']) ? $item['grand_total'] : 0.00 , 
                             'description' => isset($item['description']) ? $item['description'] : '' ,
-                            'status_id' => isset($item['status_id']) ? $item['status_id'] : 6 ,
+                            // 'status_id' => isset($item['status_id']) ? $item['status_id'] : 6 ,
+                            'status_id' => isset($item['status_id']) ? $item['status_id'] : null ,
                             'fiscal_year' => fiscalYear($item['invoice_date']),
                             'sales_no' => isset($item['sales_no']) ? $item['sales_no'] : null ,
                             'active' => 'Y',
@@ -456,7 +457,8 @@ if (! function_exists('insertSales')) {
                                     'price' => isset($rows['price']) ? $rows['price'] : 0.00 ,
                                     'tax_amount' => isset($rows['tax_amount']) ? $rows['tax_amount'] : 0.00 ,
                                     'line_total' => isset($rows['line_total']) ? $rows['line_total'] : 0.00 ,
-                                    'status_id' => '6',
+                                    // 'status_id' => '6',
+                                    'status_id' => null,
                                     'created_at' => getcurentDateTime(),
                                 ]);
                             }
@@ -502,7 +504,7 @@ if (! function_exists('insertSales')) {
                             unset($item['price'], $item['shipped_qty']);
                             return $item;
                         });
-            debitStockEntry($stocks);
+            //debitStockEntry($stocks);
         }
         if($sales->count() == 1)
         {

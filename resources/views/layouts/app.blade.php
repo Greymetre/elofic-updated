@@ -194,12 +194,14 @@
             </a>
             <div class="collapse" id="userMenu" style="">
               <ul class="nav">
+              @if(auth()->user()->can('appraisal_pms'))
                 <li class="nav-item {{ request()->is('appraisal/create') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('appraisal/index') }}">
                     <i class="material-icons">verified_user</i>
                     <p>Appraisal(PMS)</p>
                   </a>
                 </li>
+                @endif
                 @if(auth()->user()->can('sales_weightage'))
                 <li class="nav-item {{ request()->is('sales_weightage') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('sales_weightage') }}">
@@ -568,6 +570,7 @@
             </div>
           </li>
           @endif
+          @if(auth()->user()->can('reports'))
           <li class="nav-item ">
             <a class="nav-link collapsed" data-toggle="collapse" href="#tasksMenu" aria-expanded="false">
               <i class="material-icons">airplay</i>
@@ -688,21 +691,26 @@
                   </a>
                 </li>
                 @endif
+                @if(auth()->user()->can('survey_analysis_report'))
                 <li class="nav-item ">
                   <a class="nav-link" href="{{ url('reports/surveyanalysis') }}">
                     <i class="material-icons">store</i>
                     <p>Survey Analysis Report</p>
                   </a>
                 </li>
+                @endif
+                @if(auth()->user()->can('calling_report'))
                 <li class="nav-item ">
                   <a class="nav-link" href="{{ url('notes') }}">
                     <i class="material-icons">store</i>
                     <p>Calling Report</p>
                   </a>
                 </li>
+                @endif
               </ul>
             </div>
           </li>
+          @endif
         </ul>
       </div>
     </div>
