@@ -31,12 +31,22 @@ class ExpensesTypeController extends Controller
                         }
                     }
                 })
+
+                ->addColumn('is_active', function ($query) {
+                      $active = ($query->is_active == '1') ? 'checked="" value="'.$query->is_active.'"' : 'value="'.$query->is_active.'"';
+                      return '<div class="togglebutton">
+                          <label>
+                            <input type="checkbox"'.$active.' id="'.$query->id.'" class="activeRecord">
+                            <span class="toggle"></span>
+                          </label>
+                        </div>';
+              })
                 
                 ->addColumn('action', function ($query) {
                     $btn = '';
                     $activebtn = '';
 
-                    $btn = $btn . '<a href="'.route("sales_weightage.edit", ["sales_weightage" => $query->id]).'" class="btn btn-info btn-just-icon btn-sm" title="' . trans('panel.global.edit') . ' ' . trans('panel.sales_weightage.title_singular') . '">
+                    $btn = $btn . '<a href="'.route("expenses_type.edit", ["expenses_type" => $query->id]).'" class="btn btn-info btn-just-icon btn-sm" title="' . trans('panel.global.edit') . ' ' . trans('panel.expenses_type.title_singular') . '">
                                <i class="material-icons">edit</i>
                                 </a>';
 
@@ -44,7 +54,7 @@ class ExpensesTypeController extends Controller
                                             ' . $btn . '
                                         </div>' . $activebtn;
                 })
-                ->rawColumns(['allowance_type','action'])
+                ->rawColumns(['allowance_type','is_active','action'])
                 ->make(true);
         }
         return view('expenses_type.index');
@@ -74,7 +84,7 @@ class ExpensesTypeController extends Controller
         $expensesType->rate = $request->rate!=null?$request->rate:0.00;
         $expensesType->allowance_type_id = $request->allowance_type_id;
         $expensesType->save();
-        return redirect(route('expenses_type.index'));
+        return redirect(route('expenses_type.index'))->with('message_success', 'Data Store Successfully');
     }
 
     /**
@@ -96,7 +106,8 @@ class ExpensesTypeController extends Controller
      */
     public function edit(ExpensesType $expensesType)
     {
-        //
+        $allowance_type = Config('constants.allowance_type');
+        return view('expenses_type.edit', compact('expensesType', 'allowance_type'));
     }
 
     /**
@@ -108,7 +119,11 @@ class ExpensesTypeController extends Controller
      */
     public function update(UpdateExpensesTypeRequest $request, ExpensesType $expensesType)
     {
-        //
+        $expensesType->name = $request->name;
+        $expensesType->rate = $request->rate;
+        $expensesType->allowance_type_id = $request->allowance_type_id;
+        $expensesType->save();
+        return redirect(route('expenses_type.index'))->with('message_success', 'Data Updated Successfully');
     }
 
     /**
@@ -120,5 +135,18 @@ class ExpensesTypeController extends Controller
     public function destroy(ExpensesType $expensesType)
     {
         //
+    }
+
+    public function changeStatus(Request $request){
+        $expenses_type = ExpensesType::find($request->id);
+        if($request->active == '0'){
+            $expenses_type->is_active = 1;
+        }else{
+            $expenses_type->is_active = 0;
+        }
+
+        $expenses_type->save();
+
+        return response()->json(['status'=>'success', 'message'=>'Status changed successfully']);
     }
 }

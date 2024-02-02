@@ -60,6 +60,7 @@ return [
         'support_master'    => 'Supports Management',
         'support'           => 'Supports',
         'payment'           => 'Payments',
+        'expenses_type'     => 'Expenses Type',
     ],
 
     'global'                           => [

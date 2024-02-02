@@ -15249,14 +15249,18 @@ fieldset[disabled] .form-group.is-focused .togglebutton label {
   display: inline-block;
   width: 20px;
   height: 20px;
-  background-color: #FFFFFF;
+  background-color: #f7a5a5;
   border-radius: 20px;
   position: relative;
-  box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 1px 3px 1px #f7a5a5;
   left: -5px;
   top: -2.5px;
-  border: 1px solid rgba(97, 97, 97, .54);
   transition: left 0.3s ease, background 0.3s ease, box-shadow 0.1s ease;
+}
+
+.activeRecord:checked + .toggle::after {
+  background-color: #82db82;
+  box-shadow: 0 1px 3px 1px #82db82;
 }
 
 .togglebutton label input[type=checkbox][disabled]+.toggle:after,

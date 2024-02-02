@@ -1,98 +1,102 @@
 <x-app-layout>
-<div class="row">
-  <div class="col-md-12">
-    <div class="card">
-      <div class="card-header card-header-tabs card-header-warning">
-        <div class="nav-tabs-navigation">
-          <div class="nav-tabs-wrapper">
-            <h4 class="card-title ">{{ trans('panel.global.edit') }} {{ trans('panel.role.title_singular') }}
-            @if(auth()->user()->can(['role_access']))
-            <ul class="nav nav-tabs pull-right" data-tabs="tabs">
-              <li class="nav-item">
-                <a class="nav-link" href="{{ url('roles') }}">
-                  <i class="material-icons">next_plan</i> {!! trans('panel.role.title') !!}
-                  <div class="ripple-container"></div>
-                </a>
-              </li>
-            </ul>
-            @endif
-          </h4>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header card-header-tabs card-header-warning">
+          <div class="nav-tabs-navigation">
+            <div class="nav-tabs-wrapper">
+              <h4 class="card-title ">{{ trans('panel.global.edit') }} {{ trans('panel.expenses_type.title_singular') }}
+                @if(auth()->user()->can(['expenses_type']))
+                <ul class="nav nav-tabs pull-right" data-tabs="tabs">
+                  <li class="nav-item">
+                    <a class="nav-link" href="{{ url('expenses_type') }}">
+                      <i class="material-icons">next_plan</i> {!! trans('panel.expenses_type.title') !!}
+                      <div class="ripple-container"></div>
+                    </a>
+                  </li>
+                </ul>
+                @endif
+              </h4>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="card-body">
-        @if(count($errors) > 0)
-        <div class="alert alert-danger">
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <i class="material-icons">close</i>
-          </button>
-          <span>
-            @foreach($errors->all() as $error)
-                <li>{{$error}}</li>
-            @endforeach
-          </span>
-        </div>
-        @endif
-        <form method="POST" action="{{ route('roles.update', [$role->id]) }}" enctype="multipart/form-data" id="storeRoleData">
+        <div class="card-body">
+          @if(count($errors) > 0)
+          <div class="alert alert-danger">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <i class="material-icons">close</i>
+            </button>
+            <span>
+              @foreach($errors->all() as $error)
+              <li>{{$error}}</li>
+              @endforeach
+            </span>
+          </div>
+          @endif
+          <form method="POST" action="{{ route('expenses_type.update', [$expensesType->id]) }}" enctype="multipart/form-data" id="storeExpensesTypeData">
             @method('PUT')
             @csrf
-            <input type="hidden" name="id" id="role_id" value="{!! $role->id !!}">
-          <div class="row">
-            <div class="col-md-12">
-              <div class="form-group">
-                <label class="bmd-label-floating required" for="name">{{ trans('panel.role.fields.name') }}</label>
-                <input class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}" type="text" name="name" id="name" value="{{ old('name', $role->name) }}" required>
-                @if($errors->has('name'))
-                    <div class="invalid-feedback">
-                        {{ $errors->first('name') }}
+            <input type="hidden" name="id" id="id" value="{!! $expensesType->id !!}">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="row">
+                  <label class="col-md-2 col-form-label">{{ trans('panel.expenses_type.fields.allowance_type') }}<span class="text-danger"> *</span></label>
+                  <div class="col-md-10">
+                    <div class="form-group has-default bmd-form-group">
+                      <select name="allowance_type_id" id="allowance_type_id" class="form-control {{ $errors->has('allowance_type_id') ? 'is-invalid' : '' }}">
+                        <option value="">Please select allowance type</option>
+                        @foreach($allowance_type as $k=>$val)
+                        <option {{$expensesType->allowance_type_id == $k?'selected':''}} value="{{$k}}">{{$val}}</option>
+                        @endforeach
+                      </select>
+                      @if($errors->has('name'))
+                      <div class="invalid-feedback">
+                        {{ $errors->first('allowance_type_id') }}
+                      </div>
+                      @endif
                     </div>
-                @endif
-                <span class="help-block">{{ trans('panel.role.fields.name_helper') }}</span>
-
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <label class="bmd-label-floating required" for="display_name">{{ trans('panel.role.fields.display_name') }}</label>
-                <input class="form-control {{ $errors->has('display_name') ? 'is-invalid' : '' }}" type="text" name="display_name" id="display_name" value="{{ old('name', $role->name) }}" required>
-                @if($errors->has('display_name'))
-                    <div class="invalid-feedback">
-                        {{ $errors->first('display_name') }}
-                    </div>
-                @endif
-                <span class="help-block">{{ trans('panel.role.fields.name_helper') }}</span>
-
-              </div>
-            </div>
-            <div class="col-md-12">
-                <div class="form-group">
-                <label class="required" for="permissions">{{ trans('panel.role.fields.permissions') }}</label>
-                <div style="padding-bottom: 4px">
-                    <span class="btn btn-info btn-xs select-all" style="border-radius: 0">{{ trans('panel.global.select_all') }}</span>
-                    <span class="btn btn-info btn-xs deselect-all" style="border-radius: 0">{{ trans('panel.global.deselect_all') }}</span>
+                  </div>
                 </div>
-                <select class="form-control select2 {{ $errors->has('permissions') ? 'is-invalid' : '' }}" name="permissions[]" id="permissions" multiple required>
-                    @foreach($permissions as $id => $permissions)
-                        <option value="{{ $id }}" {{ (in_array($id, old('permissions', [])) || $role->permissions->contains($id)) ? 'selected' : '' }}>{{ $permissions }}</option>
-                    @endforeach
-                </select>
-                @if($errors->has('permissions'))
-                    <div class="invalid-feedback">
-                        {{ $errors->first('permissions') }}
+              </div>
+              <div class="col-md-12">
+                <div class="row">
+                  <label class="col-md-2 col-form-label">{{ trans('panel.expenses_type.fields.name') }}<span class="text-danger"> *</span></label>
+                  <div class="col-md-10">
+                    <div class="form-group has-default bmd-form-group">
+                      <input placeholder="Expenses type name" class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}" type="text" name="name" id="name" value="{{$expensesType->name}}" maxlength="200" required>
+                      @if($errors->has('name'))
+                      <div class="invalid-feedback">
+                        {{ $errors->first('name') }}
+                      </div>
+                      @endif
                     </div>
-                @endif
-                <span class="help-block">{{ trans('panel.role.fields.permissions_helper') }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-12">
+                <div class="row">
+                  <label class="col-md-2 col-form-label">{{ trans('panel.expenses_type.fields.rate') }}</label>
+                  <div class="col-md-10">
+                    <div class="form-group has-default bmd-form-group">
+                      <input class="form-control {{ $errors->has('rate') ? 'is-invalid' : '' }}" type="" name="rate" id="rate" value="{{$expensesType->rate}}" pattern="^\d*(\.\d{0,2})?$" placeholder="0.00">
+                      @if($errors->has('display_name'))
+                      <div class="invalid-feedback">
+                        {{ $errors->first('rate') }}
+                      </div>
+                      @endif
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
+            <div class="card-footer">
+              {{ Form::submit('Update', array('class' => 'btn btn-theme')) }}
             </div>
+            {{ Form::close() }}
         </div>
-        <div class="card-footer">
-            {{ Form::submit('Submit', array('class' => 'btn btn-theme')) }}
-        </div>
-        {{ Form::close() }} 
       </div>
     </div>
   </div>
-</div>
 
-<script src="{{ url('/').'/'.asset('assets/js/validation_users.js') }}"></script>
+  <script src="{{ url('/').'/'.asset('assets/js/validation_users.js') }}"></script>
 </x-app-layout>

@@ -56,10 +56,28 @@
           </span>
         </div>
         @endif
+        @if(session('message_success'))
+        <div class="alert alert-success">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <i class="material-icons">close</i>
+          </button>
+          <span>
+                <li>{{session('message_success')}}</li>
+          </span>
+        </div>
+        @endif
+        <div class="alert " style="display: none;">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <i class="material-icons">close</i>
+          </button>
+          <span class="message"></span>
+        </div>
+
         <div class="table-responsive">
            <table id="getexpensestype" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
             <thead class=" text-primary">
               <th>{!! trans('panel.global.no') !!}</th>
+              <th>{!! trans('panel.global.status') !!}</th>
               <th>{!! trans('panel.global.action') !!}</th>
               <th>{!! trans('panel.expenses_type.fields.allowance_type') !!}</th>
               <th>{!! trans('panel.role.fields.name') !!}</th>
@@ -82,7 +100,7 @@ $(document).ready(function() {
         "ajax": "{{ route('expenses_type.index') }}",
         "columns": [
             {data: 'DT_RowIndex',name: 'DT_RowIndex',orderable: false,searchable: false},
-            // { data: 'id', name: 'id', orderable: false, searchable: false },
+            { data: 'is_active', name: 'is_active', orderable: false, searchable: false },
             {data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
             {data: 'allowance_type', name: 'allowance_type'},
             {data: 'name', name: 'name',"defaultContent": ''},
@@ -90,5 +108,42 @@ $(document).ready(function() {
         ]
     });
 });
+
+$('body').on('click', '.activeRecord', function () {
+        var id = $(this).attr("id");
+        var active = $(this).attr("value");
+        var status = '';
+        if(active == '1')
+        {
+          status = 'Incative ?';
+        }
+        else
+        {
+           status = 'Ative ?';
+        }
+        var token = $("meta[name='csrf-token']").attr("content");
+        if(!confirm("Are You sure want "+status)) {
+           return false;
+        }
+        $.ajax({
+          url: "{{ url('expenses-type-active') }}",
+            type: 'POST',
+            data: {_token: token,id: id,active:active},
+            success: function (data) {
+              $('.message').empty();
+              $('.alert').show();
+              if(data.status == 'success')
+              {
+                $('.alert').addClass("alert-success");
+              }
+              else
+              {
+                $('.alert').addClass("alert-danger");
+              }
+              $('.message').append(data.message);
+              oTable.draw();
+            },
+        });
+    });
 </script>
 </x-app-layout>
