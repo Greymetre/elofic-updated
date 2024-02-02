@@ -8,6 +8,8 @@ use App\Models\Branch;
 use App\Models\User;
 use App\Models\Division;
 use App\Models\Designation;
+use App\Models\EmployeeDetail;
+use App\Models\ParentDetail;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -60,7 +62,7 @@ class CustomersExport implements FromCollection,WithHeadings,ShouldAutoSize,With
         //                 ->limit(5000)->latest()->get();   
 
 
-        return Customers::with('customertypes','firmtypes','createdbyname')->where(function ($query)  {
+            return Customers::with(['customertypes','firmtypes','createdbyname','getemployeedetail','getparentdetail'])->where(function ($query)  {
                                 if(!empty($this->user_new_id)){
                                     $query->where('executive_id', $this->user_new_id);
                                  }
@@ -102,12 +104,9 @@ class CustomersExport implements FromCollection,WithHeadings,ShouldAutoSize,With
                                  });
                                 }
 
-
                             })
                         ->select('id','name', 'first_name', 'last_name', 'mobile', 'email', 'latitude', 'longitude', 'customertype', 'created_at','created_by','executive_id','customer_code','contact_number','parent_id')
                         ->limit(5000)->latest()->get();   
-
-
 
 
 
@@ -125,6 +124,54 @@ class CustomersExport implements FromCollection,WithHeadings,ShouldAutoSize,With
     {
         // $data['gmap_address'] = UserActivity::where('customerid','=',$data['id'])->where('type','=','Counter Created')->pluck('address')->first();
         $data['gmap_address'] = UserActivity::where('customerid','=',$data['id'])->pluck('address')->first();
+
+
+        //new fields start
+
+         $employee = array();
+         $employee_id = array();
+        
+        if(!empty($data['getemployeedetail']))  
+        {
+            foreach($data['getemployeedetail'] as $key_new => $datas) {  
+
+              $employee[] = isset($datas->employee_detail->name) ? $datas->employee_detail->name: '';
+              $employee_id[] = isset($datas->user_id) ? $datas->user_id: '';
+               
+            }
+            
+        }
+
+        $parent = array();
+        $parent_id = array();
+         if(!empty($data['getparentdetail']))
+        {
+            foreach($data['getparentdetail'] as $key => $parent_data) {
+                $parent[] = isset($parent_data->parent_detail->name) ? $parent_data->parent_detail->name: '';
+                $parent_id[] = isset($parent_data->parent_id) ? $parent_data->parent_id: '';
+            }
+            
+        }
+
+
+        $getdesignation_arr = array();
+        $branch_arr = array();
+        $division_arr = array();
+        $empcode_arr = array();
+        if(!empty($data['getemployeedetail']))  
+        {
+            foreach($data['getemployeedetail'] as $key_new => $datas) {  
+              $getdesignation_arr[] = isset($datas->employee_detail->getdesignation->designation_name) ? $datas->employee_detail->getdesignation->designation_name: '';
+              $branch_arr[] = isset($datas->employee_detail->getbranch->branch_name) ? $datas->employee_detail->getbranch->branch_name: '';
+              $division_arr[] = isset($datas->employee_detail->getdepartment->division_name) ? $datas->employee_detail->getdepartment->division_name: '';
+              $empcode_arr[] = isset($datas->employee_detail->employee_codes) ? $datas->employee_detail->employee_codes: '';
+            }
+            
+        }
+    
+        //new fields end
+
+
         return [
             $data['created_at'] = isset($data['created_at']) ? date("d-m-Y", strtotime($data['created_at'])) :'',
             $data['id'],
@@ -132,7 +179,8 @@ class CustomersExport implements FromCollection,WithHeadings,ShouldAutoSize,With
             isset($data['customertypes']['customertype_name']) ? $data['customertypes']['customertype_name'] :'',
             $data['createdbyname'] = isset($data['createdbyname']['name']) ? $data['createdbyname']['name'] : '',
             $data['name'],
-            $data->parentdetail->first_name??'',
+            //$data->parentdetail->first_name??'',
+            implode(',',$parent),
             $data['first_name'],
             $data['last_name'],
             $data['mobile'],
@@ -156,15 +204,22 @@ class CustomersExport implements FromCollection,WithHeadings,ShouldAutoSize,With
             $data['shop_image'] = isset($data['profile_image']) ? $data['profile_image'] :'',
             // $data['status_name'] = isset($data['statusname']['status_name']) ? $data['statusname']['status_name'] : '',
           
-            isset($data['userdetails']['employee_codes']) ? $data['userdetails']['employee_codes'] : '',
-            $data['employee_name'] = isset($data['employeename']['name']) ? $data['employeename']['name'] : '',
-            isset($data['userdetails']['getdesignation']['designation_name']) ? $data['userdetails']['getdesignation']['designation_name'] : '',
-            isset($data['userdetails']['getbranch']['branch_name']) ? $data['userdetails']['getbranch']['branch_name'] : '',
-            isset($data['userdetails']['getdepartment']['division_name']) ? $data['userdetails']['getdepartment']['division_name'] : '',
+            //isset($data['userdetails']['employee_codes']) ? $data['userdetails']['employee_codes'] : '',
+            implode(',', $empcode_arr),
+            // $data['employee_name'] = isset($data['employeename']['name']) ? $data['employeename']['name'] : '',
+            implode(',',$employee),
+            implode(',',$getdesignation_arr),
+            implode(',',$branch_arr),
+            implode(',',$division_arr),
+            // isset($data['userdetails']['getdesignation']['designation_name']) ? $data['userdetails']['getdesignation']['designation_name'] : '',
+            // isset($data['userdetails']['getbranch']['branch_name']) ? $data['userdetails']['getbranch']['branch_name'] : '',
+            // isset($data['userdetails']['getdepartment']['division_name']) ? $data['userdetails']['getdepartment']['division_name'] : '',
              $data['latitude'],
              $data['longitude'],
-             $data['executive_id']??NULL,
-             $data['parent_id']??NULL,
+             // $data['executive_id']??NULL,
+             // $data['parent_id']??NULL,
+             implode(',',$employee_id),
+             implode(',',$parent_id),
              isset($data['customeraddress']['pincode_id']) ? $data['customeraddress']['pincode_id'] : '',
              isset($data['customeraddress']['city_id']) ? $data['customeraddress']['city_id'] : '',
              isset($data['customeraddress']['district_id']) ? $data['customeraddress']['district_id'] : '',

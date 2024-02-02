@@ -184,7 +184,7 @@
                 </div>
               </div>
             </div> -->
-            <div class="col-md-6">
+<!--             <div class="col-md-6">
               <div class="row">
                 <label class="col-md-3 col-form-label">Employee</label>
                 <div class="col-md-9">
@@ -194,6 +194,39 @@
                         @if(@isset($users ))
                         @foreach($users as $user)
                         <option value="{!! $user['id'] !!}" {{ old( 'executive_id' , (!empty($customers->executive_id))?($customers->executive_id):('') ) == $user['id'] ? 'selected' : '' }}>{!! $user['name'] !!}</option>
+                        @endforeach
+                        @endif
+                     </select>
+                  </div>
+                  @if ($errors->has('executive_id'))
+                   <div class="error col-lg-12">
+                      <p class="text-danger">{{ $errors->first('executive_id') }}</p>
+                   </div>
+                  @endif
+                </div>
+              </div>
+            </div> -->
+
+            <div class="col-md-6">
+              <div class="row">
+                <label class="col-md-3 col-form-label">Employee 
+
+                         <?php
+                         $userarray = array();
+                         ?>
+                        @foreach($customers->getemployeedetail as $key_new => $datas)
+                          <?php $userarray[] = $datas->user_id; ?>
+                        @endforeach
+
+              </label>
+                <div class="col-md-9">
+                  <div class="form-group has-default bmd-form-group">
+                    <select class="form-control select2" name="executive_id[]" style="width: 100%;" multiple>
+                        <!-- <option value="">Select Employee</option> -->
+                        @if(@isset($users ))
+
+                        @foreach($users as  $user)
+                         <option value="{!! $user['id'] !!}" <?php if(in_array($user->id,$userarray)){echo "selected";} ?>>{!! $user['name'] !!}</option>
                         @endforeach
                         @endif
                      </select>
@@ -224,7 +257,7 @@
               </div>
             </div>
 
-            <div class="col-md-6" id="parentcustomer" style="display:none;">
+<!--             <div class="col-md-6" id="parentcustomer" style="display:none;">
                 <div class="row">
                   <label class="col-md-3 col-form-label">{!! trans('panel.global.parentcustomer') !!}</label>
 
@@ -235,6 +268,40 @@
                           @if(@isset($parentcustomers ))
                             @foreach($parentcustomers as $parentcustomer)
                             <option value="{!! $parentcustomer['id'] !!}" {{ old( 'parent_id' , (!empty($customers->parent_id))?($customers->parent_id):('') ) == $parentcustomer['id'] ? 'selected' : '' }}>{!! $parentcustomer['first_name'] !!}{!! $parentcustomer['last_name'] !!}</option>
+                            @endforeach
+                          @endif
+
+                      </select>
+                    </div>
+                    @if ($errors->has('parent_id'))
+                     <div class="error col-lg-12">
+                        <p class="text-danger">{{ $errors->first('parent_id') }}</p>
+                     </div>
+                    @endif
+                  </div>
+                </div>
+              </div> -->
+
+              <div class="col-md-6" id="parentcustomer" style="display:none;">
+                <div class="row">
+                  <label class="col-md-3 col-form-label">{!! trans('panel.global.parentcustomer') !!}</label>
+
+                       <?php
+                         $parentarray = array();
+                         ?>
+                        @foreach($customers->getparentdetail as $key => $parentdetail)
+                          <?php $parentarray[] = $parentdetail->parent_id; 
+                          ?>
+                        @endforeach
+
+
+                  <div class="col-md-9">
+                    <div class="form-group has-default bmd-form-group">
+                      <select class="form-control select2 customer_parent" name="parent_id[]"  style="width: 100%;" multiple>
+                         <!-- <option value="">Select {!! trans('panel.global.parentcustomer') !!}</option> -->
+                          @if(@isset($parentcustomers ))
+                            @foreach($parentcustomers as $parentcustomer)
+                            <option value="{!! $parentcustomer['id'] !!}"  <?php if(in_array($parentcustomer->id,$parentarray)){echo "selected";} ?>>{!! $parentcustomer['name'] !!}</option>
                             @endforeach
                           @endif
 
@@ -476,7 +543,7 @@
                   
                 </div>
               </div>
-	      <div class="col-md-6">
+        <div class="col-md-6">
                 <div class="row">
                   <label class="col-md-3 col-form-label">Visit Status</label>
                   <div class="col-md-9">

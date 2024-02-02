@@ -12,6 +12,9 @@ use App\Models\UserDetails;
 use App\Models\Beat;
 use App\Models\BeatCustomer;
 use App\Models\BeatSchedule;
+use App\Models\EmployeeDetail;
+use App\Models\ParentDetail;
+
 use Maatwebsite\Excel\Concerns\ToModel;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -73,32 +76,49 @@ class CustomersImport implements ToCollection,WithValidation,WithHeadingRow, Wit
 
             if(!empty($row['customer_id'])){
 
-            // Customers::where('mobile','=',$row['mobile'])->update([
+        
+            // Customers::where('id','=',$row['customer_id'])->update([
             //     'name' => $row['firm_name'],
             //     'first_name' => !empty($row['first_name']) ? $row['first_name'] : '',
             //     'last_name' => !empty($row['last_name']) ? $row['last_name'] : '',
             //     'contact_number' => !empty($row['contact_number2'])? $row['contact_number2'] :null,
             //     'executive_id' => !empty($row['employee_id'])? $row['employee_id'] :null,
             //     'parent_id' => !empty($row['parent_id'])? $row['parent_id'] :null,
+            //     'customer_code' => !empty($row['customer_code'])? $row['customer_code'] :null,
+            //     'email' => !empty($row['email'])? $row['email'] :null,
+            //     'customertype' => !empty($row['customer_type_id'])? $row['customer_type_id'] :null,
+
             // ]);
 
-            
+
+            // CustomerDetails::where('customer_id','=',$row['customer_id'])->update([
+            //     'gstin_no' => !empty($row['gstin_no'])? $row['gstin_no']:null,
+            //     'pan_no' => !empty($row['pan_no'])? $row['pan_no']:null,
+            //     'aadhar_no' => !empty($row['aadhar_no'])? $row['aadhar_no']:null,
+            //     'otherid_no' => !empty($row['other_no'])? $row['other_no']:null,
+            //     'grade' => !empty($row['grade'])? $row['grade']:null,
+            //     'visit_status' => !empty($row['visit_status'])? $row['visit_status']:null,
+
+            // ]);
+
+
             //   Address::where('customer_id','=',$row['customer_id'])->update([
             //     'pincode_id' => !empty($row['pincode_id'])? $row['pincode_id']:null,
             //     'city_id' => !empty($row['city_id'])? $row['city_id']:null,
             //     'district_id' => !empty($row['district_id'])? $row['district_id']:null,
             //     'state_id' => !empty($row['state_id'])? $row['state_id']:null,
             //     'address1' => !empty($row['address'])? $row['address']:null,
+            //     'landmark' => !empty($row['market_place'])? $row['market_place']:null,
             // ]);
 
 
-            Customers::where('id','=',$row['customer_id'])->update([
+         Customers::where('id','=',$row['customer_id'])->update([
                 'name' => $row['firm_name'],
                 'first_name' => !empty($row['first_name']) ? $row['first_name'] : '',
                 'last_name' => !empty($row['last_name']) ? $row['last_name'] : '',
                 'contact_number' => !empty($row['contact_number2'])? $row['contact_number2'] :null,
-                'executive_id' => !empty($row['employee_id'])? $row['employee_id'] :null,
-                'parent_id' => !empty($row['parent_id'])? $row['parent_id'] :null,
+                //'executive_id' => !empty($row['employee_id'])? $row['employee_id'] :null,
+                //'parent_id' => !empty($row['parent_id'])? $row['parent_id'] :null,
                 'customer_code' => !empty($row['customer_code'])? $row['customer_code'] :null,
                 'email' => !empty($row['email'])? $row['email'] :null,
                 'customertype' => !empty($row['customer_type_id'])? $row['customer_type_id'] :null,
@@ -119,7 +139,7 @@ class CustomersImport implements ToCollection,WithValidation,WithHeadingRow, Wit
             ]);
 
 
-              Address::where('customer_id','=',$row['customer_id'])->update([
+            Address::where('customer_id','=',$row['customer_id'])->update([
                 'pincode_id' => !empty($row['pincode_id'])? $row['pincode_id']:null,
                 'city_id' => !empty($row['city_id'])? $row['city_id']:null,
                 'district_id' => !empty($row['district_id'])? $row['district_id']:null,
@@ -127,37 +147,86 @@ class CustomersImport implements ToCollection,WithValidation,WithHeadingRow, Wit
                 'address1' => !empty($row['address'])? $row['address']:null,
                 'landmark' => !empty($row['market_place'])? $row['market_place']:null,
 
-
             ]);
 
 
+
+             //employee start
+
+             if(!empty($row['employee_id']))
+                {
+                   
+                 EmployeeDetail::where('customer_id',$row['customer_id'])->delete(); 
+                 //$row['employee_id'] = str_replace('[','',$row['employee_id']);
+                 //$row['employee_id'] = str_replace(']','',$row['employee_id']);
+                 $employee_data = explode(",", $row['employee_id']);
+
+                foreach($employee_data as $keys => $row_employee) {
+                $employeeDetail = EmployeeDetail::updateOrCreate(
+                  [ 
+                    'customer_id' => $row['customer_id'],
+                    'user_id' => $row_employee,
+                    'created_by' => Auth::user()->id,
+                  ]
+
+                 );
+
+                }
+
+              }
+
+            // employee end
+
+             //parent start
+
+                if(!empty($row['parent_id']))
+                {
+                    ParentDetail::where('customer_id',$row['customer_id'])->delete(); 
+                     //$row['parent_id'] = str_replace('[','',$row['parent_id']);
+                     //$row['parent_id'] = str_replace(']','',$row['parent_id']);
+
+                     $parent_data = explode(",", $row['parent_id']);
+
+                    foreach($parent_data as $key => $row_parent) {
+                $parentDetail = ParentDetail::updateOrCreate(
+                  [ 
+                    'customer_id' => $row['customer_id'],
+                    'parent_id' => $row_parent,
+                    'created_by' => Auth::user()->id,
+                  ]
+                 );
+                 }
+
+                }
+
+               // parent end  
 
             }else{
 
 
 
-            if(!empty($row['employee_id'])){
-             $executive_id = User::where('id','=',$row['employee_id'])->pluck('id')->first();
-             if(!empty($executive_id)){
-              $executive_id;
-             }else{
-              $executive_id = null;
-             }
-            }else{   
-            $executive_id = null;
-            } 
+            // if(!empty($row['employee_id'])){
+            //  $executive_id = User::where('id','=',$row['employee_id'])->pluck('id')->first();
+            //  if(!empty($executive_id)){
+            //   $executive_id;
+            //  }else{
+            //   $executive_id = null;
+            //  }
+            // }else{   
+            // $executive_id = null;
+            // } 
 
 
-            if(!empty($row['parent_id'])){
-             $parent_id = Customers::where('id','=',$row['parent_id'])->pluck('id')->first();
-             if(!empty($parent_id)){
-              $parent_id;
-             }else{
-              $parent_id = null;
-             }
-            }else{   
-            $parent_id = null;
-            } 
+            // if(!empty($row['parent_id'])){
+            //  $parent_id = Customers::where('id','=',$row['parent_id'])->pluck('id')->first();
+            //  if(!empty($parent_id)){
+            //   $parent_id;
+            //  }else{
+            //   $parent_id = null;
+            //  }
+            // }else{   
+            // $parent_id = null;
+            // } 
 
 
 
@@ -181,13 +250,62 @@ class CustomersImport implements ToCollection,WithValidation,WithHeadingRow, Wit
                 'firmtype' =>  !empty($row['firmtype'])? $row['firmtype'] :null,
                 // 'created_by' => $user_id,
                 'created_by' => Auth::user()->id,
-                'executive_id' => $executive_id,
-                'parent_id' => $parent_id,
+                //'executive_id' => $executive_id,
+                //'parent_id' => $parent_id,
                 'contact_number' => (string)!empty($row['contact_number'])? $row['contact_number'] :null,
                 'created_at' => getcurentDateTime() ,
                 'updated_at' => getcurentDateTime()
             ]) )
             {
+
+          //employee start
+             if(!empty($row['employee_id']))
+                {
+                 //$row['employee_id'] = str_replace('[','',$row['employee_id']);
+                 //$row['employee_id'] = str_replace(']','',$row['employee_id']);
+                 $employee_data = explode(",", $row['employee_id']);
+
+                foreach($employee_data as $keys => $row_employee) {
+
+                $employeeDetail = EmployeeDetail::updateOrCreate(
+                  [ 
+                    'customer_id' => $customer['id'],
+                    'user_id' => $row_employee,
+                    'created_by' => Auth::user()->id,
+                  ]
+
+                 );
+
+               }
+
+              }
+
+            //employee end
+
+
+
+           //parent start
+
+            if(!empty($row['parent_id']))
+            {
+                 //$row['parent_id'] = str_replace('[','',$row['parent_id']);
+                 //$row['parent_id'] = str_replace(']','',$row['parent_id']);
+
+                 $parent_data = explode(",", $row['parent_id']);
+
+                foreach($parent_data as $key => $row_parent) {
+            $parentDetail = ParentDetail::updateOrCreate(
+              [ 
+                'customer_id' => $customer['id'],
+                'parent_id' => $row_parent,
+                'created_by' => Auth::user()->id,
+              ]
+             );
+             }
+
+            }
+
+           // parent end
 
                $customerdetails->push([
                     'active' => 'Y',

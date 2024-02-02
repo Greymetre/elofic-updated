@@ -21,6 +21,9 @@ use App\Exports\SurveyExport;
 use App\Exports\CustomersTemplate;
 use App\Http\Requests\CustomersRequest;
 
+use App\Models\EmployeeDetail;
+use App\Models\ParentDetail;
+
 class CustomerController extends Controller
 {
     public function __construct() 
@@ -75,13 +78,11 @@ class CustomerController extends Controller
         $all_branch = array();
         $bkey = 0;
         foreach ($all_user_branches as $k => $val) {
-            if($val->getbranch){
-                if (!in_array($val->getbranch->id, $all_branch)) {
-                    array_push($all_branch, $val->getbranch->id);
-                    $branches[$bkey]['id'] = $val->getbranch->id;
-                    $branches[$bkey]['name'] = $val->getbranch->branch_name;
-                    $bkey++;
-                }
+            if (!in_array($val->getbranch->id, $all_branch)) {
+                array_push($all_branch, $val->getbranch->id);
+                $branches[$bkey]['id'] = $val->getbranch->id;
+                $branches[$bkey]['name'] = $val->getbranch->branch_name;
+                $bkey++;
             }
         }
 
@@ -246,7 +247,7 @@ class CustomerController extends Controller
                             })->select('id','name')->orderBy('id','desc')->get();
         $deals = array();
 
-        $parentcustomers = Customers::where('active','=','Y')->where('customertype', '!=', '2')->select('id','first_name','last_name')->orderBy('id','desc')->get();
+        $parentcustomers = Customers::where('active','=','Y')->where('customertype', '!=', '2')->select('id','name')->orderBy('id','desc')->get();
 
         return view('customers.create',compact('pincodes','customertype','firmtype','pincodes','countries','fields', 'users','deals','parentcustomers'))->with('customers',$this->customers);
     }
@@ -381,6 +382,54 @@ class CustomerController extends Controller
                     }
                 }
 
+
+
+             //employee start
+
+             if(!empty($request['executive_id']))
+                {
+                    foreach ($request['executive_id'] as $key => $rows) {
+                $employeeDetail = EmployeeDetail::create(
+                  [ 
+                    'customer_id' => $request['customer_id'],
+                    'user_id' => $rows,
+                    'created_by' => Auth::user()->id,
+                  ]
+                 );
+      
+                }
+                }
+
+               // employee end
+
+
+               //parent start
+
+                if(!empty($request['parent_id']))
+                {
+                    foreach ($request['parent_id'] as $key => $rows) {
+                $parentDetail = ParentDetail::create(
+                  [ 
+                    'customer_id' => $request['customer_id'],
+                    'parent_id' => $rows,
+                    'created_by' => Auth::user()->id,
+                  ]
+                 );
+                }
+                }
+
+
+               // parent end
+
+
+
+
+
+
+
+
+
+
                 return Redirect::to('customers')->with('message_success', $response['message']); 
             }
              return redirect()->back()->with('message_danger', $response['message'])->withInput();
@@ -451,7 +500,7 @@ class CustomerController extends Controller
                                 }
                             })->select('id','name')->orderBy('id','desc')->get();
 
-        $parentcustomers = Customers::where('active','=','Y')->where('customertype', '!=', '2')->select('id','first_name','last_name')->orderBy('id','desc')->get();
+        $parentcustomers = Customers::where('active','=','Y')->where('customertype', '!=', '2')->select('id','name')->orderBy('id','desc')->get();
         return view('customers.create',compact('pincodes','customertype','firmtype','pincodes','countries','fields','users','deals','parentcustomers'))->with('customers',$customers);
     }
 
@@ -574,6 +623,49 @@ class CustomerController extends Controller
                         ]);
                     }
                 }
+
+
+
+             //employee start
+
+             if(!empty($request['executive_id']))
+                {
+
+                EmployeeDetail::where('customer_id',$request['id'])->delete(); 
+                foreach($request['executive_id'] as $key => $rows) {
+                $employeeDetail = EmployeeDetail::updateOrCreate(
+                  //['customer_id' => $request['id']],
+
+                  [ 
+                    'customer_id' => $request['id'],
+                    'user_id' => $rows,
+                    'created_by' => Auth::user()->id,
+                  ]
+                 );
+                }
+                }
+
+            //employee end
+
+            //parent start
+
+                if(!empty($request['parent_id']))
+                {
+                    ParentDetail::where('customer_id',$request['id'])->delete(); 
+                    foreach ($request['parent_id'] as $key => $rows) {
+                $parentDetail = ParentDetail::updateOrCreate(
+                 // ['customer_id' => $request['id']],  
+                  [ 
+                    'customer_id' => $request['id'],
+                    'parent_id' => $rows,
+                    'created_by' => Auth::user()->id,
+                  ]
+                 );
+                }
+                }
+
+               // parent end
+
                 return Redirect::to('customers')->with('message_success', $response['message']); 
             }
              return redirect()->back()->with('message_danger', $response['message'])->withInput();
@@ -620,6 +712,10 @@ class CustomerController extends Controller
             DB::table('user_activities')->where('customerid', '=', $id)->delete();
             CustomerDetails::where('customer_id',$id)->delete();
             Address::where('customer_id',$id)->delete();
+
+            EmployeeDetail::where('customer_id',$id)->delete();
+            ParentDetail::where('customer_id',$id)->delete();
+
             $customer = Customers::find($id);
             if($customer->delete())
             {

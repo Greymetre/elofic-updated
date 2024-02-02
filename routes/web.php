@@ -456,6 +456,10 @@ Route::group(['middleware' => ['auth']], function () {
 
     // /Expenses Type
     Route::resource('expenses_type', ExpensesTypeController::class);
+    Route::post('expenses-type-active', [ExpensesTypeController::class, 'changeStatus']);
+
+    // /Expenses
+    Route::resource('expenses', ExpensesController::class);
 
     Route::get('logout', '\App\Http\Controllers\Auth\AuthenticatedSessionController@destroy');
 });

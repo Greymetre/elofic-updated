@@ -130,9 +130,16 @@
                           <!-- <p class="text-sm"></p> -->
                           <hr class="horizontal gray-light my-4">
                           <ul class="list-group">
-                             @if(isset($customers['employeename']['name']))
+                             <!-- @if(isset($customers['employeename']['name']))
                              <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Executive:</strong> &nbsp; {!! $customers['employeename']['name'] !!} </li>
-                             @endif
+                             @endif -->
+                             
+                              @if(isset($customers->getemployeedetail))
+                             <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Executive:</strong> &nbsp;<?php foreach($customers->getemployeedetail as $key_new => $customer_detail) {  
+                                  echo $customer_detail->employee_detail->name.' '.',<br>';
+                                 }  ?> </li>
+                              @endif
+
                              @if(isset($customers['customer_code']))
                              <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Customer Code:</strong> &nbsp; {!! $customers['customer_code'] !!} </li>
                              @endif

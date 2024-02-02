@@ -67,8 +67,8 @@ class Customers extends Model
                 'status_id' =>  !empty($request['status_id'])? $request['status_id'] :2,
                 'customertype' =>  !empty($request['customertype'])? $request['customertype'] :1,
                 'firmtype' =>  !empty($request['firmtype'])? $request['firmtype'] :null,
-                'executive_id' =>  !empty($request['executive_id'])? $request['executive_id'] : $request['created_by'],
-                'parent_id' =>  !empty($request['parent_id'])? $request['parent_id'] : null,
+                //'executive_id' =>  !empty($request['executive_id'])? $request['executive_id'] : $request['created_by'],
+                //'parent_id' =>  !empty($request['parent_id'])? $request['parent_id'] : null,
                 'created_by' =>  !empty($request['created_by'])? $request['created_by'] :null,
                 'manager_name' => !empty($request['manager_name'])? $request['manager_name'] :'',
                 'manager_phone' => !empty($request['manager_phone'])? $request['manager_phone'] :'',
@@ -103,7 +103,7 @@ class Customers extends Model
             $customers->customer_code = !empty($request['customer_code'])? $request['customer_code']:'';
             $customers->customertype =  !empty($request['customertype'])? $request['customertype'] :1;
             $customers->firmtype = !empty($request['firmtype'])? $request['firmtype']:null;
-            $customers->executive_id = !empty($request['executive_id'])? $request['executive_id']:null;
+            //$customers->executive_id = !empty($request['executive_id'])? $request['executive_id']:null;
 
             if($request['password'])
             {
@@ -119,10 +119,10 @@ class Customers extends Model
                 $customers->contact_number = $request['contact_number'];
             }
 
-             if(!empty($request['parent_id']))
-            {
-                $customers->parent_id = $request['parent_id'];
-            }
+            //  if(!empty($request['parent_id']))
+            // {
+            //     $customers->parent_id = $request['parent_id'];
+            // }
 
             if(!empty($request['email']))
             {
@@ -230,5 +230,20 @@ class Customers extends Model
     public function parentdetail(){
         return $this->belongsTo(Customers::class, 'parent_id', 'id');
     }
+
+
+    public function getemployeedetail(){
+     return $this->hasMany(EmployeeDetail::class, 'customer_id', 'id');
+    }
+
+
+    public function getparentdetail(){
+     return $this->hasMany(ParentDetail::class, 'customer_id', 'id');
+    }
+
+
+
+
+
 
 }
