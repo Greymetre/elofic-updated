@@ -223,7 +223,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.date_of_birth') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="date_of_birth" class="form-control datepicker" value="{!! old( 'date_of_birth', $user['date_of_birth']) !!}" autocomplete="off">
+                                 <input type="text" name="date_of_birth" id="date_of_birth" class="form-control datepicker" value="{!! old( 'date_of_birth', $user['date_of_birth']) !!}" autocomplete="off">
                               </div>
                               @if ($errors->has('date_of_birth'))
                               <div class="error col-lg-12">
@@ -239,7 +239,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.age') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="age" class="form-control" value="{!! old( 'age') !!}" autocomplete="off">
+                                 <input type="text" name="age" id="age" readonly class="form-control" value="{!! old( 'age') !!}" autocomplete="off">
                               </div>
                               @if ($errors->has('age'))
                               <div class="error col-lg-12">
@@ -1304,5 +1304,12 @@
          var last_name = $("input[name=last_name]").val();
          $('#name').val(first_name + ' ' + last_name);
       }
+      $(document).on('change', '#date_of_birth', function(){
+         var DOB = $(this).val();
+         dob = new Date(DOB);
+         var today = new Date();
+         var age = Math.floor((today-dob) / (365.25 * 24 * 60 * 60 * 1000));
+         $('#age').val(age);
+      })
    </script>
 </x-app-layout>

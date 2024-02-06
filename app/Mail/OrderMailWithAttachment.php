@@ -34,7 +34,14 @@ class OrderMailWithAttachment extends Mailable
      */
     public function build()
     {
+        $sub = 'ORDER '.$this->order->getuserdetails->getdivision->division_name.' Order Number : '.$this->order->orderno.', Order Date : '.date('d-m-y', strtotime($this->order->order_date));
+        
         return $this->view('emails.order-email-attech')
-            ->attach($this->attachmentPath);
+            ->with([
+                'orderDetails' => $this->orderDetails,
+                'order' => $this->order,
+            ])
+            ->attach($this->attachmentPath)
+            ->subject($sub);
     }
 }
