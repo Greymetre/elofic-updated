@@ -126,9 +126,9 @@ class TourController extends Controller
                         })->orderBy(DB::raw('YEAR(date)'), 'DESC')->orderBy(DB::raw('DATE(date)'), 'ASC');
             return Datatables::of($data)
                     ->addIndexColumn()
-                    // ->addColumn('checkbox', function ($item) {
-                    //     return '<input type="checkbox" id="manual_entry_'.$item->id.'" class="manual_entry_cb" value="'.$item->id.'" />';
-                    //     })
+                    ->addColumn('checkbox', function ($item) {
+                        return '<input type="checkbox" id="manual_entry_'.$item->id.'" class="manual_entry_cb checked_all" value="'.$item->id.'" />';
+                        })
                         ->editColumn('created_at', function($data)
                         {
                             return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
@@ -208,7 +208,7 @@ class TourController extends Controller
                                         </div>'.$activebtn;
                         })
                 
-                        ->rawColumns(['action', 'stauts'])
+                        ->rawColumns(['action', 'stauts','checkbox'])
                     ->make(true);
         }
       
@@ -403,13 +403,30 @@ class TourController extends Controller
 
 
     public function changeStatus(Request $request){
-        $tour = TourProgramme::find($request->id);
-        if($tour){
-            $tour->status = $request->status;
-            $tour->save();
+        // $tour = TourProgramme::find($request->id);
+        // if($tour){
+        //     $tour->status = $request->status;
+        //     $tour->save();
+        //     return response()->json(["status"=>"success"]);
+        // }else{
+        //     return response()->json(["status"=>false]);
+        // }
+
+        if($request->id){
+        $tours = TourProgramme::whereIn('id',$request->id)->get();
+        if($tours){  
+            foreach($tours as $tour){
+              $tour->update(['status'=>$request->status]);    
+            }
             return response()->json(["status"=>"success"]);
         }else{
             return response()->json(["status"=>false]);
+        }   
+
+        }else{
+           return response()->json(["status"=>false]);
         }
+
+
     }
 }

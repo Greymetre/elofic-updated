@@ -27,7 +27,7 @@
   
 
                  <div class="p-2" style="width: 250px;">
-                    <select class="selectpicker" name="executive_id" id="executive_id" data-style="select-with-transition" title="Select User">
+                    <select class="selectpicker1 select2" name="executive_id" id="executive_id" data-style="select-with-transition" title="Select User">
                      <option value="">Select User</option>
                     @if(@isset($users ))
                     @foreach($users as $user)
@@ -107,7 +107,8 @@
         <div class="table-responsive">
           <table id="gettour" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
             <thead class=" text-primary">
-              <th>{!! trans('panel.global.no') !!}</th>
+              <th><input type="checkbox" class="allCustomerschecked"  id="check_all" /></th>
+              <!-- <th>{!! trans('panel.global.no') !!}</th> -->
               <th>{!! trans('panel.global.action') !!}</th>
               <th>User Name</th>
               <th>Date</th>
@@ -236,7 +237,8 @@
             }
         },
         columns: [
-            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+            // { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+            {data: 'checkbox', name: 'checkbox', orderable: false, searchable: false },
             {data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
              {data: 'userinfo.name', name: 'userinfo.name',"defaultContent": '', orderable: false, searchable: false},
             {data: 'date', name: 'date',"defaultContent": ''},
@@ -351,7 +353,11 @@
     });
 
     $('body').on('click', '.change_status', function () {
-        var id = $(this).attr("value");
+
+        var status_ids = $('.checked_all:checked').map(function(){return this.value;}).get();
+        var id = status_ids;
+        
+        //var id = $(this).attr("value");
         var status = $(this).data("status");
         var token = $("meta[name='csrf-token']").attr("content");
         Swal.fire({
@@ -439,4 +445,17 @@
 
 
 </script>
+
+<script type="text/javascript">
+  $(document).ready(function() {
+  $('#check_all').click(function() {
+    var checked = $(this).prop('checked');
+    $('.checked_all').prop('checked', checked);
+  });
+ })
+
+</script>
+
+
+
 </x-app-layout>

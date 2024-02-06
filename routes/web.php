@@ -48,6 +48,8 @@ use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\ExpensesTypeController;
 use App\Http\Controllers\SalesWeightageController;
+use App\Http\Controllers\DepartmentController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -456,11 +458,16 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('tours-changeStatus', [ TourController::class, 'changeStatus'])->name('tours.changesttus');
 
     // /Expenses Type
-    Route::resource('expenses_type', ExpensesTypeController::class);
-    Route::post('expenses-type-active', [ExpensesTypeController::class, 'changeStatus']);
+    // Route::resource('expenses_type', ExpensesTypeController::class);
+    // Route::post('expenses-type-active', [ExpensesTypeController::class, 'changeStatus']);
 
     // /Expenses
-    Route::resource('expenses', ExpensesController::class);
+    //Route::resource('expenses', ExpensesController::class);
+
+      // departments
+     Route::resource('departments', DepartmentController::class);
+     Route::post('departments-active', [ DepartmentController::class, 'active'])->name('departments.active');
+
 
     Route::get('logout', '\App\Http\Controllers\Auth\AuthenticatedSessionController@destroy');
 });

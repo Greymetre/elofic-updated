@@ -393,6 +393,15 @@
           </li>
           @endif
 
+          @if(auth()->user()->can('departments'))
+          <li class="nav-item {{ request()->is('departments*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ url('departments') }}">
+              <i class="material-icons">shopping_bag</i>
+              <p>Departments</p>
+            </a>
+          </li>
+          @endif
+
           @if(auth()->user()->can('payments_access'))
           <li class="nav-item ">
             <a class="nav-link collapsed" data-toggle="collapse" href="#paymentManu" aria-expanded="false">

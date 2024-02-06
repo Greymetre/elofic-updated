@@ -3,7 +3,7 @@
 return [
 
     'site_title' => 'Bridge IT',
-	'sidemenu'                           => [
+    'sidemenu'                           => [
         'dashboard'         => 'Dashboard',
         'customersDashboard'=> 'Customer Dashboard',
         'address_master'    => 'Address',
@@ -371,6 +371,7 @@ return [
         'messenger'                            => 'Messenger',
         'parentcustomer'                       => 'Parent Customer',
         'contact_number_two'                   => 'Contact Number-2',
+        'create_department'                   => 'Create Department',
     ],
     'datatables'   => [
         'copy'          => 'Copy',
@@ -612,8 +613,9 @@ return [
         'title'          => 'Users',
         'title_singular'    => 'User',
         'date_of_birth'     => 'Date of Birth',
+        'age'               => 'Age', 
         'date_of_joining'   => 'Joining Date',
-        'last_year_increments' => 'Last Year Increament',
+        'last_year_increments' => 'Last Yr Gross Increments Value',
         'last_promotion' => 'Last Promostion',
         'order_mail' => 'Order Mail Id"s',
         'employee_code'     => 'Employee Code',
@@ -622,6 +624,7 @@ return [
         'emergency_number'  => 'Emergency Number',
         'photo'             => 'Photo',
         'pan_number'        => 'Pan Number',
+        'aadhar_number'     => 'Aadhar Number',
         'father_name'       => 'Father Name',
         'current_address'   => 'Current Address',
         'permanent_address' => 'Permanent Address',
@@ -629,7 +632,35 @@ return [
         'date_of_confirmation' => 'Date of Confirmation',
         'formalities'       => 'Formalities',
         // 'salary'            => 'Salary',
-        'salary'            => 'CTC',
+        'salary'            => 'CTC Per Month',
+        'ctc_annual'            => 'CTC Annual',
+        'gross_salary_monthly'  => 'Gross Salary Monthly',
+        'last_year_increment_percent'  => 'Last Yr Increments %',
+        'last_year_increment_value'  => 'Last Yr Increment Value',
+        'esi_number'  => 'ESI Number',
+        'date_of_leaving'  => 'Date of Leaving',
+        'other_education'  => 'Other',
+        'current_company_tenture'  => 'Current Company TENURE',
+        'previous_exp'  => 'Previous Exp',
+        'total_exp'  => 'Total Exp',
+        'father_date_of_birth'  => 'Father Date of Birth',
+        'mother_name'  => 'Mother Name',
+        'mother_date_of_birth'  => 'Mother Date of Birth',
+        'marriage_anniversary'  => 'Marriage Anniversary',
+        'spouse_name'  => 'Spouse Name',
+        'spouse_date_of_birth'  => 'Spouse Date of Birth',
+        'children_one'  => 'Children-1',
+        'children_one_date_of_birth'  => 'Children-1 Date of Birth',
+        'children_two'  => 'Children-2',
+        'children_two_date_of_birth'  => 'Children-2 Date of Birth',
+        'children_three'  => 'Children-3',
+        'children_three_date_of_birth'  => 'Children-3 Date of Birth',
+        'children_four'  => 'Children-4',
+        'children_four_date_of_birth'  => 'Children-4 Date of Birth',
+        'children_five'  => 'Children-5',
+        'children_five_date_of_birth'  => 'Children-5 Date of Birth',
+
+
         'account_number'    => 'Account Number',
         'bank_name'         => 'Bank Name',
         'ifsc_code'         => 'Ifsc Code',
@@ -649,6 +680,7 @@ return [
         'year'              => 'Year',
         'branch_name'       => 'Branch Name',
         'division'          => 'Division',
+        
 
         'fields'         => [
             'id'                       => 'ID',
@@ -712,6 +744,20 @@ return [
             'division_image'        => 'Image',
         ],
     ],
+
+    'departments'           => [
+        'title'          => 'Departments',
+        'title_singular' => 'Department',
+        'fields'         => [
+            'id'                       => 'ID',
+            'department_name'        => 'Deparment Name',
+            'department_image'        => 'Image',
+        ],
+    ],
+
+
+
+
     
     'designation'           => [
         'title'          => 'Designations',

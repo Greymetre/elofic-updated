@@ -10,6 +10,8 @@ use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
 
 
 class TourExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapping
@@ -51,7 +53,8 @@ class TourExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
                                 }
                             })
                         ->select('id','date', 'userid', 'town', 'objectives', 'type', 'status')
-                        ->latest()->get();   
+                        //->latest()->get(); 
+                        ->orderBy(DB::raw('YEAR(date)'), 'DESC')->orderBy(DB::raw('DATE(date)'), 'ASC')->get();    
 
            }else{
 
@@ -60,7 +63,9 @@ class TourExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
                                 {
                                     $query->whereIn('executive_id', $this->userids);
                                 }
-                            })->select('id','date', 'userid', 'town', 'objectives', 'type', 'status')->latest()->get();   
+                            })->select('id','date', 'userid', 'town', 'objectives', 'type', 'status')
+                           //->latest()->get();
+                           ->orderBy(DB::raw('YEAR(date)'), 'DESC')->orderBy(DB::raw('DATE(date)'), 'ASC')->get();   
 
            }
 

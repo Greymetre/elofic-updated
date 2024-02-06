@@ -64,7 +64,8 @@ class UserImport implements ToCollection,WithValidation,WithHeadingRow, WithBatc
                 'employee_codes' => !empty($row['employees_code'])? $row['employees_code']:'',
                 'branch_id' => !empty($row['branch_id'])? $row['branch_id']:'',
                 'designation_id' => !empty($row['designation_id'])? $row['designation_id']:'',
-                'department_id' => !empty($row['division_id'])? $row['division_id']:'',
+                'division_id' => !empty($row['division_id'])? $row['division_id']:'',
+                'department_id' => !empty($row['department_id'])? $row['department_id']:'',
                 //'created_at' => getcurentDateTime(),
                 //'updated_at' => getcurentDateTime()
               ]);

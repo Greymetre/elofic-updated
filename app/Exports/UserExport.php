@@ -6,6 +6,8 @@ use App\Models\User;
 use App\Models\Branch;
 use App\Models\Division;
 use App\Models\Designation;
+use App\Models\Department;
+
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -31,14 +33,14 @@ class UserExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
                                 {
                                     $query->whereIn('id', $this->userids);
                                 }
-                            })->select('id','name', 'first_name', 'last_name', 'mobile', 'email', 'gender', 'profile_image','reportingid','employee_codes','branch_id','department_id','designation_id','active')->latest()->get();   
+                            })->select('id','name', 'first_name', 'last_name', 'mobile', 'email', 'gender', 'profile_image','reportingid','employee_codes','branch_id','division_id','designation_id','active','department_id')->latest()->get();   
     }
 
     public function headings(): array
     {
         // return ['id','name', 'first_name', 'last_name', 'mobile', 'email', 'gender', 'profile_image', 'role', 'Reporting','Employees Code','Branch Name','Division','Designation','Status'];
 
-        return ['id','employees_code','name','Designation','Branch Name','Division','Reporting','mobile', 'email', 'gender', 'Status','profile_image', 'role','designation_id','branch_id','division_id','ctc','date_of_joining','last_year_increments','last_promotion'];
+        return ['id','employees_code','name','Designation','Branch Name','Division','Department','Reporting','mobile', 'email', 'gender', 'Status','profile_image', 'role','designation_id','branch_id','division_id','department_id','ctc','date_of_joining','last_year_increments','last_promotion'];
     }
 
     public function map($data): array
@@ -56,7 +58,8 @@ class UserExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
             $data['name'],
             isset($data['getdesignation']['designation_name']) ? $data['getdesignation']['designation_name'] :'',
             isset($data['getbranch']['branch_name']) ? $data['getbranch']['branch_name'] :'',
-            isset($data['getdepartment']['division_name']) ? $data['getdepartment']['division_name'] :'',
+            isset($data['getdivision']['division_name']) ? $data['getdivision']['division_name'] :'',
+            isset($data['getdepartment']['name']) ? $data['getdepartment']['name'] :'',
             isset($data['reportinginfo']['name']) ? $data['reportinginfo']['name'] :'',
             //$data['first_name'],
             //$data['last_name'],
@@ -70,6 +73,7 @@ class UserExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
             str_replace(str_split('[/]/"'), '', $data->getRoleNames()),
             $data['designation_id']??NULL,
             $data['branch_id']??NULL,
+            $data['division_id']??NULL,
             $data['department_id']??NULL,
             isset($data['userinfo']['salary']) ? $data['userinfo']['salary'] :'',
             isset($data['userinfo']['date_of_joining']) ? $data['userinfo']['date_of_joining'] :'',

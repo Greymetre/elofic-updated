@@ -161,21 +161,7 @@
                   <h4 class="section-heading mb-3  h4 mt-0 text-center text-info">Employee Information </h4>
                   <hr class="my-3">
                   <div class="row">
-                     <div class="col-md-6">
-                        <div class="row">
-                           <label class="col-md-3 col-form-label">{!! trans('panel.user.father_name') !!}</label>
-                           <div class="col-md-9">
-                              <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="father_name" class="form-control" value="{!! old( 'father_name', $user['father_name']) !!}">
-                                 @if ($errors->has('father_name'))
-                                 <div class="error col-lg-12">
-                                    <p class="text-danger">{{ $errors->first('father_name') }}</p>
-                                 </div>
-                                 @endif
-                              </div>
-                           </div>
-                        </div>
-                     </div>
+           
                      <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{{ trans('panel.user.fields.gender') }}</label>
@@ -195,7 +181,7 @@
                            @endif
                         </div>
                      </div>
-                     <div class="col-md-6">
+            <!--          <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">Location</label>
                            <div class="col-md-9">
@@ -209,7 +195,7 @@
                               </div>
                            </div>
                         </div>
-                     </div>
+                     </div> -->
                      <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.marital_status') !!}</label>
@@ -247,12 +233,31 @@
                            </div>
                         </div>
                      </div>
+
+                      <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.age') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="age" class="form-control" value="{!! old( 'age') !!}" autocomplete="off">
+                              </div>
+                              @if ($errors->has('age'))
+                              <div class="error col-lg-12">
+                                 <p class="text-danger">{{ $errors->first('age') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+                     </div>
+
+
+
                      <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.pan_number') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="pan_number" id="pan_number" class="form-control" value="{!! old( 'pan_number', $user['pan_number']) !!}">
+                                 <input type="text" name="pan_number" id="pan_number" class="form-control" value="{!! old( 'pan_number') !!}">
                                  @if ($errors->has('pan_number'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('pan_number') }}</p>
@@ -262,6 +267,26 @@
                            </div>
                         </div>
                      </div>
+
+                     <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.aadhar_number') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="aadhar_number" id="aadhar_number" class="form-control" value="{!! old( 'aadhar_number') !!}">
+                                 @if ($errors->has('aadhar_number'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('aadhar_number') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+
+
+
                      <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.emergency_number') !!}</label>
@@ -316,89 +341,288 @@
                         </div>
                      </div>
                   </div>
-                  <div class="row">
-
-                     <!--                  <div class="col-md-6">
-                    <div class="row">
-                       <label class="col-md-3 col-form-label">{!! trans('panel.user.employee_code') !!}</label>
-                       <div class="col-md-9">
-                          <div class="form-group has-default bmd-form-group">
-                             <input type="text" name="employee_code" id="employee_code" class="form-control" value="{!! old( 'employee_code', $user['employee_code']) !!}">
-                             @if ($errors->has('employee_code'))
-                             <div class="error col-lg-12">
-                                <p class="text-danger">{{ $errors->first('employee_code') }}</p>
-                             </div>
-                             @endif
-                          </div>
-                       </div>
-                    </div>
-                 </div> -->
-
-                     <div class="col-md-6">
-                        <div class="row">
-                           <label class="col-md-3 col-form-label">{!! trans('panel.user.employee_codes') !!}</label>
-                           <div class="col-md-9">
-                              <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="employee_codes" id="employee_codes" class="form-control" value="{!! old( 'employee_codes', $user['employee_codes']) !!}" required>
-                                 @if ($errors->has('employee_codes'))
-                                 <div class="error col-lg-12">
-                                    <p class="text-danger">{{ $errors->first('employee_codes') }}</p>
-                                 </div>
-                                 @endif
-                              </div>
-                           </div>
-                        </div>
-                     </div>
-
-                     <div class="col-md-6">
-                        <div class="row">
-                           <label class="col-md-3 col-form-label">{!! trans('panel.user.biometric_code') !!}</label>
-                           <div class="col-md-9">
-                              <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="biometric_code" id="biometric_code" class="form-control" value="{!! old( 'biometric_code', $user['biometric_code']) !!}">
-                                 @if ($errors->has('biometric_code'))
-                                 <div class="error col-lg-12">
-                                    <p class="text-danger">{{ $errors->first('biometric_code') }}</p>
-                                 </div>
-                                 @endif
-                              </div>
-                           </div>
-                        </div>
-                     </div>
-                  </div>
 
 
-                  <!-- new field start -->
+                  <hr class="my-3">
+                  <h4 class="section-heading mb-3  h4 mt-0 text-center text-info">Family Information</h4>
+                  <hr class="my-3">
                   <div class="row">
                      <div class="col-md-6">
                         <div class="row">
-                           <label class="col-md-3 col-form-label">{!! trans('panel.user.branch_name') !!}</label>
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.father_name') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <div class="form-group has-default bmd-form-group">
-                                    <select class="form-control" name="branch_id" required>
-                                       <option value="" disabled selected>Select Branch</option>
-                                       @foreach($branches as $branche)
-                                       <option value="{{$branche->id}}">{{$branche->branch_name}}</option>
-                                       @endforeach
-                                    </select>
-                                 </div>
-                                 @if ($errors->has('branch_id'))
+                                 <input type="text" name="father_name" class="form-control" value="{!! old( 'father_name', $user['father_name']) !!}">
+                                 @if ($errors->has('father_name'))
                                  <div class="error col-lg-12">
-                                    <p class="text-danger">{{ $errors->first('branch_id') }}</p>
+                                    <p class="text-danger">{{ $errors->first('father_name') }}</p>
                                  </div>
                                  @endif
                               </div>
                            </div>
                         </div>
                      </div>
+                     <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.father_date_of_birth') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="father_date_of_birth" class="form-control datepicker" value="{!! old( 'father_date_of_birth', $user['father_date_of_birth']) !!}" autocomplete="off">
+                              </div>
+                              @if ($errors->has('father_date_of_birth'))
+                              <div class="error col-lg-12">
+                                 <p class="text-danger">{{ $errors->first('father_date_of_birth') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.mother_name') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="mother_name" class="form-control" value="{!! old( 'mother_name', $user['mother_name']) !!}">
+                                 @if ($errors->has('mother_name'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('mother_name') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.mother_date_of_birth') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="mother_date_of_birth" class="form-control datepicker" value="{!! old( 'mother_date_of_birth', $user['mother_date_of_birth']) !!}" autocomplete="off">
+                              </div>
+                              @if ($errors->has('mother_date_of_birth'))
+                              <div class="error col-lg-12">
+                                 <p class="text-danger">{{ $errors->first('mother_date_of_birth') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-6">
+                        <div class="row">  
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.marriage_anniversary') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="marriage_anniversary" class="form-control datepicker" value="{!! old( 'marriage_anniversary', $user['marriage_anniversary']) !!}" autocomplete="off">
+                              </div>
+                              @if ($errors->has('marriage_anniversary'))
+                              <div class="error col-lg-12">
+                                 <p class="text-danger">{{ $errors->first('marriage_anniversary') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-6"> 
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.spouse_name') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="spouse_name" class="form-control" value="{!! old( 'spouse_name', $user['spouse_name']) !!}">
+                                 @if ($errors->has('spouse_name'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('spouse_name') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-6">
+                        <div class="row">  
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.spouse_date_of_birth') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="spouse_date_of_birth" class="form-control datepicker" value="{!! old( 'spouse_date_of_birth', $user['spouse_date_of_birth']) !!}" autocomplete="off">
+                              </div>
+                              @if ($errors->has('spouse_date_of_birth'))
+                              <div class="error col-lg-12">
+                                 <p class="text-danger">{{ $errors->first('spouse_date_of_birth') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="col-md-6"> 
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.children_one') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="children_one" class="form-control" value="{!! old( 'children_one', $user['children_one']) !!}">
+                                 @if ($errors->has('children_one'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('children_one') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-6">
+                        <div class="row">  
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.children_one_date_of_birth') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="children_one_date_of_birth" class="form-control datepicker" value="{!! old( 'children_one_date_of_birth', $user['children_one_date_of_birth']) !!}" autocomplete="off">
+                              </div>
+                              @if ($errors->has('children_one_date_of_birth'))
+                              <div class="error col-lg-12">
+                                 <p class="text-danger">{{ $errors->first('children_one_date_of_birth') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="col-md-6"> 
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.children_two') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="children_two" class="form-control" value="{!! old( 'children_two', $user['children_two']) !!}">
+                                 @if ($errors->has('children_two'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('children_two') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="col-md-6">
+                        <div class="row">  
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.children_two_date_of_birth') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="children_two_date_of_birth" class="form-control datepicker" value="{!! old( 'children_two_date_of_birth', $user['children_two_date_of_birth']) !!}" autocomplete="off">
+                              </div>
+                              @if ($errors->has('children_two_date_of_birth'))
+                              <div class="error col-lg-12">
+                                 <p class="text-danger">{{ $errors->first('children_two_date_of_birth') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="col-md-6">   
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.children_three') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="children_three" class="form-control" value="{!! old( 'children_three', $user['children_three']) !!}">
+                                 @if ($errors->has('children_three'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('children_three') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     
+                     <div class="col-md-6">
+                        <div class="row">  
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.children_three_date_of_birth') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="children_three_date_of_birth" class="form-control datepicker" value="{!! old( 'children_three_date_of_birth', $user['children_three_date_of_birth']) !!}" autocomplete="off">
+                              </div>
+                              @if ($errors->has('children_three_date_of_birth'))
+                              <div class="error col-lg-12">
+                                 <p class="text-danger">{{ $errors->first('children_three_date_of_birth') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+                     </div>
+
+                    <div class="col-md-6">   
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.children_four') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="children_four" class="form-control" value="{!! old( 'children_four', $user['children_four']) !!}">
+                                 @if ($errors->has('children_four'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('children_four') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     
+                     <div class="col-md-6">
+                        <div class="row">  
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.children_four_date_of_birth') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="children_four_date_of_birth" class="form-control datepicker" value="{!! old( 'children_four_date_of_birth', $user['children_four_date_of_birth']) !!}" autocomplete="off">
+                              </div>
+                              @if ($errors->has('children_four_date_of_birth'))
+                              <div class="error col-lg-12">
+                                 <p class="text-danger">{{ $errors->first('children_four_date_of_birth') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="col-md-6">   
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.children_five') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="children_five" class="form-control" value="{!! old( 'children_five', $user['children_five']) !!}">
+                                 @if ($errors->has('children_five'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('children_five') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     
+                     <div class="col-md-6">
+                        <div class="row">  
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.children_five_date_of_birth') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="children_five_date_of_birth" class="form-control datepicker" value="{!! old( 'children_five_date_of_birth', $user['children_five_date_of_birth']) !!}" autocomplete="off">
+                              </div>
+                              @if ($errors->has('children_five_date_of_birth'))
+                              <div class="error col-lg-12">
+                                 <p class="text-danger">{{ $errors->first('children_five_date_of_birth') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+                     </div>
+
+
+
+
+
                   </div>
-                  <!-- new field end -->
 
 
+                
 
 
-
+            
                   <hr class="my-3">
                   <h4 class="section-heading mb-3  h4 mt-0 text-center text-info">Bank Information </h4>
                   <hr class="my-3">
@@ -448,6 +672,124 @@
                            </div>
                         </div>
                      </div>
+                  </div>
+
+
+                  <hr class="my-3">
+                  <h4 class="section-heading mb-3  h4 mt-0 text-center text-info">HR Information </h4>
+                  <hr class="my-3">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.salary') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="salary" class="form-control" value="{!! old( 'salary', $user['salary']) !!}">
+                                 @if ($errors->has('salary'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('salary') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  
+                     <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.ctc_annual') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="ctc_annual" class="form-control" value="{!! old( 'ctc_annual') !!}">
+                                 @if ($errors->has('ctc_annual'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('ctc_annual') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.gross_salary_monthly') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="gross_salary_monthly" class="form-control" value="{!! old( 'gross_salary_monthly') !!}">
+                                 @if ($errors->has('gross_salary_monthly'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('gross_salary_monthly') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.last_year_increments') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="last_year_increments" class="form-control" value="{!! old( 'last_year_increments') !!}">
+                                 @if ($errors->has('last_year_increments'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('last_year_increments') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                   
+                      
+                      <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.last_year_increment_percent') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="last_year_increment_percent" class="form-control" value="{!! old( 'last_year_increment_percent') !!}">
+                                 @if ($errors->has('last_year_increment_percent'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('last_year_increment_percent') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.last_year_increment_value') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="last_year_increment_value" class="form-control" value="{!! old( 'last_year_increment_value') !!}">
+                                 @if ($errors->has('last_year_increment_value'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('last_year_increment_value') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.last_promotion') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="last_promotion" class="form-control" value="{!! old( 'last_promotion', $user['last_promotion']) !!}">
+                                 @if ($errors->has('last_promotion'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('last_promotion') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
                      <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.pf_number') !!}</label>
@@ -478,89 +820,28 @@
                            </div>
                         </div>
                      </div>
-                  </div>
-                  <hr class="my-3">
-                  <h4 class="section-heading mb-3  h4 mt-0 text-center text-info">Joining Information </h4>
-                  <hr class="my-3">
-                  <div class="row">
-                     <div class="col-md-6">
-                        <div class="row">
-                           <label class="col-md-3 col-form-label">{!! trans('panel.user.date_of_joining') !!}</label>
-                           <div class="col-md-9">
-                              <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="date_of_joining" class="form-control datepicker" value="{!! old( 'date_of_joining', $user['date_of_joining']) !!}" autocomplete="off">
-                                 @if ($errors->has('date_of_joining'))
-                                 <div class="error col-lg-12">
-                                    <p class="text-danger">{{ $errors->first('date_of_joining') }}</p>
-                                 </div>
-                                 @endif
-                              </div>
-                           </div>
-                        </div>
-                     </div>
-                     <div class="col-md-6">
-                        <div class="row">
-                           <label class="col-md-3 col-form-label">{!! trans('panel.user.salary') !!}</label>
-                           <div class="col-md-9">
-                              <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="salary" class="form-control" value="{!! old( 'salary', $user['salary']) !!}">
-                                 @if ($errors->has('salary'))
-                                 <div class="error col-lg-12">
-                                    <p class="text-danger">{{ $errors->first('salary') }}</p>
-                                 </div>
-                                 @endif
-                              </div>
-                           </div>
-                        </div>
-                     </div>
 
                      <div class="col-md-6">
                         <div class="row">
-                           <label class="col-md-3 col-form-label">{!! trans('panel.user.designation') !!}</label>
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.esi_number') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <select class="form-control" name="designation_id">
-                                    <option value="" disabled selected>Select {!! trans('panel.user.designation') !!}</option>
-                                    @foreach($designations as $designation)
-                                    <option value="{{$designation->id}}"> {{$designation->designation_name}}</option>
-                                    @endforeach
-                                 </select>
-                                 @if($errors->has('designation_id'))
-                                 <div class="invalid-feedback">
-                                    {{ $errors->first('designation_id') }}
+                                 <input type="text" name="esi_number" class="form-control" value="{!! old( 'esi_number', $user['esi_number']) !!}">
+                                 @if ($errors->has('esi_number'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('esi_number') }}</p>
                                  </div>
                                  @endif
                               </div>
                            </div>
                         </div>
                      </div>
-                     <div class="col-md-6">
-                        <div class="row">
-                           <label class="col-md-3 col-form-label">{!! trans('panel.user.department') !!}</label>
-                           <div class="col-md-9">
-                              <div class="form-group has-default bmd-form-group">
-                                 <select class="form-control" name="department_id">
-                                    <option value="" disabled selected>Select {!! trans('panel.user.department') !!}</option>
-                                    @foreach($divisions as $division)
-                                    <option value="{{$division->id}}">{{$division->division_name}}</option>
-                                    @endforeach
-                                 </select>
-                                 @if($errors->has('department_id'))
-                                 <div class="invalid-feedback">
-                                    {{ $errors->first('department_id') }}
-                                 </div>
-                                 @endif
-                              </div>
-                           </div>
-                        </div>
-                     </div>
-
                      <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.probation_period') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="probation_period" class="form-control" value="{!! old( 'probation_period', $user['probation_period']) !!}">
+                                 <input type="text" name="probation_period" class="form-control datepicker" value="{!! old( 'probation_period', $user['probation_period']) !!}">
                                  @if ($errors->has('probation_period'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('probation_period') }}</p>
@@ -600,37 +881,187 @@
                            </div>
                         </div>
                      </div>
+                     <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.date_of_leaving') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="date_of_leaving" class="form-control datepicker" value="{!! old( 'date_of_leaving', $user['date_of_leaving']) !!}">
+                                 @if ($errors->has('date_of_leaving'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('date_of_leaving') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                  </div>   
+
+
+
+                  <hr class="my-3">
+                  <h4 class="section-heading mb-3  h4 mt-0 text-center text-info">Joining Information </h4>
+                  <hr class="my-3">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.date_of_joining') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="date_of_joining" class="form-control datepicker" value="{!! old( 'date_of_joining', $user['date_of_joining']) !!}" autocomplete="off">
+                                 @if ($errors->has('date_of_joining'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('date_of_joining') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+      
+                     <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">Head Quarter</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="location" class="form-control" value="{!! old( 'location', $user['location']) !!}">
+                                 @if ($errors->has('location'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('location') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
 
                      <div class="col-md-6">
                         <div class="row">
-                           <label class="col-md-3 col-form-label">{!! trans('panel.user.last_year_increments') !!}</label>
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.employee_codes') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="last_year_increments" class="form-control" value="{!! old( 'last_year_increments', $user['last_year_increments']) !!}">
-                                 @if ($errors->has('last_year_increments'))
+                                 <input type="text" name="employee_codes" id="employee_codes" class="form-control" value="{!! old( 'employee_codes', $user['employee_codes']) !!}" required>
+                                 @if ($errors->has('employee_codes'))
                                  <div class="error col-lg-12">
-                                    <p class="text-danger">{{ $errors->first('last_year_increments') }}</p>
+                                    <p class="text-danger">{{ $errors->first('employee_codes') }}</p>
                                  </div>
                                  @endif
                               </div>
                            </div>
                         </div>
                      </div>
+
                      <div class="col-md-6">
                         <div class="row">
-                           <label class="col-md-3 col-form-label">{!! trans('panel.user.last_promotion') !!}</label>
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.biometric_code') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="last_promotion" class="form-control datepicker" value="{!! old( 'last_promotion', $user['last_promotion']) !!}">
-                                 @if ($errors->has('last_promotion'))
+                                 <input type="text" name="biometric_code" id="biometric_code" class="form-control" value="{!! old( 'biometric_code', $user['biometric_code']) !!}">
+                                 @if ($errors->has('biometric_code'))
                                  <div class="error col-lg-12">
-                                    <p class="text-danger">{{ $errors->first('last_promotion') }}</p>
+                                    <p class="text-danger">{{ $errors->first('biometric_code') }}</p>
                                  </div>
                                  @endif
                               </div>
                            </div>
                         </div>
                      </div>
+
+                     <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.designation') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <select class="form-control" name="designation_id">
+                                    <option value="" disabled selected>Select {!! trans('panel.user.designation') !!}</option>
+                                    @foreach($designations as $designation)
+                                    <option value="{{$designation->id}}"> {{$designation->designation_name}}</option>
+                                    @endforeach
+                                 </select>
+                                 @if($errors->has('designation_id'))
+                                 <div class="invalid-feedback">
+                                    {{ $errors->first('designation_id') }}
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.branch_name') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <div class="form-group has-default bmd-form-group">
+                                    <select class="form-control" name="branch_id" required>
+                                       <option value="" disabled selected>Select Branch</option>
+                                       @foreach($branches as $branche)
+                                       <option value="{{$branche->id}}">{{$branche->branch_name}}</option>
+                                       @endforeach
+                                    </select>
+                                 </div>
+                                 @if ($errors->has('branch_id'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('branch_id') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+
+
+                     <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.division') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <select class="form-control" name="division_id">
+                                    <option value="" disabled selected>Select {!! trans('panel.user.division') !!}</option>
+                                    @foreach($divisions as $division)
+                                    <option value="{{$division->id}}">{{$division->division_name}}</option>
+                                    @endforeach
+                                 </select>
+                                 @if($errors->has('division_id'))
+                                 <div class="invalid-feedback">
+                                    {{ $errors->first('division_id') }}
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+
+                              
+                     <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.department') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <select class="form-control" name="department_id">
+                                    <option value="" disabled selected>Select {!! trans('panel.user.department') !!}</option>
+                                    @foreach($departments as $department)
+                                    <option value="{{$department->id}}">{{$department->name}}</option>
+                                    @endforeach
+                                 </select>
+                                 @if($errors->has('department_id'))
+                                 <div class="invalid-feedback">
+                                    {{ $errors->first('department_id') }}
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+   
+
+
 
                      <div class="col-md-6">
                         <div class="row">
@@ -775,6 +1206,72 @@
                            </tbody>
                         </table>
                      </div>
+
+
+                     <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.other_education') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="other_education" id="other_education" class="form-control" value="{!! old( 'other_education') !!}">
+                                 @if ($errors->has('other_education'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('other_education') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+        
+                     <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.current_company_tenture') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="current_company_tenture" id="current_company_tenture" class="form-control" value="{!! old( 'current_company_tenture') !!}">
+                                 @if ($errors->has('current_company_tenture'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('current_company_tenture') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                      <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.previous_exp') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="previous_exp" id="previous_exp" class="form-control" value="{!! old( 'previous_exp') !!}">
+                                 @if ($errors->has('previous_exp'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('previous_exp') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.total_exp') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" name="total_exp" id="total_exp" class="form-control" value="{!! old( 'total_exp') !!}">
+                                 @if ($errors->has('total_exp'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('total_exp') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+
+
                   </div>
                   <div class="row pull-right">
                      {{ Form::submit('Submit', array('class' => 'btn btn-info submituser')) }}

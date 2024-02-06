@@ -344,26 +344,53 @@
                      <br><br>
                      <div class="col-md-6">
                         <div class="row">
-                           <label class="col-md-3 col-form-label">{{ trans('panel.user.department') }}</label>
+                           <label class="col-md-3 col-form-label">{{ trans('panel.user.division') }}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <select class="form-control" name="department_id">
-                                    <option value="" disabled selected>Select {!! trans('panel.user.department') !!}</option>
+                                 <select class="form-control" name="division_id">
+                                    <option value="" disabled selected>Select {!! trans('panel.user.division') !!}</option>
                                     @foreach($divisions as $division)
-                                    <option value="{{$division->id}}" <?php if ($user->department_id == $division->id) {
+                                    <option value="{{$division->id}}" <?php if ($user->division_id == $division->id) {
                                                                            echo "selected";
                                                                         } ?>>{{$division->division_name}}</option>
                                     @endforeach
                                  </select>
-                                 @if ($errors->has('department_id'))
+                                 @if ($errors->has('division_id'))
                                  <div class="error col-lg-12">
-                                    <p class="text-danger">{{ $errors->first('department_id') }}</p>
+                                    <p class="text-danger">{{ $errors->first('division_id') }}</p>
                                  </div>
                                  @endif
                               </div>
                            </div>
                         </div>
                      </div>
+
+
+                  <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.department') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <select class="form-control" name="department_id">
+                                    <option value="" disabled selected>Select {!! trans('panel.user.department') !!}</option>
+                                    @foreach($departments as $department)
+                                    <option value="{{$department->id}}" <?php if ($user->department_id == $department->id) {
+                                                                           echo "selected";
+                                                                        } ?>  >{{$department->name}}</option>
+                                    @endforeach
+                                 </select>
+                                 @if($errors->has('department_id'))
+                                 <div class="invalid-feedback">
+                                    {{ $errors->first('department_id') }}
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+
+
 
                      <div class="col-md-6">
                         <div class="row">
