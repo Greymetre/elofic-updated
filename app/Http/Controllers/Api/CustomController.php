@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 use Validator;
 use Gate;
-use App\Models\{CustomerType , Customers};
+use App\Models\{CustomerType , Customers, EmployeeDetail};
 use App\Models\CustomerDetails;
 use App\Models\Division;
 
@@ -253,8 +253,9 @@ class CustomController extends Controller
             $user = Auth::guard('users')->user();
             $user_id = $user->id;
             $all_user_ids = getUsersReportingToAuth($user_id);
-            $query = Customers::where(function ($query) use ($all_user_ids) {
-                                        $query->where('active', '=', 'Y')->where('customertype','!=','2')->whereIn('executive_id', $all_user_ids);
+            $customer_ids_assign = EmployeeDetail::whereIn('user_id', $all_user_ids)->pluck('customer_id')->toArray();
+            $query = Customers::where(function ($query) use ($customer_ids_assign) {
+                                        $query->where('active', '=', 'Y')->whereIn('customertype',['1','3'])->whereIn('id', $customer_ids_assign);
                                     })->select('id','name');
 
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();

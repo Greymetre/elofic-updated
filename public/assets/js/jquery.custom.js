@@ -78,6 +78,23 @@ $(".getimage5").change(function(){
   readURL5(this);
 });
 
+function readURL0(input) {
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
+    
+    reader.onload = function (e) {
+        $('.imagepreview0').attr('src', e.target.result);
+    }
+    
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+$(".getimage0").change(function(){
+  readURL0(this);
+});
+
+
 /*==================== Address Functions =================*/
 function getStateList()
 {

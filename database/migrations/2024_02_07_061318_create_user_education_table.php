@@ -13,15 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('appraisals', function (Blueprint $table) {
+        Schema::create('user_education', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id')->nullable();
-            $table->date('year')->nullable();
-            $table->integer('target')->nullable();
-            $table->integer('achivment')->nullable();
-            $table->text('rating')->nullable();
-            $table->text('rating_by')->nullable();
-            $table->text('remark')->nullable();
+            $table->string('degree_name')->nullable();
+            $table->string('board_name')->nullable();
+            $table->integer('percentage')->nullable();
+            $table->string('grade')->nullable();
             $table->timestamps();
         });
     }
@@ -33,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('appraisals');
+        Schema::dropIfExists('user_education');
     }
 };

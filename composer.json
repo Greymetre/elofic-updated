@@ -15,6 +15,7 @@
         "league/flysystem-aws-s3-v3": "^3.8",
         "maatwebsite/excel": "^3.1",
         "psr/simple-cache": "^2.0",
+        "spatie/laravel-medialibrary": "^10.0.0",
         "spatie/laravel-permission": "^5.5",
         "yajra/laravel-datatables": "^9.0"
     },

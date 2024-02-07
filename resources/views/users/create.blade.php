@@ -270,6 +270,17 @@
 
                      <div class="col-md-6">
                         <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.pan_card_image') !!}</label>
+                           <div class="col-md-9">
+                              <div class=" has-default bmd-form-group">
+                                 <input type="file" name="pan_card_image" class="form-control">
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="col-md-6">
+                        <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.aadhar_number') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
@@ -284,7 +295,16 @@
                         </div>
                      </div>
 
-
+                     <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.aadhar_card_image') !!}</label>
+                           <div class="col-md-9">
+                              <div class="has-default bmd-form-group">
+                                 <input type="file" name="aadhar_card_image" class="form-control">
+                              </div>
+                           </div>
+                        </div>
+                     </div>
 
 
                      <div class="col-md-6">
@@ -910,7 +930,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.date_of_joining') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="date_of_joining" class="form-control datepicker" value="{!! old( 'date_of_joining', $user['date_of_joining']) !!}" autocomplete="off">
+                                 <input type="text" id="date_of_joining" name="date_of_joining" class="form-control datepicker" value="{!! old( 'date_of_joining', $user['date_of_joining']) !!}" autocomplete="off">
                                  @if ($errors->has('date_of_joining'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('date_of_joining') }}</p>
@@ -1119,96 +1139,35 @@
                               </tr>
                            </thead>
                            <tbody>
+                              @foreach(config('constants.education_type') as $k=>$education_type)
                               <tr class="item-row">
                                  <td>
-                                    <input type="text" name="detail[1][degree_name]" placeholder="High School">
+                                    <input type="text" name="education_detail[{{$k}}][degree_name]" placeholder="{{$education_type}}">
                                  </td>
                                  <td>
-                                    <input type="text" name="hsc_board_name">
+                                    <input type="text" name="education_detail[{{$k}}][board_name]">
                                  </td>
                                  <td>
-                                    <input type="text" name="hsc_percentage">
+                                    <input type="text" name="education_detail[{{$k}}][percentage]">
                                  </td>
                                  <td>
-                                    <input type="text" name="hsc_grade">
+                                    <input type="text" name="education_detail[{{$k}}][grade]">
                                  </td>
                                  <td>
-                                    <img src="{!! asset('assets/img/placeholder.jpg') !!}" class="imagepreview1" width="70px;">
+                                    <img src="{!! asset('assets/img/placeholder.jpg') !!}" class="imagepreview{{$k}}" width="70px;">
                                     <span class="btn btn-just-icon btn-round btn-file" style="position: relative; top: -20px;">
                                        <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
-                                       <input type="file" name="hsc_image" class="getimage1">
+                                       <input type="file" name="education_detail[{{$k}}][image]" class="getimage{{$k}}">
                                     </span>
                                  </td>
                               </tr>
-                              <tr class="item-row">
-                                 <td>
-                                    <input type="text" name="detail[2][degree_name]" placeholder="Higher Secondry">
-                                 </td>
-                                 <td>
-                                    <input type="text" name="hssc_board_name">
-                                 </td>
-                                 <td>
-                                    <input type="text" name="hssc_percentage">
-                                 </td>
-                                 <td>
-                                    <input type="text" name="hssc_grade">
-                                 </td>
-                                 <td>
-                                    <img src="{!! asset('assets/img/placeholder.jpg') !!}" class="imagepreview2" width="70px;">
-                                    <span class="btn btn-just-icon btn-round btn-file" style="position: relative; top: -20px;">
-                                       <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
-                                       <input type="file" name="hssc_image" class="getimage2">
-                                    </span>
-                                 </td>
-                              </tr>
-                              <tr class="item-row">
-                                 <td>
-                                    <input type="text" name="ug_course" placeholder="Graduction Course">
-                                 </td>
-                                 <td>
-                                    <input type="text" name="ug_university">
-                                 </td>
-                                 <td>
-                                    <input type="text" name="ug_percentage">
-                                 </td>
-                                 <td>
-                                    <input type="text" name="ug_grade">
-                                 </td>
-                                 <td>
-                                    <img src="{!! asset('assets/img/placeholder.jpg') !!}" class="imagepreview3" width="70px;">
-                                    <span class="btn btn-just-icon btn-round btn-file" style="position: relative; top: -20px;">
-                                       <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
-                                       <input type="file" name="ug_image" class="getimage3">
-                                    </span>
-                                 </td>
-                              </tr>
-                              <tr class="item-row">
-                                 <td>
-                                    <input type="text" name="pg_course" placeholder="Post Graduction Course">
-                                 </td>
-                                 <td>
-                                    <input type="text" name="pg_university">
-                                 </td>
-                                 <td>
-                                    <input type="text" name="pg_percentage">
-                                 </td>
-                                 <td>
-                                    <input type="text" name="pg_grade">
-                                 </td>
-                                 <td>
-                                    <img src="{!! asset('assets/img/placeholder.jpg') !!}" class="imagepreview4" width="70px;">
-                                    <span class="btn btn-just-icon btn-round btn-file" style="position: relative; top: -20px;">
-                                       <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
-                                       <input type="file" name="pg_image" class="getimage4">
-                                    </span>
-                                 </td>
-                              </tr>
+                              @endforeach
                            </tbody>
                         </table>
                      </div>
 
 
-                     <div class="col-md-6">
+                     <!-- <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.other_education') !!}</label>
                            <div class="col-md-9">
@@ -1222,14 +1181,14 @@
                               </div>
                            </div>
                         </div>
-                     </div>
+                     </div> -->
         
                      <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.current_company_tenture') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="current_company_tenture" id="current_company_tenture" class="form-control" value="{!! old( 'current_company_tenture') !!}">
+                                 <input placeholder="In Year" type="number" name="current_company_tenture" id="current_company_tenture" class="form-control" value="{!! old( 'current_company_tenture') !!}">
                                  @if ($errors->has('current_company_tenture'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('current_company_tenture') }}</p>
@@ -1244,7 +1203,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.previous_exp') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="previous_exp" id="previous_exp" class="form-control" value="{!! old( 'previous_exp') !!}">
+                                 <input type="number" placeholder="In Year" name="previous_exp" id="previous_exp" class="form-control" value="{!! old( 'previous_exp') !!}">
                                  @if ($errors->has('previous_exp'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('previous_exp') }}</p>
@@ -1259,7 +1218,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.total_exp') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="total_exp" id="total_exp" class="form-control" value="{!! old( 'total_exp') !!}">
+                                 <input placeholder="In Year" type="number" readonly name="total_exp" id="total_exp" class="form-control" value="{!! old( 'total_exp') !!}">
                                  @if ($errors->has('total_exp'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('total_exp') }}</p>
@@ -1304,12 +1263,35 @@
          var last_name = $("input[name=last_name]").val();
          $('#name').val(first_name + ' ' + last_name);
       }
+      
       $(document).on('change', '#date_of_birth', function(){
          var DOB = $(this).val();
          dob = new Date(DOB);
          var today = new Date();
          var age = Math.floor((today-dob) / (365.25 * 24 * 60 * 60 * 1000));
          $('#age').val(age);
+      })
+
+      $(document).on('change', '#date_of_joining', function(){
+         var DOB = $(this).val();
+         dob = new Date(DOB);
+         var today = new Date();
+         var current_company_tenture = Math.floor((today-dob) / (365.25 * 24 * 60 * 60 * 1000));
+         $('#current_company_tenture').val(current_company_tenture);
+         var previous_exp = $('#previous_exp').val();
+         $('#total_exp').val(parseInt(current_company_tenture)+parseInt(previous_exp));
+      })
+
+      $(document).on('change', '#current_company_tenture', function(){
+         var current_company_tenture  = $(this).val();
+         var previous_exp = $('#previous_exp').val();
+         $('#total_exp').val(parseInt(current_company_tenture)+parseInt(previous_exp));
+      })
+
+      $(document).on('keyup', '#previous_exp', function(){
+         var previous_exp  = $(this).val();
+         var current_company_tenture = $('#current_company_tenture').val();
+         $('#total_exp').val(parseInt(current_company_tenture)+parseInt(previous_exp));
       })
    </script>
 </x-app-layout>

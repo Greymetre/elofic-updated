@@ -434,6 +434,7 @@ class CustomerController extends Controller
             $user = $request->user();
             $userids = getUsersReportingToAuth($user->id);
             // $user_id = $user->id;
+            $customer_ids_assign = EmployeeDetail::whereIn('user_id', $userids)->pluck('customer_id')->toArray();
             
             $pageSize = $request->input('pageSize');
             $search = $request['search'] ;
@@ -462,10 +463,11 @@ class CustomerController extends Controller
                                 }
 
                                 //$query->whereIn('executive_id', $userids);
-                                $query->whereIn('customertype', ['2','3','4','5','6']);
                             })->whereHas('getemployeedetail', function($querys) use($userids){   
                                 $querys->whereIn('user_id', $userids);
                             })
+                            ->whereIn('customertype', ['1','2','3','4','5','6'])
+                            ->whereIn('id', $customer_ids_assign)
 
                             // ->whereHas('customertypes', function($query) use($user){
                             //     $query->where('type_name', '=', 'retailer');
@@ -473,6 +475,7 @@ class CustomerController extends Controller
                             ->select('id','name','first_name','last_name','mobile','email','profile_image','customer_code', 'latitude','longitude','customertype')
                             ->orderBy('name','asc');
                             //->latest();
+                            
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
             $data = collect([]);
             if($db_data->isNotEmpty())
@@ -518,7 +521,8 @@ class CustomerController extends Controller
          try
         { 
             $user = $request->user();
-            $userids = getUsersReportingToAuth($user->reportingid);
+            $userids = getUsersReportingToAuth($user->id);
+            $customer_ids_assign = EmployeeDetail::whereIn('user_id', $userids)->pluck('customer_id')->toArray();
             $pageSize = $request->input('pageSize');
             $query = $this->customers
                             // ->whereHas('customertypes', function($query) use($user){
@@ -528,8 +532,8 @@ class CustomerController extends Controller
                             ->whereHas('customertypes', function($query){
                                 $query->where('type_name', '=', 'distributor')->orWhere('type_name', '=', 'Dealer');
                             })
-                            ->whereIn('customertype', ['1'])
-                            ->whereIn('executive_id', $userids)
+                            ->whereIn('customertype', ['1', '3'])
+                            ->whereIn('id', $customer_ids_assign)
                             ->select('id','name','first_name','last_name','mobile','email','profile_image','customer_code')->orderBy('name','asc');
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
             $data = collect([]);
@@ -563,9 +567,9 @@ class CustomerController extends Controller
          try
         { 
             $user = $request->user();
-            $user_id = $user->id;
+            $userids = getUsersReportingToAuth($user->id);
             $pageSize = $request->input('pageSize');
-            $query = $this->customers->with('customeraddress:customer_id,address1,address2','customerdetails:customer_id,grade,visit_status','customertypes')->select('id','name','first_name','last_name','mobile','email','profile_image','customer_code', 'latitude','longitude')->latest();
+            $query = $this->customers->with('customeraddress:customer_id,address1,address2','customerdetails:customer_id,grade,visit_status','customertypes')->select('id','name','first_name','last_name','mobile','email','profile_image','customer_code', 'latitude','longitude')->whereIn('executive_id', $userids)->latest();
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
             $data = collect([]);
             if($db_data->isNotEmpty())

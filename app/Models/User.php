@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
+
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
@@ -89,12 +90,14 @@ class User extends Authenticatable
     }
 
 
-
-
-
     public function getdesignation()
     {
         return $this->belongsTo('App\Models\Designation', 'designation_id', 'id')->select('id','designation_name'); 
+    }
+
+    public function geteducation()
+    {
+        return $this->hasMany(UserEducation::class);
     }
 
     public static function tree($user_id){

@@ -34,6 +34,7 @@ use App\Models\CustomerType;
 use App\Models\Designation;
 use App\Models\Division;
 use App\Models\Department;
+use App\Models\UserEducation;
 
 class UsersController extends Controller
 {
@@ -42,6 +43,8 @@ class UsersController extends Controller
         $this->middleware('auth');   
         $this->user = new User();
         $this->path = 'users';
+        $this->aadhar_card_path = 'aadhar_card';
+        $this->pan_card_path = 'pan_card';
         
     }
 
@@ -70,6 +73,7 @@ class UsersController extends Controller
 
     public function store(UserRequest $request)
     {    
+        
         $user = User::create([
             'active'   =>  isset($request['active']) ? $request['active'] :'Y',
             'name'   =>  isset($request['name']) ? $request['name'] :$request['first_name'].' '.$request['last_name'],
@@ -158,8 +162,38 @@ class UsersController extends Controller
             'order_mails_type'   =>  isset($request['order_mails_type']) ? implode(',', $request['order_mails_type']) :'',
             'other_education'  => isset($request['other_education']) ? $request['other_education'] :null,
             'previous_exp'   =>  isset($request['previous_exp']) ? $request['previous_exp'] :null,
+            'current_company_tenture'   =>  isset($request['current_company_tenture']) ? $request['current_company_tenture'] :null,
+            'total_exp'   =>  isset($request['total_exp']) ? $request['total_exp'] :null,
  
         ]);
+
+        foreach($request->education_detail as $education_detail){
+            if($education_detail['degree_name'] != null && $education_detail['degree_name'] != ''){
+                $new_education_detail = new UserEducation();
+                $new_education_detail->user_id = $user['id'];
+                $new_education_detail->degree_name = $education_detail['degree_name'];
+                $new_education_detail->board_name = $education_detail['board_name'];
+                $new_education_detail->percentage = $education_detail['percentage'];
+                $new_education_detail->grade = $education_detail['grade'];
+                $new_education_detail->save();
+                if($education_detail['image'] && $education_detail['image'] != null && $education_detail['image'] != ''){
+                    $new_education_detail->addMedia($education_detail['image'])->toMediaCollection('education_image');
+                }
+            }
+        }
+
+        if($request->file('aadhar_card_image')){
+            $image = $request->file('aadhar_card_image');
+            $filename = 'aadhar_card_'.$user['id'];
+            $aadhar_card_image = fileupload($image, $this->aadhar_card_path, $filename);
+            UserDetails::where('user_id',$user['id'])->update([ 'aadhar_card_image' => $aadhar_card_image]);
+        }
+        if($request->file('pan_card_image')){
+            $image = $request->file('pan_card_image');
+            $filename = 'pan_card_'.$user['id'];
+            $pan_card_image = fileupload($image, $this->pan_card_path, $filename);
+            UserDetails::where('user_id',$user['id'])->update([ 'pan_card_image' => $pan_card_image]);
+        }
         return redirect()->route('users.index');
 
     }
