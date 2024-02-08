@@ -215,14 +215,14 @@ class UsersController extends Controller
         $branches = Branch::where('active','=','Y')->get();
         $designations = Designation::where('active','=','Y')->get();
         $divisions = Division::where('active','=','Y')->get();
-         $departments = Department::where('active','=','Y')->get();
-
-        return view('users.edit', compact('roles', 'user','cities','reportings','branches','designations','divisions', 'customertype','departments'));
+        $departments = Department::where('active','=','Y')->get();
+        // dd($user);
+        return view('users.create', compact('roles', 'user','cities','reportings','branches','designations','divisions', 'customertype','departments'));
     }
 
     //public function update(Request $request, User $user)
     public function update(Request $request, $id)
-    {    
+    {  
         if($request->file('image')){
             $image = $request->file('image');
             $filename = 'profile_'.$id;
@@ -230,31 +230,77 @@ class UsersController extends Controller
         }
 
         UserDetails::updateOrCreate(['user_id' => $id],[
-            'user_id' => $id,
+            'marital_status'   =>  isset($request['marital_status']) ? $request['marital_status'] :null,
             'date_of_birth'   =>  isset($request['date_of_birth']) ? $request['date_of_birth'] :null,
-            'date_of_joining'   =>  isset($request['date_of_joining']) ? $request['date_of_joining'] :null,
-            'marital_status'   =>  isset($request['marital_status']) ? $request['marital_status'] :'',
-            'last_year_increments'  =>  isset($request['last_year_increments']) ? $request['last_year_increments'] :null,
-            'last_promotion'   =>  isset($request['last_promotion']) ? $request['last_promotion'] :null,
+            'pan_number'   =>  isset($request['pan_number']) ? $request['pan_number'] :null,
+            'aadhar_number'   =>  isset($request['aadhar_number']) ? $request['aadhar_number'] :null,
+            'emergency_number'   =>  isset($request['emergency_number']) ? $request['emergency_number'] :null,
+            'current_address'   =>  isset($request['current_address']) ? $request['current_address'] :null,
+            'permanent_address'   =>  isset($request['permanent_address']) ? $request['permanent_address'] :null,
+            'father_name'   =>  isset($request['father_name']) ? $request['father_name'] :null,
+            'father_date_of_birth'   =>  isset($request['father_date_of_birth']) ? $request['father_date_of_birth'] :null,
+            'mother_name'   =>  isset($request['mother_name']) ? $request['mother_name'] :null,
+            'mother_date_of_birth'   =>  isset($request['mother_date_of_birth']) ? $request['mother_date_of_birth'] :null,
+            'marriage_anniversary'   =>  isset($request['marriage_anniversary']) ? $request['marriage_anniversary'] :null,
+            'spouse_name'  =>  isset($request['spouse_name']) ? $request['spouse_name'] :null,
+            'spouse_date_of_birth'  =>  isset($request['spouse_date_of_birth']) ? $request['spouse_date_of_birth'] :null,
+            'children_one'  =>  isset($request['children_one']) ? $request['children_one'] :null,
+            'children_one_date_of_birth'  =>  isset($request['children_one_date_of_birth']) ? $request['children_one_date_of_birth'] :null,
+            'children_two'  =>  isset($request['children_two']) ? $request['children_two'] :null,
+            'children_two_date_of_birth'  =>  isset($request['children_two_date_of_birth']) ? $request['children_two_date_of_birth'] :null,
+            'children_three'  =>  isset($request['children_three']) ? $request['children_three'] :null,
+            'children_three_date_of_birth'  =>  isset($request['children_three_date_of_birth']) ? $request['children_three_date_of_birth'] :null,
+            'children_four'  =>  isset($request['children_four']) ? $request['children_four'] :null,
+            'children_four_date_of_birth'  =>  isset($request['children_four_date_of_birth']) ? $request['children_four_date_of_birth'] :null,
+            'children_five'  =>  isset($request['children_five']) ? $request['children_five'] :null,
+            'children_five_date_of_birth'  =>  isset($request['children_five_date_of_birth']) ? $request['children_five_date_of_birth'] :null,
+            'account_number'   =>  isset($request['account_number']) ? $request['account_number'] :null,
+            'bank_name'   =>  isset($request['bank_name']) ? $request['bank_name'] :null,
+            'ifsc_code'   =>  isset($request['ifsc_code']) ? $request['ifsc_code'] :null,
             'salary'   =>  isset($request['salary']) ? $request['salary'] :0.00,
+            'ctc_annual'   =>  isset($request['ctc_annual']) ? $request['ctc_annual'] :0.00,
+            'gross_salary_monthly'   =>  isset($request['gross_salary_monthly']) ? $request['gross_salary_monthly'] :0.00,
+            'last_year_increments'   =>  isset($request['last_year_increments']) ? $request['last_year_increments'] :0.00,
+            'last_year_increment_percent'   =>  isset($request['last_year_increment_percent']) ? $request['last_year_increment_percent'] :null,
+            'last_year_increment_value'   =>  isset($request['last_year_increment_value']) ? $request['last_year_increment_value'] :0.00,
+            'last_promotion' =>  isset($request['last_promotion']) ? $request['last_promotion'] :null,
+            'pf_number'   =>  isset($request['pf_number']) ? $request['pf_number'] :null,
+            'un_number'   =>  isset($request['un_number']) ? $request['un_number'] :null,
+            'esi_number'   =>  isset($request['esi_number']) ? $request['esi_number'] :null,
+            'probation_period'   =>  isset($request['probation_period']) ? $request['probation_period'] :null,
+            'date_of_confirmation'   =>  isset($request['date_of_confirmation']) ? $request['date_of_confirmation'] :null,
+            'notice_period'   =>  isset($request['notice_period']) ? $request['notice_period'] :null,
+            'date_of_leaving'   =>  isset($request['date_of_leaving']) ? $request['date_of_leaving'] :null,
+            'date_of_joining'   =>  isset($request['date_of_joining']) ? $request['date_of_joining'] :null,
+            'biometric_code'   =>  isset($request['biometric_code']) ? $request['biometric_code'] :null,
             'order_mails'   =>  isset($request['order_mails']) ? $request['order_mails'] :'',
             'order_mails_type'   =>  isset($request['order_mails_type']) ? implode(',', $request['order_mails_type']) :'',
-            
-            // 'probation_period'   =>  isset($request['probation_period']) ? $request['probation_period'] :null,
-            // 'date_of_confirmation'   =>  isset($request['date_of_confirmation']) ? $request['date_of_confirmation'] :null,
-            // 'notice_period'   =>  isset($request['notice_period']) ? $request['notice_period'] :null,
-            // 'father_name'   =>  isset($request['father_name']) ? $request['father_name'] :null,
-            // 'pan_number'   =>  isset($request['pan_number']) ? $request['pan_number'] :null,
-            // 'emergency_number'   =>  isset($request['emergency_number']) ? $request['emergency_number'] :null,
-            // 'current_address'   =>  isset($request['current_address']) ? $request['current_address'] :null,
-            // 'permanent_address'   =>  isset($request['permanent_address']) ? $request['permanent_address'] :null,
-            // 'biometric_code'   =>  isset($request['biometric_code']) ? $request['biometric_code'] :null,
-            // 'account_number'   =>  isset($request['account_number']) ? $request['account_number'] :null,
-            // 'bank_name'   =>  isset($request['bank_name']) ? $request['bank_name'] :null,
-            // 'ifsc_code'   =>  isset($request['ifsc_code']) ? $request['ifsc_code'] :null,
-            // 'pf_number'   =>  isset($request['pf_number']) ? $request['pf_number'] :null,
-            // 'un_number'   =>  isset($request['un_number']) ? $request['un_number'] :null,
-        ]);   
+            'other_education'  => isset($request['other_education']) ? $request['other_education'] :null,
+            'previous_exp'   =>  isset($request['previous_exp']) ? $request['previous_exp'] :null,
+            'current_company_tenture'   =>  isset($request['current_company_tenture']) ? $request['current_company_tenture'] :null,
+            'total_exp'   =>  isset($request['total_exp']) ? $request['total_exp'] :null,
+        ]);
+
+        foreach($request->education_detail as $education_detail){
+            if($education_detail['degree_name'] != null && $education_detail['degree_name'] != ''){
+                $new_education_detail = UserEducation::updateOrCreate(
+                    [
+                        'user_id' => $id, 'education_type_id'=>$education_detail['education_type_id']
+                    ],
+                    [
+                    'user_id' => $id,
+                    'education_type_id'=>$education_detail['education_type_id'],
+                    'degree_name'=>$education_detail['degree_name'],
+                    'board_name'=>$education_detail['board_name'],
+                    'percentage'=>$education_detail['percentage'],
+                    'grade'=>$education_detail['grade'],
+                    ]
+                );
+                if(isset($education_detail['image']) && $education_detail['image'] != null && $education_detail['image'] != ''){
+                    $new_education_detail->addMedia($education_detail['image'])->toMediaCollection('education_image');
+                }
+            }
+        }
         $user = User::where('id',$id)->first();
         $user->name = isset($request['name']) ? $request['first_name'].' '.$request['last_name'] :'';
         $user->first_name = isset($request['first_name']) ? $request['first_name'] :'';

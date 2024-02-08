@@ -1,12 +1,16 @@
 <x-app-layout>
    <div class="row">
       <div class="col-md-12">
-         <div class="card">
+         <div class="card card-profile">
             <div class="card-header card-header-icon card-header-theme">
                <div class="card-icon">
                   <i class="material-icons">perm_identity</i>
                </div>
+               @if($user->id)
+               <h4 class="card-title ">{{ trans('panel.global.edit') }} {{ trans('panel.user.title_singular') }}</h4>
+               @else
                <h4 class="card-title ">{{ trans('panel.global.create') }} {{ trans('panel.user.title_singular') }}</h4>
+               @endif
             </div>
             <div class="card-body">
                @if(count($errors) > 0)
@@ -21,8 +25,29 @@
                   </span>
                </div>
                @endif
-               <form method="POST" action="{{ route('users.store') }}" enctype="multipart/form-data" id="storeUserData">
+               <form method="POST" action="{{($user->id)?route('users.update', [$user->id]): route('users.store') }}" enctype="multipart/form-data" id="{{($user->id)?'updateUserData':'storeUserData'}}">
                   @csrf
+               @if($user->id)
+                  @method('PUT')
+                  <div class="card-avatar mb-3">
+                     <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                        <div class="selectThumbnail">
+                           <span class="btn btn-just-icon btn-round btn-file">
+                              <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
+                              <span class="fileinput-exists">Change</span>
+                              <input type="file" name="image" class="getimage1">
+                           </span>
+                           <br>
+                           <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
+                        </div>
+                        <div class="fileinput-new thumbnail">
+                           <img src="../{!! ($user['profile_image']) ? asset($user['profile_image']) : asset('assets/img/placeholder.jpg') !!}" class="imagepreview1">
+                        </div>
+                        <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
+                        <label class="bmd-label-floating">{!! trans('panel.user.profile_image') !!}</label>
+                     </div>
+                  </div>
+                  @endif
                   <input type="hidden" name="name" id="name" required>
                   <div class="row">
                      <div class="col-md-6">
@@ -71,7 +96,7 @@
                            <label class="col-md-4 col-form-label">{{ trans('panel.user.fields.first_name') }} <span class="text-danger"> *</span></label>
                            <div class="col-md-8">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="first_name" class="form-control {{ $errors->has('first_name') ? 'is-invalid' : '' }}" value="{!! old( 'first_name') !!}" maxlength="200" required onchange="getfullName();">
+                                 <input type="text" name="first_name" class="form-control {{ $errors->has('first_name') ? 'is-invalid' : '' }}" value="{!! old( 'first_name'), $user->first_name !!}" maxlength="200" required onchange="getfullName();">
                                  @if ($errors->has('first_name'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('first_name') }}</p>
@@ -86,7 +111,7 @@
                            <label class="col-md-4 col-form-label">{{ trans('panel.user.fields.last_name') }}<span class="text-danger"> *</span></label>
                            <div class="col-md-8">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="last_name" class="form-control {{ $errors->has('last_name') ? 'is-invalid' : '' }}" value="{!! old( 'last_name') !!}" maxlength="200" required>
+                                 <input type="text" name="last_name" class="form-control {{ $errors->has('last_name') ? 'is-invalid' : '' }}" value="{!! old( 'last_name'), $user->last_name !!}" maxlength="200" required>
                                  @if ($errors->has('last_name'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('last_name') }}</p>
@@ -103,7 +128,7 @@
                            <label class="col-md-2 col-form-label">{!! trans('panel.global.email') !!}<span class="text-danger"> *</span></label>
                            <div class="col-md-10">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="email" name="email" class="form-control" value="{!! old( 'email') !!}" maxlength="200" required>
+                                 <input type="email" name="email" class="form-control" value="{!! $user->email,old( 'email') !!}" maxlength="200" required>
                                  @if ($errors->has('email'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('email') }}</p>
@@ -118,7 +143,7 @@
                            <label class="col-md-4 col-form-label">{!! trans('panel.global.mobile') !!}<span class="text-danger"> *</span></label>
                            <div class="col-md-8">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="number" name="mobile" class="form-control {{ $errors->has('mobile') ? 'is-invalid' : '' }}" value="{!! old( 'mobile') !!}" maxlength="10" minlength="10" required>
+                                 <input type="number" name="mobile" class="form-control {{ $errors->has('mobile') ? 'is-invalid' : '' }}" value="{!!  $user->mobile, old( 'mobile') !!}" maxlength="10" minlength="10" required>
                               </div>
                               @if ($errors->has('mobile'))
                               <label class="error">{{ $errors->first('mobile') }}</label>
@@ -126,7 +151,7 @@
                            </div>
                         </div>
                      </div>
-                     <div class="col-md-6">
+                     <!-- <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-4 col-form-label">{{ trans('panel.user.fields.password') }}<span class="text-danger"> *</span></label>
                            <div class="col-md-8">
@@ -138,7 +163,7 @@
                               </div>
                            </div>
                         </div>
-                     </div>
+                     </div> -->
                      <div class="col-md-12">
                         <div class="row">
                            <label class="col-md-2 col-form-label">{{ trans('panel.user.fields.roles') }}</label>
@@ -146,7 +171,7 @@
                               <div class="form-group has-default bmd-form-group">
                                  <select class="form-control select2" name="roles[]" id="roles" multiple required>
                                     @foreach($roles as $id => $roles)
-                                    <option value="{{ $id }}" {{ in_array($id, old('roles', [])) ? 'selected' : '' }}>{{ $roles }}</option>
+                                    <option value="{{ $id }}" {{ (in_array($id, old('roles', [])) || $user->roles->contains($id)) ? 'selected' : '' }}>{{ $roles }}</option>
                                     @endforeach
                                  </select>
                                  @if ($errors->has('roles'))
@@ -169,8 +194,8 @@
                               <div class="form-group has-default bmd-form-group">
                                  <select class="selectpicker" data-style="select-with-transition" name="gender">
                                     <option value="" disabled selected>Gender</option>
-                                    <option value="Male" {{ (old('gender') == 'Male') ? 'selected' : '' }}>Male</option>
-                                    <option value="Female" {{ (old('gender') == 'Female') ? 'selected' : '' }}>Female</option>
+                                    <option value="Male" {{ (old('gender')??$user->gender == 'Male') ? 'selected' : '' }}>Male</option>
+                                    <option value="Female" {{ (old('gender')??$user->gender == 'Female') ? 'selected' : '' }}>Female</option>
                                  </select>
                               </div>
                            </div>
@@ -203,11 +228,11 @@
                               <div class="form-group has-default bmd-form-group">
                                  <select class="form-control" name="marital_status" required>
                                     <option value="" disabled selected>Marital Status</option>
-                                    <option value="Single">Single</option>
-                                    <option value="Married">Married</option>
-                                    <option value="Separated">Separated</option>
-                                    <option value="Widowed">Widowed</option>
-                                    <option value="Divorced">Divorced</option>
+                                    <option {{ ($user->userinfo?$user->userinfo->marital_status:'' == 'Single') ? 'selected' : '' }} value="Single">Single</option>
+                                    <option {{ (old('marital_status') ?? ($user->userinfo ? $user->userinfo->marital_status : '')) == 'Married' ? 'selected' : '' }} value="Married">Married</option>
+                                    <option {{ (old('marital_status') ?? ($user->userinfo ? $user->userinfo->marital_status : '')) == 'Separated' ? 'selected' : '' }} value="Separated">Separated</option>
+                                    <option {{ (old('marital_status') ?? ($user->userinfo ? $user->userinfo->marital_status : '')) == 'Widowed' ? 'selected' : '' }} value="Widowed">Widowed</option>
+                                    <option {{ (old('marital_status') ?? ($user->userinfo ? $user->userinfo->marital_status : '')) == 'Divorced' ? 'selected' : '' }} value="Divorced">Divorced</option>
                                  </select>
                               </div>
                               @if ($errors->has('marital_status'))
@@ -223,7 +248,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.date_of_birth') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="date_of_birth" id="date_of_birth" class="form-control datepicker" value="{!! old( 'date_of_birth', $user['date_of_birth']) !!}" autocomplete="off">
+                                 <input type="text" name="date_of_birth" id="date_of_birth" class="form-control datepicker" value="{!! $user->userinfo?$user->userinfo->date_of_birth:'', old( 'date_of_birth', $user['date_of_birth']) !!}" autocomplete="off">
                               </div>
                               @if ($errors->has('date_of_birth'))
                               <div class="error col-lg-12">
@@ -257,7 +282,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.pan_number') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="pan_number" id="pan_number" class="form-control" value="{!! old( 'pan_number') !!}">
+                                 <input type="text" name="pan_number" id="pan_number" class="form-control" value="{!! $user->userinfo?$user->userinfo->pan_number:'', old( 'pan_number') !!}">
                                  @if ($errors->has('pan_number'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('pan_number') }}</p>
@@ -284,7 +309,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.aadhar_number') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="aadhar_number" id="aadhar_number" class="form-control" value="{!! old( 'aadhar_number') !!}">
+                                 <input type="text" name="aadhar_number" id="aadhar_number" class="form-control" value="{!! $user->userinfo?$user->userinfo->aadhar_number:'', old( 'aadhar_number') !!}">
                                  @if ($errors->has('aadhar_number'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('aadhar_number') }}</p>
@@ -312,7 +337,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.emergency_number') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="number" name="emergency_number" class="form-control" value="{!! old( 'emergency_number', $user['emergency_number']) !!}">
+                                 <input type="number" name="emergency_number" class="form-control" value="{!! $user->userinfo?$user->userinfo->emergency_number:'', old( 'emergency_number') !!}">
                                  @if ($errors->has('emergency_number'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('emergency_number') }}</p>
@@ -327,7 +352,7 @@
                            <label class="col-md-2 col-form-label">{!! trans('panel.user.current_address') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="current_address" class="form-control" value="{!! old( 'current_address', $user['current_address']) !!}">
+                                 <input type="text" name="current_address" class="form-control" value="{!! $user->userinfo?$user->userinfo->current_address:'', old( 'current_address') !!}">
                                  @if ($errors->has('current_address'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('current_address') }}</p>
@@ -350,7 +375,7 @@
                            <label class="col-md-2 col-form-label">{!! trans('panel.user.permanent_address') !!}</label>
                            <div class="col-md-10">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="permanent_address" class="form-control permanentAddress" value="{!! old( 'permanent_address', $user['permanent_address']) !!}">
+                                 <input type="text" name="permanent_address" class="form-control permanentAddress" value="{!! $user->userinfo?$user->userinfo->permanent_address:'', old( 'permanent_address') !!}">
                                  @if ($errors->has('permanent_address'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('permanent_address') }}</p>
@@ -372,7 +397,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.father_name') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="father_name" class="form-control" value="{!! old( 'father_name', $user['father_name']) !!}">
+                                 <input type="text" name="father_name" class="form-control" value="{!! $user->userinfo?$user->userinfo->father_name:'',old( 'father_name' )!!}">
                                  @if ($errors->has('father_name'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('father_name') }}</p>
@@ -387,7 +412,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.father_date_of_birth') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="father_date_of_birth" class="form-control datepicker" value="{!! old( 'father_date_of_birth', $user['father_date_of_birth']) !!}" autocomplete="off">
+                                 <input type="text" name="father_date_of_birth" class="form-control datepicker" value="{!! $user->userinfo?$user->userinfo->father_date_of_birth:'',old( 'father_date_of_birth') !!}" autocomplete="off">
                               </div>
                               @if ($errors->has('father_date_of_birth'))
                               <div class="error col-lg-12">
@@ -402,7 +427,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.mother_name') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="mother_name" class="form-control" value="{!! old( 'mother_name', $user['mother_name']) !!}">
+                                 <input type="text" name="mother_name" class="form-control" value="{!!  $user->userinfo?$user->userinfo->mother_name:'',old( 'mother_name') !!}">
                                  @if ($errors->has('mother_name'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('mother_name') }}</p>
@@ -417,7 +442,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.mother_date_of_birth') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="mother_date_of_birth" class="form-control datepicker" value="{!! old( 'mother_date_of_birth', $user['mother_date_of_birth']) !!}" autocomplete="off">
+                                 <input type="text" name="mother_date_of_birth" class="form-control datepicker" value="{!!  $user->userinfo?$user->userinfo->mother_date_of_birth:'',old( 'mother_date_of_birth') !!}" autocomplete="off">
                               </div>
                               @if ($errors->has('mother_date_of_birth'))
                               <div class="error col-lg-12">
@@ -432,7 +457,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.marriage_anniversary') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="marriage_anniversary" class="form-control datepicker" value="{!! old( 'marriage_anniversary', $user['marriage_anniversary']) !!}" autocomplete="off">
+                                 <input type="text" name="marriage_anniversary" class="form-control datepicker" value="{!!  $user->userinfo?$user->userinfo->marriage_anniversary:'',old( 'marriage_anniversary') !!}" autocomplete="off">
                               </div>
                               @if ($errors->has('marriage_anniversary'))
                               <div class="error col-lg-12">
@@ -447,7 +472,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.spouse_name') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="spouse_name" class="form-control" value="{!! old( 'spouse_name', $user['spouse_name']) !!}">
+                                 <input type="text" name="spouse_name" class="form-control" value="{!!  $user->userinfo?$user->userinfo->spouse_name:'',old( 'spouse_name' ) !!}">
                                  @if ($errors->has('spouse_name'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('spouse_name') }}</p>
@@ -462,7 +487,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.spouse_date_of_birth') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="spouse_date_of_birth" class="form-control datepicker" value="{!! old( 'spouse_date_of_birth', $user['spouse_date_of_birth']) !!}" autocomplete="off">
+                                 <input type="text" name="spouse_date_of_birth" class="form-control datepicker" value="{!!  $user->userinfo?$user->userinfo->spouse_date_of_birth:'',old( 'spouse_date_of_birth' ) !!}" autocomplete="off">
                               </div>
                               @if ($errors->has('spouse_date_of_birth'))
                               <div class="error col-lg-12">
@@ -478,7 +503,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.children_one') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="children_one" class="form-control" value="{!! old( 'children_one', $user['children_one']) !!}">
+                                 <input type="text" name="children_one" class="form-control" value="{!!  $user->userinfo?$user->userinfo->children_one:'',old( 'children_one' ) !!}">
                                  @if ($errors->has('children_one'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('children_one') }}</p>
@@ -493,7 +518,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.children_one_date_of_birth') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="children_one_date_of_birth" class="form-control datepicker" value="{!! old( 'children_one_date_of_birth', $user['children_one_date_of_birth']) !!}" autocomplete="off">
+                                 <input type="text" name="children_one_date_of_birth" class="form-control datepicker" value="{!!  $user->userinfo?$user->userinfo->children_one_date_of_birth:'',old( 'children_one_date_of_birth') !!}" autocomplete="off">
                               </div>
                               @if ($errors->has('children_one_date_of_birth'))
                               <div class="error col-lg-12">
@@ -509,7 +534,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.children_two') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="children_two" class="form-control" value="{!! old( 'children_two', $user['children_two']) !!}">
+                                 <input type="text" name="children_two" class="form-control" value="{!!  $user->userinfo?$user->userinfo->children_two:'',old( 'children_two') !!}">
                                  @if ($errors->has('children_two'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('children_two') }}</p>
@@ -525,7 +550,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.children_two_date_of_birth') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="children_two_date_of_birth" class="form-control datepicker" value="{!! old( 'children_two_date_of_birth', $user['children_two_date_of_birth']) !!}" autocomplete="off">
+                                 <input type="text" name="children_two_date_of_birth" class="form-control datepicker" value="{!!  $user->userinfo?$user->userinfo->children_two_date_of_birth:'',old( 'children_two_date_of_birth') !!}" autocomplete="off">
                               </div>
                               @if ($errors->has('children_two_date_of_birth'))
                               <div class="error col-lg-12">
@@ -541,7 +566,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.children_three') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="children_three" class="form-control" value="{!! old( 'children_three', $user['children_three']) !!}">
+                                 <input type="text" name="children_three" class="form-control" value="{!!  $user->userinfo?$user->userinfo->children_three:'',old( 'children_three') !!}">
                                  @if ($errors->has('children_three'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('children_three') }}</p>
@@ -557,7 +582,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.children_three_date_of_birth') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="children_three_date_of_birth" class="form-control datepicker" value="{!! old( 'children_three_date_of_birth', $user['children_three_date_of_birth']) !!}" autocomplete="off">
+                                 <input type="text" name="children_three_date_of_birth" class="form-control datepicker" value="{!!  $user->userinfo?$user->userinfo->children_three_date_of_birth:'',old( 'children_three_date_of_birth') !!}" autocomplete="off">
                               </div>
                               @if ($errors->has('children_three_date_of_birth'))
                               <div class="error col-lg-12">
@@ -573,7 +598,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.children_four') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="children_four" class="form-control" value="{!! old( 'children_four', $user['children_four']) !!}">
+                                 <input type="text" name="children_four" class="form-control" value="{!!  $user->userinfo?$user->userinfo->children_four:'',old( 'children_four') !!}">
                                  @if ($errors->has('children_four'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('children_four') }}</p>
@@ -589,7 +614,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.children_four_date_of_birth') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="children_four_date_of_birth" class="form-control datepicker" value="{!! old( 'children_four_date_of_birth', $user['children_four_date_of_birth']) !!}" autocomplete="off">
+                                 <input type="text" name="children_four_date_of_birth" class="form-control datepicker" value="{!!  $user->userinfo?$user->userinfo->children_four_date_of_birth:'',old( 'children_four_date_of_birth') !!}" autocomplete="off">
                               </div>
                               @if ($errors->has('children_four_date_of_birth'))
                               <div class="error col-lg-12">
@@ -605,7 +630,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.children_five') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="children_five" class="form-control" value="{!! old( 'children_five', $user['children_five']) !!}">
+                                 <input type="text" name="children_five" class="form-control" value="{!!  $user->userinfo?$user->userinfo->children_five:'',old( 'children_five') !!}">
                                  @if ($errors->has('children_five'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('children_five') }}</p>
@@ -621,7 +646,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.children_five_date_of_birth') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="children_five_date_of_birth" class="form-control datepicker" value="{!! old( 'children_five_date_of_birth', $user['children_five_date_of_birth']) !!}" autocomplete="off">
+                                 <input type="text" name="children_five_date_of_birth" class="form-control datepicker" value="{!!  $user->userinfo?$user->userinfo->children_five_date_of_birth:'',old( 'children_five_date_of_birth') !!}" autocomplete="off">
                               </div>
                               @if ($errors->has('children_five_date_of_birth'))
                               <div class="error col-lg-12">
@@ -652,7 +677,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.account_number') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="account_number" id="account_number" class="form-control" value="{!! old( 'account_number', $user['account_number']) !!}">
+                                 <input type="text" name="account_number" id="account_number" class="form-control" value="{!!  $user->userinfo?$user->userinfo->account_number:'',old( 'account_number') !!}">
                                  @if ($errors->has('account_number'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('account_number') }}</p>
@@ -667,7 +692,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.bank_name') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="bank_name" class="form-control" value="{!! old( 'bank_name', $user['bank_name']) !!}">
+                                 <input type="text" name="bank_name" class="form-control" value="{!! old( 'bank_name', $user->userinfo?$user->userinfo->bank_name:'') !!}">
                                  @if ($errors->has('bank_name'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('bank_name') }}</p>
@@ -682,7 +707,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.ifsc_code') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="ifsc_code" class="form-control" value="{!! old( 'ifsc_code', $user['ifsc_code']) !!}">
+                                 <input type="text" name="ifsc_code" class="form-control" value="{!! old( 'ifsc_code', $user->userinfo?$user->userinfo->ifsc_code:'') !!}">
                                  @if ($errors->has('ifsc_code'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('ifsc_code') }}</p>
@@ -704,7 +729,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.salary') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="salary" class="form-control" value="{!! old( 'salary', $user['salary']) !!}">
+                                 <input type="text" name="salary" class="form-control" value="{!! old( 'salary', $user->userinfo?$user->userinfo->salary:'') !!}">
                                  @if ($errors->has('salary'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('salary') }}</p>
@@ -720,7 +745,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.ctc_annual') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="ctc_annual" class="form-control" value="{!! old( 'ctc_annual') !!}">
+                                 <input type="text" name="ctc_annual" class="form-control" value="{!! $user->userinfo?$user->userinfo->ctc_annual:'',old( 'ctc_annual') !!}">
                                  @if ($errors->has('ctc_annual'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('ctc_annual') }}</p>
@@ -735,7 +760,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.gross_salary_monthly') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="gross_salary_monthly" class="form-control" value="{!! old( 'gross_salary_monthly') !!}">
+                                 <input type="text" name="gross_salary_monthly" class="form-control" value="{!! $user->userinfo?$user->userinfo->gross_salary_monthly:'',old( 'gross_salary_monthly') !!}">
                                  @if ($errors->has('gross_salary_monthly'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('gross_salary_monthly') }}</p>
@@ -750,7 +775,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.last_year_increments') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="last_year_increments" class="form-control" value="{!! old( 'last_year_increments') !!}">
+                                 <input type="text" name="last_year_increments" class="form-control" value="{!! $user->userinfo?$user->userinfo->last_year_increments:'',old( 'last_year_increments') !!}">
                                  @if ($errors->has('last_year_increments'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('last_year_increments') }}</p>
@@ -767,7 +792,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.last_year_increment_percent') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="last_year_increment_percent" class="form-control" value="{!! old( 'last_year_increment_percent') !!}">
+                                 <input type="text" name="last_year_increment_percent" class="form-control" value="{!! $user->userinfo?$user->userinfo->last_year_increment_percent:'',old( 'last_year_increment_percent') !!}">
                                  @if ($errors->has('last_year_increment_percent'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('last_year_increment_percent') }}</p>
@@ -783,7 +808,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.last_year_increment_value') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="last_year_increment_value" class="form-control" value="{!! old( 'last_year_increment_value') !!}">
+                                 <input type="text" name="last_year_increment_value" class="form-control" value="{!! $user->userinfo?$user->userinfo->last_year_increment_value:'',old( 'last_year_increment_value') !!}">
                                  @if ($errors->has('last_year_increment_value'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('last_year_increment_value') }}</p>
@@ -799,7 +824,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.last_promotion') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="last_promotion" class="form-control" value="{!! old( 'last_promotion', $user['last_promotion']) !!}">
+                                 <input type="text" name="last_promotion" class="form-control" value="{!! $user->userinfo?$user->userinfo->last_promotion:'',old( 'last_promotion') !!}">
                                  @if ($errors->has('last_promotion'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('last_promotion') }}</p>
@@ -815,7 +840,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.pf_number') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="pf_number" class="form-control" value="{!! old( 'pf_number', $user['pf_number']) !!}">
+                                 <input type="text" name="pf_number" class="form-control" value="{!! old( 'pf_number', $user->userinfo?$user->userinfo->pf_number:'') !!}">
                                  @if ($errors->has('pf_number'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('pf_number') }}</p>
@@ -830,7 +855,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.un_number') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="un_number" class="form-control" value="{!! old( 'un_number', $user['un_number']) !!}">
+                                 <input type="text" name="un_number" class="form-control" value="{!! old( 'un_number', $user->userinfo?$user->userinfo->un_number:'') !!}">
                                  @if ($errors->has('un_number'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('un_number') }}</p>
@@ -846,7 +871,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.esi_number') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="esi_number" class="form-control" value="{!! old( 'esi_number', $user['esi_number']) !!}">
+                                 <input type="text" name="esi_number" class="form-control" value="{!! old( 'esi_number', $user->userinfo?$user->userinfo->esi_number:'') !!}">
                                  @if ($errors->has('esi_number'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('esi_number') }}</p>
@@ -861,7 +886,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.probation_period') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="probation_period" class="form-control datepicker" value="{!! old( 'probation_period', $user['probation_period']) !!}">
+                                 <input type="text" name="probation_period" class="form-control datepicker" value="{!! old( 'probation_period', $user->userinfo?$user->userinfo->probation_period:'') !!}">
                                  @if ($errors->has('probation_period'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('probation_period') }}</p>
@@ -876,7 +901,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.date_of_confirmation') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="date_of_confirmation" class="form-control datepicker" value="{!! old( 'date_of_confirmation', $user['date_of_confirmation']) !!}" autocomplete="off">
+                                 <input type="text" name="date_of_confirmation" class="form-control datepicker" value="{!! old( 'date_of_confirmation', $user->userinfo?$user->userinfo->date_of_confirmation:'') !!}" autocomplete="off">
                                  @if ($errors->has('date_of_confirmation'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('date_of_confirmation') }}</p>
@@ -891,7 +916,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.notice_period') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="notice_period" class="form-control" value="{!! old( 'notice_period', $user['notice_period']) !!}">
+                                 <input type="text" name="notice_period" class="form-control" value="{!! old( 'notice_period', $user->userinfo?$user->userinfo->notice_period:'') !!}">
                                  @if ($errors->has('notice_period'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('notice_period') }}</p>
@@ -906,7 +931,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.date_of_leaving') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="date_of_leaving" class="form-control datepicker" value="{!! old( 'date_of_leaving', $user['date_of_leaving']) !!}">
+                                 <input type="text" name="date_of_leaving" class="form-control datepicker" value="{!! old( 'date_of_leaving', $user->userinfo?$user->userinfo->date_of_leaving:'') !!}">
                                  @if ($errors->has('date_of_leaving'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('date_of_leaving') }}</p>
@@ -930,7 +955,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.date_of_joining') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" id="date_of_joining" name="date_of_joining" class="form-control datepicker" value="{!! old( 'date_of_joining', $user['date_of_joining']) !!}" autocomplete="off">
+                                 <input type="text" id="date_of_joining" name="date_of_joining" class="form-control datepicker" value="{!! old( 'date_of_joining', $user->userinfo?$user->userinfo->date_of_joining:'') !!}" autocomplete="off">
                                  @if ($errors->has('date_of_joining'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('date_of_joining') }}</p>
@@ -997,7 +1022,7 @@
                                  <select class="form-control" name="designation_id">
                                     <option value="" disabled selected>Select {!! trans('panel.user.designation') !!}</option>
                                     @foreach($designations as $designation)
-                                    <option value="{{$designation->id}}"> {{$designation->designation_name}}</option>
+                                    <option value="{{$designation->id}}" {{ (($designation->id == old('designation_id', $user->id?$user->getdesignation->id:''))) ? 'selected' : '' }} > {{$designation->designation_name}}</option>
                                     @endforeach
                                  </select>
                                  @if($errors->has('designation_id'))
@@ -1019,7 +1044,7 @@
                                     <select class="form-control" name="branch_id" required>
                                        <option value="" disabled selected>Select Branch</option>
                                        @foreach($branches as $branche)
-                                       <option value="{{$branche->id}}">{{$branche->branch_name}}</option>
+                                       <option {{ (($branche->id == old('branch_id', $user->id?$user->getbranch->id:''))) ? 'selected' : '' }} value="{{$branche->id}}">{{$branche->branch_name}}</option>
                                        @endforeach
                                     </select>
                                  </div>
@@ -1043,7 +1068,7 @@
                                  <select class="form-control" name="division_id">
                                     <option value="" disabled selected>Select {!! trans('panel.user.division') !!}</option>
                                     @foreach($divisions as $division)
-                                    <option value="{{$division->id}}">{{$division->division_name}}</option>
+                                    <option value="{{$division->id}}" {{ (($division->id == old('division_id', $user->id?($user->getdivision?$user->getdivision->id:''):''))) ? 'selected' : '' }} >{{$division->division_name}}</option>
                                     @endforeach
                                  </select>
                                  @if($errors->has('division_id'))
@@ -1066,7 +1091,7 @@
                                  <select class="form-control" name="department_id">
                                     <option value="" disabled selected>Select {!! trans('panel.user.department') !!}</option>
                                     @foreach($departments as $department)
-                                    <option value="{{$department->id}}">{{$department->name}}</option>
+                                    <option value="{{$department->id}}" {{ (($department->id == old('department_id', $user->id?($user->getdepartment?$user->getdepartment->id:''):''))) ? 'selected' : '' }} >{{$department->name}}</option>
                                     @endforeach
                                  </select>
                                  @if($errors->has('department_id'))
@@ -1088,7 +1113,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.order_mail') !!}<span class="text-danger"> *</span></label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="order_mails" id="order_mails" class="form-control" value="{!! old( 'order_mails', $user['order_mails']) !!}">
+                                 <input type="text" name="order_mails" id="order_mails" class="form-control" value="{!! old( 'order_mails', $user->userinfo?$user->userinfo->order_mails:'') !!}">
                                  @if ($errors->has('order_mails'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('order_mails') }}</p>
@@ -1108,7 +1133,7 @@
                                     <option value="">Select {!! trans('panel.customers.fields.customertype') !!}</option>
                                     @if(@isset($customertype ))
                                     @foreach($customertype as $type)
-                                    <option value="{!! $type['id'] !!}" {{ old( 'order_mails_type' , (!empty($user['order_mails_type']))?($user['order_mails_type']):('') ) == $type['id'] ? 'selected' : '' }}>{!! $type['customertype_name'] !!}</option>
+                                    <option value="{!! $type['id'] !!}" {{ (in_array($type['id'],($user->userinfo?explode(',',$user->userinfo->order_mails_type):[]))) ? 'selected' : '' }} >{!! $type['customertype_name'] !!}</option>
                                     @endforeach
                                     @endif
                                  </select>
@@ -1141,20 +1166,24 @@
                            <tbody>
                               @foreach(config('constants.education_type') as $k=>$education_type)
                               <tr class="item-row">
+                                 <input type="hidden" name="education_detail[{{$k}}][education_type_id]" value="{{$k}}">
+                                 @php
+                                       $education = $user->geteducation->where('education_type_id', $k)->where('user_id', $user->id)->first();
+                                 @endphp
                                  <td>
-                                    <input type="text" name="education_detail[{{$k}}][degree_name]" placeholder="{{$education_type}}">
+                                    <input type="text" value="{{ $education ? $education->degree_name : '' }}" name="education_detail[{{$k}}][degree_name]" placeholder="{{ $education_type }}">
                                  </td>
                                  <td>
-                                    <input type="text" name="education_detail[{{$k}}][board_name]">
+                                    <input type="text" value="{{ $education ? $education->board_name : '' }}" name="education_detail[{{$k}}][board_name]">
                                  </td>
                                  <td>
-                                    <input type="text" name="education_detail[{{$k}}][percentage]">
+                                    <input type="text" value="{{ $education ? $education->percentage : '' }}" name="education_detail[{{$k}}][percentage]">
                                  </td>
                                  <td>
-                                    <input type="text" name="education_detail[{{$k}}][grade]">
+                                    <input type="text" value="{{ $education ? $education->grade : '' }}" name="education_detail[{{$k}}][grade]">
                                  </td>
                                  <td>
-                                    <img src="{!! asset('assets/img/placeholder.jpg') !!}" class="imagepreview{{$k}}" width="70px;">
+                                    <img src="{{ ($education ? (count($education->getMedia('education_image')) > 0 ? $education->getMedia('education_image')[0]->getFullUrl() : asset('assets/img/placeholder.jpg')) : asset('assets/img/placeholder.jpg')) }}" class="imagepreview{{$k}}" width="70px;">
                                     <span class="btn btn-just-icon btn-round btn-file" style="position: relative; top: -20px;">
                                        <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
                                        <input type="file" name="education_detail[{{$k}}][image]" class="getimage{{$k}}">
@@ -1188,7 +1217,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.current_company_tenture') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input placeholder="In Year" type="number" name="current_company_tenture" id="current_company_tenture" class="form-control" value="{!! old( 'current_company_tenture') !!}">
+                                 <input placeholder="In Year" type="number" name="current_company_tenture" id="current_company_tenture" class="form-control" value="{!! old( 'current_company_tenture', $user->userinfo?$user->userinfo->current_company_tenture:'') !!}">
                                  @if ($errors->has('current_company_tenture'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('current_company_tenture') }}</p>
@@ -1203,7 +1232,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.previous_exp') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="number" placeholder="In Year" name="previous_exp" id="previous_exp" class="form-control" value="{!! old( 'previous_exp') !!}">
+                                 <input type="number" placeholder="In Year" name="previous_exp" id="previous_exp" class="form-control" value="{!! old( 'previous_exp', $user->userinfo?$user->userinfo->previous_exp:'') !!}">
                                  @if ($errors->has('previous_exp'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('previous_exp') }}</p>
@@ -1218,7 +1247,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.total_exp') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input placeholder="In Year" type="number" readonly name="total_exp" id="total_exp" class="form-control" value="{!! old( 'total_exp') !!}">
+                                 <input placeholder="In Year" type="number" readonly name="total_exp" id="total_exp" class="form-control" value="{!! old( 'total_exp', $user->userinfo?$user->userinfo->total_exp:'') !!}">
                                  @if ($errors->has('total_exp'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('total_exp') }}</p>
@@ -1270,6 +1299,16 @@
          var today = new Date();
          var age = Math.floor((today-dob) / (365.25 * 24 * 60 * 60 * 1000));
          $('#age').val(age);
+      })
+
+      $(document).ready(function(){
+         var DOB = $('#date_of_birth').val();
+         if(DOB != ''){
+            dob = new Date(DOB);
+            var today = new Date();
+            var age = Math.floor((today-dob) / (365.25 * 24 * 60 * 60 * 1000));
+            $('#age').val(age);
+         }
       })
 
       $(document).on('change', '#date_of_joining', function(){
