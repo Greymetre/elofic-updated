@@ -381,21 +381,6 @@ $(document).ready(function () {
           }
         }
       },
-      account_number:
-      {
-        maxlength: 250,
-        remote:{
-          url:base_url+"/uniqueValidation",
-          type:"post",
-          data: {
-            "_token": token,
-            value: function() {return $("#account_number").val();},
-            table :'user_details',
-            column : 'account_number',
-            id: function() {return $("#user_id").val();},
-          }
-        }
-      },
       current_address:
       {
         maxlength: 250,

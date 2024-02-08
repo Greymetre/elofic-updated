@@ -41,7 +41,7 @@
                            <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
                         </div>
                         <div class="fileinput-new thumbnail">
-                           <img src="../{!! ($user['profile_image']) ? asset($user['profile_image']) : asset('assets/img/placeholder.jpg') !!}" class="imagepreview1">
+                           <img src="{{ ($user ? (count($user->getMedia('profile_image')) > 0 ? $user->getMedia('profile_image')[0]->getFullUrl() : asset('assets/img/placeholder.jpg')) : asset('assets/img/placeholder.jpg')) }}" class="imagepreview1">
                         </div>
                         <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
                         <label class="bmd-label-floating">{!! trans('panel.user.profile_image') !!}</label>
@@ -296,10 +296,21 @@
                      <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.pan_card_image') !!}</label>
-                           <div class="col-md-9">
+                           <div class="col-md-8">
                               <div class=" has-default bmd-form-group">
                                  <input type="file" name="pan_card_image" class="form-control">
                               </div>
+                           </div>
+                           <div class="col-md-1 p-0">
+                              @if($user->id)
+                              @if(count($user->getMedia('pan_image')) > 0)
+                              <a class="text-info h3" title="Download Pan" download="download" href="{{$user->getMedia('pan_image')[0]->getFullUrl()}}" ><i class="fa fa-download" aria-hidden="true"></i></a>
+                              @else
+                              <span title="Not Uploaded" class="text-danger h3"><i class="fa fa-exclamation-circle"></i></span>
+                              @endif
+                              @else
+                              <span title="Not Uploaded" class="text-danger h3"><i class="fa fa-exclamation-circle"></i></span>
+                              @endif
                            </div>
                         </div>
                      </div>
@@ -307,7 +318,7 @@
                      <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.aadhar_number') !!}</label>
-                           <div class="col-md-9">
+                           <div class="col-md-6">
                               <div class="form-group has-default bmd-form-group">
                                  <input type="text" name="aadhar_number" id="aadhar_number" class="form-control" value="{!! $user->userinfo?$user->userinfo->aadhar_number:'', old( 'aadhar_number') !!}">
                                  @if ($errors->has('aadhar_number'))
@@ -323,10 +334,21 @@
                      <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.aadhar_card_image') !!}</label>
-                           <div class="col-md-9">
+                           <div class="col-md-8">
                               <div class="has-default bmd-form-group">
                                  <input type="file" name="aadhar_card_image" class="form-control">
                               </div>
+                           </div>
+                           <div class="col-md-1 p-0">
+                              @if($user->id)
+                              @if(count($user->getMedia('aadhar_image')) > 0)
+                              <a class="text-info h3" title="Download Aadhar" download="download" href="{{$user->getMedia('aadhar_image')[0]->getFullUrl()}}" ><i class="fa fa-download" aria-hidden="true"></i></a>
+                              @else
+                              <span title="Not Uploaded" class="text-danger h3"><i class="fa fa-exclamation-circle"></i></span>
+                              @endif
+                              @else
+                              <span title="Not Uploaded" class="text-danger h3"><i class="fa fa-exclamation-circle"></i></span>
+                              @endif
                            </div>
                         </div>
                      </div>
@@ -1247,7 +1269,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.total_exp') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input placeholder="In Year" type="number" readonly name="total_exp" id="total_exp" class="form-control" value="{!! old( 'total_exp', $user->userinfo?$user->userinfo->total_exp:'') !!}">
+                                 <input placeholder="In Year" type="number" readonly name="total_exp" id="total_exp" class="form-control" >
                                  @if ($errors->has('total_exp'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('total_exp') }}</p>
@@ -1309,6 +1331,18 @@
             var age = Math.floor((today-dob) / (365.25 * 24 * 60 * 60 * 1000));
             $('#age').val(age);
          }
+         var current_company_tenture  = $('#current_company_tenture').val();
+         var previous_exp = $('#previous_exp').val();
+         $('#total_exp').val(parseInt(current_company_tenture)+parseInt(previous_exp));
+
+         var DOJ = $('#date_of_joining').val();
+         doj = new Date(DOJ);
+         var today = new Date();
+         var current_company_tenture = Math.floor((today-doj) / (365.25 * 24 * 60 * 60 * 1000));
+         $('#current_company_tenture').val(current_company_tenture);
+         var previous_exp = $('#previous_exp').val();
+
+         $('#total_exp').val(parseInt(current_company_tenture)+parseInt(previous_exp));
       })
 
       $(document).on('change', '#date_of_joining', function(){
@@ -1318,6 +1352,7 @@
          var current_company_tenture = Math.floor((today-dob) / (365.25 * 24 * 60 * 60 * 1000));
          $('#current_company_tenture').val(current_company_tenture);
          var previous_exp = $('#previous_exp').val();
+
          $('#total_exp').val(parseInt(current_company_tenture)+parseInt(previous_exp));
       })
 

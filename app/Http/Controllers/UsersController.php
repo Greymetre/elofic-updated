@@ -183,16 +183,10 @@ class UsersController extends Controller
         }
 
         if($request->file('aadhar_card_image')){
-            $image = $request->file('aadhar_card_image');
-            $filename = 'aadhar_card_'.$user['id'];
-            $aadhar_card_image = fileupload($image, $this->aadhar_card_path, $filename);
-            UserDetails::where('user_id',$user['id'])->update([ 'aadhar_card_image' => $aadhar_card_image]);
+            $user->addMedia($request->file('aadhar_card_image'))->toMediaCollection('aadhar_image');
         }
         if($request->file('pan_card_image')){
-            $image = $request->file('pan_card_image');
-            $filename = 'pan_card_'.$user['id'];
-            $pan_card_image = fileupload($image, $this->pan_card_path, $filename);
-            UserDetails::where('user_id',$user['id'])->update([ 'pan_card_image' => $pan_card_image]);
+            $user->addMedia($request->file('pan_card_image'))->toMediaCollection('pan_image');
         }
         return redirect()->route('users.index');
 
@@ -223,13 +217,7 @@ class UsersController extends Controller
     //public function update(Request $request, User $user)
     public function update(Request $request, $id)
     {  
-        if($request->file('image')){
-            $image = $request->file('image');
-            $filename = 'profile_'.$id;
-            $request['profile_image'] = fileupload($image, $this->path, $filename);
-        }
-
-        UserDetails::updateOrCreate(['user_id' => $id],[
+        $details_updated = UserDetails::updateOrCreate(['user_id' => $id],[
             'marital_status'   =>  isset($request['marital_status']) ? $request['marital_status'] :null,
             'date_of_birth'   =>  isset($request['date_of_birth']) ? $request['date_of_birth'] :null,
             'pan_number'   =>  isset($request['pan_number']) ? $request['pan_number'] :null,
@@ -276,9 +264,9 @@ class UsersController extends Controller
             'order_mails'   =>  isset($request['order_mails']) ? $request['order_mails'] :'',
             'order_mails_type'   =>  isset($request['order_mails_type']) ? implode(',', $request['order_mails_type']) :'',
             'other_education'  => isset($request['other_education']) ? $request['other_education'] :null,
-            'previous_exp'   =>  isset($request['previous_exp']) ? $request['previous_exp'] :null,
-            'current_company_tenture'   =>  isset($request['current_company_tenture']) ? $request['current_company_tenture'] :null,
-            'total_exp'   =>  isset($request['total_exp']) ? $request['total_exp'] :null,
+            'previous_exp'   =>  isset($request['previous_exp']) ? (int)$request['previous_exp'] :0,
+            'current_company_tenture'   =>  isset($request['current_company_tenture']) ? (int)$request['current_company_tenture'] :0,
+            'total_exp'   =>  isset($request['total_exp']) ? (int)$request['total_exp'] :0,
         ]);
 
         foreach($request->education_detail as $education_detail){
@@ -302,6 +290,15 @@ class UsersController extends Controller
             }
         }
         $user = User::where('id',$id)->first();
+        if($request->file('image')){
+            $user->addMedia($request->file('image'))->toMediaCollection('profile_image');
+        }
+        if($request->file('aadhar_card_image')){
+            $user->addMedia($request->file('aadhar_card_image'))->toMediaCollection('aadhar_image');
+        }
+        if($request->file('pan_card_image')){
+            $user->addMedia($request->file('pan_card_image'))->toMediaCollection('pan_image');
+        }
         $user->name = isset($request['name']) ? $request['first_name'].' '.$request['last_name'] :'';
         $user->first_name = isset($request['first_name']) ? $request['first_name'] :'';
         $user->last_name = isset($request['last_name']) ? $request['last_name'] :'';
