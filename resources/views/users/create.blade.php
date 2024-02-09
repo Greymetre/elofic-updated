@@ -1025,7 +1025,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.biometric_code') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="biometric_code" id="biometric_code" class="form-control" value="{!! old( 'biometric_code', $user['biometric_code']) !!}">
+                                 <input type="text" name="biometric_code" id="biometric_code" class="form-control" value="{!! old( 'biometric_code', $user->userinfo->biometric_code) !!}">
                                  @if ($errors->has('biometric_code'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('biometric_code') }}</p>
@@ -1236,10 +1236,10 @@
         
                      <div class="col-md-6">
                         <div class="row">
-                           <label class="col-md-3 col-form-label">{!! trans('panel.user.current_company_tenture') !!}</label>
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.current_company_tenture') !!}(in year)</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input placeholder="In Year" type="number" name="current_company_tenture" id="current_company_tenture" class="form-control" value="{!! old( 'current_company_tenture', $user->userinfo?$user->userinfo->current_company_tenture:'') !!}">
+                                 <input placeholder="In Year" readonly type="number" name="current_company_tenture" id="current_company_tenture" class="form-control" value="{!! old( 'current_company_tenture', $user->userinfo?$user->userinfo->current_company_tenture:'') !!}">
                                  @if ($errors->has('current_company_tenture'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('current_company_tenture') }}</p>
@@ -1251,7 +1251,7 @@
                      </div>
                       <div class="col-md-6">
                         <div class="row">
-                           <label class="col-md-3 col-form-label">{!! trans('panel.user.previous_exp') !!}</label>
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.previous_exp') !!}(in year)</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
                                  <input type="number" placeholder="In Year" name="previous_exp" id="previous_exp" class="form-control" value="{!! old( 'previous_exp', $user->userinfo?$user->userinfo->previous_exp:'') !!}">
@@ -1266,7 +1266,7 @@
                      </div>
                      <div class="col-md-6">
                         <div class="row">
-                           <label class="col-md-3 col-form-label">{!! trans('panel.user.total_exp') !!}</label>
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.total_exp') !!}(in year)</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
                                  <input placeholder="In Year" type="number" readonly name="total_exp" id="total_exp" class="form-control" >

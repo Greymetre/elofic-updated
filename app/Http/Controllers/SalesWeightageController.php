@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Department;
+use App\Models\Designation;
+use App\Models\Division;
 use App\Models\salesWeightage;
 use Illuminate\Http\Request;
 use DataTables;
@@ -62,7 +65,10 @@ class SalesWeightageController extends Controller
      */
     public function create()
     {
-        return view('sales_weightage.create')->with('sales_weightage', $this->sales_weightage);
+        $devisions = Division::all();
+        $departments = Department::all();
+        $designations = Designation::all();
+        return view('sales_weightage.create', compact('devisions', 'departments', 'designations'))->with('sales_weightage', $this->sales_weightage);
     }
 
     /**
