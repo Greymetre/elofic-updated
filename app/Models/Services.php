@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Services extends Model
+{
+    use HasFactory;
+
+    protected $fillable = ['product_code', 'invoice_no','invoice_date' ,'branch_code','party_name','product_name','qty','group','new_group', 'serial_no', 'narration', 'created_by', 'created_at', 'updated_at'];
+
+    public function createdbyname()
+    {
+        return $this->belongsTo('App\Models\User', 'created_by', 'id')->select('id','name');
+    }
+
+}

@@ -61,6 +61,10 @@ return [
         'support'           => 'Supports',
         'payment'           => 'Payments',
         'expenses_type'     => 'Expenses Type',
+        'services'     => 'Services',
+        'serial_number_transaction'     => 'Serial Number Transaction',
+        'serial_number_history'     => 'Serial Number History',
+         'hr'     => 'HR',
     ],
 
     'global'                           => [
@@ -681,6 +685,7 @@ return [
         'point'             => 'Point',
         'year'              => 'Year',
         'branch_name'       => 'Branch Name',
+        'branch_code'       => 'Branch Code',
         'division'          => 'Division',
         
 
@@ -777,6 +782,7 @@ return [
         'fields'         => [
             'id'                 => 'ID',
             'branch_name'        => 'Branch Name',
+            'branch_code'       => 'Branch Code',
         ],
     ],
     'unit'           => [
@@ -804,6 +810,8 @@ return [
         'fields'         => [
             'id'               => 'ID',
              'product_name'    =>   'Product Name', 
+             'expiry_interval'    =>   'Expiry Interval', 
+             'expiry_interval_preiod'    =>   'Expiry Interval Preiod', 
              'display_name'    =>   'Display Name', 
              'description'     =>   'Description', 
              'subcategory_id'  =>   'Subcategory ID', 
@@ -1055,6 +1063,7 @@ return [
         'worked_time' => 'Worked Time',
         'start_time' => 'Start Time',
         'end_time' => 'End Time',
+        'self_grade' => 'Self Grade'
     ],
     'sales_weightage'      => [
         'title'          => 'KRA',
@@ -1062,6 +1071,9 @@ return [
         'weightage_name' => 'KRA Name',
         'weightage' => 'Weightage',
         'last_promotion' => 'Last Promotion',
+        'display_names' => 'Display Name',
+        'display_division' => 'Division Name',
+        'financial_year' => 'Financial Year'
     ],
     'checkin'      => [
         'title'          => 'Checkin',

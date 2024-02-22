@@ -36,22 +36,17 @@
                                 'files'=>true
                                 ]) !!}
 
+
                                 <div class="p-2 form-group">
                                     <label for="display_name">Display Name</label>
                                     <input type="text" name="display_name" id="display_name" value="{{$sales_weightage?$sales_weightage->display_name:''}}" class="form-control">
                                 </div>
-
-                                 <div class="p-2 form-group">
-                                    <label for="financial_year">Financial Year</label>
-                                    <input type="text" name="financial_year" id="financial_year" value="" class="form-control">
-                                </div>
-
                                 <div class="p-2 form-group">
                                     <label for="category">Division</label>
                                     <select class="form-control select2 {{ $errors->has('division') ? 'is-invalid' : '' }}" name="division" id="division" required>
                                         <option value="">Select Division</option>
                                         @foreach($devisions as $devision)
-                                        <option value="{{ $devision->id }}" <?php if ($sales_weightage->division_id == $devision->id) {echo "selected";} ?>>{{ $devision->division_name }}</option>
+                                        <option value="{{ $devision->id }}" <?php if ($sales_weightage->division_id == $devision->id) {echo "selected";} ?> >{{ $devision->division_name }}</option>
                                         @endforeach
                                     </select>
                                     @if ($errors->has('division'))
@@ -65,7 +60,7 @@
                                     <select class="form-control select2 {{ $errors->has('department') ? 'is-invalid' : '' }}" name="department" id="department" required>
                                     <option value="">Select Department</option>
                                         @foreach($departments as $department)
-                                        <option value="{{ $department->id }}" <?php if ($sales_weightage->department_id == $department->id) {echo "selected";} ?> >{{ $department->name }}</option>
+                                        <option value="{{ $department->id }}" <?php if ($sales_weightage->department_id == $department->id) {echo "selected";} ?>>{{ $department->name }}</option>
                                         @endforeach
                                     </select>
                                     @if ($errors->has('department'))
@@ -76,7 +71,6 @@
                                 </div>
                                 <div class="p-2 form-group">
                                     <label for="category">Designation</label>
-
                                     <?php
                                     $selected_desig = array();
                                     if($sales_weightage->designation_id){
@@ -96,39 +90,31 @@
                                     </div>
                                     @endif
                                 </div>
-                               
 
-                             <div class="col-md-1">
-                            <button type="submit" class=" btn btn-theme btn-sm add_more" id="add_more" style="margin-top:20%">{{ __('+') }}</button>     
-                                </div>
-
-                            <div id="add_sales_detail">
-
-                           
                                 <div class="p-2 form-group">
                                     <label for="category">KRA Category</label>
-                                    <input value="{{$sales_weightage?$sales_weightage->category_name:''}}" type="text" name="category[]" id="category" class="form-control">
+                                    <input value="{{$sales_weightage?$sales_weightage->category_name:''}}" type="text" name="category" id="category" class="form-control">
                                 </div>
                                 <div class="p-2 form-group">
                                     <label for="name">KRA Name</label>
-                                    <input value="{{$sales_weightage?$sales_weightage->name:''}}" type="text" name="name[]" id="name" class="form-control">
+                                    <input value="{{$sales_weightage?$sales_weightage->name:''}}" type="text" name="name" id="name" class="form-control">
                                 </div>
 
                                 <div class="p-2 form-group">
                                     <label for="weightage">Weightage</label>
-                                    <input type="text" name="weightage[]" id="weightage" value="{{$sales_weightage?$sales_weightage->weightage:''}}" class="form-control">
+                                    <input type="text" name="weightage" id="weightage" value="{{$sales_weightage?$sales_weightage->weightage:''}}" class="form-control">
                                 </div>
 
                                 <div class="p-2 form-group">
                                     <label for="indicator">Indicator</label>
-                                    <input type="text" name="indicator[]" id="indicator" value="{{$sales_weightage?$sales_weightage->indicator:''}}" class="form-control">
+                                    <input type="text" name="indicator" id="indicator" value="{{$sales_weightage?$sales_weightage->indicator:''}}" class="form-control">
                                 </div>
                                 <div class="p-2 form-group">
                                     <label for="annum_target">Target Per Annum</label>
-                                    <input type="text" name="annum_target[]" id="annum_target" value="{{$sales_weightage?$sales_weightage->annum_target:''}}" class="form-control">
+                                    <input type="text" name="annum_target" id="annum_target" value="{{$sales_weightage?$sales_weightage->annum_target:''}}" class="form-control">
                                 </div>
-                            
-                            </div>
+
+
 
 
                                 @if($sales_weightage->name)
@@ -397,59 +383,5 @@
             }
         })
     </script>
-
-
-
-    <script type="text/javascript">
-
-
- // $("#add_more").click(function (e) {
-   $(".add_more").click(function (e) {     
-        e.preventDefault();
-
-    var saleAdd = '<div class="delete_row_data">'+
-            
-            '<div class="col-md-1">'+
-          '<button class="btn btn-danger btn-sm  deleteRowhstry"  type="button">'+
-          '<i class="bi bi-trash"></i>-</button>'+
-          '</div>'+
-             '<div class="p-2 form-group">'+
-                '<label for="category">KRA Category</label>'+
-                '<input value="" type="text" name="category[]" id="category" class="form-control">'+
-             '</div>'+
-            '<div class="p-2 form-group">'+
-                '<label for="name">KRA Name</label>'+
-                '<input value="" type="text" name="name[]" id="name" class="form-control">'+
-            '</div>'+
-
-            '<div class="p-2 form-group">'+
-                '<label for="weightage">Weightage</label>'+
-                '<input type="text" name="weightage[]" id="weightage" value="" class="form-control">'+
-            '</div>'+
-
-            '<div class="p-2 form-group">'+
-                '<label for="indicator">Indicator</label>'+
-                '<input type="text" name="indicator[]" id="indicator" value="" class="form-control">'+
-            '</div>'+
-            '<div class="p-2 form-group">'+
-                '<label for="annum_target">Target Per Annum</label>'+
-                '<input type="text" name="annum_target[]" id="annum_target" value="" class="form-control">'+
-            '</div>'+
-            '</div>';
-
-
-
-          $('#add_sales_detail').append(saleAdd);
-
-    $('.deleteRowhstry').on('click', function(e) {
-     e.preventDefault();
-      $(this).parents(".delete_row_data").remove();
-      //$(this).remove();
-    });
-
-  }); 
-
-    </script>
-
 
 </x-app-layout>

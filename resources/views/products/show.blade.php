@@ -30,8 +30,8 @@
                 <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Subcategory:</strong> &nbsp; {!! isset($products['subcategories']['subcategory_name']) ? $products['subcategories']['subcategory_name'] : '' !!}</li>
               <!--   <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">{!! trans('panel.product.fields.display_name') !!}:</strong> &nbsp; {!! isset($products['display_name']) ? $products['display_name'] : '' !!}</li> -->
                 <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">{!! trans('panel.product.fields.unit_name') !!}:</strong> &nbsp; {!! isset($products['unitmeasures']['unit_name']) ? $products['unitmeasures']['unit_name'] :'' !!}</li>
-                <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">HSN Code:</strong> &nbsp; {!! isset($products['productdetails'][0]['hsn_code']) ? $products['productdetails'][0]['hsn_code'] :'' !!}</li>
-                <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">EAN Code:</strong> &nbsp; {!! isset($products['productdetails'][0]['ean_code']) ? $products['productdetails'][0]['ean_code'] :'' !!}</li>
+                <!-- <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">HSN Code:</strong> &nbsp; {!! isset($products['productdetails'][0]['hsn_code']) ? $products['productdetails'][0]['hsn_code'] :'' !!}</li>
+                <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">EAN Code:</strong> &nbsp; {!! isset($products['productdetails'][0]['ean_code']) ? $products['productdetails'][0]['ean_code'] :'' !!}</li> -->
               </ul>
 					   </div>
              <div class="col-lg-5 mx-auto">

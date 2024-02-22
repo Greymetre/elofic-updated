@@ -49,7 +49,8 @@ use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\ExpensesTypeController;
 use App\Http\Controllers\SalesWeightageController;
 use App\Http\Controllers\DepartmentController;
-
+use App\Http\Controllers\ServicesController;
+use Aws\Api\Service;
 
 /*
 |--------------------------------------------------------------------------
@@ -158,13 +159,38 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('reportings', UserReportingController::class);
     //Sales Weightege
     Route::resource('sales_weightage', SalesWeightageController::class);
+    Route::post('salesweightage/multiupdate', [SalesWeightageController::class,'multiupdate'])->name('salesweightage.multiupdate');
+
     //Appraisal
-    Route::get('appraisal/create', [AppraisalController::class, 'create']);
+    //Route::get('appraisal/create', [AppraisalController::class, 'create']);
+
+    // Route::get('appraisal/{id}/create', [AppraisalController::class, 'create']);
+    // Route::get('appraisal/index', [AppraisalController::class, 'index'])->name('appraisal.index');
+    // Route::any('appraisal/store', [AppraisalController::class, 'store'])->name('appraisal.store');
+    // Route::post('appraisal/update', [AppraisalController::class, 'update'])->name('appraisal.update');
+    // Route::any('appraisal-download', [ AppraisalController::class, 'download'])->name('appraisal.download');
+    // Route::any('getappraisal', [ AppraisalController::class, 'getappraisal'])->name('appraisal.getappraisal');
+
+        Route::get('appraisal/{id}/create', [AppraisalController::class, 'create']);
     Route::get('appraisal/index', [AppraisalController::class, 'index'])->name('appraisal.index');
     Route::any('appraisal/store', [AppraisalController::class, 'store'])->name('appraisal.store');
     Route::post('appraisal/update', [AppraisalController::class, 'update'])->name('appraisal.update');
     Route::any('appraisal-download', [ AppraisalController::class, 'download'])->name('appraisal.download');
     Route::any('getappraisal', [ AppraisalController::class, 'getappraisal'])->name('appraisal.getappraisal');
+    Route::get('appraisal/{id}/{year}/edit', [AppraisalController::class, 'edit']);
+
+    Route::get('appraisal/{id}/{year}/viewappraisal', [AppraisalController::class, 'viewappraisal']);
+
+    Route::get('appraisal/{id}/{year}/appraisalApprove', [AppraisalController::class, 'appraisalApprove']);
+
+    Route::post('appraisals/updateappraisal', [ AppraisalController::class, 'updateappraisal'])->name('appraisals.updateappraisal');
+
+    Route::post('appraisals/updateapproval', [ AppraisalController::class, 'updateapproval'])->name('appraisals.updateapproval');
+
+
+
+
+
     // Permissions
     Route::delete('permissions/destroy', [ PermissionsController::class, 'massDestroy'])->name('permissions.massDestroy');
     Route::resource('permissions', PermissionsController::class);
@@ -206,6 +232,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('production', [ ProductController::class, 'production'])->name('products.production');
     Route::any('productionupdate', [ ProductController::class, 'productionUpdate'])->name('products.productionupdate');
     Route::any('products-list', [ ProductController::class, 'productList']);
+    Route::any('checkProductCode', [ ProductController::class, 'checkProductCode'])->name('checkProductCode');
     //Orders
     Route::resource('orders', OrderController::class);
     Route::any('orders-download', [ OrderController::class, 'download'])->name('orders.download');
@@ -297,6 +324,8 @@ Route::group(['middleware' => ['auth']], function () {
 
     Route::any('approveAttendance', [ AttendanceController::class, 'approveAttendance'])->name('approveAttendance');
     Route::any('rejectAttendance', [ AttendanceController::class, 'rejectAttendance'])->name('rejectAttendance');
+
+    Route::any('attendancesummary-download', [ AttendanceController::class, 'attendanceSummaryDownload'])->name('attendancesummary.download');
 
 
     
@@ -449,6 +478,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('performanceParameter-download', [ ReportController::class, 'performanceParameterDownload']);
     Route::any('mechanicsPoints-download', [ ReportController::class, 'mechanicsPointsDownload']);
     Route::any('targetAchievement-download', [ ReportController::class, 'targetAchievementDownload']);
+    Route::any('reports/attendancereportSummary', [ ReportController::class, 'attendancereportSummary']);
+
     //Tours
     Route::resource('tours', TourController::class);
     Route::any('toursInfoUpdate', [ TourController::class, 'update'])->name('tours.toursInfoUpdate');
@@ -467,6 +498,15 @@ Route::group(['middleware' => ['auth']], function () {
       // departments
      Route::resource('departments', DepartmentController::class);
      Route::post('departments-active', [ DepartmentController::class, 'active'])->name('departments.active');
+
+     //Services
+    Route::get('services/serial_number_transaction', [ServicesController::class, 'serial_number_transaction'])->name('service.serial_number_transaction');
+    Route::post('services/serial_number_transaction/upload', [ServicesController::class, 'serial_number_transaction_upload'])->name('service.serial_number_transaction.upload');
+    Route::get('services/serial_number_transaction/download', [ServicesController::class, 'serial_number_transaction_download'])->name('service.serial_number_transaction.download');
+    Route::post('services/serial_number_transaction/list', [ServicesController::class, 'serial_number_transaction_list'])->name('service.serial_number_transaction.list');
+
+    Route::get('services/serial_number_history', [ServicesController::class, 'serial_number_history'])->name('service.serial_number_history');
+    Route::post('services/serial_number_history/list', [ServicesController::class, 'serial_number_history_list'])->name('service.serial_number_history.list');
 
 
     Route::get('logout', '\App\Http\Controllers\Auth\AuthenticatedSessionController@destroy');

@@ -30,20 +30,22 @@
                         <div class="card-body ">
                             <div class="tab-content tab-space">
                                 {!! Form::model($sales_weightage,[
-                                'route' => $sales_weightage->exists ? ['sales_weightage.update', $sales_weightage->id] : 'sales_weightage.store',
-                                'method' => $sales_weightage->exists ? 'PUT' : 'POST',
+                                'route' => $sales_weightage->exists ? ['salesweightage.multiupdate'] : 'sales_weightage.store',
+                                'method' => 'POST',
                                 'id' => 'createCompany',
                                 'files'=>true
                                 ]) !!}
+
+
 
                                 <div class="p-2 form-group">
                                     <label for="display_name">Display Name</label>
                                     <input type="text" name="display_name" id="display_name" value="{{$sales_weightage?$sales_weightage->display_name:''}}" class="form-control">
                                 </div>
 
-                                 <div class="p-2 form-group">
+                                <div class="p-2 form-group">
                                     <label for="financial_year">Financial Year</label>
-                                    <input type="text" name="financial_year" id="financial_year" value="" class="form-control">
+                                    <input type="text" name="financial_year" id="financial_year" value="{{$sales_weightage?$sales_weightage->financial_year:''}}" class="form-control">
                                 </div>
 
                                 <div class="p-2 form-group">
@@ -99,37 +101,57 @@
                                
 
                              <div class="col-md-1">
-                            <button type="submit" class=" btn btn-theme btn-sm add_more" id="add_more" style="margin-top:20%">{{ __('+') }}</button>     
+                            <button type="submit" class=" btn btn-theme" id="add_more" style="margin-top:50%">{{ __('+') }}</button>     
                                 </div>
 
                             <div id="add_sales_detail">
 
-                           
-                                <div class="p-2 form-group">
+                               <?php 
+                               $categories = explode(",",$sales_weightage->category_names);
+                               $name = explode(",",$sales_weightage->names);
+                               $weightage = explode(",",$sales_weightage->weightages);
+                               $indicator = explode(",",$sales_weightage->indicators);
+                               $annum_target = explode(",",$sales_weightage->annum_targets);
+                               $weightages_id = explode(",",$sales_weightage->ids);
+                                $i=0;
+                                  ?>  
+                                    @foreach($categories as $category) 
+
+                            
+                                <div class="col-md-1">
+                                <button class="btn btn-danger btn-sm  deleteRowhstry{{$i}}"  type="button"><i class="bi bi-trash"></i>-</button></div>
+
+
+                                <div class="p-2 form-group history{{$i}}">
                                     <label for="category">KRA Category</label>
-                                    <input value="{{$sales_weightage?$sales_weightage->category_name:''}}" type="text" name="category[]" id="category" class="form-control">
+                                    <input value="{{isset($category)?$category:''}}" type="text" name="category[]" id="category" class="form-control">
+                                    <input type="hidden" name="weightages_ids[]" value="{{$weightages_id[$i]}}">
                                 </div>
-                                <div class="p-2 form-group">
+                               
+
+                                <div class="p-2 form-group history{{$i}}">
                                     <label for="name">KRA Name</label>
-                                    <input value="{{$sales_weightage?$sales_weightage->name:''}}" type="text" name="name[]" id="name" class="form-control">
+                                    <input value="{{$sales_weightage?$name[$i]:''}}" type="text" name="name[]" id="name" class="form-control">
                                 </div>
 
-                                <div class="p-2 form-group">
+                                <div class="p-2 form-group history{{$i}}">
                                     <label for="weightage">Weightage</label>
-                                    <input type="text" name="weightage[]" id="weightage" value="{{$sales_weightage?$sales_weightage->weightage:''}}" class="form-control">
+                                    <input type="text" name="weightage[]" id="weightage" value="{{$weightage[$i]??''}}" class="form-control">
                                 </div>
 
-                                <div class="p-2 form-group">
+                                <div class="p-2 form-group history{{$i}}">
                                     <label for="indicator">Indicator</label>
-                                    <input type="text" name="indicator[]" id="indicator" value="{{$sales_weightage?$sales_weightage->indicator:''}}" class="form-control">
+                                    <input type="text" name="indicator[]" id="indicator" value="{{$indicator[$i]??''}}" class="form-control">
                                 </div>
-                                <div class="p-2 form-group">
+                                <div class="p-2 form-group history{{$i}}">
                                     <label for="annum_target">Target Per Annum</label>
-                                    <input type="text" name="annum_target[]" id="annum_target" value="{{$sales_weightage?$sales_weightage->annum_target:''}}" class="form-control">
+                                    <input type="text" name="annum_target[]" id="annum_target" value="{{$annum_target[$i]??''}}" class="form-control">
                                 </div>
+                                
+                                <?php $i++; ?>
+                                @endforeach 
                             
                             </div>
-
 
                                 @if($sales_weightage->name)
                                 {{ Form::submit('Update', array('class' => 'btn btn-theme pull-right')) }}
@@ -403,19 +425,18 @@
     <script type="text/javascript">
 
 
- // $("#add_more").click(function (e) {
-   $(".add_more").click(function (e) {     
+ $("#add_more").click(function (e) {
         e.preventDefault();
 
     var saleAdd = '<div class="delete_row_data">'+
-            
             '<div class="col-md-1">'+
           '<button class="btn btn-danger btn-sm  deleteRowhstry"  type="button">'+
-          '<i class="bi bi-trash"></i>-</button>'+
-          '</div>'+
+         '<i class="bi bi-trash"></i>-</button>'+
+        '</div>'+
              '<div class="p-2 form-group">'+
                 '<label for="category">KRA Category</label>'+
                 '<input value="" type="text" name="category[]" id="category" class="form-control">'+
+                 '<input type="hidden" name="weightages_ids[]">'+
              '</div>'+
             '<div class="p-2 form-group">'+
                 '<label for="name">KRA Name</label>'+
@@ -448,6 +469,18 @@
     });
 
   }); 
+
+     
+
+    <?php $i=0; ?>
+    @foreach($categories as $category) 
+  $('.deleteRowhstry'+{{$i}}).on('click', function(e) {
+     e.preventDefault();
+     $(".history"+{{$i}}).remove();
+     $(this).remove();
+    });
+      <?php $i++; ?>
+      @endforeach   
 
     </script>
 

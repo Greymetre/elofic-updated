@@ -94,7 +94,7 @@ class OrderExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapp
             isset($data['statusname']['status_name']) ? $data['statusname']['status_name'] :'',
             isset($data['orders']['getuserdetails']['employee_codes']) ? $data['orders']['getuserdetails']['employee_codes'] :'',
             isset($data['orders']['getuserdetails']['getbranch']['branch_name']) ? $data['orders']['getuserdetails']['getbranch']['branch_name'] :'',
-            isset($data['orders']['getuserdetails']['getdepartment']['division_name']) ? $data['orders']['getuserdetails']['getdepartment']['division_name'] :'',
+            isset($data['orders']['getuserdetails']['getdivision']['division_name']) ? $data['orders']['getuserdetails']['getdivision']['division_name'] :'',
             isset($data['orders']['getuserdetails']['getdesignation']['designation_name']) ? $data['orders']['getuserdetails']['getdesignation']['designation_name'] :'',
 
 

@@ -286,7 +286,7 @@
               <p>{!! trans('panel.sidemenu.expenses_type') !!}</p>
             </a>
           </li> -->
-          @endif 
+          @endif
           @if(auth()->user()->can('product_access'))
           <li class="nav-item ">
             <a class="nav-link collapsed" data-toggle="collapse" href="#productMenu" aria-expanded="false">
@@ -350,6 +350,74 @@
                   <a class="nav-link" href="{{ url('production') }}">
                     <i class="material-icons">donut_small</i>
                     <p>Production</p>
+                  </a>
+                </li>
+                @endif
+              </ul>
+            </div>
+          </li>
+          @endif
+
+
+        @if(auth()->user()->can('hr_access'))
+          <li class="nav-item {{ request()->is('reports*') ? 'active' : '' }}">
+            <a class="nav-link collapsed" data-toggle="collapse" href="#hr" aria-expanded="false">
+              <i class="material-icons">star</i>
+              <p> {!! trans('panel.sidemenu.hr') !!}
+
+              </p>
+            </a>
+            <div class="collapse" id="hr" style="">
+              <ul class="nav">
+                @if(auth()->user()->can('attendance_report'))
+                <li class="nav-item {{ request()->is('reports/attendancereport') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('reports/attendancereport') }}">
+                    <i class="material-icons">check_circle</i>
+                    <p>Attendance Detail Report</p>
+                  </a>
+                </li>
+                @endif
+
+                @if(auth()->user()->can('attendance_summary_report'))
+                <li class="nav-item {{ request()->is('reports/attendancereportSummary') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('reports/attendancereportSummary') }}">
+                    <i class="material-icons">flaky</i>
+                    <p>Attendance Summary Report</p>
+                  </a>
+                </li>
+                @endif
+
+              </ul>
+            </div>
+          </li>
+          @endif
+
+
+
+
+          @if(auth()->user()->can('services_access'))
+          <li class="nav-item {{ request()->is('services*') ? 'active' : '' }}">
+            <a class="nav-link collapsed" data-toggle="collapse" href="#serviceMenu" aria-expanded="false">
+              <i class="material-icons">design_services</i>
+              <p> {!! trans('panel.sidemenu.services') !!}
+
+              </p>
+            </a>
+            <div class="collapse" id="serviceMenu" style="">
+              <ul class="nav">
+                @if(auth()->user()->can('serial_number_transaction'))
+                <li class="nav-item {{ request()->is('services/serial_number_transaction*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('services/serial_number_transaction') }}">
+                    <i class="material-icons">receipt_long</i>
+                    <p>{!! trans('panel.sidemenu.serial_number_transaction') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('serial_number_history'))
+                <li class="nav-item {{ request()->is('services/serial_number_history*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('services/serial_number_history') }}">
+                    <i class="material-icons">history</i>
+                    <p>{!! trans('panel.sidemenu.serial_number_history') !!}</p>
                   </a>
                 </li>
                 @endif

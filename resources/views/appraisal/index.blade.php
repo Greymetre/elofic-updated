@@ -32,18 +32,46 @@
                                             @endif
                                         </select>
                                     </div>
+
                                     <div class="p-2" style="width: 250px;">
+                                        <select class="selectpicker" name="division_id" id="division_id" data-style="select-with-transition" title="Select Division">
+                                            <option value="">Select division</option>
+                                            @if(@isset($divisions ))
+                                            @foreach($divisions as $division)
+                                            <option value="{!! $division['id'] !!}" {{ old( 'division_id')}}>{!! $division['name'] !!}</option>
+                                            @endforeach
+                                            @endif
+                                        </select>
+                                    </div>
+
+
+
+                                    <!-- <div class="p-2" style="width: 250px;">
                                         <select class="selectpicker" name="financial_year" id="financial_year" data-style="select-with-transition" title="Select Financial Year">
                                             <option value="">Select Financial Year</option>
                                             <option value="{{Carbon\Carbon::now()->format('Y')-2}}_{{Carbon\Carbon::now()->format('y')-1}}">{{Carbon\Carbon::now()->format('Y')-2}}-{{Carbon\Carbon::now()->format('y')-1}}</option>
                                             <option value="{{Carbon\Carbon::now()->format('Y')-1}}_{{Carbon\Carbon::now()->format('y')}}">{{Carbon\Carbon::now()->format('Y')-1}}-{{Carbon\Carbon::now()->format('y')}}</option>
                                         </select>
+                                    </div> -->
+
+
+                                    <div class="p-2" style="width: 250px;">
+                                        <select class="selectpicker" name="financial_year" id="financial_year" data-style="select-with-transition">
+                                            <option value="">Select Financial Year</option>
+                                             @foreach($sale_weightage_years as $sale_weightage_year)
+                                            <option value="{{$sale_weightage_year->financial_year}}">{{$sale_weightage_year->financial_year}}</option>
+                                             @endforeach
+                                        </select>
                                     </div>
+
+
+
+
                                     <button type="submit" style="border-right: 1px solid;" href="" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.appraisal.title') !!}"><i class="material-icons">cloud_download</i></button>
                                 </form>
-                                <a href="{{url('appraisal/create')}}" class="btn btn-just-icon btn-theme create" title="Add Appraisal">
+                               <!--  <a href="{{url('appraisal/create')}}" class="btn btn-just-icon btn-theme create" title="Add Appraisal">
                                     <i class="material-icons">add_circle</i>
-                                </a>
+                                </a> -->
                             </div>
                         </span>
                     </h4>
@@ -63,10 +91,15 @@
                     @endif
                     <div class="table-responsive">
                         <table id="getattendance" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
-                            <thead class=" text-primary">
+                            <thead class="text-primary">
                                 <th>{!! trans('panel.global.no') !!}</th>
+                                <th>{!! trans('panel.global.action') !!}</th>
                                 <th>{!! trans('panel.beat.user_name') !!}</th>
+                                <th>{!! trans('panel.user.designation') !!}</th>
+                                <th>{!! trans('panel.user.division') !!}</th>
+                                <th>{!! trans('panel.user.branch_name') !!}</th>
                                 <th>{!! trans('panel.appraisal.financial_year') !!}</th>
+                                <th>{!! trans('panel.appraisal.self_grade') !!}</th>
                                 <th>{!! trans('panel.global.created_at') !!}</th>
                             </thead>
                             <tbody>
@@ -96,18 +129,27 @@
                 ajax: {
                     url: "{{ route('appraisal.index') }}",
                     data: function (d) {
-                            d.user_id = $('#executive_id').val()
+                            d.user_id = $('#executive_id').val(),
+                            d.division_id = $('#division_id').val()
                         }
                     },
                 columns: [
                     {data: 'DT_RowIndex',name: 'DT_RowIndex',orderable: false,searchable: false},
-                    {data: 'user_name',name: 'user_name',orderable: false,searchable: false},
+                     {data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
+                    {data: 'name',name: 'name',orderable: false,searchable: false},
+                    {data: 'designation_name',name: 'designation_name',orderable: false,searchable: false},
+                    {data: 'division_name',name: 'division_name',orderable: false,searchable: false},
+                    {data: 'branch_name',name: 'branch_name',orderable: false,searchable: false},
                     {data: 'financial_year',name: 'financial_year',orderable: false,searchable: false},
+                    {data: 'grade',name: 'grade',orderable: false,searchable: false},
                     {data: 'date',name: 'date',orderable: false,searchable: false},
                 ]
             });
 
             $("#executive_id").on('change', function() {
+                table.draw();
+            })
+            $("#division_id").on('change', function() {
                 table.draw();
             })
         });

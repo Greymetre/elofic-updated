@@ -14,7 +14,7 @@
                     <!-- jquery validation -->
                     <div class="card card-primary">
                         <div class="card-header">
-                            <h3 class="card-title">Appraisal Create</h3>
+                            <h3 class="card-title">Appraisal Edit</h3>
                         </div>
                         <!-- /.card-header -->
                         <!-- form start -->
@@ -29,91 +29,40 @@
                         @endif
                         <div class="card-body ">
                             <div class="tab-content tab-space">
-                                {!! Form::model($appraisal,[
-                                'route' => $appraisal->exists ? ['appraisal.update', $appraisal->id] : 'appraisal.store',
-                                'method' => $appraisal->exists ? 'PUT' : 'POST',
-                                'id' => 'appraisalCreateForm',
-                                'files'=>true
-                                ]) !!}
+                               
+                                {!! Form::open(['method' => 'POST','files'=>true,'route' => ['appraisals.updateappraisal'],'class' => 'form-horizontal','id' => 'frmBuilder']) !!}
                                 <div class="row">
-                                   <!--  <div class="p-2" style="width: 250px;">
-                                        <select class="selectpicker" multiple name="branch_id" id="branch_id" data-style="select-with-transition" title="Select Branch">
-                                            <option value="">Select Branch</option>
-                                            @if(@isset($branches ))
-                                            @foreach($branches as $branche)
-                                            <option value="{!! $branche['id'] !!}" {{ old( 'branch_id') == $branche['id'] ? 'selected' : '' }}>{!! $branche['name'] !!}</option>
-                                            @endforeach
-                                            @endif
-                                        </select>
-                                    </div> -->
-
-                                   <!--  <div class="p-2" style="width: 250px;">
-                                        <select class="selectpicker" name="executive_id" id="executive_id" data-style="select-with-transition" title="Select User">
-                                            <option value="">Select User</option>
-                                            @if(@isset($users ))
-                                            @foreach($users as $user)
-                                            <option value="{!! $user['id'] !!}" {{ old( 'executive_id') == $user['id'] ? 'selected' : '' }}>{!! $user['name'] !!}</option>
-                                            @endforeach
-                                            @endif
-                                        </select>
-                                    </div> -->
-
-                                   <!--  <div class="p-2" style="width: 250px;">
-                                        <select class="selectpicker" name="division_id" id="division_id" data-style="select-with-transition" title="Select Division">
-                                            <option value="">Select Division</option>
-                                            @if(@isset($divisions ))
-                                            @foreach($divisions as $division)
-                                            <option value="{!! $division['id'] !!}">{!! $division['division_name'] !!}</option>
-                                            @endforeach
-                                            @endif
-                                        </select>
-                                    </div> -->
-
-                                   <!--  <div class="p-2" style="width: 250px;">
-                                        <select class="selectpicker"  multiple name="designation_id[]" id="designation_id" data-style="select-with-transition" title="Select Designation">
-                                            <option value="">Select Designation</option>
-                                            @if(@isset($designations ))
-                                            @foreach($designations as $designation)
-                                            <option value="{!! $designation['id'] !!}">{!! $designation['designation_name'] !!}</option>
-                                            @endforeach
-                                            @endif
-                                        </select>
-                                    </div> -->
-
-                                   <!--  <div class="p-2" style="width: 250px;">
-                                        <select class="selectpicker" name="f_year" id="f_year2" data-style="select-with-transition" title="Select Financial Year">
+                        
+                                    <!-- <div class="p-2" style="width: 250px;">
+                                        <select class="selectpicker" name="f_year" id="f_year" data-style="select-with-transition" title="Select Financial Year">
                                             <option value="">Select Financial Year</option>
-                                             <option value="{{Carbon\Carbon::now()->format('Y')-2}}_{{Carbon\Carbon::now()->format('y')-1}}">{{Carbon\Carbon::now()->format('Y')-2}}-{{Carbon\Carbon::now()->format('y')-1}}</option> 
                                             <option value="{{Carbon\Carbon::now()->format('Y')-1}}_{{Carbon\Carbon::now()->format('y')}}">{{Carbon\Carbon::now()->format('Y')-1}}-{{Carbon\Carbon::now()->format('y')}}</option>
                                         </select>
                                     </div> -->
 
+                                     @foreach($appraisal_details as $appraisal_detail)
+
+                                     @endforeach 
+
+                                
+
                                     <div class="p-2" style="width: 250px;">
-                                        <select class="selectpicker" name="f_year" id="f_year2" data-style="select-with-transition">
+                                        <select class="selectpicker" name="f_year" id="f_year" data-style="select-with-transition">
                                             <!-- <option value="">Select Financial Year</option> -->
-                                               @foreach($sale_weightage_years as $sale_weightage_year)
-                                            <option value="{{$sale_weightage_year->financial_year}}">{{$sale_weightage_year->financial_year}}</option>
-                                             @endforeach
+                                                @foreach($sale_weightage_years as $sale_weightage_year)
+                                            <option value="{{$sale_weightage_year->financial_year}}" <?php if($appraisal_detail->year == $sale_weightage_year->financial_year){echo "selected"; }  ?> >{{$sale_weightage_year->financial_year}}</option>
+                                                @endforeach
+
                                         </select>
                                     </div>
 
-
-
-
-                                   <!--  <div class="p-2" style="width: 250px;">
-                                        <select class="selectpicker" name="appraisal_type" id="appraisal_type" data-style="select-with-transition" title="Select Appraisal Type">
-                                            <option value="">Select Appraisal Type</option>
-                                            <option value="quarterly">Quarterly</option>
-                                            <option value="half_yearly">Half Yearly</option>
-                                            <option value="yearly">Yearly</option>
-                                        </select>
-                                    </div> -->
+                            
 
                                     <div class="p-2" id="session_div" style="width: 250px;">
                                         <select class="selectpicker" name="appraisal_session" id="appraisal_session" data-style="select-with-transition" title="Select Appraisal Type">
                                         </select>
                                     </div>
-                                    <input type="hidden" name="user_id" value="{{$user_id}}">
+                                      <input type="hidden" name="user_id" value="{{$user_id}}">
 
                                     <div class="table-responsive w-100">
                                         <table class="table kvcodes-dynamic-rows-example" id="table_appraisal">
@@ -133,67 +82,72 @@
                                             </thead>
                                             <tbody>
 
-                                            @foreach($sale_weightages as $sale_weightage)
+                                                <?php $i = 0; ?>
+
+                                                @foreach($appraisal_details as $appraisal_detail)
+
                                                 <?php 
 
-                                               $categories = explode(",",$sale_weightage->category_name);
-                                               $name = explode(",",$sale_weightage->name);
-                                               $weightage = explode(",",$sale_weightage->weightage);
-                                               $indicator = explode(",",$sale_weightage->indicator);
-                                               $annum_target = explode(",",$sale_weightage->annum_target);
-                                               $i=0;
+                                               // $categories = explode(",",$sale_weightage->category_name);
+                                               // $name = explode(",",$sale_weightage->name);
+                                               // $weightage = explode(",",$sale_weightage->weightage);
+                                               // $indicator = explode(",",$sale_weightage->indicator);
+                                               // $annum_target = explode(",",$sale_weightage->annum_target);
+                                               // $i=0;
+
                                                   ?> 
                                               
-                                                @foreach($categories as $category) 
+                                                
 
                                                 <tr>
-                                                    <input type="hidden" name="sale_weightage_id[]" value="{{$sale_weightage->id}}">
+                                                    <input type="hidden" name="appraisal_ids[]" value="{{$appraisal_detail->id}}">
+
+                                                    <input type="hidden" name="sale_weightage_id[]" value="{{$appraisal_detail->weightage_id}}">
+
+                                                    <input type="hidden" name="weightage[]" class="weightage" value="{{$appraisal_detail->sales_weightage->weightage??''}}">
+
+                                                    <input type="hidden" name="kra_names[]" value="{{$appraisal_detail->kra}}">
+
                                                      <td>
-                                                        <h6>{{$sale_weightage?$category:''}}</h6>
-
+                                                        <h6>{{$appraisal_detail->sales_weightage->category_name??''}}</h6>
                                                     </td>
                                                     <td>
-                                                        <h6>{{$sale_weightage?$name[$i]:''}}</h6>
-
-                                                         <input type="hidden" name="kra_names[]" value="{{$sale_weightage?$name[$i]:''}}">
+                                                        <h6>{{$appraisal_detail->sales_weightage->name??''}}</h6>
                                                     </td>
                                                     <td>
-                                                        {{$sale_weightage?$indicator[$i]:''}}
-                                                    </td>
-                                                     <td>{{$sale_weightage?$annum_target[$i]:''}}</td>
-                                                     <td>
-                                                        {{$sale_weightage?$weightage[$i]:''}}%
-
-                                                      <input type="hidden" name="weightage[]" class="weightage" value="{{$sale_weightage?$weightage[$i]:''}}">
-
-                                                    </td>
-
-                                                    <td>
-                                                        <input type="number" name="target[]" class="target">
+                                                        {{$appraisal_detail->sales_weightage->indicator??''}}
                                                     </td>
                                                     <td>
-                                                        <input type="number" class="achivment" name="achivment[]">
+                                                        {{$appraisal_detail->sales_weightage->annum_target??''}}
                                                     </td>
                                                     <td>
-                                                        <input name="acual[]" class="acual" type="text" readonly>
+                                                        {{$appraisal_detail->sales_weightage->weightage??''}}%
+                                                    </td>
+                                                           
+                                                    <td>
+                                                        <input type="number" name="target[]" class="target" value="{{$appraisal_detail->target??''}}">
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" class="achivment" name="achivment[]" value="{{$appraisal_detail->achivment??''}}">
+                                                    </td>
+                                                    <td>
+                                                        <input name="acual[]" class="acual" type="text" value="{{$appraisal_detail->acual??''}}" readonly>
                                                     </td>
                                                     <td>10</td>
                                                     <td>
-                                                        <input name="rating[]" class="all_rating" max="10" type="number">
+                                                        <input name="rating[]" class="all_rating" max="10" type="number" value="{{$appraisal_detail->rating??''}}">
                                                         <p class="rat-err"></p>
                                                     </td>
                                                 </tr>
 
-                                                  <?php $i++; ?>
+                                                  <?php $i++; ?>                                                 
                                                    @endforeach 
-                                                   @endforeach 
- 
-                                              
+
                                             </tbody>
                                         </table>
                                         <div class="form-group">
                                             <label for="remark">Remark</label>
-                                            <input type="text" class="form-control" name="remark" id="remark" placeholder="Remark">
+                                            <input type="text" class="form-control" name="remark" id="remark" placeholder="Remark" value="{{$appraisal_detail->remark}}">
                                         </div>
                                     </div>
                                     {{ Form::submit('Submit', array('class' => 'btn btn-theme pull-right')) }}
@@ -586,6 +540,20 @@
 
 
 
+        $("#division_id").on('change', function() {
+            var division_id = $(this).val();
+
+            $.ajax({
+                url: "{{ url('getSalesweitagDetail') }}",
+                data: {
+                    "division_id": division_id
+                },
+                success: function(res) {
+                    
+                }
+            });
+
+        })
 
 
     </script>

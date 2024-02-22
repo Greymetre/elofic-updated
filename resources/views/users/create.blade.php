@@ -151,7 +151,7 @@
                            </div>
                         </div>
                      </div>
-                     <!-- <div class="col-md-6">
+                      <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-4 col-form-label">{{ trans('panel.user.fields.password') }}<span class="text-danger"> *</span></label>
                            <div class="col-md-8">
@@ -163,7 +163,7 @@
                               </div>
                            </div>
                         </div>
-                     </div> -->
+                     </div> 
                      <div class="col-md-12">
                         <div class="row">
                            <label class="col-md-2 col-form-label">{{ trans('panel.user.fields.roles') }}</label>
@@ -1025,7 +1025,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.biometric_code') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="text" name="biometric_code" id="biometric_code" class="form-control" value="{!! old( 'biometric_code', $user->userinfo->biometric_code) !!}">
+                                 <input type="text" name="biometric_code" id="biometric_code" class="form-control" value="{!! old( 'biometric_code', isset($user->userinfo->biometric_code)?$user->userinfo->biometric_code:'') !!}">
                                  @if ($errors->has('biometric_code'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('biometric_code') }}</p>

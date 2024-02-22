@@ -2,6 +2,7 @@
   box-sizing: border-box;
   display: inline-block;
   margin: 0;
+  width: 100% !important;
   position: relative;
   vertical-align: middle; }
   .select2-container .select2-selection--single {
@@ -499,3 +500,7 @@
 
 .select2-container--classic.select2-container--open .select2-dropdown {
   border-color: #5897fb; }
+
+  .select2-container--default{
+    width: 100% !important;
+  }

@@ -11,7 +11,7 @@ class Product extends Model
 
     protected $table = 'products';
 
-    protected $fillable = ['active', 'ranking' ,'product_name', 'display_name', 'description', 'subcategory_id', 'category_id', 'brand_id', 'product_image', 'unit_id', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at', 'specification', 'part_no', 'product_no', 'model_no','suc_del'];
+    protected $fillable = ['active', 'ranking' ,'product_name','product_code','new_group','sub_group','expiry_interval','expiry_interval_preiod', 'display_name', 'description', 'subcategory_id', 'category_id', 'brand_id', 'product_image', 'unit_id', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at', 'specification', 'part_no', 'product_no', 'model_no','suc_del'];
 
     public function categories()
     {
@@ -44,6 +44,6 @@ class Product extends Model
 
     public function productpriceinfo()
     {
-        return $this->belongsTo('App\Models\ProductDetails', 'id', 'product_id')->select('id','product_id','mrp','price','selling_price','gst');
+        return $this->belongsTo('App\Models\ProductDetails', 'id', 'product_id')->select('id','product_id','mrp','price','selling_price','gst','discount');
     }
 }

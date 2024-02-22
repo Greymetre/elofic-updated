@@ -42,9 +42,8 @@
                             <thead class=" text-primary">
                                 <th>{!! trans('panel.global.no') !!}</th>
                                 <th>{!! trans('panel.global.actions') !!}</th>
-                                <th>{!! trans('panel.sales_weightage.financial_year') !!}</th>
-                                <th>{!! trans('panel.sales_weightage.display_names') !!}</th>
-                                <th>{!! trans('panel.sales_weightage.display_division') !!}</th>
+                                <th>{!! trans('panel.sales_weightage.weightage_name') !!}</th>
+                                <th>{!! trans('panel.sales_weightage.weightage') !!}</th>
                             </thead>
                             <tbody>
                             </tbody>
@@ -79,10 +78,8 @@
                 columns: [
                     {data: 'DT_RowIndex',name: 'DT_RowIndex',orderable: false,searchable: false},
                     {data: 'action',name: 'action',orderable: false,searchable: false},
-                    {data: 'financial_year',name: 'financial_year'},
-                    {data: 'display_name',name: 'display_name'},
-                    {data: 'devision',name: 'devision'},
-                    // {data: 'weightage',name: 'weightage'},
+                    {data: 'name',name: 'name'},
+                    {data: 'weightage',name: 'weightage'},
                 ]
             });
             $(document).on("click", ".delete", function(){
