@@ -38,9 +38,9 @@ class SchemesDataTable extends DataTable
                   }
                   if(auth()->user()->can(['scheme_show']))
                   {
-                    $btn = $btn.'<a href="'.url("schemes/".encrypt($query->id)).'" class="btn btn-theme btn-just-icon btn-sm" title="'.trans('panel.global.show').' '.trans('panel.scheme.title_singular').'">
-                                    <i class="material-icons">visibility</i>
-                                </a>';
+                    //$btn = $btn.'<a href="'.url("schemes/".encrypt($query->id)).'" class="btn btn-theme btn-just-icon btn-sm" title="'.trans('panel.global.show').' '.trans('panel.scheme.title_singular').'">
+                      //              <i class="material-icons">visibility</i>
+                        //        </a>';
                   }
                   if(auth()->user()->can(['scheme_delete']))
                   {
@@ -63,7 +63,7 @@ class SchemesDataTable extends DataTable
                             </div>'.$activebtn;
             })
             ->addColumn('image', function ($query) {
-                    return '<img src="'.asset(!empty($query->scheme_image) ? $query->scheme_image : 'public/uploads/product.jpeg').'" border="0" width="70" class="img-rounded" align="center" />';
+                    return '<img src="'.asset(!empty($query->scheme_image) ? 'uploads/'.$query->scheme_image : 'public/uploads/product.jpeg').'" border="0" width="70" class="img-rounded" align="center" />';
                 })
             ->rawColumns(['action','image']);
     }

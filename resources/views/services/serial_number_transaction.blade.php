@@ -84,6 +84,14 @@
             {{ session('success') }}
           </div>
           @endif
+          @if (session('error'))
+          <div class="alert alert-danger">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <i class="material-icons">close</i>
+            </button>
+            {{ session('error') }}
+          </div>
+          @endif
           <div class="alert " style="display: none;">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
               <i class="material-icons">close</i>
@@ -91,7 +99,7 @@
             <span class="message"></span>
           </div>
           <div class="table-responsive">
-            <table id="getSerialTransaction" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
+            <table id="getSerialTransaction" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
               <thead class=" text-primary">
                 <th>{!! trans('panel.global.no') !!}</th>
                 <th>{!! trans('panel.product.fields.product_name') !!}</th>

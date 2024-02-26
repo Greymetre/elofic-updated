@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attendance, Order, Status, Settings, Tasks , ProductDetails, Sales, UserReporting, CheckIn, Notes};
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attendance, Order, Status, Settings, Tasks , ProductDetails, Sales, UserReporting, CheckIn, Notes, SchemeDetails, Subcategory};
 use App\Models\User;
 use Carbon\Carbon;
 use App\Models\UserLiveLocation;
@@ -199,11 +199,35 @@ class AjaxController extends Controller
         }
     }
 
+    public function getSubCategoryData(Request $request)
+    {
+        try
+        {
+            $data = Subcategory::where(function ($query) {
+                                    $query->where('active', '=', 'Y');
+                                });
+                                if($request->cat_id && $request->cat_id != null && $request->cat_id != ''){
+                                    $data->where('category_id', $request->cat_id);
+                                }
+                                $data = $data->select('id','subcategory_name')
+                                ->orderBy('subcategory_name','asc')
+                                ->get();
+            return response()->json($data);
+        }
+        catch(\Exception $e){
+            return $e;
+        }
+    }
+
     public function getProductData(Request $request)
     {
         try
         {
-            $data = Product::where(function ($query) {
+            $sub_category = $request->sub_cat;
+            $data = Product::where(function ($query) use ($sub_category) {
+                                    if($sub_category && $sub_category != null){
+                                        $query->where('subcategory_id', $sub_category);
+                                    }
                                     $query->where('active', '=', 'Y');
                                 })
                                 ->select('id','product_name','product_image','display_name')
@@ -653,6 +677,20 @@ class AjaxController extends Controller
                                 ->latest()
                                 ->get();
             return response()->json($notes);
+        }
+        catch(\Exception $e){
+            return $e;
+        }
+    }
+
+    public function removeSchemesdetails(Request $request)
+    {
+        try
+        {
+            $scheme_details = SchemeDetails::find($request->id);
+            $scheme_details->delete();
+
+            return response()->json(["status"=>true]);
         }
         catch(\Exception $e){
             return $e;

@@ -65,6 +65,8 @@ return [
         'serial_number_transaction'     => 'Serial Number Transaction',
         'serial_number_history'     => 'Serial Number History',
          'hr'     => 'HR',
+         'account'  => 'Account',
+
     ],
 
     'global'                           => [
@@ -601,6 +603,7 @@ return [
             'deleted_at_helper'  => '',
         ],
     ],
+
     'expenses_type'           => [
         'title'          => 'Expenses Type',
         'title_singular' => 'Expenses Type',
@@ -613,6 +616,28 @@ return [
             'allowance_type' => 'Allowance Type'
         ],
     ],
+
+    'expenses'           => [
+        'title'          => 'Expenses',
+        'title_singular' => 'Expenses',
+        'fields'         => [
+            'expense_id'        => 'Expense Id',
+            'user'              => 'User',
+            'expense_type'      => 'Expense Type',
+            'date'              => 'Date',
+            'claim_amount'      => 'Claim Amount',
+            'expense_status'    => 'Expense Status',
+            'note'              => 'Note',
+            'start_km'          => 'Start Km',
+            'stop_km'           => 'Stop Km',
+            'total_km'          => 'Total Km',
+            'expense_file'      => 'Expense File',
+            'rate'              => 'Rate',
+        ],
+    ],
+
+
+
     'user'           => [
         'title'          => 'Users',
         'title_singular'    => 'User',
@@ -762,7 +787,16 @@ return [
         ],
     ],
 
-
+    'holidays'           => [
+        'title'          => 'Holidays',
+        'title_singular' => 'Holiday',
+        'fields'         => [
+            'id'                       => 'ID',
+            'holiday_name'        => 'Holiday Name',
+            'branch_name'        => 'Branch Name',
+            'holiday_date'        => 'Holiday Date',
+        ],
+    ],
 
 
     

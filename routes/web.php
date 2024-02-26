@@ -50,6 +50,8 @@ use App\Http\Controllers\ExpensesTypeController;
 use App\Http\Controllers\SalesWeightageController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ServicesController;
+use App\Http\Controllers\HolidayController;
+use App\Http\Controllers\TransactionHistoryController;
 use Aws\Api\Service;
 
 /*
@@ -145,6 +147,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('division', DivisionController::class);
     //Designation 
     Route::resource('designation', DesignationController::class);
+    //holidays
+    Route::resource('holidays', HolidayController::class);
+
     // Users
     Route::delete('users/destroy', [ UsersController::class, 'massDestroy'])->name('users.massDestroy');
     Route::resource('users', UsersController::class);
@@ -489,13 +494,14 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('tours-changeStatus', [ TourController::class, 'changeStatus'])->name('tours.changesttus');
 
     // /Expenses Type
-    // Route::resource('expenses_type', ExpensesTypeController::class);
-    // Route::post('expenses-type-active', [ExpensesTypeController::class, 'changeStatus']);
+     Route::resource('expenses_type', ExpensesTypeController::class);
+     Route::post('expenses-type-active', [ExpensesTypeController::class, 'changeStatus']);
 
     // /Expenses
-    //Route::resource('expenses', ExpensesController::class);
+    Route::resource('expenses', ExpensesController::class);
+     Route::post('expenses-active', [ExpensesTypeController::class, 'changeStatus']);
 
-      // departments
+     // departments
      Route::resource('departments', DepartmentController::class);
      Route::post('departments-active', [ DepartmentController::class, 'active'])->name('departments.active');
 
@@ -504,9 +510,11 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('services/serial_number_transaction/upload', [ServicesController::class, 'serial_number_transaction_upload'])->name('service.serial_number_transaction.upload');
     Route::get('services/serial_number_transaction/download', [ServicesController::class, 'serial_number_transaction_download'])->name('service.serial_number_transaction.download');
     Route::post('services/serial_number_transaction/list', [ServicesController::class, 'serial_number_transaction_list'])->name('service.serial_number_transaction.list');
-
     Route::get('services/serial_number_history', [ServicesController::class, 'serial_number_history'])->name('service.serial_number_history');
     Route::post('services/serial_number_history/list', [ServicesController::class, 'serial_number_history_list'])->name('service.serial_number_history.list');
+
+    // Transaction History
+    Route::resource('transaction_history', TransactionHistoryController::class);
 
 
     Route::get('logout', '\App\Http\Controllers\Auth\AuthenticatedSessionController@destroy');
@@ -521,6 +529,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('getAddressInfo', [ AjaxController::class, 'getAddressInfo']);
     Route::any('getCustomerData', [ AjaxController::class, 'getCustomerData'])->name('getCustomerData');
     Route::any('getCategoryData', [ AjaxController::class, 'getCategoryData']);
+    Route::any('getSubCategoryData', [ AjaxController::class, 'getSubCategoryData']);
     Route::any('getProductData', [ AjaxController::class, 'getProductData']);
     Route::any('getProductInfo', [ AjaxController::class, 'getProductInfo']);
     Route::any('getUserList', [ AjaxController::class, 'getUserList']);
@@ -534,6 +543,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('getUserLocationData', [ AjaxController::class, 'getUserLocationData']);
     Route::any('getUserActivityData', [ AjaxController::class, 'getUserActivityData']);
     Route::any('getCustomerActivityData', [ AjaxController::class, 'getCustomerActivityData']);
+    Route::any('schemesdetails/remove', [ AjaxController::class, 'removeSchemesdetails']);
 
 
 

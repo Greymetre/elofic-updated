@@ -15,14 +15,15 @@ return new class extends Migration
     {
         Schema::create('expenses', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('expenses_type');
-            $table->string('date');
-            $table->float('claim_amount');
+            $table->bigInteger('expenses_type')->nullable();
+            $table->bigInteger('user_id')->nullable();
+            $table->string('date')->nullable();
+            $table->float('claim_amount')->nullable();
             $table->string('start_km')->nullable();
             $table->string('stop_km')->nullable();
             $table->string('total_km')->nullable();
-            $table->string('note')->nullable();
-            $table->string('attechment')->nullable();
+            $table->text('note')->nullable();
+            // $table->string('attechment')->nullable();
             $table->tinyInteger('checker_status')->default('0');
             $table->tinyInteger('accountant_status')->default('0');
             $table->bigInteger('created_by');

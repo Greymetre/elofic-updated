@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\Scheme;
+use App\Models\SchemeDetails;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -14,13 +14,12 @@ class SchemeTepmlate implements FromCollection,WithHeadings,ShouldAutoSize
 {
     public function collection()
     {
-        return Scheme::select('scheme_name', 'scheme_description', 'start_date', 'end_date', 'scheme_image', 'scheme_type', 'point_value')->limit(0)->get();   
+        return SchemeDetails::limit(0)->get();
     }
 
     public function headings(): array
     {
-        return ['scheme_name', 'scheme_description', 'start_date', 'end_date', 'scheme_image', 'scheme_type', 'point_value'];
+        return ['Product Id', 'Product Name', 'Category Id', 'Category Name', 'Sub Category Id', 'Sub Category Name', 'Point'];
     }
 
-}
 }

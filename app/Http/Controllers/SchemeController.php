@@ -18,6 +18,11 @@ use App\DataTables\SchemesDataTable;
 use App\Imports\SchemeImport;
 use App\Exports\SchemeExport;
 use App\Exports\SchemeTepmlate;
+use App\Models\Branch;
+use App\Models\Customers;
+use App\Models\CustomerType;
+use App\Models\State;
+use Excel;
 
 class SchemeController extends Controller
 {
@@ -38,7 +43,11 @@ class SchemeController extends Controller
     public function create()
     {
         abort_if(Gate::denies('scheme_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return view('schemes.create')->with('schemes',$this->schemes);
+        $customer_types = CustomerType::where('active', 'Y')->select('id', 'customertype_name')->get();
+        $branchs = Branch::where('active', 'Y')->select('id', 'branch_name')->get();
+        $states = State::where('active', 'Y')->select('id', 'state_name')->get();
+        $customers = Customers::where('active', 'Y')->select('id', 'name')->get();
+        return view('schemes.create', compact('customer_types','branchs','states','customers'))->with('schemes',$this->schemes);
     }
 
 
@@ -70,33 +79,45 @@ class SchemeController extends Controller
                 'end_date' => isset($request['end_date']) ? $request['end_date'] : '',
                 'scheme_image' => isset($request['scheme_image']) ? $request['scheme_image'] : '',
                 'scheme_type' => isset($request['scheme_type']) ? $request['scheme_type'] : '',
-                'point_value' => isset($request['point_value']) ? $request['point_value'] : '',
+                'scheme_basedon' => isset($request['scheme_basedon']) ? $request['scheme_basedon'] : '',
+                'assign_to' => isset($request['assign_to']) ? $request['assign_to'] : '',
+                'branch' => (isset($request['branch']) && count($request['branch']) > 0) ? implode(',', $request['branch']) : '',
+                'state' => (isset($request['state']) && count($request['state']) > 0) ? implode(',', $request['state']) : '',
+                'customer' => (isset($request['customer']) && count($request['customer']) > 0) ? implode(',', $request['customer']) : '',
+                'customer_type' => isset($request['customer_type']) ? $request['customer_type'] : '',
                 'points_start_date' => isset($request['points_start_date']) ? $request['points_start_date'] : null,
                 'points_end_date' => isset($request['points_end_date']) ? $request['points_end_date'] : null,
-                'block_points' => isset($request['block_points']) ? $request['block_points'] : null,
-                'block_percents' => isset($request['block_percents']) ? $request['block_percents'] : null,
+                // 'block_points' => isset($request['block_points']) ? $request['block_points'] : 0,
+                // 'block_percents' => isset($request['block_percents']) ? $request['block_percents'] : 0,
                 'created_at' => getcurentDateTime(),
             ]))
             {
-                $schmedetils = collect([]);
-                if($request['points'])
-                {
-                    foreach ($request['points'] as $key => $value) {
-                        $schmedetils->push([
-                            'active' => 'Y',
-                            'scheme_id' => $id,
-                            'product_id' => !empty($request['product_id']) ? $request['product_id'][$key] : null,
-                            'category_id' => !empty($request['category_id']) ? $request['category_id'][$key] : null,
-                            'subcategory_id' => !empty($request['subcategory_id']) ? $request['subcategory_id'][$key] : null,
-                            'minimum' => isset($request['minimum']) ? $request['minimum'][$key] : null,
-                            'maximum' => isset($request['maximum']) ? $request['maximum'][$key] : null,
-                            'points' => isset($request['points']) ? $request['points'][$key] : 0,
-                        ]);
-                    }
-                    if($schmedetils->isNotEmpty())
+                if($request->import_file){
+                    if (ob_get_contents()) ob_end_clean();
+                    ob_start();
+                    Excel::import(new SchemeImport(encrypt($id)),$request['import_file']);
+                }else{
+                    $schmedetils = collect([]);
+                    if($request['points'])
                     {
-                        SchemeDetails::insert($schmedetils->toArray());
-                    } 
+                        foreach ($request['points'] as $key => $value) {
+                            $schmedetils->push([
+                                'active' => 'Y',
+                                'scheme_id' => $id,
+                                'product_id' => !empty($request['product_id']) ? $request['product_id'][$key] : null,
+                                'category_id' => !empty($request['category_id']) ? $request['category_id'][$key] : null,
+                                'subcategory_id' => !empty($request['subcategory_id']) ? $request['subcategory_id'][$key] : null,
+                                'minimum' => isset($request['minimum']) ? $request['minimum'][$key] : null,
+                                'maximum' => isset($request['maximum']) ? $request['maximum'][$key] : null,
+                                'points' => isset($request['points']) ? $request['points'][$key] : 0,
+                            ]);
+                        }
+                        if($schmedetils->isNotEmpty())
+                        {
+                            SchemeDetails::insert($schmedetils->toArray());
+                        } 
+                    }
+
                 }
               return Redirect::to('schemes')->with('message_success', 'Scheme Store Successfully');
             }
@@ -117,9 +138,13 @@ class SchemeController extends Controller
     public function edit($id)
     {
         abort_if(Gate::denies('scheme_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $customer_types = CustomerType::where('active', 'Y')->select('id', 'customertype_name')->get();
+        $branchs = Branch::where('active', 'Y')->select('id', 'branch_name')->get();
+        $states = State::where('active', 'Y')->select('id', 'state_name')->get();
+        $customers = Customers::where('active', 'Y')->select('id', 'name')->get();
         $id = decrypt($id);
         $schemes = SchemeHeader::find($id);
-        return view('schemes.create')->with('schemes',$schemes);
+        return view('schemes.create', compact('customer_types','branchs','states','customers'))->with('schemes',$schemes);
     }
 
 
@@ -128,6 +153,9 @@ class SchemeController extends Controller
         try
         { 
             abort_if(Gate::denies('scheme_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+            if($request->import_file){
+                Excel::import(new SchemeImport($id),request()->file('import_file'));
+            }
            $validator = Validator::make($request->all(), [
                 'scheme_name' => 'required',
             ]); 
@@ -136,6 +164,21 @@ class SchemeController extends Controller
                             ->withErrors($validator)
                             ->withInput();
             }
+            if ($request['assign_to'] == 'branch') {
+                $request['state'] = [];
+                $request['customer'] = [];
+             } else if ($request['assign_to'] == 'state') {
+                $request['branch'] = [];
+                $request['customer'] = [];
+             } else if ($request['assign_to'] == 'customer') {
+                $request['state'] = [];
+                $request['branch'] = [];
+             } else {
+                $request['state'] = [];
+                $request['customer'] = [];
+                $request['branch'] = [];
+    
+             }
             $id = decrypt($id);
             $scheme = SchemeHeader::find($id);
             $scheme->scheme_name = isset($request['scheme_name'])? $request['scheme_name'] :'';
@@ -143,6 +186,12 @@ class SchemeController extends Controller
             $scheme->start_date = $request['start_date'];
             $scheme->end_date = $request['end_date'];
             $scheme->scheme_type = isset($request['scheme_type'])? $request['scheme_type'] :'';
+            $scheme->scheme_basedon = isset($request['scheme_basedon']) ? $request['scheme_basedon'] : '';
+            $scheme->assign_to = isset($request['assign_to']) ? $request['assign_to'] : '';
+            $scheme->branch = (isset($request['branch']) && count($request['branch']) > 0) ? implode(',', $request['branch']) : '';
+            $scheme->state = (isset($request['state']) && count($request['state']) > 0) ? implode(',', $request['state']) : '';
+            $scheme->customer = (isset($request['customer']) && count($request['customer']) > 0) ? implode(',', $request['customer']) : '';
+            $scheme->customer_type = isset($request['customer_type']) ? $request['customer_type'] : '';
             if($request->file('image')){
                 $image = $request->file('image');
                 $filename = 'scheme'.$id;
@@ -151,26 +200,30 @@ class SchemeController extends Controller
             }
             if($scheme->save())
             {
-                $existdetails = SchemeDetails::where('scheme_id',$id)->select('id','product_id','category_id','minimum','maximum','points')->get();
-                $schmedetils = collect([]);
-                foreach ($request['points'] as $key => $value) {
-                    if(!empty($request['detail_id'][$key]))
-                    {
-                        $schmedetils = SchemeDetails::firstOrNew(array('id' => $request['detail_id'][$key]));
+                if(!$request->import_file){
+                    $existdetails = SchemeDetails::where('scheme_id',$id)->select('id','product_id','category_id','minimum','maximum','points')->get();
+                    $schmedetils = collect([]);
+                    if($request['points'] && $request['points'] != null && count($request['points']) > 0){
+                        foreach ($request['points'] as $key => $value) {
+                            if(!empty($request['detail_id'][$key]))
+                            {
+                                $schmedetils = SchemeDetails::firstOrNew(array('id' => $request['detail_id'][$key]));
+                            }
+                            else
+                            {
+                                $schmedetils = new SchemeDetails();
+                            }
+                            $schmedetils->active = 'Y';
+                            $schmedetils->scheme_id = $id;
+                            $schmedetils->product_id = !empty($request['product_id']) ? $request['product_id'][$key] : null;
+                            $schmedetils->category_id = !empty($request['category_id']) ? $request['category_id'][$key] : null;
+                            $schmedetils->subcategory_id = !empty($request['subcategory_id']) ? $request['subcategory_id'][$key] : null;
+                            $schmedetils->minimum = !empty($request['minimum']) ? $request['minimum'][$key] : null;
+                            $schmedetils->maximum = !empty($request['maximum']) ? $request['maximum'][$key] : null;
+                            $schmedetils->points = !empty($request['points']) ? $request['points'][$key] : null;
+                            $schmedetils->save();
+                        }
                     }
-                    else
-                    {
-                        $schmedetils = new SchemeDetails();
-                    }
-                    $schmedetils->active = 'Y';
-                    $schmedetils->scheme_id = $id;
-                    $schmedetils->product_id = !empty($request['product_id']) ? $request['product_id'][$key] : null;
-                    $schmedetils->category_id = !empty($request['category_id']) ? $request['category_id'][$key] : null;
-                    $schmedetils->subcategory_id = !empty($request['subcategory_id']) ? $request['subcategory_id'][$key] : null;
-                    $schmedetils->minimum = !empty($request['minimum']) ? $request['minimum'][$key] : null;
-                    $schmedetils->maximum = !empty($request['maximum']) ? $request['maximum'][$key] : null;
-                    $schmedetils->points = !empty($request['points']) ? $request['points'][$key] : null;
-                    $schmedetils->save();
                 }
 
 
@@ -215,18 +268,18 @@ class SchemeController extends Controller
         Excel::import(new SchemeImport,request()->file('import_file'));
         return back();
     }
-    public function download()
+    public function download(Request $request)
     {
         abort_if(Gate::denies('scheme_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        return Excel::download(new SchemeExport, 'schemes.xlsx');
+        return Excel::download(new SchemeExport($request->id), 'schemesProducts.xlsx');
     }
     public function template()
     {
         abort_if(Gate::denies('scheme_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        return Excel::download(new SchemeTepmlate, 'schemes.xlsx');
+        return Excel::download(new SchemeTepmlate, 'schemesProductTemplate.xlsx');
     }
 }

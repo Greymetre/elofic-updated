@@ -21,6 +21,9 @@ use Illuminate\Support\Facades\Storage;
 use File;
 
 use App\Models\Attachment;
+use App\Models\User;
+use App\Models\Holiday;
+
 use App\Exports\ExcelExport;
 use DateTime;
 use DatePeriod;
@@ -93,7 +96,7 @@ class AttendanceController extends Controller
 
 
 
-        public function attendanceSummaryDownload(Request $request){
+    public function attendanceSummaryDownload(Request $request){
 
         $filename = 'attendance-summary-report.xlsx';
         $start_date = $request->start_date;
@@ -107,73 +110,60 @@ class AttendanceController extends Controller
            new DateTime($end_date)
           );
 
-    
-        $attendancesummary = Attendance::with(['users']);
+
+
+         /// get all user
+
+      
+        $attendancesummary = User::with(['attendance_details','createdbyname','getbranch'])->where('active','Y');
         if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
             {
-              $attendancesummary = $attendancesummary->whereIn('user_id', getUsersReportingToAuth());
+              $attendancesummary = $attendancesummary->whereIn('id', getUsersReportingToAuth());
             }
-        if($start_date)
-            {
-                $attendancesummary = $attendancesummary->whereDate('punchin_date','>=',$start_date);
-            }
-        if($end_date)
-        {
-           $attendancesummary = $attendancesummary->whereDate('punchin_date','<=',$end_date);
-        }
 
         if($executive_id)
-        {
-            $attendancesummary = $attendancesummary->where('user_id', $executive_id);
-        } 
+          {
+            $attendancesummary = $attendancesummary->where('id', $executive_id);
+          } 
 
-        $attendancesummary = $attendancesummary->get()->unique('user_id');  
+        $attendancesummary = $attendancesummary->get();       
 
-        //dd($attendancesummary);
+
+        ///
+
+
+
+    
+        // $attendancesummary = Attendance::with(['users']);
+        // if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
+        //     {
+        //       $attendancesummary = $attendancesummary->whereIn('user_id', getUsersReportingToAuth());
+        //     }
+        // if($start_date)
+        //     {
+        //         $attendancesummary = $attendancesummary->whereDate('punchin_date','>=',$start_date);
+        //     }
+        // if($end_date)
+        // {
+        //    $attendancesummary = $attendancesummary->whereDate('punchin_date','<=',$end_date);
+        // }
+
+        // if($executive_id)
+        // {
+        //     $attendancesummary = $attendancesummary->where('user_id', $executive_id);
+        // } 
+
+        // $attendancesummary = $attendancesummary->get()->unique('user_id');  
+
+       
 
          $date1 = $start_date;
          $date2 = $end_date;
 
-         // $ts1 = strtotime($date1);
-         // $ts2 = strtotime($date2);
-
-         // $year1 = date('Y', $ts1);
-         // $year2 = date('Y', $ts2);
-
-         // $month1 = date('m', $ts1);
-         // $month2 = date('m', $ts2);
-
-         // $attendance_month = $month1;
-         // $attendance_year = $year1;
-
-         // $diff = (($year2 - $year1) * 12) + ($month2 - $month1);
-         // $option_arr2= array();
-
-         
-        // $month = $attendance_month;
-        // $year  = $attendance_year;
-        // $count = $diff;
-
-        $label2 =[];
-
-        // for ($i = 0; $i <= $count; $i++) {
-            
-        //     if ($month > 12) {
-        //         $month = 1;
-        //         $year++;    
-        //     } 
-        //     $x = DateTime::createFromFormat('Y-m', $year.'-'.$month);
-
-        //      $label2[]=  $x->format('m-Y');
-        //      $like_date=  $x->format('Y-m');
-          
-        //     $month++;  
-        // }
-
-
+        
+         $label2 =[];
 
         //new
-
 
         foreach ($period as $key => $value) {
 
@@ -185,75 +175,42 @@ class AttendanceController extends Controller
         //new
 
 
-
-
-
         // $label2[] ="TGT";
 
         $label2[] ="";
 
         $data = $attendancesummary->map(function ($item, $key) use ($label2 ,$date1,$date2,$period){
                             
-                //  $date1 = $date1;
-                //  $date2 = $date2;
-                //  $ts1 = strtotime($date1);
-                //  $ts2 = strtotime($date2);
- 
-                //  $year1 = date('Y', $ts1);
-                //  $year2 = date('Y', $ts2);
-
-                //  $month1 = date('m', $ts1);
-                //  $month2 = date('m', $ts2);
-
-                //  $attendance_month = $month1;
-                //  $attendance_year = $year1;
-
-
-                //  $diff = (($year2 - $year1) * 12) + ($month2 - $month1);
-                 
-                //  $option_arr2= array();
-
-                 
-                // $month = $attendance_month;
-                // $year  = $attendance_year;
-                // $count = $diff;
-                // $label_data=[];
-                // for ($i = 0; $i <= $count; $i++) {
-                    
-                //     if ($month > 12) {
-                //         $month = 1;
-                //         $year++;    
-                //     } 
-                //     $x = DateTime::createFromFormat('Y-m', $year.'-'.$month);
-
-                //     //$label[]=  $x->format('m-Y');
-                //     $like_date=  $x->format('Y-m');
-
-
-                //     if($item->working_type){
-                //         $label_data[]=  'p';
-                //     }
-                //     else{
-                //         $label_data[]='';
-                //     }
-                  
-                //     $month++;  
-                // }
-
-
+        
                 //neww
                    $label_data=[];
-
 
                  foreach ($period as $key => $value) {
                   $like_date =  $value->format('j-M-Y'); 
 
-                    $check = $value->format('Y-m-d');
+                   $check = $value->format('Y-m-d');
 
-                ///last new
+                //last new
 
-                  $attendance_details = Attendance::where(['user_id'=>$item->user_id])->where('punchin_date','like',$check.'%')->first();
+                  $attendance_details = Attendance::where(['user_id'=>$item->id])->where('punchin_date','like',$check.'%')->first();
 
+
+                 ///nnn
+
+                     $userId = $item->id;
+                     $branchId = $item->branch_id;
+                     $holiday_detail = Holiday::where('branch',$branchId)->first();
+                     $hoday_dates = $holiday_detail->holiday_date??'';
+                     $check_date_attendance  = explode(',', $hoday_dates);
+
+                     if(in_array($check,$check_date_attendance)){
+                       $label_data[] = 'Holiday';
+
+                     }else{
+
+
+                 ///nnn  
+ 
                   if(!empty($attendance_details)){
 
                     if($attendance_details->attendance_status == '1'){
@@ -283,19 +240,20 @@ class AttendanceController extends Controller
                         $label_data[]='A';
                     }
                     }else{
-
+                       
                         $dayname = date('l', strtotime($check));
                         if($dayname == 'Sunday'){
                          $label_data[]='W/o';
                         }else{
-                         $label_data[]='A';
+                         $label_data[]='MIS';
                         }
                         
                     }   
 
 
-                ///last end new    
+                ///last end new   
 
+                 } 
 
  
                 }
@@ -306,11 +264,12 @@ class AttendanceController extends Controller
                 $label_data[]="";
 
             $return =  [
-                $item->user_id??'',
-                $item->users->employee_codes??'',
-                $item->users->name??'',
-                $item->users->getbranch->branch_name??'',
-                $item->users->getdivision->division_name??'', 
+                $item->id??'',
+                $item->employee_codes??'',
+                $item->name??'',
+                $item->getbranch->branch_name??'',
+                $item->getdivision->division_name??'', 
+                $item->getdesignation->designation_name??'', 
             ];
 
            return  $option_array = array_merge($return, $label_data);
@@ -323,7 +282,8 @@ class AttendanceController extends Controller
             'Employee Code',
             'User Name',
             'Branch',
-            'Div', 
+            'Division',
+            'Designation',  
             
         ];
 

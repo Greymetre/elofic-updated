@@ -143,4 +143,11 @@ class User extends Authenticatable implements HasMedia
             }
         }
     }
+
+    public function attendance_details()
+    {
+        return $this->hasOne(Attendance::class,'user_id','id');
+    }
+
+
 }

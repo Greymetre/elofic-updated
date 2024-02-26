@@ -83,14 +83,14 @@
             <span class="message"></span>
           </div>
           <div class="table-responsive">
-            <table id="getSerialTransaction" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
+            <table id="getSerialTransaction" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
               <thead class=" text-primary">
                 <th>{!! trans('panel.global.no') !!}</th>
                 <th>Serial number</th>
                 <th>Group</th>
                 <th>Sub Group</th>
                 <th>Product Code</th>
-                <th>Discripation</th>
+                <th>Product Name</th>
                 <th>Party Name</th>
                 <th>Invoice Number</th>
                 <th>Invoice Date</th>
@@ -159,8 +159,8 @@
             "defaultContent": ''
           },
           {
-            data: 'discripation',
-            name: 'discripation',
+            data: 'product_name',
+            name: 'product_name',
             "defaultContent": ''
           },
           {

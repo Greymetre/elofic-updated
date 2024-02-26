@@ -21,10 +21,11 @@ use Log;
 use App\Models\Services;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Validator;
 
 class SerialNumberTransactionImport implements ToCollection,WithValidation,WithHeadingRow, WithBatchInserts , WithChunkReading
 {
-    use Importable, SkipsFailures;
+    use Importable;
     
     public function model(array $row)
     {
@@ -37,9 +38,10 @@ class SerialNumberTransactionImport implements ToCollection,WithValidation,WithH
         foreach ($rows as $row) {
             
             $all_serial_no = explode(',', $row['serial_no']);
+            $product = Product::where('product_code', $row['product_code'])->first();
             foreach ($all_serial_no as $serial_no) {
                 $product = Services::create([
-                    'product_name' => isset($row['product_name'])? ucfirst($row['product_name']):'',
+                    'product_name' => isset($product->product_name)? ucfirst($product->product_name):'',
                     'product_code' => isset($row['product_code'])? $row['product_code']:'',
                     'invoice_no' => isset($row['invoice_no'])? $row['invoice_no']:'',
                     'invoice_date' => isset($row['invoice_date'])? date('Y-m-d', strtotime($row['invoice_date'])):'',
@@ -72,23 +74,6 @@ class SerialNumberTransactionImport implements ToCollection,WithValidation,WithH
                 Rule::exists('branches', 'branch_code')
             ],
         ];
-        $user_branch_code = auth()->user()->getbranch->branch_code;
-        if ($user_branch_code != 'HO0000') {
-            $rules['serial_no'] = [
-                'required',
-                function ($attribute, $value, $fail) {
-                    $serialNumbers = explode(',', $value);
-                    foreach ($serialNumbers as $serialNumber) {
-                        $exists = DB::table('services')
-                            ->where('serial_no', $serialNumber)
-                            ->exists();
-                        if (!$exists) {
-                            $fail("The serial number '$serialNumber' does not exist.");
-                        }
-                    }
-                }
-            ];
-        }
         return $rules;
     }
 

@@ -1065,9 +1065,27 @@
                                  <div class="form-group has-default bmd-form-group">
                                     <select class="form-control" name="branch_id" required>
                                        <option value="" disabled selected>Select Branch</option>
+
+                                       <?php 
+                                        $branch_id = $user->branch_id; 
+                                        $branch_check = App\Models\Branch::where('id',$branch_id)->first();
+
+                                        if(!empty($branch_check)){
+                                       ?>
+
                                        @foreach($branches as $branche)
                                        <option {{ (($branche->id == old('branch_id', $user->id?$user->getbranch->id:''))) ? 'selected' : '' }} value="{{$branche->id}}">{{$branche->branch_name}}</option>
                                        @endforeach
+
+                                       <?php }else{ ?>
+
+                                        @foreach($branches as $branche)
+                                       <option  value="{{$branche->id}}">{{$branche->branch_name}}</option>
+                                        @endforeach   
+
+                                       <?php  } ?>
+
+
                                     </select>
                                  </div>
                                  @if ($errors->has('branch_id'))

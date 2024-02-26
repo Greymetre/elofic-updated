@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\Scheme;
+use App\Models\SchemeDetails;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -13,27 +13,31 @@ use Illuminate\Support\Facades\Auth;
 
 class SchemeExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapping
 {
+    private $id;
+    public function __construct($id)
+    {
+        $this->id = $id;
+    }
     public function collection()
     {
-        return Brand::select('id','scheme_name', 'scheme_description', 'start_date', 'end_date', 'scheme_image', 'scheme_type', 'point_value')->latest()->get();   
+        return SchemeDetails::where('scheme_id', $this->id)->latest()->get();   
     }
 
     public function headings(): array
     {
-        return ['id','scheme_name', 'scheme_description', 'start_date', 'end_date', 'scheme_image', 'scheme_type', 'point_value'];
+        return ['Product Id', 'Product Name', 'Category Id', 'Category Name', 'Sub Category Id', 'Sub Category Name', 'Point'];
     }
 
     public function map($data): array
     {
         return [
-            $data['id'],
-            $data['scheme_name'],
-            $data['scheme_description'],
-            Date::dateTimeToExcel($data['start_date']),
-            Date::dateTimeToExcel($data['end_date']),
-            $data['scheme_image'],
-            $data['scheme_type'],
-            $data['point_value'],
+            $data['product_id'],
+            $data['products']['product_name'],
+            $data['category_id'],
+            $data['categories']['category_name'],
+            $data['subcategory_id'],
+            $data['subcategories']['subcategory_name'],
+            $data['points'],
         ];
     }
 

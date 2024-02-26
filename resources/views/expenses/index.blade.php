@@ -1,4 +1,4 @@
-<x-app-layout>
+ <x-app-layout>
 <div class="row">
   <div class="col-md-12">
     <div class="card">
@@ -6,7 +6,7 @@
         <div class="card-icon">
           <i class="material-icons">perm_identity</i>
         </div>
-        <h4 class="card-title ">{!! trans('panel.expenses_type.title_singular') !!} {!! trans('panel.global.list') !!}
+        <h4 class="card-title ">{!! trans('panel.expenses.title_singular') !!} {!! trans('panel.global.list') !!}
               <span class="pull-right">
                 <div class="btn-group">
                   @if(auth()->user()->can(['role_upload']))
@@ -36,8 +36,8 @@
                   @if(auth()->user()->can(['role_template']))
                   <a href="{{ URL::to('roles-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.role.title_singular') !!}"><i class="material-icons">text_snippet</i></a>
                   @endif
-                  @if(auth()->user()->can(['expenses_type_create']))
-                  <a href="{{ route('expenses_type.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.role.title_singular') !!}"><i class="material-icons">add_circle</i></a>
+                  @if(auth()->user()->can(['expenses_create']))
+                  <a href="{{ route('expenses.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.role.title_singular') !!}"><i class="material-icons">add_circle</i></a>
                   @endif
                 </div>
               </span>
@@ -76,12 +76,15 @@
         <div class="table-responsive">
            <table id="getexpensestype" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
             <thead class=" text-primary">
-              <th>{!! trans('panel.global.no') !!}</th>
-              <th>{!! trans('panel.global.status') !!}</th>
+              <th>{!! trans('panel.expenses.fields.expense_id') !!}</th>
               <th>{!! trans('panel.global.action') !!}</th>
-              <th>{!! trans('panel.expenses_type.fields.allowance_type') !!}</th>
-              <th>{!! trans('panel.role.fields.name') !!}</th>
-              <th>{!! trans('panel.expenses_type.fields.rate') !!}</th>
+              <th>{!! trans('panel.expenses.fields.user') !!}</th>
+              <th>{!! trans('panel.expenses.fields.expense_type') !!}</th>
+              <th>{!! trans('panel.expenses.fields.date') !!}</th>
+              <th>{!! trans('panel.expenses.fields.claim_amount') !!}</th>
+              <th>{!! trans('panel.expenses.fields.expense_status') !!}</th>
+              <th>{!! trans('panel.expenses.fields.note') !!}</th>
+             
             </thead>
             <tbody>
             </tbody>
@@ -97,14 +100,18 @@ $(document).ready(function() {
         "processing": true,
         "serverSide": true,
         "order": [ [0, 'desc'] ],
-        "ajax": "{{ route('expenses_type.index') }}",
+        "ajax": "{{ route('expenses.index') }}",
         "columns": [
-            {data: 'DT_RowIndex',name: 'DT_RowIndex',orderable: false,searchable: false},
-            { data: 'is_active', name: 'is_active', orderable: false, searchable: false },
+            // {data: 'DT_RowIndex',name: 'DT_RowIndex',orderable: false,searchable: false},
+            {data: 'id',name: 'id',orderable: false,searchable: false},
             {data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
-            {data: 'allowance_type', name: 'allowance_type'},
-            {data: 'name', name: 'name',"defaultContent": ''},
-            {data: 'rate', name: 'rate',"defaultContent": ''},
+            {data: 'users.name',name: 'users.name',orderable: false,searchable: false},
+            {data: 'expense_type.name',name: 'expense_type.name',orderable: false,searchable: false},
+            {data: 'date',name: 'date',orderable: false,searchable: false},
+            {data: 'claim_amount',name: 'claim_amount',orderable: false,searchable: false},
+            {data: 'is_active', name: 'is_active', orderable: false, searchable: false },
+            {data: 'note', name: 'is_active', orderable: false, searchable: false },
+           
         ]
     });
 });
@@ -126,7 +133,7 @@ $('body').on('click', '.activeRecord', function () {
            return false;
         }
         $.ajax({
-          url: "{{ url('expenses-type-active') }}",
+          url: "{{ url('expenses-active') }}",
             type: 'POST',
             data: {_token: token,id: id,active:active},
             success: function (data) {

@@ -28,6 +28,30 @@ class ServicesController extends Controller
     public function serial_number_transaction_upload(Request $request)
     {
         abort_if(Gate::denies('serial_number_transaction_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $rows = Excel::toCollection([], request()->file('import_file'))->first();
+        $user_branch_code = auth()->user()->getbranch->branch_code;
+        $PCKey = 0;
+        foreach ($rows as $k=>$row) {
+            if ($user_branch_code != 'HO0000') {
+                if($k == 0){
+                    if($row == 'Product Code'){
+                        $PCKey =  $k;
+                    }
+                }else{
+                    $productCode = $row[$PCKey];
+                    $serialNumbers = explode(',', $row[9]);
+                    foreach ($serialNumbers as $serialNumber) {
+                        $exists = DB::table('services')
+                            ->where('serial_no', $serialNumber)
+                            ->where('product_code', $productCode)
+                            ->exists();
+                        if (!$exists) {
+                            return back()->with('error', 'The serial number '.$serialNumber.' with product code '.$productCode.' does not exist.');
+                        }
+                    }
+                }
+            }
+        }
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         Excel::import(new SerialNumberTransactionImport, request()->file('import_file'));
@@ -69,7 +93,7 @@ class ServicesController extends Controller
         return Datatables::of($data)
             ->addIndexColumn()
 
-            ->rawColumns(['action', 'image', 'checkbox'])
+            
             ->make(true);
     }
 
@@ -82,7 +106,6 @@ class ServicesController extends Controller
 
     public function serial_number_history_list(Request $request)
     {
-        return false;
         $data = Services::orderBy('invoice_date', 'asc')->get();
         return Datatables::of($data)
             ->addIndexColumn()

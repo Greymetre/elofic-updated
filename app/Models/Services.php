@@ -16,4 +16,9 @@ class Services extends Model
         return $this->belongsTo('App\Models\User', 'created_by', 'id')->select('id','name');
     }
 
+    public function product()
+    {
+        return $this->belongsTo('App\Models\Product', 'product_code', 'product_code');
+    }
+
 }

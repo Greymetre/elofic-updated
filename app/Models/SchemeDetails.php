@@ -21,4 +21,8 @@ class SchemeDetails extends Model
     {
         return $this->belongsTo('App\Models\Category', 'category_id', 'id')->select('id','category_name','category_image');
     }
+    public function subcategories()
+    {
+        return $this->belongsTo('App\Models\Subcategory', 'subcategory_id', 'id')->select('id','subcategory_name','subcategory_image');
+    }
 }
