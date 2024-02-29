@@ -1,5 +1,6 @@
 <?php
-  
+
+use App\Models\Attachment;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -790,4 +791,9 @@ function getAllChild($users_id, $all_user){
     $children = $all_user->whereIn('reportingid', $users_id)->pluck('id')->toArray();
    
     return $children;
+}
+
+function getCustomerAttachmentByDocumentName($document_name, $customer_id)
+{
+    return Attachment::where('document_name', $document_name)->where('customer_id', $customer_id)->first();
 }

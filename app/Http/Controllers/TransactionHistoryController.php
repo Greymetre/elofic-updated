@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use Gate;
+use Excel;
+use App\Exports\TransactionHistoryExport;
 use Validator;
+use App\Models\Branch;
+use App\Models\Services;
 use App\Models\Customers;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -12,8 +16,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 use App\DataTables\TransactionHistoryDataTable;
-use App\Models\Branch;
-use App\Models\Services;
+use App\Models\SchemeHeader;
 
 class TransactionHistoryController extends Controller
 {
@@ -32,9 +35,11 @@ class TransactionHistoryController extends Controller
      */
     public function index(TransactionHistoryDataTable $dataTable, Request $request)
     {
+        abort_if(Gate::denies('transaction_history_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $branches = Branch::where('active', 'Y')->get();
         $parent_customers = Customers::where('active', 'Y')->whereIn('customertype', ['1','3'])->select('id', 'name')->get();
-        return $dataTable->render('transaction_history.index', compact('branches', 'parent_customers'));
+        $scheme_names = SchemeHeader::where('active', 'Y')->select('id', 'scheme_name')->get();
+        return $dataTable->render('transaction_history.index', compact('branches', 'parent_customers', 'scheme_names'));
     }
 
     /**
@@ -44,6 +49,7 @@ class TransactionHistoryController extends Controller
      */
     public function create()
     {
+        abort_if(Gate::denies('transaction_history_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $customers = Customers::where('customertype', '2')->select('id', 'name', 'mobile')->get();
         return view('transaction_history.create', compact('customers'))->with('transaction_history',$this->transaction_history);;
     }
@@ -58,7 +64,7 @@ class TransactionHistoryController extends Controller
     {
         try
         { 
-            abort_if(Gate::denies('scheme_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+            abort_if(Gate::denies('transaction_history_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
             $validator = Validator::make($request->all(), [
                 'customer_id' => 'required',
                 'coupen_code.*' => 'required',
@@ -153,5 +159,13 @@ class TransactionHistoryController extends Controller
             return response()->json(['status' => 'success','message' => 'Transaction History deleted successfully!']);
         }
         return response()->json(['status' => 'error','message' => 'Error in Transaction History Delete!']);
+    }
+
+    public function download(Request $request)
+    {
+        abort_if(Gate::denies('transaction_history_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new TransactionHistoryExport($request), 'TransactionHistory.xlsx');
     }
 }

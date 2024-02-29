@@ -531,6 +531,58 @@
               </div>
               <div class="col-md-6">
                 <div class="row">
+                  <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.account_holder') !!} </label>
+                  <div class="col-md-9">
+                    <div class="form-group has-default bmd-form-group">
+                      <input type="text" name="account_holder" id="account_holder" class="form-control" value="{!! old( 'account_holder', isset($customers['customerdetails']['account_holder']) ? $customers['customerdetails']['account_holder'] :'' ) !!}" maxlength="200">
+                      @if ($errors->has('account_holder'))
+                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('account_holder') }}</p></div>
+                      @endif
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="row">
+                  <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.account_number') !!} </label>
+                  <div class="col-md-9">
+                    <div class="form-group has-default bmd-form-group">
+                      <input type="text" name="account_number" id="account_number" class="form-control" value="{!! old( 'account_number', isset($customers['customerdetails']['account_number']) ? $customers['customerdetails']['account_number'] :'' ) !!}" maxlength="200">
+                      @if ($errors->has('account_number'))
+                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('account_number') }}</p></div>
+                      @endif
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="row">
+                  <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.bank_name') !!} </label>
+                  <div class="col-md-9">
+                    <div class="form-group has-default bmd-form-group">
+                      <input type="text" name="bank_name" id="bank_name" class="form-control" value="{!! old( 'bank_name', isset($customers['customerdetails']['bank_name']) ? $customers['customerdetails']['bank_name'] :'' ) !!}" maxlength="200">
+                      @if ($errors->has('bank_name'))
+                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('bank_name') }}</p></div>
+                      @endif
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="row">
+                  <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.ifsc_code') !!} </label>
+                  <div class="col-md-9">
+                    <div class="form-group has-default bmd-form-group">
+                      <input type="text" name="ifsc_code" id="ifsc_code" class="form-control" value="{!! old( 'ifsc_code', isset($customers['customerdetails']['ifsc_code']) ? $customers['customerdetails']['ifsc_code'] :'' ) !!}" maxlength="200">
+                      @if ($errors->has('ifsc_code'))
+                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('ifsc_code') }}</p></div>
+                      @endif
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="row">
                   <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.otherid_no') !!}</label>
                   <div class="col-md-9">
                     <div class="form-group has-default bmd-form-group">
@@ -584,7 +636,7 @@
               </div>
             </div>
             <div class="row">
-              <div class="col-md-3 col-sm-3">
+              <div class="col-md-2 col-sm-2">
                  <div class="fileinput fileinput-new text-center" data-provides="fileinput">
                    <div class="selectThumbnail">
                      <span class="btn btn-just-icon btn-round btn-file">
@@ -596,7 +648,7 @@
                      <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
                    </div>
                    <div class="fileinput-new thumbnail">
-                    <img src="{!! !empty($customers['customerdocuments']->where('document_name','gstin')->pluck('file_path')->first()) ? asset($customers['customerdocuments']->where('document_name','gstin')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview1">
+                    <img src="{!! !empty($customers['customerdocuments']->where('document_name','gstin')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','gstin')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview1">
                    </div>
                    <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
                    <label class="bmd-label-floating">{!! trans('panel.customers.fields.gstin_image') !!}</label>
@@ -605,7 +657,7 @@
                     @endif
                  </div>
                </div>
-              <div class="col-md-3 col-sm-3">
+              <div class="col-md-2 col-sm-2">
                 <div class="fileinput fileinput-new text-center" data-provides="fileinput">
                   <div class="selectThumbnail">
                    <span class="btn btn-just-icon btn-round btn-file">
@@ -617,13 +669,13 @@
                    <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
                  </div>
                  <div class="fileinput-new thumbnail">
-                   <img src="{!! !empty($customers['customerdocuments']->where('document_name','pan')->pluck('file_path')->first()) ? asset($customers['customerdocuments']->where('document_name','pan')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview2">
+                   <img src="{!! !empty($customers['customerdocuments']->where('document_name','pan')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','pan')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview2">
                  </div>
                  <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
                  <label class="bmd-label-floating">{!! trans('panel.customers.fields.pan_image') !!}</label>
                </div>
              </div>
-              <div class="col-md-3 col-sm-3">
+              <div class="col-md-2 col-sm-2">
                 <div class="fileinput fileinput-new text-center" data-provides="fileinput">
                   <div class="selectThumbnail">
                    <span class="btn btn-just-icon btn-round btn-file">
@@ -635,25 +687,61 @@
                    <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
                  </div>
                  <div class="fileinput-new thumbnail">
-                   <img src="{!! !empty($customers['customerdocuments']->where('document_name','aadhar')->pluck('file_path')->first()) ? asset($customers['customerdocuments']->where('document_name','aadhar')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview3">
+                   <img src="{!! !empty($customers['customerdocuments']->where('document_name','aadhar')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','aadhar')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview3">
                  </div>
                  <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
-                 <label class="bmd-label-floating">{!! trans('panel.customers.fields.aadhar_image') !!}</label>
+                 <label class="bmd-label-floating">{!! trans('panel.customers.fields.aadhar_front_image') !!}</label>
                </div>
              </div>
-              <div class="col-md-3 col-sm-3">
+             <div class="col-md-2 col-sm-2">
                 <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                 <div class="selectThumbnail">
+                  <div class="selectThumbnail">
                    <span class="btn btn-just-icon btn-round btn-file">
                      <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
                      <span class="fileinput-exists">Change</span>
-                     <input type="file" name="imgother" class="getimage4" accept="image/*">
+                     <input type="file" name="imgaadharback" class="getimage4" accept="image/*">
                    </span>
                    <br>
                    <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
                  </div>
                  <div class="fileinput-new thumbnail">
-                   <img src="{!! !empty($customers['customerdocuments']->where('document_name','other')->pluck('file_path')->first()) ? asset($customers['customerdocuments']->where('document_name','other')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview4">
+                   <img src="{!! !empty($customers['customerdocuments']->where('document_name','aadharback')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','aadharback')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview4">
+                 </div>
+                 <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
+                 <label class="bmd-label-floating">{!! trans('panel.customers.fields.aadhar_back_image') !!}</label>
+               </div>
+             </div>
+             <div class="col-md-2 col-sm-2">
+                <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                  <div class="selectThumbnail">
+                   <span class="btn btn-just-icon btn-round btn-file">
+                     <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
+                     <span class="fileinput-exists">Change</span>
+                     <input type="file" name="imgbankpass" class="getimage5" accept="image/*">
+                   </span>
+                   <br>
+                   <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
+                 </div>
+                 <div class="fileinput-new thumbnail">
+                   <img src="{!! !empty($customers['customerdocuments']->where('document_name','bankpass')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','bankpass')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview5">
+                 </div>
+                 <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
+                 <label class="bmd-label-floating">{!! trans('panel.customers.fields.bank_passbook_image') !!}</label>
+               </div>
+             </div>
+              <div class="col-md-2 col-sm-2">
+                <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                 <div class="selectThumbnail">
+                   <span class="btn btn-just-icon btn-round btn-file">
+                     <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
+                     <span class="fileinput-exists">Change</span>
+                     <input type="file" name="imgother" class="getimage6" accept="image/*">
+                   </span>
+                   <br>
+                   <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
+                 </div>
+                 <div class="fileinput-new thumbnail">
+                   <img src="{!! !empty($customers['customerdocuments']->where('document_name','other')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','other')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview6">
                  </div>
                  <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
                  <label class="bmd-label-floating">{!! trans('panel.customers.fields.otherid_image') !!}</label>

@@ -11,7 +11,7 @@ class Expenses extends Model implements HasMedia
 {
     use HasFactory,InteractsWithMedia;
 
-    protected $fillable = [ 'expenses_type','user_id', 'date', 'claim_amount', 'start_km', 'stop_km', 'total_km','note','checker_status','accountant_status','created_at', 'updated_at','created_by'];
+   protected $fillable = ['expenses_type','user_id', 'date', 'claim_amount', 'start_km', 'stop_km', 'total_km','note','checker_status','accountant_status','created_at', 'updated_at','created_by','approve_amount','reason','approve_reject_by'];
 
     // public function expense_type(){
     //     return $this->hasOne(ExpensesType::class);
@@ -29,9 +29,13 @@ class Expenses extends Model implements HasMedia
   public function registerMediaCollections(): void {
         $this->addMediaCollection('expense_file')
              ->useFallbackUrl(asset(config('constants.NO_IMAGE_URL')))
-             ->useFallbackPath(public_path(config('constants.NO_IMAGE_URL')))
-             ->singleFile();
+             ->useFallbackPath(public_path(config('constants.NO_IMAGE_URL')));
+             //->singleFile();
     }
+
+  public function approve_reject(){
+        return $this->belongsTo(User::class,'approve_reject_by','id');
+    }  
 
 
 

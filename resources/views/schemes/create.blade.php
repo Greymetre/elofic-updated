@@ -1,13 +1,17 @@
 <x-app-layout>
    <style>
-      .select2-results__options{
+      .select2-results__options {
          overflow: auto;
          max-height: 200px !important;
       }
-      .select2-results, .select2-search--dropdown, .select2-dropdown--above{
+
+      .select2-results,
+      .select2-search--dropdown,
+      .select2-dropdown--above {
          min-width: 250px !important;
       }
-      .select2-container{
+
+      .select2-container {
          border-bottom: 1px solid lightgray;
       }
    </style>
@@ -218,14 +222,8 @@
                   </div>
                   <div class="col-md-6" id="customer">
                      <div class="form-group">
-                        <select name="customer[]" multiple placeholder="Select Customers" class="select2 form-control" required>
-                           <!-- <option value="">select branches</option> -->
-                           @if($customers && count($customers) > 0)
-                           @foreach($customers as $customer)
-                           <option value="{{$customer->id}}" {!! in_array($customer->id, old( 'customer[]', explode(',', $schemes['customer']))) ?'selected':'' !!}>{{$customer->name}}</option>
-                           @endforeach
-                           @endif
-                        </select>
+                        <!-- <select name="customer[]" id='customer_select' value="{!! old( 'customer', $schemes['customer']) !!}" ></select> -->
+                        {!! Form::select('customer[]',[], old( 'customer', $schemes['customer']), ['id'=>'customer_select', 'class' => 'form-control']) !!} 
                         @if ($errors->has('state'))
                         <div class="error col-lg-12">
                            <p class="text-danger">{{ $errors->first('state') }}</p>
@@ -384,26 +382,25 @@
          counter = 0;
       }
       $(document).ready(function() {
-         var assignTo = $('#assign_to').val();
-         if (assignTo == 'branch') {
-            $('#branch').show();
-            $('#state').hide();
-            $('#customer').hide();
-         } else if (assignTo == 'state') {
-            $('#state').show();
-            $('#branch').hide();
-            $('#customer').hide();
-         } else if (assignTo == 'customer') {
-            $('#customer').show();
-            $('#state').hide();
-            $('#branch').hide();
-         } else {
-            $('#state').hide();
-            $('#customer').hide();
-            $('#branch').hide();
+         // var assignTo = $('#assign_to').val();
+         // if (assignTo == 'branch') {
+         //    $('#branch').show();
+         //    $('#state').hide();
+         //    $('#customer').hide();
+         // } else if (assignTo == 'state') {
+         //    $('#state').show();
+         //    $('#branch').hide();
+         //    $('#customer').hide();
+         // } else if (assignTo == 'customer') {
+         //    $('#customer').show();
+         //    $('#state').hide();
+         //    $('#branch').hide();
+         // } else {
+         //    $('#state').hide();
+         //    $('#customer').hide();
+         //    $('#branch').hide();
 
-         }
-         getcategorylist();
+         // }
          columnDisplay();
          var $table = $('table.kvcodes-dynamic-rows-example');
          $('a.add-rows').click(function(event) {
@@ -503,7 +500,7 @@
       //       }
       //    });
       // }
-      $(document).on("change", ".category_drop", function(){
+      $(document).on("change", ".category_drop", function() {
          var cat = $(this).val();
          var tr = $(this).closest('tr');
          var subInput = tr.find('.sub_category');
@@ -521,26 +518,8 @@
             }
          });
       })
-      
-      
 
-      // function getproductinfo(cat) {
-      //    $.ajax({
-      //       url: "/getProductData",
-      //       data: {
-      //          'sub_cat': cat
-      //       },
-      //       success: function(data) {
-      //          var html = '<option value="">Select Product</option>';
-      //          $.each(data, function(k, v) {
-      //             html += '<option value="' + v.id + '">' + v.product_name + '</option>';
-      //          });
-      //          $('.product_drop_' + counter).html(html);
-      //       }
-      //    });
-      // }
-
-      $(document).on("change", ".sub_category", function(){
+      $(document).on("change", ".sub_category", function() {
          var cat = $(this).val();
          var tr = $(this).closest('tr');
          var proInput = tr.find('.product_drop');
@@ -573,6 +552,27 @@
             $('#customer').show();
             $('#state').hide();
             $('#branch').hide();
+            var selectedCustomersString = "{!! $schemes['customer'] !!}";
+            var selectedCustomersArray = selectedCustomersString.split(',').map(Number);
+            setTimeout(() => {
+               var $customerSelect = $('#customer_select').select2({
+                  placeholder: 'Customer Select...',
+                  multiple: true,
+                  allowClear: true,
+                  ajax: {
+                     url: "{{ route('getCustomerDataSelect') }}",
+                     dataType: 'json',
+                     delay: 250,
+                     data: function(params) {
+                        return {
+                           term: params.term || '',
+                           page: params.page || 1
+                        }
+                     },
+                     cache: true
+                  }
+               });
+            }, 1000);
          } else {
             $('#state').hide();
             $('#customer').hide();
@@ -580,6 +580,6 @@
 
          }
 
-      })
+      }).trigger('change');
    </script>
 </x-app-layout>

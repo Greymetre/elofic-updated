@@ -330,12 +330,12 @@
                 </li>
                 @endif
                 @if(auth()->user()->can('gift_access'))
-                <li class="nav-item {{ request()->is('gifts*') ? 'active' : '' }}">
+                <!-- <li class="nav-item {{ request()->is('gifts*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('gifts') }}">
                     <i class="material-icons">donut_large</i>
                     <p>{!! trans('panel.sidemenu.gifts') !!}</p>
                   </a>
-                </li>
+                </li> -->
                 @endif
                 @if(auth()->user()->can('unit_access'))
                 <li class="nav-item {{ request()->is('units*') ? 'active' : '' }}">
@@ -578,12 +578,12 @@
           </li>
           @endif
           @if(auth()->user()->can('scheme_access'))
-          <li class="nav-item {{ request()->is('schemes*') || request()->is('transaction_history*') ? 'active' : '' }}">
+          <li class="nav-item {{ request()->is('schemes*') || request()->is('transaction_history*') || request()->is('gifts*') || request()->is('gift-categories*') || request()->is('gift-subcategories*') || request()->is('gift-model*') ? 'active' : '' }}">
             <a class="nav-link collapsed" data-toggle="collapse" href="#schemesMenu" aria-expanded="false">
               <i class="material-icons">loyalty</i>
               <p> Loyalty Engine </p>
             </a>
-            <div class="collapse" id="schemesMenu" style="">
+            <div class="collapse" id="schemesMenu">
               <ul class="nav">
                 @if(auth()->user()->can('scheme_access'))
                 <li class="nav-item {{ request()->is('schemes*') ? 'active' : '' }}">
@@ -593,7 +593,7 @@
                   </a>
                 </li>
                 @endif
-                @if(auth()->user()->can('scheme_access'))
+                @if(auth()->user()->can('transaction_history_access'))
                 <li class="nav-item {{ request()->is('transaction_history*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('transaction_history') }}">
                     <i class="material-icons">history</i>
@@ -609,11 +609,41 @@
                   </a>
                 </li>
                 @endif
-                @if(auth()->user()->can('scheme_access'))
-                <li class="nav-item {{ request()->is('schemes/gift*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('#') }}">
+                @if(auth()->user()->can('gift_access'))
+                <li class="nav-item {{ request()->is('gifts*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('gifts') }}">
                     <i class="material-icons">redeem</i>
                     <p>Gift Catalogue</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('gift_category_access'))
+                <li class="nav-item {{ request()->is('gift-categories*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('gift-categories') }}">
+                    <i class="material-icons">redeem</i>
+                    <p>Gift Categories</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('gift_subcategory_access'))
+                <li class="nav-item {{ request()->is('gift-subcategories*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('gift-subcategories') }}">
+                    <i class="material-icons">redeem</i>
+                    <p>Gift Sub Categories</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('gift_model_access'))
+                <li class="nav-item {{ request()->is('gift-model*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('gift-model') }}">
+                    <i class="material-icons">redeem</i>
+                    <p>Gift Model</p>
+                  </a>
+                </li>
+                <li class="nav-item {{ request()->is('gift-subcategories*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('gift-subcategories') }}">
+                    <i class="material-icons">redeem</i>
+                    <p>Gift Brand</p>
                   </a>
                 </li>
                 @endif

@@ -15,7 +15,7 @@ class SchemeDetails extends Model
 
     public function products()
     {
-        return $this->belongsTo('App\Models\Product', 'product_id', 'id')->select('id','product_name','display_name','product_image');
+        return $this->belongsTo('App\Models\Product', 'product_id', 'id');
     }
     public function categories()
     {
@@ -24,5 +24,10 @@ class SchemeDetails extends Model
     public function subcategories()
     {
         return $this->belongsTo('App\Models\Subcategory', 'subcategory_id', 'id')->select('id','subcategory_name','subcategory_image');
+    }
+
+    public function scheme()
+    {
+        return $this->belongsTo('App\Models\SchemeHeader', 'scheme_id', 'id');
     }
 }

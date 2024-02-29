@@ -67,8 +67,10 @@ class UsersController extends Controller
         $designations = Designation::where('active','=','Y')->get();
         $divisions = Division::where('active','=','Y')->get();
         $departments = Department::where('active','=','Y')->get();
+        $pay_rolls = Config('constants.pay_roll');
 
-        return view('users.create', compact('roles','cities','reportings','branches','designations','divisions', 'customertype','departments'))->with('user',$this->user);
+
+        return view('users.create', compact('roles','cities','reportings','branches','designations','divisions', 'customertype','departments','pay_rolls'))->with('user',$this->user);
     }
 
     public function store(UserRequest $request)
@@ -95,6 +97,7 @@ class UsersController extends Controller
             'designation_id' => isset($request['designation_id']) ? $request['designation_id'] :'',
             'division_id' => isset($request['division_id']) ? $request['division_id'] :'',
             'reportingid' => isset($request['reportingid']) ? $request['reportingid'] :'',
+            'payroll' => isset($request['payroll']) ? $request['payroll'] :'',
         ]);
         $user->roles()->sync($request->input('roles', []));
         $permissions = $user->getPermissionsViaRoles()->pluck('name');
@@ -210,8 +213,9 @@ class UsersController extends Controller
         $designations = Designation::where('active','=','Y')->get();
         $divisions = Division::where('active','=','Y')->get();
         $departments = Department::where('active','=','Y')->get();
+        $pay_rolls = Config('constants.pay_roll');
         // dd($user);
-        return view('users.create', compact('roles', 'user','cities','reportings','branches','designations','divisions', 'customertype','departments'));
+        return view('users.create', compact('roles', 'user','cities','reportings','branches','designations','divisions', 'customertype','departments','pay_rolls'));
     }
 
     //public function update(Request $request, User $user)
@@ -322,6 +326,8 @@ class UsersController extends Controller
         $user->employee_codes = isset($request['employee_codes']) ? $request['employee_codes'] :null;
         $user->designation_id = isset($request['designation_id']) ? $request['designation_id'] :null;
         $user->division_id = isset($request['division_id']) ? $request['division_id'] :null;
+        $user->payroll = isset($request['payroll']) ? $request['payroll'] :null;
+
 
 
         if($user->save())

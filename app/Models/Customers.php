@@ -185,7 +185,7 @@ class Customers extends Model
 
     public function customerdetails()
     {
-        return $this->belongsTo('App\Models\CustomerDetails', 'id', 'customer_id')->select('customer_id', 'gstin_no', 'pan_no', 'aadhar_no', 'otherid_no', 'enrollment_date', 'approval_date','shop_image','visiting_card','grade','visit_status');
+        return $this->belongsTo('App\Models\CustomerDetails', 'id', 'customer_id');
     }
 
     public function customeraddress()
@@ -241,9 +241,7 @@ class Customers extends Model
      return $this->hasMany(ParentDetail::class, 'customer_id', 'id');
     }
 
-
-
-
+    
 
 
 }

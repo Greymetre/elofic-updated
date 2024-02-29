@@ -49,6 +49,9 @@ use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\ExpensesTypeController;
 use App\Http\Controllers\SalesWeightageController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\GiftCategoryController;
+use App\Http\Controllers\GiftModelController;
+use App\Http\Controllers\GiftSubcategoryController;
 use App\Http\Controllers\ServicesController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\TransactionHistoryController;
@@ -498,8 +501,16 @@ Route::group(['middleware' => ['auth']], function () {
      Route::post('expenses-type-active', [ExpensesTypeController::class, 'changeStatus']);
 
     // /Expenses
-    Route::resource('expenses', ExpensesController::class);
-     Route::post('expenses-active', [ExpensesTypeController::class, 'changeStatus']);
+     Route::resource('expenses', ExpensesController::class);
+     Route::post('expenses-active', [ExpensesController::class, 'changeStatus']);
+     Route::post('expenses-uncheck', [ExpensesController::class, 'uncheckStatus']);
+     Route::any('expenses-download', [ ExpensesController::class, 'expenseDownload'])->name('expenses.download');
+     Route::post('rejectExpense', [ ExpensesController::class, 'rejectExpense'])->name('rejectExpense');
+     Route::post('approveExpense', [ ExpensesController::class, 'approveExpense'])->name('approveExpense');
+     Route::post('getexpenseType', [ ExpensesController::class, 'getexpenseType'])->name('getexpenseType');
+     Route::post('getexpenseUserType', [ ExpensesController::class, 'getexpenseUserType'])->name('getexpenseUserType');
+     Route::post('getexpenseUserTypeEdit', [ ExpensesController::class, 'getexpenseUserTypeEdit'])->name('getexpenseUserTypeEdit');
+
 
      // departments
      Route::resource('departments', DepartmentController::class);
@@ -515,7 +526,28 @@ Route::group(['middleware' => ['auth']], function () {
 
     // Transaction History
     Route::resource('transaction_history', TransactionHistoryController::class);
+    Route::get('transaction_history_download', [TransactionHistoryController::class, 'download'])->name('transaction_history.download');
 
+    //Gift Category Route
+    Route::resource('gift-categories', GiftCategoryController::class);
+    Route::any('gift-categories-download', [ GiftCategoryController::class, 'download'])->name('gift.categories.download');
+    Route::any('gift-categories-template', [ GiftCategoryController::class, 'template'])->name('gift.categories.template');
+    Route::post('gift-categories-upload', [ GiftCategoryController::class, 'upload'])->name('gift.categories.upload');
+    Route::post('gift-categories-active', [ GiftCategoryController::class, 'active'])->name('gift.categories.active');
+    
+    //Gift Sub Category Route
+    Route::resource('gift-subcategories', GiftSubcategoryController::class);
+    Route::any('gift-subcategories-download', [ GiftSubcategoryController::class, 'download'])->name('gift.subcategories.download');
+    Route::any('gift-subcategories-template', [ GiftSubcategoryController::class, 'template'])->name('gift.subcategories.template');
+    Route::post('gift-subcategories-upload', [ GiftSubcategoryController::class, 'upload'])->name('gift.subcategories.upload');
+    Route::post('gift-subcategories-active', [ GiftSubcategoryController::class, 'active'])->name('gift.subcategories.active');
+
+    //Gift Brand Route
+    Route::resource('gift-model', GiftModelController::class);
+    Route::any('gift-model-download', [ GiftModelController::class, 'download'])->name('gift.model.download');
+    Route::any('gift-model-template', [ GiftModelController::class, 'template'])->name('gift.model.template');
+    Route::post('gift-model-upload', [ GiftModelController::class, 'upload'])->name('gift.model.upload');
+    Route::post('gift-model-active', [ GiftModelController::class, 'active'])->name('gift.model.active');
 
     Route::get('logout', '\App\Http\Controllers\Auth\AuthenticatedSessionController@destroy');
 });
@@ -528,6 +560,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('getAddressData', [ AjaxController::class, 'getAddressData']);
     Route::any('getAddressInfo', [ AjaxController::class, 'getAddressInfo']);
     Route::any('getCustomerData', [ AjaxController::class, 'getCustomerData'])->name('getCustomerData');
+    Route::any('getCustomerDataSelect', [ AjaxController::class, 'getCustomerDataSelect'])->name('getCustomerDataSelect');
     Route::any('getCategoryData', [ AjaxController::class, 'getCategoryData']);
     Route::any('getSubCategoryData', [ AjaxController::class, 'getSubCategoryData']);
     Route::any('getProductData', [ AjaxController::class, 'getProductData']);
@@ -544,6 +577,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('getUserActivityData', [ AjaxController::class, 'getUserActivityData']);
     Route::any('getCustomerActivityData', [ AjaxController::class, 'getCustomerActivityData']);
     Route::any('schemesdetails/remove', [ AjaxController::class, 'removeSchemesdetails']);
+    Route::any('changeDocumnetStatus', [ AjaxController::class, 'changeDocumnetStatus']);
 
 
 

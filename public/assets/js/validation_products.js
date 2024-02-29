@@ -36,6 +36,41 @@ $(document).ready(function () {
     }
   });
 
+    /*=============== Gift Category Validation =====================*/
+    $('#giftCreateCategoryForm').validate({
+      rules: {
+        category_name:
+        {
+          required: true,
+          minlength: 3,
+          maxlength: 250,
+          remote: {
+            url: base_url + "/uniqueValidation",
+            type: "post",
+            data: {
+              "_token": token,
+              value: function () { return $("#category_name").val(); },
+              table: 'gift_categories',
+              column: 'category_name',
+              id: function () { return $("#category_id").val(); },
+            }
+          }
+        },
+      },
+      highlight: function (element) {
+        $(element).closest('.error').css("display", "none");
+      },
+      unhighlight: function (element) {
+        $(element).closest('.error').css("display", "block");
+      },
+      messages: {
+        category_name: {
+          remote: "This Category Name already exits.",
+          required: "Please enter Category Name",
+        },
+      }
+    });
+
   /*=============== SubCategory Validation =====================*/
   $('#createsubcategoryForm').validate({
     rules: {
@@ -78,6 +113,93 @@ $(document).ready(function () {
       },
     }
   });
+
+   /*=============== SubCategory Validation =====================*/
+   $('#createModelForm').validate({
+    rules: {
+      model_name:
+      {
+        required: true,
+        minlength: 3,
+        maxlength: 250,
+        remote: {
+          url: base_url + "/uniqueValidation",
+          type: "post",
+          data: {
+            "_token": token,
+            value: function () { return $("#model_name").val(); },
+            table: 'gift_models',
+            column: 'model_name',
+            id: function () { return $("#sub_category_id").val(); },
+          }
+        }
+      },
+      sub_category_id:
+      {
+        required: true,
+        number: true,
+      },
+    },
+    highlight: function (element) {
+      $(element).closest('.error').css("display", "none");
+    },
+    unhighlight: function (element) {
+      $(element).closest('.error').css("display", "block");
+    },
+    messages: {
+      subcategory_name: {
+        remote: "This Model Name already exits.",
+        required: "Please enter Model Name",
+      },
+      category_id: {
+        required: "Please Select Sub Category",
+      },
+    }
+  });
+
+   /*=============== Gift SubCategory Validation =====================*/
+   $('#createsgiftsubcategoryForm').validate({
+    rules: {
+      subcategory_name:
+      {
+        required: true,
+        minlength: 3,
+        maxlength: 250,
+        remote: {
+          url: base_url + "/uniqueValidation",
+          type: "post",
+          data: {
+            "_token": token,
+            value: function () { return $("#subcategory_name").val(); },
+            table: 'giftsubcategories',
+            column: 'subcategory_name',
+            id: function () { return $("#category_id").val(); },
+          }
+        }
+      },
+      category_id:
+      {
+        required: true,
+        number: true,
+      },
+    },
+    highlight: function (element) {
+      $(element).closest('.error').css("display", "none");
+    },
+    unhighlight: function (element) {
+      $(element).closest('.error').css("display", "block");
+    },
+    messages: {
+      subcategory_name: {
+        remote: "This SubCategory Name already exits.",
+        required: "Please enter SubCategory Name",
+      },
+      category_id: {
+        required: "Please Select Category",
+      },
+    }
+  });
+
   /*=============== Brand Validation =====================*/
   $('#createBrandForm').validate({
     rules: {

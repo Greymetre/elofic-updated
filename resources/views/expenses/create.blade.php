@@ -9,8 +9,8 @@
           <h4 class="card-title ">{{ trans('panel.global.create') }} {{ trans('panel.expenses.title_singular') }}
             <span class="pull-right">
               <div class="btn-group">
-                @if(auth()->user()->can(['expenses_type']))
-                <a href="{{ url('expenses_type') }}" class="btn btn-just-icon btn-theme" title="{!! trans('panel.expenses_type.title_singular') !!} {!! trans('panel.global.list') !!}"><i class="material-icons">next_plan</i></a>
+                @if(auth()->user()->can(['expense_access']))
+                <a href="{{ url('expenses') }}" class="btn btn-just-icon btn-theme" title="{!! trans('panel.expenses_type.title_singular') !!} {!! trans('panel.global.list') !!}"><i class="material-icons">next_plan</i></a>
                 @endif
               </div>
             </span>
@@ -29,7 +29,7 @@
             </span>
           </div>
           @endif
-          <form method="POST" action="{{ route("expenses.store") }}" enctype="multipart/form-data" id="storeExpensesTypeData">
+          <form method="POST" action="{{ route("expenses.store") }}" enctype="multipart/form-data" id="storeExpenses">
             @csrf
             <div class="row">
               <div class="col-md-6">
@@ -77,9 +77,11 @@
                     <div class="form-group has-default bmd-form-group">
                       <select name="expenses_type" id="expenses_type" class="form-control {{ $errors->has('expenses_type') ? 'is-invalid' : '' }} select2">
                         <option value="" disabled selected>Please Select Expenses Type</option>
-                        @foreach($expensestypes as $key=>$expensestype)
+
+                       <!--  @foreach($expensestypes as $key=>$expensestype)
                         <option value="{{$expensestype->id}}" data-allowtype="{{$expensestype->allowance_type_id}}" data-rate ="{{$expensestype->rate}}">{{$expensestype->name}}</option>
-                        @endforeach
+                        @endforeach -->
+                        
                       </select>
                       @if($errors->has('expenses_type'))
                       <div class="invalid-feedback">
@@ -194,11 +196,11 @@
          
               <div class="col-md-6">
                 <div class="row">
-                   <label class="col-md-3 col-form-label">{!! trans('panel.expenses.fields.expense_file') !!}</label>
+                   <label class="col-md-2 col-form-label">{!! trans('panel.expenses.fields.expense_file') !!}</label>
                    <br><br>
                    <div class="col-md-10">
                       <div class=" has-default bmd-form-group">
-                         <input type="file" name="expense_file" class="form-control">
+                         <input type="file" name="expense_file[]" multiple class="form-control">
                       </div>
                    </div>
                 </div>
@@ -257,33 +259,6 @@ $(document).ready(function(){
      });
 
 
-         //     $(document).ready(function () {
-         //    $(".calculate").keyup(function () {
-                
-         //        var ag_value_booked = parseFloat($('#ag_value_booked').val());
-         //        var gst = parseFloat($('#gst').val());
-         //        var stamp_duty = parseFloat($('#stamp_duty').val());
-         //        var registration = parseFloat($('#registration').val());
-         //        var percentage = parseFloat(((gst * ag_value_booked) / 100).toFixed(2));
-
-
-         //        var totalsum = ag_value_booked + stamp_duty + registration + percentage;
-         //        if(ag_value_booked >= 0 && stamp_duty >= 0 && registration >= 0 && percentage >= 0){
-         //         $(".total_package").val(totalsum);
-         //        }else{
-         //          $(".total_package").val('');   
-         //        }
-         //    });
-         // });
-
-
-
-
-
-
-
-
-
  });
 
 
@@ -292,6 +267,30 @@ $(document).ready(function(){
 
 
 });
+</script>
+
+
+
+<script type="text/javascript">
+
+    // for get expense type
+ $('#user_id').change(function() {
+    var user_id = $(this).val();
+    
+    $.post("{{ route('getexpenseUserType') }}",{
+        'user_id':user_id,
+        '_token':"{{ csrf_token() }}"
+        },function(response){
+
+          var select = $('#expenses_type');
+          select.empty();
+          select.append(response);
+          //select.selectpicker('refresh');              
+
+    })
+   
+ }).trigger('change');
+    
 </script>
 
 

@@ -5,6 +5,7 @@ namespace App\DataTables;
 use App\Models\Customers;
 use App\Models\ParentDetail;
 use App\Models\SchemeDetails;
+use App\Models\Services;
 use App\Models\TransactionHistory;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -41,7 +42,7 @@ class TransactionHistoryDataTable extends DataTable
                 return $employee;
             })
             ->editColumn('customer.name', function ($data) {
-                $customer_name = '<a href="'.route('customers.edit', [encrypt($data->customer->id)]).'">'.$data->customer->name.'</a>';
+                $customer_name = '<a target="_blank" href="'.route('customers.show', [encrypt($data->customer->id)]).'">'.$data->customer->name.'</a>';
                 
                 return $customer_name;
             })
@@ -111,11 +112,23 @@ class TransactionHistoryDataTable extends DataTable
                 $data->whereIn('customer_id', $parent_customer_id);
             }
         }
+        if($request->scheme_name && $request->scheme_name != null  && $request->scheme_name != ''){
+            $scheme_details = SchemeDetails::with('products')->where('scheme_id',$request->scheme_name)->get();
+            $all_product_code = $scheme_details->pluck('products.product_code')->flatten()->unique();
+            $all_serial_number = Services::whereIn('product_code', $all_product_code)->pluck('serial_no');
+            
+            if(!empty($all_serial_number)){
+                $data->whereIn('coupen_code', $all_serial_number);
+            }
+        }
         if($request->start_date && $request->start_date != null && $request->start_date != '' && $request->end_date && $request->end_date != null && $request->end_date != ''){
             $startDate = date('Y-m-d', strtotime($request->start_date));
             $endDate = date('Y-m-d', strtotime($request->end_date));
             $data = $data->whereDate('created_at', '>=', $startDate)
              ->whereDate('created_at', '<=', $endDate);
+        }
+        if($request->customer_id && $request->customer_id != null  && $request->customer_id != ''){
+            $data->where('customer_id', $request->customer_id);
         }
         $data = $data->latest()->newQuery();
         return $data;

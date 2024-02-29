@@ -9,10 +9,10 @@
           <h4 class="card-title ">Transaction Coupon History {!! trans('panel.global.list') !!}
             <span class="pull-right">
               <div class="btn-group align-items-center">
-                @if(auth()->user()->can(['serial_number_transaction_download']))
-                <form method="GET" action="{{ URL::to('services/serial_number_transaction/download') }}" class="form-horizontal">
+                @if(auth()->user()->can(['transaction_history_download']))
+                <form method="GET" action="{{ route('transaction_history.download') }}" class="form-horizontal">
                   <div class="d-flex flex-row align-items-center">
-                    <div class="p-2" style="width:200px;">
+                    <div class="p-2" style="width:180px;">
                       <label for="branch_id">Branch</label>
                       <select class="select2" placeholder="Select Branch" multiple name="branch_id[]" id="branch_id" data-style="select-with-transition" title="Select Branch">
                         <option value="">Select Branch</option>
@@ -23,7 +23,7 @@
                         @endif
                       </select>
                     </div>
-                    <div class="p-2" style="width:200px;">
+                    <div class="p-2" style="width:180px;">
                       <label for="parent_customer">Parent Customer</label>
                       <select class="select2" multiple name="parent_customer[]" id="parent_customer" data-style="select-with-transition" title="Select Parent Customer">
                         <option value="">Select Parent Customer</option>
@@ -34,13 +34,24 @@
                         @endif
                       </select>
                     </div>
+                    <div class="p-2" style="width:180px;">
+                      <label for="scheme_type">Scheme</label>
+                      <select class="select2" name="scheme_name" id="scheme_name" data-style="select-with-transition" title="Select Scheme Type">
+                        <option value="">Scheme Name</option>
+                        @if(@isset($scheme_names ))
+                        @foreach($scheme_names as $scheme_name)
+                        <option value="{!! $scheme_name->id !!}">{!! $scheme_name->scheme_name !!}</option>
+                        @endforeach
+                        @endif
+                      </select>
+                    </div>
                     <div class="p-2" style="width:180px;"><label for="start_date">Start Date</label><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
                     <div class="p-2" style="width:180px;"><label for="end_date">End Date</label><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
                     <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Transaction Coupon History"><i class="material-icons">cloud_download</i></button></div>
                   </div>
                 </form>
                 @endif
-                @if(auth()->user()->can(['scheme_create']))
+                @if(auth()->user()->can(['transaction_history_create']))
                 <a href="{{ route('transaction_history.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Transaction Coupon History"><i class="material-icons">add_circle</i></a>
                 @endif
               </div>
@@ -81,7 +92,7 @@
             <table id="getTransactionHistory" class="table table-striped- table-bschemeed table-hover table-checkable no-wrap">
               <thead class=" text-primary">
                 <th>{!! trans('panel.global.no') !!}</th>
-                <th>{!! trans('panel.global.created_at') !!}</th>
+                <th>{!! trans('panel.expenses.fields.date') !!}</th>
                 <th>Firm Name</th>
                 <th>CONTACT PERSON</th>
                 <th>parent name</th>
@@ -121,6 +132,7 @@
           'data': function(d) {
             d.branch_id = $('#branch_id').val(),
               d.parent_customer = $('#parent_customer').val(),
+              d.scheme_name = $('#scheme_name').val(),
               d.start_date = $('#start_date').val(),
               d.end_date = $('#end_date').val()
           }
@@ -194,6 +206,9 @@
         table.draw();
       });
       $('#parent_customer').change(function() {
+        table.draw();
+      });
+      $('#scheme_name').change(function() {
         table.draw();
       });
       $('#start_date').change(function() {

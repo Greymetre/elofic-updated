@@ -46,7 +46,8 @@ class SchemeController extends Controller
         $customer_types = CustomerType::where('active', 'Y')->select('id', 'customertype_name')->get();
         $branchs = Branch::where('active', 'Y')->select('id', 'branch_name')->get();
         $states = State::where('active', 'Y')->select('id', 'state_name')->get();
-        $customers = Customers::where('active', 'Y')->select('id', 'name')->get();
+       // $customers = Customers::where('active', 'Y')->select('id', 'name')->get();
+         $customers = [];
         return view('schemes.create', compact('customer_types','branchs','states','customers'))->with('schemes',$this->schemes);
     }
 
@@ -142,6 +143,7 @@ class SchemeController extends Controller
         $branchs = Branch::where('active', 'Y')->select('id', 'branch_name')->get();
         $states = State::where('active', 'Y')->select('id', 'state_name')->get();
         $customers = Customers::where('active', 'Y')->select('id', 'name')->get();
+        // $customers = [];
         $id = decrypt($id);
         $schemes = SchemeHeader::find($id);
         return view('schemes.create', compact('customer_types','branchs','states','customers'))->with('schemes',$schemes);

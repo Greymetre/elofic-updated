@@ -16,7 +16,7 @@ class ExpensesTypeController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
-    {
+    {  
         if ($request->ajax()) {
             $data = ExpensesType::latest();
 
@@ -66,9 +66,10 @@ class ExpensesTypeController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create()
-    {
+    {      
         $allowance_type = Config('constants.allowance_type');
-        return view('expenses_type.create', compact('allowance_type'));
+        $pay_rolls = Config('constants.pay_roll');
+        return view('expenses_type.create', compact('allowance_type','pay_rolls'));
     }
 
     /**
@@ -77,38 +78,40 @@ class ExpensesTypeController extends Controller
      * @param  \App\Http\Requests\StoreExpensesTypeRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreExpensesTypeRequest $request)
-    {
+     public function store(StoreExpensesTypeRequest $request)
+     {          
         $expensesType = new ExpensesType();
         $expensesType->name = $request->name;
         $expensesType->rate = $request->rate!=null?$request->rate:0.00;
         $expensesType->allowance_type_id = $request->allowance_type_id;
+        $expensesType->payroll_id = $request->payroll_id;
         $expensesType->save();
         return redirect(route('expenses_type.index'))->with('message_success', 'Data Store Successfully');
-    }
+     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\ExpensesType  $expensesType
-     * @return \Illuminate\Http\Response
-     */
-    public function show(ExpensesType $expensesType)
-    {
-        //
-    }
+    // /**
+    //  * Display the specified resource.
+    //  *
+    //  * @param  \App\Models\ExpensesType  $expensesType
+    //  * @return \Illuminate\Http\Response
+    //  */
+    // public function show(ExpensesType $expensesType)
+    // {
+    //     //
+    // }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\ExpensesType  $expensesType
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(ExpensesType $expensesType)
-    {
+     /**
+      * Show the form for editing the specified resource.
+      *
+      * @param  \App\Models\ExpensesType  $expensesType
+      * @return \Illuminate\Http\Response
+      */
+     public function edit(ExpensesType $expensesType)
+     {  
         $allowance_type = Config('constants.allowance_type');
-        return view('expenses_type.edit', compact('expensesType', 'allowance_type'));
-    }
+        $pay_rolls = Config('constants.pay_roll');
+        return view('expenses_type.edit', compact('expensesType', 'allowance_type','pay_rolls'));
+     }
 
     /**
      * Update the specified resource in storage.
@@ -122,20 +125,21 @@ class ExpensesTypeController extends Controller
         $expensesType->name = $request->name;
         $expensesType->rate = $request->rate;
         $expensesType->allowance_type_id = $request->allowance_type_id;
+        $expensesType->payroll_id = $request->payroll_id;
         $expensesType->save();
         return redirect(route('expenses_type.index'))->with('message_success', 'Data Updated Successfully');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\ExpensesType  $expensesType
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(ExpensesType $expensesType)
-    {
-        //
-    }
+    // /**
+    //  * Remove the specified resource from storage.
+    //  *
+    //  * @param  \App\Models\ExpensesType  $expensesType
+    //  * @return \Illuminate\Http\Response
+    //  */
+    // public function destroy(ExpensesType $expensesType)
+    // {
+    //     //
+    // }
 
     public function changeStatus(Request $request){
         $expenses_type = ExpensesType::find($request->id);
@@ -146,7 +150,6 @@ class ExpensesTypeController extends Controller
         }
 
         $expenses_type->save();
-
         return response()->json(['status'=>'success', 'message'=>'Status changed successfully']);
     }
 }

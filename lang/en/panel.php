@@ -421,6 +421,13 @@ return [
             'gstin_image'        => 'GSTIN Image',
             'pan_image'        => 'Pan Image',
             'aadhar_image'     => 'Aadhar Image',
+            'aadhar_front_image'     => 'Aadhar Fornt Image',
+            'aadhar_back_image'     => 'Aadhar Back Image',
+            'bank_passbook_image'     => 'Bank Passbook Image',
+            'account_holder'     => 'Account Holder Name',
+            'account_number'     => 'Account number',
+            'bank_name'     => 'Bank Name',
+            'ifsc_code'     => 'IFSC Code',
             'otherid_image'     => 'Other ID Image',
             'customertype'        => 'Customer Type',
             'firmtype'          => 'Firm Type',
@@ -613,7 +620,8 @@ return [
             'name'              => 'Type Name',
             'display_name'      => 'Display Name',
             'rate'       => 'Rate',
-            'allowance_type' => 'Allowance Type'
+            'allowance_type' => 'Allowance Type',
+            'pay_roll' => 'Pay Roll',
         ],
     ],
 
@@ -633,6 +641,9 @@ return [
             'total_km'          => 'Total Km',
             'expense_file'      => 'Expense File',
             'rate'              => 'Rate',
+            'created_at'        => 'Created at',
+            'branch'            => 'Branch',
+
         ],
     ],
 
@@ -690,6 +701,7 @@ return [
         'children_four_date_of_birth'  => 'Children-4 Date of Birth',
         'children_five'  => 'Children-5',
         'children_five_date_of_birth'  => 'Children-5 Date of Birth',
+        'pay_roll'  => 'Pay Roll',
 
 
         'account_number'    => 'Account Number',
@@ -750,6 +762,16 @@ return [
     'category'           => [
         'title'          => 'Categories',
         'title_singular' => 'Category',
+        'fields'         => [
+            'id'                       => 'ID',
+            'category_name'            => 'Category Name',
+            'category_name_helper'     => '',
+            'category_image'            => 'Category Image',
+        ],
+    ],
+    'gift_category'           => [
+        'title'          => 'Gift Categories',
+        'title_singular' => 'Gift Category',
         'fields'         => [
             'id'                       => 'ID',
             'category_name'            => 'Category Name',
@@ -836,6 +858,26 @@ return [
             'subcategory_name'        => 'Sub Category Name',
             'subcategory_image'        => 'Image',
             'category'        => 'Category',
+        ],
+    ],
+    'gift_subcategory'           => [
+        'title'          => 'Gift Sub Categories',
+        'title_singular' => 'Gift Sub Category',
+        'fields'         => [
+            'id'                       => 'ID',
+            'subcategory_name'        => 'Sub Category Name',
+            'subcategory_image'        => 'Image',
+            'category'        => 'Gift Category',
+        ],
+    ],
+    'gift_model'           => [
+        'title'          => 'Gift Models',
+        'title_singular' => 'Gift Model',
+        'fields'         => [
+            'id'                       => 'ID',
+            'subcategory_name'        => 'Model Name',
+            'subcategory_image'        => 'Image',
+            'category'        => 'Gift Sub Category',
         ],
     ],
     'product'           => [

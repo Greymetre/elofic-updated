@@ -745,7 +745,35 @@
                   <hr class="my-3">
                   <h4 class="section-heading mb-3  h4 mt-0 text-center text-info">HR Information </h4>
                   <hr class="my-3">
+
+
+
+
+
                   <div class="row">
+
+                     <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.pay_roll') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <div class="form-group has-default bmd-form-group">
+                                    <select class="form-control" name="payroll" required>
+                                       <option value="" disabled selected>Select Pay Roll</option>
+                                       @foreach($pay_rolls as $key=> $pay_roll)
+                                       <option {{ (($key == old('payroll', $user->payroll?$user->payroll:''))) ? 'selected' : '' }} value="{{$key}}">{{$pay_roll}}</option>
+                                       @endforeach
+                                    </select>
+                                 </div>
+                                 @if ($errors->has('payroll'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('payroll') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
                      <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.salary') !!}</label>

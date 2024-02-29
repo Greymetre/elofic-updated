@@ -162,7 +162,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     //Expenses Type
      Route::get('/getExpensesType', [ExpensesTypeController::class, 'getExpensesType']);
      Route::post('createExpense', [ExpensesTypeController::class, 'createExpense']);
-     Route::get('expenseListing', [ExpensesTypeController::class, 'expenseListing']);
+     Route::any('expenseListing', [ExpensesTypeController::class, 'expenseListing']);
      Route::post('expenseDetails', [ExpensesTypeController::class, 'expenseDetails']);
      Route::post('updateExpense', [ExpensesTypeController::class, 'updateExpense']);
 });

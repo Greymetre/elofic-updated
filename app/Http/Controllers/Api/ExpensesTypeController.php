@@ -86,8 +86,10 @@ class ExpensesTypeController extends Controller
         try
         { 
             $pageSize = $request->input('pageSize');
-            $query = Expenses::with('media','expense_type')->where(['user_id'=>Auth::Id()]);
-            $expenses = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->orderBy('id','desc')->get();
+            $query = Expenses::with('media','expense_type')->where(['user_id'=>Auth::Id()])->orderBy('id','desc');
+            //$expenses = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
+            $expenses = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->paginate(100);
+
             if($expenses->isNotEmpty())
             {
 
@@ -100,17 +102,28 @@ class ExpensesTypeController extends Controller
                  $image = $expense->getFirstMedia('expense_file')->getFullUrl();
                 }
 
+              
+                if($expense->checker_status == '1'){
+                 $exp_status = 'Approved';
+                }elseif($expense->checker_status == '2'){
+                 $exp_status = 'Rejected';
+                }else{
+                 $exp_status = 'Pending';
+                }
+
+
                   $datas[] = array(
                 'id' => $expense->id ?? "",
                 'expenses_type' => $expense->expenses_type ?? "",
                 'expenses_type_name' => $expense->expense_type->name?? "",
                 'user_id' => $expense->user_id ?? "",
-                'date' => $expense->date ?? "",
+                'date' => date("d-m-Y", strtotime($expense->date)),
                 'note' => $expense->note ?? "",
                 'start_km' => $expense->start_km ?? "",
                 'stop_km' => $expense->stop_km ?? "",
                 'total_km' => $expense->total_km ?? "",
                 'claim_amount' => $expense->claim_amount ?? "",
+                'status' => $exp_status,
                 // 'claim_amount' => '$'.number_format($expense->claim_amount ?? 0,2),
                 //'expense_image' =>  $expense->getFirstMedia('expense_file')->getFullUrl(),
                  'expense_image' =>  $image,
@@ -145,29 +158,53 @@ class ExpensesTypeController extends Controller
             if(!empty($expense))
             {
 
-
                 $image = '';  
                 if(isset($expense) && $expense->getMedia('expense_file')->count() > 0 && file_exists($expense->getFirstMedia('expense_file')->getPath())){
                  $image = $expense->getFirstMedia('expense_file')->getFullUrl();
                 }
 
 
+                if($expense->checker_status == '1'){
+                 $exp_status = 'Approved';
+                }elseif($expense->checker_status == '2'){
+                 $exp_status = 'Rejected';
+                }else{
+                 $exp_status = 'Pending';
+                }
 
+                // $datas[] = array(
+                // 'id' => $expense->id ?? "",
+                // 'expenses_type' => $expense->expenses_type ?? "",
+                // 'expenses_type_name' => $expense->expense_type->name?? "",
+                // 'user_id' => $expense->user_id ?? "",
+                // 'date' => date("d-m-Y", strtotime($expense->date)),
+                // 'note' => $expense->note ?? "",
+                // 'start_km' => $expense->start_km ?? "",
+                // 'stop_km' => $expense->stop_km ?? "",
+                // 'total_km' => $expense->total_km ?? "",
+                // 'claim_amount' => $expense->claim_amount ?? "",
+                // 'approve_amount' => $expense->approve_amount ?? "",
+                // 'status' => $exp_status,
+                // 'expense_image' =>  $image,
+                //    );
 
-                $datas[] = array(
-                'id' => $expense->id ?? "",
-                'expenses_type' => $expense->expenses_type ?? "",
-                'expenses_type_name' => $expense->expense_type->name?? "",
-                'user_id' => $expense->user_id ?? "",
-                'date' => $expense->date ?? "",
-                'note' => $expense->note ?? "",
-                'start_km' => $expense->start_km ?? "",
-                'stop_km' => $expense->stop_km ?? "",
-                'total_km' => $expense->total_km ?? "",
-                'claim_amount' => $expense->claim_amount ?? "",
-                // 'claim_amount' => '$'.number_format($expense->claim_amount ?? 0,2),
-                'expense_image' =>  $image,
-                   );
+                $datas = array();
+                $datas['id'] = $expense->id ?? "";
+                $datas['expenses_type'] = $expense->expenses_type ?? "";
+                $datas['expenses_type_name'] = $expense->expense_type->name?? "";
+                $datas['rate'] = $expense->expense_type->rate?? "";
+                $datas['allowance_type_id'] = $expense->expense_type->allowance_type_id?? "";
+                $datas['user_id'] = $expense->user_id ?? "";
+                $datas['date'] = date("d-m-Y", strtotime($expense->date));
+                $datas['note'] = $expense->note ?? "";
+                $datas['start_km'] = $expense->start_km ?? "";
+                $datas['stop_km'] = $expense->stop_km ?? "";
+                $datas['total_km'] = $expense->total_km ?? "";
+                $datas['claim_amount'] = $expense->claim_amount ?? "";
+                $datas['expense_image'] = $image;
+                $datas['approve_amount'] = $expense->approve_amount ?? "";
+                $datas['status'] = $exp_status;
+
     
                 return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','data' => $datas ], $this->successStatus);
             }
@@ -197,7 +234,7 @@ class ExpensesTypeController extends Controller
             if($expenses = Expenses::where('id', $request['expense_id'])->update([
                 'user_id' => $userid,
                 'expenses_type' => isset($request['expenses_type'])? $request['expenses_type']:$expense_detail->expenses_type,
-                'date' => isset($request['date'])? $request['date']:$expense_detail->date,
+                //'date' => isset($request['date'])? $request['date']:$expense_detail->date,
                 'note' => isset($request['note'])? $request['note']:$expense_detail->note,
                 'start_km' => isset($request['start_km'])? $request['start_km']:$expense_detail->start_km,
                 'stop_km' => isset($request['stop_km'])? $request['stop_km']:$expense_detail->stop_km,
