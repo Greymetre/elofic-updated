@@ -70,7 +70,7 @@
               <th>{!! trans('panel.gift.fields.unit_name') !!}</th>
               <th>{!! trans('panel.gift.fields.mrp') !!}</th>
               <th>{!! trans('panel.gift.fields.price') !!}</th>
-              <th>{!! trans('panel.gift.fields.selling_price') !!}</th>
+              <th>{!! trans('panel.gift.fields.points') !!}</th>
               <th>{!! trans('panel.global.created_by') !!}</th>
                <th>{!! trans('panel.global.created_at') !!}</th>
             </thead>

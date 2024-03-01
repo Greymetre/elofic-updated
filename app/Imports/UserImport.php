@@ -60,44 +60,46 @@ class UserImport implements ToCollection, WithValidation, WithHeadingRow, WithBa
                     'gender' => !empty($row['gender']) ? $row['gender'] : '',
                     //'profile_image' => !empty($row['profile_image'])? $row['profile_image']:'',
                     'user_code' => !empty($row['user_code']) ? $row['user_code'] : '',
-                    'location' => !empty($row['Location']) ? $row['Location'] : '',
+                    'location' => !empty($row['location']) ? $row['location'] : '',
                     'employee_codes' => !empty($row['employees_code']) ? $row['employees_code'] : '',
                     'branch_id' => !empty($row['branch_id']) ? $row['branch_id'] : '',
                     'designation_id' => !empty($row['designation_id']) ? $row['designation_id'] : '',
                     'division_id' => !empty($row['division_id']) ? $row['division_id'] : '',
                     'department_id' => !empty($row['department_id']) ? $row['department_id'] : '',
+                    'payroll' => !empty($row['payroll']) ? $row['payroll'] : '',
                     //'created_at' => getcurentDateTime(),
                     //'updated_at' => getcurentDateTime()
                 ]);
 
 
                 UserDetails::where('user_id', '=', $row['id'])->update([
-                    'date_of_joining' => !empty($row['date_of_joining']) ? $row['date_of_joining'] : null,
-                    'date_of_birth' => !empty($row['date_of_birth']) ? $row['date_of_birth'] : null,
+                    'date_of_joining' => (!empty($row['date_of_joining'])&&$row['date_of_joining']!=null) ? date('Y-m-d', strtotime($row['date_of_joining'])) : null,
+                    'date_of_birth' => (!empty($row['date_of_birth'])&& $row['date_of_birth'] != null) ? date('Y-m-d', strtotime($row['date_of_birth'])) : null,
                     'last_year_increments' => !empty($row['last_year_increments']) ? $row['last_year_increments'] : null,
+                    'last_year_increment_percent' => !empty($row['last_year_increment_percent']) ? ($row['last_year_increment_percent']*100).'%' : null,
                     'last_promotion' => !empty($row['last_promotion']) ? $row['last_promotion'] : null,
-                    'ctc_annual' => !empty($row['ctc_annual']) ? $row['ctc_annual'] : null,
-                    'gross_salary_monthly' => !empty($row['gross_salary_monthly']) ? $row['gross_salary_monthly'] : null,
-                    'salary' => !empty($row['ctc_per_month']) ? $row['ctc_per_month'] : null,
-                    'last_year_increment_value' => !empty($row['last_year_increments_value']) ? $row['last_year_increments_value'] : null,
-                    'marital_status' => !empty($row['marital_status']) ? $row['marital_status'] : null,
+                    'ctc_annual' => !empty($row['ctc_annual']) ? $row['ctc_annual'] : 0.00,
+                    'gross_salary_monthly' => !empty($row['gross_salary_monthly']) ? $row['gross_salary_monthly'] : 0.00,
+                    'salary' => !empty($row['ctc_per_month']) ? $row['ctc_per_month'] : 0.00,
+                    'last_year_increment_value' => !empty($row['last_year_increments_value']) ? $row['last_year_increments_value'] : 0.00,
+                    'marital_status' => !empty($row['marital_status']) ? $row['marital_status'] : 0.00,
                     'father_name' => !empty($row['father_name']) ? $row['father_name'] : null,
-                    'father_date_of_birth' => !empty($row['father_date_of_birth']) ? $row['father_date_of_birth'] : null,
+                    'father_date_of_birth' => !empty($row['father_date_of_birth']) ? date('Y-m-d', strtotime($row['father_date_of_birth'])) : null,
                     'mother_name' => !empty($row['mother_name']) ? $row['mother_name'] : null,
-                    'mother_date_of_birth' => !empty($row['mother_dob']) ? $row['mother_dob'] : null,
-                    'marriage_anniversary' => !empty($row['marriage_anniversary']) ? $row['marriage_anniversary'] : null,
+                    'mother_date_of_birth' => !empty($row['mother_dob']) ? date('Y-m-d', strtotime($row['mother_dob'])) : null,
+                    'marriage_anniversary' => !empty($row['marriage_anniversary']) ? date('Y-m-d', strtotime($row['marriage_anniversary'])) : null,
                     'spouse_name' => !empty($row['spouse_name']) ? $row['spouse_name'] : null,
-                    'spouse_date_of_birth' => !empty($row['spouse_date_of_birth']) ? $row['spouse_date_of_birth'] : null,
+                    'spouse_date_of_birth' => !empty($row['spouse_date_of_birth']) ? date('Y-m-d', strtotime($row['spouse_date_of_birth'])) : null,
                     'children_one' => !empty($row['children_1']) ? $row['children_1'] : null,
-                    'children_one_date_of_birth' => !empty($row['children_1_dob']) ? $row['children_1_dob'] : null,
+                    'children_one_date_of_birth' => !empty($row['children_1_dob']) ? date('Y-m-d', strtotime($row['children_1_dob'])) : null,
                     'children_two' => !empty($row['children_2']) ? $row['children_2'] : null,
-                    'children_two_date_of_birth' => !empty($row['children_2_dob']) ? $row['children_2_dob'] : null,
+                    'children_two_date_of_birth' => !empty($row['children_2_dob']) ? date('Y-m-d', strtotime($row['children_2_dob'])) : null,
                     'children_three' => !empty($row['children_3']) ? $row['children_3'] : null,
-                    'children_three_date_of_birth' => !empty($row['children_3_dob']) ? $row['children_3_dob'] : null,
+                    'children_three_date_of_birth' => !empty($row['children_3_dob']) ? date('Y-m-d', strtotime($row['children_3_dob'])) : null,
                     'children_four' => !empty($row['children_4']) ? $row['children_4'] : null,
-                    'children_four_date_of_birth' => !empty($row['children_4_dob']) ? $row['children_4_dob'] : null,
+                    'children_four_date_of_birth' => !empty($row['children_4_dob']) ? date('Y-m-d', strtotime($row['children_4_dob'])) : null,
                     'children_five' => !empty($row['children_5']) ? $row['children_5'] : null,
-                    'children_five_date_of_birth' => !empty($row['children_5_dob']) ? $row['children_5_dob'] : null,
+                    'children_five_date_of_birth' => !empty($row['children_5_dob']) ? date('Y-m-d', strtotime($row['children_5_dob'])) : null,
                     'pan_number' => !empty($row['pan_number']) ? $row['pan_number'] : null,
                     'aadhar_number' => !empty($row['adhar_number']) ? $row['adhar_number'] : null,
                     'emergency_number' => !empty($row['emergency_number']) ? $row['emergency_number'] : null,
@@ -110,73 +112,73 @@ class UserImport implements ToCollection, WithValidation, WithHeadingRow, WithBa
                     'pf_number' => !empty($row['pf_number']) ? $row['pf_number'] : null,
                     'un_number' => !empty($row['un_number']) ? $row['un_number'] : null,
                     'esi_number' => !empty($row['esi_number']) ? $row['esi_number'] : null,
-                    'probation_period' => !empty($row['probation_period']) ? $row['probation_period'] : null,
-                    'date_of_confirmation' => !empty($row['date_of_confirmation']) ? $row['date_of_confirmation'] : null,
+                    'probation_period' => !empty($row['probation_period']) ? date('Y-m-d', strtotime($row['probation_period'])) : null,
+                    'date_of_confirmation' => !empty($row['date_of_confirmation']) ? date('Y-m-d', strtotime($row['date_of_confirmation'])) : null,
                     'notice_period' => !empty($row['notice_period']) ? $row['notice_period'] : null,
-                    'date_of_leaving' => !empty($row['date_of_leaving']) ? $row['date_of_leaving'] : null,
-                    'current_company_tenture' => !empty($row['current_company_tenure'])? $row['current_company_tenure']:null,
+                    'date_of_leaving' => !empty($row['date_of_leaving']) ? date('Y-m-d', strtotime($row['date_of_leaving'])) : null,
+                    'current_company_tenture' => !empty($row['current_company_tenure']) ? $row['current_company_tenure'] : 0,
                     'previous_exp' => !empty($row['previous_exp']) ? $row['previous_exp'] : null,
-                    'total_exp' => !empty($row['total_exp'])? $row['total_exp']:null,
+                    'total_exp' => !empty($row['total_exp']) ? $row['total_exp'] : 0,
                     'created_at' => getcurentDateTime(),
                     'updated_at' => getcurentDateTime()
                 ]);
-                if(!empty($row['higher_secondary']) && $row['higher_secondary'] != null && $row['higher_secondary'] != ''){
+                if (!empty($row['higher_secondary']) && $row['higher_secondary'] != null && $row['higher_secondary'] != '') {
                     UserEducation::updateOrCreate(
                         [
-                            'user_id' => $row['id'], 'education_type_id'=>'1'
+                            'user_id' => $row['id'], 'education_type_id' => '1'
                         ],
                         [
-                        'user_id' => $row['id'],
-                        'education_type_id'=>'1',
-                        'degree_name'=>$row['higher_secondary'],
+                            'user_id' => $row['id'],
+                            'education_type_id' => '1',
+                            'degree_name' => $row['higher_secondary'],
                         ]
                     );
                 }
-                if(!empty($row['high_school']) && $row['high_school'] != null && $row['high_school'] != ''){
+                if (!empty($row['high_school']) && $row['high_school'] != null && $row['high_school'] != '') {
                     UserEducation::updateOrCreate(
                         [
-                            'user_id' => $row['id'], 'education_type_id'=>'0'
+                            'user_id' => $row['id'], 'education_type_id' => '0'
                         ],
                         [
-                        'user_id' => $row['id'],
-                        'education_type_id'=>'0',
-                        'degree_name'=>$row['high_school'],
+                            'user_id' => $row['id'],
+                            'education_type_id' => '0',
+                            'degree_name' => $row['high_school'],
                         ]
                     );
                 }
-                if(!empty($row['graducation']) && $row['graducation'] != null && $row['graducation'] != ''){
+                if (!empty($row['graducation']) && $row['graducation'] != null && $row['graducation'] != '') {
                     UserEducation::updateOrCreate(
                         [
-                            'user_id' => $row['id'], 'education_type_id'=>'2'
+                            'user_id' => $row['id'], 'education_type_id' => '2'
                         ],
                         [
-                        'user_id' => $row['id'],
-                        'education_type_id'=>'2',
-                        'degree_name'=>$row['graducation'],
+                            'user_id' => $row['id'],
+                            'education_type_id' => '2',
+                            'degree_name' => $row['graducation'],
                         ]
                     );
                 }
-                if(!empty($row['post_graducation']) && $row['post_graducation'] != null && $row['post_graducation'] != ''){
+                if (!empty($row['post_graducation']) && $row['post_graducation'] != null && $row['post_graducation'] != '') {
                     UserEducation::updateOrCreate(
                         [
-                            'user_id' => $row['id'], 'education_type_id'=>'3'
+                            'user_id' => $row['id'], 'education_type_id' => '3'
                         ],
                         [
-                        'user_id' => $row['id'],
-                        'education_type_id'=>'3',
-                        'degree_name'=>$row['post_graducation'],
+                            'user_id' => $row['id'],
+                            'education_type_id' => '3',
+                            'degree_name' => $row['post_graducation'],
                         ]
                     );
                 }
-                if(!empty($row['other']) && $row['other'] != null && $row['other'] != ''){
+                if (!empty($row['other']) && $row['other'] != null && $row['other'] != '') {
                     UserEducation::updateOrCreate(
                         [
-                            'user_id' => $row['id'], 'education_type_id'=>'4'
+                            'user_id' => $row['id'], 'education_type_id' => '4'
                         ],
                         [
-                        'user_id' => $row['id'],
-                        'education_type_id'=>'4',
-                        'degree_name'=>$row['other'],
+                            'user_id' => $row['id'],
+                            'education_type_id' => '4',
+                            'degree_name' => $row['other'],
                         ]
                     );
                 }
@@ -196,7 +198,7 @@ class UserImport implements ToCollection, WithValidation, WithHeadingRow, WithBa
                     'gender' => !empty($row['gender']) ? $row['gender'] : '',
                     'profile_image' => !empty($row['profile_image']) ? $row['profile_image'] : '',
                     'user_code' => !empty($row['user_code']) ? $row['user_code'] : '',
-                    'location' => !empty($row['Location']) ? $row['Location'] : '',
+                    'location' => !empty($row['location']) ? $row['location'] : '',
                     'employee_codes' => !empty($row['employees_code']) ? $row['employees_code'] : '',
                     'branch_id' => !empty($row['branch_id']) ? $row['branch_id'] : '',
                     'designation_id' => !empty($row['designation_id']) ? $row['designation_id'] : '',
@@ -211,32 +213,33 @@ class UserImport implements ToCollection, WithValidation, WithHeadingRow, WithBa
                     $user->givePermissionTo($permissions);
                     $userdetails->push([
                         'user_id' => $user['id'],
-                        'date_of_joining' => !empty($row['date_of_joining']) ? $row['date_of_joining'] : null,
-                        'date_of_birth' => !empty($row['date_of_birth']) ? $row['date_of_birth'] : null,
+                        'date_of_joining' => (!empty($row['date_of_joining'])&&$row['date_of_joining']!=null) ? date('Y-m-d', strtotime($row['date_of_joining'])) : null,
+                        'date_of_birth' => (!empty($row['date_of_birth'])&& $row['date_of_birth'] != null) ? date('Y-m-d', strtotime($row['date_of_birth'])) : null,
                         'last_year_increments' => !empty($row['last_year_increments']) ? $row['last_year_increments'] : null,
+                        'last_year_increment_percent' => !empty($row['last_year_increment_percent']) ? ($row['last_year_increment_percent']*100).'%' : null,
                         'last_promotion' => !empty($row['last_promotion']) ? $row['last_promotion'] : null,
-                        'ctc_annual' => !empty($row['ctc_annual']) ? $row['ctc_annual'] : null,
-                        'gross_salary_monthly' => !empty($row['gross_salary_monthly']) ? $row['gross_salary_monthly'] : null,
-                        'salary' => !empty($row['ctc_per_month']) ? $row['ctc_per_month'] : null,
-                        'last_year_increment_value' => !empty($row['last_year_increments_value']) ? $row['last_year_increments_value'] : null,
-                        'marital_status' => !empty($row['marital_status']) ? $row['marital_status'] : null,
+                        'ctc_annual' => !empty($row['ctc_annual']) ? $row['ctc_annual'] : 0.00,
+                        'gross_salary_monthly' => !empty($row['gross_salary_monthly']) ? $row['gross_salary_monthly'] : 0.00,
+                        'salary' => !empty($row['ctc_per_month']) ? $row['ctc_per_month'] : 0.00,
+                        'last_year_increment_value' => !empty($row['last_year_increments_value']) ? $row['last_year_increments_value'] : 0.00,
+                        'marital_status' => !empty($row['marital_status']) ? $row['marital_status'] : 0.00,
                         'father_name' => !empty($row['father_name']) ? $row['father_name'] : null,
-                        'father_date_of_birth' => !empty($row['father_date_of_birth']) ? $row['father_date_of_birth'] : null,
+                        'father_date_of_birth' => !empty($row['father_date_of_birth']) ? date('Y-m-d', strtotime($row['father_date_of_birth'])) : null,
                         'mother_name' => !empty($row['mother_name']) ? $row['mother_name'] : null,
-                        'mother_date_of_birth' => !empty($row['mother_dob']) ? $row['mother_dob'] : null,
-                        'marriage_anniversary' => !empty($row['marriage_anniversary']) ? $row['marriage_anniversary'] : null,
+                        'mother_date_of_birth' => !empty($row['mother_dob']) ? date('Y-m-d', strtotime($row['mother_dob'])) : null,
+                        'marriage_anniversary' => !empty($row['marriage_anniversary']) ? date('Y-m-d', strtotime($row['marriage_anniversary'])) : null,
                         'spouse_name' => !empty($row['spouse_name']) ? $row['spouse_name'] : null,
-                        'spouse_date_of_birth' => !empty($row['spouse_date_of_birth']) ? $row['spouse_date_of_birth'] : null,
+                        'spouse_date_of_birth' => !empty($row['spouse_date_of_birth']) ? date('Y-m-d', strtotime($row['spouse_date_of_birth'])) : null,
                         'children_one' => !empty($row['children_1']) ? $row['children_1'] : null,
-                        'children_one_date_of_birth' => !empty($row['children_1_dob']) ? $row['children_1_dob'] : null,
+                        'children_one_date_of_birth' => !empty($row['children_1_dob']) ? date('Y-m-d', strtotime($row['children_1_dob'])) : null,
                         'children_two' => !empty($row['children_2']) ? $row['children_2'] : null,
-                        'children_two_date_of_birth' => !empty($row['children_2_dob']) ? $row['children_2_dob'] : null,
+                        'children_two_date_of_birth' => !empty($row['children_2_dob']) ? date('Y-m-d', strtotime($row['children_2_dob'])) : null,
                         'children_three' => !empty($row['children_3']) ? $row['children_3'] : null,
-                        'children_three_date_of_birth' => !empty($row['children_3_dob']) ? $row['children_3_dob'] : null,
+                        'children_three_date_of_birth' => !empty($row['children_3_dob']) ? date('Y-m-d', strtotime($row['children_3_dob'])) : null,
                         'children_four' => !empty($row['children_4']) ? $row['children_4'] : null,
-                        'children_four_date_of_birth' => !empty($row['children_4_dob']) ? $row['children_4_dob'] : null,
+                        'children_four_date_of_birth' => !empty($row['children_4_dob']) ? date('Y-m-d', strtotime($row['children_4_dob'])) : null,
                         'children_five' => !empty($row['children_5']) ? $row['children_5'] : null,
-                        'children_five_date_of_birth' => !empty($row['children_5_dob']) ? $row['children_5_dob'] : null,
+                        'children_five_date_of_birth' => !empty($row['children_5_dob']) ? date('Y-m-d', strtotime($row['children_5_dob'])) : null,
                         'pan_number' => !empty($row['pan_number']) ? $row['pan_number'] : null,
                         'aadhar_number' => !empty($row['adhar_number']) ? $row['adhar_number'] : null,
                         'emergency_number' => !empty($row['emergency_number']) ? $row['emergency_number'] : null,
@@ -249,59 +252,59 @@ class UserImport implements ToCollection, WithValidation, WithHeadingRow, WithBa
                         'pf_number' => !empty($row['pf_number']) ? $row['pf_number'] : null,
                         'un_number' => !empty($row['un_number']) ? $row['un_number'] : null,
                         'esi_number' => !empty($row['esi_number']) ? $row['esi_number'] : null,
-                        'probation_period' => !empty($row['probation_period']) ? $row['probation_period'] : null,
-                        'date_of_confirmation' => !empty($row['date_of_confirmation']) ? $row['date_of_confirmation'] : null,
+                        'probation_period' => !empty($row['probation_period']) ? date('Y-m-d', strtotime($row['probation_period'])) : null,
+                        'date_of_confirmation' => !empty($row['date_of_confirmation']) ? date('Y-m-d', strtotime($row['date_of_confirmation'])) : null,
                         'notice_period' => !empty($row['notice_period']) ? $row['notice_period'] : null,
-                        'date_of_leaving' => !empty($row['date_of_leaving']) ? $row['date_of_leaving'] : null,
-                        'current_company_tenture' => !empty($row['current_company_tenure'])? $row['current_company_tenure']:null,
+                        'date_of_leaving' => !empty($row['date_of_leaving']) ? date('Y-m-d', strtotime($row['date_of_leaving'])) : null,
+                        'current_company_tenture' => !empty($row['current_company_tenure']) ? $row['current_company_tenure'] : 0,
                         'previous_exp' => !empty($row['previous_exp']) ? $row['previous_exp'] : null,
-                        'total_exp' => !empty($row['total_exp'])? $row['total_exp']:null,
+                        'total_exp' => !empty($row['total_exp']) ? $row['total_exp'] : 0,
                         'created_at' => getcurentDateTime(),
                         'updated_at' => getcurentDateTime()
                     ]);
 
-                    if(!empty($row['higher_secondary']) && $row['higher_secondary'] != null && $row['higher_secondary'] != ''){
+                    if (!empty($row['higher_secondary']) && $row['higher_secondary'] != null && $row['higher_secondary'] != '') {
                         UserEducation::create(
                             [
-                            'user_id' => $user->id,
-                            'education_type_id'=>'1',
-                            'degree_name'=>$row['higher_secondary'],
+                                'user_id' => $user->id,
+                                'education_type_id' => '1',
+                                'degree_name' => $row['higher_secondary'],
                             ]
                         );
                     }
-                    if(!empty($row['high_school']) && $row['high_school'] != null && $row['high_school'] != ''){
+                    if (!empty($row['high_school']) && $row['high_school'] != null && $row['high_school'] != '') {
                         UserEducation::create(
                             [
-                            'user_id' => $user->id,
-                            'education_type_id'=>'0',
-                            'degree_name'=>$row['high_school'],
+                                'user_id' => $user->id,
+                                'education_type_id' => '0',
+                                'degree_name' => $row['high_school'],
                             ]
                         );
                     }
-                    if(!empty($row['graducation']) && $row['graducation'] != null && $row['graducation'] != ''){
+                    if (!empty($row['graducation']) && $row['graducation'] != null && $row['graducation'] != '') {
                         UserEducation::create(
                             [
-                            'user_id' => $user->id,
-                            'education_type_id'=>'2',
-                            'degree_name'=>$row['graducation'],
+                                'user_id' => $user->id,
+                                'education_type_id' => '2',
+                                'degree_name' => $row['graducation'],
                             ]
                         );
                     }
-                    if(!empty($row['post_graducation']) && $row['post_graducation'] != null && $row['post_graducation'] != ''){
+                    if (!empty($row['post_graducation']) && $row['post_graducation'] != null && $row['post_graducation'] != '') {
                         UserEducation::create(
                             [
-                            'user_id' => $user->id,
-                            'education_type_id'=>'3',
-                            'degree_name'=>$row['post_graducation'],
+                                'user_id' => $user->id,
+                                'education_type_id' => '3',
+                                'degree_name' => $row['post_graducation'],
                             ]
                         );
                     }
-                    if(!empty($row['other']) && $row['other'] != null && $row['other'] != ''){
+                    if (!empty($row['other']) && $row['other'] != null && $row['other'] != '') {
                         UserEducation::create(
                             [
-                            'user_id' => $user->id,
-                            'education_type_id'=>'4',
-                            'degree_name'=>$row['other'],
+                                'user_id' => $user->id,
+                                'education_type_id' => '4',
+                                'degree_name' => $row['other'],
                             ]
                         );
                     }

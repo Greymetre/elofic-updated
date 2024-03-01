@@ -37,6 +37,11 @@ class ProductImport implements ToCollection,WithValidation,WithHeadingRow, WithB
             if( $product = Product::updateOrCreate(['id' => $row['product_id'] ],[
                 'active' => 'Y',
                 'product_name' => isset($row['product_name'])? ucfirst($row['product_name']):'',
+                'product_code' => isset($row['product_code'])? $row['product_code']:'',
+                'new_group' => isset($row['new_group'])? $row['new_group']:'',
+                'sub_group' => isset($row['sub_group'])? ucfirst($row['sub_group']):'',
+                'expiry_interval' => isset($row['expiry_interval'])? ucfirst($row['expiry_interval']):'',
+                'expiry_interval_preiod' => isset($row['expiry_interval_preiod'])? ucfirst($row['expiry_interval_preiod']):0,
                 'display_name' => isset($row['display_name'])? ucfirst($row['display_name']):'',
                 'description' => isset($row['description'])? ucfirst($row['description']):'',
                 'subcategory_id' => isset($row['subcategory_id'])? $row['subcategory_id']:null,

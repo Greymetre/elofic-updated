@@ -120,6 +120,11 @@ class User extends Authenticatable implements HasMedia
         return $this->hasMany(UserEducation::class);
     }
 
+    public function getpmsdetail()
+    {
+        return $this->hasOne(Appraisal::class,'user_id','id');
+    }
+
     public static function tree($user_id)
     {
         $all_user = User::get();
@@ -138,4 +143,11 @@ class User extends Authenticatable implements HasMedia
             }
         }
     }
+
+    public function attendance_details()
+    {
+        return $this->hasOne(Attendance::class,'user_id','id');
+    }
+
+
 }

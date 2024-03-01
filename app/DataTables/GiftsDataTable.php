@@ -33,7 +33,7 @@ class GiftsDataTable extends DataTable
                             </div>';
             })
             ->addColumn('image', function ($query) {
-                return '<img src="'.asset(!empty($query->product_image) ? $query->product_image : 'public/uploads/product.jpeg').'" border="0" width="70" class="img-rounded" align="center" />';
+                return '<img src="'.asset(!empty($query->product_image) ? 'uploads/'.$query->product_image : 'public/uploads/product.jpeg').'" border="0" width="70" class="img-rounded" align="center" />';
               })
             ->rawColumns(['action','image']);
     }

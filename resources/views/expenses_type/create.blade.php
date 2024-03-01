@@ -32,6 +32,34 @@
           <form method="POST" action="{{ route("expenses_type.store") }}" enctype="multipart/form-data" id="storeExpensesTypeData">
             @csrf
             <div class="row">
+
+
+            <div class="col-md-12">
+                <div class="row">
+                  <label class="col-md-2 col-form-label">{{ trans('panel.expenses_type.fields.pay_roll') }}<span class="text-danger"> *</span></label>
+                  <div class="col-md-10">
+                    <div class="form-group has-default bmd-form-group">
+                      <select name="payroll_id" id="payroll_id" class="form-control {{ $errors->has('payroll_id') ? 'is-invalid' : '' }}">
+                        <option value="" disabled selected>Please select pay roll</option>
+                        @foreach($pay_rolls as $key=>$payroll)
+                        <option value="{{$key}}">{{$payroll}}</option>
+                        @endforeach
+                      </select>
+                      @if($errors->has('name'))
+                      <div class="invalid-feedback">
+                        {{ $errors->first('payroll_id') }}
+                      </div>
+                      @endif
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+
+
+
+
               <div class="col-md-12">
                 <div class="row">
                   <label class="col-md-2 col-form-label">{{ trans('panel.expenses_type.fields.allowance_type') }}<span class="text-danger"> *</span></label>
@@ -52,6 +80,7 @@
                   </div>
                 </div>
               </div>
+
               <div class="col-md-12">
                 <div class="row">
                   <label class="col-md-2 col-form-label">{{ trans('panel.expenses_type.fields.name') }}<span class="text-danger"> *</span></label>

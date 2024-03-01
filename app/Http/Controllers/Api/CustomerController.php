@@ -228,11 +228,32 @@ class CustomerController extends Controller
                     'created_at' => getcurentDateTime(),
                     'updated_at' => getcurentDateTime()
                 ]);
+
                 if($request->file('shopimage')){
                     $image = $request->file('shopimage');
                     $filename = 'customer';
                     $request['shop_image'] = fileupload($image, $this->path.'/shopimage', $filename);
                 }
+
+                 // if($request->file('image')){
+                 //    $image = $request->file('image');
+                 //    $filename = 'customer';
+                 //    $request['shop_image'] = fileupload($image, $this->path.'/shopimage', $filename);
+                 // }
+
+
+                //  if($request->file('image')){
+                // $image = $request->file('image');
+                // // $filename = 'punchin_'.autoIncrementId('Attendance', 'id');
+                // $filename = 'customer';
+                // $request['profile_image'] = fileupload($image, $this->path, $filename);
+                // }
+
+
+
+
+
+
 
                 if($request->file('visiting_card')){
                     $image = $request->file('visiting_card');
@@ -314,6 +335,7 @@ class CustomerController extends Controller
                     'enrollment_date' => isset($request['enrollment_date'])? $request['enrollment_date']:null,
                     'approval_date'  => isset($request['approval_date'])? $request['approval_date']:null,
                     'shop_image' => isset($request['shop_image'])? $request['shop_image']:'',
+                    //'shop_image' => isset($request['image'])? $request['image']:'',
                     'visiting_card' => isset($request['visiting_image'])? $request['visiting_image']:'',
                     'grade'     => isset($request['grade'])? $request['grade'] :'',
                     'visit_status'     => isset($request['status_type'])? $request['status_type']:'',

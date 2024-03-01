@@ -16,13 +16,14 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 use DataTables;
-use Validator;
+// use Validator;
 use Gate;
 use App\DataTables\ProductDataTable;
 use App\Imports\ProductImport;
 use App\Exports\ProductExport;
 use App\Exports\ProductTemplate;
 use Excel;
+use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
@@ -70,6 +71,15 @@ class ProductController extends Controller
         try
         { 
             abort_if(Gate::denies('product_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+            $validator = Validator::make($request->all(), [
+                'product_code' => 'unique:products',
+            ]);
+        
+            if ($validator->fails()) {
+                return redirect()->back()
+                            ->withErrors($validator)
+                            ->withInput();
+            }
             $request['product_image'] = '';
             if($request->file('image')){
                 $image = $request->file('image');
@@ -82,6 +92,11 @@ class ProductController extends Controller
             if($product_id = Product::insertGetId([
                 'active'        => 'Y', 
                 'product_name'  => !empty($request['product_name']) ? $request['product_name'] :'',
+                'product_code'  => !empty($request['product_code']) ? $request['product_code'] :'',
+                'new_group'  => !empty($request['new_group']) ? $request['new_group'] :'',
+                'sub_group'  => !empty($request['sub_group']) ? $request['sub_group'] :'',
+                'expiry_interval'  => !empty($request['expiry_interval']) ? $request['expiry_interval'] :'',
+                'expiry_interval_preiod'  => !empty($request['expiry_interval_preiod']) ? $request['expiry_interval_preiod'] :0,
                 'display_name'  => !empty($request['display_name']) ? $request['display_name'] :'',
                 'description'   => !empty($request['description']) ? $request['description'] :'',
                 'subcategory_id'=> !empty($request['subcategory_id']) ? $request['subcategory_id'] :null,
@@ -101,6 +116,15 @@ class ProductController extends Controller
                 {
                     $details = collect([]);
                     foreach ($request['detail'] as $key => $rows) {
+                        if(!empty($rows['mrp'])){
+                            $price = $rows['mrp'];
+                            if(!empty($request['gst']) && $request['gst'] > 0){
+                                $price = ($rows['mrp']+(($rows['mrp']*$request['gst'])/100));
+                            }
+                            if(!empty($request['discount']) && $request['discount'] > 0){
+                                $price = ($price-(($rows['mrp']*$request['discount'])/100));
+                            }
+                        }
                         $details->push([
                             'active'        => 'Y',
                             'product_id'    => $product_id,
@@ -108,7 +132,8 @@ class ProductController extends Controller
                             'detail_description' => !empty($rows['detail_description']) ? $rows['detail_description'] :'',
                             'detail_image'  => !empty($rows['detail_image']) ? $rows['detail_image'] :'',
                             'mrp'       => !empty($rows['mrp']) ? $rows['mrp'] :0.00,
-                            'price'     => !empty($rows['mrp']) ? $rows['mrp'] :$rows['mrp'],
+                            // 'price'     => !empty($rows['mrp']) ? $rows['mrp'] :$rows['mrp'],
+                            'price'     => $price,
                             'selling_price' => !empty($rows['selling_price']) ? $rows['selling_price'] :$rows['mrp'],
                             'discount' => !empty($request['discount']) ? $request['discount'] :0.00,
                             'max_discount' => !empty($request['max_discount']) ? $request['max_discount'] :0.00,
@@ -180,9 +205,23 @@ class ProductController extends Controller
         try
         { 
             abort_if(Gate::denies('product_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+            $validator = Validator::make($request->all(), [
+                'product_code' => 'unique:products,product_code,'.decrypt($id),
+            ]);
+        
+            if ($validator->fails()) {
+                return redirect()->back()
+                            ->withErrors($validator)
+                            ->withInput();
+            }
             $id = decrypt($id);
             $product = Product::find($id);
             $product->product_name = !empty($request['product_name'])? $request['product_name'] :'';
+            $product->product_code = !empty($request['product_code'])? $request['product_code'] :'';
+            $product->new_group = !empty($request['new_group'])? $request['new_group'] :'';
+            $product->sub_group = !empty($request['sub_group'])? $request['sub_group'] :'';
+            $product->expiry_interval = !empty($request['expiry_interval'])? $request['expiry_interval'] :'';
+            $product->expiry_interval_preiod = !empty($request['expiry_interval_preiod'])? $request['expiry_interval_preiod'] :0;
             $product->display_name = !empty($request['display_name']) ? $request['display_name'] :'';
             $product->description = !empty($request['description']) ? $request['description'] :'';
             $product->subcategory_id = !empty($request['subcategory_id']) ? $request['subcategory_id'] :null;
@@ -210,6 +249,16 @@ class ProductController extends Controller
                     // dd($request);
                     // ProductDetails::whereNotIn('id',$detailsids)->delete();
                     foreach ($request['detail'] as $key => $rows) {
+                        $price = 0;
+                        if(!empty($rows['mrp'])){
+                            $price = $rows['mrp'];
+                            if(!empty($request['gst']) && $request['gst'] > 0){
+                                $price = ($rows['mrp']+(($rows['mrp']*$request['gst'])/100));
+                            }
+                            if(!empty($request['discount']) && $request['discount'] > 0){
+                                $price = ($price-(($rows['mrp']*$request['discount'])/100));
+                            }
+                        }
                         if(empty($rows['detail_id']))
                         {
                             $details->push([
@@ -219,7 +268,8 @@ class ProductController extends Controller
                                 'detail_description' => !empty($rows['detail_description']) ? $rows['detail_description'] :'',
                                 'detail_image'  => !empty($rows['detail_image']) ? $rows['detail_image'] :'',
                                 'mrp'       => !empty($rows['mrp']) ? $rows['mrp'] :0.00,
-                                'price'     => !empty($rows['price']) ? $rows['price'] :0.00,
+                                // 'price'     => !empty($rows['price']) ? $rows['price'] :0.00,
+                                'price'     => $price,
                                 'selling_price' => !empty($rows['selling_price']) ? $rows['selling_price'] :0.00,
                                 'discount' => !empty($request['discount']) ? $request['discount'] :0.00,
                                 'max_discount' => !empty($request['max_discount']) ? $request['max_discount'] :0.00,
@@ -237,7 +287,8 @@ class ProductController extends Controller
                                 'detail_description' => isset($rows['detail_description']) ? $rows['detail_description'] :'',
                                 'detail_image'  => isset($rows['detail_image']) ? $rows['detail_image'] :'',
                                 'mrp'       => isset($rows['mrp']) ? $rows['mrp'] :0.00,
-                                'price'     => isset($rows['price']) ? $rows['price'] :0.00,
+                                // 'price'     => isset($rows['price']) ? $rows['price'] :0.00,
+                                'price'     => $price,
                                 'selling_price' => isset($rows['selling_price']) ? $rows['selling_price'] :0.00,
                                 'discount' => isset($request['discount']) ? $request['discount'] :0.00,
                                 'max_discount' => isset($request['max_discount']) ? $request['max_discount'] :0.00,
@@ -342,5 +393,14 @@ class ProductController extends Controller
             ]);
         }
         return Redirect::to('production')->with('message_success', 'Product Update Successfully');
+    }
+
+    public function checkProductCode(Request $request){
+        $check_code = Product::where('product_code', $request->product_code)->first();
+        if($check_code){
+            return false;
+        }else{
+            return true;
+        }
     }
 }

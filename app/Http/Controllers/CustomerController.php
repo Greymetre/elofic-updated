@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{Customers,UserLogin,CustomerType,FirmType,Regions,Pincode,Country,CustomerDetails,Address,Attachment, SurveyData, Field, State, City, Beat, DealIn};
+use App\Models\{Customers,UserLogin,CustomerType,FirmType,Regions,Pincode,Country,CustomerDetails,Address,Attachment, SurveyData, Field, State, City, Beat, DealIn, SchemeDetails};
 use App\Models\User; 
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,6 +20,7 @@ use App\Exports\DistributorExport;
 use App\Exports\SurveyExport;
 use App\Exports\CustomersTemplate;
 use App\Http\Requests\CustomersRequest;
+use App\Models\TransactionHistory;
 
 use App\Models\EmployeeDetail;
 use App\Models\ParentDetail;
@@ -454,9 +455,18 @@ class CustomerController extends Controller
     {
         ////abort_if(Gate::denies('customer_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
          $id = decrypt($id);
+        $thistorys = TransactionHistory::where('customer_id', $id)->get();
+        $total_points = 0;
+        $total_redemption = 0;
+        $total_rejected = 0;
+        $total_balance = 0;
+        foreach($thistorys as $thistory){
+            $scheme_details = SchemeDetails::where('product_id', $thistory->scheme->product->id)->first();
+            $total_points += (int)$scheme_details->points;
+        }
         $customers = Customers::find($id);
         $customers['due_amount'] = totalDueAmount($id);
-        return view('customers.show')->with('customers',$customers);
+        return view('customers.show', compact('total_balance','total_points', 'total_redemption', 'total_rejected'))->with('customers',$customers);
     }
 
     /**
@@ -517,6 +527,16 @@ class CustomerController extends Controller
     {
         try
         { 
+            $validator = Validator::make($request->all(), [
+                'gstin_no' => 'nullable|digits:15',
+                'pan_no' => 'nullable|regex:/^[a-zA-Z]{5}\d{4}[a-zA-Z]$/',
+                'aadhar_no' => 'nullable|numeric|digits:12',
+            ]);
+            if ($validator->fails()) {
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput();
+            }  
             ////abort_if(Gate::denies('customer_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
             $request['updated_by'] = Auth::user()->id;
             $docimages = collect([]);
@@ -560,6 +580,28 @@ class CustomerController extends Controller
                     'document_name' =>  'aadhar', 
                 ]);
             }
+            if($request->file('imgaadharback')){
+                $path = 'customers/';
+                $image = $request->file('imgaadharback');
+                $filename = 'aadharback_'.$id;
+                unset($request['image']);
+                $docimages->push([
+                    'active'        => 'Y',
+                    'file_path'     => fileupload($image, $this->path, $filename),
+                    'document_name' =>  'aadharback', 
+                ]);
+            }
+            if($request->file('imgbankpass')){
+                $path = 'customers/';
+                $image = $request->file('imgbankpass');
+                $filename = 'bankpass_'.$id;
+                unset($request['image']);
+                $docimages->push([
+                    'active'        => 'Y',
+                    'file_path'     => fileupload($image, $this->path, $filename),
+                    'document_name' =>  'bankpass', 
+                ]);
+            }
             if($request->file('imgother')){
                 $path = 'customers/';
                 $image = $request->file('imgother');
@@ -583,9 +625,21 @@ class CustomerController extends Controller
                             });
 
 
-                if($attachments->isNotEmpty())
-                {
-                    Attachment::insert($attachments->toArray());
+                // if($attachments->isNotEmpty())
+                // {
+                //     Attachment::insert($attachments->toArray());
+                // }
+
+                foreach ($docimages as $docimage) {
+                    $existingAttachment = Attachment::where('document_name', $docimage['document_name'])
+                    ->where('customer_id', $request['customer_id'])
+                    ->first();
+                
+                    if ($existingAttachment) {
+                        $existingAttachment->update($docimage);
+                    } else {
+                        Attachment::create(array_merge($docimage, ['customer_id' => $request['customer_id']]));
+                    }
                 }
 
                 if($request['survey'])

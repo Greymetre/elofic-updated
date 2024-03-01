@@ -1,4 +1,4 @@
-<x-app-layout>
+ <x-app-layout>
 <div class="row">
   <div class="col-md-12">
     <div class="card">
@@ -6,38 +6,92 @@
         <div class="card-icon">
           <i class="material-icons">perm_identity</i>
         </div>
-        <h4 class="card-title ">{!! trans('panel.expenses_type.title_singular') !!} {!! trans('panel.global.list') !!}
+        <h4 class="card-title ">{!! trans('panel.expenses.title_singular') !!} {!! trans('panel.global.list') !!}
               <span class="pull-right">
                 <div class="btn-group">
-                  @if(auth()->user()->can(['role_upload']))
-                  <form action="{{ URL::to('roles-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
-                  {{ csrf_field() }}
-                  <div class="input-group">
-                      <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                        <span class="btn btn-just-icon btn-theme btn-file">
-                          <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
-                          <span class="fileinput-exists">Change</span>
-                          <input type="hidden">
-                          <input type="file" name="import_file" required accept=".xls,.xlsx" />
-                        </span>
-                      </div>
-                    <div class="input-group-append">
-                      <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.upload') !!} {!! trans('panel.role.title') !!}">
-                        <i class="material-icons">cloud_upload</i>
-                        <div class="ripple-container"></div>
-                      </button>
-                    </div>
+
+        
+              @if(auth()->user()->can(['expense_download']))
+              <form method="GET" action="{{ URL::to('expenses-download') }}">
+                  <div class="d-flex flex-row">
+
+                  <div class="p-2" style="width:150px;">
+                    <select class="selectpicker" name="branch_id" id="branch_id" data-style="select-with-transition" title="Select Branch">
+                     <option value="">Select Branch</option>
+                    @if(@isset($branches ))
+                        @foreach($branches as $branch)
+                          <option value="{!! $branch['id'] !!}">{!! $branch['name'] !!}</option>
+                        @endforeach
+                    @endif
+                   </select>
                   </div>
-                  </form>
-                  @endif
+
+
+                  <div class="p-2" style="width:150px;">
+                    <select class="selectpicker" name="executive_id" id="executive_id" data-style="select-with-transition" title="Select User">
+                       <option value="">Select User</option>
+                      @if(@isset($users ))
+                      @foreach($users as $user)
+                       <option value="{!! $user['id'] !!}" {{ old( 'executive_id') == $user->id ? 'selected' : '' }}>{!! $user['name'] !!}</option>
+                      @endforeach
+                      @endif
+                    </select>
+                  </div>
+
+                  <div class="p-2" style="width:195px;">
+                    <select class="selectpicker"  name="payroll" id="payroll" data-style="select-with-transition">
+                     <!-- <option value="">Select Payroll</option> -->
+                        @foreach($pay_rolls as $key=>$payroll)
+                          <option value="{!! $key !!}">{!! $payroll !!}</option>
+                       @endforeach
+                   </select>
+                  </div>
+
+
+
+                  <div class="p-2" style="width:195px;">
+                    <select class="selectpicker"  name="expenses_type" id="expenses_type" data-style="select-with-transition" >
+                     <!-- <option value="">Select Expense Type</option>
+                    @if(@isset($expense_types ))
+                        @foreach($expense_types as $expense_type)
+                          <option value="{!! $expense_type['id'] !!}">{!! $expense_type['name'] !!}</option>
+                        @endforeach
+                    @endif -->
+                   </select>
+
+                  </div>
+
+
+                  <div class="p-2" style="width:160px;">
+                    <select class="selectpicker"  name="status" id="status" data-style="select-with-transition" title="Select Status">
+                     <option value="">Select Status</option>
+                      <option value="3">Checked</option>
+                      <option value="1">Approved</option>
+                      <option value="2">Rejected</option>
+                      <option value="0">Pending</option>
+                   </select>
+                  </div>
+
+
+                  <div class="p-2" style="width:140px;"><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
+                    <div class="p-2" style="width:140px;"><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
+                
+                    <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.customers.title') !!}"><i class="material-icons">cloud_download</i></button></div>
+                  </div>
+              </form>
+              @endif
+
+
+
                   @if(auth()->user()->can(['role_download']))
                   <a href="{{ URL::to('roles-download') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.role.title') !!}"><i class="material-icons">cloud_download</i></a>
                   @endif
+
                   @if(auth()->user()->can(['role_template']))
                   <a href="{{ URL::to('roles-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.role.title_singular') !!}"><i class="material-icons">text_snippet</i></a>
                   @endif
-                  @if(auth()->user()->can(['expenses_type_create']))
-                  <a href="{{ route('expenses_type.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.role.title_singular') !!}"><i class="material-icons">add_circle</i></a>
+                  @if(auth()->user()->can(['expenses_create'])) 
+                  <a href="{{ route('expenses.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.role.title_singular') !!}"><i class="material-icons">add_circle</i></a>
                   @endif
                 </div>
               </span>
@@ -76,12 +130,18 @@
         <div class="table-responsive">
            <table id="getexpensestype" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
             <thead class=" text-primary">
-              <th>{!! trans('panel.global.no') !!}</th>
-              <th>{!! trans('panel.global.status') !!}</th>
+              <th>{!! trans('panel.expenses.fields.expense_id') !!}</th>
               <th>{!! trans('panel.global.action') !!}</th>
-              <th>{!! trans('panel.expenses_type.fields.allowance_type') !!}</th>
-              <th>{!! trans('panel.role.fields.name') !!}</th>
-              <th>{!! trans('panel.expenses_type.fields.rate') !!}</th>
+              <th>{!! trans('panel.expenses.fields.user') !!}</th>
+              <th>{!! trans('panel.expenses.fields.expense_type') !!}</th>
+              <th>{!! trans('panel.expenses.fields.date') !!}</th>
+              <th>{!! trans('panel.expenses.fields.claim_amount') !!}</th>
+              <th>{!! trans('panel.expenses.fields.expense_status') !!}</th>
+              <th>{!! trans('panel.expenses.fields.note') !!}</th>
+              <th>{!! trans('panel.expenses.fields.created_at') !!}</th>
+              <th>{!! trans('panel.expenses.fields.branch') !!}</th>
+              <th>{!! trans('panel.expenses.fields.total_km') !!}</th>
+             
             </thead>
             <tbody>
             </tbody>
@@ -97,17 +157,64 @@ $(document).ready(function() {
         "processing": true,
         "serverSide": true,
         "order": [ [0, 'desc'] ],
-        "ajax": "{{ route('expenses_type.index') }}",
-        "columns": [
-            {data: 'DT_RowIndex',name: 'DT_RowIndex',orderable: false,searchable: false},
-            { data: 'is_active', name: 'is_active', orderable: false, searchable: false },
+
+    
+         ajax: {
+          url: "{{ route('expenses.index') }}",
+          data: function (d) { 
+                d.executive_id = $('#executive_id').val(),
+                d.expenses_type = $('#expenses_type').val(),
+                d.branch_id = $('#branch_id').val(),
+                d.status = $('#status').val(),
+                d.start_date = $('#start_date').val(),
+                d.end_date = $('#end_date').val()
+    
+            }
+        },
+
+        columns: [
+            // {data: 'DT_RowIndex',name: 'DT_RowIndex',orderable: false,searchable: false},
+            {data: 'id',name: 'id',orderable: false,searchable: false},
             {data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
-            {data: 'allowance_type', name: 'allowance_type'},
-            {data: 'name', name: 'name',"defaultContent": ''},
-            {data: 'rate', name: 'rate',"defaultContent": ''},
+            {data: 'users.name',name: 'users.name',orderable: false,searchable: false},
+            {data: 'expense_type.name',name: 'expense_type.name',orderable: false,searchable: false},
+            {data: 'date',name: 'date',orderable: false,searchable: false},
+            {data: 'claim_amount',name: 'claim_amount',orderable: false,searchable: false},
+            {data: 'checker_status', name: 'checker_status', orderable: false, searchable: false },
+            {data: 'note', name: 'note', orderable: false, searchable: false },
+            {data: 'date_create', name: 'date_create', orderable: false, searchable: false },
+            {data: 'users.getbranch.branch_name', name: 'users.getbranch.branch_name', orderable: false, searchable: false },
+            {data: 'total_km', name: 'total_km', orderable: false, searchable: false },
+           
         ]
     });
+
+    $('#branch_id').change(function(){
+        oTable.draw();
+    });
+    $('#status').change(function(){
+        oTable.draw();
+    });
+
+    $('#executive_id').change(function(){
+        oTable.draw();
+    });
+
+    $('#expenses_type').change(function(){
+        oTable.draw();
+    });
+    $('#start_date').change(function(){
+        oTable.draw();
+    });
+    $('#end_date').change(function(){
+        oTable.draw();
+    });
+
+
 });
+
+
+   
 
 $('body').on('click', '.activeRecord', function () {
         var id = $(this).attr("id");
@@ -126,7 +233,7 @@ $('body').on('click', '.activeRecord', function () {
            return false;
         }
         $.ajax({
-          url: "{{ url('expenses-type-active') }}",
+          url: "{{ url('expenses-active') }}",
             type: 'POST',
             data: {_token: token,id: id,active:active},
             success: function (data) {
@@ -145,5 +252,31 @@ $('body').on('click', '.activeRecord', function () {
             },
         });
     });
+
 </script>
+
+
+<script type="text/javascript">
+
+    // for get expense type
+ $('#payroll').change(function() {
+    var payroll = $(this).val();
+    
+    $.post("{{ route('getexpenseType') }}",{
+        'payroll':payroll,
+        '_token':"{{ csrf_token() }}"
+        },function(response){
+
+          var select = $('#expenses_type');
+          select.empty();
+          select.append(response);
+          select.selectpicker('refresh');              
+
+    })
+   
+ }).trigger('change');
+    
+</script>
+
+
 </x-app-layout>

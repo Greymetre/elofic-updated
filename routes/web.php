@@ -49,7 +49,13 @@ use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\ExpensesTypeController;
 use App\Http\Controllers\SalesWeightageController;
 use App\Http\Controllers\DepartmentController;
-
+use App\Http\Controllers\GiftCategoryController;
+use App\Http\Controllers\GiftModelController;
+use App\Http\Controllers\GiftSubcategoryController;
+use App\Http\Controllers\ServicesController;
+use App\Http\Controllers\HolidayController;
+use App\Http\Controllers\TransactionHistoryController;
+use Aws\Api\Service;
 
 /*
 |--------------------------------------------------------------------------
@@ -144,6 +150,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('division', DivisionController::class);
     //Designation 
     Route::resource('designation', DesignationController::class);
+    //holidays
+    Route::resource('holidays', HolidayController::class);
+
     // Users
     Route::delete('users/destroy', [ UsersController::class, 'massDestroy'])->name('users.massDestroy');
     Route::resource('users', UsersController::class);
@@ -158,13 +167,38 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('reportings', UserReportingController::class);
     //Sales Weightege
     Route::resource('sales_weightage', SalesWeightageController::class);
+    Route::post('salesweightage/multiupdate', [SalesWeightageController::class,'multiupdate'])->name('salesweightage.multiupdate');
+
     //Appraisal
-    Route::get('appraisal/create', [AppraisalController::class, 'create']);
+    //Route::get('appraisal/create', [AppraisalController::class, 'create']);
+
+    // Route::get('appraisal/{id}/create', [AppraisalController::class, 'create']);
+    // Route::get('appraisal/index', [AppraisalController::class, 'index'])->name('appraisal.index');
+    // Route::any('appraisal/store', [AppraisalController::class, 'store'])->name('appraisal.store');
+    // Route::post('appraisal/update', [AppraisalController::class, 'update'])->name('appraisal.update');
+    // Route::any('appraisal-download', [ AppraisalController::class, 'download'])->name('appraisal.download');
+    // Route::any('getappraisal', [ AppraisalController::class, 'getappraisal'])->name('appraisal.getappraisal');
+
+        Route::get('appraisal/{id}/create', [AppraisalController::class, 'create']);
     Route::get('appraisal/index', [AppraisalController::class, 'index'])->name('appraisal.index');
     Route::any('appraisal/store', [AppraisalController::class, 'store'])->name('appraisal.store');
     Route::post('appraisal/update', [AppraisalController::class, 'update'])->name('appraisal.update');
     Route::any('appraisal-download', [ AppraisalController::class, 'download'])->name('appraisal.download');
     Route::any('getappraisal', [ AppraisalController::class, 'getappraisal'])->name('appraisal.getappraisal');
+    Route::get('appraisal/{id}/{year}/edit', [AppraisalController::class, 'edit']);
+
+    Route::get('appraisal/{id}/{year}/viewappraisal', [AppraisalController::class, 'viewappraisal']);
+
+    Route::get('appraisal/{id}/{year}/appraisalApprove', [AppraisalController::class, 'appraisalApprove']);
+
+    Route::post('appraisals/updateappraisal', [ AppraisalController::class, 'updateappraisal'])->name('appraisals.updateappraisal');
+
+    Route::post('appraisals/updateapproval', [ AppraisalController::class, 'updateapproval'])->name('appraisals.updateapproval');
+
+
+
+
+
     // Permissions
     Route::delete('permissions/destroy', [ PermissionsController::class, 'massDestroy'])->name('permissions.massDestroy');
     Route::resource('permissions', PermissionsController::class);
@@ -206,6 +240,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('production', [ ProductController::class, 'production'])->name('products.production');
     Route::any('productionupdate', [ ProductController::class, 'productionUpdate'])->name('products.productionupdate');
     Route::any('products-list', [ ProductController::class, 'productList']);
+    Route::any('checkProductCode', [ ProductController::class, 'checkProductCode'])->name('checkProductCode');
     //Orders
     Route::resource('orders', OrderController::class);
     Route::any('orders-download', [ OrderController::class, 'download'])->name('orders.download');
@@ -297,6 +332,8 @@ Route::group(['middleware' => ['auth']], function () {
 
     Route::any('approveAttendance', [ AttendanceController::class, 'approveAttendance'])->name('approveAttendance');
     Route::any('rejectAttendance', [ AttendanceController::class, 'rejectAttendance'])->name('rejectAttendance');
+
+    Route::any('attendancesummary-download', [ AttendanceController::class, 'attendanceSummaryDownload'])->name('attendancesummary.download');
 
 
     
@@ -449,6 +486,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('performanceParameter-download', [ ReportController::class, 'performanceParameterDownload']);
     Route::any('mechanicsPoints-download', [ ReportController::class, 'mechanicsPointsDownload']);
     Route::any('targetAchievement-download', [ ReportController::class, 'targetAchievementDownload']);
+    Route::any('reports/attendancereportSummary', [ ReportController::class, 'attendancereportSummary']);
+
     //Tours
     Route::resource('tours', TourController::class);
     Route::any('toursInfoUpdate', [ TourController::class, 'update'])->name('tours.toursInfoUpdate');
@@ -458,16 +497,57 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('tours-changeStatus', [ TourController::class, 'changeStatus'])->name('tours.changesttus');
 
     // /Expenses Type
-    // Route::resource('expenses_type', ExpensesTypeController::class);
-    // Route::post('expenses-type-active', [ExpensesTypeController::class, 'changeStatus']);
+     Route::resource('expenses_type', ExpensesTypeController::class);
+     Route::post('expenses-type-active', [ExpensesTypeController::class, 'changeStatus']);
 
     // /Expenses
-    //Route::resource('expenses', ExpensesController::class);
+     Route::resource('expenses', ExpensesController::class);
+     Route::post('expenses-active', [ExpensesController::class, 'changeStatus']);
+     Route::post('expenses-uncheck', [ExpensesController::class, 'uncheckStatus']);
+     Route::any('expenses-download', [ ExpensesController::class, 'expenseDownload'])->name('expenses.download');
+     Route::post('rejectExpense', [ ExpensesController::class, 'rejectExpense'])->name('rejectExpense');
+     Route::post('approveExpense', [ ExpensesController::class, 'approveExpense'])->name('approveExpense');
+     Route::post('getexpenseType', [ ExpensesController::class, 'getexpenseType'])->name('getexpenseType');
+     Route::post('getexpenseUserType', [ ExpensesController::class, 'getexpenseUserType'])->name('getexpenseUserType');
+     Route::post('getexpenseUserTypeEdit', [ ExpensesController::class, 'getexpenseUserTypeEdit'])->name('getexpenseUserTypeEdit');
 
-      // departments
+
+     // departments
      Route::resource('departments', DepartmentController::class);
      Route::post('departments-active', [ DepartmentController::class, 'active'])->name('departments.active');
 
+     //Services
+    Route::get('services/serial_number_transaction', [ServicesController::class, 'serial_number_transaction'])->name('service.serial_number_transaction');
+    Route::post('services/serial_number_transaction/upload', [ServicesController::class, 'serial_number_transaction_upload'])->name('service.serial_number_transaction.upload');
+    Route::get('services/serial_number_transaction/download', [ServicesController::class, 'serial_number_transaction_download'])->name('service.serial_number_transaction.download');
+    Route::post('services/serial_number_transaction/list', [ServicesController::class, 'serial_number_transaction_list'])->name('service.serial_number_transaction.list');
+    Route::get('services/serial_number_history', [ServicesController::class, 'serial_number_history'])->name('service.serial_number_history');
+    Route::post('services/serial_number_history/list', [ServicesController::class, 'serial_number_history_list'])->name('service.serial_number_history.list');
+
+    // Transaction History
+    Route::resource('transaction_history', TransactionHistoryController::class);
+    Route::get('transaction_history_download', [TransactionHistoryController::class, 'download'])->name('transaction_history.download');
+
+    //Gift Category Route
+    Route::resource('gift-categories', GiftCategoryController::class);
+    Route::any('gift-categories-download', [ GiftCategoryController::class, 'download'])->name('gift.categories.download');
+    Route::any('gift-categories-template', [ GiftCategoryController::class, 'template'])->name('gift.categories.template');
+    Route::post('gift-categories-upload', [ GiftCategoryController::class, 'upload'])->name('gift.categories.upload');
+    Route::post('gift-categories-active', [ GiftCategoryController::class, 'active'])->name('gift.categories.active');
+    
+    //Gift Sub Category Route
+    Route::resource('gift-subcategories', GiftSubcategoryController::class);
+    Route::any('gift-subcategories-download', [ GiftSubcategoryController::class, 'download'])->name('gift.subcategories.download');
+    Route::any('gift-subcategories-template', [ GiftSubcategoryController::class, 'template'])->name('gift.subcategories.template');
+    Route::post('gift-subcategories-upload', [ GiftSubcategoryController::class, 'upload'])->name('gift.subcategories.upload');
+    Route::post('gift-subcategories-active', [ GiftSubcategoryController::class, 'active'])->name('gift.subcategories.active');
+
+    //Gift Brand Route
+    Route::resource('gift-model', GiftModelController::class);
+    Route::any('gift-model-download', [ GiftModelController::class, 'download'])->name('gift.model.download');
+    Route::any('gift-model-template', [ GiftModelController::class, 'template'])->name('gift.model.template');
+    Route::post('gift-model-upload', [ GiftModelController::class, 'upload'])->name('gift.model.upload');
+    Route::post('gift-model-active', [ GiftModelController::class, 'active'])->name('gift.model.active');
 
     Route::get('logout', '\App\Http\Controllers\Auth\AuthenticatedSessionController@destroy');
 });
@@ -480,7 +560,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('getAddressData', [ AjaxController::class, 'getAddressData']);
     Route::any('getAddressInfo', [ AjaxController::class, 'getAddressInfo']);
     Route::any('getCustomerData', [ AjaxController::class, 'getCustomerData'])->name('getCustomerData');
+    Route::any('getCustomerDataSelect', [ AjaxController::class, 'getCustomerDataSelect'])->name('getCustomerDataSelect');
     Route::any('getCategoryData', [ AjaxController::class, 'getCategoryData']);
+    Route::any('getSubCategoryData', [ AjaxController::class, 'getSubCategoryData']);
     Route::any('getProductData', [ AjaxController::class, 'getProductData']);
     Route::any('getProductInfo', [ AjaxController::class, 'getProductInfo']);
     Route::any('getUserList', [ AjaxController::class, 'getUserList']);
@@ -494,6 +576,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('getUserLocationData', [ AjaxController::class, 'getUserLocationData']);
     Route::any('getUserActivityData', [ AjaxController::class, 'getUserActivityData']);
     Route::any('getCustomerActivityData', [ AjaxController::class, 'getCustomerActivityData']);
+    Route::any('schemesdetails/remove', [ AjaxController::class, 'removeSchemesdetails']);
+    Route::any('changeDocumnetStatus', [ AjaxController::class, 'changeDocumnetStatus']);
 
 
 

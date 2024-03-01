@@ -40,10 +40,17 @@ $(document).ready(function () {
         minlength:3,
         maxlength: 250,
       },
-      point_value:
+      customer_type:
       {
         required:true,
-        number:true,
+      },
+      scheme_basedon:
+      {
+        required:true,
+      },
+      assign_to:
+      {
+        required:true,
       },
       start_date:
       {
@@ -128,6 +135,34 @@ $(document).ready(function () {
       },
       coupon_count:{
         required: "Please enter No of Coupons",
+      },
+    }
+  });
+
+  /*=============== Transaction History Validation =====================*/
+  $('#storeTransactionHistoryData').validate({
+    rules:{
+      customer_id:
+      {
+        required:true,
+      },
+      coupen_code:
+      {
+        required:true,
+      },
+    },
+    highlight: function(element) {
+      $(element).closest('.error').css("display", "none");
+    },
+    unhighlight: function(element) {
+      $(element).closest('.error').css("display", "block");
+    },
+    messages:{
+      customer_id:{
+        required: "Please select Customer",
+      },
+      coupen_code:{
+        required: "Please enter Coupon Code",
       },
     }
   });

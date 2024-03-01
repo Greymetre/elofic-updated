@@ -6,14 +6,14 @@
         <div class="card-icon">
           <i class="material-icons">perm_identity</i>
         </div>
-        <h4 class="card-title ">{!! trans('panel.scheme.title_singular') !!}{!! trans('panel.global.list') !!}
+        <h4 class="card-title ">Loyalty {!! trans('panel.scheme.title_singular') !!} {!! trans('panel.global.list') !!}
               <span class="pull-right">
                 <div class="btn-group">
                   @if(auth()->user()->can(['scheme_upload']))
                   <form action="{{ URL::to('schemes-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                   {{ csrf_field() }}
                   <div class="input-group">
-                      <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                      <!-- <div class="fileinput fileinput-new text-center" data-provides="fileinput">
                         <span class="btn btn-just-icon btn-theme btn-file">
                           <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
                           <span class="fileinput-exists">Change</span>
@@ -27,14 +27,14 @@
                         <div class="ripple-container"></div>
                       </button>
                     </div>
-                  </div>
+                  </div> -->
                   </form>
                   @endif
                   @if(auth()->user()->can(['scheme_download']))
-                  <a href="{{ URL::to('schemes-download') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.scheme.title') !!}"><i class="material-icons">cloud_download</i></a>
+                  <!-- <a href="{{ URL::to('schemes-download') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.scheme.title') !!}"><i class="material-icons">cloud_download</i></a> -->
                   @endif
                   @if(auth()->user()->can(['scheme_template']))
-                  <a href="{{ URL::to('schemes-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.scheme.title_singular') !!}"><i class="material-icons">text_snippet</i></a>
+                  <!-- <a href="{{ URL::to('schemes-templates') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.scheme.title_singular') !!}"><i class="material-icons">text_snippet</i></a> -->
                   @endif
                   @if(auth()->user()->can(['scheme_create']))
                   <a href="{{ route('schemes.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.scheme.title_singular') !!}"><i class="material-icons">add_circle</i></a>
@@ -74,8 +74,6 @@
               <th>{!! trans('panel.scheme.fields.start_date') !!}</th>
               <th>{!! trans('panel.scheme.fields.end_date') !!}</th>
               <th>{!! trans('panel.scheme.fields.scheme_type') !!}</th>
-              <th>{!! trans('panel.scheme.fields.point_value') !!}</th>
-              <th>{!! trans('panel.global.created_by') !!}</th>
               <th>{!! trans('panel.global.created_at') !!}</th>
             </thead>
             <tbody>
@@ -108,8 +106,6 @@
             {data: 'start_date', name: 'start_date',"defaultContent": ''},
             {data: 'end_date', name: 'end_date',"defaultContent": ''},
             {data: 'scheme_type', name: 'scheme_type',"defaultContent": ''},
-            {data: 'point_value', name: 'point_value',"defaultContent": ''},
-            {data: 'createdbyname.name', name: 'createdbyname.name',"defaultContent": ''},
             {data: 'created_at', name: 'created_at',"defaultContent": ''},
         ]
     });

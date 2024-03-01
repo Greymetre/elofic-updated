@@ -61,6 +61,12 @@ return [
         'support'           => 'Supports',
         'payment'           => 'Payments',
         'expenses_type'     => 'Expenses Type',
+        'services'     => 'Services',
+        'serial_number_transaction'     => 'Serial Number Transaction',
+        'serial_number_history'     => 'Serial Number History',
+         'hr'     => 'HR',
+         'account'  => 'Account',
+
     ],
 
     'global'                           => [
@@ -415,6 +421,13 @@ return [
             'gstin_image'        => 'GSTIN Image',
             'pan_image'        => 'Pan Image',
             'aadhar_image'     => 'Aadhar Image',
+            'aadhar_front_image'     => 'Aadhar Fornt Image',
+            'aadhar_back_image'     => 'Aadhar Back Image',
+            'bank_passbook_image'     => 'Bank Passbook Image',
+            'account_holder'     => 'Account Holder Name',
+            'account_number'     => 'Account number',
+            'bank_name'     => 'Bank Name',
+            'ifsc_code'     => 'IFSC Code',
             'otherid_image'     => 'Other ID Image',
             'customertype'        => 'Customer Type',
             'firmtype'          => 'Firm Type',
@@ -597,6 +610,7 @@ return [
             'deleted_at_helper'  => '',
         ],
     ],
+
     'expenses_type'           => [
         'title'          => 'Expenses Type',
         'title_singular' => 'Expenses Type',
@@ -606,9 +620,35 @@ return [
             'name'              => 'Type Name',
             'display_name'      => 'Display Name',
             'rate'       => 'Rate',
-            'allowance_type' => 'Allowance Type'
+            'allowance_type' => 'Allowance Type',
+            'pay_roll' => 'Pay Roll',
         ],
     ],
+
+    'expenses'           => [
+        'title'          => 'Expenses',
+        'title_singular' => 'Expenses',
+        'fields'         => [
+            'expense_id'        => 'Expense Id',
+            'user'              => 'User',
+            'expense_type'      => 'Expense Type',
+            'date'              => 'Date',
+            'claim_amount'      => 'Claim Amount',
+            'expense_status'    => 'Expense Status',
+            'note'              => 'Note',
+            'start_km'          => 'Start Km',
+            'stop_km'           => 'Stop Km',
+            'total_km'          => 'Total Km',
+            'expense_file'      => 'Expense File',
+            'rate'              => 'Rate',
+            'created_at'        => 'Created at',
+            'branch'            => 'Branch',
+
+        ],
+    ],
+
+
+
     'user'           => [
         'title'          => 'Users',
         'title_singular'    => 'User',
@@ -661,6 +701,7 @@ return [
         'children_four_date_of_birth'  => 'Children-4 Date of Birth',
         'children_five'  => 'Children-5',
         'children_five_date_of_birth'  => 'Children-5 Date of Birth',
+        'pay_roll'  => 'Pay Roll',
 
 
         'account_number'    => 'Account Number',
@@ -681,6 +722,7 @@ return [
         'point'             => 'Point',
         'year'              => 'Year',
         'branch_name'       => 'Branch Name',
+        'branch_code'       => 'Branch Code',
         'division'          => 'Division',
         
 
@@ -727,6 +769,16 @@ return [
             'category_image'            => 'Category Image',
         ],
     ],
+    'gift_category'           => [
+        'title'          => 'Gift Categories',
+        'title_singular' => 'Gift Category',
+        'fields'         => [
+            'id'                       => 'ID',
+            'category_name'            => 'Category Name',
+            'category_name_helper'     => '',
+            'category_image'            => 'Category Image',
+        ],
+    ],
     'brand'           => [
         'title'          => 'Brands',
         'title_singular' => 'Brand',
@@ -757,7 +809,16 @@ return [
         ],
     ],
 
-
+    'holidays'           => [
+        'title'          => 'Holidays',
+        'title_singular' => 'Holiday',
+        'fields'         => [
+            'id'                       => 'ID',
+            'holiday_name'        => 'Holiday Name',
+            'branch_name'        => 'Branch Name',
+            'holiday_date'        => 'Holiday Date',
+        ],
+    ],
 
 
     
@@ -777,6 +838,7 @@ return [
         'fields'         => [
             'id'                 => 'ID',
             'branch_name'        => 'Branch Name',
+            'branch_code'       => 'Branch Code',
         ],
     ],
     'unit'           => [
@@ -798,12 +860,34 @@ return [
             'category'        => 'Category',
         ],
     ],
+    'gift_subcategory'           => [
+        'title'          => 'Gift Sub Categories',
+        'title_singular' => 'Gift Sub Category',
+        'fields'         => [
+            'id'                       => 'ID',
+            'subcategory_name'        => 'Sub Category Name',
+            'subcategory_image'        => 'Image',
+            'category'        => 'Gift Category',
+        ],
+    ],
+    'gift_model'           => [
+        'title'          => 'Gift Models',
+        'title_singular' => 'Gift Model',
+        'fields'         => [
+            'id'                       => 'ID',
+            'subcategory_name'        => 'Model Name',
+            'subcategory_image'        => 'Image',
+            'category'        => 'Gift Sub Category',
+        ],
+    ],
     'product'           => [
         'title'          => 'Products',
         'title_singular' => 'Product',
         'fields'         => [
             'id'               => 'ID',
              'product_name'    =>   'Product Name', 
+             'expiry_interval'    =>   'Expiry Interval', 
+             'expiry_interval_preiod'    =>   'Expiry Interval Preiod', 
              'display_name'    =>   'Display Name', 
              'description'     =>   'Description', 
              'subcategory_id'  =>   'Subcategory ID', 
@@ -1046,7 +1130,7 @@ return [
         'achievement' => 'Achievement',
         'all_rating' => 'All Ratings',
         'rating_by' => 'Rating By',
-        'sales_weightage' => 'Sales Weightage',
+        'sales_weightage' => 'KRA',
         'financial_year' => 'Financial Year',
         'punchout_latitude' => 'Punchout Latitude',
         'punchout_longitude' => 'Punchout Longitude',
@@ -1055,13 +1139,17 @@ return [
         'worked_time' => 'Worked Time',
         'start_time' => 'Start Time',
         'end_time' => 'End Time',
+        'self_grade' => 'Self Grade'
     ],
     'sales_weightage'      => [
-        'title'          => 'Sales Weightage',
-        'title_singular' => 'Sales Weightage',
-        'weightage_name' => 'Weightage Name',
+        'title'          => 'KRA',
+        'title_singular' => 'KRA',
+        'weightage_name' => 'KRA Name',
         'weightage' => 'Weightage',
         'last_promotion' => 'Last Promotion',
+        'display_names' => 'Display Name',
+        'display_division' => 'Division Name',
+        'financial_year' => 'Financial Year'
     ],
     'checkin'      => [
         'title'          => 'Checkin',

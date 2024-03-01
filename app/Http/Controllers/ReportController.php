@@ -477,6 +477,180 @@ class ReportController extends Controller
         }
         return view('reports.attendancereport', compact('users', 'branches'));
     }
+
+
+        // new summary attendance report start
+
+
+    public function attendancereportSummary(Request $request){
+
+        $search_branches = $request->input('search_branches');
+        $all_reporting_user_ids = getUsersReportingToAuth();
+        $all_user_branches = User::with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
+        $branches = array();
+        $all_branch = array();
+        $bkey = 0;
+        foreach ($all_user_branches as $k => $val) {
+            if($val->getbranch){
+                if(!in_array($val->getbranch->id, $all_branch)){
+                    array_push($all_branch, $val->getbranch->id);
+                    $branches[$bkey]['id'] = $val->getbranch->id;
+                    $branches[$bkey]['name'] = $val->getbranch->branch_name;
+                    $bkey++;
+                }
+            }
+        }
+        if ($search_branches && count($search_branches) > 0 && $search_branches[0] != null) {
+            $all_reporting_user_ids = User::whereIn('id', $all_reporting_user_ids)->whereIn('branch_id', $search_branches)->pluck('id')->toArray();
+        }
+        $all_user_details = User::with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
+        $all_users = array();
+        foreach ($all_user_details as $k => $val) {
+            $users[$k]['id'] = $val->id;
+            $users[$k]['name'] = $val->name;
+        
+        }
+        if ($search_branches && count($search_branches) > 0 && $search_branches[0] != null) {
+            if ($request->ajax()) {
+                $response = ["users"=>$users, "status"=>true];
+                return response()->json($response);
+            }
+        }
+        if ($request->ajax()) {
+            $data = Attendance::with('users:id,name')
+                ->where(function ($query) use ($request, $all_reporting_user_ids) {
+                    if (!empty($request['executive_id'])) {
+                        $query->where('user_id', $request['executive_id']);
+                    }
+
+                    if (!empty($request['start_date']) && !empty($request['end_date'])) {
+                        $query->whereBetween('punchin_date', [$request['start_date'], $request['end_date']]);
+                    }
+
+                    // if(!empty($request['search']) && is_array($request['search']) == false){
+                    //     $search = $request['search'] ;
+                    //     $query->where(function($query) use($search) {
+                    //         $query->where('punchin_date', 'like', "%{$search}%")
+                    //         ->Orwhere('punchin_time', 'like', "%{$search}%")
+                    //         ->Orwhere('working_type', 'like', "%{$search}%");
+                    //     });
+                    // }
+
+                    if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                        $query->whereIn('user_id', $all_reporting_user_ids);
+                    }
+                })
+                ->select('id', 'user_id', 'punchin_date', 'punchin_time', 'punchin_longitude', 'punchin_latitude', 'punchin_address', 'punchin_image', 'punchout_date', 'punchout_time', 'punchout_latitude', 'punchout_longitude', 'punchout_address', 'punchout_image', 'worked_time', 'punchin_summary', 'punchout_summary', 'working_type', 'attendance_status', 'remark_status')
+                ->latest();
+            return Datatables::of($data)
+                ->addIndexColumn()
+                ->editColumn('punchin_date', function ($data) {
+                    return isset($data->punchin_date) ? stringtodate($data->punchin_date) : '';
+                })
+
+                ->addColumn('current_status', function ($query) {
+                    $status = '';
+                    if ($query->attendance_status == '0') {
+                        $status = 'pending';
+                    } elseif ($query->attendance_status == '1') {
+                        $status = 'approved';
+                    } else {
+                        $status = 'rejected';
+                    }
+                    return $status;
+                })
+
+
+                // ->editColumn('punchout_date', function($data)
+                // {
+                //     return isset($data->punchout_date) ? stringtodate($data->punchout_date) : stringtodate($data->punchin_date);
+                // })
+
+                // ->addColumn('punchin', function ($query) {
+                //     $punchin_image = !empty($query->punchin_image) ? env('IMAGE_UPLOADS').$query->punchin_image : asset('assets/img/placeholder.jpg') ;
+                //         return '<img src="'.$punchin_image.'" border="0" width="70" class="img-rounded imageDisplayModel" align="center" />';
+                //     })
+                ->addColumn('punchout', function ($query) {
+                    $punchout_image = !empty($query->punchout_image) ? env('IMAGE_UPLOADS') . $query->punchout_image : asset('assets/img/placeholder.jpg');
+                    return '<img src="' . $punchout_image . '" border="0" width="70" class="img-rounded imageDisplayModel" align="center" />';
+                })
+                ->addColumn('action', function ($query) {
+                    $btn = '';
+                    // if(auth()->user()->can(['attendance_delete'])  && $query->punchin_date == date('Y-m-d'))
+                    // {
+                    $btn = '<a href="" class="btn btn-danger btn-just-icon btn-sm deleteAttendance" value="' . $query->id . '" title="Delete Attendance">
+                                        <i class="material-icons">clear</i>
+                                      </a>
+                                      <a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm removePunchout" value="' . $query->id . '" title="Remove Puncout">
+                                    <i class="material-icons">schedule</i>
+                                  </a>';
+
+
+                    // }
+                    return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
+                                ' . $btn . '
+                            </div>';
+                })
+
+                ->addColumn('action_status', function ($query) {
+                    $btn = '';
+                    // if(auth()->user()->can(['attendance_delete'])  && $query->punchin_date == date('Y-m-d'))
+                    // {
+
+                    if ($query->attendance_status == 0) {
+
+                        $btn = '<a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm approve_status" value="' . $query->id . '" title="Approve Status">
+                                        <i class="material-icons">approval</i>
+                                      </a>
+                                      <a href="javascript:void(0)" class="btn btn-danger btn-just-icon btn-sm reject_status" value="' . $query->id . '" title="Reject Status">
+                                    <i class="material-icons">cancel</i>
+                                  </a>
+                                  <a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm pending" value="' . $query->id . '" title="Pending">
+                                    <i class="material-icons">pending</i>
+                                  </a>
+                                  ';
+                    }
+                    if ($query->attendance_status == 1) {
+
+                        $btn = '<a href="javascript:void(0)" class="btn btn-danger btn-just-icon btn-sm reject_status" value="' . $query->id . '" title="Reject Status">
+                                    <i class="material-icons">cancel</i>
+                                  </a>';
+                    }
+                    if ($query->attendance_status == 2) {
+
+                        $btn = '<a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm approve_status" value="' . $query->id . '" title="Approve Status">
+                                        <i class="material-icons">approval</i>
+                                      </a>';
+                    }
+
+
+                    // }
+                    return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
+                                ' . $btn . '
+                            </div>';
+                })
+
+
+
+                ->rawColumns(['punchin', 'punchout', 'action', 'action_status', 'current_status'])
+                ->make(true);
+        }
+
+     
+    return view('reports.attendancereport_summary', compact('users', 'branches'));
+
+    }
+
+
+    // new summary attendance report end
+
+
+
+
+
+
+
+
     public function counterVisitReportDownload(Request $request)
     {
         ////abort_if(Gate::denies('visitreport_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');

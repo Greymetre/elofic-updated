@@ -88,8 +88,8 @@ $(document).ready(function () {
       },
       gstin_no:
       {
-        minlength:3,
-        maxlength: 250,
+        minlength:15,
+        maxlength: 15,
         // remote:{
         //   url:base_url+"/uniqueValidation",
         //   type:"post",
@@ -104,8 +104,9 @@ $(document).ready(function () {
       },
       pan_no:
       {
-        minlength:3,
-        maxlength: 250,
+        minlength:10,
+        maxlength: 10,
+        pattern: /^([a-zA-Z]){5}([0-9]){4}([a-zA-Z]){1}?$/,
         // remote:{
         //   url:base_url+"/uniqueValidation",
         //   type:"post",
@@ -120,8 +121,9 @@ $(document).ready(function () {
       },
       aadhar_no:
       {
-        minlength:3,
-        maxlength: 250,
+        minlength:12,
+        maxlength: 12,
+        number: true,
         // remote:{
         //   url:base_url+"/uniqueValidation",
         //   type:"post",

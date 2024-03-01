@@ -83,7 +83,7 @@ class AttendanceExport implements FromCollection,WithHeadings,ShouldAutoSize,Wit
             isset($data['users']['name'])? $data['users']['name'] :'',
             isset($data['users']['getdesignation']['designation_name'])? $data['users']['getdesignation']['designation_name'] :'',
             isset($data['users']['getbranch']['branch_name'])? $data['users']['getbranch']['branch_name'] :'',
-            isset($data['users']['getdepartment']['division_name'])? $data['users']['getdepartment']['division_name'] :'',
+            isset($data['users']['getdivision']['division_name'])? $data['users']['getdivision']['division_name'] :'',
 
             $data['punchin_date'],
             $data['punchin_time'],

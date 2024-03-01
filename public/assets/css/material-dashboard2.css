@@ -23392,6 +23392,7 @@ table.dataTable {
   max-width: none !important;
   border-collapse: separate !important;
   border-spacing: 0;
+  width: 100% !important;
 }
 
 table.dataTable td,
