@@ -24,18 +24,30 @@ class GiftsDataTable extends DataTable
             })
             ->addColumn('action', function ($query) {
                     return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
-                                <a href="'.url("gifts/".encrypt($query->id).'/edit') .'" class="btn btn-primary btn-just-icon btn-sm">
+                                <a href="'.url("gifts/".encrypt($query->id).'/edit') .'" class="btn btn-success btn-just-icon btn-sm">
                                     <i class="material-icons">edit</i>
                                 </a>
-                                <a href="'.url("gifts/".encrypt($query->id)).'" class="btn btn-success btn-just-icon btn-sm">
-                                    <i class="material-icons">visibility</i>
-                                </a>
+                                <a href="javascript:void(0)" class="btn btn-danger btn-just-icon btn-sm delete" value="'.$query->id.'" title="'.trans('panel.global.delete').' '.trans('panel.gift.title_singular').'">
+                                <i class="material-icons">clear</i>
+                              </a>
                             </div>';
             })
+            ->addColumn('active', function ($query) {
+                if(auth()->user()->can(['category_active']))
+                {
+                  $active = ($query->active == 'Y') ? 'checked="" value="'.$query->active.'"' : 'value="'.$query->active.'"';
+                  return '<div class="togglebutton">
+                      <label>
+                        <input type="checkbox"'.$active.' id="'.$query->id.'" class="activeRecord">
+                        <span class="toggle"></span>
+                      </label>
+                    </div>';
+                }
+          })
             ->addColumn('image', function ($query) {
-                return '<img src="'.asset(!empty($query->product_image) ? 'uploads/'.$query->product_image : 'public/uploads/product.jpeg').'" border="0" width="70" class="img-rounded" align="center" />';
+                return '<img src="'.asset(!empty($query->product_image) ? 'uploads/'.$query->product_image : 'assets/img/placeholder.jpg').'" border="0" width="70" class="img-rounded" align="center" />';
               })
-            ->rawColumns(['action','image']);
+            ->rawColumns(['action','image','active']);
     }
 
     /**
@@ -46,7 +58,7 @@ class GiftsDataTable extends DataTable
      */
     public function query(Gifts $model)
     {
-        return $model->with('createdbyname','categories','subcategories','brands','unitmeasures')->latest()->newQuery();
+        return $model->with('createdbyname','categories','subcategories','brands','models')->latest()->newQuery();
     }
 
     /**

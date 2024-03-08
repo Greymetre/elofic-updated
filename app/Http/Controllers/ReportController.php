@@ -415,17 +415,35 @@ class ReportController extends Controller
                 })
                 ->addColumn('action', function ($query) {
                     $btn = '';
+
                     // if(auth()->user()->can(['attendance_delete'])  && $query->punchin_date == date('Y-m-d'))
                     // {
-                    $btn = '<a href="" class="btn btn-danger btn-just-icon btn-sm deleteAttendance" value="' . $query->id . '" title="Delete Attendance">
-                                        <i class="material-icons">clear</i>
-                                      </a>
-                                      <a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm removePunchout" value="' . $query->id . '" title="Remove Puncout">
-                                    <i class="material-icons">schedule</i>
-                                  </a>';
+                    // $btn = '<a href="" class="btn btn-danger btn-just-icon btn-sm deleteAttendance" value="' . $query->id . '" title="Delete Attendance">
+                    //                     <i class="material-icons">clear</i>
+                    //                   </a>
+                    //                   <a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm removePunchout" value="' . $query->id . '" title="Remove Puncout">
+                    //                 <i class="material-icons">schedule</i>
+                    //               </a>';
 
 
                     // }
+
+                 
+                     if(auth()->user()->can(['attendance_delete'])){
+                     $btn = $btn. '<a href="" class="btn btn-danger btn-just-icon btn-sm deleteAttendance" value="' . $query->id . '" title="Delete Attendance">
+                                        <i class="material-icons">clear</i>
+                                      </a>';
+                        }  
+                      
+                    if(auth()->user()->can(['attendance_punchout'])){              
+
+                     $btn = $btn.'<a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm removePunchout" value="' . $query->id . '" title="Remove Puncout">
+                                    <i class="material-icons">schedule</i>
+                                  </a>';
+                           }       
+
+
+
                     return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
                                 ' . $btn . '
                             </div>';
@@ -578,15 +596,31 @@ class ReportController extends Controller
                     $btn = '';
                     // if(auth()->user()->can(['attendance_delete'])  && $query->punchin_date == date('Y-m-d'))
                     // {
-                    $btn = '<a href="" class="btn btn-danger btn-just-icon btn-sm deleteAttendance" value="' . $query->id . '" title="Delete Attendance">
-                                        <i class="material-icons">clear</i>
-                                      </a>
-                                      <a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm removePunchout" value="' . $query->id . '" title="Remove Puncout">
-                                    <i class="material-icons">schedule</i>
-                                  </a>';
+                    // $btn = '<a href="" class="btn btn-danger btn-just-icon btn-sm deleteAttendance" value="' . $query->id . '" title="Delete Attendance">
+                    //                     <i class="material-icons">clear</i>
+                    //                   </a>
+                    //                   <a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm removePunchout" value="' . $query->id . '" title="Remove Puncout">
+                    //                 <i class="material-icons">schedule</i>
+                    //               </a>';
 
 
                     // }
+
+                      if(auth()->user()->can(['attendance_delete'])){
+                    $btn = $btn. '<a href="" class="btn btn-danger btn-just-icon btn-sm deleteAttendance" value="' . $query->id . '" title="Delete Attendance">
+                                        <i class="material-icons">clear</i>
+                                      </a>';
+                        }
+                        
+                         if(auth()->user()->can(['attendance_punchout'])){                 
+
+                    $btn = $btn.'<a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm removePunchout" value="' . $query->id . '" title="Remove Puncout">
+                                    <i class="material-icons">schedule</i>
+                                  </a>';
+                            }      
+
+
+
                     return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
                                 ' . $btn . '
                             </div>';

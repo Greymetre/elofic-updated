@@ -78,10 +78,10 @@
                       <select name="expenses_type" id="expenses_type" class="form-control {{ $errors->has('expenses_type') ? 'is-invalid' : '' }} select2">
                         <option value="" disabled selected>Please Select Expenses Type</option>
 
-                       <!--  @foreach($expensestypes as $key=>$expensestype)
+                        <!--  @foreach($expensestypes as $key=>$expensestype)
                         <option value="{{$expensestype->id}}" data-allowtype="{{$expensestype->allowance_type_id}}" data-rate ="{{$expensestype->rate}}">{{$expensestype->name}}</option>
-                        @endforeach -->
-                        
+                        @endforeach  -->
+
                       </select>
                       @if($errors->has('expenses_type'))
                       <div class="invalid-feedback">
@@ -223,6 +223,7 @@
 $(document).ready(function(){
 
     $('#expenses_type').change(function() {
+
     var type = $(this).children(":selected").data('allowtype');
     var rate = $(this).children(":selected").data('rate');
     if(type == '1'){
@@ -232,8 +233,10 @@ $(document).ready(function(){
     $('.rate').prop("readonly", true) 
     }else if(type == '2'){
     $('.km').hide()
-    $('.km').prop("disabled", true) 
-    $('.claim').prop("disabled", false) 
+     //$('.km').prop("disabled", true) 
+     //$('.claim').prop("disabled", false) 
+    $('.final_claim').val(rate);
+    $('.claim').prop("readonly", false) 
     }else{
     $('.km').hide()
     $('.km').prop("disabled", true) 
@@ -261,14 +264,8 @@ $(document).ready(function(){
 
  });
 
-
-
-
-
-
 });
 </script>
-
 
 
 <script type="text/javascript">
@@ -292,6 +289,9 @@ $(document).ready(function(){
  }).trigger('change');
     
 </script>
+
+
+
 
 
 

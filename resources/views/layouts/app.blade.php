@@ -49,7 +49,7 @@
       <div class="sidebar-wrapper">
         <div class="user">
           <div class="photo">
-            <img src="{!! (Auth::user()->profile_image) ? env('IMAGE_UPLOADS').Auth::user()->profile_image : url('/').'/'.asset('assets/img/placeholder.jpg') !!}">
+            <img src="{!! (Auth::user()->profile_image) ? '/public/uploads/'.Auth::user()->profile_image : url('/').'/'.asset('assets/img/placeholder.jpg') !!}">
           </div>
           <div class="user-info">
             <a data-toggle="collapse" href="#collapseExample" class="username">
@@ -203,7 +203,7 @@
             </a>
             <div class="collapse" id="userMenu" style="">
               <ul class="nav">
-                @if(auth()->user()->can('appraisal_pms'))
+<!--                 @if(auth()->user()->can('appraisal_pms'))
                 <li class="nav-item {{ request()->is('appraisal/create') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('appraisal/index') }}">
                     <i class="material-icons">verified_user</i>
@@ -218,7 +218,7 @@
                     <p>{!! trans('panel.sales_weightage.title') !!}</p>
                   </a>
                 </li>
-                @endif
+                @endif -->
                 @if(auth()->user()->can('user_access'))
                 <li class="nav-item {{ request()->is('users*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('users') }}">
@@ -395,6 +395,24 @@
                   </a>
                 </li>
                 @endif
+
+                  @if(auth()->user()->can('appraisal_pms'))
+                <li class="nav-item {{ request()->is('appraisal/create') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('appraisal/index') }}">
+                    <i class="material-icons">verified_user</i>
+                    <p>Appraisal(PMS)</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('sales_weightage'))
+                <li class="nav-item {{ request()->is('sales_weightage') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('sales_weightage') }}">
+                    <i class="material-icons">check</i>
+                    <p>{!! trans('panel.sales_weightage.title') !!}</p>
+                  </a>
+                </li>
+                @endif
+
 
               </ul>
             </div>
@@ -578,7 +596,7 @@
           </li>
           @endif
           @if(auth()->user()->can('scheme_access'))
-          <li class="nav-item {{ request()->is('schemes*') || request()->is('transaction_history*') || request()->is('gifts*') || request()->is('gift-categories*') || request()->is('gift-subcategories*') || request()->is('gift-model*') ? 'active' : '' }}">
+          <li class="nav-item {{ request()->is('schemes*') || request()->is('transaction_history*') || request()->is('gifts*') || request()->is('gift-categories*') || request()->is('gift-subcategories*') || request()->is('gift-model*') || request()->is('gift-brands*') ? 'active' : '' }}">
             <a class="nav-link collapsed" data-toggle="collapse" href="#schemesMenu" aria-expanded="false">
               <i class="material-icons">loyalty</i>
               <p> Loyalty Engine </p>
@@ -640,8 +658,10 @@
                     <p>Gift Model</p>
                   </a>
                 </li>
-                <li class="nav-item {{ request()->is('gift-subcategories*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('gift-subcategories') }}">
+                @endif
+                @if(auth()->user()->can('gift_brand_access'))
+                <li class="nav-item {{ request()->is('gift-brands*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('gift-brands') }}">
                     <i class="material-icons">redeem</i>
                     <p>Gift Brand</p>
                   </a>
@@ -789,14 +809,14 @@
             </a>
             <div class="collapse" id="tasksMenu" style="">
               <ul class="nav">
-                @if(auth()->user()->can('attendance_report'))
+<!--                 @if(auth()->user()->can('attendance_report'))
                 <li class="nav-item {{ request()->is('reports/attendancereport*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('reports/attendancereport') }}">
                     <i class="material-icons">check_circle</i>
                     <p>Attendance Report</p>
                   </a>
                 </li>
-                @endif
+                @endif -->
                 @if(auth()->user()->can('adherence_report'))
                 <li class="nav-item {{ request()->is('reports/beatadherence*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('reports/beatadherence') }}">

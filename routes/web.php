@@ -49,12 +49,14 @@ use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\ExpensesTypeController;
 use App\Http\Controllers\SalesWeightageController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\GiftBrandController;
 use App\Http\Controllers\GiftCategoryController;
 use App\Http\Controllers\GiftModelController;
 use App\Http\Controllers\GiftSubcategoryController;
 use App\Http\Controllers\ServicesController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\TransactionHistoryController;
+use App\Http\Controllers\OrderSchemeController;
 use Aws\Api\Service;
 
 /*
@@ -510,11 +512,19 @@ Route::group(['middleware' => ['auth']], function () {
      Route::post('getexpenseType', [ ExpensesController::class, 'getexpenseType'])->name('getexpenseType');
      Route::post('getexpenseUserType', [ ExpensesController::class, 'getexpenseUserType'])->name('getexpenseUserType');
      Route::post('getexpenseUserTypeEdit', [ ExpensesController::class, 'getexpenseUserTypeEdit'])->name('getexpenseUserTypeEdit');
+     
+     Route::get('deletImages', [ ExpensesController::class, 'deletImages'])->name('deletImages');
+     Route::get('deleteview', [ ExpensesController::class, 'deleteview'])->name('deleteview');
 
 
      // departments
      Route::resource('departments', DepartmentController::class);
      Route::post('departments-active', [ DepartmentController::class, 'active'])->name('departments.active');
+
+      //order scheme
+     Route::resource('orderschemes', OrderSchemeController::class);
+
+
 
      //Services
     Route::get('services/serial_number_transaction', [ServicesController::class, 'serial_number_transaction'])->name('service.serial_number_transaction');
@@ -542,12 +552,19 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('gift-subcategories-upload', [ GiftSubcategoryController::class, 'upload'])->name('gift.subcategories.upload');
     Route::post('gift-subcategories-active', [ GiftSubcategoryController::class, 'active'])->name('gift.subcategories.active');
 
-    //Gift Brand Route
+    //Gift Model Route
     Route::resource('gift-model', GiftModelController::class);
     Route::any('gift-model-download', [ GiftModelController::class, 'download'])->name('gift.model.download');
     Route::any('gift-model-template', [ GiftModelController::class, 'template'])->name('gift.model.template');
     Route::post('gift-model-upload', [ GiftModelController::class, 'upload'])->name('gift.model.upload');
     Route::post('gift-model-active', [ GiftModelController::class, 'active'])->name('gift.model.active');
+
+    //Gift Brand Route
+    Route::resource('gift-brands', GiftBrandController::class);
+    Route::any('gift-brands-download', [ GiftBrandController::class, 'download'])->name('gift.brands.download');
+    Route::any('gift-brands-template', [ GiftBrandController::class, 'template'])->name('gift.brands.template');
+    Route::post('gift-brands-upload', [ GiftBrandController::class, 'upload'])->name('gift.brands.upload');
+    Route::post('gift-brands-active', [ GiftBrandController::class, 'active'])->name('gift.brands.active');
 
     Route::get('logout', '\App\Http\Controllers\Auth\AuthenticatedSessionController@destroy');
 });
@@ -563,6 +580,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('getCustomerDataSelect', [ AjaxController::class, 'getCustomerDataSelect'])->name('getCustomerDataSelect');
     Route::any('getCategoryData', [ AjaxController::class, 'getCategoryData']);
     Route::any('getSubCategoryData', [ AjaxController::class, 'getSubCategoryData']);
+    Route::any('getGiftSubCategoryData', [ AjaxController::class, 'getGiftSubCategoryData']);
+    Route::any('getGiftModelData', [ AjaxController::class, 'getGiftModelData']);
     Route::any('getProductData', [ AjaxController::class, 'getProductData']);
     Route::any('getProductInfo', [ AjaxController::class, 'getProductInfo']);
     Route::any('getUserList', [ AjaxController::class, 'getUserList']);

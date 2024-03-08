@@ -246,13 +246,14 @@ class CustomController extends Controller
 
 
   public function getRetailerList(Request $request)
-    {
+    {      
         try
         { 
             $pageSize = $request->input('pageSize');
             $user = Auth::guard('users')->user();
             $user_id = $user->id;
-            $all_user_ids = getUsersReportingToAuth($user_id);
+            $all_user_ids = getUsersReportingToAuth($user_id); 
+            //print_r($all_user_ids); die();
             $customer_ids_assign = EmployeeDetail::whereIn('user_id', $all_user_ids)->pluck('customer_id')->toArray();
             $query = Customers::where(function ($query) use ($customer_ids_assign) {
                                         $query->where('active', '=', 'Y')->whereIn('customertype',['1','3'])->whereIn('id', $customer_ids_assign);

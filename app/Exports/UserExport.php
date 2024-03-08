@@ -35,7 +35,7 @@ class UserExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
                                 {
                                     $query->whereIn('id', $this->userids);
                                 }
-                            })->select('id','name', 'first_name', 'last_name', 'mobile', 'email', 'gender', 'profile_image','reportingid','employee_codes','branch_id','division_id','designation_id','location','active','department_id')->latest()->get();   
+                            })->select('id','name', 'first_name', 'last_name', 'mobile', 'email', 'gender', 'profile_image','reportingid','employee_codes','branch_id','division_id','designation_id','location','active','department_id','payroll')->latest()->get();   
     }
 
     public function headings(): array

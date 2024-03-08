@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, CustomerDetails, Notes, SchemeDetails, Subcategory};
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, CustomerDetails, GiftModel, GiftSubcategory, Notes, SchemeDetails, Subcategory};
 use App\Models\User;
 use Carbon\Carbon;
 use App\Models\UserLiveLocation;
@@ -691,6 +691,42 @@ class AjaxController extends Controller
                 );
             }
             return response()->json($results);
+        }
+    }
+
+    public function getGiftSubCategoryData(Request $request)
+    {
+        try {
+            $data = GiftSubcategory::where(function ($query) {
+                $query->where('active', '=', 'Y');
+            });
+            if ($request->cat_id && $request->cat_id != null && $request->cat_id != '') {
+                $data->where('category_id', $request->cat_id);
+            }
+            $data = $data->select('id', 'subcategory_name')
+                ->orderBy('subcategory_name', 'asc')
+                ->get();
+            return response()->json($data);
+        } catch (\Exception $e) {
+            return $e;
+        }
+    }
+
+    public function getGiftModelData(Request $request)
+    {
+        try {
+            $data = GiftModel::where(function ($query) {
+                $query->where('active', '=', 'Y');
+            });
+            if ($request->cat_id && $request->cat_id != null && $request->cat_id != '') {
+                $data->where('sub_category_id', $request->cat_id);
+            }
+            $data = $data->select('id', 'model_name')
+                ->orderBy('model_name', 'asc')
+                ->get();
+            return response()->json($data);
+        } catch (\Exception $e) {
+            return $e;
         }
     }
 }

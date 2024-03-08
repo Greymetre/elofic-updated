@@ -64,6 +64,7 @@ class LoginController extends Controller
                 $nestedData['mobile'] = isset($user['mobile']) ? $user['mobile'] :'';
                 $nestedData['profile_image'] = isset($user['profile_image']) ? $user['profile_image'] :'';
                 $nestedData['gender'] = isset($user['gender']) ? $user['gender'] :'';
+                $nestedData['payroll_id'] = isset($user['payroll']) ? $user['payroll'] :'';
                 $nestedData['access_token'] = $token;
                 $user['provider'] = 'users';
                 $user['entry_from'] = 'app';

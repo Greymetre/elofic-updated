@@ -160,7 +160,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::post('tour/add', [TourPlanController::class, 'add']);
     Route::post('tour/edit', [TourPlanController::class, 'edit']);
     //Expenses Type
-     Route::get('/getExpensesType', [ExpensesTypeController::class, 'getExpensesType']);
+     Route::post('/getExpensesType', [ExpensesTypeController::class, 'getExpensesType']);
      Route::post('createExpense', [ExpensesTypeController::class, 'createExpense']);
      Route::any('expenseListing', [ExpensesTypeController::class, 'expenseListing']);
      Route::post('expenseDetails', [ExpensesTypeController::class, 'expenseDetails']);
