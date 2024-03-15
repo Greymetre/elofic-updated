@@ -383,7 +383,19 @@ if (! function_exists('getUsersReportingToAuth')) {
 
         $all_users = User::get();
      
-        if(!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin'))
+        // if(!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin'))
+        // {
+        //     $all_ids_array = array($userid);
+        //     $test = getAllChild(array($userid), $all_users);
+        //     while(count($test) > 0){
+        //         $all_ids_array = array_merge($all_ids_array, $test);
+        //         $test = getAllChild($test, $all_users);
+        //     }
+        // }else{
+        //     $all_ids_array = User::pluck('id')->toArray();
+        // }
+
+        if(!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin') && !$userinfo->hasRole('Sub_Admin') && !$userinfo->hasRole('HR_Admin') && !$userinfo->hasRole('HO_Account'))
         {
             $all_ids_array = array($userid);
             $test = getAllChild(array($userid), $all_users);
@@ -394,6 +406,11 @@ if (! function_exists('getUsersReportingToAuth')) {
         }else{
             $all_ids_array = User::pluck('id')->toArray();
         }
+
+
+
+
+
                 
         // $users = User::where(function($query) use($userinfo){
         //                 if(!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin'))

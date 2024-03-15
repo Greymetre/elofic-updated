@@ -13,7 +13,40 @@
         
               @if(auth()->user()->can(['expense_download']))
               <form method="GET" action="{{ URL::to('expenses-download') }}">
-                  <div class="d-flex flex-row">
+
+
+
+
+
+
+
+
+               <div class="d-flex flex-row">
+                  <div class="p-2" style="width:195px;">
+                    <select class="selectpicker"  name="payroll" id="payroll" data-style="select-with-transition">
+                    
+                        @foreach($pay_rolls as $key=>$payroll)
+                          <option value="{!! $key !!}">{!! $payroll !!}</option>
+                       @endforeach
+                   </select>
+                  </div>
+
+                  <div class="p-2" style="width:195px;">
+                    <select class="selectpicker"  name="expenses_type" id="expenses_type" data-style="select-with-transition">
+                   </select>
+                  </div>   
+
+                  <div class="p-2" style="width:150px;">
+                    <select class="selectpicker1 select2" name="expense_id" id="expense_id" data-style="select-with-transition" title="Select Expense">
+                     <option value="">Select Expense Id</option>
+                    @if(@isset($expense_ids ))
+                        @foreach($expense_ids as $expense_id)
+                          <option value="{!! $expense_id['id'] !!}">#{!! $expense_id['id'] !!}</option>
+                        @endforeach
+                    @endif
+                   </select>
+                  </div>
+
 
                   <div class="p-2" style="width:150px;">
                     <select class="selectpicker" name="branch_id" id="branch_id" data-style="select-with-transition" title="Select Branch">
@@ -28,39 +61,29 @@
 
 
                   <div class="p-2" style="width:150px;">
-                    <select class="selectpicker" name="executive_id" id="executive_id" data-style="select-with-transition" title="Select User">
+                    <select class="selectpicker" name="division_id" id="division_id" data-style="select-with-transition" title="Select Division">
+                     <option value="">Select Division</option>
+                    @if(@isset($divisions ))
+                        @foreach($divisions as $division)
+                          <option value="{!! $division['id'] !!}">{!! $division['name'] !!}</option>
+                        @endforeach
+                    @endif
+                   </select>
+                  </div>
+
+
+
+
+                  <div class="p-2" style="width:150px;">
+                    <select class="select2" name="executive_id" id="executive_id" data-style="select-with-transition" title="Select User">
                        <option value="">Select User</option>
                       @if(@isset($users ))
                       @foreach($users as $user)
-                       <option value="{!! $user['id'] !!}" {{ old( 'executive_id') == $user->id ? 'selected' : '' }}>{!! $user['name'] !!}</option>
+                       <option value="{!! $user['id'] !!}" {{ old( 'executive_id') == $user->id ? 'selected' : '' }}> ({!! $user['employee_codes']??'' !!}) {!! $user['name'] !!}</option>
                       @endforeach
                       @endif
                     </select>
                   </div>
-
-                  <div class="p-2" style="width:195px;">
-                    <select class="selectpicker"  name="payroll" id="payroll" data-style="select-with-transition">
-                     <!-- <option value="">Select Payroll</option> -->
-                        @foreach($pay_rolls as $key=>$payroll)
-                          <option value="{!! $key !!}">{!! $payroll !!}</option>
-                       @endforeach
-                   </select>
-                  </div>
-
-
-
-                  <div class="p-2" style="width:195px;">
-                    <select class="selectpicker"  name="expenses_type" id="expenses_type" data-style="select-with-transition" >
-                     <!-- <option value="">Select Expense Type</option>
-                    @if(@isset($expense_types ))
-                        @foreach($expense_types as $expense_type)
-                          <option value="{!! $expense_type['id'] !!}">{!! $expense_type['name'] !!}</option>
-                        @endforeach
-                    @endif -->
-                   </select>
-
-                  </div>
-
 
                   <div class="p-2" style="width:160px;">
                     <select class="selectpicker"  name="status" id="status" data-style="select-with-transition" title="Select Status">
@@ -73,14 +96,24 @@
                   </div>
 
 
-                  <div class="p-2" style="width:140px;"><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
-                    <div class="p-2" style="width:140px;"><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
+                  <div class="p-2" style="width:140px;">
+                    <input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly>
+                  </div>
+                    <div class="p-2" style="width:140px;">
+                      <input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly>
+                    </div>
                 
                     <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.customers.title') !!}"><i class="material-icons">cloud_download</i></button></div>
-                  </div>
+                  </div> 
+
+
+
+
+
+
+
               </form>
               @endif
-
 
 
                   @if(auth()->user()->can(['role_download']))
@@ -133,9 +166,11 @@
               <th>{!! trans('panel.expenses.fields.expense_id') !!}</th>
               <th>{!! trans('panel.global.action') !!}</th>
               <th>{!! trans('panel.expenses.fields.user') !!}</th>
+              <th>{!! trans('panel.expenses.fields.designation') !!}</th>
               <th>{!! trans('panel.expenses.fields.expense_type') !!}</th>
               <th>{!! trans('panel.expenses.fields.date') !!}</th>
               <th>{!! trans('panel.expenses.fields.claim_amount') !!}</th>
+              <th>{!! trans('panel.expenses.fields.approve_amount') !!}</th>
               <th>{!! trans('panel.expenses.fields.expense_status') !!}</th>
               <th>{!! trans('panel.expenses.fields.note') !!}</th>
               <th>{!! trans('panel.expenses.fields.created_at') !!}</th>
@@ -151,6 +186,31 @@
     </div>
   </div>
 </div>
+
+<style type="text/css">
+  
+.flex-row .p-2 {
+    width: 20%!important;
+/*   overflow: hidden;*/
+}
+
+.flex-row {
+    flex-direction: row !important;
+    flex-wrap: wrap;
+}
+
+span.select2.select2-container.select2-container--default.select2-container--below.select2-container--focus {
+}
+
+span#select2-executive_id-container {
+    color: #000;
+    line-height: 43px;
+}
+
+span#select2-executive_id-container {
+}
+
+</style>
 <script type="text/javascript">
 $(document).ready(function() {
     oTable = $('#getexpensestype').DataTable({
@@ -162,9 +222,12 @@ $(document).ready(function() {
          ajax: {
           url: "{{ route('expenses.index') }}",
           data: function (d) { 
+                d.payroll = $('#payroll').val(),
                 d.executive_id = $('#executive_id').val(),
                 d.expenses_type = $('#expenses_type').val(),
                 d.branch_id = $('#branch_id').val(),
+                d.division_id = $('#division_id').val(),
+                d.expense_id = $('#expense_id').val(),
                 d.status = $('#status').val(),
                 d.start_date = $('#start_date').val(),
                 d.end_date = $('#end_date').val()
@@ -177,9 +240,11 @@ $(document).ready(function() {
             {data: 'id',name: 'id',orderable: false,searchable: false},
             {data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
             {data: 'users.name',name: 'users.name',orderable: false,searchable: false},
+            {data: 'users.getdesignation.designation_name', name: 'users.getdesignation.designation_name', orderable: false, searchable: false },
             {data: 'expense_type.name',name: 'expense_type.name',orderable: false,searchable: false},
             {data: 'date',name: 'date',orderable: false,searchable: false},
             {data: 'claim_amount',name: 'claim_amount',orderable: false,searchable: false},
+            {data: 'approve_amount',name: 'approve_amount',orderable: false,searchable: false},
             {data: 'checker_status', name: 'checker_status', orderable: false, searchable: false },
             {data: 'note', name: 'note', orderable: false, searchable: false },
             {data: 'date_create', name: 'date_create', orderable: false, searchable: false },
@@ -188,7 +253,10 @@ $(document).ready(function() {
            
         ]
     });
-
+  
+    $('#payroll').change(function(){
+        oTable.draw();
+    });
     $('#branch_id').change(function(){
         oTable.draw();
     });
@@ -207,6 +275,12 @@ $(document).ready(function() {
         oTable.draw();
     });
     $('#end_date').change(function(){
+        oTable.draw();
+    });
+    $('#division_id').change(function(){
+        oTable.draw();
+    });
+    $('#expense_id').change(function(){
         oTable.draw();
     });
 
@@ -253,6 +327,37 @@ $('body').on('click', '.activeRecord', function () {
         });
     });
 
+
+
+    $('body').on('click', '.delete', function () {
+        var id = $(this).attr("value");
+        var token = $("meta[name='csrf-token']").attr("content");
+        if(!confirm("Are You sure want to delete ?")) {
+           return false;
+        }
+        $.ajax({
+            url: "{{ url('expenses') }}"+'/'+id,
+            type: 'DELETE',
+            data: {_token: token,id: id},
+            success: function (data) {
+              $('.alert').show();
+              if(data.status == 'success')
+              {
+                $('.alert').addClass("alert-success");
+              }
+              else
+              {
+                $('.alert').addClass("alert-danger");
+              }
+              $('.message').append(data.message);
+              oTable.draw();
+            },
+        });
+    });
+
+
+
+
 </script>
 
 
@@ -277,6 +382,5 @@ $('body').on('click', '.activeRecord', function () {
  }).trigger('change');
     
 </script>
-
 
 </x-app-layout>

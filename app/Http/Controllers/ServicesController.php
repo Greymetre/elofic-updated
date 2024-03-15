@@ -22,23 +22,27 @@ class ServicesController extends Controller
         $branches = Branch::latest()->get();
         $products = Product::latest()->get();
         abort_if(Gate::denies('serial_number_transaction'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return view('services.serial_number_transaction', compact('branches','products'));
+        return view('services.serial_number_transaction', compact('branches', 'products'));
     }
 
     public function serial_number_transaction_upload(Request $request)
     {
         abort_if(Gate::denies('serial_number_transaction_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $rows = Excel::toCollection([], request()->file('import_file'))->first();
-        $user_branch_code = auth()->user()->getbranch->branch_code;
         $PCKey = 0;
-        foreach ($rows as $k=>$row) {
-            if ($user_branch_code != 'HO0000') {
-                if($k == 0){
-                    if($row == 'Product Code'){
-                        $PCKey =  $k;
-                    }
-                }else{
-                    $productCode = $row[$PCKey];
+        $BCKey = 3;
+        foreach ($rows as $k => $row) {
+            if ($k == 0) {
+                if ($row == 'Product Code') {
+                    $PCKey =  $k;
+                }
+                if ($row == 'Branch Code') {
+                    $BCKey =  $k;
+                }
+            } else {
+                $productCode = $row[$PCKey];
+                $branchCode = $row[$BCKey];
+                if ($branchCode != 'HO0000') {
                     $serialNumbers = explode(',', $row[9]);
                     foreach ($serialNumbers as $serialNumber) {
                         $exists = DB::table('services')
@@ -46,7 +50,7 @@ class ServicesController extends Controller
                             ->where('product_code', $productCode)
                             ->exists();
                         if (!$exists) {
-                            return back()->with('error', 'The serial number '.$serialNumber.' with product code '.$productCode.' does not exist.');
+                            return back()->with('error', 'The serial number ' . $serialNumber . ' with product code ' . $productCode . ' does not exist or not uploaded by Head Office. Please remove them and try again');
                         }
                     }
                 }
@@ -78,22 +82,33 @@ class ServicesController extends Controller
             'qty',
             'group'
         );
-        if($request->branch_id && $request->branch_id != null && $request->branch_id != ''){
+        if ($request->branch_id && $request->branch_id != null && $request->branch_id != '') {
             $branche_code = Branch::where('id', $request->branch_id)->value('branch_code');
             $data = $data->where('branch_code', $branche_code);
         }
-        if($request->product_id && $request->product_id != null && $request->product_id != ''){
+        if ($request->product_id && $request->product_id != null && $request->product_id != '') {
             $product_code = Product::where('id', $request->product_id)->value('product_code');
             $data = $data->where('product_code', $product_code);
         }
-        if($request->start_date && $request->start_date != null && $request->start_date != '' && $request->end_date && $request->end_date != null && $request->end_date != ''){
+        if ($request->start_date && $request->start_date != null && $request->start_date != '' && $request->end_date && $request->end_date != null && $request->end_date != '') {
             $data = $data->whereBetween('invoice_date', [$request->start_date, $request->end_date]);
         }
-        $data = $data->groupBy('product_code', 'invoice_no','invoice_date' ,'branch_code','party_name','product_name','group','qty')->with('createdbyname');
+        $data = $data->groupBy('product_code', 'invoice_no', 'invoice_date', 'branch_code', 'party_name', 'product_name', 'group', 'qty')->with('createdbyname');
         return Datatables::of($data)
             ->addIndexColumn()
-
-            
+            ->addColumn('action', function ($data) {
+                $btn = '';
+                $activebtn = '';
+                if (auth()->user()->can(['brand_delete'])) {
+                    $btn = $btn . ' <a href="#" class="btn btn-danger btn-just-icon btn-sm delete" value="' . $data->invoice_no . '" title="' . trans('panel.global.delete') . ' Serial Number Transaction">
+                              <i class="material-icons">clear</i>
+                            </a>';
+                }
+                return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
+                              ' . $btn . '
+                          </div>';
+            })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
@@ -111,18 +126,25 @@ class ServicesController extends Controller
             ->addIndexColumn()
             ->addColumn('expiry_date', function ($data) {
                 $product = Product::where('product_code', $data->product_code)->first();
-                if($product->expiry_interval && $product->expiry_interval != null && $product->expiry_interval != '' && $product->expiry_interval_preiod && $product->expiry_interval_preiod > 0 && $product->expiry_interval_preiod != null){
+                if ($product->expiry_interval && $product->expiry_interval != null && $product->expiry_interval != '' && $product->expiry_interval_preiod && $product->expiry_interval_preiod > 0 && $product->expiry_interval_preiod != null) {
                     $initialDate = Carbon::parse($data->invoice_date);
 
                     $expiryDate = $initialDate->add($product->expiry_interval_preiod, strtolower($product->expiry_interval));
 
                     return $expiryDate->toDateString();
-                }else{
+                } else {
                     return 'No Expiry Date';
                 }
             })
 
             ->rawColumns(['expiry_date',])
             ->make(true);
+    }
+
+    public function serial_number_transaction_delete(Request $request)
+    {
+        Services::where('invoice_no', $request->id)->delete();
+
+        return response()->json(['status' => 'success', 'message' => 'Serial Number Transaction Delete successfully']);
     }
 }

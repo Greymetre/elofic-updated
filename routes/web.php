@@ -43,18 +43,24 @@ use App\Http\Controllers\VisitReportController;
 use App\Http\Controllers\VisitTypeController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\BranchController;
+use App\Http\Controllers\CustomerKycController;
 use App\Http\Controllers\DivisionController;
 use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\ExpensesTypeController;
 use App\Http\Controllers\SalesWeightageController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\GiftBrandController;
 use App\Http\Controllers\GiftCategoryController;
 use App\Http\Controllers\GiftModelController;
 use App\Http\Controllers\GiftSubcategoryController;
 use App\Http\Controllers\ServicesController;
 use App\Http\Controllers\HolidayController;
+use App\Http\Controllers\NeftRedemptionDetailsController;
 use App\Http\Controllers\TransactionHistoryController;
+use App\Http\Controllers\OrderSchemeController;
+use App\Http\Controllers\RedemptionController;
+use App\Http\Controllers\WarrantyActivationController;
 use Aws\Api\Service;
 
 /*
@@ -510,14 +516,23 @@ Route::group(['middleware' => ['auth']], function () {
      Route::post('getexpenseType', [ ExpensesController::class, 'getexpenseType'])->name('getexpenseType');
      Route::post('getexpenseUserType', [ ExpensesController::class, 'getexpenseUserType'])->name('getexpenseUserType');
      Route::post('getexpenseUserTypeEdit', [ ExpensesController::class, 'getexpenseUserTypeEdit'])->name('getexpenseUserTypeEdit');
+     
+     Route::get('deletImages', [ ExpensesController::class, 'deletImages'])->name('deletImages');
+     Route::get('deleteview', [ ExpensesController::class, 'deleteview'])->name('deleteview');
 
 
      // departments
      Route::resource('departments', DepartmentController::class);
      Route::post('departments-active', [ DepartmentController::class, 'active'])->name('departments.active');
 
+      //order scheme
+     Route::resource('orderschemes', OrderSchemeController::class);
+
+
+
      //Services
     Route::get('services/serial_number_transaction', [ServicesController::class, 'serial_number_transaction'])->name('service.serial_number_transaction');
+    Route::get('services/serial_number_transaction/delete', [ServicesController::class, 'serial_number_transaction_delete'])->name('service.serial_number_transaction.delete');
     Route::post('services/serial_number_transaction/upload', [ServicesController::class, 'serial_number_transaction_upload'])->name('service.serial_number_transaction.upload');
     Route::get('services/serial_number_transaction/download', [ServicesController::class, 'serial_number_transaction_download'])->name('service.serial_number_transaction.download');
     Route::post('services/serial_number_transaction/list', [ServicesController::class, 'serial_number_transaction_list'])->name('service.serial_number_transaction.list');
@@ -542,13 +557,38 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('gift-subcategories-upload', [ GiftSubcategoryController::class, 'upload'])->name('gift.subcategories.upload');
     Route::post('gift-subcategories-active', [ GiftSubcategoryController::class, 'active'])->name('gift.subcategories.active');
 
-    //Gift Brand Route
+    //Gift Model Route
     Route::resource('gift-model', GiftModelController::class);
     Route::any('gift-model-download', [ GiftModelController::class, 'download'])->name('gift.model.download');
     Route::any('gift-model-template', [ GiftModelController::class, 'template'])->name('gift.model.template');
     Route::post('gift-model-upload', [ GiftModelController::class, 'upload'])->name('gift.model.upload');
     Route::post('gift-model-active', [ GiftModelController::class, 'active'])->name('gift.model.active');
 
+    //Gift Brand Route
+    Route::resource('gift-brands', GiftBrandController::class);
+    Route::any('gift-brands-download', [ GiftBrandController::class, 'download'])->name('gift.brands.download');
+    Route::any('gift-brands-template', [ GiftBrandController::class, 'template'])->name('gift.brands.template');
+    Route::post('gift-brands-upload', [ GiftBrandController::class, 'upload'])->name('gift.brands.upload');
+    Route::post('gift-brands-active', [ GiftBrandController::class, 'active'])->name('gift.brands.active');
+
+    // Redemption Route
+    Route::resource('redemptions', RedemptionController::class);
+    Route::get('redemptions_download', [RedemptionController::class, 'download'])->name('redemptions.download');
+    Route::post('redemptions-upload', [RedemptionController::class, 'upload'])->name('redemptions.upload');
+    Route::get('redemptions-template', [RedemptionController::class, 'template'])->name('redemptions.template');
+    Route::get('redemption-change-status', [RedemptionController::class, 'changeStatus'])->name('redemptions.changeStatus');
+    Route::get('redemption-gift-delivered', [RedemptionController::class, 'giftDelivered'])->name('redemptions.giftDelivered');
+    Route::any('redemption-gift-catalogue', [RedemptionController::class, 'gift_catalogue'])->name('redemptions.gift-catalogue');
+    Route::any('redemption-gifttable', [RedemptionController::class, 'gifttable'])->name('redemptions.gifttable');
+    Route::get('neft-redemption-change-status', [NeftRedemptionDetailsController::class, 'changeStatus'])->name('neft.redemptions.changeStatus');
+
+    // Redemption Route
+    Route::resource('warranty_activation', WarrantyActivationController::class);
+
+    // Customer KYC Route
+    Route::resource('customer-kyc', CustomerKycController::class);
+    Route::any('customer-kyc-download', [CustomerKycController::class, 'download'])->name('customer-kyc.download');
+    
     Route::get('logout', '\App\Http\Controllers\Auth\AuthenticatedSessionController@destroy');
 });
 
@@ -563,6 +603,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('getCustomerDataSelect', [ AjaxController::class, 'getCustomerDataSelect'])->name('getCustomerDataSelect');
     Route::any('getCategoryData', [ AjaxController::class, 'getCategoryData']);
     Route::any('getSubCategoryData', [ AjaxController::class, 'getSubCategoryData']);
+    Route::any('getGiftSubCategoryData', [ AjaxController::class, 'getGiftSubCategoryData']);
+    Route::any('getGiftModelData', [ AjaxController::class, 'getGiftModelData']);
     Route::any('getProductData', [ AjaxController::class, 'getProductData']);
     Route::any('getProductInfo', [ AjaxController::class, 'getProductInfo']);
     Route::any('getUserList', [ AjaxController::class, 'getUserList']);
@@ -578,6 +620,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('getCustomerActivityData', [ AjaxController::class, 'getCustomerActivityData']);
     Route::any('schemesdetails/remove', [ AjaxController::class, 'removeSchemesdetails']);
     Route::any('changeDocumnetStatus', [ AjaxController::class, 'changeDocumnetStatus']);
+    Route::any('getBankdetailandPoints', [ AjaxController::class, 'getBankdetailandPoints']);
+    Route::any('getProductByCoupon', [ AjaxController::class, 'getProductByCoupon']);
 
 
 

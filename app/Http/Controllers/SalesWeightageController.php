@@ -6,6 +6,7 @@ use App\Models\Department;
 use App\Models\Designation;
 use App\Models\Division;
 use App\Models\salesWeightage;
+use App\Models\Appraisal;
 use Illuminate\Http\Request;
 use DataTables;
 use Validator;
@@ -418,7 +419,8 @@ class SalesWeightageController extends Controller
 
 
         if(!empty($request['weightages_ids']))
-        {
+        {  
+            $data_array = array();
             foreach ($request['weightages_ids'] as $key => $weightages_id) {
         $salesWeightage = salesWeightage::updateOrCreate(['id' => $weightages_id],
           [ 
@@ -434,7 +436,12 @@ class SalesWeightageController extends Controller
             'financial_year' => $request->financial_year??NULL,
           ]
           );
+         $data_array[] = $salesWeightage->id;
          }
+
+      $kra_id = salesWeightage::where(['display_name'=> $request->display_name])->whereNotIn('id',$data_array)->pluck('id');
+      Appraisal::whereIn('weightage_id',$kra_id)->delete();
+      salesWeightage::where(['display_name'=> $request->display_name])->whereNotIn('id',$data_array)->delete();
 
       return redirect(route('sales_weightage.index'))->with('message', 'Sales weightage updated successfully');  
 

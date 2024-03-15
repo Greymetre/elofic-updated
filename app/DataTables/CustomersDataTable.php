@@ -63,10 +63,14 @@ class CustomersDataTable extends DataTable
                             </div>'.$activebtn;
             })
             ->addColumn('image', function ($query) {
-                    $profileimage = !empty($query->profile_image) ? env('IMAGE_UPLOADS').$query->profile_image : asset('assets/img/placeholder.jpg') ;
+                    $profileimage = !empty($query->profile_image) ? '/public/uploads/'.$query->profile_image : asset('assets/img/placeholder.jpg') ;
                     return '<img src="'.$profileimage.'" border="0" width="70" class="img-rounded imageDisplayModel" align="center" />';
                 })
-            ->rawColumns(['action','image','checkbox']);
+            ->addColumn('createdbyname.name', function ($query) {
+                
+                    return $query->created_by?$query->createdbyname->name:'Self';
+                })
+            ->rawColumns(['action','image','checkbox', 'createdbyname.name']);
     }
 
     /**

@@ -278,7 +278,7 @@ class SchemeController extends Controller
         return Excel::download(new SchemeExport($request->id), 'schemesProducts.xlsx');
     }
     public function template()
-    {
+    {  
         abort_if(Gate::denies('scheme_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();

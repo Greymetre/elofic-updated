@@ -66,6 +66,7 @@ return [
         'serial_number_history'     => 'Serial Number History',
          'hr'     => 'HR',
          'account'  => 'Account',
+         'warranty_activation'  => 'Warranty Activation',
 
     ],
 
@@ -378,6 +379,8 @@ return [
         'parentcustomer'                       => 'Parent Customer',
         'contact_number_two'                   => 'Contact Number-2',
         'create_department'                   => 'Create Department',
+        'list_price'                          => 'Rate(LP)',
+        'taxs'                                => 'Tax',
     ],
     'datatables'   => [
         'copy'          => 'Copy',
@@ -634,6 +637,7 @@ return [
             'expense_type'      => 'Expense Type',
             'date'              => 'Date',
             'claim_amount'      => 'Claim Amount',
+            'approve_amount'    => 'Approve Amount',
             'expense_status'    => 'Expense Status',
             'note'              => 'Note',
             'start_km'          => 'Start Km',
@@ -643,7 +647,34 @@ return [
             'rate'              => 'Rate',
             'created_at'        => 'Created at',
             'branch'            => 'Branch',
+            'designation'       => 'Designation',
 
+        ],
+    ],
+
+
+    //order scheme
+
+     'orderschemes'          => [
+        'title'          => 'Order Schemes',
+        'title_singular' => 'Order Schemes',
+        'fields'         => [
+            'created_at'         => 'Created at',
+            'branch'             => 'Branch',
+            'scheme_description' => 'Scheme Description',
+            'start_date'         => 'Start Date',
+            'end_date'           => 'End Date',
+            'scheme_type'        => 'Scheme Type',
+            'point_value'        =>  'Point Value',
+            'product_id'         =>  'Product',
+            'category_id'        =>  'Category',
+            'subcategory_id'     =>  'Subcategory',
+            'scheme_name'        =>  'Scheme Name',
+            'points_start_date'  =>  'Points Start Date',
+            'points_end_date'    =>  'Points End Date',
+            'points'             =>  'Discount',
+            'minimum'            =>  'Minimum Qty',
+            'maximum'            =>  'Maximum Qty',
         ],
     ],
 
@@ -779,6 +810,16 @@ return [
             'category_image'            => 'Category Image',
         ],
     ],
+    'gift_brand'           => [
+        'title'          => 'Gift Brands',
+        'title_singular' => 'Gift Brand',
+        'fields'         => [
+            'id'                       => 'ID',
+            'category_name'            => 'Brand Name',
+            'category_name_helper'     => '',
+            'category_image'            => 'Brand Image',
+        ],
+    ],
     'brand'           => [
         'title'          => 'Brands',
         'title_singular' => 'Brand',
@@ -911,8 +952,8 @@ return [
         ],
     ],
     'gift'           => [
-        'title'          => 'Gifts',
-        'title_singular' => 'Gift',
+        'title'          => 'Gift Catalogues',
+        'title_singular' => 'Gift Catalogue',
         'fields'         => [
             'id'               => 'ID',
              'product_name'    =>   'Product Name', 
@@ -926,7 +967,8 @@ return [
              'brand_name'        =>   'Brand Name',
              'product_image'   =>   'Product Image', 
              'unit_id'         =>   'Unit ID', 
-             'unit_name'         =>   'Unit Name',
+             'customer_type'         =>   'Customer Type', 
+             'unit_name'         =>   'Model Name',
              'mrp'         =>   'MRP',
              'price'         =>   'Price',
              'points'         =>   'Points',

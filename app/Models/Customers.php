@@ -4,14 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Passport\HasApiTokens;
+use Spatie\MediaLibrary\HasMedia;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class Customers extends Model
+class Customers extends Authenticatable
 {
-    use HasFactory;
+    use HasApiTokens, HasFactory;
 
     protected $table = 'customers';
 
-    protected $fillable = [ 'active', 'name', 'first_name', 'last_name', 'mobile', 'email', 'password', 'notification_id', 'latitude', 'longitude', 'device_type', 'gender', 'profile_image', 'customer_code', 'status_id', 'region_id', 'customertype', 'firmtype', 'created_by', 'updated_by', 'executive_id', 'deleted_at', 'created_at', 'updated_at', 'beatscheduleid', 'manager_name', 'manager_phone','contact_number','parent_id'];
+    protected $fillable = [ 'active', 'name', 'first_name', 'last_name', 'mobile', 'email', 'password', 'notification_id', 'latitude', 'longitude', 'device_type', 'gender', 'profile_image', 'customer_code', 'status_id', 'region_id', 'customertype', 'firmtype', 'created_by', 'updated_by', 'executive_id', 'otp', 'deleted_at', 'created_at', 'updated_at', 'beatscheduleid', 'manager_name', 'manager_phone','contact_number','parent_id'];
 
     public function message()
     {
@@ -46,7 +49,7 @@ class Customers extends Model
             $created_at = getcurentDateTime();
             if(strlen(preg_replace('/\s+/', '', $request['mobile'])) == 10)
             {
-                $request['mobile'] = '+91'.preg_replace('/\s+/', '', $request['mobile']);
+                $request['mobile'] = '91'.preg_replace('/\s+/', '', $request['mobile']);
             }
             if( $customer_id = Customers::insertGetId([
                 'active' => 'Y',
@@ -94,7 +97,6 @@ class Customers extends Model
             {
                 $request['mobile'] = '+91'.preg_replace('/\s+/', '', $request['mobile']);
             }
-            
             $customers = Customers::find($request['customer_id']);
             $customers->name = !empty($request['name'])? $request['name'] :'';
             $customers->first_name = !empty($request['first_name'])? ucfirst($request['first_name']):'';
@@ -239,6 +241,10 @@ class Customers extends Model
 
     public function getparentdetail(){
      return $this->hasMany(ParentDetail::class, 'customer_id', 'id');
+    }
+
+    public function customer_transacation(){
+        return $this->hasMany(TransactionHistory::class, 'customer_id', 'id');
     }
 
     

@@ -82,6 +82,16 @@
             </span>
           </div>
           @endif
+          @if(session('message_info'))
+          <div class="alert alert-info">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <i class="material-icons">close</i>
+            </button>
+            <span>
+              {{ session('message_info') }}
+            </span>
+          </div>
+          @endif
           <div class="alert " style="display: none;">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
               <i class="material-icons">close</i>
@@ -187,8 +197,8 @@
             searchable: false
           },
           {
-            data: 'points',
-            name: 'points',
+            data: 'point',
+            name: 'point',
             orderable: false,
             searchable: false
           },

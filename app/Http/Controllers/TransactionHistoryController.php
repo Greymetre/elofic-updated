@@ -16,7 +16,9 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 use App\DataTables\TransactionHistoryDataTable;
+use App\Models\SchemeDetails;
 use App\Models\SchemeHeader;
+use Carbon\Carbon;
 
 class TransactionHistoryController extends Controller
 {
@@ -84,6 +86,7 @@ class TransactionHistoryController extends Controller
             $nonNullCoupenCodes = array_filter($request->coupen_code, function($value) {
                 return !is_null($value);
             });
+            $expire_schemes = array();
             foreach($nonNullCoupenCodes as $nonNullCoupenCode){
                 $exists = TransactionHistory::where('coupen_code', $nonNullCoupenCode)->exists();
                 $notexists = Services::where('serial_no', $nonNullCoupenCode)->exists();
@@ -98,13 +101,30 @@ class TransactionHistoryController extends Controller
                         'coupen_code' => "The coupon code '$nonNullCoupenCode' is Invalid.",
                     ]);
                 }
-                TransactionHistory::create([
+                $scheme = Services::where('serial_no', $nonNullCoupenCode)->first();
+                $scheme_details = SchemeDetails::where('product_id', $scheme->product->id)->first();
+                $start_date = Carbon::createFromFormat('Y-m-d', $scheme_details->scheme->start_date);
+                $end_date = Carbon::createFromFormat('Y-m-d', $scheme_details->scheme->end_date);
+                $current_date = Carbon::today();
+                if ($current_date->isSameDay($start_date) || ($current_date->gte($start_date) && $current_date->lte($end_date))) {
+                    $point = ($scheme_details) ? $scheme_details->points: NULL;
+                } else {
+                    array_push($expire_schemes, $nonNullCoupenCode);
+                    $point = '0';
+                }
+                $tHistory = TransactionHistory::create([
                     'customer_id' => $request->customer_id,
                     'coupen_code' => $nonNullCoupenCode,
+                    'scheme_id' => $scheme_details->scheme_id,
+                    'point' => $point,
                     'created_by' => auth()->user()->id,
                 ]);
             }
-            return Redirect::to('transaction_history')->with('message_success', 'Transaction History Store Successfully');
+            if(count($expire_schemes) > 0){
+                return Redirect::to('transaction_history')->with('message_info', 'Transaction History Store Successfully but coupon code ('. implode(',', $expire_schemes) . ') scheme has either expired or has not started yet so you earned 0 point.');
+            }else{
+                return Redirect::to('transaction_history')->with('message_success', 'Transaction History Store Successfully');
+            }
         }
         catch(\Exception $e)
         {

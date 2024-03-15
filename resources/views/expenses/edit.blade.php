@@ -1,4 +1,5 @@
 <x-app-layout>
+
   <div class="row">
     <div class="col-md-12">
       <div class="card">
@@ -82,12 +83,10 @@
                   <div class="col-md-10">
                     <div class="form-group has-default bmd-form-group">
                       <select name="expenses_type" id="expenses_type" class="form-control {{ $errors->has('expenses_type') ? 'is-invalid' : '' }} select2">
-
-                       <!--  <option value="" disabled selected>Please Select Expenses Type</option>
-                        @foreach($expensestypes as $key=>$expensestype)
-                        <option value="{{$expensestype->id}}" data-allowtype="{{$expensestype->allowance_type_id}}" data-rate ="{{$expensestype->rate}}" <?php // if($expensestype->id == $expense->expenses_type){echo "selected";} ?>>{{$expensestype->name}}</option>
+                        <!-- <option value="" disabled selected>Please Select Expenses Type</option> -->
+                       <!--  @foreach($expensestypes as $key=>$expensestype)
+                        <option value="{{$expensestype->id}}" data-allowtype="{{$expensestype->allowance_type_id}}" data-rate ="{{$expensestype->rate}}" <?php //if($expensestype->id == $expense->expenses_type){echo "selected";} ?>>{{$expensestype->name}}</option>
                         @endforeach -->
-
                       </select>
                       @if($errors->has('expenses_type'))
                       <div class="invalid-feedback">
@@ -97,7 +96,13 @@
                     </div>
                   </div>
                 </div>
-                  <input type="text" name="expenses_type" value="{{$expense->expenses_type??''}}" id="expenses_type_id" hidden>
+
+              <input type="text" name="expenses_types" value="{{$expense->expenses_type??''}}" id="expenses_type_id" hidden>
+
+              <input type="text" name="total_kms" value="{{$expense->total_km??''}}" id="total_kms" hidden> 
+
+              <input type="text" name="total_clm" value="{{$expense->claim_amount??''}}" id="total_clm" hidden>
+
               </div>
 
               <div class="col-md-6 km" style="display:none;">
@@ -202,7 +207,30 @@
                   @if(isset($expense) && $expense->getMedia('expense_file')->count() > 0 && file_exists($expense->getFirstMedia('expense_file')->getPath()))
                          <div class="form-group col-md-12">
                             @foreach($expense->getMedia('expense_file') as $image)
-                         <img class="img-fluid" src="{{ $image->getFullUrl() }}" style="width:80px;height: 80px;">
+                         <!-- <img class="img-fluid" src="{{ $image->getFullUrl() }}" style="width:80px;height: 80px;"> -->
+                           <?php 
+
+
+                      
+                            $media_id = $image->id;
+
+                           $infoPath = pathinfo($image->getFullUrl());
+                           $extension = $infoPath['extension'];
+                                 if($extension == 'png' || $extension == 'jpg' || $extension == 'jpeg'){
+                            ?>
+                           <a href="{{ $image->getFullUrl()}}" data-lightbox="mygallery">
+                          <img class="img-fluid" src="{{ $image->getFullUrl() }}"  style="width:80px;height: 80px;">
+                           </a>
+                           <?php }else{ ?>
+                              <p>
+                                <a href="{{ $image->getFullUrl()}}" download>Download File</a>
+                              </p>
+                           <?php } 
+
+                            ?>
+                         
+                           <a class="btn btn-danger" href="{{route('deletImages', ['id' => $media_id,'expense_id'=>$expense->id])}}" role="button" onclick="return confirm('are you sure do you want delete file')" style="width:5px !important;">X</a>
+
                             @endforeach  
                         </div>
                   @endif
@@ -230,6 +258,15 @@
     </div>
   </div>
 
+
+  <!-- Custom styles for this page -->
+  <link rel="stylesheet" href="{{ url('/').'/'.asset('lightboxx/css/lightbox.min.css') }}">
+  
+  <script src="{{ url('/').'/'.asset('lightboxx/js/lightbox-plus-jquery.min.js') }}"></script>
+
+
+
+
   <script type="text/javascript">
 
 $(document).ready(function(){
@@ -237,6 +274,17 @@ $(document).ready(function(){
     $('#expenses_type').change(function() { 
     var type = $(this).children(":selected").data('allowtype');
     var rate = $(this).children(":selected").data('rate');
+    var total_kms = $('#total_kms').val();
+    var total_clm = $('#total_clm').val();
+
+  
+    if(total_kms){
+    var tol_amt = rate;
+    }else{ 
+    var tol_amt = total_clm; 
+    }
+
+
     if(type == '1'){ 
     $('.km').show()
     $('.claim').prop("readonly", true) 
@@ -247,6 +295,7 @@ $(document).ready(function(){
     //$('.km').prop("disabled", true) 
     //$('.claim').prop("disabled", false) 
     $('.claim').prop("readonly", false) 
+     $('.final_claim').val(tol_amt);
     }else{
     $('.km').hide()
     //$('.km').prop("disabled", true) 
@@ -286,28 +335,42 @@ $(document).ready(function(){
 </script>
 
 
+
 <script type="text/javascript">
 
     // for get expense type
   $('#user_id').change(function() {
     var user_id = $(this).val();
     var expenses_type = $('#expenses_type_id').val();
+    
 
     $.post("{{ route('getexpenseUserTypeEdit') }}",{
         'user_id':user_id,
         'expenses_type':expenses_type,
         '_token':"{{ csrf_token() }}"
         },function(response){
-          var select = $('#expenses_type');
-          select.empty();
-          select.append(response);
-          //select.selectpicker('refresh');              
+
+          // var select = $('#expenses_type');
+          // select.empty();
+          // select.append(response);
+          //select.selectpicker('refresh'); 
+
+        $('#expenses_type').html(response);
+        $('#expenses_type').val("{{$expense->expenses_type??''}}");
+
+
     })
+
+
+  setTimeout(function() {
+          $('#expenses_type').change();
+
+            }, 1000);
+
    
  }).trigger('change');
     
 </script>
-
 
 
 

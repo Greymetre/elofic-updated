@@ -8,7 +8,10 @@ use App\Models\Expenses;
 use App\Models\User;
 use App\Models\ExpensesType;
 use App\Models\ExpenseLog;
+use App\Models\Media;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+
 use DataTables;
 use Validator;
 use DB;
@@ -28,14 +31,17 @@ class ExpensesController extends Controller
      */
     public function index(Request $request)
     {  
-        $expense_types = ExpensesType::orderBy('id','desc')->get();
+        
+
+        //$expense_types = ExpensesType::orderBy('id','desc')->get();
+
         $userids = getUsersReportingToAuth();
         $users= User::where('active','=','Y')->where(function($query) use($userids){
                                 if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
                                 {
                                     $query->whereIn('id',$userids);
                                 }
-                            })->select('id','name')->get();
+                            })->select('id','name','employee_codes')->get();
 
 
         $all_user_branches = User::with('getbranch')->whereIn('id', $userids)->orderBy('branch_id')->get();
@@ -53,12 +59,54 @@ class ExpensesController extends Controller
             }
         }
 
+
+
+        $all_user_divisions = User::with('getdivision')->whereIn('id', $userids)->orderBy('branch_id')->get();
+        $divisions = array();
+        $all_division = array();
+        $dkey = 0;
+
+
+        foreach ($all_user_divisions as $dv => $div_val) {
+            if ($div_val->getdivision) {
+                if (!in_array($div_val->getdivision->id, $all_division)) {
+                    array_push($all_division, $div_val->getdivision->id);
+                    $divisions[$dkey]['id'] = $div_val->getdivision->id;
+                    $divisions[$dkey]['name'] = $div_val->getdivision->division_name;
+                    $dkey++;
+                }
+            }
+        }
+
+
+
+        $expense_ids = Expenses::orderBy('id','desc')->get();
+
         $pay_rolls = Config('constants.pay_roll');
 
-
-
         if($request->ajax()) {
+
             $data = Expenses::with(['expense_type','users'])->orderBy('id','desc');
+              if(!empty($request['payroll']))
+                {
+                  // $payrollid = $request['payroll']; 
+                  // $userid = User::where('payroll',$payrollid)->pluck('id');
+                  // $data->whereIn('user_id', $userid);
+
+                  $payrollid = $request['payroll']; 
+
+                  // $userid = User::where('payroll',$payrollid)->pluck('id');
+                  // $data->whereIn('user_id', $userid); 
+
+                 $userid = User::where('active','=','Y')->where(function($query) use($userids){
+                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
+                                {
+                                    $query->whereIn('id',$userids);
+                                }
+                            })->where('payroll',$payrollid)->pluck('id');
+
+                 $data->whereIn('user_id', $userid); 
+                }
         
                 if(!empty($request['executive_id']))
                 {
@@ -68,6 +116,7 @@ class ExpensesController extends Controller
                 {
                     $data->where('expenses_type', $request['expenses_type']);
                 }
+
                if(!empty($request['branch_id']))
                 {
                    $branch_user_id = User::where('branch_id',$request['branch_id'])->pluck('id');
@@ -75,6 +124,20 @@ class ExpensesController extends Controller
                        $data->whereIn('user_id', $branch_user_id);  
                     }
                 }
+              if(!empty($request['division_id']))
+                {
+                   $division_user_id = User::where('division_id',$request['division_id'])->pluck('id');
+                    if(!empty($division_user_id)){
+                       $data->whereIn('user_id', $division_user_id);  
+                    }
+                }
+
+              if(!empty($request['expense_id']))
+                { 
+                  $data->where('id', $request['expense_id']);  
+                   
+                }
+
 
                 if(!empty($request['start_date']) && !empty($request['end_date']))
                 {
@@ -95,9 +158,13 @@ class ExpensesController extends Controller
                     return $query->id??'';
                 })
                 ->addColumn('users.name', function ($query) {
-                    return $query->users->name??'';
-                // return "<a href='".route('expenses.show',["expense" => $query->id])."'><span>{$query->users->name}</span></a>";
+                      $name = '('.$query->users->employee_codes.')'.$query->users->name;
+                    return $name;
+                
 
+                })
+                ->addColumn('users.getdesignation.designation_name', function ($query) {
+                    return $query->users->getdesignation->designation_name??'';
                 })
                 ->addColumn('expense_type.name', function ($query) {
                     return $query->expense_type->name??'';
@@ -108,6 +175,9 @@ class ExpensesController extends Controller
                 })
                 ->editColumn('claim_amount', function ($query) {
                     return $query->claim_amount??'';
+                })
+                ->editColumn('approve_amount', function ($query) {
+                    return $query->approve_amount??'';
                 })
                 ->editColumn('note', function ($query) {
                     return $query->note??'';
@@ -150,9 +220,22 @@ class ExpensesController extends Controller
                     $btn = '';
                     $activebtn = '';
 
-                    $btn = $btn . '<a href="'.route("expenses.edit", ["expense" => $query->id]).'" class="btn btn-info btn-just-icon btn-sm" title="' . trans('panel.global.edit') . ' ' . trans('panel.expenses.title_singular') . '">
-                               <i class="material-icons">edit</i>
-                                </a>';
+                    //  if(auth()->user()->can(['expenses_edit']))
+                    //   {
+
+                    // $btn = $btn . '<a href="'.route("expenses.edit", ["expense" => $query->id]).'" class="btn btn-info btn-just-icon btn-sm" title="' . trans('panel.global.edit') . ' ' . trans('panel.expenses.title_singular') . '">
+                    //            <i class="material-icons">edit</i>
+                    //             </a>';
+                    //   }
+
+                      if(auth()->user()->can(['expenses_delete']))
+                      {
+
+                    $btn = $btn.' <a href="" class="btn btn-danger btn-just-icon btn-sm delete" value="'.$query->id.'" title="'.trans('panel.global.delete').' '.trans('panel.expenses.title_singular').'">
+                                            <i class="material-icons">clear</i>
+                                          </a>';
+                       }                   
+                              
 
                     return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
                                             ' . $btn . '
@@ -161,7 +244,7 @@ class ExpensesController extends Controller
                 ->rawColumns(['checker_status','action','users.name'])
                 ->make(true);
         } 
-        return view('expenses.index',compact('expense_types','users','branches','pay_rolls'));
+        return view('expenses.index',compact('users','branches','pay_rolls','divisions','expense_ids'));
     }
 
     /**
@@ -172,12 +255,27 @@ class ExpensesController extends Controller
     public function create()
     {
         $userids = getUsersReportingToAuth();
-        $users= User::where('active','=','Y')->where(function($query) use($userids){
-                            if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
+        // $users= User::where('active','=','Y')->where(function($query) use($userids){
+        //                     if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
+        //                     {
+        //                         $query->whereIn('id',$userids);
+        //                     }
+        //                     })->select('id','name')->get();
+
+        if(Auth::user()->hasRole('superadmin') || Auth::user()->hasRole('Admin') || Auth::user()->hasRole('Sub_Admin') || Auth::user()->hasRole('HR_Admin') || Auth::user()->hasRole('HO_Account')){
+
+        $users = User::where('active','=','Y')->where(function($query) use($userids){
+                            if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('Sub_Admin') && !Auth::user()->hasRole('HR_Admin') && !Auth::user()->hasRole('HO_Account'))
                             {
                                 $query->whereIn('id',$userids);
                             }
-                            })->select('id','name')->get();
+                            })->select('id','name')->get();   
+
+        }else{
+        $users = User::where('active','=','Y')->where('id',Auth::user()->id)->select('id','name')->get();      
+
+        }
+
         $expensestypes = ExpensesType::get();
 
         return view('expenses.create',compact('users','expensestypes'));    
@@ -191,6 +289,64 @@ class ExpensesController extends Controller
      */
     public function store(Request $request)
     {
+     // $rules = [
+     //        'expenses_type'    => 'required', 
+     //        'user_id'          => 'required', 
+     //        'claim_amount'    => 'required', 
+     //        'date'            => 'required', 
+     //    ];
+
+
+     //    $validator = Validator::make($request->all(), $rules);
+     //    if ($validator->passes()) {
+     //        $data = $request->all();
+
+     //         $data = array(
+     //            'expenses_type' =>$request->expenses_type??NULL,
+     //            'user_id' =>$request->user_id??NULL,
+     //            'date' =>$request->date??NULL,
+     //            'claim_amount' =>$request->claim_amount??NULL,
+     //            'start_km' =>$request->start_km??NULL,
+     //            'stop_km' =>$request->stop_km??NULL,
+     //            'total_km' =>$request->total_km ??NULL,
+     //            'note' =>$request->note??NULL,
+     //            'created_by' =>Auth::user()->id??NULL,
+     //           );
+
+     //        $expenses = Expenses::create($data);
+
+     //        if($expenses){
+
+     //         $logdata = array(
+     //            'log_date' => date('Y-m-d'),
+     //            'expense_id' => $expenses->id,
+     //            'created_by' => Auth::user()->id,
+     //            'status_type' => 'generated'
+     //         );
+     //         ExpenseLog::create($logdata);
+
+     //        }
+
+
+     //        if($request->hasFile('expense_file')){
+     //            $files = $request->file('expense_file');
+     //            foreach($files as $file){
+     //            $customname = time() . '.' . $file->getClientOriginalExtension();
+     //            $expenses->addMedia($file)
+     //                    ->usingFileName($customname)
+     //                    ->toMediaCollection('expense_file');
+     //             }       
+
+     //        }
+     //     return redirect(route('expenses.index'))->with('message', 'expense added successfully');
+     //    }else {
+     //        return redirect()->back()->withErrors($validator)->withInput();
+     //    }
+
+        $subdays = Carbon::now()->subDays(1)->format('Y-m-d');
+        $adddays = Carbon::now()->addDays(1)->format('Y-m-d');
+        $current_date = Carbon::now()->format('Y-m-d');
+
      $rules = [
             'expenses_type'    => 'required', 
             'user_id'          => 'required', 
@@ -203,6 +359,9 @@ class ExpensesController extends Controller
         if ($validator->passes()) {
             $data = $request->all();
 
+            if(Auth::user()->hasRole('superadmin') || Auth::user()->hasRole('Admin') || Auth::user()->hasRole('Sub_Admin') || Auth::user()->hasRole('HR_Admin') || Auth::user()->hasRole('HO_Account'))
+            {
+
              $data = array(
                 'expenses_type' =>$request->expenses_type??NULL,
                 'user_id' =>$request->user_id??NULL,
@@ -210,16 +369,13 @@ class ExpensesController extends Controller
                 'claim_amount' =>$request->claim_amount??NULL,
                 'start_km' =>$request->start_km??NULL,
                 'stop_km' =>$request->stop_km??NULL,
-                'total_km ' =>$request->total_km ??NULL,
+                'total_km' =>$request->total_km ??NULL,
                 'note' =>$request->note??NULL,
                 'created_by' =>Auth::user()->id??NULL,
-                'total_km' =>$request->total_km??NULL,
                );
 
             $expenses = Expenses::create($data);
-
             if($expenses){
-
              $logdata = array(
                 'log_date' => date('Y-m-d'),
                 'expense_id' => $expenses->id,
@@ -230,14 +386,8 @@ class ExpensesController extends Controller
 
             }
 
-
             if($request->hasFile('expense_file')){
-                // $file = $request->file('expense_file');
-                // $customname = time() . '.' . $file->getClientOriginalExtension();
-                // $expenses->addMedia($file)
-                //         ->usingFileName($customname)
-                //         ->toMediaCollection('expense_file');
-
+                
                 $files = $request->file('expense_file');
                 foreach($files as $file){
                 $customname = time() . '.' . $file->getClientOriginalExtension();
@@ -247,10 +397,62 @@ class ExpensesController extends Controller
                  }       
 
             }
-         return redirect(route('expenses.index'))->with('message', 'expense added successfully');
+        
+         }else{
+
+            $endter_date = $request->date;  
+            if($endter_date == $current_date || $endter_date == $subdays){
+
+            $data = array(
+                'expenses_type' =>$request->expenses_type??NULL,
+                'user_id' =>$request->user_id??NULL,
+                'date' =>$request->date??NULL,
+                'claim_amount' =>$request->claim_amount??NULL,
+                'start_km' =>$request->start_km??NULL,
+                'stop_km' =>$request->stop_km??NULL,
+                'total_km' =>$request->total_km ??NULL,
+                'note' =>$request->note??NULL,
+                'created_by' =>Auth::user()->id??NULL,
+               );
+
+            $expenses = Expenses::create($data);
+            if($expenses){
+             $logdata = array(
+                'log_date' => date('Y-m-d'),
+                'expense_id' => $expenses->id,
+                'created_by' => Auth::user()->id,
+                'status_type' => 'generated'
+             );
+             ExpenseLog::create($logdata);
+
+            }
+
+            if($request->hasFile('expense_file')){
+                
+                $files = $request->file('expense_file');
+                foreach($files as $file){
+                $customname = time() . '.' . $file->getClientOriginalExtension();
+                $expenses->addMedia($file)
+                        ->usingFileName($customname)
+                        ->toMediaCollection('expense_file');
+                 }       
+
+            }
+            
+            
+            }else{ 
+
+            return redirect()->back()->withErrors('enter current date or 1 day before')->withInput();
+
+            }
+
+         }
+
+        return redirect(route('expenses.index'))->with('message', 'expense added successfully');
         }else {
             return redirect()->back()->withErrors($validator)->withInput();
-        }
+        }  
+
 
     }
 
@@ -277,12 +479,27 @@ class ExpensesController extends Controller
     public function edit(Expenses $expense)
     {    
         $userids = getUsersReportingToAuth();
-        $users= User::where('active','=','Y')->where(function($query) use($userids){
-                            if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
+        // $users= User::where('active','=','Y')->where(function($query) use($userids){
+        //                     if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
+        //                     {
+        //                         $query->whereIn('id',$userids);
+        //                     }
+        //                     })->select('id','name')->get();
+
+        if(Auth::user()->hasRole('superadmin') || Auth::user()->hasRole('Admin') || Auth::user()->hasRole('Sub_Admin') || Auth::user()->hasRole('HR_Admin') || Auth::user()->hasRole('HO_Account')){
+
+        $users = User::where('active','=','Y')->where(function($query) use($userids){
+                            if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('Sub_Admin') && !Auth::user()->hasRole('HR_Admin') && !Auth::user()->hasRole('HO_Account'))
                             {
                                 $query->whereIn('id',$userids);
                             }
-                            })->select('id','name')->get();
+                            })->select('id','name')->get();   
+
+        }else{
+        $users = User::where('active','=','Y')->where('id',Auth::user()->id)->select('id','name')->get();      
+
+        }
+
         $expensestypes = ExpensesType::get(); 
       return view('expenses.edit',compact('users','expensestypes','expense'));    
 
@@ -297,6 +514,7 @@ class ExpensesController extends Controller
      */
     public function update(Request $request, Expenses $expense)
     {
+
      $rules = [
             'expenses_type'    => 'required', 
             'user_id'          => 'required', 
@@ -308,22 +526,44 @@ class ExpensesController extends Controller
         $validator = Validator::make($request->all(), $rules);
         if ($validator->passes()) {
             $data = $request->all();
+          
 
-             $data = array(
+
+            $expense_details = ExpensesType::where('id',$request->expenses_type)->first();
+            $expense_details->allowance_type_id;
+
+
+            if($expense_details->allowance_type_id == '1'){
+
+           $data = array(
                 'expenses_type' =>$request->expenses_type??NULL,
                 'user_id' =>$request->user_id??NULL,
                 'date' =>$request->date??NULL,
                 'claim_amount' =>$request->claim_amount??NULL,
                 'start_km' =>$request->start_km??NULL,
                 'stop_km' =>$request->stop_km??NULL,
-                'total_km ' =>$request->total_km ??NULL,
+                'total_km' =>$request->total_km ??NULL,
                 'note' =>$request->note??NULL,
                 'created_by' =>Auth::user()->id??NULL,
-                'total_km' =>$request->total_km??NULL,
                );
-
-
             $expense->update($data);
+
+            }else{
+
+           $data = array(
+                'expenses_type' =>$request->expenses_type??NULL,
+                'user_id' =>$request->user_id??NULL,
+                'date' =>$request->date??NULL,
+                'claim_amount' =>$request->claim_amount??NULL,
+                'start_km' =>NULL,
+                'stop_km' =>NULL,
+                'total_km' =>NULL,
+                'note' =>$request->note??NULL,
+                'created_by' =>Auth::user()->id??NULL,
+               );
+            $expense->update($data);      
+
+            }
 
             if($expense){
              $logdata = array(
@@ -337,6 +577,9 @@ class ExpensesController extends Controller
 
 
             if($request->hasFile('expense_file')){
+
+                 //$expense->clearMediaCollection('expense_file');
+
                 $files = $request->file('expense_file');
                 foreach($files as $file){
                 $customname = time() . '.' . $file->getClientOriginalExtension();
@@ -366,8 +609,17 @@ class ExpensesController extends Controller
         $status = $request->status;
         $start_date = $request->start_date;
         $end_date = $request->end_date;
+        $payroll = $request->payroll;
+        $division_id = $request->division_id;
+        $expense_id = $request->expense_id;
  
-        $expenses = Expenses::with(['expense_type','users','approve_reject']);
+        $expenses = Expenses::with(['expense_type','users','approve_reject','get_time_history']);
+
+        if(!empty($payroll))
+                {
+                  $userid = User::where('payroll',$payroll)->pluck('id');
+                  $expenses = $expenses->whereIn('user_id', $userid);
+                }
         if(!empty($executive_id)){
             $expenses = $expenses->where(['user_id'=>$executive_id]);
         }
@@ -384,7 +636,6 @@ class ExpensesController extends Controller
         }
 
         if(!empty($start_date) && !empty($end_date)){
-            $expenses = $expenses->where(['expenses_type'=>$expenses_type]);
             $expenses->whereBetween('date',[$start_date,$end_date]); 
         }
 
@@ -392,6 +643,25 @@ class ExpensesController extends Controller
         {
             $expenses->where('checker_status', $status);
         }
+
+        if(!empty($division_id))
+        {
+           $division_user_id = User::where('division_id',$division_id)->pluck('id');
+            if(!empty($division_user_id)){
+               $expenses->whereIn('user_id', $division_user_id);  
+            }
+        }
+
+      if(!empty($expense_id))
+        { 
+          $expenses->where('id', $expense_id);  
+           
+        }
+
+
+
+
+
 
         $expenses = $expenses->orderBy('id','desc')->get();
 
@@ -406,13 +676,36 @@ class ExpensesController extends Controller
                         $status = "Pending";
                     }
 
+
+             $checke_by = array();
+             $approved_by = array(); 
+            if(!empty($item->get_time_history))  
+            {
+                foreach($item->get_time_history as $key_new => $datas) {  
+
+                   if($datas->status_type == 'checked'){
+                  $checke_by[0] = $datas->logusers->name??'';
+                    }
+
+                  if($datas->status_type == 'approved'){
+                  $approved_by[0] = $datas->logusers->name??'';
+                        }
+                   
+                }
+                
+            }
+
+
+
                 return [
                    
                         $item->id??"",
                         $item->date??"", 
                         $item->users->employee_codes??"",
                         $item->users->name??"",
+                        $item->users->getdesignation->designation_name??'',
                         $item->users->getbranch->branch_name??'',
+                        $item->users->getdivision->division_name??'',
                         $item->expense_type->name??"",
                         $item->expense_type->rate??"",
                         $item->claim_amount??"",
@@ -421,7 +714,9 @@ class ExpensesController extends Controller
                         $item->total_km??"",
                         $item->reason??"",
                         $status,
-                        $item->approve_reject->name??"",
+                        // $item->approve_reject->name??"",
+                        implode(',',$checke_by),
+                        implode(',',$approved_by),
         
                 ];
         })->toArray();
@@ -431,7 +726,9 @@ class ExpensesController extends Controller
             'Created at',
             'Emp Code',
             'User Name',
+            'Designation',
             'Branch',
+            'Division',
             'Expense Type',
             'Rate',
             'Claim Amount',
@@ -440,7 +737,9 @@ class ExpensesController extends Controller
             'Total km',
             'Reason',
             'Expense Status',
-            'Status BY'
+            // 'Status BY'
+            'Checked By Name',
+            'Approved BY Name',
         ], $data);
 
         return Excel::download($export, $filename);
@@ -505,9 +804,23 @@ class ExpensesController extends Controller
      * @param  \App\Models\Expenses  $expenses
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Expenses $expenses)
-    {
-        //
+    public function destroy($id)
+    {    
+        try
+        { 
+            ExpenseLog::where('expense_id',$id)->delete();
+            $expenses = Expenses::find($id);
+            if($expenses->delete())
+            {
+                return response()->json(['status' => 'success','message' => 'Expense deleted successfully!']);
+            }
+            return response()->json(['status' => 'error','message' => 'Error in Expense Delete!']);
+        }         
+        catch(\Exception $e)
+        {
+          return redirect()->back()->withErrors($e->getMessage())->withInput();
+        }
+
     }
 
     public function changeStatus(Request $request){
@@ -553,16 +866,19 @@ class ExpensesController extends Controller
     }
 
 
-        public function getexpenseType(Request $request){
+
+
+
+
+    public function getexpenseType(Request $request){
         $payroll = $request->payroll;
         $expenseTypes = ExpensesType::where('payroll_id',$payroll)->get();  
         $html = "";  
-         $html .= "<option value='' >Select Expense Type</option>";
+        $html .= "<option value='' >Select Expense Type</option>";
         foreach ($expenseTypes as $expenseType) {
             $html .= "<option value='".$expenseType->id."'>".ucwords($expenseType->name)."</option>";
             }
         return $html;   
-
 
     }
 
@@ -586,7 +902,6 @@ class ExpensesController extends Controller
 
 
 
-
    public function getexpenseUserTypeEdit(Request $request){
 
         $user_id = $request->user_id;
@@ -596,7 +911,7 @@ class ExpensesController extends Controller
         $selected = '';
 
          $html = "";  
-         $html .= "<option value=''>Select Expense Type</option>";
+         //$html .= "<option value=''>Select Expense Type</option>";
 
         if(!empty($userDetail->payroll) && $expenseTypes->count()>0){ 
         foreach ($expenseTypes as $expenseType) {
@@ -613,6 +928,34 @@ class ExpensesController extends Controller
         return $html;
 
    }
+
+
+
+   public function deletImages(Request $request){
+     $id = $request->id;
+     $expense_id = $request->expense_id;
+     Media::where('id',$id)->delete();
+     //$media = Media::find($id);
+     // $model = Model::find($media->id);
+     //$media->deleteMedia($media->id);
+
+     return redirect()->route('expenses.edit', ['expense' => $expense_id]);
+   
+   }
+
+
+   public function deleteview(Request $request){
+
+     $id = $request->id;
+     $expense_id = $request->expense_id;
+     Media::where('id',$id)->delete();
+     //$media = Media::find($id);
+     // $model = Model::find($media->id);
+     //$media->deleteMedia($media->id);
+     return redirect()->route('expenses.show', ['expense' => $expense_id]);
+
+   }
+
 
 
 

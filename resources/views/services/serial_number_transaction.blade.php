@@ -102,6 +102,7 @@
             <table id="getSerialTransaction" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
               <thead class=" text-primary">
                 <th>{!! trans('panel.global.no') !!}</th>
+                <th>{!! trans('panel.global.action') !!}</th>
                 <th>{!! trans('panel.product.fields.product_name') !!}</th>
                 <th>Product Code</th>
                 <th>Invoice Number</th>
@@ -152,6 +153,11 @@
             name: 'DT_RowIndex',
             orderable: false,
             searchable: false
+          },
+          {
+            data: 'action',
+            name: 'action',
+            "defaultContent": ''
           },
           {
             data: 'product_name',
@@ -206,6 +212,32 @@
       });
       $('#end_date').change(function() {
         table.draw();
+      });
+      $('body').on('click', '.delete', function() {
+        var id = $(this).attr("value");
+        var token = $("meta[name='csrf-token']").attr("content");
+        if (!confirm("Are You sure want to delete ?")) {
+          return false;
+        }
+        $.ajax({
+          url: "{{ url('services/serial_number_transaction/delete') }}",
+          type: 'GET',
+          data: {
+            _token: token,
+            id: id
+          },
+          success: function(data) {
+            $('.message').empty();
+            $('.alert').show();
+            if (data.status == 'success') {
+              $('.alert').addClass("alert-success");
+            } else {
+              $('.alert').addClass("alert-danger");
+            }
+            $('.message').append(data.message);
+            table.draw();
+          },
+        });
       });
     });
   </script>

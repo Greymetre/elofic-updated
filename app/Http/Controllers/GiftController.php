@@ -23,6 +23,11 @@ use App\Imports\GiftImport;
 use App\Exports\GiftExport;
 use App\Exports\GiftTemplate;
 use App\Http\Requests\GiftsRequest;
+use App\Models\CustomerType;
+use App\Models\GiftBrand;
+use App\Models\GiftCategory;
+use App\Models\GiftModel;
+use App\Models\GiftSubcategory;
 
 class GiftController extends Controller
 {
@@ -47,11 +52,10 @@ class GiftController extends Controller
     public function create()
     {
         abort_if(Gate::denies('gift_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        $categories = Category::where('active','=','Y')->select('id', 'category_name')->get();
-        $subcategories = Subcategory::where('active','=','Y')->select('id', 'subcategory_name')->get();
-        $brands = Brand::where('active','=','Y')->select('id', 'brand_name')->get();
-        $units = UnitMeasure::where('active','=','Y')->select('id', 'unit_name')->get();
-        return view('gifts.create',compact('categories','subcategories','brands','units') )->with('gifts',$this->gifts);
+        $categories = GiftCategory::where('active','=','Y')->select('id', 'category_name')->get();
+        $brands = GiftBrand::where('active','=','Y')->select('id', 'brand_name')->get();
+        $customer_types = CustomerType::where('active','=','Y')->get();
+        return view('gifts.create',compact('categories','brands', 'customer_types') )->with('gifts',$this->gifts);
     }
 
     /**
@@ -84,6 +88,7 @@ class GiftController extends Controller
                 'brand_id'      => isset($request['brand_id']) ? $request['brand_id'] :null,
                 'product_image' => isset($request['product_image']) ? $request['product_image'] :'',
                 'unit_id'       => isset($request['unit_id']) ? $request['unit_id'] :null,
+                'customer_type_id'       => isset($request['customer_type_id']) ? $request['customer_type_id'] :null,
                 'mrp'   => isset($request['mrp']) ? $request['mrp'] :0.00,
                 'price'      => isset($request['price']) ? $request['price'] :0.00,
                 'points' => isset($request['points']) ? $request['points'] :0,
@@ -123,11 +128,10 @@ class GiftController extends Controller
         abort_if(Gate::denies('gift_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $id = decrypt($id);
         $gifts = Gifts::find($id);
-        $categories = Category::where('active','=','Y')->select('id', 'category_name')->get();
-        $subcategories = Subcategory::where('active','=','Y')->select('id', 'subcategory_name')->get();
-        $brands = Brand::where('active','=','Y')->select('id', 'brand_name')->get();
-        $units = UnitMeasure::where('active','=','Y')->select('id', 'unit_name')->get();
-        return view('gifts.create',compact('categories','subcategories','brands','units') )->with('gifts',$gifts);
+        $categories = GiftCategory::where('active','=','Y')->select('id', 'category_name')->get();
+        $brands = GiftBrand::where('active','=','Y')->select('id', 'brand_name')->get();
+        $customer_types = CustomerType::where('active','=','Y')->get();
+        return view('gifts.create',compact('categories','brands','customer_types') )->with('gifts',$gifts);
     }
 
     /**
@@ -151,6 +155,7 @@ class GiftController extends Controller
             $product->category_id = isset($request['category_id']) ? $request['category_id'] :null;
             $product->brand_id = isset($request['brand_id']) ? $request['brand_id'] :null;
             $product->unit_id = isset($request['unit_id']) ? $request['unit_id'] :null;
+            $product->customer_type_id = isset($request['customer_type_id']) ? $request['customer_type_id'] :null;
             $product->mrp   = isset($request['mrp']) ? $request['mrp'] :0.00;
             $product->price = isset($request['price']) ? $request['price'] :0.00;
             $product->points = isset($request['points']) ? $request['points'] :0;
@@ -182,6 +187,11 @@ class GiftController extends Controller
     public function destroy(Gifts $gift)
     {
         abort_if(Gate::denies('gift_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if($gift->delete())
+        {
+            return response()->json(['status' => 'success','message' => 'Gift Catalogue deleted successfully!']);
+        }
+        return response()->json(['status' => 'error','message' => 'Error in Gift Catalogue Delete!']);
     }
 
     public function upload(Request $request) 
@@ -204,6 +214,16 @@ class GiftController extends Controller
       abort_if(Gate::denies('gift_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        return Excel::download(new GiftExport, 'gifts.xlsx');
+        return Excel::download(new GiftTemplate, 'giftsTemplate.xlsx');
+    }
+
+    public function active(Request $request)
+    {
+        if(Gifts::where('id',$request['id'])->update(['active' => ($request['active'] == 'Y') ? 'N' :'Y']))
+        {
+            $message = ($request['active'] == 'Y') ? 'Inactive' :'Active';
+            return response()->json(['status' => 'success','message' => 'Gift Catalogue '.$message.' Successfully!']);
+        }
+        return response()->json(['status' => 'error','message' => 'Error in Status Update']);
     }
 }

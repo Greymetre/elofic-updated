@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\ExpensesType;
 use App\Models\Expenses;
+use App\Models\ExpenseLog;
+use App\Models\Media;
 use Validator;
 use Auth;
 
@@ -29,26 +31,72 @@ class ExpensesTypeController extends Controller
 
 
     public function getExpensesType(Request $request)
-    {
-        $expenses_type = ExpensesType::all();
-        return response()->json(['status'=>'success', 'data'=>$expenses_type], 200); 
+    {  
+        // $expenses_type = ExpensesType::all();
+        // return response()->json(['status'=>'success', 'data'=>$expenses_type], 200); 
+
+        try
+        { 
+        
+            $validator = Validator::make($request->all(), [
+                'payroll_id'  => "required",
+            ]);
+            if($validator->fails()) {
+                return response()->json(['status' => 'error','message' =>  $validator->errors()], $this->badrequest); 
+            }
+
+            $payroll_id = $request->payroll_id;
+            $expense_types = ExpensesType::where('payroll_id',$payroll_id)->get();
+            if(!empty($expense_types))
+            {
+
+                $datas = array();
+                foreach($expense_types as $expense_type){
+                $datas[] = array(
+                'id' => $expense_type->id ?? "",
+                'name' => $expense_type->name ?? "",
+                'rate' => $expense_type->rate?? "",
+                'allowance_type_id' => $expense_type->allowance_type_id ?? "",
+                'payroll_id' => $expense_type->payroll_id ?? "",
+                   );
+
+                 }
+    
+                return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','data' => $datas ], $this->successStatus);
+            }
+            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $expense ],200);  
+            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
+        } 
+
+
     }
 
 
 
     public function createExpense(Request $request){
       try
-        { 
+        {   ini_set('memory_limit', '-1');
             $userid = $request->user()->id;
             $validator = Validator::make($request->all(), [
                // 'customer_id'   => 'nullable|exists:customers,id',
                 'expenses_type'  => "required",
                 'claim_amount'  => "required",
                 'date'  => "required",
-            ]);
+                'expense_file.*' => 'mimes:jpeg,jpg,png,pdf,doc',
+             ]
+            );
+
+            
+
             if ($validator->fails()) {
                 return response()->json(['status' => 'error','message' =>  $validator->errors()], $this->badrequest); 
             }
+
+
             if($expenses = Expenses::create([
                 'user_id' => $userid,
                 'expenses_type' => isset($request->expenses_type) ? $request->expenses_type :null,
@@ -62,13 +110,25 @@ class ExpensesTypeController extends Controller
                 'created_at' => date('Y-m-d H:i:s')
             ]))
             {
+               
+              $logdata = array(
+                'log_date' => date('Y-m-d'),
+                'expense_id' => $expenses->id,
+                'created_by' => $userid,
+                'status_type' => 'generated'
+               );
+
+                ExpenseLog::create($logdata);
                 if($request->hasFile('expense_file')){
-                $file = $request->file('expense_file');
+                $files = $request->file('expense_file');
+                foreach($files as $file){
                 $customname = time() . '.' . $file->getClientOriginalExtension();
                 $expenses->addMedia($file)
                 ->usingFileName($customname)
                 ->toMediaCollection('expense_file');
+
                 }
+               }
 
                 return response()->json(['status' => 'success','message' => 'Data inserted successfully.','data' => $expenses ], $this->successStatus);
             }
@@ -96,17 +156,27 @@ class ExpensesTypeController extends Controller
                 $datas = array();
                 foreach($expenses as $expense){
 
-                $image = '';  
+                // $image = '';  
+                // if(isset($expense) && $expense->getMedia('expense_file')->count() > 0 && file_exists($expense->getFirstMedia('expense_file')->getPath())){
+                //  $image = $expense->getFirstMedia('expense_file')->getFullUrl();
+                // }
 
+                $image = array();
+             
                 if(isset($expense) && $expense->getMedia('expense_file')->count() > 0 && file_exists($expense->getFirstMedia('expense_file')->getPath())){
-                 $image = $expense->getFirstMedia('expense_file')->getFullUrl();
-                }
+                    foreach($expense->getMedia('expense_file') as $expense_image){
+                   $image[] = $expense_image->getFullUrl();
+                 
+                   }
+                }    
 
               
                 if($expense->checker_status == '1'){
                  $exp_status = 'Approved';
                 }elseif($expense->checker_status == '2'){
                  $exp_status = 'Rejected';
+                }elseif($expense->checker_status == '3'){
+                 $exp_status = 'Checked';
                 }else{
                  $exp_status = 'Pending';
                 }
@@ -127,6 +197,7 @@ class ExpensesTypeController extends Controller
                 // 'claim_amount' => '$'.number_format($expense->claim_amount ?? 0,2),
                 //'expense_image' =>  $expense->getFirstMedia('expense_file')->getFullUrl(),
                  'expense_image' =>  $image,
+                
                    );
                    }    
 
@@ -158,9 +229,15 @@ class ExpensesTypeController extends Controller
             if(!empty($expense))
             {
 
-                $image = '';  
+                 $image = array();
+                 $image_id = array();
                 if(isset($expense) && $expense->getMedia('expense_file')->count() > 0 && file_exists($expense->getFirstMedia('expense_file')->getPath())){
-                 $image = $expense->getFirstMedia('expense_file')->getFullUrl();
+                    foreach($expense->getMedia('expense_file') as $expense_image){
+                   $image[] = $expense_image->getFullUrl();
+                   $image_id[] = $expense_image->id;
+                   
+                   }
+
                 }
 
 
@@ -168,6 +245,8 @@ class ExpensesTypeController extends Controller
                  $exp_status = 'Approved';
                 }elseif($expense->checker_status == '2'){
                  $exp_status = 'Rejected';
+                }elseif($expense->checker_status == '3'){
+                 $exp_status = 'Checked';
                 }else{
                  $exp_status = 'Pending';
                 }
@@ -202,8 +281,11 @@ class ExpensesTypeController extends Controller
                 $datas['total_km'] = $expense->total_km ?? "";
                 $datas['claim_amount'] = $expense->claim_amount ?? "";
                 $datas['expense_image'] = $image;
+                $datas['image_id'] = $image_id;
+              
                 $datas['approve_amount'] = $expense->approve_amount ?? "";
                 $datas['status'] = $exp_status;
+                $datas['reason'] = $expense->reason??"";
 
     
                 return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','data' => $datas ], $this->successStatus);
@@ -222,10 +304,13 @@ class ExpensesTypeController extends Controller
    public function updateExpense(Request $request){
         try
         { 
+            ini_set('memory_limit', '-1');
             $userid = $request->user()->id;
             $validator = Validator::make($request->all(), [
                 'expense_id'  => "required",
-            ]);
+                'expense_file.*' => 'mimes:jpeg,jpg,png,pdf,doc',
+            ]
+        );
             if($validator->fails()) {
                 return response()->json(['status' => 'error','message' =>  $validator->errors()], $this->badrequest); 
             }
@@ -242,15 +327,33 @@ class ExpensesTypeController extends Controller
                 'claim_amount' => isset($request['claim_amount'])? $request['claim_amount']:$expense_detail->claim_amount,
             ]))
             {
+
+            $logdata = array(
+                'log_date' => date('Y-m-d'),
+                'expense_id' => $request['expense_id'],
+                'created_by' => $userid,
+                'status_type' => 'updated'
+             );
+            
+             ExpenseLog::create($logdata);  
+
               if($request->hasFile('expense_file')){
-                $file = $request->file('expense_file');
+                $files = $request->file('expense_file');
+                foreach($files as $file){
                 $customname = time() . '.' . $file->getClientOriginalExtension();
                 $expense_detail->addMedia($file)
                 ->usingFileName($customname)
                 ->toMediaCollection('expense_file');
+
+                }
                 }
 
-                return response()->json(['status' => 'success','message' => 'Data updated successfully.'], $this->successStatus);
+
+              if(!empty($request->image_id)){
+                Media::where('id',$request->image_id)->delete();
+               } 
+
+            return response()->json(['status' => 'success','message' => 'Data updated successfully.'], $this->successStatus);
             }
             return response(['status' => 'error', 'message' => 'No Record Updated.'],200);  
         }

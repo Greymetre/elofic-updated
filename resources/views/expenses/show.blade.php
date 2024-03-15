@@ -41,21 +41,76 @@
                       <h3 class="card-title pb-3">Approve View</h3>
                     </div>
                     <div class="col-8">
-                        
+
+
                         @if($expense->checker_status=='3')
+
+                           @if(auth()->user()->can(['expense_unchecked']))
                         <button type="button" class="btn btn-dark unchecked_status">Unchecked</button>
+                           @endif 
+                           
+                          @if(auth()->user()->can(['expense_approve']))
                         <button type="button" class="btn btn-success approve_status">Approved</button>
+                           @endif 
+
+                          @if(auth()->user()->can(['expense_reject']))
                         <button type="button" class="btn btn-danger reject_status">Rejected</button>
+                           @endif 
+
                         @elseif($expense->checker_status=='1') 
+                              @if(auth()->user()->can(['expense_reject']))
                          <button type="button" class="btn btn-danger reject_status">Rejected</button>
+                              @endif 
                         @else
+                               @if(auth()->user()->can(['expense_checked']))  
                          <button type="button" class="btn btn-dark checked_status">Checked</button>
+                               @endif 
+
+                              @if(auth()->user()->can(['expense_reject']))
                          <button type="button" class="btn btn-danger reject_status">Rejected</button>
+                              @endif 
+
                         @endif 
 
 
+                      <?php 
+                     if(Auth::user()->hasRole('superadmin') || Auth::user()->hasRole('Admin') || Auth::user()->hasRole('Sub_Admin') || Auth::user()->hasRole('HR_Admin') || Auth::user()->hasRole('HO_Account'))
+                       { ?>
+
                         <a class="btn btn-warning" href="{{route('expenses.edit', ['expense' => $expense->id])}}" role="button">Edit</a>
+
+                      <?php }else{ 
+
+                           $created_at  = $expense->created_at;
+                           $startDate = Carbon\Carbon::parse($created_at);
+                           $endDate = Carbon\Carbon::now();
+                           //$timeDifference = $startDate->diff($endDate)->format('%h hours and %i minutes');
+                           $diffInHours = $startDate->diffInHours($endDate);
+
+                           if($diffInHours <= 24 && $expense->checker_status == 0){
+
+                        ?>
+
+                            @if($expense->checker_status=='3' || $expense->checker_status=='1')
+                             <a class="btn btn-warning" href="javascript:void(0)" role="button">Edit</a>
+                            @else
+                             <a class="btn btn-warning" href="{{route('expenses.edit', ['expense' => $expense->id])}}" role="button">Edit</a>
+                            @endif
+
+                        <?php 
+                            }else{ 
+                          ?>
+                          <a class="btn btn-warning" href="javascript:void(0)" role="button">Edit</a>
+                         <?php 
+                          }
+
+                        }
+
+                      ?>
+
+
                         <a class="btn btn-primary" href="{{route('expenses.index')}}" role="button">Back</a>
+
                         
                     </div>
                     <!-- /.col -->
@@ -79,7 +134,7 @@
                  <div class="col-sm-4 invoice-col">
                   From
                   <address>
-                    <strong>{!! isset($expense['users']['name']) ? $expense['users']['name'] :'' !!} </strong><br>
+                    <strong>{!! isset($expense['users']['name']) ? $expense['users']['name'] :'' !!} ({{$expense->users->getdesignation->designation_name??''}}) </strong><br>
                   </address>
                 </div>
                 <!-- /.col -->
@@ -121,10 +176,15 @@
                 <div class="col-sm-4 invoice-col">
                   Status Change Reason
                   <address>
-                    <strong>test</strong><br>
+                    <strong>{{$expense->reason??""}}</strong><br>
                   </address>
                 </div>
               </div>
+
+
+        
+              
+                @if($expense->expense_type->allowance_type_id == '1')
 
               <!-- Table row -->
               <div class="row">
@@ -151,6 +211,32 @@
                 <!-- /.col -->
               </div>
               <!-- /.row -->
+
+               @else
+
+                <!-- Table row -->
+              <div class="row">
+                <div class="col-12 table-responsive">
+                  <table class="table table-striped">
+                    <thead>
+                    <tr>
+                      <th>{{ trans('panel.expenses.fields.rate') }}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                          <td>{!! $expense['expense_type']['rate']??0 !!}</td>
+                        </tr> 
+                    </tbody>
+                  </table>
+                </div>
+                <!-- /.col -->
+              </div>
+              <!-- /.row -->
+
+               @endif
+
+
 
             <div class="row">
               <div class="col-6">
@@ -192,6 +278,39 @@
                 </div>
               </div>
 
+              <div class="row">
+                <!-- accepted payments column -->
+                <div class="col-6">
+                  <p class="lead"></p>
+                  <p class="text-muted well well-sm shadow-none" style="margin-top: 10px;">
+                   <strong> Image and doc:</strong>
+                    @if(isset($expense) && $expense->getMedia('expense_file')->count() > 0 && file_exists($expense->getFirstMedia('expense_file')->getPath()))
+                         <div class="form-group col-md-12">
+                            @foreach($expense->getMedia('expense_file') as $image)
+                         
+                           <?php 
+                           $infoPath = pathinfo($image->getFullUrl());
+                           $extension = $infoPath['extension'];
+                                 if($extension == 'png' || $extension == 'jpg' || $extension == 'jpeg'){
+                            ?>
+                           <a href="{{ $image->getFullUrl()}}" data-lightbox="mygallery">
+                          <img class="img-fluid" src="{{ $image->getFullUrl() }}"  style="width:80px;height: 80px;">
+                           </a>
+                           <?php }else{ ?>
+                              <p>
+                                <a href="{{ $image->getFullUrl()}}" download>Download File</a>
+                              </p>
+                           <?php } ?>
+
+                            <a class="btn btn-danger" href="{{route('deleteview', ['id' => $image->id,'expense_id'=>$expense->id])}}" role="button" onclick="return confirm('are you sure do you want delete file')" style="width:5px !important;">X</a>
+
+                            @endforeach  
+                        </div>
+                  @endif
+
+                  </p>
+                </div>
+              </div>
 
               <!-- /.row -->
             </div>
@@ -302,7 +421,7 @@
 
                <div class="input-group input-group-outline my-3">
                 <label class="form-label">Reason</label>
-                <input type="text" name="reasons" id="reasons" class="form-control" value="{!! old( 'reasons') !!}" required> <br><br>
+                <input type="text" name="reasons" id="reasons" class="form-control" value="{!! old( 'reasons') !!}"> <br><br>
               </div>
 
 
@@ -316,6 +435,12 @@
 </div> 
 
 <!-- end model for status -->
+
+  <!-- Custom styles for this page -->
+  <link rel="stylesheet" href="{{ url('/').'/'.asset('lightboxx/css/lightbox.min.css') }}">
+  
+  <script src="{{ url('/').'/'.asset('lightboxx/js/lightbox-plus-jquery.min.js') }}"></script>
+
 
 
 

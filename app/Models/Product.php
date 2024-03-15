@@ -46,4 +46,14 @@ class Product extends Model
     {
         return $this->belongsTo('App\Models\ProductDetails', 'id', 'product_id')->select('id','product_id','mrp','price','selling_price','gst','discount');
     }
+
+    public function serial_numbers()
+    {
+        return $this->hasMany('App\Models\Services', 'product_code', 'product_code')->where('branch_code', 'HO0000');
+    }
+
+    public function getSchemeDetail(){
+      return $this->hasOne('App\Models\OrderSchemeDetail', 'product_id', 'id');
+    }
+
 }

@@ -11,26 +11,30 @@ class Gifts extends Model
 
     protected $table = 'gifts';
 
-    protected $fillable = [ 'active', 'product_name', 'display_name', 'description', 'product_image', 'mrp', 'price', 'points', 'subcategory_id', 'category_id', 'brand_id', 'unit_id', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at'];
+    protected $fillable = [ 'active', 'product_name', 'display_name', 'description', 'product_image', 'mrp', 'price', 'points', 'subcategory_id', 'category_id', 'brand_id', 'customer_type_id', 'unit_id', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at'];
 
    public function categories()
     {
-        return $this->belongsTo('App\Models\Category', 'category_id', 'id')->select('id','category_name','category_image');
+        return $this->belongsTo('App\Models\GiftCategory', 'category_id', 'id')->select('id','category_name','category_image');
     }
 
     public function subcategories()
     {
-        return $this->belongsTo('App\Models\Subcategory', 'subcategory_id', 'id')->select('id','subcategory_name','subcategory_image');
+        return $this->belongsTo('App\Models\GiftSubcategory', 'subcategory_id', 'id')->select('id','subcategory_name','subcategory_image');
     }
 
     public function brands()
     {
-        return $this->belongsTo('App\Models\Brand', 'brand_id', 'id')->select('id','brand_name','brand_image');
+        return $this->belongsTo('App\Models\GiftBrand', 'brand_id', 'id')->select('id','brand_name','brand_image');
     }
 
-    public function unitmeasures()
+    public function models()
     {
-        return $this->belongsTo('App\Models\UnitMeasure', 'unit_id', 'id')->select('id','unit_name','unit_code');
+        return $this->belongsTo('App\Models\GiftModel', 'unit_id', 'id')->select('id','model_name');
+    }
+    public function customer_types()
+    {
+        return $this->belongsTo('App\Models\CustomerType', 'customer_type_id', 'id')->select('id','customertype_name');
     }
     public function createdbyname()
     {

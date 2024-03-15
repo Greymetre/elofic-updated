@@ -70,7 +70,11 @@ class CustomerController extends Controller
                 return response()->json(['status' => 'error','message' => $validator->messages()->all()],$this->badrequest);
             }
             //$request['fordelete'] = implode(',', $request->getContent());
-
+            $request['mobile'] = preg_replace("/[^0-9]/", "",$request['mobile']);
+            if(strlen(preg_replace('/\s+/', '', $request['mobile'])) == 10)
+            {
+                $request['mobile'] = '91'.preg_replace('/\s+/', '', $request['mobile']);
+            }
             
 
              $customerdetails = Customers::where('mobile', $request['mobile'])->first();
@@ -92,10 +96,6 @@ class CustomerController extends Controller
             $customertype = CustomerType::where('type_name', '=', 'retailer')->pluck('id')->first() ;
             $request['customertype'] = isset($request['customertype']) ? $request['customertype'] : $customertype;
             //$response =  $this->customers->save_data($request);
-            if(strlen(preg_replace('/\s+/', '', $request['mobile'])) == 10)
-            {
-                $request['mobile'] = '91'.preg_replace('/\s+/', '', $request['mobile']);
-            }
 
             if($request->file('image')){
                 $image = $request->file('image');
