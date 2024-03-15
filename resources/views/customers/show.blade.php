@@ -1,26 +1,32 @@
 <x-app-layout>
    <style>
       .card.text-center.card-body.p-3 {
-         font-size: 20px;
+         font-size: 16px;
          font-weight: 900;
          line-height: 40px;
          text-shadow: 2px 2px 10px gray;
       }
    </style>
-<div class="row">
-   <div class="p-3 m-3">
-      <div class="card card-primary text-center card-body p-3">Total Point Earn <br> <span>{{$total_points}}</span> </div>
+   <div class="row">
+      <div class="m-1">
+         <div class="card card-primary text-center card-body p-3">Total Point Earn <br> <span>{{$total_points}}</span> </div>
+      </div>
+      <div class="m-1">
+         <div class="card card-primary text-center card-body p-3">Total Active Point <br> <span>{{$active_points}}</span> </div>
+      </div>
+      <div class="m-1">
+         <div class="card card-primary text-center card-body p-3">Total Provision Point <br> <span>{{$provision_points}}</span> </div>
+      </div>
+      <div class="m-1">
+         <div class="card card-success text-center card-body p-3">Total Redeem Point <br> <span>{{$total_redemption}}</span> </div>
+      </div>
+      <div class="m-1">
+         <div class="card card-danger card-body text-center p-3">Total Rejected Point <br> <span>{{$total_rejected}}</span> </div>
+      </div>
+      <div class="m-1">
+         <div class="card card-info card-body text-center p-3">Total balance Point <br> <span>{{$total_balance}}</span> </div>
+      </div>
    </div>
-   <div class="p-3 m-3">
-      <div class="card card-success text-center card-body p-3">Total Redemption <br> <span>{{$total_redemption}}</span> </div>
-   </div>
-   <div class="p-3 m-3">
-      <div class="card card-danger card-body text-center p-3">Total RejectedPoint <br> <span>{{$total_rejected}}</span> </div>
-   </div>
-   <div class="p-3 m-3">
-      <div class="card card-info card-body text-center p-3">Total balancePoint <br> <span>{{$total_balance}}</span> </div>
-   </div>
-</div>
    <div class="row">
       <div class="col">
          <div class="card card-body">
@@ -31,666 +37,680 @@
                         @if(auth()->user()->can(['customer_edit']))
                         <a href="{{ url('customers/'.encrypt($customers->id).'/edit') }}" class="btn btn-just-icon btn-theme"><i class="material-icons">edit</i></a>
                         @endif
+                        @if(auth()->user()->can(['transaction_history_download']))
+                        <form method="GET" action="{{ route('transaction_history.download') }}" class="form-horizontal">
+                           <input type="hidden" name="customer_id" value="{{$customers['id']}}">
+                           <div class="pl-1"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Transaction Coupon History"><i class="material-icons">cloud_download</i></button></div>
+                        </form>
+                        @endif
+                        @if(auth()->user()->can(['redemption_download']))
+                        <form method="GET" action="{{ route('redemptions.download') }}" class="form-horizontal">
+                           <input type="hidden" name="customer_id" value="{{$customers['id']}}">
+                           <input type="hidden" name="redeem_mode" value="1">
+                           <div class="pl-1"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Redemption"><i class="material-icons">cloud_download</i></button></div>
                      </div>
-                  </span>
+                     </form>
+                     @endif
+               </div>
+               </span>
+            </div>
+         </div>
+         <div class="row gx-4 mb-2">
+            <div class="col-auto">
+               <div class="avatar avatar-xl position-relative">
+                  <img src="{!! !empty($customers['profile_image']) ? asset('uploads/'.$customers['profile_image']) : asset('public/assets/img/placeholder.jpg') !!}" alt="profile_image" class="w-100 border-radius-lg shadow-sm imageDisplayModel">
                </div>
             </div>
-            <div class="row gx-4 mb-2">
-               <div class="col-auto">
-                  <div class="avatar avatar-xl position-relative">
-                     <img src="{!! !empty($customers['profile_image']) ? asset('uploads/'.$customers['profile_image']) : asset('public/assets/img/placeholder.jpg') !!}" alt="profile_image" class="w-100 border-radius-lg shadow-sm imageDisplayModel">
-                  </div>
-               </div>
-               <div class="col-auto my-auto">
-                  <div class="h-100">
-                     <h5 class="mb-1">
-                        {!! isset($customers['name']) ? $customers['name'] : '' !!}
-                     </h5>
-                     <p class="mb-0 font-weight-normal text-sm">
-                        {!! isset($customers['customertypes']['customertype_name']) ? $customers['customertypes']['customertype_name'] : '' !!}
-                     </p>
-                  </div>
-               </div>
-               <div class="col-lg-6 col-md-6 my-sm-auto ms-sm-auto me-sm-0 mx-auto mt-3">
-                  <div class="nav-wrapper position-relative end-0">
-                     <ul class="nav nav-pills nav-pills-warning nav-pills-icons justify-content-center" role="tablist">
-                        <li class="nav-item">
-                           <a class="nav-link active show" data-toggle="tab" href="#profile-tabs-detail" role="tablist">
-                              <i class="material-icons">preview</i> Details
-                           </a>
-                        </li>
-                        <li class="nav-item">
-                           <a class="nav-link orderinfo" data-toggle="tab" href="#profile-tabs-orders" role="tablist">
-                              <i class="material-icons">add_shopping_cart</i> Orders
-                           </a>
-                        </li>
-                        <li class="nav-item">
-                           <a class="nav-link pointsinfo" data-toggle="tab" href="#profile-tabs-sales" role="tablist">
-                              <i class="material-icons">shopping_bag</i> Sales
-                           </a>
-                        </li>
-                        <li class="nav-item">
-                           <a class="nav-link " data-toggle="tab" href="#profile-tabs-payments" role="tablist">
-                              <i class="material-icons">currency_rupee</i> Payments
-                           </a>
-                        </li>
-                        <li class="nav-item">
-                           <a class="nav-link " data-toggle="tab" href="#profile-tabs-activity" role="tablist" onclick="getCustomerActivity()">
-                              <i class="material-icons">add_task</i> Activity
-                           </a>
-                        </li>
-                        <li class="nav-item">
-                           <a class="nav-link " data-toggle="tab" href="#kyc" role="tablist">
-                              <i class="material-icons">verified</i> KYC
-                           </a>
-                        </li>
-                        <li class="nav-item">
-                           <a class="nav-link " data-toggle="tab" href="#transaction_history" role="tablist">
-                              <i class="material-icons">payment</i> Transaction
-                           </a>
-                        </li>
-                        <li class="nav-item">
-                           <a class="nav-link " data-toggle="tab" href="#redemption" role="tablist">
-                              <i class="material-icons">R</i> Redemption
-                           </a>
-                        </li>
-                     </ul>
-                  </div>
+            <div class="col-auto my-auto">
+               <div class="h-100">
+                  <h5 class="mb-1">
+                     {!! isset($customers['name']) ? $customers['name'] : '' !!}
+                  </h5>
+                  <p class="mb-0 font-weight-normal text-sm">
+                     {!! isset($customers['customertypes']['customertype_name']) ? $customers['customertypes']['customertype_name'] : '' !!}
+                  </p>
                </div>
             </div>
-            <div class="">
-               <div class="tab-content tab-subcategories">
-                  <div class="tab-pane active show" id="profile-tabs-detail">
-                     <div class="row mt-3">
-                        <div class="col-md-4 col-xl-4 mt-md-0 mt-4 position-relative">
-                           <div class="card card-plain h-100">
-                              <div class="card-header pb-0 p-3">
-                                 <div class="row">
-                                    <div class="col-md-8 d-flex align-items-center">
-                                       <h6 class="mb-0">Personal Information</h6>
-                                    </div>
+            <div class="col-lg-6 col-md-6 my-sm-auto ms-sm-auto me-sm-0 mx-auto mt-3">
+               <div class="nav-wrapper position-relative end-0">
+                  <ul class="nav nav-pills nav-pills-warning nav-pills-icons justify-content-center" role="tablist">
+                     <li class="nav-item">
+                        <a class="nav-link {{$kyc?'':'active show'}}" data-toggle="tab" href="#profile-tabs-detail" role="tablist">
+                           <i class="material-icons">preview</i> Details
+                        </a>
+                     </li>
+                     <li class="nav-item">
+                        <a class="nav-link orderinfo" data-toggle="tab" href="#profile-tabs-orders" role="tablist">
+                           <i class="material-icons">add_shopping_cart</i> Orders
+                        </a>
+                     </li>
+                     <li class="nav-item">
+                        <a class="nav-link pointsinfo" data-toggle="tab" href="#profile-tabs-sales" role="tablist">
+                           <i class="material-icons">shopping_bag</i> Sales
+                        </a>
+                     </li>
+                     <li class="nav-item">
+                        <a class="nav-link " data-toggle="tab" href="#profile-tabs-payments" role="tablist">
+                           <i class="material-icons">currency_rupee</i> Payments
+                        </a>
+                     </li>
+                     <li class="nav-item">
+                        <a class="nav-link " data-toggle="tab" href="#profile-tabs-activity" role="tablist" onclick="getCustomerActivity()">
+                           <i class="material-icons">add_task</i> Activity
+                        </a>
+                     </li>
+                     <li class="nav-item">
+                        <a class="nav-link {{$kyc?'active show':''}}" data-toggle="tab" href="#kyc" role="tablist">
+                           <i class="material-icons">verified</i> KYC
+                        </a>
+                     </li>
+                     <li class="nav-item">
+                        <a class="nav-link " data-toggle="tab" href="#transaction_history" role="tablist">
+                           <i class="material-icons">payment</i> Transaction
+                        </a>
+                     </li>
+                     <li class="nav-item">
+                        <a class="nav-link " data-toggle="tab" href="#redemption" role="tablist">
+                           <i class="material-icons">R</i> Redemption
+                        </a>
+                     </li>
+                  </ul>
+               </div>
+            </div>
+         </div>
+         <div class="">
+            <div class="tab-content tab-subcategories">
+               <div class="tab-pane {{$kyc?'':'active show'}}" id="profile-tabs-detail">
+                  <div class="row mt-3">
+                     <div class="col-md-4 col-xl-4 mt-md-0 mt-4 position-relative">
+                        <div class="card card-plain h-100">
+                           <div class="card-header pb-0 p-3">
+                              <div class="row">
+                                 <div class="col-md-8 d-flex align-items-center">
+                                    <h6 class="mb-0">Personal Information</h6>
                                  </div>
-                              </div>
-                              <div class="card-body p-3">
-                                 <!-- <p class="text-sm">
-                             </p> -->
-                                 <hr class="horizontal gray-light my-4">
-                                 <ul class="list-group">
-                                    <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Full Name:</strong> &nbsp; {!! isset($customers['first_name']) ? $customers['first_name'] : '' !!} {!! isset($customers['last_name']) ? $customers['last_name'] : '' !!}</li>
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Mobile:</strong> &nbsp; {!! isset($customers['mobile']) ? $customers['mobile'] : '' !!}</li>
-                                    @if(isset($customers['email']))
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Email:</strong> &nbsp; {!! $customers['email'] !!} </li>
-                                    @endif
-                                    @if(isset($customers['gender']) && $customers['gender'] != '')
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Gender:</strong> &nbsp; {!! $customers['gender'] !!} </li>
-                                    @endif
-                                 </ul>
-                                 <hr class="horizontal gray-light my-4">
-                                 <hr class="horizontal gray-light my-4">
-                                 <h6 class="mb-0">Address Info</h6>
-                                 <hr class="horizontal gray-light my-4">
-                                 <ul class="list-group">
-                                    @if(isset($customers['customeraddress']['address1']) && $customers['customeraddress']['address1'] != '')
-                                    <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Address:</strong> &nbsp; {!! isset($customers['customeraddress']['address1']) ? $customers['customeraddress']['address1'] : '' !!}
-                                       {!! isset($customers['customeraddress']['address2']) ? $customers['customeraddress']['address2'] : '' !!}
-                                       {!! isset($customers['customeraddress']['landmark']) ? $customers['customeraddress']['landmark'] : '' !!}
-                                       {!! isset($customers['customeraddress']['locality']) ? $customers['customeraddress']['locality'] : '' !!}
-                                    </li>
-                                    @endif
-                                    @if(isset($customers['customeraddress']['cityname']['city_name']) && $customers['customeraddress']['cityname']['city_name'] != '')
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">City:</strong> &nbsp; {!! $customers['customeraddress']['cityname']['city_name'] !!} </li>
-                                    @endif
-                                    @if(isset($customers['customeraddress']['districtname']['district_name']) && $customers['customeraddress']['districtname']['district_name'] != '')
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">District:</strong> &nbsp; {!! $customers['customeraddress']['districtname']['district_name'] !!} </li>
-                                    @endif
-                                    @if(isset($customers['customeraddress']['statename']['state_name']) && $customers['customeraddress']['statename']['state_name'] != '')
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">State:</strong> &nbsp; {!! $customers['customeraddress']['statename']['state_name'] !!} </li>
-                                    @endif
-                                    @if(isset($customers['customeraddress']['pincodename']['pincode']) && $customers['customeraddress']['pincodename']['pincode'] != '')
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Pincode:</strong> &nbsp; {!! $customers['customeraddress']['pincodename']['pincode'] !!} </li>
-                                    @endif
-                                 </ul>
                               </div>
                            </div>
-                           <hr class="vertical dark">
+                           <div class="card-body p-3">
+                              <!-- <p class="text-sm">
+                             </p> -->
+                              <hr class="horizontal gray-light my-4">
+                              <ul class="list-group">
+                                 <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Full Name:</strong> &nbsp; {!! isset($customers['first_name']) ? $customers['first_name'] : '' !!} {!! isset($customers['last_name']) ? $customers['last_name'] : '' !!}</li>
+                                 <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Mobile:</strong> &nbsp; {!! isset($customers['mobile']) ? $customers['mobile'] : '' !!}</li>
+                                 @if(isset($customers['email']))
+                                 <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Email:</strong> &nbsp; {!! $customers['email'] !!} </li>
+                                 @endif
+                                 @if(isset($customers['gender']) && $customers['gender'] != '')
+                                 <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Gender:</strong> &nbsp; {!! $customers['gender'] !!} </li>
+                                 @endif
+                              </ul>
+                              <hr class="horizontal gray-light my-4">
+                              <hr class="horizontal gray-light my-4">
+                              <h6 class="mb-0">Address Info</h6>
+                              <hr class="horizontal gray-light my-4">
+                              <ul class="list-group">
+                                 @if(isset($customers['customeraddress']['address1']) && $customers['customeraddress']['address1'] != '')
+                                 <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Address:</strong> &nbsp; {!! isset($customers['customeraddress']['address1']) ? $customers['customeraddress']['address1'] : '' !!}
+                                    {!! isset($customers['customeraddress']['address2']) ? $customers['customeraddress']['address2'] : '' !!}
+                                    {!! isset($customers['customeraddress']['landmark']) ? $customers['customeraddress']['landmark'] : '' !!}
+                                    {!! isset($customers['customeraddress']['locality']) ? $customers['customeraddress']['locality'] : '' !!}
+                                 </li>
+                                 @endif
+                                 @if(isset($customers['customeraddress']['cityname']['city_name']) && $customers['customeraddress']['cityname']['city_name'] != '')
+                                 <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">City:</strong> &nbsp; {!! $customers['customeraddress']['cityname']['city_name'] !!} </li>
+                                 @endif
+                                 @if(isset($customers['customeraddress']['districtname']['district_name']) && $customers['customeraddress']['districtname']['district_name'] != '')
+                                 <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">District:</strong> &nbsp; {!! $customers['customeraddress']['districtname']['district_name'] !!} </li>
+                                 @endif
+                                 @if(isset($customers['customeraddress']['statename']['state_name']) && $customers['customeraddress']['statename']['state_name'] != '')
+                                 <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">State:</strong> &nbsp; {!! $customers['customeraddress']['statename']['state_name'] !!} </li>
+                                 @endif
+                                 @if(isset($customers['customeraddress']['pincodename']['pincode']) && $customers['customeraddress']['pincodename']['pincode'] != '')
+                                 <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Pincode:</strong> &nbsp; {!! $customers['customeraddress']['pincodename']['pincode'] !!} </li>
+                                 @endif
+                              </ul>
+                           </div>
                         </div>
-                        <div class="col-md-4 col-xl-4 mt-md-0 mt-4 position-relative">
-                           <div class="card card-plain h-100">
-                              <div class="card-header pb-0 p-3">
-                                 <div class="row">
-                                    <div class="col-md-8 d-flex align-items-center">
-                                       <h6 class="mb-0">Customer Information</h6>
-                                    </div>
+                        <hr class="vertical dark">
+                     </div>
+                     <div class="col-md-4 col-xl-4 mt-md-0 mt-4 position-relative">
+                        <div class="card card-plain h-100">
+                           <div class="card-header pb-0 p-3">
+                              <div class="row">
+                                 <div class="col-md-8 d-flex align-items-center">
+                                    <h6 class="mb-0">Customer Information</h6>
                                  </div>
                               </div>
-                              <div class="card-body p-3">
-                                 <!-- <p class="text-sm"></p> -->
-                                 <hr class="horizontal gray-light my-4">
-                                 <ul class="list-group">
-                                    <!-- @if(isset($customers['employeename']['name']))
+                           </div>
+                           <div class="card-body p-3">
+                              <!-- <p class="text-sm"></p> -->
+                              <hr class="horizontal gray-light my-4">
+                              <ul class="list-group">
+                                 <!-- @if(isset($customers['employeename']['name']))
                              <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Executive:</strong> &nbsp; {!! $customers['employeename']['name'] !!} </li>
                              @endif -->
 
-                                    @if(isset($customers->getemployeedetail))
-                                    <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Executive:</strong> &nbsp;<?php foreach ($customers->getemployeedetail as $key_new => $customer_detail) {
-                                                                                                                                                   echo $customer_detail->employee_detail->name . ' ' . ',<br>';
-                                                                                                                                                }  ?> </li>
-                                    @endif
+                                 @if(isset($customers->getemployeedetail))
+                                 <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Executive:</strong> &nbsp;<?php foreach ($customers->getemployeedetail as $key_new => $customer_detail) {
+                                                                                                                                                echo $customer_detail->employee_detail->name . ' ' . ',<br>';
+                                                                                                                                             }  ?> </li>
+                                 @endif
 
-                                    @if(isset($customers['customer_code']))
-                                    <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Customer Code:</strong> &nbsp; {!! $customers['customer_code'] !!} </li>
-                                    @endif
-                                    @if(isset($customers['manager_name']))
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Manager Name:</strong> &nbsp; {!! $customers['manager_name'] !!} </li>
-                                    @endif
-                                    @if(isset($customers['manager_phone']))
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Manager Phone:</strong> &nbsp; {!! $customers['manager_phone'] !!} </li>
-                                    @endif
-                                    @if(isset($customers['customerdetails']['gstin_no']) && $customers['customerdetails']['gstin_no'] != '')
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">GSTIN No:</strong> &nbsp; {!! $customers['customerdetails']['gstin_no'] !!} </li>
-                                    @endif
-                                    @if(isset($customers['customerdetails']['pan_no']) && $customers['customerdetails']['pan_no'] != '')
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Pan No:</strong> &nbsp; {!! $customers['customerdetails']['pan_no'] !!} </li>
-                                    @endif
-                                    @if(isset($customers['customerdetails']['aadhar_no']) && $customers['customerdetails']['aadhar_no'] != '')
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Aadhar No:</strong> &nbsp; {!! $customers['customerdetails']['aadhar_no'] !!} </li>
-                                    @endif
-                                    @if(isset($customers['customerdetails']['otherid_no']) && $customers['customerdetails']['otherid_no'] != '')
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Other No:</strong> &nbsp; {!! $customers['customerdetails']['otherid_no'] !!} </li>
-                                    @endif
-                                    @if(isset($customers['customerdetails']['enrollment_date']) && $customers['customerdetails']['enrollment_date'] != '')
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Enrollment Date:</strong> &nbsp; {!! $customers['customerdetails']['enrollment_date'] !!} </li>
-                                    @endif
-                                    @if(isset($customers['customerdetails']['approval_date']) && $customers['customerdetails']['approval_date'] != '')
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Approval Date:</strong> &nbsp; {!! $customers['customerdetails']['approval_date'] !!} </li>
-                                    @endif
-                                    @if(isset($customers['customerdetails']['aadhar_no']) && $customers['customerdetails']['aadhar_no'] != '')
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Aadhar No:</strong> &nbsp; {!! $customers['customerdetails']['aadhar_no'] !!} </li>
-                                    @endif
-                                    @if(isset($customers['customerdetails']['shop_image']) && $customers['customerdetails']['shop_image'] != '')
-                                    <li class="list-group-item border-0 ps-0 text-sm"><img src="{!! !empty($customers['customerdetails']['shop_image']) ? env('IMAGE_UPLOADS').$customers['customerdetails']['shop_image'] : asset('public/assets/img/placeholder.jpg') !!}" alt="profile_image" class="w-100 border-radius-lg shadow-sm"> </li>
-                                    @endif
-                                    @if(isset($customers['customerdetails']['aadhar_no']) && $customers['customerdetails']['visiting_card'] != '')
-                                    <li class="list-group-item border-0 ps-0 text-sm"><img src="{!! $customers['customerdetails']['visiting_card'] !!}" alt="profile_image" class="w-100 border-radius-lg shadow-sm"> </li>
-                                    @endif
-                                    @if(isset($customers['customerdetails']['aadhar_no']) && $customers['customerdetails']['grade'] != '')
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Grade:</strong> &nbsp; {!! $customers['customerdetails']['grade'] !!} </li>
-                                    @endif
-                                    @if(isset($customers['customerdetails']['aadhar_no']) && $customers['customerdetails']['visit_status'] != '')
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Visit Status:</strong> &nbsp; {!! $customers['customerdetails']['visit_status'] !!} </li>
-                                    @endif
-                                 </ul>
-                                 <hr class="horizontal gray-light my-4">
-                                 <h6 class="mb-0">Survey Information</h6>
-                                 <hr class="horizontal gray-light my-4">
-                                 <div id="accordion" role="tablist">
-                                    @if(!empty($customers['surveys']))
-                                    @foreach( $customers['surveys'] as $index => $survey )
-                                    <div class="card-collapse">
-                                       <div class="card-header" role="tab" id="heading{{$index}}">
-                                          <h5 class="mb-0">
-                                             <a data-toggle="collapse" href="#collapse{{$index}}" aria-expanded="false" aria-controls="collapse{{$index}}" class="collapsed">
-                                                {!! isset($survey['fields']['label_name']) ? $survey['fields']['label_name'] : '' !!}
-                                                <i class="material-icons">keyboard_arrow_down</i>
-                                             </a>
-                                          </h5>
-                                       </div>
-                                       <div id="collapse{{$index}}" class="collapse" role="tabpanel" aria-labelledby="headingOne" data-parent="#accordion" style="">
-                                          <div class="card-body">
-                                             {!! $survey['value'] !!}
-                                          </div>
+                                 @if(isset($customers['customer_code']))
+                                 <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Customer Code:</strong> &nbsp; {!! $customers['customer_code'] !!} </li>
+                                 @endif
+                                 @if(isset($customers['manager_name']))
+                                 <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Manager Name:</strong> &nbsp; {!! $customers['manager_name'] !!} </li>
+                                 @endif
+                                 @if(isset($customers['manager_phone']))
+                                 <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Manager Phone:</strong> &nbsp; {!! $customers['manager_phone'] !!} </li>
+                                 @endif
+                                 @if(isset($customers['customerdetails']['gstin_no']) && $customers['customerdetails']['gstin_no'] != '')
+                                 <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">GSTIN No:</strong> &nbsp; {!! $customers['customerdetails']['gstin_no'] !!} </li>
+                                 @endif
+                                 @if(isset($customers['customerdetails']['pan_no']) && $customers['customerdetails']['pan_no'] != '')
+                                 <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Pan No:</strong> &nbsp; {!! $customers['customerdetails']['pan_no'] !!} </li>
+                                 @endif
+                                 @if(isset($customers['customerdetails']['aadhar_no']) && $customers['customerdetails']['aadhar_no'] != '')
+                                 <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Aadhar No:</strong> &nbsp; {!! $customers['customerdetails']['aadhar_no'] !!} </li>
+                                 @endif
+                                 @if(isset($customers['customerdetails']['otherid_no']) && $customers['customerdetails']['otherid_no'] != '')
+                                 <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Other No:</strong> &nbsp; {!! $customers['customerdetails']['otherid_no'] !!} </li>
+                                 @endif
+                                 @if(isset($customers['customerdetails']['enrollment_date']) && $customers['customerdetails']['enrollment_date'] != '')
+                                 <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Enrollment Date:</strong> &nbsp; {!! $customers['customerdetails']['enrollment_date'] !!} </li>
+                                 @endif
+                                 @if(isset($customers['customerdetails']['approval_date']) && $customers['customerdetails']['approval_date'] != '')
+                                 <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Approval Date:</strong> &nbsp; {!! $customers['customerdetails']['approval_date'] !!} </li>
+                                 @endif
+                                 @if(isset($customers['customerdetails']['aadhar_no']) && $customers['customerdetails']['aadhar_no'] != '')
+                                 <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Aadhar No:</strong> &nbsp; {!! $customers['customerdetails']['aadhar_no'] !!} </li>
+                                 @endif
+                                 @if(isset($customers['customerdetails']['shop_image']) && $customers['customerdetails']['shop_image'] != '')
+                                 <li class="list-group-item border-0 ps-0 text-sm"><img src="{!! !empty($customers['customerdetails']['shop_image']) ? env('IMAGE_UPLOADS').$customers['customerdetails']['shop_image'] : asset('public/assets/img/placeholder.jpg') !!}" alt="profile_image" class="w-100 border-radius-lg shadow-sm"> </li>
+                                 @endif
+                                 @if(isset($customers['customerdetails']['aadhar_no']) && $customers['customerdetails']['visiting_card'] != '')
+                                 <li class="list-group-item border-0 ps-0 text-sm"><img src="{!! $customers['customerdetails']['visiting_card'] !!}" alt="profile_image" class="w-100 border-radius-lg shadow-sm"> </li>
+                                 @endif
+                                 @if(isset($customers['customerdetails']['aadhar_no']) && $customers['customerdetails']['grade'] != '')
+                                 <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Grade:</strong> &nbsp; {!! $customers['customerdetails']['grade'] !!} </li>
+                                 @endif
+                                 @if(isset($customers['customerdetails']['aadhar_no']) && $customers['customerdetails']['visit_status'] != '')
+                                 <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Visit Status:</strong> &nbsp; {!! $customers['customerdetails']['visit_status'] !!} </li>
+                                 @endif
+                              </ul>
+                              <hr class="horizontal gray-light my-4">
+                              <h6 class="mb-0">Survey Information</h6>
+                              <hr class="horizontal gray-light my-4">
+                              <div id="accordion" role="tablist">
+                                 @if(!empty($customers['surveys']))
+                                 @foreach( $customers['surveys'] as $index => $survey )
+                                 <div class="card-collapse">
+                                    <div class="card-header" role="tab" id="heading{{$index}}">
+                                       <h5 class="mb-0">
+                                          <a data-toggle="collapse" href="#collapse{{$index}}" aria-expanded="false" aria-controls="collapse{{$index}}" class="collapsed">
+                                             {!! isset($survey['fields']['label_name']) ? $survey['fields']['label_name'] : '' !!}
+                                             <i class="material-icons">keyboard_arrow_down</i>
+                                          </a>
+                                       </h5>
+                                    </div>
+                                    <div id="collapse{{$index}}" class="collapse" role="tabpanel" aria-labelledby="headingOne" data-parent="#accordion" style="">
+                                       <div class="card-body">
+                                          {!! $survey['value'] !!}
                                        </div>
                                     </div>
-                                    @endforeach
-                                    @endif
                                  </div>
-                              </div>
-                           </div>
-                           <hr class="vertical dark">
-                        </div>
-                        <div class="col-md-4 mt-md-0 mt-4">
-                           <div class="card card-plain h-100">
-                              <div class="card-header pb-0 p-3">
-                                 <h6 class="mb-0">Conversations</h6>
-                              </div>
-                              <div class="card-body p-3">
-                                 <ul class="timeline timeline-simple">
-                                    @if(isset($customers['visitsinfo']))
-                                    @foreach( $customers['visitsinfo'] as $visit )
-                                    @if(isset($visit['description']) && $visit['description'] != '')
-                                    <li class="timeline-inverted">
-                                       <div class="timeline-badge danger">
-                                          <i class="material-icons">card_travel</i>
-                                       </div>
-                                       <div class="timeline-panel">
-                                          <div class="timeline-heading">
-                                             <span class="badge badge-pill badge-danger">{!! $visit['users']['name'] !!}</span>
-                                          </div>
-                                          <div class="timeline-body">
-                                             <p>{!! $visit['description'] !!}</p>
-                                          </div>
-                                          <h6>
-                                             <i class="ti-time"></i> {!! date("d-m-Y", strtotime($visit['created_at'])) !!}
-                                          </h6>
-                                       </div>
-                                    </li>
-                                    @endif
-                                    @endforeach
-                                    @endif
-                                 </ul>
+                                 @endforeach
+                                 @endif
                               </div>
                            </div>
                         </div>
-                        <div class="showCustomerLocationonMaps" style="display:none;">
-                           <div id="map" style="width: 900px; height: 700px;"></div>
+                        <hr class="vertical dark">
+                     </div>
+                     <div class="col-md-4 mt-md-0 mt-4">
+                        <div class="card card-plain h-100">
+                           <div class="card-header pb-0 p-3">
+                              <h6 class="mb-0">Conversations</h6>
+                           </div>
+                           <div class="card-body p-3">
+                              <ul class="timeline timeline-simple">
+                                 @if(isset($customers['visitsinfo']))
+                                 @foreach( $customers['visitsinfo'] as $visit )
+                                 @if(isset($visit['description']) && $visit['description'] != '')
+                                 <li class="timeline-inverted">
+                                    <div class="timeline-badge danger">
+                                       <i class="material-icons">card_travel</i>
+                                    </div>
+                                    <div class="timeline-panel">
+                                       <div class="timeline-heading">
+                                          <span class="badge badge-pill badge-danger">{!! $visit['users']['name'] !!}</span>
+                                       </div>
+                                       <div class="timeline-body">
+                                          <p>{!! $visit['description'] !!}</p>
+                                       </div>
+                                       <h6>
+                                          <i class="ti-time"></i> {!! date("d-m-Y", strtotime($visit['created_at'])) !!}
+                                       </h6>
+                                    </div>
+                                 </li>
+                                 @endif
+                                 @endforeach
+                                 @endif
+                              </ul>
+                           </div>
                         </div>
-                        <div class="col-md-12">
-                           <span class="pull-right">
-                              <a href="javascript:void(0)" class="btn btn-just-icon btn-theme" onclick="showGoogleMaps()"><i class="material-icons">room</i></a>
-                           </span>
+                     </div>
+                     <div class="showCustomerLocationonMaps" style="display:none;">
+                        <div id="map" style="width: 900px; height: 700px;"></div>
+                     </div>
+                     <div class="col-md-12">
+                        <span class="pull-right">
+                           <a href="javascript:void(0)" class="btn btn-just-icon btn-theme" onclick="showGoogleMaps()"><i class="material-icons">room</i></a>
+                        </span>
+                     </div>
+                  </div>
+               </div>
+               <div class="tab-pane " id="profile-tabs-orders">
+                  <div class="row">
+                     <div class="col-md-12">
+                        <h4 class="mb-0">Orders List</h4>
+                        <div class="table-responsive">
+                           <table id="getorder" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap" style="width: 100%">
+                              <thead class="text-primary">
+                                 <th>{!! trans('panel.global.action') !!}</th>
+                                 <th>{!! trans('panel.global.seller') !!}</th>
+                                 <th>{!! trans('panel.global.buyer') !!}</th>
+                                 <th>{!! trans('panel.order.orderno') !!}</th>
+                                 <th>{!! trans('panel.order.order_date') !!}</th>
+                                 <th>{!! trans('panel.order.grand_total') !!}</th>
+                              </thead>
+                              <tbody>
+                              </tbody>
+                           </table>
                         </div>
                      </div>
                   </div>
-                  <div class="tab-pane " id="profile-tabs-orders">
-                     <div class="row">
-                        <div class="col-md-12">
-                           <h4 class="mb-0">Orders List</h4>
-                           <div class="table-responsive">
-                              <table id="getorder" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap" style="width: 100%">
-                                 <thead class="text-primary">
-                                    <th>{!! trans('panel.global.action') !!}</th>
-                                    <th>{!! trans('panel.global.seller') !!}</th>
-                                    <th>{!! trans('panel.global.buyer') !!}</th>
-                                    <th>{!! trans('panel.order.orderno') !!}</th>
-                                    <th>{!! trans('panel.order.order_date') !!}</th>
-                                    <th>{!! trans('panel.order.grand_total') !!}</th>
-                                 </thead>
-                                 <tbody>
-                                 </tbody>
-                              </table>
-                           </div>
-                        </div>
-                     </div>
-                  </div>
-                  <div class="tab-pane " id="profile-tabs-sales">
-                     <h4 class="mb-0">Sales List</h4>
-                     <div class="table-responsive">
-                        <table id="getsales" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap" style="width: 100%">
-                           <thead class=" text-primary">
-                              <th>{!! trans('panel.global.action') !!}</th>
-                              <th>{!! trans('panel.global.seller') !!}</th>
-                              <th>{!! trans('panel.sale.fields.invoice_no') !!}</th>
-                              <th>{!! trans('panel.sale.fields.invoice_date') !!}</th>
-                              <th>{!! trans('panel.sale.fields.grand_total') !!}</th>
-                           </thead>
-                           <tbody>
-                           </tbody>
-                        </table>
-                     </div>
-                  </div>
-                  <div class="tab-pane " id="profile-tabs-payments">
-                     <h4 class="mb-0">Payments List</h4>
-                     <div class="table-responsive">
-                        <table id="getPaymentList" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap" style="width: 100%">
-                           <thead class=" text-primary">
-                              <th>No</th>
-                              <th>Date</th>
-                              <th>Type</th>
-                              <th>Mode</th>
-                              <th>Amount</th>
-                           </thead>
-                           <tbody>
-                           </tbody>
-                        </table>
-                     </div>
-                  </div>
-                  <div class="tab-pane " id="profile-tabs-activity">
-                     <div class="row mt-3">
-                        <div class="col-12">
-                           <div class="card card-plain h-100">
-                              <div class="card-header pb-0 p-3">
-                                 <h4 class="section-heading mb-3 h4 mt-0">
-                                    Activity List
-                                    <span class="pull-right">
-                                       <div class="btn-group">
-                                          <a class="btn btn-just-icon btn-theme create" title="Create Notes" onclick="showCreateNotes()"><i class="material-icons">add_circle</i></a>
-                                       </div>
-                                    </span>
-                                 </h4>
-                              </div>
-                              <div class="card-body p-3">
-                                 <div class="row">
-                                    <div class="col-md-12 createCustomerActivity" style="display:none;">
-                                       {!! Form::open(['route' => 'notes.store']) !!}
-                                       <input type="hidden" name="customer_id" value="{!! $customers['id'] !!}">
-                                       <input type="hidden" name="id" id="note_id">
-                                       <div class="row">
-                                          <div class="col-md-6">
-                                             <div class="row">
-                                                <label class="col-md-3 col-form-label">Purpose<span class="text-danger"> *</span></label>
-                                                <div class="col-md-9">
-                                                   <div class="form-group has-default bmd-form-group">
-                                                      <select class="form-control select2" name="purpose" id="purpose" style="width: 100%;" required>
-                                                         <option value="" disabled>Select Purpose</option>
-                                                         <option value="Welcome Call">Welcome Call</option>
-                                                         <option value="Product Launch">Product Launch</option>
-                                                      </select>
-                                                   </div>
-                                                   @if ($errors->has('purpose'))
-                                                   <div class="error col-lg-12">
-                                                      <p class="text-danger">{{ $errors->first('purpose') }}</p>
-                                                   </div>
-                                                   @endif
-                                                </div>
-                                             </div>
-                                          </div>
-                                          <div class="col-md-6">
-                                             <div class="row">
-                                                <label class="col-md-3 col-form-label">Call Status <span class="text-danger"> *</span></label>
-                                                <div class="col-md-9">
-                                                   <div class="form-group has-default bmd-form-group">
-                                                      <select class="form-control select2" name="callstatus" id="callstatus" data-style="select-with-transition" title="Select Call Status" required style="width: 100%;">
-                                                         <option value="" disabled>Select Call Status</option>
-                                                         <option value="Switched Off">Switched Off</option>
-                                                         <option value="Out Of Network">Out Of Network</option>
-                                                         <option value="Did Not Pick">Did Not Pick</option>
-                                                         <option value="Call Back Later">Call Back Later</option>
-                                                         <option value="Call Done">Call Done</option>
-                                                         <option value="Not Interested">Not Interested</option>
-                                                         <option value="Language Issue">Language Issue</option>
-                                                         <option value="Wrong Number">Wrong Number</option>
-                                                         <option value="Call Disconnected">Call Disconnected</option>
-
-                                                      </select>
-                                                   </div>
-                                                </div>
-                                             </div>
-                                          </div>
-                                          <div class="col-md-12">
-                                             <div class="row">
-                                                <label class="col-sm-1 col-form-label">Notes<span class="text-danger"> *</span></label>
-                                                <div class="col-sm-11">
-                                                   <div class="form-group bmd-form-group">
-                                                      <textarea class="form-control" rows="4" name="note" id="note" required>{!! old( 'note') !!}</textarea>
-                                                   </div>
-                                                </div>
-                                             </div>
-                                          </div>
-                                          <div class="col-md-12 pull-right">
-                                             {{ Form::submit('Submit', array('class' => 'btn btn-info pull-right')) }}
-                                          </div>
-                                          {{ Form::close() }}
-                                       </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                       <ul class="timeline timeline-simple customerActivity">
-                                       </ul>
-                                    </div>
-                                 </div>
-                              </div>
-                           </div>
-                        </div>
-                     </div>
-                  </div>
-                  <div class="tab-pane border rounded" id="kyc">
-                     <hr>
-                     <div class="row align-items-center">
-                        <div class="col-md-6 col-sm-6">
-                           <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                              <div class="fileinput-new thumbnail">
-                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','gstin')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','gstin')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview1">
-                              </div>
-                              <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div><br>
-                              <label class="bmd-label-floating">{!! trans('panel.customers.fields.gstin_image') !!}</label>
-                              @if ($errors->has('imggstin'))
-                              <div class="error col-lg-12">
-                                 <p class="text-danger">{{ $errors->first('imggstin') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                        <div class="col-md-4 col-sm-4">
-                           <div class="row">
-                              <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.gstin_no') !!} </label>
-                              <div class="col-md-9">
-                                 <div class="form-group has-default bmd-form-group">
-                                    <input type="text" readonly name="gstin_no" id="gstin_no" class="form-control" value="{!! old( 'gstin_no', isset($customers['customerdetails']['gstin_no']) ? $customers['customerdetails']['gstin_no'] :'' ) !!}" maxlength="200">
-                                    @if ($errors->has('gstin_no'))
-                                    <div class="error col-lg-12">
-                                       <p class="text-danger">{{ $errors->first('gstin_no') }}</p>
-                                    </div>
-                                    @endif
-                                 </div>
-                              </div>
-
-                           </div>
-                        </div>
-                        <div class="col-md-2 col-sm-2">
-                           @if($customers['customerdetails']['gstin_no'] && $customers['customerdetails']['gstin_no_status'] == '0')
-                              <button class="btn btn-success veridy_data" data-type="gstin_no_status" data-id="{{$customers['id']}}" data-id="{{$customers['id']}}">Verify</button>
-                              <button class="btn btn-danger reject_data" data-type="gstin_no_status" data-id="{{$customers['id']}}">Reject</button>
-                           @elseif($customers['customerdetails']['gstin_no'] && $customers['customerdetails']['gstin_no_status'] == '1')
-                              <button disabled class="btn btn-success">Verified</button>
-                              <button class="btn btn-danger reject_data" data-type="gstin_no_status" data-id="{{$customers['id']}}">Reject</button>
-                           @elseif($customers['customerdetails']['gstin_no'] && $customers['customerdetails']['gstin_no_status'] == '2')
-                              <button class="btn btn-success veridy_data" data-type="gstin_no_status" data-id="{{$customers['id']}}" >Verify</button>
-                              <button disabled class="btn btn-danger">Rejected</button>
-                           @endif
-                        </div>
-                     </div>
-                     <hr>
-                     <div class="row align-items-center">
-                        <div class="col-md-6 col-sm-6">
-                           <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                              <div class="fileinput-new thumbnail">
-                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','pan')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','pan')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview2">
-                              </div>
-                              <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div><br>
-                              <label class="bmd-label-floating">{!! trans('panel.customers.fields.pan_image') !!}</label>
-                           </div>
-                        </div>
-                        <div class="col-md-4 col-sm-4">
-                           <div class="row">
-                              <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.pan_no') !!}</label>
-                              <div class="col-md-9">
-                                 <div class="form-group has-default bmd-form-group">
-                                    <input type="text" readonly name="pan_no" id="pan_no" class="form-control" value="{!! old( 'pan_no', isset($customers['customerdetails']['pan_no']) ? $customers['customerdetails']['pan_no'] :'' ) !!}" maxlength="200">
-                                    @if ($errors->has('pan_no'))
-                                    <div class="error col-lg-12">
-                                       <p class="text-danger">{{ $errors->first('pan_no') }}</p>
-                                    </div>
-                                    @endif
-                                 </div>
-                              </div>
-                           </div>
-                        </div>
-                        <div class="col-md-2 col-sm-2">
-                           @if($customers['customerdetails']['pan_no'] && $customers['customerdetails']['pan_no_status'] == '0')
-                              <button class="btn btn-success veridy_data" data-type="pan_no_status" data-id="{{$customers['id']}}">Verify</button>
-                              <button class="btn btn-danger reject_data" data-type="pan_no_status" data-id="{{$customers['id']}}">Reject</button>
-                           @elseif($customers['customerdetails']['pan_no'] && $customers['customerdetails']['pan_no_status'] == '1')
-                              <button disabled class="btn btn-success">Verified</button>
-                              <button class="btn btn-danger reject_data" data-type="pan_no_status" data-id="{{$customers['id']}}">Reject</button>
-                           @elseif($customers['customerdetails']['pan_no'] && $customers['customerdetails']['pan_no_status'] == '2')
-                              <button class="btn btn-success veridy_data" data-type="pan_no_status" data-id="{{$customers['id']}}" >Verify</button>
-                              <button disabled class="btn btn-danger">Rejected</button>
-                           @endif
-                        </div>
-                     </div>
-                     <hr>
-                     <div class="row align-items-center">
-                        <div class="col-md-6 col-sm-6">
-                           <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                              <div class="fileinput-new thumbnail">
-                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','aadhar')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','aadhar')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview3">
-                              </div>
-                              <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
-                              <div class="fileinput-new thumbnail ml-2">
-                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','aadharback')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','aadharback')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview3">
-                              </div>
-                              <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div><br>
-                              <label class="bmd-label-floating">{!! trans('panel.customers.fields.aadhar_front_image') !!}</label>
-                              <label style="padding-left: 50px;" class="bmd-label-floating">{!! trans('panel.customers.fields.aadhar_back_image') !!}</label>
-                           </div>
-                        </div>
-                        <div class="col-md-4 col-sm-4">
-                           <div class="row">
-                              <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.aadhar_no') !!} </label>
-                              <div class="col-md-9">
-                                 <div class="form-group has-default bmd-form-group">
-                                    <input type="text" readonly name="aadhar_no" id="aadhar_no" class="form-control" value="{!! old( 'aadhar_no', isset($customers['customerdetails']['aadhar_no']) ? $customers['customerdetails']['aadhar_no'] :'' ) !!}" maxlength="200">
-                                    @if ($errors->has('aadhar_no'))
-                                    <div class="error col-lg-12">
-                                       <p class="text-danger">{{ $errors->first('aadhar_no') }}</p>
-                                    </div>
-                                    @endif
-                                 </div>
-                              </div>
-                           </div>
-                        </div>
-                        <div class="col-md-2 col-sm-2">
-                           @if($customers['customerdetails']['aadhar_no'] && $customers['customerdetails']['aadhar_no_status'] == '0')
-                              <button class="btn btn-success veridy_data" data-type="aadhar_no_status" data-id="{{$customers['id']}}">Verify</button>
-                              <button class="btn btn-danger reject_data" data-type="aadhar_no_status" data-id="{{$customers['id']}}">Reject</button>
-                           @elseif($customers['customerdetails']['aadhar_no'] && $customers['customerdetails']['aadhar_no_status'] == '1')
-                              <button disabled class="btn btn-success">Verified</button>
-                              <button class="btn btn-danger reject_data" data-type="aadhar_no_status" data-id="{{$customers['id']}}">Reject</button>
-                           @elseif($customers['customerdetails']['aadhar_no'] && $customers['customerdetails']['aadhar_no_status'] == '2')
-                              <button class="btn btn-success veridy_data" data-type="aadhar_no_status" data-id="{{$customers['id']}}" >Verify</button>
-                              <button disabled class="btn btn-danger">Rejected</button>
-                           @endif
-                        </div>
-                     </div>
-                     <hr>
-                     <div class="row align-items-center">
-                        <div class="col-md-6 col-sm-6">
-                           <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                              <div class="fileinput-new thumbnail">
-                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','bankpass')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','bankpass')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview2">
-                              </div>
-                              <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div><br>
-                              <label class="bmd-label-floating">{!! trans('panel.customers.fields.bank_passbook_image') !!}</label>
-                           </div>
-                        </div>
-                        <div class="col-md-4 col-sm-4">
-                           <div class="row">
-                              <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.account_holder') !!}</label>
-                              <div class="col-md-9">
-                                 <div class="form-group has-default bmd-form-group">
-                                    <input type="text" readonly name="account_holder" id="account_holder" class="form-control" value="{!! old( 'account_holder', isset($customers['customerdetails']['account_holder']) ? $customers['customerdetails']['account_holder'] :'' ) !!}" maxlength="200">
-                                 </div>
-                              </div>
-                           </div>
-                           <div class="row">
-                              <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.account_number') !!}</label>
-                              <div class="col-md-9">
-                                 <div class="form-group has-default bmd-form-group">
-                                    <input type="text" readonly name="account_number" id="account_number" class="form-control" value="{!! old( 'account_number', isset($customers['customerdetails']['account_number']) ? $customers['customerdetails']['account_number'] :'' ) !!}" maxlength="200">
-                                 </div>
-                              </div>
-                           </div>
-                           <div class="row">
-                              <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.bank_name') !!}</label>
-                              <div class="col-md-9">
-                                 <div class="form-group has-default bmd-form-group">
-                                    <input type="text" readonly name="bank_name" id="bank_name" class="form-control" value="{!! old( 'bank_name', isset($customers['customerdetails']['bank_name']) ? $customers['customerdetails']['bank_name'] :'' ) !!}" maxlength="200">
-                                 </div>
-                              </div>
-                           </div>
-                           <div class="row">
-                              <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.ifsc_code') !!}</label>
-                              <div class="col-md-9">
-                                 <div class="form-group has-default bmd-form-group">
-                                    <input type="text" readonly name="ifsc_code" id="ifsc_code" class="form-control" value="{!! old( 'ifsc_code', isset($customers['customerdetails']['ifsc_code']) ? $customers['customerdetails']['ifsc_code'] :'' ) !!}" maxlength="200">
-                                 </div>
-                              </div>
-                           </div>
-                        </div>
-                        <div class="col-md-2 col-sm-2">
-                           @if($customers['customerdetails']['account_number'] && $customers['customerdetails']['bank_status'] == '0')
-                              <button class="btn btn-success veridy_data" data-type="bank_status" data-id="{{$customers['id']}}">Verify</button>
-                              <button class="btn btn-danger reject_data" data-type="bank_status" data-id="{{$customers['id']}}">Reject</button>
-                           @elseif($customers['customerdetails']['account_number'] && $customers['customerdetails']['bank_status'] == '1')
-                              <button disabled class="btn btn-success">Verified</button>
-                              <button class="btn btn-danger reject_data" data-type="bank_status" data-id="{{$customers['id']}}">Reject</button>
-                           @elseif($customers['customerdetails']['account_number'] && $customers['customerdetails']['bank_status'] == '2')
-                              <button class="btn btn-success veridy_data" data-type="bank_status" data-id="{{$customers['id']}}" >Verify</button>
-                              <button disabled class="btn btn-danger">Rejected</button>
-                           @endif
-                        </div>
-                     </div>
-                     <hr>
-                     <div class="row align-items-center">
-                        <div class="col-md-6 col-sm-6">
-                           <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                              <div class="fileinput-new thumbnail">
-                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','other')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','other')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview4">
-                              </div>
-                              <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div><br>
-                              <label class="bmd-label-floating">{!! trans('panel.customers.fields.otherid_image') !!}</label>
-                           </div>
-                        </div>
-                        <div class="col-md-4 col-sm-4">
-                           <div class="row">
-                              <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.otherid_no') !!}</label>
-                              <div class="col-md-9">
-                                 <div class="form-group has-default bmd-form-group">
-                                    <input type="text" readonly name="otherid_no" id="otherid_no" class="form-control" value="{!! old( 'otherid_no', isset($customers['customerdetails']['otherid_no']) ? $customers['customerdetails']['otherid_no'] :'' ) !!}" maxlength="200">
-                                    @if ($errors->has('otherid_no'))
-                                    <div class="error col-lg-12">
-                                       <p class="text-danger">{{ $errors->first('otherid_no') }}</p>
-                                    </div>
-                                    @endif
-                                 </div>
-                              </div>
-
-                           </div>
-                        </div>
-                        <div class="col-md-2 col-sm-2">
-                           @if($customers['customerdetails']['otherid_no'] && $customers['customerdetails']['otherid_no_status'] == '0')
-                              <button class="btn btn-success veridy_data" data-type="otherid_no_status" data-id="{{$customers['id']}}">Verify</button>
-                              <button class="btn btn-danger reject_data" data-type="otherid_no_status" data-id="{{$customers['id']}}">Reject</button>
-                           @elseif($customers['customerdetails']['otherid_no'] && $customers['customerdetails']['otherid_no_status'] == '1')
-                              <button disabled class="btn btn-success">Verified</button>
-                              <button class="btn btn-danger reject_data" data-type="otherid_no_status" data-id="{{$customers['id']}}">Reject</button>
-                           @elseif($customers['customerdetails']['otherid_no_status'] && $customers['customerdetails']['otherid_no_status'] == '2')
-                              <button class="btn btn-success veridy_data" data-type="otherid_no_status" data-id="{{$customers['id']}}" >Verify</button>
-                              <button disabled class="btn btn-danger">Rejected</button>
-                           @endif
-                        </div>
-                     </div>
-                     <hr>
-                  </div>
-                  <div class="tab-pane " id="transaction_history">
-                     <div class="table-responsive">
-                     <table id="getTransactionHistory" class="table table-striped- table-bschemeed table-hover table-checkable no-wrap">
-                     <thead class=" text-primary">
-                        <th>{!! trans('panel.global.no') !!}</th>
-                        <th>{!! trans('panel.expenses.fields.date') !!}</th>
-                        <th>Firm Name</th>
-                        <th>CONTACT PERSON</th>
-                        <th>parent name</th>
-                        <th>Mobile Number</th>
-                        <th>COUPON Code</th>
-                        <th>Sub Category</th>
-                        <th>Prodcut Name</th>
-                        <th>Point</th>
-                        <th>{!! trans('panel.global.action') !!}</th>
-                     </thead>
-                     <tbody>
-                     </tbody>
+               </div>
+               <div class="tab-pane " id="profile-tabs-sales">
+                  <h4 class="mb-0">Sales List</h4>
+                  <div class="table-responsive">
+                     <table id="getsales" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap" style="width: 100%">
+                        <thead class=" text-primary">
+                           <th>{!! trans('panel.global.action') !!}</th>
+                           <th>{!! trans('panel.global.seller') !!}</th>
+                           <th>{!! trans('panel.sale.fields.invoice_no') !!}</th>
+                           <th>{!! trans('panel.sale.fields.invoice_date') !!}</th>
+                           <th>{!! trans('panel.sale.fields.grand_total') !!}</th>
+                        </thead>
+                        <tbody>
+                        </tbody>
                      </table>
+                  </div>
+               </div>
+               <div class="tab-pane " id="profile-tabs-payments">
+                  <h4 class="mb-0">Payments List</h4>
+                  <div class="table-responsive">
+                     <table id="getPaymentList" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap" style="width: 100%">
+                        <thead class=" text-primary">
+                           <th>No</th>
+                           <th>Date</th>
+                           <th>Type</th>
+                           <th>Mode</th>
+                           <th>Amount</th>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                     </table>
+                  </div>
+               </div>
+               <div class="tab-pane " id="profile-tabs-activity">
+                  <div class="row mt-3">
+                     <div class="col-12">
+                        <div class="card card-plain h-100">
+                           <div class="card-header pb-0 p-3">
+                              <h4 class="section-heading mb-3 h4 mt-0">
+                                 Activity List
+                                 <span class="pull-right">
+                                    <div class="btn-group">
+                                       <a class="btn btn-just-icon btn-theme create" title="Create Notes" onclick="showCreateNotes()"><i class="material-icons">add_circle</i></a>
+                                    </div>
+                                 </span>
+                              </h4>
+                           </div>
+                           <div class="card-body p-3">
+                              <div class="row">
+                                 <div class="col-md-12 createCustomerActivity" style="display:none;">
+                                    {!! Form::open(['route' => 'notes.store']) !!}
+                                    <input type="hidden" name="customer_id" value="{!! $customers['id'] !!}">
+                                    <input type="hidden" name="id" id="note_id">
+                                    <div class="row">
+                                       <div class="col-md-6">
+                                          <div class="row">
+                                             <label class="col-md-3 col-form-label">Purpose<span class="text-danger"> *</span></label>
+                                             <div class="col-md-9">
+                                                <div class="form-group has-default bmd-form-group">
+                                                   <select class="form-control select2" name="purpose" id="purpose" style="width: 100%;" required>
+                                                      <option value="" disabled>Select Purpose</option>
+                                                      <option value="Welcome Call">Welcome Call</option>
+                                                      <option value="Product Launch">Product Launch</option>
+                                                   </select>
+                                                </div>
+                                                @if ($errors->has('purpose'))
+                                                <div class="error col-lg-12">
+                                                   <p class="text-danger">{{ $errors->first('purpose') }}</p>
+                                                </div>
+                                                @endif
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-6">
+                                          <div class="row">
+                                             <label class="col-md-3 col-form-label">Call Status <span class="text-danger"> *</span></label>
+                                             <div class="col-md-9">
+                                                <div class="form-group has-default bmd-form-group">
+                                                   <select class="form-control select2" name="callstatus" id="callstatus" data-style="select-with-transition" title="Select Call Status" required style="width: 100%;">
+                                                      <option value="" disabled>Select Call Status</option>
+                                                      <option value="Switched Off">Switched Off</option>
+                                                      <option value="Out Of Network">Out Of Network</option>
+                                                      <option value="Did Not Pick">Did Not Pick</option>
+                                                      <option value="Call Back Later">Call Back Later</option>
+                                                      <option value="Call Done">Call Done</option>
+                                                      <option value="Not Interested">Not Interested</option>
+                                                      <option value="Language Issue">Language Issue</option>
+                                                      <option value="Wrong Number">Wrong Number</option>
+                                                      <option value="Call Disconnected">Call Disconnected</option>
+
+                                                   </select>
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-12">
+                                          <div class="row">
+                                             <label class="col-sm-1 col-form-label">Notes<span class="text-danger"> *</span></label>
+                                             <div class="col-sm-11">
+                                                <div class="form-group bmd-form-group">
+                                                   <textarea class="form-control" rows="4" name="note" id="note" required>{!! old( 'note') !!}</textarea>
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-12 pull-right">
+                                          {{ Form::submit('Submit', array('class' => 'btn btn-info pull-right')) }}
+                                       </div>
+                                       {{ Form::close() }}
+                                    </div>
+                                 </div>
+                                 <div class="col-md-12">
+                                    <ul class="timeline timeline-simple customerActivity">
+                                    </ul>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
                      </div>
                   </div>
-                  <div class="tab-pane " id="redemption">
-                     <div class="m-2 p-2 text-center">
-                        <h2>Coming soon</h2>
+               </div>
+               <div class="tab-pane border rounded {{$kyc?'active show':''}}" id="kyc">
+                  <hr>
+                  <div class="row align-items-center">
+                     <div class="col-md-6 col-sm-6">
+                        <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                           <div class="fileinput-new thumbnail">
+                              <img src="{!! !empty($customers['customerdocuments']->where('document_name','gstin')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','gstin')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview1">
+                           </div>
+                           <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div><br>
+                           <label class="bmd-label-floating">{!! trans('panel.customers.fields.gstin_image') !!}</label>
+                           @if ($errors->has('imggstin'))
+                           <div class="error col-lg-12">
+                              <p class="text-danger">{{ $errors->first('imggstin') }}</p>
+                           </div>
+                           @endif
+                        </div>
                      </div>
+                     <div class="col-md-4 col-sm-4">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.gstin_no') !!} </label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" readonly name="gstin_no" id="gstin_no" class="form-control" value="{!! old( 'gstin_no', isset($customers['customerdetails']['gstin_no']) ? $customers['customerdetails']['gstin_no'] :'' ) !!}" maxlength="200">
+                                 @if ($errors->has('gstin_no'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('gstin_no') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+
+                        </div>
+                     </div>
+                     <div class="col-md-2 col-sm-2">
+                        @if($customers['customerdetails'] && $customers['customerdetails']['gstin_no'] && $customers['customerdetails']['gstin_no_status'] == '0')
+                        <button class="btn btn-success veridy_data" data-type="gstin_no_status" data-id="{{$customers['id']}}" data-id="{{$customers['id']}}">Verify</button>
+                        <button class="btn btn-danger reject_data" data-type="gstin_no_status" data-id="{{$customers['id']}}">Reject</button>
+                        @elseif($customers['customerdetails'] && $customers['customerdetails']['gstin_no'] && $customers['customerdetails']['gstin_no_status'] == '1')
+                        <button disabled class="btn btn-success">Verified</button>
+                        <button class="btn btn-danger reject_data" data-type="gstin_no_status" data-id="{{$customers['id']}}">Reject</button>
+                        @elseif($customers['customerdetails'] && $customers['customerdetails']['gstin_no'] && $customers['customerdetails']['gstin_no_status'] == '2')
+                        <button class="btn btn-success veridy_data" data-type="gstin_no_status" data-id="{{$customers['id']}}">Verify</button>
+                        <button disabled class="btn btn-danger">Rejected</button>
+                        @endif
+                     </div>
+                  </div>
+                  <hr>
+                  <div class="row align-items-center">
+                     <div class="col-md-6 col-sm-6">
+                        <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                           <div class="fileinput-new thumbnail">
+                              <img src="{!! !empty($customers['customerdocuments']->where('document_name','pan')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','pan')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview2">
+                           </div>
+                           <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div><br>
+                           <label class="bmd-label-floating">{!! trans('panel.customers.fields.pan_image') !!}</label>
+                        </div>
+                     </div>
+                     <div class="col-md-4 col-sm-4">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.pan_no') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" readonly name="pan_no" id="pan_no" class="form-control" value="{!! old( 'pan_no', isset($customers['customerdetails']['pan_no']) ? $customers['customerdetails']['pan_no'] :'' ) !!}" maxlength="200">
+                                 @if ($errors->has('pan_no'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('pan_no') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-2 col-sm-2">
+                        @if($customers['customerdetails'] && $customers['customerdetails']['pan_no'] && $customers['customerdetails']['pan_no_status'] == '0')
+                        <button class="btn btn-success veridy_data" data-type="pan_no_status" data-id="{{$customers['id']}}">Verify</button>
+                        <button class="btn btn-danger reject_data" data-type="pan_no_status" data-id="{{$customers['id']}}">Reject</button>
+                        @elseif($customers['customerdetails'] && $customers['customerdetails']['pan_no'] && $customers['customerdetails']['pan_no_status'] == '1')
+                        <button disabled class="btn btn-success">Verified</button>
+                        <button class="btn btn-danger reject_data" data-type="pan_no_status" data-id="{{$customers['id']}}">Reject</button>
+                        @elseif($customers['customerdetails'] && $customers['customerdetails']['pan_no'] && $customers['customerdetails']['pan_no_status'] == '2')
+                        <button class="btn btn-success veridy_data" data-type="pan_no_status" data-id="{{$customers['id']}}">Verify</button>
+                        <button disabled class="btn btn-danger">Rejected</button>
+                        @endif
+                     </div>
+                  </div>
+                  <hr>
+                  <div class="row align-items-center">
+                     <div class="col-md-6 col-sm-6">
+                        <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                           <div class="fileinput-new thumbnail">
+                              <img src="{!! !empty($customers['customerdocuments']->where('document_name','aadhar')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','aadhar')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview3">
+                           </div>
+                           <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
+                           <div class="fileinput-new thumbnail ml-2">
+                              <img src="{!! !empty($customers['customerdocuments']->where('document_name','aadharback')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','aadharback')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview3">
+                           </div>
+                           <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div><br>
+                           <label class="bmd-label-floating">{!! trans('panel.customers.fields.aadhar_front_image') !!}</label>
+                           <label style="padding-left: 50px;" class="bmd-label-floating">{!! trans('panel.customers.fields.aadhar_back_image') !!}</label>
+                        </div>
+                     </div>
+                     <div class="col-md-4 col-sm-4">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.aadhar_no') !!} </label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" readonly name="aadhar_no" id="aadhar_no" class="form-control" value="{!! old( 'aadhar_no', isset($customers['customerdetails']['aadhar_no']) ? $customers['customerdetails']['aadhar_no'] :'' ) !!}" maxlength="200">
+                                 @if ($errors->has('aadhar_no'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('aadhar_no') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-2 col-sm-2">
+                        @if($customers['customerdetails'] && $customers['customerdetails']['aadhar_no'] && $customers['customerdetails']['aadhar_no_status'] == '0')
+                        <button class="btn btn-success veridy_data" data-type="aadhar_no_status" data-id="{{$customers['id']}}">Verify</button>
+                        <button class="btn btn-danger reject_data" data-type="aadhar_no_status" data-id="{{$customers['id']}}">Reject</button>
+                        @elseif($customers['customerdetails'] && $customers['customerdetails']['aadhar_no'] && $customers['customerdetails']['aadhar_no_status'] == '1')
+                        <button disabled class="btn btn-success">Verified</button>
+                        <button class="btn btn-danger reject_data" data-type="aadhar_no_status" data-id="{{$customers['id']}}">Reject</button>
+                        @elseif($customers['customerdetails'] && $customers['customerdetails']['aadhar_no'] && $customers['customerdetails']['aadhar_no_status'] == '2')
+                        <button class="btn btn-success veridy_data" data-type="aadhar_no_status" data-id="{{$customers['id']}}">Verify</button>
+                        <button disabled class="btn btn-danger">Rejected</button>
+                        @endif
+                     </div>
+                  </div>
+                  <hr>
+                  <div class="row align-items-center">
+                     <div class="col-md-6 col-sm-6">
+                        <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                           <div class="fileinput-new thumbnail">
+                              <img src="{!! !empty($customers['customerdocuments']->where('document_name','bankpass')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','bankpass')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview2">
+                           </div>
+                           <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div><br>
+                           <label class="bmd-label-floating">{!! trans('panel.customers.fields.bank_passbook_image') !!}</label>
+                        </div>
+                     </div>
+                     <div class="col-md-4 col-sm-4">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.account_holder') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" readonly name="account_holder" id="account_holder" class="form-control" value="{!! old( 'account_holder', isset($customers['customerdetails']['account_holder']) ? $customers['customerdetails']['account_holder'] :'' ) !!}" maxlength="200">
+                              </div>
+                           </div>
+                        </div>
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.account_number') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" readonly name="account_number" id="account_number" class="form-control" value="{!! old( 'account_number', isset($customers['customerdetails']['account_number']) ? $customers['customerdetails']['account_number'] :'' ) !!}" maxlength="200">
+                              </div>
+                           </div>
+                        </div>
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.bank_name') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" readonly name="bank_name" id="bank_name" class="form-control" value="{!! old( 'bank_name', isset($customers['customerdetails']['bank_name']) ? $customers['customerdetails']['bank_name'] :'' ) !!}" maxlength="200">
+                              </div>
+                           </div>
+                        </div>
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.ifsc_code') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" readonly name="ifsc_code" id="ifsc_code" class="form-control" value="{!! old( 'ifsc_code', isset($customers['customerdetails']['ifsc_code']) ? $customers['customerdetails']['ifsc_code'] :'' ) !!}" maxlength="200">
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-2 col-sm-2">
+                        @if($customers['customerdetails'] && $customers['customerdetails']['account_number'] && $customers['customerdetails']['bank_status'] == '0')
+                        <button class="btn btn-success veridy_data" data-type="bank_status" data-id="{{$customers['id']}}">Verify</button>
+                        <button class="btn btn-danger reject_data" data-type="bank_status" data-id="{{$customers['id']}}">Reject</button>
+                        @elseif($customers['customerdetails'] && $customers['customerdetails']['account_number'] && $customers['customerdetails']['bank_status'] == '1')
+                        <button disabled class="btn btn-success">Verified</button>
+                        <button class="btn btn-danger reject_data" data-type="bank_status" data-id="{{$customers['id']}}">Reject</button>
+                        @elseif($customers['customerdetails'] && $customers['customerdetails']['account_number'] && $customers['customerdetails']['bank_status'] == '2')
+                        <button class="btn btn-success veridy_data" data-type="bank_status" data-id="{{$customers['id']}}">Verify</button>
+                        <button disabled class="btn btn-danger">Rejected</button>
+                        @endif
+                     </div>
+                  </div>
+                  <hr>
+                  <div class="row align-items-center">
+                     <div class="col-md-6 col-sm-6">
+                        <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                           <div class="fileinput-new thumbnail">
+                              <img src="{!! !empty($customers['customerdocuments']->where('document_name','other')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','other')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview4">
+                           </div>
+                           <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div><br>
+                           <label class="bmd-label-floating">{!! trans('panel.customers.fields.otherid_image') !!}</label>
+                        </div>
+                     </div>
+                     <div class="col-md-4 col-sm-4">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.otherid_no') !!}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <input type="text" readonly name="otherid_no" id="otherid_no" class="form-control" value="{!! old( 'otherid_no', isset($customers['customerdetails']['otherid_no']) ? $customers['customerdetails']['otherid_no'] :'' ) !!}" maxlength="200">
+                                 @if ($errors->has('otherid_no'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('otherid_no') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+
+                        </div>
+                     </div>
+                     <div class="col-md-2 col-sm-2">
+                        @if($customers['customerdetails'] && $customers['customerdetails']['otherid_no'] && $customers['customerdetails']['otherid_no_status'] == '0')
+                        <button class="btn btn-success veridy_data" data-type="otherid_no_status" data-id="{{$customers['id']}}">Verify</button>
+                        <button class="btn btn-danger reject_data" data-type="otherid_no_status" data-id="{{$customers['id']}}">Reject</button>
+                        @elseif($customers['customerdetails'] && $customers['customerdetails']['otherid_no'] && $customers['customerdetails']['otherid_no_status'] == '1')
+                        <button disabled class="btn btn-success">Verified</button>
+                        <button class="btn btn-danger reject_data" data-type="otherid_no_status" data-id="{{$customers['id']}}">Reject</button>
+                        @elseif($customers['customerdetails'] && $customers['customerdetails']['otherid_no_status'] && $customers['customerdetails']['otherid_no_status'] == '2')
+                        <button class="btn btn-success veridy_data" data-type="otherid_no_status" data-id="{{$customers['id']}}">Verify</button>
+                        <button disabled class="btn btn-danger">Rejected</button>
+                        @endif
+                     </div>
+                  </div>
+                  <hr>
+               </div>
+               <div class="tab-pane " id="transaction_history">
+                  <div class="table-responsive">
+                     <table id="getTransactionHistory" class="table table-striped- table-bschemeed table-hover table-checkable no-wrap">
+                        <thead class=" text-primary">
+                           <th>{!! trans('panel.global.no') !!}</th>
+                           <th>{!! trans('panel.expenses.fields.date') !!}</th>
+                           <th>Firm Name</th>
+                           <th>CONTACT PERSON</th>
+                           <th>parent name</th>
+                           <th>Mobile Number</th>
+                           <th>COUPON Code</th>
+                           <th>Sub Category</th>
+                           <th>Prodcut Name</th>
+                           <th>Point</th>
+                           <th>{!! trans('panel.global.action') !!}</th>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                     </table>
+                  </div>
+               </div>
+               <div class="tab-pane " id="redemption">
+                  <div class="m-2 p-2 text-center">
+                     <h2>Coming soon</h2>
                   </div>
                </div>
             </div>
          </div>
       </div>
+   </div>
    </div>
    <script src="http://maps.google.com/maps/api/js?key=AIzaSyAVSDwHbKULnZa93kYpYINTqX4eaWy9q18" type="text/javascript"></script>
    <script type="text/javascript">
@@ -1047,11 +1067,11 @@
          })
       }
 
-      $(document).on('click', '.veridy_data', function(){
+      $(document).on('click', '.veridy_data', function() {
          var type = $(this).data('type');
          var customer_id = $(this).data('id');
          Swal.fire({
-            title: "ARE YOU SURE TO VERIFIY THE "+type.replaceAll('_', ' ').toUpperCase()+" ?",
+            title: "ARE YOU SURE TO VERIFIY THE " + type.replaceAll('_', ' ').toUpperCase() + " ?",
             showDenyButton: true,
             showCancelButton: true,
             confirmButtonText: "Save",
@@ -1063,30 +1083,32 @@
                   url: "{{ url('changeDocumnetStatus') }}",
                   dataType: "json",
                   type: "POST",
-                  data:{ _token: "{{csrf_token()}}", type:type, customer_id:customer_id, status:1},
-                  success: function(res){
-                        if(res.status === true)
-                        {
-                           Swal.fire("Saved!", res.msg, "success");
-                           setTimeout(() => {
-                              location.reload();
-                           }, 3000);
-                        }
-                        else
-                        {
-                           Swal.fire("Somthing went wrong", "", "error");
-                        }
+                  data: {
+                     _token: "{{csrf_token()}}",
+                     type: type,
+                     customer_id: customer_id,
+                     status: 1
+                  },
+                  success: function(res) {
+                     if (res.status === true) {
+                        Swal.fire("Saved!", res.msg, "success");
+                        setTimeout(() => {
+                           location.reload();
+                        }, 3000);
+                     } else {
+                        Swal.fire("Somthing went wrong", "", "error");
+                     }
                   }
                });
             }
          });
       })
 
-      $(document).on('click', '.reject_data', function(){
+      $(document).on('click', '.reject_data', function() {
          var type = $(this).data('type');
          var customer_id = $(this).data('id');
          Swal.fire({
-            title: "ARE YOU SURE TO REJECT THE "+type.replaceAll('_', ' ').toUpperCase()+" ?",
+            title: "ARE YOU SURE TO REJECT THE " + type.replaceAll('_', ' ').toUpperCase() + " ?",
             showDenyButton: true,
             showCancelButton: true,
             confirmButtonText: "YES",
@@ -1097,19 +1119,21 @@
                   url: "{{ url('changeDocumnetStatus') }}",
                   dataType: "json",
                   type: "POST",
-                  data:{ _token: "{{csrf_token()}}", type:type, customer_id:customer_id, status:2},
-                  success: function(res){
-                        if(res.status === true)
-                        {
-                           Swal.fire("Saved!", res.msg, "success");
-                           setTimeout(() => {
-                              location.reload();
-                           }, 3000);
-                        }
-                        else
-                        {
-                           Swal.fire("Somthing went wrong", "", "error");
-                        }
+                  data: {
+                     _token: "{{csrf_token()}}",
+                     type: type,
+                     customer_id: customer_id,
+                     status: 2
+                  },
+                  success: function(res) {
+                     if (res.status === true) {
+                        Swal.fire("Saved!", res.msg, "success");
+                        setTimeout(() => {
+                           location.reload();
+                        }, 3000);
+                     } else {
+                        Swal.fire("Somthing went wrong", "", "error");
+                     }
                   }
                });
             }
@@ -1117,115 +1141,115 @@
       })
 
       $(function() {
-      $.ajaxSetup({
-        headers: {
-          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-      });
-      var table = $('#getTransactionHistory').DataTable({
-        processing: true,
-        serverSide: true,
-        "order": [
-          [0, 'desc']
-        ],
-        "ajax": {
-          'url': "{{ route('transaction_history.index') }}",
-          'data': function(d) {
-            d.branch_id = $('#branch_id').val(),
-              d.customer_id = '{{$customers["id"]}}'
-          }
-        },
-        columns: [{
-            data: 'DT_RowIndex',
-            name: 'DT_RowIndex',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'created_at',
-            name: 'created_at',
-            "defaultContent": ''
-          },
-          {
-            data: 'customer.name',
-            name: 'customer.name',
-          },
-          {
-            data: 'contact_person',
-            name: 'contact_person',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'parent_name',
-            name: 'parent_name',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'customer.mobile',
-            name: 'customer.mobile',
-            "defaultContent": ''
-          },
-          {
-            data: 'coupen_code',
-            name: 'coupen_code',
-            "defaultContent": ''
-          },
-          {
-            data: 'subcategory_name',
-            name: 'subcategory_name',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'product_name',
-            name: 'product_name',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'points',
-            name: 'points',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'action',
-            name: 'action',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          },
-        ]
-      });
-      $('body').on('click', '.delete', function() {
-        var id = $(this).attr("value");
-        var token = $("meta[name='csrf-token']").attr("content");
-        if (!confirm("Are You sure want to delete ?")) {
-          return false;
-        }
-        $.ajax({
-          url: "{{ url('transaction_history') }}" + '/' + id,
-          type: 'DELETE',
-          data: {
-            _token: token,
-            id: id
-          },
-          success: function(data) {
-            $('.message').empty();
-            $('.alert').show();
-            if (data.status == 'success') {
-              $('.alert').addClass("alert-success");
-            } else {
-              $('.alert').addClass("alert-danger");
+         $.ajaxSetup({
+            headers: {
+               'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
-            $('.message').append(data.message);
-            table.draw();
-          },
-        });
-      });
+         });
+         var table = $('#getTransactionHistory').DataTable({
+            processing: true,
+            serverSide: true,
+            "order": [
+               [0, 'desc']
+            ],
+            "ajax": {
+               'url': "{{ route('transaction_history.index') }}",
+               'data': function(d) {
+                  d.branch_id = $('#branch_id').val(),
+                     d.customer_id = '{{$customers["id"]}}'
+               }
+            },
+            columns: [{
+                  data: 'DT_RowIndex',
+                  name: 'DT_RowIndex',
+                  orderable: false,
+                  searchable: false
+               },
+               {
+                  data: 'created_at',
+                  name: 'created_at',
+                  "defaultContent": ''
+               },
+               {
+                  data: 'customer.name',
+                  name: 'customer.name',
+               },
+               {
+                  data: 'contact_person',
+                  name: 'contact_person',
+                  orderable: false,
+                  searchable: false
+               },
+               {
+                  data: 'parent_name',
+                  name: 'parent_name',
+                  orderable: false,
+                  searchable: false
+               },
+               {
+                  data: 'customer.mobile',
+                  name: 'customer.mobile',
+                  "defaultContent": ''
+               },
+               {
+                  data: 'coupen_code',
+                  name: 'coupen_code',
+                  "defaultContent": ''
+               },
+               {
+                  data: 'subcategory_name',
+                  name: 'subcategory_name',
+                  orderable: false,
+                  searchable: false
+               },
+               {
+                  data: 'product_name',
+                  name: 'product_name',
+                  orderable: false,
+                  searchable: false
+               },
+               {
+                  data: 'point',
+                  name: 'point',
+                  orderable: false,
+                  searchable: false
+               },
+               {
+                  data: 'action',
+                  name: 'action',
+                  "defaultContent": '',
+                  orderable: false,
+                  searchable: false
+               },
+            ]
+         });
+         $('body').on('click', '.delete', function() {
+            var id = $(this).attr("value");
+            var token = $("meta[name='csrf-token']").attr("content");
+            if (!confirm("Are You sure want to delete ?")) {
+               return false;
+            }
+            $.ajax({
+               url: "{{ url('transaction_history') }}" + '/' + id,
+               type: 'DELETE',
+               data: {
+                  _token: token,
+                  id: id
+               },
+               success: function(data) {
+                  $('.message').empty();
+                  $('.alert').show();
+                  if (data.status == 'success') {
+                     $('.alert').addClass("alert-success");
+                  } else {
+                     $('.alert').addClass("alert-danger");
+                  }
+                  $('.message').append(data.message);
+                  table.draw();
+               },
+            });
+         });
 
-    });
+      });
    </script>
 </x-app-layout>

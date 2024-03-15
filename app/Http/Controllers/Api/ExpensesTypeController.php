@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\ExpensesType;
 use App\Models\Expenses;
+use App\Models\ExpenseLog;
 use App\Models\Media;
 use Validator;
 use Auth;
@@ -30,7 +31,7 @@ class ExpensesTypeController extends Controller
 
 
     public function getExpensesType(Request $request)
-    {
+    {  
         // $expenses_type = ExpensesType::all();
         // return response()->json(['status'=>'success', 'data'=>$expenses_type], 200); 
 
@@ -78,17 +79,24 @@ class ExpensesTypeController extends Controller
 
     public function createExpense(Request $request){
       try
-        { 
+        {   ini_set('memory_limit', '-1');
             $userid = $request->user()->id;
             $validator = Validator::make($request->all(), [
                // 'customer_id'   => 'nullable|exists:customers,id',
                 'expenses_type'  => "required",
                 'claim_amount'  => "required",
                 'date'  => "required",
-            ]);
+                'expense_file.*' => 'mimes:jpeg,jpg,png,pdf,doc',
+             ]
+            );
+
+            
+
             if ($validator->fails()) {
                 return response()->json(['status' => 'error','message' =>  $validator->errors()], $this->badrequest); 
             }
+
+
             if($expenses = Expenses::create([
                 'user_id' => $userid,
                 'expenses_type' => isset($request->expenses_type) ? $request->expenses_type :null,
@@ -102,6 +110,15 @@ class ExpensesTypeController extends Controller
                 'created_at' => date('Y-m-d H:i:s')
             ]))
             {
+               
+              $logdata = array(
+                'log_date' => date('Y-m-d'),
+                'expense_id' => $expenses->id,
+                'created_by' => $userid,
+                'status_type' => 'generated'
+               );
+
+                ExpenseLog::create($logdata);
                 if($request->hasFile('expense_file')){
                 $files = $request->file('expense_file');
                 foreach($files as $file){
@@ -153,13 +170,13 @@ class ExpensesTypeController extends Controller
                    }
                 }    
 
-
-
               
                 if($expense->checker_status == '1'){
                  $exp_status = 'Approved';
                 }elseif($expense->checker_status == '2'){
                  $exp_status = 'Rejected';
+                }elseif($expense->checker_status == '3'){
+                 $exp_status = 'Checked';
                 }else{
                  $exp_status = 'Pending';
                 }
@@ -228,6 +245,8 @@ class ExpensesTypeController extends Controller
                  $exp_status = 'Approved';
                 }elseif($expense->checker_status == '2'){
                  $exp_status = 'Rejected';
+                }elseif($expense->checker_status == '3'){
+                 $exp_status = 'Checked';
                 }else{
                  $exp_status = 'Pending';
                 }
@@ -266,6 +285,7 @@ class ExpensesTypeController extends Controller
               
                 $datas['approve_amount'] = $expense->approve_amount ?? "";
                 $datas['status'] = $exp_status;
+                $datas['reason'] = $expense->reason??"";
 
     
                 return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','data' => $datas ], $this->successStatus);
@@ -284,10 +304,13 @@ class ExpensesTypeController extends Controller
    public function updateExpense(Request $request){
         try
         { 
+            ini_set('memory_limit', '-1');
             $userid = $request->user()->id;
             $validator = Validator::make($request->all(), [
                 'expense_id'  => "required",
-            ]);
+                'expense_file.*' => 'mimes:jpeg,jpg,png,pdf,doc',
+            ]
+        );
             if($validator->fails()) {
                 return response()->json(['status' => 'error','message' =>  $validator->errors()], $this->badrequest); 
             }
@@ -304,11 +327,18 @@ class ExpensesTypeController extends Controller
                 'claim_amount' => isset($request['claim_amount'])? $request['claim_amount']:$expense_detail->claim_amount,
             ]))
             {
+
+            $logdata = array(
+                'log_date' => date('Y-m-d'),
+                'expense_id' => $request['expense_id'],
+                'created_by' => $userid,
+                'status_type' => 'updated'
+             );
+            
+             ExpenseLog::create($logdata);  
+
               if($request->hasFile('expense_file')){
                 $files = $request->file('expense_file');
-
-                //$expense_detail->clearMediaCollection('expense_file');
-
                 foreach($files as $file){
                 $customname = time() . '.' . $file->getClientOriginalExtension();
                 $expense_detail->addMedia($file)

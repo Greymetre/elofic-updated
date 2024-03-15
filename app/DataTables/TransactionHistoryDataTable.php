@@ -29,17 +29,7 @@ class TransactionHistoryDataTable extends DataTable
                 return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
             })
             ->editColumn('contact_person', function ($data) {
-                $employee = '';
-                if (!empty($data->customer->getemployeedetail)) {
-                    foreach ($data->customer->getemployeedetail as $key_new => $datas) {
-                        if ($key_new == (count($data->customer->getemployeedetail) - 1)) {
-                            $employee .= isset($datas->employee_detail->name) ? $datas->employee_detail->name : '';
-                        } else {
-                            $employee .= isset($datas->employee_detail->name) ? $datas->employee_detail->name . ', ' : '';
-                        }
-                    }
-                }
-                return $employee;
+                return $data->customer->first_name.' '.$data->customer->last_name;
             })
             ->editColumn('customer.name', function ($data) {
                 $customer_name = '<a target="_blank" href="'.route('customers.show', [encrypt($data->customer->id)]).'">'.$data->customer->name.'</a>';
@@ -61,15 +51,11 @@ class TransactionHistoryDataTable extends DataTable
             })
             ->editColumn('subcategory_name', function ($data) {
 
-                return $data->scheme->product->subcategories->subcategory_name;
+                return $data->scheme ? $data->scheme->product->subcategories->subcategory_name : '';
             })
             ->editColumn('product_name', function ($data) {
 
-                return $data->scheme->product->product_name;
-            })
-            ->editColumn('points', function ($data) {
-                $scheme_details = SchemeDetails::where('product_id', $data->scheme->product->id)->first();
-                return ($scheme_details) ? $scheme_details->points: '';
+                return $data->scheme ? $data->scheme->product->product_name : '';
             })
             ->addColumn('action', function ($query) {
                 $btn = '';
@@ -83,7 +69,7 @@ class TransactionHistoryDataTable extends DataTable
                                 ' . $btn . '
                             </div>' . $activebtn;
             })
-            ->rawColumns(['action', 'contact_person', 'parent_name', 'subcategory_name', 'product_name', 'points','customer.name']);
+            ->rawColumns(['action', 'contact_person', 'parent_name', 'subcategory_name', 'product_name','customer.name']);
     }
 
     /**

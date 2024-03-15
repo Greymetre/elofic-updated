@@ -179,6 +179,7 @@ class AddressController extends Controller
                 $data['country_id'] = isset($data['cityname']['districtname']['statename']['country_id']) ? $data['cityname']['districtname']['statename']['country_id'] : 0;
                 $data['country_name'] = isset($data['cityname']['districtname']['statename']['countryname']['country_name']) ? $data['cityname']['districtname']['statename']['countryname']['country_name'] : 0;
                 unset($data['cityname']);
+                return response(['status' => 'success', 'message' => 'Record Found.', 'data' => $data ],200);  
             }
             return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data ],200);  
             

@@ -51,4 +51,9 @@ class Product extends Model
     {
         return $this->hasMany('App\Models\Services', 'product_code', 'product_code')->where('branch_code', 'HO0000');
     }
+
+    public function getSchemeDetail(){
+      return $this->hasOne('App\Models\OrderSchemeDetail', 'product_id', 'id');
+    }
+
 }

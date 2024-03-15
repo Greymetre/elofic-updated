@@ -66,6 +66,7 @@ return [
         'serial_number_history'     => 'Serial Number History',
          'hr'     => 'HR',
          'account'  => 'Account',
+         'warranty_activation'  => 'Warranty Activation',
 
     ],
 
@@ -378,6 +379,8 @@ return [
         'parentcustomer'                       => 'Parent Customer',
         'contact_number_two'                   => 'Contact Number-2',
         'create_department'                   => 'Create Department',
+        'list_price'                          => 'Rate(LP)',
+        'taxs'                                => 'Tax',
     ],
     'datatables'   => [
         'copy'          => 'Copy',
@@ -644,6 +647,7 @@ return [
             'rate'              => 'Rate',
             'created_at'        => 'Created at',
             'branch'            => 'Branch',
+            'designation'       => 'Designation',
 
         ],
     ],

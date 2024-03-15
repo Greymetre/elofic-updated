@@ -37,6 +37,10 @@ class Expenses extends Model implements HasMedia
         return $this->belongsTo(User::class,'approve_reject_by','id');
     }  
 
+public function get_time_history(){
+   return $this->hasMany('App\Models\ExpenseLog', 'expense_id','id');
+ }    
+
 
 
 }

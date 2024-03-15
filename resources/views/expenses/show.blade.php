@@ -42,45 +42,75 @@
                     </div>
                     <div class="col-8">
 
-                       @if(auth()->user()->can(['expenses_authority']))
-                        
+
                         @if($expense->checker_status=='3')
+
+                           @if(auth()->user()->can(['expense_unchecked']))
                         <button type="button" class="btn btn-dark unchecked_status">Unchecked</button>
+                           @endif 
+                           
+                          @if(auth()->user()->can(['expense_approve']))
                         <button type="button" class="btn btn-success approve_status">Approved</button>
+                           @endif 
+
+                          @if(auth()->user()->can(['expense_reject']))
                         <button type="button" class="btn btn-danger reject_status">Rejected</button>
+                           @endif 
+
                         @elseif($expense->checker_status=='1') 
+                              @if(auth()->user()->can(['expense_reject']))
                          <button type="button" class="btn btn-danger reject_status">Rejected</button>
+                              @endif 
                         @else
+                               @if(auth()->user()->can(['expense_checked']))  
                          <button type="button" class="btn btn-dark checked_status">Checked</button>
+                               @endif 
+
+                              @if(auth()->user()->can(['expense_reject']))
                          <button type="button" class="btn btn-danger reject_status">Rejected</button>
+                              @endif 
+
                         @endif 
 
+
+                      <?php 
+                     if(Auth::user()->hasRole('superadmin') || Auth::user()->hasRole('Admin') || Auth::user()->hasRole('Sub_Admin') || Auth::user()->hasRole('HR_Admin') || Auth::user()->hasRole('HO_Account'))
+                       { ?>
 
                         <a class="btn btn-warning" href="{{route('expenses.edit', ['expense' => $expense->id])}}" role="button">Edit</a>
 
-                        @else
+                      <?php }else{ 
 
+                           $created_at  = $expense->created_at;
+                           $startDate = Carbon\Carbon::parse($created_at);
+                           $endDate = Carbon\Carbon::now();
+                           //$timeDifference = $startDate->diff($endDate)->format('%h hours and %i minutes');
+                           $diffInHours = $startDate->diffInHours($endDate);
 
-                        @if($expense->checker_status=='3')
-                        <button type="button" class="btn btn-dark unchecked_status_new">Unchecked</button>
-                        <button type="button" class="btn btn-success approve_status_new">Approved</button>
-                        <button type="button" class="btn btn-danger reject_status_new">Rejected</button>
-                        @elseif($expense->checker_status=='1') 
-                         <button type="button" class="btn btn-danger reject_status_new">Rejected</button>
-                        @else
-                         <button type="button" class="btn btn-dark checked_status_new">Checked</button>
-                         <button type="button" class="btn btn-danger reject_status_new">Rejected</button>
-                        @endif 
+                           if($diffInHours <= 24 && $expense->checker_status == 0){
 
-                        <a class="btn btn-warning" href="javascript:void(0)" role="button">Edit</a>
+                        ?>
 
+                            @if($expense->checker_status=='3' || $expense->checker_status=='1')
+                             <a class="btn btn-warning" href="javascript:void(0)" role="button">Edit</a>
+                            @else
+                             <a class="btn btn-warning" href="{{route('expenses.edit', ['expense' => $expense->id])}}" role="button">Edit</a>
+                            @endif
 
-                        @endif
+                        <?php 
+                            }else{ 
+                          ?>
+                          <a class="btn btn-warning" href="javascript:void(0)" role="button">Edit</a>
+                         <?php 
+                          }
 
+                        }
 
+                      ?>
 
 
                         <a class="btn btn-primary" href="{{route('expenses.index')}}" role="button">Back</a>
+
                         
                     </div>
                     <!-- /.col -->
@@ -104,7 +134,7 @@
                  <div class="col-sm-4 invoice-col">
                   From
                   <address>
-                    <strong>{!! isset($expense['users']['name']) ? $expense['users']['name'] :'' !!} </strong><br>
+                    <strong>{!! isset($expense['users']['name']) ? $expense['users']['name'] :'' !!} ({{$expense->users->getdesignation->designation_name??''}}) </strong><br>
                   </address>
                 </div>
                 <!-- /.col -->

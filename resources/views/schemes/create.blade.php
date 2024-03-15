@@ -416,7 +416,7 @@
                var newRow =
                   '<tr> <td>' + counter + '</td>' +
                   '<td class="category"><select required name="category_id[]' + counter + '" class="form-control set_cat_' + counter + ' category_drop rowchange"> </select></td>' +
-                  '<td style="max-width: 300px;" class="subCat"><select required style="max-width: 300px;" name="subcategory_id[]' + counter + '" class="form-control sub_category rowchange" onchange="getproductinfo(this.value)"/> </select></td>' +
+                  '<td style="max-width: 300px;" class="subCat"><select required style="max-width: 300px;" name="subcategory_id[]' + counter + '" class="form-control select2bs4 sub_category rowchange" /> </select></td>' +
                   '<td class="product"><select required name="product_id[]' + counter + '" class="form-control select2bs4 product_drop rowchange"/></select></td>' +
                   '<td><input required type="number" name="points[]' + counter + '"class="form-control points rowchange" /></td>' +
                   '<td class="td-actions text-center"><a class="remove-rows btn btn-danger btn-just-icon btn-sm"><i class="fa fa-minus"></i></a></td> </tr>';

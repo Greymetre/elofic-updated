@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{Customers,UserLogin,CustomerType,FirmType,Regions,Pincode,Country,CustomerDetails,Address,Attachment, SurveyData, Field, State, City, Beat, DealIn, SchemeDetails};
+use App\Models\{Customers,UserLogin,CustomerType,FirmType,Regions,Pincode,Country,CustomerDetails,Address,Attachment, SurveyData, Field, State, City, Beat, DealIn, Redemption, SchemeDetails};
 use App\Models\User; 
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -197,7 +197,10 @@ class CustomerController extends Controller
                             $profileimage = !empty($query->profile_image) ? '/public/uploads/'.$query->profile_image : asset('assets/img/placeholder.jpg') ;
                                 return '<img src="'.$profileimage.'" border="0" width="70" class="rounded imageDisplayModel" align="center" />';
                             })
-                        ->rawColumns(['action','image','checkbox'])
+                            ->addColumn('createdbyname.name', function ($query) {
+                                return $query->created_by?$query->createdbyname->name:'Self';
+                            })
+                        ->rawColumns(['action','image','checkbox','createdbyname.name'])
                     ->make(true);
         }
         return view('customers.index', compact('beats','users','states','cities','customertype','branches'));
@@ -451,22 +454,29 @@ class CustomerController extends Controller
      * @param  \App\Models\Customers  $customers
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id, Request $request)
     {
+        if($request->kyc){
+            $kyc = true;
+        }else{
+            $kyc = false;
+        }
         ////abort_if(Gate::denies('customer_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
          $id = decrypt($id);
-        $thistorys = TransactionHistory::where('customer_id', $id)->get();
-        $total_points = 0;
-        $total_redemption = 0;
-        $total_rejected = 0;
-        $total_balance = 0;
-        foreach($thistorys as $thistory){
-            $scheme_details = SchemeDetails::where('product_id', $thistory->scheme->product->id)->first();
-            $total_points += (int)$scheme_details->points;
-        }
+        // $thistorys = TransactionHistory::where('customer_id', $id)->sum('points');
+        $total_points = TransactionHistory::where('customer_id', $id)->sum('point')??0;
+        $active_points = TransactionHistory::where('customer_id', $id)->where('status', '1')->sum('point')??0;
+        $provision_points = TransactionHistory::where('customer_id', $id)->where('status', '0')->sum('point')??0;
+        $total_redemption = Redemption::where('customer_id', $id)->whereNot('status', '2')->sum('redeem_amount')??0;
+        $total_rejected = Redemption::where('customer_id', $id)->where('status', '2')->sum('redeem_amount')??0;
+        $total_balance = (int)$active_points-(int)$total_redemption;
+        // foreach($thistorys as $thistory){
+        //     $scheme_details = SchemeDetails::where('product_id', $thistory->scheme->product->id)->first();
+        //     $total_points += (int)$scheme_details->points;
+        // }
         $customers = Customers::find($id);
         $customers['due_amount'] = totalDueAmount($id);
-        return view('customers.show', compact('total_balance','total_points', 'total_redemption', 'total_rejected'))->with('customers',$customers);
+        return view('customers.show', compact('total_balance','total_points', 'total_redemption', 'active_points', 'provision_points', 'total_rejected', 'kyc'))->with('customers',$customers);
     }
 
     /**

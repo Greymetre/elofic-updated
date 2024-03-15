@@ -11,7 +11,7 @@ class Order extends Model
 
     protected $table = 'orders';
 
-    protected $fillable = [ 'active', 'buyer_id', 'seller_id', 'total_qty', 'shipped_qty', 'orderno', 'order_date', 'completed_date', 'total_gst', 'sub_total', 'grand_total', 'order_taking','status_id', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at','beatscheduleid' , 'suc_del'];
+    protected $fillable = [ 'active', 'buyer_id', 'seller_id', 'total_qty', 'shipped_qty', 'orderno', 'order_date', 'completed_date', 'total_gst', 'sub_total', 'grand_total', 'order_taking','status_id', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at','beatscheduleid' , 'suc_del','order_remark'];
 
     public function message()
     {
@@ -46,10 +46,19 @@ class Order extends Model
             
             $created_at = getcurentDateTime();
             $request['orderno'] = !empty($request['orderno']) ? $request['orderno'] : date('Y').'_'.$request['seller_id'].'_'.autoIncrementId('Order','id');
+
+                 if(!empty($request['buyer_id'])){
+                   $buyer = $request['buyer_id'];
+                   }else{
+                    $buyer = $request['seller_id'];
+                   }
+
             if( $order_id = Order::insertGetId([
                 'active' => 'Y',
-                'buyer_id' => isset($request['buyer_id'])? $request['buyer_id']:null,
-                'seller_id' => isset($request['seller_id'])? $request['seller_id']:null,
+                // 'buyer_id' => isset($request['buyer_id'])? $request['buyer_id']:null,
+                // 'seller_id' => isset($request['seller_id'])? $request['seller_id']:null,
+                'buyer_id' => isset($request['seller_id'])? $request['seller_id']:null,
+                'seller_id' => $buyer,
                  'total_qty' => 0,
                  //'total_qty' => isset($request['quantity'])? $request['quantity']:0,
                 'shipped_qty' => 0,
@@ -61,7 +70,8 @@ class Order extends Model
                 'order_taking' => isset($request['order_taking'])?  $request['order_taking']:'MobileApp',
                 'suc_del' => isset($request['suc_del'])?  $request['suc_del']:'',  
                 'beatscheduleid' => isset($request['beatscheduleid']) ? $request['beatscheduleid'] :null,   
-                'created_by' => isset($request['created_by']) ? $request['created_by'] :null,         
+                'created_by' => isset($request['created_by']) ? $request['created_by'] :null,     
+                'order_remark' => isset($request['order_remark']) ? $request['order_remark'] :null,     
                 'created_at' => $created_at ,
                 'updated_at' => $created_at
             ]) )

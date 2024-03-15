@@ -11,7 +11,7 @@ class CustomerDetails extends Model
 
     protected $table = 'customer_details';
 
-    protected $fillable = [  'active', 'customer_id', 'gstin_no', 'pan_no', 'aadhar_no', 'account_holder', 'account_number', 'bank_name', 'ifsc_code', 'otherid_no', 'enrollment_date', 'approval_date', 'shop_image', 'visiting_card', 'grade', 'visit_status', 'deleted_at', 'created_at', 'updated_at'];
+    protected $fillable = [  'active', 'customer_id', 'gstin_no', 'pan_no', 'aadhar_no', 'account_holder', 'account_number', 'bank_name', 'ifsc_code', 'otherid_no', 'enrollment_date', 'approval_date', 'shop_image', 'visiting_card', 'grade', 'visit_status', 'fcm_token', 'deleted_at', 'created_at', 'updated_at'];
 
     public function save_data($request)
     {
@@ -50,5 +50,15 @@ class CustomerDetails extends Model
         {
             return $response = array('status' => 'error', 'message' => $e->getMessage());
         }
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customers::class, 'customer_id', 'id');
+    }
+
+    public function document_status_by()
+    {
+        return $this->belongsTo(User::class, 'status_update_by', 'id');
     }
 }

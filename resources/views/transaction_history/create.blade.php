@@ -111,23 +111,23 @@
       $('a.add-rows').click(function(event) {
          event.preventDefault();
          var newRow =
-            '<div class="row">'+
-                     '<div class="col-md-2">'+
-                        '<label for="coupen_code" class="form-control">Coupen Code</label>'+
-                     '</div>'+
-                     '<div class="col-md-9">'+
-                        '<input type="text" name="coupen_code[]" id="coupen_code" class="form-control" required>'+
-                     '</div>'+
-                     '<div class="col-md-1">'+
-                        '<a class="remove-rows btn btn-danger btn-just-icon btn-sm"><i class="fa fa-minus"></i></a>'+
-                     '</div>'+
-                  '</div>';
+            '<div class="row">' +
+            '<div class="col-md-2">' +
+            '<label for="coupen_code" class="form-control">Coupen Code</label>' +
+            '</div>' +
+            '<div class="col-md-9">' +
+            '<input type="text" name="coupen_code[]" id="coupen_code" class="form-control copen_codes" required>' +
+            '</div>' +
+            '<div class="col-md-1">' +
+            '<a class="remove-rows btn btn-danger btn-just-icon btn-sm"><i class="fa fa-minus"></i></a>' +
+            '</div>' +
+            '</div>';
 
          $div.append(newRow);
       });
       $div.on('click', '.remove-rows', function() {
-            var closeDiv = $(this).closest('div.row');
-            $(this).closest('div.row').remove();
-         });
+         var closeDiv = $(this).closest('div.row');
+         $(this).closest('div.row').remove();
+      });
    </script>
 </x-app-layout>

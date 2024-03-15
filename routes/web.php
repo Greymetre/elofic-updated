@@ -43,6 +43,7 @@ use App\Http\Controllers\VisitReportController;
 use App\Http\Controllers\VisitTypeController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\BranchController;
+use App\Http\Controllers\CustomerKycController;
 use App\Http\Controllers\DivisionController;
 use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\ExpensesController;
@@ -55,8 +56,11 @@ use App\Http\Controllers\GiftModelController;
 use App\Http\Controllers\GiftSubcategoryController;
 use App\Http\Controllers\ServicesController;
 use App\Http\Controllers\HolidayController;
+use App\Http\Controllers\NeftRedemptionDetailsController;
 use App\Http\Controllers\TransactionHistoryController;
 use App\Http\Controllers\OrderSchemeController;
+use App\Http\Controllers\RedemptionController;
+use App\Http\Controllers\WarrantyActivationController;
 use Aws\Api\Service;
 
 /*
@@ -528,6 +532,7 @@ Route::group(['middleware' => ['auth']], function () {
 
      //Services
     Route::get('services/serial_number_transaction', [ServicesController::class, 'serial_number_transaction'])->name('service.serial_number_transaction');
+    Route::get('services/serial_number_transaction/delete', [ServicesController::class, 'serial_number_transaction_delete'])->name('service.serial_number_transaction.delete');
     Route::post('services/serial_number_transaction/upload', [ServicesController::class, 'serial_number_transaction_upload'])->name('service.serial_number_transaction.upload');
     Route::get('services/serial_number_transaction/download', [ServicesController::class, 'serial_number_transaction_download'])->name('service.serial_number_transaction.download');
     Route::post('services/serial_number_transaction/list', [ServicesController::class, 'serial_number_transaction_list'])->name('service.serial_number_transaction.list');
@@ -566,6 +571,24 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('gift-brands-upload', [ GiftBrandController::class, 'upload'])->name('gift.brands.upload');
     Route::post('gift-brands-active', [ GiftBrandController::class, 'active'])->name('gift.brands.active');
 
+    // Redemption Route
+    Route::resource('redemptions', RedemptionController::class);
+    Route::get('redemptions_download', [RedemptionController::class, 'download'])->name('redemptions.download');
+    Route::post('redemptions-upload', [RedemptionController::class, 'upload'])->name('redemptions.upload');
+    Route::get('redemptions-template', [RedemptionController::class, 'template'])->name('redemptions.template');
+    Route::get('redemption-change-status', [RedemptionController::class, 'changeStatus'])->name('redemptions.changeStatus');
+    Route::get('redemption-gift-delivered', [RedemptionController::class, 'giftDelivered'])->name('redemptions.giftDelivered');
+    Route::any('redemption-gift-catalogue', [RedemptionController::class, 'gift_catalogue'])->name('redemptions.gift-catalogue');
+    Route::any('redemption-gifttable', [RedemptionController::class, 'gifttable'])->name('redemptions.gifttable');
+    Route::get('neft-redemption-change-status', [NeftRedemptionDetailsController::class, 'changeStatus'])->name('neft.redemptions.changeStatus');
+
+    // Redemption Route
+    Route::resource('warranty_activation', WarrantyActivationController::class);
+
+    // Customer KYC Route
+    Route::resource('customer-kyc', CustomerKycController::class);
+    Route::any('customer-kyc-download', [CustomerKycController::class, 'download'])->name('customer-kyc.download');
+    
     Route::get('logout', '\App\Http\Controllers\Auth\AuthenticatedSessionController@destroy');
 });
 
@@ -597,6 +620,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('getCustomerActivityData', [ AjaxController::class, 'getCustomerActivityData']);
     Route::any('schemesdetails/remove', [ AjaxController::class, 'removeSchemesdetails']);
     Route::any('changeDocumnetStatus', [ AjaxController::class, 'changeDocumnetStatus']);
+    Route::any('getBankdetailandPoints', [ AjaxController::class, 'getBankdetailandPoints']);
+    Route::any('getProductByCoupon', [ AjaxController::class, 'getProductByCoupon']);
 
 
 

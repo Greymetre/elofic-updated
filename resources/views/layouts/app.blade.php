@@ -456,7 +456,7 @@
 
 
           @if(auth()->user()->can('services_access'))
-          <li class="nav-item {{ request()->is('services*') ? 'active' : '' }}">
+          <li class="nav-item {{ request()->is('services*') || request()->is('warranty_activation*') ? 'active' : '' }}">
             <a class="nav-link collapsed" data-toggle="collapse" href="#serviceMenu" aria-expanded="false">
               <i class="material-icons">design_services</i>
               <p> {!! trans('panel.sidemenu.services') !!}
@@ -481,18 +481,38 @@
                   </a>
                 </li>
                 @endif
+                @if(auth()->user()->can('warranty_activation_access'))
+                <li class="nav-item {{ request()->is('warranty_activation*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('warranty_activation') }}">
+                    <i class="material-icons">history</i>
+                    <p>{!! trans('panel.sidemenu.warranty_activation') !!}</p>
+                  </a>
+                </li>
+                @endif
               </ul>
             </div>
           </li>
           @endif
-          @if(auth()->user()->can('order_access'))
+          @if(auth()->user()->can('order_access')) 
           <li class="nav-item {{ request()->is('orders*') ? 'active' : '' }}">
             <a class="nav-link" href="{{ url('orders') }}">
               <i class="material-icons">shopping_bag</i>
               <p>{!! trans('panel.sidemenu.orders') !!}</p>
             </a>
           </li>
+
           @endif
+
+         <!--  @if(auth()->user()->can('orderscheme')) 
+          <li class="nav-item {{ request()->is('orderschemes*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ url('orderschemes') }}">
+              <i class="material-icons">shopping_bag</i>
+              <p>Order Scheme</p>
+            </a>
+          </li>
+          @endif -->
+
+
 
           @if(auth()->user()->can('branch'))
           <li class="nav-item {{ request()->is('branch*') ? 'active' : '' }}">
@@ -566,7 +586,7 @@
           @endif
 
           @if(auth()->user()->can('wallet_access'))
-          <li class="nav-item ">
+          <!-- <li class="nav-item ">
             <a class="nav-link collapsed" data-toggle="collapse" href="#walletMenu" aria-expanded="false">
               <i class="material-icons">account_balance_wallet</i>
               <p> {!! trans('panel.sidemenu.wallet_master') !!}
@@ -593,10 +613,10 @@
                 @endif
               </ul>
             </div>
-          </li>
+          </li> -->
           @endif
           @if(auth()->user()->can('scheme_access'))
-          <li class="nav-item {{ request()->is('schemes*') || request()->is('transaction_history*') || request()->is('gifts*') || request()->is('gift-categories*') || request()->is('gift-subcategories*') || request()->is('gift-model*') || request()->is('gift-brands*') ? 'active' : '' }}">
+          <li class="nav-item {{ request()->is('schemes*') || request()->is('transaction_history*') || request()->is('gifts*') || request()->is('gift-categories*') || request()->is('gift-subcategories*') || request()->is('gift-model*') || request()->is('gift-brands*') || request()->is('redemptions*') ? 'active' : '' }}">
             <a class="nav-link collapsed" data-toggle="collapse" href="#schemesMenu" aria-expanded="false">
               <i class="material-icons">loyalty</i>
               <p> Loyalty Engine </p>
@@ -619,9 +639,9 @@
                   </a>
                 </li>
                 @endif
-                @if(auth()->user()->can('scheme_access'))
-                <li class="nav-item {{ request()->is('schemes/redemption*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('#') }}">
+                @if(auth()->user()->can('redemption_access'))
+                <li class="nav-item {{ request()->is('redemptions*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('redemptions') }}">
                     <i class="material-icons">mp</i>
                     <p>Redemption</p>
                   </a>
@@ -667,9 +687,9 @@
                   </a>
                 </li>
                 @endif
-                @if(auth()->user()->can('scheme_access'))
-                <li class="nav-item {{ request()->is('schemes/customer_kyc*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('#') }}">
+                @if(auth()->user()->can('customer_kyc_access'))
+                <li class="nav-item {{ request()->is('customer-kyc*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('customer-kyc') }}">
                     <i class="material-icons">verified</i>
                     <p>Customer KYC</p>
                   </a>

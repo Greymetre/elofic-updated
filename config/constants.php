@@ -16,4 +16,8 @@ return [
         '1' => 'Silver',
         '2' => 'Greymetre'
     ],
+    'redeem_mode' => [
+        '1' => 'Gift',
+        '2' => 'Neft'
+    ],
 ];

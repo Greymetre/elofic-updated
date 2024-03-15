@@ -748,9 +748,9 @@ class AppraisalController extends Controller
                 $data[$k][9] = $val->users->userinfo->emergency_number??'';
                 $data[$k][10] = $val->users->mobile;
                 $data[$k][11] = $val->users->location;
-                $data[$k][12] = $val->users->userinfo->date_of_birth ? date('d-m-Y', strtotime($val->users->userinfo->date_of_birth)) : "";
-                $data[$k][13] = $val->users->userinfo->date_of_joining ? date('d-m-Y', strtotime($val->users->userinfo->date_of_joining)) : "";
-                $data[$k][14] = $val->users->userinfo->date_of_leaving ? date('d-m-Y', strtotime($val->users->userinfo->date_of_leaving)) : "";
+                $data[$k][12] = $val->users->userinfo ? date('d-m-Y', strtotime($val->users->userinfo->date_of_birth)) : "";
+                $data[$k][13] = $val->users->userinfo ? date('d-m-Y', strtotime($val->users->userinfo->date_of_joining)) : "";
+                $data[$k][14] = $val->users->userinfo ? date('d-m-Y', strtotime($val->users->userinfo->date_of_leaving)) : "";
                 $data[$k][15] = implode(',',$degree_name);
                 $data[$k][16] = Carbon::parse($val->users->userinfo->date_of_birth??0)->age;
                 $data[$k][17] = $val->users->userinfo->current_company_tenture??0;

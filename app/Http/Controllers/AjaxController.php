@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, CustomerDetails, GiftModel, GiftSubcategory, Notes, SchemeDetails, Subcategory};
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, CustomerDetails, GiftModel, GiftSubcategory, Notes, Redemption, SchemeDetails, Services, Subcategory, TransactionHistory};
 use App\Models\User;
 use Carbon\Carbon;
 use App\Models\UserLiveLocation;
@@ -143,7 +143,7 @@ class AjaxController extends Controller
             $customer_id = $request->input('customer_id');
             $data = Customers::with('customeraddress', 'addresslists')
                 ->where('id', '=', $customer_id)
-                ->select('id', 'name', 'first_name', 'last_name', 'mobile', 'email')
+                ->select('id', 'name', 'first_name', 'last_name', 'mobile', 'email','customertype')
                 ->first();
             $addresslists = collect([]);
             if ($data['addresslists']) {
@@ -162,6 +162,7 @@ class AjaxController extends Controller
                 'first_name' => isset($data['first_name']) ? $data['first_name'] : '',
                 'last_name' => isset($data['last_name']) ? $data['last_name'] : '',
                 'mobile' => isset($data['mobile']) ? $data['mobile'] : '',
+                'customertype' => isset($data['customertype']) ? $data['customertype']:'',
                 'email' => isset($data['email']) ? $data['email'] : '',
                 'address1' => isset($data['customeraddress']['address1']) ? $data['customeraddress']['address1'] . ' ' . $data['customeraddress']['address2'] . ' ' . $data['customeraddress']['landmark'] . ' ' . $data['customeraddress']['locality'] : '',
                 'address2' => isset($data['customeraddress']['cityname']['city_name']) ? $data['customeraddress']['cityname']['city_name'] . ', ' . $data['customeraddress']['pincodename']['pincode'] : '',
@@ -216,7 +217,7 @@ class AjaxController extends Controller
                 }
                 $query->where('active', '=', 'Y');
             })
-                ->select('id', 'product_name', 'product_image', 'display_name')
+                ->select('id', 'product_name', 'product_image', 'display_name','product_code')
                 ->orderBy('product_name', 'asc')
                 ->get();
             return response()->json($data);
@@ -671,7 +672,7 @@ class AjaxController extends Controller
             $column = $request->type;
             $customer_id = $request->customer_id;
             $status = $request->status;
-            $update = CustomerDetails::where('customer_id', $customer_id)->update([$column => $status]);
+            $update = CustomerDetails::where('customer_id', $customer_id)->update([$column => $status, 'status_update_by' => auth()->user()->id]);
             if($update){
                 if($status == 1){
                     $msg = "Verified Successfully !!";
@@ -724,6 +725,48 @@ class AjaxController extends Controller
             $data = $data->select('id', 'model_name')
                 ->orderBy('model_name', 'asc')
                 ->get();
+            return response()->json($data);
+        } catch (\Exception $e) {
+            return $e;
+        }
+    }
+
+    public function getBankdetailandPoints(Request $request)
+    {
+        try {
+            $shop_img = Customers::where('id', $request->cust_id)->value('profile_image');
+            $customer_bank_details = CustomerDetails::select('account_number','account_holder','ifsc_code','bank_name', 'bank_status')->where('customer_id', $request->cust_id)->first();
+            $customer_aadhar_details = CustomerDetails::select('aadhar_no','aadhar_no_status')->where('customer_id', $request->cust_id)->first();
+            $trans_history = TransactionHistory::where('customer_id', $request->cust_id)->where('status', '1')->sum('point');
+            $redem_history = Redemption::where('customer_id', $request->cust_id)->whereNotIn('status', ['2'])->sum('redeem_amount');
+
+            $data['bank_details'] = $customer_bank_details;
+            $data['aadhar_details'] = $customer_aadhar_details;
+            $data['Total_points'] = (int)$trans_history-(int)$redem_history;
+            $data['shop_img'] = $shop_img;
+
+            return response()->json($data);
+        } catch (\Exception $e) {
+            return $e;
+        }
+    }
+
+    public function getProductByCoupon(Request $request)
+    {
+        try {
+            $serial_no = $request->serial_no;
+            $serial_no_product_code = Services::where('serial_no', $serial_no)->value('product_code');
+            $all_products = Product::all();
+            $html = '<option value="">Select Product</option>';
+            foreach ($all_products as $product) {
+                if($serial_no_product_code && $product->product_code == $serial_no_product_code && $serial_no_product_code != null && $serial_no_product_code != ''){
+                    $html .= '<option value="'.$product->id.'" selected>'.$product->product_name.'</option> ';
+                }else{
+                    $html .= '<option value="'.$product->id.'">'.$product->product_name.'</option> ';
+                }
+            }
+            $data['status'] = true;
+            $data['html'] = $html;
             return response()->json($data);
         } catch (\Exception $e) {
             return $e;

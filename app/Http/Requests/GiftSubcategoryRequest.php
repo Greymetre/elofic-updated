@@ -24,7 +24,7 @@ class GiftSubcategoryRequest extends FormRequest
                 $rules = [
                     'subcategory_name'   => 'required|min:2|max:100|string|regex:/[a-zA-Z0-9\s]+/',
                     'image'        => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-                    'category_id'     => 'required|numeric|exists:categories,id',
+                    'category_id'     => 'required|numeric|exists:gift_categories,id',
                     
                 ];
                 break;
@@ -32,7 +32,7 @@ class GiftSubcategoryRequest extends FormRequest
                 $rules = [
                     'subcategory_name'   => 'required|min:2|max:100|string|regex:/[a-zA-Z0-9\s]+/',
                     'image'        => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-                    'category_id'     => 'required|numeric|exists:categories,id',
+                    'category_id'     => 'required|numeric|exists:gift_categories,id',
                 ];
                 break;
         }

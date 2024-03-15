@@ -166,6 +166,7 @@
               <th>{!! trans('panel.expenses.fields.expense_id') !!}</th>
               <th>{!! trans('panel.global.action') !!}</th>
               <th>{!! trans('panel.expenses.fields.user') !!}</th>
+              <th>{!! trans('panel.expenses.fields.designation') !!}</th>
               <th>{!! trans('panel.expenses.fields.expense_type') !!}</th>
               <th>{!! trans('panel.expenses.fields.date') !!}</th>
               <th>{!! trans('panel.expenses.fields.claim_amount') !!}</th>
@@ -239,6 +240,7 @@ $(document).ready(function() {
             {data: 'id',name: 'id',orderable: false,searchable: false},
             {data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
             {data: 'users.name',name: 'users.name',orderable: false,searchable: false},
+            {data: 'users.getdesignation.designation_name', name: 'users.getdesignation.designation_name', orderable: false, searchable: false },
             {data: 'expense_type.name',name: 'expense_type.name',orderable: false,searchable: false},
             {data: 'date',name: 'date',orderable: false,searchable: false},
             {data: 'claim_amount',name: 'claim_amount',orderable: false,searchable: false},
