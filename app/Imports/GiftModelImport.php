@@ -34,7 +34,7 @@ class GiftModelImport implements ToModel,WithValidation,WithHeadingRow, WithBatc
             'model_name' => isset($row['model_name'])? $row['model_name']:'',
             // 'model_image' => isset($row['subcategory_image'])? $row['subcategory_image']:'',
             'sub_category_id' => isset($row['sub_category_id'])? $row['sub_category_id']:null,
-            'created_by' => Auth::user()->id,
+            'created_by' => auth()->user()->id,
             'created_at' => getcurentDateTime(),
             'updated_at' => getcurentDateTime()
         ]);

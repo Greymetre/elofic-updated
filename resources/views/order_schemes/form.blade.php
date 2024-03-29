@@ -114,10 +114,10 @@
                      <div class="form-group">
                         <select name="scheme_type" class="select2 form-control" id="schemetype">
                            <option value="">{!! trans('panel.orderschemes.fields.scheme_type') !!}</option>
-                           <!-- <option value="invoice" {!! ($schemes->scheme_type == 'invoice' ) ? "selected" : ''!!}>Invoice</option> -->
+                          
                            <option value="lp" {!! ($schemes->scheme_type == 'lp' ) ? "selected" : ''!!}>LP Price</option>
                            <option value="Qty" {!! ($schemes->scheme_type == 'Qty' ) ? "selected" : ''!!}>Quantity</option>
-                           <!-- <option value="coupon" {!! ($schemes->scheme_type == 'coupon' ) ? "selected" : ''!!}>Coupons</option> -->
+                          
                         </select>
                         @if ($errors->has('scheme_type'))
                         <div class="error col-lg-12">
@@ -134,8 +134,7 @@
                            <option value="">Scheme Based On</option>
                            <option value="value" {!! ($schemes->scheme_basedon == 'value' ) ? "selected" : ''!!}>Value</option>
                            <option value="percentage" {!! ($schemes->scheme_basedon == 'percentage' ) ? "selected" : ''!!}>Percentage</option>
-                           <option value="Qty" {!! ($schemes->scheme_basedon == 'Qty' ) ? "selected" : ''!!}>Quantity</option>
-                           <!-- <option value="coupon" {!! ($schemes->scheme_basedon == 'coupon' ) ? "selected" : ''!!}>Coupons</option> -->
+                          
                         </select>
                         @if ($errors->has('scheme_basedon'))
                         <div class="error col-lg-12">
@@ -307,9 +306,9 @@
                                     <input type="hidden">
                                     <input type="file" name="import_file" accept=".xls,.xlsx" />
                                  </span>
-                                 <a href="{{ URL::to('schemes-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.scheme.title_singular') !!}"><i class="material-icons">text_snippet</i></a>
+                                 <a href="{{ URL::to('orderschemes-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.scheme.title_singular') !!}"><i class="material-icons">text_snippet</i></a>
                                  @if( $schemes->exists && isset($schemes['orderscheme_details']) )
-                                 <a href="{{ URL::to('schemes-download') }}?id={{$schemes->id}}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.scheme.title') !!}"><i class="material-icons">cloud_download</i></a>
+                                 <a href="{{ URL::to('orderschemes-download') }}?id={{$schemes->id}}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.scheme.title') !!}"><i class="material-icons">cloud_download</i></a>
                                  @endif 
                               </div>
                            </div>

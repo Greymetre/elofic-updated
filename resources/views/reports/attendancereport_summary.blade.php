@@ -50,11 +50,11 @@
               </form>
               @endif
               @if(auth()->user()->can(['attendance_create']))
-              <a data-toggle="modal" data-target="#submitAttendance" class="btn btn-just-icon btn-theme create" title="Submit Attendance">
+              <a data-toggle="modal" data-target="#submitAttendance" class="btn btn-just-icon btn-theme create d-none" title="Submit Attendance">
                 <i class="material-icons">add_circle</i>
               </a>
                @endif
-               <a href="{{ URL::to('attendance-location') }}" class="btn btn-just-icon btn-theme" title="Update Location"><i class="material-icons">add_location</i></a>
+               <a href="{{ URL::to('attendance-location') }}" class="btn btn-just-icon btn-theme  d-none" title="Update Location"><i class="material-icons">add_location</i></a>
             </div>
           </span>
         </h4>

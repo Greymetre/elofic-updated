@@ -20,31 +20,29 @@ class GiftsRequest extends FormRequest
         switch($this) {
             case !empty($this->id) :
                 $rules = [
-                    'product_name'  =>  'required|min:2|max:100|string|regex:/[a-zA-Z0-9\s]+/',
-                    'display_name'  =>  'required|min:2|max:100|string|regex:/[a-zA-Z0-9\s]+/',
-                    'description'   =>  'required|min:2|max:450|string|regex:/[a-zA-Z0-9\s]+/',
+                    'product_name'  =>  'required',
+                    'display_name'  =>  'required',
+                    'description'   =>  'required',
                     'mrp'           =>  'nullable|numeric',
                     'price'         =>  'nullable|numeric',
                     'points'        =>  'nullable|numeric',
-                    'subcategory_id'=>  'nullable|numeric|exists:subcategories,id',
-                    'category_id'   =>  'nullable|numeric|exists:categories,id',
-                    'brand_id'      =>  'nullable|numeric|exists:brands,id',
-                    'unit_id'       =>  'nullable|numeric|exists:unit_measures,id',
+                    'subcategory_id'=>  'nullable|numeric|exists:giftsubcategories,id',
+                    'category_id'   =>  'nullable|numeric|exists:gift_categories,id',
+                    'brand_id'      =>  'nullable|numeric|exists:gift_brands,id',
                     'image'         =>  'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                 ];
                 break;
             default :
                 $rules = [
-                    'product_name'  =>  'required|min:2|max:100|string|regex:/[a-zA-Z0-9\s]+/',
-                    'display_name'  =>  'required|min:2|max:100|string|regex:/[a-zA-Z0-9\s]+/',
-                    'description'   =>  'required|min:2|max:450|string|regex:/[a-zA-Z0-9\s]+/',
+                    'product_name'  =>  'required',
+                    'display_name'  =>  'required',
+                    'description'   =>  'required',
                     'mrp'           =>  'nullable|numeric',
                     'price'         =>  'nullable|numeric',
                     'points'        =>  'nullable|numeric',
-                    'subcategory_id'=>  'nullable|numeric|exists:subcategories,id',
-                    'category_id'   =>  'nullable|numeric|exists:categories,id',
-                    'brand_id'      =>  'nullable|numeric|exists:brands,id',
-                    'unit_id'       =>  'nullable|numeric|exists:unit_measures,id',
+                    'subcategory_id'=>  'nullable|numeric|exists:giftsubcategories,id',
+                    'category_id'   =>  'nullable|numeric|exists:gift_categories,id',
+                    'brand_id'      =>  'nullable|numeric|exists:gift_brands,id',
                     'image'         =>  'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                 ];
                 break;

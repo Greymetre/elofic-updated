@@ -34,6 +34,7 @@ class GiftCategoryImport implements ToModel,WithValidation,WithHeadingRow, WithB
             'category_name' => isset($row['category_name'])? ucfirst($row['category_name']):'',
             'category_image' => isset($row['category_image'])? $row['category_image']:'',
             'created_at' => getcurentDateTime() ,
+            'created_by' => auth()->user()->id,
             'updated_at' => getcurentDateTime()
         ]);
     }

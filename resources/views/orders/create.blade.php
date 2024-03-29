@@ -143,7 +143,8 @@
                       <label class="col-md-3 col-form-label">{!! trans('panel.global.bill_to') !!}<span class="text-danger"> *</span></label>
                       <div class="col-md-9">
                         <div class="form-group has-default bmd-form-group">
-                        <select class="form-control select2 seller" name="seller_id" style="width: 100%;" required onchange="sellerinfo()" id="seller_id">
+                           <select class="form-control select2 seller" name="seller_id" style="width: 100%;" required onchange="sellerinfo()" id="seller_id">
+                            <!-- <option value="">Select {!! trans('panel.global.seller') !!}</option> -->
                              <option value="">Select Customer</option>
                             @if(@isset($sellers ))
                               @foreach($sellers as $seller)
@@ -151,8 +152,6 @@
                               @endforeach
                             @endif
                          </select>
-
-
                         </div>
                         @if ($errors->has('seller_id'))
                          <div class="error col-lg-12">
@@ -161,6 +160,7 @@
                         @endif
                       </div>
                     </div>
+
                     <div class="row">
                         <label class="col-md-3 col-form-label">Address : </label>
                         <span class="seller_address"></span>
@@ -172,7 +172,7 @@
                        <label class="col-md-3 col-form-label">Dealer/Distributer<span class="text-danger"> *</span></label>
                       <div class="col-md-9">
                         <div class="form-group has-default bmd-form-group">
-                           <select class="form-control select2 buyer" name="buyer_id" style="width: 100%;" required onchange="buyerinfo()">
+                           <select class="form-control select2 buyer" name="buyer_id" style="width: 100%;" onchange="buyerinfo()">
                             <!-- <option value="">Select {!! trans('panel.global.buyer') !!}</option> -->
                             <option value="">Select Dealer/Distributer</option>
                             @if(@isset($buyers ))
@@ -182,7 +182,7 @@
                             @endif
                          </select>
                         </div>
-                        @if ($errors->has('seller_id'))
+                        @if($errors->has('seller_id'))
                          <div class="error col-lg-12">
                             <p class="text-danger">{{ $errors->first('seller_id') }}</p>
                          </div>
@@ -290,9 +290,9 @@
                                  <!-- <th class="text-center"> {!! trans('panel.global.product_detail') !!} </th> -->
                                  <th class="text-center"> {!! trans('panel.global.quantity') !!}</th> 
                                  <th class="text-center"> {!! trans('panel.global.list_price') !!}</th>
-                                 <th class="text-center"> Trade Discount</th>
+                                 <th class="text-center"> Tax</th>
 
-                                 <th class="text-center"> {!! trans('panel.global.discount_percent') !!}</th>
+                                 <th class="text-center"> Trade Discount%</th>
                                  <th class="text-center">EBD Discount%</th>
                                  <th class="text-center"> {!! trans('panel.global.amount') !!} </th>
 
@@ -364,7 +364,7 @@
                                        @if(@isset($products))
                                        <option value="">Select Product</option>
                                        @foreach($products as $product )
-                                       <option value="{{ $product['id'] }}">{{ $product['display_name'] }}  {{ $product['product_code'] }}</option>
+                                       <option value="{{ $product['id'] }}">{{ $product['product_name'] }}  {{ $product['product_code'] }}</option>
                                        @endforeach
                                        @endif
                                     </select>
@@ -399,8 +399,21 @@
                                     <div class='error-discount'></div>
                                  </td>
                                  <td> <input type="text" name="orderdetail[1][scheme_dis]"  class="scheme_dis form-control" readonly>
-                                      <input type="text" name="orderdetail[1][scheme_amount]" class="ebd_amount" hidden>
-                                      <input type="text" name="orderdetail[1][scheme_name]" class="scheme_name" hidden>
+
+                                    <!-- nnn -->
+                                 <input type="text" name="orderdetail[1][scheme_type]" class="scheme_type" hidden>
+                                 <input type="text" name="orderdetail[1][scheme_value_type]" class="scheme_value_type" hidden> 
+                                <input type="text" name="orderdetail[1][minimum]" class="minimum" hidden>
+                                <input type="text" name="orderdetail[1][maximum]" class="maximum" hidden>  
+
+                                <input type="text" name="orderdetail[1][start_date]" class="start_date" hidden>    
+                                <input type="text" name="orderdetail[1][end_date]" class="end_date" hidden>    
+
+                                    <!-- nnn end -->
+
+                                    <input type="text" name="orderdetail[1][scheme_amount]" class="ebd_amount" hidden>
+                                    <input type="text" name="orderdetail[1][scheme_name]" class="scheme_name" hidden>
+
                                  </td>
                                  <td>
                                     <input type="number" name='orderdetail[1][line_total]' class="form-control total" readonly/>
@@ -412,10 +425,12 @@
                                  <td hidden><input type="text" name="orderdetail[1][deal_dis]" class="deal_dis">
                                      <input type="text" name="orderdetail[1][deal_amounts]" class="deal_amounts" hidden>
                                  </td>
+                                   
 
                                  <td hidden><input type="text" name="orderdetail[1][distributot_dis]" class="distributot_dis">
 
                                     <input type="text" name="orderdetail[1][distributot_amounts]" class="distributot_amounts" hidden>
+                                   
                                     <input type="text" name="orderdetail[1][five_gst]" class="five_gst" hidden>
                                     <input type="text" name="orderdetail[1][twelve_gst]" class="twelve_gst" hidden>
                                     <input type="text" name="orderdetail[1][eighteen_gst]" class="eighteen_gst" hidden>
@@ -510,7 +525,7 @@
                          </select> 
                         </div>
                         <div class="col-sm-4">
-                          <input type="text" name="extra_cluster_discount" class="extra_cluster_discount" readonly>  
+                          <input type="text" name="extra_cluster_discount" class="extra_cluster_discount form-control" readonly>  
                         </div>
 
                      </div>
@@ -708,11 +723,11 @@
 
                   '<td><input type="text" name="orderdetail[' + counter + '][quantity]" class="form-control quantity rowchange" /></td>' +
 
-                  '<td><input type="number" name="orderdetail[' + counter + '][mrp]" class="form-control price" readonly/></td>' +
+                  '<td><input type="number" name="orderdetail[' + counter + '][mrp]" class="form-control price readonly"/></td>' +
 
                   '<td><input type="text" name="orderdetail[' + counter + '][gst]" class="form-control gst_new readonly"/></td>' +
                   '<td><input type="number" name="orderdetail[' + counter + '][discount]" class="form-control discount" readonly/></td>' +
-                  '<td><input type="text" name="orderdetail['+ counter+'][scheme_dis]"  class="scheme_dis form-control" readonly> <input type="text" name="orderdetail['+ counter+'][scheme_amount]" class="ebd_amount" hidden> <input type="text" name="orderdetail['+ counter+'][scheme_name]" class="scheme_name" hidden></td>'+
+                  '<td><input type="text" name="orderdetail['+ counter+'][scheme_dis]"  class="scheme_dis form-control" readonly> <input type="text" name="orderdetail['+ counter+'][scheme_amount]" class="ebd_amount" hidden> <input type="text" name="orderdetail['+ counter+'][scheme_name]" class="scheme_name" hidden> <input type="text" name="orderdetail['+ counter+'][scheme_type]" class="scheme_type" hidden> <input type="text" name="orderdetail['+ counter+'][scheme_value_type]" class="scheme_value_type" hidden><input type="text" name="orderdetail['+ counter+'][minimum]" class="minimum" hidden><input type="text" name="orderdetail['+ counter+'][maximum]" class="maximum" hidden>  <input type="text" name="orderdetail['+ counter+'][start_date]" class="start_date" hidden><input type="text" name="orderdetail['+ counter+'][end_date]" class="end_date" hidden> </td>'+
 
                   '<td><input type="text" name="orderdetail[' + counter + '][line_total]" class="form-control total rowchange" readonly /></td>' +
                   '<td hidden> <input type="text" name="orderdetail[' + counter + '][clustered_dis]" class="clustered_dis"> <input type="text" name="orderdetail[' + counter + '][clus_amounts]" class="clus_amounts" hidden> </td>'+
@@ -801,18 +816,22 @@
                   if(res)
                   {
                       $(".seller_address").empty();
+                     
                       $('.seller_address').append(res.address1+'<br> '+res.address2+'<br>Phone : '+res.mobile+'<br>Email: '+res.email);
 
-                     if(res.customertype == '2'){
+                      if(res.customertype == '2'){
                         $('#de_dis').show();
                       }else{
                         $('#de_dis').hide();
                       }
 
+
                   }
                   else
                   {
                       $(".seller_address").empty();
+                      
+
                   }
               }
           });
@@ -873,6 +892,14 @@
             row.find('.scheme_dis').val(res.scheme_discount);
             row.find('.scheme_name').val(res.scheme_name);
 
+            row.find('.scheme_type').val(res.scheme_type);
+            row.find('.scheme_value_type').val(res.scheme_value_type);
+            row.find('.minimum').val(res.minimum);
+            row.find('.maximum').val(res.maximum);
+
+            row.find('.start_date').val(res.start_date);
+            row.find('.end_date').val(res.end_date);
+
             if(res.productdetails){
               $.each(res.productdetails,function(key,value){ 
                 row.find('.productdetails').append('<option style value="'+value.id+'">'+value.detail_title+'</option>');
@@ -921,16 +948,38 @@
             var quantity = $(this).find('.quantity').val();
             var price = $(this).find('.price').val();
             var discount = $(this).find('.discount').val();
+
             var total = quantity*price;
             var discount_amount = total * discount / 100;
              total = total - discount_amount;
 
-            //code for scheme
+            var ebd_dis = 0;
 
-           var ebd_discount = $(this).find('.scheme_dis').val();   
-           var ebd_dis = total * ebd_discount / 100;
+            //code for scheme
+           var ebd_discount = 0  
+           var scheme_value_type = $(this).find('.scheme_value_type').val();
+          
+            if(scheme_value_type == 'percentage'){
+
+           ebd_discount = $(this).find('.scheme_dis').val();   
+           ebd_dis = total * ebd_discount / 100;
             total = total - ebd_dis;
-           var ebd_amount = $(this).find('.ebd_amount').val((ebd_dis).toFixed(2));   
+           var ebd_amount = $(this).find('.ebd_amount').val((ebd_dis).toFixed(2));        
+
+            }else{
+
+           ebd_discount = $(this).find('.scheme_dis').val();   
+           ebd_dis = ebd_discount;
+            total = total - ebd_discount;
+           var ebd_amount = $(this).find('.ebd_amount').val(ebd_dis);       
+
+            }  
+         
+
+           // var ebd_discount = $(this).find('.scheme_dis').val();   
+           // var ebd_dis = total * ebd_discount / 100;
+           //  total = total - ebd_dis;
+           // var ebd_amount = $(this).find('.ebd_amount').val((ebd_dis).toFixed(2));   
 
             //code scheme end
 
@@ -959,6 +1008,16 @@
             // end distributor
 
 
+            //new gst single discount
+               // var gst = $(this).find('.gst_percent').html();
+               // var gst = $(this).find('.gst_new').html();
+               // var tax_gst = total * gst / 100;
+               // $(this).find('.gst_amount_single').val((total).toFixed(2));
+
+             //new gst
+           
+
+
 
             // if($("#withoutgst").is(":checked")){
             //     var tax_amount = 0.00;
@@ -972,7 +1031,7 @@
 
 
 
-            var gst = $(this).find('.gst_percent').html();
+           var gst = $(this).find('.gst_percent').html();
             var tax_amount = total * gst / 100;
 
             if(gst == 5){
@@ -991,6 +1050,8 @@
              var twenty_eight_amount = total * gst /100; 
              $(this).find('.twenti_eight_gst').val((twenty_eight_amount).toFixed(2)); 
             }
+
+
             
           $(this).find('.total').val((total).toFixed(2));
           $(this).find('.tax_amount').val((tax_amount).toFixed(2));
@@ -1174,7 +1235,7 @@
                   var productcode = '';      
                     }
 
-                $('#tab_logic tr:last').find('.product').append('<option value="'+value.id+'">'+value.display_name+productcode+'</option>');
+                $('#tab_logic tr:last').find('.product').append('<option value="'+value.id+'">'+value.product_name+productcode+'</option>');
    
               });
             }
@@ -1201,7 +1262,7 @@
 
 
 
-  setTimeout(() => {
+     setTimeout(() => {
    $('#seller_id').select2({
         placeholder: 'Please Select...',
         allowClear: true,
@@ -1220,9 +1281,7 @@
       }).trigger('change');
 
    }, 1000);
-
 </script>
 
 
 </x-app-layout>
-taxamount

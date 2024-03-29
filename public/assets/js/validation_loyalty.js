@@ -168,4 +168,34 @@ $(document).ready(function () {
   });
 
 });
+
+/*=============== Damage Entries Validation =====================*/
+$('#storeDamageEntryData').validate({
+  rules:{
+    customer_id:
+    {
+      required:true,
+      number:true,
+    },
+    damageattach1:
+    {
+      required:true,
+      image:true,
+    },
+  },
+  highlight: function(element) {
+    $(element).closest('.error').css("display", "none");
+  },
+  unhighlight: function(element) {
+    $(element).closest('.error').css("display", "block");
+  },
+  messages:{
+    customer_id:{
+      required: "Please enter Retailer",
+    },
+    coupon_code:{
+      required: "Please enter Coupon Code",
+    },
+  }
+});
     

@@ -46,21 +46,21 @@
                   From
                   <address>
                     <strong>{!! isset($orders['sellers']['name']) ? $orders['sellers']['name'] :'' !!} </strong><br>
-                   {!! $orders['sellers']['customeraddress']['address1'] !!} ,{!! $orders['sellers']['customeraddress']['address2'] !!}<br>
-                    {!! $orders['sellers']['customeraddress']['locality'] !!}, {!! $orders['sellers']['customeraddress']['cityname']['city_name'] !!} {!! $orders['sellers']['customeraddress']['pincodename']['pincode'] !!}<br>
-                    Phone: {!! $orders['sellers']['mobile'] !!}<br>
-                    Email: {!! $orders['sellers']['email'] !!}
+                   {!! $orders['sellers']['customeraddress']['address1']??'' !!} ,{!! $orders['sellers']['customeraddress']['address2']??'' !!}<br>
+                    {!! $orders['sellers']['customeraddress']['locality']??'' !!}, {!! $orders['sellers']['customeraddress']['cityname']['city_name']??'' !!} {!! $orders['sellers']['customeraddress']['pincodename']['pincode']??'' !!}<br>
+                    Phone: {!! $orders['sellers']['mobile']??'' !!}<br>
+                    Email: {!! $orders['sellers']['email']??'' !!}
                   </address>
                 </div>
                 <!-- /.col -->
                 <div class="col-sm-6 invoice-col">
                   To
                   <address>
-                    <strong>{!! $orders['buyers']['name'] !!}</strong><br>
-                   {!! $orders['buyers']['customeraddress']['address1'] !!} ,{!! $orders['buyers']['customeraddress']['address2'] !!}<br>
-                    {!! $orders['buyers']['customeraddress']['locality'] !!}, {!! $orders['buyers']['customeraddress']['cityname']['city_name'] !!} {!! $orders['buyers']['customeraddress']['pincodename']['pincode'] !!}<br>
-                    Phone: {!! $orders['buyers']['mobile'] !!}<br>
-                    Email: {!! $orders['buyers']['email'] !!}
+                    <strong>{!! $orders['buyers']['name']??'' !!}</strong><br>
+                   {!! $orders['buyers']['customeraddress']['address1']??'' !!} ,{!! $orders['buyers']['customeraddress']['address2']??'' !!}<br>
+                    {!! $orders['buyers']['customeraddress']['locality']??'' !!}, {!! $orders['buyers']['customeraddress']['cityname']['city_name']??'' !!} {!! $orders['buyers']['customeraddress']['pincodename']['pincode']??'' !!}<br>
+                    Phone: {!! $orders['buyers']['mobile']??'' !!}<br>
+                    Email: {!! $orders['buyers']['email']??'' !!}
                   </address>
                 </div>
               </div>
@@ -73,9 +73,11 @@
                     <thead>
                     <tr>
                       <th>{!! trans('panel.global.products') !!}</th>
-                      <th>{!! trans('panel.global.product_detail') !!}</th>
-                      <th>{!! trans('panel.global.price') !!}</th>
                       <th>{!! trans('panel.global.quantity') !!}</th>
+                      <!-- <th>{!! trans('panel.global.product_detail') !!}</th> -->
+                      <th>{!! trans('panel.global.list_price') !!}</th>
+                      <th>Tax</th>
+                      <th>Trade Discount%</th>
                       <th>{!! trans('panel.global.amount') !!}</th>
                     </tr>
                     </thead>
@@ -83,15 +85,18 @@
                     @if($orders->exists && isset($orderdetails))
                         @foreach($orderdetails as $rows )
                         <tr>
-                            <td>{!! $rows['products']['display_name'] !!} <br>
+                            <td>{!! $rows['products']['product_name'] !!} {!! $rows['products']['product_code']??'' !!}   <br>
                               Detail Title : <span class="prd_title">{!! isset($rows['productdetails']['detail_title']) ? $rows['productdetails']['detail_title'] : '' !!}</span>
                             </td>
-                            <td>
+                            <td>{!! $rows['quantity'] !!}</td>
+                           <!--  <td>
                               GST Percent : <span class="gst_percent">{!! isset($rows['productdetails']['gst']) ? $rows['productdetails']['gst'] : '' !!}</span> <br>
                             GST Amount : <span class="gstamount">{!! $rows['tax_amount'] !!}</span> <br>
-                            </td>
+                            </td> -->
+
                           <td>{!! $rows['price'] !!}</td>
-                          <td>{!! $rows['quantity'] !!}</td>
+                          <td>{!! $rows['gst'] !!}</td>
+                          <td>{!! $rows['discount'] !!}</td>
                           <td>{!! $rows['line_total'] !!}</td>
                         </tr>
                         @endforeach
@@ -115,12 +120,110 @@
                 <div class="col-6">
                   <p class="lead"></p>
 
+
+                  <?php 
+
+                  $ebd_dicount_sum = 0;
+                  $clustor_dicount_sum = 0;
+                  $deal_dicount_sum = 0;
+                  $distributor_dicount_sum = 0;
+
+                  $cluster_discount;
+                  $deal_discount;
+                  $distributor_discount;
+
+                  $gst_amount_5 = 0;
+                  $gst_amount_12 = 0;
+                  $gst_amount_18 = 0;
+                  $gst_amount_28 = 0;
+
+                  if(!empty($orderdetails)){
+
+                  foreach($orderdetails as $keys => $rowss){
+
+                  $ebd_dicount_sum+= $rowss['ebd_amount'];
+                  $clustor_dicount_sum+= $rowss['cluster_amount'];
+                  $deal_dicount_sum+= $rowss['deal_amount'];
+                  $distributor_dicount_sum+= $rowss['distributor_amount'];
+
+                  $cluster_discount = $rowss['cluster_discount'];
+                  $deal_discount = $rowss['deal_discount'];
+                  $distributor_discount = $rowss['distributor_discount'];
+
+                  if($rowss['gst'] == 5){
+
+                  //$gst_amount_5+= $rowss['gst_amount'];
+                  $gst_amount_5+= $rowss['tax_amount'];
+
+                  }elseif($rowss['gst'] == 12){
+
+                  //$gst_amount_12+= $rowss['gst_amount'];
+                  $gst_amount_12+= $rowss['tax_amount'];
+
+                  }elseif($rowss['gst'] == 18){
+
+                  //$gst_amount_18+= $rowss['gst_amount'];
+                  $gst_amount_18+= $rowss['tax_amount'];
+
+                  }else{
+
+                  //$gst_amount_28+= $rowss['gst_amount'];
+                  $gst_amount_28+= $rowss['tax_amount'];
+                  }
+
+                  }
+
+                  } 
+
+                  ?>
+
                   <div class="table-responsive">
                     <table class="table">
-                      <tbody><tr>
+                      <tbody>
+                        <tr>
                         <th style="width:50%">Subtotal:</th>
                         <td>{!! $orders['sub_total'] !!}</td>
-                      </tr>
+                       </tr>
+
+                        <tr>
+                        <th style="width:50%">EBD Discount:</th>
+                        <td>{!! $ebd_dicount_sum !!}</td>
+                       </tr>
+
+                        <tr>
+                        <th style="width:50%">Cluster Discount%:</th>
+                         <td>{!! $cluster_discount!!}</td>
+                         <td>{!! $clustor_dicount_sum !!}</td>
+                       </tr>
+                        <tr>
+                        <th style="width:50%">Deal Discount%:</th>
+                        <td>{!! $deal_discount !!}</td>
+                        <td>{!! $deal_dicount_sum !!}</td>
+                       </tr>
+                       <tr>
+                        <th style="width:50%">Distributor Discount%:</th>
+                        <td>{!! $distributor_discount !!}</td>
+                        <td>{!! $distributor_dicount_sum !!}</td>
+                       </tr>
+
+                       <tr>
+                        <th style="width:50%">5%Tax:</th>
+                        <td>{!! $gst_amount_5 !!}</td>
+                       </tr>
+                       <tr>
+                        <th style="width:50%">12%Tax:</th>
+                        <td>{!! $gst_amount_12 !!}</td>
+                       </tr>
+                       <tr>
+                        <th style="width:50%">18%Tax:</th>
+                        <td>{!! $gst_amount_18 !!}</td>
+                       </tr>
+                        <tr>
+                        <th style="width:50%">28%Tax:</th>
+                        <td>{!! $gst_amount_28 !!}</td>
+                       </tr>
+
+
                       <tr>
                         <th>Tax</th>
                         <td>{!! $orders['total_gst'] !!}</td>
@@ -140,7 +243,7 @@
               <div class="row no-print">
                 <div class="col-12">
                   @if($orders['status_id'] != 1)
-                    <a href="{!! url('order-dispatched/'.encrypt($orders->id)) !!}" class="btn btn-success float-right">Dispatched</a>
+                    <a href="{!! url('order-dispatched/'.encrypt($orders->id)) !!}" class="btn btn-success float-right">Fully Dispatched</a>
                   @endif
 
                   @if($orders['status_id'] != 1)

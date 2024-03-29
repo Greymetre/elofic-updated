@@ -200,7 +200,14 @@ class CustomerController extends Controller
                             ->addColumn('createdbyname.name', function ($query) {
                                 return $query->created_by?$query->createdbyname->name:'Self';
                             })
-                        ->rawColumns(['action','image','checkbox','createdbyname.name'])
+                        ->addColumn('profileimage', function ($query) {
+                            $profileimage = !empty($query->shop_image) ? '/public/uploads/'.$query->shop_image : asset('assets/img/placeholder.jpg') ;
+                                return '<img src="'.$profileimage.'" border="0" width="70" class="rounded imageDisplayModel" align="center" />';
+                            })
+                            ->addColumn('createdbyname.name', function ($query) {
+                                return $query->created_by?$query->createdbyname->name:'Self';
+                            })
+                        ->rawColumns(['action','image','checkbox','createdbyname.name', 'profileimage'])
                     ->make(true);
         }
         return view('customers.index', compact('beats','users','states','cities','customertype','branches'));
@@ -287,10 +294,17 @@ class CustomerController extends Controller
             $docimages = collect([]);
             if($request->file('image')){
                 $image = $request->file('image');
-                $filename = 'profile';
+                $filename = 'shop';
                 unset($request['image']);
                 $request['profile_image'] = fileupload($image, $this->path, $filename) ;
                 
+            }
+            if($request->file('profileImage')){
+                $path = 'customers';
+                $image = $request->file('profileImage');
+                $filename = 'profile_'.$request->id;
+                unset($request['image']);
+                $request['shop_image'] = fileupload($image, $this->path, $filename) ;
             }
             if($request->file('imggstin')){
                 $image = $request->file('imggstin');
@@ -556,6 +570,13 @@ class CustomerController extends Controller
                 $filename = 'profile_'.$id;
                 unset($request['image']);
                 $request['profile_image'] = fileupload($image, $this->path, $filename) ;
+            }
+            if($request->file('profileImage')){
+                $path = 'customers';
+                $image = $request->file('profileImage');
+                $filename = 'profile_'.$request->id;
+                unset($request['image']);
+                $request['shop_image'] = fileupload($image, $this->path, $filename) ;
             }
             if($request->file('imggstin')){
                 $path = 'customers/';

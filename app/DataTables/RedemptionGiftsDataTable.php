@@ -25,11 +25,11 @@ class RedemptionGiftsDataTable extends DataTable
             ->addColumn('action', function ($query) use ($request) {
                 if ((int)$request->Total_points >= (int)$query->points) {
                     return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
-                        <input ' . ($request->data != "[]" && json_decode($request->data)->gift_id == $query->id ? "checked" : "") . ' type="checkbox" name="gift_id[]" value="' . $query->id . '" />
+                        <input ' . ($request->data != "[]" && json_decode($request->data)->gift_id == $query->id ? "checked" : "") . ' type="checkbox" name="gift_id[]" data-points="' . $query->points . '" value="' . $query->id . '" />
                         </div>';
                 } else {
                     return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
-                        <input ' . ($request->data != "[]" && json_decode($request->data)->gift_id == $query->id ? "checked" : "") . ' disabled type="checkbox" name="gift_id[]" value="' . $query->id . '" />
+                        <input ' . ($request->data != "[]" && json_decode($request->data)->gift_id == $query->id ? "checked" : "") . ' disabled type="checkbox" name="gift_id[]" data-points="' . $query->points . '" value="' . $query->id . '" />
                         </div>';
                 }
             })

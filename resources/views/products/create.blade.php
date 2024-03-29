@@ -87,10 +87,25 @@
                 <label class="col-md-3 col-form-label">HP<span class="text-danger"> *</span></label>
                 <div class="col-md-9">
                   <div class="form-group has-default bmd-form-group">
-                    <textarea name="specification" class="form-control" rows="4" maxlength="200" required>{!! old( 'specification', $products['specification']) !!}</textarea>
+                    <input type="text" name="specification" class="form-control" rows="4" maxlength="200" required value="{!! old( 'specification', $products['specification']) !!}">
                     @if ($errors->has('specification'))
                     <div class="error col-lg-12">
                       <p class="text-danger">{{ $errors->first('specification') }}</p>
+                    </div>
+                    @endif
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="row">
+                <label class="col-md-3 col-form-label">Phase<span class="text-danger"> *</span></label>
+                <div class="col-md-9">
+                  <div class="form-group has-default bmd-form-group">
+                    <input type="text" name="phase" class="form-control" rows="4" maxlength="200" required value="{!! old( 'phase', $products['phase']) !!}">
+                    @if ($errors->has('phase'))
+                    <div class="error col-lg-12">
+                      <p class="text-danger">{{ $errors->first('phase') }}</p>
                     </div>
                     @endif
                   </div>

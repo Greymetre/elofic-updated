@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, CustomerDetails, GiftModel, GiftSubcategory, Notes, Redemption, SchemeDetails, Services, Subcategory, TransactionHistory};
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, CustomerDetails, EndUser, GiftModel, GiftSubcategory, Notes, Redemption, SchemeDetails, Services, Subcategory, TourProgramme, TransactionHistory, UserCityAssign};
 use App\Models\User;
 use Carbon\Carbon;
 use App\Models\UserLiveLocation;
@@ -143,7 +143,7 @@ class AjaxController extends Controller
             $customer_id = $request->input('customer_id');
             $data = Customers::with('customeraddress', 'addresslists')
                 ->where('id', '=', $customer_id)
-                ->select('id', 'name', 'first_name', 'last_name', 'mobile', 'email','customertype')
+                ->select('id', 'name', 'first_name', 'last_name', 'mobile', 'email', 'customertype')
                 ->first();
             $addresslists = collect([]);
             if ($data['addresslists']) {
@@ -162,7 +162,7 @@ class AjaxController extends Controller
                 'first_name' => isset($data['first_name']) ? $data['first_name'] : '',
                 'last_name' => isset($data['last_name']) ? $data['last_name'] : '',
                 'mobile' => isset($data['mobile']) ? $data['mobile'] : '',
-                'customertype' => isset($data['customertype']) ? $data['customertype']:'',
+                'customertype' => isset($data['customertype']) ? $data['customertype'] : '',
                 'email' => isset($data['email']) ? $data['email'] : '',
                 'address1' => isset($data['customeraddress']['address1']) ? $data['customeraddress']['address1'] . ' ' . $data['customeraddress']['address2'] . ' ' . $data['customeraddress']['landmark'] . ' ' . $data['customeraddress']['locality'] : '',
                 'address2' => isset($data['customeraddress']['cityname']['city_name']) ? $data['customeraddress']['cityname']['city_name'] . ', ' . $data['customeraddress']['pincodename']['pincode'] : '',
@@ -217,7 +217,7 @@ class AjaxController extends Controller
                 }
                 $query->where('active', '=', 'Y');
             })
-                ->select('id', 'product_name', 'product_image', 'display_name','product_code')
+                ->select('id', 'product_name', 'product_image', 'display_name', 'product_code')
                 ->orderBy('product_name', 'asc')
                 ->get();
             return response()->json($data);
@@ -307,6 +307,15 @@ class AjaxController extends Controller
                 'gst' => isset($data['productdetails'][0]['gst']) ? $data['productdetails'][0]['gst'] : '',
                 'discount' => isset($data['productdetails'][0]['discount']) ? $data['productdetails'][0]['discount'] : '',
                 'max_discount' => ($data['productdetails'][0]['max_discount']) ? $data['productdetails'][0]['max_discount'] : 0.00,
+                'scheme_discount' => $data['getSchemeDetail']['points'] ?? 0.00,
+                'scheme_name' => $data['getSchemeDetail']['orderscheme']['scheme_name'] ?? '',
+                'scheme_type' => $data['getSchemeDetail']['orderscheme']['scheme_type']??'',
+                'scheme_value_type' => $data['getSchemeDetail']['orderscheme']['scheme_basedon']??'',
+                'minimum' => $data['getSchemeDetail']['orderscheme']['minimum']??0,
+                'maximum' => $data['getSchemeDetail']['orderscheme']['maximum']??0,
+                'start_date' => $data['getSchemeDetail']['orderscheme']['start_date']??0,
+                'end_date' => $data['getSchemeDetail']['orderscheme']['end_date']??0,
+
                 'productdetails' => $data['productdetails']
             ]);
 
@@ -646,8 +655,80 @@ class AjaxController extends Controller
         if ($request->ajax()) {
 
             $term = trim($request->term);
-            
-            $coins = Customers::select("id as id", "name as text")->where('name', 'LIKE',  '%' . $term . '%')->orderBy('id', 'asc')->simplePaginate(10);
+
+            $coins = Customers::select("id as id", "name as text")->whereIN('customertype', ['1', '2', '3'])->where('name', 'LIKE',  '%' . $term . '%')->orderBy('id', 'asc')->simplePaginate(10);
+
+
+            $morePages = true;
+            $pagination_obj = json_encode($coins);
+            if (empty($coins->nextPageUrl())) {
+                $morePages = false;
+            }
+            $results = array(
+                "results" => $coins->items(),
+                "pagination" => array(
+                    "more" => $morePages
+                )
+            );
+            return response()->json($results);
+        }
+    }
+
+    public function getProductDataSelect(Request $request)
+    {
+        if ($request->ajax()) {
+
+            $term = trim($request->term);
+
+            $coins = Product::select("id as id", "product_name as text")->where('product_name', 'LIKE',  '%' . $term . '%')->orderBy('id', 'asc')->simplePaginate(10);
+
+
+            $morePages = true;
+            $pagination_obj = json_encode($coins);
+            if (empty($coins->nextPageUrl())) {
+                $morePages = false;
+            }
+            $results = array(
+                "results" => $coins->items(),
+                "pagination" => array(
+                    "more" => $morePages
+                )
+            );
+            return response()->json($results);
+        }
+    }
+
+    public function getDealerDisDataSelect(Request $request)
+    {
+        if ($request->ajax()) {
+
+            $term = trim($request->term);
+
+            $coins = Customers::select("id as id", "name as text")->whereIN('customertype', ['1', '3'])->where('name', 'LIKE',  '%' . $term . '%')->orderBy('id', 'asc')->simplePaginate(10);
+
+
+            $morePages = true;
+            $pagination_obj = json_encode($coins);
+            if (empty($coins->nextPageUrl())) {
+                $morePages = false;
+            }
+            $results = array(
+                "results" => $coins->items(),
+                "pagination" => array(
+                    "more" => $morePages
+                )
+            );
+            return response()->json($results);
+        }
+    }
+
+    public function getRetailerDataSelect(Request $request)
+    {
+        if ($request->ajax()) {
+
+            $term = trim($request->term);
+
+            $coins = Customers::select("id as id", "name as text")->where('customertype', '2')->where('name', 'LIKE',  '%' . $term . '%')->orderBy('id', 'asc')->simplePaginate(10);
 
 
             $morePages = true;
@@ -673,19 +754,19 @@ class AjaxController extends Controller
             $customer_id = $request->customer_id;
             $status = $request->status;
             $update = CustomerDetails::where('customer_id', $customer_id)->update([$column => $status, 'status_update_by' => auth()->user()->id]);
-            if($update){
-                if($status == 1){
+            if ($update) {
+                if ($status == 1) {
                     $msg = "Verified Successfully !!";
-                }elseif($status == 2){
+                } elseif ($status == 2) {
                     $msg = "Rejected Successfully !!";
-                }else{
+                } else {
                     $msg = "";
                 }
                 $results = array(
                     "status" => true,
                     "msg" => $msg
                 );
-            }else{
+            } else {
                 $results = array(
                     "status" => false,
                     "msg" => "Somthing went wrong"
@@ -735,14 +816,14 @@ class AjaxController extends Controller
     {
         try {
             $shop_img = Customers::where('id', $request->cust_id)->value('profile_image');
-            $customer_bank_details = CustomerDetails::select('account_number','account_holder','ifsc_code','bank_name', 'bank_status')->where('customer_id', $request->cust_id)->first();
-            $customer_aadhar_details = CustomerDetails::select('aadhar_no','aadhar_no_status')->where('customer_id', $request->cust_id)->first();
+            $customer_bank_details = CustomerDetails::select('account_number', 'account_holder', 'ifsc_code', 'bank_name', 'bank_status')->where('customer_id', $request->cust_id)->first();
+            $customer_aadhar_details = CustomerDetails::select('aadhar_no', 'aadhar_no_status')->where('customer_id', $request->cust_id)->first();
             $trans_history = TransactionHistory::where('customer_id', $request->cust_id)->where('status', '1')->sum('point');
             $redem_history = Redemption::where('customer_id', $request->cust_id)->whereNotIn('status', ['2'])->sum('redeem_amount');
 
             $data['bank_details'] = $customer_bank_details;
             $data['aadhar_details'] = $customer_aadhar_details;
-            $data['Total_points'] = (int)$trans_history-(int)$redem_history;
+            $data['Total_points'] = (int)$trans_history - (int)$redem_history;
             $data['shop_img'] = $shop_img;
 
             return response()->json($data);
@@ -758,16 +839,150 @@ class AjaxController extends Controller
             $serial_no_product_code = Services::where('serial_no', $serial_no)->value('product_code');
             $all_products = Product::all();
             $html = '<option value="">Select Product</option>';
+            $slected = false;
             foreach ($all_products as $product) {
-                if($serial_no_product_code && $product->product_code == $serial_no_product_code && $serial_no_product_code != null && $serial_no_product_code != ''){
-                    $html .= '<option value="'.$product->id.'" selected>'.$product->product_name.'</option> ';
-                }else{
-                    $html .= '<option value="'.$product->id.'">'.$product->product_name.'</option> ';
+                if ($serial_no_product_code && $product->product_code == $serial_no_product_code && $serial_no_product_code != null && $serial_no_product_code != '') {
+                    $html .= '<option value="' . $product->id . '" selected>' . $product->product_name . '</option> ';
+                    $slected = true;
+                } else {
+                    $html .= '<option value="' . $product->id . '">' . $product->product_name . '</option> ';
                 }
             }
             $data['status'] = true;
             $data['html'] = $html;
+            $data['slected'] = $slected;
             return response()->json($data);
+        } catch (\Exception $e) {
+            return $e;
+        }
+    }
+
+    public function getTourPlanByUserAndDate(Request $request)
+    {
+        try {
+            $data = TourProgramme::where('date', $request->date)->where('userid', $request->user_id)->first();
+            if ($data && $data != NULL && !empty($data)) {
+                $response = ['status' => true, 'data' => $data];
+                return response()->json($response);
+            } else {
+                $response = ['status' => false, 'data' => $data];
+                return response()->json($response);
+            }
+        } catch (\Exception $e) {
+            return $e;
+        }
+    }
+    public function userCityList(Request $request)
+    {
+        try {
+            $cityname = $request->input('cityname');
+            $user_id = $request->user()->id;
+            $cityids = UserCityAssign::where('userid', '=', $user_id)->pluck('city_id')->toArray();
+            //$data = City::whereIn('id',$cityids)->select('id','city_name', 'grade')->orderBy('city_name','asc')->get();
+
+            $data = City::whereIn('id', $cityids)->select('id', 'city_name', 'grade');
+            if ($cityname) {
+                $data->where('city_name', 'LIKE', trim($cityname) . '%');
+            }
+            $data = $data->orderBy('city_name', 'asc')->get();
+
+            if ($data->isNotEmpty()) {
+                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], 200);
+            }
+            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data], 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getProductInfoBySerialNo(Request $request)
+    {
+        try {
+            $serial_no = $request->input('serial_no');
+            $data = Services::with('product')
+                ->where(function ($query) use ($serial_no) {
+                    if (isset($serial_no)) {
+                        $query->where('serial_no', '=', $serial_no);
+                    }
+                })
+                ->first();
+            if ($data) {
+                $data->product->categories = $data->product->categories;
+                return response()->json(['status' => true, 'data' => $data->product]);
+            } else {
+                return response()->json(['status' => false, 'data' => null]);
+            }
+        } catch (\Exception $e) {
+            return $e;
+        }
+    }
+
+    public function getEndUserData(Request $request)
+    {
+        try {
+            $customer_number = $request->input('customer_number');
+            if (isset($customer_number)) {
+                $data = EndUser::where(function ($query) use ($customer_number) {
+                    $query->where('customer_number', '=', $customer_number);
+                })
+                    ->first();
+                if ($data) {
+                    return response()->json(['status' => true, 'data' => $data]);
+                } else {
+                    return response()->json(['status' => false, 'data' => null]);
+                }
+            } else {
+                return response()->json(['status' => false, 'data' => null]);
+            }
+        } catch (\Exception $e) {
+            return $e;
+        }
+    }
+
+    public function getComplaintsData(Request $request)
+    {
+        try {
+            $search = $request->input('search');
+            $end_user = EndUser::where('customer_number', $search)->first();
+            $data = Complaint::where(function ($query) use ($search, $end_user) {
+                if (isset($search)) {
+                    $query->where('product_serail_number', '=', $search);
+                }
+                if (isset($end_user) && $end_user && $end_user != NULL) {
+                    $query->orwhere('end_user_id', '=', $end_user->id);
+                }
+            })
+                ->get();
+            if (count($data) > 0) {
+                $html = '';
+                foreach ($data as $val) {
+                    $html .= '<tr><td>';
+                    $html .= $val->complaint_number;
+                    $html .= '</td><td>';
+                    $html .= date('d M Y', strtotime($val->complaint_date));
+                    $html .= '</td><td>';
+                    $html .= '</td><td>';
+                    if ($val->status == '0') {
+                        $html .= 'Open';
+                    } elseif ($val->status == '1') {
+                        $html .= 'Pending';
+                    }
+
+                    $html .= '</td><td>';
+                    $html .= strtoupper($val->product_serail_number);
+                    $html .= '</td><td>';
+                    $html .= $val->service_center_details ? $val->service_center_details->name : '';
+                    $html .= '</td><td>';
+                    $html .= $val->seller_details ? $val->seller_details->name : '';
+                    $html .= '</td><td>';
+                    $html .= $val->party ? $val->party->name : '';
+                    $html .= '</td><tr>';
+                }
+                return response()->json(['status' => true, 'data' => $html]);
+            } else {
+                $data = '<tr><td class="text-center" colspan="8">No record Found</td></tr>';
+                return response()->json(['status' => false, 'data' => $data]);
+            }
         } catch (\Exception $e) {
             return $e;
         }

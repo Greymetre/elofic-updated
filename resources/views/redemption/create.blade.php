@@ -103,8 +103,10 @@
                      <div class="col-md-2">
                         <label for="total_point" class="form-control">Total Point</label>
                      </div>
-                     <div class="col-md-2">
-                        <input readonly type="number" value="{!! old( 'total_point' ) !!}" name="total_point" id="total_point" class="form-control">
+                     <div class="col-md-10">
+                        <div class="d-flex">
+                           <input style="width: 40% !important;" readonly type="number" value="{!! old( 'total_point' ) !!}" name="total_point" id="total_point" class="form-control"> <h4 class="ml-2">- Redeem Point </h4> <h4 class="ml-2" id="redeem_amount_cal">0</h4> <h4 class="ml-2">= Balance Point</h4> <h4 class="ml-2" id="remain_amount_cal"> 0 </h4>
+                        </div>
                         @if ($errors->has('total_point'))
                         <div class="error col-lg-12">
                            <p class="text-danger">{{ $errors->first('total_point') }}</p>
@@ -217,6 +219,7 @@
                },
                success: function(data) {
                   $("#total_point").val(data.Total_points);
+                  $("#remain_amount_cal").html(data.Total_points);
                   $("#account_holder").val(data.bank_details.account_holder);
                   $("#account_number").val(data.bank_details.account_number);
                   $("#bank_name").val(data.bank_details.bank_name);
@@ -312,6 +315,8 @@
       }).trigger('change');
 
       $("#redeem_mode").on('change', function() {
+         $("#redeem_amount_cal").html('0');
+         $("#remain_amount_cal").html('0');
          var redeem_mode = $(this).val();
          var cust_id = $("#customer_id").val();
          if (cust_id != '' && cust_id != null) {
@@ -420,5 +425,27 @@
             }
          }, 1000);
       }).trigger('change');
+
+      $(document).on("keyup", "#redeem_amount", function(){
+         var redeem_amount = $(this).val();
+         var total_points = $("#total_point").val();
+         if(redeem_amount != ''){
+            $("#redeem_amount_cal").html(redeem_amount);
+            $("#remain_amount_cal").html(total_points-redeem_amount);
+         }
+      })
+
+      $(document).on('change', 'input[name="gift_id[]"]', function() {
+         var redeem_amount = 0;
+         var total_points = $("#total_point").val();
+         $('input[name="gift_id[]"]:checked').each(function() {
+            var dataPoints = $(this).data('points');
+            redeem_amount += parseInt(dataPoints);
+         });
+         if(redeem_amount > 0){
+            $("#redeem_amount_cal").html(redeem_amount);
+            $("#remain_amount_cal").html(total_points-redeem_amount);
+         }
+      });
    </script>
 </x-app-layout>

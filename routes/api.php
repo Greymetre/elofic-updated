@@ -62,6 +62,8 @@ Route::any('getDevision', [ CustomController::class, 'getDevision']);
 Route::any('mobileNumberExists', [ CustomController::class, 'mobileNumberExists']);
 Route::any('gstNumberExists', [ CustomController::class, 'gstNumberExists']);
 Route::any('getRetailerList', [ CustomController::class, 'getRetailerList']);
+Route::any('getslider', [CustomController::class, 'getslider']);
+Route::get('getsettings', [DashboardController::class, 'getsettings']);
 
 Route::any('emailExists', [ CustomController::class, 'emailExists']);
 /*================= Customer Routes ============================*/
@@ -73,6 +75,8 @@ Route::group(['middleware' => ['auth:customers']], function () {
     Route::any('customer/getKyc', [DashboardController::class, 'getKyc']);
     Route::post('customer/addKyc', [DashboardController::class, 'addKyc']);
     Route::post('customer/updateprofile', [DashboardController::class, 'updateprofile']);
+    Route::get('customer/getsettings', [DashboardController::class, 'getsettings']);
+    Route::get('customer/getpoints', [DashboardController::class, 'getpoints']);
     // Secondry Sales
     Route::post('customer/insertSales', [SalesController::class, 'customerInsertSales']);
     Route::any('customer/getSales', [SalesController::class, 'customerGetSales']);
@@ -90,6 +94,9 @@ Route::group(['middleware' => ['auth:customers']], function () {
     Route::post('customer/couponScans', [CouponController::class, 'customerCouponScans']);
     Route::post('customer/getScanedCoupons', [CouponController::class, 'customerScanedCouponList']);
     Route::post('customer/pointRedemption', [WalletController::class, 'customerpointRedemption']);
+    Route::any('customer/getProductByCoupon', [CouponController::class, 'getProductByCoupon']);
+    Route::any('customer/getEndUserData', [CouponController::class, 'getEndUserData']);
+    Route::post('customer/warrantyActivation', [CouponController::class, 'warrantyActivation']);
     // Gift Catalogue
     Route::any('customer/getgiftcatalogue', [GiftController::class, 'getgiftcatalogue']);
     Route::any('customer/getgiftcategories', [GiftController::class, 'getgiftcategories']);
@@ -99,7 +106,10 @@ Route::group(['middleware' => ['auth:customers']], function () {
     Route::any('customer/getredemptionhistory', [TransactionHistoryController::class, 'getredemptionhistory']);
     Route::any('customer/getBankDetails', [TransactionHistoryController::class, 'getBankDetails']);
     Route::post('customer/addNeftRedemption', [TransactionHistoryController::class, 'addNeftRedemption']);
+    Route::post('customer/addGiftRedemption', [TransactionHistoryController::class, 'addGiftRedemption']);
     Route::post('customer/addSerialNumber', [TransactionHistoryController::class, 'addSerialNumber']);
+    Route::get('customer/getDamageEntry', [TransactionHistoryController::class, 'getDamageEntry']);
+    Route::post('customer/addDamageEntry', [TransactionHistoryController::class, 'addDamageEntry']);
 });
 
 Route::group(['middleware' => ['auth:users']], function () {

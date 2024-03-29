@@ -50,6 +50,7 @@
                   @endif
                   <input type="hidden" name="name" id="name" required>
                   <div class="row">
+                  <input type="hidden" name="id" id="user_id" value="{!! $user?$user->id:'' !!}">
                      <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">Assign Cities</label>
@@ -128,7 +129,7 @@
                            <label class="col-md-2 col-form-label">{!! trans('panel.global.email') !!}<span class="text-danger"> *</span></label>
                            <div class="col-md-10">
                               <div class="form-group has-default bmd-form-group">
-                                 <input type="email" name="email" class="form-control" value="{!! $user->email,old( 'email') !!}" maxlength="200" required>
+                                 <input type="email" name="email" id="email" class="form-control" value="{!! $user->email,old( 'email') !!}" maxlength="200" required>
                                  @if ($errors->has('email'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('email') }}</p>

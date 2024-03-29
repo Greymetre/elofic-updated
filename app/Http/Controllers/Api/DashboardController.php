@@ -27,8 +27,11 @@ use App\Models\Payment;
 use App\Models\PaymentDetail;
 use App\Models\SalesTarget;
 use App\Models\Customers;
+use App\Models\LoyaltyAppSetting;
 use App\Models\Pincode;
+use App\Models\Redemption;
 use App\Models\State;
+use App\Models\TransactionHistory;
 
 class DashboardController extends Controller
 {
@@ -265,6 +268,7 @@ class DashboardController extends Controller
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
             $customer = Customers::with('customerdocuments')->with('customerdetails')->find($request->id);
+            $id = $request->id;
             $docimages = collect([]);
             if ($request->file('imggstin')) {
                 $path = 'customers/';
@@ -273,7 +277,7 @@ class DashboardController extends Controller
                 unset($request['imggstin']);
                 $docimages->push([
                     'active'        => 'Y',
-                    'file_path'     => fileupload($image, $this->path, $filename),
+                    'file_path'     => fileupload($image, $path, $filename),
                     'document_name' =>  'gstin',
                 ]);
             }
@@ -284,7 +288,7 @@ class DashboardController extends Controller
                 unset($request['imgpan']);
                 $docimages->push([
                     'active'        => 'Y',
-                    'file_path'     => fileupload($image, $this->path, $filename),
+                    'file_path'     => fileupload($image, $path, $filename),
                     'document_name' =>  'pan',
                 ]);
             }
@@ -295,7 +299,7 @@ class DashboardController extends Controller
                 unset($request['image']);
                 $docimages->push([
                     'active'        => 'Y',
-                    'file_path'     => fileupload($image, $this->path, $filename),
+                    'file_path'     => fileupload($image, $path, $filename),
                     'document_name' =>  'aadhar',
                 ]);
             }
@@ -306,7 +310,7 @@ class DashboardController extends Controller
                 unset($request['image']);
                 $docimages->push([
                     'active'        => 'Y',
-                    'file_path'     => fileupload($image, $this->path, $filename),
+                    'file_path'     => fileupload($image, $path, $filename),
                     'document_name' =>  'aadharback',
                 ]);
             }
@@ -317,7 +321,7 @@ class DashboardController extends Controller
                 unset($request['image']);
                 $docimages->push([
                     'active'        => 'Y',
-                    'file_path'     => fileupload($image, $this->path, $filename),
+                    'file_path'     => fileupload($image, $path, $filename),
                     'document_name' =>  'bankpass',
                 ]);
             }
@@ -330,7 +334,7 @@ class DashboardController extends Controller
                 if ($existingAttachment) {
                     $existingAttachment->update($docimage);
                 } else {
-                    Attachment::create(array_merge($docimage, ['customer_id' => $request['customer_id']]));
+                    Attachment::create(array_merge($docimage, ['customer_id' => $id]));
                 }
             }
             $request['customer_id'] = $request->id;
@@ -353,13 +357,19 @@ class DashboardController extends Controller
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
             $customer = Customers::with('customeraddress','customerdetails')->find($request->id);
-            
             if($request->file('image')){
                 $path = 'customers';
                 $image = $request->file('image');
-                $filename = 'profile_'.$request->id;
+                $filename = 'shop_'.$request->id;
                 unset($request['image']);
                 $request['profile_image'] = fileupload($image, $path, $filename) ;
+            }
+            if($request->file('profileImage')){
+                $path = 'customers';
+                $image = $request->file('profileImage');
+                $filename = 'profile_'.$request->id;
+                unset($request['image']);
+                $request['shop_image'] = fileupload($image, $path, $filename) ;
             }
             $request['customer_id'] = $request->id;
             $response = $customer->update_data($request);
@@ -391,8 +401,43 @@ class DashboardController extends Controller
                         'created_at' => getcurentDateTime(),
                         'updated_at' => getcurentDateTime()
                     ]);
-                return response(['status' => 'success', 'message' => 'Data Update successfully.', 'data' => $customer], 200);
+                    $customer_updated = Customers::with('customeraddress','customerdetails')->find($request->id);
+                    $profile_image = $customer_updated->shop_image;
+                    $customer_updated->shop_image = $customer_updated->profile_image;
+                    $customer_updated->profile_image = $profile_image;
+                return response(['status' => 'success', 'message' => 'Data Update successfully.', 'data' => $customer_updated], 200);
             }
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
+    }
+
+    public function getsettings()
+    {
+        try {
+            $data = LoyaltyAppSetting::with('media')->first();
+            return response(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
+    }
+
+    public function getpoints(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'id' => 'required|exists:customers,id',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
+            }
+            $data['total_points'] = TransactionHistory::where('customer_id', $request->id)->sum('point')??0;
+            $data['active_points'] = TransactionHistory::where('customer_id', $request->id)->where('status', '1')->sum('point')??0;
+            $data['provision_points'] = TransactionHistory::where('customer_id', $request->id)->where('status', '0')->sum('point')??0;
+            $data['total_redemption'] = Redemption::where('customer_id', $request->id)->whereNot('status', '2')->sum('redeem_amount')??0;
+            $data['total_rejected'] = Redemption::where('customer_id', $request->id)->where('status', '2')->sum('redeem_amount')??0;
+            $data['total_balance'] = (int)$data['active_points']-(int)$data['total_redemption'];
+            return response(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], 200);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }

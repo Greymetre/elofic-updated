@@ -78,19 +78,52 @@ $(".getimage5").change(function(){
   readURL5(this);
 });
 
-function readURL0(input) {
+function readURL6(input) {
   if (input.files && input.files[0]) {
     var reader = new FileReader();
     
     reader.onload = function (e) {
-        $('.imagepreview0').attr('src', e.target.result);
+        $('.imagepreview6').attr('src', e.target.result);
     }
     
     reader.readAsDataURL(input.files[0]);
   }
 }
 
-$(".getimage0").change(function(){
+$(".getimage6").change(function(){
+  readURL0(this);
+});
+
+function readURL7(input) {
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
+    
+    reader.onload = function (e) {
+        $('.imagepreview7').attr('src', e.target.result);
+    }
+    
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+$(".getimage7").change(function(){
+  readURL0(this);
+});
+
+
+function readURL8(input) {
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
+    
+    reader.onload = function (e) {
+        $('.imagepreview8').attr('src', e.target.result);
+    }
+    
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+$(".getimage8").change(function(){
   readURL0(this);
 });
 

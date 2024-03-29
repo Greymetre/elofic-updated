@@ -41,7 +41,7 @@
                      <input type="hidden" name="name" value="{!! $user->name !!}">
                      <div class="col-md-6">
                         <div class="row">
-                           <label class="col-md-3 col-form-label">{{ trans('panel.user.fields.first_name') }}</label>
+                           <label class="col-md-3 col-form-label">{{ trans('panel.user.fields.first_name') }}sss</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
                                  <input type="text" name="first_name" class="form-control" value="{!! old( 'first_name', !empty($user['first_name']) ? $user['first_name']:'') !!}">

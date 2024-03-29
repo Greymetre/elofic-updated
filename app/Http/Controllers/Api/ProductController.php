@@ -113,7 +113,7 @@ class ProductController extends Controller
             $subcategory_id = $request->input('subcategory_id');
             $brand_id = $request->input('brand_id');
             $search = $request->input('search');
-            $query = Product::with('productdetails','productpriceinfo')->where(function ($query) use($category_id,$subcategory_id, $brand_id,$search) {
+            $query = Product::with('productdetails','productpriceinfo','getSchemeDetail')->where(function ($query) use($category_id,$subcategory_id, $brand_id,$search) {
                             if(!empty($category_id))
                             {
                                 $query->where('category_id','=',$category_id);
@@ -151,6 +151,44 @@ class ProductController extends Controller
             if($db_data->isNotEmpty())
             {
                 foreach ($db_data as $key => $value) {
+
+                        $discount_amount = 0;
+                        $total_amount = 0;
+                        $ebd_amount = 0;
+                        $product_ebd_amount = 0;
+                        $ebd_discount = 0;
+
+
+                        $discount = $value['productpriceinfo']['discount']??0;
+                        $mrp = $value['productpriceinfo']['mrp']??0;
+
+                        $discount_amount = $mrp*$discount/100;
+                        $total_amount = $mrp-$discount_amount; 
+                        $total_amount = number_format($total_amount, 2, ".", "");
+
+
+                        $ebd_discount = $value['getSchemeDetail']['points']??0;
+                        $scheme_type = $value['getSchemeDetail']['orderscheme']['scheme_type']??'';
+                        $scheme_value_type = $value['getSchemeDetail']['orderscheme']['scheme_basedon']??'';
+
+                        $minimum = $value['getSchemeDetail']['orderscheme']['minimum']??0;
+                        $maximum = $value['getSchemeDetail']['orderscheme']['maximum']??0;
+
+                        if($scheme_value_type == 'percentage'){
+                        $ebd_amount = $total_amount * $ebd_discount / 100;
+                        $product_ebd_amount = $total_amount-$ebd_amount;
+                        }
+
+                        if($scheme_value_type == 'value'){
+
+                        $ebd_amount = $ebd_discount;
+                        $product_ebd_amount = $total_amount-$ebd_discount;
+
+                        }
+                        
+
+
+
                     //$prodcutdetails = $value['prodcutdetails']->where('isprimary',1);
                     $data->push([
                         'id' => isset($value['id']) ? $value['id'] : 0,
@@ -176,6 +214,9 @@ class ProductController extends Controller
                         'product_no' => isset($value['product_no']) ? $value['product_no'] : '',
                         'model_no' => isset($value['model_no']) ? $value['model_no'] : '',
                         'hp'=> isset($value['specification']) ? $value['specification'] : '',
+
+                        'ebd_amount'=> (string)$ebd_amount,
+                        'product_ebd_amount'=> (string)$product_ebd_amount,
 
                     ]);
                 }

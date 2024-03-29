@@ -260,7 +260,6 @@
     </div>
   </div>
   <script src="{{ url('/').'/'.asset('assets/js/jquery.custom.js') }}"></script>
-  <script src="{{ url('/').'/'.asset('assets/js/validation_products.js') }}"></script>
   <script>
     $(document).ready(function(){
       var cat = $('#category_id').val();

@@ -12,7 +12,7 @@
                 @if(auth()->user()->can(['transaction_history_download']))
                 <form method="GET" action="{{ route('transaction_history.download') }}" class="form-horizontal">
                   <div class="d-flex flex-row align-items-center">
-                    <div class="p-2" style="width:180px;">
+                    <div class="p-2" style="width:160px;">
                       <label for="branch_id">Branch</label>
                       <select class="select2" placeholder="Select Branch" multiple name="branch_id[]" id="branch_id" data-style="select-with-transition" title="Select Branch">
                         <option value="">Select Branch</option>
@@ -23,7 +23,7 @@
                         @endif
                       </select>
                     </div>
-                    <div class="p-2" style="width:180px;">
+                    <div class="p-2" style="width:160px;">
                       <label for="parent_customer">Parent Customer</label>
                       <select class="select2" multiple name="parent_customer[]" id="parent_customer" data-style="select-with-transition" title="Select Parent Customer">
                         <option value="">Select Parent Customer</option>
@@ -34,7 +34,7 @@
                         @endif
                       </select>
                     </div>
-                    <div class="p-2" style="width:180px;">
+                    <div class="p-2" style="width:160px;">
                       <label for="scheme_type">Scheme</label>
                       <select class="select2" name="scheme_name" id="scheme_name" data-style="select-with-transition" title="Select Scheme Type">
                         <option value="">Scheme Name</option>
@@ -45,15 +45,53 @@
                         @endif
                       </select>
                     </div>
-                    <div class="p-2" style="width:180px;"><label for="start_date">Start Date</label><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
-                    <div class="p-2" style="width:180px;"><label for="end_date">End Date</label><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
-                    <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Transaction Coupon History"><i class="material-icons">cloud_download</i></button></div>
+                    <div class="p-2" style="width:160px;"><label for="start_date">Start Date</label><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
+                    <div class="p-2" style="width:160px;"><label for="end_date">End Date</label><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
+                    <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Transaction"><i class="material-icons">cloud_download</i></button></div>
                   </div>
                 </form>
                 @endif
-                @if(auth()->user()->can(['transaction_history_create']))
-                <a href="{{ route('transaction_history.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Transaction Coupon History"><i class="material-icons">add_circle</i></a>
-                @endif
+              </div>
+              <button class="btn btn-just-icon btn-theme" type="button" data-toggle="collapse" data-target="#multiCollapseExample2" aria-expanded="false" aria-controls="multiCollapseExample2"><i class="material-icons">menu</i></button>
+              <div class="row">
+                <div class="col">
+                  <div class="collapse multi-collapse" id="multiCollapseExample2">
+                    <div class="d-flex" style="font-size: 14px;align-items: center;justify-content: space-between;">
+                      @if(auth()->user()->can(['transaction_history_upload']))
+                      <p>Upload Manual Transaction</p>
+                      <form action="{{ URL::to('transaction_history_upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
+                        {{ csrf_field() }}
+                        <div class="d-flex">
+                          <div class="fileinput-new text-center" data-provides="fileinput">
+                            <span class="btn btn-just-icon btn-theme btn-file">
+                              <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
+                              <span class="fileinput-exists">Change</span>
+                              <input type="hidden">
+                              <input type="file" name="import_file" required accept=".xls,.xlsx" />
+                            </span>
+                          </div>
+                          <div class="input-group-append">
+                            <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.upload') !!} Manual Transaction">
+                              <i class="material-icons">cloud_upload</i>
+                              <div class="ripple-container"></div>
+                            </button>
+                          </div>
+                        </div>
+                      </form>
+                      @endif
+                      @if(auth()->user()->can(['transaction_history_template']))
+                      <p>{!!  trans('panel.global.template') !!} Manual Transaction</p>
+                      <a href="{{ URL::to('transaction_history_template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} Manual Transaction"><i class="material-icons">text_snippet</i></a>
+                      @endif
+                      @if(auth()->user()->can(['transaction_history_create']))
+                      <p>{!!  trans('panel.global.add') !!} Transaction</p>
+                      <a href="{{ route('transaction_history.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Transaction"><i class="material-icons">add_circle</i></a>
+                      <p>{!!  trans('panel.global.add') !!} Manual Transaction</p>
+                      <a href="{{ route('transaction_history.manualcreate') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Manual Transaction"><i class="material-icons">add_circle</i></a>
+                      @endif
+                    </div>
+                  </div>
+                </div>
               </div>
             </span>
           </h4>
@@ -111,6 +149,7 @@
                 <th>Sub Category</th>
                 <th>Prodcut Name</th>
                 <th>Point</th>
+                <th>Remark</th>
                 <th>{!! trans('panel.global.action') !!}</th>
               </thead>
               <tbody>
@@ -180,9 +219,11 @@
             "defaultContent": ''
           },
           {
-            data: 'coupen_code',
-            name: 'coupen_code',
-            "defaultContent": ''
+            data: 'coupon_code',
+            name: 'coupon_code',
+            render: function(data, type, row) {
+              return data ? data : 'Manual';
+            }
           },
           {
             data: 'subcategory_name',
@@ -201,6 +242,10 @@
             name: 'point',
             orderable: false,
             searchable: false
+          },
+          {
+            data: 'remark',
+            name: 'remark'
           },
           {
             data: 'action',
@@ -290,5 +335,25 @@
       });
 
     });
+    setTimeout(() => {
+
+      $('#parent_customer').select2({
+        placeholder: 'Select...',
+        multiple: true,
+        allowClear: true,
+        ajax: {
+          url: "{{ route('getCustomerDataSelect') }}",
+          dataType: 'json',
+          delay: 250,
+          data: function(params) {
+            return {
+              term: params.term || '',
+              page: params.page || 1
+            }
+          },
+          cache: true
+        }
+      }).trigger('change');
+    }, 2000);
   </script>
 </x-app-layout>

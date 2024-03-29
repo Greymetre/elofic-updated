@@ -455,7 +455,7 @@ class CustomerController extends Controller
         { 
             $user = $request->user();
             $userids = getUsersReportingToAuth($user->id);
-            // $user_id = $user->id;
+            //$userids = $user->id;
             $customer_ids_assign = EmployeeDetail::whereIn('user_id', $userids)->pluck('customer_id')->toArray();
             
             $pageSize = $request->input('pageSize');
@@ -475,9 +475,11 @@ class CustomerController extends Controller
                                 if(!empty($customer_id)){
                                   $query->whereIn('id', $customer_id);
                                 }
+
                                 // if(!empty($branch_user_id)){
                                 //   $query->whereIn('executive_id', $branch_user_id);
                                 // }
+
                                 if(!empty($branch_user_id)){
                                   $query->whereHas('getemployeedetail', function($query) use($branch_user_id){
                                 $query->whereIn('user_id', $branch_user_id);
@@ -485,10 +487,11 @@ class CustomerController extends Controller
                                 }
 
                                 //$query->whereIn('executive_id', $userids);
+
                             })->whereHas('getemployeedetail', function($querys) use($userids){   
                                 $querys->whereIn('user_id', $userids);
                             })
-                            ->whereIn('customertype', ['1','2','3','4','5','6'])
+                            
                             ->whereIn('id', $customer_ids_assign)
 
                             // ->whereHas('customertypes', function($query) use($user){
@@ -497,8 +500,10 @@ class CustomerController extends Controller
                             ->select('id','name','first_name','last_name','mobile','email','profile_image','customer_code', 'latitude','longitude','customertype')
                             ->orderBy('name','asc');
                             //->latest();
+
                             
-            $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
+                            $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->paginate(10000);
+                            // dd($db_data);
             $data = collect([]);
             if($db_data->isNotEmpty())
             {
@@ -971,4 +976,5 @@ class CustomerController extends Controller
         } 
 
     }
+
 }

@@ -113,7 +113,7 @@ class RedemptionController extends Controller
             }elseif($request->redeem_mode == '1'){
                 $tottal_redeem_point = Gifts::whereIn('id', $request->gift_id)->sum('points');
                 if($tottal_redeem_point > $request->input('total_point')){
-                    return redirect()->back()->withErrors('The redeem amount must not be greater than total point.');
+                    return redirect()->back()->withErrors('The redeem amount not be greater than to total point.');
                 }
                 foreach($request->gift_id as $gift){
                     $redeem_point = Gifts::where('id', $gift)->value('points');

@@ -43,21 +43,44 @@
                      <span class="btn btn-just-icon btn-round btn-file">
                        <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
                        <span class="fileinput-exists">Change</span>
-                       <input type="file" name="image" class="getimage5" accept="image/*">
+                       <input type="file" name="image" class="getimage7" accept="image/*">
                      </span>
                      <br>
                      <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
                    </div>
                    <div class="fileinput-new thumbnail">
-                    <img src="{!! !empty($customers['profile_image']) ? asset($customers['profile_image']) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview5">
+                    <img src="{!! !empty($customers['profile_image']) ? asset('uploads/'.$customers['profile_image']) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview7">
                    </div>
                    <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
-                   <label class="bmd-label-floating">{!! trans('panel.customers.fields.profile_image') !!}</label>
-                   @if ($errors->has('imggstin'))
-                      <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('imggstin') }}</p></div>
+                   <label class="bmd-label-floating">{!! trans('panel.customers.fields.shop_image') !!}</label>
+                   @if ($errors->has('image'))
+                      <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('image') }}</p></div>
                     @endif
                  </div>
                </div>
+               <div class="col-md-3 ml-auto mr-auto">
+                <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                  <div class="selectThumbnail">
+                    <span class="btn btn-just-icon btn-round btn-file">
+                      <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
+                      <span class="fileinput-exists">Change</span>
+                      <input type="file" name="profileImage" class="getimage8" accept="image/*">
+                    </span>
+                    <br>
+                    <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
+                  </div>
+                  <div class="fileinput-new thumbnail">
+                    <img src="{!! !empty($customers['shop_image']) ? asset('uploads/'.$customers['shop_image']) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview8">
+                  </div>
+                  <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
+                  <label class="bmd-label-floating">{!! trans('panel.customers.fields.profile_image') !!}</label>
+                  @if ($errors->has('profileImage'))
+                  <div class="error col-lg-12">
+                    <p class="text-danger">{{ $errors->first('profileImage') }}</p>
+                  </div>
+                  @endif
+                </div>
+              </div>
              </div>
             <div class="row">
               <div class="col-md-6">
