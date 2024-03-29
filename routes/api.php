@@ -64,7 +64,7 @@ Route::any('gstNumberExists', [ CustomController::class, 'gstNumberExists']);
 Route::any('getRetailerList', [ CustomController::class, 'getRetailerList']);
 Route::any('getslider', [CustomController::class, 'getslider']);
 Route::get('getsettings', [DashboardController::class, 'getsettings']);
-
+ 
 Route::any('emailExists', [ CustomController::class, 'emailExists']);
 /*================= Customer Routes ============================*/
 Route::group(['middleware' => ['auth:customers']], function () {
