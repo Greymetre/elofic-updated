@@ -34,6 +34,8 @@ class SerialNumberTransactionExport implements FromCollection,WithHeadings,Shoul
             'branch_code',
             'party_name',
             'product_name',
+            'product_description',
+            'product_store',
             'qty',
             'group',
             'new_group',
@@ -51,29 +53,31 @@ class SerialNumberTransactionExport implements FromCollection,WithHeadings,Shoul
         if($this->startdate && $this->startdate != null && $this->startdate != '' && $this->enddate && $this->enddate != null && $this->enddate != ''){
             $data = $data->whereBetween('invoice_date', [$this->startdate, $this->enddate]);
         }
-        $data = $data->groupBy('product_code', 'invoice_no','invoice_date' ,'branch_code','party_name','product_name','group','new_group','qty')->get();
+        $data = $data->groupBy('product_code', 'invoice_no','invoice_date' ,'branch_code','party_name', 'product_description', 'product_store','product_name','group','new_group','qty')->get();
         return $data;
     }
 
     public function headings(): array
     {
-        return ['Product Code','Invoice No','Invoice Date','Branch Code','Party Name','Product Name','Qty','Group', 'New Group', 'Serial No.','Narration'];
+        return ['Invoice No','Invoice Date','Party Name','Product Code','Product Name','Qty','Group','Branch Code','Serial No.','Narration','Product Description','Store','New Group'];
     }
 
     public function map($data): array
     {
         return [
-            $data['product_code'],
             $data['invoice_no'],
             $data['invoice_date'],
-            $data['branch_code'],
             $data['party_name'],
+            $data['product_code'],
             $data['product_name'],
             $data['qty'],
             $data['group'],
-            $data['new_group'],
+            $data['branch_code'],
             $data['serial_no'],
-            $data['narration']
+            $data['narration'],
+            $data['product_description'],
+            $data['product_store'],
+            $data['new_group']
         ];
     }
 

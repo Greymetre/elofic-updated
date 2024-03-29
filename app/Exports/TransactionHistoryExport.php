@@ -78,7 +78,7 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
 
     public function headings(): array
     {
-        return ['Transaction Id', 'Date', 'Customer Id', 'Firm Name', 'Contact Person', 'Parent Code', 'Parent Id', 'Parent Name', 'Mobile Number', 'City', 'District', 'State', 'Branch', 'Div', 'Coupon Code', 'Sub Category', 'Prodcut Id', 'Prodcut Name', 'Scheme Name', 'Active Point', 'Provision Point', 'Emp Code', 'User Name'];
+        return ['Transaction Id', 'Date', 'Customer Id', 'Firm Name', 'Contact Person', 'Parent Code', 'Parent Id', 'Parent Name', 'Mobile Number', 'City', 'District', 'State', 'Branch', 'Div', 'Coupon Code', 'Sub Category', 'Prodcut Id', 'Prodcut Name', 'Scheme Name', 'Active Point', 'Provision Point', 'Remark', 'Emp Code', 'User Name'];
     }
 
     public function map($data): array
@@ -155,6 +155,7 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
                 (isset($scheme_details)) ? $scheme_details->scheme->scheme_name:'',
                 $data['point'],
                 '',
+                $data['remark'],
                 implode(',', $empcode_arr),
                 implode(',', $employee),
             ];
@@ -182,6 +183,7 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
                 (isset($scheme_details)) ? $scheme_details->scheme->scheme_name : '',
                 '',
                 $data['point'],
+                $data['remark'],
                 implode(',', $empcode_arr),
                 implode(',', $employee),
             ];            

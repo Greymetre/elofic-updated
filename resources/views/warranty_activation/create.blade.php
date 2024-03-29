@@ -61,13 +61,13 @@
                      <h5>Warranty Details</h5>
                      <div class="row">
                         <div class="col-md-2">
-                           <label for="serial_no" class="form-control">Product Serial Number</label>
+                           <label for="product_serail_number" class="form-control">Product Serial Number</label>
                         </div>
                         <div class="col-md-4">
-                           <input type="text" name="serial_no" id="serial_no" class="form-control" required>
-                           @if ($errors->has('serial_no'))
+                           <input type="text" name="product_serail_number" id="product_serail_number" class="form-control" required>
+                           @if ($errors->has('product_serail_number'))
                            <div class="error col-lg-12">
-                              <p class="text-danger">{{ $errors->first('serial_no') }}</p>
+                              <p class="text-danger">{{ $errors->first('product_serail_number') }}</p>
                            </div>
                            @endif
                         </div>
@@ -75,8 +75,9 @@
                            <label for="product_id" class="form-control">Product</label>
                         </div>
                         <div class="col-md-4">
-                           <select name="product_id" id="product_id" placeholder="Select Product" class="select2 form-control">
+                           <select name="select_product_id" id="select_product_id" placeholder="Select Product" class="select2 form-control">
                            </select>
+                           <input type="hidden" name="product_id" id="product_id">
                            @if ($errors->has('product_id'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('product_id') }}</p>
@@ -108,7 +109,7 @@
                         </div>
                         <div class="col-md-4">
                            <input type="radio" name="status" id="status" value="0"> Inactive
-                           <input type="radio" name="status" id="status" value="1"> active
+                           <input type="radio" checked name="status" id="status" value="1"> active
                            @if ($errors->has('status'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('status') }}</p>
@@ -121,10 +122,11 @@
                      <h5>Contact Details</h5>
                      <div class="row">
                         <div class="col-md-2">
-                           <label for="customer_number" class="form-control">Customer Number</label>
+                           <label for="customer_number" class="form-control">Customer Number Search</label>
                         </div>
                         <div class="col-md-4">
-                           <input type="text" name="customer_number" id="customer_number" class="form-control">
+                           <input type="number" name="customer_number" id="customer_number" class="form-control" required>
+                           <input type="hidden" name="end_user_id" id="end_user_id">
                            @if ($errors->has('customer_number'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('customer_number') }}</p>
@@ -135,7 +137,7 @@
                            <label for="customer_name" class="form-control">Customer Name</label>
                         </div>
                         <div class="col-md-4">
-                           <input type="text" name="customer_name" id="customer_name" class="form-control">
+                           <input type="text" name="customer_name" id="customer_name" class="form-control" required>
                            @if ($errors->has('customer_name'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('customer_name') }}</p>
@@ -148,7 +150,7 @@
                            <label for="customer_email" class="form-control">Email</label>
                         </div>
                         <div class="col-md-4">
-                           <input type="email" name="customer_email" id="customer_email" class="form-control">
+                           <input type="email" name="customer_email" id="customer_email" class="form-control" required>
                            @if ($errors->has('customer_email'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('customer_email') }}</p>
@@ -156,13 +158,13 @@
                            @endif
                         </div>
                         <div class="col-md-2">
-                           <label for="customer_registered_number" class="form-control">Registered Number</label>
+                           <label for="customer_place" class="form-control">Place</label>
                         </div>
                         <div class="col-md-4">
-                           <input type="text" name="customer_registered_number" id="customer_registered_number" class="form-control">
-                           @if ($errors->has('customer_registered_number'))
+                           <input type="text" name="customer_place" id="customer_place" class="form-control" required>
+                           @if ($errors->has('customer_place'))
                            <div class="error col-lg-12">
-                              <p class="text-danger">{{ $errors->first('customer_registered_number') }}</p>
+                              <p class="text-danger">{{ $errors->first('customer_place') }}</p>
                            </div>
                            @endif
                         </div>
@@ -172,7 +174,7 @@
                            <label for="customer_address" class="form-control">Address</label>
                         </div>
                         <div class="col-md-4">
-                           <input type="email" name="customer_address" id="customer_address" class="form-control">
+                           <input type="text" name="customer_address" id="customer_address" class="form-control" required>
                            @if ($errors->has('customer_address'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('customer_address') }}</p>
@@ -200,10 +202,21 @@
                      </div>
                      <div class="row">
                         <div class="col-md-1">
+                           <label for="customer_country" class="form-control">Country</label>
+                        </div>
+                        <div class="col-md-2">
+                           <input type="text" readonly name="customer_country" id="customer_country" class="form-control">
+                           @if ($errors->has('customer_country'))
+                           <div class="error col-lg-12">
+                              <p class="text-danger">{{ $errors->first('customer_country') }}</p>
+                           </div>
+                           @endif
+                        </div>
+                        <div class="col-md-1">
                            <label for="customer_state" class="form-control">State</label>
                         </div>
-                        <div class="col-md-3">
-                           <input type="text" name="customer_state" id="customer_state" class="form-control">
+                        <div class="col-md-2">
+                           <input type="text" readonly name="customer_state" id="customer_state" class="form-control">
                            @if ($errors->has('customer_state'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('customer_state') }}</p>
@@ -213,8 +226,8 @@
                         <div class="col-md-1">
                            <label for="customer_district" class="form-control">District</label>
                         </div>
-                        <div class="col-md-3">
-                           <input type="text" name="customer_district" id="customer_district" class="form-control">
+                        <div class="col-md-2">
+                           <input type="text" readonly name="customer_district" id="customer_district" class="form-control">
                            @if ($errors->has('customer_district'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('customer_district') }}</p>
@@ -224,8 +237,8 @@
                         <div class="col-md-1">
                            <label for="customer_city" class="form-control">City</label>
                         </div>
-                        <div class="col-md-3">
-                           <input type="text" name="customer_city" id="customer_city" class="form-control">
+                        <div class="col-md-2">
+                           <input type="text" readonly name="customer_city" id="customer_city" class="form-control">
                            @if ($errors->has('customer_city'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('customer_city') }}</p>
@@ -268,7 +281,7 @@
                         </div>
                      </div>
                      <div class="row">
-                     <div class="col-md-2">
+                        <div class="col-md-2">
                            <label for="warranty_date" class="form-control">Warranty Date</label>
                         </div>
                         <div class="col-md-4">
@@ -304,7 +317,7 @@
    </div>
    <script src="{{ url('/').'/'.asset('assets/js/validation_loyalty.js') }}"></script>
    <script>
-      $(document).on("keyup", "#serial_no", function() {
+      $(document).on("keyup", "#product_serail_number", function() {
          var serial_no = $(this).val();
          $.ajax({
             url: "{{ url('getProductByCoupon') }}",
@@ -316,11 +329,20 @@
             },
             success: function(res) {
                if (res.status == true) {
-                  $('#product_id').html(res.html);
+                  $('#select_product_id').html(res.html);
+                  $('#product_id').val($('#select_product_id').val());
+                  if (res.slected === true) {
+                     $('#select_product_id').prop('disabled', true);
+                  } else {
+                     $('#select_product_id').prop('disabled', false);
+                  }
                }
             }
          });
       });
+      $("#select_product_id").on("change", function(){
+         $('#product_id').val($(this).val());
+      })
       $(document).on("change", "#customer_pindcode", function() {
          var customer_pindcode = $(this).val();
          $.ajax({
@@ -332,10 +354,66 @@
                pincode_id: customer_pindcode
             },
             success: function(res) {
+               $("#customer_country").val(res.country_name);
                $("#customer_state").val(res.state_name);
                $("#customer_district").val(res.district_name);
                $("#customer_city").val(res.city_name);
-               console.log(res);
+            }
+         });
+      });
+      $("#customer_number").on("keyup", function() {
+         var customer_number = $(this).val();
+         $.ajax({
+            url: "{{ url('getEndUserData') }}",
+            dataType: "json",
+            type: "POST",
+            data: {
+               _token: "{{csrf_token()}}",
+               customer_number: customer_number
+            },
+            success: function(res) {
+               if (res.status === true) {
+                  $("#customer_name").val(res.data.customer_name);
+                  $("#end_user_id").val(res.data.id);
+                  $("#customer_email").val(res.data.customer_email);
+                  $("#customer_address").val(res.data.customer_address);
+                  $("#customer_place").val(res.data.customer_place);
+                  $("#customer_pindcode").val(res.data.customer_pindcode).trigger("change");;
+                  $("#customer_state").val(res.data.customer_state);
+                  $("#customer_district").val(res.data.customer_district);
+                  $("#customer_city").val(res.data.customer_city);
+
+                  $("#customer_name").prop('readonly', true);
+                  $("#customer_email").prop('readonly', true);
+                  $("#customer_address").prop('readonly', true);
+                  $("#customer_place").prop('readonly', true);
+                  $("#customer_pindcode").prop('disabled', true);
+                  $("#customer_state").prop('readonly', true);
+                  $("#customer_district").prop('readonly', true);
+                  $("#customer_city").prop('readonly', true);
+
+               } else {
+                  $("#customer_name").val("");
+                  $("#end_user_id").val("");
+                  $("#customer_email").val("");
+                  $("#customer_address").val("");
+                  $("#customer_place").val("");
+                  $("#customer_pindcode").val("").trigger("change");;
+                  $("#customer_state").val("");
+                  $("#customer_district").val("");
+                  $("#customer_city").val("");
+
+                  $("#customer_name").prop('readonly', false);
+                  $("#customer_email").prop('readonly', false);
+                  $("#customer_address").prop('readonly', false);
+                  $("#customer_place").prop('readonly', false);
+                  $("#customer_pindcode").prop('disabled', false);
+                  $("#customer_state").prop('readonly', false);
+                  $("#customer_district").prop('readonly', false);
+                  $("#customer_city").prop('readonly', false);
+                  $("#customer_name").prop('readonly', false);
+                  $("#customer_email").prop('readonly', false);
+               }
             }
          });
       });

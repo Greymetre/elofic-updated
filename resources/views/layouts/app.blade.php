@@ -246,7 +246,7 @@
                 @if(auth()->user()->can('role_access'))
                 <li class="nav-item {{ request()->is('roles*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('roles') }}">
-                    <i class="material-icons">role</i>
+                    <i class="material-icons">person_pin</i>
                     <p>{!! trans('panel.sidemenu.roles') !!}</p>
                   </a>
                 </li>
@@ -390,8 +390,17 @@
               @if(auth()->user()->can('holiday_access'))
                 <li class="nav-item {{ request()->is('holidays*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('holidays') }}">
-                    <i class="material-icons">flaky</i>
+                    <i class="material-icons">holiday_village</i>
                     <p>Holidays</p>
+                  </a>
+                </li>
+                @endif
+
+                @if(auth()->user()->can('leave_access'))
+                <li class="nav-item {{ request()->is('leaves*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('leaves') }}">
+                    <i class="material-icons">holiday_village</i>
+                    <p>Leaves</p>
                   </a>
                 </li>
                 @endif
@@ -456,7 +465,7 @@
 
 
           @if(auth()->user()->can('services_access'))
-          <li class="nav-item {{ request()->is('services*') || request()->is('warranty_activation*') ? 'active' : '' }}">
+          <li class="nav-item {{ request()->is('services*') || request()->is('warranty_activation*') || request()->is('complaint-type*') || request()->is('complaints*') ? 'active' : '' }}">
             <a class="nav-link collapsed" data-toggle="collapse" href="#serviceMenu" aria-expanded="false">
               <i class="material-icons">design_services</i>
               <p> {!! trans('panel.sidemenu.services') !!}
@@ -481,6 +490,22 @@
                   </a>
                 </li>
                 @endif
+                @if(auth()->user()->can('complaint_type_access'))
+                <li class="nav-item {{ request()->is('complaint-type*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('complaint-type') }}">
+                    <i class="material-icons">history</i>
+                    <p>{!! trans('panel.sidemenu.complaint_type') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('complaint_access'))
+                <li class="nav-item {{ request()->is('complaints*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('complaints') }}">
+                    <i class="material-icons">history</i>
+                    <p>{!! trans('panel.sidemenu.complaint') !!}</p>
+                  </a>
+                </li>
+                @endif
                 @if(auth()->user()->can('warranty_activation_access'))
                 <li class="nav-item {{ request()->is('warranty_activation*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('warranty_activation') }}">
@@ -493,25 +518,46 @@
             </div>
           </li>
           @endif
-          @if(auth()->user()->can('order_access')) 
+
+<!--           @if(auth()->user()->can('order_access')) 
           <li class="nav-item {{ request()->is('orders*') ? 'active' : '' }}">
             <a class="nav-link" href="{{ url('orders') }}">
               <i class="material-icons">shopping_bag</i>
               <p>{!! trans('panel.sidemenu.orders') !!}</p>
             </a>
           </li>
-
-          @endif
-
-         <!--  @if(auth()->user()->can('orderscheme')) 
-          <li class="nav-item {{ request()->is('orderschemes*') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ url('orderschemes') }}">
-              <i class="material-icons">shopping_bag</i>
-              <p>Order Scheme</p>
-            </a>
-          </li>
           @endif -->
 
+        @if(auth()->user()->can('order_access'))
+            <li class="nav-item ">
+            <a class="nav-link collapsed" data-toggle="collapse" href="#orderMenu" aria-expanded="false">
+              <i class="material-icons">star</i>
+             <p>{!! trans('panel.sidemenu.orders') !!}</p>
+            </a>
+
+            <div class="collapse" id="orderMenu" style="">
+              <ul class="nav">
+                @if(auth()->user()->can('order_access'))
+                 <li class="nav-item {{ request()->is('orders*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('orders') }}">
+                    <i class="material-icons">shopping_bag</i>
+                    <p>{!! trans('panel.sidemenu.orders') !!}</p>
+                  </a>
+                </li>
+                @endif
+
+                @if(auth()->user()->can('orderscheme'))
+                <li class="nav-item {{ request()->is('orderschemes*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('orderschemes') }}">
+                    <i class="material-icons">flaky</i>
+                    <p>OrderSchemes</p>
+                  </a>
+                </li>
+                @endif
+              </ul>
+            </div>
+          </li>
+        @endif
 
 
           @if(auth()->user()->can('branch'))
@@ -616,7 +662,7 @@
           </li> -->
           @endif
           @if(auth()->user()->can('scheme_access'))
-          <li class="nav-item {{ request()->is('schemes*') || request()->is('transaction_history*') || request()->is('gifts*') || request()->is('gift-categories*') || request()->is('gift-subcategories*') || request()->is('gift-model*') || request()->is('gift-brands*') || request()->is('redemptions*') ? 'active' : '' }}">
+          <li class="nav-item {{ request()->is('schemes*') || request()->is('transaction_history*') || request()->is('gifts*') || request()->is('gift-categories*') || request()->is('gift-subcategories*') || request()->is('gift-model*') || request()->is('gift-brands*') || request()->is('redemptions*') || request()->is('damage_entries*') ? 'active' : '' }}">
             <a class="nav-link collapsed" data-toggle="collapse" href="#schemesMenu" aria-expanded="false">
               <i class="material-icons">loyalty</i>
               <p> Loyalty Engine </p>
@@ -636,6 +682,14 @@
                   <a class="nav-link" href="{{ url('transaction_history') }}">
                     <i class="material-icons">history</i>
                     <p>Transaction Coupon History</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('damage_entry_access'))
+                <li class="nav-item {{ request()->is('damage_entries*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('damage_entries') }}">
+                    <i class="material-icons">insert_page_break</i>
+                    <p>Damage QR Entries</p>
                   </a>
                 </li>
                 @endif
@@ -700,7 +754,7 @@
           </li>
           @endif
           @if(auth()->user()->can('status_access'))
-          <li class="nav-item ">
+          <li class="nav-item {{request()->is('loyalty-app-setting*') ? 'active' : '' }}">
             <a class="nav-link collapsed" data-toggle="collapse" href="#settingMenu" aria-expanded="false">
               <i class="material-icons">settings</i>
               <p> {!! trans('panel.sidemenu.setting_master') !!}
@@ -710,10 +764,18 @@
             <div class="collapse" id="settingMenu" style="">
               <ul class="nav">
                 @if(auth()->user()->can('setting_access'))
-                <li class="nav-item ">
+                <!-- <li class="nav-item ">
                   <a class="nav-link" href="{{ url('settings') }}">
                     <i class="material-icons">settings</i>
                     <p>{!! trans('panel.sidemenu.setting') !!}</p>
+                  </a>
+                </li> -->
+                @endif
+                @if(auth()->user()->can('loyalty_app_setting_access'))
+                <li class="nav-item ">
+                  <a class="nav-link" href="{{ url('loyalty-app-setting') }}">
+                    <i class="material-icons">settings</i>
+                    <p>Loyalty App {!! trans('panel.sidemenu.setting') !!}</p>
                   </a>
                 </li>
                 @endif

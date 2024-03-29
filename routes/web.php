@@ -43,7 +43,10 @@ use App\Http\Controllers\VisitReportController;
 use App\Http\Controllers\VisitTypeController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\BranchController;
+use App\Http\Controllers\ComplaintController;
+use App\Http\Controllers\ComplaintTypeController;
 use App\Http\Controllers\CustomerKycController;
+use App\Http\Controllers\DamageEntryController;
 use App\Http\Controllers\DivisionController;
 use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\ExpensesController;
@@ -56,12 +59,13 @@ use App\Http\Controllers\GiftModelController;
 use App\Http\Controllers\GiftSubcategoryController;
 use App\Http\Controllers\ServicesController;
 use App\Http\Controllers\HolidayController;
+use App\Http\Controllers\LeaveController;
+use App\Http\Controllers\LoyaltyAppSettingController;
 use App\Http\Controllers\NeftRedemptionDetailsController;
 use App\Http\Controllers\TransactionHistoryController;
 use App\Http\Controllers\OrderSchemeController;
 use App\Http\Controllers\RedemptionController;
 use App\Http\Controllers\WarrantyActivationController;
-use Aws\Api\Service;
 
 /*
 |--------------------------------------------------------------------------
@@ -260,6 +264,10 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('order-dispatched/{id}', [ OrderController::class, 'orderDispatched'])->name('orders.dispatched');
     Route::any('order-partially-dispatched/{id}', [ OrderController::class, 'orderPartiallyDispatched'])->name('orders.partiallydispatched');
     Route::post('submit-dispatched', [ OrderController::class, 'submitDispatched'])->name('orders.submitdispatched');
+    
+    Route::post('submit-fullydispatched', [ OrderController::class, 'submitFullyDispatched'])->name('orders.submitFullyDispatched');
+
+
     //Targets
     Route::resource('targets', TargetController::class);
     //Secondry Sales
@@ -334,6 +342,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('attendancesInfo', [ AttendanceController::class, 'attendancesInfo'])->name('attendances.info');
     Route::any('attendance-download', [ AttendanceController::class, 'download'])->name('attendance.download');
     Route::any('removePunchout', [ AttendanceController::class, 'removePunchout'])->name('removePunchout');
+    Route::any('punchoutnow', [ AttendanceController::class, 'punchoutnow'])->name('punchoutnow');
     Route::delete('attendances/{id}', [ AttendanceController::class, 'destroy'])->name('attendances.destroy');
 
     Route::any('approveAttendance', [ AttendanceController::class, 'approveAttendance'])->name('approveAttendance');
@@ -527,6 +536,9 @@ Route::group(['middleware' => ['auth']], function () {
 
       //order scheme
      Route::resource('orderschemes', OrderSchemeController::class);
+     Route::post('orderschemes-active', [ OrderSchemeController::class, 'active'])->name('orderschemes.active');
+     Route::any('orderschemes-template', [ OrderSchemeController::class, 'template'])->name('orderschemes.template');
+     Route::any('orderschemes-download', [ OrderSchemeController::class, 'download'])->name('orderschemes.download');
 
 
 
@@ -542,6 +554,11 @@ Route::group(['middleware' => ['auth']], function () {
     // Transaction History
     Route::resource('transaction_history', TransactionHistoryController::class);
     Route::get('transaction_history_download', [TransactionHistoryController::class, 'download'])->name('transaction_history.download');
+    Route::post('transaction_history_upload', [TransactionHistoryController::class, 'upload'])->name('transaction_history.upload');
+    Route::get('transaction_history_template', [TransactionHistoryController::class, 'template'])->name('transaction_history.template');
+    Route::get('transaction_history_manualcreate', [TransactionHistoryController::class, 'manualcreate'])->name('transaction_history.manualcreate');
+    Route::POST('transaction_history_manualstore', [TransactionHistoryController::class, 'manualstore'])->name('transaction_history.manualstore');
+    Route::POST('transaction_history_manualupdate', [TransactionHistoryController::class, 'manualupdate'])->name('transaction_history.manualupdate');
 
     //Gift Category Route
     Route::resource('gift-categories', GiftCategoryController::class);
@@ -588,6 +605,25 @@ Route::group(['middleware' => ['auth']], function () {
     // Customer KYC Route
     Route::resource('customer-kyc', CustomerKycController::class);
     Route::any('customer-kyc-download', [CustomerKycController::class, 'download'])->name('customer-kyc.download');
+
+    // Complaint Type Route
+    Route::resource('complaint-type', ComplaintTypeController::class);
+    Route::post('complaint-type-active', [ ComplaintTypeController::class, 'active'])->name('complaint-type.active');
+
+    // Complaint Route
+    Route::resource('complaints', ComplaintController::class);
+
+    // Leaves Route
+    Route::resource('leaves', LeaveController::class);
+    Route::any('approveLeave', [ LeaveController::class, 'approveLeave'])->name('approveLeave');
+    Route::any('rejectLeave', [ LeaveController::class, 'rejectLeave'])->name('rejectLeave');
+    
+    // Loyalty App Setting Route
+    Route::resource('loyalty-app-setting', LoyaltyAppSettingController::class);
+
+    // Damage Entry Route
+    Route::resource('damage_entries', DamageEntryController::class);
+    Route::get('damage-entries-change-status', [DamageEntryController::class, 'changeStatus'])->name('damage_entries.changeStatus');
     
     Route::get('logout', '\App\Http\Controllers\Auth\AuthenticatedSessionController@destroy');
 });
@@ -601,6 +637,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('getAddressInfo', [ AjaxController::class, 'getAddressInfo']);
     Route::any('getCustomerData', [ AjaxController::class, 'getCustomerData'])->name('getCustomerData');
     Route::any('getCustomerDataSelect', [ AjaxController::class, 'getCustomerDataSelect'])->name('getCustomerDataSelect');
+    Route::any('getDealerDisDataSelect', [ AjaxController::class, 'getDealerDisDataSelect'])->name('getDealerDisDataSelect');
+    Route::any('getRetailerDataSelect', [ AjaxController::class, 'getRetailerDataSelect'])->name('getRetailerDataSelect');
+    Route::any('getProductDataSelect', [ AjaxController::class, 'getProductDataSelect'])->name('getProductDataSelect');
     Route::any('getCategoryData', [ AjaxController::class, 'getCategoryData']);
     Route::any('getSubCategoryData', [ AjaxController::class, 'getSubCategoryData']);
     Route::any('getGiftSubCategoryData', [ AjaxController::class, 'getGiftSubCategoryData']);
@@ -622,6 +661,11 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('changeDocumnetStatus', [ AjaxController::class, 'changeDocumnetStatus']);
     Route::any('getBankdetailandPoints', [ AjaxController::class, 'getBankdetailandPoints']);
     Route::any('getProductByCoupon', [ AjaxController::class, 'getProductByCoupon']);
+    Route::any('getTourPlanByUserAndDate', [ AjaxController::class, 'getTourPlanByUserAndDate']);
+    Route::any('userCityList', [ AjaxController::class, 'userCityList']);
+    Route::any('getProductInfoBySerialNo', [ AjaxController::class, 'getProductInfoBySerialNo']);
+    Route::any('getEndUserData', [ AjaxController::class, 'getEndUserData']);
+    Route::any('getComplaintsData', [ AjaxController::class, 'getComplaintsData']);
 
 
 

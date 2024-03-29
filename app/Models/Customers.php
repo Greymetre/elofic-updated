@@ -14,7 +14,7 @@ class Customers extends Authenticatable
 
     protected $table = 'customers';
 
-    protected $fillable = [ 'active', 'name', 'first_name', 'last_name', 'mobile', 'email', 'password', 'notification_id', 'latitude', 'longitude', 'device_type', 'gender', 'profile_image', 'customer_code', 'status_id', 'region_id', 'customertype', 'firmtype', 'created_by', 'updated_by', 'executive_id', 'otp', 'deleted_at', 'created_at', 'updated_at', 'beatscheduleid', 'manager_name', 'manager_phone','contact_number','parent_id'];
+    protected $fillable = [ 'active', 'name', 'first_name', 'last_name', 'mobile', 'email', 'password', 'notification_id', 'latitude', 'longitude', 'device_type', 'gender', 'profile_image', 'shop_image', 'customer_code', 'status_id', 'region_id', 'customertype', 'firmtype', 'created_by', 'updated_by', 'executive_id', 'otp', 'deleted_at', 'created_at', 'updated_at', 'beatscheduleid', 'manager_name', 'manager_phone','contact_number','parent_id'];
 
     public function message()
     {
@@ -67,6 +67,7 @@ class Customers extends Authenticatable
                 'gender' => !empty($request['gender'])? ucfirst($request['gender']):'',
                 'customer_code' => !empty($request['customer_code'])? $request['customer_code']:'',
                 'profile_image' =>  !empty($request['profile_image'])? $request['profile_image'] :'',
+                'shop_image' =>  !empty($request['shop_image'])? $request['shop_image'] :'',
                 'status_id' =>  !empty($request['status_id'])? $request['status_id'] :2,
                 'customertype' =>  !empty($request['customertype'])? $request['customertype'] :1,
                 'firmtype' =>  !empty($request['firmtype'])? $request['firmtype'] :null,
@@ -103,7 +104,7 @@ class Customers extends Authenticatable
             $customers->last_name = !empty($request['last_name'])? ucfirst($request['last_name']):'';
             $customers->gender = !empty($request['gender'])? ucfirst($request['gender']):'';
             $customers->customer_code = !empty($request['customer_code'])? $request['customer_code']:'';
-            $customers->customertype =  !empty($request['customertype'])? $request['customertype'] :1;
+            $customers->customertype =  !empty($request['customertype'])? $request['customertype'] :$customers->customertype;
             $customers->firmtype = !empty($request['firmtype'])? $request['firmtype']:null;
             //$customers->executive_id = !empty($request['executive_id'])? $request['executive_id']:null;
 
@@ -133,6 +134,10 @@ class Customers extends Authenticatable
             if(!empty($request['profile_image']))
             {
                 $customers->profile_image = !empty($request['profile_image'])? $request['profile_image'] :'';
+            }
+            if(!empty($request['shop_image']))
+            {
+                $customers->shop_image = !empty($request['shop_image'])? $request['shop_image'] :'';
             }
             if(!empty($request['manager_name']))
             {

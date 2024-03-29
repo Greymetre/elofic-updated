@@ -5,19 +5,22 @@ namespace App\Http\Controllers;
 use App\DataTables\WarrantyActivationDataTable;
 use App\Models\Branch;
 use App\Models\Customers;
+use App\Models\EndUser;
 use App\Models\Pincode;
 use App\Models\SchemeHeader;
+use App\Models\TransactionHistory;
 use App\Models\WarrantyActivation;
 use Illuminate\Http\Request;
 use Gate;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Redirect;
 
 class WarrantyActivationController extends Controller
 {
 
-    public function __construct() 
-    {     
-        $this->middleware('auth');   
+    public function __construct()
+    {
+        $this->middleware('auth');
         $this->warranty_activation = new WarrantyActivation();
         $this->path = 'warranty_activation';
     }
@@ -31,7 +34,7 @@ class WarrantyActivationController extends Controller
     {
         abort_if(Gate::denies('warranty_activation_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $branches = Branch::where('active', 'Y')->get();
-        $parent_customers = Customers::where('active', 'Y')->whereIn('customertype', ['1','3'])->select('id', 'name')->get();
+        $parent_customers = [];
         $scheme_names = SchemeHeader::where('active', 'Y')->select('id', 'scheme_name')->get();
         return $dataTable->render('warranty_activation.index', compact('branches', 'parent_customers', 'scheme_names'));
     }
@@ -48,7 +51,7 @@ class WarrantyActivationController extends Controller
         $customers = Customers::where('customertype', '2')->select('id', 'name', 'mobile')->get();
         $customers_dealer = Customers::where('customertype', ['1', '3'])->select('id', 'name', 'mobile')->get();
         $pincodes = Pincode::all();
-        return view('warranty_activation.create', compact('customers', 'pincodes', 'branches'))->with('warranty_activation',$this->warranty_activation);
+        return view('warranty_activation.create', compact('customers', 'pincodes', 'branches'))->with('warranty_activation', $this->warranty_activation);
     }
 
     /**
@@ -59,70 +62,39 @@ class WarrantyActivationController extends Controller
      */
     public function store(Request $request)
     {
-        try
-        { 
-            abort_if(Gate::denies('transaction_history_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-            $validator = Validator::make($request->all(), [
-                'customer_id' => 'required',
-                'coupen_code.*' => 'required',
-            ]);
-            $validator->setAttributeNames([
-                'coupen_code.*' => 'coupon code',
-            ]);
-            
-            $validator->setCustomMessages([
-                'coupen_code.*.required' => 'All coupon code fields are required.',
-            ]); 
-            if ($validator->fails()) {
-                return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-            }
-            $nonNullCoupenCodes = array_filter($request->coupen_code, function($value) {
-                return !is_null($value);
-            });
-            $expire_schemes = array();
-            foreach($nonNullCoupenCodes as $nonNullCoupenCode){
-                $exists = TransactionHistory::where('coupen_code', $nonNullCoupenCode)->exists();
-                $notexists = Services::where('serial_no', $nonNullCoupenCode)->exists();
-
-                if ($exists) {
-                    throw ValidationException::withMessages([
-                        'coupen_code' => "The coupon code '$nonNullCoupenCode' already Scanned.",
-                    ]);
-                }
-                if (!$notexists) {
-                    throw ValidationException::withMessages([
-                        'coupen_code' => "The coupon code '$nonNullCoupenCode' is Invalid.",
-                    ]);
-                }
-                $scheme = Services::where('serial_no', $nonNullCoupenCode)->first();
-                $scheme_details = SchemeDetails::where('product_id', $scheme->product->id)->first();
-                $start_date = Carbon::createFromFormat('Y-m-d', $scheme_details->scheme->start_date);
-                $end_date = Carbon::createFromFormat('Y-m-d', $scheme_details->scheme->end_date);
-                $current_date = Carbon::today();
-                if ($current_date->isSameDay($start_date) || ($current_date->gte($start_date) && $current_date->lte($end_date))) {
-                    $point = ($scheme_details) ? $scheme_details->points: NULL;
-                } else {
-                    array_push($expire_schemes, $nonNullCoupenCode);
-                    $point = '0';
-                }
-                $tHistory = TransactionHistory::create([
-                    'customer_id' => $request->customer_id,
-                    'coupen_code' => $nonNullCoupenCode,
-                    'scheme_id' => $scheme_details->scheme_id,
-                    'point' => $point,
-                    'created_by' => auth()->user()->id,
+        try {
+            abort_if(Gate::denies('warranty_activation_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+            if (!$request->end_user_id || $request->end_user_id == NULL || $request->end_user_id == '') {
+                $end_user = EndUser::updateOrCreate(['customer_number' => $request->customer_number ?? ''], [
+                    'customer_name' => $request->customer_name ?? '',
+                    'customer_number' => $request->customer_number ?? '',
+                    'customer_email' => $request->customer_email ?? '',
+                    'customer_address' => $request->customer_address ?? '',
+                    'customer_place' => $request->customer_place ?? '',
+                    'customer_pindcode' => $request->customer_pindcode ?? '',
+                    'customer_country' => $request->customer_country ?? '',
+                    'customer_state' => $request->customer_state ?? '',
+                    'customer_district' => $request->customer_district ?? '',
+                    'customer_city' => $request->customer_city ?? ''
                 ]);
+                $request->end_user_id = $end_user->id;
             }
-            if(count($expire_schemes) > 0){
-                return Redirect::to('transaction_history')->with('message_info', 'Transaction History Store Successfully but coupon code ('. implode(',', $expire_schemes) . ') scheme has either expired or has not started yet so you earned 0 point.');
-            }else{
-                return Redirect::to('transaction_history')->with('message_success', 'Transaction History Store Successfully');
-            }
-        }
-        catch(\Exception $e)
-        {
+            WarrantyActivation::create([
+                'product_serail_number' => $request->product_serail_number ?? NULL,
+                'product_id' => $request->product_id ?? NULL,
+                'end_user_id' => $request->end_user_id ?? NULL,
+                'branch_id' => $request->branch_id ?? NULL,
+                'customer_id' => $request->customer_id ?? NULL,
+                'status' => $request->status ?? 1,
+                'sale_bill_no' => $request->sale_bill_no ?? NULL,
+                'sale_bill_date' => $request->sale_bill_date ?? NULL,
+                'warranty_date' => $request->warranty_date ?? NULL,
+                'created_by' => auth()->user()->id
+            ]);
+            TransactionHistory::where('coupon_code', $request->product_serail_number)->update(['status' => '1']);
+
+            return Redirect::to('warranty_activation')->with('message_success', 'Warranty Activation Store Successfully.');
+        } catch (\Exception $e) {
             return redirect()->back()->withErrors($e->getMessage())->withInput();
         }
     }
@@ -169,11 +141,10 @@ class WarrantyActivationController extends Controller
      */
     public function destroy(TransactionHistory $transactionHistory)
     {
-        if($transactionHistory->delete())
-        {
-            return response()->json(['status' => 'success','message' => 'Transaction History deleted successfully!']);
+        if ($transactionHistory->delete()) {
+            return response()->json(['status' => 'success', 'message' => 'Transaction History deleted successfully!']);
         }
-        return response()->json(['status' => 'error','message' => 'Error in Transaction History Delete!']);
+        return response()->json(['status' => 'error', 'message' => 'Error in Transaction History Delete!']);
     }
 
     public function download(Request $request)

@@ -462,7 +462,7 @@ class ReportController extends Controller
                                       <a href="javascript:void(0)" class="btn btn-danger btn-just-icon btn-sm reject_status" value="' . $query->id . '" title="Reject Status">
                                     <i class="material-icons">cancel</i>
                                   </a>
-                                  <a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm pending" value="' . $query->id . '" title="Pending">
+                                  <a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm punchoutnow" value="' . $query->id . '" title="Punch Out Now">
                                     <i class="material-icons">pending</i>
                                   </a>
                                   ';

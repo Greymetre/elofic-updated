@@ -97,7 +97,7 @@ class ProductController extends Controller
                 'sub_group'  => !empty($request['sub_group']) ? $request['sub_group'] :'',
                 'expiry_interval'  => !empty($request['expiry_interval']) ? $request['expiry_interval'] :'',
                 'expiry_interval_preiod'  => !empty($request['expiry_interval_preiod']) ? $request['expiry_interval_preiod'] :0,
-                'display_name'  => !empty($request['display_name']) ? $request['display_name'] :'',
+                //'display_name'  => !empty($request['display_name']) ? $request['display_name'] :'',
                 'description'   => !empty($request['description']) ? $request['description'] :'',
                 'subcategory_id'=> !empty($request['subcategory_id']) ? $request['subcategory_id'] :null,
                 'category_id'   => !empty($request['category_id']) ? $request['category_id'] :null,
@@ -107,6 +107,7 @@ class ProductController extends Controller
                 'created_by'    => Auth::user()->id,
                 'created_at'    => getcurentDateTime(),
                 'specification' => !empty($request['specification']) ? $request['specification'] :'',
+                'phase' => !empty($request['phase']) ? $request['phase'] :'',
                 'part_no'       => !empty($request['part_no']) ? $request['part_no'] :'',
                 'product_no'    => !empty($request['product_no']) ? $request['product_no'] :'',
                 'model_no'      => !empty($request['model_no']) ? $request['model_no'] :'',
@@ -222,13 +223,14 @@ class ProductController extends Controller
             $product->sub_group = !empty($request['sub_group'])? $request['sub_group'] :'';
             $product->expiry_interval = !empty($request['expiry_interval'])? $request['expiry_interval'] :'';
             $product->expiry_interval_preiod = !empty($request['expiry_interval_preiod'])? $request['expiry_interval_preiod'] :0;
-            $product->display_name = !empty($request['display_name']) ? $request['display_name'] :'';
+            //$product->display_name = !empty($request['display_name']) ? $request['display_name'] :'';
             $product->description = !empty($request['description']) ? $request['description'] :'';
             $product->subcategory_id = !empty($request['subcategory_id']) ? $request['subcategory_id'] :null;
             $product->category_id = !empty($request['category_id']) ? $request['category_id'] :null;
             $product->brand_id = !empty($request['brand_id']) ? $request['brand_id'] :null;
             $product->unit_id = !empty($request['unit_id']) ? $request['unit_id'] :null;
             $product->specification = !empty($request['specification']) ? $request['specification'] :'';
+            $product->phase = !empty($request['phase']) ? $request['phase'] :'';
             $product->part_no = !empty($request['part_no']) ? $request['part_no'] :'';
             $product->product_no = !empty($request['product_no']) ? $request['product_no'] :'';
             $product->model_no = !empty($request['model_no']) ? $request['model_no'] :'';

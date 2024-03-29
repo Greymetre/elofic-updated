@@ -6,7 +6,7 @@ use App\Models\Customers;
 use App\Models\ParentDetail;
 use App\Models\SchemeDetails;
 use App\Models\Services;
-use App\Models\TransactionHistory;
+use App\Models\WarrantyActivation;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Html\Button;
@@ -25,37 +25,15 @@ class WarrantyActivationDataTable extends DataTable
         return datatables()
             ->eloquent($query)
             ->addIndexColumn()
-            ->editColumn('created_at', function ($data) {
-                return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
+            ->addColumn('cust_status', function ($query) {
+                return 'Active';
             })
-            ->editColumn('contact_person', function ($data) {
-                return $data->customer->first_name.' '.$data->customer->last_name;
-            })
-            ->editColumn('customer.name', function ($data) {
-                $customer_name = '<a target="_blank" href="'.route('customers.show', [encrypt($data->customer->id)]).'">'.$data->customer->name.'</a>';
-                
-                return $customer_name;
-            })
-            ->editColumn('parent_name', function ($data) {
-                $parents = '';
-                if (!empty($data->customer->getparentdetail)) {
-                    foreach ($data->customer->getparentdetail as $key => $parent_data) {
-                        if ($key == (count($data->customer->getemployeedetail) - 1)) {
-                            $parents .= isset($parent_data->parent_detail->name) ? $parent_data->parent_detail->name : '';
-                        } else {
-                            $parents .= isset($parent_data->parent_detail->name) ? $parent_data->parent_detail->name . ', ' : '';
-                        }
-                    }
+            ->addColumn('status', function ($query) {
+                if($query->status == '0'){
+                    return 'Pending Activation';
+                }else{
+                    return 'Activet';
                 }
-                return $parents;
-            })
-            ->editColumn('subcategory_name', function ($data) {
-
-                return $data->scheme ? $data->scheme->product->subcategories->subcategory_name : '';
-            })
-            ->editColumn('product_name', function ($data) {
-
-                return $data->scheme ? $data->scheme->product->product_name : '';
             })
             ->addColumn('action', function ($query) {
                 $btn = '';
@@ -69,7 +47,7 @@ class WarrantyActivationDataTable extends DataTable
                                 ' . $btn . '
                             </div>' . $activebtn;
             })
-            ->rawColumns(['action', 'contact_person', 'parent_name', 'subcategory_name', 'product_name','customer.name']);
+            ->rawColumns(['action', 'cust_status']);
     }
 
     /**
@@ -78,44 +56,23 @@ class WarrantyActivationDataTable extends DataTable
      * @param \App\Scheme $model
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function query(TransactionHistory $model, Request $request)
+    public function query(WarrantyActivation $model, Request $request)
     {
         
-        $data = $model->with('customer', 'scheme');
-        if($request->branch_id && $request->branch_id != null && count($request->branch_id) > 0){
-            $branch_user_id = User::whereIn('branch_id',$request['branch_id'])->pluck('id');
-            if(!empty($branch_user_id)){
-                $branch_customer_id = Customers::whereIn('executive_id',$branch_user_id)->pluck('id');
-            }
-            if(!empty($branch_customer_id)){
-                $data->whereIn('customer_id', $branch_customer_id);
-            }
+        $data = $model->with('customer', 'seller_details', 'product_details');
+        if($request->branch_id && $request->branch_id != null && $request->branch_id != ''){
+            $data->where('branch_id', $request->branch_id);
         }
-        if($request->parent_customer && $request->parent_customer != null  && count($request->parent_customer) > 0){
-            $parent_customer_id = ParentDetail::whereIn('parent_id',$request->parent_customer)->pluck('customer_id');
-            
-            if(!empty($parent_customer_id)){
-                $data->whereIn('customer_id', $parent_customer_id);
-            }
+        if($request->parent_customer && $request->parent_customer != null  && $request->parent_customer != ''){
+            $data->where('customer_id', $request->parent_customer);
         }
-        if($request->scheme_name && $request->scheme_name != null  && $request->scheme_name != ''){
-            $scheme_details = SchemeDetails::with('products')->where('scheme_id',$request->scheme_name)->get();
-            $all_product_code = $scheme_details->pluck('products.product_code')->flatten()->unique();
-            $all_serial_number = Services::whereIn('product_code', $all_product_code)->pluck('serial_no');
-            
-            if(!empty($all_serial_number)){
-                $data->whereIn('coupen_code', $all_serial_number);
-            }
+        if($request->status != null  && $request->status != ''){
+            $data->where('status', $request->status);
         }
-        if($request->start_date && $request->start_date != null && $request->start_date != '' && $request->end_date && $request->end_date != null && $request->end_date != ''){
-            $startDate = date('Y-m-d', strtotime($request->start_date));
-            $endDate = date('Y-m-d', strtotime($request->end_date));
-            $data = $data->whereDate('created_at', '>=', $startDate)
-             ->whereDate('created_at', '<=', $endDate);
+        if($request->product_id && $request->product_id != null  && $request->product_id != ''){
+            $data->where('product_id', $request->product_id);
         }
-        if($request->customer_id && $request->customer_id != null  && $request->customer_id != ''){
-            $data->where('customer_id', $request->customer_id);
-        }
+        
         $data = $data->latest()->newQuery();
         return $data;
     }

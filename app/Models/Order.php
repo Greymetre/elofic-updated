@@ -11,7 +11,7 @@ class Order extends Model
 
     protected $table = 'orders';
 
-    protected $fillable = [ 'active', 'buyer_id', 'seller_id', 'total_qty', 'shipped_qty', 'orderno', 'order_date', 'completed_date', 'total_gst', 'sub_total', 'grand_total', 'order_taking','status_id', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at','beatscheduleid' , 'suc_del','order_remark'];
+    protected $fillable = [ 'active', 'buyer_id', 'seller_id', 'total_qty', 'shipped_qty', 'orderno', 'order_date', 'completed_date', 'total_gst', 'sub_total', 'grand_total', 'order_taking','status_id', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at','beatscheduleid' , 'suc_del','order_remark','executive_id'];
 
     public function message()
     {
@@ -47,20 +47,23 @@ class Order extends Model
             $created_at = getcurentDateTime();
             $request['orderno'] = !empty($request['orderno']) ? $request['orderno'] : date('Y').'_'.$request['seller_id'].'_'.autoIncrementId('Order','id');
 
-                 if(!empty($request['buyer_id'])){
-                   $buyer = $request['buyer_id'];
-                   }else{
-                    $buyer = $request['seller_id'];
-                   }
+                 // if(!empty($request['buyer_id'])){
+                 //   $buyer = $request['buyer_id'];
+                 //   }else{
+                 //    $buyer = $request['seller_id'];
+                 //   }
 
             if( $order_id = Order::insertGetId([
                 'active' => 'Y',
-                // 'buyer_id' => isset($request['buyer_id'])? $request['buyer_id']:null,
-                // 'seller_id' => isset($request['seller_id'])? $request['seller_id']:null,
-                'buyer_id' => isset($request['seller_id'])? $request['seller_id']:null,
-                'seller_id' => $buyer,
+
+                'buyer_id' => isset($request['buyer_id'])? $request['buyer_id']:null,
+                'seller_id' => isset($request['seller_id'])? $request['seller_id']:null,
+
+                // 'buyer_id' => isset($request['seller_id'])? $request['seller_id']:null,
+                // 'seller_id' => $buyer,
                  'total_qty' => 0,
                  //'total_qty' => isset($request['quantity'])? $request['quantity']:0,
+                'executive_id' => isset($request['executive_id'])? $request['executive_id']:null,
                 'shipped_qty' => 0,
                 'orderno' => isset($request['orderno'])? $request['orderno'] :'',
                 'order_date' => isset($request['order_date'])? $request['order_date']:getcurentDate(),
@@ -106,7 +109,11 @@ class Order extends Model
 
     public function orderdetails()
     {
-        return $this->hasMany('App\Models\OrderDetails', 'order_id', 'id')->select('id','order_id', 'product_id', 'product_detail_id','quantity', 'shipped_qty', 'price', 'tax_amount', 'line_total', 'status_id');
+        // return $this->hasMany('App\Models\OrderDetails', 'order_id', 'id')->select('id','order_id', 'product_id', 'product_detail_id','quantity', 'shipped_qty', 'price', 'tax_amount', 'line_total', 'status_id');
+
+     return $this->hasMany('App\Models\OrderDetails', 'order_id', 'id')->select('id','order_id', 'product_id', 'product_detail_id','quantity', 'shipped_qty', 'price', 'tax_amount', 'line_total', 'status_id','gst','discount','ebd_discount','ebd_amount','cluster_amount','deal_amount','distributor_amount','cluster_discount','deal_discount','distributor_discount','gst_amount');
+
+
     }
 
     public function address()
@@ -128,6 +135,11 @@ class Order extends Model
     public function getuserdetails()
     {
         return $this->belongsTo('App\Models\User', 'created_by', 'id');
+    }
+
+    public function getsalesdetail()
+    {
+        return $this->hasOne('App\Models\Sales', 'order_id', 'id')->select('invoice_no','invoice_date');
     }
 
 

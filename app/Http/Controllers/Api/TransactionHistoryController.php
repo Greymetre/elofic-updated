@@ -20,6 +20,8 @@ use App\Models\SchemeDetails;
 use App\Models\SchemeHeader;
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
+use App\Models\DamageEntry;
+use App\Models\Gifts;
 use App\Models\Redemption;
 
 class TransactionHistoryController extends Controller
@@ -74,7 +76,7 @@ class TransactionHistoryController extends Controller
                     $data->push([
                         'id' => isset($value['id']) ? $value['id'] : 0,
                         'scheme_name' => isset($value['scheme_details']) ? $value['scheme_details']['scheme_name'] : '',
-                        'coupon_code' => isset($value['coupen_code']) ? $value['coupen_code'] : '',
+                        'coupon_code' => (isset($value['coupon_code']) && $value['coupon_code'] != '' && $value['coupon_code'] != NULL) ? $value['coupon_code'] : 'Manual',
                         'status' => isset($value['status']) ? $value['status'] : '',
                         'point' => isset($value['point']) ? $value['point'] : '',
                         'date' => isset($value['created_at']) ? date('d M Y', strtotime($value['created_at'])) : '',
@@ -98,7 +100,7 @@ class TransactionHistoryController extends Controller
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
             $pageSize = $request->input('pageSize');
-            $query = Redemption::with('product')->with('neft_details')->where(function ($query) use ($request) {
+            $query = Redemption::with('product', 'neft_details')->where(function ($query) use ($request) {
                 $query->where('customer_id', $request->id);
                 if ($request->search && $request->search != '' && $request->search != null) {
                     $query->where('product_name', 'LIKE', "%{$request->search}%")->orWhere('display_name', 'LIKE', "%{$request->search}%");
@@ -125,10 +127,11 @@ class TransactionHistoryController extends Controller
                     $data->push([
                         'id' => isset($value['id']) ? $value['id'] : 0,
                         'redeem_mode' => isset($value['redeem_mode']) ? $value['redeem_mode'] : '',
-                        'coupon_code' => isset($value['coupen_code']) ? $value['coupen_code'] : '',
+                        'coupon_code' => isset($value['coupon_code']) ? $value['coupon_code'] : '',
                         'status' => isset($value['status']) ? $value['status'] : '',
                         'point' => isset($value['redeem_amount']) ? $value['redeem_amount'] : '',
                         'date' => isset($value['updated_at']) ? date('d M Y', strtotime($value['updated_at'])) : '',
+                        'details' => $value->neft_details,
                     ]);
                 }
                 return response()->json(['status' => 'success', 'total_redemption' => $total_redemption, 'total_rejected' => $total_rejected, 'total_balance' => $total_balance, 'message' => 'Data retrieved successfully.', 'data' => $data], $this->successStatus);
@@ -149,6 +152,14 @@ class TransactionHistoryController extends Controller
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
             $customer = Customers::with('customerdocuments')->with('customerdetails')->find($request->id);
+            $last_redemption = Redemption::where('customer_id', $request->id)->latest()->first();
+
+            if ($last_redemption) {
+                $last_redemption->date = date('d M Y', strtotime($last_redemption->created_at));
+            }
+            $active_points = TransactionHistory::where('customer_id', $request->id)->where('status', '1')->sum('point') ?? 0;
+            $total_redemption = Redemption::where('customer_id', $request->id)->whereNot('status', '2')->sum('redeem_amount') ?? 0;
+            $total_balance = (int)$active_points - (int)$total_redemption;
 
             // $data = collect([]);
             if ($customer) {
@@ -158,6 +169,8 @@ class TransactionHistoryController extends Controller
                 $data['bank_details']['ifsc_code'] = $customer->customerdetails ? $customer->customerdetails->ifsc_code : '';
                 $data['bank_details']['passbook_image'] = !empty($customer['customerdocuments']->where('document_name', 'bankpass')->pluck('file_path')->first()) ? asset('uploads/' . $customer['customerdocuments']->where('document_name', 'bankpass')->pluck('file_path')->first()) : url('/') . '/' . asset('assets/img/placeholder.jpg');
                 $data['bank_details']['status'] = $customer->customerdetails ? $customer->customerdetails->bank_status : 0;
+                $data['last_redemption'] = $last_redemption;
+                $data['active_balance_points'] = $total_balance;
                 return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], $this->successStatus);
             }
             return response(['status' => 'success', 'message' => 'No Record Found.', 'data' => $data], 200);
@@ -190,7 +203,46 @@ class TransactionHistoryController extends Controller
                 'redeem_amount' => $request->redeem_amount,
             ]);
             return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
-          
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
+    }
+
+    public function addGiftRedemption(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'customer_id' => 'required|exists:customers,id',
+                'gift_id' => 'required|array',
+                'gift_id.*' => 'exists:gifts,id',
+            ]);
+            $validator->setCustomMessages([
+                'redeem_amount.max' => 'The redeem amount must not be greater than total point.',
+                'gift_id.required' => 'Please select at least one gift.',
+                'gift_id.*.exists' => 'The selected gift id :input is invalid.',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
+            }
+            
+            $active_points = TransactionHistory::where('customer_id', $request->customer_id)->where('status', '1')->sum('point')??0;
+            $total_redemption = Redemption::where('customer_id', $request->customer_id)->whereNot('status', '2')->sum('redeem_amount')??0;
+            $total_balance = (int)$active_points-(int)$total_redemption;
+            $tottal_redeem_point = Gifts::whereIn('id', $request->gift_id)->sum('points');
+            
+            if ($tottal_redeem_point > $total_balance) {
+                return response()->json(['status' => 'error', 'message' => 'The redeem amount not be greater than to total point.'], $this->successStatus);
+            }
+            foreach ($request->gift_id as $gift) {
+                $redeem_point = Gifts::where('id', $gift)->value('points');
+                $data = Redemption::create([
+                    'customer_id' => $request->customer_id,
+                    'redeem_mode' => '1',
+                    'gift_id' => $gift,
+                    'redeem_amount' => $redeem_point,
+                ]);
+            }
+            return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
@@ -201,41 +253,41 @@ class TransactionHistoryController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'customer_id' => 'required|exists:customers,id',
-                'coupen_code.*' => 'required',
+                'coupon_code' => 'required|array',
             ]);
             $validator->setAttributeNames([
-                'coupen_code.*' => 'coupon code',
+                'coupon_code.*' => 'coupon code',
             ]);
 
             $validator->setCustomMessages([
-                'coupen_code.*.required' => 'All coupon code fields are required.',
+                'coupon_code.*.required' => 'All coupon code fields are required.',
             ]);
             if ($validator->fails()) {
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
-            $nonNullCoupenCodes = array_filter($request->coupen_code, function ($value) {
+            $nonNullCoupenCodes = array_filter($request->coupon_code, function ($value) {
                 return !is_null($value);
             });
             $expire_schemes = array();
             $no_schemes = array();
             foreach ($nonNullCoupenCodes as $nonNullCoupenCode) {
-                $exists = TransactionHistory::where('coupen_code', $nonNullCoupenCode)->exists();
+                $exists = TransactionHistory::where('coupon_code', $nonNullCoupenCode)->exists();
                 $notexists = Services::where('serial_no', $nonNullCoupenCode)->exists();
 
                 if ($exists) {
                     throw ValidationException::withMessages([
-                        'coupen_code' => "The coupon code '$nonNullCoupenCode' already Scanned.",
+                        'coupon_code' => "The coupon code '$nonNullCoupenCode' already Scanned.",
                     ]);
                 }
                 if (!$notexists) {
                     throw ValidationException::withMessages([
-                        'coupen_code' => "The coupon code '$nonNullCoupenCode' is Invalid.",
+                        'coupon_code' => "The coupon code '$nonNullCoupenCode' is Invalid.",
                     ]);
                 }
                 $scheme = Services::where('serial_no', $nonNullCoupenCode)->first();
                 $scheme_details = SchemeDetails::where('product_id', $scheme->product->id)->first();
                 $point = 0;
-                if($scheme_details){
+                if ($scheme_details) {
                     $scheme_id = $scheme_details->scheme_id;
                     $start_date = Carbon::createFromFormat('Y-m-d', $scheme_details->scheme->start_date);
                     $end_date = Carbon::createFromFormat('Y-m-d', $scheme_details->scheme->end_date);
@@ -246,23 +298,133 @@ class TransactionHistoryController extends Controller
                         array_push($expire_schemes, $nonNullCoupenCode);
                         $point = '0';
                     }
-                }else{
+                } else {
                     array_push($no_schemes, $nonNullCoupenCode);
                     $scheme_id = null;
                 }
                 $tHistory = TransactionHistory::create([
                     'customer_id' => $request->customer_id,
-                    'coupen_code' => $nonNullCoupenCode,
+                    'coupon_code' => $nonNullCoupenCode,
                     'scheme_id' => $scheme_id,
                     'point' => $point,
                 ]);
             }
             if (count($expire_schemes) > 0) {
-                return response(['status' => 'success', 'message' => 'Transaction History Store Successfully but coupon code (' . implode(',', $expire_schemes) . ') scheme has either expired or has not started yet so you earned 0 point.'], 200);
-            } elseif(!$scheme_details) {
-                return response(['status' => 'success', 'message' => 'Transaction History Store Successfully but no any scheme on coupon code (' . implode(',', $no_schemes) . ') so you earned 0 point.'], 200);
-            }else{
-                return response(['status' => 'success', 'message' => 'Transaction History Store Successfully'], 200);
+                return response(['status' => 'success', 'message' => 'Transaction History Store Successfully but coupon code (' . implode(',', $expire_schemes) . ') scheme has either expired or has not started yet so you earned 0 point.', 'point_earn' => $point], 200);
+            } elseif (!$scheme_details) {
+                return response(['status' => 'success', 'message' => 'Transaction History Store Successfully but no any scheme on coupon code (' . implode(',', $no_schemes) . ') so you earned 0 point.', 'point_earn' => $point], 200);
+            } else {
+                return response(['status' => 'success', 'message' => 'Transaction History Store Successfully', 'point_earn' => $point], 200);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
+    }
+
+    public function getDamageEntry(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'id' => 'required|exists:customers,id',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
+            }
+            $data = DamageEntry::where('customer_id', $request->id)->get();
+            if (count($data) > 0) {
+                return response(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], 200);
+            } else {
+                return response(['status' => 'error', 'message' => 'No data found'], 200);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
+    }
+
+    public function addDamageEntry(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'customer_id' => 'required|exists:customers,id',
+                'damageattach1' => 'required|image',
+            ]);
+            $validator->setCustomMessages([
+                'damageattach1.required' => 'Please attach at least one attachment.',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
+            }
+            $expire_schemes = array();
+            if ($request->coupon_code && $request->coupon_code != NULL && $request->coupon_code != '') {
+                $exists = TransactionHistory::where('coupon_code', $request->coupon_code)->exists();
+                $existsDamage = DamageEntry::where('coupon_code', $request->coupon_code)->exists();
+
+                if ($exists) {
+                    throw ValidationException::withMessages([
+                        'coupon_code' => "The coupon code '$request->coupon_code' already Scanned.",
+                    ]);
+                }
+                if ($existsDamage) {
+                    throw ValidationException::withMessages([
+                        'coupon_code' => "The coupon code '$request->coupon_code' already Scanned.",
+                    ]);
+                }
+                $scheme = Services::where('serial_no', $request->coupon_code)->first();
+                if ($scheme) {
+                    $scheme_details = SchemeDetails::where('product_id', $scheme->product->id)->first();
+                    $scheme_id = $scheme_details->scheme_id;
+                    $start_date = Carbon::createFromFormat('Y-m-d', $scheme_details->scheme->start_date);
+                    $end_date = Carbon::createFromFormat('Y-m-d', $scheme_details->scheme->end_date);
+                    $current_date = Carbon::today();
+                    if ($current_date->isSameDay($start_date) || ($current_date->gte($start_date) && $current_date->lte($end_date))) {
+                        $point = ($scheme_details) ? $scheme_details->points : NULL;
+                    } else {
+                        array_push($expire_schemes, $request->coupon_code);
+                        $point = '0';
+                    }
+                } else {
+                    $scheme_id = NULL;
+                    $point = 0;
+                }
+                $damageEntry = new DamageEntry();
+                $damageEntry->customer_id = $request->customer_id;
+                $damageEntry->coupon_code = $request->coupon_code;
+                $damageEntry->scheme_id = $scheme_id;
+                $damageEntry->point = $point;
+                $damageEntry->created_by = auth()->user()->id;
+                $damageEntry->save();
+            } else {
+                $damageEntry = new DamageEntry();
+                $damageEntry->customer_id = $request->customer_id;
+                $damageEntry->created_by = auth()->user()->id;
+                $damageEntry->save();
+            }
+
+            if ($request->hasFile('damageattach1')) {
+                $file = $request->file('damageattach1');
+                $customname = time() . '.' . $file->getClientOriginalExtension();
+                $damageEntry->addMedia($file)
+                    ->usingFileName($customname)
+                    ->toMediaCollection('damageattach1');
+            }
+            if ($request->hasFile('damageattach2')) {
+                $file = $request->file('damageattach2');
+                $customname = time() . '.' . $file->getClientOriginalExtension();
+                $damageEntry->addMedia($file)
+                    ->usingFileName($customname)
+                    ->toMediaCollection('damageattach2');
+            }
+            if ($request->hasFile('damageattach3')) {
+                $file = $request->file('damageattach3');
+                $customname = time() . '.' . $file->getClientOriginalExtension();
+                $damageEntry->addMedia($file)
+                    ->usingFileName($customname)
+                    ->toMediaCollection('damageattach3');
+            }
+            if (count($expire_schemes) > 0) {
+                return response(['status' => 'success', 'message' => 'Damage Entry Store Successfully but coupon code (' . implode(',', $expire_schemes) . ') scheme has either expired or has not started yet so you earned 0 point.'], 200);
+            } else {
+                return response(['status' => 'success', 'message' => 'Damage Entry Store Successfully'], 200);
             }
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);

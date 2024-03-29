@@ -9,6 +9,8 @@ use App\Models\ExpenseLog;
 use App\Models\Media;
 use Validator;
 use Auth;
+use Carbon\Carbon;
+
 
 use Illuminate\Http\Request;
 
@@ -80,6 +82,10 @@ class ExpensesTypeController extends Controller
     public function createExpense(Request $request){
       try
         {   ini_set('memory_limit', '-1');
+            
+            $dates = Carbon::now();
+            $current_date_time = $dates->setTimezone('Asia/Kolkata');
+
             $userid = $request->user()->id;
             $validator = Validator::make($request->all(), [
                // 'customer_id'   => 'nullable|exists:customers,id',
@@ -107,7 +113,7 @@ class ExpensesTypeController extends Controller
                 'total_km' => isset($request->total_km) ? $request->total_km :null,
                 'note' => isset($request->note) ? $request->note :null,
                 'created_by' => $userid,
-                'created_at' => date('Y-m-d H:i:s')
+                'created_at' => $current_date_time
             ]))
             {
                
@@ -115,7 +121,8 @@ class ExpensesTypeController extends Controller
                 'log_date' => date('Y-m-d'),
                 'expense_id' => $expenses->id,
                 'created_by' => $userid,
-                'status_type' => 'generated'
+                'status_type' => 'generated',
+                'created_at' => $current_date_time
                );
 
                 ExpenseLog::create($logdata);
@@ -305,6 +312,10 @@ class ExpensesTypeController extends Controller
         try
         { 
             ini_set('memory_limit', '-1');
+
+            $dates = Carbon::now();
+            $current_date_time = $dates->setTimezone('Asia/Kolkata');
+
             $userid = $request->user()->id;
             $validator = Validator::make($request->all(), [
                 'expense_id'  => "required",
@@ -325,6 +336,7 @@ class ExpensesTypeController extends Controller
                 'stop_km' => isset($request['stop_km'])? $request['stop_km']:$expense_detail->stop_km,
                 'total_km' => isset($request['total_km'])? $request['total_km']:$expense_detail->total_km,
                 'claim_amount' => isset($request['claim_amount'])? $request['claim_amount']:$expense_detail->claim_amount,
+                'created_at' => $current_date_time
             ]))
             {
 
@@ -332,7 +344,8 @@ class ExpensesTypeController extends Controller
                 'log_date' => date('Y-m-d'),
                 'expense_id' => $request['expense_id'],
                 'created_by' => $userid,
-                'status_type' => 'updated'
+                'status_type' => 'updated',
+                'created_at' => $current_date_time
              );
             
              ExpenseLog::create($logdata);  

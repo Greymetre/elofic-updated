@@ -9,14 +9,14 @@ class TransactionHistory extends Model
 {
     use HasFactory;
 
-    protected $fillable = [ 'customer_id', 'coupen_code', 'point', 'scheme_id', 'status', 'created_by', 'created_at', 'updated_at'];
+    protected $fillable = [ 'customer_id', 'coupon_code', 'point', 'scheme_id', 'status', 'remark', 'created_by', 'created_at', 'updated_at'];
 
     public function customer(){
         return $this->belongsTo(Customers::class, 'customer_id', 'id');
     }
 
     public function scheme(){
-        return $this->belongsTo(Services::class, 'coupen_code', 'serial_no');
+        return $this->belongsTo(Services::class, 'coupon_code', 'serial_no');
     }
 
     public function scheme_details(){

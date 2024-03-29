@@ -13,8 +13,13 @@ use Illuminate\Support\Facades\DB;
 use Validator;
 use Gate;
 use App\Models\Coupons;
+use App\Models\WarrantyActivation;
+use App\Models\TransactionHistory;
+use App\Models\EndUser;
 use App\Models\Wallet;
 use App\Models\InvalidCoupons;
+use App\Models\Product;
+use App\Models\Services;
 
 class CouponController extends Controller
 {
@@ -112,5 +117,115 @@ class CouponController extends Controller
         {
             return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
         }        
+    }
+
+    public function getProductByCoupon(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'serial_no' => 'required',
+            ]); 
+            if ($validator->fails()) {
+                return response()->json(['status' => 'error','message' =>  $validator->errors()], $this->badrequest); 
+            }
+            $serial_no = $request->serial_no;
+            $serial_no_product_code = Services::where('serial_no', $serial_no)->value('product_code');
+            $all_products = Product::all();
+            $slected = false;
+            $data['status'] = 'success';
+            foreach ($all_products as $k=>$product) {
+                if ($serial_no_product_code && $product->product_code == $serial_no_product_code && $serial_no_product_code != null && $serial_no_product_code != '') {
+                    $data['products'][0]['id'] = $product->id; 
+                    $data['products'][0]['name'] = $product->product_name; 
+                    $slected = true;
+                }
+            }
+            if($slected === false){
+                foreach ($all_products as $k=>$product) {
+                    $data['products'][$k]['id'] = $product->id; 
+                    $data['products'][$k]['name'] = $product->product_name; 
+
+                }
+            }
+            return response()->json($data, 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
+        }
+    }
+
+    public function getEndUserData(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'customer_number' => 'required',
+            ]); 
+            if ($validator->fails()) {
+                return response()->json(['status' => 'error','message' =>  $validator->errors()], $this->badrequest); 
+            }
+            $customer_number = $request->input('customer_number');
+            if (isset($customer_number)) {
+                $data = EndUser::where(function ($query) use ($customer_number) {
+                    $query->where('customer_number', '=', $customer_number);
+                })
+                    ->first();
+                if ($data) {
+                    return response()->json(['status' => 'success', 'data' => $data], 200);
+                } else {
+                    return response()->json(['status' => 'error', 'message' =>'Customer not found', 'data' => null], 404);
+                }
+            } else {
+                return response()->json(['status' => 'error','message' =>'Please insert number', 'data' => null], 400);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
+        }
+    }
+
+    public function warrantyActivation(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'customer_id' => 'required',
+                'product_serail_number' => 'required',
+                'product_id' => 'required',
+                'sale_bill_no' => 'required',
+                'sale_bill_date' => 'required',
+                'warranty_date' => 'required',
+            ]); 
+            if ($validator->fails()) {
+                return response()->json(['status' => 'error','message' =>  $validator->errors()], $this->badrequest); 
+            }
+            if (!$request->end_user_id || $request->end_user_id == NULL || $request->end_user_id == '') {
+                $end_user = EndUser::updateOrCreate(['customer_number' => $request->customer_number ?? ''], [
+                    'customer_name' => $request->customer_name ?? '',
+                    'customer_number' => $request->customer_number ?? '',
+                    'customer_email' => $request->customer_email ?? '',
+                    'customer_address' => $request->customer_address ?? '',
+                    'customer_place' => $request->customer_place ?? '',
+                    'customer_pindcode' => $request->customer_pindcode ?? '',
+                    'customer_country' => $request->customer_country ?? '',
+                    'customer_state' => $request->customer_state ?? '',
+                    'customer_district' => $request->customer_district ?? '',
+                    'customer_city' => $request->customer_city ?? ''
+                ]);
+                $request->end_user_id = $end_user->id;
+            }
+            $data = WarrantyActivation::create([
+                'product_serail_number' => $request->product_serail_number ?? NULL,
+                'product_id' => $request->product_id ?? NULL,
+                'end_user_id' => $request->end_user_id ?? NULL,
+                'branch_id' => $request->branch_id ?? NULL,
+                'customer_id' => $request->customer_id ?? NULL,
+                'status' => $request->status ?? 1,
+                'sale_bill_no' => $request->sale_bill_no ?? NULL,
+                'sale_bill_date' => $request->sale_bill_date ?? NULL,
+                'warranty_date' => $request->warranty_date ?? NULL
+            ]);
+            TransactionHistory::where('coupon_code', $request->product_serail_number)->update(['status' => '1']);
+
+            return response()->json(['status' => 'success', 'message'=>'Warranty Activation Store Successfully.', 'data' => $data], 200); 
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
+        }
     }
 }

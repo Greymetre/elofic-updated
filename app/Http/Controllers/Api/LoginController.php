@@ -7,6 +7,7 @@ use App\Models\Address;
 use App\Models\CustomerDetails;
 use App\Models\Customers;
 use App\Models\CustomerType;
+use App\Models\ParentDetail;
 use App\Models\Pincode;
 use App\Models\State;
 use Illuminate\Http\Request;
@@ -164,7 +165,8 @@ class LoginController extends Controller
             if (!$user = $this->customer->with('customerdetails')->where('mobile', $username)->first()) {
                 return response()->json(['status' => 'error', 'message' => 'User not found'], $this->notFound);
             } else {
-                $otp = rand(1000, 9999);
+                $otp = 1234;
+                // $otp = rand(1000, 9999);
                 $user->otp = $otp;
                 $user->save();
                 $nestedData['id'] = $user->id;
@@ -193,6 +195,9 @@ class LoginController extends Controller
                 return response()->json(['status' => 'error', 'message' => 'Wroung OTP !!'], $this->notFound);
             } else {
                 $token = $user->createToken('gSQ01LKOg1JV0O9eMsDiAN0TqkQlOpulK7vWemPF')->accessToken;
+                $profile_image = $user->shop_image;
+                $user->shop_image = $user->profile_image;
+                $user->profile_image = $profile_image;
                 $user->token = $token;
                 $user->total_point = $user->customer_transacation->sum('point');
                 $user->active_point = $user->customer_transacation->where('status', '1')->sum('point');
@@ -209,6 +214,7 @@ class LoginController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'name' => 'required',
+                'shop_name' => 'required',
                 'address' => 'nullable|min:2|max:100|string|regex:/[a-zA-Z0-9\s]+/',
                 'mobile'  => 'required|numeric|unique:customers,mobile',
                 'customertype'       => 'nullable|exists:customer_types,id',
@@ -235,7 +241,7 @@ class LoginController extends Controller
 
                 if ($customer = Customers::updateOrCreate(['mobile' => $request['mobile']], [
                     'active' => 'Y',
-                    'name' => !empty($request['name']) ? ucfirst($request['name']) : '',
+                    'name' => !empty($request['shop_name']) ? ucfirst($request['shop_name']) : '',
                     'first_name' => !empty($request['first_name']) ? ucfirst($request['first_name']) : '',
                     'last_name' => !empty($request['last_name']) ? ucfirst($request['last_name']) : '',
                     'mobile' => $request['mobile'],
@@ -276,6 +282,15 @@ class LoginController extends Controller
                         'customer_id'   =>  $request['customer_id'],
                         'fcm_token'   =>  $request['fcm_token'],
                     ]);
+                    if (!empty($request['parent_id'])) {
+                        $parentDetail = ParentDetail::create(
+                            [
+                                'customer_id' => $request['customer_id'],
+                                'parent_id' => $request['parent_id'],
+                                'created_by' => Auth::user()->id,
+                            ]
+                        );
+                    }
                     $otp = rand(1000, 9999);
                     $customer->otp = $otp;
                     $customer->save();

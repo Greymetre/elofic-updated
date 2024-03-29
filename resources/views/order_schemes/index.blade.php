@@ -30,9 +30,11 @@
                   </div> -->
                   </form>
                   @endif
+
                   @if(auth()->user()->can(['scheme_download']))
                   <!-- <a href="{{ URL::to('schemes-download') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.scheme.title') !!}"><i class="material-icons">cloud_download</i></a> -->
                   @endif
+
                   @if(auth()->user()->can(['scheme_template']))
                   <!-- <a href="{{ URL::to('schemes-templates') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.scheme.title_singular') !!}"><i class="material-icons">text_snippet</i></a> -->
                   @endif
@@ -107,70 +109,74 @@
             {data: 'created_at', name: 'created_at',"defaultContent": ''},
         ]
     });
+
          
-    // $('body').on('click', '.activeRecord', function () {
-    //     var id = $(this).attr("id");
-    //     var active = $(this).attr("value");
-    //     var status = '';
-    //     if(active == 'Y')
-    //     {
-    //       status = 'Incative ?';
-    //     }
-    //     else
-    //     {
-    //        status = 'Ative ?';
-    //     }
-    //     var token = $("meta[name='csrf-token']").attr("content");
-    //     if(!confirm("Are You sure want "+status)) {
-    //        return false;
-    //     }
-    //     $.ajax({
-    //         url: "{{ url('schemes-active') }}",
-    //         type: 'POST',
-    //         data: {_token: token,id: id,active:active},
-    //         success: function (data) {
-    //           $('.message').empty();
-    //           $('.alert').show();
-    //           if(data.status == 'success')
-    //           {
-    //             $('.alert').addClass("alert-success");
-    //           }
-    //           else
-    //           {
-    //             $('.alert').addClass("alert-danger");
-    //           }
-    //           $('.message').append(data.message);
-    //           table.draw();
-    //         },
-    //     });
-    // });
+    $('body').on('click', '.orderschemeActive', function () {
+        var id = $(this).attr("id");
+        var active = $(this).attr("value");
+        var status = '';
+        if(active == 'Y')
+        {
+          status = 'Incative ?';
+        }
+        else
+        {
+           status = 'Ative ?';
+        }
+        var token = $("meta[name='csrf-token']").attr("content");
+        if(!confirm("Are You sure want "+status)) {
+           return false;
+        }
+        $.ajax({
+            url: "{{ url('orderschemes-active') }}",
+            type: 'POST',
+            data: {_token: token,id: id,active:active},
+            success: function (data) {
+              $('.message').empty();
+              $('.alert').show();
+              if(data.status == 'success')
+              {
+                $('.alert').addClass("alert-success");
+              }
+              else
+              {
+                $('.alert').addClass("alert-danger");
+              }
+              $('.message').append(data.message);
+              table.draw();
+            },
+        });
+    });
+
     
-    // $('body').on('click', '.delete', function () {
-    //     var id = $(this).attr("value");
-    //     var token = $("meta[name='csrf-token']").attr("content");
-    //     if(!confirm("Are You sure want to delete ?")) {
-    //        return false;
-    //     }
-    //     $.ajax({
-    //         url: "{{ url('schemes') }}"+'/'+id,
-    //         type: 'DELETE',
-    //         data: {_token: token,id: id},
-    //         success: function (data) {
-    //           $('.message').empty();
-    //           $('.alert').show();
-    //           if(data.status == 'success')
-    //           {
-    //             $('.alert').addClass("alert-success");
-    //           }
-    //           else
-    //           {
-    //             $('.alert').addClass("alert-danger");
-    //           }
-    //           $('.message').append(data.message);
-    //           table.draw();
-    //         },
-    //     });
-    // }); 
+    $('body').on('click', '.delete', function () {
+        var id = $(this).attr("value");
+        var token = $("meta[name='csrf-token']").attr("content");
+        if(!confirm("Are You sure want to delete ?")) {
+           return false;
+        }
+
+        $.ajax({
+            url: "{{ url('orderschemes') }}"+'/'+id,
+            type: 'DELETE',
+            data: {_token: token,id: id},
+            success: function (data) {
+              $('.message').empty();
+              $('.alert').show();
+              if(data.status == 'success')
+              {
+                $('.alert').addClass("alert-success");
+              }
+              else
+              {
+                $('.alert').addClass("alert-danger");
+              }
+              $('.message').append(data.message);
+              table.draw();
+            },
+        });
+    }); 
+
      
   });
 </script>

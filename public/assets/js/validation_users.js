@@ -36,9 +36,9 @@ $(document).ready(function () {
           data: {
             "_token": token,
             value: function() {return $("#email").val();},
+            id: function() {return $("#user_id").val();},
             table :'users',
             column : 'email',
-            id: function() {return $("#user_id").val();},
           }
         }
       },

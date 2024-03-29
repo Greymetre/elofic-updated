@@ -202,6 +202,7 @@
               <th>{!! trans('panel.customers.fields.first_name') !!}</th>
               <th>{!! trans('panel.customers.fields.last_name') !!}</th>
               <th>{!! trans('panel.customers.fields.mobile') !!}</th>
+              <th>{!! trans('panel.customers.fields.shop_image') !!}</th>
               <th>{!! trans('panel.customers.fields.profile_image') !!}</th>
               <th>{!! trans('panel.customers.fields.customertype') !!}</th>
               <th>{!! trans('panel.global.created_by') !!}</th>
@@ -253,6 +254,7 @@
             {data: 'last_name', name: 'last_name',"defaultContent": ''},
             {data: 'mobile', name: 'mobile',"defaultContent": ''},
             {data: 'image', name: 'image',"defaultContent": ''},
+            {data: 'profileimage', name: 'profileimage',"defaultContent": ''},
             {data: 'customertypes.customertype_name', name: 'customertypes.customertype_name',"defaultContent": '', orderable: false},
             {data: 'createdbyname.name', name: 'createdbyname.name',"defaultContent": '', orderable: false},
             {data: 'created_at', name: 'created_at',"defaultContent": ''},

@@ -67,6 +67,8 @@ return [
          'hr'     => 'HR',
          'account'  => 'Account',
          'warranty_activation'  => 'Warranty Activation',
+         'complaint_type'  => 'Complaint Type',
+         'complaint'  => 'Complaints',
 
     ],
 
@@ -415,6 +417,7 @@ return [
             'device_type'        => 'Device Type',
             'gender'        => 'Gender',
             'profile_image'        => 'Profile Image',
+            'shop_image'        => 'Shop Image',
             'customer_code'        => 'Customer Code',
             'status'        => 'Status',
             'gstin_no'        => 'GSTIN No',
@@ -523,6 +526,23 @@ return [
         'id'                => 'ID',
         'city_name'      => 'City Name',
         'district'      => 'District',
+        'status'        => 'Status',
+    ],
+
+    'leave'     => [
+        'title'          => 'Leaves',
+        'title_singular' => 'Leave',
+        'id'                => 'ID',
+        'city_name'      => 'City Name',
+        'district'      => 'District',
+        'status'        => 'Status',
+    ],
+
+    'complaint_type'     => [
+        'title'          => 'Complaint Type',
+        'title_singular' => 'Complaint Type',
+        'id'                => 'ID',
+        'city_name'      => 'Name',
         'status'        => 'Status',
     ],
 
@@ -1050,6 +1070,15 @@ return [
             'points_end_date'       =>  'Points End Date',
             'block_points'          =>  'Block Points',
             'block_percents'        =>  'Block Percents',
+        ],
+    ],
+
+    'complaint'           => [
+        'title'          => 'Complaints',
+        'title_singular' => 'Complaint',
+        'detail_title' => 'Complaint Detail',
+        'fields'         => [
+            'id'                    =>  'ID',
         ],
     ],
     'wallet'           => [

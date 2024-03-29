@@ -30,20 +30,41 @@ class ServicesController extends Controller
         abort_if(Gate::denies('serial_number_transaction_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $rows = Excel::toCollection([], request()->file('import_file'))->first();
         $PCKey = 0;
-        $BCKey = 3;
+        $PCKeyCheck = false;
+        $BCKey = 0;
+        $BCKeyCheck = false;
+        $SNKey = 0;
+        $SNKeyCheck = false;
         foreach ($rows as $k => $row) {
             if ($k == 0) {
-                if ($row == 'Product Code') {
-                    $PCKey =  $k;
+                foreach ($row as $ks => $heads) {
+                    if ($heads == 'Product Code') {
+                        $PCKey =  $ks;
+                        $PCKeyCheck = true;
+                    }
+                    if ($heads == 'Branch Code') {
+                        $BCKey =  $ks;
+                        $BCKeyCheck = true;
+                    }
+                    if ($heads == 'Serial No.') {
+                        $SNKey =  $ks;
+                        $SNKeyCheck = true;
+                    }
                 }
-                if ($row == 'Branch Code') {
-                    $BCKey =  $k;
+                if($SNKeyCheck == false){
+                    return back()->with('error', 'Serial No. column not found in uploaded file.');
+                }
+                if($PCKeyCheck == false){
+                    return back()->with('error', 'Product Code column not found in uploaded file.');
+                }
+                if($BCKeyCheck == false){
+                    return back()->with('error', 'Branch Code column not found in uploaded file.');
                 }
             } else {
                 $productCode = $row[$PCKey];
                 $branchCode = $row[$BCKey];
                 if ($branchCode != 'HO0000') {
-                    $serialNumbers = explode(',', $row[9]);
+                    $serialNumbers = explode(',', $row[$SNKey]);
                     foreach ($serialNumbers as $serialNumber) {
                         $exists = DB::table('services')
                             ->where('serial_no', $serialNumber)
@@ -108,7 +129,10 @@ class ServicesController extends Controller
                               ' . $btn . '
                           </div>';
             })
-            ->rawColumns(['action'])
+            ->addColumn('invoice_date', function ($data) {
+                return date('d M Y', strtotime($data->invoice_date));
+            })
+            ->rawColumns(['action','invoice_date'])
             ->make(true);
     }
 

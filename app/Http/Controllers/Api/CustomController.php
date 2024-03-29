@@ -14,6 +14,7 @@ use Gate;
 use App\Models\{CustomerType , Customers, EmployeeDetail};
 use App\Models\CustomerDetails;
 use App\Models\Division;
+use App\Models\LoyaltyAppSetting;
 
 
 class CustomController extends Controller
@@ -251,12 +252,20 @@ class CustomController extends Controller
         { 
             $pageSize = $request->input('pageSize');
             $user = Auth::guard('users')->user();
-            $user_id = $user->id;
-            $all_user_ids = getUsersReportingToAuth($user_id); 
-            //print_r($all_user_ids); die();
-            $customer_ids_assign = EmployeeDetail::whereIn('user_id', $all_user_ids)->pluck('customer_id')->toArray();
+            if($user)
+            {
+                $user_id = $user->id;
+                $all_user_ids = getUsersReportingToAuth($user_id); 
+                //print_r($all_user_ids); die();
+                $customer_ids_assign = EmployeeDetail::whereIn('user_id', $all_user_ids)->pluck('customer_id')->toArray();
+            }else{
+                $customer_ids_assign = NULL;
+            }
             $query = Customers::where(function ($query) use ($customer_ids_assign) {
-                                        $query->where('active', '=', 'Y')->whereIn('customertype',['1','3'])->whereIn('id', $customer_ids_assign);
+                                        $query->where('active', '=', 'Y')->whereIn('customertype',['1','3']);
+                                        if($customer_ids_assign){
+                                            $query->whereIn('id', $customer_ids_assign);
+                                        }
                                     })->select('id','name');
 
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
@@ -283,7 +292,31 @@ class CustomController extends Controller
         }       
     }
 
-
+    public function getslider()
+    {
+        try {
+            $data = LoyaltyAppSetting::first();
+            $slider_image = $data->getMedia('slider_image');
+            $gift_slider_image = $data->getMedia('gift_slider_image');
+            if(count($slider_image) > 0){
+                $k = 0;
+                foreach($slider_image as $val){
+                    $main_data['slider_image'][$k] = $val->original_url;
+                    $k++;
+                }
+            }
+            if(count($gift_slider_image) > 0){
+                $k = 0;
+                foreach($gift_slider_image as $val){
+                    $main_data['gift_slider_image'][$k] = $val->original_url;
+                    $k++;
+                }
+            }
+            return response(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $main_data], 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
+    }
 
 
 }

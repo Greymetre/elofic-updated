@@ -343,6 +343,9 @@ class ExpensesController extends Controller
      //        return redirect()->back()->withErrors($validator)->withInput();
      //    }
 
+        $dates = Carbon::now();
+        $current_date_time = $dates->setTimezone('Asia/Kolkata');
+
         $subdays = Carbon::now()->subDays(1)->format('Y-m-d');
         $adddays = Carbon::now()->addDays(1)->format('Y-m-d');
         $current_date = Carbon::now()->format('Y-m-d');
@@ -372,6 +375,7 @@ class ExpensesController extends Controller
                 'total_km' =>$request->total_km ??NULL,
                 'note' =>$request->note??NULL,
                 'created_by' =>Auth::user()->id??NULL,
+                'created_at' => $current_date_time
                );
 
             $expenses = Expenses::create($data);
@@ -380,7 +384,8 @@ class ExpensesController extends Controller
                 'log_date' => date('Y-m-d'),
                 'expense_id' => $expenses->id,
                 'created_by' => Auth::user()->id,
-                'status_type' => 'generated'
+                'status_type' => 'generated',
+                'created_at' => $current_date_time
              );
              ExpenseLog::create($logdata);
 
@@ -413,6 +418,7 @@ class ExpensesController extends Controller
                 'total_km' =>$request->total_km ??NULL,
                 'note' =>$request->note??NULL,
                 'created_by' =>Auth::user()->id??NULL,
+                'created_at' => $current_date_time
                );
 
             $expenses = Expenses::create($data);
@@ -421,7 +427,8 @@ class ExpensesController extends Controller
                 'log_date' => date('Y-m-d'),
                 'expense_id' => $expenses->id,
                 'created_by' => Auth::user()->id,
-                'status_type' => 'generated'
+                'status_type' => 'generated',
+                'created_at' => $current_date_time
              );
              ExpenseLog::create($logdata);
 
@@ -514,6 +521,8 @@ class ExpensesController extends Controller
      */
     public function update(Request $request, Expenses $expense)
     {
+        $dates = Carbon::now();
+        $current_date_time = $dates->setTimezone('Asia/Kolkata');
 
      $rules = [
             'expenses_type'    => 'required', 
@@ -545,6 +554,7 @@ class ExpensesController extends Controller
                 'total_km' =>$request->total_km ??NULL,
                 'note' =>$request->note??NULL,
                 'created_by' =>Auth::user()->id??NULL,
+                'created_at' => $current_date_time
                );
             $expense->update($data);
 
@@ -560,6 +570,7 @@ class ExpensesController extends Controller
                 'total_km' =>NULL,
                 'note' =>$request->note??NULL,
                 'created_by' =>Auth::user()->id??NULL,
+                'created_at' => $current_date_time
                );
             $expense->update($data);      
 
@@ -570,7 +581,8 @@ class ExpensesController extends Controller
                 'log_date' => date('Y-m-d'),
                 'expense_id' => $expense->id,
                 'created_by' => Auth::user()->id,
-                'status_type' => 'updated'
+                'status_type' => 'updated',
+                'created_at' => $current_date_time
              );
              ExpenseLog::create($logdata);
             }
@@ -749,6 +761,8 @@ class ExpensesController extends Controller
 
 
     public function rejectExpense(Request $request){
+        $dates = Carbon::now();
+        $current_date_time = $dates->setTimezone('Asia/Kolkata');
          $expense_id = $request->expense_id; 
          $reason = $request->reason??NULL;
        Expenses::where('id',$expense_id)->update(['reason'=>$reason,'checker_status'=>'2','approve_reject_by'=>Auth::user()->id,'approve_amount'=>NULL]); 
@@ -759,7 +773,8 @@ class ExpensesController extends Controller
             'log_date' => date('Y-m-d'),
             'expense_id' => $expense_id,
             'created_by' => Auth::user()->id,
-            'status_type' => 'rejected'
+            'status_type' => 'rejected',
+            'created_at' => $current_date_time
          );
          ExpenseLog::create($logdata);
         }
@@ -769,6 +784,8 @@ class ExpensesController extends Controller
     }
 
     public function approveExpense(Request $request){
+        $dates = Carbon::now();
+        $current_date_time = $dates->setTimezone('Asia/Kolkata');
         $expense_detail = Expenses::where('id',$request->expense_new_id)->first();
         $approve_amnt = $request->approve_amnt;
         $expense_id = $request->expense_new_id; 
@@ -785,7 +802,8 @@ class ExpensesController extends Controller
             'log_date' => date('Y-m-d'),
             'expense_id' => $expense_id,
             'created_by' => Auth::user()->id,
-            'status_type' => 'approved'
+            'status_type' => 'approved',
+            'created_at' => $current_date_time
          );
          ExpenseLog::create($logdata);
         }
@@ -824,6 +842,8 @@ class ExpensesController extends Controller
     }
 
     public function changeStatus(Request $request){
+        $dates = Carbon::now();
+        $current_date_time = $dates->setTimezone('Asia/Kolkata');
         $expenses = Expenses::find($request->id);
         $expenses->checker_status = '3';
         $expenses->approve_reject_by = Auth::user()->id;
@@ -834,7 +854,8 @@ class ExpensesController extends Controller
             'log_date' => date('Y-m-d'),
             'expense_id' => $request->id,
             'created_by' => Auth::user()->id,
-            'status_type' => 'checked'
+            'status_type' => 'checked',
+            'created_at' => $current_date_time
          );
          ExpenseLog::create($logdata);
         }
@@ -845,6 +866,8 @@ class ExpensesController extends Controller
 
 
     public function uncheckStatus(Request $request){
+        $dates = Carbon::now();
+        $current_date_time = $dates->setTimezone('Asia/Kolkata');
         $expenses = Expenses::find($request->id);
         $expenses->checker_status = '0';
         $expenses->approve_amount = null;
@@ -856,7 +879,8 @@ class ExpensesController extends Controller
             'log_date' => date('Y-m-d'),
             'expense_id' => $request->id,
             'created_by' => Auth::user()->id,
-            'status_type' => 'unchecked'
+            'status_type' => 'unchecked',
+            'created_at' => $current_date_time
          );
          ExpenseLog::create($logdata);
         }

@@ -11,7 +11,7 @@ class OrderDetails extends Model
 
     protected $table = 'order_details';
 
-    protected $fillable = [ 'active', 'order_id', 'product_id', 'product_detail_id','quantity', 'shipped_qty', 'price', 'tax_amount', 'line_total', 'status_id', 'created_at', 'updated_at','ebd_discount','ebd_name','ebd_amount','cluster_discount','cluster_amount','distributor_discount','distributor_amount','deal_discount','deal_amount'];
+    protected $fillable = [ 'active', 'order_id', 'product_id', 'product_detail_id','quantity', 'shipped_qty', 'price', 'tax_amount', 'line_total', 'status_id', 'created_at', 'updated_at','ebd_discount','ebd_name','ebd_amount','cluster_discount','cluster_amount','distributor_discount','distributor_amount','deal_discount','deal_amount','gst','gst_amount'];
 
     public function products()
     {
