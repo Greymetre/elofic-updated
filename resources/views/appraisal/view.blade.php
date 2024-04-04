@@ -150,7 +150,6 @@
                                                     </td>
                                                     <td>10</td>
                                                     
-
                                                     @foreach(explode(',',$appraisal_detail->ratings) as $keys => $rating)
                                                      
                                                     <td>

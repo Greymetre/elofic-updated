@@ -96,7 +96,20 @@ class OrderController extends Controller
             $user = $request->user();
             $user_id = $user->id;
             $order_id = $request->input('order_id');
-            $data = $this->orders->with('orderdetails','orderdetails.products','orderdetails.productdetails')->where('id', $order_id)->select('id','seller_id','total_qty','shipped_qty','orderno','order_date','completed_date','total_gst','sub_total','grand_total','buyer_id')->first();
+            $data = $this->orders->with('orderdetails','orderdetails.products','orderdetails.productdetails')->where('id', $order_id)->first();
+
+            $data['cluster_discount'] = (string)$data['cluster_discount']; 
+            $data['cluster_amount'] = (string)$data['cluster_amount']; 
+            $data['deal_discount'] = (string)$data['deal_discount']; 
+            $data['deal_amount'] = (string)$data['deal_amount']; 
+            $data['distributor_discount'] = (string)$data['distributor_discount']; 
+            $data['distributor_amount'] = (string)$data['distributor_amount']; 
+            $data['frieght_discount'] = (string)$data['frieght_discount']; 
+            $data['frieght_amount'] = (string)$data['frieght_amount']; 
+            $data['gst5_amt'] = (string)$data['gst5_amt']; 
+            $data['gst12_amt'] = (string)$data['gst12_amt']; 
+            $data['gst18_amt'] = (string)$data['gst18_amt']; 
+            $data['gst28_amt'] = (string)$data['gst28_amt']; 
 
             if(!empty($data['orderdetails']))
             {
@@ -111,6 +124,7 @@ class OrderController extends Controller
                         //'detail_title' =>  isset($value['productdetails']['detail_title']) ? $value['productdetails']['detail_title'] : '',
                         'detail_title' =>  isset($value['products']['product_no']) ? $value['products']['product_no'] : '',
                         'quantity' =>  isset($value['quantity']) ? $value['quantity'] : 0,
+                        'ebd_amount' =>  isset($value['ebd_amount']) ? $value['ebd_amount'] : 0,
                         'shipped_qty'  =>  isset($value['shipped_qty']) ? $value['shipped_qty'] : 0,
                         'price'  =>  isset($value['price']) ? $value['price'] : 0.00,
                         'tax_amount'  =>  isset($value['tax_amount']) ? $value['tax_amount'] : 0.00,
@@ -125,6 +139,7 @@ class OrderController extends Controller
                 unset($data['orderdetails']);
                 $data['seller_name'] = isset($data['sellers']['name']) ? $data['sellers']['name'] : '';
                 $data['buyer_name'] = isset($data['buyers']['name']) ? $data['buyers']['name'] : '';
+                $data['buyer_type'] = isset($data['buyers']['customertypes']) ? $data['buyers']['customertypes']['customertype_name'] : '';
                 $data['orderdetails'] = $orderdetails;
                 return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','data' => $data ], $this->successStatus);
             }
@@ -152,6 +167,36 @@ class OrderController extends Controller
             {
                 $orderdetail = collect([]);
                 foreach ($request->orderdetail as $key => $rows) {
+
+
+                      // if($rows['gst5_amt']){
+                      // $gst = 5;
+                      // $gst_amount = $rows['gst5_amt']??0.00;
+
+                      // }elseif($rows['gst12_amt']){
+
+                      // $gst = 12;  
+                      // $gst_amount = $rows['gst12_amt']??0.00;
+
+                      // }elseif($rows['gst18_amt']){
+
+                      // $gst = 18;  
+                      // $gst_amount = $rows['gst18_amt']??0.00;  
+
+                      // }elseif($rows['gst28_amt']){
+
+                      // $gst = 28;  
+                      // $gst_amount = $rows['gst28_amt']??0.00;    
+
+                      // }else{
+
+                      // $gst = 0;  
+                      // $gst_amount = 0;      
+
+                      // }
+
+
+
                     $orderdetail->push([
                         'active' => 'Y',
                         'order_id' => isset($response['order_id']) ? $response['order_id'] :null,
@@ -165,6 +210,21 @@ class OrderController extends Controller
                         'tax_amount' => isset($rows['tax_amount']) ? $rows['tax_amount'] :0.00,
                         'line_total' => isset($rows['line_total']) ? $rows['line_total'] :0.00,
                         'created_at' => getcurentDateTime(),
+
+                        'ebd_amount' => isset($rows['ebd_amount']) ? $rows['ebd_amount'] :0.00,
+                        // 'ebd_amount' => isset($rows['ebd_amount']) ? $rows['ebd_amount'] :0.00,
+                        // 'cluster_discount' => isset($rows['cluster_discount']) ? $rows['cluster_discount'] :0.00,
+                        // 'cluster_amount' => isset($rows['cluster_amount']) ? $rows['cluster_amount'] :0.00,
+                        // 'distributor_discount' => isset($rows['distributor_discount']) ? $rows['distributor_discount'] :0.00,
+                        // 'distributor_amount' => isset($rows['distributor_amount']) ? $rows['distributor_amount'] :0.00,
+                        // 'deal_discount' => isset($rows['deal_discount']) ? $rows['deal_discount'] :0.00,
+                        // 'deal_amount' => isset($rows['deal_amount']) ? $rows['deal_amount'] :0.00,
+                        // 'frieght_discount' => isset($rows['frieght_discount']) ? $rows['frieght_discount'] :0.00,
+                        // 'frieght_amount' => isset($rows['frieght_amount']) ? $rows['frieght_amount'] :0.00,
+                        // 'gst' => $gst??0,
+                        // 'gst_amount' => $gst_amount??0,
+
+
                     ]);
                 }
 

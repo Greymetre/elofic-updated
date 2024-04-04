@@ -86,7 +86,7 @@ class OrderExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapp
 
     public function headings(): array
     {
-        return ['id','Order Date','Retailer ID','Customer','Customer Name', 'Dealer ID','Dealer & Distributor Name', 'User Name' ,'Order No','Invoice No','Invoice Date','Order ID', 'Order Status', 'Product Name', 'Product ID', 'Product Detail', 'Product Stage','kW', 'HP','Suc x Del','Category','Subcategory','Quantity', 'Shipped Qty','Pending Qty','Rate(LP)','Trade Discount%','Scheme Discount%', 'Scheme Name','CLuster Discount%','Deal Dicount%','Special Discount%','Sub Total','Tax%','Total', 'Status','Employee Code','Branch','Division','Designation'];
+        return ['id','Order Date','Retailer ID','Customer','Customer Name', 'Dealer ID','Dealer & Distributor Name', 'User Name' ,'Order No','Invoice No','Invoice Date','Order ID', 'Order Status', 'Product Name', 'Product ID', 'Product Detail', 'Product Stage','kW', 'HP','Suc x Del','Category','Subcategory','Quantity', 'Shipped Qty','Pending Qty','Rate(LP)','Trade Discount%','EBD Discount%', 'EBD Name','CLuster Discount%','Deal Dicount%','Distributor Discount%','Frieght Discount%','Sub Total','Tax%','Total', 'Status','Employee Code','Branch','Division','Designation'];
     }
 
     public function map($data): array
@@ -155,6 +155,7 @@ class OrderExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapp
             isset($data['cluster_discount']) ? $data['cluster_discount'] :'',
             isset($data['deal_discount']) ? $data['deal_discount'] :'',
             isset($data['distributor_discount']) ? $data['distributor_discount'] :'',
+            isset($data['frieght_discount']) ? $data['frieght_discount'] :'',
             isset($data['line_total'])? $data['line_total'] :'',
             isset($data['products']['productpriceinfo']['gst']) ? $data['products']['productpriceinfo']['gst'] :'',
 

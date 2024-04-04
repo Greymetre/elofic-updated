@@ -535,5 +535,46 @@ $(document).ready(function () {
     }
   });
 
+   /*=============== Sales Target User Update Validation =====================*/
+  $('#updateSalesTargetForm').validate({
+    rules:{
+      user_id:
+      {
+        required:true,
+      },
+      month:
+      {
+        required:true,
+      },
+      year:
+      {
+        required:true,
+      },
+      target:
+      {
+        required:true,
+      },
+    },
+    highlight: function(element) {
+      $(element).closest('.error').css("display", "none");
+    },
+    unhighlight: function(element) {
+      $(element).closest('.error').css("display", "block");
+    },
+    messages:{
+      user_id:{
+        required: "User field is required.",
+      },
+      month:{
+        required: "Month field is required.",
+      },
+      year:{
+        required: "Year field is required.",
+      },
+      target:{
+        required: "Taget amount field is required.",
+      },
+    }
+  });
 });
     

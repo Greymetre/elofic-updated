@@ -46,21 +46,21 @@
                   From
                   <address>
                     <strong>{!! isset($orders['sellers']['name']) ? $orders['sellers']['name'] :'' !!} </strong><br>
-                   {!! $orders['sellers']['customeraddress']['address1']??'' !!} ,{!! $orders['sellers']['customeraddress']['address2']??'' !!}<br>
-                    {!! $orders['sellers']['customeraddress']['locality']??'' !!}, {!! $orders['sellers']['customeraddress']['cityname']['city_name']??'' !!} {!! $orders['sellers']['customeraddress']['pincodename']['pincode']??'' !!}<br>
-                    Phone: {!! $orders['sellers']['mobile']??'' !!}<br>
-                    Email: {!! $orders['sellers']['email']??'' !!}
+                   {!! $orders['sellers']['customeraddress']['address1'] !!} ,{!! $orders['sellers']['customeraddress']['address2'] !!}<br>
+                    {!! $orders['sellers']['customeraddress']['locality'] !!}, {!! $orders['sellers']['customeraddress']['cityname']['city_name'] !!} {!! $orders['sellers']['customeraddress']['pincodename']['pincode'] !!}<br>
+                    Phone: {!! $orders['sellers']['mobile'] !!}<br>
+                    Email: {!! $orders['sellers']['email'] !!}
                   </address>
                 </div>
                 <!-- /.col -->
                 <div class="col-sm-6 invoice-col">
                   To
                   <address>
-                    <strong>{!! $orders['buyers']['name']??'' !!}</strong><br>
-                   {!! $orders['buyers']['customeraddress']['address1']??'' !!} ,{!! $orders['buyers']['customeraddress']['address2']??'' !!}<br>
-                    {!! $orders['buyers']['customeraddress']['locality']??'' !!}, {!! $orders['buyers']['customeraddress']['cityname']['city_name']??'' !!} {!! $orders['buyers']['customeraddress']['pincodename']['pincode']??'' !!}<br>
-                    Phone: {!! $orders['buyers']['mobile']??'' !!}<br>
-                    Email: {!! $orders['buyers']['email']??'' !!}
+                    <strong>{!! $orders['buyers']['name'] !!}</strong><br>
+                   {!! $orders['buyers']['customeraddress']['address1'] !!} ,{!! $orders['buyers']['customeraddress']['address2'] !!}<br>
+                    {!! $orders['buyers']['customeraddress']['locality'] !!}, {!! $orders['buyers']['customeraddress']['cityname']['city_name'] !!} {!! $orders['buyers']['customeraddress']['pincodename']['pincode'] !!}<br>
+                    Phone: {!! $orders['buyers']['mobile'] !!}<br>
+                    Email: {!! $orders['buyers']['email'] !!}
                   </address>
                 </div>
               </div>
@@ -127,10 +127,13 @@
                   $clustor_dicount_sum = 0;
                   $deal_dicount_sum = 0;
                   $distributor_dicount_sum = 0;
+                  $frieght_dicount_sum = 0;
 
-                  $cluster_discount;
-                  $deal_discount;
-                  $distributor_discount;
+                  $cluster_discount = 0;
+                  $deal_discount = 0;
+                  $distributor_discount = 0;
+                  $frieght_discount = 0;
+
 
                   $gst_amount_5 = 0;
                   $gst_amount_12 = 0;
@@ -145,10 +148,12 @@
                   $clustor_dicount_sum+= $rowss['cluster_amount'];
                   $deal_dicount_sum+= $rowss['deal_amount'];
                   $distributor_dicount_sum+= $rowss['distributor_amount'];
+                  $frieght_dicount_sum+= $rowss['frieght_amount'];
 
                   $cluster_discount = $rowss['cluster_discount'];
                   $deal_discount = $rowss['deal_discount'];
                   $distributor_discount = $rowss['distributor_discount'];
+                  $frieght_discount = $rowss['frieght_discount'];
 
                   if($rowss['gst'] == 5){
 
@@ -204,6 +209,11 @@
                         <th style="width:50%">Distributor Discount%:</th>
                         <td>{!! $distributor_discount !!}</td>
                         <td>{!! $distributor_dicount_sum !!}</td>
+                       </tr>
+                       <tr>
+                        <th style="width:50%">Frieght Discount%:</th>
+                        <td>{!! $frieght_discount !!}</td>
+                        <td>{!! $frieght_dicount_sum !!}</td>
                        </tr>
 
                        <tr>

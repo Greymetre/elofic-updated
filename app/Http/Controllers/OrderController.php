@@ -142,9 +142,18 @@ class OrderController extends Controller
 
 
             $request['buyer_id'] = isset($request['seller_id'])? $request['seller_id']:null;  
-            $request['seller_id'] = $buyer;        
-
-
+            $request['seller_id'] = $buyer; 
+            $request['ebd_amount'] = $request['scheme_discount'];
+            $request['cluster_amount'] = $request['extra_cluster_discount'];
+            $request['deal_discount'] = $request['extra_discount'];
+            $request['deal_amount'] = $request['extra_discount_amount'];
+            $request['distributor_amount'] = $request['distributor_discount_amount'];
+            $request['frieght_amount'] = $request['frieght_discount_amount'];
+            $request['gst5_amt'] = $request['5_gst'];
+            $request['gst12_amt'] = $request['12_gst'];
+            $request['gst28_amt'] = $request['18_gst'];
+            $request['gst18_amt'] = $request['28_gst'];
+            
             $response =  $this->orders->save_data($request);
             if($response['status'] == 'success')
             {
@@ -176,6 +185,8 @@ class OrderController extends Controller
                         'distributor_amount' => isset($rows['distributot_amounts']) ? $rows['distributot_amounts'] :0.00,
                         'deal_discount' => isset($rows['deal_dis']) ? $rows['deal_dis'] :0.00,
                         'deal_amount' => isset($rows['deal_amounts']) ? $rows['deal_amounts'] :0.00,
+                        'frieght_discount' => isset($rows['frieght_dis']) ? $rows['frieght_dis'] :0.00,
+                        'frieght_amount' => isset($rows['frieght_amounts']) ? $rows['frieght_amounts'] :0.00,
                         'created_at' => getcurentDateTime(),
                     ]);
                 }
@@ -357,7 +368,8 @@ class OrderController extends Controller
                         'distributor_amount' => isset($rows['distributot_amounts']) ? $rows['distributot_amounts'] :0.00,
                         'deal_discount' => isset($rows['deal_dis']) ? $rows['deal_dis'] :0.00,
                         'deal_amount' => isset($rows['deal_amounts']) ? $rows['deal_amounts'] :0.00,
-
+                        'frieght_discount' => isset($rows['frieght_dis']) ? $rows['frieght_dis'] :0.00,
+                        'frieght_amount' => isset($rows['frieght_amounts']) ? $rows['frieght_amounts'] :0.00,
                         'created_at' => getcurentDateTime(),
                     ]);
                 }

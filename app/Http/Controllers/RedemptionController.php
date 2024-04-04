@@ -63,7 +63,7 @@ class RedemptionController extends Controller
     public function create()
     {
         abort_if(Gate::denies('redemption_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        $customers = Customers::where('customertype', '2')->select('id', 'name', 'mobile')->get();
+        $customers = [];
         $redeem_modes = Config('constants.redeem_mode');
         $gifts = Gifts::where('active', 'Y')->get();
         return view('redemption.create', compact('customers', 'gifts','redeem_modes'))->with('redemption',$this->redemption);

@@ -38,8 +38,8 @@
                From
                <address>
                  <strong>{!! isset($orders['sellers']['name']) ? $orders['sellers']['name'] :'' !!} </strong><br>
-                {!! $orders['sellers']['customeraddress']['address1']??'' !!} {!! $orders['sellers']['customeraddress']['address2']??'' !!}<br>
-                 {!! $orders['sellers']['customeraddress']['cityname']['city_name']??'' !!} {!! $orders['sellers']['customeraddress']['pincodename']['pincode']??'' !!}<br>
+                {!! $orders['sellers']['customeraddress']['address1'] !!} {!! $orders['sellers']['customeraddress']['address2'] !!}<br>
+                 {!! $orders['sellers']['customeraddress']['cityname']['city_name'] !!} {!! $orders['sellers']['customeraddress']['pincodename']['pincode'] !!}<br>
                  Phone: {!! $orders['sellers']['mobile'] !!}<br>
                  Email: {!! $orders['sellers']['email'] !!}
                </address>
@@ -94,7 +94,7 @@
                         <label class="col-md-4">Invoice Date</label>
                          <div class="col-md-9">
                            <div class="form-group has-default bmd-form-group">
-                              <input type="text" name="invoice_date" class="form-control datepicker" value="{!! old( 'invoice_date') !!}" autocomplete="off">
+                              <input type="text" name="invoice_date" class="form-control datepicker" value="{!! old( 'invoice_date') !!}" autocomplete="off" readonly>
                            </div>
                         </div>
                      </div>
@@ -146,6 +146,7 @@
                               @foreach($orders['orderdetails'] as $index => $rows )
                                  @if($rows['quantity']-$rows['shipped_qty'] >= 1 )
                                  <tr id='addr0'>
+                                    
                                     <td>{!! $index +1 !!}</td>
                                     <td>
                                        <input type="hidden" name="orderdetail[{!! $index !!}][product_id]" value="{!! $rows['product_id'] !!}">
@@ -179,7 +180,7 @@
                                     </td> -->
 
                                     <td>
-                                       <input type="number" name="orderdetail[{!! $index !!}][gst]" class="form-control price rowchange" step="0.01" min="0" value="{!! $rows['gst'] !!}" readonly />
+                                       <input type="number" name="orderdetail[{!! $index !!}][gst]" class="form-control gst_new rowchange" step="0.01" min="0" value="{!! $rows['gst'] !!}" readonly />
                                        <div class='error-price'></div>
                                     </td>
 
@@ -193,6 +194,17 @@
                                  <td hidden>
 
                                 <input type="number" name='orderdetail[{{ $index }}][ebd_discount]' class="form-control total_new scheme_dis" value="{!! $rows['ebd_discount'] !!}" readonly hidden />
+
+                                 <!-- nnn -->
+
+                                <input type="text" name="orderdetail[{{ $index }}][scheme_type]" class="scheme_type" hidden>
+                                <input type="text" name="orderdetail[{{ $index }}][scheme_value_type]" class="scheme_value_type" hidden> 
+                                <input type="text" name="orderdetail[{{ $index }}][minimum]" class="minimum" hidden>
+                                <input type="text" name="orderdetail[{{ $index }}][maximum]" class="maximum" hidden>  
+
+                                <input type="text" name="orderdetail[{{ $index }}][start_date]" class="start_date" hidden>    
+                                <input type="text" name="orderdetail[{{ $index }}][end_date]" class="end_date" hidden>    
+                                 <!-- nnn end -->
 
                                 <input type="text" name="orderdetail[{{ $index }}][ebd_amount]" class="ebd_amount" value="{!! $rows['ebd_amount'] !!}" hidden>
 
@@ -209,6 +221,11 @@
                                 <input type="text" name="orderdetail[{{ $index }}][distributot_amounts]" class="distributot_amounts" value="{!! $rows['distributor_amount'] !!}" hidden>
 
                                 <input type="text" name="orderdetail[{{ $index }}][distributot_dis]" class="distributot_dis" hidden>
+
+
+                                <input type="text" name="orderdetail[{{ $index }}][frieght_dis]" class="frieght_dis" value="{!! $rows['frieght_discount'] !!}" hidden>
+
+                                <input type="text" name="orderdetail[{{ $index }}][frieght_amounts]" class="frieght_amounts"  value="{!! $rows['frieght_amount'] !!}" hidden>
 
 
                                <?php
@@ -295,10 +312,12 @@
                   $clustor_dicount_sum = 0;
                   $deal_dicount_sum = 0;
                   $distributor_dicount_sum = 0;
+                  $frieght_dicount_sum = 0;
 
-                  $cluster_discount;
-                  $deal_discount;
-                  $distributor_discount;
+                  $cluster_discount = 0;
+                  $deal_discount = 0;
+                  $distributor_discount = 0;
+                  $frieght_discount = 0;
 
                   $gst_amount_5 = 0;
                   $gst_amount_12 = 0;
@@ -313,10 +332,12 @@
                   $clustor_dicount_sum+= $rowss['cluster_amount'];
                   $deal_dicount_sum+= $rowss['deal_amount'];
                   $distributor_dicount_sum+= $rowss['distributor_amount'];
+                  $frieght_dicount_sum+= $rowss['frieght_amount'];
 
                   $cluster_discount = $rowss['cluster_discount'];
                   $deal_discount = $rowss['deal_discount'];
                   $distributor_discount = $rowss['distributor_discount'];
+                  $frieght_discount = $rowss['frieght_discount'];
 
                   if($rowss['gst'] == 5){
 
@@ -444,13 +465,38 @@
                      </div>
 
 
+                     <div class="form-group row">
+                       <div class="col-sm-4">
+                        <label class="bmd-label">frieght Discount%</label>
+                      </div>
+                        <div class="col-sm-8">
+                           <div class="input-group">
+                             <div class="input-group-prepend">
+                             </div>
+                            
+                             <input type="number" name='frieght_discount' class="form-control frieght_discount" value="{!! old( 'frieght_discount', $frieght_discount) !!}"/>
+
+                              <input type="text" name="frieght_discount_amount" class="form-control frieght_discount_amount" readonly value="{!! old( 'frieght_discount_amount', $frieght_dicount_sum) !!}">
+                           </div>
+                           @if($errors->has('frieght_discount'))
+                           <div class="invalid-feedback">
+                              {{ $errors->first('frieght_discount') }}
+                           </div>
+                           @endif
+                        </div>
+                     </div>
+
+
+
+
+
                      <div class="form-group row"> 
                      <div class="col-sm-4">
                         <label class="bmd-label">5%Tax</label>
                       </div>
                         <div class="col-sm-8">
                            <div class="input-group">
-                             <input type="number" name='5_gst' class="form-control 5_gst" readonly  value="{!! old( '5_gst', $gst_amount_5) !!}" />
+                             <input type="number" name='5_gst' class="form-control 5_gst" readonly  value="{!! old( '5_gst', $gst_amount_5) !!}" disabled/>
                         </div>
                        </div> 
                      </div> 
@@ -461,7 +507,7 @@
                       </div>
                         <div class="col-sm-8">  
                            <div class="input-group">
-                             <input type="number" name='12_gst' class="form-control 12_gst" readonly value="{!! old( '12_gst', $gst_amount_12) !!}"/>
+                             <input type="number" name='12_gst' class="form-control 12_gst" readonly value="{!! old( '12_gst', $gst_amount_12) !!}" disabled/>
                         </div>
                        </div> 
                      </div>
@@ -472,7 +518,7 @@
                       </div>
                         <div class="col-sm-8">
                            <div class="input-group">
-                             <input type="number" name='18_gst' class="form-control 18_gst" readonly value="{!! old( '18_gst', $gst_amount_18) !!}"/>
+                             <input type="number" name='18_gst' class="form-control 18_gst" readonly value="{!! old( '18_gst', $gst_amount_18) !!}" disabled/>
                         </div>
                        </div> 
                      </div> 
@@ -483,7 +529,7 @@
                       </div>
                         <div class="col-sm-8">
                            <div class="input-group">
-                             <input type="number" name='28_gst' class="form-control 28_gst" readonly value="{!! old( '28_gst', $gst_amount_28) !!}"/>
+                             <input type="number" name='28_gst' class="form-control 28_gst" readonly value="{!! old( '28_gst', $gst_amount_28) !!}" disabled/>
                         </div>
                        </div> 
                     </div>
@@ -492,7 +538,7 @@
 
 
 
-                     <div class="form-group row">
+                     <div class="form-group row" hidden>
                        <div class="col-sm-4">
                         <label class="bmd-label">{!! trans('panel.order.total_gst') !!}</label>
                       </div>
@@ -611,6 +657,11 @@
     $('.distributor_discount').on('keyup',function(){
       var distributot_dis = $(this).val();   
       $('.distributot_dis').val(distributot_dis);  
+    }).trigger('keyup');
+
+   $('.frieght_discount').on('keyup',function(){
+      var frieght_discount = $(this).val();   
+      $('.frieght_dis').val(frieght_discount);  
     }).trigger('keyup');
 
 
@@ -793,18 +844,31 @@
             var ebd_dis = 0;
             var ebd_discount = 0;
 
-             ebd_discount = $(this).find('.scheme_dis').val();   
-           // var ebd_dis = total * ebd_discount / 100;
-            ebd_dis = total * ebd_discount / 100;
+
+           // ebd_discount = $(this).find('.scheme_dis').val();   
+           // // var ebd_dis = total * ebd_discount / 100;
+           //  ebd_dis = total * ebd_discount / 100;
+           //  total = total - ebd_dis;
+           //  var ebd_amount = $(this).find('.ebd_amount').val((ebd_dis).toFixed(2));  
+
+
+           var scheme_value_type = $(this).find('.scheme_value_type').val();
+            if(scheme_value_type == 'percentage'){
+           ebd_discount = $(this).find('.scheme_dis').val();   
+           ebd_dis = total * ebd_discount / 100;
             total = total - ebd_dis;
+           var ebd_amount = $(this).find('.ebd_amount').val((ebd_dis).toFixed(2));        
+            }
 
+           if(scheme_value_type == 'value'){
+           ebd_discount = $(this).find('.scheme_dis').val();   
+           ebd_dis = ebd_discount;
+            total = total - ebd_discount;
+           var ebd_amount = $(this).find('.ebd_amount').val(ebd_dis);       
 
+            } 
 
-            var ebd_amount = $(this).find('.ebd_amount').val((ebd_dis).toFixed(2));  
-
-           // var ebd_amount = $(this).find('.ebd_amount').val((ebd_dis).toFixed(2));   
-           
-
+        
             //code scheme end
 
             //new code for clustor
@@ -834,6 +898,16 @@
              total = total - distributots_dis_cal;
              $(this).find('.distributot_amounts').val((distributots_dis_cal).toFixed(2));
             // end distributor
+
+
+            // start frieght_discount
+            var frieght_dis = $(this).find('.frieght_dis').val();  
+            var frieght_dis_cal = total * frieght_dis/100; 
+             total = total - frieght_dis_cal;
+             $(this).find('.frieght_amounts').val((frieght_dis_cal).toFixed(2));  
+           
+           // frieght_discount end   
+
 
 
             var gst = $(this).find('.gst_percent').html();
@@ -877,14 +951,7 @@
       }); 
 
 
-
-
-
-
-
     }
-
-
 
 
 
@@ -928,6 +995,8 @@
       deal_amounts = 0;
       cluster_amnt=0;  
       distributot_amounts=0;
+      frieght_amounts=0;
+
       total=0;
       subtotal=0;
       taxamount=0;
@@ -1026,6 +1095,16 @@
       $('.distributor_discount_amount').val(distributot_amounts.toFixed(2));
 
       //end distributor discount
+
+
+      //frieght_discount start
+
+     $('.frieght_amounts').each(function() {
+        frieght_amounts += parseFloat($(this).val());
+         $('.frieght_discount_amount').val(frieght_amounts.toFixed(2));
+      }); 
+
+       //frieght_discount  end
 
 
 

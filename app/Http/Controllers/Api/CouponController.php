@@ -18,16 +18,17 @@ use App\Models\TransactionHistory;
 use App\Models\EndUser;
 use App\Models\Wallet;
 use App\Models\InvalidCoupons;
+use App\Models\Pincode;
 use App\Models\Product;
 use App\Models\Services;
 
 class CouponController extends Controller
 {
-     public function __construct()
+    public function __construct()
     {
         $this->coupons = new Coupons();
-        
-        
+
+
         $this->successStatus = 200;
         $this->created = 201;
         $this->accepted = 202;
@@ -41,45 +42,40 @@ class CouponController extends Controller
 
     public function couponScans(Request $request)
     {
-        try
-        { 
+        try {
             $user = $request->user();
             $validator = Validator::make($request->all(), [
                 'coupons.*' => 'required',
-            ]); 
+            ]);
             if ($validator->fails()) {
-                return response()->json(['status' => 'error','message' =>  $validator->errors()], $this->badrequest); 
+                return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
             $data = collect($request['coupons']);
-            $data = $data->map(function ($item) use($user) {
-                    return collect([
-                        'customer_id'  =>  $user['id'],
-                        'coupon_code'  =>   $item,   
-                    ]);
-                });
+            $data = $data->map(function ($item) use ($user) {
+                return collect([
+                    'customer_id'  =>  $user['id'],
+                    'coupon_code'  =>   $item,
+                ]);
+            });
             $response = couponScans($data);
-            return response()->json($response, $this->successStatus); 
+            return response()->json($response, $this->successStatus);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
-        catch(\Exception $e)
-        {
-            return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
-        }        
     }
 
     public function getScanedCoupons(Request $request)
     {
-        try
-        { 
+        try {
             $user = $request->user();
             $user_id = $user->id;
             $pageSize = $request->input('pageSize');
             $query = Wallet::where('customer_id', $user_id)
-                            ->whereNotNull('coupon_code')
-                            ->select('id','coupon_code','transaction_at','points')->latest();
+                ->whereNotNull('coupon_code')
+                ->select('id', 'coupon_code', 'transaction_at', 'points')->latest();
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
             $data = collect([]);
-            if($db_data->isNotEmpty())
-            {
+            if ($db_data->isNotEmpty()) {
                 foreach ($db_data as $key => $value) {
                     $data->push([
                         'wallet_id' => isset($value['id']) ? $value['id'] : 0,
@@ -91,12 +87,11 @@ class CouponController extends Controller
             }
 
             $errorquery = InvalidCoupons::where('customer_id', $user_id)
-                            ->whereNotNull('coupon_code')
-                            ->select('id','coupon_code','created_at','status_id')->latest();
+                ->whereNotNull('coupon_code')
+                ->select('id', 'coupon_code', 'created_at', 'status_id')->latest();
             $invalid_data = (!empty($pageSize)) ? $errorquery->paginate($pageSize) : $errorquery->get();
             $invalidData = collect([]);
-            if($invalid_data->isNotEmpty())
-            {
+            if ($invalid_data->isNotEmpty()) {
                 foreach ($invalid_data as $key => $rows) {
                     $invalidData->push([
                         'transaction_id' => isset($rows['id']) ? $rows['id'] : 0,
@@ -106,17 +101,13 @@ class CouponController extends Controller
                     ]);
                 }
             }
-            if(!empty($data) || !empty($invalidData))
-            {
-                return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','data' => $data , 'invalid' => $invalidData ], $this->successStatus);
+            if (!empty($data) || !empty($invalidData)) {
+                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data, 'invalid' => $invalidData], $this->successStatus);
             }
-            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data ],200);  
-            
+            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data], 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
-        catch(\Exception $e)
-        {
-            return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
-        }        
     }
 
     public function getProductByCoupon(Request $request)
@@ -124,32 +115,31 @@ class CouponController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'serial_no' => 'required',
-            ]); 
+            ]);
             if ($validator->fails()) {
-                return response()->json(['status' => 'error','message' =>  $validator->errors()], $this->badrequest); 
+                return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
             $serial_no = $request->serial_no;
             $serial_no_product_code = Services::where('serial_no', $serial_no)->value('product_code');
             $all_products = Product::all();
             $slected = false;
             $data['status'] = 'success';
-            foreach ($all_products as $k=>$product) {
+            foreach ($all_products as $k => $product) {
                 if ($serial_no_product_code && $product->product_code == $serial_no_product_code && $serial_no_product_code != null && $serial_no_product_code != '') {
-                    $data['products'][0]['id'] = $product->id; 
-                    $data['products'][0]['name'] = $product->product_name; 
+                    $data['products'][0]['id'] = $product->id;
+                    $data['products'][0]['name'] = $product->product_name;
                     $slected = true;
                 }
             }
-            if($slected === false){
-                foreach ($all_products as $k=>$product) {
-                    $data['products'][$k]['id'] = $product->id; 
-                    $data['products'][$k]['name'] = $product->product_name; 
-
+            if ($slected === false) {
+                foreach ($all_products as $k => $product) {
+                    $data['products'][$k]['id'] = $product->id;
+                    $data['products'][$k]['name'] = $product->product_name;
                 }
             }
             return response()->json($data, 200);
         } catch (\Exception $e) {
-            return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
     }
 
@@ -158,26 +148,28 @@ class CouponController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'customer_number' => 'required',
-            ]); 
+            ]);
             if ($validator->fails()) {
-                return response()->json(['status' => 'error','message' =>  $validator->errors()], $this->badrequest); 
+                return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
             $customer_number = $request->input('customer_number');
             if (isset($customer_number)) {
                 $data = EndUser::where(function ($query) use ($customer_number) {
                     $query->where('customer_number', '=', $customer_number);
                 })
-                    ->first();
+                ->first();
+                $pincodes = Pincode::where('id', '=', $data->customer_pindcode)->first();
+                $data->customer_pindcode = $pincodes?$pincodes->pincode:'';
                 if ($data) {
                     return response()->json(['status' => 'success', 'data' => $data], 200);
                 } else {
-                    return response()->json(['status' => 'error', 'message' =>'Customer not found', 'data' => null], 404);
+                    return response()->json(['status' => 'error', 'message' => 'Customer not found', 'data' => null], 404);
                 }
             } else {
-                return response()->json(['status' => 'error','message' =>'Please insert number', 'data' => null], 400);
+                return response()->json(['status' => 'error', 'message' => 'Please insert number', 'data' => null], 400);
             }
         } catch (\Exception $e) {
-            return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
     }
 
@@ -191,18 +183,24 @@ class CouponController extends Controller
                 'sale_bill_no' => 'required',
                 'sale_bill_date' => 'required',
                 'warranty_date' => 'required',
-            ]); 
+            ]);
             if ($validator->fails()) {
-                return response()->json(['status' => 'error','message' =>  $validator->errors()], $this->badrequest); 
+                return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
             if (!$request->end_user_id || $request->end_user_id == NULL || $request->end_user_id == '') {
+                $pincodes = Pincode::with('cityname', 'cityname.districtname')->where('pincode', '=', $request['customer_pindcode'])->first();
+                $request['customer_state'] = !empty($pincodes['cityname']['districtname']['statename']) ? $pincodes['cityname']['districtname']['statename']['state_name'] : '';
+                $request['state_id'] = !empty($pincodes['cityname']['districtname']['state_id']) ? $pincodes['cityname']['districtname']['state_id'] : '';
+                $request['customer_district'] = !empty($pincodes['cityname']['districtname']) ? $pincodes['cityname']['districtname']['district_name'] : '';
+                $request['customer_city'] = !empty($pincodes['cityname']) ? $pincodes['cityname']['city_name'] : '';
+                $request['customer_country'] = !empty($pincodes['cityname']['districtname']['statename']['countryname']) ? $pincodes['cityname']['districtname']['statename']['countryname']['country_name'] : '';
                 $end_user = EndUser::updateOrCreate(['customer_number' => $request->customer_number ?? ''], [
                     'customer_name' => $request->customer_name ?? '',
                     'customer_number' => $request->customer_number ?? '',
                     'customer_email' => $request->customer_email ?? '',
                     'customer_address' => $request->customer_address ?? '',
                     'customer_place' => $request->customer_place ?? '',
-                    'customer_pindcode' => $request->customer_pindcode ?? '',
+                    'customer_pindcode' => $pincodes ? $pincodes->id : '',
                     'customer_country' => $request->customer_country ?? '',
                     'customer_state' => $request->customer_state ?? '',
                     'customer_district' => $request->customer_district ?? '',
@@ -210,22 +208,36 @@ class CouponController extends Controller
                 ]);
                 $request->end_user_id = $end_user->id;
             }
+            $checkTrans = TransactionHistory::where('coupon_code', $request->product_serail_number)->first();
+            if($checkTrans){
+                $checkTrans->status = '1';
+                $checkTrans->save();
+                $status = '1';
+            }else{
+                $status = '0';
+            }
             $data = WarrantyActivation::create([
                 'product_serail_number' => $request->product_serail_number ?? NULL,
                 'product_id' => $request->product_id ?? NULL,
                 'end_user_id' => $request->end_user_id ?? NULL,
                 'branch_id' => $request->branch_id ?? NULL,
                 'customer_id' => $request->customer_id ?? NULL,
-                'status' => $request->status ?? 1,
+                'status' => $status,
                 'sale_bill_no' => $request->sale_bill_no ?? NULL,
                 'sale_bill_date' => $request->sale_bill_date ?? NULL,
                 'warranty_date' => $request->warranty_date ?? NULL
             ]);
-            TransactionHistory::where('coupon_code', $request->product_serail_number)->update(['status' => '1']);
+            if ($request->hasFile('warranty_activation_attach')) {
+                $file = $request->file('warranty_activation_attach');
+                $customname = time() . '.' . $file->getClientOriginalExtension();
+                $data->addMedia($file)
+                    ->usingFileName($customname)
+                    ->toMediaCollection('warranty_activation_attach');
+            }
 
-            return response()->json(['status' => 'success', 'message'=>'Warranty Activation Store Successfully.', 'data' => $data], 200); 
+            return response()->json(['status' => 'success', 'message' => 'Warranty Activation Store Successfully.', 'data' => $data], 200);
         } catch (\Exception $e) {
-            return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
     }
 }

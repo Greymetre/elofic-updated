@@ -63,7 +63,7 @@
                       <label class="col-md-3 col-form-label">Order Taking</label>
                       <div class="col-md-9">
                         <div class="form-group has-default bmd-form-group">
-                           <select class="form-control" name="order_taking" style="width: 100%;">
+                           <select class="form-control" name="order_taking" style="width: 100%;" required>
                             <option value="">Select Order Taking</option>
                             <option value="MobileApp" {{ old( 'order_taking' , (!empty($orders->order_taking)) ? ($orders->order_taking) :('') ) == 'MobileApp' ? 'selected' : '' }}>MobileApp</option>
                             <option value="Web" {{ old( 'order_taking' , (!empty($orders->order_taking)) ? ($orders->order_taking) :('') ) == 'Web' ? 'selected' : '' }}>Web</option>
@@ -84,7 +84,7 @@
                       <label class="col-md-3 col-form-label">Employee</label>
                       <div class="col-md-9">
                         <div class="form-group has-default bmd-form-group">
-                          <select class="form-control select2" name="executive_id" style="width: 100%;">
+                          <select class="form-control select2" name="executive_id" style="width: 100%;" required>
                               <option value="">Select Employee</option>
                               @if(@isset($users ))
                               @foreach($users as $user)
@@ -427,9 +427,15 @@
                                  </td>
                                    
 
-                                 <td hidden><input type="text" name="orderdetail[1][distributot_dis]" class="distributot_dis">
+                                 <td hidden>
+                                    <input type="text" name="orderdetail[1][distributot_dis]" class="distributot_dis">
 
                                     <input type="text" name="orderdetail[1][distributot_amounts]" class="distributot_amounts" hidden>
+
+
+                                    <input type="text" name="orderdetail[1][frieght_dis]" class="frieght_dis">
+                                    <input type="text" name="orderdetail[1][frieght_amounts]" class="frieght_amounts">
+
                                    
                                     <input type="text" name="orderdetail[1][five_gst]" class="five_gst" hidden>
                                     <input type="text" name="orderdetail[1][twelve_gst]" class="twelve_gst" hidden>
@@ -570,6 +576,27 @@
                            @endif
                         </div>
                      </div>
+
+
+                    <div class="form-group row">
+                       <div class="col-sm-4">
+                        <label class="bmd-label">Frieght Discount%</label>
+                      </div>
+                        <div class="col-sm-8">
+                           <div class="input-group">
+                             <div class="input-group-prepend">
+                             </div>
+                             <input type="number" name='frieght_discount' class="form-control frieght_discount" value="{!! old( 'frieght_discount', $orders['frieght_discount']) !!}"/>
+
+                             <input type="text" name="frieght_discount_amount" class="form-control frieght_discount_amount" readonly>
+                           </div>
+                           @if($errors->has('frieght_discount'))
+                           <div class="invalid-feedback">
+                              {{ $errors->first('frieght_discount') }}
+                           </div>
+                           @endif
+                        </div>
+                     </div> 
 
 
                      <!-- for tax start -->
@@ -723,16 +750,16 @@
 
                   '<td><input type="text" name="orderdetail[' + counter + '][quantity]" class="form-control quantity rowchange" /></td>' +
 
-                  '<td><input type="number" name="orderdetail[' + counter + '][mrp]" class="form-control price readonly"/></td>' +
+                  '<td><input type="number" name="orderdetail[' + counter + '][mrp]" class="form-control price " readonly/></td>' +
 
-                  '<td><input type="text" name="orderdetail[' + counter + '][gst]" class="form-control gst_new readonly"/></td>' +
+                  '<td><input type="text" name="orderdetail[' + counter + '][gst]" class="form-control gst_new "readonly/></td>' +
                   '<td><input type="number" name="orderdetail[' + counter + '][discount]" class="form-control discount" readonly/></td>' +
                   '<td><input type="text" name="orderdetail['+ counter+'][scheme_dis]"  class="scheme_dis form-control" readonly> <input type="text" name="orderdetail['+ counter+'][scheme_amount]" class="ebd_amount" hidden> <input type="text" name="orderdetail['+ counter+'][scheme_name]" class="scheme_name" hidden> <input type="text" name="orderdetail['+ counter+'][scheme_type]" class="scheme_type" hidden> <input type="text" name="orderdetail['+ counter+'][scheme_value_type]" class="scheme_value_type" hidden><input type="text" name="orderdetail['+ counter+'][minimum]" class="minimum" hidden><input type="text" name="orderdetail['+ counter+'][maximum]" class="maximum" hidden>  <input type="text" name="orderdetail['+ counter+'][start_date]" class="start_date" hidden><input type="text" name="orderdetail['+ counter+'][end_date]" class="end_date" hidden> </td>'+
 
                   '<td><input type="text" name="orderdetail[' + counter + '][line_total]" class="form-control total rowchange" readonly /></td>' +
                   '<td hidden> <input type="text" name="orderdetail[' + counter + '][clustered_dis]" class="clustered_dis"> <input type="text" name="orderdetail[' + counter + '][clus_amounts]" class="clus_amounts" hidden> </td>'+
                   '<td hidden><input type="text" name="orderdetail['+ counter +'][deal_dis]" class="deal_dis"><input type="text" name="orderdetail['+ counter +'][deal_amounts]" class="deal_amounts" hidden></td>'+
-                  '<td hidden><input type="text" name="orderdetail['+ counter +'][distributot_dis]" class="distributot_dis"><input type="text" name="orderdetail['+ counter +'][distributot_amounts]" class="distributot_amounts" hidden> <input type="text" name="orderdetail['+ counter +'][five_gst]" class="five_gst" hidden> <input type="text" name="orderdetail['+ counter +'][twelve_gst]" class="twelve_gst" hidden> <input type="text" name="orderdetail['+ counter +'][eighteen_gst]" class="eighteen_gst" hidden> <input type="text" name="orderdetail['+ counter +'][twenti_eight_gst]" class="twenti_eight_gst" hidden></td>'+
+                  '<td hidden><input type="text" name="orderdetail['+ counter +'][distributot_dis]" class="distributot_dis"><input type="text" name="orderdetail['+ counter +'][distributot_amounts]" class="distributot_amounts" hidden> <input type="text" name="orderdetail['+ counter +'][frieght_dis]" class="frieght_dis"><input type="text" name="orderdetail['+ counter +'][frieght_amounts]" class="frieght_amounts"><input type="text" name="orderdetail['+ counter +'][five_gst]" class="five_gst" hidden> <input type="text" name="orderdetail['+ counter +'][twelve_gst]" class="twelve_gst" hidden> <input type="text" name="orderdetail['+ counter +'][eighteen_gst]" class="eighteen_gst" hidden> <input type="text" name="orderdetail['+ counter +'][twenti_eight_gst]" class="twenti_eight_gst" hidden></td>'+
                   '<td class="td-actions text-center"><a href="#" class="remove-rows btn btn-danger btn-xs"><i class="fa fa-minus"></i></a></td> </tr>';
           $table.append(newRow);
             $('.select2').select2({
@@ -747,6 +774,7 @@
           $('.cluster_discount').change();
           $('.deal_discnt').keyup();
           $('.distributor_discount').keyup();
+          $('.frieght_discount').keyup();
             //}, 100);
 
             //end new  
@@ -786,6 +814,11 @@
     $('.distributor_discount').on('keyup',function(){
       var distributot_dis = $(this).val();   
       $('.distributot_dis').val(distributot_dis);  
+    }).trigger('keyup');
+
+     $('.frieght_discount').on('keyup',function(){
+      var frieght_discount = $(this).val();   
+      $('.frieght_dis').val(frieght_discount);  
     }).trigger('keyup');
 
 
@@ -1008,6 +1041,17 @@
             // end distributor
 
 
+           // start frieght_discount
+
+            var frieght_dis = $(this).find('.frieght_dis').val();  
+            var frieght_dis_cal = total * frieght_dis/100; 
+             total = total - frieght_dis_cal;
+             $(this).find('.frieght_amounts').val((frieght_dis_cal).toFixed(2));  
+           
+           // frieght_discount end 
+
+
+
             //new gst single discount
                // var gst = $(this).find('.gst_percent').html();
                // var gst = $(this).find('.gst_new').html();
@@ -1080,6 +1124,7 @@
       deal_amounts = 0;
       cluster_amnt=0;  
       distributot_amounts=0;
+      frieght_amounts=0;
       total=0;
       subtotal=0;
       taxamount=0;
@@ -1141,6 +1186,18 @@
          $('.distributor_discount_amount').val(distributot_amounts.toFixed(2));
       }); 
       //end distributor discount
+
+
+       //frieght_discount start
+
+     $('.frieght_amounts').each(function() {
+        frieght_amounts += parseFloat($(this).val());
+         $('.frieght_discount_amount').val(frieght_amounts.toFixed(2));
+      }); 
+
+
+       //frieght_discount  end
+
 
 
 

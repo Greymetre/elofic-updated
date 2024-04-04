@@ -308,18 +308,65 @@ class AjaxController extends Controller
                 'discount' => isset($data['productdetails'][0]['discount']) ? $data['productdetails'][0]['discount'] : '',
                 'max_discount' => ($data['productdetails'][0]['max_discount']) ? $data['productdetails'][0]['max_discount'] : 0.00,
                 'scheme_discount' => $data['getSchemeDetail']['points'] ?? 0.00,
+                'repetition' => $data['getSchemeDetail']['orderscheme']['repetition'] ?? '',
                 'scheme_name' => $data['getSchemeDetail']['orderscheme']['scheme_name'] ?? '',
-                'scheme_type' => $data['getSchemeDetail']['orderscheme']['scheme_type']??'',
-                'scheme_value_type' => $data['getSchemeDetail']['orderscheme']['scheme_basedon']??'',
-                'minimum' => $data['getSchemeDetail']['orderscheme']['minimum']??0,
-                'maximum' => $data['getSchemeDetail']['orderscheme']['maximum']??0,
-                'start_date' => $data['getSchemeDetail']['orderscheme']['start_date']??0,
-                'end_date' => $data['getSchemeDetail']['orderscheme']['end_date']??0,
+                'scheme_type' => $data['getSchemeDetail']['orderscheme']['scheme_type'] ?? '',
+                'scheme_value_type' => $data['getSchemeDetail']['orderscheme']['scheme_basedon'] ?? '',
+                'minimum' => $data['getSchemeDetail']['orderscheme']['minimum'] ?? 0,
+                'maximum' => $data['getSchemeDetail']['orderscheme']['maximum'] ?? 0,
+                'start_date' => $data['getSchemeDetail']['orderscheme']['start_date'] ?? 0,
+                'end_date' => $data['getSchemeDetail']['orderscheme']['end_date'] ?? 0,
 
                 'productdetails' => $data['productdetails']
             ]);
 
 
+            if ($product['repetition'] == '3' || $product['repetition'] == '4') {
+                $start_date = $data['getSchemeDetail']['orderscheme']['start_date'] ?? '';
+                $end_date = $data['getSchemeDetail']['orderscheme']['end_date'] ?? '';
+
+                if ($product['repetition'] == '3') {
+                    $startCarbon = Carbon::parse($start_date);
+                    $endCarbon = Carbon::parse($end_date);
+                    $today = Carbon::today();
+                    $startDay = $startCarbon->day;
+                    $endDay = $endCarbon->day;
+                    $todayDay = $today->day;
+                    if ($todayDay >= $startDay && $todayDay <= $endDay) {
+                    } else {
+                        $product['scheme_discount'] = 0.00;
+                    }
+                }
+
+                if ($product['repetition'] == '4') {
+                    $startMonthDay = Carbon::parse($start_date)->format('m-d');
+                    $endMonthDay = Carbon::parse($end_date)->format('m-d');
+                    $todayMonthDay = Carbon::today()->format('m-d');
+                    if (($startMonthDay <= $todayMonthDay && $endMonthDay >= $todayMonthDay) ||
+                        ($startMonthDay >= $todayMonthDay && $endMonthDay <= $todayMonthDay)
+                    ) {
+                    } else {
+                        $product['scheme_discount'] = 0.00;
+                    }
+                }
+            }
+            if ($product['repetition'] == '2') {
+                $currentDate = Carbon::now();
+                $weekOfMonth = ceil($currentDate->day / 7);
+                $week_repeat = $data['getSchemeDetail']['orderscheme']['week_repeat'] ?? '';
+                if ((int)$week_repeat == (int)$weekOfMonth) {
+                } else {
+                    $product['scheme_discount'] = 0.00;
+                }
+            }
+            if ($product['repetition'] == '1') {
+                $day_repeat = explode(',', $data['getSchemeDetail']['orderscheme']['day_repeat']) ?? [];
+                $todayDayOfWeek = Carbon::today()->format('D');
+                if (in_array($todayDayOfWeek, $day_repeat)) {
+                } else {
+                    $product['scheme_discount'] = 0.00;
+                }
+            }
             return response()->json($product);
         } catch (\Exception $e) {
             return $e;
@@ -681,6 +728,30 @@ class AjaxController extends Controller
             $term = trim($request->term);
 
             $coins = Product::select("id as id", "product_name as text")->where('product_name', 'LIKE',  '%' . $term . '%')->orderBy('id', 'asc')->simplePaginate(10);
+
+
+            $morePages = true;
+            $pagination_obj = json_encode($coins);
+            if (empty($coins->nextPageUrl())) {
+                $morePages = false;
+            }
+            $results = array(
+                "results" => $coins->items(),
+                "pagination" => array(
+                    "more" => $morePages
+                )
+            );
+            return response()->json($results);
+        }
+    }
+
+    public function getStateDataSelect(Request $request)
+    {
+        if ($request->ajax()) {
+
+            $term = trim($request->term);
+
+            $coins = State::select("id as id", "state_name as text")->where('state_name', 'LIKE',  '%' . $term . '%')->orderBy('id', 'asc')->simplePaginate(10);
 
 
             $morePages = true;

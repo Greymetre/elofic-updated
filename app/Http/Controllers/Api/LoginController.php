@@ -13,11 +13,13 @@ use App\Models\State;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\UserLogin;
+use App\Services\InfismsApiClient;
 use Illuminate\Support\Facades\Hash;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use GuzzleHttp\Client;
 
 use Validator;
 use Gate;
@@ -28,7 +30,6 @@ class LoginController extends Controller
     {
         $this->users = new User();
         $this->customer = new Customers();
-
         $this->usersLogin = new UserLogin();
         $this->successStatus = 200;
         $this->created = 201;
@@ -165,12 +166,37 @@ class LoginController extends Controller
             if (!$user = $this->customer->with('customerdetails')->where('mobile', $username)->first()) {
                 return response()->json(['status' => 'error', 'message' => 'User not found'], $this->notFound);
             } else {
-                $otp = 1234;
-                // $otp = rand(1000, 9999);
+                if($username == '917788996655'){
+                    $otp = 1234;
+                }else{
+                    $otp = rand(1000, 9999);
+                }
+
+                $curl = curl_init();
+
+                curl_setopt_array($curl, array(
+                    CURLOPT_URL => 'http://sms.infisms.co.in/API/SendSMS.aspx?UserID=SILCLN&UserPassword=sil%24clnco&PhoneNumber=' . $username . '&Text=%22' . $otp . '%22is%20your%20OTP%20to%20login%20into%20the%20SILVER%20FAMILY%20App.%20Let%27s%20grow%20together%20and%20achieve%20more.%20From%20SILVER%20CONSUMER%20ELECTRICALS%20PRIVATE%20LIMITED&SenderId=SILCCD&AccountType=2&MessageType=0',
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_ENCODING => '',
+                    CURLOPT_MAXREDIRS => 10,
+                    CURLOPT_TIMEOUT => 0,
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                    CURLOPT_CUSTOMREQUEST => 'GET',
+                    CURLOPT_HTTPHEADER => array(
+                        'Cookie: ASP.NET_SessionId=ti1fkgsldce1g3rn4l5ee4e1'
+                    ),
+                ));
+
+                $response = curl_exec($curl);
+
+                curl_close($curl);
+
                 $user->otp = $otp;
                 $user->save();
                 $nestedData['id'] = $user->id;
                 $nestedData['otp'] = $user->otp;
+
                 return response()->json(['status' => 'success', 'info' => $nestedData], $this->successStatus);
             }
         } catch (\Exception $e) {
@@ -286,12 +312,31 @@ class LoginController extends Controller
                         $parentDetail = ParentDetail::create(
                             [
                                 'customer_id' => $request['customer_id'],
-                                'parent_id' => $request['parent_id'],
-                                'created_by' => Auth::user()->id,
+                                'parent_id' => $request['parent_id']
                             ]
                         );
                     }
                     $otp = rand(1000, 9999);
+
+                    $curl = curl_init();
+
+                    curl_setopt_array($curl, array(
+                        CURLOPT_URL => 'http://sms.infisms.co.in/API/SendSMS.aspx?UserID=SILCLN&UserPassword=sil%24clnco&PhoneNumber=' . $request['mobile'] . '&Text=%22' . $otp . '%22is%20your%20OTP%20to%20login%20into%20the%20SILVER%20FAMILY%20App.%20Let%27s%20grow%20together%20and%20achieve%20more.%20From%20SILVER%20CONSUMER%20ELECTRICALS%20PRIVATE%20LIMITED&SenderId=SILCCD&AccountType=2&MessageType=0',
+                        CURLOPT_RETURNTRANSFER => true,
+                        CURLOPT_ENCODING => '',
+                        CURLOPT_MAXREDIRS => 10,
+                        CURLOPT_TIMEOUT => 0,
+                        CURLOPT_FOLLOWLOCATION => true,
+                        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                        CURLOPT_CUSTOMREQUEST => 'GET',
+                        CURLOPT_HTTPHEADER => array(
+                            'Cookie: ASP.NET_SessionId=ti1fkgsldce1g3rn4l5ee4e1'
+                        ),
+                    ));
+
+                    $response = curl_exec($curl);
+
+                    curl_close($curl);
                     $customer->otp = $otp;
                     $customer->save();
                     return response()->json(['status' => 'success', 'userinfo' => $customer], $this->successStatus);

@@ -357,8 +357,26 @@
             </div>
           </li>
           @endif
-
-
+          @if(auth()->user()->can('target_users_access'))
+          <li class="nav-item ">
+            <a class="nav-link collapsed" data-toggle="collapse" href="#salesUserMenu" aria-expanded="false">
+              <i class="material-icons">store</i>
+              <p> {!! trans('panel.sidemenu.sales_users') !!} </p>
+            </a>
+            <div class="collapse" id="salesUserMenu" style="">
+              <ul class="nav">
+                @if(auth()->user()->can('target_users_access'))
+                <li class="nav-item {{ request()->is('sales_users.target_users') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('sales_users/target_users') }}">
+                    <i class="material-icons">verified_user</i>
+                    <p> {!! trans('panel.sales_users.target_users') !!}</p>
+                  </a>
+                </li>
+                @endif
+              </ul>
+            </div>
+          </li>
+          @endif
         @if(auth()->user()->can('hr_access'))
           <li class="nav-item {{ request()->is('reports*') ? 'active' : '' }}">
             <a class="nav-link collapsed" data-toggle="collapse" href="#hr" aria-expanded="false">
@@ -529,7 +547,7 @@
           @endif -->
 
         @if(auth()->user()->can('order_access'))
-            <li class="nav-item ">
+            <li class="nav-item {{ request()->is('orders*') ? 'active' : '' }}">
             <a class="nav-link collapsed" data-toggle="collapse" href="#orderMenu" aria-expanded="false">
               <i class="material-icons">star</i>
              <p>{!! trans('panel.sidemenu.orders') !!}</p>
@@ -550,7 +568,7 @@
                 <li class="nav-item {{ request()->is('orderschemes*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('orderschemes') }}">
                     <i class="material-icons">flaky</i>
-                    <p>OrderSchemes</p>
+                    <p>Order Schemes</p>
                   </a>
                 </li>
                 @endif

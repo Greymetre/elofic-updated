@@ -63,18 +63,18 @@ class ServicesController extends Controller
             } else {
                 $productCode = $row[$PCKey];
                 $branchCode = $row[$BCKey];
-                if ($branchCode != 'HO0000') {
-                    $serialNumbers = explode(',', $row[$SNKey]);
-                    foreach ($serialNumbers as $serialNumber) {
-                        $exists = DB::table('services')
-                            ->where('serial_no', $serialNumber)
-                            ->where('product_code', $productCode)
-                            ->exists();
-                        if (!$exists) {
-                            return back()->with('error', 'The serial number ' . $serialNumber . ' with product code ' . $productCode . ' does not exist or not uploaded by Head Office. Please remove them and try again');
-                        }
-                    }
-                }
+                // if ($branchCode != 'HO0000') {
+                //     $serialNumbers = explode(',', $row[$SNKey]);
+                //     foreach ($serialNumbers as $serialNumber) {
+                //         $exists = DB::table('services')
+                //             ->where('serial_no', $serialNumber)
+                //             ->where('product_code', $productCode)
+                //             ->exists();
+                //         if (!$exists) {
+                //             return back()->with('error', 'The serial number ' . $serialNumber . ' with product code ' . $productCode . ' does not exist or not uploaded by Head Office. Please remove them and try again');
+                //         }
+                //     }
+                // }
             }
         }
         if (ob_get_contents()) ob_end_clean();

@@ -50,29 +50,35 @@ class TransactionHistoryController extends Controller
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
             $pageSize = $request->input('pageSize');
-            $query = TransactionHistory::with('scheme_details')->where(function ($query) use ($request) {
+            $query = TransactionHistory::with('scheme_details', 'scheme')->where(function ($query) use ($request) {
                 $query->where('customer_id', $request->id);
                 if ($request->search && $request->search != '' && $request->search != null) {
                     $query->where('product_name', 'LIKE', "%{$request->search}%")->orWhere('display_name', 'LIKE', "%{$request->search}%");
                 }
-                if ($request->category_id && $request->category_id != '' && $request->category_id != null) {
-                    $query->where('category_id', $request->category_id);
+                if ($request->status != '' && $request->status != null) {
+                    $query->where('status', $request->status);
                 }
-                if ($request->subcategory_id && $request->subcategory_id != '' && $request->subcategory_id != null) {
-                    $query->where('subcategory_id', $request->subcategory_id);
-                }
-                if ($request->min_range && $request->min_range != '' && $request->min_range != null && $request->max_range && $request->max_range != '' && $request->max_range != null) {
-                    $query->whereBetween('points', [$request->min_range, $request->max_range]);
+                // if ($request->subcategory_id && $request->subcategory_id != '' && $request->subcategory_id != null) {
+                //     $query->where('subcategory_id', $request->subcategory_id);
+                // }
+                if ($request->start_date && $request->start_date != null && $request->start_date != '' && $request->end_date && $request->end_date != null && $request->end_date != '') {
+                    $startDate = date('Y-m-d', strtotime($request->start_date));
+                    $endDate = date('Y-m-d', strtotime($request->end_date));
+                    $data = $query->whereDate('created_at', '>=', $startDate)
+                        ->whereDate('created_at', '<=', $endDate);
                 }
             })->orderBy('created_at', 'desc');
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
             $total_points = TransactionHistory::where('customer_id', $request->id)->sum('point') ?? 0;
             $active_points = TransactionHistory::where('customer_id', $request->id)->where('status', '1')->sum('point') ?? 0;
             $provision_points = TransactionHistory::where('customer_id', $request->id)->where('status', '0')->sum('point') ?? 0;
+            $total_redemption = Redemption::where('customer_id', $request->id)->whereNot('status', '2')->sum('redeem_amount') ?? 0;
+            $total_balance = (int)$active_points - (int)$total_redemption;
 
             $data = collect([]);
             if ($db_data->isNotEmpty()) {
                 foreach ($db_data as $key => $value) {
+
                     $data->push([
                         'id' => isset($value['id']) ? $value['id'] : 0,
                         'scheme_name' => isset($value['scheme_details']) ? $value['scheme_details']['scheme_name'] : '',
@@ -80,9 +86,10 @@ class TransactionHistoryController extends Controller
                         'status' => isset($value['status']) ? $value['status'] : '',
                         'point' => isset($value['point']) ? $value['point'] : '',
                         'date' => isset($value['created_at']) ? date('d M Y', strtotime($value['created_at'])) : '',
+                        'product_name' => isset($value['scheme']) ? preg_replace('/\s+/', ' ', $value['scheme']['product']['product_name']) : '',
                     ]);
                 }
-                return response()->json(['status' => 'success', 'total_points' => $total_points, 'active_points' => $active_points, 'provision_points' => $provision_points, 'message' => 'Data retrieved successfully.', 'data' => $data], $this->successStatus);
+                return response()->json(['status' => 'success', 'total_points' => $total_points, 'active_points' => $active_points, 'provision_points' => $provision_points, 'total_balance' => $total_balance, 'message' => 'Data retrieved successfully.', 'data' => $data], $this->successStatus);
             }
             return response(['status' => 'error', 'total_points' => $total_points, 'active_points' => $active_points, 'provision_points' => $provision_points, 'message' => 'No Record Found.', 'data' => $data], 200);
         } catch (\Exception $e) {
@@ -105,14 +112,17 @@ class TransactionHistoryController extends Controller
                 if ($request->search && $request->search != '' && $request->search != null) {
                     $query->where('product_name', 'LIKE', "%{$request->search}%")->orWhere('display_name', 'LIKE', "%{$request->search}%");
                 }
-                if ($request->category_id && $request->category_id != '' && $request->category_id != null) {
-                    $query->where('category_id', $request->category_id);
+                if ($request->redeem_mode && $request->redeem_mode != '' && $request->redeem_mode != null) {
+                    $query->where('redeem_mode', $request->redeem_mode);
                 }
-                if ($request->subcategory_id && $request->subcategory_id != '' && $request->subcategory_id != null) {
-                    $query->where('subcategory_id', $request->subcategory_id);
+                if ($request->status != '' && $request->status != null) {
+                    $query->where('status', $request->status);
                 }
-                if ($request->min_range && $request->min_range != '' && $request->min_range != null && $request->max_range && $request->max_range != '' && $request->max_range != null) {
-                    $query->whereBetween('points', [$request->min_range, $request->max_range]);
+                if ($request->start_date && $request->start_date != null && $request->start_date != '' && $request->end_date && $request->end_date != null && $request->end_date != '') {
+                    $startDate = date('Y-m-d', strtotime($request->start_date));
+                    $endDate = date('Y-m-d', strtotime($request->end_date));
+                    $data = $query->whereDate('created_at', '>=', $startDate)
+                        ->whereDate('created_at', '<=', $endDate);
                 }
             })->orderBy('created_at', 'desc');
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
@@ -132,11 +142,12 @@ class TransactionHistoryController extends Controller
                         'point' => isset($value['redeem_amount']) ? $value['redeem_amount'] : '',
                         'date' => isset($value['updated_at']) ? date('d M Y', strtotime($value['updated_at'])) : '',
                         'details' => $value->neft_details,
+                        'gift_details' => ['dispatch_number' => $value->dispatch_number, 'remark' => $value->remark],
                     ]);
                 }
                 return response()->json(['status' => 'success', 'total_redemption' => $total_redemption, 'total_rejected' => $total_rejected, 'total_balance' => $total_balance, 'message' => 'Data retrieved successfully.', 'data' => $data], $this->successStatus);
             }
-            return response(['status' => 'success', 'total_redemption' => $total_redemption, 'total_rejected' => $total_rejected, 'total_balance' => $total_balance, 'message' => 'No Record Found.', 'data' => $data], 200);
+            return response(['status' => 'error', 'total_redemption' => $total_redemption, 'total_rejected' => $total_rejected, 'total_balance' => $total_balance, 'message' => 'No Record Found.', 'data' => $data], 200);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
@@ -193,6 +204,13 @@ class TransactionHistoryController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
+            $active_points = TransactionHistory::where('customer_id', $request->customer_id)->where('status', '1')->sum('point') ?? 0;
+            $total_redemption = Redemption::where('customer_id', $request->customer_id)->whereNot('status', '2')->sum('redeem_amount') ?? 0;
+            $total_balance = (int)$active_points - (int)$total_redemption;
+
+            if ($request->redeem_amount > $total_balance) {
+                return response()->json(['status' => 'error', 'message' => 'The redeem amount not be greater than to total active balance point.'], $this->successStatus);
+            }
             $data = Redemption::create([
                 'customer_id' => $request->customer_id,
                 'redeem_mode' => '2',
@@ -224,22 +242,25 @@ class TransactionHistoryController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
-            
-            $active_points = TransactionHistory::where('customer_id', $request->customer_id)->where('status', '1')->sum('point')??0;
-            $total_redemption = Redemption::where('customer_id', $request->customer_id)->whereNot('status', '2')->sum('redeem_amount')??0;
-            $total_balance = (int)$active_points-(int)$total_redemption;
+
+            $active_points = TransactionHistory::where('customer_id', $request->customer_id)->where('status', '1')->sum('point') ?? 0;
+            $total_redemption = Redemption::where('customer_id', $request->customer_id)->whereNot('status', '2')->sum('redeem_amount') ?? 0;
+            $total_balance = (int)$active_points - (int)$total_redemption;
             $tottal_redeem_point = Gifts::whereIn('id', $request->gift_id)->sum('points');
-            
+
             if ($tottal_redeem_point > $total_balance) {
-                return response()->json(['status' => 'error', 'message' => 'The redeem amount not be greater than to total point.'], $this->successStatus);
+                return response()->json(['status' => 'error', 'message' => 'The redeem amount not be greater than to total active balance point.'], $this->successStatus);
             }
             foreach ($request->gift_id as $gift) {
                 $redeem_point = Gifts::where('id', $gift)->value('points');
+                $created_at = Carbon::now();
+                $created_at = $created_at->setTimezone('Asia/Kolkata');
                 $data = Redemption::create([
                     'customer_id' => $request->customer_id,
                     'redeem_mode' => '1',
                     'gift_id' => $gift,
                     'redeem_amount' => $redeem_point,
+                    'created_at' => $created_at,
                 ]);
             }
             return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
@@ -302,19 +323,22 @@ class TransactionHistoryController extends Controller
                     array_push($no_schemes, $nonNullCoupenCode);
                     $scheme_id = null;
                 }
+                $created_at = Carbon::now();
+                $created_at = $created_at->setTimezone('Asia/Kolkata');
                 $tHistory = TransactionHistory::create([
                     'customer_id' => $request->customer_id,
                     'coupon_code' => $nonNullCoupenCode,
                     'scheme_id' => $scheme_id,
                     'point' => $point,
+                    'created_at' => $created_at,
                 ]);
             }
             if (count($expire_schemes) > 0) {
-                return response(['status' => 'success', 'message' => 'Transaction History Store Successfully but coupon code (' . implode(',', $expire_schemes) . ') scheme has either expired or has not started yet so you earned 0 point.', 'point_earn' => $point], 200);
+                return response(['status' => 'success', 'message' => 'Transaction History Store Successfully but coupon code (' . implode(',', $expire_schemes) . ') scheme has either expired or has not started yet so you earned 0 point.', 'point_earn' => $point, 'data' => $tHistory], 200);
             } elseif (!$scheme_details) {
-                return response(['status' => 'success', 'message' => 'Transaction History Store Successfully but no any scheme on coupon code (' . implode(',', $no_schemes) . ') so you earned 0 point.', 'point_earn' => $point], 200);
+                return response(['status' => 'success', 'message' => 'Transaction History Store Successfully but no any scheme on coupon code (' . implode(',', $no_schemes) . ') so you earned 0 point.', 'point_earn' => $point, 'data' => $tHistory], 200);
             } else {
-                return response(['status' => 'success', 'message' => 'Transaction History Store Successfully', 'point_earn' => $point], 200);
+                return response(['status' => 'success', 'message' => 'Transaction History Store Successfully', 'point_earn' => $point, 'data' => $tHistory], 200);
             }
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);

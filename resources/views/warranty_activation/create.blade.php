@@ -59,12 +59,13 @@
                <div class="form-group">
                   <div>
                      <h5>Warranty Details</h5>
+                     <input type="hidden" name="warranty_id" value="{{$warranty_activation->id}}">
                      <div class="row">
                         <div class="col-md-2">
                            <label for="product_serail_number" class="form-control">Product Serial Number</label>
                         </div>
                         <div class="col-md-4">
-                           <input type="text" name="product_serail_number" id="product_serail_number" class="form-control" required>
+                           <input type="text" name="product_serail_number" id="product_serail_number" class="form-control" value="{!! old( 'product_serail_number' , $warranty_activation['product_serail_number']) !!}">
                            @if ($errors->has('product_serail_number'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('product_serail_number') }}</p>
@@ -76,6 +77,9 @@
                         </div>
                         <div class="col-md-4">
                            <select name="select_product_id" id="select_product_id" placeholder="Select Product" class="select2 form-control">
+                              @if($warranty_activation->exists && $warranty_activation->product_details)
+                              <option value="{{$warranty_activation->product_details->id}}" selected>{{$warranty_activation->product_details->product_name}}</option>
+                              @endif
                            </select>
                            <input type="hidden" name="product_id" id="product_id">
                            @if ($errors->has('product_id'))
@@ -108,8 +112,13 @@
                            <label for="status" class="form-control">Status</label>
                         </div>
                         <div class="col-md-4">
+                           @if($warranty_activation->exists && $warranty_activation->status == '0')
+                           <input type="radio" checked name="status" id="status" value="0"> Inactive
+                           <input type="radio" name="status" id="status" value="1"> active
+                           @else
                            <input type="radio" name="status" id="status" value="0"> Inactive
                            <input type="radio" checked name="status" id="status" value="1"> active
+                           @endif
                            @if ($errors->has('status'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('status') }}</p>
@@ -125,8 +134,8 @@
                            <label for="customer_number" class="form-control">Customer Number Search</label>
                         </div>
                         <div class="col-md-4">
-                           <input type="number" name="customer_number" id="customer_number" class="form-control" required>
-                           <input type="hidden" name="end_user_id" id="end_user_id">
+                           <input type="number" name="customer_number" id="customer_number" class="form-control" value="{!! old( 'customer_number' , $warranty_activation['customer']?$warranty_activation['customer']['customer_number']:'') !!}" required>
+                           <input type="hidden" name="end_user_id" id="end_user_id" value="{!! old( 'end_user_id' , $warranty_activation['end_user_id']) !!}">
                            @if ($errors->has('customer_number'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('customer_number') }}</p>
@@ -137,7 +146,7 @@
                            <label for="customer_name" class="form-control">Customer Name</label>
                         </div>
                         <div class="col-md-4">
-                           <input type="text" name="customer_name" id="customer_name" class="form-control" required>
+                           <input type="text" name="customer_name" id="customer_name" class="form-control" value="{!! old( 'customer_name' , $warranty_activation['customer']?$warranty_activation['customer']['customer_name']:'') !!}" required>
                            @if ($errors->has('customer_name'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('customer_name') }}</p>
@@ -150,7 +159,7 @@
                            <label for="customer_email" class="form-control">Email</label>
                         </div>
                         <div class="col-md-4">
-                           <input type="email" name="customer_email" id="customer_email" class="form-control" required>
+                           <input type="email" name="customer_email" id="customer_email" class="form-control" value="{!! old( 'customer_email' , $warranty_activation['customer']?$warranty_activation['customer']['customer_email']:'') !!}" required>
                            @if ($errors->has('customer_email'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('customer_email') }}</p>
@@ -161,7 +170,7 @@
                            <label for="customer_place" class="form-control">Place</label>
                         </div>
                         <div class="col-md-4">
-                           <input type="text" name="customer_place" id="customer_place" class="form-control" required>
+                           <input type="text" name="customer_place" id="customer_place" class="form-control" value="{!! old( 'customer_place' , $warranty_activation['customer']?$warranty_activation['customer']['customer_place']:'') !!}" required>
                            @if ($errors->has('customer_place'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('customer_place') }}</p>
@@ -174,7 +183,7 @@
                            <label for="customer_address" class="form-control">Address</label>
                         </div>
                         <div class="col-md-4">
-                           <input type="text" name="customer_address" id="customer_address" class="form-control" required>
+                           <input type="text" name="customer_address" id="customer_address" class="form-control" value="{!! old( 'customer_address' , $warranty_activation['customer']?$warranty_activation['customer']['customer_address']:'') !!}" required>
                            @if ($errors->has('customer_address'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('customer_address') }}</p>
@@ -189,7 +198,7 @@
                               <option value="" disabled selected>Select Pincode</option>
                               @if($pincodes && count($pincodes) > 0)
                               @foreach($pincodes as $pincode)
-                              <option value="{{$pincode->id}}" {!! old( 'customer_pindcode' , $warranty_activation['customer_pindcode'])==$pincode->id?'selected':'' !!}>{{$pincode->pincode}}</option>
+                              <option value="{{$pincode->id}}" {!! old( 'customer_pindcode' , $warranty_activation['customer']?$warranty_activation['customer']['customer_pindcode']:'')==$pincode->id?'selected':'' !!}>{{$pincode->pincode}}</option>
                               @endforeach
                               @endif
                            </select>
@@ -272,7 +281,7 @@
                            <label for="sale_bill_date" class="form-control">Sale Bill Date</label>
                         </div>
                         <div class="col-md-4">
-                           <input type="text" name="sale_bill_date" id="sale_bill_date" class="datepicker form-control" placeholder="Sale Bill Date" autocomplete="off" readonly>
+                           <input type="text" name="sale_bill_date" id="sale_bill_date" class="datepicker form-control" placeholder="Sale Bill Date" autocomplete="off" value="{!! old( 'sale_bill_date' , $warranty_activation['sale_bill_date']) !!}">
                            @if ($errors->has('sale_bill_date'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('sale_bill_date') }}</p>
@@ -285,7 +294,7 @@
                            <label for="warranty_date" class="form-control">Warranty Date</label>
                         </div>
                         <div class="col-md-4">
-                           <input type="text" name="warranty_date" id="warranty_date" class="datepicker form-control" placeholder="Warranty Date" autocomplete="off" readonly>
+                           <input type="text" name="warranty_date" id="warranty_date" class="datepicker form-control" placeholder="Warranty Date" autocomplete="off" value="{!! old( 'warranty_date' , $warranty_activation['warranty_date']) !!}">
                            @if ($errors->has('warranty_date'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('warranty_date') }}</p>
@@ -296,13 +305,45 @@
                            <label for="sale_bill_no" class="form-control">Co Sale Bill No.</label>
                         </div>
                         <div class="col-md-4">
-                           <input type="text" name="sale_bill_no" id="sale_bill_no" class="form-control">
+                           <input type="text" name="sale_bill_no" id="sale_bill_no" class="form-control" value="{!! old( 'sale_bill_no' , $warranty_activation['sale_bill_no']) !!}">
                            @if ($errors->has('sale_bill_no'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('sale_bill_no') }}</p>
                            </div>
                            @endif
                         </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-md-2">
+                     <label for="warranty_activation_attach" class="form-control">Attachment</label>
+                  </div>
+                  <div class="col-md-3 col-sm-3 mt-4">
+                     <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                        <div class="selectThumbnail">
+                           <span class="btn btn-just-icon btn-round btn-file">
+                              <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
+                              <span class="fileinput-exists">Change</span>
+                              <input type="file" name="warranty_activation_attach" class="getimage1" accept="image/*">
+                           </span>
+                           <br>
+                           <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
+                        </div>
+                        <div class="fileinput-new thumbnail">
+                           @if($warranty_activation->exists && $warranty_activation->getMedia('warranty_activation_attach')->count() > 0 && file_exists($warranty_activation->getFirstMedia('warranty_activation_attach')->getPath()))
+                           <img src="{!! $warranty_activation->getMedia('warranty_activation_attach')[0]->getFullUrl() !!}" class="imagepreview1">   
+                           @else
+                           <img src="{!! url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview1">
+                           @endif
+                        </div>
+                        <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
+                        <!-- <label class="bmd-label-floating">Attachment 1st</label> -->
+                        @if ($errors->has('warranty_activation_attach'))
+                        <div class="error col-lg-12">
+                           <p class="text-danger">{{ $errors->first('warranty_activation_attach') }}</p>
+                        </div>
+                        @endif
                      </div>
                   </div>
                </div>
@@ -316,8 +357,9 @@
       </div>
    </div>
    <script src="{{ url('/').'/'.asset('assets/js/validation_loyalty.js') }}"></script>
+   <script src="{{ url('/').'/'.asset('assets/js/jquery.custom.js') }}"></script>
    <script>
-      $(document).on("keyup", "#product_serail_number", function() {
+      $("#product_serail_number").on("keyup", function() {
          var serial_no = $(this).val();
          $.ajax({
             url: "{{ url('getProductByCoupon') }}",
@@ -339,11 +381,12 @@
                }
             }
          });
-      });
-      $("#select_product_id").on("change", function(){
+      }).trigger('change');
+
+      $("#select_product_id").on("change", function() {
          $('#product_id').val($(this).val());
       })
-      $(document).on("change", "#customer_pindcode", function() {
+      $("#customer_pindcode").on("change", function() {
          var customer_pindcode = $(this).val();
          $.ajax({
             url: "{{ url('getAddressData') }}",
@@ -360,7 +403,8 @@
                $("#customer_city").val(res.city_name);
             }
          });
-      });
+      }).trigger('change');
+
       $("#customer_number").on("keyup", function() {
          var customer_number = $(this).val();
          $.ajax({
@@ -416,6 +460,6 @@
                }
             }
          });
-      });
+      }).trigger('change');
    </script>
 </x-app-layout>

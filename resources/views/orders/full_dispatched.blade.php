@@ -38,8 +38,8 @@
                From
                <address>
                  <strong>{!! isset($orders['sellers']['name']) ? $orders['sellers']['name'] :'' !!} </strong><br>
-                {!! $orders['sellers']['customeraddress']['address1']??'' !!} {!! $orders['sellers']['customeraddress']['address2']??'' !!}<br>
-                 {!! $orders['sellers']['customeraddress']['cityname']['city_name']??'' !!} {!! $orders['sellers']['customeraddress']['pincodename']['pincode']??'' !!}<br>
+                {!! $orders['sellers']['customeraddress']['address1'] !!} {!! $orders['sellers']['customeraddress']['address2'] !!}<br>
+                 {!! $orders['sellers']['customeraddress']['cityname']['city_name'] !!} {!! $orders['sellers']['customeraddress']['pincodename']['pincode'] !!}<br>
                  Phone: {!! $orders['sellers']['mobile'] !!}<br>
                  Email: {!! $orders['sellers']['email'] !!}
                </address>
@@ -181,7 +181,7 @@
                                     </td> -->
 
                                     <td>
-                                       <input type="number" name="orderdetail[{!! $index !!}][gst]" class="form-control price rowchange" step="0.01" min="0" value="{!! $rows['gst'] !!}" readonly />
+                                       <input type="number" name="orderdetail[{!! $index !!}][gst]" class="form-control gst_new rowchange" step="0.01" min="0" value="{!! $rows['gst'] !!}" readonly />
                                        <div class='error-price'></div>
                                     </td>
 
@@ -190,6 +190,90 @@
                                        <input type="number" name="orderdetail[{!! $index !!}][discount]" class="form-control discount rowchange" step="0.01" min="0" value="{!! $rows['discount'] !!}" readonly />
                                        <div class='error-discount'></div>
                                     </td>
+
+
+                               <td hidden>
+
+                                <input type="number" name='orderdetail[{{ $index }}][ebd_discount]' class="form-control total_new scheme_dis" value="{!! $rows['ebd_discount'] !!}" readonly hidden />
+
+                                 <!-- nnn -->
+
+                                <input type="text" name="orderdetail[{{ $index }}][scheme_type]" class="scheme_type" hidden>
+                                <input type="text" name="orderdetail[{{ $index }}][scheme_value_type]" class="scheme_value_type" hidden> 
+                                <input type="text" name="orderdetail[{{ $index }}][minimum]" class="minimum" hidden>
+                                <input type="text" name="orderdetail[{{ $index }}][maximum]" class="maximum" hidden>  
+
+                                <input type="text" name="orderdetail[{{ $index }}][start_date]" class="start_date" hidden>    
+                                <input type="text" name="orderdetail[{{ $index }}][end_date]" class="end_date" hidden>    
+                                 <!-- nnn end -->
+
+                                <input type="text" name="orderdetail[{{ $index }}][ebd_amount]" class="ebd_amount" value="{!! $rows['ebd_amount'] !!}" hidden>
+
+
+                                 <input type="text" name="orderdetail[{{ $index }}][clus_amounts]" class="clus_amounts" value="{!! $rows['cluster_amount'] !!}" hidden>
+
+                                 <input type="text" name="orderdetail[{{ $index }}][clustered_dis]" class="clustered_dis">
+                                 
+
+                                 <input type="text" name="orderdetail[{{ $index }}][deal_amounts]" class="deal_amounts" value="{!! $rows['deal_amount'] !!}" hidden>
+
+                                 <input type="text" name="orderdetail[{{ $index }}][deal_dis]" class="deal_dis" hidden>
+
+                                <input type="text" name="orderdetail[{{ $index }}][distributot_amounts]" class="distributot_amounts" value="{!! $rows['distributor_amount'] !!}" hidden>
+
+                                <input type="text" name="orderdetail[{{ $index }}][distributot_dis]" class="distributot_dis" hidden>
+
+                                <input type="text" name="orderdetail[{{ $index }}][frieght_dis]" class="frieght_dis" value="{!! $rows['frieght_discount'] !!}" hidden>
+
+                                <input type="text" name="orderdetail[{{ $index }}][frieght_amounts]" class="frieght_amounts"  value="{!! $rows['frieght_amount'] !!}" hidden>
+
+
+                               <?php
+
+                                $gst_amount_fives = 0;
+                                $gst_amount_twels = 0;
+                                $gst_amount_eighteens = 0;
+                                $gst_amount_twenty_eights = 0;
+
+                                if($rows['gst'] == 5){
+                                 //$gst_amount_fives+= $rows['gst_amount']; 
+                                 $gst_amount_fives = $rows['tax_amount']; 
+                                  
+                                 ?>
+                                 <input type="text" name="orderdetail[{{ $index }}][five_gst]" class="five_gst" value="{!! $gst_amount_fives !!}" hidden>
+
+                                <?php }elseif($rows['gst'] == 12){
+                                 //$gst_amount_twels+= $rows['gst_amount']; 
+                                 $gst_amount_twels = $rows['tax_amount']; 
+                                 ?>
+                                
+                                <input type="text" name="orderdetail[{{ $index }}][twelve_gst]" class="twelve_gst" value="{!! $gst_amount_twels !!}" hidden>
+
+                                <?php }elseif($rows['gst'] == 18){
+                                  //$gst_amount_eighteens+= $rows['gst_amount']; 
+                                  $gst_amount_eighteens = $rows['tax_amount']; 
+                                  ?>
+
+                                <input type="text" name="orderdetail[{{ $index }}][eighteen_gst]" class="eighteen_gst" value="{!! $gst_amount_eighteens !!}" hidden>
+
+                                <?php }else{ 
+                                 //$gst_amount_twenty_eights+= $rows['gst_amount']; 
+                                 $gst_amount_twenty_eights = $rows['tax_amount']; 
+                                 ?>
+
+                                <input type="text" name="orderdetail[{{ $index }}][twenti_eight_gst]" class="twenti_eight_gst" value="{!! $gst_amount_twenty_eights !!}" hidden> 
+                                <?php 
+                                  }
+
+                                 ?>
+
+                                    </td>
+
+
+
+
+
+
 
                                     <td>
                                        <input type="number" name='orderdetail[{!! $index !!}][line_total]' class="form-control total" value="{!! $rows['line_total'] !!}" readonly/>
@@ -233,10 +317,12 @@
                   $clustor_dicount_sum = 0;
                   $deal_dicount_sum = 0;
                   $distributor_dicount_sum = 0;
+                  $frieght_dicount_sum = 0;
 
-                  $cluster_discount;
-                  $deal_discount;
-                  $distributor_discount;
+                  $cluster_discount = 0;
+                  $deal_discount = 0;
+                  $distributor_discount = 0;
+                  $frieght_discount = 0;
 
                   $gst_amount_5 = 0;
                   $gst_amount_12 = 0;
@@ -251,10 +337,13 @@
                   $clustor_dicount_sum+= $rowss['cluster_amount'];
                   $deal_dicount_sum+= $rowss['deal_amount'];
                   $distributor_dicount_sum+= $rowss['distributor_amount'];
+                  $frieght_dicount_sum+= $rowss['frieght_amount'];
+
 
                   $cluster_discount = $rowss['cluster_discount'];
                   $deal_discount = $rowss['deal_discount'];
                   $distributor_discount = $rowss['distributor_discount'];
+                  $frieght_discount = $rowss['frieght_discount'];
 
                   if($rowss['gst'] == 5){
 
@@ -380,6 +469,30 @@
                            @endif
                         </div>
                      </div>
+
+                      <div class="form-group row">
+                       <div class="col-sm-4">
+                        <label class="bmd-label">frieght Discount%</label>
+                      </div>
+                        <div class="col-sm-8">
+                           <div class="input-group">
+                             <div class="input-group-prepend">
+                             </div>
+                            
+                             <input type="number" name='frieght_discount' class="form-control frieght_discount" value="{!! old( 'frieght_discount', $frieght_discount) !!}" readonly />
+
+                              <input type="text" name="frieght_discount_amount" class="form-control frieght_discount_amount" readonly value="{!! old( 'frieght_discount_amount', $frieght_dicount_sum) !!}">
+                           </div>
+                           @if($errors->has('frieght_discount'))
+                           <div class="invalid-feedback">
+                              {{ $errors->first('frieght_discount') }}
+                           </div>
+                           @endif
+                        </div>
+                     </div>
+
+
+
 
 
                      <div class="form-group row"> 
@@ -528,6 +641,35 @@
       calc();
     });
    });
+
+
+   //new
+    $('.cluster_discount').on('change',function(){
+      var cls_dis = $(this).val();  
+    
+     $('.clustered_dis').val(cls_dis);  
+    }).trigger('change');
+
+
+    $('.deal_discnt').on('keyup',function(){
+      var deal_discnt = $(this).val();   
+      $('.deal_dis').val(deal_discnt);  
+    }).trigger('keyup');
+
+
+    $('.distributor_discount').on('keyup',function(){
+      var distributot_dis = $(this).val();   
+      $('.distributot_dis').val(distributot_dis);  
+    }).trigger('keyup');
+
+   $('.frieght_discount').on('keyup',function(){
+      var frieght_discount = $(this).val();   
+      $('.frieght_dis').val(frieght_discount);  
+    }).trigger('keyup');
+
+
+   //new
+
    
     function sellerinfo()
     {
@@ -638,64 +780,431 @@
       calc();
     });
    
-    function calc()
-    {
+    // function calc()
+    // {
+    //   $('#tab_logic tbody tr').each(function(i, element) {
+    //     var html = $(this).html();
+    //     if(html!='')
+    //     {
+    //       var quantity = $(this).find('.quantity').val();
+    //       var price = $(this).find('.price').val();
+    //       var discount = $(this).find('.discount').val();
+    //       var total = quantity*price;
+    //       var discount_amount = total * discount / 100;
+    //       total = total - discount_amount;
+    //        if($("#withoutgst").is(":checked")){
+    //             var tax_amount = 0.00;
+    //         }
+    //         else
+    //         {
+    //            var gst = $(this).find('.gst_percent').html();
+    //            var tax_amount = total * gst / 100;
+    //         }
+    //       $(this).find('.total').val((total).toFixed(2));
+    //       $(this).find('.tax_amount').val((tax_amount).toFixed(2));
+    //       $(this).find('.gstamount').empty();
+    //       $(this).find('.gstamount').append(tax_amount);
+    //       $(this).find('.discountamount').empty();
+    //       $(this).find('.discountamount').val(discount_amount);
+    //       calc_total();
+    //     }
+    //   });
+    // }
+
       $('#tab_logic tbody tr').each(function(i, element) {
+
         var html = $(this).html();
         if(html!='')
-        {
-          var quantity = $(this).find('.quantity').val();
-          var price = $(this).find('.price').val();
-          var discount = $(this).find('.discount').val();
-          var total = quantity*price;
-          var discount_amount = total * discount / 100;
-          total = total - discount_amount;
-           if($("#withoutgst").is(":checked")){
-                var tax_amount = 0.00;
+        { 
+           
+            var quantity = $(this).find('.quantity').val();
+            var price = $(this).find('.price').val();
+            var discount = $(this).find('.discount').val();
+            var total = quantity*price;
+            var discount_amount = total * discount / 100;
+             total = total - discount_amount;
+         
+            //code for scheme
+            var ebd_dis = 0;
+            var ebd_discount = 0;
+
+
+           // ebd_discount = $(this).find('.scheme_dis').val();   
+           // // var ebd_dis = total * ebd_discount / 100;
+           //  ebd_dis = total * ebd_discount / 100;
+           //  total = total - ebd_dis;
+           //  var ebd_amount = $(this).find('.ebd_amount').val((ebd_dis).toFixed(2));  
+
+
+           var scheme_value_type = $(this).find('.scheme_value_type').val();
+            if(scheme_value_type == 'percentage'){
+           ebd_discount = $(this).find('.scheme_dis').val();   
+           ebd_dis = total * ebd_discount / 100;
+            total = total - ebd_dis;
+           var ebd_amount = $(this).find('.ebd_amount').val((ebd_dis).toFixed(2));        
             }
-            else
-            {
-               var gst = $(this).find('.gst_percent').html();
-               var tax_amount = total * gst / 100;
+
+           if(scheme_value_type == 'value'){
+           ebd_discount = $(this).find('.scheme_dis').val();   
+           ebd_dis = ebd_discount;
+            total = total - ebd_discount;
+           var ebd_amount = $(this).find('.ebd_amount').val(ebd_dis);       
+
+            } 
+
+        
+            //code scheme end
+
+            //new code for clustor
+            var clusters_discount = $(this).find('.clustered_dis').val();   
+            var clus_dis = total * clusters_discount / 100;
+             total = total - clus_dis;
+
+             $(this).find('.clus_amounts').val((clus_dis).toFixed(2));   
+
+            //end clustor 
+
+
+
+
+            // start deal discount
+            var deal_dis = $(this).find('.deal_dis').val();   
+            var deal_dis_cal = total * deal_dis /100;
+             total = total - deal_dis_cal;
+
+
+             $(this).find('.deal_amounts').val((deal_dis_cal).toFixed(2));
+            // end deal discount 
+
+            // start code for distributor
+            var distributots_dis = $(this).find('.distributot_dis').val();  
+            var distributots_dis_cal = total * distributots_dis/100; 
+             total = total - distributots_dis_cal;
+             $(this).find('.distributot_amounts').val((distributots_dis_cal).toFixed(2));
+            // end distributor
+
+
+            var gst = $(this).find('.gst_percent').html();
+            var tax_amount = total * gst / 100;
+
+            if(gst == 5){
+            var five_amount = total * gst /100;  
+             $(this).find('.five_gst').val((five_amount).toFixed(2)); 
+            }else if(gst == 12){
+
+            var twelve_amount = total * gst /100;     
+            $(this).find('.twelve_gst').val((twelve_amount).toFixed(2));
+
+            }else if(gst == 18){
+            var eighteen_amount = total * gst /100; 
+            $(this).find('.eighteen_gst').val((eighteen_amount).toFixed(2));   
+
+            }else{
+             var twenty_eight_amount = total * gst /100; 
+             $(this).find('.twenti_eight_gst').val((twenty_eight_amount).toFixed(2)); 
             }
-          $(this).find('.total').val((total).toFixed(2));
+            
+
+         $(this).find('.total').val((total).toFixed(2));
+
+          
+         //$('#tab_logic tr:last').find('.total').val((total).toFixed(2));
+         //$('#tab_logic tr:last').find(".total").empty();
+
+           //$('#tab_logic tr:last').find('.total').val((total).toFixed(2));
+
           $(this).find('.tax_amount').val((tax_amount).toFixed(2));
           $(this).find('.gstamount').empty();
           $(this).find('.gstamount').append(tax_amount);
           $(this).find('.discountamount').empty();
           $(this).find('.discountamount').val(discount_amount);
           calc_total();
+
         }
-      });
-    }
+
+      });   
+
+
+
    
-    function calc_total()
-    {
+    // function calc_total()
+    // {
+    //   total=0;
+    //   subtotal=0;
+    //   taxamount=0;
+    //   discount=0;
+    //   var extra_discount = $("input[name=extra_discount]").val();
+    //   var discount_amount = 0;
+    //   $('.total').each(function() {
+    //     total += parseInt($(this).val());
+    //   });
+    //   $('.tax_amount').each(function() {
+    //     taxamount += parseInt($(this).val());
+    //   });
+    //   $('.discountamount').each(function() {
+    //     discount += parseInt($(this).val());
+    //   });
+    //    discount_amount = total * extra_discount / 100;
+    //    subtotal = total;
+    //    total -= discount_amount;
+    //   $('#subtotal').val((subtotal).toFixed(2));
+    //   $('#totalgst').val(taxamount.toFixed(2));
+    //   $('#totaldiscount').val(discount.toFixed(2));
+    //   $('.extra_discount_amount').empty();
+    //   $('.extra_discount_amount').val(discount_amount.toFixed(2));
+    //   $('#grandtotal').val((total+taxamount).toFixed(2));
+    // }
+
+   function calc_total()
+    {   
+
+     total_new_ebd = 0;
+     total_scheme = 0;
+
+     clus_amounts_new = 0;
+     total_slustor_amount_new = 0;
+
+     deal_amounts_new = 0;
+     total_deal_amounts_new = 0;
+
+     distributot_amounts_new = 0;
+     total_distributot_amounts_new = 0;
+
+
+     five_gst_new = 0;
+     total_five_gst_new = 0;
+
+     twelve_gst_new = 0;
+     total_twelve_gst_new = 0;
+
+
+     eighteen_gst_new = 0;
+     total_eighteen_gst_new = 0;
+
+     twenti_eight_gst_new = 0;
+     total_twenti_eight_gst_new = 0;
+
+    
+      five_gst=0; 
+      twelve_gst=0; 
+      eighteen_gst=0;
+      twenti_eight_gst=0;
+
+      clus_amounts=0;  
+      scheme_discount = 0; 
+      deal_amounts = 0;
+      cluster_amnt=0;  
+      distributot_amounts=0;
+      frieght_amounts=0;
+
       total=0;
       subtotal=0;
       taxamount=0;
       discount=0;
+      transportation = 0;
       var extra_discount = $("input[name=extra_discount]").val();
+
+
+      discount_amount_cluster = 0;
+
+
+      var transportamt = $("#transportation_amount").val();
+      if(transportamt)
+      {
+         transportation = parseInt(transportamt);
+      }
       var discount_amount = 0;
       $('.total').each(function() {
-        total += parseInt($(this).val());
+        // total += parseInt($(this).val());
+        total += parseFloat($(this).val());
       });
+
+     //scheme discount start
+      $('.ebd_amount').each(function() {
+        // scheme_discount += parseInt($(this).val());
+        scheme_discount += parseFloat($(this).val());
+      }); 
+
+
+       //new skm
+
+        $('.ebd_amount_new').each(function() {
+         total_new_ebd += parseFloat($(this).val());
+        });
+
+
+      total_scheme = total_new_ebd+scheme_discount;
+
+       //new skm end
+     
+     //$('#scheme_discount').val((scheme_discount).toFixed(2));
+
+     $('#scheme_discount').val((scheme_discount).toFixed(2));
+     //scheme discount end
+
+     //cluster discout start
+       var cluster_amnt = $(".cluster_discount").val();
+        discount_amount_cluster_new = total * cluster_amnt / 100;
+    
+
+      $('.clus_amounts').each(function() {
+        clus_amounts += parseFloat($(this).val());
+         // $('.extra_cluster_discount').val(clus_amounts.toFixed(2));
+      }); 
+
+
+       $('.clus_amounts_new').each(function() {
+         clus_amounts_new += parseFloat($(this).val());
+        });
+
+      total_slustor_amount_new = clus_amounts+clus_amounts_new;
+
+      $('.extra_cluster_discount').val(clus_amounts.toFixed(2));
+      //cluster discout end
+
+
+      //deal discount
+      $('.deal_amounts').each(function() {
+        deal_amounts += parseFloat($(this).val());
+         // $('.extra_discount_amount').val(deal_amounts.toFixed(2));
+      });
+
+       $('.deal_amounts_new').each(function() {
+         deal_amounts_new += parseFloat($(this).val());
+        });
+
+       total_deal_amounts_new = deal_amounts+deal_amounts_new; 
+       $('.extra_discount_amount').val(deal_amounts.toFixed(2));
+
+
+      //deal discoun
+
+
+      //distributor discount
+       $('.distributot_amounts').each(function() {
+        distributot_amounts += parseFloat($(this).val());
+         // $('.distributor_discount_amount').val(distributot_amounts.toFixed(2));
+      }); 
+
+        $('.distributot_amounts_new').each(function() {
+         distributot_amounts_new += parseFloat($(this).val());
+        });
+
+      total_distributot_amounts_new = distributot_amounts+distributot_amounts_new;
+
+      $('.distributor_discount_amount').val(distributot_amounts.toFixed(2));
+
+      //end distributor discount
+
+
+       //frieght_discount start
+
+     $('.frieght_amounts').each(function() {
+        frieght_amounts += parseFloat($(this).val());
+         $('.frieght_discount_amount').val(frieght_amounts.toFixed(2));
+      }); 
+
+       //frieght_discount  end
+
+
+
+
+
+
       $('.tax_amount').each(function() {
         taxamount += parseInt($(this).val());
       });
+
       $('.discountamount').each(function() {
         discount += parseInt($(this).val());
       });
-       discount_amount = total * extra_discount / 100;
-       subtotal = total;
-       total -= discount_amount;
+
+      
+       //new calculation
+
+         subtotal = total;
+
+       //end ne calculation
+
+        discount_amount = total * extra_discount / 100;
+
+        //conditions for tax start
+
+        $('.five_gst').each(function() {
+         five_gst += parseFloat($(this).val())||0;
+         // $('.5_gst').val(five_gst.toFixed(2));
+         });
+
+         $('.five_gst_new').each(function() {
+         five_gst_new += parseFloat($(this).val())||0;
+         //$('.5_gst').val(five_gst.toFixed(2));
+
+         });
+
+         total_five_gst_new = five_gst+five_gst_new; 
+         $('.5_gst').val(five_gst.toFixed(2));
+
+
+
+
+        $('.twelve_gst').each(function() {
+        twelve_gst += parseFloat($(this).val())||0;
+          //$('.12_gst').val(twelve_gst.toFixed(2));
+         });
+
+        $('.twelve_gst_new').each(function() {
+        twelve_gst_new += parseFloat($(this).val())||0;
+         // $('.12_gst').val(twelve_gst.toFixed(2));
+         });
+
+        total_twelve_gst_new = twelve_gst+twelve_gst_new;
+        $('.12_gst').val(twelve_gst.toFixed(2));
+
+
+        $('.eighteen_gst').each(function() {
+        eighteen_gst += parseFloat($(this).val())||0;
+          // $('.18_gst').val(eighteen_gst.toFixed(2));
+         });
+
+
+        $('.eighteen_gst_new').each(function() {
+        eighteen_gst_new += parseFloat($(this).val())||0;
+           // $('.18_gst').val(eighteen_gst.toFixed(2));
+         });
+
+       total_eighteen_gst_new = eighteen_gst+eighteen_gst_new;
+
+        $('.18_gst').val(eighteen_gst.toFixed(2));
+
+
+        $('.twenti_eight_gst').each(function() {
+        twenti_eight_gst += parseFloat($(this).val())||0;
+         //$('.28_gst').val(twenti_eight_gst.toFixed(2));
+         });
+
+
+         $('.twenti_eight_gst_new').each(function() {
+        twenti_eight_gst_new += parseFloat($(this).val())||0;
+         // $('.28_gst').val(twenti_eight_gst.toFixed(2));
+         });
+
+         total_twenti_eight_gst_new = twenti_eight_gst+twenti_eight_gst_new;
+         $('.28_gst').val(twenti_eight_gst.toFixed(2));
+
+
+
+    //conditions for tax  end 
+
       $('#subtotal').val((subtotal).toFixed(2));
       $('#totalgst').val(taxamount.toFixed(2));
       $('#totaldiscount').val(discount.toFixed(2));
-      $('.extra_discount_amount').empty();
-      $('.extra_discount_amount').val(discount_amount.toFixed(2));
-      $('#grandtotal').val((total+taxamount).toFixed(2));
-    }
+      $('#grandtotal').val((total+five_gst+twelve_gst+eighteen_gst+twenti_eight_gst).toFixed(2));
+     
+    }   
+
+
+
+
    
     function getProductlist()
     {

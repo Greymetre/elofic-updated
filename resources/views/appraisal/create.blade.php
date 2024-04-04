@@ -179,7 +179,7 @@
                                                     </td>
                                                     <td>10</td>
                                                     <td>
-                                                        <input name="rating[]" class="all_rating" max="10" type="number">
+                                                        <input name="rating[]" class="all_rating" max="10" type="number" required>
                                                         <p class="rat-err"></p>
                                                     </td>
                                                 </tr>

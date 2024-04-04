@@ -31,6 +31,7 @@ use App\Models\LoyaltyAppSetting;
 use App\Models\Pincode;
 use App\Models\Redemption;
 use App\Models\State;
+use App\Models\TourProgramme;
 use App\Models\TransactionHistory;
 
 class DashboardController extends Controller
@@ -437,6 +438,24 @@ class DashboardController extends Controller
             $data['total_redemption'] = Redemption::where('customer_id', $request->id)->whereNot('status', '2')->sum('redeem_amount')??0;
             $data['total_rejected'] = Redemption::where('customer_id', $request->id)->where('status', '2')->sum('redeem_amount')??0;
             $data['total_balance'] = (int)$data['active_points']-(int)$data['total_redemption'];
+            return response(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
+    }
+
+    public function pendingCounts(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'id' => 'required|exists:users,id',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
+            }
+            $data['pending_attendance'] = Attendance::where('user_id', $request->id)->where('attendance_status', '0')->count('*');
+            $data['pending_tour_plan'] = TourProgramme::where('userid', $request->id)->where('status', '0')->count('*');
+
             return response(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], 200);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);

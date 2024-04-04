@@ -3,6 +3,7 @@
 namespace App\DataTables;
 
 use App\Models\Customers;
+use App\Models\EndUser;
 use App\Models\ParentDetail;
 use App\Models\SchemeDetails;
 use App\Models\Services;
@@ -28,18 +29,26 @@ class WarrantyActivationDataTable extends DataTable
             ->addColumn('cust_status', function ($query) {
                 return 'Active';
             })
+            ->addColumn('customer.customer_name', function ($query) {
+                return '<a href="'.route("warranty_activation.show", encrypt($query->id)).'">'.$query->customer->customer_name.'</a>';
+            })
             ->addColumn('status', function ($query) {
                 if($query->status == '0'){
                     return 'Pending Activation';
                 }else{
-                    return 'Activet';
+                    return 'Activated';
                 }
             })
             ->addColumn('action', function ($query) {
                 $btn = '';
                 $activebtn = '';
                 if (auth()->user()->can(['scheme_delete'])) {
-                    $btn = $btn . ' <a href="" class="btn btn-danger btn-just-icon btn-sm delete" value="' . $query->id . '" title="' . trans('panel.global.delete') . ' Transaction History">
+                    $btn = $btn . ' <a href="'.route("warranty_activation.edit", encrypt($query->id)).'" class="btn btn-success btn-just-icon btn-sm" title="' . trans('panel.global.edit') . ' Warranty Activation">
+                                <i class="material-icons">edit</i>
+                              </a>';
+                }
+                if (auth()->user()->can(['scheme_delete'])) {
+                    $btn = $btn . ' <a href="#" class="btn btn-danger btn-just-icon btn-sm delete" value="' . $query->id . '" title="' . trans('panel.global.delete') . ' Warranty Activation">
                                 <i class="material-icons">clear</i>
                               </a>';
                 }
@@ -47,7 +56,7 @@ class WarrantyActivationDataTable extends DataTable
                                 ' . $btn . '
                             </div>' . $activebtn;
             })
-            ->rawColumns(['action', 'cust_status']);
+            ->rawColumns(['action', 'cust_status', 'customer.customer_name']);
     }
 
     /**
@@ -71,6 +80,14 @@ class WarrantyActivationDataTable extends DataTable
         }
         if($request->product_id && $request->product_id != null  && $request->product_id != ''){
             $data->where('product_id', $request->product_id);
+        }
+        if($request->state_id && $request->state_id != null  && $request->state_id != ''){
+            $all_end_users = EndUser::where('state_id', $request->state_id)->pluck('id');
+            if(count($all_end_users) > 0){
+                $data->whereIn('end_user_id', $all_end_users);
+            }else{
+                $data->where('id', '0');
+            }
         }
         
         $data = $data->latest()->newQuery();

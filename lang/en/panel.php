@@ -64,12 +64,45 @@ return [
         'services'     => 'Services',
         'serial_number_transaction'     => 'Serial Number Transaction',
         'serial_number_history'     => 'Serial Number History',
-         'hr'     => 'HR',
-         'account'  => 'Account',
-         'warranty_activation'  => 'Warranty Activation',
-         'complaint_type'  => 'Complaint Type',
-         'complaint'  => 'Complaints',
+        'target_users'     => 'Target Users',
+        'hr'     => 'HR',
+        'account'  => 'Account',
+        'warranty_activation'  => 'Warranty Activation',
+        'complaint_type'  => 'Complaint Type',
+        'complaint'  => 'Complaints',
+        'sales_users'  => 'Sales Users',
 
+    ],
+
+    'sales_users' => [
+        'target_users'        => 'Target Users',
+        'select-divisions'    => 'Divisions',
+        'month'               => 'Month',
+        'year'                => 'Year',
+        'user_name'           => 'User Name',
+        'employee_code'       => 'Employee Code',
+        'branch_name'         => 'Branch Name',
+        'target'              => 'Target',
+        'achievement'         => 'Achievement',
+        'branch'              => 'Branch',
+        'designation'         => 'Designation',
+        'achievement_percent' => 'Achievement%',
+
+    ],
+
+    'sales_target_user'           => [
+        'title'          => 'Sales Target Users',
+        'title_singular' => 'Sales Target User',
+        'fields'         => [
+        'id'             => 'ID',
+        'category_name'  => 'Category Name',
+        'target'         => 'Target',
+        'category_image' => 'Category Image',
+        'user'           => 'User',
+        'month'          => 'Month',
+        'year'           => 'Year',
+        'update'         => 'Update',
+        ],
     ],
 
     'global'                           => [

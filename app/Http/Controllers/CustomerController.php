@@ -103,6 +103,14 @@ class CustomerController extends Controller
                             {
                                 $query->where('customertype', $request['customertype']);
                             }
+                            if(!empty($request['created_by']))
+                            {
+                                if($request['created_by'] == 'self'){
+                                    $query->where('created_by', NULL);
+                                }elseif($request['created_by'] == 'other'){
+                                    $query->where('created_by', '!=', NULL);
+                                }
+                            }
                             // if(!empty($request['beat_id']))
                             // {
                             //     $query->whereHas('beatdetails',function($q) use($request){

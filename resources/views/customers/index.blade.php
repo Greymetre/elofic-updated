@@ -54,13 +54,20 @@
                     </select>
                   </div>
                    <div class="p-2" style="width:150px;">
-                    <select class="selectpicker" name="customertype" id="customertype" data-style="select-with-transition" title="Select Type">
+                    <select class="selectpicker" name="customertype" id="customertype" data-style="select-with-transition" title="Customer Type">
                        <option value="">Select Customer Type</option>
                       @if(@isset($customertype ))
                       @foreach($customertype as $type)
                        <option value="{!! $type->id !!}" {{ old( 'customertype') == $type->id ? 'selected' : '' }}>{!! $type->customertype_name !!}</option>
                       @endforeach
                       @endif
+                    </select>
+                   </div>
+                   <div class="p-2" style="width:150px;">
+                    <select class="selectpicker" name="created_by" id="created_by" data-style="select-with-transition" title="Created By">
+                       <option value="">Select Created By</option>
+                       <option value="other">Others</option>
+                       <option value="self">Self</option>
                     </select>
                    </div> 
 
@@ -242,6 +249,7 @@
                 d.state_id = $('#state_id').val(),
                 d.city_id = $('#city_id').val(),
                 d.customertype = $('#customertype').val(),
+                d.created_by = $('#created_by').val(),
                 d.search = $('input[type="search"]').val()
             }
         },
@@ -265,9 +273,9 @@
     $('#executive_id').change(function(){
         table.draw();
     });
-    // $('#beat_id').change(function(){
-    //     table.draw();
-    // });
+    $('#created_by').change(function(){
+        table.draw();
+    });
     $('#state_id').change(function(){
         table.draw();
     });
