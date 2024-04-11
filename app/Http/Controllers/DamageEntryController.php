@@ -7,6 +7,7 @@ use App\DataTables\DamageEntryDataTable;
 use Illuminate\Support\Facades\Redirect;
 use App\Models\Customers;
 use App\Models\DamageEntry;
+use App\Models\Product;
 use App\Models\SchemeDetails;
 use App\Models\Services;
 use App\Models\TransactionHistory;
@@ -196,16 +197,59 @@ class DamageEntryController extends Controller
 
     public function changeStatus(Request $request)
     {
-        $updateStatus = DamageEntry::where('id', $request->id)->update(['status' => $request->status, 'remark' => $request->remark]);
+        $updateStatus = DamageEntry::where('id', $request->id)->update(['status' => $request->status, 'coupon_code'=>$request->coupon_code, 'remark' => $request->remark]);
         if($updateStatus){
-            if($request->status == '1'){
+            if($request->status != '2'){
                 $damageEntry = DamageEntry::find($request->id);
-                TransactionHistory::create([
+                $damageEntry->status = '1';
+                $damageEntry->save();
+                $product = Product::find($request->product_id);
+                $notexists = Services::where('serial_no', $request->coupon_code)->exists();
+                if ($notexists) {
+                    $mmssgg = "The coupon code '$request->coupon_code' already Scanned.";
+                    return response()->json(['status' => 'error','message' => $mmssgg]);
+                }
+                Services::create([
+                    'product_code' => $product->product_code,
+                    'product_name' => $product->product_name,
+                    'product_description' => $product->description,
+                    'group' => $product->new_group,
+                    'serial_no' => $request->coupon_code,
+                    'party_name' => 'Damage Entry',
+                    'qty' => '1',
+                ]);
+                $exists = TransactionHistory::where('coupon_code', $request->coupon_code)->exists();
+
+                if ($exists) {
+                    $mmssgg = "The coupon code '$request->coupon_code' already Scanned.";
+                    return response()->json(['status' => 'error','message' => $mmssgg]);
+                }
+                $scheme = Services::where('serial_no', $request->coupon_code)->first();
+                $scheme_details = SchemeDetails::where('product_id', $scheme->product->id)->first();
+                $point = 0;
+                if ($scheme_details) {
+                    $scheme_id = $scheme_details->scheme_id;
+                    $start_date = Carbon::createFromFormat('Y-m-d', $scheme_details->scheme->start_date);
+                    $end_date = Carbon::createFromFormat('Y-m-d', $scheme_details->scheme->end_date);
+                    $current_date = Carbon::today();
+                    if ($current_date->isSameDay($start_date) || ($current_date->gte($start_date) && $current_date->lte($end_date))) {
+                        $point = ($scheme_details) ? $scheme_details->points : NULL;
+                    } else {
+                        array_push($expire_schemes, $request->coupon_code);
+                        $point = '0';
+                    }
+                } else {
+                    $scheme_id = null;
+                    $point = '0';
+                }
+                $created_at = Carbon::now();
+                $created_at = $created_at->setTimezone('Asia/Kolkata');
+                $tHistory = TransactionHistory::create([
                     'customer_id' => $damageEntry->customer_id,
-                    'coupon_code' => $damageEntry->coupon_code,
-                    'scheme_id' => $damageEntry->scheme_id,
-                    'point' => $damageEntry->point,
-                    'created_by' => auth()->user()->id,
+                    'coupon_code' => $request->coupon_code,
+                    'scheme_id' => $scheme_details?$scheme_id:null,
+                    'point' => $point,
+                    'created_at' => $created_at,
                 ]);
             }
             return response()->json(['status' => 'success','message' => 'Damage Entry status change successfully!']);

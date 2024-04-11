@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\DataTables\WarrantyActivationDataTable;
+use App\Exports\WarrantyActivactionExport;
 use App\Models\Branch;
 use App\Models\Customers;
 use App\Models\EndUser;
@@ -12,6 +13,7 @@ use App\Models\TransactionHistory;
 use App\Models\WarrantyActivation;
 use Illuminate\Http\Request;
 use Gate;
+use Excel;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Redirect;
 
@@ -65,6 +67,12 @@ class WarrantyActivationController extends Controller
         try {
             abort_if(Gate::denies('warranty_activation_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
             if (!$request->end_user_id || $request->end_user_id == NULL || $request->end_user_id == '') {
+                $pincodes = Pincode::with('cityname', 'cityname.districtname')->where('pincode', '=', $request['customer_pindcode'])->first();
+                $request['customer_state'] = !empty($pincodes['cityname']['districtname']['statename']) ? $pincodes['cityname']['districtname']['statename']['state_name'] : '';
+                $request['state_id'] = !empty($pincodes['cityname']['districtname']['state_id']) ? $pincodes['cityname']['districtname']['state_id'] : '';
+                $request['customer_district'] = !empty($pincodes['cityname']['districtname']) ? $pincodes['cityname']['districtname']['district_name'] : '';
+                $request['customer_city'] = !empty($pincodes['cityname']) ? $pincodes['cityname']['city_name'] : '';
+                $request['customer_country'] = !empty($pincodes['cityname']['districtname']['statename']['countryname']) ? $pincodes['cityname']['districtname']['statename']['countryname']['country_name'] : '';
                 $end_user = EndUser::updateOrCreate(['customer_number' => $request->customer_number ?? ''], [
                     'customer_name' => $request->customer_name ?? '',
                     'customer_number' => $request->customer_number ?? '',
@@ -79,7 +87,7 @@ class WarrantyActivationController extends Controller
                 ]);
                 $request->end_user_id = $end_user->id;
             }
-            WarrantyActivation::create([
+            $wararanty = WarrantyActivation::create([
                 'product_serail_number' => $request->product_serail_number ?? NULL,
                 'product_id' => $request->product_id ?? NULL,
                 'end_user_id' => $request->end_user_id ?? NULL,
@@ -91,6 +99,13 @@ class WarrantyActivationController extends Controller
                 'warranty_date' => $request->warranty_date ?? NULL,
                 'created_by' => auth()->user()->id
             ]);
+            if ($request->hasFile('warranty_activation_attach')) {
+                $file = $request->file('warranty_activation_attach');
+                $customname = time() . '.' . $file->getClientOriginalExtension();
+                $wararanty->addMedia($file)
+                    ->usingFileName($customname)
+                    ->toMediaCollection('warranty_activation_attach');
+            }
             TransactionHistory::where('coupon_code', $request->product_serail_number)->update(['status' => '1']);
 
             return Redirect::to('warranty_activation')->with('message_success', 'Warranty Activation Store Successfully.');
@@ -102,56 +117,93 @@ class WarrantyActivationController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\TransactionHistory  $transactionHistory
+     * @param  \App\Models\WarrantyActivation  $warrantyactivation
      * @return \Illuminate\Http\Response
      */
-    public function show(TransactionHistory $transactionHistory)
+    public function show($id)
     {
-        //
+        $this->warranty_activation = WarrantyActivation::find(decrypt($id));
+        return view('warranty_activation.show')->with('warrantyactivation', $this->warranty_activation);
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\TransactionHistory  $transactionHistory
+     * @param  \App\Models\WarrantyActivation  $warrantyactivation
      * @return \Illuminate\Http\Response
      */
-    public function edit(TransactionHistory $transactionHistory)
+    public function edit($id)
     {
-        //
+        $this->warranty_activation = WarrantyActivation::find(decrypt($id));
+        abort_if(Gate::denies('warranty_activation_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $branches = Branch::where('active', 'Y')->get();
+        $customers = Customers::where('customertype', '2')->select('id', 'name', 'mobile')->get();
+        $customers_dealer = Customers::where('customertype', ['1', '3'])->select('id', 'name', 'mobile')->get();
+        $pincodes = Pincode::all();
+        return view('warranty_activation.create', compact('customers', 'pincodes', 'branches'))->with('warranty_activation', $this->warranty_activation);
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\TransactionHistory  $transactionHistory
+     * @param  \App\Models\WarrantyActivation  $warrantyactivation
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, TransactionHistory $transactionHistory)
+    public function update(Request $request, WarrantyActivation $warrantyactivation)
     {
-        //
+        try {
+            // dd($request->all());
+            $warrantyactivation = WarrantyActivation::find($request->warranty_id);
+            $warrantyactivation->product_serail_number = $request->product_serail_number ?? NULL;
+            $warrantyactivation->product_id = $request->select_product_id ?? NULL;
+            $warrantyactivation->end_user_id = $request->end_user_id ?? NULL;
+            $warrantyactivation->branch_id = $request->branch_id ?? NULL;
+            $warrantyactivation->customer_id = $request->customer_id ?? NULL;
+            $warrantyactivation->status = $request->status ?? 1;
+            $warrantyactivation->sale_bill_no = $request->sale_bill_no ?? NULL;
+            $warrantyactivation->sale_bill_date = $request->sale_bill_date ?? NULL;
+            $warrantyactivation->warranty_date = $request->warranty_date ?? NULL;
+            $warrantyactivation->created_by = auth()->user()->id;
+            $warrantyactivation->save();
+            if ($request->hasFile('warranty_activation_attach')) {
+                $file = $request->file('warranty_activation_attach');
+                $customname = time() . '.' . $file->getClientOriginalExtension();
+                $warrantyactivation->addMedia($file)
+                    ->usingFileName($customname)
+                    ->toMediaCollection('warranty_activation_attach');
+            }
+            TransactionHistory::where('coupon_code', $request->product_serail_number)->update(['status' => '1']);
+
+            return Redirect::to('warranty_activation')->with('message_success', 'Warranty Activation Update Successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors($e->getMessage())->withInput();
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\TransactionHistory  $transactionHistory
+     * @param  \App\Models\WarrantyActivation  $warrantyactivation
      * @return \Illuminate\Http\Response
      */
-    public function destroy(TransactionHistory $transactionHistory)
+    public function destroy($id)
     {
-        if ($transactionHistory->delete()) {
-            return response()->json(['status' => 'success', 'message' => 'Transaction History deleted successfully!']);
+        $warrantyactivation = WarrantyActivation::find($id);
+        if($warrantyactivation){
+            TransactionHistory::where('coupon_code', $warrantyactivation->product_serail_number)->update(['status' => '0']);
+            if ($warrantyactivation->delete()) {
+                return response()->json(['status' => 'success', 'message' => 'Warranty Activation deleted successfully!']);
+            }
         }
-        return response()->json(['status' => 'error', 'message' => 'Error in Transaction History Delete!']);
+            return response()->json(['status' => 'error', 'message' => 'Error in Warranty Activation Delete!']);
     }
 
     public function download(Request $request)
     {
-        abort_if(Gate::denies('transaction_history_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('warranty_activation_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        return Excel::download(new TransactionHistoryExport($request), 'TransactionHistory.xlsx');
+        return Excel::download(new WarrantyActivactionExport($request), 'WarrantyActivation.xlsx');
     }
 }

@@ -48,10 +48,12 @@ class LoyaltyAppSettingController extends Controller
         if ($request->id && $request->id != '' && $request->id != NULL) {
             $loyaltyAppSetting = LoyaltyAppSetting::find($request->id);
             $loyaltyAppSetting->customer_types = implode(',', $request->customer_types);
+            $loyaltyAppSetting->app_version = $request->app_version;
             $loyaltyAppSetting->save();
         } else {
             $loyaltyAppSetting = new LoyaltyAppSetting();
             $loyaltyAppSetting->customer_types = implode(',', $request->customer_types);
+            $loyaltyAppSetting->app_version = $request->app_version;
             $loyaltyAppSetting->save();
         }
         if ($request->hasFile('images')) {

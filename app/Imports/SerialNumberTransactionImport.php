@@ -71,7 +71,8 @@ class SerialNumberTransactionImport implements ToCollection,WithValidation,WithH
     {
         $rules = [
             'product_name' => 'required|string|regex:/[a-zA-Z0-9\s]+/',
-            'invoice_no' => 'required|unique:services,invoice_no',
+            'invoice_no' => 'required',
+            // 'invoice_no' => 'required|unique:services,invoice_no',
             'product_code' => [
                 'required',
                 Rule::exists('products', 'product_code')

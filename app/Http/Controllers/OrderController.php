@@ -25,6 +25,8 @@ use App\Imports\OrderImport;
 use App\Exports\OrderExport;
 use App\Exports\OrderTemplate;
 use App\Http\Requests\OrderRequest;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 class OrderController extends Controller
 {
@@ -142,9 +144,17 @@ class OrderController extends Controller
 
 
             $request['buyer_id'] = isset($request['seller_id'])? $request['seller_id']:null;  
-            $request['seller_id'] = $buyer;        
-
-
+            $request['seller_id'] = $buyer; 
+            $request['cluster_amount'] = $request['extra_cluster_discount'];
+            $request['deal_discount'] = $request['extra_discount'];
+            $request['deal_amount'] = $request['extra_discount_amount'];
+            $request['distributor_amount'] = $request['distributor_discount_amount'];
+            $request['frieght_amount'] = $request['frieght_discount_amount'];
+            $request['gst5_amt'] = $request['5_gst'];
+            $request['gst12_amt'] = $request['12_gst'];
+            $request['gst28_amt'] = $request['18_gst'];
+            $request['gst18_amt'] = $request['28_gst'];
+            
             $response =  $this->orders->save_data($request);
             if($response['status'] == 'success')
             {
@@ -167,15 +177,17 @@ class OrderController extends Controller
                         'gst' => isset($rows['gst']) ? $rows['gst'] :0.00,
                         'gst_amount' => $single_product_amount??0.00,
                         'discount' => isset($rows['discount']) ? $rows['discount'] :0.00,
-                        'ebd_discount' => isset($rows['scheme_dis']) ? $rows['scheme_dis'] :0.00,
-                        'ebd_name' => isset($rows['scheme_name']) ? $rows['scheme_name'] :null,
-                        'ebd_amount' => isset($rows['scheme_amount']) ? $rows['scheme_amount'] :0.00,
+                        'scheme_discount' => isset($rows['scheme_dis']) ? $rows['scheme_dis'] :0.00,
+                        'scheme_name' => isset($rows['scheme_name']) ? $rows['scheme_name'] :null,
+                        'scheme_amount' => isset($rows['scheme_amount']) ? $rows['scheme_amount'] :0.00,
                         'cluster_discount' => isset($rows['clustered_dis']) ? $rows['clustered_dis'] :0.00,
                         'cluster_amount' => isset($rows['clus_amounts']) ? $rows['clus_amounts'] :0.00,
                         'distributor_discount' => isset($rows['distributot_dis']) ? $rows['distributot_dis'] :0.00,
                         'distributor_amount' => isset($rows['distributot_amounts']) ? $rows['distributot_amounts'] :0.00,
                         'deal_discount' => isset($rows['deal_dis']) ? $rows['deal_dis'] :0.00,
                         'deal_amount' => isset($rows['deal_amounts']) ? $rows['deal_amounts'] :0.00,
+                        'frieght_discount' => isset($rows['frieght_dis']) ? $rows['frieght_dis'] :0.00,
+                        'frieght_amount' => isset($rows['frieght_amounts']) ? $rows['frieght_amounts'] :0.00,
                         'created_at' => getcurentDateTime(),
                     ]);
                 }
@@ -224,6 +236,9 @@ class OrderController extends Controller
         $orderdetail = OrderDetails::with('products')->where('order_id','=',$id)->get();
         $products = Product::where('active','=','Y')->select('id', 'display_name','product_image')->get();
 
+        
+
+        // Optionally, you can save the PDF file path to your database or perform any other necessary actions
 
         // $sellers = Customers::whereHas('customertypes', function($query){
         //                         $query->where('type_name', '=', 'distributor');
@@ -357,7 +372,8 @@ class OrderController extends Controller
                         'distributor_amount' => isset($rows['distributot_amounts']) ? $rows['distributot_amounts'] :0.00,
                         'deal_discount' => isset($rows['deal_dis']) ? $rows['deal_dis'] :0.00,
                         'deal_amount' => isset($rows['deal_amounts']) ? $rows['deal_amounts'] :0.00,
-
+                        'frieght_discount' => isset($rows['frieght_dis']) ? $rows['frieght_dis'] :0.00,
+                        'frieght_amount' => isset($rows['frieght_amounts']) ? $rows['frieght_amounts'] :0.00,
                         'created_at' => getcurentDateTime(),
                     ]);
                 }
@@ -612,6 +628,20 @@ class OrderController extends Controller
         $orderid = decrypt($orderid);
         $orders = $this->orders->with('orderdetails')->find($orderid);
         return view('orders.dispatched')->with('orders',$orders);
+    }
+
+    public function orderCancle($orderid, Request $request)
+    {
+        $orderid = decrypt($orderid);
+        $orders = $this->orders->with('orderdetails')->find($orderid);
+        if($orders){
+            $orders->status_id = '4';
+            $orders->order_remark = $request->remark;
+            $orders->save();
+            return response()->json(['status'=>'success', 'message'=>'Order cancle successfully !!']);
+        }else{
+            return response()->json(['status'=>'error', 'message'=>'Order not found !!']);
+        }
     }
 
     public function submitDispatched(Request $request)

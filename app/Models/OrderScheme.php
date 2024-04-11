@@ -11,7 +11,7 @@ class OrderScheme extends Model
 
     protected $table = 'order_schemes';
 
-    protected $fillable = [ 'active', 'scheme_name', 'scheme_description', 'start_date', 'end_date', 'customer_type', 'scheme_type', 'scheme_basedon', 'assign_to', 'branch', 'state', 'customer','minimum', 'maximum','created_at', 'updated_at'];
+    protected $fillable = [ 'active', 'scheme_name', 'scheme_description', 'start_date', 'end_date', 'customer_type', 'scheme_type', 'scheme_basedon', 'assign_to', 'branch', 'state', 'customer','minimum', 'maximum','created_at', 'updated_at','repetition','week_days','year_months'];
 
 
     public function orderscheme_details()

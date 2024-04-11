@@ -75,7 +75,7 @@
                            <option value="" disabled>Select Customer Type</option>
                            @if($customer_types && count($customer_types) > 0)
                            @foreach($customer_types as $customer_type)
-                           <option value="{{$customer_type->id}}" {!! old( 'customer_type' , $schemes['customer_type'])==$customer_type->id?'selected':'' !!} >{{$customer_type->customertype_name}}</option>
+                           <option value="{{$customer_type->id}}" {!! in_array($customer_type->id, old( 'customer_type[]')??[]) ?'selected':'' !!} >{{$customer_type->customertype_name}}</option>
                            @endforeach
                            @endif
                         </select>
@@ -87,11 +87,79 @@
                      </div>
                   </div>
                </div>
+
                <div class="row">
-                  <div class="col-md-4">
+                  <div class="col-md-6">
+                     <div class="form-group">
+                        <select name="repetition" class="select2 form-control" id="repetition">
+                           <option value="">Select Repetition </option>
+                           <option value="1" {{(old('repetition') == '1')?'selected':''}}>Day</option>
+                           <option value="2" {{(old('repetition') == '2')?'selected':''}}>Week</option>
+                           <option value="3" {{(old('repetition') == '3')?'selected':''}}>Month</option>
+                           <option value="4" {{(old('repetition') == '4')?'selected':''}}>Year</option>
+                        </select>
+                        @if ($errors->has('repetition'))
+                        <div class="error col-lg-12">
+                           <p class="text-danger">{{ $errors->first('repetition') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+                  <div class="col-md-6">
+                     <div class="form-group">
+                        <select name="scheme_type" class="select2 form-control" id="schemetype">
+                           <option value="">{!! trans('panel.orderschemes.fields.scheme_type') !!}</option>
+                           <option value="lp" {{(old('repetition') == 'lp')?'selected':''}}>LP Price</option>
+                           <option value="Qty" {{(old('repetition') == 'Qty')?'selected':''}}>Quantity</option>
+                        </select>
+                        @if ($errors->has('scheme_type'))
+                        <div class="error col-lg-12">
+                           <p class="text-danger">{{ $errors->first('scheme_type') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+               </div>
+
+
+               <div class="weekDays row d-none">
+                  <div class="col-md-6">
+                     <div class="form-group {{$errors->has('day_repeat') ? config('constants.ERROR_FORM_GROUP_CLASS') : ''}}">
+                        <label class="col-md-6 control-label" for="day_repeat">Repeat on days<span style="color:red">*</span></label>
+                        <div class="col-md-10">
+                           @foreach(config('constants.WEEK_LIST') as $key => $week)
+                           <input type="checkbox" value="{{$key}}" class="weeks_data" name=week[] checked> {{$week}}
+                           @endforeach
+                           @if($errors->has('day_repeat'))
+                           <strong for="day_repeat" class="help-block">{{ $errors->first('day_repeat') }}</strong>
+                           @endif
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="weeks row d-none">
+               <div class="col-md-6">
+                     <div class="form-group">
+                        <select name="week_repeat" class="select2 form-control" id="week_repeat">
+                           <option value="">Select Week </option>
+                           <option value="1">First Week</option>
+                           <option value="2">Second Week</option>
+                           <option value="3">Third Week</option>
+                           <option value="4">Last Week</option>
+                        </select>
+                        @if ($errors->has('week_repeat'))
+                        <div class="error col-lg-12">
+                           <p class="text-danger">{{ $errors->first('week_repeat') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+               </div>
+               <div class="dateRang row d-none">
+                  <div class="col-md-6">
                      <div class="form-group">
                         <label class="bmd-label-floating">{!! trans('panel.orderschemes.fields.start_date') !!} </label>
-                        <input type="text" name="start_date" class="form-control datepicker" value="{!! old( 'start_date', $schemes['start_date']) !!}" autocomplete="off" readonly>
+                        <input type="text" name="start_date" class="form-control datepicker1" value="{!! old( 'start_date', $schemes['start_date']) !!}" autocomplete="off" readonly id="start_date">
                         @if ($errors->has('start_date'))
                         <div class="error col-lg-12">
                            <p class="text-danger">{{ $errors->first('start_date') }}</p>
@@ -99,29 +167,13 @@
                         @endif
                      </div>
                   </div>
-                  <div class="col-md-4">
+                  <div class="col-md-6">
                      <div class="form-group">
                         <label class="bmd-label-floating">{!! trans('panel.orderschemes.fields.end_date') !!} </label>
-                        <input type="text" name="end_date" class="form-control datepicker" value="{!! old( 'end_date', $schemes['end_date']) !!}" autocomplete="off" readonly>
+                        <input type="text" name="end_date" class="form-control datepicker1" value="{!! old( 'end_date', $schemes['end_date']) !!}" autocomplete="off" readonly id="end_date">
                         @if ($errors->has('end_date'))
                         <div class="error col-lg-12">
                            <p class="text-danger">{{ $errors->first('end_date') }}</p>
-                        </div>
-                        @endif
-                     </div>
-                  </div>
-                  <div class="col-md-4">
-                     <div class="form-group">
-                        <select name="scheme_type" class="select2 form-control" id="schemetype">
-                           <option value="">{!! trans('panel.orderschemes.fields.scheme_type') !!}</option>
-                          
-                           <option value="lp" {!! ($schemes->scheme_type == 'lp' ) ? "selected" : ''!!}>LP Price</option>
-                           <option value="Qty" {!! ($schemes->scheme_type == 'Qty' ) ? "selected" : ''!!}>Quantity</option>
-                          
-                        </select>
-                        @if ($errors->has('scheme_type'))
-                        <div class="error col-lg-12">
-                           <p class="text-danger">{{ $errors->first('scheme_type') }}</p>
                         </div>
                         @endif
                      </div>
@@ -132,9 +184,9 @@
                      <div class="form-group">
                         <select name="scheme_basedon" class="select2 form-control" id="schemebasedon">
                            <option value="">Scheme Based On</option>
-                           <option value="value" {!! ($schemes->scheme_basedon == 'value' ) ? "selected" : ''!!}>Value</option>
-                           <option value="percentage" {!! ($schemes->scheme_basedon == 'percentage' ) ? "selected" : ''!!}>Percentage</option>
-                          
+                           <option value="value" {{(old('repetition') == 'value')?'selected':''}}>Value</option>
+                           <option value="percentage" {{(old('repetition') == 'percentage')?'selected':''}}>Percentage</option>
+
                         </select>
                         @if ($errors->has('scheme_basedon'))
                         <div class="error col-lg-12">
@@ -146,7 +198,7 @@
                   <div class="col-md-8">
                      <div class="form-group">
                         <label class="bmd-label-floating">{!! trans('panel.orderschemes.fields.scheme_description') !!} </label>
-                        <textarea class="form-control" rows="4" name="scheme_description">{!! old( 'scheme_description', $schemes['scheme_description']) !!}</textarea>
+                        <textarea class="form-control" rows="4" name="scheme_description">{!! old( 'scheme_description') !!}</textarea>
                         @if ($errors->has('scheme_description'))
                         <div class="error col-lg-12">
                            <p class="text-danger">{{ $errors->first('scheme_description') }}</p>
@@ -154,10 +206,10 @@
                         @endif
                      </div>
                   </div>
-               
+
                </div>
 
-               <div class="row" id="min_max" style="display:none;"> 
+               <div class="row" id="min_max" style="display:none;">
                   <div class="col-md-4">
                      <div class="form-group">
                         <label class="bmd-label-floating">{!! trans('panel.orderschemes.fields.minimum') !!} </label>
@@ -203,7 +255,7 @@
                   <div class="col-md-6" id="branch">
                      <div class="form-group">
                         <select name="branch[]" multiple placeholder="Select Branch" class="select2 form-control" required style="width:100%;">
-                        
+
                            @if($branchs && count($branchs) > 0)
                            @foreach($branchs as $branch)
                            <option value="{{$branch->id}}" {!! in_array($branch->id, old( 'branch[]', explode(',', $schemes['branch']))) ?'selected':'' !!} >{{$branch->branch_name}}</option>
@@ -220,7 +272,7 @@
                   <div class="col-md-6" id="state">
                      <div class="form-group">
                         <select name="state[]" multiple placeholder="Select States" class="select2 form-control" required style="width:100%;">
-                           
+
                            @if($states && count($states) > 0)
                            @foreach($states as $state)
                            <option value="{{$state->id}}" {!! in_array($state->id, old( 'state[]', explode(',', $schemes['state']))) ?'selected':'' !!}>{{$state->state_name}}</option>
@@ -237,7 +289,7 @@
                   <div class="col-md-6" id="customer">
                      <div class="form-group">
                         <!-- <select name="customer[]" id='customer_select' value="{!! old( 'customer', $schemes['customer']) !!}" ></select> -->
-                        {!! Form::select('customer[]',[], old( 'customer', $schemes['customer']), ['id'=>'customer_select', 'class' => 'form-control']) !!} 
+                        {!! Form::select('customer[]',[], old( 'customer', $schemes['customer']), ['id'=>'customer_select', 'class' => 'form-control']) !!}
                         @if ($errors->has('state'))
                         <div class="error col-lg-12">
                            <p class="text-danger">{{ $errors->first('state') }}</p>
@@ -247,7 +299,7 @@
                   </div>
                </div>
 
-             <!--  <div class="row redemption">
+               <!--  <div class="row redemption">
                   <div class="col-md-6">
                      <div class="row">
                         <label class="col-sm-3 col-form-label">{!! trans('panel.orderschemes.fields.points_start_date') !!}</label>
@@ -309,7 +361,7 @@
                                  <a href="{{ URL::to('orderschemes-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.scheme.title_singular') !!}"><i class="material-icons">text_snippet</i></a>
                                  @if( $schemes->exists && isset($schemes['orderscheme_details']) )
                                  <a href="{{ URL::to('orderschemes-download') }}?id={{$schemes->id}}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.scheme.title') !!}"><i class="material-icons">cloud_download</i></a>
-                                 @endif 
+                                 @endif
                               </div>
                            </div>
                         </div>
@@ -399,7 +451,7 @@
          counter = 0;
       }
       $(document).ready(function() {
- 
+
          columnDisplay();
          var $table = $('table.kvcodes-dynamic-rows-example');
          $('a.add-rows').click(function(event) {
@@ -466,23 +518,23 @@
       $(function() {
          $("#schemetype").on('change', function() {
 
-         var schemetypeqty = $("#schemetype option:selected").val();
-          if(schemetypeqty === 'Qty') { 
-           $('#min_max').show();
-          }else{ 
-           $('#min_max').hide();
-          }
+            var schemetypeqty = $("#schemetype option:selected").val();
+            if (schemetypeqty === 'Qty') {
+               $('#min_max').show();
+            } else {
+               $('#min_max').hide();
+            }
 
             columnDisplay();
          })
 
       });
-           
 
-      function getcategorylist() { 
+
+      function getcategorylist() {
          $.ajax({
-             //url: "/getCategoryData",
-             url:"{{url('/getCategoryData')}}",
+            //url: "/getCategoryData",
+            url: "{{url('/getCategoryData')}}",
             success: function(data) {
                var html = '<option value="">Select Category</option>';
                $.each(data, function(k, v) {
@@ -499,8 +551,8 @@
          var tr = $(this).closest('tr');
          var subInput = tr.find('.sub_category');
          $.ajax({
-           //url: "/getSubCategoryData",
-           url:"{{url('/getSubCategoryData')}}",
+            //url: "/getSubCategoryData",
+            url: "{{url('/getSubCategoryData')}}",
             data: {
                'cat_id': cat
             },
@@ -520,7 +572,7 @@
          var proInput = tr.find('.product_drop');
          $.ajax({
             //url: "/getProductData",
-            url:"{{url('/getProductData')}}",
+            url: "{{url('/getProductData')}}",
             data: {
                'sub_cat': cat
             },
@@ -578,4 +630,66 @@
 
       }).trigger('change');
    </script>
+
+
+   <script>
+      $(function() {
+         $("#start_date").datepicker({
+            dateFormat: 'yy-mm-dd',
+            onSelect: function(selected) {
+               $("#end_date").datepicker("option", "minDate", selected);
+            }
+         });
+
+         $("#end_date").datepicker({
+            dateFormat: 'yy-mm-dd',
+            onSelect: function(selected) {
+               $("#start_date").datepicker("option", "maxDate", selected);
+            }
+         });
+      });
+
+
+      // for years
+      $("#ones_in_year").datepicker({
+         dateFormat: 'dd-MM',
+
+      });
+
+
+      //for month date
+      $("#date_of_month").datepicker({
+         dateFormat: 'dd',
+
+      });
+   </script>
+
+   <script>
+      $(document).ready(function() {
+
+         $(document).on('change', '#repetition', function() {
+
+            var repetition = $(this).val();
+            if (repetition == 1) {
+               $('.weekDays').removeClass('d-none');
+               $('.dateRang').addClass('d-none');
+               $('.weeks').addClass('d-none');
+            } else if (repetition == 2) {
+               $('.weeks').removeClass('d-none');
+               $('.weekDays').addClass('d-none');
+               $('.dateRang').addClass('d-none');
+            }else{
+               $('.weeks').addClass('d-none');
+               $('.weekDays').addClass('d-none');
+               $('.dateRang').removeClass('d-none');
+            }
+
+
+         });
+
+      });
+   </script>
+
+
+
 </x-app-layout>

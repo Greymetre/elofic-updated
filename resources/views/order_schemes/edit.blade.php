@@ -88,7 +88,72 @@
                   </div>
                </div>
                <div class="row">
-                  <div class="col-md-4">
+                  <div class="col-md-6">
+                     <div class="form-group">
+                        <select name="repetition" class="select2 form-control" id="repetition">
+                           <option value="">Select Repetition </option>
+                           <option value="1" {{($schemes->repetition == '1')?'selected':''}}>Day</option>
+                           <option value="2" {{($schemes->repetition == '2')?'selected':''}}>Week</option>
+                           <option value="3" {{($schemes->repetition == '3')?'selected':''}}>Month</option>
+                           <option value="4" {{($schemes->repetition == '4')?'selected':''}}>Year</option>
+                        </select>
+                        @if ($errors->has('repetition'))
+                        <div class="error col-lg-12">
+                           <p class="text-danger">{{ $errors->first('repetition') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+                  <div class="col-md-6">
+                     <div class="form-group">
+                        <select name="scheme_type" class="select2 form-control" id="schemetype">
+                           <option value="">{!! trans('panel.orderschemes.fields.scheme_type') !!}</option>
+                           <option value="lp" {!! ($schemes->scheme_type == 'lp' ) ? "selected" : ''!!}>LP Price</option>
+                           <option value="Qty" {!! ($schemes->scheme_type == 'Qty' ) ? "selected" : ''!!}>Quantity</option>
+                        </select>
+                        @if ($errors->has('scheme_type'))
+                        <div class="error col-lg-12">
+                           <p class="text-danger">{{ $errors->first('scheme_type') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+               </div>
+               <div class="weekDays row d-none">
+                  <div class="col-md-6">
+                     <div class="form-group {{$errors->has('day_repeat') ? config('constants.ERROR_FORM_GROUP_CLASS') : ''}}">
+                        <label class="col-md-6 control-label" for="day_repeat">Repeat on days<span style="color:red">*</span></label>
+                        <div class="col-md-10">
+                           @foreach(config('constants.WEEK_LIST') as $key => $week)
+                           <input type="checkbox" value="{{$key}}" class="weeks_data" name=week[] {{in_array($key, explode(',', $schemes->day_repeat))?'checked':''}}> {{$week}}
+                           @endforeach
+                           @if($errors->has('day_repeat'))
+                           <strong for="day_repeat" class="help-block">{{ $errors->first('day_repeat') }}</strong>
+                           @endif
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="weeks row d-none">
+                  <div class="col-md-6">
+                     <div class="form-group">
+                        <select name="week_repeat" class="select2 form-control" id="week_repeat">
+                           <option value="">Select Week </option>
+                           <option value="1" {{($schemes->week_repeat == '1')?'selected':''}}>First Week</option>
+                           <option value="2" {{($schemes->week_repeat == '2')?'selected':''}}>Second Week</option>
+                           <option value="3" {{($schemes->week_repeat == '3')?'selected':''}}>Third Week</option>
+                           <option value="4" {{($schemes->week_repeat == '4')?'selected':''}}>Last Week</option>
+                        </select>
+                        @if ($errors->has('week_repeat'))
+                        <div class="error col-lg-12">
+                           <p class="text-danger">{{ $errors->first('week_repeat') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+               </div>
+               <div class="dateRang row d-none">
+                  <div class="col-md-6">
                      <div class="form-group">
                         <label class="bmd-label-floating">{!! trans('panel.orderschemes.fields.start_date') !!} </label>
                         <input type="text" name="start_date" class="form-control datepicker" value="{!! old( 'start_date', $schemes['start_date']) !!}" autocomplete="off" readonly>
@@ -99,27 +164,13 @@
                         @endif
                      </div>
                   </div>
-                  <div class="col-md-4">
+                  <div class="col-md-6">
                      <div class="form-group">
                         <label class="bmd-label-floating">{!! trans('panel.orderschemes.fields.end_date') !!} </label>
                         <input type="text" name="end_date" class="form-control datepicker" value="{!! old( 'end_date', $schemes['end_date']) !!}" autocomplete="off" readonly>
                         @if ($errors->has('end_date'))
                         <div class="error col-lg-12">
                            <p class="text-danger">{{ $errors->first('end_date') }}</p>
-                        </div>
-                        @endif
-                     </div>
-                  </div>
-                  <div class="col-md-4">
-                     <div class="form-group">
-                        <select name="scheme_type" class="select2 form-control" id="schemetype">
-                           <option value="">{!! trans('panel.orderschemes.fields.scheme_type') !!}</option>
-                           <option value="lp" {!! ($schemes->scheme_type == 'lp' ) ? "selected" : ''!!}>LP Price</option>
-                           <option value="Qty" {!! ($schemes->scheme_type == 'Qty' ) ? "selected" : ''!!}>Quantity</option>
-                        </select>
-                        @if ($errors->has('scheme_type'))
-                        <div class="error col-lg-12">
-                           <p class="text-danger">{{ $errors->first('scheme_type') }}</p>
                         </div>
                         @endif
                      </div>
@@ -151,10 +202,10 @@
                         @endif
                      </div>
                   </div>
-               
+
                </div>
 
-               <div class="row" id="min_max" style="display:none;"> 
+               <div class="row" id="min_max" style="display:none;">
                   <div class="col-md-4">
                      <div class="form-group">
                         <label class="bmd-label-floating">{!! trans('panel.orderschemes.fields.minimum') !!} </label>
@@ -200,7 +251,7 @@
                   <div class="col-md-6" id="branch">
                      <div class="form-group">
                         <select name="branch[]" multiple placeholder="Select Branch" class="select2 form-control" required style="width:100%;">
-                        
+
                            @if($branchs && count($branchs) > 0)
                            @foreach($branchs as $branch)
                            <option value="{{$branch->id}}" {!! in_array($branch->id, old( 'branch[]', explode(',', $schemes['branch']))) ?'selected':'' !!} >{{$branch->branch_name}}</option>
@@ -217,7 +268,7 @@
                   <div class="col-md-6" id="state">
                      <div class="form-group">
                         <select name="state[]" multiple placeholder="Select States" class="select2 form-control" required style="width:100%;">
-                           
+
                            @if($states && count($states) > 0)
                            @foreach($states as $state)
                            <option value="{{$state->id}}" {!! in_array($state->id, old( 'state[]', explode(',', $schemes['state']))) ?'selected':'' !!}>{{$state->state_name}}</option>
@@ -233,7 +284,7 @@
                   </div>
                   <div class="col-md-6" id="customer">
                      <div class="form-group">
-                        {!! Form::select('customer[]',[], old( 'customer', $schemes['customer']), ['id'=>'customer_select', 'class' => 'form-control']) !!} 
+                        {!! Form::select('customer[]',[], old( 'customer', $schemes['customer']), ['id'=>'customer_select', 'class' => 'form-control']) !!}
                         @if ($errors->has('state'))
                         <div class="error col-lg-12">
                            <p class="text-danger">{{ $errors->first('state') }}</p>
@@ -243,7 +294,7 @@
                   </div>
                </div>
 
-             <!--  <div class="row redemption">
+               <!--  <div class="row redemption">
                   <div class="col-md-6">
                      <div class="row">
                         <label class="col-sm-3 col-form-label">{!! trans('panel.orderschemes.fields.points_start_date') !!}</label>
@@ -305,7 +356,7 @@
                                  <a href="{{ URL::to('orderschemes-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.scheme.title_singular') !!}"><i class="material-icons">text_snippet</i></a>
                                  @if( $schemes->exists && isset($schemes['orderscheme_details']) )
                                  <a href="{{ URL::to('orderschemes-download') }}?id={{$schemes->id}}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.scheme.title') !!}"><i class="material-icons">cloud_download</i></a>
-                                 @endif 
+                                 @endif
                               </div>
                            </div>
                         </div>
@@ -395,7 +446,7 @@
          counter = 0;
       }
       $(document).ready(function() {
- 
+
          columnDisplay();
          var $table = $('table.kvcodes-dynamic-rows-example');
          $('a.add-rows').click(function(event) {
@@ -459,25 +510,25 @@
          }
       }
 
-     // $(function() {
-         $("#schemetype").on('change', function() {
+      // $(function() {
+      $("#schemetype").on('change', function() {
 
          var schemetypeqty = $("#schemetype option:selected").val();
-          if(schemetypeqty === 'Qty') { 
-           $('#min_max').show();
-          }else{ 
-           $('#min_max').hide();
-          }
-            columnDisplay();
-         }).trigger('change');
+         if (schemetypeqty === 'Qty') {
+            $('#min_max').show();
+         } else {
+            $('#min_max').hide();
+         }
+         columnDisplay();
+      }).trigger('change');
 
-     // }).trigger('change');
-           
+      // }).trigger('change');
 
-      function getcategorylist() { 
+
+      function getcategorylist() {
          $.ajax({
-             //url: "/getCategoryData",
-             url:"{{url('/getCategoryData')}}",
+            //url: "/getCategoryData",
+            url: "{{url('/getCategoryData')}}",
             success: function(data) {
                var html = '<option value="">Select Category</option>';
                $.each(data, function(k, v) {
@@ -494,8 +545,8 @@
          var tr = $(this).closest('tr');
          var subInput = tr.find('.sub_category');
          $.ajax({
-           //url: "/getSubCategoryData",
-           url:"{{url('/getSubCategoryData')}}",
+            //url: "/getSubCategoryData",
+            url: "{{url('/getSubCategoryData')}}",
             data: {
                'cat_id': cat
             },
@@ -515,7 +566,7 @@
          var proInput = tr.find('.product_drop');
          $.ajax({
             //url: "/getProductData",
-            url:"{{url('/getProductData')}}",
+            url: "{{url('/getProductData')}}",
             data: {
                'sub_cat': cat
             },
@@ -574,17 +625,28 @@
       }).trigger('change');
 
 
+      $(document).ready(function() {
 
-   // $("#schemetype").on('change', function() {
-   // var schemetypeqty = $("#schemetype option:selected").val();
-   //  if(schemetypeqty === 'Qty') { 
-   //   $('#min_max').show();
-   //  }else{ 
-   //   $('#min_max').hide();
-   //  }
-   //    columnDisplay();
-   // }).trigger('change')
+         $('#repetition').on('change', function() {
+
+            var repetition = $(this).val();
+            if (repetition == 1) {
+               $('.weekDays').removeClass('d-none');
+               $('.dateRang').addClass('d-none');
+               $('.weeks').addClass('d-none');
+            } else if (repetition == 2) {
+               $('.weeks').removeClass('d-none');
+               $('.weekDays').addClass('d-none');
+               $('.dateRang').addClass('d-none');
+            } else {
+               $('.weeks').addClass('d-none');
+               $('.weekDays').addClass('d-none');
+               $('.dateRang').removeClass('d-none');
+            }
 
 
+         }).trigger('change');
+
+      });
    </script>
 </x-app-layout>

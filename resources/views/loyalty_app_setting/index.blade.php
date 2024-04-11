@@ -153,6 +153,25 @@
                         @endif
                      </div>
                   </div>
+                  <div class="col-md-6">
+                     <div class="form-group">
+                        <div class="row">
+                           <div class="col-md-3">
+                              <label class="form-control">App Version </label>
+                           </div>
+                           <div class="col-md-9">
+                              <input type="number" name="app_version" placeholder="1.01" step="0.01" class="form-control" id="app_version" value="{{old('app_version', $loyalty_app_setting['app_version'])}}" required>
+                              @if ($errors->has('app_version'))
+                              <div class="error col-lg-12">
+                                 <p class="text-danger">{{ $errors->first('app_version') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="row mt-4">
                   <div class="col-md-6 mt-4">
                      <div class="row">
                         <div class="col-md-4">
@@ -175,8 +194,6 @@
                      </div>
                      @endif
                   </div>
-               </div>
-               <div class="row">
                   <div class="col-md-6 mt-4">
                      <div class="row">
                         <div class="col-md-4">
@@ -198,6 +215,8 @@
                      </div>
                      @endif
                   </div>
+               </div>
+               <div class="row">
                   <div class="col-md-6 mt-4">
                      <div class="row">
                         <div class="col-md-4">

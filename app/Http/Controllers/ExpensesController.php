@@ -18,9 +18,7 @@ use DB;
 use Auth;
 use Excel;
 use App\Exports\ExcelExport;
-
-
-
+use App\Models\Customers;
 
 class ExpensesController extends Controller
 {
@@ -31,10 +29,6 @@ class ExpensesController extends Controller
      */
     public function index(Request $request)
     {  
-        
-
-        //$expense_types = ExpensesType::orderBy('id','desc')->get();
-
         $userids = getUsersReportingToAuth();
         $users= User::where('active','=','Y')->where(function($query) use($userids){
                                 if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))

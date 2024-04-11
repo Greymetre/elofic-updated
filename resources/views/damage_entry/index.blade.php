@@ -1,4 +1,9 @@
 <x-app-layout>
+  <style>
+    span.select2-dropdown.select2-dropdown--below {
+      z-index: 99999 !important;
+    }
+  </style>
   <div class="row">
     <div class="col-md-12">
       <div class="card">
@@ -57,8 +62,8 @@
                 <div class="col">
                   <!-- <div class="collapse multi-collapse" id="multiCollapseExample2">
                     <div class="d-flex" style="font-size: 14px;align-items: center;justify-content: space-between;"> -->
-                      @if(auth()->user()->can(['transaction_history_upload']))
-                      <!-- <p>Upload Manual Transaction</p>
+                  @if(auth()->user()->can(['transaction_history_upload']))
+                  <!-- <p>Upload Manual Transaction</p>
                       <form action="{{ URL::to('transaction_history_upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                         {{ csrf_field() }}
                         <div class="d-flex">
@@ -78,18 +83,18 @@
                           </div>
                         </div>
                       </form> -->
-                      @endif
-                      @if(auth()->user()->can(['transaction_history_template']))
-                      <!-- <p>{!!  trans('panel.global.template') !!} Manual Transaction</p>
+                  @endif
+                  @if(auth()->user()->can(['transaction_history_template']))
+                  <!-- <p>{!!  trans('panel.global.template') !!} Manual Transaction</p>
                       <a href="{{ URL::to('transaction_history_template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} Manual Transaction"><i class="material-icons">text_snippet</i></a> -->
-                      @endif
-                      @if(auth()->user()->can(['transaction_history_create']))
-                      <!-- <p>{!!  trans('panel.global.add') !!} Transaction</p> -->
-                      <a href="{{ route('damage_entries.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Damage Entry"><i class="material-icons">add_circle</i></a>
-                      <!-- <p>{!!  trans('panel.global.add') !!} Manual Transaction</p>
+                  @endif
+                  @if(auth()->user()->can(['transaction_history_create']))
+                  <!-- <p>{!!  trans('panel.global.add') !!} Transaction</p> -->
+                  <a href="{{ route('damage_entries.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Damage Entry"><i class="material-icons">add_circle</i></a>
+                  <!-- <p>{!!  trans('panel.global.add') !!} Manual Transaction</p>
                       <a href="{{ route('transaction_history.manualcreate') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Manual Transaction"><i class="material-icons">add_circle</i></a> -->
-                      @endif
-                    <!-- </div>
+                  @endif
+                  <!-- </div>
                   </div> -->
                 </div>
               </div>
@@ -251,14 +256,32 @@
         table.draw();
       });
       $('body').on('click', '.changeStatus', function() {
+        setTimeout(() => {
+          $('#product_id').select2({
+            placeholder: 'Select Product',
+            allowClear: true,
+            ajax: {
+              url: "{{ route('getProductDataSelect') }}",
+              dataType: 'json',
+              delay: 250,
+              data: function(params) {
+                return {
+                  term: params.term || '',
+                  page: params.page || 1
+                }
+              },
+              cache: true
+            }
+          }).trigger('change');
+        }, 1000);
         var id = $(this).attr("id");
         var active = $(this).data("status");
+        var ccode = $(this).data("ccode");
         var status = active == 0 ? '0' : (active == 1 ? '1' : '2');
         Swal.fire({
           title: 'Please Select Status',
           input: 'select',
           inputOptions: {
-            '0': 'Pendding',
             '1': 'Approve',
             '2': 'Reject'
           },
@@ -274,17 +297,33 @@
               }
             });
           },
-          html: '<input id="remark" name="remark" class="swal2-input" placeholder="Remark">',
+          html: '<input type="text" name="coupon_code" id="coupon_code" class="swal2-input" value="' + ccode + '" placeholder="Coupon Code"/ required><select class="form-control select2" name="product_id" id="product_id" data-style="select-with-transition" title="Select Product"></select><input id="remark" name="remark" class="swal2-input" placeholder="Remark"><p class="alert alert-danger d-none" id="poperror"></p>',
+          preConfirm: function() {
+            var remark = $('#remark').val();
+            var coupon_code = $('#coupon_code').val();
+            var product_id = $('#product_id').val();
+            if (!coupon_code || !product_id) {
+              $('#poperror').text('Coupon code and product are both required.');
+              $('#poperror').removeClass('d-none');
+              return false;
+            } else {
+              return true;
+            }
+          }
         }).then(function(result) {
           if (!result.dismiss) {
             var remark = $('#remark').val();
+            var coupon_code = $('#coupon_code').val();
+            var product_id = $('#product_id').val();
             $.ajax({
               url: "{{ url('damage-entries-change-status') }}",
               type: 'GET',
               data: {
                 id: id,
                 status: result.value,
-                remark: remark
+                remark: remark,
+                coupon_code: coupon_code,
+                product_id: product_id
               },
               success: function(data) {
                 $('.message').empty();
@@ -349,6 +388,7 @@
           cache: true
         }
       }).trigger('change');
+
     }, 2000);
   </script>
 </x-app-layout>

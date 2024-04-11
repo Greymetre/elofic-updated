@@ -9,49 +9,55 @@
           <h4 class="card-title ">Warranty Activation {!! trans('panel.global.list') !!}
             <span class="pull-right">
               <div class="btn-group align-items-center">
-                {{-- @if(auth()->user()->can(['warranty_activation_download'])) 
-                <form method="GET" action="{{ route('warranty_activation.download') }}" class="form-horizontal"> --}}
-                <div class="d-flex flex-row align-items-center">
-                  <div class="p-2" style="width:180px;">
-                    <!-- <label for="status">Status</label> -->
-                    <select class="select2" placeholder="Select Branch" name="status" id="status" data-style="select-with-transition" title="Select Branch">
-                      <option value="">Select Status</option>
-                      <option value="0">Inactive</option>
-                      <option value="1">Active</option>
-                    </select>
+                @if(auth()->user()->can(['warranty_activation_download']))
+                <form method="GET" action="{{ route('warranty_activation.download') }}" class="form-horizontal">
+                  <div class="d-flex flex-row align-items-center">
+                    <div class="p-2" style="width:180px;">
+                      <!-- <label for="status">Status</label> -->
+                      <select class="select2" placeholder="Select Branch" name="status" id="status" data-style="select-with-transition" title="Select Branch">
+                        <option value="">Select Status</option>
+                        <option value="0">Inactive</option>
+                        <option value="1">Active</option>
+                      </select>
+                    </div>
+                    <div class="p-2" style="width:180px;">
+                      <!-- <label for="branch_id">Branch</label> -->
+                      <select class="select2" placeholder="Select Branch" name="branch_id" id="branch_id" data-style="select-with-transition" title="Select Branch">
+                        <option value="">Select Branch</option>
+                        @if(@isset($branches ))
+                        @foreach($branches as $branch)
+                        <option value="{!! $branch->id !!}">{!! $branch->branch_name !!}</option>
+                        @endforeach
+                        @endif
+                      </select>
+                    </div>
+                    <div class="p-2" style="width:180px;">
+                      <!-- <label for="parent_customer">Seller Name</label> -->
+                      <select name="parent_customer" id="parent_customer" data-style="select-with-transition" title="Select seller">
+                      </select>
+                    </div>
+                    <div class="p-2" style="width:180px;">
+                      <!-- <label for="product_id">Product Name</label> -->
+                      <select name="product_id" id="product_id" data-style="select-with-transition" title="Select seller">
+                      </select>
+                    </div>
+                    <div class="p-2" style="width:180px;">
+                      <!-- <label for="product_id">Product Name</label> -->
+                      <select name="state_id" id="state_id" data-style="select-with-transition" title="Select seller">
+                      </select>
+                    </div>
+
+                    <!-- <div class="p-2" style="width:180px;"><label for="start_date">Start Date</label><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
+                    <div class="p-2" style="width:180px;"><label for="end_date">End Date</label><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div> -->
+                    <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Warranty Activation"><i class="material-icons">cloud_download</i></button></div>
+
                   </div>
-                  <div class="p-2" style="width:180px;">
-                    <!-- <label for="branch_id">Branch</label> -->
-                    <select class="select2" placeholder="Select Branch" name="branch_id" id="branch_id" data-style="select-with-transition" title="Select Branch">
-                      <option value="">Select Branch</option>
-                      @if(@isset($branches ))
-                      @foreach($branches as $branch)
-                      <option value="{!! $branch->id !!}">{!! $branch->branch_name !!}</option>
-                      @endforeach
-                      @endif
-                    </select>
-                  </div>
-                  <div class="p-2" style="width:180px;">
-                    <!-- <label for="parent_customer">Seller Name</label> -->
-                    <select name="parent_customer" id="parent_customer" data-style="select-with-transition" title="Select seller">
-                    </select>
-                  </div>
-                  <div class="p-2" style="width:180px;">
-                    <!-- <label for="product_id">Product Name</label> -->
-                    <select name="product_id" id="product_id" data-style="select-with-transition" title="Select seller">
-                    </select>
-                  </div>
-                  
-                  {{-- <div class="p-2" style="width:180px;"><label for="start_date">Start Date</label><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
-                    <div class="p-2" style="width:180px;"><label for="end_date">End Date</label><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
-                    <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Transaction Coupon History"><i class="material-icons">cloud_download</i></button></div>
-                    --}}</div>{{--
-                </form> 
-                  @endif --}}
-                  @if(auth()->user()->can(['warranty_activation_create']))
-                  <a href="{{ route('warranty_activation.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Transaction Coupon History"><i class="material-icons">add_circle</i></a>
-                  @endif
-                </div>
+                </form>
+                @endif
+                @if(auth()->user()->can(['warranty_activation_create']))
+                <a href="{{ route('warranty_activation.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Warranty Activation"><i class="material-icons">add_circle</i></a>
+                @endif
+              </div>
             </span>
           </h4>
         </div>
@@ -103,6 +109,7 @@
                 <th>Customer Name</th>
                 <th>Contact Number</th>
                 <th>Status</th>
+                <th>Serail_ Number</th>
                 <th>Seller Name</th>
                 <th>Product Name</th>
                 <th>Activation Status</th>
@@ -134,10 +141,11 @@
         "ajax": {
           'url': "{{ route('warranty_activation.index') }}",
           'data': function(d) {
-              d.branch_id = $('#branch_id').val(),
+            d.branch_id = $('#branch_id').val(),
               d.parent_customer = $('#parent_customer').val(),
               d.status = $('#status').val(),
-              d.product_id = $('#product_id').val()
+              d.product_id = $('#product_id').val(),
+              d.state_id = $('#state_id').val()
           }
         },
         columns: [{
@@ -171,6 +179,14 @@
             searchable: false
           },
           {
+            data: 'product_serail_number',
+            name: 'product_serail_number',
+            "defaultContent": '',
+            render: function(data, type, row) {
+              return data.toUpperCase();
+            }
+          },
+          {
             data: 'seller_details.name',
             name: 'seller_details.name',
             "defaultContent": ''
@@ -197,6 +213,9 @@
         table.draw();
       });
       $('#product_id').change(function() {
+        table.draw();
+      });
+      $('#state_id').change(function() {
         table.draw();
       });
       $('body').on('click', '.activeRecord', function() {
@@ -241,7 +260,7 @@
           return false;
         }
         $.ajax({
-          url: "{{ url('transaction_history') }}" + '/' + id,
+          url: "{{ url('warranty_activation') }}" + '/' + id,
           type: 'DELETE',
           data: {
             _token: token,
@@ -297,9 +316,24 @@
           cache: true
         }
       }).trigger('change');
-    
-    }, 1000);
 
-    
+      $('#state_id').select2({
+        placeholder: 'Select State',
+        allowClear: true,
+        ajax: {
+          url: "{{ route('getStateDataSelect') }}",
+          dataType: 'json',
+          delay: 250,
+          data: function(params) {
+            return {
+              term: params.term || '',
+              page: params.page || 1
+            }
+          },
+          cache: true
+        }
+      }).trigger('change');
+
+    }, 1000);
   </script>
 </x-app-layout>

@@ -357,8 +357,34 @@
             </div>
           </li>
           @endif
-
-
+          @if(auth()->user()->can('target_users_access'))
+          <li class="nav-item ">
+            <a class="nav-link collapsed" data-toggle="collapse" href="#salesUserMenu" aria-expanded="false">
+              <i class="material-icons">store</i>
+              <p> {!! trans('panel.sidemenu.sales_users') !!} </p>
+            </a>
+            <div class="collapse" id="salesUserMenu" style="">
+              <ul class="nav">
+                @if(auth()->user()->can('target_users_access'))
+                <li class="nav-item {{ request()->is('sales_users.target_users') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('sales_users/target_users') }}">
+                    <i class="material-icons">verified_user</i>
+                    <p> {!! trans('panel.sales_users.title') !!}</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('target_users_access'))
+                <li class="nav-item {{ request()->is('sales_users.target_users') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('sales_users/target_users') }}">
+                    <i class="material-icons">verified_user</i>
+                    <p> {!! trans('panel.dealer_distributor_user.title') !!}</p>
+                  </a>
+                </li>
+                @endif
+              </ul>
+            </div>
+          </li>
+          @endif
         @if(auth()->user()->can('hr_access'))
           <li class="nav-item {{ request()->is('reports*') ? 'active' : '' }}">
             <a class="nav-link collapsed" data-toggle="collapse" href="#hr" aria-expanded="false">
@@ -529,7 +555,7 @@
           @endif -->
 
         @if(auth()->user()->can('order_access'))
-            <li class="nav-item ">
+            <li class="nav-item {{ request()->is('orders*') ? 'active' : '' }}">
             <a class="nav-link collapsed" data-toggle="collapse" href="#orderMenu" aria-expanded="false">
               <i class="material-icons">star</i>
              <p>{!! trans('panel.sidemenu.orders') !!}</p>
@@ -550,7 +576,15 @@
                 <li class="nav-item {{ request()->is('orderschemes*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('orderschemes') }}">
                     <i class="material-icons">flaky</i>
-                    <p>OrderSchemes</p>
+                    <p>Order Schemes</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('sale_access'))
+                <li class="nav-item {{ request()->is('sales') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('sales') }}">
+                    <i class="material-icons">shopping_cart</i>
+                    <p>{!! trans('panel.sidemenu.order_dispatch') !!}</p>
                   </a>
                 </li>
                 @endif
@@ -622,15 +656,6 @@
             </div>
           </li>
           @endif
-          @if(auth()->user()->can('sale_access'))
-          <li class="nav-item {{ request()->is('sales') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ url('sales') }}">
-              <i class="material-icons">shopping_cart</i>
-              <p>{!! trans('panel.sidemenu.sales') !!}</p>
-            </a>
-          </li>
-          @endif
-
           @if(auth()->user()->can('wallet_access'))
           <!-- <li class="nav-item ">
             <a class="nav-link collapsed" data-toggle="collapse" href="#walletMenu" aria-expanded="false">
@@ -682,6 +707,14 @@
                   <a class="nav-link" href="{{ url('transaction_history') }}">
                     <i class="material-icons">history</i>
                     <p>Transaction Coupon History</p>
+                  </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('loyalty_mobile_app_users_access'))
+                <li class="nav-item {{ request()->is('mobile_user_login') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('mobile_user_login') }}">
+                    <i class="material-icons">verified_user</i>
+                    <p>Mobile App Users</p>
                   </a>
                 </li>
                 @endif

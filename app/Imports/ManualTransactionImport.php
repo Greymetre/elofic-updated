@@ -26,7 +26,7 @@ class ManualTransactionImport implements ToModel,WithValidation,WithHeadingRow, 
     {
         return new TransactionHistory([
             'customer_id' => isset($row['customer_id'])? ucfirst($row['customer_id']):'',
-            'point_type' => isset($row['point_type'])? $row['point_type']:'',
+            'status' => isset($row['point_type'])? $row['point_type']:'',
             'point' => isset($row['points'])? $row['points']:'',
             'remark' => isset($row['remark'])? $row['remark']:NULL,
             'created_by' => Auth::user()->id,

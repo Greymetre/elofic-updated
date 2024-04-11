@@ -80,13 +80,13 @@
                   <div id="copen_code_div">
                      <div class="row">
                         <div class="col-md-2">
-                           <label for="coupen_code" class="form-control">Coupen Code</label>
+                           <label for="coupon_code" class="form-control">Coupen Code</label>
                         </div>
                         <div class="col-md-9">
-                           <input type="text" name="coupen_code[]" id="coupen_code" class="form-control" required>
-                           @if ($errors->has('coupen_code'))
+                           <input type="text" name="coupon_code[]" id="coupon_code" class="form-control" required>
+                           @if ($errors->has('coupon_code'))
                            <div class="error col-lg-12">
-                              <p class="text-danger">{{ $errors->first('coupen_code') }}</p>
+                              <p class="text-danger">{{ $errors->first('coupon_code') }}</p>
                            </div>
                            @endif
                         </div>
@@ -113,10 +113,10 @@
          var newRow =
             '<div class="row">' +
             '<div class="col-md-2">' +
-            '<label for="coupen_code" class="form-control">Coupen Code</label>' +
+            '<label for="coupon_code" class="form-control">Coupen Code</label>' +
             '</div>' +
             '<div class="col-md-9">' +
-            '<input type="text" name="coupen_code[]" id="coupen_code" class="form-control copen_codes" required>' +
+            '<input type="text" name="coupon_code[]" id="coupon_code" class="form-control copen_codes" required>' +
             '</div>' +
             '<div class="col-md-1">' +
             '<a class="remove-rows btn btn-danger btn-just-icon btn-sm"><i class="fa fa-minus"></i></a>' +

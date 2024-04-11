@@ -17,13 +17,14 @@ use App\Models\Subcategory;
 use App\Models\Product;
 use App\Models\ProductDetails;
 use App\Models\Gift;
+use Carbon\Carbon;
 
 class ProductController extends Controller
 {
     public function __construct()
     {
-        
-        
+
+
         $this->successStatus = 200;
         $this->created = 201;
         $this->accepted = 202;
@@ -37,18 +38,16 @@ class ProductController extends Controller
 
     public function getCategoryList(Request $request)
     {
-        try
-        { 
+        try {
             $pageSize = $request->input('pageSize');
             $query = Category::where(function ($query) {
-                            $query->where('active','=','Y');
-                        })
-                        ->select('id','category_name','category_image')->latest();
+                $query->where('active', '=', 'Y');
+            })
+                ->select('id', 'category_name', 'category_image')->latest();
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
 
             $data = collect([]);
-            if($db_data->isNotEmpty())
-            {
+            if ($db_data->isNotEmpty()) {
                 foreach ($db_data as $key => $value) {
                     $data->push([
                         'id' => isset($value['id']) ? $value['id'] : 0,
@@ -56,35 +55,29 @@ class ProductController extends Controller
                         'category_image' => isset($value['category_image']) ? $value['category_image'] : '',
                     ]);
                 }
-                return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','data' => $data ], $this->successStatus);
+                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], $this->successStatus);
             }
-            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data ],200);  
-            
+            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data], 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
-        catch(\Exception $e)
-        {
-            return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
-        }        
     }
 
     public function getSubCategoryList(Request $request)
     {
-        try
-        { 
+        try {
             $pageSize = $request->input('pageSize');
             $category_id = $request->input('category_id');
-            $query = Subcategory::where(function ($query) use($category_id) {
-                            if(!empty($category_id))
-                            {
-                                $query->where('category_id','=',$category_id);
-                            }
-                            $query->where('active','=','Y');
-                        })
-                        ->select('id','subcategory_name','subcategory_image','category_id')->latest();
+            $query = Subcategory::where(function ($query) use ($category_id) {
+                if (!empty($category_id)) {
+                    $query->where('category_id', '=', $category_id);
+                }
+                $query->where('active', '=', 'Y');
+            })
+                ->select('id', 'subcategory_name', 'subcategory_image', 'category_id')->latest();
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
             $data = collect([]);
-            if($db_data->isNotEmpty())
-            {
+            if ($db_data->isNotEmpty()) {
                 foreach ($db_data as $key => $value) {
                     $data->push([
                         'id' => isset($value['id']) ? $value['id'] : 0,
@@ -94,98 +87,141 @@ class ProductController extends Controller
                         'category_name' => isset($value['categories']['category_name']) ? $value['categories']['category_name'] : '',
                     ]);
                 }
-                return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','data' => $data ], $this->successStatus);
+                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], $this->successStatus);
             }
-            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data ],200);  
-            
+            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data], 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
-        catch(\Exception $e)
-        {
-            return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
-        }        
     }
     public function getProductList(Request $request)
     {
-        try
-        { 
+        try {
             $pageSize = $request->input('pageSize');
             $category_id = $request->input('category_id');
             $subcategory_id = $request->input('subcategory_id');
             $brand_id = $request->input('brand_id');
             $search = $request->input('search');
-            $query = Product::with('productdetails','productpriceinfo','getSchemeDetail')->where(function ($query) use($category_id,$subcategory_id, $brand_id,$search) {
-                            if(!empty($category_id))
-                            {
-                                $query->where('category_id','=',$category_id);
-                            }
-                            if(!empty($subcategory_id))
-                            {
-                                $query->where('subcategory_id','=',$subcategory_id);
-                            }
-                            if(!empty($brand_id))
-                            {
-                                $query->where('brand_id','=',$brand_id);
-                            }
-                            if(!empty($search)){
-                                $query->where(function($query) use($search) {
-                                    $query->where('product_name', 'LIKE',"%{$search}%")
-                                    ->Orwhere('description', 'LIKE',"%{$search}%")
-                                    ->Orwhere('specification', 'LIKE',"%{$search}%")
-                                    ->Orwhere('part_no', 'LIKE',"%{$search}%")
-                                    ->Orwhere('product_no', 'LIKE',"%{$search}%")
-                                    ->orWhereHas('categories', function( $query ) use ( $search ){
-                                        $query->where('category_name','LIKE',"%{$search}%");
-                                    })
-                                    ->orWhereHas('subcategories', function( $query ) use ( $search ){
-                                        $query->where('subcategory_name','LIKE',"%{$search}%");
-                                    });
-                                });
-                            }
-                            $query->where('active','=','Y');
-                        })
-                        ->select('id','product_name','display_name','description','subcategory_id','category_id','brand_id','product_image','unit_id','specification','part_no','product_no','model_no','suc_del')->latest();
-       
+            $query = Product::with('productdetails', 'productpriceinfo', 'getSchemeDetail')->where(function ($query) use ($category_id, $subcategory_id, $brand_id, $search) {
+                if (!empty($category_id)) {
+                    $query->where('category_id', '=', $category_id);
+                }
+                if (!empty($subcategory_id)) {
+                    $query->where('subcategory_id', '=', $subcategory_id);
+                }
+                if (!empty($brand_id)) {
+                    $query->where('brand_id', '=', $brand_id);
+                }
+                if (!empty($search)) {
+                    $query->where(function ($query) use ($search) {
+                        $query->where('product_name', 'LIKE', "%{$search}%")
+                            ->Orwhere('description', 'LIKE', "%{$search}%")
+                            ->Orwhere('specification', 'LIKE', "%{$search}%")
+                            ->Orwhere('part_no', 'LIKE', "%{$search}%")
+                            ->Orwhere('product_no', 'LIKE', "%{$search}%")
+                            ->orWhereHas('categories', function ($query) use ($search) {
+                                $query->where('category_name', 'LIKE', "%{$search}%");
+                            })
+                            ->orWhereHas('subcategories', function ($query) use ($search) {
+                                $query->where('subcategory_name', 'LIKE', "%{$search}%");
+                            });
+                    });
+                }
+                $query->where('active', '=', 'Y');
+            })
+                ->select('id', 'product_name', 'display_name', 'description', 'subcategory_id', 'category_id', 'brand_id', 'product_image', 'unit_id', 'specification', 'part_no', 'product_no', 'model_no', 'suc_del')->latest();
+
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
 
             $data = collect([]);
-            if($db_data->isNotEmpty())
-            {
+            if ($db_data->isNotEmpty()) {
                 foreach ($db_data as $key => $value) {
 
-                        $discount_amount = 0;
-                        $total_amount = 0;
-                        $ebd_amount = 0;
-                        $product_ebd_amount = 0;
-                        $ebd_discount = 0;
+                    $discount_amount = 0;
+                    $total_amount = 0;
+                    $ebd_amount = 0;
+                    $product_ebd_amount = 0;
+                    $ebd_discount = 0;
 
 
-                        $discount = $value['productpriceinfo']['discount']??0;
-                        $mrp = $value['productpriceinfo']['mrp']??0;
+                    $discount = $value['productpriceinfo']['discount'] ?? 0;
+                    $mrp = $value['productpriceinfo']['mrp'] ?? 0;
 
-                        $discount_amount = $mrp*$discount/100;
-                        $total_amount = $mrp-$discount_amount; 
-                        $total_amount = number_format($total_amount, 2, ".", "");
+                    $discount_amount = $mrp * $discount / 100;
+                    $total_amount = $mrp - $discount_amount;
+                    $total_amount = number_format($total_amount, 2, ".", "");
 
 
-                        $ebd_discount = $value['getSchemeDetail']['points']??0;
-                        $scheme_type = $value['getSchemeDetail']['orderscheme']['scheme_type']??'';
-                        $scheme_value_type = $value['getSchemeDetail']['orderscheme']['scheme_basedon']??'';
+                    $ebd_discount = $value['getSchemeDetail']['points'] ?? 0;
+                    $scheme_type = $value['getSchemeDetail']['orderscheme']['scheme_type'] ?? '';
+                    $repetition_type = $value['getSchemeDetail']['orderscheme']['repetition'] ?? '';
+                    $is_active = false;
+                    if ($repetition_type == '3' || $repetition_type == '4') {
+                        $start_date = $value['getSchemeDetail']['orderscheme']['start_date'] ?? '';
+                        $end_date = $value['getSchemeDetail']['orderscheme']['end_date'] ?? '';
 
-                        $minimum = $value['getSchemeDetail']['orderscheme']['minimum']??0;
-                        $maximum = $value['getSchemeDetail']['orderscheme']['maximum']??0;
-
-                        if($scheme_value_type == 'percentage'){
-                        $ebd_amount = $total_amount * $ebd_discount / 100;
-                        $product_ebd_amount = $total_amount-$ebd_amount;
+                        if ($repetition_type == '3') {
+                            $startCarbon = Carbon::parse($start_date);
+                            $endCarbon = Carbon::parse($end_date);
+                            $today = Carbon::today();
+                            $startDay = $startCarbon->day;
+                            $endDay = $endCarbon->day;
+                            $todayDay = $today->day;
+                            if ($todayDay >= $startDay && $todayDay <= $endDay) {
+                                $is_active = true;
+                            }
                         }
 
-                        if($scheme_value_type == 'value'){
-
-                        $ebd_amount = $ebd_discount;
-                        $product_ebd_amount = $total_amount-$ebd_discount;
-
+                        if ($repetition_type == '4') {
+                            $startMonthDay = Carbon::parse($start_date)->format('m-d');
+                            $endMonthDay = Carbon::parse($end_date)->format('m-d');
+                            $todayMonthDay = Carbon::today()->format('m-d');
+                            if (($startMonthDay <= $todayMonthDay && $endMonthDay >= $todayMonthDay) ||
+                                ($startMonthDay >= $todayMonthDay && $endMonthDay <= $todayMonthDay)
+                            ) {
+                                $is_active = true;
+                            }
                         }
-                        
+                    }
+                    if ($repetition_type == '2') {
+                        $currentDate = Carbon::now();
+                        $weekOfMonth = ceil($currentDate->day / 7);
+                        $week_repeat = $value['getSchemeDetail']['orderscheme']['week_repeat'] ?? '';
+                        if ((int)$week_repeat == (int)$weekOfMonth) {
+                            $is_active = true;
+                        }
+                    }
+                    if ($repetition_type == '1') {
+                        $day_repeat = explode(',', $value['getSchemeDetail']['orderscheme']['day_repeat']) ?? [];
+                        $todayDayOfWeek = Carbon::today()->format('D');
+                        if (in_array($todayDayOfWeek, $day_repeat)) {
+                            $is_active = true;
+                        }
+                    }
+                    if ($is_active === true) {
+                        $scheme_value_type = $value['getSchemeDetail']['orderscheme']['scheme_basedon'] ?? '';
+
+                        $minimum = $value['getSchemeDetail']['orderscheme']['minimum'] ?? 0;
+                        $maximum = $value['getSchemeDetail']['orderscheme']['maximum'] ?? 0;
+
+                        if ($scheme_value_type == 'percentage') {
+                            $ebd_amount = $total_amount * $ebd_discount / 100;
+                            $product_ebd_amount = $total_amount - $ebd_amount;
+                        }
+
+                        if ($scheme_value_type == 'value') {
+
+                            $ebd_amount = $ebd_discount;
+                            $product_ebd_amount = $total_amount - $ebd_discount;
+                        }
+
+                        $ebd_amount = number_format($ebd_amount, 2, ".", "");
+                        $product_ebd_amount = number_format($product_ebd_amount, 2, ".", "");
+                    } else {
+                        $ebd_amount = number_format(0, 2, ".", "");
+                        $product_ebd_amount = number_format($total_amount, 2, ".", "");
+                    }
+
 
 
 
@@ -213,63 +249,56 @@ class ProductController extends Controller
                         'part_no' => isset($value['part_no']) ? $value['part_no'] : '',
                         'product_no' => isset($value['product_no']) ? $value['product_no'] : '',
                         'model_no' => isset($value['model_no']) ? $value['model_no'] : '',
-                        'hp'=> isset($value['specification']) ? $value['specification'] : '',
+                        'hp' => isset($value['specification']) ? $value['specification'] : '',
 
-                        'ebd_amount'=> (string)$ebd_amount,
-                        'product_ebd_amount'=> (string)$product_ebd_amount,
+                        'ebd_amount' => (string)$ebd_amount,
+                        'product_ebd_amount' => (string)$product_ebd_amount,
 
                     ]);
                 }
-                return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','data' => $data ], $this->successStatus);
+                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], $this->successStatus);
             }
-            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data ],200);  
-            
+            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data], 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
-        catch(\Exception $e)
-        {
-            return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
-        }        
     }
 
     public function getCategoryData(Request $request)
     {
-        try
-        { 
+        try {
             $pageSize = $request->input('pageSize');
-            $query = Category::where(function ($query)  {
-                            $query->where('active','=','Y');
-                        })
-                        ->select('id','category_name','category_image','ranking')
-                        ->orderBy('ranking', 'asc')->latest();
+            $query = Category::where(function ($query) {
+                $query->where('active', '=', 'Y');
+            })
+                ->select('id', 'category_name', 'category_image', 'ranking')
+                ->orderBy('ranking', 'asc')->latest();
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
 
-            $querysubcategory = Subcategory::where(function ($query) use($db_data) {
-                            if(!empty($db_data))
-                            {
-                                $query->where('category_id','=',$db_data->pluck('id')->first());
-                            }
-                            $query->where('active','=','Y');
-                        })
-                        ->select('id','subcategory_name','subcategory_image','category_id','ranking')
-                        ->orderBy('ranking', 'asc')
-                        ->latest();
+            $querysubcategory = Subcategory::where(function ($query) use ($db_data) {
+                if (!empty($db_data)) {
+                    $query->where('category_id', '=', $db_data->pluck('id')->first());
+                }
+                $query->where('active', '=', 'Y');
+            })
+                ->select('id', 'subcategory_name', 'subcategory_image', 'category_id', 'ranking')
+                ->orderBy('ranking', 'asc')
+                ->latest();
             $subcategory_data = (!empty($pageSize)) ? $querysubcategory->paginate($pageSize) : $querysubcategory->get();
-            $query_product = Product::with('productdetails','productpriceinfo')->where(function ($query) use($subcategory_data) {
-                            if(!empty($subcategory_data))
-                            {
-                                $query->where('subcategory_id','=',$subcategory_data->pluck('id')->first());
-                            }
-                            $query->where('active','=','Y');
-                        })
-                        ->select('id','product_name','display_name','description','subcategory_id','category_id','brand_id','product_image','unit_id','specification','part_no','product_no','model_no','suc_del')->latest();
-       
+            $query_product = Product::with('productdetails', 'productpriceinfo', 'getSchemeDetail')->where(function ($query) use ($subcategory_data) {
+                if (!empty($subcategory_data)) {
+                    $query->where('subcategory_id', '=', $subcategory_data->pluck('id')->first());
+                }
+                $query->where('active', '=', 'Y');
+            })
+                ->select('id', 'product_name', 'display_name', 'description', 'subcategory_id', 'category_id', 'brand_id', 'product_image', 'unit_id', 'specification', 'part_no', 'product_no', 'model_no', 'suc_del')->latest();
+
             $product_data = (!empty($pageSize)) ? $query_product->paginate($pageSize) : $query_product->get();
 
             $data = collect([]);
             $subcategories = collect([]);
             $products = collect([]);
-            if($db_data->isNotEmpty())
-            {
+            if ($db_data->isNotEmpty()) {
                 foreach ($db_data as $key => $value) {
                     $data->push([
                         'id' => isset($value['id']) ? $value['id'] : 0,
@@ -277,8 +306,7 @@ class ProductController extends Controller
                         'category_image' => isset($value['category_image']) ? $value['category_image'] : '',
                     ]);
                 }
-                if($subcategory_data->isNotEmpty())
-                {
+                if ($subcategory_data->isNotEmpty()) {
                     foreach ($subcategory_data as $key => $rows) {
                         $subcategories->push([
                             'id' => isset($rows['id']) ? $rows['id'] : 0,
@@ -289,11 +317,50 @@ class ProductController extends Controller
                         ]);
                     }
                 }
-                if($product_data->isNotEmpty())
-                {
+                if ($product_data->isNotEmpty()) {
 
                     foreach ($product_data as $key => $product) {
                         //$prodcutdetails = $value['prodcutdetails']->where('isprimary',1);
+
+
+                        $discount_amount = 0;
+                        $total_amount = 0;
+                        $ebd_amount = 0;
+                        $product_ebd_amount = 0;
+                        $ebd_discount = 0;
+
+
+                        $discount = $product['productpriceinfo']['discount'] ?? 0;
+                        $mrp = $product['productpriceinfo']['mrp'] ?? 0;
+
+                        $discount_amount = $mrp * $discount / 100;
+                        $total_amount = $mrp - $discount_amount;
+                        $total_amount = number_format($total_amount, 2, ".", "");
+
+
+                        $ebd_discount = $product['getSchemeDetail']['points'] ?? 0;
+                        $scheme_type = $product['getSchemeDetail']['orderscheme']['scheme_type'] ?? '';
+                        $scheme_value_type = $product['getSchemeDetail']['orderscheme']['scheme_basedon'] ?? '';
+
+                        $minimum = $product['getSchemeDetail']['orderscheme']['minimum'] ?? 0;
+                        $maximum = $product['getSchemeDetail']['orderscheme']['maximum'] ?? 0;
+
+                        if ($scheme_value_type == 'percentage') {
+                            $ebd_amount = $total_amount * $ebd_discount / 100;
+                            $product_ebd_amount = $total_amount - $ebd_amount;
+                        }
+
+                        if ($scheme_value_type == 'value') {
+
+                            $ebd_amount = $ebd_discount;
+                            $product_ebd_amount = $total_amount - $ebd_discount;
+                        }
+
+                        $ebd_amount = number_format($ebd_amount, 2, ".", "");
+                        $product_ebd_amount = number_format($product_ebd_amount, 2, ".", "");
+
+
+
                         $products->push([
                             'id' => isset($product['id']) ? $product['id'] : 0,
                             'product_name' => isset($product['product_name']) ? $product['product_name'] : '',
@@ -318,56 +385,50 @@ class ProductController extends Controller
                             'product_no' => isset($product['product_no']) ? $product['product_no'] : '',
                             'model_no'  => isset($product['model_no']) ? $product['model_no'] : '',
                             'hp' => isset($product['specification']) ? $product['specification'] : '',
+                            'ebd_amount' => (string)$ebd_amount,
+                            'product_ebd_amount' => (string)$product_ebd_amount,
                         ]);
                     }
                 }
-                return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','data' => $data , 'subcategories' => $subcategories , 'products' => $products ], $this->successStatus);
+                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data, 'subcategories' => $subcategories, 'products' => $products], $this->successStatus);
             }
-            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data , 'subcategories' => $subcategories , 'products' => $products],200);  
-            
+            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data, 'subcategories' => $subcategories, 'products' => $products], 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
-        catch(\Exception $e)
-        {
-            return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
-        } 
     }
 
     public function getSubCategoryData(Request $request)
     {
-        try
-        { 
+        try {
             $pageSize = $request->input('pageSize');
             $category_id = $request->input('category_id');
 
-            $query = Subcategory::where(function ($query) use($category_id) {
-                            if(!empty($category_id))
-                            {
-                                $query->where('category_id','=',$category_id);
-                            }
-                            $query->where('active','=','Y');
-                        })
-                        ->select('id','subcategory_name','subcategory_image','category_id','ranking')
-                        ->orderBy('ranking', 'asc')
-                        ->latest();
+            $query = Subcategory::where(function ($query) use ($category_id) {
+                if (!empty($category_id)) {
+                    $query->where('category_id', '=', $category_id);
+                }
+                $query->where('active', '=', 'Y');
+            })
+                ->select('id', 'subcategory_name', 'subcategory_image', 'category_id', 'ranking')
+                ->orderBy('ranking', 'asc')
+                ->latest();
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
 
-            $query_product = Product::with('productdetails','productpriceinfo')->where(function ($query) use($db_data) {
-                            if(!empty($db_data))
-                            {
-                                $query->where('subcategory_id','=',$db_data->pluck('id')->first());
-                            }
-                            $query->where('active','=','Y');
-                        })
-                        ->select('id','product_name','display_name','description','subcategory_id','category_id','brand_id','product_image','unit_id','specification','part_no','product_no','model_no','suc_del')->latest();
-       
+            $query_product = Product::with('productdetails', 'productpriceinfo', 'getSchemeDetail')->where(function ($query) use ($db_data) {
+                if (!empty($db_data)) {
+                    $query->where('subcategory_id', '=', $db_data->pluck('id')->first());
+                }
+                $query->where('active', '=', 'Y');
+            })
+                ->select('id', 'product_name', 'display_name', 'description', 'subcategory_id', 'category_id', 'brand_id', 'product_image', 'unit_id', 'specification', 'part_no', 'product_no', 'model_no', 'suc_del')->latest();
+
             $product_data = (!empty($pageSize)) ? $query_product->paginate($pageSize) : $query_product->get();
 
             $data = collect([]);
             $products = collect([]);
-            if($db_data->isNotEmpty())
-            {
-                if($db_data->isNotEmpty())
-                {
+            if ($db_data->isNotEmpty()) {
+                if ($db_data->isNotEmpty()) {
                     foreach ($db_data as $key => $rows) {
                         $data->push([
                             'id' => isset($rows['id']) ? $rows['id'] : 0,
@@ -378,11 +439,50 @@ class ProductController extends Controller
                         ]);
                     }
                 }
-                if($product_data->isNotEmpty())
-                {
+                if ($product_data->isNotEmpty()) {
 
                     foreach ($product_data as $key => $product) {
                         //$prodcutdetails = $value['prodcutdetails']->where('isprimary',1);
+
+                        $discount_amount = 0;
+                        $total_amount = 0;
+                        $ebd_amount = 0;
+                        $product_ebd_amount = 0;
+                        $ebd_discount = 0;
+
+
+                        $discount = $product['productpriceinfo']['discount'] ?? 0;
+                        $mrp = $product['productpriceinfo']['mrp'] ?? 0;
+
+                        $discount_amount = $mrp * $discount / 100;
+                        $total_amount = $mrp - $discount_amount;
+                        $total_amount = number_format($total_amount, 2, ".", "");
+
+
+                        $ebd_discount = $product['getSchemeDetail']['points'] ?? 0;
+                        $scheme_type = $product['getSchemeDetail']['orderscheme']['scheme_type'] ?? '';
+                        $scheme_value_type = $product['getSchemeDetail']['orderscheme']['scheme_basedon'] ?? '';
+
+                        $minimum = $product['getSchemeDetail']['orderscheme']['minimum'] ?? 0;
+                        $maximum = $product['getSchemeDetail']['orderscheme']['maximum'] ?? 0;
+
+                        if ($scheme_value_type == 'percentage') {
+                            $ebd_amount = $total_amount * $ebd_discount / 100;
+                            $product_ebd_amount = $total_amount - $ebd_amount;
+                        }
+
+                        if ($scheme_value_type == 'value') {
+
+                            $ebd_amount = $ebd_discount;
+                            $product_ebd_amount = $total_amount - $ebd_discount;
+                        }
+
+                        $ebd_amount = number_format($ebd_amount, 2, ".", "");
+                        $product_ebd_amount = number_format($product_ebd_amount, 2, ".", "");
+
+
+
+
                         $products->push([
                             'id' => isset($product['id']) ? $product['id'] : 0,
                             'product_name' => isset($product['product_name']) ? $product['product_name'] : '',
@@ -407,38 +507,35 @@ class ProductController extends Controller
                             'product_no' => isset($product['product_no']) ? $product['product_no'] : '',
                             'model_no'  => isset($product['model_no']) ? $product['model_no'] : '',
                             'hp'  => isset($product['specification']) ? $product['specification'] : '',
+                            'ebd_amount' => (string)$ebd_amount,
+                            'product_ebd_amount' => (string)$product_ebd_amount,
                         ]);
                     }
                 }
-                return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','data' => $data  , 'products' => $products ], $this->successStatus);
+                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data, 'products' => $products], $this->successStatus);
             }
-            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data , 'products' => $products],200);  
-            
+            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data, 'products' => $products], 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
-        catch(\Exception $e)
-        {
-            return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
-        } 
     }
 
 
     public function getProductDetails(Request $request)
     {
-        try
-        { 
+        try {
             $pageSize = $request->input('pageSize');
             $product_id = $request->input('product_id');
-            $query = Product::with('productdetails','productpriceinfo')->where(function ($query) use($product_id ) {
-                            $query->where('active','=','Y');
-                            $query->where('id','=',$product_id);
-                        })
-                        ->select('id','product_name','display_name','description','subcategory_id','category_id','brand_id','product_image','unit_id','specification','part_no','product_no','model_no','suc_del')
-                        ->first();
+            $query = Product::with('productdetails', 'productpriceinfo', 'getSchemeDetail')->where(function ($query) use ($product_id) {
+                $query->where('active', '=', 'Y');
+                $query->where('id', '=', $product_id);
+            })
+                ->select('id', 'product_name', 'display_name', 'description', 'subcategory_id', 'category_id', 'brand_id', 'product_image', 'unit_id', 'specification', 'part_no', 'product_no', 'model_no', 'suc_del')
+                ->first();
 
             $detail = collect([]);
             $data = collect([]);
-            if(!empty($query))
-            {
+            if (!empty($query)) {
                 foreach ($query['productdetails'] as $key => $value) {
                     $detail->push([
                         'detail_id' => isset($value['id']) ? $value['id'] : 0,
@@ -446,7 +543,7 @@ class ProductController extends Controller
                         'detail_description' => isset($value['detail_description']) ? $value['detail_description'] : '',
                         'mrp' => isset($value['mrp']) ? $value['mrp'] : 0.00,
                         'price' => isset($value['price']) ? $value['price'] : 0.00,
-                        'min_price' => isset($value['price']) ? $value['price']-10 : 0.00,
+                        'min_price' => isset($value['price']) ? $value['price'] - 10 : 0.00,
                         'max_price' => isset($value['price']) ? $value['price'] + 10 : 0.00,
                         'selling_price' => isset($value['selling_price']) ? $value['selling_price'] : 0.00,
                         'gst' => isset($value['gst']) ? $value['gst'] : 0,
@@ -456,6 +553,94 @@ class ProductController extends Controller
                 }
                 //$primary = $query['productdetails']->where('isprimary',1)->first();
                 $primary = $query['productpriceinfo'];
+
+
+                $discount_amount = 0;
+                $total_amount = 0;
+                $ebd_amount = 0;
+                $product_ebd_amount = 0;
+                $ebd_discount = 0;
+
+
+                $discount = $query['productpriceinfo']['discount'] ?? 0;
+                $mrp = $query['productpriceinfo']['mrp'] ?? 0;
+
+                $discount_amount = $mrp * $discount / 100;
+                $total_amount = $mrp - $discount_amount;
+                $total_amount = number_format($total_amount, 2, ".", "");
+
+
+                $ebd_discount = $value['getSchemeDetail']['points'] ?? 0;
+                $scheme_type = $value['getSchemeDetail']['orderscheme']['scheme_type'] ?? '';
+                $repetition_type = $value['getSchemeDetail']['orderscheme']['repetition'] ?? '';
+                $is_active = false;
+                if ($repetition_type == '3' || $repetition_type == '4') {
+                    $start_date = $value['getSchemeDetail']['orderscheme']['start_date'] ?? '';
+                    $end_date = $value['getSchemeDetail']['orderscheme']['end_date'] ?? '';
+
+                    if ($repetition_type == '3') {
+                        $startCarbon = Carbon::parse($start_date);
+                        $endCarbon = Carbon::parse($end_date);
+                        $today = Carbon::today();
+                        $startDay = $startCarbon->day;
+                        $endDay = $endCarbon->day;
+                        $todayDay = $today->day;
+                        if ($todayDay >= $startDay && $todayDay <= $endDay) {
+                            $is_active = true;
+                        }
+                    }
+
+                    if ($repetition_type == '4') {
+                        $startMonthDay = Carbon::parse($start_date)->format('m-d');
+                        $endMonthDay = Carbon::parse($end_date)->format('m-d');
+                        $todayMonthDay = Carbon::today()->format('m-d');
+                        if (($startMonthDay <= $todayMonthDay && $endMonthDay >= $todayMonthDay) ||
+                            ($startMonthDay >= $todayMonthDay && $endMonthDay <= $todayMonthDay)
+                        ) {
+                            $is_active = true;
+                        }
+                    }
+                }
+                if ($repetition_type == '2') {
+                    $currentDate = Carbon::now();
+                    $weekOfMonth = ceil($currentDate->day / 7);
+                    $week_repeat = $value['getSchemeDetail']['orderscheme']['week_repeat'] ?? '';
+                    if ((int)$week_repeat == (int)$weekOfMonth) {
+                        $is_active = true;
+                    }
+                }
+                if ($repetition_type == '1') {
+                    $day_repeat = explode(',', $value['getSchemeDetail']['orderscheme']['day_repeat']) ?? [];
+                    $todayDayOfWeek = Carbon::today()->format('D');
+                    if (in_array($todayDayOfWeek, $day_repeat)) {
+                        $is_active = true;
+                    }
+                }
+                if ($is_active === true) {
+                    $scheme_value_type = $value['getSchemeDetail']['orderscheme']['scheme_basedon'] ?? '';
+
+                    $minimum = $value['getSchemeDetail']['orderscheme']['minimum'] ?? 0;
+                    $maximum = $value['getSchemeDetail']['orderscheme']['maximum'] ?? 0;
+
+                    if ($scheme_value_type == 'percentage') {
+                        $ebd_amount = $total_amount * $ebd_discount / 100;
+                        $product_ebd_amount = $total_amount - $ebd_amount;
+                    }
+
+                    if ($scheme_value_type == 'value') {
+
+                        $ebd_amount = $ebd_discount;
+                        $product_ebd_amount = $total_amount - $ebd_discount;
+                    }
+
+                    $ebd_amount = number_format($ebd_amount, 2, ".", "");
+                    $product_ebd_amount = number_format($product_ebd_amount, 2, ".", "");
+                } else {
+                    $ebd_amount = number_format(0, 2, ".", "");
+                    $product_ebd_amount = number_format($total_amount, 2, ".", "");
+                }
+
+
                 $data = collect([
                     'id' => isset($query['id']) ? $query['id'] : 0,
                     'product_name' => isset($query['product_name']) ? $query['product_name'] : '',
@@ -473,8 +658,8 @@ class ProductController extends Controller
                     'detail_id' => isset($primary['id']) ? $primary['id'] : 0,
                     'mrp' => isset($primary['mrp']) ? $primary['mrp'] : 0.00,
                     'price' => isset($primary['price']) ? $primary['price'] : 0.00,
-                    'min_price' => isset($primary['price']) ? $primary['price']-10 : 0.00,
-                    'max_price' => isset($primary['price']) ? $primary['price']+10 : 0.00,
+                    'min_price' => isset($primary['price']) ? $primary['price'] - 10 : 0.00,
+                    'max_price' => isset($primary['price']) ? $primary['price'] + 10 : 0.00,
                     'selling_price' => isset($primary['selling_price']) ? $primary['selling_price'] : 0.00,
                     'gst' => isset($primary['gst']) ? $primary['gst'] : 0,
                     'discount' => isset($primary['discount']) ? $primary['discount'] : 0,
@@ -484,62 +669,56 @@ class ProductController extends Controller
                     'product_no' => isset($query['product_no']) ? $query['product_no'] : '',
                     'model_no' => isset($query['model_no']) ? $query['model_no'] : '',
                     'hp' => isset($query['specification']) ? $query['specification'] : '',
+                    'ebd_amount' => (string)$ebd_amount,
+                    'scheme_amount' => (string)$ebd_amount,
+                    'product_ebd_amount' => (string)$product_ebd_amount,
                     'details' => $detail
                 ]);
-                return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','data' => $data ], $this->successStatus);
+                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], $this->successStatus);
             }
-            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data ],200);  
-            
+            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data], 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
-        catch(\Exception $e)
-        {
-            return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
-        }        
     }
 
     public function getGiftList(Request $request)
     {
-        try
-        { 
+        try {
             $pageSize = $request->input('pageSize');
             $category_id = $request->input('category_id');
             $subcategory_id = $request->input('subcategory_id');
             $brand_id = $request->input('brand_id');
             $search = $request->input('search');
-            $query = Gift::where(function ($query) use($category_id,$subcategory_id, $brand_id,$search) {
-                            if(!empty($category_id))
-                            {
-                                $query->where('category_id','=',$category_id);
-                            }
-                            if(!empty($subcategory_id))
-                            {
-                                $query->where('subcategory_id','=',$subcategory_id);
-                            }
-                            if(!empty($brand_id))
-                            {
-                                $query->where('brand_id','=',$brand_id);
-                            }
-                            if(!empty($search))
-                            {
-                                $query->orWhere('product_name', 'LIKE',"%{$search}%");
-                                $query->orWhere('display_name', 'LIKE',"%{$search}%");
-                                $query->orWhere('description', 'LIKE',"%{$search}%");
-                                $query->orWhere('product_name', 'LIKE',"%{$search}%");
-                                $query->orWhereHas('categories', function( $query ) use ( $search ){
-                                    $query->where('category_name','LIKE',"%{$search}%");
-                                });
-                                $query->orWhereHas('subcategories', function( $query ) use ( $search ){
-                                    $query->where('subcategory_name','LIKE',"%{$search}%");
-                                });
-                            }
-                            $query->where('active','=','Y');
-                        })
-                        ->select('id','product_name', 'display_name', 'description', 'product_image', 'mrp', 'price', 'points', 'subcategory_id', 'category_id', 'brand_id', 'unit_id')->latest();
+            $query = Gift::where(function ($query) use ($category_id, $subcategory_id, $brand_id, $search) {
+                if (!empty($category_id)) {
+                    $query->where('category_id', '=', $category_id);
+                }
+                if (!empty($subcategory_id)) {
+                    $query->where('subcategory_id', '=', $subcategory_id);
+                }
+                if (!empty($brand_id)) {
+                    $query->where('brand_id', '=', $brand_id);
+                }
+                if (!empty($search)) {
+                    $query->orWhere('product_name', 'LIKE', "%{$search}%");
+                    $query->orWhere('display_name', 'LIKE', "%{$search}%");
+                    $query->orWhere('description', 'LIKE', "%{$search}%");
+                    $query->orWhere('product_name', 'LIKE', "%{$search}%");
+                    $query->orWhereHas('categories', function ($query) use ($search) {
+                        $query->where('category_name', 'LIKE', "%{$search}%");
+                    });
+                    $query->orWhereHas('subcategories', function ($query) use ($search) {
+                        $query->where('subcategory_name', 'LIKE', "%{$search}%");
+                    });
+                }
+                $query->where('active', '=', 'Y');
+            })
+                ->select('id', 'product_name', 'display_name', 'description', 'product_image', 'mrp', 'price', 'points', 'subcategory_id', 'category_id', 'brand_id', 'unit_id')->latest();
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
 
             $data = collect([]);
-            if($db_data->isNotEmpty())
-            {
+            if ($db_data->isNotEmpty()) {
                 foreach ($db_data as $key => $value) {
                     //$prodcutdetails = $value['prodcutdetails']->where('isprimary',1);
                     $data->push([
@@ -562,16 +741,11 @@ class ProductController extends Controller
 
                     ]);
                 }
-                return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','data' => $data ], $this->successStatus);
+                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], $this->successStatus);
             }
-            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data ],200);  
-            
+            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data], 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
-        catch(\Exception $e)
-        {
-            return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
-        }        
     }
-
 }
-

@@ -11,7 +11,7 @@ class Order extends Model
 
     protected $table = 'orders';
 
-    protected $fillable = [ 'active', 'buyer_id', 'seller_id', 'total_qty', 'shipped_qty', 'orderno', 'order_date', 'completed_date', 'total_gst', 'sub_total', 'grand_total', 'order_taking','status_id', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at','beatscheduleid' , 'suc_del','order_remark','executive_id'];
+    protected $fillable = [ 'active','buyer_id','seller_id','executive_id','total_qty','shipped_qty','orderno','order_date','completed_date','estimated_date','total_gst','total_discount','extra_discount','extra_discount_amount','sub_total','grand_total','order_taking','status_id','address_id','suc_del','gst_amount','schme_amount','ebd_amount','ebd_discount',	'special_discount','special_amount',	'cluster_discount','cluster_amount','deal_discount','deal_amount','distributor_discount','distributor_amount','frieght_discount','frieght_amount',	'gst5_amt','gst12_amt','gst18_amt','gst28_amt','order_remark','discount_status','created_by', 'updated_by','deleted_at','created_at','updated_at','beatscheduleid',];
 
     public function message()
     {
@@ -73,6 +73,24 @@ class Order extends Model
                 'order_taking' => isset($request['order_taking'])?  $request['order_taking']:'MobileApp',
                 'suc_del' => isset($request['suc_del'])?  $request['suc_del']:'',  
                 'beatscheduleid' => isset($request['beatscheduleid']) ? $request['beatscheduleid'] :null,   
+                'gst_amount' => isset($request['gst_amount']) ? $request['gst_amount'] :null,   
+                'schme_amount' => isset($request['schme_amount']) ? $request['schme_amount'] :null,   
+                'ebd_discount' => isset($request['ebd_discount']) ? $request['ebd_discount'] :null,   
+                'ebd_amount' => isset($request['ebd_amount']) ? $request['ebd_amount'] :null,   
+                'special_discount' => isset($request['special_discount']) ? $request['special_discount'] :null,   
+                'special_amount' => isset($request['special_amount']) ? $request['special_amount'] :null,   
+                'cluster_discount' => isset($request['cluster_discount']) ? $request['cluster_discount'] :null,   
+                'cluster_amount' => isset($request['cluster_amount']) ? $request['cluster_amount'] :null,   
+                'deal_discount' => isset($request['deal_discount']) ? $request['deal_discount'] :null,   
+                'deal_amount' => isset($request['deal_amount']) ? $request['deal_amount'] :null,   
+                'distributor_discount' => isset($request['distributor_discount']) ? $request['distributor_discount'] :null,   
+                'distributor_amount' => isset($request['distributor_amount']) ? $request['distributor_amount'] :null,   
+                'frieght_discount' => isset($request['frieght_discount']) ? $request['frieght_discount'] :null,   
+                'frieght_amount' => isset($request['frieght_amount']) ? $request['frieght_amount'] :null,   
+                'gst5_amt' => isset($request['gst5_amt']) ? $request['gst5_amt'] :null,   
+                'gst12_amt' => isset($request['gst12_amt']) ? $request['gst12_amt'] :null,   
+                'gst18_amt' => isset($request['gst18_amt']) ? $request['gst18_amt'] :null,   
+                'gst28_amt' => isset($request['gst28_amt']) ? $request['gst28_amt'] :null,   
                 'created_by' => isset($request['created_by']) ? $request['created_by'] :null,     
                 'order_remark' => isset($request['order_remark']) ? $request['order_remark'] :null,     
                 'created_at' => $created_at ,
@@ -111,7 +129,7 @@ class Order extends Model
     {
         // return $this->hasMany('App\Models\OrderDetails', 'order_id', 'id')->select('id','order_id', 'product_id', 'product_detail_id','quantity', 'shipped_qty', 'price', 'tax_amount', 'line_total', 'status_id');
 
-     return $this->hasMany('App\Models\OrderDetails', 'order_id', 'id')->select('id','order_id', 'product_id', 'product_detail_id','quantity', 'shipped_qty', 'price', 'tax_amount', 'line_total', 'status_id','gst','discount','ebd_discount','ebd_amount','cluster_amount','deal_amount','distributor_amount','cluster_discount','deal_discount','distributor_discount','gst_amount');
+     return $this->hasMany('App\Models\OrderDetails', 'order_id', 'id');
 
 
     }

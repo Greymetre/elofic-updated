@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\ExpensesTypeController;
 use App\Http\Controllers\Api\GiftController;
+use App\Http\Controllers\Api\LeaveController;
 use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
@@ -38,34 +39,35 @@ use App\Http\Controllers\Api\TransactionHistoryController;
 */
 
 /*================= Auth Routes ============================*/
+
 Route::post('login', [LoginController::class, 'login']);
 Route::post('customerLogin', [LoginController::class, 'customerLogin']);
 Route::post('verifyotp', [LoginController::class, 'verifyotp']);
 Route::post('customerSignup', [LoginController::class, 'customerSignup']);
-Route::any('getCategoryList', [ ProductController::class, 'getCategoryList']);
-Route::any('getSubCategoryList', [ ProductController::class, 'getSubCategoryList']);
-Route::any('getProductList', [ ProductController::class, 'getProductList']);
-Route::any('getProductDetails', [ ProductController::class, 'getProductDetails']);
-Route::any('getGiftList', [ ProductController::class, 'getGiftList']);
-Route::any('getCategoryData', [ ProductController::class, 'getCategoryData']);
-Route::any('getSubCategoryData', [ ProductController::class, 'getSubCategoryData']);
-Route::any('getStateList', [ AddressController::class, 'getStateList']);
-Route::any('getDistrictList', [ AddressController::class, 'getDistrictList']);
-Route::any('getCityList', [ AddressController::class, 'getCityList']);
-Route::any('getPincodeList', [ AddressController::class, 'getPincodeList']);
-Route::any('getCustomerTypeList', [ CustomController::class, 'getCustomerTypeList']);
-Route::any('getPincodeInfo', [ AddressController::class, 'getPincodeInfo']);
-Route::any('getReportType', [ CustomController::class, 'getReportType']);
-Route::any('getWorkType', [ CustomController::class, 'getWorkType']);
-Route::any('getDevision', [ CustomController::class, 'getDevision']);
+Route::any('getCategoryList', [ProductController::class, 'getCategoryList']);
+Route::any('getSubCategoryList', [ProductController::class, 'getSubCategoryList']);
+Route::any('getProductList', [ProductController::class, 'getProductList']);
+Route::any('getProductDetails', [ProductController::class, 'getProductDetails']);
+Route::any('getGiftList', [ProductController::class, 'getGiftList']);
+Route::any('getCategoryData', [ProductController::class, 'getCategoryData']);
+Route::any('getSubCategoryData', [ProductController::class, 'getSubCategoryData']);
+Route::any('getStateList', [AddressController::class, 'getStateList']);
+Route::any('getDistrictList', [AddressController::class, 'getDistrictList']);
+Route::any('getCityList', [AddressController::class, 'getCityList']);
+Route::any('getPincodeList', [AddressController::class, 'getPincodeList']);
+Route::any('getCustomerTypeList', [CustomController::class, 'getCustomerTypeList']);
+Route::any('getPincodeInfo', [AddressController::class, 'getPincodeInfo']);
+Route::any('getReportType', [CustomController::class, 'getReportType']);
+Route::any('getWorkType', [CustomController::class, 'getWorkType']);
+Route::any('getDevision', [CustomController::class, 'getDevision']);
 
-Route::any('mobileNumberExists', [ CustomController::class, 'mobileNumberExists']);
-Route::any('gstNumberExists', [ CustomController::class, 'gstNumberExists']);
-Route::any('getRetailerList', [ CustomController::class, 'getRetailerList']);
+Route::any('mobileNumberExists', [CustomController::class, 'mobileNumberExists']);
+Route::any('gstNumberExists', [CustomController::class, 'gstNumberExists']);
+Route::any('getRetailerList', [CustomController::class, 'getRetailerList']);
 Route::any('getslider', [CustomController::class, 'getslider']);
 Route::get('getsettings', [DashboardController::class, 'getsettings']);
 
-Route::any('emailExists', [ CustomController::class, 'emailExists']);
+Route::any('emailExists', [CustomController::class, 'emailExists']);
 /*================= Customer Routes ============================*/
 Route::group(['middleware' => ['auth:customers']], function () {
     // Route::any('customer/getProfile', [LoginController::class, 'getCustomerProfile']);
@@ -101,6 +103,7 @@ Route::group(['middleware' => ['auth:customers']], function () {
     Route::any('customer/getgiftcatalogue', [GiftController::class, 'getgiftcatalogue']);
     Route::any('customer/getgiftcategories', [GiftController::class, 'getgiftcategories']);
     Route::any('customer/getgiftsubcategories', [GiftController::class, 'getgiftsubcategories']);
+    Route::any('customer/getgiftdetails', [GiftController::class, 'getgiftdetails']);
     // Transacation Coupon History
     Route::any('customer/getcouponhistory', [TransactionHistoryController::class, 'getcouponhistory']);
     Route::any('customer/getredemptionhistory', [TransactionHistoryController::class, 'getredemptionhistory']);
@@ -114,69 +117,79 @@ Route::group(['middleware' => ['auth:customers']], function () {
 
 Route::group(['middleware' => ['auth:users']], function () {
     // Dashboard
-    Route::any('dashboard', [ DashboardController::class, 'dashboard']);
-    
-    Route::any('getProfile', [ LoginController::class, 'getProfile']);
-    Route::post('updateProfile', [ LoginController::class, 'updateProfile']);
-    Route::any('logout', [ LoginController::class, 'logout']);
-    
+    Route::any('dashboard', [DashboardController::class, 'dashboard']);
+    Route::any('pendingCounts', [DashboardController::class, 'pendingCounts']);
+
+    Route::any('getProfile', [LoginController::class, 'getProfile']);
+    Route::post('updateProfile', [LoginController::class, 'updateProfile']);
+    Route::any('logout', [LoginController::class, 'logout']);
+
     // Customer
-    Route::post('storeCustomer', [ CustomerController::class, 'storeCustomer']);
-    Route::post('updateCustomerLocation', [ CustomerController::class, 'updateCustomerLocation']);
-    Route::post('updateCustomerProfile', [ CustomerController::class, 'updateCustomerProfile']);
-    Route::any('getRetailers', [ CustomerController::class, 'getRetailers']);
-    Route::any('getDistributors', [ CustomerController::class, 'getDistributors']);
-    Route::any('getCustomerList', [ CustomerController::class, 'getCustomerList']);
-    Route::any('getCustomerInfo', [ CustomerController::class, 'getCustomerInfo']);
-    Route::post('leadToCustomer', [ CustomerController::class, 'leadToCustomer']);
+    Route::post('storeCustomer', [CustomerController::class, 'storeCustomer']);
+    Route::post('updateCustomerLocation', [CustomerController::class, 'updateCustomerLocation']);
+    Route::post('updateCustomerProfile', [CustomerController::class, 'updateCustomerProfile']);
+    Route::any('getRetailers', [CustomerController::class, 'getRetailers']);
+    Route::any('getDistributors', [CustomerController::class, 'getDistributors']);
+    Route::any('getCustomerList', [CustomerController::class, 'getCustomerList']);
+    Route::any('getCustomerInfo', [CustomerController::class, 'getCustomerInfo']);
+    Route::post('leadToCustomer', [CustomerController::class, 'leadToCustomer']);
     // Get Order List
-    Route::post('insertOrder', [ OrderController::class, 'insertOrder']);
-    Route::any('getOrderList', [ OrderController::class, 'getOrderList']);
-    Route::any('getOrderDetails', [ OrderController::class, 'getOrderDetails']);
-    Route::post('addCartItems', [ OrderController::class, 'addCartItems']);
-    Route::get('getCartItems', [ OrderController::class, 'getCartItems']);
-    Route::any('getBeatList', [ BeatController::class, 'getBeatList']);
-    Route::any('getBeatDropdownList', [ BeatController::class, 'getBeatDropdownList']);
-    Route::any('getBeatCustomers', [ BeatController::class, 'getBeatCustomers']);
-    Route::post('userPunchin', [ AttendanceController::class, 'userPunchin']);
-    Route::post('userPunchout', [ AttendanceController::class, 'userPunchout']);
-    Route::any('getPunchin', [ AttendanceController::class, 'getPunchin']);
-    Route::any('getAllUserPunchInOut', [ AttendanceController::class, 'getAllUserPunchInOut']);
-    Route::any('attendance/changeStatus', [ AttendanceController::class, 'changeStatus']);
-    Route::any('showAttendance', [ AttendanceController::class, 'showAttendance']);
-    Route::any('lastPunchin', [ AttendanceController::class, 'lastPunchin']);
-    Route::post('submitCheckin', [ CheckinController::class, 'submitCheckin']);
-    Route::post('submitCheckout', [ CheckinController::class, 'submitCheckout']);
-    Route::any('getCheckin', [ CheckinController::class, 'getCheckin']);
-    Route::post('submitVisitReports', [ VisitReportController::class, 'submitVisitReports']);
-    Route::any('getVisitTypes', [ VisitReportController::class, 'getVisitTypes']);
-    Route::any('getVisitReports', [ VisitReportController::class, 'getVisitReports']);
+    Route::post('insertOrder', [OrderController::class, 'insertOrder']);
+    Route::any('getOrderList', [OrderController::class, 'getOrderList']);
+    Route::any('getClusterOrderList', [OrderController::class, 'getClusterOrderList']);
+    Route::post('updateClusterOrder', [OrderController::class, 'updateClusterOrder']);
+    Route::any('getOrderDetails', [OrderController::class, 'getOrderDetails']);
+    Route::post('addCartItems', [OrderController::class, 'addCartItems']);
+    Route::get('getCartItems', [OrderController::class, 'getCartItems']);
+    Route::any('getOrderPfd', [OrderController::class, 'getOrderPfd']);
+
+    //Leave
+    Route::any('addLeaves', [LeaveController::class, 'addLeaves']);
+    Route::any('getLeaves', [LeaveController::class, 'getLeaves']);
+
+    Route::any('getBeatList', [BeatController::class, 'getBeatList']);
+    Route::any('getBeatDropdownList', [BeatController::class, 'getBeatDropdownList']);
+    Route::any('getBeatCustomers', [BeatController::class, 'getBeatCustomers']);
+    Route::post('userPunchin', [AttendanceController::class, 'userPunchin']);
+    Route::post('userPunchout', [AttendanceController::class, 'userPunchout']);
+    Route::any('getPunchin', [AttendanceController::class, 'getPunchin']);
+    Route::any('getAllUserPunchInOut', [AttendanceController::class, 'getAllUserPunchInOut']);
+    Route::any('attendance/changeStatus', [AttendanceController::class, 'changeStatus']);
+    Route::any('showAttendance', [AttendanceController::class, 'showAttendance']);
+    Route::any('lastPunchin', [AttendanceController::class, 'lastPunchin']);
+    Route::post('submitCheckin', [CheckinController::class, 'submitCheckin']);
+    Route::post('submitCheckout', [CheckinController::class, 'submitCheckout']);
+    Route::any('getCheckin', [CheckinController::class, 'getCheckin']);
+    Route::post('submitVisitReports', [VisitReportController::class, 'submitVisitReports']);
+    Route::any('getVisitTypes', [VisitReportController::class, 'getVisitTypes']);
+    Route::any('getVisitReports', [VisitReportController::class, 'getVisitReports']);
+
     // Get Sales
-    Route::post('insertSales', [ SalesController::class, 'insertSales']);
-    Route::post('couponScans', [ CouponController::class, 'couponScans']);
-    Route::any('getSales', [ SalesController::class, 'getSales']);
-    Route::any('getSalesDetails', [ SalesController::class, 'getSalesDetails']);
-    Route::any('getSurveyQuestions', [ SurveyController::class, 'getSurveyQuestions']);
-    Route::any('getUnpaidInvoice', [ PaymentController::class, 'getUnpaidInvoice']);
-    Route::post('paymentReceived', [ PaymentController::class, 'paymentReceived']);
-    Route::any('getPaymentList', [ PaymentController::class, 'getPaymentList']);
-    Route::any('getPaymentInfo', [ PaymentController::class, 'getPaymentInfo']);
-    Route::post('createNewTask', [ UserController::class, 'createNewTask']);
-    Route::post('taskMarkComplite', [ UserController::class, 'taskMarkComplite']);
-    Route::post('getTaskInfo', [ UserController::class, 'getTaskInfo']);
-    Route::any('getUpcomingTasks', [ UserController::class, 'getUpcomingTasks']);
-    Route::any('updateLiveLocation', [ UserController::class, 'updateLiveLocation']);
-    Route::any('addTourProgramme', [ UserController::class, 'addTourProgramme']);
-    Route::any('upcommingTourProgramme', [ UserController::class, 'upcommingTourProgramme']);
-    Route::any('userCityList', [ UserController::class, 'userCityList']);
-    Route::post('userScheduleBeat', [ BeatController::class, 'userScheduleBeat']);
-    Route::post('pointsCollection', [ WalletController::class, 'pointsCollection']);
-    Route::any('getCollectedPoints', [ WalletController::class, 'getCollectedPoints']);
-    Route::any('getUserActivity', [ UserController::class, 'getUserActivity']);
-    Route::any('requestReport', [ UserController::class, 'requestReport']);
-    Route::any('getNotification', [ UserController::class, 'getNotification']);
-    Route::any('masterStateCity', [ UserController::class, 'masterStateCity']);
-    Route::any('getPunchinMasterData', [ UserController::class, 'getPunchinMasterData']);
+    Route::post('insertSales', [SalesController::class, 'insertSales']);
+    Route::post('couponScans', [CouponController::class, 'couponScans']);
+    Route::any('getSales', [SalesController::class, 'getSales']);
+    Route::any('getSalesDetails', [SalesController::class, 'getSalesDetails']);
+    Route::any('getSurveyQuestions', [SurveyController::class, 'getSurveyQuestions']);
+    Route::any('getUnpaidInvoice', [PaymentController::class, 'getUnpaidInvoice']);
+    Route::post('paymentReceived', [PaymentController::class, 'paymentReceived']);
+    Route::any('getPaymentList', [PaymentController::class, 'getPaymentList']);
+    Route::any('getPaymentInfo', [PaymentController::class, 'getPaymentInfo']);
+    Route::post('createNewTask', [UserController::class, 'createNewTask']);
+    Route::post('taskMarkComplite', [UserController::class, 'taskMarkComplite']);
+    Route::post('getTaskInfo', [UserController::class, 'getTaskInfo']);
+    Route::any('getUpcomingTasks', [UserController::class, 'getUpcomingTasks']);
+    Route::any('updateLiveLocation', [UserController::class, 'updateLiveLocation']);
+    Route::any('addTourProgramme', [UserController::class, 'addTourProgramme']);
+    Route::any('upcommingTourProgramme', [UserController::class, 'upcommingTourProgramme']);
+    Route::any('userCityList', [UserController::class, 'userCityList']);
+    Route::post('userScheduleBeat', [BeatController::class, 'userScheduleBeat']);
+    Route::post('pointsCollection', [WalletController::class, 'pointsCollection']);
+    Route::any('getCollectedPoints', [WalletController::class, 'getCollectedPoints']);
+    Route::any('getUserActivity', [UserController::class, 'getUserActivity']);
+    Route::any('requestReport', [UserController::class, 'requestReport']);
+    Route::any('getNotification', [UserController::class, 'getNotification']);
+    Route::any('masterStateCity', [UserController::class, 'masterStateCity']);
+    Route::any('getPunchinMasterData', [UserController::class, 'getPunchinMasterData']);
     //Reporting Activity
     Route::get('reporting/users', [ReportingActivityController::class, 'allReportingUsers']);
     Route::get('user/activity', [ReportingActivityController::class, 'userActivity']);
@@ -186,11 +199,9 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::post('tour/add', [TourPlanController::class, 'add']);
     Route::post('tour/edit', [TourPlanController::class, 'edit']);
     //Expenses Type
-     Route::post('/getExpensesType', [ExpensesTypeController::class, 'getExpensesType']);
-     Route::post('createExpense', [ExpensesTypeController::class, 'createExpense']);
-     Route::any('expenseListing', [ExpensesTypeController::class, 'expenseListing']);
-     Route::post('expenseDetails', [ExpensesTypeController::class, 'expenseDetails']);
-     Route::post('updateExpense', [ExpensesTypeController::class, 'updateExpense']);
+    Route::post('/getExpensesType', [ExpensesTypeController::class, 'getExpensesType']);
+    Route::post('createExpense', [ExpensesTypeController::class, 'createExpense']);
+    Route::any('expenseListing', [ExpensesTypeController::class, 'expenseListing']);
+    Route::post('expenseDetails', [ExpensesTypeController::class, 'expenseDetails']);
+    Route::post('updateExpense', [ExpensesTypeController::class, 'updateExpense']);
 });
-
-

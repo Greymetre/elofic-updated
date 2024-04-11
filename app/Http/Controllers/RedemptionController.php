@@ -20,13 +20,14 @@ use App\Models\Customers;
 use App\Models\Gifts;
 use App\Models\SchemeHeader;
 use Validator;
+use App\Http\Controllers\SendNotifications;
 
 class RedemptionController extends Controller
 {
 
-    public function __construct() 
-    {     
-        $this->middleware('auth');   
+    public function __construct()
+    {
+        $this->middleware('auth');
         $this->redemption = new Redemption();
         $this->path = 'redemption';
     }
@@ -50,7 +51,7 @@ class RedemptionController extends Controller
     {
         abort_if(Gate::denies('transaction_history_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $branches = Branch::where('active', 'Y')->get();
-        $parent_customers = Customers::where('active', 'Y')->whereIn('customertype', ['1','3'])->select('id', 'name')->get();
+        $parent_customers = Customers::where('active', 'Y')->whereIn('customertype', ['1', '3'])->select('id', 'name')->get();
         $redeem_modes = Config('constants.redeem_mode');
         return $dataTable->render('redemption.index', compact('branches', 'parent_customers', 'redeem_modes'));
     }
@@ -63,10 +64,10 @@ class RedemptionController extends Controller
     public function create()
     {
         abort_if(Gate::denies('redemption_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        $customers = Customers::where('customertype', '2')->select('id', 'name', 'mobile')->get();
+        $customers = [];
         $redeem_modes = Config('constants.redeem_mode');
         $gifts = Gifts::where('active', 'Y')->get();
-        return view('redemption.create', compact('customers', 'gifts','redeem_modes'))->with('redemption',$this->redemption);
+        return view('redemption.create', compact('customers', 'gifts', 'redeem_modes'))->with('redemption', $this->redemption);
     }
 
     /**
@@ -77,8 +78,7 @@ class RedemptionController extends Controller
      */
     public function store(Request $request)
     {
-        try
-        { 
+        try {
             abort_if(Gate::denies('transaction_history_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
             $rules = [
                 'customer_id' => 'required',
@@ -93,13 +93,13 @@ class RedemptionController extends Controller
             $validator->setCustomMessages([
                 'redeem_amount.max' => 'The redeem amount must not be greater than total point.',
                 'gift_id.required' => 'Please select at least one gift.',
-            ]); 
+            ]);
             if ($validator->fails()) {
                 return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+                    ->withErrors($validator)
+                    ->withInput();
             }
-            if($request->redeem_mode == '2'){
+            if ($request->redeem_mode == '2') {
                 Redemption::create([
                     'customer_id' => $request->customer_id,
                     'redeem_mode' => $request->redeem_mode,
@@ -110,12 +110,12 @@ class RedemptionController extends Controller
                     'redeem_amount' => $request->redeem_amount,
                     'created_by' => auth()->user()->id,
                 ]);
-            }elseif($request->redeem_mode == '1'){
+            } elseif ($request->redeem_mode == '1') {
                 $tottal_redeem_point = Gifts::whereIn('id', $request->gift_id)->sum('points');
-                if($tottal_redeem_point > $request->input('total_point')){
+                if ($tottal_redeem_point > $request->input('total_point')) {
                     return redirect()->back()->withErrors('The redeem amount not be greater than to total point.');
                 }
-                foreach($request->gift_id as $gift){
+                foreach ($request->gift_id as $gift) {
                     $redeem_point = Gifts::where('id', $gift)->value('points');
                     Redemption::create([
                         'customer_id' => $request->customer_id,
@@ -126,11 +126,9 @@ class RedemptionController extends Controller
                     ]);
                 }
             }
-            
+
             return Redirect::to('redemptions')->with('message_success', 'Redemption Store Successfully');
-        }
-        catch(\Exception $e)
-        {
+        } catch (\Exception $e) {
             return redirect()->back()->withErrors($e->getMessage())->withInput();
         }
     }
@@ -158,7 +156,7 @@ class RedemptionController extends Controller
         $this->redemption = $Redemption;
         $customers = Customers::where('customertype', '2')->select('id', 'name', 'mobile')->get();
         $redeem_modes = Config('constants.redeem_mode');
-        return view('redemption.create', compact('customers','redeem_modes'))->with('redemption',$this->redemption);
+        return view('redemption.create', compact('customers', 'redeem_modes'))->with('redemption', $this->redemption);
     }
 
     /**
@@ -176,11 +174,11 @@ class RedemptionController extends Controller
         ]);
         $validator->setCustomMessages([
             'redeem_amount.max' => 'The redeem amount must not be greater than total point.',
-        ]); 
+        ]);
         if ($validator->fails()) {
             return redirect()->back()
-            ->withErrors($validator)
-            ->withInput();
+                ->withErrors($validator)
+                ->withInput();
         }
         $Redemption->update($request->all());
 
@@ -195,11 +193,10 @@ class RedemptionController extends Controller
      */
     public function destroy(Redemption $Redemption)
     {
-        if($Redemption->delete())
-        {
-            return response()->json(['status' => 'success','message' => 'Redemption deleted successfully!']);
+        if ($Redemption->delete()) {
+            return response()->json(['status' => 'success', 'message' => 'Redemption deleted successfully!']);
         }
-        return response()->json(['status' => 'error','message' => 'Error in Redemption Delete!']);
+        return response()->json(['status' => 'error', 'message' => 'Error in Redemption Delete!']);
     }
 
     public function download(Request $request)
@@ -213,10 +210,41 @@ class RedemptionController extends Controller
     public function changeStatus(Request $request)
     {
         $updateStatus = Redemption::where('id', $request->id)->update(['status' => $request->status, 'dispatch_number' => $request->dispatch_number]);
-        if($updateStatus){
-            return response()->json(['status' => 'success','message' => 'Redemption status change successfully!']);
-        }else{
-            return response()->json(['status' => 'error','message' => 'Error in change status of redemption!']);
+        if ($updateStatus) {
+            $redemption = Redemption::find($request->id);
+            if ($redemption) {
+                if ($redemption->redeem_mode == '2') {
+                    if ($request->status == '1') {
+                        $status = 'Approved';
+                    } elseif ($request->status == '2') {
+                        $status = 'Rejected';
+                    } elseif ($request->status == '3') {
+                        $status = 'Success';
+                    } elseif ($request->status == '4') {
+                        $status = 'Fail';
+                    }
+                } elseif ($redemption->redeem_mode == '1') {
+                    if ($request->status == '1') {
+                        $status = 'Approved';
+                    } elseif ($request->status == '2') {
+                        $status = 'Rejected';
+                    } elseif ($request->status == '3') {
+                        $status = 'Dispatch';
+                    } elseif ($request->status == '4') {
+                        $status = 'Success';
+                    }
+                }
+            }
+            $customer = Customers::with('customerdetails')->find($redemption->customer_id);
+            $noti_data = [
+                'fcm_token' =>  $customer->customerdetails->fcm_token,
+                'title' => 'Redemption is ' . $status . ' ✅',
+                'msg' => $customer->first_name . ', your redemption is ' . $status,
+            ];
+            $send_notification = SendNotifications::send($noti_data);
+            return response()->json(['status' => 'success', 'message' => 'Redemption status change successfully!']);
+        } else {
+            return response()->json(['status' => 'error', 'message' => 'Error in change status of redemption!']);
         }
     }
 
@@ -229,10 +257,41 @@ class RedemptionController extends Controller
     public function giftDelivered(Request $request)
     {
         $updateStatus = Redemption::where('id', $request->id)->update(['status' => $request->status, 'remark' => $request->remark]);
-        if($updateStatus){
-            return response()->json(['status' => 'success','message' => 'Redemption status change successfully!']);
-        }else{
-            return response()->json(['status' => 'error','message' => 'Error in change status of redemption!']);
+        if ($updateStatus) {
+            $redemption = Redemption::find($request->id);
+            if ($redemption) {
+                if ($redemption->redeem_mode == '2') {
+                    if ($request->status == '1') {
+                        $status = 'Approved';
+                    } elseif ($request->status == '2') {
+                        $status = 'Rejected';
+                    } elseif ($request->status == '3') {
+                        $status = 'Success';
+                    } elseif ($request->status == '4') {
+                        $status = 'Fail';
+                    }
+                } elseif ($redemption->redeem_mode == '1') {
+                    if ($request->status == '1') {
+                        $status = 'Approved';
+                    } elseif ($request->status == '2') {
+                        $status = 'Rejected';
+                    } elseif ($request->status == '3') {
+                        $status = 'Dispatch';
+                    } elseif ($request->status == '4') {
+                        $status = 'Success';
+                    }
+                }
+            }
+            $customer = Customers::with('customerdetails')->find($redemption->customer_id);
+            $noti_data = [
+                'fcm_token' =>  $customer->customerdetails->fcm_token,
+                'title' => 'Redemption is ' . $status . ' ✅',
+                'msg' => $customer->first_name . ', your redemption is ' . $status,
+            ];
+            $send_notification = SendNotifications::send($noti_data);
+            return response()->json(['status' => 'success', 'message' => 'Redemption status change successfully!']);
+        } else {
+            return response()->json(['status' => 'error', 'message' => 'Error in change status of redemption!']);
         }
     }
 
@@ -244,13 +303,12 @@ class RedemptionController extends Controller
         return Excel::download(new RedemptionTemplate, 'NEFT_Redemption_status.xlsx');
     }
 
-    public function upload(Request $request) 
+    public function upload(Request $request)
     {
         abort_if(Gate::denies('redemption_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        Excel::import(new RedemptionImport,request()->file('import_file'));
+        Excel::import(new RedemptionImport, request()->file('import_file'));
         return back()->with('message_success', 'NEFT Redemption Status changed successfully.');
     }
-
 }

@@ -11,9 +11,9 @@
             <div class="btn-group">
               @if(auth()->user()->can(['customer_download']))
               <form method="GET" action="{{ URL::to('customers-download') }}">
-                  <div class="d-flex flex-row">
+                  <div class="d-flex flex-wrap flex-row">
 
-                  <div class="p-2" style="width:160px;">
+                  <div class="p-2" style="width:200px;">
                     <select class="selectpicker" name="executive_id" id="executive_id" data-style="select-with-transition" title="Select User">
                        <option value="">Select User</option>
                       @if(@isset($users ))
@@ -23,7 +23,7 @@
                       @endif
                     </select>
                   </div>
-                  <div class="p-2" style="width:150px;">
+                  <div class="p-2" style="width:180px;">
                     <select class="selectpicker" multiple name="branch_id[]" id="branch_id" data-style="select-with-transition" title="Select Branch">
                      <option value="">Select Branch</option>
                     @if(@isset($branches ))
@@ -33,7 +33,7 @@
                     @endif
                    </select>
                   </div>
-                  <div class="p-2" style="width:145px;">
+                  <div class="p-2" style="width:200px;">
                     <select class="selectpicker" name="state_id" id="state_id" data-style="select-with-transition" title="Select State">
                        <option value="">Select State</option>
                       @if(@isset($states ))
@@ -43,8 +43,8 @@
                       @endif
                     </select>
                   </div>
-                  <div class="p-2" style="width:140px;">
-                    <select class="selectpicker" name="city_id" id="city_id" data-style="select-with-transition" title="Select City">
+                  <div class="p-2" style="width:200px;">
+                    <select class="select2" name="city_id" id="city_id" data-style="select-with-transition" title="Select City">
                        <option value="">Select City</option>
                       @if(@isset($cities ))
                       @foreach($cities as $city)
@@ -53,8 +53,11 @@
                       @endif
                     </select>
                   </div>
-                   <div class="p-2" style="width:150px;">
-                    <select class="selectpicker" name="customertype" id="customertype" data-style="select-with-transition" title="Select Type">
+                  <div class="p-2" style="width:200px;">
+                    <select name="parent_id" id="parent_id" class="select2 form-control"></select>
+                  </div>
+                   <div class="p-2" style="width:200px;">
+                    <select class="selectpicker" name="customertype" id="customertype" data-style="select-with-transition" title="Customer Type">
                        <option value="">Select Customer Type</option>
                       @if(@isset($customertype ))
                       @foreach($customertype as $type)
@@ -62,10 +65,17 @@
                       @endforeach
                       @endif
                     </select>
+                   </div>
+                   <div class="p-2" style="width:200px;">
+                    <select class="selectpicker" name="created_by" id="created_by" data-style="select-with-transition" title="Created By">
+                       <option value="">Select Created By</option>
+                       <option value="other">Others</option>
+                       <option value="self">Self</option>
+                    </select>
                    </div> 
 
-                    <div class="p-2" style="width:130px;"><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
-                    <div class="p-2" style="width:130px;"><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
+                    <div class="p-2" style="width:150px;"><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
+                    <div class="p-2" style="width:150px;"><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
                     <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.customers.title') !!}"><i class="material-icons">cloud_download</i></button></div>
                   </div>
               </form>
@@ -237,11 +247,12 @@
           url: "{{ route('customers.index') }}",
           data: function (d) {
                 d.executive_id = $('#executive_id').val(),
-                //d.beat_id = $('#beat_id').val(),
+                d.parent_id = $('#parent_id').val(),
                 d.branch_id = $('#branch_id').val(),
                 d.state_id = $('#state_id').val(),
                 d.city_id = $('#city_id').val(),
                 d.customertype = $('#customertype').val(),
+                d.created_by = $('#created_by').val(),
                 d.search = $('input[type="search"]').val()
             }
         },
@@ -265,9 +276,12 @@
     $('#executive_id').change(function(){
         table.draw();
     });
-    // $('#beat_id').change(function(){
-    //     table.draw();
-    // });
+    $('#parent_id').change(function(){
+        table.draw();
+    });
+    $('#created_by').change(function(){
+        table.draw();
+    });
     $('#state_id').change(function(){
         table.draw();
     });
@@ -343,6 +357,24 @@
             },
         });
     });
+    setTimeout(() => {
+         var $customerSelect = $('#parent_id').select2({
+            placeholder: 'Select Parent',
+            allowClear: true,
+            ajax: {
+               url: "{{ route('getDealerDisDataSelect') }}",
+               dataType: 'json',
+               delay: 250,
+               data: function(params) {
+                  return {
+                     term: params.term || '',
+                     page: params.page || 1
+                  }
+               },
+               cache: true
+            }
+         });
+      }, 1500);
      
     });
 </script>

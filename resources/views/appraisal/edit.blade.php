@@ -29,10 +29,10 @@
                         @endif
                         <div class="card-body ">
                             <div class="tab-content tab-space">
-                               
+
                                 {!! Form::open(['method' => 'POST','files'=>true,'route' => ['appraisals.updateappraisal'],'class' => 'form-horizontal','id' => 'frmBuilder']) !!}
                                 <div class="row">
-                        
+
                                     <!-- <div class="p-2" style="width: 250px;">
                                         <select class="selectpicker" name="f_year" id="f_year" data-style="select-with-transition" title="Select Financial Year">
                                             <option value="">Select Financial Year</option>
@@ -40,29 +40,31 @@
                                         </select>
                                     </div> -->
 
-                                     @foreach($appraisal_details as $appraisal_detail)
+                                    @foreach($appraisal_details as $appraisal_detail)
 
-                                     @endforeach 
+                                    @endforeach
 
-                                
+
 
                                     <div class="p-2" style="width: 250px;">
                                         <select class="selectpicker" name="f_year" id="f_year" data-style="select-with-transition">
                                             <!-- <option value="">Select Financial Year</option> -->
-                                                @foreach($sale_weightage_years as $sale_weightage_year)
-                                            <option value="{{$sale_weightage_year->financial_year}}" <?php if($appraisal_detail->year == $sale_weightage_year->financial_year){echo "selected"; }  ?> >{{$sale_weightage_year->financial_year}}</option>
-                                                @endforeach
+                                            @foreach($sale_weightage_years as $sale_weightage_year)
+                                            <option value="{{$sale_weightage_year->financial_year}}" <?php if ($appraisal_detail->year == $sale_weightage_year->financial_year) {
+                                                                                                            echo "selected";
+                                                                                                        }  ?>>{{$sale_weightage_year->financial_year}}</option>
+                                            @endforeach
 
                                         </select>
                                     </div>
 
-                            
+
 
                                     <div class="p-2" id="session_div" style="width: 250px;">
                                         <select class="selectpicker" name="appraisal_session" id="appraisal_session" data-style="select-with-transition" title="Select Appraisal Type">
                                         </select>
                                     </div>
-                                      <input type="hidden" name="user_id" value="{{$user_id}}">
+                                    <input type="hidden" name="user_id" value="{{$user_id}}">
 
                                     <div class="table-responsive w-100">
                                         <table class="table kvcodes-dynamic-rows-example" id="table_appraisal">
@@ -78,29 +80,69 @@
                                                     <th class="text-center">Acual</th>
                                                     <th class="text-center">Max Rating</th>
                                                     <th class="text-center">Rating</th>
+                                                    @php
+                                                    $check_old = array();
+                                                    @endphp
+
+                                                    @foreach($appraisal_details as $appraisal_detail)
+                                                    @php
+                                                    $appraisal_detail->rating_bys = explode(',', $appraisal_detail->rating_bys);
+                                                    @endphp
+
+                                                    @foreach($appraisal_detail->rating_bys as $keys => $rating_by_id)
+                                                    @php
+                                                    $reting_user = App\models\User::find($rating_by_id);
+                                                    @endphp
+
+
+                                                    @if(!in_array($rating_by_id, $check_old) && explode(',',$appraisal_detail->user_ids)[$keys] != $rating_by_id)
+
+
+                                                    @php array_push($check_old, $rating_by_id) @endphp
+                                                    @if($rating_by_id != auth()->user()->id)
+                                                    <th>{{$reting_user->name}}({{$reting_user->getdesignation->designation_name}})</th>
+                                                    @endif
+                                                    @endif
+
+
+                                                    @if(explode(',',$appraisal_detail->user_ids)[$keys] == $rating_by_id && !in_array($rating_by_id, $check_old))
+                                                    @php array_push($check_old, $rating_by_id) @endphp
+                                                    @if($rating_by_id != auth()->user()->id)
+                                                    <th>Self Rating</th>
+                                                    @endif
+                                                    @endif
+                                                    @endforeach
+                                                    @endforeach
                                                 </tr>
                                             </thead>
                                             <tbody>
 
-                                                <?php $i = 0; ?>
-
+                                                <?php $i = 0;
+                                                $old_w_id = array();
+                                                ?>
                                                 @foreach($appraisal_details as $appraisal_detail)
 
-                                                <?php 
+                                                <?php
+                                                array_push($old_w_id, $appraisal_detail->weightage_id);
+                                                // $categories = explode(",",$sale_weightage->category_name);
+                                                // $name = explode(",",$sale_weightage->name);
+                                                // $weightage = explode(",",$sale_weightage->weightage);
+                                                // $indicator = explode(",",$sale_weightage->indicator);
+                                                // $annum_target = explode(",",$sale_weightage->annum_target);
+                                                // $i=0;
 
-                                               // $categories = explode(",",$sale_weightage->category_name);
-                                               // $name = explode(",",$sale_weightage->name);
-                                               // $weightage = explode(",",$sale_weightage->weightage);
-                                               // $indicator = explode(",",$sale_weightage->indicator);
-                                               // $annum_target = explode(",",$sale_weightage->annum_target);
-                                               // $i=0;
+                                                ?>
 
-                                                  ?> 
-                                              
-                                                
 
                                                 <tr>
-                                                    <input type="hidden" name="appraisal_ids[]" value="{{$appraisal_detail->id}}">
+                                                    @if(in_array(auth()->user()->id, $appraisal_detail->rating_bys))
+                                                    @php
+                                                        $rattingId = App\Models\Appraisal::where('rating_by', auth()->user()->id)->where('weightage_id', $appraisal_detail->weightage_id)->where('user_id', explode(',', $appraisal_detail->user_ids)[0])->where('year', $appraisal_detail->year)->value('id');
+                                                        @endphp
+                                                    <input type="hidden" name="appraisal_ids[]" value="{{$rattingId}}">
+                                                    @else
+                                                    <input type="hidden" name="appraisal_ids[]" value="">
+                                                    @endif
 
                                                     <input type="hidden" name="sale_weightage_id[]" value="{{$appraisal_detail->weightage_id}}">
 
@@ -108,7 +150,7 @@
 
                                                     <input type="hidden" name="kra_names[]" value="{{$appraisal_detail->kra}}">
 
-                                                     <td>
+                                                    <td>
                                                         <h6>{{$appraisal_detail->sales_weightage->category_name??''}}</h6>
                                                     </td>
                                                     <td>
@@ -123,25 +165,42 @@
                                                     <td>
                                                         {{$appraisal_detail->sales_weightage->weightage??''}}%
                                                     </td>
-                                                           
+
                                                     <td>
-                                                        <input type="number" name="target[]" class="target" value="{{$appraisal_detail->target??''}}">
+                                                        <input type="number" name="target[]" class="target" value="{{explode(',',$appraisal_detail->targets)[0]??''}}">
                                                     </td>
                                                     <td>
-                                                        <input type="number" class="achivment" name="achivment[]" value="{{$appraisal_detail->achivment??''}}">
+                                                        <input type="number" class="achivment" name="achivment[]" value="{{explode(',',$appraisal_detail->achivments)[0]??''}}">
                                                     </td>
                                                     <td>
-                                                        <input name="acual[]" class="acual" type="text" value="{{$appraisal_detail->acual??''}}" readonly>
+                                                        <input name="acual[]" class="acual" type="text" value="{{explode(',',$appraisal_detail->acuals)[0]??''}}" readonly>
                                                     </td>
                                                     <td>10</td>
+
                                                     <td>
-                                                        <input name="rating[]" class="all_rating" max="10" type="number" value="{{$appraisal_detail->rating??''}}">
+                                                        @if(in_array(auth()->user()->id, $appraisal_detail->rating_bys))
+                                                        @php
+                                                        $rattingAre = App\Models\Appraisal::where('rating_by', auth()->user()->id)->where('weightage_id', $appraisal_detail->weightage_id)->where('user_id', explode(',', $appraisal_detail->user_ids)[0])->where('year', $appraisal_detail->year)->value('rating');
+                                                        @endphp
+                                                        <input name="rating[]" class="all_rating" max="10" type="number" value="{{$rattingAre??''}}">
+                                                        @else
+                                                        <input name="rating[]" class="all_rating" max="10" type="number" value="" required>
+                                                        @endif
                                                         <p class="rat-err"></p>
                                                     </td>
+
+                                                    @foreach($appraisal_detail->rating_bys as $rating_bys)
+                                                    @if(auth()->user()->id != $rating_bys)
+                                                    @php
+                                                    $rattingAre = App\Models\Appraisal::where('rating_by', $rating_bys)->where('weightage_id', $appraisal_detail->weightage_id)->where('user_id', explode(',', $appraisal_detail->user_ids)[0])->where('year', $appraisal_detail->year)->value('rating');
+                                                    @endphp
+                                                    <td>{{$rattingAre}}</td>
+                                                    @endif
+                                                    @endforeach
                                                 </tr>
 
-                                                  <?php $i++; ?>                                                 
-                                                   @endforeach 
+                                                <?php $i++; ?>
+                                                @endforeach
 
                                             </tbody>
                                         </table>
@@ -278,7 +337,7 @@
             }
         })
 
-        function getAllRatings(executive_id, f_year, appraisal_type, appraisal_session){
+        function getAllRatings(executive_id, f_year, appraisal_type, appraisal_session) {
             if (executive_id != '' && f_year != '' && appraisal_type != '') {
                 if (appraisal_type == 'quarterly' || appraisal_type == 'half_yearly') {
                     if (appraisal_session != '') {
@@ -339,7 +398,7 @@
                                             });
                                             var NewTh = '<th class="text-center appended">';
                                             if (item.user_id != item.rating_by_user.id) {
-                                                 NewTh += item.rating_by_user.name+'('+item.rating_by_user.getdesignation.designation_name+')';
+                                                NewTh += item.rating_by_user.name + '(' + item.rating_by_user.getdesignation.designation_name + ')';
                                             } else {
                                                 NewTh += 'Self';
                                             }
@@ -382,7 +441,7 @@
                                     } else if (selftotalPer > 80) {
                                         $("#auth-user-grade").html("GRADE-A+(SPECIAL)");
                                     }
-                                    $("#auth-user-per").html(selftotalPer+"%");
+                                    $("#auth-user-per").html(selftotalPer + "%");
                                     if (selftotalPer < 51) {
                                         $("#auth-user-grade").html("GRADE-C(Poor)");
                                     } else if (selftotalPer > 50 && selftotalPer < 61) {
@@ -394,7 +453,7 @@
                                     } else if (selftotalPer > 80) {
                                         $("#auth-user-grade").html("GRADE-A+(SPECIAL)");
                                     }
-                                    $("#auth-user-per").html(selftotalPer+"%");
+                                    $("#auth-user-per").html(selftotalPer + "%");
                                 } else {
                                     $('input[name="target[]"], input[name="achivment[]"], input[name="acual[]"], input[name="rating[]"]').val('');
                                     const rows = document.querySelectorAll('tr');
@@ -422,7 +481,7 @@
                             if (res.length > 0) {
                                 var old_data = '';
                                 var tttr = '<tr class="appended"><td colspan="6" class="tottal-td">Total</td><td class="tottal-td" id="auth-user-per"></td>';
-                                    var tttr2 = '<tr class="appended"><td colspan="6" class="tottal-td">Grade</td><td class="tottal-td" id="auth-user-grade"></td>';
+                                var tttr2 = '<tr class="appended"><td colspan="6" class="tottal-td">Grade</td><td class="tottal-td" id="auth-user-grade"></td>';
                                 var totalPer = 0;
                                 var selftotalPer = 0;
                                 $.each(res, function(i, item) {
@@ -468,7 +527,7 @@
                                         });
                                         var NewTh = '<th class="text-center appended">';
                                         if (item.user_id != item.rating_by_user.id) {
-                                             NewTh += item.rating_by_user.name+'('+item.rating_by_user.getdesignation.designation_name+')';
+                                            NewTh += item.rating_by_user.name + '(' + item.rating_by_user.getdesignation.designation_name + ')';
                                         } else {
                                             NewTh += 'Self';
                                         }
@@ -511,7 +570,7 @@
                                 } else if (selftotalPer > 80) {
                                     $("#auth-user-grade").html("GRADE-A+(SPECIAL)");
                                 }
-                                $("#auth-user-per").html(selftotalPer+"%");
+                                $("#auth-user-per").html(selftotalPer + "%");
                             } else {
                                 $('input[name="target[]"], input[name="achivment[]"], input[name="acual[]"], input[name="rating[]"]').val('');
                                 const rows = document.querySelectorAll('tr');
@@ -549,13 +608,11 @@
                     "division_id": division_id
                 },
                 success: function(res) {
-                    
+
                 }
             });
 
         })
-
-
     </script>
 
 </x-app-layout>

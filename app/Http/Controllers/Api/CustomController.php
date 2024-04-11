@@ -251,6 +251,7 @@ class CustomController extends Controller
         try
         { 
             $pageSize = $request->input('pageSize');
+            $search = $request->input('search');
             $user = Auth::guard('users')->user();
             if($user)
             {
@@ -261,10 +262,13 @@ class CustomController extends Controller
             }else{
                 $customer_ids_assign = NULL;
             }
-            $query = Customers::where(function ($query) use ($customer_ids_assign) {
+            $query = Customers::where(function ($query) use ($customer_ids_assign, $search) {
                                         $query->where('active', '=', 'Y')->whereIn('customertype',['1','3']);
                                         if($customer_ids_assign){
                                             $query->whereIn('id', $customer_ids_assign);
+                                        }
+                                        if($search){
+                                            $query->where('name', 'LIKE', '%'.$search.'%');
                                         }
                                     })->select('id','name');
 

@@ -1073,7 +1073,7 @@
                                  <select class="form-control" name="designation_id">
                                     <option value="" disabled selected>Select {!! trans('panel.user.designation') !!}</option>
                                     @foreach($designations as $designation)
-                                    <option value="{{$designation->id}}" {{ (($designation->id == old('designation_id', $user->id?$user->getdesignation->id:''))) ? 'selected' : '' }} > {{$designation->designation_name}}</option>
+                                    <option value="{{$designation->id}}" {{ (($designation->id == old('designation_id', ($user->id && $user->getdesignation)?$user->getdesignation->id:''))) ? 'selected' : '' }} > {{$designation->designation_name}}</option>
                                     @endforeach
                                  </select>
                                  @if($errors->has('designation_id'))

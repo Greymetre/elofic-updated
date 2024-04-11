@@ -68,13 +68,9 @@
                         <label for="customer_id" class="form-control">Customer</label>
                      </div>
                      <div class="col-md-4">
-                        <select name="customer_id" id="customer_id" placeholder="Select Customers" class="select2 form-control" required>
+                        <select name="customer_id" id="customer_id" placeholder="Select Customers" class="form-control" required>
                            <option value="" disabled selected>Select Customer</option>
-                           @if($customers && count($customers) > 0)
-                           @foreach($customers as $customer)
-                           <option value="{{$customer->id}}" {!! (old('customer_id', $redemption['customer_id'])==$customer->id) ?'selected':'' !!}>{{$customer->name}}({{$customer->mobile}})</option>
-                           @endforeach
-                           @endif
+
                         </select>
                         @if ($errors->has('customer_id'))
                         <div class="error col-lg-12">
@@ -105,7 +101,11 @@
                      </div>
                      <div class="col-md-10">
                         <div class="d-flex">
-                           <input style="width: 40% !important;" readonly type="number" value="{!! old( 'total_point' ) !!}" name="total_point" id="total_point" class="form-control"> <h4 class="ml-2">- Redeem Point </h4> <h4 class="ml-2" id="redeem_amount_cal">0</h4> <h4 class="ml-2">= Balance Point</h4> <h4 class="ml-2" id="remain_amount_cal"> 0 </h4>
+                           <input style="width: 40% !important;" readonly type="number" value="{!! old( 'total_point' ) !!}" name="total_point" id="total_point" class="form-control">
+                           <h4 class="ml-2">- Redeem Point </h4>
+                           <h4 class="ml-2" id="redeem_amount_cal">0</h4>
+                           <h4 class="ml-2">= Balance Point</h4>
+                           <h4 class="ml-2" id="remain_amount_cal"> 0 </h4>
                         </div>
                         @if ($errors->has('total_point'))
                         <div class="error col-lg-12">
@@ -426,12 +426,12 @@
          }, 1000);
       }).trigger('change');
 
-      $(document).on("keyup", "#redeem_amount", function(){
+      $(document).on("keyup", "#redeem_amount", function() {
          var redeem_amount = $(this).val();
          var total_points = $("#total_point").val();
-         if(redeem_amount != ''){
+         if (redeem_amount != '') {
             $("#redeem_amount_cal").html(redeem_amount);
-            $("#remain_amount_cal").html(total_points-redeem_amount);
+            $("#remain_amount_cal").html(total_points - redeem_amount);
          }
       })
 
@@ -442,10 +442,29 @@
             var dataPoints = $(this).data('points');
             redeem_amount += parseInt(dataPoints);
          });
-         if(redeem_amount > 0){
+         if (redeem_amount > 0) {
             $("#redeem_amount_cal").html(redeem_amount);
-            $("#remain_amount_cal").html(total_points-redeem_amount);
+            $("#remain_amount_cal").html(total_points - redeem_amount);
          }
       });
+
+      setTimeout(() => {
+         $('#customer_id').select2({
+            placeholder: 'Select Seller',
+            allowClear: true,
+            ajax: {
+               url: "{{ route('getRetailerDataSelect') }}",
+               dataType: 'json',
+               delay: 250,
+               data: function(params) {
+                  return {
+                     term: params.term || '',
+                     page: params.page || 1
+                  }
+               },
+               cache: true
+            }
+         }).trigger('change');
+      }, 1000);
    </script>
 </x-app-layout>
