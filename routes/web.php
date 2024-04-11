@@ -67,6 +67,7 @@ use App\Http\Controllers\OrderSchemeController;
 use App\Http\Controllers\RedemptionController;
 use App\Http\Controllers\WarrantyActivationController;
 use App\Http\Controllers\SalesTargetUsersController;
+use App\Http\Controllers\MobileUserLoginDetailsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -232,12 +233,17 @@ Route::group(['middleware' => ['auth']], function () {
     // Sales Target Users
     Route::get('sales_users/target_users', [SalesTargetUsersController::class, 'sales_target_users'])->name('sales_users.target_users');
     Route::post('sales_users/target_users_upload/upload', [SalesTargetUsersController::class, 'target_users_upload'])->name('sales_users.target_users_upload.upload');
-    Route::get('sales_users/target_users_download/download', [SalesTargetUsersController::class, 'target_users_download'])->name('sales_users.target_users_download.download');
+    Route::any('sales_users/target_users_download/download', [SalesTargetUsersController::class, 'target_users_download'])->name('sales_users.target_users_download.download');
     Route::post('sales_users/target_users/list', [SalesTargetUsersController::class, 'sales_target_users_list'])->name('sales_users.target_users.list');
     Route::get('sales_users/target_user/delete', [SalesTargetUsersController::class, 'sales_target_users_delete'])->name('sales_users.target_user.delete');
     Route::any('sales-target-users-template', [ SalesTargetUsersController::class, 'template'])->name('sales_users.target_user.template');
     Route::get('sales-target-users/{id}', [SalesTargetUsersController::class, 'update_target_user_modal'])->name('sales-target-users');
     Route::post('sales-target-users/store', [SalesTargetUsersController::class, 'update_target_user_updte'])->name('sales-target-users.store');
+
+    // Sales Achievement
+    Route::any('sales-achievement-template', [ SalesTargetUsersController::class, 'achievement_template'])->name('sales.achievement.template');
+    Route::post('sales/achievement/upload', [SalesTargetUsersController::class, 'achievement_upload'])->name('sales.achievement.upload');
+    Route::get('sales/achievement/download', [SalesTargetUsersController::class, 'achievement_download'])->name('sales_users.achievement.download');
 
      //Brand
     Route::resource('brands', BrandController::class);
@@ -275,6 +281,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('submit-expected-delivery', [ OrderController::class, 'submitExpectedDelivery'])->name('orders.submitexpecteddelivery');
     Route::any('order-dispatched/{id}', [ OrderController::class, 'orderDispatched'])->name('orders.dispatched');
     Route::any('order-partially-dispatched/{id}', [ OrderController::class, 'orderPartiallyDispatched'])->name('orders.partiallydispatched');
+    Route::any('order-cancle/{id}', [ OrderController::class, 'orderCancle'])->name('orders.orderCancle');
     Route::post('submit-dispatched', [ OrderController::class, 'submitDispatched'])->name('orders.submitdispatched');
     
     Route::post('submit-fullydispatched', [ OrderController::class, 'submitFullyDispatched'])->name('orders.submitFullyDispatched');
@@ -571,6 +578,13 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('transaction_history_manualcreate', [TransactionHistoryController::class, 'manualcreate'])->name('transaction_history.manualcreate');
     Route::POST('transaction_history_manualstore', [TransactionHistoryController::class, 'manualstore'])->name('transaction_history.manualstore');
     Route::POST('transaction_history_manualupdate', [TransactionHistoryController::class, 'manualupdate'])->name('transaction_history.manualupdate');
+
+    // Mobile User Login Details
+    Route::get('mobile_user_login', [MobileUserLoginDetailsController::class, 'mobile_user_login'])->name('mobile_user_login');
+
+    Route::post('mobile_user/login_list/download', [MobileUserLoginDetailsController::class, 'mobile_user_login_download'])->name('mobile_user.login_list.download');
+
+    Route::post('mobile_user_login/list', [MobileUserLoginDetailsController::class, 'mobile_user_login_list'])->name('mobile_user_login.list');
 
     //Gift Category Route
     Route::resource('gift-categories', GiftCategoryController::class);

@@ -449,20 +449,6 @@
 
                             ?>
 
-                     <div class="form-group row">
-                       <div class="col-sm-4">
-                        <label class="bmd-label">{!! trans('panel.order.sub_total') !!}</label>
-                      </div>
-                        <div class="col-sm-8">
-                           <input type="number" name='sub_total' class="form-control" id="subtotal" readonly value="{!! old( 'sub_total', $orders['sub_total']) !!}"/>
-                           @if($errors->has('sub_total'))
-                           <div class="invalid-feedback">
-                              {{ $errors->first('sub_total') }}
-                           </div>
-                           @endif
-                        </div>
-                     </div>
-
 
                     <div class="form-group row">
                        <div class="col-sm-4">
@@ -573,8 +559,19 @@
                         </div>
                      </div>
 
-
-
+                     <div class="form-group row">
+                       <div class="col-sm-4">
+                        <label class="bmd-label">{!! trans('panel.order.sub_total') !!}</label>
+                      </div>
+                        <div class="col-sm-8">
+                           <input type="number" name='sub_total' class="form-control" id="subtotal" readonly value="{!! old( 'sub_total', $orders['sub_total']) !!}"/>
+                           @if($errors->has('sub_total'))
+                           <div class="invalid-feedback">
+                              {{ $errors->first('sub_total') }}
+                           </div>
+                           @endif
+                        </div>
+                     </div>
 
 
 

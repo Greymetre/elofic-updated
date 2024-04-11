@@ -175,6 +175,7 @@
                   <select class=" select2" name="type" id="type" style="width: 100%;" required>
                     <option value="">Select Type</option>
                     <option value="Leave" data-is-city="false">Leave</option>
+                    <option value="Holiday" data-is-city="false">Holiday</option>
                   </select>
                 </div>
               </div>

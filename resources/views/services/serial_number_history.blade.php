@@ -91,6 +91,7 @@
                 <th>Sub Group</th>
                 <th>Product Code</th>
                 <th>Product Name</th>
+                <th>Product Model</th>
                 <th>Party Name</th>
                 <th>Invoice Number</th>
                 <th>Invoice Date</th>
@@ -146,41 +147,64 @@
           {
             data: 'group',
             name: 'group',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: false,
+            searchable: false
           },
           {
             data: 'new_group',
             name: 'new_group',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: false,
+            searchable: false
           },
           {
             data: 'product_code',
             name: 'product_code',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: false,
+            searchable: false
           },
           {
             data: 'product_name',
             name: 'product_name',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: false,
+            searchable: false
+          },
+          {
+            data: 'product.model_no',
+            name: 'product.model_no',
+            "defaultContent": '',
+            orderable: false,
+            searchable: false
           },
           {
             data: 'party_name',
             name: 'party_name',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: false,
+            searchable: false
           },
           {
             data: 'invoice_no',
             name: 'invoice_no',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: false,
+            searchable: false
           },
           {
             data: 'invoice_date',
             name: 'invoice_date',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: false,
+            searchable: false
           },
           {
             data: 'expiry_date',
-            name: 'expiry_date'
+            name: 'expiry_date',
+            orderable: false,
+            searchable: false
           }
         ]
       });

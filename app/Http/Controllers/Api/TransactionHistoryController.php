@@ -20,6 +20,7 @@ use App\Models\SchemeDetails;
 use App\Models\SchemeHeader;
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\SendNotifications;
 use App\Models\DamageEntry;
 use App\Models\Gifts;
 use App\Models\Redemption;
@@ -220,6 +221,13 @@ class TransactionHistoryController extends Controller
                 'ifsc_code' => $request->ifsc_code,
                 'redeem_amount' => $request->redeem_amount,
             ]);
+            $customer = Customers::with('customerdetails')->find($request->customer_id);
+            $noti_data = [
+                'fcm_token' =>  $customer->customerdetails->fcm_token,
+                'title' => 'Redemption Request Sent 💸',
+                'msg' => $customer->first_name . ', your redemption request of '.$request->redeem_amount.' Points is sent successfully.',
+            ];
+            $send_notification = SendNotifications::send($noti_data);
             return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
@@ -251,6 +259,7 @@ class TransactionHistoryController extends Controller
             if ($tottal_redeem_point > $total_balance) {
                 return response()->json(['status' => 'error', 'message' => 'The redeem amount not be greater than to total active balance point.'], $this->successStatus);
             }
+            $ttpoints = 0;
             foreach ($request->gift_id as $gift) {
                 $redeem_point = Gifts::where('id', $gift)->value('points');
                 $created_at = Carbon::now();
@@ -262,7 +271,15 @@ class TransactionHistoryController extends Controller
                     'redeem_amount' => $redeem_point,
                     'created_at' => $created_at,
                 ]);
+                $ttpoints += $redeem_point;
             }
+            $customer = Customers::with('customerdetails')->find($request->customer_id);
+            $noti_data = [
+                'fcm_token' =>  $customer->customerdetails->fcm_token,
+                'title' => 'Redemption Request Sent 💸',
+                'msg' => $customer->first_name . ', your redemption request of '.$ttpoints.' Points is sent successfully.',
+            ];
+            $send_notification = SendNotifications::send($noti_data);
             return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
@@ -333,12 +350,31 @@ class TransactionHistoryController extends Controller
                     'created_at' => $created_at,
                 ]);
             }
+            $customer = Customers::with('customerdetails')->find($request->customer_id);
             if (count($expire_schemes) > 0) {
-                return response(['status' => 'success', 'message' => 'Transaction History Store Successfully but coupon code (' . implode(',', $expire_schemes) . ') scheme has either expired or has not started yet so you earned 0 point.', 'point_earn' => $point, 'data' => $tHistory], 200);
+                $noti_data = [
+                    'fcm_token' =>  $customer->customerdetails->fcm_token,
+                    'title' => 'Scan Successful 💸💸',
+                    'msg' => $customer->name . ' you have successfully earned '.$point.' provisional points in Silver Saarthi.',
+                ];
+                $send_notification = SendNotifications::send($noti_data);
+                return response(['status' => 'success', 'message' => 'Transaction History Store Successfully but coupon code (' . implode(',', $expire_schemes) . ') scheme has either expired or has not started yet so you earned 0 point.', 'point_earn' => $point, 'data' => $tHistory, 'push_notification'=>$send_notification], 200);
             } elseif (!$scheme_details) {
-                return response(['status' => 'success', 'message' => 'Transaction History Store Successfully but no any scheme on coupon code (' . implode(',', $no_schemes) . ') so you earned 0 point.', 'point_earn' => $point, 'data' => $tHistory], 200);
+                $noti_data = [
+                    'fcm_token' =>  $customer->customerdetails->fcm_token,
+                    'title' => 'Scan Successful 💸💸',
+                    'msg' => $customer->name . ' you have successfully earned '.$point.' provisional points in Silver Saarthi.',
+                ];
+                $send_notification = SendNotifications::send($noti_data);
+                return response(['status' => 'success', 'message' => 'Scan is successfully but the coupon code (' . implode(',', $no_schemes) . ') is not part of any scheme. So 0 points are credited.', 'point_earn' => $point, 'data' => $tHistory, 'push_notification'=>$send_notification], 200);
             } else {
-                return response(['status' => 'success', 'message' => 'Transaction History Store Successfully', 'point_earn' => $point, 'data' => $tHistory], 200);
+                $noti_data = [
+                    'fcm_token' =>  $customer->customerdetails->fcm_token,
+                    'title' => 'Scan Successful 💸💸',
+                    'msg' => $customer->name . ' you have successfully earned '.$point.' provisional points in Silver Saarthi.',
+                ];
+                $send_notification = SendNotifications::send($noti_data);
+                return response(['status' => 'success', 'message' => 'Transaction History Store Successfully', 'point_earn' => $point, 'data' => $tHistory, 'push_notification'=>$send_notification], 200);
             }
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);

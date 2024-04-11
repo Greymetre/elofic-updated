@@ -182,43 +182,42 @@ class ProductController extends Controller
                                 $is_active = true;
                             }
                         }
-
                     }
-                    if($repetition_type == '2'){
+                    if ($repetition_type == '2') {
                         $currentDate = Carbon::now();
                         $weekOfMonth = ceil($currentDate->day / 7);
                         $week_repeat = $value['getSchemeDetail']['orderscheme']['week_repeat'] ?? '';
-                        if((int)$week_repeat == (int)$weekOfMonth){
+                        if ((int)$week_repeat == (int)$weekOfMonth) {
                             $is_active = true;
                         }
                     }
-                    if($repetition_type == '1'){
+                    if ($repetition_type == '1') {
                         $day_repeat = explode(',', $value['getSchemeDetail']['orderscheme']['day_repeat']) ?? [];
                         $todayDayOfWeek = Carbon::today()->format('D');
                         if (in_array($todayDayOfWeek, $day_repeat)) {
                             $is_active = true;
                         }
                     }
-                    if($is_active === true){
+                    if ($is_active === true) {
                         $scheme_value_type = $value['getSchemeDetail']['orderscheme']['scheme_basedon'] ?? '';
-    
+
                         $minimum = $value['getSchemeDetail']['orderscheme']['minimum'] ?? 0;
                         $maximum = $value['getSchemeDetail']['orderscheme']['maximum'] ?? 0;
-    
+
                         if ($scheme_value_type == 'percentage') {
                             $ebd_amount = $total_amount * $ebd_discount / 100;
                             $product_ebd_amount = $total_amount - $ebd_amount;
                         }
-    
+
                         if ($scheme_value_type == 'value') {
-    
+
                             $ebd_amount = $ebd_discount;
                             $product_ebd_amount = $total_amount - $ebd_discount;
                         }
-    
+
                         $ebd_amount = number_format($ebd_amount, 2, ".", "");
                         $product_ebd_amount = number_format($product_ebd_amount, 2, ".", "");
-                    }else{
+                    } else {
                         $ebd_amount = number_format(0, 2, ".", "");
                         $product_ebd_amount = number_format($total_amount, 2, ".", "");
                     }
@@ -571,27 +570,75 @@ class ProductController extends Controller
                 $total_amount = number_format($total_amount, 2, ".", "");
 
 
-                $ebd_discount = $query['getSchemeDetail']['points'] ?? 0;
-                $scheme_type = $query['getSchemeDetail']['orderscheme']['scheme_type'] ?? '';
-                $scheme_value_type = $query['getSchemeDetail']['orderscheme']['scheme_basedon'] ?? '';
+                $ebd_discount = $value['getSchemeDetail']['points'] ?? 0;
+                $scheme_type = $value['getSchemeDetail']['orderscheme']['scheme_type'] ?? '';
+                $repetition_type = $value['getSchemeDetail']['orderscheme']['repetition'] ?? '';
+                $is_active = false;
+                if ($repetition_type == '3' || $repetition_type == '4') {
+                    $start_date = $value['getSchemeDetail']['orderscheme']['start_date'] ?? '';
+                    $end_date = $value['getSchemeDetail']['orderscheme']['end_date'] ?? '';
 
-                $minimum = $query['getSchemeDetail']['orderscheme']['minimum'] ?? 0;
-                $maximum = $query['getSchemeDetail']['orderscheme']['maximum'] ?? 0;
+                    if ($repetition_type == '3') {
+                        $startCarbon = Carbon::parse($start_date);
+                        $endCarbon = Carbon::parse($end_date);
+                        $today = Carbon::today();
+                        $startDay = $startCarbon->day;
+                        $endDay = $endCarbon->day;
+                        $todayDay = $today->day;
+                        if ($todayDay >= $startDay && $todayDay <= $endDay) {
+                            $is_active = true;
+                        }
+                    }
 
-                if ($scheme_value_type == 'percentage') {
-                    $ebd_amount = $total_amount * $ebd_discount / 100;
-                    $product_ebd_amount = $total_amount - $ebd_amount;
+                    if ($repetition_type == '4') {
+                        $startMonthDay = Carbon::parse($start_date)->format('m-d');
+                        $endMonthDay = Carbon::parse($end_date)->format('m-d');
+                        $todayMonthDay = Carbon::today()->format('m-d');
+                        if (($startMonthDay <= $todayMonthDay && $endMonthDay >= $todayMonthDay) ||
+                            ($startMonthDay >= $todayMonthDay && $endMonthDay <= $todayMonthDay)
+                        ) {
+                            $is_active = true;
+                        }
+                    }
                 }
-
-                if ($scheme_value_type == 'value') {
-
-                    $ebd_amount = $ebd_discount;
-                    $product_ebd_amount = $total_amount - $ebd_discount;
+                if ($repetition_type == '2') {
+                    $currentDate = Carbon::now();
+                    $weekOfMonth = ceil($currentDate->day / 7);
+                    $week_repeat = $value['getSchemeDetail']['orderscheme']['week_repeat'] ?? '';
+                    if ((int)$week_repeat == (int)$weekOfMonth) {
+                        $is_active = true;
+                    }
                 }
+                if ($repetition_type == '1') {
+                    $day_repeat = explode(',', $value['getSchemeDetail']['orderscheme']['day_repeat']) ?? [];
+                    $todayDayOfWeek = Carbon::today()->format('D');
+                    if (in_array($todayDayOfWeek, $day_repeat)) {
+                        $is_active = true;
+                    }
+                }
+                if ($is_active === true) {
+                    $scheme_value_type = $value['getSchemeDetail']['orderscheme']['scheme_basedon'] ?? '';
 
-                $ebd_amount = number_format($ebd_amount, 2, ".", "");
-                $product_ebd_amount = number_format($product_ebd_amount, 2, ".", "");
+                    $minimum = $value['getSchemeDetail']['orderscheme']['minimum'] ?? 0;
+                    $maximum = $value['getSchemeDetail']['orderscheme']['maximum'] ?? 0;
 
+                    if ($scheme_value_type == 'percentage') {
+                        $ebd_amount = $total_amount * $ebd_discount / 100;
+                        $product_ebd_amount = $total_amount - $ebd_amount;
+                    }
+
+                    if ($scheme_value_type == 'value') {
+
+                        $ebd_amount = $ebd_discount;
+                        $product_ebd_amount = $total_amount - $ebd_discount;
+                    }
+
+                    $ebd_amount = number_format($ebd_amount, 2, ".", "");
+                    $product_ebd_amount = number_format($product_ebd_amount, 2, ".", "");
+                } else {
+                    $ebd_amount = number_format(0, 2, ".", "");
+                    $product_ebd_amount = number_format($total_amount, 2, ".", "");
+                }
 
 
                 $data = collect([
@@ -623,6 +670,7 @@ class ProductController extends Controller
                     'model_no' => isset($query['model_no']) ? $query['model_no'] : '',
                     'hp' => isset($query['specification']) ? $query['specification'] : '',
                     'ebd_amount' => (string)$ebd_amount,
+                    'scheme_amount' => (string)$ebd_amount,
                     'product_ebd_amount' => (string)$product_ebd_amount,
                     'details' => $detail
                 ]);

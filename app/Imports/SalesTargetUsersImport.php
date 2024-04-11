@@ -65,7 +65,7 @@ class SalesTargetUsersImport implements ToCollection,WithValidation,WithHeadingR
             'user_id' => 'required',
             'month' => 'required',
             // 'year' => 'required',
-            'target_value' => 'required',
+            'target_value' => 'required|numeric',
         ];
         return $rules;
     }
@@ -76,7 +76,8 @@ class SalesTargetUsersImport implements ToCollection,WithValidation,WithHeadingR
             'user_id.required' => 'The user id is required.',
             'month.required' => 'The month name field is required.',
             // 'year.required' => 'The year name field is required.',
-            'target_value.required' => 'The target value is required.'
+            'target_value.required' => 'The target value is required.',
+            'target_value.required' => 'The target value must be numeric.'
         ];
     }
 

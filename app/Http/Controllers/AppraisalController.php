@@ -4,10 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Exports\AppraisalExport;
 use App\Models\Appraisal;
+use App\Models\Customers;
 use App\Models\salesWeightage;
 use App\Models\User;
 use App\Models\Designation;
 use App\Models\Division;
+use Edujugon\PushNotification\PushNotification;
+use Edujugon\PushNotification\Messages\PushMessage;
+use Edujugon\PushNotification\Channels\ApnChannel;
+use Edujugon\PushNotification\Channels\FcmChannel;
+
 use Illuminate\Http\Request;
 use DataTables;
 use Validator;
@@ -407,7 +413,7 @@ class AppraisalController extends Controller
             ->groupBy('weightage_id', 'year')
             ->orderByRaw('MIN(created_at)')
             ->get();
-            // dd($appraisal_details);
+        // dd($appraisal_details);
 
         $sale_weightage_years = salesWeightage::orderBy('financial_year', 'asc')->get()->unique('financial_year');
 
@@ -475,7 +481,7 @@ class AppraisalController extends Controller
 
         //new
         $totalper = 0;
-dd($request->all());
+
         if (!empty($request['appraisal_ids'])) {
             foreach ($request['appraisal_ids'] as $key => $appraisal_id) {
 
@@ -693,39 +699,10 @@ dd($request->all());
             'Last Yr Gross Increments Value',
             'Last Yr Increments %',
             'Last Yr Increment Value',
-
-            // 'Last Yr Increments',
-            //'Last Promotion',
-            // 'Sale Target',
-            // 'Sale Achivment',
-            // 'New Dealer Target',
-            // 'New Dealer Achivment',
-            // 'Saarthi Accu target',
-            // 'Saarthi Accu Point',
-            // 'target',
-            // 'Plumbers Meet Nos of Meets',
-            // 'target',
-            // 'Discipline',
-            // 'target',
-            // '>60 Days OS',
         ];
 
 
-        // old data
-
-        // $second_head = array();
-        // foreach ($all_sales_weight as $wtg) {
-        //     array_push($second_head, $wtg->name." target");
-        //     array_push($second_head, $wtg->name." Achivment");
-        // }
-
-
-        //old data
-
-
         if (count($appraisal) > 0) {
-            foreach ($appraisal as $k => $val) {
-            }
             $rids = array();
             foreach ($appraisal as $k => $val) {
                 $check_same_user = explode(',', $val->user_id);
@@ -776,29 +753,6 @@ dd($request->all());
                 $data[$k][23] = $val->users->userinfo->last_year_increments ?? 0;
                 $data[$k][24] = $val->users->userinfo->last_year_increment_percent ?? 0;
                 $data[$k][25] = $val->users->userinfo->last_year_increment_value ?? 0;
-
-                //$data[$k][26] = $val->users->userinfo->last_promotion ?? "-";
-
-
-                //old data
-
-                // $all_tr = explode(',', $val->target);
-                // $all_ach = explode(',', $val->achivment);
-
-                $tr = 0;
-                // foreach ($all_sales_weight as $i=>$wtg) {
-                //     $tr_ac_data = Appraisal::where('weightage_id', $wtg->id)->where('user_id', $check_same_user[0])->where('year', $year_array[0])->orderBy('id', 'desc')->first();
-
-                //     $data[$k][26+$tr] = $tr_ac_data->target ?? "0";
-                //     $data[$k][27+$tr] = $tr_ac_data->achivment ?? "0";
-                //     $tr++;
-                //     $tr++;
-                // }
-
-                //old  data
-
-
-
                 $all_reporting_by = explode(',', $val->rating_by);
                 $all_reporting_by = array_unique($all_reporting_by);
                 if (in_array($val->users->id, $all_reporting_by)) {
@@ -809,92 +763,352 @@ dd($request->all());
                             $totalper += ($calcu->sales_weightage->weightage * $calcu->rating) / 10;
                         }
                         if ($totalper < 51) {
-                            $data[$k][26 + $tr] = 'C';
+                            $data[$k][26] = 'C';
                         } else if ($totalper > 50 && $totalper < 61) {
-                            $data[$k][26 + $tr] = 'B';
+                            $data[$k][26] = 'B';
                         } else if ($totalper > 60 && $totalper < 71) {
-                            $data[$k][26 + $tr] = 'B+';
+                            $data[$k][26] = 'B+';
                         } else if ($totalper > 70 && $totalper < 81) {
-                            $data[$k][26 + $tr] = 'A';
+                            $data[$k][26] = 'A';
                         } else if ($totalper > 80) {
-                            $data[$k][26 + $tr] = 'A+';
+                            $data[$k][26] = 'A+';
                         }
                     }
                 } else {
-                    $data[$k][26 + $tr] = '-';
+                    $data[$k][26] = '-';
                 }
 
-                $i = 0;
                 $remark = "-";
                 $Increment = "-";
+                $asmrat = '-';
+                $bmrat = '-';
+                $rmrat = '-';
+                $shrat = '-';
+                $agmrat = '-';
+                $chmrat = '-';
+                $homrat = '-';
                 foreach ($rportingByArray as $k2 => $val2) {
                     $check_same_user2 = explode(',', $val2->user_id);
                     $main_user = User::find($check_same_user[0]);
                     $rp_user = User::find($val2->rating_by);
-                    if (!in_array($val2->rating_by, $check_same_user) && in_array($main_user->id, $check_same_user2) && $rp_user->roles[0]->id != $main_user->roles[0]->id) {
-                        if (!in_array($rp_user->id, $rids)) {
-                            // array_push($all_grades, $rp_user->name.'('.$rp_user->roles[0]->name.')');
-                            // array_push($rids, $rp_user->id);
-
-                            $gdby = 'Grade BY';
-                            array_push($all_grades, $gdby . ' ' . '(' . $rp_user->roles[0]->name . ')');
-                            array_push($rids, $rp_user->id);
-                        }
-                        $rats = Appraisal::where('year', $val2->year)->where('user_id', $main_user->id)->where('rating_by', $val2->rating_by)->get();
-                        if (count($rats) > 0) {
-                            $totalper = 0;
-                            foreach ($rats as $fn) {
-                                $totalper += ($fn->sales_weightage->weightage * $fn->rating) / 10;
-                                if ($totalper < 51) {
-                                    $data[$k][27 + $tr + $i] = 'C';
-                                    if ($rp_user->hasRole('Head office')) {
-                                        $remark = $rats[0]->remark;
-                                        $Increment = 'NIL';
+                    
+                    if ($rp_user->hasRole('ASM')) {
+                        if (!in_array($val2->rating_by, $check_same_user) && in_array($main_user->id, $check_same_user2) && $rp_user->roles[0]->id != $main_user->roles[0]->id) {
+                            $rats = Appraisal::where('year', $val2->year)->where('user_id', $main_user->id)->where('rating_by', $val2->rating_by)->get();
+                            if (count($rats) > 0) {
+                                $totalper = 0;
+                                foreach ($rats as $fn) {
+                                    $totalper += ($fn->sales_weightage->weightage * $fn->rating) / 10;
+                                    if ($totalper < 51) {
+                                        $asmrat = 'C';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = 'NIL';
+                                        }
+                                    } else if ($totalper > 50 && $totalper < 61) {
+                                        $asmrat = 'B';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '8%';
+                                        }
+                                    } else if ($totalper > 60 && $totalper < 71) {
+                                        $asmrat = 'B+';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '10%';
+                                        }
+                                    } else if ($totalper > 70 && $totalper < 81) {
+                                        $asmrat = 'A';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '12%';
+                                        }
+                                    } else if ($totalper > 80) {
+                                        $asmrat = 'A+';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '14%';
+                                        }
                                     }
-                                } else if ($totalper > 50 && $totalper < 61) {
-                                    $data[$k][27 + $tr + $i] = 'B';
-                                    if ($rp_user->hasRole('Head office')) {
-                                        $remark = $rats[0]->remark;
-                                        $Increment = '8%';
-                                    }
-                                } else if ($totalper > 60 && $totalper < 71) {
-                                    $data[$k][27 + $tr + $i] = 'B+';
-                                    if ($rp_user->hasRole('Head office')) {
-                                        $remark = $rats[0]->remark;
-                                        $Increment = '10%';
-                                    }
-                                } else if ($totalper > 70 && $totalper < 81) {
-                                    $data[$k][27 + $tr + $i] = 'A';
-                                    if ($rp_user->hasRole('Head office')) {
-                                        $remark = $rats[0]->remark;
-                                        $Increment = '12%';
-                                    }
-                                } else if ($totalper > 80) {
-                                    $data[$k][27 + $tr + $i] = 'A+';
-                                    if ($rp_user->hasRole('Head office')) {
-                                        $remark = $rats[0]->remark;
-                                        $Increment = '14%';
+                                }
+                            } 
+                        } 
+                    } 
+                    if ($rp_user->hasRole('Branch Manager')) {
+                        if (!in_array($val2->rating_by, $check_same_user) && in_array($main_user->id, $check_same_user2) && $rp_user->roles[0]->id != $main_user->roles[0]->id) {
+                            $rats = Appraisal::where('year', $val2->year)->where('user_id', $main_user->id)->where('rating_by', $val2->rating_by)->get();
+                            if (count($rats) > 0) {
+                                $totalper = 0;
+                                foreach ($rats as $fn) {
+                                    $totalper += ($fn->sales_weightage->weightage * $fn->rating) / 10;
+                                    if ($totalper < 51) {
+                                        $bmrat = 'C';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = 'NIL';
+                                        }
+                                    } else if ($totalper > 50 && $totalper < 61) {
+                                        $bmrat = 'B';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '8%';
+                                        }
+                                    } else if ($totalper > 60 && $totalper < 71) {
+                                        $bmrat = 'B+';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '10%';
+                                        }
+                                    } else if ($totalper > 70 && $totalper < 81) {
+                                        $bmrat = 'A';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '12%';
+                                        }
+                                    } else if ($totalper > 80) {
+                                        $bmrat = 'A+';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '14%';
+                                        }
                                     }
                                 }
                             }
-                        } else {
-                            $data[$k][27 + $tr + $i] = "-";
                         }
-                        $i++;
-                    } else {
-                        if (in_array($rp_user->id, $rids)) {
-                            $data[$k][27 + $tr + $i] = "-";
-                            $i++;
+                    } 
+                    if ($rp_user->hasRole('Regional Manager')) {
+                        if (!in_array($val2->rating_by, $check_same_user) && in_array($main_user->id, $check_same_user2) && $rp_user->roles[0]->id != $main_user->roles[0]->id) {
+                            $rats = Appraisal::where('year', $val2->year)->where('user_id', $main_user->id)->where('rating_by', $val2->rating_by)->get();
+                            if (count($rats) > 0) {
+                                $totalper = 0;
+                                foreach ($rats as $fn) {
+                                    $totalper += ($fn->sales_weightage->weightage * $fn->rating) / 10;
+                                    if ($totalper < 51) {
+                                        $rmrat = 'C';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = 'NIL';
+                                        }
+                                    } else if ($totalper > 50 && $totalper < 61) {
+                                        $rmrat = 'B';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '8%';
+                                        }
+                                    } else if ($totalper > 60 && $totalper < 71) {
+                                        $rmrat = 'B+';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '10%';
+                                        }
+                                    } else if ($totalper > 70 && $totalper < 81) {
+                                        $rmrat = 'A';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '12%';
+                                        }
+                                    } else if ($totalper > 80) {
+                                        $rmrat = 'A+';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '14%';
+                                        }
+                                    }
+                                }
+                            } 
                         }
-                    }
+                    } 
+                    if ($rp_user->hasRole('State Head')) {
+                        if (!in_array($val2->rating_by, $check_same_user) && in_array($main_user->id, $check_same_user2) && $rp_user->roles[0]->id != $main_user->roles[0]->id) {
+                            $rats = Appraisal::where('year', $val2->year)->where('user_id', $main_user->id)->where('rating_by', $val2->rating_by)->get();
+                            if (count($rats) > 0) {
+                                $totalper = 0;
+                                foreach ($rats as $fn) {
+                                    $totalper += ($fn->sales_weightage->weightage * $fn->rating) / 10;
+                                    if ($totalper < 51) {
+                                        $shrat = 'C';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = 'NIL';
+                                        }
+                                    } else if ($totalper > 50 && $totalper < 61) {
+                                        $shrat = 'B';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '8%';
+                                        }
+                                    } else if ($totalper > 60 && $totalper < 71) {
+                                        $shrat = 'B+';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '10%';
+                                        }
+                                    } else if ($totalper > 70 && $totalper < 81) {
+                                        $shrat = 'A';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '12%';
+                                        }
+                                    } else if ($totalper > 80) {
+                                        $shrat = 'A+';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '14%';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } 
+                    if ($rp_user->hasRole('Asst General Manager')) {
+                        if (!in_array($val2->rating_by, $check_same_user) && in_array($main_user->id, $check_same_user2) && $rp_user->roles[0]->id != $main_user->roles[0]->id) {
+                            $rats = Appraisal::where('year', $val2->year)->where('user_id', $main_user->id)->where('rating_by', $val2->rating_by)->get();
+                            if (count($rats) > 0) {
+                                $totalper = 0;
+                                foreach ($rats as $fn) {
+                                    $totalper += ($fn->sales_weightage->weightage * $fn->rating) / 10;
+                                    if ($totalper < 51) {
+                                        $agmrat = 'C';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = 'NIL';
+                                        }
+                                    } else if ($totalper > 50 && $totalper < 61) {
+                                        $agmrat = 'B';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '8%';
+                                        }
+                                    } else if ($totalper > 60 && $totalper < 71) {
+                                        $agmrat = 'B+';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '10%';
+                                        }
+                                    } else if ($totalper > 70 && $totalper < 81) {
+                                        $agmrat = 'A';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '12%';
+                                        }
+                                    } else if ($totalper > 80) {
+                                        $agmrat = 'A+';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '14%';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } 
+                    if ($rp_user->hasRole('Cluster Head')) {
+                        if (!in_array($val2->rating_by, $check_same_user) && in_array($main_user->id, $check_same_user2) && $rp_user->roles[0]->id != $main_user->roles[0]->id) {
+                            $rats = Appraisal::where('year', $val2->year)->where('user_id', $main_user->id)->where('rating_by', $val2->rating_by)->get();
+                            if (count($rats) > 0) {
+                                $totalper = 0;
+                                foreach ($rats as $fn) {
+                                    $totalper += ($fn->sales_weightage->weightage * $fn->rating) / 10;
+                                    if ($totalper < 51) {
+                                        $chmrat = 'C';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = 'NIL';
+                                        }
+                                    } else if ($totalper > 50 && $totalper < 61) {
+                                        $chmrat = 'B';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '8%';
+                                        }
+                                    } else if ($totalper > 60 && $totalper < 71) {
+                                        $chmrat = 'B+';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '10%';
+                                        }
+                                    } else if ($totalper > 70 && $totalper < 81) {
+                                        $chmrat = 'A';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '12%';
+                                        }
+                                    } else if ($totalper > 80) {
+                                        $chmrat = 'A+';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '14%';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } 
+                    if ($rp_user->hasRole('Head office')) {
+                        if (!in_array($val2->rating_by, $check_same_user) && in_array($main_user->id, $check_same_user2) && $rp_user->roles[0]->id != $main_user->roles[0]->id) {
+                            $rats = Appraisal::where('year', $val2->year)->where('user_id', $main_user->id)->where('rating_by', $val2->rating_by)->get();
+                            if (count($rats) > 0) {
+                                $totalper = 0;
+                                foreach ($rats as $fn) {
+                                    $totalper += ($fn->sales_weightage->weightage * $fn->rating) / 10;
+                                    if ($totalper < 51) {
+                                        $homrat = 'C';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = 'NIL';
+                                        }
+                                    } else if ($totalper > 50 && $totalper < 61) {
+                                        $homrat = 'B';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '8%';
+                                        }
+                                    } else if ($totalper > 60 && $totalper < 71) {
+                                        $homrat = 'B+';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '10%';
+                                        }
+                                    } else if ($totalper > 70 && $totalper < 81) {
+                                        $homrat = 'A';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '12%';
+                                        }
+                                    } else if ($totalper > 80) {
+                                        $homrat = 'A+';
+                                        if ($rp_user->hasRole('Head office')) {
+                                            $remark = $rats[0]->remark;
+                                            $Increment = '14%';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } 
                 }
-                $data[$k][28 + $tr + $i] = $Increment;
-                $data[$k][29 + $tr + $i] = " ";
-                $data[$k][30 + $tr + $i] = " ";
-                $data[$k][31 + $tr + $i] = $remark;
+                $data[$k][27] = $asmrat;
+                $data[$k][28] = $bmrat;
+                $data[$k][29] = $rmrat;
+                $data[$k][30] = $shrat;
+                $data[$k][31] = $agmrat;
+                $data[$k][32] = $chmrat;
+                $data[$k][33] = $homrat;
+                $data[$k][34] = $Increment;
+                $data[$k][35] = " ";
+                $data[$k][36] = " ";
+                $data[$k][37] = $remark;
             }
         }
         $last_head = [
+            'Self Rating',
+            'ASM',
+            'Branch Manager',
+            'Regional Manager',
+            'State Head',
+            'Asst General Manager',
+            'National Head',
+            'Head office',
             'Increment %',
             'Final Amount',
             'Promotion',
@@ -903,7 +1117,7 @@ dd($request->all());
         $headings = array_merge(
             $first_head,
             //$second_head,
-            $all_grades,
+            // $all_grades,
             $last_head,
         );
         $export = new AppraisalExport($data, $headings, count($all_grades));

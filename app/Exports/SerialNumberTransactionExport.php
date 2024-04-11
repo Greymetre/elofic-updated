@@ -40,6 +40,7 @@ class SerialNumberTransactionExport implements FromCollection,WithHeadings,Shoul
             'group',
             'new_group',
             DB::raw('GROUP_CONCAT(serial_no) as serial_no'),
+            DB::raw('count(serial_no) as serial_no_count'),
             DB::raw('GROUP_CONCAT(narration) as narration')
         );
         if($this->branch_id && $this->branch_id != null && $this->branch_id != ''){
@@ -70,7 +71,7 @@ class SerialNumberTransactionExport implements FromCollection,WithHeadings,Shoul
             $data['party_name'],
             $data['product_code'],
             $data['product_name'],
-            $data['qty'],
+            $data['serial_no_count'],
             $data['group'],
             $data['branch_code'],
             $data['serial_no'],

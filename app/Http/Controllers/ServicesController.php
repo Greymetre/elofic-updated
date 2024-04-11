@@ -145,7 +145,7 @@ class ServicesController extends Controller
 
     public function serial_number_history_list(Request $request)
     {
-        $data = Services::orderBy('invoice_date', 'asc')->get();
+        $data = Services::with('product')->orderBy('invoice_date', 'asc');
         return Datatables::of($data)
             ->addIndexColumn()
             ->addColumn('expiry_date', function ($data) {

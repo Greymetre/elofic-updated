@@ -10,8 +10,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\SalesTargetUsers;
 use App\Exports\SalesTargetUsersTemplate;
+use App\Exports\SalesAchievementTemplate;
 use App\Exports\SalesTargetUsersExport;
+use App\Exports\SalesTargetBranchExport;
+use App\Exports\CurrentLastYearSalesGrowthExport;
 use App\Imports\SalesTargetUsersImport;
+use App\Imports\SalesAchievementImport;
 use App\Models\Branch;
 use App\Models\Division;
 use App\Models\User;
@@ -39,37 +43,57 @@ class SalesTargetUsersController extends Controller
     public function sales_target_users_list(Request $request)
     {
         $query = SalesTargetUsers::with(['user','user.getbranch','user.getdesignation'])->where(function ($query) use ($request) {
-                       
-                        if($request->month && $request->month != '' && $request->month != null){
-                            $query->where('month',$request->month) ;
-                        }
 
-                        if($request->branch_id && $request->branch_id != '' && $request->branch_id != null){
-                            $userIds = User::where('branch_id', $request->branch_id)->pluck('id');
-                            $query->whereIn('user_id',$userIds) ;
-                        }
+            if($request->month && $request->month != '' && $request->month != null){
+                $query->where('month',$request->month) ;
+            }
 
-                        if($request->user_id && $request->user_id != '' && $request->user_id != null){
-                            $query->where('user.id',$request->user) ;
-                        }
+            if($request->branch_id && $request->branch_id != '' && $request->branch_id != null){
+                $userIds = User::where('branch_id', $request->branch_id)->pluck('id');
+                $query->whereIn('user_id',$userIds) ;
+            }
 
-                        if($request->division && $request->division != '' && $request->division != null){
-                            $divisionIds = User::where('division_id', $request->division)->pluck('id');
-                            $query->whereIn('user_id',$divisionIds) ;
-                        }
+            if($request->user_id && $request->user_id != '' && $request->user_id != null){
+                $userIds = User::where('id', $request->user_id)->pluck('id');
+                $query->whereIn('user_id',$userIds);
+            }
 
-                        if($request->year && $request->year != '' && $request->year != null){
-                            $query->where('year',$request->year) ;
-                        }
-                        if($request->min_range && $request->min_range != '' && $request->min_range != null && $request->max_range && $request->max_range != '' && $request->max_range != null){
-                            $query->whereBetween('points',[$request->min_range,$request->max_range]) ;
-                        }
-                    })->orderBy('id', 'asc');
-      
+            if($request->division && $request->division != '' && $request->division != null){
+                $divisionIds = User::where('division_id', $request->division)->pluck('id');
+                $query->whereIn('user_id',$divisionIds) ;
+            }
+
+            if($request->year && $request->year != '' && $request->year != null){
+
+                $f_year_array = explode('-', $request->year);
+
+                $query->where(function ($query) use ($f_year_array) {
+                    $query->where('year', '=', $f_year_array[0])
+                        ->where('month', '>=', 'Apr');
+                })->orWhere(function ($query) use ($f_year_array) {
+                    $query->where('year', '=', $f_year_array[1])
+                        ->where('month', '<=', 'Mar');
+                });
+            }
+
+            if($request->min_range && $request->min_range != '' && $request->min_range != null && $request->max_range && $request->max_range != '' && $request->max_range != null){
+                $query->whereBetween('points',[$request->min_range,$request->max_range]) ;
+            }
+        })->orderBy('id', 'asc');
+
         // $data = SalesTargetUsers::with(['user','user.getbranch'])->get();
 
         return Datatables::of($query)
             ->addIndexColumn()
+            ->addColumn('achievement_percent', function ($data) {
+                if(isset($data['achievement']) && isset($data['target']) && !empty($data['achievement']) && !empty($data['target'])) {
+                    $achievementPercent = ($data['target'] == 0) ? 0 : ($data['achievement'] * 100 / $data['target']);
+                    return $achievementPercent;
+                } else {
+                    return '';
+                }
+
+            })
             ->addColumn('action', function ($data) {
                 $btn = '';
                 $activebtn = '';
@@ -91,7 +115,7 @@ class SalesTargetUsersController extends Controller
                           </div>';
          
             })
-            ->rawColumns(['action'])
+            ->rawColumns(['action','achievement_percent'])
             ->make(true);
     }
 
@@ -103,6 +127,7 @@ class SalesTargetUsersController extends Controller
         $divisions = Division::latest()->get();
         $currentYear = Carbon::now()->year;
         $years = range($currentYear - 2, $currentYear + 2);
+       
         abort_if(Gate::denies('target_users_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         return view('sales_target_users.index', compact('sales_target_users','branches','years','users','divisions'));
     }
@@ -120,10 +145,56 @@ class SalesTargetUsersController extends Controller
     }
 
     public function target_users_download(Request $request) {
-        abort_if(Gate::denies('sales_target_users_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        if (ob_get_contents()) ob_end_clean();
-        ob_start();
-        return Excel::download(new SalesTargetUsersExport($request), 'SalesTargetUsers.xlsx');
+
+        if($request->export_branch) {
+            $validator = Validator::make($request->all(), [
+                'financial_year' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+            }
+
+            abort_if(Gate::denies('sales_branch_report_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+            if (ob_get_contents()) ob_end_clean();
+            ob_start();
+
+            return Excel::download(new SalesTargetBranchExport($request), 'sales_target_branch.xlsx');
+        }elseif($request->export_user){
+            $validator = Validator::make($request->all(), [
+                'financial_year' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+            }
+
+            abort_if(Gate::denies('sales_target_users_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+            if (ob_get_contents()) ob_end_clean();
+            ob_start();
+
+            return Excel::download(new SalesTargetUsersExport($request), 'sales_target_users.xlsx');
+        }elseif($request->cy_ly_sales_report){
+            $validator = Validator::make($request->all(), [
+                'financial_year' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+            }
+
+            abort_if(Gate::denies('cy_ly_sales_target_report_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+            if (ob_get_contents()) ob_end_clean();
+            ob_start();
+
+            return Excel::download(new CurrentLastYearSalesGrowthExport($request), 'LY_CY_Sales.xlsx');
+        }
     }
 
     public function sales_target_users_delete(Request $request)
@@ -157,5 +228,22 @@ class SalesTargetUsersController extends Controller
         ]);
 
         return back()->with('success', 'Sales Target User Updated successfully !!'); 
+    }
+
+    public function achievement_template(Request $request) {
+        abort_if(Gate::denies('sales_achievement_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new SalesAchievementTemplate, 'sales_achievements.xlsx');
+    }
+
+    public function achievement_upload(Request $request) {
+        abort_if(Gate::denies('sales_achievement_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');                
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        Excel::import(new SalesAchievementImport, request()->file('import_file'));
+        // Excel::import(new SalesAchievementImport, $request->file('import_file')->store('temp'));
+
+        return back()->with('success', 'Sales Achievement Import successfully !!'); 
     }
 }

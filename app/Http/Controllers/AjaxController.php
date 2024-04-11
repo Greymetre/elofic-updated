@@ -11,11 +11,12 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, CustomerDetails, EndUser, GiftModel, GiftSubcategory, Notes, Redemption, SchemeDetails, Services, Subcategory, TourProgramme, TransactionHistory, UserCityAssign};
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, CustomerDetails, EndUser, GiftModel, GiftSubcategory, Notes, OrderSchemeDetail, Redemption, SchemeDetails, Services, Subcategory, TourProgramme, TransactionHistory, UserCityAssign};
 use App\Models\User;
 use Carbon\Carbon;
 use App\Models\UserLiveLocation;
 use App\Models\UserActivity;
+use App\Http\Controllers\SendNotifications;
 
 class AjaxController extends Controller
 {
@@ -688,7 +689,7 @@ class AjaxController extends Controller
     public function removeSchemesdetails(Request $request)
     {
         try {
-            $scheme_details = SchemeDetails::find($request->id);
+            $scheme_details = OrderSchemeDetail::find($request->id);
             $scheme_details->delete();
 
             return response()->json(["status" => true]);
@@ -825,14 +826,25 @@ class AjaxController extends Controller
             $customer_id = $request->customer_id;
             $status = $request->status;
             $update = CustomerDetails::where('customer_id', $customer_id)->update([$column => $status, 'status_update_by' => auth()->user()->id]);
+            $customer = Customers::with('customerdetails')->find($customer_id);
             if ($update) {
                 if ($status == 1) {
                     $msg = "Verified Successfully !!";
+                    $title = 'KYC Approval';
+                    $pmsg = 'KYC is Approved ✅';
                 } elseif ($status == 2) {
                     $msg = "Rejected Successfully !!";
+                    $title = 'KYC Rejection 🚫';
+                    $pmsg = 'KYC is Rejected';
                 } else {
                     $msg = "";
                 }
+                $noti_data = [
+                    'fcm_token' =>  $customer->customerdetails->fcm_token,
+                    'title' => $title,
+                    'msg' => $pmsg,
+                ];
+                $send_notification = SendNotifications::send($noti_data);
                 $results = array(
                     "status" => true,
                     "msg" => $msg

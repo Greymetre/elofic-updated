@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\SendNotifications;
 use App\Models\Address;
 use App\Models\Attachment;
 use Illuminate\Http\Request;
@@ -27,7 +28,9 @@ use App\Models\Payment;
 use App\Models\PaymentDetail;
 use App\Models\SalesTarget;
 use App\Models\Customers;
+use App\Models\Expenses;
 use App\Models\LoyaltyAppSetting;
+use App\Models\ParentDetail;
 use App\Models\Pincode;
 use App\Models\Redemption;
 use App\Models\State;
@@ -268,7 +271,7 @@ class DashboardController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
-            $customer = Customers::with('customerdocuments')->with('customerdetails')->find($request->id);
+            $customer = Customers::with('customerdocuments','customerdetails')->find($request->id);
             $id = $request->id;
             $docimages = collect([]);
             if ($request->file('imggstin')) {
@@ -329,9 +332,9 @@ class DashboardController extends Controller
 
             foreach ($docimages as $docimage) {
                 $existingAttachment = Attachment::where('document_name', $docimage['document_name'])
-                ->where('customer_id', $request->id)
-                ->first();
-            
+                    ->where('customer_id', $request->id)
+                    ->first();
+
                 if ($existingAttachment) {
                     $existingAttachment->update($docimage);
                 } else {
@@ -341,7 +344,13 @@ class DashboardController extends Controller
             $request['customer_id'] = $request->id;
             $customerdetails = new CustomerDetails();
             $customerdetails->save_data($request);
-            return response(['status' => 'success', 'message' => 'Data save successfully.', 'data' => $customerdetails], 200);
+            $noti_data = [
+                'fcm_token' =>  trim($customer->customerdetails->fcm_token),
+                'title' => 'KYC Sent for verification 🧐',
+                'msg' => $customer->first_name . ' your KYC details have sent for verification in Silver Saarthi.',
+            ];
+            $send_notification = SendNotifications::send($noti_data);
+            return response(['status' => 'success', 'message' => 'Data save successfully.', 'data' => $customerdetails, 'push_notification'=>$send_notification], 200);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
@@ -357,55 +366,65 @@ class DashboardController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
-            $customer = Customers::with('customeraddress','customerdetails')->find($request->id);
-            if($request->file('image')){
+            $customer = Customers::with('customeraddress', 'customerdetails')->find($request->id);
+            if ($request->file('image')) {
                 $path = 'customers';
                 $image = $request->file('image');
-                $filename = 'shop_'.$request->id;
+                $filename = 'shop_' . $request->id;
                 unset($request['image']);
-                $request['profile_image'] = fileupload($image, $path, $filename) ;
+                $request['profile_image'] = fileupload($image, $path, $filename);
             }
-            if($request->file('profileImage')){
+            if ($request->file('profileImage')) {
                 $path = 'customers';
                 $image = $request->file('profileImage');
-                $filename = 'profile_'.$request->id;
+                $filename = 'profile_' . $request->id;
                 unset($request['image']);
-                $request['shop_image'] = fileupload($image, $path, $filename) ;
+                $request['shop_image'] = fileupload($image, $path, $filename);
             }
             $request['customer_id'] = $request->id;
             $response = $customer->update_data($request);
-            if($response['status'] == 'success')
-            {
+            if ($response['status'] == 'success') {
                 $pincodes = Pincode::with('cityname', 'cityname.districtname')->where('pincode', '=', $request['zipcode'])->first();
-                    $request['state_id'] = !empty($pincodes['cityname']['districtname']['state_id']) ? $pincodes['cityname']['districtname']['state_id'] : $request['state_id'];
-                    $request['district_id'] = !empty($pincodes['cityname']['district_id']) ? $pincodes['cityname']['district_id'] : $request['district_id'];
-                    $request['city_id'] = !empty($pincodes['city_id']) ? $pincodes['city_id'] : $request['city_id'];
-                    $request['zipcode'] = !empty($request['pincode_id']) ? $request['pincode_id'] : $request['zipcode'];
-                    $request['pincode_id'] = !empty($pincodes['id']) ? $pincodes['id'] : $request['pincode_id'];
+                $request['state_id'] = !empty($pincodes['cityname']['districtname']['state_id']) ? $pincodes['cityname']['districtname']['state_id'] : $request['state_id'];
+                $request['district_id'] = !empty($pincodes['cityname']['district_id']) ? $pincodes['cityname']['district_id'] : $request['district_id'];
+                $request['city_id'] = !empty($pincodes['city_id']) ? $pincodes['city_id'] : $request['city_id'];
+                $request['zipcode'] = !empty($request['pincode_id']) ? $request['pincode_id'] : $request['zipcode'];
+                $request['pincode_id'] = !empty($pincodes['id']) ? $pincodes['id'] : $request['pincode_id'];
 
-                    $request['country_id'] = !empty($request['country_id']) ? $request['country_id'] : State::where('id', $request['state_id'])->pluck('country_id')->first();
-                    $request['landmark'] = !empty($request['landmark']) ? $request['landmark'] : '';
-                    Address::updateOrCreate(['customer_id' => $request->id], [
-                        'active'    => 'Y',
-                        'customer_id'   =>  $request['customer_id'],
-                        'address1' => !empty($request['address1']) ? $request['address1'] : '',
-                        'address2' => !empty($request['address2']) ? $request['address2'] : '',
-                        'landmark' => !empty($request['landmark']) ? $request['landmark'] : '',
-                        'locality' => !empty($request['locality']) ? $request['locality'] : $request['landmark'],
-                        'country_id' => !empty($request['country_id']) ? $request['country_id'] : null,
-                        'state_id' => !empty($request['state_id']) ? $request['state_id'] : null,
-                        'district_id' => !empty($request['district_id']) ? $request['district_id'] : null,
-                        'city_id' => !empty($request['city_id']) ? $request['city_id'] : null,
-                        'pincode_id' => !empty($request['pincode_id']) ? $request['pincode_id'] : null,
-                        'zipcode' => !empty($request['zipcode']) ? $request['zipcode'] : '',
-                        'created_by' => !empty($request['created_by']) ? $request['created_by'] : 0,
-                        'created_at' => getcurentDateTime(),
-                        'updated_at' => getcurentDateTime()
-                    ]);
-                    $customer_updated = Customers::with('customeraddress','customerdetails')->find($request->id);
-                    $profile_image = $customer_updated->shop_image;
-                    $customer_updated->shop_image = $customer_updated->profile_image;
-                    $customer_updated->profile_image = $profile_image;
+                $request['country_id'] = !empty($request['country_id']) ? $request['country_id'] : State::where('id', $request['state_id'])->pluck('country_id')->first();
+                $request['landmark'] = !empty($request['landmark']) ? $request['landmark'] : '';
+                Address::updateOrCreate(['customer_id' => $request->id], [
+                    'active'    => 'Y',
+                    'customer_id'   =>  $request['customer_id'],
+                    'address1' => !empty($request['address1']) ? $request['address1'] : '',
+                    'address2' => !empty($request['address2']) ? $request['address2'] : '',
+                    'landmark' => !empty($request['landmark']) ? $request['landmark'] : '',
+                    'locality' => !empty($request['locality']) ? $request['locality'] : $request['landmark'],
+                    'country_id' => !empty($request['country_id']) ? $request['country_id'] : null,
+                    'state_id' => !empty($request['state_id']) ? $request['state_id'] : null,
+                    'district_id' => !empty($request['district_id']) ? $request['district_id'] : null,
+                    'city_id' => !empty($request['city_id']) ? $request['city_id'] : null,
+                    'pincode_id' => !empty($request['pincode_id']) ? $request['pincode_id'] : null,
+                    'zipcode' => !empty($request['zipcode']) ? $request['zipcode'] : '',
+                    'created_by' => !empty($request['created_by']) ? $request['created_by'] : 0,
+                    'created_at' => getcurentDateTime(),
+                    'updated_at' => getcurentDateTime()
+                ]);
+                if (!empty($request['parent_id'])) {
+                    ParentDetail::where('customer_id', $request['id'])->delete();
+                    foreach ($request['parent_id'] as $key => $rows) {
+                        $parentDetail = ParentDetail::create(
+                            [
+                                'customer_id' => $request['id'],
+                                'parent_id' => $rows,
+                            ]
+                        );
+                    }
+                }
+                $customer_updated = Customers::with('customeraddress', 'getparentdetail', 'customerdetails')->find($request->id);
+                $profile_image = $customer_updated->shop_image;
+                $customer_updated->shop_image = $customer_updated->profile_image;
+                $customer_updated->profile_image = $profile_image;
                 return response(['status' => 'success', 'message' => 'Data Update successfully.', 'data' => $customer_updated], 200);
             }
         } catch (\Exception $e) {
@@ -432,12 +451,12 @@ class DashboardController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
-            $data['total_points'] = TransactionHistory::where('customer_id', $request->id)->sum('point')??0;
-            $data['active_points'] = TransactionHistory::where('customer_id', $request->id)->where('status', '1')->sum('point')??0;
-            $data['provision_points'] = TransactionHistory::where('customer_id', $request->id)->where('status', '0')->sum('point')??0;
-            $data['total_redemption'] = Redemption::where('customer_id', $request->id)->whereNot('status', '2')->sum('redeem_amount')??0;
-            $data['total_rejected'] = Redemption::where('customer_id', $request->id)->where('status', '2')->sum('redeem_amount')??0;
-            $data['total_balance'] = (int)$data['active_points']-(int)$data['total_redemption'];
+            $data['total_points'] = TransactionHistory::where('customer_id', $request->id)->sum('point') ?? 0;
+            $data['active_points'] = TransactionHistory::where('customer_id', $request->id)->where('status', '1')->sum('point') ?? 0;
+            $data['provision_points'] = TransactionHistory::where('customer_id', $request->id)->where('status', '0')->sum('point') ?? 0;
+            $data['total_redemption'] = Redemption::where('customer_id', $request->id)->whereNot('status', '2')->sum('redeem_amount') ?? 0;
+            $data['total_rejected'] = Redemption::where('customer_id', $request->id)->where('status', '2')->sum('redeem_amount') ?? 0;
+            $data['total_balance'] = (int)$data['active_points'] - (int)$data['total_redemption'];
             return response(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], 200);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
@@ -455,6 +474,8 @@ class DashboardController extends Controller
             }
             $data['pending_attendance'] = Attendance::where('user_id', $request->id)->where('attendance_status', '0')->count('*');
             $data['pending_tour_plan'] = TourProgramme::where('userid', $request->id)->where('status', '0')->count('*');
+            $data['pending_expense'] = Expenses::where('user_id', $request->id)->where('accountant_status', '0')->count('*');
+            $data['pending_order_discount'] = Order::where('created_by', $request->id)->where('cluster_discount', '!=', NULL)->where('discount_status', '0')->count('*');
 
             return response(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], 200);
         } catch (\Exception $e) {

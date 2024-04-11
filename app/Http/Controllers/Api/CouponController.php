@@ -21,6 +21,8 @@ use App\Models\InvalidCoupons;
 use App\Models\Pincode;
 use App\Models\Product;
 use App\Models\Services;
+use App\Http\Controllers\SendNotifications;
+use App\Models\Customers;
 
 class CouponController extends Controller
 {
@@ -128,6 +130,8 @@ class CouponController extends Controller
                 if ($serial_no_product_code && $product->product_code == $serial_no_product_code && $serial_no_product_code != null && $serial_no_product_code != '') {
                     $data['products'][0]['id'] = $product->id;
                     $data['products'][0]['name'] = $product->product_name;
+                    $data['products'][0]['expiry_interval'] = $product->expiry_interval;
+                    $data['products'][0]['expiry_interval_preiod'] = $product->expiry_interval_preiod;
                     $slected = true;
                 }
             }
@@ -135,6 +139,8 @@ class CouponController extends Controller
                 foreach ($all_products as $k => $product) {
                     $data['products'][$k]['id'] = $product->id;
                     $data['products'][$k]['name'] = $product->product_name;
+                    $data['products'][$k]['expiry_interval'] = $product->expiry_interval;
+                    $data['products'][$k]['expiry_interval_preiod'] = $product->expiry_interval_preiod;
                 }
             }
             return response()->json($data, 200);
@@ -208,11 +214,18 @@ class CouponController extends Controller
                 ]);
                 $request->end_user_id = $end_user->id;
             }
+            $customer = Customers::with('customerdetails')->find($request->customer_id);
             $checkTrans = TransactionHistory::where('coupon_code', $request->product_serail_number)->first();
             if($checkTrans){
                 $checkTrans->status = '1';
                 $checkTrans->save();
                 $status = '1';
+                $noti_data = [
+                    'fcm_token' =>  $customer->customerdetails->fcm_token,
+                    'title' => 'Points Activated ✅',
+                    'msg' => $customer->name . ' your '.$checkTrans->point.' provisional points are successfully activated in Silver Saarthi.',
+                ];
+                $send_notification = SendNotifications::send($noti_data);
             }else{
                 $status = '0';
             }
@@ -234,7 +247,12 @@ class CouponController extends Controller
                     ->usingFileName($customname)
                     ->toMediaCollection('warranty_activation_attach');
             }
-
+            $noti_data = [
+                'fcm_token' =>  $customer->customerdetails->fcm_token,
+                'title' => 'Warranty Is Activated Successfully ✅',
+                'msg' => $customer->name . ' your warranty activation is successful in Silver Saarthi.',
+            ];
+            $send_notification = SendNotifications::send($noti_data);
             return response()->json(['status' => 'success', 'message' => 'Warranty Activation Store Successfully.', 'data' => $data], 200);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);

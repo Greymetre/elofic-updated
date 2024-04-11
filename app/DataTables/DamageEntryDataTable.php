@@ -71,7 +71,7 @@ class DamageEntryDataTable extends DataTable
             })
             ->editColumn('status', function ($data) {
                 if($data->status == "0"){
-                    return '<button type="button" data-status="'.$data->status.'" id="'.$data->id.'" class="btn btn-warning changeStatus">Pennding</button>';
+                    return '<button type="button" data-ccode="'.$data->coupon_code.'" data-status="'.$data->status.'" id="'.$data->id.'" class="btn btn-warning changeStatus">Pennding</button>';
                 }elseif($data->status == "1"){
                     return '<button type="button" data-status="'.$data->status.'" id="'.$data->id.'" class="btn btn-success ">Approved</button>';
                 }elseif($data->status == "2"){

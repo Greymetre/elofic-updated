@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\SendNotifications;
 use App\Models\Address;
 use App\Models\CustomerDetails;
 use App\Models\Customers;
@@ -166,9 +167,14 @@ class LoginController extends Controller
             if (!$user = $this->customer->with('customerdetails')->where('mobile', $username)->first()) {
                 return response()->json(['status' => 'error', 'message' => 'User not found'], $this->notFound);
             } else {
-                if($username == '917788996655'){
+                CustomerDetails::updateOrCreate(['customer_id' => $user->id], [
+                    'active'    => 'Y',
+                    'customer_id'   =>  $user->id,
+                    'fcm_token'   =>  $request['fcm_token'],
+                ]);
+                if ($username == '917788996655') {
                     $otp = 1234;
-                }else{
+                } else {
                     $otp = rand(1000, 9999);
                 }
 
@@ -217,7 +223,7 @@ class LoginController extends Controller
             $id = $request->input('id');
             $otp = $request->input('otp');
 
-            if (!$user = $this->customer->with('customerdetails', 'customeraddress', 'customeraddress.statename', 'customeraddress.districtname', 'customeraddress.cityname')->where('id', $id)->where('otp', $otp)->first()) {
+            if (!$user = $this->customer->with('getparentdetail', 'customerdetails', 'customeraddress', 'customeraddress.statename', 'customeraddress.districtname', 'customeraddress.cityname')->where('id', $id)->where('otp', $otp)->first()) {
                 return response()->json(['status' => 'error', 'message' => 'Wroung OTP !!'], $this->notFound);
             } else {
                 $token = $user->createToken('gSQ01LKOg1JV0O9eMsDiAN0TqkQlOpulK7vWemPF')->accessToken;
@@ -309,12 +315,14 @@ class LoginController extends Controller
                         'fcm_token'   =>  $request['fcm_token'],
                     ]);
                     if (!empty($request['parent_id'])) {
-                        $parentDetail = ParentDetail::create(
-                            [
-                                'customer_id' => $request['customer_id'],
-                                'parent_id' => $request['parent_id']
-                            ]
-                        );
+                        foreach ($request['parent_id'] as $key => $rows) {
+                            $parentDetail = ParentDetail::create(
+                                [
+                                    'customer_id' => $request['customer_id'],
+                                    'parent_id' => $rows,
+                                ]
+                            );
+                        }
                     }
                     $otp = rand(1000, 9999);
 
@@ -339,7 +347,13 @@ class LoginController extends Controller
                     curl_close($curl);
                     $customer->otp = $otp;
                     $customer->save();
-                    return response()->json(['status' => 'success', 'userinfo' => $customer], $this->successStatus);
+                    $noti_data = [
+                        'fcm_token' => $customer->customerdetails->fcm_token,
+                        'title' => 'Sign up Successful 💯',
+                        'msg' => $customer->name . ' your sign up is successful in Silver Saarthi.',
+                    ];
+                    $send_notification = SendNotifications::send($noti_data);                    
+                    return response()->json(['status' => 'success', 'userinfo' => $customer, 'push_notification'=>$send_notification], $this->successStatus);
                 }
             }
         } catch (\Exception $e) {

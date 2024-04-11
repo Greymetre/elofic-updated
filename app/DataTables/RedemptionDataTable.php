@@ -97,7 +97,6 @@ class RedemptionDataTable extends DataTable
      */
     public function query(Redemption $model, Request $request)
     {
-
         $data = $model->with('customer')->where('redeem_mode', '2');
         if ($request->branch_id && $request->branch_id != null && count($request->branch_id) > 0) {
             $branch_user_id = User::whereIn('branch_id', $request['branch_id'])->pluck('id');

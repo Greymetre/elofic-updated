@@ -35,6 +35,7 @@ return [
         'orders'            => 'Orders',
         'sales_master'      => 'Sales',
         'sales'             => 'Sales',
+        'order_dispatch'    => 'Order Dispatch',
         'wallet_master'     => 'Wallet',
         'wallet'            => 'Wallet',
         'redeemedPoint'     => 'Redemption',
@@ -70,11 +71,12 @@ return [
         'warranty_activation'  => 'Warranty Activation',
         'complaint_type'  => 'Complaint Type',
         'complaint'  => 'Complaints',
-        'sales_users'  => 'Sales Users',
+        'sales_users'  => 'Sales',
 
     ],
 
     'sales_users' => [
+        'title' => 'Target Achievement Users',
         'target_users'        => 'Target Users',
         'select-divisions'    => 'Divisions',
         'month'               => 'Month',
@@ -90,6 +92,11 @@ return [
 
     ],
 
+    'dealer_distributor_user' => [
+        'title' => 'Dealer Distributor users',
+        'title_singular' => 'Dealer Distributor user',
+    ],
+
     'sales_target_user'           => [
         'title'          => 'Sales Target Users',
         'title_singular' => 'Sales Target User',
@@ -103,6 +110,45 @@ return [
         'year'           => 'Year',
         'update'         => 'Update',
         ],
+    ],
+
+    'sales_target_branch'     => [
+        'title'          => 'Sales Target Branches',
+        'title_singular' => 'Sales Target Branch',
+    ],
+
+    'cy_and_ly_sales_target' => [
+        'title' => 'Current & Last Year Sales Target'
+    ],
+
+    'sales_achievement'           => [
+       'title'          => 'Sales Achievements',
+       'title_singular' => 'Sales Achievement',
+       'fields'         => [
+       'id'             => 'ID',
+       'user_id'        => 'User ID',
+       'target'         => 'Target',
+       'category_image' => 'Category Image',
+       'user'           => 'User',
+       'month'          => 'Month',
+       'year'           => 'Year',
+       'update'         => 'Update',
+       ],
+    ],
+
+    'mobile_app_login' => [
+        'title'          => 'Mobile App Login',
+        'title_singular' => 'Mobile App Login',
+        'serial_number'  => 'S. No.',
+        'firm_name'  => 'Firm Name',
+        'contact_person'  => 'Contact Person',
+        'mobile_number'  => 'Mobile Number',
+        'app_version'  => 'App Version',
+        'device_type'  => 'Device Type',
+        'first_login_date'  => 'First Login Date',
+        'last_login_date'  => 'Last Login Date',
+        'login_status'  => 'Login Status',
+        'mobile_app_login_details_download' => 'Mobile App Login Details'
     ],
 
     'global'                           => [

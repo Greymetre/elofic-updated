@@ -23,6 +23,26 @@ class Customers extends Authenticatable
         ];
     }
 
+        /**
+     * Route notifications for the Apn channel.
+     *
+     * @return string|array
+     */
+    public function routeNotificationForApn()
+    {
+        return $this->customerdetails->fcm_token??'';
+    }
+
+    /**
+     * Route notifications for the Fcm channel.
+     *
+     * @return string|array
+     */
+    public function routeNotificationForFcm()
+    {
+        return $this->customerdetails->fcm_token??'';
+    }
+
     public function insertrules()
     {
         

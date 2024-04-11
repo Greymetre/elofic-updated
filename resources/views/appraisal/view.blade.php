@@ -170,13 +170,13 @@
                                                      
                                                         <td>
                                                             @if(!empty($grade->grades))
-                                                               @if($grade->grades < 50)
+                                                               @if($grade->grades < 51)
                                                                 C            
-                                                               @elseif($grade->grades >=50 && $grade->grades <= 60)
+                                                               @elseif($grade->grades >=51 && $grade->grades <= 60)
                                                                 B
-                                                               @elseif($grade->grades >=60 && $grade->grades <= 70)
+                                                               @elseif($grade->grades >=61 && $grade->grades <= 70)
                                                                  B+
-                                                               @elseif($grade->grades >=70 && $grade->grades <= 80)
+                                                               @elseif($grade->grades >=71 && $grade->grades <= 80)
                                                                  A
                                                                @else
                                                                  A+

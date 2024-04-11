@@ -54,7 +54,7 @@ class OrderExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapp
                         $query->where('id',$this->order_id);
                     }  
                    
-                })->select('id','order_id', 'product_id', 'product_detail_id', 'quantity', 'shipped_qty', 'price', 'discount', 'discount_amount', 'tax_amount', 'line_total', 'status_id', 'created_at','ebd_name','ebd_discount','ebd_amount','cluster_discount','cluster_amount','deal_discount','deal_amount','distributor_discount','distributor_amount')->latest()->get();      
+                })->select('id','order_id', 'product_id', 'product_detail_id', 'quantity', 'shipped_qty', 'price', 'discount', 'discount_amount', 'tax_amount', 'line_total', 'status_id', 'created_at','scheme_name','scheme_discount','scheme_amount','cluster_discount','cluster_amount','deal_discount','deal_amount','distributor_discount','distributor_amount')->latest()->get();      
 
             }else{
 
@@ -76,7 +76,7 @@ class OrderExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapp
                         $query->where('id',$this->order_id);
                     }  
                    
-                })->select('id','order_id', 'product_id', 'product_detail_id', 'quantity', 'shipped_qty', 'price', 'discount', 'discount_amount', 'tax_amount', 'line_total', 'status_id', 'created_at','ebd_name','ebd_discount','ebd_amount','cluster_discount','cluster_amount','deal_discount','deal_amount','distributor_discount','distributor_amount')->latest()->get();          
+                })->select('id','order_id', 'product_id', 'product_detail_id', 'quantity', 'shipped_qty', 'price', 'discount', 'discount_amount', 'tax_amount', 'line_total', 'status_id', 'created_at','scheme_name','scheme_discount','scheme_amount','cluster_discount','cluster_amount','deal_discount','deal_amount','distributor_discount','distributor_amount')->latest()->get();          
 
 
             }  
@@ -150,8 +150,8 @@ class OrderExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapp
 
             // isset($data['products']['getSchemeDetail']['orderscheme']['scheme_name']) ? $data['products']['getSchemeDetail']['orderscheme']['scheme_name'] :'',
 
-            isset($data['ebd_discount']) ? $data['ebd_discount'] :'',
-            isset($data['ebd_name']) ? $data['ebd_name'] :'',
+            isset($data['scheme_discount']) ? $data['scheme_discount'] :'',
+            isset($data['scheme_name']) ? $data['scheme_name'] :'',
             isset($data['cluster_discount']) ? $data['cluster_discount'] :'',
             isset($data['deal_discount']) ? $data['deal_discount'] :'',
             isset($data['distributor_discount']) ? $data['distributor_discount'] :'',

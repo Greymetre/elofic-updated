@@ -54,8 +54,8 @@ class LeaveController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'user_id' => 'required',
-                'from_date' => 'required|before:to_date',
-                'to_date' => 'required|after:from_date',
+                'from_date' => 'required|before_or_equal:to_date',
+                'to_date' => 'required|after_or_equal:from_date',
                 'type' => 'required',
             ]);
             if ($validator->fails()) {

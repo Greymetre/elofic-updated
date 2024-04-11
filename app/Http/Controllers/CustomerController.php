@@ -38,8 +38,9 @@ class CustomerController extends Controller
 
     public function index(Request $request)
     {
-        ////abort_if(Gate::denies('customer_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('customer_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $userids = getUsersReportingToAuth();
+        
         $beats = Beat::where('active','=','Y')->whereHas('beatusers',function($query) use($userids){
                                 if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
                                 {
@@ -70,11 +71,7 @@ class CustomerController extends Controller
                             })->select('id','city_name')->get();
         $customertype = CustomerType::select('id','customertype_name')->orderBy('id','desc')->get();
 
-
-
-       
-        $all_reporting_user_ids = getUsersReportingToAuth();
-        $all_user_branches = User::with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
+        $all_user_branches = User::with('getbranch')->whereIn('id', $userids)->orderBy('branch_id')->get();
         $branches = array();
         $all_branch = array();
         $bkey = 0;
@@ -98,6 +95,13 @@ class CustomerController extends Controller
                             if(!empty($request['executive_id']))
                             {
                                 $query->where('executive_id', $request['executive_id']);
+                            }
+                            if(!empty($request['parent_id']))
+                            {
+                                $customer_idss = ParentDetail::where('parent_id', $request['parent_id'])->pluck('customer_id');
+                                if(!empty($customer_idss)){
+                                    $query->whereIn('id', $customer_idss);
+                                }
                             }
                             if(!empty($request['customertype']))
                             {
@@ -150,7 +154,7 @@ class CustomerController extends Controller
                                     ->Orwhere('mobile', 'like', "%{$search}%");
                                 });
                             }
-                            if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
+                            if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('Sub_Support')  && !Auth::user()->hasRole('HO_Account')  && !Auth::user()->hasRole('HR_Admin'))
                             {
                                 $query->whereIn('executive_id',$userids);
                             }
@@ -798,7 +802,7 @@ class CustomerController extends Controller
             DB::table('sales')->where('buyer_id', '=', $id)->orWhere('seller_id', '=', $id)->delete();
             DB::table('attachments')->where('customer_id', '=', $id)->delete();
             DB::table('beat_customers')->where('customer_id', '=', $id)->delete();
-            DB::table('check_in')->where('customer_id', '=', $id)->delete();
+            // DB::table('check_in')->where('customer_id', '=', $id)->delete();
             DB::table('notifications')->where('customer_id', '=', $id)->delete();
             DB::table('supports')->where('customer_id', '=', $id)->delete();
             DB::table('survey_data')->where('customer_id', '=', $id)->delete();

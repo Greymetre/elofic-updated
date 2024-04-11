@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\NeftRedemptionDetails;
 use App\Models\Redemption;
 use Illuminate\Http\Request;
+use App\Http\Controllers\SendNotifications;
+use App\Models\Customers;
 
 class NeftRedemptionDetailsController extends Controller
 {
@@ -100,6 +102,37 @@ class NeftRedemptionDetailsController extends Controller
 
         $updateStatus = Redemption::where('id', $request->id)->update(['status' => $request->status]);
         if($updateStatus){
+            $redemption = Redemption::find($request->id);
+            if ($redemption) {
+                if ($redemption->redeem_mode == '2') {
+                    if ($request->status == '1') {
+                        $status = 'Approved';
+                    } elseif ($request->status == '2') {
+                        $status = 'Rejected';
+                    } elseif ($request->status == '3') {
+                        $status = 'Success';
+                    } elseif ($request->status == '4') {
+                        $status = 'Fail';
+                    }
+                } elseif ($redemption->redeem_mode == '1') {
+                    if ($request->status == '1') {
+                        $status = 'Approved';
+                    } elseif ($request->status == '2') {
+                        $status = 'Rejected';
+                    } elseif ($request->status == '3') {
+                        $status = 'Dispatch';
+                    } elseif ($request->status == '4') {
+                        $status = 'Success';
+                    }
+                }
+            }
+            $customer = Customers::with('customerdetails')->find($redemption->customer_id);
+            $noti_data = [
+                'fcm_token' =>  $customer->customerdetails->fcm_token,
+                'title' => 'Redemption is ' . $status . ' ✅',
+                'msg' => $customer->first_name . ', your redemption is ' . $status,
+            ];
+            $send_notification = SendNotifications::send($noti_data);
             return response()->json(['status' => 'success','message' => 'Redemption status change successfully!']);
         }else{
             return response()->json(['status' => 'error','message' => 'Error in change status of redemption!']);
