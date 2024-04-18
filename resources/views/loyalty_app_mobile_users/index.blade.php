@@ -12,17 +12,23 @@
                 <form method="post" action="{{ URL::to('mobile_user/login_list/download') }}" class="form-horizontal">
                   @csrf
                   <div class="d-flex flex-row">
-                    <div class="p-2" style="width:160px;">
-                      <select class="selectpicker" name="user" id="user" data-style="select-with-transition" title="{!! trans('panel.sales_users.user_name') !!}">
+                    <div class="p-2" style="width:160px; display: none;">
+                      <select class="select2" name="user" id="user" data-style="select-with-transition" title="{!! trans('panel.sales_users.user_name') !!}">
                         <option value="" disabled selected>{!! trans('panel.sales_users.user_name') !!}</option>
                         @if(@isset($users ))
                         @foreach($users as $user)
-                        <option value="{!! $user->id !!}">{!! $user->name !!}</option>
+                        <option value="{!! $user->id !!}">{!! $user->first_name !!} {!! $user->last_name  !!}</option>
                         @endforeach
                         @endif
                       </select>
                     </div>
-                    <div class="p-2" style="width:160px;">
+                    <div class="p-2">
+                      <input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly>
+                    </div>
+                    <div class="p-2">
+                      <input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly>
+                    </div>
+                 <!--    <div class="p-2" style="width:160px;">
                       <select class="selectpicker" name="month" id="month" data-style="select-with-transition" title="Month">
                           <option value="" disabled selected>{!! trans('panel.sales_users.month') !!}</option>
                           @for ($month = 1; $month <= 12; $month++)
@@ -41,7 +47,7 @@
                               <option value="{!!$startYear!!}-{!!$endYear!!}">{!! $startYear!!} - {!! $endYear !!}</option>
                           @endforeach
                       </select>
-                    </div>
+                    </div> -->
                     <div class="p-2">
                     @if(auth()->user()->can(['mobile_app_login_details_download']))
                       <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.mobile_app_login.mobile_app_login_details_download') !!}" name="export_branch" value="true"><i class="material-icons">cloud_download</i></button>
@@ -98,6 +104,7 @@
                 <th>{!! trans('panel.mobile_app_login.mobile_number') !!}</th>
                 <th>{!! trans('panel.mobile_app_login.app_version') !!}</th>
                 <th>{!! trans('panel.mobile_app_login.device_type') !!}</th>
+                <th>{!! trans('panel.mobile_app_login.device_name') !!}</th>
                 <th>{!! trans('panel.mobile_app_login.first_login_date') !!}</th>
                 <th>{!! trans('panel.mobile_app_login.last_login_date') !!}</th>
                 <th>{!! trans('panel.mobile_app_login.login_status') !!}</th>
@@ -131,9 +138,9 @@
           'url': "{{ url('mobile_user_login/list') }}",
           'data': function(d) {
             d._token = token,
-              d.user_id = $('#user').val(),
-              d.month = $('#month').val(),
-              d.year = $('#financial_year').val()
+            d.user_id = $('#user').val(),
+            d.start_date = $('#start_date').val(),
+            d.end_date = $('#end_date').val()
           }
         },
         columns: [{
@@ -145,18 +152,26 @@
           {
             data: 'action',
             name: 'action',
+            visible: false,
             "defaultContent": ''
           },
           {
             data: 'customer.name',
-            name: 'firm_name',
+            name: 'customer.name',
             orderable: true, 
             searchable: true,
             "defaultContent": ''
           },
           {
-            data: 'customer.first_name',
-            name: 'contact_person',
+             data: 'contact_person',
+             name: 'contact_person',
+             orderable: true, 
+             searchable: true,
+             "defaultContent": ''
+           },
+          {
+            data: 'customer.mobile',
+            name: 'customer.mobile',
             orderable: true, 
             searchable: true,
             "defaultContent": ''
@@ -182,6 +197,7 @@
             searchable: true,
             "defaultContent": ''
           },
+         
           {
             data: 'first_login_date',
             name: 'first_login_date',
@@ -193,8 +209,15 @@
             "defaultContent": ''
           },
           {
-            data: 'login_status',
-            name: 'login_status',
+            data: 'login_status1',
+            name: 'login_status1',
+            "defaultContent": ''
+          },
+          {
+            data: 'customer.mobile',
+            name: 'customer.mobile',
+            searchable: true,
+            visible:false,
             "defaultContent": ''
           },
         ]
@@ -204,11 +227,10 @@
       table.draw();
     });
 
-    $('#month').change(function() {
+    $('#start_date').change(function() {
       table.draw();
     });
-
-    $('#financial_year').change(function() {
+    $('#end_date').change(function() {
       table.draw();
     });
 

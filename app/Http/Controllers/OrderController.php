@@ -25,23 +25,23 @@ use App\Imports\OrderImport;
 use App\Exports\OrderExport;
 use App\Exports\OrderTemplate;
 use App\Http\Requests\OrderRequest;
+use App\Models\Division;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
 class OrderController extends Controller
 {
-    public function __construct() 
-    {     
-        $this->middleware('auth');   
+    public function __construct()
+    {
+        $this->middleware('auth');
         $this->orders = new Order();
-        
-        
     }
 
     public function index(OrderDataTable $dataTable)
     {
         abort_if(Gate::denies('order_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return $dataTable->render('orders.index');
+        $divisions = Division::where('active', 'Y')->select('id', 'division_name')->get();
+        return $dataTable->render('orders.index', compact('divisions'));
     }
 
     /**
@@ -50,9 +50,9 @@ class OrderController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create()
-    {     
+    {
         abort_if(Gate::denies('order_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-         $products = Product::where('active','=','Y')->select('id', 'product_name','product_image','display_name','product_code')->orderBy('product_name', 'asc')->get();
+        $products = Product::where('active', '=', 'Y')->select('id', 'product_name', 'product_image', 'display_name', 'product_code')->orderBy('product_name', 'asc')->get();
 
         // $products = Product::where('active','=','Y')->select('id', 'product_name','product_image','display_name','product_code')->get();
         $userids = getUsersReportingToAuth();
@@ -81,9 +81,9 @@ class OrderController extends Controller
         //                     ->where('active','=','Y')
         //                     ->select('id', 'name','mobile','customertype')
         //                     ->get();
-       
 
-          $sellers = array();
+
+        $sellers = array();
 
 
         // $buyers = Customers::whereIn('customertype', ['2','3','4','5','6'])
@@ -97,27 +97,25 @@ class OrderController extends Controller
         //                     ->select('id', 'name','mobile')
         //                     ->get();
 
-        $buyers = Customers::whereIn('customertype', ['1','3','4','5','6'])
-                            ->where(function($query) use($userids){
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                                {
-                                    $query->whereIn('executive_id',$userids);
-                                }
-                            })
-                            ->where('active','=','Y')
-                            ->select('id', 'name','mobile')
-                            ->get();
+        $buyers = Customers::whereIn('customertype', ['1', '3', '4', '5', '6'])
+            ->where(function ($query) use ($userids) {
+                if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                    $query->whereIn('executive_id', $userids);
+                }
+            })
+            ->where('active', '=', 'Y')
+            ->select('id', 'name', 'mobile')
+            ->get();
 
-        $users = User::where(function($query) use($userids){
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                                {
-                                    $query->whereIn('id',$userids);
-                                }
-                            })->select('id','name')->orderBy('id','desc')->get();                    
+        $users = User::where(function ($query) use ($userids) {
+            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                $query->whereIn('id', $userids);
+            }
+        })->select('id', 'name')->orderBy('id', 'desc')->get();
 
 
 
-        return view('orders.create',compact('products','sellers','buyers','users'))->with('orders',$this->orders);
+        return view('orders.create', compact('products', 'sellers', 'buyers', 'users'))->with('orders', $this->orders);
     }
 
     /**
@@ -128,81 +126,83 @@ class OrderController extends Controller
      */
     public function store(OrderRequest $request)
     {
-        try
-        { 
+        try {
 
             abort_if(Gate::denies('order_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
             $request['created_by'] = Auth::user()->id;
-            $request['orderno'] = isset($request['orderno']) ? $request['orderno'] : date('Ymd').'_'.autoIncrementId('Order','id') ;
+            $request['orderno'] = isset($request['orderno']) ? $request['orderno'] : date('Ymd') . '_' . autoIncrementId('Order', 'id');
 
 
-              if(!empty($request['buyer_id'])){
-               $buyer = $request['buyer_id'];
-               }else{
+            if (!empty($request['buyer_id'])) {
+                $buyer = $request['buyer_id'];
+            } else {
                 $buyer = $request['seller_id'];
-               }
+            }
 
 
-            $request['buyer_id'] = isset($request['seller_id'])? $request['seller_id']:null;  
-            $request['seller_id'] = $buyer; 
+            $request['buyer_id'] = isset($request['seller_id']) ? $request['seller_id'] : null;
+            $request['seller_id'] = $buyer;
             $request['cluster_amount'] = $request['extra_cluster_discount'];
-            $request['deal_discount'] = $request['extra_discount'];
-            $request['deal_amount'] = $request['extra_discount_amount'];
+            $request['deal_discount'] = $request['extra_discount'] ?? NULL;
+            $request['deal_amount'] = $request['extra_discount_amount'] ?? NULL;
             $request['distributor_amount'] = $request['distributor_discount_amount'];
             $request['frieght_amount'] = $request['frieght_discount_amount'];
+            $request['special_amount'] = $request['special_discount_amount'];
+            $request['ebd_amount'] = $request['extra_ebd_discount'];
             $request['gst5_amt'] = $request['5_gst'];
             $request['gst12_amt'] = $request['12_gst'];
-            $request['gst28_amt'] = $request['18_gst'];
-            $request['gst18_amt'] = $request['28_gst'];
-            
+            $request['gst18_amt'] = $request['18_gst'];
+            $request['gst28_amt'] = $request['28_gst'];
+
+
             $response =  $this->orders->save_data($request);
-            if($response['status'] == 'success')
-            {
+            if ($response['status'] == 'success') {
                 $orderdetail = collect([]);
                 foreach ($request['orderdetail'] as $key => $rows) {
 
-                     $single_product_amount = $rows['line_total']+$rows['tax_amount'];
-                     $single_product_amount = number_format((float)$single_product_amount, 2, '.', '');
+                    $single_product_amount = $rows['line_total'] + $rows['tax_amount'];
+                    $single_product_amount = number_format((float)$single_product_amount, 2, '.', '');
 
                     $orderdetail->push([
                         'active' => 'Y',
-                        'order_id' => isset($response['order_id']) ? $response['order_id'] :null,
-                        'product_id' => isset($rows['product_id']) ? $rows['product_id'] :null,
-                        'product_detail_id' => isset($rows['product_detail']) ? $rows['product_detail'] :null,
-                        'quantity' => isset($rows['quantity']) ? $rows['quantity'] :0,
-                        'shipped_qty' => isset($rows['shipped_qty']) ? $rows['shipped_qty'] :0,
-                        'price' => isset($rows['mrp']) ? $rows['mrp'] :0.00,
-                        'tax_amount' => isset($rows['tax_amount']) ? $rows['tax_amount'] :0.00,
-                        'line_total' => isset($rows['line_total']) ? $rows['line_total'] :0.00,
-                        'gst' => isset($rows['gst']) ? $rows['gst'] :0.00,
-                        'gst_amount' => $single_product_amount??0.00,
-                        'discount' => isset($rows['discount']) ? $rows['discount'] :0.00,
-                        'scheme_discount' => isset($rows['scheme_dis']) ? $rows['scheme_dis'] :0.00,
-                        'scheme_name' => isset($rows['scheme_name']) ? $rows['scheme_name'] :null,
-                        'scheme_amount' => isset($rows['scheme_amount']) ? $rows['scheme_amount'] :0.00,
-                        'cluster_discount' => isset($rows['clustered_dis']) ? $rows['clustered_dis'] :0.00,
-                        'cluster_amount' => isset($rows['clus_amounts']) ? $rows['clus_amounts'] :0.00,
-                        'distributor_discount' => isset($rows['distributot_dis']) ? $rows['distributot_dis'] :0.00,
-                        'distributor_amount' => isset($rows['distributot_amounts']) ? $rows['distributot_amounts'] :0.00,
-                        'deal_discount' => isset($rows['deal_dis']) ? $rows['deal_dis'] :0.00,
-                        'deal_amount' => isset($rows['deal_amounts']) ? $rows['deal_amounts'] :0.00,
-                        'frieght_discount' => isset($rows['frieght_dis']) ? $rows['frieght_dis'] :0.00,
-                        'frieght_amount' => isset($rows['frieght_amounts']) ? $rows['frieght_amounts'] :0.00,
+                        'order_id' => isset($response['order_id']) ? $response['order_id'] : null,
+                        'product_id' => isset($rows['product_id']) ? $rows['product_id'] : null,
+                        'product_detail_id' => isset($rows['product_detail']) ? $rows['product_detail'] : null,
+                        'quantity' => isset($rows['quantity']) ? $rows['quantity'] : 0,
+                        'shipped_qty' => isset($rows['shipped_qty']) ? $rows['shipped_qty'] : 0,
+                        'price' => isset($rows['mrp']) ? $rows['mrp'] : 0.00,
+                        'tax_amount' => isset($rows['tax_amount']) ? $rows['tax_amount'] : 0.00,
+                        'line_total' => isset($rows['line_total']) ? $rows['line_total'] : 0.00,
+                        'gst' => isset($rows['gst']) ? $rows['gst'] : 0.00,
+                        'gst_amount' => $single_product_amount ?? 0.00,
+                        'discount' => isset($rows['discount']) ? $rows['discount'] : 0.00,
+                        'scheme_discount' => isset($rows['scheme_dis']) ? $rows['scheme_dis'] : 0.00,
+                        'scheme_name' => isset($rows['scheme_name']) ? $rows['scheme_name'] : null,
+                        'scheme_amount' => isset($rows['scheme_amount']) ? $rows['scheme_amount'] : 0.00,
+                        'cluster_discount' => isset($rows['clustered_dis']) ? $rows['clustered_dis'] : 0.00,
+                        'cluster_amount' => isset($rows['clus_amounts']) ? $rows['clus_amounts'] : 0.00,
+                        'distributor_discount' => isset($rows['distributot_dis']) ? $rows['distributot_dis'] : 0.00,
+                        'distributor_amount' => isset($rows['distributot_amounts']) ? $rows['distributot_amounts'] : 0.00,
+                        'deal_discount' => isset($rows['deal_dis']) ? $rows['deal_dis'] : 0.00,
+                        'deal_amount' => isset($rows['deal_amounts']) ? $rows['deal_amounts'] : 0.00,
+                        'ebd_dis' => isset($rows['ebd_dis']) ? $rows['ebd_dis'] : 0.00,
+                        'ebd_amount' => isset($rows['ebd_amounts']) ? $rows['ebd_amounts'] : 0.00,
+                        'special_dis' => isset($rows['special_dis']) ? $rows['special_dis'] : 0.00,
+                        'special_amounts' => isset($rows['special_amounts']) ? $rows['special_amounts'] : 0.00,
+                        'frieght_discount' => isset($rows['frieght_dis']) ? $rows['frieght_dis'] : 0.00,
+                        'frieght_amount' => isset($rows['frieght_amounts']) ? $rows['frieght_amounts'] : 0.00,
                         'created_at' => getcurentDateTime(),
                     ]);
                 }
 
-                if($orderdetail->isNotEmpty())
-                {
+                if ($orderdetail->isNotEmpty()) {
                     OrderDetails::insert($orderdetail->toArray());
                 }
                 return Redirect::to('orders')->with('message_success', 'Order Store Successfully');
             }
-            return redirect()->back()->with('message_danger', 'Error in Purchases Store')->withInput();  
-        }         
-        catch(\Exception $e)
-        {
-          return redirect()->back()->withErrors($e->getMessage())->withInput();
+            return redirect()->back()->with('message_danger', 'Error in Purchases Store')->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors($e->getMessage())->withInput();
         }
     }
 
@@ -216,9 +216,9 @@ class OrderController extends Controller
     {
         abort_if(Gate::denies('order_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $id = decrypt($id);
-        $orders = $this->orders->with('sellers')->find($id);
-        $orderdetails = OrderDetails::with('products')->where('order_id','=',$id)->get();
-        return view('orders.show',compact('orderdetails','orders'));
+        $orders = $this->orders->with('sellers', 'createdbyname')->find($id);
+        $orderdetails = OrderDetails::with('products')->where('order_id', '=', $id)->get();
+        return view('orders.show', compact('orderdetails', 'orders'));
     }
 
     /**
@@ -233,10 +233,10 @@ class OrderController extends Controller
         $id = decrypt($id);
         $userids = getUsersReportingToAuth();
         $orders = $this->orders->with('orderdetails')->find($id);
-        $orderdetail = OrderDetails::with('products')->where('order_id','=',$id)->get();
-        $products = Product::where('active','=','Y')->select('id', 'display_name','product_image')->get();
+        $orderdetail = OrderDetails::with('products')->where('order_id', '=', $id)->get();
+        $products = Product::where('active', '=', 'Y')->select('id', 'display_name', 'product_image')->get();
 
-        
+
 
         // Optionally, you can save the PDF file path to your database or perform any other necessary actions
 
@@ -253,17 +253,16 @@ class OrderController extends Controller
         //                     ->select('id', 'name','mobile')
         //                     ->get();
 
-        $sellers = Customers::where(function($query) use($userids){
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                                {
-                                    $query->whereIn('executive_id',$userids);
-                                }
-                            })
-                            ->where('active','=','Y')
-                            ->select('id', 'name','mobile')
-                            ->get();
+        $sellers = Customers::where(function ($query) use ($userids) {
+            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                $query->whereIn('executive_id', $userids);
+            }
+        })
+            ->where('active', '=', 'Y')
+            ->select('id', 'name', 'mobile')
+            ->get();
 
-         //$sellers = array();
+        //$sellers = array();
 
 
 
@@ -278,16 +277,15 @@ class OrderController extends Controller
         //                     ->select('id', 'name','mobile')
         //                     ->get();
 
-       $buyers = Customers::whereIn('customertype', ['1','3','4','5','6'])
-                            ->where(function($query) use($userids){
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                                {
-                                    $query->whereIn('executive_id',$userids);
-                                }
-                            })
-                            ->where('active','=','Y')
-                            ->select('id', 'name','mobile')
-                            ->get();                   
+        $buyers = Customers::whereIn('customertype', ['1', '3', '4', '5', '6'])
+            ->where(function ($query) use ($userids) {
+                if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                    $query->whereIn('executive_id', $userids);
+                }
+            })
+            ->where('active', '=', 'Y')
+            ->select('id', 'name', 'mobile')
+            ->get();
 
         // $users = User::where(function($query) use($userids){
         //                         if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
@@ -296,15 +294,14 @@ class OrderController extends Controller
         //                         }
         //                     })->select('id','name')->orderBy('id','desc')->get();  
 
-        $users = User::where(function($query) use($userids){
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                                {
-                                    $query->whereIn('id',$userids);
-                                }
-                            })->where('active','Y')->select('id','name')->orderBy('id','desc')->get();                      
+        $users = User::where(function ($query) use ($userids) {
+            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                $query->whereIn('id', $userids);
+            }
+        })->where('active', 'Y')->select('id', 'name')->orderBy('id', 'desc')->get();
 
 
-        return view('orders.edit',compact('products','sellers','buyers','orderdetail','users'))->with('orders',$orders);
+        return view('orders.edit', compact('products', 'sellers', 'buyers', 'orderdetail', 'users'))->with('orders', $orders);
     }
 
     /**
@@ -318,24 +315,55 @@ class OrderController extends Controller
     {
         abort_if(Gate::denies('order_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $id = decrypt($id);
+
+        
+        $request['cluster_amount'] = $request['extra_cluster_discount'];
+        $request['deal_discount'] = $request['extra_discount'] ?? NULL;
+        $request['deal_amount'] = $request['extra_discount_amount'] ?? NULL;
+        $request['distributor_amount'] = $request['distributor_discount_amount'];
+        $request['frieght_amount'] = $request['frieght_discount_amount'];
+        $request['special_amount'] = $request['special_discount_amount'];
+        $request['ebd_amount'] = $request['extra_ebd_discount'];
+        $request['gst5_amt'] = $request['5_gst'];
+        $request['gst12_amt'] = $request['12_gst'];
+        $request['gst28_amt'] = $request['18_gst'];
+        $request['gst18_amt'] = $request['28_gst'];
+        
         $orders = Order::with('orderdetails')->find($id);
-        $orders->buyer_id = isset($request['seller_id']) ? $request['seller_id'] :null;
-        $orders->seller_id = isset($request['buyer_id']) ? $request['buyer_id'] :null;
+        $orders->buyer_id = isset($request['seller_id']) ? $request['seller_id'] : null;
+        $orders->seller_id = isset($request['buyer_id']) ? $request['buyer_id'] : null;
 
         //$orders->buyer_id = isset($request['buyer_id']) ? $request['buyer_id'] :null ;
-        $orders->executive_id = isset($request['executive_id']) ? $request['executive_id'] :null ;
+        $orders->executive_id = isset($request['executive_id']) ? $request['executive_id'] : null;
         //$orders->seller_id = isset($request['seller_id']) ? $request['seller_id'] :null ;
-        $orders->order_date = isset($request['order_date']) ? $request['order_date'] :null ;
-        $orders->total_gst = isset($request['total_gst']) ? $request['total_gst'] : 0.00 ;
-        $orders->total_discount = isset($request['total_discount']) ? $request['total_discount'] : 0.00 ;
-        $orders->extra_discount = isset($request['extra_discount']) ? $request['extra_discount'] : 0.00 ;
-        $orders->sub_total = isset($request['sub_total']) ? $request['sub_total'] : 0.00 ;
-        $orders->grand_total = isset($request['grand_total']) ? $request['grand_total'] : 0.00 ;
-        $orders->order_taking = isset($request['order_taking']) ? $request['order_taking'] :'' ;
-        $orders->suc_del = isset($request['suc_del']) ? $request['suc_del'] :'' ;
-        $orders->updated_by = Auth::user()->id ;
-        if($orders->save())
-        {
+        $orders->order_date = isset($request['order_date']) ? $request['order_date'] : null;
+        $orders->total_gst = isset($request['total_gst']) ? $request['total_gst'] : 0.00;
+        $orders->total_discount = isset($request['total_discount']) ? $request['total_discount'] : 0.00;
+        $orders->extra_discount = isset($request['extra_discount']) ? $request['extra_discount'] : 0.00;
+        $orders->gst_amount = isset($request['gst_amount']) ? $request['gst_amount'] : null;
+        $orders->schme_amount = isset($request['schme_amount']) ? $request['schme_amount'] : null;
+        $orders->ebd_discount = isset($request['ebd_discount']) ? $request['ebd_discount'] : null;
+        $orders->ebd_amount = isset($request['ebd_amount']) ? $request['ebd_amount'] : null;
+        $orders->special_discount = isset($request['special_discount']) ? $request['special_discount'] : null;
+        $orders->special_amount = isset($request['special_amount']) ? $request['special_amount'] : null;
+        $orders->cluster_discount = isset($request['cluster_discount']) ? $request['cluster_discount'] : null;
+        $orders->cluster_amount = isset($request['cluster_amount']) ? $request['cluster_amount'] : null;
+        $orders->deal_discount = isset($request['deal_discount']) ? $request['deal_discount'] : null;
+        $orders->deal_amount = isset($request['deal_amount']) ? $request['deal_amount'] : null;
+        $orders->distributor_discount = isset($request['distributor_discount']) ? $request['distributor_discount'] : null;
+        $orders->distributor_amount = isset($request['distributor_amount']) ? $request['distributor_amount'] : null;
+        $orders->frieght_discount = isset($request['frieght_discount']) ? $request['frieght_discount'] : null;
+        $orders->frieght_amount = isset($request['frieght_amount']) ? $request['frieght_amount'] : null;
+        $orders->gst5_amt = isset($request['gst5_amt']) ? $request['gst5_amt'] : null;
+        $orders->gst12_amt = isset($request['gst12_amt']) ? $request['gst12_amt'] : null;
+        $orders->gst18_amt = isset($request['gst18_amt']) ? $request['gst18_amt'] : null;
+        $orders->gst28_amt = isset($request['gst28_amt']) ? $request['gst28_amt'] : null;
+        $orders->sub_total = isset($request['sub_total']) ? $request['sub_total'] : 0.00;
+        $orders->grand_total = isset($request['grand_total']) ? $request['grand_total'] : 0.00;
+        $orders->order_taking = isset($request['order_taking']) ? $request['order_taking'] : '';
+        $orders->suc_del = isset($request['suc_del']) ? $request['suc_del'] : '';
+        $orders->updated_by = Auth::user()->id;
+        if ($orders->save()) {
             // foreach ($request['orderdetail'] as $key => $rows) {
             //         OrderDetails::updateOrCreate(['product_id' => $request['product_id'], 'order_id' => $id], [
             //             'order_id' => $id,
@@ -349,37 +377,40 @@ class OrderController extends Controller
             //             'created_at' => getcurentDateTime(),
             //         ]);
             //     }
-
             foreach ($request['orderdetail'] as $key => $rows) {
-                    OrderDetails::updateOrCreate(['product_id' => $rows['product_id'], 'order_id' => $id], [
+                // dd($rows);
+                OrderDetails::updateOrCreate(['product_id' => $rows['product_id'], 'order_id' => $id], [
                         'order_id' => $id,
-                        'product_id' => isset($rows['product_id']) ? $rows['product_id'] :null,
-                        'product_detail_id' => isset($rows['product_detail']) ? $rows['product_detail'] :null,
-                        'quantity' => isset($rows['quantity']) ? $rows['quantity'] :0,
-                        'shipped_qty' => isset($rows['shipped_qty']) ? $rows['shipped_qty'] :0,
-                        'price' => isset($rows['mrp']) ? $rows['mrp'] :0.00,
-                        'gst' => isset($rows['gst']) ? $rows['gst'] :0.00,
-                        'discount'=> isset($rows['discount']) ? $rows['discount'] :0.00,
-                        'tax_amount' => isset($rows['tax_amount']) ? $rows['tax_amount'] :0.00,
-                        'line_total' => isset($rows['line_total']) ? $rows['line_total'] :0.00,
-
-                        'ebd_discount' => isset($rows['scheme_dis']) ? $rows['scheme_dis'] :0.00,
-                        'ebd_name' => isset($rows['scheme_name']) ? $rows['scheme_name'] :null,
-                        'ebd_amount' => isset($rows['scheme_amount']) ? $rows['scheme_amount'] :0.00,
-                        'cluster_discount' => isset($rows['clustered_dis']) ? $rows['clustered_dis'] :0.00,
-                        'cluster_amount' => isset($rows['clus_amounts']) ? $rows['clus_amounts'] :0.00,
-                        'distributor_discount' => isset($rows['distributot_dis']) ? $rows['distributot_dis'] :0.00,
-                        'distributor_amount' => isset($rows['distributot_amounts']) ? $rows['distributot_amounts'] :0.00,
-                        'deal_discount' => isset($rows['deal_dis']) ? $rows['deal_dis'] :0.00,
-                        'deal_amount' => isset($rows['deal_amounts']) ? $rows['deal_amounts'] :0.00,
-                        'frieght_discount' => isset($rows['frieght_dis']) ? $rows['frieght_dis'] :0.00,
-                        'frieght_amount' => isset($rows['frieght_amounts']) ? $rows['frieght_amounts'] :0.00,
+                        'product_id' => isset($rows['product_id']) ? $rows['product_id'] : null,
+                        'product_detail_id' => isset($rows['product_detail']) ? $rows['product_detail'] : null,
+                        'quantity' => isset($rows['quantity']) ? $rows['quantity'] : 0,
+                        'shipped_qty' => isset($rows['shipped_qty']) ? $rows['shipped_qty'] : 0,
+                        'price' => isset($rows['mrp']) ? $rows['mrp'] : 0.00,
+                        'tax_amount' => isset($rows['tax_amount']) ? $rows['tax_amount'] : 0.00,
+                        'line_total' => isset($rows['line_total']) ? $rows['line_total'] : 0.00,
+                        'gst' => isset($rows['gst']) ? $rows['gst'] : 0.00,
+                        'gst_amount' => $single_product_amount ?? 0.00,
+                        'discount' => isset($rows['discount']) ? $rows['discount'] : 0.00,
+                        'scheme_discount' => isset($rows['scheme_dis']) ? $rows['scheme_dis'] : 0.00,
+                        'scheme_name' => isset($rows['scheme_name']) ? $rows['scheme_name'] : null,
+                        'scheme_amount' => isset($rows['scheme_amount']) ? $rows['scheme_amount'] : 0.00,
+                        'cluster_discount' => isset($rows['clustered_dis']) ? $rows['clustered_dis'] : 0.00,
+                        'cluster_amount' => isset($rows['clus_amounts']) ? $rows['clus_amounts'] : 0.00,
+                        'distributor_discount' => isset($rows['distributot_dis']) ? $rows['distributot_dis'] : 0.00,
+                        'distributor_amount' => isset($rows['distributot_amounts']) ? $rows['distributot_amounts'] : 0.00,
+                        'deal_discount' => isset($rows['deal_dis']) ? $rows['deal_dis'] : 0.00,
+                        'deal_amount' => isset($rows['deal_amounts']) ? $rows['deal_amounts'] : 0.00,
+                        'ebd_dis' => isset($rows['ebd_dis']) ? $rows['ebd_dis'] : 0.00,
+                        'ebd_amount' => isset($rows['ebd_amounts']) ? $rows['ebd_amounts'] : 0.00,
+                        'special_dis' => isset($rows['special_dis']) ? $rows['special_dis'] : 0.00,
+                        'special_amounts' => isset($rows['special_amounts']) ? $rows['special_amounts'] : 0.00,
+                        'frieght_discount' => isset($rows['frieght_dis']) ? $rows['frieght_dis'] : 0.00,
+                        'frieght_amount' => isset($rows['frieght_amounts']) ? $rows['frieght_amounts'] : 0.00,
                         'created_at' => getcurentDateTime(),
-                    ]);
-                }
+                ]);
+            }
 
-
-           return Redirect::to('orders')->with('message_success', 'Order update Successfully');
+            return Redirect::to('orders')->with('message_success', 'Order update Successfully');
         }
         return redirect()->back()->with('message_danger', 'Error in Purchases Store')->withInput();
     }
@@ -387,31 +418,29 @@ class OrderController extends Controller
     public function destroy($id)
     {
         abort_if(Gate::denies('order_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        OrderDetails::where('order_id',$id)->delete();
+        OrderDetails::where('order_id', $id)->delete();
         $product = Order::find($id);
-        if($product->delete())
-        {
-            return response()->json(['status' => 'success','message' => 'Order deleted successfully!']);
+        if ($product->delete()) {
+            return response()->json(['status' => 'success', 'message' => 'Order deleted successfully!']);
         }
-        return response()->json(['status' => 'error','message' => 'Error in User Delete!']);
-    }
-    
-    public function active(Request $request)
-    {
-        if(Order::where('id',$request['id'])->update(['active' => ($request['active'] == 'Y') ? 'N' :'Y']))
-        {
-            $message = ($request['active'] == 'Y') ? 'Inactive' :'Active';
-            return response()->json(['status' => 'success','message' => 'Order '.$message.' Successfully!']);
-        }
-        return response()->json(['status' => 'error','message' => 'Error in Status Update']);
+        return response()->json(['status' => 'error', 'message' => 'Error in User Delete!']);
     }
 
-    public function upload(Request $request) 
+    public function active(Request $request)
+    {
+        if (Order::where('id', $request['id'])->update(['active' => ($request['active'] == 'Y') ? 'N' : 'Y'])) {
+            $message = ($request['active'] == 'Y') ? 'Inactive' : 'Active';
+            return response()->json(['status' => 'success', 'message' => 'Order ' . $message . ' Successfully!']);
+        }
+        return response()->json(['status' => 'error', 'message' => 'Error in Status Update']);
+    }
+
+    public function upload(Request $request)
     {
         abort_if(Gate::denies('order_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        Excel::import(new OrderImport,request()->file('import_file'));
+        Excel::import(new OrderImport, request()->file('import_file'));
         return back();
     }
     public function download(Request $request)
@@ -432,80 +461,73 @@ class OrderController extends Controller
     public function ordersInfo(Request $request)
     {
         if ($request->ajax()) {
-            $data = Order::with('sellers','buyers')
-                            ->latest();
+            $data = Order::with('sellers', 'buyers')
+                ->latest();
             return Datatables::of($data)
-                    ->addIndexColumn()
-                    ->editColumn('created_at', function($data)
-                    {
-                        return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
-                    })
-                    ->editColumn('order_date', function($data)
-                    {
-                        return isset($data->order_date) ? showdateformat($data->order_date) : '';
-                    })
-                    ->addColumn('action', function ($query) {
-                          $btn = '';
-                          if(auth()->user()->can(['order_show']))
-                          {
-                            $btn = $btn.'<a href="'.url("orders/".encrypt($query->id)).'" class="btn btn-theme btn-just-icon btn-sm" title="'.trans('panel.global.show').' '.trans('panel.orders.title_singular').'">
+                ->addIndexColumn()
+                ->editColumn('created_at', function ($data) {
+                    return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
+                })
+                ->editColumn('order_date', function ($data) {
+                    return isset($data->order_date) ? showdateformat($data->order_date) : '';
+                })
+                ->addColumn('action', function ($query) {
+                    $btn = '';
+                    if (auth()->user()->can(['order_show'])) {
+                        $btn = $btn . '<a href="' . url("orders/" . encrypt($query->id)) . '" class="btn btn-theme btn-just-icon btn-sm" title="' . trans('panel.global.show') . ' ' . trans('panel.orders.title_singular') . '">
                                             <i class="material-icons">visibility</i>
                                         </a>';
-                          }
-                          return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
-                                        '.$btn.'
+                    }
+                    return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
+                                        ' . $btn . '
                                     </div>';
-                    })
-                    ->filter(function ($query) use ($request) {
-                        if(!empty($request['buyer_id']))
-                        {
-                            $query->where('buyer_id', $request['buyer_id'])->orWhere('seller_id', $request['buyer_id']);
-                        }
-                        if(!empty($request['seller_id']))
-                        {
-                            $query->where('seller_id', $request['seller_id'])->orWhere('buyer_id', $request['buyer_id']);
-                        }
-                        if(!empty($request['created_by']))
-                        {
-                            $query->where('created_by', $request['created_by']);
-                        }
-                    })
-                    ->rawColumns(['action'])
-                    ->make(true);
+                })
+                ->filter(function ($query) use ($request) {
+                    if (!empty($request['buyer_id'])) {
+                        $query->where('buyer_id', $request['buyer_id'])->orWhere('seller_id', $request['buyer_id']);
+                    }
+                    if (!empty($request['seller_id'])) {
+                        $query->where('seller_id', $request['seller_id'])->orWhere('buyer_id', $request['buyer_id']);
+                    }
+                    if (!empty($request['created_by'])) {
+                        $query->where('created_by', $request['created_by']);
+                    }
+                })
+                ->rawColumns(['action'])
+                ->make(true);
         }
     }
 
     public function ordertopoint()
     {
 
-        $orders = Order::with('orderdetails')->whereNotNull(['buyer_id','seller_id'])->select('orderno as invoice_no','id','buyer_id','seller_id','grand_total','order_date as invoice_date','id as order_id','total_qty','shipped_qty','total_gst','status_id')->get();
+        $orders = Order::with('orderdetails')->whereNotNull(['buyer_id', 'seller_id'])->select('orderno as invoice_no', 'id', 'buyer_id', 'seller_id', 'grand_total', 'order_date as invoice_date', 'id as order_id', 'total_qty', 'shipped_qty', 'total_gst', 'status_id')->get();
 
         foreach ($orders as $key => $order) {
             $details = collect([]);
             $data = collect([
-                'order_id' => isset($order['order_id']) ? $order['order_id'] :null,
-                'invoice_no' => isset($order['invoice_no']) ? $order['invoice_no'] :null,
-                'buyer_id' => isset($order['buyer_id']) ? $order['buyer_id'] :null,
-                'seller_id' => isset($order['seller_id']) ? $order['seller_id'] :null,
-                'grand_total' => isset($order['grand_total']) ? $order['grand_total'] :0.00,
-                'invoice_date' => isset($order['invoice_date']) ? $order['invoice_date'] :null,
-                'order_id' => isset($order['order_id']) ? $order['order_id'] :null,
-                'total_qty' => isset($order['total_qty']) ? $order['total_qty'] :null,
-                'shipped_qty' => isset($order['shipped_qty']) ? $order['shipped_qty'] :null,
-                'total_gst' => isset($order['total_gst']) ? $order['total_gst'] :null,
-                'status_id' => isset($order['status_id']) ? $order['status_id'] :null,
+                'order_id' => isset($order['order_id']) ? $order['order_id'] : null,
+                'invoice_no' => isset($order['invoice_no']) ? $order['invoice_no'] : null,
+                'buyer_id' => isset($order['buyer_id']) ? $order['buyer_id'] : null,
+                'seller_id' => isset($order['seller_id']) ? $order['seller_id'] : null,
+                'grand_total' => isset($order['grand_total']) ? $order['grand_total'] : 0.00,
+                'invoice_date' => isset($order['invoice_date']) ? $order['invoice_date'] : null,
+                'order_id' => isset($order['order_id']) ? $order['order_id'] : null,
+                'total_qty' => isset($order['total_qty']) ? $order['total_qty'] : null,
+                'shipped_qty' => isset($order['shipped_qty']) ? $order['shipped_qty'] : null,
+                'total_gst' => isset($order['total_gst']) ? $order['total_gst'] : null,
+                'status_id' => isset($order['status_id']) ? $order['status_id'] : null,
             ]);
-            if(!empty($order['orderdetails']))
-            {
+            if (!empty($order['orderdetails'])) {
                 foreach ($order['orderdetails'] as $key => $rows) {
                     $details->push([
-                        'order_id' => isset($rows['order_id']) ? $rows['order_id'] :null,
-                        'product_id' => isset($rows['product_id']) ? $rows['product_id'] :null,
-                        'quantity' => isset($rows['quantity']) ? $rows['quantity'] :0,
-                        'shipped_qty' => isset($rows['shipped_qty']) ? $rows['shipped_qty'] :0,
-                        'price' => isset($rows['price']) ? $rows['price'] :0.00,
-                        'tax_amount' => isset($rows['tax_amount']) ? $rows['tax_amount'] :0.00,
-                        'line_total' => isset($rows['line_total']) ? $rows['line_total'] :0.00,
+                        'order_id' => isset($rows['order_id']) ? $rows['order_id'] : null,
+                        'product_id' => isset($rows['product_id']) ? $rows['product_id'] : null,
+                        'quantity' => isset($rows['quantity']) ? $rows['quantity'] : 0,
+                        'shipped_qty' => isset($rows['shipped_qty']) ? $rows['shipped_qty'] : 0,
+                        'price' => isset($rows['price']) ? $rows['price'] : 0.00,
+                        'tax_amount' => isset($rows['tax_amount']) ? $rows['tax_amount'] : 0.00,
+                        'line_total' => isset($rows['line_total']) ? $rows['line_total'] : 0.00,
                     ]);
                 }
             }
@@ -537,87 +559,73 @@ class OrderController extends Controller
         //     Order::where('id','=',$orderid)->update(['status_id' => null]);
         // }
 
-         $orderid = decrypt($orderid);
+        $orderid = decrypt($orderid);
         $orders = $this->orders->with('orderdetails')->find($orderid);
-        return view('orders.full_dispatched')->with('orders',$orders);
-
+        return view('orders.full_dispatched')->with('orders', $orders);
     }
 
-    public function submitFullyDispatched(Request $request){
+    public function submitFullyDispatched(Request $request)
+    {
         //$orderid = decrypt($orderid);
-        try
-        { 
-        $validator = Validator::make($request->all(), [
-            'invoice_no' => 'required',
-            'order_id' => 'required',
-            'invoice_date' => 'required',
+        try {
+            
+            $validator = Validator::make($request->all(), [
+                'invoice_no' => 'required',
+                'order_id' => 'required',
+                'invoice_date' => 'required',
 
-        ]); 
-        if($validator->fails()) {
-            return redirect()->back()
-                        ->withErrors($validator)
-                        ->withInput();
-        }
+            ]);
+            if ($validator->fails()) {
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput();
+            }
 
-        $orderid = $request['order_id'];
-        $status_id = Status::where('status_name','=','Dispatched')->pluck('id')->first();
-        Order::where('id','=',$orderid)->update(['status_id' => $status_id]);
-        $orders = $this->orders->with('orderdetails')->find($orderid);
-        $orders['invoice_date'] = $request['invoice_date'];
-        $orders['invoice_no'] = $request['invoice_no'];
-        $orders['order_id'] = $orderid ;
-        $orders['saledetail'] = $orders['orderdetails'];
-        $data = collect([$orders]);
-        $response = insertSales($data);
-        if($response['status'] == 'success')
-        {
+            $orderid = $request['order_id'];
+            $status_id = Status::where('status_name', '=', 'Dispatched')->pluck('id')->first();
+            Order::where('id', '=', $orderid)->update(['status_id' => $status_id,'cash_discount' => $request->cash_discount,'cash_amount' => $request->cash_amount,'sub_total' => $request->sub_total,'grand_total' => $request->grand_total,'order_remark' => $request->order_remark]);
+            $orders = $this->orders->with('orderdetails')->find($orderid);
+            $orders['invoice_date'] = $request['invoice_date'];
+            $orders['invoice_no'] = $request['invoice_no'];
+            $orders['order_id'] = $orderid;
+            $orders['saledetail'] = $orders['orderdetails'];
+            $data = collect([$orders]);
+            $response = insertSales($data);
+            if ($response['status'] == 'success') {
 
-            $status_id = Status::where('status_name','=','Dispatched')->pluck('id')->first();
-            $partiallystatus = Status::where('status_name','=','Partially Dispatched')->pluck('id')->first();
-                
-                if($request['orderdetail'])
-                {
+                $status_id = Status::where('status_name', '=', 'Dispatched')->pluck('id')->first();
+                $partiallystatus = Status::where('status_name', '=', 'Partially Dispatched')->pluck('id')->first();
+
+                if ($request['orderdetail']) {
                     foreach ($request['orderdetail'] as $key => $rows) {
 
-                        $orderdetail = OrderDetails::where('order_id','=',$request['order_id'])
-                                                    ->where('product_detail_id','=',$rows['product_detail'])->first();
-                        if($orderdetail['shipped_qty'] + $rows['quantity'] == $orderdetail['quantity'] )
-                        {
+                        $orderdetail = OrderDetails::where('order_id', '=', $request['order_id'])
+                            ->where('product_detail_id', '=', $rows['product_detail'])->first();
+                        if ($orderdetail['shipped_qty'] + $rows['quantity'] == $orderdetail['quantity']) {
                             $orderdetail->status_id = $status_id;
-                        }
-                        else
-                        {
+                        } else {
                             $orderdetail->status_id = $partiallystatus;
                         }
-                        $orderdetail->increment('shipped_qty',$rows['quantity']);
+                        $orderdetail->increment('shipped_qty', $rows['quantity']);
                         $orderdetail->save();
                     }
                 }
 
-                if(OrderDetails::where('order_id','=',$request['order_id'])->where('status_id','=',$partiallystatus)->exists())
-                {
-                    Order::where('id','=',$request['order_id'])->update(['status_id' => $partiallystatus]);
+                if (OrderDetails::where('order_id', '=', $request['order_id'])->where('status_id', '=', $partiallystatus)->exists()) {
+                    Order::where('id', '=', $request['order_id'])->update(['status_id' => $partiallystatus]);
+                } else {
+                    Order::where('id', '=', $request['order_id'])->update(['status_id' => $status_id]);
                 }
-                else
-                {
-                    Order::where('id','=',$request['order_id'])->update(['status_id' => $status_id]);
-                }
-              return Redirect::to('sales')->with('message_success', 'Sales Store Successfully');     
+                return Redirect::to('sales')->with('message_success', 'Sales Store Successfully');
 
-          // OrderDetails::where('order_id','=',$orderid)->update(['status_id' => $status_id]);
-          // return Redirect::to('orders')->with('message_success', 'Sales Store Successfully');
+                // OrderDetails::where('order_id','=',$orderid)->update(['status_id' => $status_id]);
+                // return Redirect::to('orders')->with('message_success', 'Sales Store Successfully');
+            } else {
+                Order::where('id', '=', $orderid)->update(['status_id' => null]);
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors($e->getMessage())->withInput();
         }
-        else
-        {
-            Order::where('id','=',$orderid)->update(['status_id' => null]);
-        } 
-
-        }         
-        catch(\Exception $e)
-        {
-          return redirect()->back()->withErrors($e->getMessage())->withInput();
-        }
-
     }
 
 
@@ -627,27 +635,26 @@ class OrderController extends Controller
     {
         $orderid = decrypt($orderid);
         $orders = $this->orders->with('orderdetails')->find($orderid);
-        return view('orders.dispatched')->with('orders',$orders);
+        return view('orders.dispatched')->with('orders', $orders);
     }
 
     public function orderCancle($orderid, Request $request)
     {
         $orderid = decrypt($orderid);
         $orders = $this->orders->with('orderdetails')->find($orderid);
-        if($orders){
+        if ($orders) {
             $orders->status_id = '4';
             $orders->order_remark = $request->remark;
             $orders->save();
-            return response()->json(['status'=>'success', 'message'=>'Order cancle successfully !!']);
-        }else{
-            return response()->json(['status'=>'error', 'message'=>'Order not found !!']);
+            return response()->json(['status' => 'success', 'message' => 'Order cancle successfully !!']);
+        } else {
+            return response()->json(['status' => 'error', 'message' => 'Order not found !!']);
         }
     }
 
     public function submitDispatched(Request $request)
     {
-        try
-        { 
+        try {
             $request['active'] = 'Y';
             $request['created_by'] = Auth::user()->id;
             $validator = Validator::make($request->all(), [
@@ -656,77 +663,65 @@ class OrderController extends Controller
                 'invoice_no' => 'required',
                 'order_id' => 'required',
                 'grand_total' => 'required',
-            ]); 
+            ]);
             if ($validator->fails()) {
                 return redirect()->back()
-                            ->withErrors($validator)
-                            ->withInput();
+                    ->withErrors($validator)
+                    ->withInput();
             }
             $request['saledetail'] = $request['orderdetails'];
             $data = collect([$request]);
             $response = insertSales($data);
-            if($response['status'] == 'success')
-            {
-                $status_id = Status::where('status_name','=','Dispatched')->pluck('id')->first();
-                $partiallystatus = Status::where('status_name','=','Partially Dispatched')->pluck('id')->first();
-                
+            if ($response['status'] == 'success') {
+                $status_id = Status::where('status_name', '=', 'Dispatched')->pluck('id')->first();
+                $partiallystatus = Status::where('status_name', '=', 'Partially Dispatched')->pluck('id')->first();
 
-                if($request['orderdetail'])
-                {
+
+                if ($request['orderdetail']) {
                     foreach ($request['orderdetail'] as $key => $rows) {
 
-                        $orderdetail = OrderDetails::where('order_id','=',$request['order_id'])
-                                                    ->where('product_detail_id','=',$rows['product_detail'])->first();
-                        if($orderdetail['shipped_qty'] + $rows['quantity'] == $orderdetail['quantity'] )
-                        {
-                            $orderdetail->status_id = $status_id ;
+                        $orderdetail = OrderDetails::where('order_id', '=', $request['order_id'])
+                            ->where('product_detail_id', '=', $rows['product_detail'])->first();
+                        if ($orderdetail['shipped_qty'] + $rows['quantity'] == $orderdetail['quantity']) {
+                            $orderdetail->status_id = $status_id;
+                        } else {
+                            $orderdetail->status_id = $partiallystatus;
                         }
-                        else
-                        {
-                            $orderdetail->status_id = $partiallystatus ;
-                        }
-                        $orderdetail->increment('shipped_qty',$rows['quantity']);
+                        $orderdetail->increment('shipped_qty', $rows['quantity']);
                         $orderdetail->save();
                     }
                 }
 
-                if(OrderDetails::where('order_id','=',$request['order_id'])->where('status_id','=',$partiallystatus)->exists())
-                {
-                    Order::where('id','=',$request['order_id'])->update(['status_id' => $partiallystatus]);
+                if (OrderDetails::where('order_id', '=', $request['order_id'])->where('status_id', '=', $partiallystatus)->exists()) {
+                    Order::where('id', '=', $request['order_id'])->update(['status_id' => $partiallystatus]);
+                } else {
+                    Order::where('id', '=', $request['order_id'])->update(['status_id' => $status_id]);
                 }
-                else
-                {
-                    Order::where('id','=',$request['order_id'])->update(['status_id' => $status_id]);
-                }
-              return Redirect::to('sales')->with('message_success', 'Sales Store Successfully');
+                return Redirect::to('sales')->with('message_success', 'Sales Store Successfully');
             }
-            return redirect()->back()->with('message_danger', 'Error in Sales Store')->withInput();  
-        }         
-        catch(\Exception $e)
-        {
-          return redirect()->back()->withErrors($e->getMessage())->withInput();
+            return redirect()->back()->with('message_danger', 'Error in Sales Store')->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors($e->getMessage())->withInput();
         }
     }
 
     public function expectedDelivery(Request $request)
     {
-        $cities = City::select('id','city_name')->get();
-        $palaces =PlaceDispatch::select('city_name','pincode','days')->get();
-        return view('orders.delivery',compact('cities','palaces') );
+        $cities = City::select('id', 'city_name')->get();
+        $palaces = PlaceDispatch::select('city_name', 'pincode', 'days')->get();
+        return view('orders.delivery', compact('cities', 'palaces'));
     }
 
     public function submitExpectedDelivery(Request $request)
     {
         foreach ($request['detail'] as $key => $rows) {
-            if(!empty($rows['pincode']))
-            {
-                PlaceDispatch::updateOrCreate(['pincode' => $rows['pincode']],[
-                    'city_name'      => isset($rows['city_name']) ? $rows['city_name'] :null,
-                    'pincode'      => isset($rows['pincode']) ? $rows['pincode'] :null,
-                    'days'      => isset($rows['days']) ? $rows['days'] :null,
+            if (!empty($rows['pincode'])) {
+                PlaceDispatch::updateOrCreate(['pincode' => $rows['pincode']], [
+                    'city_name'      => isset($rows['city_name']) ? $rows['city_name'] : null,
+                    'pincode'      => isset($rows['pincode']) ? $rows['pincode'] : null,
+                    'days'      => isset($rows['days']) ? $rows['days'] : null,
                 ]);
             }
-            
         }
         return Redirect::to('expected-delivery')->with('message_success', 'PlaceDispatch Update Successfully');
     }

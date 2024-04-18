@@ -27,7 +27,7 @@
                @endif
                <form method="POST" action="{{($user->id)?route('users.update', [$user->id]): route('users.store') }}" enctype="multipart/form-data" id="{{($user->id)?'updateUserData':'storeUserData'}}">
                   @csrf
-               @if($user->id)
+                  @if($user->id)
                   @method('PUT')
                   <div class="card-avatar mb-3">
                      <div class="fileinput fileinput-new text-center" data-provides="fileinput">
@@ -49,8 +49,9 @@
                   </div>
                   @endif
                   <input type="hidden" name="name" id="name" required>
+                  <div class="first-box">
                   <div class="row">
-                  <input type="hidden" name="id" id="user_id" value="{!! $user?$user->id:'' !!}">
+                     <input type="hidden" name="id" id="user_id" value="{!! $user?$user->id:'' !!}">
                      <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">Assign Cities</label>
@@ -152,7 +153,7 @@
                            </div>
                         </div>
                      </div>
-                      <div class="col-md-6">
+                     <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-4 col-form-label">{{ trans('panel.user.fields.password') }}<span class="text-danger"> *</span></label>
                            <div class="col-md-8">
@@ -164,8 +165,8 @@
                               </div>
                            </div>
                         </div>
-                     </div> 
-                     <div class="col-md-12">
+                     </div>
+                     <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-2 col-form-label">{{ trans('panel.user.fields.roles') }}</label>
                            <div class="col-md-10">
@@ -182,12 +183,37 @@
                            </div>
                         </div>
                      </div>
-                  </div>
+                     <div class="col-md-6 d-none" id="branch-data" >
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">Branch data</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <div class="form-group has-default bmd-form-group">
+                                    <select class="form-control select2" name="branch_show[]" multiple required>
+                                       <option value="" disabled>Select Branch For Data</option>
 
+                                       @foreach($branches as $branche)
+                                          <option value="{{$branche->id}}" {{ (in_array($branche->id, old('branch_show', explode(',', $user->branch_show)))) ? 'selected' : '' }}>{{$branche->branch_name}}</option>
+                                       @endforeach
+
+                                    </select>
+                                 </div>
+                                 @if ($errors->has('branch_id'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('branch_id') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  </div>
                   <h4 class="section-heading mb-3  h4 mt-0 text-center text-info">Employee Information </h4>
                   <hr class="my-3">
+                  <div class="first-box">
                   <div class="row">
-           
+
                      <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{{ trans('panel.user.fields.gender') }}</label>
@@ -207,7 +233,7 @@
                            @endif
                         </div>
                      </div>
-            <!--          <div class="col-md-6">
+                     <!--          <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">Location</label>
                            <div class="col-md-9">
@@ -260,7 +286,7 @@
                         </div>
                      </div>
 
-                      <div class="col-md-6">
+                     <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.age') !!}</label>
                            <div class="col-md-9">
@@ -305,7 +331,7 @@
                            <div class="col-md-1 p-0">
                               @if($user->id)
                               @if(count($user->getMedia('pan_image')) > 0)
-                              <a class="text-info h3" title="Download Pan" download="download" href="{{$user->getMedia('pan_image')[0]->getFullUrl()}}" ><i class="fa fa-download" aria-hidden="true"></i></a>
+                              <a class="text-info h3" title="Download Pan" download="download" href="{{$user->getMedia('pan_image')[0]->getFullUrl()}}"><i class="fa fa-download" aria-hidden="true"></i></a>
                               @else
                               <span title="Not Uploaded" class="text-danger h3"><i class="fa fa-exclamation-circle"></i></span>
                               @endif
@@ -343,7 +369,7 @@
                            <div class="col-md-1 p-0">
                               @if($user->id)
                               @if(count($user->getMedia('aadhar_image')) > 0)
-                              <a class="text-info h3" title="Download Aadhar" download="download" href="{{$user->getMedia('aadhar_image')[0]->getFullUrl()}}" ><i class="fa fa-download" aria-hidden="true"></i></a>
+                              <a class="text-info h3" title="Download Aadhar" download="download" href="{{$user->getMedia('aadhar_image')[0]->getFullUrl()}}"><i class="fa fa-download" aria-hidden="true"></i></a>
                               @else
                               <span title="Not Uploaded" class="text-danger h3"><i class="fa fa-exclamation-circle"></i></span>
                               @endif
@@ -409,11 +435,11 @@
                         </div>
                      </div>
                   </div>
-
-
+                  </div>
                   <hr class="my-3">
                   <h4 class="section-heading mb-3  h4 mt-0 text-center text-info">Family Information</h4>
                   <hr class="my-3">
+                  <div class="first-box">
                   <div class="row">
                      <div class="col-md-6">
                         <div class="row">
@@ -476,7 +502,7 @@
                         </div>
                      </div>
                      <div class="col-md-6">
-                        <div class="row">  
+                        <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.marriage_anniversary') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
@@ -490,7 +516,7 @@
                            </div>
                         </div>
                      </div>
-                     <div class="col-md-6"> 
+                     <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.spouse_name') !!}</label>
                            <div class="col-md-9">
@@ -506,7 +532,7 @@
                         </div>
                      </div>
                      <div class="col-md-6">
-                        <div class="row">  
+                        <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.spouse_date_of_birth') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
@@ -521,7 +547,7 @@
                         </div>
                      </div>
 
-                     <div class="col-md-6"> 
+                     <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.children_one') !!}</label>
                            <div class="col-md-9">
@@ -537,7 +563,7 @@
                         </div>
                      </div>
                      <div class="col-md-6">
-                        <div class="row">  
+                        <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.children_one_date_of_birth') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
@@ -552,7 +578,7 @@
                         </div>
                      </div>
 
-                     <div class="col-md-6"> 
+                     <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.children_two') !!}</label>
                            <div class="col-md-9">
@@ -569,7 +595,7 @@
                      </div>
 
                      <div class="col-md-6">
-                        <div class="row">  
+                        <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.children_two_date_of_birth') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
@@ -584,7 +610,7 @@
                         </div>
                      </div>
 
-                     <div class="col-md-6">   
+                     <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.children_three') !!}</label>
                            <div class="col-md-9">
@@ -599,9 +625,9 @@
                            </div>
                         </div>
                      </div>
-                     
+
                      <div class="col-md-6">
-                        <div class="row">  
+                        <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.children_three_date_of_birth') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
@@ -616,7 +642,7 @@
                         </div>
                      </div>
 
-                    <div class="col-md-6">   
+                     <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.children_four') !!}</label>
                            <div class="col-md-9">
@@ -631,9 +657,9 @@
                            </div>
                         </div>
                      </div>
-                     
+
                      <div class="col-md-6">
-                        <div class="row">  
+                        <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.children_four_date_of_birth') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
@@ -648,7 +674,7 @@
                         </div>
                      </div>
 
-                     <div class="col-md-6">   
+                     <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.children_five') !!}</label>
                            <div class="col-md-9">
@@ -663,9 +689,9 @@
                            </div>
                         </div>
                      </div>
-                     
+
                      <div class="col-md-6">
-                        <div class="row">  
+                        <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.children_five_date_of_birth') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
@@ -685,15 +711,12 @@
 
 
                   </div>
+                  </div>
 
-
-                
-
-
-            
                   <hr class="my-3">
                   <h4 class="section-heading mb-3  h4 mt-0 text-center text-info">Bank Information </h4>
                   <hr class="my-3">
+                  <div class="first-box">
                   <div class="row">
                      <div class="col-md-6">
                         <div class="row">
@@ -741,6 +764,7 @@
                         </div>
                      </div>
                   </div>
+                  </div>
 
 
                   <hr class="my-3">
@@ -750,7 +774,7 @@
 
 
 
-
+                  <div class="first-box">
                   <div class="row">
 
                      <div class="col-md-6">
@@ -790,7 +814,7 @@
                            </div>
                         </div>
                      </div>
-                  
+
                      <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.ctc_annual') !!}</label>
@@ -821,7 +845,7 @@
                            </div>
                         </div>
                      </div>
-                    <div class="col-md-6">
+                     <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.last_year_increments') !!}</label>
                            <div class="col-md-9">
@@ -836,9 +860,9 @@
                            </div>
                         </div>
                      </div>
-                   
-                      
-                      <div class="col-md-6">
+
+
+                     <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.last_year_increment_percent') !!}</label>
                            <div class="col-md-9">
@@ -993,13 +1017,15 @@
                         </div>
                      </div>
 
-                  </div>   
+                  </div>
+                  </div>
 
 
 
                   <hr class="my-3">
                   <h4 class="section-heading mb-3  h4 mt-0 text-center text-info">Joining Information </h4>
                   <hr class="my-3">
+                  <div class="first-box">
                   <div class="row">
                      <div class="col-md-6">
                         <div class="row">
@@ -1016,7 +1042,7 @@
                            </div>
                         </div>
                      </div>
-      
+
                      <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">Head Quarter</label>
@@ -1073,7 +1099,7 @@
                                  <select class="form-control" name="designation_id">
                                     <option value="" disabled selected>Select {!! trans('panel.user.designation') !!}</option>
                                     @foreach($designations as $designation)
-                                    <option value="{{$designation->id}}" {{ (($designation->id == old('designation_id', ($user->id && $user->getdesignation)?$user->getdesignation->id:''))) ? 'selected' : '' }} > {{$designation->designation_name}}</option>
+                                    <option value="{{$designation->id}}" {{ (($designation->id == old('designation_id', ($user->id && $user->getdesignation)?$user->getdesignation->id:''))) ? 'selected' : '' }}> {{$designation->designation_name}}</option>
                                     @endforeach
                                  </select>
                                  @if($errors->has('designation_id'))
@@ -1095,22 +1121,22 @@
                                     <select class="form-control" name="branch_id" required>
                                        <option value="" disabled selected>Select Branch</option>
 
-                                       <?php 
-                                        $branch_id = $user->branch_id; 
-                                        $branch_check = App\Models\Branch::where('id',$branch_id)->first();
+                                       <?php
+                                       $branch_id = $user->branch_id;
+                                       $branch_check = App\Models\Branch::where('id', $branch_id)->first();
 
-                                        if(!empty($branch_check)){
+                                       if (!empty($branch_check)) {
                                        ?>
 
-                                       @foreach($branches as $branche)
-                                       <option {{ (($branche->id == old('branch_id', $user->id?$user->getbranch->id:''))) ? 'selected' : '' }} value="{{$branche->id}}">{{$branche->branch_name}}</option>
-                                       @endforeach
+                                          @foreach($branches as $branche)
+                                          <option {{ (($branche->id == old('branch_id', $user->id?$user->getbranch->id:''))) ? 'selected' : '' }} value="{{$branche->id}}">{{$branche->branch_name}}</option>
+                                          @endforeach
 
-                                       <?php }else{ ?>
+                                       <?php } else { ?>
 
-                                        @foreach($branches as $branche)
-                                       <option  value="{{$branche->id}}">{{$branche->branch_name}}</option>
-                                        @endforeach   
+                                          @foreach($branches as $branche)
+                                          <option value="{{$branche->id}}">{{$branche->branch_name}}</option>
+                                          @endforeach
 
                                        <?php  } ?>
 
@@ -1137,7 +1163,7 @@
                                  <select class="form-control" name="division_id">
                                     <option value="" disabled selected>Select {!! trans('panel.user.division') !!}</option>
                                     @foreach($divisions as $division)
-                                    <option value="{{$division->id}}" {{ (($division->id == old('division_id', $user->id?($user->getdivision?$user->getdivision->id:''):''))) ? 'selected' : '' }} >{{$division->division_name}}</option>
+                                    <option value="{{$division->id}}" {{ (($division->id == old('division_id', $user->id?($user->getdivision?$user->getdivision->id:''):''))) ? 'selected' : '' }}>{{$division->division_name}}</option>
                                     @endforeach
                                  </select>
                                  @if($errors->has('division_id'))
@@ -1151,7 +1177,7 @@
                      </div>
 
 
-                              
+
                      <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.department') !!}</label>
@@ -1160,7 +1186,7 @@
                                  <select class="form-control" name="department_id">
                                     <option value="" disabled selected>Select {!! trans('panel.user.department') !!}</option>
                                     @foreach($departments as $department)
-                                    <option value="{{$department->id}}" {{ (($department->id == old('department_id', $user->id?($user->getdepartment?$user->getdepartment->id:''):''))) ? 'selected' : '' }} >{{$department->name}}</option>
+                                    <option value="{{$department->id}}" {{ (($department->id == old('department_id', $user->id?($user->getdepartment?$user->getdepartment->id:''):''))) ? 'selected' : '' }}>{{$department->name}}</option>
                                     @endforeach
                                  </select>
                                  @if($errors->has('department_id'))
@@ -1173,7 +1199,7 @@
                         </div>
                      </div>
 
-   
+
 
 
 
@@ -1202,7 +1228,7 @@
                                     <option value="">Select {!! trans('panel.customers.fields.customertype') !!}</option>
                                     @if(@isset($customertype ))
                                     @foreach($customertype as $type)
-                                    <option value="{!! $type['id'] !!}" {{ (in_array($type['id'],($user->userinfo?explode(',',$user->userinfo->order_mails_type):[]))) ? 'selected' : '' }} >{!! $type['customertype_name'] !!}</option>
+                                    <option value="{!! $type['id'] !!}" {{ (in_array($type['id'],($user->userinfo?explode(',',$user->userinfo->order_mails_type):[]))) ? 'selected' : '' }}>{!! $type['customertype_name'] !!}</option>
                                     @endforeach
                                     @endif
                                  </select>
@@ -1217,9 +1243,11 @@
                      </div>
 
                   </div>
+                  </div>
                   <hr class="my-3">
                   <h4 class="section-heading mb-3  h4 mt-0 text-center text-info">Educational Information </h4>
                   <hr class="my-3">
+                  <div class="first-box">
                   <div class="row">
                      <div class="table-responsive">
                         <table class="table kvcodes-dynamic-rows-example" id="tab_logic">
@@ -1237,7 +1265,7 @@
                               <tr class="item-row">
                                  <input type="hidden" name="education_detail[{{$k}}][education_type_id]" value="{{$k}}">
                                  @php
-                                       $education = $user->geteducation->where('education_type_id', $k)->where('user_id', $user->id)->first();
+                                 $education = $user->geteducation->where('education_type_id', $k)->where('user_id', $user->id)->first();
                                  @endphp
                                  <td>
                                     <input type="text" value="{{ $education ? $education->degree_name : '' }}" name="education_detail[{{$k}}][degree_name]" placeholder="{{ $education_type }}">
@@ -1280,7 +1308,7 @@
                            </div>
                         </div>
                      </div> -->
-        
+
                      <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.current_company_tenture') !!}(in year)</label>
@@ -1296,7 +1324,7 @@
                            </div>
                         </div>
                      </div>
-                      <div class="col-md-6">
+                     <div class="col-md-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.previous_exp') !!}(in year)</label>
                            <div class="col-md-9">
@@ -1316,7 +1344,7 @@
                            <label class="col-md-3 col-form-label">{!! trans('panel.user.total_exp') !!}(in year)</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <input placeholder="In Year" type="number" readonly name="total_exp" id="total_exp" class="form-control" >
+                                 <input placeholder="In Year" type="number" readonly name="total_exp" id="total_exp" class="form-control">
                                  @if ($errors->has('total_exp'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('total_exp') }}</p>
@@ -1329,6 +1357,7 @@
 
 
 
+                  </div>
                   </div>
                   <div class="row pull-right">
                      {{ Form::submit('Submit', array('class' => 'btn btn-info submituser')) }}
@@ -1361,58 +1390,66 @@
          var last_name = $("input[name=last_name]").val();
          $('#name').val(first_name + ' ' + last_name);
       }
-      
-      $(document).on('change', '#date_of_birth', function(){
+
+      $(document).on('change', '#date_of_birth', function() {
          var DOB = $(this).val();
          dob = new Date(DOB);
          var today = new Date();
-         var age = Math.floor((today-dob) / (365.25 * 24 * 60 * 60 * 1000));
+         var age = Math.floor((today - dob) / (365.25 * 24 * 60 * 60 * 1000));
          $('#age').val(age);
       })
 
-      $(document).ready(function(){
+      $(document).ready(function() {
          var DOB = $('#date_of_birth').val();
-         if(DOB != ''){
+         if (DOB != '') {
             dob = new Date(DOB);
             var today = new Date();
-            var age = Math.floor((today-dob) / (365.25 * 24 * 60 * 60 * 1000));
+            var age = Math.floor((today - dob) / (365.25 * 24 * 60 * 60 * 1000));
             $('#age').val(age);
          }
-         var current_company_tenture  = $('#current_company_tenture').val();
+         var current_company_tenture = $('#current_company_tenture').val();
          var previous_exp = $('#previous_exp').val();
-         $('#total_exp').val(parseInt(current_company_tenture)+parseInt(previous_exp));
+         $('#total_exp').val(parseInt(current_company_tenture) + parseInt(previous_exp));
 
          var DOJ = $('#date_of_joining').val();
          doj = new Date(DOJ);
          var today = new Date();
-         var current_company_tenture = Math.floor((today-doj) / (365.25 * 24 * 60 * 60 * 1000));
+         var current_company_tenture = Math.floor((today - doj) / (365.25 * 24 * 60 * 60 * 1000));
          $('#current_company_tenture').val(current_company_tenture);
          var previous_exp = $('#previous_exp').val();
 
-         $('#total_exp').val(parseInt(current_company_tenture)+parseInt(previous_exp));
+         $('#total_exp').val(parseInt(current_company_tenture) + parseInt(previous_exp));
       })
 
-      $(document).on('change', '#date_of_joining', function(){
+      $(document).on('change', '#date_of_joining', function() {
          var DOB = $(this).val();
          dob = new Date(DOB);
          var today = new Date();
-         var current_company_tenture = Math.floor((today-dob) / (365.25 * 24 * 60 * 60 * 1000));
+         var current_company_tenture = Math.floor((today - dob) / (365.25 * 24 * 60 * 60 * 1000));
          $('#current_company_tenture').val(current_company_tenture);
          var previous_exp = $('#previous_exp').val();
 
-         $('#total_exp').val(parseInt(current_company_tenture)+parseInt(previous_exp));
+         $('#total_exp').val(parseInt(current_company_tenture) + parseInt(previous_exp));
       })
 
-      $(document).on('change', '#current_company_tenture', function(){
-         var current_company_tenture  = $(this).val();
+      $(document).on('change', '#current_company_tenture', function() {
+         var current_company_tenture = $(this).val();
          var previous_exp = $('#previous_exp').val();
-         $('#total_exp').val(parseInt(current_company_tenture)+parseInt(previous_exp));
+         $('#total_exp').val(parseInt(current_company_tenture) + parseInt(previous_exp));
       })
 
-      $(document).on('keyup', '#previous_exp', function(){
-         var previous_exp  = $(this).val();
+      $(document).on('keyup', '#previous_exp', function() {
+         var previous_exp = $(this).val();
          var current_company_tenture = $('#current_company_tenture').val();
-         $('#total_exp').val(parseInt(current_company_tenture)+parseInt(previous_exp));
+         $('#total_exp').val(parseInt(current_company_tenture) + parseInt(previous_exp));
       })
+
+      $("#roles").on("change", function() {
+         if (jQuery.inArray("8", $(this).val()) !== -1) {
+            $("#branch-data").removeClass('d-none');
+         } else {
+            $("#branch-data").addClass('d-none');
+         }
+      }).trigger('change');
    </script>
 </x-app-layout>

@@ -53,6 +53,7 @@ class SalesTargetUsersImport implements ToCollection,WithValidation,WithHeadingR
                 'year' => $carbonYear],[
 
                 'user_id' => $row['user_id'],
+                'type' => $row['type'],
                 'month' => $carbonMonth,
                 'year' => $carbonYear,
                 'target' => $row['target_value']
@@ -64,7 +65,7 @@ class SalesTargetUsersImport implements ToCollection,WithValidation,WithHeadingR
         $rules = [
             'user_id' => 'required',
             'month' => 'required',
-            // 'year' => 'required',
+            'type' => 'required|in:primary,secondary',
             'target_value' => 'required|numeric',
         ];
         return $rules;
@@ -75,7 +76,8 @@ class SalesTargetUsersImport implements ToCollection,WithValidation,WithHeadingR
         return [
             'user_id.required' => 'The user id is required.',
             'month.required' => 'The month name field is required.',
-            // 'year.required' => 'The year name field is required.',
+            'type.required' => 'The type name field is required.',
+            'type.in' => 'The type name field either have primary or secondary value.',
             'target_value.required' => 'The target value is required.',
             'target_value.required' => 'The target value must be numeric.'
         ];

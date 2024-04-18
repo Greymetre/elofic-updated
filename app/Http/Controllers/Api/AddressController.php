@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 use Validator;
 use Gate;
-use App\Models\{State, District, City, Pincode };
+use App\Models\{State, District, City, Customers, Pincode };
 
 class AddressController extends Controller
 {
@@ -179,7 +179,13 @@ class AddressController extends Controller
                 $data['country_id'] = isset($data['cityname']['districtname']['statename']['country_id']) ? $data['cityname']['districtname']['statename']['country_id'] : 0;
                 $data['country_name'] = isset($data['cityname']['districtname']['statename']['countryname']['country_name']) ? $data['cityname']['districtname']['statename']['countryname']['country_name'] : 0;
                 unset($data['cityname']);
-                return response(['status' => 'success', 'message' => 'Record Found.', 'data' => $data ],200);  
+                $dis_data = Customers::where('active', '=', 'Y')
+                    ->whereIn('customertype', ['1', '3'])
+                    ->whereHas('customeraddress', function ($query) use ($data) {
+                        $query->where('district_id', $data['district_id']);
+                    })
+                    ->select('id', 'name')->get();
+                return response(['status' => 'success', 'message' => 'Record Found.', 'data' => $data, 'dis_data' => $dis_data],200);  
             }
             return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data ],200);  
             

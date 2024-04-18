@@ -92,6 +92,7 @@ class UsersController extends Controller
             'longitude' => isset($request['longitude']) ? $request['longitude'] :'',
             'location' => !empty($request['location']) ? $request['location'] :'',
             'branch_id' => isset($request['branch_id']) ? $request['branch_id'] :'',
+            'branch_show' => isset($request['branch_show']) ? implode(',', $request['branch_show']) :NULL,
             'department_id' => isset($request['department_id']) ? $request['department_id'] :'',
             'employee_codes' => isset($request['employee_codes']) ? $request['employee_codes'] :'',
             'designation_id' => isset($request['designation_id']) ? $request['designation_id'] :'',
@@ -340,8 +341,7 @@ class UsersController extends Controller
         $user->designation_id = isset($request['designation_id']) ? $request['designation_id'] :null;
         $user->division_id = isset($request['division_id']) ? $request['division_id'] :null;
         $user->payroll = isset($request['payroll']) ? $request['payroll'] :null;
-
-
+        $user->branch_show = isset($request['branch_show']) ? implode(',', $request['branch_show']) :null;
 
         if($user->save())
         {

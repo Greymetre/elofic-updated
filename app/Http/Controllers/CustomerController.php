@@ -154,7 +154,7 @@ class CustomerController extends Controller
                                     ->Orwhere('mobile', 'like', "%{$search}%");
                                 });
                             }
-                            if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('Sub_Support')  && !Auth::user()->hasRole('HO_Account')  && !Auth::user()->hasRole('HR_Admin'))
+                            if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('Sub_Support')  && !Auth::user()->hasRole('HO_Account')  && !Auth::user()->hasRole('HR_Admin') && !Auth::user()->hasRole('Service Admin'))
                             {
                                 $query->whereIn('executive_id',$userids);
                             }

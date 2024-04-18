@@ -6,18 +6,20 @@
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
-          <h4 class="card-title ">{!! trans('panel.sales_users.target_users') !!} {!! trans('panel.global.list') !!}
+          <h4 class="card-title ">{!! trans('panel.dealer_distributor_user.title') !!} {!! trans('panel.global.list') !!}
             <span class="pull-right">
               <div class="btn-group">
                 <!-- @if(auth()->user()->can(['sales_target_users_download'])) -->
-                <form method="post" action="{{ URL::to('sales_users/target_users_download/download') }}" class="form-horizontal">
+                <form method="post" action="{{ URL::to('sales_dealer/target_dealers/download') }}" class="form-horizontal">
                   @csrf
+                  <div id="myGroup">
+
                   <div class="row">
 
                     <div class="d-flex flex-column" style="align-items: end;">
                       <div class="testdiv" style="display: flex;">
                         <div class="p-2" style="width:160px;">
-                          <select class="selectpicker" name="branch_id" id="branch_id" data-style="select-with-transition" title="panel.sales_users.branch">
+                          <select class="select2" name="branch_id" id="branch_id" data-style="select-with-transition" title="panel.sales_users.branch">
                             <option value="" disabled selected>{!! trans('panel.sales_users.branch') !!}</option>
                             @if(@isset($branches ))
                             @foreach($branches as $branch)
@@ -27,8 +29,8 @@
                           </select>
                         </div>
                         <div class="p-2" style="width:160px;">
-                          <select class="select2" name="user" id="user" data-style="select-with-transition" title="{!! trans('panel.sales_users.user_name') !!}">
-                            <option value="" disabled selected>{!! trans('panel.sales_users.user_name') !!}</option>
+                          <select class="select2" name="customer" id="customer" data-style="select-with-transition" title="{!! trans('panel.sales_dealer_distributor.dealer_distributor') !!}">
+                            <option value="" disabled selected>{!! trans('panel.sales_dealer_distributor.dealer_distributor') !!}</option>
                             @if(@isset($users ))
                             @foreach($users as $user)
                             <option value="{!! $user->id !!}">{!! $user->name !!}</option>
@@ -37,7 +39,7 @@
                           </select>
                         </div>
                         <div class="p-2" style="width:160px;">
-                          <select class="selectpicker" name="division" id="division" data-style="select-with-transition" title="{!! trans('panel.sales_users.select-divisions') !!}">
+                          <select class="select2" name="division" id="division" data-style="select-with-transition" title="{!! trans('panel.sales_users.select-divisions') !!}">
                             <option value="" disabled selected>{!! trans('panel.sales_users.select-divisions') !!}</option>
                             @if(@isset($divisions ))
                             @foreach($divisions as $division)
@@ -47,8 +49,8 @@
                           </select>
                         </div>
                         <div class="p-2" style="width:160px;">
-                          <select class="select2" name="type" id="type" data-style="select-with-transition" title="{!! trans('panel.sales_users.type') !!}">
-                            <option value="" disabled selected>{!! trans('panel.sales_users.type') !!}</option>
+                          <select class="select2" name="type" id="type" data-style="select-with-transition" title="{!! trans('panel.sales_dealer_distributor.type') !!}">
+                            <option value="" disabled selected>{!! trans('panel.sales_dealer_distributor.type') !!}</option>
                             <option value="primary">Primary</option>
                             <option value="secondary">Secondary</option>
                           </select>
@@ -81,30 +83,30 @@
                         <div class="collapse multi-collapse" style="display:flex; align-items: center;" id="multiCollapseExample2">
                           <div class="d-flex" style="font-size: 14px;align-items: center;justify-content: space-between;">
                             <div class="p-2" style="display:flex;">
-                              @if(auth()->user()->can(['sales_target_users_download']))
-                              <p style="margin: 0px;">{!!  trans('panel.global.download') !!} {!! trans('panel.sales_target_user.title') !!}</p>
-                              <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.sales_target_user.title') !!}" name="export_user" value="true"><i class="material-icons">cloud_download</i></button>
+                              @if(auth()->user()->can(['sales_target_dealers_download']))
+                              <p>{!!  trans('panel.global.download') !!} {!! trans('panel.sales_dealer_distributor.dealer_distributor') !!}</p>
+                              <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.sales_dealer_distributor.dealer_distributor') !!}" name="export_dealer_target" value="true"><i class="material-icons">cloud_download</i></button>
                               @endif
                             </div>
                             <div class="p-2" style="display:flex;">
-                              @if(auth()->user()->can(['sales_branch_report_download']))
-                              <p style="margin: 0px;">{!!  trans('panel.global.download') !!} {!! trans('panel.sales_target_branch.title_singular') !!}</p>
-                              <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.sales_target_branch.title_singular') !!}" name="export_branch" value="true"><i class="material-icons">cloud_download</i></button>
-                              @endif
-                            </div>
-                            <!-- current and last year sales target -->
-                            <div class="p-2" style="display:flex;">
-                              @if(auth()->user()->can(['cy_ly_sales_target_report_download']))
-                              <p style="margin: 0px;">{!!  trans('panel.global.download') !!} {!! trans('panel.cy_and_ly_sales_target.title') !!}</p>
-                              <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.cy_and_ly_sales_target.title') !!}" name="cy_ly_sales_report" value="true"><i class="material-icons">cloud_download</i></button>
+                              @if(auth()->user()->can(['sales_dealers_branch_report_download']))
+                              <p>{!!  trans('panel.global.download') !!} {!! trans('panel.sales_dealer_distributor_branch.title_singular') !!}</p>
+                              <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.sales_dealer_distributor_branch.title_singular') !!}" name="export_branch" value="true"><i class="material-icons">cloud_download</i></button>
                               @endif
                             </div>
                           </div>
+                          <!-- current and last year sales target -->
+                          <div class="p-2" style="display:flex;">
+                            @if(auth()->user()->can(['cy_ly_sales_dealers_report_download']))
+                            <p>{!!  trans('panel.global.download') !!} {!! trans('panel.cy_and_ly_dealers_target.title') !!}</p>
+                            <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.cy_and_ly_dealers_target.title') !!}" name="cy_ly_sales_report" value="true"><i class="material-icons">cloud_download</i></button>
+                            @endif
+                          </div>
                         </form>
                         <!-- @endif -->
-                        @if(auth()->user()->can(['sales_target_users_upload']))
-                        <p style="margin:0px;gap: 10px;align-items: center;">{!!  trans('panel.global.upload') !!} {!! trans('panel.sales_target_user.title') !!}</p> 
-                        <form action="{{ URL::to('sales_users/target_users_upload/upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
+                        @if(auth()->user()->can(['sales_target_dealers_upload']))
+                        <p>{!!  trans('panel.global.upload') !!} {!! trans('panel.sales_dealer_distributor.dealer_distributor') !!}</p> 
+                        <form action="{{ URL::to('sales_dealers/target/upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                           {{ csrf_field() }}
                           <div class="input-group" id="collapse-btn" style="flex-wrap: nowrap; gap: 5px;">
                             <div class="fileinput fileinput-new text-center" data-provides="fileinput">
@@ -116,7 +118,7 @@
                               </span>
                             </div>
                             <div class="input-group-append" style="flex-wrap: nowrap;">
-                              <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.upload') !!} {!! trans('panel.sales_target_user.title') !!}">
+                              <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.upload') !!} {!! trans('panel.sales_dealer_distributor.dealer_distributor') !!}">
                                 <i class="material-icons">cloud_upload</i>
                                 <div class="ripple-container"></div>
                               </button>
@@ -124,55 +126,55 @@
                           </div>
                         </form>
                         @endif
-                        <!-- sales target user template creation -->
-                        @if(auth()->user()->can(['sales_target_users_template']))
-                        <p>{!!  trans('panel.global.template') !!} {!! trans('panel.sales_target_user.title') !!}</p>
-                        <a href="{{ URL::to('sales-target-users-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.sales_target_user.title') !!}"><i class="material-icons">text_snippet</i></a>
-                        @endif
-                      
+                        
                       </div>
+                        <div>
+                          <div class="collapse multi-collapse" style="display:flex; align-items: center;" id="multiCollapseExample1">
+                            <div class="d-flex" style="font-size: 14px;align-items: center;justify-content: space-between;">
+                              <!-- sales target user template creation -->
+                              @if(auth()->user()->can(['sales_target_dealers_template']))
+                              <p>{!!  trans('panel.global.template') !!} {!! trans('panel.sales_dealer_distributor.dealer_distributor') !!}</p>
+                              <a href="{{ URL::to('sales-target-dealers-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.sales_dealer_distributor.dealer_distributor') !!}"><i class="material-icons">text_snippet</i></a>
+                              @endif
+                              <!-- sales achievemnts download-->
+                              @if(auth()->user()->can(['sales_dealers_achievement_download']))
+                              <p>{!!  trans('panel.global.download') !!} {!! trans('panel.sales_dealers_achievement.title') !!}</p>
+                              <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.sales_dealers_achievement.title') !!}"><i class="material-icons">cloud_download</i></button>
+                              @endif
+                              <!-- sales dealers achievemnts upload-->
+                              @if(auth()->user()->can(['sales_dealers_achievement_upload'])) 
+                              <p>{!!  trans('panel.global.upload') !!} {!! trans('panel.sales_dealers_achievement.title') !!}</p>
+                              <form action="{{ URL::to('sales-dealers/achievement/upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
+                                {{ csrf_field() }}
+                                <div class="input-group" style="flex-wrap:nowrap;">
+                                  <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                                    <span class="btn btn-just-icon btn-theme btn-file">
+                                      <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
+                                      <span class="fileinput-exists">Change</span>
+                                      <input type="hidden">
+                                      <input type="file" name="import_file" style="flex-wrap: nowrap;" required accept=".xls,.xlsx" />
+                                    </span>
+                                  </div>
+                                  <div class="input-group-append">
 
-                      <div>
-                        <div class="collapse multi-collapse" style="display:flex; align-items: center;" id="multiCollapseExample1">
-                          <div class="d-flex" style="font-size: 14px;align-items: center;justify-content: space-between;">
-                            <!-- sales achievemnts download-->
-                            @if(auth()->user()->can(['sales_achievement_download']))
-                            <p style="margin: 0px;">{!!  trans('panel.global.download') !!} {!! trans('panel.sales_achievement.title') !!}</p>
-                            <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.sales_achievement.title') !!}"><i class="material-icons">cloud_download</i></button>
-                            @endif
-                            <!-- sales achievemnts upload-->
-                            @if(auth()->user()->can(['sales_achievement_upload']))
-                            <p style="margin:0px; gap: 10px;align-items: center;">{!!  trans('panel.global.upload') !!} {!! trans('panel.sales_achievement.title') !!}</p> 
-                            <form action="{{ URL::to('sales/achievement/upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
-                              {{ csrf_field() }}
-                              <div class="input-group" style="flex-wrap:nowrap;">
-                                <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                                  <span class="btn btn-just-icon btn-theme btn-file">
-                                    <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
-                                    <span class="fileinput-exists">Change</span>
-                                    <input type="hidden">
-                                    <input type="file" name="import_file" style="flex-wrap: nowrap;" required accept=".xls,.xlsx" />
-                                  </span>
+                                    <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.upload') !!} {!! trans('panel.sales_dealers_achievement.title') !!}">
+                                      <i class="material-icons">cloud_upload</i>
+                                      <div class="ripple-container"></div>
+                                    </button>
+                                  </div>
                                 </div>
-                                <div class="input-group-append">
-                                  <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.upload') !!} {!! trans('panel.sales_achievement.title') !!}">
-                                    <i class="material-icons">cloud_upload</i>
-                                    <div class="ripple-container"></div>
-                                  </button>
-                                </div>
-                              </div>
-                            </form>
-                            @endif
-                            <!-- sales achievemnts template creation-->
-                            @if(auth()->user()->can(['sales_achievement_template']))
-                            <p>{!!  trans('panel.global.template') !!} {!! trans('panel.sales_achievement.title') !!}</p>
-                            <a href="{{ URL::to('sales-achievement-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.sales_achievement.title') !!}"><i class="material-icons">text_snippet</i></a>
-                            @endif
-                          </div>
+                              </form>
+                              @endif
+                              <!-- sales dealers achievemnts template creation-->
+                              @if(auth()->user()->can(['sales_dealers_achievement_template']))
+                              <p>{!!  trans('panel.global.template') !!} {!! trans('panel.sales_dealers_achievement.title') !!}</p>
+                              <a href="{{ URL::to('sales-dealers-achievement-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.sales_dealers_achievement.title') !!}"><i class="material-icons">text_snippet</i></a>
+                              @endif
+                            </div>
                         </div>
-                      </div>
                     </div>
                   </div>
+                </div>
                 </div>
               </div>
             </span>
@@ -219,16 +221,16 @@
               <thead class=" text-primary">
                 <th>{!! trans('panel.global.no') !!}</th>
                 <th>{!! trans('panel.global.action') !!}</th>
-                <th>{!! trans('panel.sales_users.employee_code') !!}</th>
-                <th>{!! trans('panel.sales_users.user_name') !!}</th>
-                <th>{!! trans('panel.sales_users.designation') !!}</th>
-                <th>{!! trans('panel.sales_users.branch_name') !!}</th>
-                <th>{!! trans('panel.sales_users.sales_type') !!}</th>
-                <th>{!! trans('panel.sales_users.month') !!}</th>
-                <th>{!! trans('panel.sales_users.year') !!}</th>
-                <th>{!! trans('panel.sales_users.target') !!}</th>
-                <th>{!! trans('panel.sales_users.achievement') !!}</th>
-                <th>{!! trans('panel.sales_users.achievement_percent') !!}</th>
+                <th>{!! trans('panel.sales_dealer_distributor.dealer_distributor_name') !!}</th>
+                <th>{!! trans('panel.sales_dealer_distributor.dealer_distributor_firm_name') !!}</th>
+                <th>{!! trans('panel.sales_dealer_distributor.city') !!}</th>
+                <th>{!! trans('panel.sales_dealer_distributor.branch_name') !!}</th>
+                <th>{!! trans('panel.sales_dealer_distributor.sales_type') !!}</th>
+                <th>{!! trans('panel.sales_dealer_distributor.month') !!}</th>
+                <th>{!! trans('panel.sales_dealer_distributor.year') !!}</th>
+                <th>{!! trans('panel.sales_dealer_distributor.target') !!}</th>
+                <th>{!! trans('panel.sales_dealer_distributor.achievement') !!}</th>
+                <th>{!! trans('panel.sales_dealer_distributor.achievement_percent') !!}</th>
               </thead>
               <tbody>
               </tbody>
@@ -239,29 +241,29 @@
     </div>
   </div>
   <!-- Modal -->
-  <div class="modal fade bd-example-modal-lg" id="editSalesTargetUser" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal fade bd-example-modal-lg" id="editSalesTargetDealer" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content card">
         <div class="card-header card-header-icon card-header-theme">
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
-          <h4 class="card-title"><span class="modal-title">{!! trans('panel.global.edit') !!} </span> {!! trans('panel.sales_users.target_users') !!}
+          <h4 class="card-title"><span class="modal-title">{!! trans('panel.global.edit') !!} </span> {!! trans('panel.sales_dealer_distributor.dealer_distributor') !!}
             <span class="pull-right" >
               <a href="javascript:void(0)" class="btn btn-just-icon btn-danger" data-dismiss="modal"><i class="material-icons">clear</i></a>
             </span>
           </h4>
         </div>
         <div class="modal-body">
-          <form method="POST" action="{{ route('sales-target-users.store') }}" enctype="multipart/form-data" id="updateSalesTargetForm">
+          <form method="POST" action="{{ route('sales-target-dealer.store') }}" enctype="multipart/form-data" id="updateSalesTargetForm">
             @csrf
             <div class="row">
               <div class="col-md-9">
                 <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.sales_target_user.fields.user') !!} <span class="text-danger"> *</span></label>
+                  <label class="col-md-3 col-form-label">{!! trans('panel.sales_target_dealer.fields.dealer') !!} <span class="text-danger"> *</span></label>
                   <div class="col-md-9">
                     <div class="form-group has-default bmd-form-group">
-                      <select class="form-control select2" name="user_id" id="user_id" title="{!! trans('panel.sales_users.user_name') !!}">
+                      <select class="form-control select2" name="customer_id" id="customer_id" title="{!! trans('panel.sales_users.user_name') !!}">
                         <option value="form-control" disabled selected>{!! trans('panel.sales_users.target_users') !!}</option>
                         @if(@isset($users ))
                         @foreach($users as $user)
@@ -269,31 +271,48 @@
                         @endforeach
                         @endif
                       </select>
-                      @if ($errors->has('user_id'))
-                      <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('user_id') }}</p></div>
+                      @if ($errors->has('customer_id'))
+                      <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('customer_id') }}</p></div>
                       @endif
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-             <div class="row">
-               <div class="col-md-9">
-                 <div class="row">
-                   <label class="col-md-3 col-form-label">{!! trans('panel.sales_target_user.fields.type') !!} <span class="text-danger"> *</span></label>
-                   <div class="col-md-9">
-                     <div class="form-group has-default bmd-form-group">
-                       <input type="text" name="type" id="type" class="form-control" value="{!! old('type') !!}" readonly>
-                       @if ($errors->has('type'))
-                       <div class="error col-lg-12">
-                         <p class="text-danger">{{ $errors->first('type') }}</p>
-                       </div>
-                       @endif
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <div class="row">
+              <div class="col-md-9">
+                <div class="row">
+                  <label class="col-md-3 col-form-label">{!! trans('panel.sales_target_dealer.fields.dealer_firm_name') !!} <span class="text-danger"> *</span></label>
+                  <div class="col-md-9">
+                    <div class="form-group has-default bmd-form-group">
+                      <input type="text" name="firm_name" id="firm_name" class="form-control" value="{!! old( 'firm_name') !!}" readonly>
+                      @if ($errors->has('firm_name'))
+                      <div class="error col-lg-12">
+                        <p class="text-danger">{{ $errors->first('firm_name') }}</p>
+                      </div>
+                      @endif
+                   </div>
+                 </div>
+               </div>
+             </div>
+           </div>
+            <div class="row">
+              <div class="col-md-9">
+                <div class="row">
+                  <label class="col-md-3 col-form-label">{!! trans('panel.sales_target_dealer.fields.sales_type') !!} <span class="text-danger"> *</span></label>
+                  <div class="col-md-9">
+                    <div class="form-group has-default bmd-form-group">
+                      <input type="text" name="type" id="type" class="form-control" value="{!! old('type') !!}" readonly>
+                      @if ($errors->has('type'))
+                      <div class="error col-lg-12">
+                        <p class="text-danger">{{ $errors->first('type') }}</p>
+                      </div>
+                      @endif
+                   </div>
+                 </div>
+               </div>
+             </div>
+           </div>
             <div class="row">
               <div class="col-md-9">
                 <div class="row">
@@ -377,10 +396,10 @@
         ],
         "ajax": {
           'type': 'POST',
-          'url': "{{ url('sales_users/target_users/list') }}",
+          'url': "{{ url('sales_dealer/target_achievement/list') }}",
           'data': function(d) {
             d._token = token,
-              d.user_id = $('#user').val(),
+              d.customer_id = $('#customer').val(),
               d.branch_id = $('#branch_id').val(),
               d.division = $('#division').val(),
               d.type = $('#type').val(),
@@ -400,29 +419,29 @@
             "defaultContent": ''
           },
           {
-            data: 'user.employee_codes',
-            name: 'employee_code',
+            data: 'customer_name',
+            name: 'customer_name',
             orderable: false, 
             searchable: false,
             "defaultContent": ''
           },
           {
-            data: 'user.name',
-            name: 'name',
+            data: 'customer.name',
+            name: 'customer.name',
             orderable: false, 
             searchable: false,
             "defaultContent": ''
           },
           {
-            data: 'user.getdesignation.designation_name',
-            name: 'designation',
+            data: 'city_name',
+            name: 'city_name',
             orderable: false, 
             searchable: false,
             "defaultContent": ''
           },
           {
-            data: 'user.getbranch.branch_name',
-            name: 'branch',
+            data: 'branch_name',
+            name: 'branch_name',
             orderable: false, 
             searchable: false,
             "defaultContent": ''
@@ -432,7 +451,7 @@
             name: 'type',
             orderable: true, 
             searchable: true,
-            "defaultContent": ''
+            "defaultContent": 'ddd'
           },
           {
             data: 'month',
@@ -467,7 +486,6 @@
             name: 'achievement_percent',
             "defaultContent": ''
           },
-          
         ]
       });
 
@@ -502,23 +520,24 @@
         var id = $(this).attr('id');
 
         $.ajax({
-          url: base_url + '/sales-target-users/'+id,
+          url: base_url + '/sales-target-dealer/'+id,
          dataType:"json",
          success:function(data)
          {
-          $('#user_id').val(data.user_id);
+          $('#customer_id').val(data.customer_id);
           $('#month').val(data.month);
           $('#year').val(data.year);
           $('#target').val(data.target);
-          $('#type').val(data.type);
           $('#sales_target_id').val(data.id);
+          $('#firm_name').val(data.firm_name);
+          $('#type').val(data.type);
 
           $('#month option[value="' + data.month + '"]').prop('selected', true);
           $('#year option[value="' + data.year + '"]').prop('selected', true);
-          $('#user_id').trigger('change'); 
+          $('#customer_id').trigger('change'); 
 
           $('#action_button').val('Edit');
-          $('#editSalesTargetUser').modal('show');
+          $('#editSalesTargetDealer').modal('show');
          }
         })
        });
@@ -531,7 +550,7 @@
           return false;
         }
         $.ajax({
-          url: "{{ url('sales_users/target_user/delete') }}",
+          url: "{{ url('sales_dealer/delete') }}",
           type: 'GET',
           data: {
             _token: token,

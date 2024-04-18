@@ -163,9 +163,9 @@ class CouponController extends Controller
                 $data = EndUser::where(function ($query) use ($customer_number) {
                     $query->where('customer_number', '=', $customer_number);
                 })
-                ->first();
+                    ->first();
                 $pincodes = Pincode::where('id', '=', $data->customer_pindcode)->first();
-                $data->customer_pindcode = $pincodes?$pincodes->pincode:'';
+                $data->customer_pindcode = $pincodes ? $pincodes->pincode : '';
                 if ($data) {
                     return response()->json(['status' => 'success', 'data' => $data], 200);
                 } else {
@@ -216,17 +216,17 @@ class CouponController extends Controller
             }
             $customer = Customers::with('customerdetails')->find($request->customer_id);
             $checkTrans = TransactionHistory::where('coupon_code', $request->product_serail_number)->first();
-            if($checkTrans){
+            if ($checkTrans) {
                 $checkTrans->status = '1';
                 $checkTrans->save();
                 $status = '1';
                 $noti_data = [
                     'fcm_token' =>  $customer->customerdetails->fcm_token,
                     'title' => 'Points Activated ✅',
-                    'msg' => $customer->name . ' your '.$checkTrans->point.' provisional points are successfully activated in Silver Saarthi.',
+                    'msg' => $customer->name . ' your ' . $checkTrans->point . ' provisional points are successfully activated in Silver Saarthi.',
                 ];
                 $send_notification = SendNotifications::send($noti_data);
-            }else{
+            } else {
                 $status = '0';
             }
             $data = WarrantyActivation::create([
@@ -235,7 +235,7 @@ class CouponController extends Controller
                 'end_user_id' => $request->end_user_id ?? NULL,
                 'branch_id' => $request->branch_id ?? NULL,
                 'customer_id' => $request->customer_id ?? NULL,
-                'status' => $status,
+                'status' => 0,
                 'sale_bill_no' => $request->sale_bill_no ?? NULL,
                 'sale_bill_date' => $request->sale_bill_date ?? NULL,
                 'warranty_date' => $request->warranty_date ?? NULL
@@ -254,6 +254,43 @@ class CouponController extends Controller
             ];
             $send_notification = SendNotifications::send($noti_data);
             return response()->json(['status' => 'success', 'message' => 'Warranty Activation Store Successfully.', 'data' => $data], 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
+    }
+
+    public function getwarranty(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'customer_id' => 'required|exists:customers,id',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
+            }
+            $data = WarrantyActivation::with('product_details', 'customer')->where('customer_id', $request->customer_id);
+            if($request->serial_number && $request->serial_number != NULL && $request->serial_number != ''){
+                $data->where('product_serail_number', $request->serial_number);
+            }
+            if($request->product_id && $request->product_id != NULL && $request->product_id != ''){
+                $data->where('product_id', $request->product_id);
+            }
+            if($request->status != NULL && $request->status != ''){
+                $data->where('status', $request->status);
+            }
+            if($request->warranty_date && $request->warranty_date != NULL && $request->warranty_date != ''){
+                $data->where('warranty_date', $request->warranty_date);
+            }
+            if($request->sale_bill_date && $request->sale_bill_date != NULL && $request->sale_bill_date != ''){
+                $data->where('sale_bill_date', $request->sale_bill_date);
+            }
+            
+            $data = $data->get();
+            if ($data) {
+                return response()->json(['status' => 'success', 'data' => $data], 200);
+            } else {
+                return response()->json(['status' => 'error', 'message' => 'data not found', 'data' => null], 404);
+            }
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }

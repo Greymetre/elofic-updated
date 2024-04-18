@@ -23,22 +23,24 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use App\Models\SalesTargetUsers;
+use App\Models\SalesTargetCustomers;
 use App\Models\User;
 use Validator;
 
-class SalesAchievementImport implements ToCollection,WithValidation,WithHeadingRow, WithBatchInserts , WithChunkReading
+class SalesDealersAchievementImport implements ToCollection,WithValidation,WithHeadingRow, WithBatchInserts , WithChunkReading
 {
     use Importable;
     
     public function model(array $row)
     {
-        return new SalesTargetUsers([
+        return new SalesTargetCustomers([
             //
         ]);
     }
     
     public function collection(Collection $rows)
     {
+
         // dd($rows);
         foreach ($rows as $row) {
             $excelDate = $row['month'] - 25569; // Adjust for Excel's epoch
@@ -47,12 +49,12 @@ class SalesAchievementImport implements ToCollection,WithValidation,WithHeadingR
             $carbonMonth = $carbonDate->format('M');
             $carbonYear = $carbonDate->format('Y');
 
-            $salesTargetUsers = SalesTargetUsers::updateOrCreate([
-                'user_id' => $row['user_id'],
+            $salesTargetCustomers = SalesTargetCustomers::updateOrCreate([
+                'customer_id' => $row['customer_id'],
                 'month' => $carbonMonth,
                 'year' => $carbonYear],[
-                    'user_id' => $row['user_id'],
-                    'type' => $row['user_id'],
+                    'customer_id' => $row['customer_id'],
+                    'type' => $row['type'],
                     'month' => $carbonMonth,
                     'year' => $carbonYear,
                     'achievement' => $row['achievement']                
@@ -63,7 +65,7 @@ class SalesAchievementImport implements ToCollection,WithValidation,WithHeadingR
     public function rules(): array
     {
         $rules = [
-            'user_id' => 'required',
+            'customer_id' => 'required',
             'month' => 'required',
             'type' => 'required|in:primary,secondary',
             'achievement' => 'required|numeric',
@@ -74,7 +76,7 @@ class SalesAchievementImport implements ToCollection,WithValidation,WithHeadingR
     public function customValidationMessages()
     {
         return [
-            'user_id.required' => 'The user id is required.',
+            'customer_id.required' => 'The customer id id is required.',
             'month.required' => 'The month name field is required.',
             'type.in' => 'The type name field either have primary or secondary value.',
             'target_value.required' => 'The target value is required.',

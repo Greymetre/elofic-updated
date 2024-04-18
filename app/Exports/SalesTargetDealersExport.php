@@ -13,12 +13,13 @@ use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Illuminate\Support\Facades\Auth;
 use App\Models\SalesTargetUsers;
+use App\Models\SalesTargetCustomers;
 use App\Models\User;
 use DB;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapping,WithStyles
+class SalesTargetDealersExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapping,WithStyles
 {
 
     private $rowIndex = 3;
@@ -36,16 +37,26 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         $f_year_array = explode('-', $this->financial_year);
         
 
-        // $data = SalesTargetUsers::with(['user'])->whereBetween('year', $f_year_array)->toSql();
-        $data = SalesTargetUsers::with(['user','user.getdesignation','user.getdivision','user.getbranch'])->select([
+        $data = SalesTargetCustomers::with(['customer','customer.userdetails'])->select([
          DB::raw('GROUP_CONCAT(target) as targets'),
          DB::raw('GROUP_CONCAT(achievement) as achievements'),
          DB::raw('GROUP_CONCAT(month) as months'),  
          DB::raw('GROUP_CONCAT(year) as years'),
          DB::raw('GROUP_CONCAT(achievement_percent) as achievement_percents'),
-         DB::raw('user_id'),
+         DB::raw('customer_id'),
          DB::raw('type'),
         ]); 
+
+        // $data = SalesTargetUsers::with(['user','user.getdesignation','user.getdivision','user.getbranch'])->select([
+        //  DB::raw('GROUP_CONCAT(target) as targets'),
+        //  DB::raw('GROUP_CONCAT(achievement) as achievements'),
+        //  DB::raw('GROUP_CONCAT(month) as months'),  
+        //  DB::raw('GROUP_CONCAT(year) as years'),
+        //  DB::raw('GROUP_CONCAT(achievement_percent) as achievement_percents'),
+        //  DB::raw('user_id'),
+        // ]); 
+
+        // dd($data);
 
         if($this->month == '' && empty($this->month)){
             $data->where(function ($query) use($f_year_array) {
@@ -65,7 +76,7 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
             });
         }
         
-        $data = $data->groupBy('user_id')->orderBy('month')->get();
+        $data = $data->groupBy('customer_id')->orderBy('month')->get();
 
         // dd($data);
 
@@ -81,7 +92,7 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
 
      $endYear = $f_year_array[1];
 
-     $headings = ['Emp Code', 'User Name', 'Designation', 'Branch Name', 'Division','Sales Type'];
+     $headings = ['Dealer id', 'Dealer Distributor Name', 'Firm Name', 'City', 'Branch', 'Division', 'Sales Type'];
 
      $quarterNames = ['Q1', 'Q2', 'Q3', 'Q4'];
 
@@ -111,7 +122,7 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
 
        $headings[] = 'Total';
 
-       $sub_headings = ['','','','','','','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%'];
+       $sub_headings = ['','','','','','','','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%'];
 
        $final_heading = [$headings, $sub_headings];
 
@@ -122,12 +133,17 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
    public function map($data): array
    {
     $response = array();
-    $response[0] = $data['user']['employee_codes']??'';
-    $response[1] = $data['user']['name']??'';
-    $response[2] = $data['user']['getdesignation']['designation_name']??'';
-    $response[3] = $data['user']['getbranch']['branch_name'] ?? '';
-    $response[4] = $data['user']['getdivision']['division_name']??'';
-    $response[5] = $data['type']??'';
+    $first_name = !empty($data['customer']['first_name']) ? $data['customer']['first_name'] : '';
+    $last_name = !empty($data['customer']['last_name']) ? $data['customer']['last_name'] : '';
+    
+    $dealer_name =  $first_name.' '.$last_name;
+    $response[0] = $data['customer']['id'] ?? '';
+    $response[1] = $dealer_name;
+    $response[2] = $data['customer']['name'];
+    $response[3] = $data['customer']['customeraddress']['cityname']['city_name'] ?? '';
+    $response[4] = $data['customer']['userdetails']['getbranch']['branch_name'] ?? '';
+    $response[5] = $data['customer']['userdetails']['getdivision']['division_name']??'';
+    $response[6] = $data['type']??'';
     $f_year_array = explode('-', $this->financial_year);
     $data['months'] = explode(',', $data['months']);
     $data['targets'] = explode(',', $data['targets']);
@@ -139,24 +155,24 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         $year = explode(',',$data['years']); 
 
         if($month == 'Apr' && $f_year_array[0] == $year[$key]) {
-            $response[6] = $data['targets'][$key];
-            $response[7] = $data['achievements'][$key]??'';
-            if(isset($response[6]) && isset($response[7]) && !empty($response[7]) && !empty($response[6])) {
-                $achievementPercent = ($response[6] == 0) ? 0 : ($response[7] * 100 / $response[6]);
+            $response[7] = $data['targets'][$key];
+            $response[8] = $data['achievements'][$key]??'';
+            if(isset($response[7]) && isset($response[8]) && !empty($response[8]) && !empty($response[7])) {
+                $achievementPercent = ($response[7] == 0) ? 0 : ($response[8] * 100 / $response[7]);
             }else{
                 $achievementPercent = '';
             }   
-            $response[8] = $achievementPercent;
+            $response[9] = $achievementPercent;
         }
         else{
-            if(!isset($response[6])) {
-                $response[6] = '';
-            }
             if(!isset($response[7])) {
                 $response[7] = '';
             }
             if(!isset($response[8])) {
                 $response[8] = '';
+            }
+            if(!isset($response[9])) {
+                $response[9] = '';
             }
         }
     }
@@ -164,24 +180,24 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
         if($month == 'May' && $f_year_array[0] == $year[$key]) {
-            $response[9] = $data['targets'][$key];
-            $response[10] = $data['achievements'][$key]??'';
-            if(isset($response[9]) && isset($response[10]) && !empty($response[10]) && !empty($response[9])) {
-                $achievementPercent = ($response[9] == 0) ? 0 : ($response[10] * 100 / $response[9]);
+            $response[10] = $data['targets'][$key];
+            $response[11] = $data['achievements'][$key]??'';
+            if(isset($response[10]) && isset($response[11]) && !empty($response[11]) && !empty($response[10])) {
+                $achievementPercent = ($response[10] == 0) ? 0 : ($response[11] * 100 / $response[10]);
             }else{
                 $achievementPercent = '';
             }
-            $response[11] = $achievementPercent;
+            $response[12] = $achievementPercent;
         }
         else{
-            if(!isset($response[9])) {
-                $response[9] = '';
-            }
             if(!isset($response[10])) {
                 $response[10] = '';
             }
             if(!isset($response[11])) {
                 $response[11] = '';
+            }
+            if(!isset($response[12])) {
+                $response[12] = '';
             }
         }
     }
@@ -189,51 +205,51 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
         if($month == 'Jun' && $f_year_array[0] == $year[$key]) {
-            $response[12] = $data['targets'][$key];
-            $response[13] = $data['achievements'][$key]??'';
-            if(isset($response[12]) && isset($response[13]) && !empty($response[13]) && !empty($response[12])) {
-                $achievementPercent = ($response[12] == 0) ? 0 : ($response[13] * 100 / $response[12]);
+            $response[13] = $data['targets'][$key];
+            $response[14] = $data['achievements'][$key]??'';
+            if(isset($response[13]) && isset($response[14]) && !empty($response[14]) && !empty($response[13])) {
+                $achievementPercent = ($response[13] == 0) ? 0 : ($response[14] * 100 / $response[13]);
             }else{
                 $achievementPercent = '';
             }
-            $response[14] = $achievementPercent;
+            $response[15] = $achievementPercent;
         }else{
-            if(!isset($response[12])) {
-                $response[12] = '';
-            }
             if(!isset($response[13])) {
                 $response[13] = '';
             }
             if(!isset($response[14])) {
                 $response[14] = '';
             }
+            if(!isset($response[15])) {
+                $response[15] = '';
+            }
         }
     }
 
-    $response[16] = '=G'.$this->rowIndex.' + J'.$this->rowIndex.' + M'.$this->rowIndex;
     $response[17] = '=H'.$this->rowIndex.' + K'.$this->rowIndex.' + N'.$this->rowIndex;
-    $response[18] = '=(I'.$this->rowIndex.' + L'.$this->rowIndex.' + O'.$this->rowIndex.') / 3';
+    $response[18] = '=I'.$this->rowIndex.' + L'.$this->rowIndex.' + O'.$this->rowIndex;
+    $response[19] = '=(J'.$this->rowIndex.' + M'.$this->rowIndex.' + P'.$this->rowIndex.') / 3';
 
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
         if($month == 'Jul' && $f_year_array[0] == $year[$key]) {
-            $response[19] = $data['targets'][$key];
-            $response[20] = $data['achievements'][$key]??'';
-            if(isset($response[19]) && isset($response[20]) && !empty($response[20]) && !empty($response[19])) {
-                $achievementPercent = ($response[19] == 0) ? 0 : ($response[20] * 100 / $response[19]);
+            $response[20] = $data['targets'][$key];
+            $response[21] = $data['achievements'][$key]??'';
+            if(isset($response[20]) && isset($response[21]) && !empty($response[21]) && !empty($response[20])) {
+                $achievementPercent = ($response[20] == 0) ? 0 : ($response[21] * 100 / $response[20]);
             }else{
                 $achievementPercent = '';
             }
-            $response[21] = $achievementPercent;
+            $response[22] = $achievementPercent;
         }else{
-            if(!isset($response[19])) {
-                $response[19] = '';
-            }
             if(!isset($response[20])) {
                 $response[20] = '';
             }
             if(!isset($response[21])) {
-                $response[2] = '';
+                $response[21] = '';
+            }
+            if(!isset($response[22])) {
+                $response[22] = '';
             }
         }
     }
@@ -241,23 +257,23 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
         if($month == 'Aug' && $f_year_array[0] == $year[$key]) {
-            $response[22] = $data['targets'][$key];
-            $response[23] = $data['achievements'][$key]??'';
-            if(isset($response[22]) && isset($response[23]) && !empty($response[23]) && !empty($response[22])) {
-                $achievementPercent = ($response[22] == 0) ? 0 : ($response[23] * 100 / $response[22]);
+            $response[23] = $data['targets'][$key];
+            $response[24] = $data['achievements'][$key]??'';
+            if(isset($response[23]) && isset($response[24]) && !empty($response[24]) && !empty($response[23])) {
+                $achievementPercent = ($response[23] == 0) ? 0 : ($response[24] * 100 / $response[23]);
             }else{
                 $achievementPercent = '';
             }
-            $response[24] = $achievementPercent;
+            $response[25] = $achievementPercent;
         }else{
-            if(!isset($response[22])) {
-                $response[22] = '';
-            }
             if(!isset($response[23])) {
                 $response[23] = '';
             }
             if(!isset($response[24])) {
                 $response[24] = '';
+            }
+            if(!isset($response[25])) {
+                $response[25] = '';
             }
         }
     }
@@ -265,52 +281,52 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
         if($month == 'Sep' && $f_year_array[0] == $year[$key]) {
-            $response[25] = $data['targets'][$key];
-            $response[26] = $data['achievements'][$key]??'';
-            if(isset($response[25]) && isset($response[26]) && !empty($response[26]) && !empty($response[25])) {
-                $achievementPercent = ($response[25] == 0) ? 0 : ($response[26] * 100 / $response[25]);
+            $response[26] = $data['targets'][$key];
+            $response[27] = $data['achievements'][$key]??'';
+            if(isset($response[26]) && isset($response[27]) && !empty($response[27]) && !empty($response[26])) {
+                $achievementPercent = ($response[26] == 0) ? 0 : ($response[27] * 100 / $response[26]);
             }else{
                 $achievementPercent = '';
             }
-            $response[27] = $achievementPercent;
+            $response[28] = $achievementPercent;
         }else{
-            if(!isset($response[25])) {
-               $response[25] = '';
-            }
             if(!isset($response[26])) {
                $response[26] = '';
             }
             if(!isset($response[27])) {
                $response[27] = '';
             }
+            if(!isset($response[28])) {
+               $response[28] = '';
+            }
         }
     }
 
-    $response[28] = '=S'.$this->rowIndex.' + V'.$this->rowIndex.' + Y'.$this->rowIndex;
     $response[29] = '=T'.$this->rowIndex.' + W'.$this->rowIndex.' + Z'.$this->rowIndex;
-    $response[30] = '=(U'.$this->rowIndex.' + X'.$this->rowIndex.' + AA'.$this->rowIndex.') / 3';
+    $response[30] = '=U'.$this->rowIndex.' + X'.$this->rowIndex.' + AA'.$this->rowIndex;
+    $response[31] = '=(V'.$this->rowIndex.' + Y'.$this->rowIndex.' + AB'.$this->rowIndex.') / 3';
 
 
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
         if($month == 'Oct' && $f_year_array[0] == $year[$key]) {
-            $response[31] = $data['targets'][$key];
-            $response[32] = $data['achievements'][$key]??'';
-            if(isset($response[31]) && isset($response[32]) && !empty($response[32]) && !empty($response[31])) {
-                $achievementPercent = ($response[31] == 0) ? 0 : ($response[32] * 100 / $response[31]);
+            $response[32] = $data['targets'][$key];
+            $response[33] = $data['achievements'][$key]??'';
+            if(isset($response[32]) && isset($response[33]) && !empty($response[33]) && !empty($response[32])) {
+                $achievementPercent = ($response[32] == 0) ? 0 : ($response[33] * 100 / $response[32]);
             }else{
                 $achievementPercent = '';
             }
-            $response[33] = $achievementPercent;
+            $response[34] = $achievementPercent;
         }else{
-            if(!isset($response[31])) {
-               $response[31] = '';
-            }
             if(!isset($response[32])) {
                $response[32] = '';
             }
             if(!isset($response[33])) {
                $response[33] = '';
+            }
+            if(!isset($response[34])) {
+               $response[34] = '';
             }
         }
     }
@@ -318,23 +334,23 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
         if($month == 'Nov' && $f_year_array[0] == $year[$key]) {
-            $response[34] = $data['targets'][$key];
-            $response[35] = $data['achievements'][$key]??'';
-            if(isset($response[34]) && isset($response[35]) && !empty($response[35]) && !empty($response[34])) {
-                $achievementPercent = ($response[34] == 0) ? 0 : ($response[35] * 100 / $response[34]);
+            $response[35] = $data['targets'][$key];
+            $response[36] = $data['achievements'][$key]??'';
+            if(isset($response[35]) && isset($response[36]) && !empty($response[36]) && !empty($response[35])) {
+                $achievementPercent = ($response[35] == 0) ? 0 : ($response[36] * 100 / $response[35]);
             }else{
                 $achievementPercent = '';
             }
-            $response[36] = $achievementPercent;
+            $response[37] = $achievementPercent;
         }else{
-            if(!isset($response[34])) {
-               $response[34] = '';
-            }
             if(!isset($response[35])) {
                $response[35] = '';
             }
             if(!isset($response[36])) {
                $response[36] = '';
+            }
+            if(!isset($response[37])) {
+               $response[37] = '';
             }
         }
     }
@@ -342,51 +358,51 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
         if($month == 'Dec' && $f_year_array[0] == $year[$key]) {
-            $response[37] = $data['targets'][$key];
-            $response[38] = $data['achievements'][$key]??'';
-            if(isset($response[37]) && isset($response[38]) && !empty($response[38]) && !empty($response[37])) {
-                $achievementPercent = ($response[37] == 0) ? 0 : ($response[38] * 100 / $response[37]);
+            $response[38] = $data['targets'][$key];
+            $response[39] = $data['achievements'][$key]??'';
+            if(isset($response[38]) && isset($response[39]) && !empty($response[39]) && !empty($response[38])) {
+                $achievementPercent = ($response[38] == 0) ? 0 : ($response[39] * 100 / $response[38]);
             }else{
                 $achievementPercent = '';
             }
-            $response[39] = $achievementPercent;
+            $response[40] = $achievementPercent;
         }else{
-            if(!isset($response[37])) {
-               $response[37] = '';
-            }
             if(!isset($response[38])) {
                $response[38] = '';
             }
             if(!isset($response[39])) {
                $response[39] = '';
             }
+            if(!isset($response[40])) {
+               $response[40] = '';
+            }
         }
     }
 
-    $response[40] = '=AE'.$this->rowIndex.' + AH'.$this->rowIndex.' + AK'.$this->rowIndex;
     $response[41] = '=AF'.$this->rowIndex.' + AI'.$this->rowIndex.' + AL'.$this->rowIndex;
-    $response[42] = '=(AG'.$this->rowIndex.' + AJ'.$this->rowIndex.' + AM'.$this->rowIndex.') / 3';
+    $response[42] = '=AG'.$this->rowIndex.' + AJ'.$this->rowIndex.' + AM'.$this->rowIndex;
+    $response[43] = '=(AH'.$this->rowIndex.' + AK'.$this->rowIndex.' + AN'.$this->rowIndex.') / 3';
 
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
         if($month == 'Jan' && $f_year_array[1] == $year[$key]) {
-            $response[43] = $data['targets'][$key];
-            $response[44] = $data['achievements'][$key]??'';
-            if(isset($response[43]) && isset($response[44]) && !empty($response[44]) && !empty($response[43])) {
-                $achievementPercent = ($response[43] == 0) ? 0 : ($response[44] * 100 / $response[43]);
+            $response[44] = $data['targets'][$key];
+            $response[45] = $data['achievements'][$key]??'';
+            if(isset($response[44]) && isset($response[45]) && !empty($response[45]) && !empty($response[44])) {
+                $achievementPercent = ($response[44] == 0) ? 0 : ($response[45] * 100 / $response[44]);
             }else{
                 $achievementPercent = '';
             }
-            $response[45] = $achievementPercent;
+            $response[46] = $achievementPercent;
         }else{
-            if(!isset($response[43])) {
-               $response[43] = '';
-            }
             if(!isset($response[44])) {
                $response[44] = '';
             }
             if(!isset($response[45])) {
                $response[45] = '';
+            }
+            if(!isset($response[46])) {
+               $response[46] = '';
             }
         }
     }
@@ -394,23 +410,23 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
         if($month == 'Feb' && $f_year_array[1] == $year[$key]) {
-            $response[46] = $data['targets'][$key];
-            $response[47] = $data['achievements'][$key]??'';
-            if(isset($response[46]) && isset($response[47]) && !empty($response[47]) && !empty($response[46])) {
-                $achievementPercent = ($response[46] == 0) ? 0 : ($response[47] * 100 / $response[46]);
+            $response[47] = $data['targets'][$key];
+            $response[48] = $data['achievements'][$key]??'';
+            if(isset($response[47]) && isset($response[48]) && !empty($response[48]) && !empty($response[47])) {
+                $achievementPercent = ($response[47] == 0) ? 0 : ($response[48] * 100 / $response[47]);
             }else{
                 $achievementPercent = '';
             }
-            $response[48] = $achievementPercent;
+            $response[49] = $achievementPercent;
         }else{
-            if(!isset($response[46])) {
-               $response[46] = '';
-            }
             if(!isset($response[47])) {
                $response[47] = '';
             }
             if(!isset($response[48])) {
                $response[48] = '';
+            }
+            if(!isset($response[49])) {
+               $response[49] = '';
             }
         }
     }
@@ -418,34 +434,34 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
         if($month == 'Mar' && $f_year_array[1] == $year[$key]) {
-            $response[49] = $data['targets'][$key];
-            $response[50] = $data['achievements'][$key]??'';
-            if(isset($response[49]) && isset($response[50]) && !empty($response[50]) && !empty($response[49])) {
-                $achievementPercent = ($response[49] == 0) ? 0 : ($response[50] * 100 / $response[49]);
+            $response[50] = $data['targets'][$key];
+            $response[51] = $data['achievements'][$key]??'';
+            if(isset($response[50]) && isset($response[51]) && !empty($response[51]) && !empty($response[50])) {
+                $achievementPercent = ($response[50] == 0) ? 0 : ($response[51] * 100 / $response[50]);
             }else{
                 $achievementPercent = '';
             }
-            $response[50] = $achievementPercent;
+            $response[52] = $achievementPercent;
         }else{
-            if(!isset($response[49])) {
-                $response[49] = '';
-            }
             if(!isset($response[50])) {
                 $response[50] = '';
             }
             if(!isset($response[51])) {
                 $response[51] = '';
             }
+            if(!isset($response[52])) {
+                $response[52] = '';
+            }
         }
     }
 
-    $response[52] = '=AQ'.$this->rowIndex.' + AT'.$this->rowIndex.' + AW'.$this->rowIndex;
     $response[53] = '=AR'.$this->rowIndex.' + AU'.$this->rowIndex.' + AX'.$this->rowIndex;
-    $response[54] = '=(AS'.$this->rowIndex.' + AV'.$this->rowIndex.' + AY'.$this->rowIndex.') / 3';
+    $response[54] = '=AS'.$this->rowIndex.' + AV'.$this->rowIndex.' + AY'.$this->rowIndex;
+    $response[55] = '=(AT'.$this->rowIndex.' + AW'.$this->rowIndex.' + AZ'.$this->rowIndex.') / 3';
 
-    $response[55] = '=P'.$this->rowIndex.' + AB'.$this->rowIndex.' + AN'.$this->rowIndex.' + AZ'.$this->rowIndex;
     $response[56] = '=Q'.$this->rowIndex.' + AC'.$this->rowIndex.' + AO'.$this->rowIndex.' + BA'.$this->rowIndex;
-    $response[57] = '=(R'.$this->rowIndex.' + AD'.$this->rowIndex.' + AP'.$this->rowIndex.' + BB'.$this->rowIndex.') / 4';
+    $response[57] = '=R'.$this->rowIndex.' + AD'.$this->rowIndex.' + AP'.$this->rowIndex.' + BB'.$this->rowIndex;
+    $response[58] = '=(S'.$this->rowIndex.' + AE'.$this->rowIndex.' + AQ'.$this->rowIndex.' + BC'.$this->rowIndex.') / 4';
 
     $this->rowIndex++;
 
@@ -460,23 +476,24 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         $sheet->mergeCells('D1:D2');
         $sheet->mergeCells('E1:E2');
         $sheet->mergeCells('F1:F2');
-        $sheet->mergeCells('G1:I1');
-        $sheet->mergeCells('J1:L1');
-        $sheet->mergeCells('M1:O1');
-        $sheet->mergeCells('P1:R1');
-        $sheet->mergeCells('S1:U1');
-        $sheet->mergeCells('V1:X1');
-        $sheet->mergeCells('Y1:AA1');
-        $sheet->mergeCells('AB1:AD1');
-        $sheet->mergeCells('AE1:AG1');
-        $sheet->mergeCells('AH1:AJ1');
-        $sheet->mergeCells('AK1:AM1');
-        $sheet->mergeCells('AN1:AP1');
-        $sheet->mergeCells('AQ1:AS1');
-        $sheet->mergeCells('AT1:AV1');
-        $sheet->mergeCells('AW1:AY1');
-        $sheet->mergeCells('AZ1:BB1');
-        $sheet->mergeCells('BC1:BE1');
+        $sheet->mergeCells('G1:G2');
+        $sheet->mergeCells('H1:J1');
+        $sheet->mergeCells('K1:M1');
+        $sheet->mergeCells('N1:P1');
+        $sheet->mergeCells('Q1:S1');
+        $sheet->mergeCells('T1:V1');
+        $sheet->mergeCells('W1:Y1');
+        $sheet->mergeCells('Z1:AB1');
+        $sheet->mergeCells('AC1:AE1');
+        $sheet->mergeCells('AF1:AH1');
+        $sheet->mergeCells('AI1:AK1');
+        $sheet->mergeCells('AL1:AN1');
+        $sheet->mergeCells('AO1:AQ1');
+        $sheet->mergeCells('AR1:AT1');
+        $sheet->mergeCells('AU1:AW1');
+        $sheet->mergeCells('AX1:AZ1');
+        $sheet->mergeCells('BA1:BC1');
+        $sheet->mergeCells('BD1:BF1');
 
         $sheet->getStyle('A1:ZZ1')->applyFromArray([
             'font' => [

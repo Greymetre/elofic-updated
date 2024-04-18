@@ -17,7 +17,7 @@ use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Illuminate\Support\Facades\Auth;
-
+use Carbon\Carbon;
 
 class CustomersExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapping
 {
@@ -175,7 +175,7 @@ class CustomersExport implements FromCollection,WithHeadings,ShouldAutoSize,With
         return [
             $data['created_at'] = isset($data['created_at']) ? date("d-m-Y", strtotime($data['created_at'])) :'',
             $data['id'],
-             $data['customer_code'], 
+            $data['customer_code'], 
             isset($data['customertypes']['customertype_name']) ? $data['customertypes']['customertype_name'] :'',
             $data['createdbyname'] = isset($data['createdbyname']['name']) ? $data['createdbyname']['name'] : '',
             $data['name'],

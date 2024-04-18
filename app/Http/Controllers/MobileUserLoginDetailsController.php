@@ -45,49 +45,68 @@ class MobileUserLoginDetailsController extends Controller
     public function mobile_user_login(Request $request) {
 
         $mobile_users = MobileUserLoginDetails::latest()->get();
-        $users = User::latest()->get();
         $branches = Branch::latest()->get(); 
         $divisions = Division::latest()->get();
         $currentYear = Carbon::now()->year;
         $years = range($currentYear - 2, $currentYear + 2);
 
         abort_if(Gate::denies('loyalty_mobile_app_users_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return view('loyalty_app_mobile_users.index', compact('mobile_users','branches','years','users','divisions'));
+        return view('loyalty_app_mobile_users.index', compact('mobile_users','branches','years','divisions'));
     }
 
 
     public function mobile_user_login_list(Request $request)
     {
-         $query = MobileUserLoginDetails::with(['customer'])->where(function ($query) use ($request) {
+        $query = MobileUserLoginDetails::with(['customer'])->where(function ($query) use ($request) {
 
-             if($request->month && $request->month != '' && $request->month != null){
-                 $query->where('month',$request->month) ;
-             }
-         })->orderBy('id', 'asc');
+            if($request->user_id && $request->user_id != '' && $request->user_id != null){
+                $userIds = Customers::where('id', $request->user_id)->pluck('id');
+                $query->whereIn('customer_id',$userIds);
+            }
 
-                   // $data = SalesTargetUsers::with(['user','user.getbranch'])->get();
+            if($request->start_date && $request->start_date != null && $request->start_date != '' && $request->end_date && $request->end_date != null && $request->end_date != ''){
+                $startDate = date('Y-m-d', strtotime($request->start_date));
+                $endDate = date('Y-m-d', strtotime($request->end_date));
+                $query->whereDate('first_login_date', '>=', $startDate)
+                ->whereDate('first_login_date', '<=', $endDate);
+            }
 
-         return Datatables::of($query)
-         ->addIndexColumn()
-         ->addColumn('action', function ($data) {
-         })
-        ->rawColumns(['action'])
+        })->orderBy('last_login_date', 'desc');
+
+        // $data = SalesTargetUsers::with(['user','user.getbranch'])->get();
+
+        return Datatables::of($query)
+        ->addIndexColumn()
+        ->addColumn('contact_person', function ($data) {
+
+           $first_name = !empty($data['customer']['first_name']) ? $data['customer']['first_name'] : '';
+           $last_name = !empty($data['customer']['last_name']) ? $data['customer']['last_name'] : '';
+
+           return $first_name.' '.$last_name;
+        })
+        ->addColumn('login_status1', function ($data) {
+            if ($data['login_status'] == '0') {
+                return '<span class="badge badge-danger">Logout</span>';
+            } elseif ($data['login_status'] == '1') {
+                return '<span class="badge badge-info">Login</span>';
+            }
+        })
+        ->addColumn('first_login_date', function ($data) {
+            return $data->first_login_date?date('d M y h:i A', strtotime($data->first_login_date)):'';
+        })
+        ->addColumn('last_login_date', function ($data) {
+            return $data->last_login_date?date('d M y h:i A', strtotime($data->last_login_date)):'';
+        })
+
+        ->addColumn('action', function ($data) {
+        })
+        ->rawColumns(['action','contact_person','login_status1','last_login_date','first_login_date'])
         ->make(true);
     }
 
 
     public function mobile_user_login_download(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'financial_year' => 'required',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()
-            ->withErrors($validator)
-            ->withInput();
-        }
-
         abort_if(Gate::denies('mobile_app_login_details_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();

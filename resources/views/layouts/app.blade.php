@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
   <!-- CSS Files -->
   <link href="{{ url('/').'/'.asset('assets/css/material-dashboard2.css') }}" rel="stylesheet" />
+  <link href="{{ url('/').'/'.asset('assets/css/new_design.css') }}" rel="stylesheet" />
   <link href="{{ url('/').'/'.asset('assets/css/custom1.css') }}" rel="stylesheet" />
   <!-- CSS Just for demo purpose, don't include it in your project -->
   <link href="{{ url('/').'/'.asset('assets/demo/demo.css') }}" rel="stylesheet" />
@@ -358,33 +359,33 @@
           </li>
           @endif
           @if(auth()->user()->can('target_users_access'))
-          <li class="nav-item ">
-            <a class="nav-link collapsed" data-toggle="collapse" href="#salesUserMenu" aria-expanded="false">
-              <i class="material-icons">store</i>
-              <p> {!! trans('panel.sidemenu.sales_users') !!} </p>
-            </a>
-            <div class="collapse" id="salesUserMenu" style="">
-              <ul class="nav">
-                @if(auth()->user()->can('target_users_access'))
-                <li class="nav-item {{ request()->is('sales_users.target_users') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('sales_users/target_users') }}">
-                    <i class="material-icons">verified_user</i>
-                    <p> {!! trans('panel.sales_users.title') !!}</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('target_users_access'))
-                <li class="nav-item {{ request()->is('sales_users.target_users') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('sales_users/target_users') }}">
-                    <i class="material-icons">verified_user</i>
-                    <p> {!! trans('panel.dealer_distributor_user.title') !!}</p>
-                  </a>
-                </li>
-                @endif
-              </ul>
-            </div>
-          </li>
-          @endif
+           <li class="nav-item ">
+             <a class="nav-link collapsed" data-toggle="collapse" href="#salesUserMenu" aria-expanded="false">
+               <i class="material-icons">store</i>
+               <p> {!! trans('panel.sidemenu.sales_users') !!} </p>
+             </a>
+             <div class="collapse" id="salesUserMenu" style="">
+               <ul class="nav">
+                 @if(auth()->user()->can('target_users_access'))
+                 <li class="nav-item {{ request()->is('sales_users.target_users') ? 'active' : '' }}">
+                   <a class="nav-link" href="{{ url('sales_users/target_users') }}">
+                     <i class="material-icons">verified_user</i>
+                     <p> {!! trans('panel.sales_users.title') !!}</p>
+                   </a>
+                 </li>
+                 @endif
+                 @if(auth()->user()->can('sales_target_dealers_access'))
+                 <li class="nav-item {{ request()->is('sales_dealer.target_dealers') ? 'active' : '' }}">
+                   <a class="nav-link" href="{{ url('sales_dealer/target_dealers') }}">
+                     <i class="material-icons">verified_user</i>
+                     <p> {!! trans('panel.dealer_distributor_user.title') !!}</p>
+                   </a>
+                 </li>
+                 @endif
+               </ul>
+             </div>
+           </li>
+           @endif
         @if(auth()->user()->can('hr_access'))
           <li class="nav-item {{ request()->is('reports*') ? 'active' : '' }}">
             <a class="nav-link collapsed" data-toggle="collapse" href="#hr" aria-expanded="false">

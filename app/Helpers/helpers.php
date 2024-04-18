@@ -395,9 +395,16 @@ if (! function_exists('getUsersReportingToAuth')) {
         //     $all_ids_array = User::pluck('id')->toArray();
         // }
 
-        if(!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin') && !$userinfo->hasRole('Sub_Admin') && !$userinfo->hasRole('HR_Admin') && !$userinfo->hasRole('HO_Account')  && !$userinfo->hasRole('Sub_Support'))
+        if(!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin') && !$userinfo->hasRole('Sub_Admin') && !$userinfo->hasRole('HR_Admin') && !$userinfo->hasRole('HO_Account')  && !$userinfo->hasRole('Sub_Support') && !$userinfo->hasRole('Accounts Order') && !$userinfo->hasRole('Service Admin'))
         {
             $all_ids_array = array($userid);
+            $test = getAllChild(array($userid), $all_users);
+            while(count($test) > 0){
+                $all_ids_array = array_merge($all_ids_array, $test);
+                $test = getAllChild($test, $all_users);
+            }
+        }elseif($userinfo->hasRole('Accounts Order')){
+            $all_ids_array = User::whereIn('branch_id', explode(',', $userinfo->branch_show))->pluck('id')->toArray();
             $test = getAllChild(array($userid), $all_users);
             while(count($test) > 0){
                 $all_ids_array = array_merge($all_ids_array, $test);

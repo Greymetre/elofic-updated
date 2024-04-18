@@ -76,6 +76,16 @@
             </span>
           </div>
           @endif
+          @if(session()->has('message_success'))
+          <div class="alert alert-success">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <i class="material-icons">close</i>
+            </button>
+            <span>
+              {{ session()->get('message_success') }}
+            </span>
+          </div>
+          @endif
           <div class="alert " style="display: none;">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
               <i class="material-icons">close</i>
@@ -86,6 +96,7 @@
             <table id="getSerialTransaction" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
               <thead class=" text-primary">
                 <th>{!! trans('panel.global.no') !!}</th>
+                <th>Action</th>
                 <th>Serial number</th>
                 <th>Group</th>
                 <th>Sub Group</th>
@@ -96,6 +107,7 @@
                 <th>Invoice Number</th>
                 <th>Invoice Date</th>
                 <th>Expiry Date</th>
+                <th>Warranty Status</th>
                 <!-- <th>{!! trans('panel.global.created_by') !!}</th>
               <th>{!! trans('panel.global.created_at') !!}</th> -->
               </thead>
@@ -125,17 +137,24 @@
         "ajax": {
           'type': 'POST',
           'url': "{{ url('services/serial_number_history/list') }}",
-          'data': function (d) {
-                d._token = token,
-                d.branch_id = $('#branch_id').val(),
-                d.product_id = $('#product_id').val(),
-                d.start_date = $('#start_date').val(),
-                d.end_date = $('#end_date').val()
-            }
+          'data': function(d) {
+            d._token = token,
+              d.branch_id = $('#branch_id').val(),
+              d.product_id = $('#product_id').val(),
+              d.start_date = $('#start_date').val(),
+              d.end_date = $('#end_date').val()
+          }
         },
         columns: [{
             data: 'DT_RowIndex',
             name: 'DT_RowIndex',
+            orderable: false,
+            searchable: false
+          },
+          {
+            data: 'action',
+            name: 'action',
+            "defaultContent": '',
             orderable: false,
             searchable: false
           },
@@ -203,6 +222,12 @@
           {
             data: 'expiry_date',
             name: 'expiry_date',
+            orderable: false,
+            searchable: false
+          },
+          {
+            data: 'warranty_status',
+            name: 'warranty_status',
             orderable: false,
             searchable: false
           }

@@ -266,9 +266,18 @@ class ReportController extends Controller
         $userids = getUsersReportingToAuth();
         if ($request->ajax()) {
             $data = CheckIn::with('users:id,name', 'customers:id,name,mobile', 'customers.customeraddress', 'beatschedules.beats', 'visitreports', 'orders_sum')
-                ->whereHas('users', function ($query) use ($userids) {
+                ->whereHas('users', function ($query) use ($userids, $request) {
                     if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                         $query->whereIn('id', $userids);
+                    }
+                    if($request->user_id && $request->user_id != null && $request->user_id != ''){
+                        $query->where('user_id', $request->user_id);
+                    }
+                    if($request->start_date && $request->start_date != null && $request->start_date != '' && $request->end_date && $request->end_date != null && $request->end_date != ''){
+                        $startDate = date('Y-m-d', strtotime($request->start_date));
+                        $endDate = date('Y-m-d', strtotime($request->end_date));
+                        $query->whereDate('checkin_date', '>=', $startDate)
+                         ->whereDate('checkin_date', '<=', $endDate);
                     }
                 })
                 ->select('id', 'checkin_date', 'checkin_time', 'user_id', 'customer_id', 'checkout_time', 'beatscheduleid')
@@ -318,7 +327,8 @@ class ReportController extends Controller
                 ->rawColumns(['visit_time', 'beat_name', 'district_name', 'city_name', 'pincode', 'address', 'ordersum', 'uniquesku', 'uniqueorder', 'remarks'])
                 ->make(true);
         }
-        return view('reports.customervisit');
+        $users = User::whereIn('id', $userids)->select('id', 'name')->get();
+        return view('reports.customervisit', compact('users'));
     }
 
     public function attendancereport(Request $request)

@@ -63,7 +63,7 @@ class MobileAppLoginUsersExport implements FromCollection,WithHeadings,ShouldAut
            isset($data['device_name']) ? $data['device_name'] :'',
            isset($data['first_login_date']) ? date('Y-m-d', strtotime($data['first_login_date'])) :'',
            isset($data['last_login_date']) ? date('Y-m-d', strtotime($data['last_login_date'])) :'',
-           isset($data['login_status']) ? $data['login_status'] :'',
+           isset($data['login_status']) ? ($data['login_status'] == '0' ? 'Logout' : 'Login') :'',
            
        ];
    }

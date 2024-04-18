@@ -240,6 +240,21 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('sales-target-users/{id}', [SalesTargetUsersController::class, 'update_target_user_modal'])->name('sales-target-users');
     Route::post('sales-target-users/store', [SalesTargetUsersController::class, 'update_target_user_updte'])->name('sales-target-users.store');
 
+    // Target achievement distributed dealer wise
+      Route::get('sales_dealer/target_dealers', [SalesTargetUsersController::class, 'sales_target_dealers'])->name('sales_dealer.target_dealers');
+      Route::post('sales_dealer/target_achievement/list', [SalesTargetUsersController::class, 'sales_dealers_target_achievement'])->name('sales_dealer.target_achievement');
+      Route::any('sales_dealer/target_dealers/download', [SalesTargetUsersController::class, 'sales_target_dealers_download'])->name('sales_dealer.target_dealers.download');
+      Route::any('sales-target-dealers-template', [ SalesTargetUsersController::class, 'sales_dealers_target_template'])->name('sales_dealer.target_dealers.template');
+      Route::get('sales-target-dealer/{id}', [SalesTargetUsersController::class, 'update_target_dealer_modal'])->name('sales-target-dealer');
+      Route::post('sales-dealer-users/store', [SalesTargetUsersController::class, 'update_target_dealer_update'])->name('sales-target-dealer.store');
+      Route::get('sales_dealer/delete', [SalesTargetUsersController::class, 'sales_target_dealer_delete'])->name('sales_dealer.delete');
+      Route::post('sales_dealers/target/upload', [SalesTargetUsersController::class, 'sales_target_dealers_upload'])->name('sales_target_dealers_upload.target.upload');
+
+      // Sales dealers distributors achievement
+      Route::any('sales-dealers-achievement-template', [ SalesTargetUsersController::class, 'sales_dealers_achievement_template'])->name('sales.dealers.achievement.template');
+      Route::post('sales-dealers/achievement/upload', [SalesTargetUsersController::class, 'sales_dealers_achievement_upload'])->name('sales.dealers.achievement.upload');
+      Route::get('sales/achievement/download', [SalesTargetUsersController::class, 'achievement_download'])->name('sales_users.achievement.download');
+
     // Sales Achievement
     Route::any('sales-achievement-template', [ SalesTargetUsersController::class, 'achievement_template'])->name('sales.achievement.template');
     Route::post('sales/achievement/upload', [SalesTargetUsersController::class, 'achievement_upload'])->name('sales.achievement.upload');
@@ -569,6 +584,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('services/serial_number_transaction/list', [ServicesController::class, 'serial_number_transaction_list'])->name('service.serial_number_transaction.list');
     Route::get('services/serial_number_history', [ServicesController::class, 'serial_number_history'])->name('service.serial_number_history');
     Route::post('services/serial_number_history/list', [ServicesController::class, 'serial_number_history_list'])->name('service.serial_number_history.list');
+    Route::get('services/serial_number_history/edit/{id}', [ServicesController::class, 'serial_number_history_edit'])->name('service.serial_number_history.edit');
+    Route::PUT('services/serial_number_history/update', [ServicesController::class, 'serial_number_history_update'])->name('service.serial_number_history.update');
 
     // Transaction History
     Route::resource('transaction_history', TransactionHistoryController::class);

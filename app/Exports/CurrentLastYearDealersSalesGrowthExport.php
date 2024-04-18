@@ -14,12 +14,13 @@ use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Illuminate\Support\Facades\Auth;
 use App\Models\SalesTargetUsers;
+use App\Models\SalesTargetCustomers;
 use App\Models\User;
 use DB;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class CurrentLastYearSalesGrowthExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapping,WithStyles
+class CurrentLastYearDealersSalesGrowthExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapping,WithStyles
 {
 
     private $rowIndex = 3;
@@ -36,15 +37,30 @@ class CurrentLastYearSalesGrowthExport implements FromCollection,WithHeadings,Sh
     {
         $f_year_array = explode('-', $this->financial_year);
 
-        $data = SalesTargetUsers::join('users', 'salestargetusers.user_id', '=', 'users.id')->select([
-         DB::raw('SUM(achievement) as achievements'),
+        // $data = SalesTargetUsers::join('users', 'salestargetusers.user_id', '=', 'users.id')->select([
+        //  DB::raw('SUM(achievement) as achievements'),
+        //  DB::raw('GROUP_CONCAT(month) as months'),  
+        //  DB::raw('GROUP_CONCAT(user_id) as user_ids'),
+        //  DB::raw('GROUP_CONCAT(year) as years'),
+        //  'users.branch_id',
+        //  'users.division_id',
+        //  'users.designation_id',
+        // ]);
+
+        $data = SalesTargetCustomers::join('customers', 'salestargetcustomers.customer_id', '=', 'customers.id')->join('users', 'users.id', '=', 'customers.executive_id' )->
+
+        select([
+         // DB::raw('SUM(target) as targets'),
+         // DB::raw('SUM(achievement) as achievements'),
          DB::raw('GROUP_CONCAT(month) as months'),  
-         DB::raw('GROUP_CONCAT(user_id) as user_ids'),
+         DB::raw('GROUP_CONCAT(customer_id) as user_ids'),
          DB::raw('GROUP_CONCAT(year) as years'),
+         // DB::raw('GROUP_CONCAT(achievement_percent) as achievement_percents'),
          'users.branch_id',
          'users.division_id',
          'users.designation_id',
         ]);
+
 
         if($this->month == '' && empty($this->month)){
             $data->where(function ($query) use($f_year_array) {
@@ -136,17 +152,17 @@ class CurrentLastYearSalesGrowthExport implements FromCollection,WithHeadings,Sh
             $previousYear = $f_year_array[0] - 1;
             $growthPercent = '';
 
-            $sales_data_current_year = DB::table('salestargetusers')
+            $sales_data_current_year = DB::table('salestargetcustomers')
                 ->where('month', 'Apr')
                 ->where('year', $currentYear)
-                ->whereIn('user_id', $userIds)
+                ->whereIn('customer_id', $userIds)
                 ->select(DB::raw('SUM(achievement) as achievements_current_year'))
                 ->first();
 
-            $sales_data_last_year = DB::table('salestargetusers')
+            $sales_data_last_year = DB::table('salestargetcustomers')
                 ->where('month', 'Apr')
                 ->where('year', $previousYear)
-                ->whereIn('user_id', $userIds)
+                ->whereIn('customer_id', $userIds)
                 ->select(DB::raw('SUM(achievement) as achievements_last_year'))
                 ->first(); 
 
@@ -195,17 +211,17 @@ class CurrentLastYearSalesGrowthExport implements FromCollection,WithHeadings,Sh
             $previousYear = $f_year_array[0] - 1;
             $growthPercent = '';
 
-            $sales_data_current_year = DB::table('salestargetusers')
+            $sales_data_current_year = DB::table('salestargetcustomers')
             ->where('month', 'May')
             ->where('year', $currentYear)
-            ->whereIn('user_id', $userIds)
+            ->whereIn('customer_id', $userIds)
             ->select(DB::raw('SUM(achievement) as achievements_current_year'))
             ->first();
 
-            $sales_data_last_year = DB::table('salestargetusers')
+            $sales_data_last_year = DB::table('salestargetcustomers')
             ->where('month', 'May')
             ->where('year', $previousYear)
-            ->whereIn('user_id', $userIds)
+            ->whereIn('customer_id', $userIds)
             ->select(DB::raw('SUM(achievement) as achievements_last_year'))
             ->first();    
 
@@ -251,17 +267,17 @@ class CurrentLastYearSalesGrowthExport implements FromCollection,WithHeadings,Sh
             $currentYear = $f_year_array[0];
             $previousYear = $f_year_array[0] - 1;
             $growthPercent = ''; 
-            $sales_data_current_year = DB::table('salestargetusers')
+            $sales_data_current_year = DB::table('salestargetcustomers')
             ->where('month', 'Jun')
             ->where('year', $currentYear)
-            ->whereIn('user_id', $userIds)
+            ->whereIn('customer_id', $userIds)
             ->select(DB::raw('SUM(achievement) as achievements_current_year'))
             ->first();
 
-            $sales_data_last_year = DB::table('salestargetusers')
+            $sales_data_last_year = DB::table('salestargetcustomers')
             ->where('month', 'Jun')
             ->where('year', $previousYear)
-            ->whereIn('user_id', $userIds)
+            ->whereIn('customer_id', $userIds)
             ->select(DB::raw('SUM(achievement) as achievements_last_year'))
             ->first();    
 
@@ -312,17 +328,17 @@ class CurrentLastYearSalesGrowthExport implements FromCollection,WithHeadings,Sh
             $currentYear = $f_year_array[0];
             $previousYear = $f_year_array[0] - 1;
             $growthPercent = ''; 
-            $sales_data_current_year = DB::table('salestargetusers')
+            $sales_data_current_year = DB::table('salestargetcustomers')
             ->where('month', 'Jul')
             ->where('year', $currentYear)
-            ->whereIn('user_id', $userIds)
+            ->whereIn('customer_id', $userIds)
             ->select(DB::raw('SUM(achievement) as achievements_current_year'))
             ->first();
 
-            $sales_data_last_year = DB::table('salestargetusers')
+            $sales_data_last_year = DB::table('salestargetcustomers')
             ->where('month', 'Jul')
             ->where('year', $previousYear)
-            ->whereIn('user_id', $userIds)
+            ->whereIn('customer_id', $userIds)
             ->select(DB::raw('SUM(achievement) as achievements_last_year'))
             ->first();    
 
@@ -366,17 +382,17 @@ class CurrentLastYearSalesGrowthExport implements FromCollection,WithHeadings,Sh
             $currentYear = $f_year_array[0];
             $previousYear = $f_year_array[0] - 1;
             $growthPercent = ''; 
-            $sales_data_current_year = DB::table('salestargetusers')
+            $sales_data_current_year = DB::table('salestargetcustomers')
             ->where('month', 'Aug')
             ->where('year', $currentYear)
-            ->whereIn('user_id', $userIds)
+            ->whereIn('customer_id', $userIds)
             ->select(DB::raw('SUM(achievement) as achievements_current_year'))
             ->first();
 
-            $sales_data_last_year = DB::table('salestargetusers')
+            $sales_data_last_year = DB::table('salestargetcustomers')
             ->where('month', 'Aug')
             ->where('year', $previousYear)
-            ->whereIn('user_id', $userIds)
+            ->whereIn('customer_id', $userIds)
             ->select(DB::raw('SUM(achievement) as achievements_last_year'))
             ->first();    
 
@@ -420,17 +436,17 @@ class CurrentLastYearSalesGrowthExport implements FromCollection,WithHeadings,Sh
             $currentYear = $f_year_array[0];
                        $previousYear = $f_year_array[0] - 1;
                        $growthPercent = ''; 
-                       $sales_data_current_year = DB::table('salestargetusers')
+                       $sales_data_current_year = DB::table('salestargetcustomers')
                        ->where('month', 'Sep')
                        ->where('year', $currentYear)
-                       ->whereIn('user_id', $userIds)
+                       ->whereIn('customer_id', $userIds)
                        ->select(DB::raw('SUM(achievement) as achievements_current_year'))
                        ->first();
 
-                       $sales_data_last_year = DB::table('salestargetusers')
+                       $sales_data_last_year = DB::table('salestargetcustomers')
                        ->where('month', 'Sep')
                        ->where('year', $previousYear)
-                       ->whereIn('user_id', $userIds)
+                       ->whereIn('customer_id', $userIds)
                        ->select(DB::raw('SUM(achievement) as achievements_last_year'))
                        ->first();    
 
@@ -480,17 +496,17 @@ class CurrentLastYearSalesGrowthExport implements FromCollection,WithHeadings,Sh
                     $currentYear = $f_year_array[0];
                     $previousYear = $f_year_array[0] - 1;
                     $growthPercent = ''; 
-                    $sales_data_current_year = DB::table('salestargetusers')
+                    $sales_data_current_year = DB::table('salestargetcustomers')
                     ->where('month', 'Oct')
                     ->where('year', $currentYear)
-                    ->whereIn('user_id', $userIds)
+                    ->whereIn('customer_id', $userIds)
                     ->select(DB::raw('SUM(achievement) as achievements_current_year'))
                     ->first();
 
-                    $sales_data_last_year = DB::table('salestargetusers')
+                    $sales_data_last_year = DB::table('salestargetcustomers')
                     ->where('month', 'Oct')
                     ->where('year', $previousYear)
-                    ->whereIn('user_id', $userIds)
+                    ->whereIn('customer_id', $userIds)
                     ->select(DB::raw('SUM(achievement) as achievements_last_year'))
                     ->first();    
 
@@ -529,17 +545,17 @@ class CurrentLastYearSalesGrowthExport implements FromCollection,WithHeadings,Sh
                       $previousYear = $f_year_array[0] - 1;
                       $growthPercent = '';
 
-                      $sales_data_current_year = DB::table('salestargetusers')
+                      $sales_data_current_year = DB::table('salestargetcustomers')
                           ->where('month', 'Nov')
                           ->where('year', $currentYear)
-                          ->whereIn('user_id', $userIds)
+                          ->whereIn('customer_id', $userIds)
                           ->select(DB::raw('SUM(achievement) as achievements_current_year'))
                           ->first();
 
-                      $sales_data_last_year = DB::table('salestargetusers')
+                      $sales_data_last_year = DB::table('salestargetcustomers')
                           ->where('month', 'Nov')
                           ->where('year', $previousYear)
-                          ->whereIn('user_id', $userIds)
+                          ->whereIn('customer_id', $userIds)
                           ->select(DB::raw('SUM(achievement) as achievements_last_year'))
                           ->first(); 
 
@@ -586,17 +602,17 @@ class CurrentLastYearSalesGrowthExport implements FromCollection,WithHeadings,Sh
             $previousYear = $f_year_array[0] - 1;
             $growthPercent = '';
 
-            $sales_data_current_year = DB::table('salestargetusers')
+            $sales_data_current_year = DB::table('salestargetcustomers')
             ->where('month', 'Dec')
             ->where('year', $currentYear)
-            ->whereIn('user_id', $userIds)
+            ->whereIn('customer_id', $userIds)
             ->select(DB::raw('SUM(achievement) as achievements_current_year'))
             ->first();
 
-            $sales_data_last_year = DB::table('salestargetusers')
+            $sales_data_last_year = DB::table('salestargetcustomers')
             ->where('month', 'Dec')
             ->where('year', $previousYear)
-            ->whereIn('user_id', $userIds)
+            ->whereIn('customer_id', $userIds)
             ->select(DB::raw('SUM(achievement) as achievements_last_year'))
             ->first(); 
 
@@ -648,17 +664,17 @@ class CurrentLastYearSalesGrowthExport implements FromCollection,WithHeadings,Sh
             $previousYear = $f_year_array[1] - 1;
             $growthPercent = '';
 
-            $sales_data_current_year = DB::table('salestargetusers')
+            $sales_data_current_year = DB::table('salestargetcustomers')
             ->where('month', 'Jan')
             ->where('year', $currentYear)
-            ->whereIn('user_id', $userIds)
+            ->whereIn('customer_id', $userIds)
             ->select(DB::raw('SUM(achievement) as achievements_current_year'))
             ->first();
 
-            $sales_data_last_year = DB::table('salestargetusers')
+            $sales_data_last_year = DB::table('salestargetcustomers')
             ->where('month', 'Jan')
             ->where('year', $previousYear)
-            ->whereIn('user_id', $userIds)
+            ->whereIn('customer_id', $userIds)
             ->select(DB::raw('SUM(achievement) as achievements_last_year'))
             ->first(); 
 
@@ -705,17 +721,17 @@ class CurrentLastYearSalesGrowthExport implements FromCollection,WithHeadings,Sh
             $previousYear = $f_year_array[1] - 1;
             $growthPercent = '';
 
-            $sales_data_current_year = DB::table('salestargetusers')
+            $sales_data_current_year = DB::table('salestargetcustomers')
             ->where('month', 'Feb')
             ->where('year', $currentYear)
-            ->whereIn('user_id', $userIds)
+            ->whereIn('customer_id', $userIds)
             ->select(DB::raw('SUM(achievement) as achievements_current_year'))
             ->first();
 
-            $sales_data_last_year = DB::table('salestargetusers')
+            $sales_data_last_year = DB::table('salestargetcustomers')
             ->where('month', 'Feb')
             ->where('year', $previousYear)
-            ->whereIn('user_id', $userIds)
+            ->whereIn('customer_id', $userIds)
             ->select(DB::raw('SUM(achievement) as achievements_last_year'))
             ->first(); 
 
@@ -762,17 +778,17 @@ class CurrentLastYearSalesGrowthExport implements FromCollection,WithHeadings,Sh
             $previousYear = $f_year_array[1] - 1;
             $growthPercent = '';
 
-            $sales_data_current_year = DB::table('salestargetusers')
+            $sales_data_current_year = DB::table('salestargetcustomers')
             ->where('month', 'Mar')
             ->where('year', $currentYear)
-            ->whereIn('user_id', $userIds)
+            ->whereIn('customer_id', $userIds)
             ->select(DB::raw('SUM(achievement) as achievements_current_year'))
             ->first();
 
-            $sales_data_last_year = DB::table('salestargetusers')
+            $sales_data_last_year = DB::table('salestargetcustomers')
             ->where('month', 'Mar')
             ->where('year', $previousYear)
-            ->whereIn('user_id', $userIds)
+            ->whereIn('customer_id', $userIds)
             ->select(DB::raw('SUM(achievement) as achievements_last_year'))
             ->first(); 
 
@@ -823,7 +839,7 @@ class CurrentLastYearSalesGrowthExport implements FromCollection,WithHeadings,Sh
     $response[51] = '=M'.$this->rowIndex.' + Y'.$this->rowIndex.' + AK'.$this->rowIndex.' + AW'.$this->rowIndex;
     $response[52] = '=(N'.$this->rowIndex.' + Z'.$this->rowIndex.' + AL'.$this->rowIndex.' + AX'.$this->rowIndex.') / 4';
 
-    $response[49] = '=IF(AND(AZ'.$this->rowIndex.'=0, AY'.$this->rowIndex.'=0), "0", IF(AY'.$this->rowIndex.'=0, 100, ((AZ'.$this->rowIndex.' - AY'.$this->rowIndex.') / AY'.$this->rowIndex.') * 100))';
+    $response[49] = '=IF(AND(AZ'.$this->rowIndex.'=0, AY'.$this->rowIndex.'=0), "0", IF(AY'.$this->rowIndex.'=0, 100, ((AZ'.$this->rowIndex.' - AY'.$this->rowIndex.') / AW'.$this->rowIndex.') * 100))';
 
     $this->rowIndex++;
 

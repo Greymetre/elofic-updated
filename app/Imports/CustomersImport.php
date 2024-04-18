@@ -71,7 +71,10 @@ class CustomersImport implements ToCollection,WithValidation,WithHeadingRow, Wit
             // ]);
 
             //$user_id = User::where('user_code','=',$row['emp_code'])->pluck('id')->first();
-
+            if(strlen(preg_replace('/\s+/', '', $row['mobile'])) == 10)
+            {
+                $row['mobile'] = '91'.preg_replace('/\s+/', '', $row['mobile']);
+            }
 
 
             if(!empty($row['customer_id'])){
@@ -227,9 +230,7 @@ class CustomersImport implements ToCollection,WithValidation,WithHeadingRow, Wit
             // }else{   
             // $parent_id = null;
             // } 
-
-
-
+            
             if( $customer = Customers::create([
                 'active' => 'Y',
                 'name' => !empty($row['firm_name'])? ucfirst($row['firm_name']):'',

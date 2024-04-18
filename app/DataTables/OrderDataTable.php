@@ -23,6 +23,10 @@ class OrderDataTable extends DataTable
             {
                 return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
             })
+            ->editColumn('total_gst', function($data)
+            {
+                return $data->gst5_amt+$data->gst12_amt+$data->gst18_amt+$data->gst28_amt;
+            })
             ->addColumn('action', function ($query) {
                   $btn = '';
                   $activebtn ='';
@@ -58,7 +62,7 @@ class OrderDataTable extends DataTable
                                 '.$btn.'
                             </div>'.$activebtn;
             })
-            ->rawColumns(['action']);
+            ->rawColumns(['action', 'total_gst']);
     }
 
     /**
@@ -70,7 +74,8 @@ class OrderDataTable extends DataTable
     public function query(Order $model)
     {
         $userids = getUsersReportingToAuth() ;
-        return $model->with('sellers','buyers','statusname')->whereHas('buyers', function($query) use($userids){
+        
+        return $model->with('sellers','buyers','statusname', 'createdbyname')->whereHas('buyers', function($query) use($userids){
                                 if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
                                 {
                                     $query->whereIn('executive_id',$userids);
