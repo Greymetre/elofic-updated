@@ -152,7 +152,8 @@
                  <div class="col-sm-4 invoice-col">
                   Date
                   <address>
-                    <strong>{!! $expense['date'] !!}</strong><br>
+                    <!-- <strong>{!! $expense['date'] !!}</strong><br> -->
+                    <strong>{!! date("d/m/Y g:i a", strtotime($expense['date'])) !!}</strong><br>
                   </address>
                 </div>
               </div>

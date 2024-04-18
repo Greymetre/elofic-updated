@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\BeatController;
 use App\Http\Controllers\Api\CheckinController;
+use App\Http\Controllers\Api\ComplaintController;
 use App\Http\Controllers\Api\CouponController;
 use App\Http\Controllers\Api\CustomController;
 use App\Http\Controllers\Api\CustomerController;
@@ -73,6 +74,7 @@ Route::group(['middleware' => ['auth:customers']], function () {
     // Route::any('customer/getProfile', [LoginController::class, 'getCustomerProfile']);
     // Route::any('customer/updateProfile', [LoginController::class, 'updateCustomerProfile']);
     // Dashboard
+    Route::any('customer/logout', [LoginController::class, 'customerlogout']);
     Route::any('customer/dashboard', [DashboardController::class, 'customerDashboard']);
     Route::any('customer/getKyc', [DashboardController::class, 'getKyc']);
     Route::post('customer/addKyc', [DashboardController::class, 'addKyc']);
@@ -99,6 +101,7 @@ Route::group(['middleware' => ['auth:customers']], function () {
     Route::any('customer/getProductByCoupon', [CouponController::class, 'getProductByCoupon']);
     Route::any('customer/getEndUserData', [CouponController::class, 'getEndUserData']);
     Route::post('customer/warrantyActivation', [CouponController::class, 'warrantyActivation']);
+    Route::any('customer/getwarranty', [CouponController::class, 'getwarranty']);
     // Gift Catalogue
     Route::any('customer/getgiftcatalogue', [GiftController::class, 'getgiftcatalogue']);
     Route::any('customer/getgiftcategories', [GiftController::class, 'getgiftcategories']);
@@ -113,6 +116,9 @@ Route::group(['middleware' => ['auth:customers']], function () {
     Route::post('customer/addSerialNumber', [TransactionHistoryController::class, 'addSerialNumber']);
     Route::get('customer/getDamageEntry', [TransactionHistoryController::class, 'getDamageEntry']);
     Route::post('customer/addDamageEntry', [TransactionHistoryController::class, 'addDamageEntry']);
+    //Complaints Route
+    Route::any('customer/getComplaintType', [ComplaintController::class, 'getComplaintType']);
+
 });
 
 Route::group(['middleware' => ['auth:users']], function () {

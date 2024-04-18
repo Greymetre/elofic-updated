@@ -130,7 +130,7 @@ class ServicesController extends Controller
                           </div>';
             })
             ->addColumn('invoice_date', function ($data) {
-                return date('d M Y', strtotime($data->invoice_date));
+                return date("d/m/Y", strtotime($data->invoice_date));
             })
             ->rawColumns(['action','invoice_date'])
             ->make(true);
@@ -145,7 +145,10 @@ class ServicesController extends Controller
 
     public function serial_number_history_list(Request $request)
     {
-        $data = Services::with('product')->orderBy('invoice_date', 'asc');
+        $data = Services::with('product', 'warrantyDetails')->orderBy('invoice_date', 'desc');
+        if($request->search['value'] && $request->search['value'] != '' && $request->search['value'] != NULL){
+            $data = $data->where('serial_no', $request->search['value']);
+        }
         return Datatables::of($data)
             ->addIndexColumn()
             ->addColumn('expiry_date', function ($data) {
@@ -155,13 +158,39 @@ class ServicesController extends Controller
 
                     $expiryDate = $initialDate->add($product->expiry_interval_preiod, strtolower($product->expiry_interval));
 
-                    return $expiryDate->toDateString();
+                    return date("d/m/Y", strtotime($expiryDate)) ?? '';
+
+                    // return $expiryDate->toDateString();
                 } else {
                     return 'No Expiry Date';
                 }
             })
+            ->addColumn('invoice_date', function ($data) {
+               
+                    return date("d/m/Y", strtotime($data->invoice_date)) ?? '';
+            })
+            ->addColumn('warranty_status', function ($data) {
+               
+                    if($data->warrantyDetails){
+                        return '<a href="/warranty_activation/'.encrypt($data->warrantyDetails->id).'">Active</a>';
+                    }else{
+                        return 'Not Active';
+                    }
+            })
+            ->addColumn('action', function ($data) {
+                $btn = '';
+                 if(auth()->user()->can(['leave_delete'])){
+                 $btn = $btn. '<a href="'.url("services/serial_number_history/edit", $data->id).'" class="btn btn-success btn-just-icon btn-sm" title="Edit Serial Number history">
+                                    <i class="material-icons">edit</i>
+                                  </a>';
+                    }  
 
-            ->rawColumns(['expiry_date',])
+                return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
+                            ' . $btn . '
+                        </div>';
+            })
+
+            ->rawColumns(['expiry_date','invoice_date','action', 'warranty_status'])
             ->make(true);
     }
 
@@ -171,4 +200,27 @@ class ServicesController extends Controller
 
         return response()->json(['status' => 'success', 'message' => 'Serial Number Transaction Delete successfully']);
     }
+
+    public function serial_number_history_edit($id){
+        $serialNumberHistory = Services::with('product')->find($id);
+        $products = Product::all();
+        return view('services.serial_number_history_edit', compact('serialNumberHistory', 'products'))->with('serialNumberHistory', $serialNumberHistory);
+    }
+
+    public function serial_number_history_update(Request $request)
+    {
+        $service = Services::find($request->service_id);
+        
+        $service->serial_no = $request->serial_no;
+        $service->product_code = $request->product_code;
+        $service->party_name = $request->party_name;
+        $service->branch_code = $request->branch_code;
+        $service->invoice_date = $request->invoice_date;
+        $service->invoice_no = $request->invoice_no;
+        $service->narration = $request->narration;
+        $service->save();
+
+        return redirect()->route('service.serial_number_history')->with('message_success', 'Serial number updated successfully.');
+    }
+
 }

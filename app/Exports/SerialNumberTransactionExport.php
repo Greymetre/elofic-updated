@@ -67,7 +67,7 @@ class SerialNumberTransactionExport implements FromCollection,WithHeadings,Shoul
     {
         return [
             $data['invoice_no'],
-            $data['invoice_date'],
+            isset($data['invoice_date']) ? date("d-m-Y", strtotime($data['invoice_date'])) :'',
             $data['party_name'],
             $data['product_code'],
             $data['product_name'],

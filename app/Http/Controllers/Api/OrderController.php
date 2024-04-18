@@ -19,6 +19,7 @@ use App\Models\OrderDetails;
 use App\Models\Attachment;
 use App\Models\Cart;
 use App\Models\Customers;
+use App\Models\Product;
 use App\Models\User;
 use Excel;
 use Illuminate\Support\Facades\Mail;
@@ -94,7 +95,7 @@ class OrderController extends Controller
             $user = $request->user();
             $user_id = $user->id;
             $order_id = $request->input('order_id');
-            $data = $this->orders->with('orderdetails', 'orderdetails.products', 'orderdetails.productdetails')->where('id', $order_id)->first();
+            $data = $this->orders->with('orderdetails', 'orderdetails.products', 'orderdetails.productdetails', 'createdbyname')->where('id', $order_id)->first();
 
             $data['schme_amount'] = (string)$data['schme_amount'];
             $data['ebd_amount'] = (string)$data['ebd_amount'];
@@ -169,37 +170,32 @@ class OrderController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => 'error', 'message' => $validator->messages()->all()], $this->badrequest);
             }
+            $request['order_remark'] = $request['remark'] ?? '';
             $response =  $this->orders->save_data($request);
             if ($response['status'] == 'success') {
                 $orderdetail = collect([]);
                 foreach ($request->orderdetail as $key => $rows) {
 
-
-                    // if($rows['gst5_amt']){
-                    // $gst = 5;
-                    // $gst_amount = $rows['gst5_amt']??0.00;
-
-                    // }elseif($rows['gst12_amt']){
-
-                    // $gst = 12;  
-                    // $gst_amount = $rows['gst12_amt']??0.00;
-
-                    // }elseif($rows['gst18_amt']){
-
-                    // $gst = 18;  
-                    // $gst_amount = $rows['gst18_amt']??0.00;  
-
-                    // }elseif($rows['gst28_amt']){
-
-                    // $gst = 28;  
-                    // $gst_amount = $rows['gst28_amt']??0.00;    
-
-                    // }else{
-
-                    // $gst = 0;  
-                    // $gst_amount = 0;      
-
-                    // }
+                    $product = Product::with('productpriceinfo')->find($rows['product_id']);
+                    if ($product) {
+                        $rows['discount'] = $product->productpriceinfo->discount;
+                        if ($product->productpriceinfo->gst == '5') {
+                            $gst = 5;
+                            $gst_amount = (($rows['quantity']*$rows['price'])*5)/100;
+                        } elseif ($product->productpriceinfo->gst == '12') {
+                            $gst = 12;
+                            $gst_amount = (($rows['quantity']*$rows['price'])*12)/100;
+                        } elseif ($product->productpriceinfo->gst == '18') {
+                            $gst = 18;
+                            $gst_amount = (($rows['quantity']*$rows['price'])*18)/100;
+                        } elseif ($product->productpriceinfo->gst == '28') {
+                            $gst = 28;
+                            $gst_amount = (($rows['quantity']*$rows['price'])*28)/100;
+                        } else {
+                            $gst = 0;
+                            $gst_amount = 0;
+                        }
+                    }
 
 
 
@@ -226,8 +222,8 @@ class OrderController extends Controller
                         // 'deal_amount' => isset($rows['deal_amount']) ? $rows['deal_amount'] :0.00,
                         // 'frieght_discount' => isset($rows['frieght_discount']) ? $rows['frieght_discount'] :0.00,
                         // 'frieght_amount' => isset($rows['frieght_amount']) ? $rows['frieght_amount'] :0.00,
-                        // 'gst' => $gst??0,
-                        // 'gst_amount' => $gst_amount??0,
+                        'gst' => $gst ?? 0,
+                        'gst_amount' => $gst_amount ?? 0,
 
 
                     ]);
@@ -392,8 +388,10 @@ class OrderController extends Controller
             $user = $request->user();
             $user_id = $user->id;
             $pageSize = $request->input('pageSize');
-            $query = $this->orders->where(function ($query) use ($user_id) {
-                $query->where('created_by', '=', $user_id);
+            $user_ids = getUsersReportingToAuth($user_id);
+
+            $query = $this->orders->where(function ($query) use ($user_ids) {
+                $query->whereIn('created_by', $user_ids);
             })
                 ->latest()
                 ->where('cluster_discount', '!=', NULL);
@@ -415,8 +413,7 @@ class OrderController extends Controller
                         'completed_date' => isset($value['completed_date']) ? $value['completed_date'] : '',
                         'grand_total' => isset($value['grand_total']) ? $value['grand_total'] : 0.00,
                         'sub_total' => isset($value['sub_total']) ? $value['sub_total'] : 0.00,
-                        'discount_status' => (($value['discount_status'] == '1') ? 'Approved' : (($value['discount_status'] == '2') ? 'Reject' : 'Pending'))
-                        ,
+                        'discount_status' => (($value['discount_status'] == '1') ? 'Approved' : (($value['discount_status'] == '2') ? 'Reject' : 'Pending')),
                     ]);
                 }
                 return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], $this->successStatus);
@@ -442,25 +439,27 @@ class OrderController extends Controller
             if ($order) {
                 $order->sub_total = $request->sub_total;
                 $order->grand_total = $request->grand_total;
-                $order->gst_amount = $request->gst_amount??'';
-                $order->cluster_discount = $request->cluster_discount??'';
-                $order->cluster_amount = $request->cluster_amount??'';
-                $order->deal_discount = $request->deal_discount??'';
-                $order->deal_amount = $request->deal_amount??'';
-                $order->distributor_discount = $request->distributor_discount??'';
-                $order->distributor_amount = $request->distributor_amount??'';
-                $order->frieght_discount = $request->frieght_discount??'';
-                $order->frieght_amount = $request->frieght_amount??'';
-                $order->discount_status = $request->discount_status??'';
-                $order->gst5_amt = $request->gst5_amt??NULL;
-                $order->gst12_amt = $request->gst12_amt??NULL;
-                $order->gst18_amt = $request->gst18_amt??NULL;
-                $order->gst28_amt = $request->gst28_amt??NULL;
-                $order->ebd_discount = $request->ebd_discount??NULL;
-                $order->ebd_amount = $request->ebd_amount??NULL;
-                $order->special_discount = $request->special_discount??NULL;
-                $order->special_amount = $request->special_amount??NULL;
+                $order->gst_amount = $request->gst_amount ?? '';
+                $order->cluster_discount = $request->cluster_discount ?? '';
+                $order->cluster_amount = $request->cluster_amount ?? '';
+                $order->deal_discount = $request->deal_discount ?? '';
+                $order->deal_amount = $request->deal_amount ?? '';
+                $order->distributor_discount = $request->distributor_discount ?? '';
+                $order->distributor_amount = $request->distributor_amount ?? '';
+                $order->frieght_discount = $request->frieght_discount ?? '';
+                $order->frieght_amount = $request->frieght_amount ?? '';
+                $order->discount_status = $request->discount_status ?? '';
+                $order->discount_status = $request->discount_status ?? '';
+                $order->gst5_amt = $request->gst5_amt ?? NULL;
+                $order->gst12_amt = $request->gst12_amt ?? NULL;
+                $order->gst18_amt = $request->gst18_amt ?? NULL;
+                $order->gst28_amt = $request->gst28_amt ?? NULL;
+                $order->ebd_discount = $request->ebd_discount ?? NULL;
+                $order->ebd_amount = $request->ebd_amount ?? NULL;
+                $order->special_discount = $request->special_discount ?? NULL;
+                $order->special_amount = $request->special_amount ?? NULL;
                 $order->updated_at = getcurentDateTime();
+                $order->updated_by = auth()->user()->id;
                 $order->save();
                 return response()->json(['status' => 'success', 'message' => 'Data updated successfully.', 'data' => $order], 200);
             } else {

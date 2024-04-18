@@ -11,7 +11,7 @@ class Order extends Model
 
     protected $table = 'orders';
 
-    protected $fillable = [ 'active','buyer_id','seller_id','executive_id','total_qty','shipped_qty','orderno','order_date','completed_date','estimated_date','total_gst','total_discount','extra_discount','extra_discount_amount','sub_total','grand_total','order_taking','status_id','address_id','suc_del','gst_amount','schme_amount','ebd_amount','ebd_discount',	'special_discount','special_amount',	'cluster_discount','cluster_amount','deal_discount','deal_amount','distributor_discount','distributor_amount','frieght_discount','frieght_amount',	'gst5_amt','gst12_amt','gst18_amt','gst28_amt','order_remark','discount_status','created_by', 'updated_by','deleted_at','created_at','updated_at','beatscheduleid',];
+    protected $fillable = [ 'active','buyer_id','seller_id','executive_id','total_qty','shipped_qty','orderno','order_date','completed_date','estimated_date','total_gst','total_discount','extra_discount','extra_discount_amount','sub_total','grand_total','order_taking','status_id','address_id','suc_del','gst_amount','schme_amount','ebd_amount','ebd_discount',	'special_discount','special_amount','cluster_discount','cluster_amount','deal_discount','deal_amount','distributor_discount','distributor_amount','frieght_discount','frieght_amount',	'gst5_amt','gst12_amt','gst18_amt','gst28_amt','order_remark','discount_status','created_by', 'updated_by','deleted_at','created_at','updated_at','beatscheduleid',];
 
     public function message()
     {
@@ -87,10 +87,10 @@ class Order extends Model
                 'distributor_amount' => isset($request['distributor_amount']) ? $request['distributor_amount'] :null,   
                 'frieght_discount' => isset($request['frieght_discount']) ? $request['frieght_discount'] :null,   
                 'frieght_amount' => isset($request['frieght_amount']) ? $request['frieght_amount'] :null,   
-                'gst5_amt' => isset($request['gst5_amt']) ? $request['gst5_amt'] :null,   
-                'gst12_amt' => isset($request['gst12_amt']) ? $request['gst12_amt'] :null,   
-                'gst18_amt' => isset($request['gst18_amt']) ? $request['gst18_amt'] :null,   
-                'gst28_amt' => isset($request['gst28_amt']) ? $request['gst28_amt'] :null,   
+                'gst5_amt' => isset($request['gst5_amt']) ? $request['gst5_amt'] :0.00,   
+                'gst12_amt' => isset($request['gst12_amt']) ? $request['gst12_amt'] :0.00,   
+                'gst18_amt' => isset($request['gst18_amt']) ? $request['gst18_amt'] :0.00,   
+                'gst28_amt' => isset($request['gst28_amt']) ? $request['gst28_amt'] :0.00,   
                 'created_by' => isset($request['created_by']) ? $request['created_by'] :null,     
                 'order_remark' => isset($request['order_remark']) ? $request['order_remark'] :null,     
                 'created_at' => $created_at ,
@@ -109,6 +109,10 @@ class Order extends Model
     public function createdbyname()
     {
         return $this->belongsTo('App\Models\User', 'created_by', 'id')->select('id','name','profile_image');
+    }
+    public function updatedbyname()
+    {
+        return $this->belongsTo('App\Models\User', 'updated_by', 'id')->select('id','name','profile_image');
     }
 
     public function sellers()

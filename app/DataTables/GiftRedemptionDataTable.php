@@ -69,7 +69,7 @@ class GiftRedemptionDataTable extends DataTable
                 } elseif ($data->status == '2') {
                     return '<button id="' . $data->id . '" data-status="2" class="ChangeStatusGift btn btn-danger">Rejected</button>';
                 } elseif ($data->status == '4') {
-                    return '<button id="' . $data->id . '" data-status="4" class="ChangeStatusGift btn btn-success">Success</button><p class="badge badge-info">Remark - '.$data->remark.'</p>';
+                    return '<button id="' . $data->id . '" data-status="4" class=" btn btn-success">Success</button><p class="badge badge-info">Remark - '.$data->remark.'</p>';
                 }
             })
             ->addColumn('action', function ($query) {

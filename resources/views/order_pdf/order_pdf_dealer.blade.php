@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,27 +11,39 @@
         body {
             font-family: Arial, sans-serif;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
         }
-        th, td {
+
+        th,
+        td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
         }
+
         th {
             background-color: #f2f2f2;
         }
+
         .total-row {
             font-weight: bold;
         }
     </style>
 </head>
+
 <body>
     <h1>Order Details</h1>
     <table>
         <thead>
+            <tr>
+                <td>Order Number</td>
+                <td>{{ $order->orderno?$order->orderno:'' }}</td>
+                <td>Order Date</td>
+                <td>{{ $order->order_date?$order->order_date:'' }}</td>
+            </tr>
             <tr>
                 <th colspan="2">Buyer Details</th>
                 <th colspan="2">Seller Details</th>
@@ -57,7 +70,7 @@
             </tr>
         </tbody>
     </table>
-    
+
 
     <h2>Product Details</h2>
     <table>
@@ -84,77 +97,84 @@
             </tr>
             @php $ttq += $detail->quantity; @endphp
             @endforeach
-
-            <tr><th colspan="5"> </th></tr>
-
+        </tbody>
+    </table>
+    <table>
+        <tbody>
             <tr>
-                <th colspan="2">Sub Total</th>
-                <th colspan="3">{{$order->sub_total}}</th>
-            </tr>
-
-            <tr><th colspan="5"> </th></tr>
-
-            <tr>
-                <th colspan="2">EBD Discount</th>
-                <th colspan="3">{{$order->ebd_amount}}</th>
+                <th colspan="5">Scheme Discount</th>
+                <th>{{$order->schme_amount}}</th>
             </tr>
             <tr>
-                <th>Cluster Discount%</th>
-                <th>{{$order->cluster_discount}}</th>
-                <th colspan="3">{{$order->cluster_amount}}</th>
+                <th colspan="4">EBD Discount</th>
+                <th>{{$order->ebd_discount}}</th>
+                <th>{{$order->ebd_amount}}</th>
             </tr>
             <tr>
-                <th>Deal Discount%</th>
-                <th>{{$order->deal_discount}}</th>
-                <th colspan="3">{{$order->deal_amount}}</th>
-            </tr>
-            <tr>
-                <th>Distributor Discount%</th>
+                <th colspan="4">MOU Discount%</th>
                 <th>{{$order->distributor_discount}}</th>
-                <th colspan="3">{{$order->distributor_amount}}</th>
+                <th>{{$order->distributor_amount}}</th>
             </tr>
             <tr>
-                <th>Frieght Discount%</th>
-                <th>{{$order->frieght_discount}}</th>
-                <th colspan="3">{{$order->frieght_amount}}</th>
+                <th colspan="4">Special Discount%</th>
+                <th>{{$order->special_discount}}</th>
+                <th>{{$order->special_amount}}</th>
             </tr>
-            
-            <tr><th colspan="5"> </th></tr>
+            <tr>
+                <th colspan="4">Frieght Discount%</th>
+                <th>{{$order->frieght_discount}}</th>
+                <th>{{$order->frieght_amount}}</th>
+            </tr>
+            <tr>
+                <th colspan="4">Cluster Discount%</th>
+                <th>{{$order->cluster_discount}}</th>
+                <th>{{$order->cluster_amount}}</th>
+            </tr>
+            <tr>
+                <th colspan="4">Deal Discount%</th>
+                <th>{{$order->deal_discount}}</th>
+                <th>{{$order->deal_amount}}</th>
+            </tr>
+
+            <tr>
+                <th colspan="5">Sub Total</th>
+                <th>{{$order->sub_total}}</th>
+            </tr>
 
             @if($order->gst5_amt && $order->gst5_amt != '' && $order->gst5_amt != NULL)
             <tr>
-                <th colspan="2">5% Tax</th>
-                <th colspan="3">{{$order->gst5_amt}}</th>
+                <th colspan="5">5% Tax</th>
+                <th>{{$order->gst5_amt}}</th>
             </tr>
             @endif
             @if($order->gst12_amt && $order->gst12_amt != '' && $order->gst12_amt != NULL)
             <tr>
-                <th colspan="2">12% Tax</th>
-                <th colspan="3">{{$order->gst12_amt}}</th>
+                <th colspan="5">12% Tax</th>
+                <th>{{$order->gst12_amt}}</th>
             </tr>
             @endif
             @if($order->gst18_amt && $order->gst18_amt != '' && $order->gst18_amt != NULL)
             <tr>
-                <th colspan="2">18% Tax</th>
-                <th colspan="3">{{$order->gst18_amt}}</th>
+                <th colspan="5">18% Tax</th>
+                <th>{{$order->gst18_amt}}</th>
             </tr>
             @endif
             @if($order->gst28_amt && $order->gst28_amt != '' && $order->gst28_amt != NULL)
             <tr>
-                <th colspan="2">28% Tax</th>
-                <th colspan="3">{{$order->gst28_amt}}</th>
+                <th colspan="5">28% Tax</th>
+                <th>{{$order->gst28_amt}}</th>
             </tr>
             @endif
             <tr>
-                <th colspan="2">Total Order Value</th>
-                <th colspan="3">{{$order->grand_total}}</th>
+                <th colspan="5">Total Order Value</th>
+                <th>{{$order->grand_total}}</th>
             </tr>
-            <tr><th colspan="5"> </th></tr>
             <tr>
-                <th colspan="5">Remark - {{$order->order_remark}}</th>
+                <th colspan="6">Remark - {{$order->order_remark}}</th>
             </tr>
         </tbody>
     </table>
 
 </body>
+
 </html>

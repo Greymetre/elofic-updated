@@ -36,6 +36,7 @@
             'files'=>true
             ]) !!}
             <input type="hidden" name="id" id="customer_id" value="{!! $customers['id'] !!}">
+            <div class="first-box">
             <div class="row">
               <div class="col-md-3 ml-auto mr-auto">
                  <div class="fileinput fileinput-new text-center" data-provides="fileinput">
@@ -155,7 +156,7 @@
                 <label class="col-md-3 col-form-label">{!! trans('panel.global.mobile') !!}<span class="text-danger"> *</span></label>
                 <div class="col-md-9">
                   <div class="form-group has-default bmd-form-group">
-                    <input type="text" name="mobile" id="mobile" class="form-control" value="{!! old( 'mobile', $customers['mobile']) !!}" maxlength="13" minlength="10" required>
+                    <input type="text" name="mobile"  pattern="[0-9]{10}" id="mobile" class="form-control" value="{!! old( 'mobile', $customers['mobile']) !!}" required>
                   </div>
                   @if ($errors->has('mobile'))
                     <label class="error">{{ $errors->first('mobile') }}</label>
@@ -338,12 +339,13 @@
                   </div>
                 </div>
               </div>
-
+              </div>
              <!-- end new feld -->
 
           </div>
           <hr class="my-3">
             <h4 class="section-heading mb-3  h4 mt-0 text-center text-theme2">{!! trans('panel.customers.title_address') !!}</h4> 
+            <div class="second-box">
             <div class="row">
               <div class="col-md-6">
                 <div class="row">
@@ -506,8 +508,10 @@
                 </div>
               </div>
             </div>
+            </div>
           <hr class="my-3">
           <h4 class="section-heading mb-3  h4 mt-0 text-center text-theme2">{!! trans('panel.customers.title_kyc') !!}</h4> 
+          <div class="last-box">
           <div class="row">
               <div class="col-md-6">
                 <div class="row">
@@ -773,11 +777,11 @@
             </div>
             <hr class="my-3">
             <!-- <h4 class="section-heading mb-3  h4 mt-0 text-center text-info">Customer survey</h4>  -->
-            <div class="row">
+            <div class="row last-inner-form">
               <div class="col-md-12">
                 <div id="accordion" role="tablist">
                   <div class="card-collapse">
-                    <div class="card-header" role="tab" id="headingOne">
+                    <div class="card-header inner-form-heading" role="tab" id="headingOne">
                       <h4 class="section-heading mb-3  h4 mt-0 text-theme2"><a data-toggle="collapse" href="#collapseOne" aria-expanded="false" aria-controls="collapseOne" class="collapsed">
                           Customer survey
                           <i class="material-icons">keyboard_arrow_down</i>
@@ -876,6 +880,7 @@
             </div>
             {{ Form::close() }} 
          </div>
+      </div>
       </div>
    </div>
 </div>

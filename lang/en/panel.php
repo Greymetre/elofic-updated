@@ -79,6 +79,7 @@ return [
         'title' => 'Target Achievement Users',
         'target_users'        => 'Target Users',
         'select-divisions'    => 'Divisions',
+        'sales_type'          => 'Type',
         'month'               => 'Month',
         'year'                => 'Year',
         'user_name'           => 'User Name',
@@ -88,6 +89,7 @@ return [
         'achievement'         => 'Achievement',
         'branch'              => 'Branch',
         'designation'         => 'Designation',
+        'type'                => 'Sales Type',
         'achievement_percent' => 'Achievement%',
 
     ],
@@ -97,7 +99,27 @@ return [
         'title_singular' => 'Dealer Distributor user',
     ],
 
-    'sales_target_user'           => [
+    'sales_dealer_distributor' => [
+        'title'               => 'Target Achievement Dealer/Distributor Wise',
+        'target_dealers'      => 'Target Dealers',
+        'select-divisions'    => 'Divisions',
+        'sales_type'          => 'Type',
+        'month'               => 'Month',
+        'year'                => 'Year',
+        'dealer_distributor'  => 'Sales Dealer/Distributor',
+        'dealer_distributor_name' => 'Dealer/Distributor Name',
+        'dealer_distributor_firm_name' => 'Firm Name',
+        'branch_name'         => 'Branch Name',
+        'target'              => 'Target',
+        'achievement'         => 'Achievement',
+        'branch'              => 'Branch',
+        'designation'         => 'Designation',
+        'achievement_percent' => 'Achievement%',
+        'city'  => 'City',
+        'type'  => 'Sales Type',
+    ],
+
+    'sales_target_dealer'    => [
         'title'          => 'Sales Target Users',
         'title_singular' => 'Sales Target User',
         'fields'         => [
@@ -105,10 +127,53 @@ return [
         'category_name'  => 'Category Name',
         'target'         => 'Target',
         'category_image' => 'Category Image',
-        'user'           => 'User',
+        'dealer'         => 'Dealer/Distributor Name',
+        'dealer_firm_name' => 'Firm Name',
+        'sales_type'     => 'Sales Type',
         'month'          => 'Month',
         'year'           => 'Year',
         'update'         => 'Update',
+        ],
+    ],
+
+    'sales_dealers_achievement'  => [
+       'title'          => 'Sales Dealers/Distributor Achievements',
+       'title_singular' => 'Sales Dealers/Distributor Achievement',
+       'fields'         => [
+       'id'             => 'ID',
+       'user_id'        => 'User ID',
+       'target'         => 'Target',
+       'category_image' => 'Category Image',
+       'user'           => 'User',
+       'month'          => 'Month',
+       'year'           => 'Year',
+       'update'         => 'Update',
+       ],
+    ],
+
+    'cy_and_ly_dealers_target' => [
+        'title' => 'Current & Last Year Dealers Target'
+    ],
+
+    'sales_dealer_distributor_branch' => [
+        'title'          => 'Sales Dealers/Distributors Branches',
+        'title_singular' => 'Sales Dealers/Distributors Branch',
+    ],
+
+
+    'sales_target_user'           => [
+        'title'          => 'Sales Target Users',
+        'title_singular' => 'Sales Target User',
+        'fields'         => [
+            'id'             => 'ID',
+            'category_name'  => 'Category Name',
+            'target'         => 'Target',
+            'category_image' => 'Category Image',
+            'user'           => 'User',
+            'month'          => 'Month',
+            'year'           => 'Year',
+            'update'         => 'Update',
+            'type'           => 'Type',
         ],
     ],
 
@@ -145,6 +210,7 @@ return [
         'mobile_number'  => 'Mobile Number',
         'app_version'  => 'App Version',
         'device_type'  => 'Device Type',
+        'device_name'  => 'Device Name',
         'first_login_date'  => 'First Login Date',
         'last_login_date'  => 'Last Login Date',
         'login_status'  => 'Login Status',
@@ -1083,7 +1149,7 @@ return [
         'orderno'              => 'Order No',
         'order_date'              => 'Order Date',
         'completed_date'              => 'Closed Date',
-        'total_gst'              => 'Total Tax',
+        'total_gst'              => 'Total GST',
         'sub_total'              => 'Subtotal',
         'grand_total'              => 'Grand Total',
         'status_id'              => 'Order Status',

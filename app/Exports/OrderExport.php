@@ -2,7 +2,9 @@
 
 namespace App\Exports;
 
+use App\Models\Customers;
 use App\Models\OrderDetails;
+use App\Models\User;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -20,6 +22,7 @@ class OrderExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapp
         $this->startdate = $request->input('start_date');
         $this->enddate = $request->input('end_date');
         $this->order_id = $request->input('order_id');
+        $this->dividion_id = $request->input('dividion_id');
 
         $this->userids = getUsersReportingToAuth();
     }
@@ -51,10 +54,15 @@ class OrderExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapp
                     }
                     if($this->order_id)
                     {
-                        $query->where('id',$this->order_id);
+                        $query->where('order_id',$this->order_id);
+                    }  
+                    if($this->dividion_id)
+                    {
+                        $users = User::where('division_id', $this->dividion_id)->pluck('id');
+                        $query->whereIn('created_by',$users);
                     }  
                    
-                })->select('id','order_id', 'product_id', 'product_detail_id', 'quantity', 'shipped_qty', 'price', 'discount', 'discount_amount', 'tax_amount', 'line_total', 'status_id', 'created_at','scheme_name','scheme_discount','scheme_amount','cluster_discount','cluster_amount','deal_discount','deal_amount','distributor_discount','distributor_amount')->latest()->get();      
+                })->latest()->get();      
 
             }else{
 
@@ -73,7 +81,12 @@ class OrderExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapp
                     }
                     if($this->order_id)
                     {
-                        $query->where('id',$this->order_id);
+                        $query->where('order_id',$this->order_id);
+                    }  
+                    if($this->dividion_id)
+                    {
+                        $users = User::where('division_id', $this->dividion_id)->pluck('id');
+                        $query->whereIn('created_by',$users);
                     }  
                    
                 })->select('id','order_id', 'product_id', 'product_detail_id', 'quantity', 'shipped_qty', 'price', 'discount', 'discount_amount', 'tax_amount', 'line_total', 'status_id', 'created_at','scheme_name','scheme_discount','scheme_amount','cluster_discount','cluster_amount','deal_discount','deal_amount','distributor_discount','distributor_amount')->latest()->get();          
@@ -86,7 +99,7 @@ class OrderExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapp
 
     public function headings(): array
     {
-        return ['id','Order Date','Retailer ID','Customer','Customer Name', 'Dealer ID','Dealer & Distributor Name', 'User Name' ,'Order No','Invoice No','Invoice Date','Order ID', 'Order Status', 'Product Name', 'Product ID', 'Product Detail', 'Product Stage','kW', 'HP','Suc x Del','Category','Subcategory','Quantity', 'Shipped Qty','Pending Qty','Rate(LP)','Trade Discount%','EBD Discount%', 'EBD Name','CLuster Discount%','Deal Dicount%','Distributor Discount%','Frieght Discount%','Sub Total','Tax%','Total', 'Status','Employee Code','Branch','Division','Designation'];
+        return ['id','Order Date','Employee Code', 'User Name','Branch','Division','Designation','Retailer ID','Customer','Customer Name', 'Dealer ID','Dealer & Distributor Name' ,'Order No','Order ID', 'Order Status','Category','Subcategory', 'Product Code', 'Product Name', 'Product ID', 'Product Stage','kW', 'HP','Suc x Del','Quantity', 'Shipped Qty','Pending Qty','Rate(LP)','Trade Discount%','Scheme Discount%', 'Scheme Name', 'EBD Discount%', 'MOU Discount%','Special Discount%','Frieght Discount%','Cluster Discount%','Deal Dicount%','Cash Discount%','Tax%','Sub Total','Total', 'Order Remark','Discount Approvel Remark', 'Discount Approve By', 'Status'];
     }
 
     public function map($data): array
@@ -114,30 +127,32 @@ class OrderExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapp
         return [
             $data['id'],
             isset($data['orders']['order_date']) ? date('Y-m-d', strtotime($data['orders']['order_date'])) :'',
+            isset($data['orders']['getuserdetails']['employee_codes']) ? $data['orders']['getuserdetails']['employee_codes'] :'',
+            isset($data['orders']['createdbyname']['name']) ? $data['orders']['createdbyname']['name'] :'',
+            isset($data['orders']['getuserdetails']['getbranch']['branch_name']) ? $data['orders']['getuserdetails']['getbranch']['branch_name'] :'',
+            isset($data['orders']['getuserdetails']['getdivision']['division_name']) ? $data['orders']['getuserdetails']['getdivision']['division_name'] :'',
+            isset($data['orders']['getuserdetails']['getdesignation']['designation_name']) ? $data['orders']['getuserdetails']['getdesignation']['designation_name'] :'',
             isset($data['orders']['buyer_id']) ? $data['orders']['buyer_id'] :'',
             isset($data['orders']['buyers']['customertypes']['customertype_name']) ? $data['orders']['buyers']['customertypes']['customertype_name'] :'',
             isset($data['orders']['buyers']['name']) ? $data['orders']['buyers']['name'] :'',
             isset($data['orders']['seller_id']) ? $data['orders']['seller_id'] :'',
             isset($data['orders']['sellers']['name']) ? $data['orders']['sellers']['name'] :'',
-            isset($data['orders']['createdbyname']['name']) ? $data['orders']['createdbyname']['name'] :'',
             isset($data['orders']['orderno']) ? $data['orders']['orderno'] :'',
-            isset($data['orders']['getsalesdetail']['invoice_no']) ? $data['orders']['getsalesdetail']['invoice_no'] :'',
-            isset($data['orders']['getsalesdetail']['invoice_date']) ? $data['orders']['getsalesdetail']['invoice_date'] :'',
-            isset($data['order_id']) ? $data['order_id'] :'',
+            isset($data['orders']['id']) ? $data['orders']['id'] :'',
          
             // isset($data['orders']['sub_total']) ? $data['orders']['sub_total'] :'',
             // isset($data['orders']['grand_total']) ? $data['orders']['grand_total'] :'',
             // isset($data['orders']['statusname']['status_name']) ? $data['orders']['statusname']['status_name'] :'',
             isset($data['statusname']['status_name']) ? $data['statusname']['status_name'] :'',
+            isset($data['products']['categories']['category_name']) ? $data['products']['categories']['category_name'] :'',
+            isset($data['products']['subcategories']['subcategory_name']) ? $data['products']['subcategories']['subcategory_name'] :'',
+            isset($data['products']['product_code']) ? $data['products']['product_code'] :'',
             isset($data['products']['product_name']) ? $data['products']['product_name'] :'',
             isset($data['product_id'])? $data['product_id'] :'',
-            isset($data['products']['description']) ? $data['products']['description'] :'',
             isset($data['products']['product_no']) ? $data['products']['product_no'] :'',
             isset($data['products']['part_no']) ? $data['products']['part_no'] :'',
             isset($data['products']['specification']) ? $data['products']['specification'] :'',
             isset($data['products']['suc_del']) ? $data['products']['suc_del'] :'',
-            isset($data['products']['categories']['category_name']) ? $data['products']['categories']['category_name'] :'',
-            isset($data['products']['subcategories']['subcategory_name']) ? $data['products']['subcategories']['subcategory_name'] :'',
             isset($data['quantity'])? $data['quantity'] :'',
             isset($data['shipped_qty'])? $data['shipped_qty'] :'',
             $pending_qty??0,
@@ -152,21 +167,23 @@ class OrderExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapp
 
             isset($data['scheme_discount']) ? $data['scheme_discount'] :'',
             isset($data['scheme_name']) ? $data['scheme_name'] :'',
-            isset($data['cluster_discount']) ? $data['cluster_discount'] :'',
-            isset($data['deal_discount']) ? $data['deal_discount'] :'',
-            isset($data['distributor_discount']) ? $data['distributor_discount'] :'',
-            isset($data['frieght_discount']) ? $data['frieght_discount'] :'',
-            isset($data['line_total'])? $data['line_total'] :'',
+            isset($data['orders']['ebd_discount']) ? $data['orders']['ebd_discount'] :'',
+            isset($data['orders']['distributor_discount']) ? $data['orders']['distributor_discount'] :'',
+            isset($data['orders']['special_discount']) ? $data['orders']['special_discount'] :'',
+            isset($data['orders']['frieght_discount']) ? $data['orders']['frieght_discount'] :'',
+            isset($data['orders']['cluster_discount']) ? $data['orders']['cluster_discount'] :'',
+            isset($data['orders']['deal_discount']) ? $data['orders']['deal_discount'] :'',
+            isset($data['orders']['cash_discount']) ? $data['orders']['cash_discount'] :'',
             isset($data['products']['productpriceinfo']['gst']) ? $data['products']['productpriceinfo']['gst'] :'',
-
+            isset($data['line_total'])? $data['line_total'] :'',
+            
             //isset($data['line_total'])? $data['line_total'] :'',
             $grandtotal,
+            isset($data['orders']['order_remark']) ? $data['orders']['order_remark'] :'',
+            isset($data['orders']['order_remark']) ? $data['orders']['order_remark'] :'',
+            isset($data['orders']['updatedbyname']) ? $data['orders']['updatedbyname']['name'] :'',
 
             isset($data['statusname']['status_name']) ? $data['statusname']['status_name'] :'',
-            isset($data['orders']['getuserdetails']['employee_codes']) ? $data['orders']['getuserdetails']['employee_codes'] :'',
-            isset($data['orders']['getuserdetails']['getbranch']['branch_name']) ? $data['orders']['getuserdetails']['getbranch']['branch_name'] :'',
-            isset($data['orders']['getuserdetails']['getdivision']['division_name']) ? $data['orders']['getuserdetails']['getdivision']['division_name'] :'',
-            isset($data['orders']['getuserdetails']['getdesignation']['designation_name']) ? $data['orders']['getuserdetails']['getdesignation']['designation_name'] :'',
 
 
         ];

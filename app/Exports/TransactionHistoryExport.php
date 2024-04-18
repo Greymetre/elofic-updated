@@ -62,7 +62,7 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
             $all_serial_number = Services::whereIn('product_code', $all_product_code)->pluck('serial_no');
             
             if(!empty($all_serial_number)){
-                $data->whereIn('coupen_code', $all_serial_number);
+                $data->whereIn('coupon_code', $all_serial_number);
             }
         }
         if ($this->startdate && $this->startdate != null && $this->startdate != '' && $this->enddate && $this->enddate != null && $this->enddate != '') {
@@ -71,8 +71,8 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
             $data = $data->whereDate('created_at', '>=', $startDate)
                 ->whereDate('created_at', '<=', $endDate);
         }
-        
         $data = $data->latest()->get();
+        
         return $data;
     }
 
@@ -148,7 +148,7 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
                 $data['state_name'] = isset($data['customer']['customeraddress']['statename']['state_name']) ? $data['customer']['customeraddress']['statename']['state_name'] : '',
                 implode(',', $branch_arr),
                 implode(',', $division_arr),
-                $data['coupen_code'],
+                $data['coupon_code'],
                 $data['scheme']?$data['scheme']['product']['subcategories']['subcategory_name']:'',
                 $data['scheme']?$data['scheme']['product']['id']:'',
                 $data['scheme']?$data['scheme']['product']['product_name']:'',
@@ -176,7 +176,7 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
                 $data['state_name'] = isset($data['customer']['customeraddress']['statename']['state_name']) ? $data['customer']['customeraddress']['statename']['state_name'] : '',
                 implode(',', $branch_arr),
                 implode(',', $division_arr),
-                $data['coupen_code'],
+                $data['coupon_code'],
                 $data['scheme']?$data['scheme']['product']['subcategories']['subcategory_name']:'',
                 $data['scheme']?$data['scheme']['product']['id']:'',
                 $data['scheme']?$data['scheme']['product']['product_name']:'',

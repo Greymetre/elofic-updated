@@ -87,7 +87,7 @@ class AttendanceExport implements FromCollection,WithHeadings,ShouldAutoSize,Wit
 
             $data['punchin_date'],
             $data['punchin_time'],
-            isset($data['punchout_time']) ? $data['punchout_time'] :'21:00:00',
+            isset($data['punchout_time']) ? $data['punchout_time'] :'misspunch',
             $data['worked_time'],
             isset($data['working_type']) ? $data['working_type'] : '',
             $status,

@@ -8,6 +8,7 @@ use App\Models\Address;
 use App\Models\CustomerDetails;
 use App\Models\Customers;
 use App\Models\CustomerType;
+use App\Models\MobileUserLoginDetails;
 use App\Models\ParentDetail;
 use App\Models\Pincode;
 use App\Models\State;
@@ -15,6 +16,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\UserLogin;
 use App\Services\InfismsApiClient;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Redirect;
@@ -172,6 +174,27 @@ class LoginController extends Controller
                     'customer_id'   =>  $user->id,
                     'fcm_token'   =>  $request['fcm_token'],
                 ]);
+                $checkLastLogin = MobileUserLoginDetails::where('customer_id', $user->id)->first();
+                if($checkLastLogin){
+                    MobileUserLoginDetails::updateOrCreate(['customer_id' => $user->id], [
+                        'customer_id'   =>  $user->id,
+                        'app_version'   =>  $request['app_version'],
+                        'device_type'   =>  $request['device_type'],
+                        'device_name'   =>  $request['device_name'],
+                        'last_login_date'   =>  Carbon::now(),
+                        'login_status'   =>  '1',
+                    ]);
+                }else{
+                    MobileUserLoginDetails::updateOrCreate(['customer_id' => $user->id], [
+                        'customer_id'   =>  $user->id,
+                        'app_version'   =>  $request['app_version'],
+                        'device_type'   =>  $request['device_type'],
+                        'device_name'   =>  $request['device_name'],
+                        'first_login_date'   =>  Carbon::now(),
+                        'last_login_date'   =>  Carbon::now(),
+                        'login_status'   =>  '1',
+                    ]);
+                }
                 if ($username == '917788996655') {
                     $otp = 1234;
                 } else {
@@ -356,6 +379,23 @@ class LoginController extends Controller
                     return response()->json(['status' => 'success', 'userinfo' => $customer, 'push_notification'=>$send_notification], $this->successStatus);
                 }
             }
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
+    }
+
+    public function customerlogout(Request $request)
+    {
+        try {
+            $user = $request->user();
+            if ($request->user()->token()->revoke()) {
+                MobileUserLoginDetails::updateOrCreate(['customer_id' => $user->id], [
+                    'customer_id'   =>  $user->id,
+                    'login_status'   =>  '0',
+                ]);
+                return response()->json(['status' => 'success', 'message' => 'Logout Successfully'], $this->successStatus);
+            }
+            return response()->json(['status' => 'error', 'message' => 'Error in Logout'], $this->badrequest);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }

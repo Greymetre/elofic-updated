@@ -7,23 +7,23 @@
          text-shadow: 2px 2px 10px gray;
       }
    </style>
-   <div class="row">
-      <div class="m-1">
+   <div class="row all-points">
+      <div class="col-md-4">
          <div class="card card-primary text-center card-body p-3">Total Point Earn <br> <span>{{$total_points}}</span> </div>
       </div>
-      <div class="m-1">
+      <div class="col-md-4">
          <div class="card card-primary text-center card-body p-3">Total Active Point <br> <span>{{$active_points}}</span> </div>
       </div>
-      <div class="m-1">
+      <div class="col-md-4">
          <div class="card card-primary text-center card-body p-3">Total Provision Point <br> <span>{{$provision_points}}</span> </div>
       </div>
-      <div class="m-1">
+      <div class="col-md-4">
          <div class="card card-success text-center card-body p-3">Total Redeem Point <br> <span>{{$total_redemption}}</span> </div>
       </div>
-      <div class="m-1">
+      <div class="col-md-4">
          <div class="card card-danger card-body text-center p-3">Total Rejected Point <br> <span>{{$total_rejected}}</span> </div>
       </div>
-      <div class="m-1">
+      <div class="col-md-4">
          <div class="card card-info card-body text-center p-3">Total balance Point <br> <span>{{$total_balance}}</span> </div>
       </div>
    </div>
@@ -55,7 +55,7 @@
                </span>
             </div>
          </div>
-         <div class="row gx-4 mb-2">
+         <div class="row gx-4 mb-2 view-tab">
             <div class="col-auto">
                <div class="avatar avatar-xl position-relative">
                   <img src="{!! !empty($customers['profile_image']) ? asset('uploads/'.$customers['profile_image']) : asset('public/assets/img/placeholder.jpg') !!}" alt="profile_image" class="w-100 border-radius-lg shadow-sm imageDisplayModel">
@@ -71,7 +71,7 @@
                   </p>
                </div>
             </div>
-            <div class="col-lg-6 col-md-6 my-sm-auto ms-sm-auto me-sm-0 mx-auto mt-3">
+            <div class="col-lg-8 col-md-6 my-sm-auto ms-sm-auto me-sm-0 mx-auto mt-3">
                <div class="nav-wrapper position-relative end-0">
                   <ul class="nav nav-pills nav-pills-warning nav-pills-icons justify-content-center" role="tablist">
                      <li class="nav-item">
@@ -145,8 +145,8 @@
                                  <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Gender:</strong> &nbsp; {!! $customers['gender'] !!} </li>
                                  @endif
                               </ul>
-                              <hr class="horizontal gray-light my-4">
-                              <hr class="horizontal gray-light my-4">
+                              <!-- <hr class="horizontal gray-light my-4"> -->
+                              <!-- <hr class="horizontal gray-light my-4"> -->
                               <h6 class="mb-0">Address Info</h6>
                               <hr class="horizontal gray-light my-4">
                               <ul class="list-group">
@@ -455,7 +455,7 @@
                <div class="tab-pane border rounded {{$kyc?'active show':''}}" id="kyc">
                   <hr>
                   <div class="row align-items-center">
-                     <div class="col-md-6 col-sm-6">
+                     <div class="col-md-4 col-sm-4">
                         <div class="fileinput fileinput-new text-center" data-provides="fileinput">
                            <div class="fileinput-new thumbnail">
                               <img src="{!! !empty($customers['customerdocuments']->where('document_name','gstin')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','gstin')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview1">
@@ -469,7 +469,7 @@
                            @endif
                         </div>
                      </div>
-                     <div class="col-md-4 col-sm-4">
+                     <div class="col-md-6 col-sm-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.gstin_no') !!} </label>
                            <div class="col-md-9">
@@ -500,7 +500,7 @@
                   </div>
                   <hr>
                   <div class="row align-items-center">
-                     <div class="col-md-6 col-sm-6">
+                     <div class="col-md-4 col-sm-4">
                         <div class="fileinput fileinput-new text-center" data-provides="fileinput">
                            <div class="fileinput-new thumbnail">
                               <img src="{!! !empty($customers['customerdocuments']->where('document_name','pan')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','pan')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview2">
@@ -509,7 +509,7 @@
                            <label class="bmd-label-floating">{!! trans('panel.customers.fields.pan_image') !!}</label>
                         </div>
                      </div>
-                     <div class="col-md-4 col-sm-4">
+                     <div class="col-md-6 col-sm-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.pan_no') !!}</label>
                            <div class="col-md-9">
@@ -539,7 +539,7 @@
                   </div>
                   <hr>
                   <div class="row align-items-center">
-                     <div class="col-md-6 col-sm-6">
+                     <div class="col-md-4 col-sm-4">
                         <div class="fileinput fileinput-new text-center" data-provides="fileinput">
                            <div class="fileinput-new thumbnail">
                               <img src="{!! !empty($customers['customerdocuments']->where('document_name','aadhar')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','aadhar')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview3">
@@ -553,7 +553,7 @@
                            <label style="padding-left: 50px;" class="bmd-label-floating">{!! trans('panel.customers.fields.aadhar_back_image') !!}</label>
                         </div>
                      </div>
-                     <div class="col-md-4 col-sm-4">
+                     <div class="col-md-6 col-sm-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.aadhar_no') !!} </label>
                            <div class="col-md-9">
@@ -583,7 +583,7 @@
                   </div>
                   <hr>
                   <div class="row align-items-center">
-                     <div class="col-md-6 col-sm-6">
+                     <div class="col-md-4 col-sm-4">
                         <div class="fileinput fileinput-new text-center" data-provides="fileinput">
                            <div class="fileinput-new thumbnail">
                               <img src="{!! !empty($customers['customerdocuments']->where('document_name','bankpass')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','bankpass')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview2">
@@ -592,7 +592,7 @@
                            <label class="bmd-label-floating">{!! trans('panel.customers.fields.bank_passbook_image') !!}</label>
                         </div>
                      </div>
-                     <div class="col-md-4 col-sm-4">
+                     <div class="col-md-6 col-sm-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.account_holder') !!}</label>
                            <div class="col-md-9">
@@ -641,7 +641,7 @@
                   </div>
                   <hr>
                   <div class="row align-items-center">
-                     <div class="col-md-6 col-sm-6">
+                     <div class="col-md-4 col-sm-4">
                         <div class="fileinput fileinput-new text-center" data-provides="fileinput">
                            <div class="fileinput-new thumbnail">
                               <img src="{!! !empty($customers['customerdocuments']->where('document_name','other')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','other')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview4">
@@ -650,7 +650,7 @@
                            <label class="bmd-label-floating">{!! trans('panel.customers.fields.otherid_image') !!}</label>
                         </div>
                      </div>
-                     <div class="col-md-4 col-sm-4">
+                     <div class="col-md-6 col-sm-6">
                         <div class="row">
                            <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.otherid_no') !!}</label>
                            <div class="col-md-9">

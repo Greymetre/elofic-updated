@@ -21,25 +21,32 @@
             <div class="invoice p-3 mb-3">
               <!-- title row -->
               <div class="row">
-                <div class="col-4">
+                <div class="col-3">
                   <h4>
                     <small class="float-left">{!! trans('panel.order.id') !!} # {!! $orders['id'] !!}</small>
                   </h4>
                 </div>
-                <div class="col-4">
+                <div class="col-3">
                   <h4>
                     <!-- <img src="" class="brand-image" width="70px" alt="Logo"> <span> </span> -->
                     <small class="float-left">{!! trans('panel.order.orderno') !!}: {!! $orders['orderno'] !!}</small>
                   </h4>
                 </div>
-                <div class="col-4">
+                <div class="col-3">
                   <h4>
                     <!-- <img src="" class="brand-image" width="70px" alt="Logo"> <span> </span> -->
-                    <small class="float-right">Date: {!! date("d-M-Y", strtotime($orders['order_date'])) !!}</small>
+                    <small class="float-left">Date: {!! date("d-M-Y", strtotime($orders['order_date'])) !!}</small>
+                  </h4>
+                </div>
+                <div class="col-3">
+                  <h4>
+                    <!-- <img src="" class="brand-image" width="70px" alt="Logo"> <span> </span> -->
+                    <small class="float-left">Created By: {!! $orders['createdbyname']['name'] !!}</small>
                   </h4>
                 </div>
                 <!-- /.col -->
               </div>
+              <hr>
               <!-- info row -->
               <div class="row invoice-info">
                 <div class="col-sm-6 invoice-col">
@@ -123,6 +130,7 @@
 
                   <?php
 
+                  $scheme_dicount_sum = 0;
                   $ebd_dicount_sum = 0;
                   $clustor_dicount_sum = 0;
                   $deal_dicount_sum = 0;
@@ -144,6 +152,7 @@
 
                     foreach ($orderdetails as $keys => $rowss) {
 
+                      $scheme_dicount_sum += $rowss['schme_amount'];
                       $ebd_dicount_sum += $rowss['ebd_amount'];
                       $clustor_dicount_sum += $rowss['cluster_amount'];
                       $deal_dicount_sum += $rowss['deal_amount'];
@@ -180,62 +189,89 @@
                   <div class="table-responsive">
                     <table class="table">
                       <tbody>
+                        
                         <tr>
-                          <th style="width:50%">Subtotal:</th>
+                          <th style="width:50%">Scheme Discount :</th>
+                          <td>-</td>
+                          <td>{!! $scheme_dicount_sum !!}</td>
+                        </tr>
+                        <tr>
+                          <th style="width:50%">EBD Discount :</th>
+                          <td>{!! $orders->ebd_discount !!}</td>
+                          <td>{!! $orders->ebd_amount !!}</td>
+                        </tr>
+                        <tr>
+                          <th style="width:50%">MOU Discount% :</th>
+                          <td>{!! $orders->distributor_discount !!}</td>
+                          <td>{!! $orders->distributor_amount !!}</td>
+                        </tr>
+                        <tr>
+                          <th style="width:50%">Special Discount% :</th>
+                          <td>{!! $orders->special_discount !!}</td>
+                          <td>{!! $orders->special_amount !!}</td>
+                        </tr>
+
+                        <tr>
+                          <th style="width:50%">Frieght Discount% :</th>
+                          <td>{!! $orders->frieght_discount !!}</td>
+                          <td>{!! $orders->frieght_amount !!}</td>
+                        </tr>
+                        <tr>
+                          <th style="width:50%">Cluster Discount% :</th>
+                          <td>{!! $orders->cluster_discount!!}</td>
+                          <td>{!! $orders->cluster_amount !!}</td>
+                        </tr>
+                        <tr>
+                          <th style="width:50%">Deal Discount% :</th>
+                          <td>{!! $orders->deal_discount !!}</td>
+                          <td>{!! $orders->deal_amount !!}</td>
+                        </tr>
+                        <tr>
+                          <th style="width:50%">Cash Discount% :</th>
+                          <td>{!! $orders->cash_discount !!}</td>
+                          <td>{!! $orders->cash_amount !!}</td>
+                        </tr>
+                        <tr>
+                          <th style="width:50%">Subtotal :</th>
+                          <td>-</td>
                           <td>{!! $orders['sub_total'] !!}</td>
                         </tr>
 
                         <tr>
-                          <th style="width:50%">EBD Discount:</th>
-                          <td>{!! $ebd_dicount_sum !!}</td>
-                        </tr>
-
-                        <tr>
-                          <th style="width:50%">Cluster Discount%:</th>
-                          <td>{!! $cluster_discount!!}</td>
-                          <td>{!! $clustor_dicount_sum !!}</td>
-                        </tr>
-                        <tr>
-                          <th style="width:50%">Deal Discount%:</th>
-                          <td>{!! $deal_discount !!}</td>
-                          <td>{!! $deal_dicount_sum !!}</td>
-                        </tr>
-                        <tr>
-                          <th style="width:50%">Distributor Discount%:</th>
-                          <td>{!! $distributor_discount !!}</td>
-                          <td>{!! $distributor_dicount_sum !!}</td>
-                        </tr>
-                        <tr>
-                          <th style="width:50%">Frieght Discount%:</th>
-                          <td>{!! $frieght_discount !!}</td>
-                          <td>{!! $frieght_dicount_sum !!}</td>
-                        </tr>
-
-                        <tr>
                           <th style="width:50%">5%Tax:</th>
-                          <td>{!! $gst_amount_5 !!}</td>
+                          <td>-</td>
+                          <td>{!! $orders->gst5_amt !!}</td>
                         </tr>
                         <tr>
                           <th style="width:50%">12%Tax:</th>
-                          <td>{!! $gst_amount_12 !!}</td>
+                          <td>-</td>
+                          <td>{!! $orders->gst12_amt !!}</td>
                         </tr>
                         <tr>
                           <th style="width:50%">18%Tax:</th>
-                          <td>{!! $gst_amount_18 !!}</td>
+                          <td>-</td>
+                          <td>{!! $orders->gst18_amt !!}</td>
                         </tr>
                         <tr>
                           <th style="width:50%">28%Tax:</th>
-                          <td>{!! $gst_amount_28 !!}</td>
+                          <td>-</td>
+                          <td>{!! $orders->gst28_amt !!}</td>
                         </tr>
 
 
                         <tr>
                           <th>Tax</th>
+                          <td>-</td>
                           <td>{!! $orders['total_gst'] !!}</td>
                         </tr>
                         <tr>
                           <th>Total:</th>
+                          <td>-</td>
                           <td>{!! $orders['grand_total'] !!}</td>
+                        </tr>
+                        <tr>
+                          <th>Remark:</th>
+                          <td colspan="2">{!! $orders['order_remark'] !!}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -256,11 +292,14 @@
                   <a href="{!! url('order-partially-dispatched/'.encrypt($orders->id)) !!}" class="btn btn-theme float-right">Partially Dispatched</a>
                   @endif
 
-                  @if($orders['status_id'] != 4)
-                  <button type="button" data-orderid="{!! encrypt($orders->id) !!}" id="cancleButton" class="btn btn-danger float-right">Cancle</button>
+                  @if($orders['status_id'] != 1 && $orders['status_id'] != 4)
+                  <button type="button" data-orderid="{!! encrypt($orders->id) !!}" id="cancleButton" class="btn btn-danger float-right">Cancel</button>
                   @endif
                   @if($orders['status_id'] == 4)
                   <button type="button" disabled class="btn btn-danger float-right">Canceled</button>
+                  @endif
+                  @if($orders['status_id'] == 1)
+                  <button type="button" disabled class="btn btn-success float-right">Dispatched</button>
                   @endif
                 </div>
               </div>
@@ -307,6 +346,9 @@
                 title: res.status,
                 text: res.message,
               });
+              if(res.status == 'success'){
+                window.location.href = base_url + '/orders';
+              }
             }
           });
         }

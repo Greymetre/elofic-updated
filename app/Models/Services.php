@@ -21,4 +21,9 @@ class Services extends Model
         return $this->belongsTo('App\Models\Product', 'product_code', 'product_code');
     }
 
+    public function warrantyDetails()
+    {
+        return $this->belongsTo('App\Models\WarrantyActivation', 'serial_no', 'product_serail_number');
+    }
+
 }

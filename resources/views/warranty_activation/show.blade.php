@@ -112,7 +112,13 @@
                      <div class="row">
                         <div class="col-md-3">
                            <h6>Dealer</h6>
+                           @if(count($warrantyactivation->seller_details->getparentdetail) > 0)
+                           @foreach($warrantyactivation->seller_details->getparentdetail as $pdetails)
+                           <p>{{$pdetails->parent_detail->name}}</p>
+                           @endforeach
+                           @else
                            <p>-</p>
+                           @endif
                         </div>
                         <div class="col-md-3">
                            <h6>Sale Bill Date</h6>
@@ -126,6 +132,16 @@
                            <h6>Co Sale Bill No.</h6>
                            <p>{{$warrantyactivation->sale_bill_no}}</p>
                         </div>
+                     </div>
+                     <h3 class="mt-4">Invoice Attachment</h3>
+                     <hr>
+                     <div class="row text-center">
+                        @if($warrantyactivation->exists && $warrantyactivation->getMedia('warranty_activation_attach')->count() > 0 && file_exists($warrantyactivation->getFirstMedia('warranty_activation_attach')->getPath()))
+                        <a href="{!! $warrantyactivation->getMedia('warranty_activation_attach')[0]->getFullUrl() !!}" data-lightbox="mygallery" data-title="Invoice">
+                           <img width="250" src="{!! $warrantyactivation->getMedia('warranty_activation_attach')[0]->getFullUrl() !!}" class="img-fluid rounded"></a>
+                        @else
+                        <img width="250" src="{!! url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview1">
+                        @endif
                      </div>
                   </div>
                   <div class="col-md-3 rounded">
@@ -150,4 +166,8 @@
          </div>
       </div>
    </div>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+   <link rel="stylesheet" href="{{ url('/').'/'.asset('lightboxx/css/lightbox.min.css') }}">
+   <script src="{{ url('/').'/'.asset('lightboxx/js/lightbox-plus-jquery.min.js') }}"></script>
+ 
 </x-app-layout>
