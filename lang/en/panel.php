@@ -540,6 +540,37 @@ return [
         'zero_selected' => 'No rows selected',
     ],
 
+    'primary_dashboard' => [
+        'kpis'      => 'KPIS',
+        'sales'     => 'Sales',
+        'sales_summary' => 'Sales Summary',
+        'retailer_name' => 'Retailer Name',
+        'dealers_and_distibutors' => 'Dealers & Distibutors',
+        'sales_person' => 'Sales Person',
+        'branch' => 'Branch',
+        'division' => 'Division',
+        'month' => 'Month',
+        'year' => 'Year',
+        'product_model' => 'Product Model',
+        'new_group_name' => 'New Group Name',
+    ],
+    
+    'secondary_dashboard' => [
+        'kpis'          => 'KPIS',
+        'sales'         => 'Sales',
+        'sales_summary' => 'Sales Summary',
+        'retailer_name' => 'Retailer Name',
+        'dealers_and_distibutors' => 'Dealers & Distibutors',
+        'sales_person' => 'Sales Person',
+        'branch' => 'Branch',
+        'division' => 'Division',
+        'month' => 'Month',
+        'year' => 'Year',
+        'product_model' => 'Product Model',
+        'new_group_name' => 'New Group Name',
+    ],
+
+
     'customers'     => [
         'title'          => 'Customers',
         'create_title'   => 'Create Customer',
@@ -898,6 +929,7 @@ return [
         'children_five'  => 'Children-5',
         'children_five_date_of_birth'  => 'Children-5 Date of Birth',
         'pay_roll'  => 'Pay Roll',
+        'sales_type' => 'Sales Type',
 
 
         'account_number'    => 'Account Number',

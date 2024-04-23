@@ -227,10 +227,10 @@
                                  <td style="display: none;">
                                     <select class="form-control productdetails rowchange select2" name="orderdetail[{{ $key }}][product_detail]" onchange="getproductdetailinfo(this)">
                                        @if ($rows['product_detail_id'] !== null)
-                                       <option value="{!! $rows['product_detail_id'] !!}">{!! $rows['productdetails']['detail_title'] !!}</option>
+                                       <option value="{!! $rows['product_detail_id'] !!}">{!! $rows['products']['productpriceinfo']['detail_title'] !!}</option>
                                        @endif
                                     </select>
-                                    <span class="gst_percent" style="display:none;">{!! isset($rows['productdetails']['gst']) ? $rows['productdetails']['gst'] : '' !!}</span> <br>
+                                    <span class="gst_percent" style="display:none;">{!! isset($rows['products']['productpriceinfo']['gst']) ? $rows['products']['productpriceinfo']['gst'] : '' !!}</span> <br>
                                     <span class="gstamount" style="display:none;">{!! $rows['tax_amount'] !!}</span> <br>
                                     <span class="linediscount" style="display:none;"></span>
                                     <input type="hidden" name="orderdetail[{{ $key }}][tax_amount]" class="form-control tax_amount" value="{!! $rows['tax_amount'] !!}" readonly />

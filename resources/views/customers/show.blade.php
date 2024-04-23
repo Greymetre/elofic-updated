@@ -8,22 +8,22 @@
       }
    </style>
    <div class="row all-points">
-      <div class="col-md-4">
+      <div class="col-md-2">
          <div class="card card-primary text-center card-body p-3">Total Point Earn <br> <span>{{$total_points}}</span> </div>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-2">
          <div class="card card-primary text-center card-body p-3">Total Active Point <br> <span>{{$active_points}}</span> </div>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-2">
          <div class="card card-primary text-center card-body p-3">Total Provision Point <br> <span>{{$provision_points}}</span> </div>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-2">
          <div class="card card-success text-center card-body p-3">Total Redeem Point <br> <span>{{$total_redemption}}</span> </div>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-2">
          <div class="card card-danger card-body text-center p-3">Total Rejected Point <br> <span>{{$total_rejected}}</span> </div>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-2">
          <div class="card card-info card-body text-center p-3">Total balance Point <br> <span>{{$total_balance}}</span> </div>
       </div>
    </div>
@@ -124,17 +124,10 @@
                   <div class="row mt-3">
                      <div class="col-md-4 col-xl-4 mt-md-0 mt-4 position-relative">
                         <div class="card card-plain h-100">
-                           <div class="card-header pb-0 p-3">
-                              <div class="row">
-                                 <div class="col-md-8 d-flex align-items-center">
-                                    <h6 class="mb-0">Personal Information</h6>
-                                 </div>
-                              </div>
-                           </div>
-                           <div class="card-body p-3">
-                              <!-- <p class="text-sm">
-                             </p> -->
-                              <hr class="horizontal gray-light my-4">
+                           
+                              <div class="card-body p-3">
+                              <div class="ctmr-box">
+                              <h6 class="mb-0">Personal Information</h6>
                               <ul class="list-group">
                                  <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Full Name:</strong> &nbsp; {!! isset($customers['first_name']) ? $customers['first_name'] : '' !!} {!! isset($customers['last_name']) ? $customers['last_name'] : '' !!}</li>
                                  <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Mobile:</strong> &nbsp; {!! isset($customers['mobile']) ? $customers['mobile'] : '' !!}</li>
@@ -145,10 +138,9 @@
                                  <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Gender:</strong> &nbsp; {!! $customers['gender'] !!} </li>
                                  @endif
                               </ul>
-                              <!-- <hr class="horizontal gray-light my-4"> -->
-                              <!-- <hr class="horizontal gray-light my-4"> -->
+                              </div>
+                              <div class="ctmr-box">
                               <h6 class="mb-0">Address Info</h6>
-                              <hr class="horizontal gray-light my-4">
                               <ul class="list-group">
                                  @if(isset($customers['customeraddress']['address1']) && $customers['customeraddress']['address1'] != '')
                                  <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Address:</strong> &nbsp; {!! isset($customers['customeraddress']['address1']) ? $customers['customeraddress']['address1'] : '' !!}
@@ -170,30 +162,24 @@
                                  <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Pincode:</strong> &nbsp; {!! $customers['customeraddress']['pincodename']['pincode'] !!} </li>
                                  @endif
                               </ul>
+                              </div>
                            </div>
                         </div>
                         <hr class="vertical dark">
                      </div>
                      <div class="col-md-4 col-xl-4 mt-md-0 mt-4 position-relative">
                         <div class="card card-plain h-100">
-                           <div class="card-header pb-0 p-3">
-                              <div class="row">
-                                 <div class="col-md-8 d-flex align-items-center">
-                                    <h6 class="mb-0">Customer Information</h6>
-                                 </div>
-                              </div>
-                           </div>
-                           <div class="card-body p-3">
-                              <!-- <p class="text-sm"></p> -->
-                              <hr class="horizontal gray-light my-4">
+                         
+                              <div class="card-body p-3">
+                              <div class="ctmr-box">
+                              <h6 class="mb-0">Customer Information</h6>
+                              
                               <ul class="list-group">
-                                 <!-- @if(isset($customers['employeename']['name']))
-                             <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Executive:</strong> &nbsp; {!! $customers['employeename']['name'] !!} </li>
-                             @endif -->
-
-                                 @if(isset($customers->getemployeedetail))
+                              
+                                 @if(isset($customers->getemployeedetail) && count($customers->getemployeedetail) > 0)
                                  <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Executive:</strong> &nbsp;<?php foreach ($customers->getemployeedetail as $key_new => $customer_detail) {
-                                                                                                                                                echo $customer_detail->employee_detail->name . ' ' . ',<br>';
+                                    
+                                                                                                                                                echo $customer_detail->employee_detail?$customer_detail->employee_detail->name:'' . ' ' . ',<br>';
                                                                                                                                              }  ?> </li>
                                  @endif
 
@@ -240,9 +226,9 @@
                                  <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Visit Status:</strong> &nbsp; {!! $customers['customerdetails']['visit_status'] !!} </li>
                                  @endif
                               </ul>
-                              <hr class="horizontal gray-light my-4">
+                              </div>
+                              <div class="ctmr-box">
                               <h6 class="mb-0">Survey Information</h6>
-                              <hr class="horizontal gray-light my-4">
                               <div id="accordion" role="tablist">
                                  @if(!empty($customers['surveys']))
                                  @foreach( $customers['surveys'] as $index => $survey )
@@ -264,12 +250,13 @@
                                  @endforeach
                                  @endif
                               </div>
+                              </div>
                            </div>
                         </div>
                         <hr class="vertical dark">
                      </div>
                      <div class="col-md-4 mt-md-0 mt-4">
-                        <div class="card card-plain h-100">
+                        <div class="card card-plain h-100 activity-conv">
                            <div class="card-header pb-0 p-3">
                               <h6 class="mb-0">Conversations</h6>
                            </div>

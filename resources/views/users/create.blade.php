@@ -1016,6 +1016,26 @@
                            </div>
                         </div>
                      </div>
+                     <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">{{ trans('panel.user.sales_type') }}</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 <select class="selectpicker" data-style="select-with-transition" name="sales_type">
+                                    <option value="" disabled selected>{{ trans('panel.user.sales_type') }}</option>
+                                    <option value="Primary" {{ (old('sales_type')??$user->sales_type == 'Primary') ? 'selected' : '' }}>Primary</option>
+                                    <option value="Secondary" {{ (old('sales_type')??$user->sales_type == 'Secondary') ? 'selected' : '' }}>Secondary</option>
+                                 </select>
+                              </div>
+                           </div>
+                           @if ($errors->has('sales_type'))
+                           <div class="error col-lg-12">
+                              <p class="text-danger">{{ $errors->first('sales_type') }}</p>
+                           </div>
+                           @endif
+                        </div>
+                     </div>
+                     <!-- user sales type -->
 
                   </div>
                   </div>

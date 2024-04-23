@@ -42,8 +42,32 @@ class UserImport implements ToCollection, WithValidation, WithHeadingRow, WithBa
         $userdetails = collect([]);
         $addressdetails = collect([]);
         foreach ($rows as $row) {
-
+            
             if (!empty($row['id'])) {
+
+                $excelDate = $row['spouse_date_of_birth'] - 25569; // Adjust for Excel's epoch
+                $unixTimestamp = strtotime('+'.$excelDate.' days', strtotime('1970-01-01'));
+                $row['spouse_date_of_birth'] = !empty($row['spouse_date_of_birth'])?Carbon::createFromTimestamp($unixTimestamp):'';
+
+                $excelDate = $row['children_1_dob'] - 25569; // Adjust for Excel's epoch
+                $unixTimestamp = strtotime('+'.$excelDate.' days', strtotime('1970-01-01'));
+                $row['children_1_dob'] = !empty($row['children_1_dob'])?Carbon::createFromTimestamp($unixTimestamp):'';
+
+                $excelDate = $row['children_2_dob'] - 25569; // Adjust for Excel's epoch
+                $unixTimestamp = strtotime('+'.$excelDate.' days', strtotime('1970-01-01'));
+                $row['children_2_dob'] = !empty($row['children_2_dob'])?Carbon::createFromTimestamp($unixTimestamp):'';
+
+                $excelDate = $row['children_3_dob'] - 25569; // Adjust for Excel's epoch
+                $unixTimestamp = strtotime('+'.$excelDate.' days', strtotime('1970-01-01'));
+                $row['children_3_dob'] = !empty($row['children_3_dob'])?Carbon::createFromTimestamp($unixTimestamp):'';
+
+                $excelDate = $row['children_4_dob'] - 25569; // Adjust for Excel's epoch
+                $unixTimestamp = strtotime('+'.$excelDate.' days', strtotime('1970-01-01'));
+                $row['children_4_dob'] = !empty($row['children_4_dob'])?Carbon::createFromTimestamp($unixTimestamp):'';
+
+                $excelDate = $row['children_5_dob'] - 25569; // Adjust for Excel's epoch
+                $unixTimestamp = strtotime('+'.$excelDate.' days', strtotime('1970-01-01'));
+                $row['children_5_dob'] = !empty($row['children_5_dob'])?Carbon::createFromTimestamp($unixTimestamp):'';
 
                 $name = trim($row['user_name']);
                 $last_name = (strpos($name, ' ') === false) ? '' : preg_replace('#.*\s([\w-]*)$#', '$1', $name);
@@ -51,10 +75,10 @@ class UserImport implements ToCollection, WithValidation, WithHeadingRow, WithBa
 
                 User::where('id', '=', $row['id'])->update([
                     'name' => !empty($name) ? ucfirst(strtolower($name)) : '',
-                    //'first_name' => !empty($first_name)? ucfirst(strtolower($first_name)):'',
-                    //'last_name' => !empty($last_name)? ucfirst(strtolower($last_name)):'',
+                    'first_name' => !empty($first_name)? ucfirst(strtolower($first_name)):'',
+                    'last_name' => !empty($last_name)? ucfirst(strtolower($last_name)):'',
                     //'mobile' => $row['mobile'],
-                    'mobile' => !empty($row['mobile']) ? $row['mobile'] : null,
+                    // 'mobile' => !empty($row['mobile']) ? $row['mobile'] : null,
                     'email' => !empty($row['email']) ? $row['email'] : null,
                     //'password' => !empty($row['password'])? Hash::make($row['password']) :'',
                     'gender' => !empty($row['gender']) ? $row['gender'] : '',
@@ -67,9 +91,13 @@ class UserImport implements ToCollection, WithValidation, WithHeadingRow, WithBa
                     'division_id' => !empty($row['division_id']) ? $row['division_id'] : '',
                     'department_id' => !empty($row['department_id']) ? $row['department_id'] : '',
                     'payroll' => !empty($row['payroll']) ? $row['payroll'] : '',
+                    'reportingid' => !empty($row['reporting_id']) ? $row['reporting_id'] : '',
+                    'sales_type' => !empty($row['sales_type']) ? $row['sales_type'] : '',
                     //'created_at' => getcurentDateTime(),
                     //'updated_at' => getcurentDateTime()
                 ]);
+                $user = User::find($row['id']);
+                $user->roles()->sync(explode(',', $row['role_ids']));
 
 
                 UserDetails::where('user_id', '=', $row['id'])->update([

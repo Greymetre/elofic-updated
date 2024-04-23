@@ -13,6 +13,26 @@
             </a>
          </li>
          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#primarysales" role="tablist" onclick="getPrimarySalesDashboard()">
+            <i class="material-icons">monetization_on</i> Primary Sales Dashboard
+            </a>
+         </li>
+         <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#secondarysaleskpi" role="tablist" onclick="getSecondarySalesKpi()">
+            <i class="material-icons">monetization_on</i> Secondary Sales KPIS
+            </a>
+         </li>
+         <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#secondaryordersreport" role="tablist" onclick="getPrimarySalesDashboard()">
+            <i class="material-icons">home</i> Secondary Order Detailed Report
+            </a>
+         </li>
+         <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#saarthi" role="tablist" onclick="getPrimarySalesDashboard()">
+            <i class="material-icons">home</i> Saarthi
+            </a>
+         </li>
+         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#travelsummarytab" role="tablist" onclick="travelSummaryDashboard()">
             <i class="material-icons">flight</i> Travel
             </a>
@@ -69,6 +89,61 @@
        <div class="form-group has-default bmd-form-group">
           <input type="text" class="form-control datepicker" id="todate" name="todate" autocomplete="off" readonly>
        </div>
+    </div>
+    <div class="col col4">
+       <label class="bmd-label-floating">Division</label>
+       <select class="form-control select2" name="division_id" id="division_id" data-style="select-with-transition" title="Select User">
+           <option value="">Division</option>
+          @if(@isset($divisions ))
+          @foreach($divisions as $division)
+           <option value="{!! $division['id'] !!}" {{ old( 'division_id') == $division->id ? 'selected' : '' }}>{!! $division['division_name'] !!} </option>
+          @endforeach
+          @endif
+        </select>
+    </div>
+    <div class="col col5">
+       <label class="bmd-label-floating">Branch</label>
+       <select class="form-control select2" name="branch_id" id="branch_id" data-style="select-with-transition" title="Select User">
+           <option value="">Branch</option>
+          @if(@isset($branches ))
+          @foreach($branches as $branch)
+           <option value="{!! $branch['id'] !!}" {{ old( 'branch_id') == $branch->id ? 'selected' : '' }}>{!! $branch['branch_name'] !!}</option>
+          @endforeach
+          @endif
+        </select>
+    </div>
+    <div class="col col6">
+       <label class="bmd-label-floating">Financial Year</label>
+        <select class="form-control select2" name="financial_year" id="financial_year" required data-style="select-with-transition" title="Year">
+          <option value="" disabled selected>Financial Year</option>
+          @foreach($years as $year)
+          @php 
+          $startYear = $year - 1;
+          $endYear = $year;
+          @endphp
+          <option value="{!!$startYear!!}-{!!$endYear!!}">{!! $startYear!!} - {!! $endYear !!}</option>
+          @endforeach
+        </select>
+    </div>
+    <div class="col col7">
+      <label class="bmd-label-floating">Branch</label>
+       <select class="form-control select2" name="month" id="month" data-style="select-with-transition" title="Month">
+         <option value="" disabled selected>Month</option>
+         @for ($month = 1; $month <= 12; $month++)
+         <option value="{!! date('M', mktime(0, 0, 0, $month, 1)) !!}">{!! date('M', mktime(0, 0, 0, $month, 1)) !!}</option>
+         @endfor
+       </select>
+    </div>
+    <div class="col col5">
+       <label class="bmd-label-floating">Sales Person</label>
+       <select class="form-control select2" name="sales_id" id="sales_id" data-style="select-with-transition" title="Select User">
+           <option value="">Sales Person</option>
+          @if(@isset($branches ))
+          @foreach($branches as $branch)
+           <option value="{!! $branch['id'] !!}" {{ old( 'sales_id') == $branch->id ? 'selected' : '' }}>$value</option>
+          @endforeach
+          @endif
+        </select>
     </div>
 </div>
 <div class="tab-content tab-space tab-subcategories">
@@ -261,6 +336,200 @@
       </div>
    </div>
    <div class="tab-pane" id="travelsummarytab">
+    <div class="row">
+         <div class="col-md-12 text-center">
+            <h4 class="section-heading mb-3 h4 mt-0">Travel Summary</h4>
+         </div>
+         <div class="col-md-12">
+            <div class="row">
+               <div class="col-sm">
+                  <div class="card text-center">
+                     <div class="card-body">
+                        <h4 class="card-title daystouredcount">0</h4>
+                        <p class="card-text">Days Toured</p>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-sm">
+                  <div class="card text-center">
+                     <div class="card-body">
+                        <h4 class="card-title citiescoveredcount">0</h4>
+                        <p class="card-text text-center">Cities Covered</p>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-sm">
+                  <div class="card">
+                     <div class="card-body">
+                        <h4 class="card-title text-center daysCentralMarketcount">0</h4>
+                        <p class="card-text text-center">Days Central Market</p>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-sm">
+                  <div class="card">
+                     <div class="card-body">
+                        <h4 class="card-title text-center daysSuburbancount">0</h4>
+                        <p class="card-text text-center">Days Suburban</p>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-sm">
+                  <div class="card">
+                     <div class="card-body">
+                        <h4 class="card-title text-center daysOfficeWorkCount">0</h4>
+                        <p class="card-text text-center">Days Office Work</p>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="col-md-9">
+            <div class="row">
+               <div class="col-sm">
+                  <div class="card">
+                     <div class="card-body">
+                        <h4 class="card-title">Travel Summary in {!! date('F') !!}</h4>
+                        <div id="MonthlyCitiesTours" class="ct-chart"></div>
+                     </div>
+                     <!-- <div class="card-footer">
+                        <div class="row">
+                           <div class="col-md-12 pr-6">
+                              <i class="fa fa-circle text-info pr-6"></i> Toured
+                              <i class="fa fa-circle text-danger pr-6"></i> Central Market
+                              <i class="fa fa-circle text-warning pr-6"></i> Suburban
+                              <i class="fa fa-circle text-primary pr-6"></i> Office Work
+                           </div>
+                        </div>
+                     </div> -->
+                  </div>
+               </div>
+             </div>
+         </div>
+         <div class="col-md-12">
+            <div class="row">
+               <div class="col-sm">
+                  <div class="card">
+                     <div class="card-body">
+                        <h4 class="card-title">Travel Summary in {!! date('Y') !!}</h4>
+                        <div id="YearCitiesTours" class="ct-chart ct-perfect-fourth"></div>
+                     </div>
+                     <div class="card-footer">
+                        <div class="row">
+                           <div class="col-md-12 pr-6">
+                              <i class="fa fa-circle text-info pr-6"></i> Toured
+                              <i class="fa fa-circle text-danger pr-6"></i> Central Market
+                              <i class="fa fa-circle text-warning pr-6"></i> Suburban
+                              <!-- <i class="fa fa-circle text-primary pr-6"></i> Office Work -->
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="tab-pane" id="secondarysaleskpi">
+    <div class="row">
+         <div class="col-md-12 text-center">
+            <h4 class="section-heading mb-3 h4 mt-0">Secondary KPIS</h4>
+         </div>
+         <div class="col-md-12">
+            <div class="row">
+               <div class="col-sm">
+                  <div class="card text-center">
+                     <div class="card-body">
+                        <h4 class="card-title registredretailercount">0</h4>
+                        <p class="card-text">Registred Retailer</p>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-sm">
+                  <div class="card text-center">
+                     <div class="card-body">
+                        <h4 class="card-title activeretailercount">0</h4>
+                        <p class="card-text text-center">Active Retailer</p>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-sm">
+                  <div class="card">
+                     <div class="card-body">
+                        <h4 class="card-title text-center activeRetailerPercent">0</h4>
+                        <p class="card-text text-center">Active Retailer %</p>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-sm">
+                  <div class="card">
+                     <div class="card-body">
+                        <h4 class="card-title text-center newretaileradcount">0</h4>
+                        <p class="card-text text-center">New Retailer Ad</p>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-sm">
+                  <div class="card">
+                     <div class="card-body">
+                        <h4 class="card-title text-center nosOfRetailerRegistredSaarthi">0</h4>
+                        <p class="card-text text-center">Nos Of Retailer Registred under saarthi</p>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-sm">
+                  <div class="card">
+                     <div class="card-body">
+                        <h4 class="card-title text-center nosOfRetailerRegistredSaarthiPercent">0</h4>
+                        <p class="card-text text-center">Nos Of Retailer Registred under saarthi %</p>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-sm">
+                  <div class="card">
+                     <div class="card-body">
+                        <h4 class="card-title text-center orderTarget">0</h4>
+                        <p class="card-text text-center">Order Target</p>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-sm">
+                  <div class="card">
+                     <div class="card-body">
+                        <h4 class="card-title text-center orderAchievement">0</h4>
+                        <p class="card-text text-center">Order Achievement</p>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-sm">
+                  <div class="card">
+                     <div class="card-body">
+                        <h4 class="card-title text-center achievementPercent">0</h4>
+                        <p class="card-text text-center">Achievement %</p>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-sm">
+                  <div class="card">
+                     <div class="card-body">
+                        <h4 class="card-title text-center perDayAverageSales">0</h4>
+                        <p class="card-text text-center">Per Day Avg Sales</p>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-sm">
+                  <div class="card">
+                     <div class="card-body">
+                        <h4 class="card-title text-center perDayAverageVisit">0</h4>
+                        <p class="card-text text-center">Per Day average  Visit</p>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="tab-pane" id="secondaryordersreport">
     <div class="row">
          <div class="col-md-12 text-center">
             <h4 class="section-heading mb-3 h4 mt-0">Travel Summary</h4>
@@ -851,13 +1120,29 @@
 <script type="text/javascript">
    $( document ).ready(function() {
     getDashboardData();   
-   })
+   });
+
+   $(document).ready(function() {
+       $('.nav-link[href="#secondarysaleskpi"]').on('click', function(event) {
+           event.preventDefault();
+           getSecondarySalesKpi();
+       });
+   });
+
   $('#fromdate').change(function(){
      var activetabs = $("#tabs .active").attr("href");
       switch (activetabs) {
         case '#kpistab':
           getDashboardData();
           break;
+         case '#secondarysaleskpi':
+            getSecondarySalesKpi();
+            break;
+         case  '#secondaryordersreport':
+            break;
+         case '#primarysales':
+            getPrimarySalesDashboard();
+         break;   
         case '#travelsummarytab':
           travelSummaryDashboard()
           break;
@@ -885,6 +1170,11 @@
         case '#kpistab':
           getDashboardData();
           break;
+        case '#secondarysaleskpi':
+            getSecondarySalesKpi();
+            break; 
+        case  '#secondaryordersreport':
+            break; 
         case '#travelsummarytab':
           travelSummaryDashboard()
           break;
@@ -913,6 +1203,11 @@
         case '#kpistab':
           getDashboardData();
           break;
+        case '#secondarysaleskpi':
+           getSecondarySalesKpi();
+           break;  
+        case  '#secondaryordersreport':
+             break;
         case '#travelsummarytab':
           travelSummaryDashboard()
           break;
@@ -934,6 +1229,66 @@
          getDashboardData();
       }
   });
+
+  $('#division_id').change(function(){
+     var activetabs = $("#tabs .active").attr("href");
+      switch (activetabs) {
+        case '#secondarysaleskpi':
+          getSecondarySalesKpi();
+          alert('division_id');
+          break;
+         default:
+          getSecondarySalesKpi();
+       }
+    });
+
+   $('#branch_id').change(function(){
+    var activetabs = $("#tabs .active").attr("href");
+     switch (activetabs) {
+       case '#secondarysaleskpi':
+         getSecondarySalesKpi();
+         alert('branch_id');
+         break;
+        default:
+         getSecondarySalesKpi();
+      }
+   });
+
+   $('#sales_id').change(function(){
+    var activetabs = $("#tabs .active").attr("href");
+     switch (activetabs) {
+       case '#secondarysaleskpi':
+         getSecondarySalesKpi();
+         alert('sales_id');
+         break;
+        default:
+         getSecondarySalesKpi();
+      }
+   });
+
+   $('#financial_year').change(function(){
+    var activetabs = $("#tabs .active").attr("href");
+     switch (activetabs) {
+       case '#secondarysaleskpi':
+         getSecondarySalesKpi();
+         alert('financial_year');
+         break;
+        default:
+         getSecondarySalesKpi();
+      }
+   });
+
+   $('#month').change(function(){
+    var activetabs = $("#tabs .active").attr("href");
+     switch (activetabs) {
+       case '#secondarysaleskpi':
+         getSecondarySalesKpi();
+         alert('month');
+         break;
+        default:
+         getSecondarySalesKpi();
+      }
+   });
 
   function travelSummaryDashboard()
   {
@@ -960,6 +1315,39 @@
             YearCitiesTours(res.yeartours)
         }
     })
+  }
+
+  function getSecondarySalesKpi() {
+    var fromdate = $("input[name=fromdate]").val();
+    var todate = $("input[name=todate]").val();
+    var user_id = $("select[name=user_id]").val();
+    var branch_id = $("select[name=branch_id]").val();
+    var division_id = $("select[name=division_id]").val();
+    var sales_id = $("select[name=sales_id]").val();
+    var financial_year = $("select[name=financial_year]").val();
+    var month = $("select[name=month]").val();
+
+    $.ajax({
+        url: "{{ url('secondarySalesKpiData') }}",
+        dataType: "json",
+        type: 'POST',
+        data:{ _token: "{{csrf_token()}}", fromdate:fromdate,todate:todate,user_id:user_id, branch_id:branch_id,division_id:division_id,sales_id:sales_id,financial_year:financial_year,month:month },
+        success: function(response) {
+            $('.registredretailercount').text(response.registeredRetailerCount);
+            $('.activeretailercount').text(response.activeRetailerCount);
+            $('.activeRetailerPercent').text(response.activeRetailerPercent);
+            $('.nosOfRetailerRegistredSaarthi').text(response.nosOfRetailerRegistredSaarthi);
+            $('.nosOfRetailerRegistredSaarthiPercent').text(response.nosOfRetailerRegistredSaarthiPercent);
+            $('.orderTarget').text(response.orderTarget);
+            $('.orderAchievement').text(response.orderAchievement);
+            $('.achievementPercent').text(response.achievementPercent);
+            $('.perDayAverageSales').text(response.perDayAverageSales);
+            $('.perDayAverageVisit').text(response.perDayAverageVisit);
+        },
+        error: function(xhr, status, error) {
+            console.error(xhr.responseText);
+        }
+    });
   }
 
   function visitSummaryDashboard()
@@ -1910,6 +2298,19 @@
             thisYearBeatAdheranceBar(res.yearbeatAdherence)
         }
     })
+  }
+
+  function  getPrimarySalesDashboard() {
+     $.ajax({
+       url: "{{ url('secondary_dashboard/sales') }}",
+         dataType: "json",
+         type: "GET",
+         data:{ 
+            _token: "{{csrf_token()}}"
+         },
+         success: function(res){
+         }
+      })
   }
 </script>
 </x-app-layout>

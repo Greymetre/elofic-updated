@@ -187,9 +187,9 @@ class CustomerController extends Controller
                               }
                               if(auth()->user()->can(['customer_delete']))
                               {
-                                $btn = $btn.' <a href="" class="btn btn-danger btn-just-icon btn-sm delete" value="'.$query->id.'" title="'.trans('panel.global.delete').' '.trans('panel.customers.title_singular').'">
-                                            <i class="material-icons">clear</i>
-                                          </a>';
+                                // $btn = $btn.' <a href="" class="btn btn-danger btn-just-icon btn-sm delete" value="'.$query->id.'" title="'.trans('panel.global.delete').' '.trans('panel.customers.title_singular').'">
+                                //             <i class="material-icons">clear</i>
+                                //           </a>';
                               }
                               if(auth()->user()->can(['customer_active']))
                               {
@@ -564,7 +564,7 @@ class CustomerController extends Controller
         try
         { 
             $validator = Validator::make($request->all(), [
-                'gstin_no' => 'nullable|digits:15',
+                'gstin_no' => 'nullable|min:15|max:15',
                 'pan_no' => 'nullable|regex:/^[a-zA-Z]{5}\d{4}[a-zA-Z]$/',
                 'aadhar_no' => 'nullable|numeric|digits:12',
             ]);

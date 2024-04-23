@@ -40,7 +40,7 @@ class UsersDataTable extends DataTable
                   // }
                   if(auth()->user()->can(['user_delete']))
                   {
-                    $btn = $btn.' <a href="" class="btn btn-danger btn-just-icon btn-sm delete" value="'.$query->id.'" title="'.trans('panel.global.delete').' '.trans('panel.user.title_singular').'">
+                    $btn = $btn.' <a type="button" href="#" class="btn btn-danger btn-just-icon btn-sm delete" value="'.$query->id.'" title="'.trans('panel.global.delete').' '.trans('panel.user.title_singular').'">
                                 <i class="material-icons">clear</i>
                               </a>';
                   }

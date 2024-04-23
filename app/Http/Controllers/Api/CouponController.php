@@ -143,6 +143,13 @@ class CouponController extends Controller
                     $data['products'][$k]['expiry_interval_preiod'] = $product->expiry_interval_preiod;
                 }
             }
+            $check_warranty = warrantyActivation::with('customer', 'media')->where('product_serail_number', $serial_no)->first();
+            if($check_warranty){
+                $data['warranty']['status'] = true;
+                $data['warranty']['details'] = $check_warranty;
+            }else{
+                $data['warranty']['status'] = false;
+            }
             return response()->json($data, 200);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
@@ -236,6 +243,7 @@ class CouponController extends Controller
                 'branch_id' => $request->branch_id ?? NULL,
                 'customer_id' => $request->customer_id ?? NULL,
                 'status' => 0,
+                'remark' => $request->remark ?? NULL,
                 'sale_bill_no' => $request->sale_bill_no ?? NULL,
                 'sale_bill_date' => $request->sale_bill_date ?? NULL,
                 'warranty_date' => $request->warranty_date ?? NULL
@@ -268,7 +276,7 @@ class CouponController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
-            $data = WarrantyActivation::with('product_details', 'customer')->where('customer_id', $request->customer_id);
+            $data = WarrantyActivation::with('media', 'product_details', 'customer')->where('customer_id', $request->customer_id);
             if($request->serial_number && $request->serial_number != NULL && $request->serial_number != ''){
                 $data->where('product_serail_number', $request->serial_number);
             }

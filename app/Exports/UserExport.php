@@ -17,7 +17,7 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Illuminate\Support\Facades\Auth;
 
 use Carbon\Carbon;
-
+use PHPUnit\Framework\Constraint\Count;
 
 class UserExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapping
 {
@@ -44,7 +44,7 @@ class UserExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
 
         // return ['id','employees_code','name','Designation','Branch Name','Division','Department','Reporting','mobile', 'email', 'gender', 'Status','profile_image', 'role','designation_id','branch_id','division_id','department_id','ctc','date_of_joining','last_year_increments','last_promotion'];
 
-        return ['ID','Employees Code','User Name','Designation','Role','Branch Name','Location','Department','Division','Reporting To','Mobile', 'Email','Gender','Date Of Joining','Date Of Birth','Age','CTC Annual','Gross Salary Monthly','CTC Per Month','Last Year Increments','Last Year Increment Percent','Last Year Increments Value','Last Promotion','Marital Status','Father Name','Father Date Of Birth','Mother Name','Mother  DOB','Marriage Anniversary','Spouse name','Spouse Date Of Birth','Children-1','Children-1 DOB','Children-2','Children-2 DOB','Children-3','Children-3 DOB','Children-4','Children-4 DOB','Children-5','Children-5 DOB','PAN Number','Adhar Number','Emergency Number','Current Address','Permanent Address','Biometric Code','Account Number','Bank Name','IFSC Code','PF Number','UN Number','ESI Number','Probation Period','Date of Confirmation','Notice Period','Date of leaving','High School','Higher Secondary','Graducation','Post Graducation','Other','Current Company TENURE','Previous Exp','Total Exp','Status','profile_image','designation_id','branch_id','division_id','department_id','payroll'];
+        return ['ID','Employees Code','User Name','Designation','Role','Branch Name','Location','Department','Division','Reporting To','Mobile', 'Email','Gender','Date Of Joining','Date Of Birth','Age','CTC Annual','Gross Salary Monthly','CTC Per Month','Last Year Increments','Last Year Increment Percent','Last Year Increments Value','Last Promotion','Marital Status','Father Name','Father Date Of Birth','Mother Name','Mother  DOB','Marriage Anniversary','Spouse name','Spouse Date Of Birth','Children-1','Children-1 DOB','Children-2','Children-2 DOB','Children-3','Children-3 DOB','Children-4','Children-4 DOB','Children-5','Children-5 DOB','PAN Number','Adhar Number','Emergency Number','Current Address','Permanent Address','Biometric Code','Account Number','Bank Name','IFSC Code','PF Number','UN Number','ESI Number','Probation Period','Date of Confirmation','Notice Period','Date of leaving','High School','Higher Secondary','Graducation','Post Graducation','Other','Current Company TENURE','Previous Exp','Total Exp','Sales Type','Status','profile_image','designation_id','branch_id','division_id','department_id','Reporting ID', 'Role Ids','payroll'];
     }
 
     public function map($data): array
@@ -54,6 +54,17 @@ class UserExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
                 $status = 'ACTIVE';
             }else{
                 $status = 'INACTIVE';
+            }
+            $roles = '';
+            if(count($data['roles']) > 0){
+                foreach($data['roles'] as $k => $role){
+                    if($k == (count($data['roles'])-1)){
+                        $roles .= $role->id;
+                    }else{
+                        $roles .= $role->id.', ';
+                    }
+                }
+
             }
 
         return [
@@ -124,7 +135,7 @@ class UserExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
             isset($data['userinfo']['current_company_tenture']) ? $data['userinfo']['current_company_tenture'] :'',
             isset($data['userinfo']['previous_exp']) ? $data['userinfo']['previous_exp'] :'',
             isset($data['userinfo']['total_exp']) ? $data['userinfo']['total_exp'] :'',
-            //$data['active'],
+            $data['sales_type'],
             $status,
             $data['profile_image'],
             //isset($data['roles']['name']) ? $data['roles']['name'] :'',
@@ -132,6 +143,8 @@ class UserExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
             $data['branch_id']??NULL,
             $data['division_id']??NULL,
             $data['department_id']??NULL,
+            $data['reportingid']??NULL,
+            $roles,
             $data['payroll']??NULL,
         ];
     }
