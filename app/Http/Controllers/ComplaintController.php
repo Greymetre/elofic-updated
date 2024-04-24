@@ -142,7 +142,9 @@ class ComplaintController extends Controller
             'division' => $request->division ?? NULL,
             'register_by' => $request->register_by ?? NULL,
             'complaint_type' => $request->complaint_type ?? NULL,
-            'description' => $request->description ?? NULL
+            'description' => $request->description ?? NULL,
+            'created_by_device' => 'user',
+            'created_by' => auth()->user()->id
         ]);
 
         return Redirect::to('complaints')->with('message_success', 'Complaint Store Successfully and the complaint number is <span title="Copy" id="copyText">'. $newComplaintNumber .'</span>');

@@ -117,6 +117,7 @@ class CustomersImport implements ToCollection,WithValidation,WithHeadingRow, Wit
 
          Customers::where('id','=',$row['customer_id'])->update([
                 'name' => $row['firm_name'],
+                'active' => $row['status']??'Y',
                 'first_name' => !empty($row['first_name']) ? $row['first_name'] : '',
                 'last_name' => !empty($row['last_name']) ? $row['last_name'] : '',
                 'contact_number' => !empty($row['contact_number2'])? $row['contact_number2'] :null,

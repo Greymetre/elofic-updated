@@ -342,7 +342,7 @@ class UsersController extends Controller
         $user->division_id = isset($request['division_id']) ? $request['division_id'] :null;
         $user->payroll = isset($request['payroll']) ? $request['payroll'] :null;
         $user->branch_show = isset($request['branch_show']) ? implode(',', $request['branch_show']) :null;
-
+        $user->sales_type = isset($request['sales_type']) ? $request['sales_type'] :'';
         if($user->save())
         {
             $user->roles()->sync($request->input('roles', []));

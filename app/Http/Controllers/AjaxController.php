@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, CustomerDetails, EndUser, GiftModel, GiftSubcategory, Notes, OrderSchemeDetail, Redemption, SchemeDetails, Services, Subcategory, TourProgramme, TransactionHistory, UserCityAssign, WarrantyActivation};
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, CustomerDetails, EndUser, GiftModel, GiftSubcategory, Notes, OrderSchemeDetail, Redemption, SchemeDetails, Services, Subcategory, TourProgramme, TransactionHistory, UserCityAssign, WarrantyActivation};
 use App\Models\User;
 use Carbon\Carbon;
 use App\Models\UserLiveLocation;
@@ -822,10 +822,44 @@ class AjaxController extends Controller
     public function changeDocumnetStatus(Request $request)
     {
         if ($request->ajax()) {
+            
             $column = $request->type;
             $customer_id = $request->customer_id;
             $status = $request->status;
             $update = CustomerDetails::where('customer_id', $customer_id)->update([$column => $status, 'status_update_by' => auth()->user()->id]);
+            if($request->status == '2'){
+                switch ($request->type) {
+                    case 'aadhar_no_status':
+                        $update = CustomerDetails::where('customer_id', $customer_id)->update(['aadhar_no' => NULL, 'status_update_by' => auth()->user()->id]);
+                        Attachment::where('customer_id', $customer_id)->where('document_name', 'aadhar')->delete();
+                        Attachment::where('customer_id', $customer_id)->where('document_name', 'aadharback')->delete();
+                        break;
+
+                    case 'gstin_no_status':
+                        $update = CustomerDetails::where('customer_id', $customer_id)->update(['gstin_no' => NULL, 'status_update_by' => auth()->user()->id]);
+                        Attachment::where('customer_id', $customer_id)->where('document_name', 'gstin')->delete();
+                        break;
+
+                    case 'pan_no_status':
+                        $update = CustomerDetails::where('customer_id', $customer_id)->update(['pan_no' => NULL, 'status_update_by' => auth()->user()->id]);
+                        Attachment::where('customer_id', $customer_id)->where('document_name', 'pan')->delete();
+                        break;
+
+                    case 'bank_status':
+                        $update = CustomerDetails::where('customer_id', $customer_id)->update(['account_holder' => NULL,'account_number' => NULL,'bank_name' => NULL,'ifsc_code' => NULL]);
+                        Attachment::where('customer_id', $customer_id)->where('document_name', 'bankpass')->delete();
+                        break;
+
+                    case 'otherid_no_status':
+                        $update = CustomerDetails::where('customer_id', $customer_id)->update(['otherid_no' => NULL]);
+                        Attachment::where('customer_id', $customer_id)->where('document_name', 'other')->delete();
+                        break;
+                
+                    default:
+                        
+                        break;
+                }
+            }
             $customer = Customers::with('customerdetails')->find($customer_id);
             if ($update) {
                 if ($status == 1) {

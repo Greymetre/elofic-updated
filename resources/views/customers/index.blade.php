@@ -74,6 +74,14 @@
                     </select>
                    </div> 
 
+                   <div class="p-2" style="width:200px;">
+                    <select class="selectpicker" name="active" id="active" data-style="select-with-transition" title="Status">
+                       <option value="">Select Status</option>
+                       <option value="Y">Active</option>
+                       <option value="N">Inactive</option>
+                    </select>
+                   </div> 
+
                     <div class="p-2" style="width:150px;"><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
                     <div class="p-2" style="width:150px;"><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
                     <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.customers.title') !!}"><i class="material-icons">cloud_download</i></button></div>
@@ -253,6 +261,7 @@
                 d.branch_id = $('#branch_id').val(),
                 d.state_id = $('#state_id').val(),
                 d.city_id = $('#city_id').val(),
+                d.active = $('#active').val(),
                 d.customertype = $('#customertype').val(),
                 d.created_by = $('#created_by').val(),
                 d.search = $('input[type="search"]').val()
@@ -276,6 +285,9 @@
     });
 
     $('#executive_id').change(function(){
+        table.draw();
+    });
+    $('#active').change(function(){
         table.draw();
     });
     $('#parent_id').change(function(){

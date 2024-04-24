@@ -118,6 +118,7 @@ Route::group(['middleware' => ['auth:customers']], function () {
     Route::post('customer/addDamageEntry', [TransactionHistoryController::class, 'addDamageEntry']);
     //Complaints Route
     Route::any('customer/getComplaintType', [ComplaintController::class, 'getComplaintType']);
+    Route::any('customer/getComplaints', [ComplaintController::class, 'getComplaints']);
     Route::post('customer/addComplaint', [ComplaintController::class, 'addComplaint']);
     Route::any('customer/getComplaintCounts', [ComplaintController::class, 'getComplaintCounts']);
 

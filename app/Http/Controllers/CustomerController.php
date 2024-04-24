@@ -144,6 +144,11 @@ class CustomerController extends Controller
                                     $q->where('city_id', $request['city_id']);
                                 });
                             }
+                            if(!empty($request['active']))
+                            {
+                                $query->where('active', $request['active']);
+                                
+                            }
                             if(!empty($request['search']) && is_array($request['search']) == false){
                                 $search = $request['search'] ;
                                 $query->where(function($query) use($search) {
