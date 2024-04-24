@@ -132,6 +132,7 @@ class ComplaintController extends Controller
                 'register_by' => $request->register_by ?? NULL,
                 'complaint_type' => $request->complaint_type ?? NULL,
                 'description' => $request->description ?? NULL,
+                'created_by_device' => 'customer',
                 'created_by' => $request->customer_id ?? NULL
             ]);
             $noti_data = [
@@ -187,6 +188,46 @@ class ComplaintController extends Controller
             $data['unassigned'] = $query->where('assign_user', NULL)->count();
             if ($data) {
                 return response()->json(['status' => 'success', 'data' => $data], 200);
+            } else {
+                return response()->json(['status' => 'error', 'message' => 'data not found', 'data' => null], 404);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
+    }
+
+    public function getComplaints(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'customer_id' => 'required|exists:customers,id',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
+            }
+            
+            $data = Complaint::with('customer', 'complaint_type_details','product_details')->where('created_by', $request->customer_id)->where('created_by_device', 'customer');
+            if($request->warranty_start_date && $request->warranty_start_date != '' && $request->warranty_start_date != NULL){
+                $data->where('customer_bill_date', $request->warranty_start_date);
+            }
+
+            if($request->complaint_status != '' && $request->complaint_status != NULL){
+                $data->where('complaint_status', $request->complaint_status);
+            }
+            $data = $data->get();
+            if ($data) {
+                $main_data = array();
+                foreach ($data as $key => $value) {
+                    $main_data[$key]['complaint_number'] = $value->complaint_number;
+                    $main_data[$key]['complaint_status'] = $value->complaint_status;
+                    $main_data[$key]['product_serail_number'] = $value->product_serail_number;
+                    $main_data[$key]['remark'] = $value->remark;
+                    $main_data[$key]['product_name'] = $value->product_name??($value->product_details?$value->product_details->product_name:'');
+                    $main_data[$key]['warranty_start_date'] = $value->customer_bill_date;
+                    $main_data[$key]['complaint_type'] = $value->complaint_type_details->name;
+                    $main_data[$key]['end_user'] = $value->customer;
+                }
+                return response()->json(['status' => 'success', 'data' => $main_data], 200);
             } else {
                 return response()->json(['status' => 'error', 'message' => 'data not found', 'data' => null], 404);
             }

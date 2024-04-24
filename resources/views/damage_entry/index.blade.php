@@ -296,9 +296,13 @@
           },
           html: '<input type="text" name="coupon_code" id="coupon_code" class="swal2-input" value="' + ccode + '" placeholder="Coupon Code"/ required><select class="form-control select2" name="product_id" id="product_id" data-style="select-with-transition" title="Select Product"></select><input id="remark" name="remark" class="swal2-input" placeholder="Remark"><p class="alert alert-danger d-none" id="poperror"></p>',
           preConfirm: function() {
+            var status = $('.swal2-select').val();
             var remark = $('#remark').val();
             var coupon_code = $('#coupon_code').val();
             var product_id = $('#product_id').val();
+            if (status == 2) {
+              return true;
+            } 
             if (!coupon_code || !product_id) {
               $('#poperror').text('Coupon code and product are both required.');
               $('#poperror').removeClass('d-none');
@@ -310,6 +314,7 @@
         }).then(function(result) {
           if (!result.dismiss) {
             var remark = $('#remark').val();
+            var status = $('.swal2-select').val();
             var coupon_code = $('#coupon_code').val();
             var product_id = $('#product_id').val();
             $.ajax({
@@ -317,7 +322,7 @@
               type: 'GET',
               data: {
                 id: id,
-                status: result.value,
+                status: status,
                 remark: remark,
                 coupon_code: coupon_code,
                 product_id: product_id

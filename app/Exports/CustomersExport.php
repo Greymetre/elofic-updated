@@ -29,6 +29,7 @@ class CustomersExport implements FromCollection,WithHeadings,ShouldAutoSize,With
         $this->branch_id = $request->input('branch_id');   
         $this->state_id = $request->input('state_id');
         $this->city_id = $request->input('city_id'); 
+        $this->active = $request->input('active'); 
 
         //$this->userid = !empty($request->input('executive_id')) ? $request->input('executive_id') : Auth::user()->id;
         //$this->userids = getUsersReportingToAuth($this->userid); 
@@ -72,6 +73,10 @@ class CustomersExport implements FromCollection,WithHeadings,ShouldAutoSize,With
                                     $query->whereIn('executive_id',$userids);
                                 }
 
+                                if($this->active)
+                                {
+                                    $query->where('active',$this->active);
+                                }
                                 if($this->startdate)
                                 {
                                     $query->whereDate('created_at','>=',$this->startdate);
@@ -105,7 +110,6 @@ class CustomersExport implements FromCollection,WithHeadings,ShouldAutoSize,With
                                 }
 
                             })
-                        ->select('id','name', 'first_name', 'last_name', 'mobile', 'email', 'latitude', 'longitude', 'customertype', 'created_at','created_by','executive_id','customer_code','contact_number','parent_id')
                         ->limit(5000)->latest()->get();   
 
 
@@ -116,7 +120,7 @@ class CustomersExport implements FromCollection,WithHeadings,ShouldAutoSize,With
     {
         // return ['Created Date','Customer ID','Customer Type','Created by','Firm Name', 'First Name', 'Last Name', 'Mobile', 'Email','Address', 'Gmap address','Pin Code','Zip Code','Market Place','City','District','State','Beat Name', 'Latitude', 'Longitude','GST No','Adhar No','Pan No','Other No','Shop Image', 'Employee Name', 'Grade', 'Visit Status','Contact number -2','Customer Code','Employee Code','Branch Name','Department','Designation','Parent Customer'];
 
-    return ['Created Date','customer_id','customer_code','Customer Type','Created by','firm_name','Parent Customer','first_name', 'last_name', 'Mobile','contact_number2', 'email','address', 'Gmap address','Pin Code','Zip Code','market_place','City','District','State','grade','visit_status','gstin_no','aadhar_no','pan_no','other_no','Shop Image','Employee Code','Employee Name','Designation','Branch Name','Division','Latitude', 'Longitude','employee_id','parent_id','pincode_id','city_id','district_id','state_id','customer_type_id'];
+    return ['Created Date','customer_id','customer_code','status','Customer Type','Created by','firm_name','Parent Customer','first_name', 'last_name', 'Mobile','contact_number2', 'email','address', 'Gmap address','Pin Code','Zip Code','market_place','City','District','State','grade','visit_status','gstin_no','aadhar_no','pan_no','other_no','Shop Image','Employee Code','Employee Name','Designation','Branch Name','Division','Latitude', 'Longitude','employee_id','parent_id','pincode_id','city_id','district_id','state_id','customer_type_id'];
 
     }
 
@@ -176,6 +180,7 @@ class CustomersExport implements FromCollection,WithHeadings,ShouldAutoSize,With
             $data['created_at'] = isset($data['created_at']) ? date("d-m-Y", strtotime($data['created_at'])) :'',
             $data['id'],
             $data['customer_code'], 
+            $data['active'], 
             isset($data['customertypes']['customertype_name']) ? $data['customertypes']['customertype_name'] :'',
             $data['createdbyname'] = isset($data['createdbyname']['name']) ? $data['createdbyname']['name'] : '',
             $data['name'],

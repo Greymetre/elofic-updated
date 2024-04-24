@@ -1,4 +1,10 @@
 <x-app-layout>
+  <style>
+    .table.new-table th,
+    .table.new-table td {
+      border-top: 0px !important;
+    }
+  </style>
   <div class="content-header">
     <div class="container-fluid">
       <div class="row mb-2">
@@ -94,7 +100,7 @@
               <!-- info row -->
               <div class="row invoice-info mt-5">
                 <div class="col-md-6">
-                  <h4>Complaint From</h4>
+                  <h4><em>Complaint From</em></h4>
                   <h6 style="color: #5252b7;">{{$complaint->customer->customer_name}}</h6>
                   <p>At - {{$complaint->customer->customer_address}} {{$complaint->customer->customer_place}} Po - {{$complaint->customer->customer_city}} District - {{$complaint->customer->customer_district}} State - {{$complaint->customer->customer_state}} Pin - {{$complaint->customer->pincodeDetails->pincode}}</p>
                   <p>{{$complaint->customer->customer_district}}, {{$complaint->customer->customer_state}}, {{$complaint->customer->customer_country}}</p>
@@ -117,19 +123,286 @@
                     @endif
                   </p>
                   <p>Complaint Date : {{date('d-m-Y', strtotime($complaint->complaint_date))}}</p>
-                  <p>Created By : {{$complaint->createdbyname->name}}</p>
-                  <p>Closed Date : </p>
+                  <p>Created By : {{$complaint->createdbyname?$complaint->createdbyname->name:'-'}}</p>
+                  <p>Closed Date : -</p>
                 </div>
               </div>
 
               <hr>
 
               <div class="row invoice-info">
-
+                <div class="col-md-4"></div>
+                <div class="col-md-4 text-center" style="line-height: 0px;">
+                  <h5><em>Complaint Type</em></h5>
+                  <p><b>{{$complaint->complaint_type_details->name}}</b></p>
+                </div>
+                <div class="col-md-4"></div>
               </div>
 
+              <table class="table responsive border-0 mt-4 new-table">
+                <tr>
+                  <td><em>Category</em></td>
+                  <td><em>Product/Model(Code)</em></td>
+                  <td><em>Description</em></td>
+                </tr>
+                <tr>
+                  <th class="pt-0">{{$complaint->product_details?$complaint->product_details->categories->category_name:'-'}}</th>
+                  <th class="pt-0">{{$complaint->product_code??'-'}}</th>
+                  <th class="pt-0">{{$complaint->product_details?$complaint->product_details->description:'-'}}</th>
+                </tr>
+
+                <tr>
+                  <td><em>Product Serial Number</em></td>
+                  <td><em>HP</em></td>
+                  <td><em>Stage</em></td>
+                </tr>
+                <tr>
+                  <th class="pt-0">{{$complaint->product_serail_number??'-'}}</th>
+                  <th class="pt-0">{{$complaint->product_details?$complaint->product_details->specification:'-'}}</th>
+                  <th class="pt-0">{{$complaint->product_details?$complaint->product_details->product_no:''}}</th>
+                </tr>
+
+                <tr>
+                  <td><em>Phase</em></td>
+                  <td><em>Warranty/Customer Bill Date</em></td>
+                  <td><em>Service Paid/Free</em></td>
+                </tr>
+                <tr>
+                  <th class="pt-0">{{($complaint->product_details && $complaint->product_details->phase != '')?$complaint->product_details->phase:'-'}}</th>
+                  <th class="pt-0">{{$complaint->customer_bill_date?date('d-m-Y', strtotime($complaint->customer_bill_date)):'-'}}</th>
+                  <th class="pt-0">{{$complaint->service_type??'-'}}</th>
+                </tr>
+
+                <tr>
+                  <td><em>Seller</em></td>
+                </tr>
+                <tr>
+                  <th class="pt-0">{{($complaint->seller_details && $complaint->seller_details->name != '')?'['.$complaint->seller_details->id.'] '.$complaint->seller_details->name:'-'}}</th>
+                </tr>
+              </table>
+
+              <div class="row invoice-info">
+                <div class="col-md-4"></div>
+                <div class="col-md-4 text-center" style="line-height: 0px;">
+                  <h5><em>Complaint Feedback Type</em></h5>
+                  <p><b>-</b></p>
+                </div>
+                <div class="col-md-4"></div>
+
+                <div class="col-md-4"></div>
+                <div class="col-md-4 text-center" style="line-height: 0px;">
+                  <h6><em>Feedback</em></h6>
+                  <p><b>-</b></p>
+                </div>
+                <div class="col-md-4"></div>
+              </div>
+
+              <table class="table responsive border-0 mt-4 new-table">
+                <tr>
+                  <td><em>Replacement Tag</em></td>
+                  <td><em>Replacement Tag Serial Number</em></td>
+                  <td><em>Replacement Tag Description</em></td>
+                </tr>
+                <tr>
+                  <th class="pt-0">-</th>
+                  <th class="pt-0">-</th>
+                  <th class="pt-0">-</th>
+                </tr>
+              </table>
+
+              <hr class="mb-4">
+
+              <div class="row invoice-info">
+                <div class="col-md-6">
+                  <div class="row invoice-info" style="align-items: center;border:1px solid lightgrey;border-radius: 5px;padding: 0px 10px;">
+                    @if($complaint->warranty_details)
+                    @if($complaint->warranty_details->exists && $complaint->warranty_details->getMedia('warranty_activation_attach')->count() > 0 && file_exists($complaint->warranty_details->getFirstMedia('warranty_activation_attach')->getPath()))
+                    <a href="{!! $complaint->warranty_details->getMedia('warranty_activation_attach')[0]->getFullUrl() !!}" data-lightbox="mygallery" data-title="Invoice">
+                      <img width="50" src="{!! $complaint->warranty_details->getMedia('warranty_activation_attach')[0]->getFullUrl() !!}" class="img-fluid rounded"></a>
+                    <h6 class="ml-2 mb-0">{{$complaint->warranty_details->getMedia('warranty_activation_attach')[0]->name}}</h6>
+                    @else
+                    <img width="50" src="{!! url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview1">
+                    @endif
+                    @endif
+                  </div>
+                </div>
+              </div>
+
+              <hr class="mt-4">
+              <h4>ATTACHMENT</h4>
+              <table class="table responsive border-0 mt-4 new-table">
+                <tr>
+                  <th class="pb-0">SITE/SERVICE</th>
+                  <th class="pb-0">BRANCH</th>
+                  <th class="pb-0">Parchased Party Name</th>
+                  <th class="pb-0">Warranty / Bill</th>
+                </tr>
+                <tr>
+                  <td class="pt-0">-</td>
+                  <td class="pt-0">{{$complaint->purchased_branch_details?$complaint->purchased_branch_details->branch_name:'-'}}</td>
+                  <td class="pt-0">{{$complaint->party?$complaint->party->name:'-'}}</td>
+                  <td class="pt-0">{{$complaint->warranty_bill??'-'}}</td>
+                </tr>
+
+                <tr>
+                  <th class="pb-0">Customer Bill No.</th>
+                  <th class="pb-0">Warranty/Custtomer Bill Date</th>
+                  <th class="pb-0">Under Warranty</th>
+                  <th class="pb-0">Serbvice Paid/Free</th>
+                </tr>
+                <tr>
+                  <td class="pt-0">{{$complaint->customer_bill_no??'-'}}</td>
+                  <td class="pt-0">{{$complaint->customer_bill_date?date('d-m-Y', strtotime($complaint->customer_bill_date)):'-'}}</td>
+                  <td class="pt-0">{{$complaint->under_warranty??'-'}}</td>
+                  <td class="pt-0">{{$complaint->service_type??'-'}}</td>
+                </tr>
+
+                <tr>
+                  <th class="pb-0">Company Sale Bill No.</th>
+                  <th class="pb-0">Company Sale Bill Date</th>
+                  <th class="pb-0">Service Centre Remarks</th>
+                  <th class="pb-0">Fault Type</th>
+                </tr>
+                <tr>
+                  <td class="pt-0">{{$complaint->company_sale_bill_no??'-'}}</td>
+                  <td class="pt-0">{{$complaint->company_sale_bill_date?date('d-m-Y', strtotime($complaint->company_sale_bill_date)):'-'}}</td>
+                  <td class="pt-0">{{$complaint->service_centre_remark??'-'}}</td>
+                  <td class="pt-0">{{$complaint->fault_type??'-'}}</td>
+                </tr>
+
+                <tr>
+                  <th class="pb-0">Remark</th>
+                  <th class="pb-0">Complaint Register By</th>
+                  <th class="pb-0">Division</th>
+                  <th class="pb-0"> </th>
+                </tr>
+                <tr>
+                  <td class="pt-0">{{$complaint->remark??'-'}}</td>
+                  <td class="pt-0">{{$complaint->register_by??'-'}}</td>
+
+                  <td class="pt-0">{{$complaint->division_details?$complaint->division_details->division_name:'-'}}</td>
+                  <td class="pt-0"> </td>
+                </tr>
 
 
+              </table>
+
+              <hr class="mt-3 mb-3">
+
+              <div class="row invoice-info mt-4">
+                <div class="col-md-4">
+                  <h4><b>Work Done Detail</b></h4>
+                </div>
+                <div class="col-md-4 text-center">
+                </div>
+                <div class="col-md-4"></div>
+              </div>
+
+              <table class="table responsive border-0 new-table">
+                <tr>
+                  <td><em>Action Done by ASC</em></td>
+                  <td><em>Service centre remark</em></td>
+                  <td><em>Work Done At</em></td>
+                </tr>
+                <tr>
+                  <th class="pt-0">-</th>
+                  <th class="pt-0">{{$complaint->service_centre_remark??'-'}}</th>
+                  <th class="pt-0">-</th>
+                </tr>
+              </table>
+
+              <hr class="mt-3 mb-3">
+
+              <div class="row invoice-info mt-4">
+                <div class="col-md-4">
+                  <h4><b>Warranty Details</b></h4>
+                </div>
+                <div class="col-md-4 text-center">
+                </div>
+                <div class="col-md-4"></div>
+              </div>
+
+              <table class="table table-striped responsive">
+                <tr>
+                  <th>Product Serial No.</th>
+                  <th>Product</th>
+                  <th>Warranty Start Date</th>
+                  <th>Warranty Upto</th>
+                  <th>Warranty Status</th>
+                </tr>
+                <tr>
+                  <td>{{strtoupper($complaint->product_serail_number)}}</td>
+                  <td>[{{$complaint->product_code}}] {{$complaint->product_name}}</td>
+                  <td>
+                    @if ($complaint->customer_bill_date)
+                    {{ date('d-m-Y', strtotime($complaint->customer_bill_date)) }}
+                    @else
+                    -
+                    @endif
+                  </td>
+                  <td>
+                    @if ($complaint->customer_bill_date)
+                    @php
+                    $today = Carbon\Carbon::today();
+                    $date = Carbon\Carbon::parse($complaint->customer_bill_date);
+                    if ($date !== false) {
+                    $date->addMonths(18);
+                    } else {
+                    $date = null;
+                    }
+                    @endphp
+                    @if ($date)
+                    {{ $date->format('d-m-Y') }}
+                    @else
+                    Invalid date
+                    @endif
+                    @else
+                    -
+                    @endif
+                  </td>
+                  <td>
+                    @if ($complaint->customer_bill_date)
+                    @if ($date)
+                    @if ($date->gt($today))
+                    <span class="badge badge-success">In Warranty</span>
+                    @else
+                    <span class="badge badge-danger">Out Of Warranty</span>
+                    @endif
+                    @else
+                    Invalid date
+                    @endif
+                    @else
+                    -
+                    @endif
+                  </td>
+                </tr>
+
+              </table>
+
+              <hr class="mt-3 mb-3">
+
+              <div class="row invoice-info mt-4">
+                <div class="col-md-4">
+                  <h4><b>Service Bill Details</b></h4>
+                </div>
+                <div class="col-md-4 text-center">
+                </div>
+                <div class="col-md-4"></div>
+              </div>
+
+              <table class="table table-striped responsive">
+                <tr>
+                  <th>Serial No.</th>
+                  <th>Total Amount</th>
+                  <th>Service Bill Status</th>
+                </tr>
+                <tr>
+                  <td>{{strtoupper($complaint->product_serail_number)}}</td>
+                  <td>-</td>
+                  <td>-</td>
+                </tr>
+
+              </table>
 
 
               <!-- /.row -->

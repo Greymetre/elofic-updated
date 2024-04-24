@@ -1235,7 +1235,6 @@
       switch (activetabs) {
         case '#secondarysaleskpi':
           getSecondarySalesKpi();
-          alert('division_id');
           break;
          default:
           getSecondarySalesKpi();
@@ -1247,7 +1246,6 @@
      switch (activetabs) {
        case '#secondarysaleskpi':
          getSecondarySalesKpi();
-         alert('branch_id');
          break;
         default:
          getSecondarySalesKpi();
@@ -1259,7 +1257,6 @@
      switch (activetabs) {
        case '#secondarysaleskpi':
          getSecondarySalesKpi();
-         alert('sales_id');
          break;
         default:
          getSecondarySalesKpi();

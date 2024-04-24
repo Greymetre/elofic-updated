@@ -120,22 +120,6 @@ $(document).ready(function () {
           }
         }
       },
-      
-      biometric_code:
-      {
-        maxlength: 250,
-        remote:{
-          url:base_url+"/uniqueValidation",
-          type:"post",
-          data: {
-            "_token": token,
-            value: function() {return $("#biometric_code").val();},
-            table :'user_details',
-            column : 'biometric_code',
-            id: function() {return $("#user_id").val();},
-          }
-        }
-      },
       account_number:
       {
         maxlength: 250,
@@ -361,22 +345,6 @@ $(document).ready(function () {
             value: function() {return $("#employee_code").val();},
             table :'user_details',
             column : 'employee_code',
-            id: function() {return $("#user_id").val();},
-          }
-        }
-      },
-      
-      biometric_code:
-      {
-        maxlength: 250,
-        remote:{
-          url:base_url+"/uniqueValidation",
-          type:"post",
-          data: {
-            "_token": token,
-            value: function() {return $("#biometric_code").val();},
-            table :'user_details',
-            column : 'biometric_code',
             id: function() {return $("#user_id").val();},
           }
         }

@@ -251,8 +251,9 @@ class DamageEntryController extends Controller
                     'point' => $point,
                     'created_at' => $created_at,
                 ]);
+                return response()->json(['status' => 'success','message' => 'Damage Entry Approved successfully!']);
             }
-            return response()->json(['status' => 'success','message' => 'Damage Entry status change successfully!']);
+            return response()->json(['status' => 'success','message' => 'Damage Entry Rejected successfully!']);
         }else{
             return response()->json(['status' => 'error','message' => 'Error in change status of Damage Entry!']);
         }
