@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, CustomerDetails, EndUser, GiftModel, GiftSubcategory, Notes, OrderSchemeDetail, Redemption, SchemeDetails, Services, Subcategory, TourProgramme, TransactionHistory, UserCityAssign};
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, CustomerDetails, EndUser, GiftModel, GiftSubcategory, Notes, OrderSchemeDetail, Redemption, SchemeDetails, Services, Subcategory, TourProgramme, TransactionHistory, UserCityAssign, WarrantyActivation};
 use App\Models\User;
 use Carbon\Carbon;
 use App\Models\UserLiveLocation;
@@ -982,16 +982,21 @@ class AjaxController extends Controller
     {
         try {
             $serial_no = $request->input('serial_no');
-            $data = Services::with('product')
-                ->where(function ($query) use ($serial_no) {
-                    if (isset($serial_no)) {
-                        $query->where('serial_no', '=', $serial_no);
-                    }
-                })
-                ->first();
-            if ($data) {
-                $data->product->categories = $data->product->categories;
-                return response()->json(['status' => true, 'data' => $data->product]);
+            if($serial_no != NULL && $serial_no != ''){
+                $data = Services::with('product')
+                    ->where(function ($query) use ($serial_no) {
+                        if (isset($serial_no)) {
+                            $query->where('serial_no', '=', $serial_no);
+                        }
+                    })
+                    ->first();
+                if ($data) {
+                    $data->product->categories = $data->product->categories;
+                    $check_Warranty = WarrantyActivation::with('customer')->where('product_serail_number', $serial_no)->first();
+                    return response()->json(['status' => true, 'data' => $data->product, 'check_Warranty'=>$check_Warranty]);
+                } else {
+                    return response()->json(['status' => false, 'data' => null]);
+                }
             } else {
                 return response()->json(['status' => false, 'data' => null]);
             }
@@ -1044,10 +1049,11 @@ class AjaxController extends Controller
                     $html .= '</td><td>';
                     $html .= date('d M Y', strtotime($val->complaint_date));
                     $html .= '</td><td>';
+                    $html .= $val->claim_amount;
                     $html .= '</td><td>';
-                    if ($val->status == '0') {
+                    if ($val->complaint_status == '0') {
                         $html .= 'Open';
-                    } elseif ($val->status == '1') {
+                    } elseif ($val->complaint_status == '1') {
                         $html .= 'Pending';
                     }
 

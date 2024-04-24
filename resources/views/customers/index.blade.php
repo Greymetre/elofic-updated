@@ -7,8 +7,8 @@
           <i class="material-icons">perm_identity</i>
         </div>
         <h4 class="card-title">{!! trans('panel.customers.title') !!}{!! trans('panel.global.list') !!}
-          <span class="pull-right">
-            <div class="btn-group">
+          <span class="">
+            <div class="btn-group header-frm-btn">
               @if(auth()->user()->can(['customer_download']))
               <form method="GET" action="{{ URL::to('customers-download') }}">
                   <div class="d-flex flex-wrap flex-row">
@@ -80,6 +80,7 @@
                   </div>
               </form>
               @endif
+              <div class="next-btn">
               @if(auth()->user()->can(['customer_upload']))
               <form action="{{ URL::to('customers-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
               {{ csrf_field() }}
@@ -107,6 +108,7 @@
               @if(auth()->user()->can(['customer_create']))
               <a href="{{ route('customers.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.customers.title_singular') !!}"><i class="material-icons">add_circle</i></a>
               @endif
+              </div>
             </div>
           </span>
         </h4>
@@ -260,12 +262,12 @@
             // { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
             { data: 'checkbox', name: 'checkbox', orderable: false, searchable: false },
             { data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
-            {data: 'name', name: 'name',"defaultContent": ''},
-            {data: 'first_name', name: 'first_name',"defaultContent": ''},
-            {data: 'last_name', name: 'last_name',"defaultContent": ''},
-            {data: 'mobile', name: 'mobile',"defaultContent": ''},
-            {data: 'image', name: 'image',"defaultContent": ''},
-            {data: 'profileimage', name: 'profileimage',"defaultContent": ''},
+            {data: 'name', name: 'name',"defaultContent": '',orderable: false,},
+            {data: 'first_name', name: 'first_name',"defaultContent": '',orderable: false,},
+            {data: 'last_name', name: 'last_name',"defaultContent": '',orderable: false,},
+            {data: 'mobile', name: 'mobile',"defaultContent": '',orderable: false,},
+            {data: 'image', name: 'image',"defaultContent": '',orderable: false,},
+            {data: 'profileimage', name: 'profileimage',"defaultContent": '',orderable: false,},
             {data: 'customertypes.customertype_name', name: 'customertypes.customertype_name',"defaultContent": '', orderable: false},
             {data: 'createdbyname.name', name: 'createdbyname.name',"defaultContent": '', orderable: false},
             {data: 'created_at', name: 'created_at',"defaultContent": ''},

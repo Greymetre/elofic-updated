@@ -38,22 +38,28 @@ class CountryDataTable extends DataTable
                                 <i class="material-icons">clear</i>
                               </a>';
                   }
+                  $active = ($query->active == 'Y') ? 'checked="" value="'.$query->active.'"' : 'value="'.$query->active.'"';
                   return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
                                 '.$btn.'
-                            </div>';
+                            </div><div class="togglebutton">
+                            <label>
+                              <input type="checkbox"'.$active.' id="'.$query->id.'" class="activeRecord">
+                              <span class="toggle"></span>
+                            </label>
+                          </div>';
             })
-            ->addColumn('active', function ($query) {
-                  // if(auth()->user()->can(['country_active']))
-                  // {
-                    $active = ($query->active == 'Y') ? 'checked="" value="'.$query->active.'"' : 'value="'.$query->active.'"';
-                    return '<div class="togglebutton">
-                        <label>
-                          <input type="checkbox"'.$active.' id="'.$query->id.'" class="activeRecord">
-                          <span class="toggle"></span>
-                        </label>
-                      </div>';
-                  // }
-            })
+            // ->addColumn('active', function ($query) {
+            //       // if(auth()->user()->can(['country_active']))
+            //       // {
+            //         $active = ($query->active == 'Y') ? 'checked="" value="'.$query->active.'"' : 'value="'.$query->active.'"';
+            //         return '<div class="togglebutton">
+            //             <label>
+            //               <input type="checkbox"'.$active.' id="'.$query->id.'" class="activeRecord">
+            //               <span class="toggle"></span>
+            //             </label>
+            //           </div>';
+            //       // }
+            // })
             ->rawColumns(['action','active']);
     }
 

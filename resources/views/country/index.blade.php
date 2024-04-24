@@ -67,7 +67,7 @@
             <thead class=" text-primary">
               <th>{!! trans('panel.global.no') !!}</th>
               <th>{!! trans('panel.global.action') !!}</th>
-              <th>{!! trans('panel.global.active') !!}</th>
+              <!-- <th>{!! trans('panel.global.active') !!}</th> -->
               <th>{!! trans('panel.country.country_name') !!}</th>
               <th>{!! trans('panel.global.created_by') !!}</th>
               <th>{!! trans('panel.global.created_at') !!}</th>
@@ -138,7 +138,7 @@
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
             {data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
-            {data: 'active', name: 'active',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
+            // {data: 'active', name: 'active',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
             {data: 'country_name', name: 'country_name',"defaultContent": ''},
              {data: 'createdbyname.name', name: 'createdbyname.name',"defaultContent": ''},
             {data: 'created_at', name: 'created_at',"defaultContent": ''},

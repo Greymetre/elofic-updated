@@ -655,6 +655,7 @@ class OrderController extends Controller
     public function submitDispatched(Request $request)
     {
         try {
+            
             $request['active'] = 'Y';
             $request['created_by'] = Auth::user()->id;
             $validator = Validator::make($request->all(), [
@@ -682,6 +683,8 @@ class OrderController extends Controller
 
                         $orderdetail = OrderDetails::where('order_id', '=', $request['order_id'])
                             ->where('product_detail_id', '=', $rows['product_detail'])->first();
+                        $orderdetail->cash_dis = $rows['cash_dis'];
+                        $orderdetail->cash_amounts = $rows['cash_amounts'];
                         if ($orderdetail['shipped_qty'] + $rows['quantity'] == $orderdetail['quantity']) {
                             $orderdetail->status_id = $status_id;
                         } else {
@@ -693,9 +696,9 @@ class OrderController extends Controller
                 }
 
                 if (OrderDetails::where('order_id', '=', $request['order_id'])->where('status_id', '=', $partiallystatus)->exists()) {
-                    Order::where('id', '=', $request['order_id'])->update(['status_id' => $partiallystatus]);
+                    Order::where('id', '=', $request['order_id'])->update(['status_id' => $partiallystatus,'cash_discount' => $request->cash_discount,'cash_amount' => $request->cash_amount,'order_remark' => $request->order_remark]);
                 } else {
-                    Order::where('id', '=', $request['order_id'])->update(['status_id' => $status_id]);
+                    Order::where('id', '=', $request['order_id'])->update(['status_id' => $status_id,'cash_discount' => $request->cash_discount,'cash_amount' => $request->cash_amount,'order_remark' => $request->order_remark]);
                 }
                 return Redirect::to('sales')->with('message_success', 'Sales Store Successfully');
             }

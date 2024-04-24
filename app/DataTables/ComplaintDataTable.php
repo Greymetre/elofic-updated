@@ -19,25 +19,53 @@ class ComplaintDataTable extends DataTable
         return datatables()
             ->eloquent($query)
             ->addIndexColumn()
-            ->addColumn('action', function ($query) {
-                $btn = '';
-                $activebtn = '';
-                if (auth()->user()->can(['city_edit'])) {
-                    $btn = $btn . '<a href="javascript:void(0)" class="btn btn-info btn-just-icon btn-sm edit" id="' . encrypt($query->id) . '" title="' . trans('panel.global.edit') . ' ' . trans('panel.city.title_singular') . '">
-                          <i class="material-icons">edit</i>
-                          </a>';
+            ->addColumn('status', function ($query) {
+                if($query->complaint_status == '0'){
+                    return '<span class="badge badge-secondary">Open</span>';
+                }elseif($query->complaint_status == '1'){
+                    return '<span class="badge badge-warning">Pending</span>';
+                }elseif($query->complaint_status == '2'){
+                    return '<span class="badge badge-info">Work Done</span>';
+                }elseif($query->complaint_status == '3'){
+                    return '<span class="badge badge-success">Completed</span>';
+                }elseif($query->complaint_status == '4'){
+                    return '<span class="badge badge-primary">Closed</span>';
+                }elseif($query->complaint_status == '5'){
+                    return '<span class="badge badge-danger">Cancel</span>';
                 }
-                if (auth()->user()->can(['city_delete'])) {
-                    $btn = $btn . ' <a href="javascript:void(0)" class="btn btn-danger btn-just-icon btn-sm delete" value="' . $query->id . '" title="' . trans('panel.global.delete') . ' ' . trans('panel.city.title_singular') . '">
-                                <i class="material-icons">clear</i>
+            })
+            // ->addColumn('action', function ($query) {
+            //     $btn = '';
+            //     $activebtn = '';
+            //     if (auth()->user()->can(['complaint_edit'])) {
+            //         $btn = $btn . '<a href="'.route('complaints.edit', $query->id).'" class="btn btn-success btn-just-icon btn-sm" title="' . trans('panel.global.edit') . ' Complaint">
+            //               <i class="material-icons">edit</i>
+            //               </a>';
+            //     }
+            //     if (auth()->user()->can(['complaint_view'])) {
+            //         $btn = $btn . ' <a href="'.route('complaints.show', $query->id).'" class="btn btn-info btn-just-icon btn-sm" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Complaint">
+            //                     <i class="material-icons">visibility</i>
+            //                     </a>';
+            //     }
+            //     // $btn = '';
+            //     return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
+            //                     ' . $btn . '
+            //                 </div>';
+            // })
+            ->addColumn('complaint_number', function ($query) {
+                if (auth()->user()->can(['complaint_view'])) {
+                    $btn = ' <a href="'.route('complaints.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Complaint">
+                                '.$query->complaint_number.'
                                 </a>';
+                }else{
+                    $btn = $query->complaint_number;
                 }
-                $btn = '';
+                // $btn = '';
                 return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
                                 ' . $btn . '
                             </div>';
             })
-            ->rawColumns(['action', 'active']);
+            ->rawColumns(['action', 'status','complaint_number']);
     }
 
     /**
@@ -48,7 +76,7 @@ class ComplaintDataTable extends DataTable
      */
     public function query(Complaint $model)
     {
-        return $model->with('party', 'service_center_details', 'seller_details', 'customer', 'complaint_type_details','pp')->newQuery();
+        return $model->with('party', 'service_center_details', 'seller_details', 'customer', 'complaint_type_details')->newQuery();
     }
 
     /**

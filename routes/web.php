@@ -100,6 +100,12 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('orderSummaryData', [ DashboardController::class, 'orderSummaryData']);
     Route::post('salesSummaryData', [ DashboardController::class, 'salesSummaryData']);
     Route::post('activityDashboardCount', [ DashboardController::class, 'activityDashboardCount']);
+    Route::post('secondarySalesKpiData', [ DashboardController::class, 'secondarySalesKpiData']);
+
+    // Secondary Sales Dashboard
+    Route::get('secondary_dashboard/sales', [DashboardController::class, 'secondary_dashboard_sales'])->name('secondary_dashboard.sales');
+    Route::any('secondary_dashboard/sales/list', [DashboardController::class, 'secondary_dashboard_sales_list'])->name('secondary_dashboard.sales.list');
+    
      //Customers
     Route::resource('customertype', CustomerTypeController::class);
     Route::post('customertype-active', [ CustomerTypeController::class, 'active'])->name('customertype.active');
@@ -656,6 +662,8 @@ Route::group(['middleware' => ['auth']], function () {
 
     // Complaint Route
     Route::resource('complaints', ComplaintController::class);
+    Route::post('complaint-cancel', [ ComplaintController::class, 'cancelComplaint'])->name('cancelComplaint');
+    Route::post('complaint-pending', [ ComplaintController::class, 'pendingComplaint'])->name('pendingComplaint');
 
     // Leaves Route
     Route::resource('leaves', LeaveController::class);

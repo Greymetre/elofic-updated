@@ -12,6 +12,7 @@ use App\Models\Division;
 use App\Models\EndUser;
 use App\Models\Pincode;
 use App\Models\User;
+use App\Models\WarrantyActivation;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Gate;
@@ -87,10 +88,27 @@ class ComplaintController extends Controller
             ]);
             $request->end_user_id = $end_user->id;
         }
+        $check_warranty = WarrantyActivation::with('customer', 'media')->where('product_serail_number', $request->product_serail_number)->first();
+        if(!$check_warranty)
+        {
+            WarrantyActivation::create([
+                'product_serail_number' => $request->product_serail_number ?? NULL,
+                'product_id' => $request->product_id ?? NULL,
+                'end_user_id' => $request->end_user_id ?? NULL,
+                'branch_id' => $request->branch_id ?? NULL,
+                'customer_id' => $request->seller ?? NULL,
+                'status' => 0,
+                'sale_bill_no' => $request->sale_bill_no ?? NULL,
+                'sale_bill_date' => $request->sale_bill_date ?? NULL,
+                'warranty_date' => $request->customer_bill_date ?? NULL,
+                'created_by' => auth()->user()->id
+            ]);
+        }
         $newComplaintNumber = $this->getComplaintNumber();
         Complaint::create([
             'complaint_number' => $newComplaintNumber,
             'complaint_date' => $request->complaint_date ?? NULL,
+            'claim_amount' => $request->claim_amount ?? NULL,
             'seller' => $request->seller ?? NULL,
             'end_user_id' => $request->end_user_id ?? NULL,
             'party_name' => $request->party_name ?? NULL,
@@ -100,6 +118,7 @@ class ComplaintController extends Controller
             'product_id' => $request->product_id ?? NULL,
             'product_serail_number' => $request->product_serail_number ?? NULL,
             'product_code' => $request->product_code ?? NULL,
+            'product_name' => $request->product_name ?? NULL,
             'category' => $request->category ?? NULL,
             'specification' => $request->specification ?? NULL,
             'product_no' => $request->product_no ?? NULL,
@@ -118,6 +137,7 @@ class ComplaintController extends Controller
             'warranty_bill' => $request->warranty_bill ?? NULL,
             'fault_type' => $request->fault_type ?? NULL,
             'service_centre_remark' => $request->service_centre_remark ?? NULL,
+            'complaint_status' => $request->complaint_status ?? 0,
             'remark' => $request->remark ?? NULL,
             'division' => $request->division ?? NULL,
             'register_by' => $request->register_by ?? NULL,
@@ -137,7 +157,7 @@ class ComplaintController extends Controller
      */
     public function show(Complaint $complaint)
     {
-        //
+        return view('complaint.show', compact('complaint'));
     }
 
     /**
@@ -148,7 +168,22 @@ class ComplaintController extends Controller
      */
     public function edit(Complaint $complaint)
     {
-        //
+        $this->complaint = $complaint;
+        $roleName = "Service Eng";
+
+        $assign_users = User::whereHas('roles', function ($query) use ($roleName) {
+            $query->where('name', $roleName);
+        })
+            ->with(['roles' => function ($query) {
+                $query->with('permissions');
+            }])->select('id', 'name')
+            ->get();
+        $service_centers = Customers::where('customertype', '4')->select('id', 'name')->get();
+        $branchs = Branch::where('active', 'Y')->select('id', 'branch_name', 'branch_code')->get();
+        $pincodes = Pincode::where('active', 'Y')->select('id', 'pincode')->get();
+        $divisions = Division::where('active', 'Y')->select('id', 'division_name')->get();
+        $complaint_types = ComplaintType::where('active', 'Y')->select('id', 'name')->get();
+        return view('complaint.create', compact('assign_users', 'service_centers', 'branchs', 'pincodes', 'divisions', 'complaint_types'))->with('complaints', $this->complaint);
     }
 
     /**
@@ -160,7 +195,10 @@ class ComplaintController extends Controller
      */
     public function update(Request $request, Complaint $complaint)
     {
-        //
+        $complaint->update($request->all());
+        $newComplaintNumber = $complaint->complaint_number;
+
+        return Redirect::to('complaints')->with('message_success', 'Complaint Update Successfully and the complaint number is <span title="Copy" id="copyText">'. $newComplaintNumber .'</span>');
     }
 
     /**
@@ -192,5 +230,13 @@ class ComplaintController extends Controller
         $nextComplaintNumberPadded = str_pad($nextComplaintNumber, 3, '0', STR_PAD_LEFT);
 
         return "SEC/HO/$financialYear/$nextComplaintNumberPadded";
+    }
+
+    public function cancelComplaint(Request $request){
+        dd($request->all());
+    }
+
+    public function pendingComplaint(Request $request){
+        dd($request->all());
     }
 }

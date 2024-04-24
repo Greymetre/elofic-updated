@@ -15,7 +15,7 @@
             <span class="pull-right">
               <div class="btn-group align-items-center">
                 @if(auth()->user()->can(['transaction_history_download']))
-                <!-- <form method="GET" action="{{ route('transaction_history.download') }}" class="form-horizontal">
+               <!-- <form method="GET" action="{{ route('transaction_history.download') }}" class="form-horizontal">
                   <div class="d-flex flex-row align-items-center">
                     <div class="p-2" style="width:160px;">
                       <label for="branch_id">Branch</label>
@@ -27,19 +27,16 @@
                         @endforeach
                         @endif
                       </select>
-                    </div>
-                    <div class="p-2" style="width:160px;">
-                      <label for="parent_customer">Parent Customer</label>
-                      <select class="select2" multiple name="parent_customer[]" id="parent_customer" data-style="select-with-transition" title="Select Parent Customer">
-                        <option value="">Select Parent Customer</option>
-                        @if(@isset($parent_customers ))
-                        @foreach($parent_customers as $parent_customer)
-                        <option value="{!! $parent_customer->id !!}">{!! $parent_customer->name !!}</option>
-                        @endforeach
-                        @endif
+                    </div> -->
+                    <div class="p-2 mr-5" style="width:250px;">
+                      <!-- <label for="status">Status</label> -->
+                      <select class="select2 form-control" name="status" id="status" data-style="select-with-transition" title="Select Parent Customer">
+                        <option value="">Select Status</option>
+                        <option value="0">Pending</option>
+                        <option value="1">Approved</option>
                       </select>
                     </div>
-                    <div class="p-2" style="width:160px;">
+                    <!-- <div class="p-2" style="width:160px;">
                       <label for="scheme_type">Scheme</label>
                       <select class="select2" name="scheme_name" id="scheme_name" data-style="select-with-transition" title="Select Scheme Type">
                         <option value="">Scheme Name</option>
@@ -52,11 +49,11 @@
                     </div>
                     <div class="p-2" style="width:160px;"><label for="start_date">Start Date</label><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
                     <div class="p-2" style="width:160px;"><label for="end_date">End Date</label><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
-                    <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Transaction"><i class="material-icons">cloud_download</i></button></div>
-                  </div>
-                </form> -->
+                    <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Transaction"><i class="material-icons">cloud_download</i></button></div> -->
+                  <!-- </div> -->
+                <!-- </form> -->
                 @endif
-              </div>
+              <!-- </div> -->
               <!-- <button class="btn btn-just-icon btn-theme" type="button" data-toggle="collapse" data-target="#multiCollapseExample2" aria-expanded="false" aria-controls="multiCollapseExample2"><i class="material-icons">menu</i></button> -->
               <div class="row">
                 <div class="col">
@@ -183,7 +180,7 @@
         "ajax": {
           'url': "{{ route('damage_entries.index') }}",
           'data': function(d) {
-            d.branch_id = $('#branch_id').val(),
+            d.status = $('#status').val(),
               d.parent_customer = $('#parent_customer').val(),
               d.scheme_name = $('#scheme_name').val(),
               d.start_date = $('#start_date').val(),
@@ -240,7 +237,7 @@
           },
         ]
       });
-      $('#branch_id').change(function() {
+      $('#status').change(function() {
         table.draw();
       });
       $('#parent_customer').change(function() {
@@ -369,26 +366,5 @@
       });
 
     });
-    setTimeout(() => {
-
-      $('#parent_customer').select2({
-        placeholder: 'Select...',
-        multiple: true,
-        allowClear: true,
-        ajax: {
-          url: "{{ route('getCustomerDataSelect') }}",
-          dataType: 'json',
-          delay: 250,
-          data: function(params) {
-            return {
-              term: params.term || '',
-              page: params.page || 1
-            }
-          },
-          cache: true
-        }
-      }).trigger('change');
-
-    }, 2000);
   </script>
 </x-app-layout>

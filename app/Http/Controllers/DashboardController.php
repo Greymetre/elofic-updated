@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\{User, Customers, Order, CheckIn, BeatSchedule, Sales, SalesTarget, OrderDetails, TourProgramme, Wallet, Product, UserActivity, UserCityAssign, Address, TourDetail};
+use App\Models\{User, Customers, Order, Branch, Division,CheckIn, BeatSchedule, Sales, SalesTarget, OrderDetails, TourProgramme, Wallet, Product, UserActivity, UserCityAssign, Address, TourDetail,TransactionHistory,EmployeeDetail,SalesTargetUsers,Attendance,VisitReport};
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Auth;
@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -24,8 +25,12 @@ class DashboardController extends Controller
         abort_if(Gate::denies('dashboard_access'), Response::HTTP_FORBIDDEN, 'Forbidden,' . PHP_EOL . 'You don\'t have the right permissions. Please contact to the admin.');
         $users_ids = getUsersReportingToAuth();
         $users= User::where('active','=','Y')->whereIn('reportingid', $users_ids)->select('id','name')->get();
+        $branches = Branch::latest()->get();
+        $divisions = Division::latest()->get();
+        $currentYear = Carbon::now()->year;
+        $years = range($currentYear - 2, $currentYear + 2);
         // dd($users);
-        return view('dashboard.index',compact('users'));
+        return view('dashboard.index',compact('users','branches','divisions','years'));
     }
 
     public function dashboardData(Request $request)
@@ -762,5 +767,233 @@ class DashboardController extends Controller
 
         return response()->json($data);
         
+    }
+
+    public function secondary_dashboard_sales(Request $request) {
+        $retailers = Customers::where('customertype', '2')->get();
+        $dealers_and_distibutors = Customers::where('customertype',[3, 4])->get();
+        $sales_persons = User::latest()->get();
+        $products = Product::latest()->get();;
+        $users = User::latest()->get();
+        $branches = Branch::latest()->get(); 
+        $divisions = Division::latest()->get();
+        $currentYear = Carbon::now()->year;
+        $years = range($currentYear - 2, $currentYear + 2);
+
+        $orders = Order::with(['buyers','orderdetails','getuserdetails','getsalesdetail'])->get();
+
+        abort_if(Gate::denies('dashboard_secondary_sales_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        return view('secondary_dashboard.index', compact('branches','years','sales_persons','divisions','retailers','dealers_and_distibutors','products'));
+    }
+
+    public function secondary_dashboard_sales_list(Request $request) {
+
+       $query = OrderDetails::with(['orders','orders.sellers','orders.buyers','orders.createdbyname','orders.getuserdetails.getdivision','orders.buyers.customeraddress.cityname','orders.buyers.customeraddress.statename','products','products.productpriceinfo','orders.getuserdetails.getbranch','orders.sellers.customeraddress.cityname','orders.createdbyname.getbranch'])->where(function ($query) use ($request) {
+        
+            if ($request->month && $request->month != '' && $request->month != null) {
+                // Get the month name abbreviation from the request (e.g., "Mar", "Apr")
+                $monthName = $request->month;
+
+                // Filter orders based on the month name of the order_date column
+                $query->whereRaw('UPPER(MONTHNAME(orders.order_date)) = ?', [strtoupper($monthName)]);
+            }
+
+            if($request->branch_id && $request->branch_id != '' && $request->branch_id != null){
+                $branchIds = User::where('branch_id', $request->branch_id)->pluck('id');
+
+                $query->whereHas('orders', function ($q) use ($branchIds) {
+                    $q->whereIn('orders.created_by', $branchIds);
+                });
+            }
+
+            if($request->dealer_id && $request->dealer_id != '' && $request->dealer_id != null){
+                $dealerIds = Customers::where('id', $request->dealer_id)->pluck('id');
+
+                $query->whereHas('orders', function ($q) use ($dealerIds) {
+                    $q->whereIn('orders.seller_id', $dealerIds);
+                });
+            }
+
+            // if($request->user_id && $request->user_id != '' && $request->user_id != null){
+            //     $userIds = User::where('id', $request->user_id)->pluck('id');
+            //     $query->whereIn('se',$userIds);
+            // }
+
+            if($request->executive_id && $request->executive_id != '' && $request->executive_id != null){
+                $executiveIds = User::where('id', $request->executive_id)->pluck('id');
+
+                $query->whereHas('orders', function ($q) use ($executiveIds) {
+                    $q->whereIn('orders.created_by', $executiveIds);
+                });
+            }                    
+
+            if($request->retailer_id && $request->retailer_id != '' && $request->retailer_id != null){
+                $buyerIds = User::where('id', $request->retailer_id)->pluck('id');
+                $query->whereIn('buyer_id',$buyerIds);
+            }
+
+            if ($request->division_id && $request->division_id != '' && $request->division_id != null) {
+                $userIds = User::where('division_id', $request->division_id)->pluck('id')->toArray();
+
+                $query->whereHas('orders', function ($q) use ($userIds) {
+                    $q->whereIn('orders.created_by', $userIds);
+                });
+            }
+
+            if ($request->product_model && $request->product_model != '' && $request->product_model != null) {
+                $productIds = Product::where('id', $request->product_model)->pluck('id')->toArray();
+                $query->whereIn('product_id', $productIds);
+            }
+
+            if ($request->new_group && $request->new_group != '') {
+                $productIds = Product::where('id', $request->new_group)->pluck('id')->toArray();
+                $query->whereIn('product_id', $productIds);
+            }
+
+            if($request->year && $request->year != '' && $request->year != null){
+
+                $f_year_array = explode('-', $request->year);
+
+                $query->where(function ($query) use ($f_year_array) {
+                    $query->where('year', '=', $f_year_array[0])
+                        ->where('month', '>=', 'Apr');
+                })->orWhere(function ($query) use ($f_year_array) {
+                    $query->where('year', '=', $f_year_array[1])
+                        ->where('month', '<=', 'Mar');
+                });
+            }
+
+
+            if($request->min_range && $request->min_range != '' && $request->min_range != null && $request->max_range && $request->max_range != '' && $request->max_range != null){
+                $query->whereBetween('points',[$request->min_range,$request->max_range]) ;
+            }
+        })->orderBy('id', 'asc');
+
+        return Datatables::of($query)
+            ->addIndexColumn()
+            ->addColumn('order_date', function ($query) {
+                return date('d/m/Y', strtotime($query->orders->order_date));
+            
+            })
+            ->addColumn('month', function ($query) {
+               return date('M Y', strtotime($query->orders->order_date));
+            })
+            ->addColumn('total_qty', function ($query) {
+                return $query->sum('quantity');
+            })
+            ->addColumn('total', function ($query) {
+                return $query->products->productpriceinfo->gst;
+            })
+
+            ->rawColumns(['order_date','month','total'])
+            ->make(true);
+    }
+
+    public function secondarySalesKpiData(Request $request)
+    {
+        $data = collect([]);
+        $fromdate = isset($request->fromdate) ? date('Y-m-d', strtotime($request->fromdate)) : date('Y-m-d',strtotime(date("Y-m-d")));
+        $todate = isset($request->todate) ? date('Y-m-d', strtotime($request->todate)) : date('Y-m-d',strtotime(date("Y-m-d")));
+        $userid = isset($request->user_id) ? $request->user_id : Auth::user()->id;
+        $yearStartDate = date('Y-m-d',strtotime(date("Y-01-01")));
+        $yearEndDate = date('Y-m-d',strtotime(date("Y-12-31")));
+        $activeStartDate = date("Y-m-d",strtotime('-90 days'));
+        $users = getUsersReportingToAuth($userid);
+        $query_start_date = ($fromdate < $yearStartDate) ? $fromdate : $yearStartDate ;
+        $query_end_date = ($todate > $yearEndDate) ? $todate : $yearEndDate ;
+        $month_calendar = collect([]);
+        $year_calendar = collect([]);
+
+        for($i = 1; $i <=  date('t'); $i++)
+        {
+           $month_calendar->push(['date' => date('Y') . "-" . date('m') . "-" . str_pad($i, 2, '0', STR_PAD_LEFT)]);
+        }
+        for($i = 1; $i <= 12 ; $i++)
+        {
+            $year_calendar->push(['year' => date('Y'), 'month' => ($i < 10) ? '0'.$i : $i ]);
+        }
+
+        $orderDetails = OrderDetails::with(['orders','products','productdetails','orders.buyers'])->get();
+
+        if ($request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
+            $f_year_array = explode('-', $request->financial_year);
+
+            $orderDetails->whereHas('orders', function ($query) {
+                $query->whereYear('order_date', '=', $f_year_array[0]);
+            });
+
+            // $orderDetails = $orderDetails->where(function ($query) use ($f_year_array) {
+            //     $query->whereHas('orders', function ($query) {
+            //         $query->whereYear('order_date', '=', $f_year_array[0]);
+            //     })
+            // });
+        }
+
+
+        if($request->month && $request->month != '' && $request->month != null){
+            $query->where('month',$request->month) ;
+        }
+
+        // user with secondary sales type
+        $usersIds = User::with('attendance_details')->where('sales_type', 'Secondary')->pluck('id');
+        $employeeIds = EmployeeDetail::whereIn('user_id', $usersIds)->pluck('customer_id');
+        $customerIds= Customers::whereIn('id', $employeeIds)->where('customertype', '2')->pluck('id');
+
+        $registeredRetailerCount = $customerIds->count();
+
+        $activeRetailerCount = $orderDetails->where(function ($query) use($customerIds) {
+            $query->whereIn('orders.buyer_id',$customerIds);
+        })->count();
+
+        // $registeredRetailerCount = $customerIds->where(function($query) use($query_start_date , $query_end_date,$users) {
+        //                         $query->where('created_at', '>=', $query_start_date);
+        //                         $query->where('created_at', '<=', $query_end_date);
+        //                     })
+        //                     ->count();
+
+        $activeRetailerPercent = number_format((float)(($activeRetailerCount/$registeredRetailerCount)*100), 2, '.', '');
+        $transactionHistory = TransactionHistory::with('customer')->get();
+
+        $nosOfRetailerRegistredSaarthi = $transactionHistory->whereIn('customer_id',$customerIds)->count();
+        $nosOfRetailerRegistredSaarthiPercent =  number_format((float)(($nosOfRetailerRegistredSaarthi/$registeredRetailerCount)*100), 2, '.', '');
+
+        $orderTarget = SalesTargetUsers::where('type', 'secondary')->whereIn('user_id',$customerIds)->sum('target');
+        $orderAchievement = $orderDetails->where(function ($query) use ($customerIds) {
+             $query->whereHas('orders', function ($subquery) use ($customerIds) {
+                 $subquery->whereIn('orders.buyer_id', $customerIds);
+             });
+         })->sum('line_total');
+
+        if($orderTarget == 0) {
+            $achievementPercent = 0;
+        }else{
+            $achievementPercent = number_format((float)(($orderAchievement/$orderTarget)*100), 2, '.', '');
+        }
+
+        $attendanceCount = Attendance::whereIn('user_id', $usersIds)->groupBy('user_id')->count();
+        $totalUsers = $usersIds->count();
+        $avgWorkingDays = number_format((float)($attendanceCount/$totalUsers));
+
+        $totalOrders = $orderDetails->where(function ($query) use($usersIds) {
+            $query->whereIn('orders.buyer_id.',$usersIds);
+        })->count();
+
+        $averageVisits = VisitReport::whereIn('user_id', $usersIds)->count();
+
+        $perDayAverageSales = number_format((float)($totalOrders/$avgWorkingDays));            
+        $perDayAverageVisit = number_format((float)($totalOrders/$averageVisits));                              
+        $data['registeredRetailerCount'] = $registeredRetailerCount;
+        $data['activeRetailerCount'] = $activeRetailerCount;
+        $data['activeRetailerPercent'] = $activeRetailerPercent;
+        $data['nosOfRetailerRegistredSaarthi'] = $nosOfRetailerRegistredSaarthi;
+        $data['nosOfRetailerRegistredSaarthiPercent'] = $nosOfRetailerRegistredSaarthiPercent;
+
+        $data['orderTarget'] = $orderTarget;
+        $data['orderAchievement'] = $orderAchievement;
+        $data['achievementPercent'] = $achievementPercent;
+        $data['perDayAverageSales'] = $perDayAverageSales;
+        $data['perDayAverageVisit'] = $perDayAverageVisit;
+
+        return response()->json($data);     
     }
 }

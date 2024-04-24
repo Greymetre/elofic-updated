@@ -85,7 +85,7 @@
             <table id="getscheme" class="table table-striped- table-bschemeed table-hover table-checkable responsive no-wrap">
               <thead class=" text-primary">
                 <th>{!! trans('panel.global.no') !!}</th>
-                <th>{!! trans('panel.global.action') !!}</th>
+                <!-- <th>{!! trans('panel.global.action') !!}</th> -->
                 <th>Complaint Number</th>
                 <th>Customer</th>
                 <th>Complaint Date</th>
@@ -123,21 +123,23 @@
             orderable: false,
             searchable: false
           },
-          {
-            data: 'action',
-            name: 'action',
-            "defaultContent": '',
-            className: 'td-actions text-center',
-            orderable: false,
-            searchable: false
-          },
+          // {
+          //   data: 'action',
+          //   name: 'action',
+          //   "defaultContent": '',
+          //   className: 'text-center',
+          //   orderable: false,
+          //   searchable: false
+          // },
           {
             data: 'complaint_number',
             name: 'complaint_number',
+            orderable: false,
             "defaultContent": ''
           },
           {
             data: null,
+            orderable: false,
             render: function(data, type, full, meta) {
                 return data.customer.customer_name + ' (' + data.customer.customer_number + ')';
             }
@@ -145,26 +147,31 @@
           {
             data: 'complaint_date',
             name: 'complaint_date',
+            orderable: false,
             "defaultContent": ''
           },
           {
             data: 'complaint_type_details.name',
             name: 'complaint_type_details.name',
+            orderable: false,
             "defaultContent": ''
           },
           {
             data: 'party.name',
             name: 'party.name',
+            orderable: false,
             "defaultContent": ''
           },
           {
             data: 'service_center_details.name',
             name: 'service_center_details.name',
+            orderable: false,
             "defaultContent": ''
           },
           {
             data: 'status',
             name: 'status',
+            orderable: false,
             "defaultContent": ''
           },
         ]

@@ -586,7 +586,7 @@ class ExpensesController extends Controller
             $expenses = $expenses->where(['user_id' => $executive_id]);
         }
 
-        if (!empty($executive_id)) {
+        if (!empty($expenses_type)) {
             $expenses = $expenses->where(['expenses_type' => $expenses_type]);
         }
 
