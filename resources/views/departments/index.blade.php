@@ -7,9 +7,9 @@
           <i class="material-icons">perm_identity</i>
         </div>
         <h4 class="card-title">{!! trans('panel.departments.title') !!} {!! trans('panel.global.list') !!}
-          <span class="pull-right">
-            <div class="btn-group">
-
+          <span class="">
+            <div class="btn-group header-frm-btn">
+               <div class="next-btn">
 
              <!--  @if(auth()->user()->can(['customer_template']))
               <a href="{{ URL::to('customers-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.customers.title_singular') !!}"><i class="material-icons">text_snippet</i></a>
@@ -18,7 +18,7 @@
               <!-- @if(auth()->user()->can(['customer_create'])) -->
               <a href="{{ route('departments.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.departments.title_singular') !!}"><i class="material-icons">add_circle</i></a>
               <!-- @endif  -->
-
+              </div>
 
             </div>
           </span>

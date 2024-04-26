@@ -7,10 +7,10 @@
             <i class="material-icons">perm_identity</i>
           </div>
           <h4 class="card-title ">Customer KYC {!! trans('panel.global.list') !!}
-            <span class="pull-right">
-              <div class="btn-group">
+            <span class="">
+              <div class="btn-group header-frm-btn">
                 <form method="GET" action="{{ route('customer-kyc.download') }}" class="form-horizontal">
-                  <div class="d-flex flex-row align-items-center">
+                  <div class="d-flex flex-wrap flex-row">
                     <div class="p-2" style="width:180px;">
                       <select class="select2" placeholder="Select Branch" name="branch_id" id="branch_id" data-style="select-with-transition" title="Select Branch">
                         <option value="">Select Branch</option>

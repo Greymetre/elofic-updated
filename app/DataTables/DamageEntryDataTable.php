@@ -73,9 +73,9 @@ class DamageEntryDataTable extends DataTable
                 if($data->status == "0"){
                     return '<button type="button" data-ccode="'.$data->coupon_code.'" data-status="'.$data->status.'" id="'.$data->id.'" class="btn btn-warning changeStatus">Pennding</button>';
                 }elseif($data->status == "1"){
-                    return '<button type="button" data-status="'.$data->status.'" id="'.$data->id.'" class="btn btn-success ">Approved</button>';
+                    return '<button type="button" data-ccode="'.$data->coupon_code.'" data-status="'.$data->status.'" id="'.$data->id.'" class="btn btn-success changeStatus">Approved</button>';
                 }elseif($data->status == "2"){
-                    return '<button type="button" data-status="'.$data->status.'" id="'.$data->id.'" class="btn btn-danger ">Reject</button>';
+                    return '<button type="button" data-ccode="'.$data->coupon_code.'" data-status="'.$data->status.'" id="'.$data->id.'" class="btn btn-danger changeStatus">Reject</button>';
                 }
             })
             ->rawColumns(['contact_person', 'parent_name', 'subcategory_name', 'product_name','customer.name', 'attach', 'status']);

@@ -7,12 +7,14 @@
           <i class="material-icons">perm_identity</i>
         </div>
         <h4 class="card-title ">{!! trans('panel.branch.title_singular') !!}{!! trans('panel.global.list') !!}
-              <span class="pull-right">
-                <div class="btn-group"> 
+              <span class="">
+                <div class="btn-group header-frm-btn"> 
+                  <div class="next-btn">
                 
                   @if(auth()->user())
                   <a data-toggle="modal" data-target="#createbranch" class="btn btn-just-icon btn-theme create" title="{!!  trans('panel.global.add') !!} {!! trans('panel.branch.title_singular') !!}"><i class="material-icons">add_circle</i></a>
                   @endif
+                </div>
                 </div>
               </span>
           </h4>

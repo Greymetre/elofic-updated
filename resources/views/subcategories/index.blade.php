@@ -7,8 +7,9 @@
           <i class="material-icons">perm_identity</i>
         </div>
         <h4 class="card-title ">{!! trans('panel.subcategory.title_singular') !!}{!! trans('panel.global.list') !!}
-              <span class="pull-right">
-                <div class="btn-group">
+              <span class="">
+                <div class="btn-group header-frm-btn">
+                  <div class="next-btn">
                   @if(auth()->user()->can(['subcategory_upload']))
                   <form action="{{ URL::to('subcategories-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                   {{ csrf_field() }}
@@ -30,6 +31,7 @@
                   </div>
                   </form>
                   @endif
+                  
                   @if(auth()->user()->can(['subcategory_download']))
                   <a href="{{ URL::to('subcategories-download') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.subcategory.title') !!}"><i class="material-icons">cloud_download</i></a>
                   @endif
@@ -39,6 +41,7 @@
                   @if(auth()->user()->can(['subcategory_create']))
                    <a data-toggle="modal" data-target="#createsubcategory" class="btn btn-just-icon btn-theme create" title="{!!  trans('panel.global.add') !!} {!! trans('panel.subcategory.title_singular') !!}"><i class="material-icons">add_circle</i></a>
                   @endif
+                </div>
                 </div>
               </span>
           </h4>

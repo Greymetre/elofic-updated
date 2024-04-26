@@ -7,8 +7,8 @@
             <i class="material-icons">perm_identity</i>
           </div>
           <h4 class="card-title">Customer Visit Report
-            <span class="pull-right">
-              <div class="btn-group">
+            <span class="">
+              <div class="btn-group header-frm-btn">
                 @if(auth()->user()->can(['checkin_download']))
                 <form method="GET" action="{{ URL::to('checkin-download') }}">
                   <div class="d-flex flex-row">

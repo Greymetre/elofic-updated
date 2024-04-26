@@ -7,8 +7,9 @@
           <i class="material-icons">perm_identity</i>
         </div>
         <h4 class="card-title ">{!! trans('panel.visitreport.title_singular') !!}{!! trans('panel.global.list') !!}
-              <span class="pull-right">
-                <div class="btn-group">
+              <span class="">
+                <div class="btn-group header-frm-btn">
+                    <div class="next-btn">
                   @if(auth()->user()->can(['visitreport_upload']))
                   <form action="{{ URL::to('visitreports-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                   {{ csrf_field() }}
@@ -30,6 +31,7 @@
                   </div>
                   </form>
                   @endif
+                
                   <a href="{{ URL::to('visitreports-download') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.visitreport.title') !!}"><i class="material-icons">cloud_download</i></a>
                   @if(auth()->user()->can(['visitreport_template']))
                   <a href="{{ URL::to('visitreports-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.visitreport.title_singular') !!}"><i class="material-icons">text_snippet</i></a>
@@ -37,6 +39,7 @@
                   @if(auth()->user()->can(['visitreport_create']))
                   <a href="{{ route('visitreports.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.visitreport.title_singular') !!}"><i class="material-icons">add_circle</i></a>
                   @endif
+                </div>
                 </div>
               </span>
           </h4>

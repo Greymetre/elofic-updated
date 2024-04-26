@@ -7,8 +7,9 @@
           <i class="material-icons">perm_identity</i>
         </div>
         <h4 class="card-title ">{!! trans('panel.customertype.title_singular') !!}{!! trans('panel.global.list') !!}
-              <span class="pull-right">
-                <div class="btn-group">
+              <span class="">
+                <div class="btn-group header-frm-btn">
+                  <div class="next-btn">
                   @if(auth()->user()->can(['customertype_upload']))
                   <form action="{{ URL::to('customertype-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                   {{ csrf_field() }}
@@ -18,7 +19,7 @@
                           <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
                           <span class="fileinput-exists">Change</span>
                           <input type="hidden">
-                          <input type="file" name="import_file" required accept=".xls,.xlsx" />
+                          <input type="file" title="Select File" name="import_file" required accept=".xls,.xlsx" />
                         </span>
                       </div>
                     <div class="input-group-append">
@@ -39,6 +40,7 @@
                   @if(auth()->user()->can(['customertype_create']))
                    <a data-toggle="modal" data-target="#createcustomertype" class="btn btn-just-icon btn-theme create" title="{!!  trans('panel.global.add') !!} {!! trans('panel.customertype.title_singular') !!}"><i class="material-icons">add_circle</i></a>
                   @endif
+                </div>
                 </div>
               </span>
           </h4>
@@ -157,8 +159,8 @@
         ajax: "{{ route('customertype.index') }}",
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-            {data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
-            {data: 'active', name: 'active',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
+            {data: 'action', name: 'action',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'active', name: 'active',"defaultContent": '', orderable: false, searchable: false},
             {data: 'customertype_name', name: 'customertype_name',"defaultContent": ''},
             {data: 'type_name', name: 'type_name',"defaultContent": ''},
              {data: 'createdbyname.name', name: 'createdbyname.name',"defaultContent": ''},

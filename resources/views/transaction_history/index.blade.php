@@ -7,8 +7,8 @@
             <i class="material-icons">perm_identity</i>
           </div>
           <h4 class="card-title ">Transaction Coupon History {!! trans('panel.global.list') !!}
-            <span class="pull-right">
-              <div class="btn-group align-items-center">
+            <span class="">
+              <div class="btn-group header-frm-btn">
                 @if(auth()->user()->can(['transaction_history_download']))
                 <form method="GET" action="{{ route('transaction_history.download') }}" class="form-horizontal">
                   <div class="d-flex flex-row align-items-center">
@@ -51,15 +51,9 @@
                   </div>
                 </form>
                 @endif
-              </div>
-              <button class="btn btn-just-icon btn-theme" type="button" data-toggle="collapse" data-target="#multiCollapseExample2" aria-expanded="false" aria-controls="multiCollapseExample2"><i class="material-icons">menu</i></button>
-              <div class="row">
-                <div class="col">
-                  <div class="collapse multi-collapse" id="multiCollapseExample2">
-                    <div class="d-flex" style="font-size: 14px;align-items: center;justify-content: space-between;">
-                      @if(auth()->user()->can(['transaction_history_upload']))
-                      <p>Upload Manual Transaction</p>
-                      <form action="{{ URL::to('transaction_history_upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
+                <div class="next-btn">
+                @if(auth()->user()->can(['transaction_history_upload']))
+                <form action="{{ URL::to('transaction_history_upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                         {{ csrf_field() }}
                         <div class="d-flex">
                           <div class="fileinput-new text-center" data-provides="fileinput">
@@ -67,7 +61,7 @@
                               <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
                               <span class="fileinput-exists">Change</span>
                               <input type="hidden">
-                              <input type="file" name="import_file" required accept=".xls,.xlsx" />
+                              <input type="file" title="Select File" name="import_file" required accept=".xls,.xlsx" />
                             </span>
                           </div>
                           <div class="input-group-append">
@@ -80,19 +74,15 @@
                       </form>
                       @endif
                       @if(auth()->user()->can(['transaction_history_template']))
-                      <p>{!!  trans('panel.global.template') !!} Manual Transaction</p>
                       <a href="{{ URL::to('transaction_history_template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} Manual Transaction"><i class="material-icons">text_snippet</i></a>
                       @endif
                       @if(auth()->user()->can(['transaction_history_create']))
-                      <p>{!!  trans('panel.global.add') !!} Transaction</p>
                       <a href="{{ route('transaction_history.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Transaction"><i class="material-icons">add_circle</i></a>
-                      <p>{!!  trans('panel.global.add') !!} Manual Transaction</p>
                       <a href="{{ route('transaction_history.manualcreate') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Manual Transaction"><i class="material-icons">add_circle</i></a>
                       @endif
-                    </div>
-                  </div>
                 </div>
               </div>
+              
             </span>
           </h4>
         </div>

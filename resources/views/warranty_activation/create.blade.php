@@ -27,7 +27,7 @@
                         <ul class="nav nav-tabs pull-right" data-tabs="tabs">
                            <li class="nav-item">
                               <a class="nav-link" href="{{ url('warranty_activation') }}">
-                                 <i class="material-icons">next_plan</i> Warranty Activation
+                                 <i class="material-icons">next_plan</i> Back
                                  <div class="ripple-container"></div>
                               </a>
                            </li>
@@ -57,7 +57,19 @@
                'files'=>true
                ]) !!}
                <div class="form-group">
-                  <div>
+                  <div class="col-md-3">
+                     <label for="status" class="form-control"><b>Warranty Activation Status</b></label>
+                  </div>
+                  <div class="col-md-3" style="margin-top: -25px;">
+                     <select name="status" id="status" class="select2" required>
+                        <option value="">Select Status</option>
+                        <option value="0" {{($warranty_activation->exists && $warranty_activation->status == '0')?'selected':''}}>In Verification</option>
+                        <option value="1" {{($warranty_activation->exists && $warranty_activation->status == '1')?'selected':''}}>Activated</option>
+                        <option value="2" {{($warranty_activation->exists && $warranty_activation->status == '2')?'selected':''}}>Pending Activated</option>
+                        <option value="3" {{($warranty_activation->exists && $warranty_activation->status == '3')?'selected':''}}>Rejected</option>
+                     </select>
+                  </div>
+                  <div class="mt-5">
                      <h5>Warranty Details</h5>
                      <input type="hidden" name="warranty_id" value="{{$warranty_activation->id}}">
                      <div class="row">
@@ -105,23 +117,6 @@
                            @if ($errors->has('branch_id'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('branch_id') }}</p>
-                           </div>
-                           @endif
-                        </div>
-                        <div class="col-md-2">
-                           <label for="status" class="form-control">Status</label>
-                        </div>
-                        <div class="col-md-4">
-                           @if($warranty_activation->exists && $warranty_activation->status == '0')
-                           <input type="radio" checked name="status" id="status" value="0"> Inactive
-                           <input type="radio" name="status" id="status" value="1"> active
-                           @else
-                           <input type="radio" name="status" id="status" value="0"> Inactive
-                           <input type="radio" checked name="status" id="status" value="1"> active
-                           @endif
-                           @if ($errors->has('status'))
-                           <div class="error col-lg-12">
-                              <p class="text-danger">{{ $errors->first('status') }}</p>
                            </div>
                            @endif
                         </div>
@@ -255,6 +250,15 @@
                            @endif
                         </div>
                      </div>
+                     <div class="row">
+                        <div class="col-md-2">
+                           <label for="customer_status" class="form-control">Customer Statsu</label>
+                        </div>
+                        <div class="col-md-4">
+                           <input type="radio" name="customer_status" id="inactive" value="0"> Inactive
+                           <input type="radio" checked name="customer_status" id="active" value="1"> active
+                        </div>
+                     </div>
                   </div>
                   <div class="pt-4">
                      <h5>Other Details</h5>
@@ -332,7 +336,7 @@
                         </div>
                         <div class="fileinput-new thumbnail">
                            @if($warranty_activation->exists && $warranty_activation->getMedia('warranty_activation_attach')->count() > 0 && file_exists($warranty_activation->getFirstMedia('warranty_activation_attach')->getPath()))
-                           <img src="{!! $warranty_activation->getMedia('warranty_activation_attach')[0]->getFullUrl() !!}" class="imagepreview1">   
+                           <img src="{!! $warranty_activation->getMedia('warranty_activation_attach')[0]->getFullUrl() !!}" class="imagepreview1">
                            @else
                            <img src="{!! url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview1">
                            @endif
@@ -417,6 +421,11 @@
             },
             success: function(res) {
                if (res.status === true) {
+                  if (res.data.status == '0') {
+                     $('#inactive').prop('checked', true);
+                  } else {
+                     $('#active').prop('checked', true);
+                  }
                   $("#customer_name").val(res.data.customer_name);
                   $("#end_user_id").val(res.data.id);
                   $("#customer_email").val(res.data.customer_email);

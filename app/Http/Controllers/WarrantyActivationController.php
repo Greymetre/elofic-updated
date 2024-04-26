@@ -11,6 +11,7 @@ use App\Models\Pincode;
 use App\Models\SchemeHeader;
 use App\Models\TransactionHistory;
 use App\Models\WarrantyActivation;
+use App\Models\WarrantyTimeline;
 use Illuminate\Http\Request;
 use Gate;
 use Excel;
@@ -83,7 +84,8 @@ class WarrantyActivationController extends Controller
                     'customer_country' => $request->customer_country ?? '',
                     'customer_state' => $request->customer_state ?? '',
                     'customer_district' => $request->customer_district ?? '',
-                    'customer_city' => $request->customer_city ?? ''
+                    'customer_city' => $request->customer_city ?? '',
+                    'status' => $request->customer_status ?? ''
                 ]);
                 $request->end_user_id = $end_user->id;
             }
@@ -93,7 +95,7 @@ class WarrantyActivationController extends Controller
                 'end_user_id' => $request->end_user_id ?? NULL,
                 'branch_id' => $request->branch_id ?? NULL,
                 'customer_id' => $request->customer_id ?? NULL,
-                'status' => $request->status ?? 1,
+                'status' => $request->status ?? 0,
                 'sale_bill_no' => $request->sale_bill_no ?? NULL,
                 'sale_bill_date' => $request->sale_bill_date ?? NULL,
                 'warranty_date' => $request->warranty_date ?? NULL,
@@ -123,7 +125,8 @@ class WarrantyActivationController extends Controller
     public function show($id)
     {
         $this->warranty_activation = WarrantyActivation::find(decrypt($id));
-        return view('warranty_activation.show')->with('warrantyactivation', $this->warranty_activation);
+        $warranty_timeline = WarrantyTimeline::where('warranty_id', decrypt($id))->orderBy('created_at', 'desc')->get();
+        return view('warranty_activation.show', compact('warranty_timeline'))->with('warrantyactivation', $this->warranty_activation);
     }
 
     /**
@@ -160,7 +163,7 @@ class WarrantyActivationController extends Controller
             $warrantyactivation->end_user_id = $request->end_user_id ?? NULL;
             $warrantyactivation->branch_id = $request->branch_id ?? NULL;
             $warrantyactivation->customer_id = $request->customer_id ?? NULL;
-            $warrantyactivation->status = $request->status ?? 1;
+            $warrantyactivation->status = $request->status ?? 0;
             $warrantyactivation->sale_bill_no = $request->sale_bill_no ?? NULL;
             $warrantyactivation->sale_bill_date = $request->sale_bill_date ?? NULL;
             $warrantyactivation->warranty_date = $request->warranty_date ?? NULL;
@@ -205,5 +208,18 @@ class WarrantyActivationController extends Controller
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         return Excel::download(new WarrantyActivactionExport($request), 'WarrantyActivation.xlsx');
+    }
+
+    public function statuschange(Request $request)
+    {
+        WarrantyActivation::where('id', $request->id)->update(['status' => $request->status]);
+
+        WarrantyTimeline::create([
+            'warranty_id' => $request->id,
+            'created_by' => auth()->user()->id,
+            'status' => $request->status,
+        ]);
+
+        return response()->json(['status' => true,]);
     }
 }

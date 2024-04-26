@@ -12,11 +12,11 @@
             <i class="material-icons">perm_identity</i>
           </div>
           <h4 class="card-title ">Damage Entries {!! trans('panel.global.list') !!}
-            <span class="pull-right">
-              <div class="btn-group align-items-center">
+            <span class="">
+              <div class="btn-group header-frm-btn">
                 @if(auth()->user()->can(['transaction_history_download']))
-               <!-- <form method="GET" action="{{ route('transaction_history.download') }}" class="form-horizontal">
-                  <div class="d-flex flex-row align-items-center">
+                <form method="GET" action="#" class="form-horizontal"> 
+                  <div class="d-flex flex-wrap flex-row"><!-- 
                     <div class="p-2" style="width:160px;">
                       <label for="branch_id">Branch</label>
                       <select class="select2" placeholder="Select Branch" multiple name="branch_id[]" id="branch_id" data-style="select-with-transition" title="Select Branch">
@@ -28,15 +28,16 @@
                         @endif
                       </select>
                     </div> -->
-                    <div class="p-2 mr-5" style="width:250px;">
-                      <!-- <label for="status">Status</label> -->
-                      <select class="select2 form-control" name="status" id="status" data-style="select-with-transition" title="Select Parent Customer">
-                        <option value="">Select Status</option>
-                        <option value="0">Pending</option>
-                        <option value="1">Approved</option>
-                      </select>
-                    </div>
-                    <!-- <div class="p-2" style="width:160px;">
+                <div class="p-2 mr-5" style="width:250px;">
+                  <!-- <label for="status">Status</label> -->
+                  <select class="selectpicker" name="status" id="status" data-style="select-with-transition" title="Select Status">
+                    <option value="">Select Status</option>
+                    <option value="0">Pending</option>
+                    <option value="1">Approved</option>
+                    <option value="2">Rejected</option>
+                  </select>
+                </div>
+                <!-- <div class="p-2" style="width:160px;">
                       <label for="scheme_type">Scheme</label>
                       <select class="select2" name="scheme_name" id="scheme_name" data-style="select-with-transition" title="Select Scheme Type">
                         <option value="">Scheme Name</option>
@@ -50,17 +51,17 @@
                     <div class="p-2" style="width:160px;"><label for="start_date">Start Date</label><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
                     <div class="p-2" style="width:160px;"><label for="end_date">End Date</label><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
                     <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Transaction"><i class="material-icons">cloud_download</i></button></div> -->
-                  <!-- </div> -->
-                <!-- </form> -->
+                </div>
+                </form>
                 @endif
-              <!-- </div> -->
-              <!-- <button class="btn btn-just-icon btn-theme" type="button" data-toggle="collapse" data-target="#multiCollapseExample2" aria-expanded="false" aria-controls="multiCollapseExample2"><i class="material-icons">menu</i></button> -->
-              <div class="row">
-                <div class="col">
-                  <!-- <div class="collapse multi-collapse" id="multiCollapseExample2">
+                <!-- </div> -->
+                <!-- <button class="btn btn-just-icon btn-theme" type="button" data-toggle="collapse" data-target="#multiCollapseExample2" aria-expanded="false" aria-controls="multiCollapseExample2"><i class="material-icons">menu</i></button> -->
+                <!-- <div class="row">
+                <div class="col"> -->
+                <!-- <div class="collapse multi-collapse" id="multiCollapseExample2">
                     <div class="d-flex" style="font-size: 14px;align-items: center;justify-content: space-between;"> -->
-                  @if(auth()->user()->can(['transaction_history_upload']))
-                  <!-- <p>Upload Manual Transaction</p>
+                @if(auth()->user()->can(['transaction_history_upload']))
+                <!-- <p>Upload Manual Transaction</p>
                       <form action="{{ URL::to('transaction_history_upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                         {{ csrf_field() }}
                         <div class="d-flex">
@@ -80,7 +81,8 @@
                           </div>
                         </div>
                       </form> -->
-                  @endif
+                @endif
+                <div class="next-btn">
                   @if(auth()->user()->can(['transaction_history_template']))
                   <!-- <p>{!!  trans('panel.global.template') !!} Manual Transaction</p>
                       <a href="{{ URL::to('transaction_history_template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} Manual Transaction"><i class="material-icons">text_snippet</i></a> -->
@@ -149,7 +151,8 @@
                 <th>Mobile Number</th>
                 <th>COUPON Code(Damage)</th>
                 <th>Attechement</th>
-                <th>Satus</th>
+                <th>Satuts</th>
+                <th>Remark</th>
               </thead>
               <tbody>
               </tbody>
@@ -235,6 +238,12 @@
             orderable: false,
             searchable: false
           },
+          {
+            data: 'remark',
+            name: 'remark',
+            orderable: false,
+            searchable: false
+          },
         ]
       });
       $('#status').change(function() {
@@ -279,6 +288,7 @@
           title: 'Please Select Status',
           input: 'select',
           inputOptions: {
+            '0': 'Pending',
             '1': 'Approve',
             '2': 'Reject'
           },
@@ -300,9 +310,9 @@
             var remark = $('#remark').val();
             var coupon_code = $('#coupon_code').val();
             var product_id = $('#product_id').val();
-            if (status == 2) {
+            if (status != 1) {
               return true;
-            } 
+            }
             if (!coupon_code || !product_id) {
               $('#poperror').text('Coupon code and product are both required.');
               $('#poperror').removeClass('d-none');

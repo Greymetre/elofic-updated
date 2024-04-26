@@ -7,8 +7,8 @@
           <i class="material-icons">perm_identity</i>
         </div>
         <h4 class="card-title ">Tour List
-              <span class="pull-right">
-                <div class="btn-group">
+              <span class="">
+                <div class="btn-group header-frm-btn">
 
 
                 <form method="GET" action="{{ URL::to('tours-download') }}">
@@ -45,8 +45,7 @@
                   </div>
               </form>
 
-
-
+              <div class="next-btn">
 
                   <form action="{{ URL::to('tours-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                   {{ csrf_field() }}
@@ -81,6 +80,7 @@
                    <a data-toggle="modal" data-target="#createCategory" class="btn btn-just-icon btn-theme create" title="{!!  trans('panel.global.add') !!} {!! trans('panel.tour.title_singular') !!}"><i class="material-icons">add_circle</i></a>
                   @endif
                   <a href="{{ route('tours.create') }}" class="btn btn-just-icon btn-theme"><i class="material-icons">add_circle</i></a>
+                </div>
                 </div>
               </span>
           </h4>

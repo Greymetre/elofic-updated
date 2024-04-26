@@ -7,8 +7,9 @@
             <i class="material-icons">perm_identity</i>
           </div>
           <h4 class="card-title ">{!! trans('panel.gift.title_singular') !!}{!! trans('panel.global.list') !!}
-            <span class="pull-right">
-              <div class="btn-group">
+            <span class="">
+              <div class="d-flex flex-wrap flex-row">
+                <div class="next-btn">
                 @if(auth()->user()->can(['gift_upload']))
                 <form action="{{ URL::to('gifts-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                   {{ csrf_field() }}
@@ -18,7 +19,7 @@
                         <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
                         <span class="fileinput-exists">Change</span>
                         <input type="hidden">
-                        <input type="file" name="import_file" required accept=".xls,.xlsx" />
+                        <input type="file" title="Selet File" name="import_file" required accept=".xls,.xlsx" />
                       </span>
                     </div>
                     <div class="input-group-append">
@@ -39,6 +40,7 @@
                 @if(auth()->user()->can(['gift_create']))
                 <a href="{{ route('gifts.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.gift.title_singular') !!}"><i class="material-icons">add_circle</i></a>
                 @endif
+              </div>
               </div>
             </span>
           </h4>
@@ -109,7 +111,6 @@
             data: 'action',
             name: 'action',
             "defaultContent": '',
-            className: 'td-actions text-center',
             orderable: false,
             searchable: false
           },

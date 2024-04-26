@@ -23,8 +23,8 @@
             <i class="material-icons">perm_identity</i>
           </div>
           <h4 class="card-title">Leaves
-            <span class="pull-right">
-              <div class="btn-group">
+            <span class="">
+              <div class="btn-group header-frm-btn">
                 @if(auth()->user()->can(['attendance_download']))
                 <!-- <form method="GET" action="{{ URL::to('attendance-download') }}">
                   <div class="d-flex flex-row">
@@ -65,12 +65,14 @@
                   </div>
                 </form> -->
                 @endif
+                <div class="next-btn">
                 @if(auth()->user()->can(['leave_create']))
                 <a data-toggle="modal" data-target="#submitLeave" class="custom-btn create" title="Punch In">
                   Add Leave
                 </a>
                 @endif
                 <a href="{{ URL::to('attendance-location') }}" class="btn btn-just-icon btn-theme  d-none" title="Update Location"><i class="material-icons">add_location</i></a>
+              </div>
               </div>
             </span>
           </h4>
@@ -277,7 +279,6 @@
             data: 'action_status',
             name: 'action_status',
             "defaultContent": '',
-            className: 'td-actions text-center',
             orderable: false,
             searchable: false
           },
@@ -325,7 +326,6 @@
             data: 'action',
             name: 'action',
             "defaultContent": '',
-            className: 'td-actions text-center',
             orderable: false,
             searchable: false
           },

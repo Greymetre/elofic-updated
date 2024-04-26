@@ -208,7 +208,8 @@ class CustomerController extends Controller
                               }
                               return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
                                             '.$btn.'
-                                        </div>'.$activebtn;
+                                            '.$activebtn.'
+                                        </div>';
                         })
                         ->addColumn('image', function ($query) {
                             $profileimage = !empty($query->profile_image) ? '/public/uploads/'.$query->profile_image : asset('assets/img/placeholder.jpg') ;
@@ -595,60 +596,65 @@ class CustomerController extends Controller
                 unset($request['image']);
                 $request['shop_image'] = fileupload($image, $this->path, $filename) ;
             }
-            if($request->file('imggstin')){
+            if ($request->file('imggstin')) {
                 $path = 'customers/';
                 $image = $request->file('imggstin');
-                $filename = 'gstin_'.$id;
+                $filename = 'gstin_' . $id;
                 unset($request['imggstin']);
                 $docimages->push([
                     'active'        => 'Y',
-                    'file_path'     => fileupload($image, $this->path, $filename),
-                    'document_name' =>  'gstin', 
+                    'file_path'     => fileupload($image, $path, $filename),
+                    'document_name' =>  'gstin',
                 ]);
+                CustomerDetails::where('customer_id', $request->id)->update(['gstin_no_status' => '0']);
             }
-            if($request->file('imgpan')){
+            if ($request->file('imgpan')) {
                 $path = 'customers/';
                 $image = $request->file('imgpan');
-                $filename = 'pan_'.$id;
+                $filename = 'pan_' . $id;
                 unset($request['imgpan']);
                 $docimages->push([
                     'active'        => 'Y',
-                    'file_path'     => fileupload($image, $this->path, $filename),
-                    'document_name' =>  'pan', 
+                    'file_path'     => fileupload($image, $path, $filename),
+                    'document_name' =>  'pan',
                 ]);
+                CustomerDetails::where('customer_id', $request->id)->update(['pan_no_status' => '0']);
             }
-            if($request->file('imgaadhar')){
+            if ($request->file('imgaadhar')) {
                 $path = 'customers/';
                 $image = $request->file('imgaadhar');
-                $filename = 'aadhar_'.$id;
+                $filename = 'aadhar_' . $id;
                 unset($request['image']);
                 $docimages->push([
                     'active'        => 'Y',
-                    'file_path'     => fileupload($image, $this->path, $filename),
-                    'document_name' =>  'aadhar', 
+                    'file_path'     => fileupload($image, $path, $filename),
+                    'document_name' =>  'aadhar',
                 ]);
+                CustomerDetails::where('customer_id', $request->id)->update(['aadhar_no_status' => '0']);
             }
-            if($request->file('imgaadharback')){
+            if ($request->file('imgaadharback')) {
                 $path = 'customers/';
                 $image = $request->file('imgaadharback');
-                $filename = 'aadharback_'.$id;
+                $filename = 'aadharback_' . $id;
                 unset($request['image']);
                 $docimages->push([
                     'active'        => 'Y',
-                    'file_path'     => fileupload($image, $this->path, $filename),
-                    'document_name' =>  'aadharback', 
+                    'file_path'     => fileupload($image, $path, $filename),
+                    'document_name' =>  'aadharback',
                 ]);
+                CustomerDetails::where('customer_id', $request->id)->update(['aadhar_no_status' => '0']);
             }
-            if($request->file('imgbankpass')){
+            if ($request->file('imgbankpass')) {
                 $path = 'customers/';
                 $image = $request->file('imgbankpass');
-                $filename = 'bankpass_'.$id;
+                $filename = 'bankpass_' . $id;
                 unset($request['image']);
                 $docimages->push([
                     'active'        => 'Y',
-                    'file_path'     => fileupload($image, $this->path, $filename),
-                    'document_name' =>  'bankpass', 
+                    'file_path'     => fileupload($image, $path, $filename),
+                    'document_name' =>  'bankpass',
                 ]);
+                CustomerDetails::where('customer_id', $request->id)->update(['bank_status' => '0']);
             }
             if($request->file('imgother')){
                 $path = 'customers/';
@@ -660,6 +666,7 @@ class CustomerController extends Controller
                     'file_path'     => fileupload($image, $this->path, $filename),
                     'document_name' =>  'other', 
                 ]);
+                CustomerDetails::where('customer_id', $request->id)->update(['otherid_no_status' => '0']);
             }
             $request['customer_id'] = $id;
             $response = $this->customers->update_data($request);

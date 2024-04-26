@@ -64,7 +64,20 @@ class UsersDataTable extends DataTable
                     $profileimage = !empty($query->profile_image) ? env('IMAGE_UPLOADS').$query->profile_image : asset('assets/img/placeholder.jpg') ;
                     return '<img src="'.$profileimage.'" border="0" width="70" class="img-rounded imageDisplayModel" align="center" />';
                 })
-            ->rawColumns(['action','image','active']);
+            ->addColumn('roles', function ($query) {
+                $roles = '';
+                    if(count($query->roles) > 0){
+                        foreach($query->roles as $k=>$role){
+                            if(count($query->roles) == ($k+1)){
+                                $roles .= $role->name;
+                            }else{
+                                $roles .= $role->name.', ';
+                            }
+                        }
+                    }
+                    return $roles;
+                })
+            ->rawColumns(['action','image','active','roles']);
     }
 
     /**
@@ -76,7 +89,7 @@ class UsersDataTable extends DataTable
     public function query(User $model)
     {
         $userids = getUsersReportingToAuth();
-        return $model->with('createdbyname')->where(function($query) use($userids){
+        return $model->with('createdbyname','getbranch','getdesignation','reportinginfo','userinfo','getdivision')->where(function($query) use($userids){
                                 if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
                                 {
                                     $query->whereIn('id',$userids);

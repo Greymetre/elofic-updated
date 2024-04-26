@@ -7,9 +7,9 @@
           <i class="material-icons">perm_identity</i>
         </div>
         <h4 class="card-title ">{!! trans('panel.pincode.title_singular') !!}{!! trans('panel.global.list') !!}
-              <span class="pull-right">
-                <div class="btn-group">
-     
+              <span class="">
+                <div class="btn-group header-frm-btn">
+                    <div class="next-btn">
                   <form action="{{ URL::to('pincode-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                   {{ csrf_field() }}
                   <div class="input-group">
@@ -29,7 +29,7 @@
                     </div>
                   </div>
                   </form>
-             
+                 
                   <a href="{{ URL::to('pincode-download') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.pincode.title') !!}"><i class="material-icons">cloud_download</i></a>
       
                   <a href="{{ URL::to('pincode-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.pincode.title_singular') !!}"><i class="material-icons">text_snippet</i></a>
@@ -37,6 +37,7 @@
                   @if(auth()->user()->can(['pincode_create']))
                    <a data-toggle="modal" data-target="#createpincode" class="btn btn-just-icon btn-theme create" title="{!!  trans('panel.global.add') !!} {!! trans('panel.pincode.title_singular') !!}"><i class="material-icons">add_circle</i></a>
                   @endif
+                </div>
                 </div>
               </span>
           </h4>
@@ -165,8 +166,8 @@
         ajax: "{{ route('pincode.index') }}",
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-            {data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
-            {data: 'active', name: 'active',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
+            {data: 'action', name: 'action',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'active', name: 'active',"defaultContent": '',orderable: false, searchable: false},
             {data: 'pincode', name: 'pincode',"defaultContent": ''},
              {data: 'cityname.city_name', name: 'cityname.city_name',"defaultContent": ''},
              {data: 'createdbyname.name', name: 'createdbyname.name',"defaultContent": ''},

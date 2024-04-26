@@ -7,8 +7,9 @@
           <i class="material-icons">perm_identity</i>
         </div>
         <h4 class="card-title ">{!! trans('panel.user.title_singular') !!}{!! trans('panel.global.list') !!}
-              <span class="pull-right">
-                <div class="btn-group">
+              <span class="">
+                <div class="btn-group header-frm-btn">
+                  <div class="next-btn">
                   @if(auth()->user()->can(['user_upload']))
                   <form action="{{ URL::to('users-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                   {{ csrf_field() }}
@@ -30,6 +31,7 @@
                   </div>
                   </form>
                   @endif
+                   
                   @if(auth()->user()->can(['user_download']))
                   <a href="{{ URL::to('users-download') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.user.title') !!}"><i class="material-icons">cloud_download</i></a>
                   @endif
@@ -39,6 +41,7 @@
                   @if(auth()->user()->can(['user_create']))
                   <a href="{{ route('users.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.user.title_singular') !!}"><i class="material-icons">add_circle</i></a>
                   @endif
+                </div>
                 </div>
               </span>
           </h4>
@@ -69,14 +72,16 @@
               <th>{!! trans('panel.global.action') !!}</th>
               <th>{!! trans('panel.global.active') !!}</th>
               <th>{!! trans('panel.global.profile') !!}</th>
+              <th>{!! trans('panel.sidemenu.branches') !!}</th>
+              <th>Emp Code</th>
               <th>{!! trans('panel.global.name') !!}</th>
-              <th>{!! trans('panel.global.first_name') !!}</th>
-              <th>{!! trans('panel.global.last_name') !!}</th>
-              <th>{!! trans('panel.global.email') !!}</th>
+              <th>Designation</th>
               <th>{!! trans('panel.global.mobile') !!}</th>
-              <th>{!! trans('panel.global.gender') !!}</th>
-              <th>{!! trans('panel.global.created_by') !!}</th>
-              <th>{!! trans('panel.global.created_at') !!}</th>
+              <th>{!! trans('panel.global.email') !!}</th>
+              <th>Reporting Person</th>
+              <th>Joining Date</th>
+              <th>Roles</th>
+              <th>Division</th>
             </thead>
             <tbody>
             </tbody>
@@ -101,17 +106,19 @@
         ajax: "{{ route('users.index') }}",
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-            {data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
-            {data: 'active', name: 'active',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
+            {data: 'action', name: 'action',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'active', name: 'active',"defaultContent": '', orderable: false, searchable: false},
             {data: 'image', name: 'image',"defaultContent": '', orderable: false, searchable: false },
+            {data: 'getbranch.branch_name', name: 'getbranch.branch_name',"defaultContent": '', orderable: false, searchable: false },
+            {data: 'employee_codes', name: 'employee_codes',"defaultContent": '', orderable: false, searchable: false },
             {data: 'name', name: 'name',"defaultContent": '', orderable: false, searchable: false },
-            {data: 'first_name', name: 'first_name',"defaultContent": ''},
-            {data: 'last_name', name: 'last_name',"defaultContent": ''},
-            {data: 'email', name: 'email',"defaultContent": ''},
+            {data: 'getdesignation.designation_name', name: 'getdesignation.designation_name',"defaultContent": '', orderable: false, searchable: false },
             {data: 'mobile', name: 'mobile',"defaultContent": ''},
-            {data: 'gender', name: 'gender',"defaultContent": ''},
-             {data: 'createdbyname.name', name: 'createdbyname.name',"defaultContent": '', orderable: false, searchable: false },
-            {data: 'created_at', name: 'created_at',"defaultContent": ''},
+            {data: 'email', name: 'email',"defaultContent": ''},
+            {data: 'reportinginfo.name', name: 'reportinginfo.name',"defaultContent": '', orderable: false, searchable: false },
+            {data: 'userinfo.date_of_joining', name: 'userinfo.date_of_joining',"defaultContent": '', orderable: false, searchable: false },
+            {data: 'roles', name: 'roles',"defaultContent": '', orderable: false, searchable: false },
+            {data: 'getdivision.division_name', name: 'getdivision.division_name',"defaultContent": '', orderable: false, searchable: false },
         ]
     });
          

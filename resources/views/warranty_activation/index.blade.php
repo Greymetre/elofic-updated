@@ -7,17 +7,18 @@
             <i class="material-icons">perm_identity</i>
           </div>
           <h4 class="card-title ">Warranty Activation {!! trans('panel.global.list') !!}
-            <span class="pull-right">
-              <div class="btn-group align-items-center">
+            <span class="">
+              <div class="btn-group header-frm-btn">
                 @if(auth()->user()->can(['warranty_activation_download']))
                 <form method="GET" action="{{ route('warranty_activation.download') }}" class="form-horizontal">
-                  <div class="d-flex flex-row align-items-center">
+                  <div class="d-flex flex-wrap flex-row">
                     <div class="p-2" style="width:180px;">
                       <!-- <label for="status">Status</label> -->
                       <select class="select2" placeholder="Select Branch" name="status" id="status" data-style="select-with-transition" title="Select Branch">
-                        <option value="">Select Status</option>
-                        <option value="0">Inactive</option>
-                        <option value="1">Active</option>
+                      <option value="0">In Verification</option>
+                        <option value="1">Activated</option>
+                        <option value="2">Pending Activated</option>
+                        <option value="3">Rejected</option>
                       </select>
                     </div>
                     <div class="p-2" style="width:180px;">
@@ -54,9 +55,11 @@
                   </div>
                 </form>
                 @endif
-                @if(auth()->user()->can(['warranty_activation_create']))
-                <a href="{{ route('warranty_activation.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Warranty Activation"><i class="material-icons">add_circle</i></a>
-                @endif
+                <div class="next-btn">
+                  @if(auth()->user()->can(['warranty_activation_create']))
+                  <a href="{{ route('warranty_activation.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Warranty Activation"><i class="material-icons">add_circle</i></a>
+                  @endif
+                </div>
               </div>
             </span>
           </h4>
@@ -158,7 +161,6 @@
             data: 'action',
             name: 'action',
             "defaultContent": '',
-            className: 'td-actions text-center',
             orderable: false,
             searchable: false
           },

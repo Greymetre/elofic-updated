@@ -7,10 +7,9 @@
           <i class="material-icons">perm_identity</i>
         </div>
         <h4 class="card-title">{!! trans('panel.holidays.title') !!} {!! trans('panel.global.list') !!}
-          <span class="pull-right">
-            <div class="btn-group">
-
-
+          <span class="">
+            <div class="btn-group header-frm-btn">
+            <div class="next-btn">
              <!--  @if(auth()->user()->can(['customer_template']))
               <a href="{{ URL::to('customers-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.customers.title_singular') !!}"><i class="material-icons">text_snippet</i></a>
               @endif -->
@@ -19,7 +18,7 @@
               <a href="{{ route('holidays.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.holidays.title_singular') !!}"><i class="material-icons">add_circle</i></a>
               <!-- @endif  -->
 
-
+            </div>
             </div>
           </span>
         </h4>
@@ -92,7 +91,7 @@
         },
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-            { data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
+            { data: 'action', name: 'action',"defaultContent": '', orderable: false, searchable: false},
             {data: 'getbranch.branch_name', name: 'getbranch.branch_name',"defaultContent": ''},
             {data: 'created_at', name: 'created_at',"defaultContent": ''},
             {data: 'createdbyname.name', name: 'createdbyname.name',"defaultContent": '', orderable: false},
