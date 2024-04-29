@@ -9,8 +9,10 @@
             <h4 class="card-title ">
                Target List
                <span class="pull-right">
-                  <div class="btn-group">
+                  <div class="btn-group header-frm-btn">
+                  <div class="next-btn">
                      <a data-toggle="modal" data-target="#createtargets" class="btn btn-just-icon btn-theme create" title="{!!  trans('panel.global.add') !!} {!! trans('panel.targets.title_singular') !!}"><i class="material-icons">add_circle</i></a>
+                  </div>
                   </div>
                </span>
             </h4>

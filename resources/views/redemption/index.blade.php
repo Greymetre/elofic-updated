@@ -7,11 +7,11 @@
             <i class="material-icons">perm_identity</i>
           </div>
           <h4 class="card-title ">Redeemption {!! trans('panel.global.list') !!}
-            <span class="pull-right">
-              <div class="btn-group align-items-center">
+            <span class="">
+              <div class="btn-group header-frm-btn">
                 @if(auth()->user()->can(['redemption_download']))
                 <form method="GET" action="{{ route('redemptions.download') }}" class="form-horizontal">
-                  <div class="d-flex flex-row align-items-center">
+                  <div class="d-flex flex-wrap flex-row">
                     <div class="p-2" style="width:160px;">
                       <label for="branch_id">Branch</label>
                       <select class="select2" placeholder="Select Branch" multiple name="branch_id[]" id="branch_id" data-style="select-with-transition" title="Select Branch">
@@ -50,6 +50,7 @@
                   </div>
                 </form>
                 @endif
+                <div class="next-btn">
                 @if(auth()->user()->can(['redemption_upload']))
                 <form id="neft_status_form" action="{{ URL::to('redemptions-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data" style="display: none;">
                   {{ csrf_field() }}
@@ -77,6 +78,7 @@
                 @if(auth()->user()->can(['redemption_create']))
                 <a href="{{ route('redemptions.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Redemption"><i class="material-icons">add_circle</i></a>
                 @endif
+              </div>
               </div>
             </span>
           </h4>

@@ -7,8 +7,9 @@
           <i class="material-icons">perm_identity</i>
         </div>
         <h4 class="card-title ">{!! trans('panel.firmtype.title_singular') !!}{!! trans('panel.global.list') !!}
-              <span class="pull-right">
-                <div class="btn-group">
+              <span class="">
+                <div class="btn-group header-frm-btn">
+                  <div class="next-btn">
                   @if(auth()->user()->can(['firmtype_upload']))
                   <form action="{{ URL::to('firmtype-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                   {{ csrf_field() }}
@@ -18,7 +19,7 @@
                           <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
                           <span class="fileinput-exists">Change</span>
                           <input type="hidden">
-                          <input type="file" name="import_file" required accept=".xls,.xlsx" />
+                          <input type="file" title="Select File" name="import_file" required accept=".xls,.xlsx" />
                         </span>
                       </div>
                     <div class="input-group-append">
@@ -39,6 +40,7 @@
                   @if(auth()->user()->can(['firmtype_create']))
                    <a data-toggle="modal" data-target="#createfirmtype" class="btn btn-just-icon btn-theme create" title="{!!  trans('panel.global.add') !!} {!! trans('panel.firmtype.title_singular') !!}"><i class="material-icons">add_circle</i></a>
                   @endif
+                </div>
                 </div>
               </span>
           </h4>
@@ -137,8 +139,8 @@
         ajax: "{{ route('firmtype.index') }}",
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-            {data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
-            {data: 'active', name: 'active',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
+            {data: 'action', name: 'action',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'active', name: 'active',"defaultContent": '', orderable: false, searchable: false},
             {data: 'firmtype_name', name: 'firmtype_name',"defaultContent": ''},
              {data: 'createdbyname.name', name: 'createdbyname.name',"defaultContent": ''},
             {data: 'created_at', name: 'created_at',"defaultContent": ''},

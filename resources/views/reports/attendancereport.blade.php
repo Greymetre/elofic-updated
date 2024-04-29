@@ -23,8 +23,8 @@
             <i class="material-icons">perm_identity</i>
           </div>
           <h4 class="card-title">Attendance Report
-            <span class="pull-right">
-              <div class="btn-group">
+            <span class="">
+              <div class="btn-group header-frm-btn">
                 @if(auth()->user()->can(['attendance_download']))
                 <form method="GET" action="{{ URL::to('attendance-download') }}">
                   <div class="d-flex flex-row">
@@ -65,12 +65,15 @@
                   </div>
                 </form>
                 @endif
+                <div class="next-btn">
                 @if(auth()->user()->can(['attendance_create']))
+
                 <a data-toggle="modal" data-target="#submitAttendance" class="custom-btn create" title="Punch In">
                   Punch In
                 </a>
                 @endif
                 <a href="{{ URL::to('attendance-location') }}" class="btn btn-just-icon btn-theme  d-none" title="Update Location"><i class="material-icons">add_location</i></a>
+              </div>
               </div>
             </span>
           </h4>

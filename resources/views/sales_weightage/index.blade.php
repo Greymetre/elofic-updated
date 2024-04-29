@@ -7,11 +7,13 @@
                         <i class="material-icons">perm_identity</i>
                     </div>
                     <h4 class="card-title">{!! trans('panel.sales_weightage.title_singular') !!} {!! trans('panel.global.list') !!}
-                        <span class="pull-right">
-                            <div class="btn-group">
+                        <span class="">
+                            <div class="btn-group header-frm-btn">
+                            <div class="next-btn">
                                 <a href="{{route('sales_weightage.create')}}" class="btn btn-just-icon btn-theme create" title="Add Appraisal">
                                     <i class="material-icons">add_circle</i>
                                 </a>
+                            </div>
                             </div>
                         </span>
                     </h4>

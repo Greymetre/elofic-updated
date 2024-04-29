@@ -3,6 +3,10 @@
       .theadl {
          font-weight: 900;
       }
+
+      li.nav-item {
+         border-left: 1px solid;
+      }
    </style>
    <div class="row">
       <div class="col-md-12">
@@ -14,9 +18,92 @@
                         Warranty Activation > {{$warrantyactivation->customer->customer_name}}
                         @if(auth()->user()->can(['district_access']))
                         <ul class="nav nav-tabs pull-right" data-tabs="tabs">
+                           @if($warrantyactivation->status == '0')
+                           <li class="nav-item">
+                              <a class="nav-link" onclick="changeStatus(this)" data-status="1" data-waid="{{$warrantyactivation->id}}" href="#">
+                                 <i class="material-icons">check_circle</i> Activated
+                                 <div class="ripple-container"></div>
+                              </a>
+                           </li>
+                           <li class="nav-item">
+                              <a class="nav-link" onclick="changeStatus(this)" data-status="2" data-waid="{{$warrantyactivation->id}}" href="#">
+                                 <i class="material-icons">check</i> Pending Activated
+                                 <div class="ripple-container"></div>
+                              </a>
+                           </li>
+                           <li class="nav-item">
+                              <a class="nav-link" onclick="changeStatus(this)" data-status="3" data-waid="{{$warrantyactivation->id}}" href="#">
+                                 <i class="material-icons">cancel</i> Reject
+                                 <div class="ripple-container"></div>
+                              </a>
+                           </li>
+                           @elseif($warrantyactivation->status == '1')
+                           <li class="nav-item">
+                              <a class="nav-link" onclick="changeStatus(this)" data-status="0" data-waid="{{$warrantyactivation->id}}" href="#">
+                                 <i class="material-icons">schedule</i> In Verification
+                                 <div class="ripple-container"></div>
+                              </a>
+                           </li>
+                           <li class="nav-item">
+                              <a class="nav-link" onclick="changeStatus(this)" data-status="2" data-waid="{{$warrantyactivation->id}}" href="#">
+                                 <i class="material-icons">check</i> Pending Activated
+                                 <div class="ripple-container"></div>
+                              </a>
+                           </li>
+                           <li class="nav-item">
+                              <a class="nav-link" onclick="changeStatus(this)" data-status="3" data-waid="{{$warrantyactivation->id}}" href="#">
+                                 <i class="material-icons">cancel</i> Reject
+                                 <div class="ripple-container"></div>
+                              </a>
+                           </li>
+                           @elseif($warrantyactivation->status == '2')
+                           <li class="nav-item">
+                              <a class="nav-link" onclick="changeStatus(this)" data-status="3" data-waid="{{$warrantyactivation->id}}" href="#">
+                                 <i class="material-icons">cancel</i> Reject
+                                 <div class="ripple-container"></div>
+                              </a>
+                           </li>
+                           <li class="nav-item">
+                              <a class="nav-link" onclick="changeStatus(this)" data-status="0" data-waid="{{$warrantyactivation->id}}" href="#">
+                                 <i class="material-icons">schedule</i> In Verification
+                                 <div class="ripple-container"></div>
+                              </a>
+                           </li>
+                           <li class="nav-item">
+                              <a class="nav-link" data-status="1" data-waid="{{$warrantyactivation->id}}" href="#">
+                                 <i class="material-icons">check_circle</i> Activated
+                                 <div class="ripple-container"></div>
+                              </a>
+                           </li>
+                           @elseif($warrantyactivation->status == '3')
+                           <li class="nav-item">
+                              <a class="nav-link" onclick="changeStatus(this)" data-status="0" data-waid="{{$warrantyactivation->id}}" href="#">
+                                 <i class="material-icons">schedule</i> In Verification
+                                 <div class="ripple-container"></div>
+                              </a>
+                           </li>
+                           <li class="nav-item">
+                              <a class="nav-link" data-status="1" data-waid="{{$warrantyactivation->id}}" href="#">
+                                 <i class="material-icons">check_circle</i> Activated
+                                 <div class="ripple-container"></div>
+                              </a>
+                           </li>
+                           <li class="nav-item">
+                              <a class="nav-link" onclick="changeStatus(this)" data-status="2" data-waid="{{$warrantyactivation->id}}" href="#">
+                                 <i class="material-icons">check</i> Pending Activated
+                                 <div class="ripple-container"></div>
+                              </a>
+                           </li>
+                           @endif
+                           <li class="nav-item">
+                              <a class="nav-link" href="{{ route('warranty_activation.edit', encrypt($warrantyactivation->id)) }}">
+                                 <i class="material-icons">edit</i> Edit
+                                 <div class="ripple-container"></div>
+                              </a>
+                           </li>
                            <li class="nav-item">
                               <a class="nav-link" href="{{ url('warranty_activation') }}">
-                                 <i class="material-icons">next_plan</i> Warranty Activation
+                                 <i class="material-icons">next_plan</i> Back
                                  <div class="ripple-container"></div>
                               </a>
                            </li>
@@ -41,11 +128,13 @@
                @endif
                <div class="row">
                   <div class="col-md-12">
-                     <h6>Activation Status</h6>
+                     <h6>Warranty Activation Status</h6>
                      @if($warrantyactivation->status == '0')
-                     <p>Pending Activation'</p>
-                     @else
+                     <p>In Verification</p>
+                     @elseif($warrantyactivation->status == '1')
                      <p>Activated</p>
+                     @else
+                     <p>Pending Activated</p>
                      @endif
                   </div>
                   <div class="col-md-9">
@@ -152,6 +241,26 @@
                            You don't have any Schedule activity.
                         </p>
                         <h5 class="theadl mt-5">PAST</h5>
+                        @if(count($warranty_timeline) > 0)
+                        @foreach($warranty_timeline as $timeline)
+                        @if($timeline->status == '0')
+                        @php $status = 'In Verification'; @endphp
+                        @elseif($timeline->status == '1')
+                        @php $status = 'Activated'; @endphp
+                        @elseif($timeline->status == '2')
+                        @php $status = 'Pending Activated'; @endphp
+                        @elseif($timeline->status == '3')
+                        @php $status = 'Rejected'; @endphp
+                        @endif
+                        <div class="d-flex"><i class="material-icons">military_tech</i>
+                        @if($timeline->status == '0')
+                        <p>Warranty <span class="theadl">{{$warrantyactivation->product_serail_number}}</span> Move to {{$status}}. By <span class="theadl">{{$timeline->createdByName->name}}</span> on {{date('d M Y h:i A', strtotime($timeline->created_at))}}</p>
+                        @else
+                        <p>Warranty <span class="theadl">{{$warrantyactivation->product_serail_number}}</span> {{$status}}. By <span class="theadl">{{$timeline->createdByName->name}}</span> on {{date('d M Y h:i A', strtotime($timeline->created_at))}}</p>
+                        @endif
+                        </div>
+                        @endforeach
+                        @endif
                         <div class="d-flex"><i class="material-icons">military_tech</i>
                            @if($warrantyactivation->created_by)
                            <p>Warranty <span class="theadl">{{$warrantyactivation->product_serail_number}}</span> generated by <span class="theadl">{{$warrantyactivation->createdByName->name}}</span> on {{date('d M Y', strtotime($warrantyactivation->created_at))}}</p>
@@ -169,5 +278,43 @@
    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
    <link rel="stylesheet" href="{{ url('/').'/'.asset('lightboxx/css/lightbox.min.css') }}">
    <script src="{{ url('/').'/'.asset('lightboxx/js/lightbox-plus-jquery.min.js') }}"></script>
- 
+
+   <script>
+      function changeStatus(element) {
+         var id = $(element).data('waid');
+         var status = $(element).data('status');
+         Swal.fire({
+            title: "ARE YOU SURE TO CHANGE STATUS ?",
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: "Yes",
+            denyButtonText: `No`
+         }).then((result) => {
+            console.log(result);
+            if (result.value) {
+               $.ajax({
+                  url: "{{ url('warranty-status-change') }}",
+                  dataType: "json",
+                  type: "POST",
+                  data: {
+                     _token: "{{csrf_token()}}",
+                     id: id,
+                     status: status
+                  },
+                  success: function(res) {
+                     if (res.status === true) {
+                        Swal.fire("Status Update successfully!", res.msg, "success");
+                        setTimeout(() => {
+                           location.reload();
+                        }, 3000);
+                     } else {
+                        Swal.fire("Somthing went wrong", "", "error");
+                     }
+                  }
+               });
+            }
+         });
+      }
+   </script>
+
 </x-app-layout>

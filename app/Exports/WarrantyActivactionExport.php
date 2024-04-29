@@ -72,10 +72,14 @@ class WarrantyActivactionExport implements FromCollection, WithHeadings, ShouldA
     public function map($data): array
     {
 
-        if ($data['status'] == '1') {
+        if($data['status'] == '0'){
+            $status = 'In Verification';
+        }elseif($data['status'] == '1'){
             $status = 'Activated';
-        } else {
-            $status = 'Pending Activation';
+        }elseif($data['status'] == '2'){
+            $status = 'Pending Activated';
+        }elseif($data['status'] == '3'){
+            $status = 'Reject';
         }
         $expire_count = $data['product_details']?$data['product_details']['expiry_interval_preiod']:"18";
         $expire_type = $data['product_details']?strtolower($data['product_details']['expiry_interval'].'s'):"months";

@@ -10,6 +10,7 @@ use App\Models\ComplaintType;
 use App\Models\Customers;
 use App\Models\Division;
 use App\Models\EndUser;
+use App\Models\Media;
 use App\Models\Pincode;
 use App\Models\User;
 use App\Models\WarrantyActivation;
@@ -146,6 +147,14 @@ class ComplaintController extends Controller
             'created_by_device' => 'user',
             'created_by' => auth()->user()->id
         ]);
+        if($request->images && count($request->images) > 0){
+            foreach($request->images as $file){
+                $customname = time() . '.' . $file->getClientOriginalExtension();
+                $complaint->addMedia($file)
+                    ->usingFileName($customname)
+                    ->toMediaCollection('complaint_attach');
+            }
+        }
 
         return Redirect::to('complaints')->with('message_success', 'Complaint Store Successfully and the complaint number is <span title="Copy" id="copyText">'. $newComplaintNumber .'</span>');
 
@@ -197,6 +206,14 @@ class ComplaintController extends Controller
      */
     public function update(Request $request, Complaint $complaint)
     {
+        if($request->images && count($request->images) > 0){
+            foreach($request->images as $file){
+                $customname = time() . '.' . $file->getClientOriginalExtension();
+                $complaint->addMedia($file)
+                    ->usingFileName($customname)
+                    ->toMediaCollection('complaint_attach');
+            }
+        }
         $complaint->update($request->all());
         $newComplaintNumber = $complaint->complaint_number;
 
@@ -232,6 +249,11 @@ class ComplaintController extends Controller
         $nextComplaintNumberPadded = str_pad($nextComplaintNumber, 3, '0', STR_PAD_LEFT);
 
         return "SEC/HO/$financialYear/$nextComplaintNumberPadded";
+    }
+
+    public function deleteAttachment(Request $request){
+        Media::where('id', $request->id)->delete();
+        return response()->json(['status'=>true]);
     }
 
     public function cancelComplaint(Request $request){

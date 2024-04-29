@@ -199,25 +199,25 @@ class DamageEntryController extends Controller
     {
         $updateStatus = DamageEntry::where('id', $request->id)->update(['status' => $request->status, 'coupon_code'=>$request->coupon_code, 'remark' => $request->remark]);
         if($updateStatus){
-            if($request->status != '2'){
+            if($request->status == '1'){
                 $damageEntry = DamageEntry::find($request->id);
                 $damageEntry->status = '1';
                 $damageEntry->save();
                 $product = Product::find($request->product_id);
                 $notexists = Services::where('serial_no', $request->coupon_code)->exists();
-                if ($notexists) {
-                    $mmssgg = "The coupon code '$request->coupon_code' already Scanned.";
-                    return response()->json(['status' => 'error','message' => $mmssgg]);
+                if (!$notexists) {
+                    // $mmssgg = "The coupon code '$request->coupon_code' already Scanned.";
+                    // return response()->json(['status' => 'error','message' => $mmssgg]);
+                    Services::create([
+                        'product_code' => $product->product_code,
+                        'product_name' => $product->product_name,
+                        'product_description' => $product->description,
+                        'group' => $product->new_group,
+                        'serial_no' => $request->coupon_code,
+                        'party_name' => 'Damage Entry',
+                        'qty' => '1',
+                    ]);
                 }
-                Services::create([
-                    'product_code' => $product->product_code,
-                    'product_name' => $product->product_name,
-                    'product_description' => $product->description,
-                    'group' => $product->new_group,
-                    'serial_no' => $request->coupon_code,
-                    'party_name' => 'Damage Entry',
-                    'qty' => '1',
-                ]);
                 $exists = TransactionHistory::where('coupon_code', $request->coupon_code)->exists();
 
                 if ($exists) {
@@ -252,8 +252,11 @@ class DamageEntryController extends Controller
                     'created_at' => $created_at,
                 ]);
                 return response()->json(['status' => 'success','message' => 'Damage Entry Approved successfully!']);
+            }elseif($request->status == '0'){
+                return response()->json(['status' => 'success','message' => 'Damage Entry Pending successfully!']);    
+            }else{
+                return response()->json(['status' => 'success','message' => 'Damage Entry Rejected successfully!']);
             }
-            return response()->json(['status' => 'success','message' => 'Damage Entry Rejected successfully!']);
         }else{
             return response()->json(['status' => 'error','message' => 'Error in change status of Damage Entry!']);
         }

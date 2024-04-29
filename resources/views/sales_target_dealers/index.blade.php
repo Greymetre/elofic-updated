@@ -7,176 +7,154 @@
             <i class="material-icons">perm_identity</i>
           </div>
           <h4 class="card-title ">{!! trans('panel.dealer_distributor_user.title') !!} {!! trans('panel.global.list') !!}
-            <span class="pull-right">
-              <div class="btn-group">
+            <span class="">
+              <div class="btn-group header-frm-btn">
                 <!-- @if(auth()->user()->can(['sales_target_users_download'])) -->
                 <form method="post" action="{{ URL::to('sales_dealer/target_dealers/download') }}" class="form-horizontal">
                   @csrf
-                  <div id="myGroup">
-
-                  <div class="row">
-
-                    <div class="d-flex flex-column" style="align-items: end;">
-                      <div class="testdiv" style="display: flex;">
-                        <div class="p-2" style="width:160px;">
-                          <select class="select2" name="branch_id" id="branch_id" data-style="select-with-transition" title="panel.sales_users.branch">
-                            <option value="" disabled selected>{!! trans('panel.sales_users.branch') !!}</option>
-                            @if(@isset($branches ))
-                            @foreach($branches as $branch)
-                            <option value="{!! $branch->id !!}">{!! $branch->branch_name !!}</option>
-                            @endforeach
-                            @endif
-                          </select>
-                        </div>
-                        <div class="p-2" style="width:160px;">
-                          <select class="select2" name="customer" id="customer" data-style="select-with-transition" title="{!! trans('panel.sales_dealer_distributor.dealer_distributor') !!}">
-                            <option value="" disabled selected>{!! trans('panel.sales_dealer_distributor.dealer_distributor') !!}</option>
-                            @if(@isset($users ))
-                            @foreach($users as $user)
-                            <option value="{!! $user->id !!}">{!! $user->name !!}</option>
-                            @endforeach
-                            @endif
-                          </select>
-                        </div>
-                        <div class="p-2" style="width:160px;">
-                          <select class="select2" name="division" id="division" data-style="select-with-transition" title="{!! trans('panel.sales_users.select-divisions') !!}">
-                            <option value="" disabled selected>{!! trans('panel.sales_users.select-divisions') !!}</option>
-                            @if(@isset($divisions ))
-                            @foreach($divisions as $division)
-                            <option value="{!! $division->id !!}">{!! $division->division_name !!}</option>
-                            @endforeach
-                            @endif
-                          </select>
-                        </div>
-                        <div class="p-2" style="width:160px;">
-                          <select class="select2" name="type" id="type" data-style="select-with-transition" title="{!! trans('panel.sales_dealer_distributor.type') !!}">
-                            <option value="" disabled selected>{!! trans('panel.sales_dealer_distributor.type') !!}</option>
-                            <option value="primary">Primary</option>
-                            <option value="secondary">Secondary</option>
-                          </select>
-                        </div>
-                        <div class="p-2" style="width:160px;">
-                          <select class="selectpicker" name="month" id="month" data-style="select-with-transition" title="Month">
-                            <option value="" disabled selected>{!! trans('panel.sales_users.month') !!}</option>
-                            @for ($month = 1; $month <= 12; $month++)
-                            <option value="{!! date('M', mktime(0, 0, 0, $month, 1)) !!}">{!! date('M', mktime(0, 0, 0, $month, 1)) !!}</option>
-                            @endfor
-                          </select>
-                        </div>
-                        <div class="p-2" style="width:160px;">
-                          <select class="selectpicker" name="financial_year" id="financial_year" required data-style="select-with-transition" title="Year">
-                            <option value="" disabled selected>{!! trans('panel.sales_users.year') !!}</option>
-                            @foreach($years as $year)
-                            @php 
-                            $startYear = $year - 1;
-                            $endYear = $year;
-                            @endphp
-                            <option value="{!!$startYear!!}-{!!$endYear!!}">{!! $startYear!!} - {!! $endYear !!}</option>
-                            @endforeach
-                          </select>
-                        </div>
-                        <button class="btn btn-just-icon btn-theme" type="button" data-toggle="collapse" data-target="#multiCollapseExample2" aria-expanded="false" aria-controls="multiCollapseExample2"><i class="material-icons">menu</i></button>
-                        <button class="btn btn-just-icon btn-theme" type="button" data-toggle="collapse" data-target="#multiCollapseExample1" aria-expanded="false" aria-controls="multiCollapseExample1"><i class="material-icons">menu</i></button>
-                      </div>
-
-                      <div class="">
-                        <div class="collapse multi-collapse" style="display:flex; align-items: center;" id="multiCollapseExample2">
-                          <div class="d-flex" style="font-size: 14px;align-items: center;justify-content: space-between;">
-                            <div class="p-2" style="display:flex;">
-                              @if(auth()->user()->can(['sales_target_dealers_download']))
-                              <p>{!!  trans('panel.global.download') !!} {!! trans('panel.sales_dealer_distributor.dealer_distributor') !!}</p>
-                              <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.sales_dealer_distributor.dealer_distributor') !!}" name="export_dealer_target" value="true"><i class="material-icons">cloud_download</i></button>
-                              @endif
-                            </div>
-                            <div class="p-2" style="display:flex;">
-                              @if(auth()->user()->can(['sales_dealers_branch_report_download']))
-                              <p>{!!  trans('panel.global.download') !!} {!! trans('panel.sales_dealer_distributor_branch.title_singular') !!}</p>
-                              <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.sales_dealer_distributor_branch.title_singular') !!}" name="export_branch" value="true"><i class="material-icons">cloud_download</i></button>
-                              @endif
-                            </div>
-                          </div>
-                          <!-- current and last year sales target -->
-                          <div class="p-2" style="display:flex;">
-                            @if(auth()->user()->can(['cy_ly_sales_dealers_report_download']))
-                            <p>{!!  trans('panel.global.download') !!} {!! trans('panel.cy_and_ly_dealers_target.title') !!}</p>
-                            <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.cy_and_ly_dealers_target.title') !!}" name="cy_ly_sales_report" value="true"><i class="material-icons">cloud_download</i></button>
-                            @endif
-                          </div>
-                        </form>
-                        <!-- @endif -->
-                        @if(auth()->user()->can(['sales_target_dealers_upload']))
-                        <p>{!!  trans('panel.global.upload') !!} {!! trans('panel.sales_dealer_distributor.dealer_distributor') !!}</p> 
-                        <form action="{{ URL::to('sales_dealers/target/upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
-                          {{ csrf_field() }}
-                          <div class="input-group" id="collapse-btn" style="flex-wrap: nowrap; gap: 5px;">
-                            <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                              <span class="btn btn-just-icon btn-theme btn-file">
-                                <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
-                                <span class="fileinput-exists">Change</span>
-                                <input type="hidden">
-                                <input type="file" name="import_file" style="flex-wrap: nowrap; gap: 5px;" required accept=".xls,.xlsx" />
-                              </span>
-                            </div>
-                            <div class="input-group-append" style="flex-wrap: nowrap;">
-                              <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.upload') !!} {!! trans('panel.sales_dealer_distributor.dealer_distributor') !!}">
-                                <i class="material-icons">cloud_upload</i>
-                                <div class="ripple-container"></div>
-                              </button>
-                            </div>
-                          </div>
-                        </form>
+                  <div class="d-flex flex-wrap flex-row">
+                    <div class="p-2" style="width:160px;">
+                      <select class="select2" name="branch_id" id="branch_id" data-style="select-with-transition" title="panel.sales_users.branch">
+                        <option value="" disabled selected>{!! trans('panel.sales_users.branch') !!}</option>
+                        @if(@isset($branches ))
+                        @foreach($branches as $branch)
+                        <option value="{!! $branch->id !!}">{!! $branch->branch_name !!}</option>
+                        @endforeach
                         @endif
-                        
-                      </div>
-                        <div>
-                          <div class="collapse multi-collapse" style="display:flex; align-items: center;" id="multiCollapseExample1">
-                            <div class="d-flex" style="font-size: 14px;align-items: center;justify-content: space-between;">
-                              <!-- sales target user template creation -->
-                              @if(auth()->user()->can(['sales_target_dealers_template']))
-                              <p>{!!  trans('panel.global.template') !!} {!! trans('panel.sales_dealer_distributor.dealer_distributor') !!}</p>
-                              <a href="{{ URL::to('sales-target-dealers-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.sales_dealer_distributor.dealer_distributor') !!}"><i class="material-icons">text_snippet</i></a>
-                              @endif
-                              <!-- sales achievemnts download-->
-                              @if(auth()->user()->can(['sales_dealers_achievement_download']))
-                              <p>{!!  trans('panel.global.download') !!} {!! trans('panel.sales_dealers_achievement.title') !!}</p>
-                              <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.sales_dealers_achievement.title') !!}"><i class="material-icons">cloud_download</i></button>
-                              @endif
-                              <!-- sales dealers achievemnts upload-->
-                              @if(auth()->user()->can(['sales_dealers_achievement_upload'])) 
-                              <p>{!!  trans('panel.global.upload') !!} {!! trans('panel.sales_dealers_achievement.title') !!}</p>
-                              <form action="{{ URL::to('sales-dealers/achievement/upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
-                                {{ csrf_field() }}
-                                <div class="input-group" style="flex-wrap:nowrap;">
-                                  <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                                    <span class="btn btn-just-icon btn-theme btn-file">
-                                      <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
-                                      <span class="fileinput-exists">Change</span>
-                                      <input type="hidden">
-                                      <input type="file" name="import_file" style="flex-wrap: nowrap;" required accept=".xls,.xlsx" />
-                                    </span>
-                                  </div>
-                                  <div class="input-group-append">
+                      </select>
+                    </div>
+                    <div class="p-2" style="width:160px;">
+                      <select class="select2" name="customer" id="customer" data-style="select-with-transition" title="{!! trans('panel.sales_dealer_distributor.dealer_distributor') !!}">
+                        <option value="" disabled selected>{!! trans('panel.sales_dealer_distributor.dealer_distributor') !!}</option>
+                        @if(@isset($users ))
+                        @foreach($users as $user)
+                        <option value="{!! $user->id !!}">{!! $user->name !!}</option>
+                        @endforeach
+                        @endif
+                      </select>
+                    </div>
+                    <div class="p-2" style="width:160px;">
+                      <select class="select2" name="division" id="division" data-style="select-with-transition" title="{!! trans('panel.sales_users.select-divisions') !!}">
+                        <option value="" disabled selected>{!! trans('panel.sales_users.select-divisions') !!}</option>
+                        @if(@isset($divisions ))
+                        @foreach($divisions as $division)
+                        <option value="{!! $division->id !!}">{!! $division->division_name !!}</option>
+                        @endforeach
+                        @endif
+                      </select>
+                    </div>
+                    <div class="p-2" style="width:160px;">
+                      <select class="select2" name="type" id="type" data-style="select-with-transition" title="{!! trans('panel.sales_dealer_distributor.type') !!}">
+                        <option value="" disabled selected>{!! trans('panel.sales_dealer_distributor.type') !!}</option>
+                        <option value="primary">Primary</option>
+                        <option value="secondary">Secondary</option>
+                      </select>
+                    </div>
+                    <div class="p-2" style="width:160px;">
+                      <select class="selectpicker" name="month" id="month" data-style="select-with-transition" title="Month">
+                        <option value="" disabled selected>{!! trans('panel.sales_users.month') !!}</option>
+                        @for ($month = 1; $month <= 12; $month++) <option value="{!! date('M', mktime(0, 0, 0, $month, 1)) !!}">{!! date('M', mktime(0, 0, 0, $month, 1)) !!}</option>
+                          @endfor
+                      </select>
+                    </div>
+                    <div class="p-2" style="width:160px;">
+                      <select class="selectpicker" name="financial_year" id="financial_year" required data-style="select-with-transition" title="Year">
+                        <option value="" disabled selected>{!! trans('panel.sales_users.year') !!}</option>
+                        @foreach($years as $year)
+                        @php
+                        $startYear = $year - 1;
+                        $endYear = $year;
+                        @endphp
+                        <option value="{!!$startYear!!}-{!!$endYear!!}">{!! $startYear!!} - {!! $endYear !!}</option>
+                        @endforeach
+                      </select>
+                    </div>
 
-                                    <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.upload') !!} {!! trans('panel.sales_dealers_achievement.title') !!}">
-                                      <i class="material-icons">cloud_upload</i>
-                                      <div class="ripple-container"></div>
-                                    </button>
-                                  </div>
-                                </div>
-                              </form>
-                              @endif
-                              <!-- sales dealers achievemnts template creation-->
-                              @if(auth()->user()->can(['sales_dealers_achievement_template']))
-                              <p>{!!  trans('panel.global.template') !!} {!! trans('panel.sales_dealers_achievement.title') !!}</p>
-                              <a href="{{ URL::to('sales-dealers-achievement-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.sales_dealers_achievement.title') !!}"><i class="material-icons">text_snippet</i></a>
-                              @endif
-                            </div>
-                        </div>
+
+
+                    <div class="p-2" style="display:flex;">
+                      @if(auth()->user()->can(['sales_target_dealers_download']))
+                      <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.sales_dealer_distributor.dealer_distributor') !!}" name="export_dealer_target" value="true"><i class="material-icons">cloud_download</i></button>
+                      @endif
+                    </div>
+                    <div class="p-2" style="display:flex;">
+                      @if(auth()->user()->can(['sales_dealers_branch_report_download']))
+                      <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.sales_dealer_distributor_branch.title_singular') !!}" name="export_branch" value="true"><i class="material-icons">cloud_download</i></button>
+                      @endif
+                    </div>
+
+                    <!-- current and last year sales target -->
+                    <div class="p-2" style="display:flex;">
+                      @if(auth()->user()->can(['cy_ly_sales_dealers_report_download']))
+                      <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.cy_and_ly_dealers_target.title') !!}" name="cy_ly_sales_report" value="true"><i class="material-icons">cloud_download</i></button>
+                      @endif
                     </div>
                   </div>
-                </div>
+                </form>
+                <!-- @endif -->
+                <div class="next-btn">
+                  @if(auth()->user()->can(['sales_target_dealers_upload']))
+
+                  <form action="{{ URL::to('sales_dealers/target/upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
+                    {{ csrf_field() }}
+                    <div class="input-group" id="collapse-btn" style="flex-wrap: nowrap; gap: 5px;">
+                      <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                        <span class="btn btn-just-icon btn-theme btn-file">
+                          <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
+                          <span class="fileinput-exists">Change</span>
+                          <input type="hidden">
+                          <input type="file" title="Select File" name="import_file" style="flex-wrap: nowrap; gap: 5px;" required accept=".xls,.xlsx" />
+                        </span>
+                      </div>
+                      <div class="input-group-append" style="flex-wrap: nowrap;">
+                        <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.upload') !!} {!! trans('panel.sales_dealer_distributor.dealer_distributor') !!}">
+                          <i class="material-icons">cloud_upload</i>
+                          <div class="ripple-container"></div>
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                  @endif
+
+
+                  <!-- sales target user template creation -->
+                  @if(auth()->user()->can(['sales_target_dealers_template']))
+                  <a href="{{ URL::to('sales-target-dealers-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.sales_dealer_distributor.dealer_distributor') !!}"><i class="material-icons">text_snippet</i></a>
+                  @endif
+                  <!-- sales achievemnts download-->
+                  @if(auth()->user()->can(['sales_dealers_achievement_download']))
+                  <button class="btn btn-just-icon btn-theme  mr-2" title="{!!  trans('panel.global.download') !!} {!! trans('panel.sales_dealers_achievement.title') !!}"><i class="material-icons">cloud_download</i></button>
+                  @endif
+                  <!-- sales dealers achievemnts upload-->
+                  @if(auth()->user()->can(['sales_dealers_achievement_upload']))
+                  <form action="{{ URL::to('sales-dealers/achievement/upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
+                    {{ csrf_field() }}
+                    <div class="input-group" style="flex-wrap:nowrap;">
+                      <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                        <span class="btn btn-just-icon btn-theme btn-file">
+                          <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
+                          <span class="fileinput-exists">Change</span>
+                          <input type="hidden">
+                          <input type="file" title="Select File" name="import_file" style="flex-wrap: nowrap;" required accept=".xls,.xlsx" />
+                        </span>
+                      </div>
+                      <div class="input-group-append">
+
+                        <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.upload') !!} {!! trans('panel.sales_dealers_achievement.title') !!}">
+                          <i class="material-icons">cloud_upload</i>
+                          <div class="ripple-container"></div>
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                  @endif
+                  <!-- sales dealers achievemnts template creation-->
+                  @if(auth()->user()->can(['sales_dealers_achievement_template']))
+                  <a href="{{ URL::to('sales-dealers-achievement-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.sales_dealers_achievement.title') !!}"><i class="material-icons">text_snippet</i></a>
+                  @endif
                 </div>
               </div>
+
             </span>
           </h4>
 
@@ -249,7 +227,7 @@
             <i class="material-icons">perm_identity</i>
           </div>
           <h4 class="card-title"><span class="modal-title">{!! trans('panel.global.edit') !!} </span> {!! trans('panel.sales_dealer_distributor.dealer_distributor') !!}
-            <span class="pull-right" >
+            <span class="pull-right">
               <a href="javascript:void(0)" class="btn btn-just-icon btn-danger" data-dismiss="modal"><i class="material-icons">clear</i></a>
             </span>
           </h4>
@@ -272,7 +250,9 @@
                         @endif
                       </select>
                       @if ($errors->has('customer_id'))
-                      <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('customer_id') }}</p></div>
+                      <div class="error col-lg-12">
+                        <p class="text-danger">{{ $errors->first('customer_id') }}</p>
+                      </div>
                       @endif
                     </div>
                   </div>
@@ -291,11 +271,11 @@
                         <p class="text-danger">{{ $errors->first('firm_name') }}</p>
                       </div>
                       @endif
-                   </div>
-                 </div>
-               </div>
-             </div>
-           </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div class="row">
               <div class="col-md-9">
                 <div class="row">
@@ -308,11 +288,11 @@
                         <p class="text-danger">{{ $errors->first('type') }}</p>
                       </div>
                       @endif
-                   </div>
-                 </div>
-               </div>
-             </div>
-           </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div class="row">
               <div class="col-md-9">
                 <div class="row">
@@ -320,13 +300,14 @@
                   <div class="col-md-9">
                     <div class="form-group has-default bmd-form-group">
                       <select class="form-control" name="month" id="month" title="{!! trans('panel.sales_target_user.fields.month') !!}">
-                          <option value="" disabled selected>{!! trans('panel.sales_users.month') !!}</option>
-                          @for ($month = 1; $month <= 12; $month++)
-                              <option value="{!! date('M', mktime(0, 0, 0, $month, 1)) !!}">{!! date('M', mktime(0, 0, 0, $month, 1)) !!}</option>
+                        <option value="" disabled selected>{!! trans('panel.sales_users.month') !!}</option>
+                        @for ($month = 1; $month <= 12; $month++) <option value="{!! date('M', mktime(0, 0, 0, $month, 1)) !!}">{!! date('M', mktime(0, 0, 0, $month, 1)) !!}</option>
                           @endfor
                       </select>
                       @if ($errors->has('month'))
-                      <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('month') }}</p></div>
+                      <div class="error col-lg-12">
+                        <p class="text-danger">{{ $errors->first('month') }}</p>
+                      </div>
                       @endif
                     </div>
                   </div>
@@ -340,13 +321,15 @@
                   <div class="col-md-9">
                     <div class="form-group has-default bmd-form-group">
                       <select class="form-control" name="year" id="year" title="{!! trans('panel.sales_target_user.fields.year') !!}">
-                          <option value="" disabled selected>{!! trans('panel.sales_users.year') !!}</option>
-                          @foreach($years as $year)
-                              <option value="{!! $year !!}">{!! $year !!}</option>
-                          @endforeach
+                        <option value="" disabled selected>{!! trans('panel.sales_users.year') !!}</option>
+                        @foreach($years as $year)
+                        <option value="{!! $year !!}">{!! $year !!}</option>
+                        @endforeach
                       </select>
                       @if ($errors->has('year'))
-                      <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('year') }}</p></div>
+                      <div class="error col-lg-12">
+                        <p class="text-danger">{{ $errors->first('year') }}</p>
+                      </div>
                       @endif
                     </div>
                   </div>
@@ -361,7 +344,9 @@
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="target" id="target" class="form-control" value="{!! old( 'target') !!}" maxlength="200">
                       @if ($errors->has('target'))
-                      <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('target') }}</p></div>
+                      <div class="error col-lg-12">
+                        <p class="text-danger">{{ $errors->first('target') }}</p>
+                      </div>
                       @endif
                     </div>
                   </div>
@@ -372,11 +357,11 @@
             <div class="modal-footer">
               <input type="hidden" name="id" id="sales_target_id" />
               <button class="btn btn-info save"> {!! trans('panel.sales_target_user.fields.update') !!}</button>
-            </form>
-          </div>
+          </form>
         </div>
       </div>
     </div>
+  </div>
   </div>
   <script src="{{ url('/').'/'.asset('assets/js/validation_sales.js') }}"></script>
   <script src="{{ url('/').'/'.asset('assets/js/jquery.custom.js') }}"></script>
@@ -421,63 +406,63 @@
           {
             data: 'customer_name',
             name: 'customer_name',
-            orderable: false, 
+            orderable: false,
             searchable: false,
             "defaultContent": ''
           },
           {
             data: 'customer.name',
             name: 'customer.name',
-            orderable: false, 
+            orderable: false,
             searchable: false,
             "defaultContent": ''
           },
           {
             data: 'city_name',
             name: 'city_name',
-            orderable: false, 
+            orderable: false,
             searchable: false,
             "defaultContent": ''
           },
           {
             data: 'branch_name',
             name: 'branch_name',
-            orderable: false, 
+            orderable: false,
             searchable: false,
             "defaultContent": ''
           },
           {
             data: 'type',
             name: 'type',
-            orderable: true, 
+            orderable: true,
             searchable: true,
             "defaultContent": 'ddd'
           },
           {
             data: 'month',
             name: 'month',
-            orderable: true, 
+            orderable: true,
             searchable: true,
             "defaultContent": ''
           },
           {
             data: 'year',
             name: 'year',
-            orderable: true, 
+            orderable: true,
             searchable: true,
             "defaultContent": ''
           },
           {
             data: 'target',
             name: 'target',
-            orderable: true, 
+            orderable: true,
             searchable: true,
             "defaultContent": ''
           },
           {
             data: 'achievement',
             name: 'achievement',
-            orderable: true, 
+            orderable: true,
             searchable: true,
             "defaultContent": ''
           },
@@ -490,58 +475,57 @@
       });
 
 
-    $('#branch_id').change(function() {
-      table.draw();
-    });
+      $('#branch_id').change(function() {
+        table.draw();
+      });
 
-    $('#user').change(function() {
-      table.draw();
-    });
+      $('#user').change(function() {
+        table.draw();
+      });
 
-    $('#division').change(function() {
-      table.draw();
-    });
+      $('#division').change(function() {
+        table.draw();
+      });
 
-    $('#type').change(function() {
-      table.draw();
-    });
+      $('#type').change(function() {
+        table.draw();
+      });
 
-    $('#month').change(function() {
-      table.draw();
-    });
+      $('#month').change(function() {
+        table.draw();
+      });
 
-    $('#financial_year').change(function() {
-      table.draw();
-    });
+      $('#financial_year').change(function() {
+        table.draw();
+      });
 
       // edit sales target user
-      $(document).on('click', '.edit', function(){
-        var base_url =$('.baseurl').data('baseurl');
+      $(document).on('click', '.edit', function() {
+        var base_url = $('.baseurl').data('baseurl');
         var id = $(this).attr('id');
 
         $.ajax({
-          url: base_url + '/sales-target-dealer/'+id,
-         dataType:"json",
-         success:function(data)
-         {
-          $('#customer_id').val(data.customer_id);
-          $('#month').val(data.month);
-          $('#year').val(data.year);
-          $('#target').val(data.target);
-          $('#sales_target_id').val(data.id);
-          $('#firm_name').val(data.firm_name);
-          $('#type').val(data.type);
+          url: base_url + '/sales-target-dealer/' + id,
+          dataType: "json",
+          success: function(data) {
+            $('#customer_id').val(data.customer_id);
+            $('#month').val(data.month);
+            $('#year').val(data.year);
+            $('#target').val(data.target);
+            $('#sales_target_id').val(data.id);
+            $('#firm_name').val(data.firm_name);
+            $('#type').val(data.type);
 
-          $('#month option[value="' + data.month + '"]').prop('selected', true);
-          $('#year option[value="' + data.year + '"]').prop('selected', true);
-          $('#customer_id').trigger('change'); 
+            $('#month option[value="' + data.month + '"]').prop('selected', true);
+            $('#year option[value="' + data.year + '"]').prop('selected', true);
+            $('#customer_id').trigger('change');
 
-          $('#action_button').val('Edit');
-          $('#editSalesTargetDealer').modal('show');
-         }
+            $('#action_button').val('Edit');
+            $('#editSalesTargetDealer').modal('show');
+          }
         })
-       });
-      
+      });
+
       // delete sales target user
       $('body').on('click', '.delete', function() {
         var id = $(this).attr("value");

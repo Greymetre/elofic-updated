@@ -7,38 +7,13 @@
           <i class="material-icons">perm_identity</i>
         </div>
         <h4 class="card-title ">{!! trans('panel.complaint_type.title_singular') !!} {!! trans('panel.global.list') !!}
-              <span class="pull-right">
-                <div class="btn-group">
-                  @if(auth()->user()->can(['city_upload']))
-                  <!-- <form action="{{ URL::to('city-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
-                  {{ csrf_field() }}
-                  <div class="input-group">
-                      <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                        <span class="btn btn-just-icon btn-theme btn-file">
-                          <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
-                          <span class="fileinput-exists">Change</span>
-                          <input type="hidden">
-                          <input type="file" name="import_file" required accept=".xls,.xlsx" />
-                        </span>
-                      </div>
-                    <div class="input-group-append">
-                      <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.upload') !!} {!! trans('panel.city.title') !!}">
-                        <i class="material-icons">cloud_upload</i>
-                        <div class="ripple-container"></div>
-                      </button>
-                    </div>
-                  </div>
-                  </form> -->
-                  @endif
-                  @if(auth()->user()->can(['city_download']))
-                  <!-- <a href="{{ URL::to('city-download') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.city.title') !!}"><i class="material-icons">cloud_download</i></a> -->
-                  @endif
-                  @if(auth()->user()->can(['city_template']))
-                  <!-- <a href="{{ URL::to('city-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.city.title_singular') !!}"><i class="material-icons">text_snippet</i></a> -->
-                  @endif
+              <span class="">
+                <div class="btn-group header-frm-btn">
+                  <div class="next-btn">
                   @if(auth()->user()->can(['complaint_type_create']))
                    <a data-toggle="modal" data-target="#createcomplainttype" class="btn btn-just-icon btn-theme create" title="{!!  trans('panel.global.add') !!} {!! trans('panel.complaint_type.title_singular') !!}"><i class="material-icons">add_circle</i></a>
                   @endif
+                </div>
                 </div>
               </span>
           </h4>
@@ -153,8 +128,8 @@
         ajax: "{{ route('complaint-type.index') }}",
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-            {data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
-            {data: 'active', name: 'active',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
+            {data: 'action', name: 'action',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'active', name: 'active',"defaultContent": '', orderable: false, searchable: false},
             {data: 'name', name: 'name',"defaultContent": ''},
             {data: 'created_at', name: 'created_at',"defaultContent": ''},
         ]

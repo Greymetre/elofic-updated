@@ -27,16 +27,25 @@ class WarrantyActivationDataTable extends DataTable
             ->eloquent($query)
             ->addIndexColumn()
             ->addColumn('cust_status', function ($query) {
-                return 'Active';
+                if($query->customer->status == '0'){
+                    return 'Inactive';
+                }elseif($query->customer->status == '1'){
+                    return 'Active';
+                }
+                return '-';
             })
             ->addColumn('customer.customer_name', function ($query) {
                 return '<a href="'.route("warranty_activation.show", encrypt($query->id)).'">'.$query->customer->customer_name.'</a>';
             })
             ->addColumn('status', function ($query) {
                 if($query->status == '0'){
-                    return 'Pending Activation';
-                }else{
+                    return 'In Verification';
+                }elseif($query->status == '1'){
                     return 'Activated';
+                }elseif($query->status == '2'){
+                    return 'Pending Activated';
+                }elseif($query->status == '3'){
+                    return 'Reject';
                 }
             })
             ->addColumn('action', function ($query) {

@@ -56,7 +56,6 @@
             <a data-toggle="collapse" href="#collapseExample" class="username">
               <span>
                 {!! Auth::user()->name !!}
-                <b class="caret"></b>
               </span>
             </a>
           </div>
@@ -71,7 +70,7 @@
           </li>
           @endif
           @if(auth()->user()->can(['customer_access']))
-          <li class="nav-item ">
+          <li class="nav-item {{ request()->is('customers*') || request()->is('customertype*') || request()->is('firmtype*') || request()->is('customersLogin*') || request()->is('customers-survey*') || request()->is('fields*') ? 'active' : '' }}">
             <a class="nav-link collapsed" data-toggle="collapse" href="#customerMenu" aria-expanded="false">
               <i class="material-icons">store</i>
               <p> {!! trans('panel.sidemenu.customers_master') !!}
@@ -141,7 +140,7 @@
           </li>
           @endif
           @if(auth()->user()->can('country_access'))
-          <li class="nav-item ">
+          <li class="nav-item {{ request()->is('country*') || request()->is('state*') || request()->is('district*') || request()->is('city*') || request()->is('pincode*') ? 'active' : '' }}">
             <a class="nav-link collapsed" data-toggle="collapse" href="#addressMenu" aria-expanded="false">
               <i class="material-icons">room</i>
               <p> {!! trans('panel.sidemenu.address_master') !!}
@@ -195,7 +194,7 @@
           </li>
           @endif
           @if(auth()->user()->can('user_access'))
-          <li class="nav-item ">
+          <li class="nav-item {{ request()->is('users*') || request()->is('targets*') || request()->is('livelocation*') || request()->is('roles*') || request()->is('permissions*') || request()->is('tours*') || request()->is('usercity*') ? 'active' : '' }}">
             <a class="nav-link collapsed" data-toggle="collapse" href="#userMenu" aria-expanded="false">
               <i class="material-icons">people</i>
               <p> {!! trans('panel.sidemenu.users_master') !!}
@@ -289,7 +288,7 @@
           </li> -->
           @endif
           @if(auth()->user()->can('product_access'))
-          <li class="nav-item ">
+          <li class="nav-item {{ request()->is('categories*') || request()->is('subcategories*') || request()->is('brands*') || request()->is('products*') || request()->is('units*') || request()->is('production*') ? 'active' : '' }}">
             <a class="nav-link collapsed" data-toggle="collapse" href="#productMenu" aria-expanded="false">
               <i class="material-icons">star</i>
               <p> {!! trans('panel.sidemenu.product_master') !!}
@@ -347,19 +346,19 @@
                 </li>
                 @endif
                 @if(auth()->user()->can('stockdetails_access'))
-                <li class="nav-item {{ request()->is('production*') ? 'active' : '' }}">
+                <!-- <li class="nav-item {{ request()->is('production*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('production') }}">
                     <i class="material-icons">donut_small</i>
                     <p>Production</p>
                   </a>
-                </li>
+                </li> -->
                 @endif
               </ul>
             </div>
           </li>
           @endif
           @if(auth()->user()->can('target_users_access'))
-           <li class="nav-item ">
+           <li class="nav-item {{ request()->is('sales_users*') || request()->is('sales_dealer*') ? 'active' : '' }}">
              <a class="nav-link collapsed" data-toggle="collapse" href="#salesUserMenu" aria-expanded="false">
                <i class="material-icons">store</i>
                <p> {!! trans('panel.sidemenu.sales_users') !!} </p>
@@ -367,7 +366,7 @@
              <div class="collapse" id="salesUserMenu" style="">
                <ul class="nav">
                  @if(auth()->user()->can('target_users_access'))
-                 <li class="nav-item {{ request()->is('sales_users.target_users') ? 'active' : '' }}">
+                 <li class="nav-item {{ request()->is('sales_users*') ? 'active' : '' }}">
                    <a class="nav-link" href="{{ url('sales_users/target_users') }}">
                      <i class="material-icons">verified_user</i>
                      <p> {!! trans('panel.sales_users.title') !!}</p>
@@ -375,7 +374,7 @@
                  </li>
                  @endif
                  @if(auth()->user()->can('sales_target_dealers_access'))
-                 <li class="nav-item {{ request()->is('sales_dealer.target_dealers') ? 'active' : '' }}">
+                 <li class="nav-item {{ request()->is('sales_dealer*') ? 'active' : '' }}">
                    <a class="nav-link" href="{{ url('sales_dealer/target_dealers') }}">
                      <i class="material-icons">verified_user</i>
                      <p> {!! trans('panel.dealer_distributor_user.title') !!}</p>
@@ -387,7 +386,7 @@
            </li>
            @endif
         @if(auth()->user()->can('hr_access'))
-          <li class="nav-item {{ request()->is('reports*') ? 'active' : '' }}">
+          <li class="nav-item {{ request()->is('reports*') || request()->is('holidays*') || request()->is('leaves*') || request()->is('appraisal*') || request()->is('sales_weightage*') ? 'active' : '' }}">
             <a class="nav-link collapsed" data-toggle="collapse" href="#hr" aria-expanded="false">
               <i class="material-icons">star</i>
               <p> {!! trans('panel.sidemenu.hr') !!}
@@ -433,7 +432,7 @@
                 @endif
 
                   @if(auth()->user()->can('appraisal_pms'))
-                <li class="nav-item {{ request()->is('appraisal/create') ? 'active' : '' }}">
+                <li class="nav-item {{ request()->is('appraisal*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('appraisal/index') }}">
                     <i class="material-icons">verified_user</i>
                     <p>Appraisal(PMS)</p>
@@ -441,7 +440,7 @@
                 </li>
                 @endif
                 @if(auth()->user()->can('sales_weightage'))
-                <li class="nav-item {{ request()->is('sales_weightage') ? 'active' : '' }}">
+                <li class="nav-item {{ request()->is('sales_weightage*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('sales_weightage') }}">
                     <i class="material-icons">check</i>
                     <p>{!! trans('panel.sales_weightage.title') !!}</p>
@@ -457,7 +456,7 @@
 
 
           @if(auth()->user()->can(['account_access']))
-          <li class="nav-item">
+          <li class="nav-item {{ request()->is('expenses*') ? 'active' : '' }}">
             <a class="nav-link collapsed" data-toggle="collapse" href="#accountMenu" aria-expanded="false">
               <i class="material-icons">store</i>
               <p> {!! trans('panel.sidemenu.account') !!}
@@ -467,7 +466,7 @@
             <div class="collapse" id="accountMenu" style="">
               <ul class="nav">
                  @if(auth()->user()->can(['expenses_type']))
-               <li class="nav-item {{ request()->is('expenses_type') ? 'active' : '' }}">
+               <li class="nav-item {{ request()->is('expenses_type*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ url('expenses_type') }}">
                   <i class="material-icons">dashboard</i>
                   <p>{!! trans('panel.sidemenu.expenses_type') !!}</p>
@@ -476,7 +475,7 @@
           @endif 
           
           @if(auth()->user()->can('expense_access'))
-                <li class="nav-item {{ request()->is('expenses*') ? 'active' : '' }}">
+                <li class="nav-item {{ request()->is('expenses') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('expenses') }}">
                     <i class="material-icons">outlet</i>
                     <p>Expense</p>
@@ -556,7 +555,7 @@
           @endif -->
 
         @if(auth()->user()->can('order_access'))
-            <li class="nav-item {{ request()->is('orders*') ? 'active' : '' }}">
+            <li class="nav-item {{ request()->is('orders*') || request()->is('orderschemes*') || request()->is('sales') ? 'active' : '' }}">
             <a class="nav-link collapsed" data-toggle="collapse" href="#orderMenu" aria-expanded="false">
               <i class="material-icons">star</i>
              <p>{!! trans('panel.sidemenu.orders') !!}</p>
@@ -688,7 +687,7 @@
           </li> -->
           @endif
           @if(auth()->user()->can('scheme_access'))
-          <li class="nav-item {{ request()->is('schemes*') || request()->is('transaction_history*') || request()->is('gifts*') || request()->is('gift-categories*') || request()->is('gift-subcategories*') || request()->is('gift-model*') || request()->is('gift-brands*') || request()->is('redemptions*') || request()->is('damage_entries*') ? 'active' : '' }}">
+          <li class="nav-item {{ request()->is('schemes*') || request()->is('transaction_history*') || request()->is('gifts*') || request()->is('gift-categories*') || request()->is('gift-subcategories*') || request()->is('gift-model*') || request()->is('gift-brands*') || request()->is('redemptions*') || request()->is('damage_entries*') || request()->is('mobile_user_login*') || request()->is('customer-kyc*') ? 'active' : '' }}">
             <a class="nav-link collapsed" data-toggle="collapse" href="#schemesMenu" aria-expanded="false">
               <i class="material-icons">loyalty</i>
               <p> Loyalty Engine </p>
@@ -806,7 +805,7 @@
                 </li> -->
                 @endif
                 @if(auth()->user()->can('loyalty_app_setting_access'))
-                <li class="nav-item ">
+                <li class="nav-item {{request()->is('loyalty-app-setting*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('loyalty-app-setting') }}">
                     <i class="material-icons">settings</i>
                     <p>Loyalty App {!! trans('panel.sidemenu.setting') !!}</p>

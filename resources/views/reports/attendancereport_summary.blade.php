@@ -7,11 +7,11 @@
           <i class="material-icons">perm_identity</i>
         </div>
         <h4 class="card-title">Attendance Summary Report
-          <span class="pull-right">
-            <div class="btn-group">
+          <span class="">
+            <div class="btn-group header-frm-btn">
               @if(auth()->user()->can(['attendance_summary_download']))
               <form method="GET" action="{{ URL::to('attendancesummary-download') }}">
-                  <div class="d-flex flex-row">
+                  <div class="d-flex flex-wrap flex-row">
 
                   <div class="p-2" style="width: 250px;">
                     <select class="selectpicker" multiple name="branch_id" id="branch_id" data-style="select-with-transition" title="Select Branch">
@@ -49,12 +49,14 @@
                   </div>
               </form>
               @endif
+              <div class="next-btn">
               @if(auth()->user()->can(['attendance_create']))
               <a data-toggle="modal" data-target="#submitAttendance" class="btn btn-just-icon btn-theme create d-none" title="Submit Attendance">
                 <i class="material-icons">add_circle</i>
               </a>
                @endif
                <a href="{{ URL::to('attendance-location') }}" class="btn btn-just-icon btn-theme  d-none" title="Update Location"><i class="material-icons">add_location</i></a>
+            </div>
             </div>
           </span>
         </h4>

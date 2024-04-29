@@ -98,7 +98,7 @@
                       <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
                       <span class="fileinput-exists">Change</span>
                       <input type="hidden">
-                      <input type="file" name="import_file" required accept=".xls,.xlsx" />
+                      <input type="file" title="Select File" name="import_file" required accept=".xls,.xlsx" />
                     </span>
                   </div>
                 <div class="input-group-append">
@@ -270,7 +270,7 @@
         columns: [
             // { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
             { data: 'checkbox', name: 'checkbox', orderable: false, searchable: false },
-            { data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
+            { data: 'action', name: 'action',"defaultContent": '', orderable: false, searchable: false},
             {data: 'name', name: 'name',"defaultContent": '',orderable: false,},
             {data: 'first_name', name: 'first_name',"defaultContent": '',orderable: false,},
             {data: 'last_name', name: 'last_name',"defaultContent": '',orderable: false,},

@@ -7,8 +7,8 @@
           <i class="material-icons">perm_identity</i>
         </div>
         <h4 class="card-title ">{!! trans('panel.checkin.title_singular') !!} {!! trans('panel.global.list') !!}
-              <span class="pull-right">
-                <div class="btn-group">
+              <span class="">
+                <div class="btn-group header-frm-btn">
 		@if(auth()->user()->can(['checkin_download']))
                     <form method="GET" action="{{ URL::to('checkin-download') }}">
                         <div class="d-flex flex-row">
@@ -17,8 +17,10 @@
                           <div class="p-2"><button class="btn btn-just-icon btn-theme" title="Checkin Download"><i class="material-icons">cloud_download</i></button></div>
                         </div>
                     </form>
+                    <div class="next-btn">
                     @endif
                     <a href="{{ URL::to('checkin-location') }}" class="btn btn-just-icon btn-theme" title="Update Location"><i class="material-icons">add_location</i></a>
+                  </div>
                 </div>
               </span>
           </h4>

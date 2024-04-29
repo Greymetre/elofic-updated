@@ -651,6 +651,7 @@ Route::group(['middleware' => ['auth']], function () {
     // Redemption Route
     Route::resource('warranty_activation', WarrantyActivationController::class);
     Route::any('warranty-activation-download', [ WarrantyActivationController::class, 'download'])->name('warranty_activation.download');
+    Route::post('warranty-status-change', [ WarrantyActivationController::class, 'statuschange'])->name('warranty_activation.statuschange');
 
     // Customer KYC Route
     Route::resource('customer-kyc', CustomerKycController::class);
@@ -662,6 +663,7 @@ Route::group(['middleware' => ['auth']], function () {
 
     // Complaint Route
     Route::resource('complaints', ComplaintController::class);
+    Route::post('complaint-attach-delete', [ ComplaintController::class, 'deleteAttachment'])->name('deleteAttachment');
     Route::post('complaint-cancel', [ ComplaintController::class, 'cancelComplaint'])->name('cancelComplaint');
     Route::post('complaint-pending', [ ComplaintController::class, 'pendingComplaint'])->name('pendingComplaint');
 

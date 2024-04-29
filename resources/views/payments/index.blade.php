@@ -8,7 +8,8 @@
         </div>
         <h4 class="card-title ">{!! trans('panel.payment.title_singular') !!}{!! trans('panel.global.list') !!}
               <span class="pull-right">
-                <div class="btn-group">
+                <div class="btn-group header-frm-btn">
+                <div class="next-btn">
                   @if(auth()->user()->can(['payments_upload']))
                   <form action="{{ URL::to('payments-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                   {{ csrf_field() }}
@@ -18,7 +19,7 @@
                           <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
                           <span class="fileinput-exists">Change</span>
                           <input type="hidden">
-                          <input type="file" name="import_file" required accept=".xls,.xlsx" />
+                          <input type="file" title="Select File" name="import_file" required accept=".xls,.xlsx" />
                         </span>
                       </div>
                     <div class="input-group-append">
@@ -39,6 +40,7 @@
                   @if(auth()->user()->can(['payments_create']))
                   <a href="{{ route('payments.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.payment.title_singular') !!}"><i class="material-icons">add_circle</i></a>
                   @endif
+                </div>
                 </div>
               </span>
           </h4>

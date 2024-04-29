@@ -7,10 +7,11 @@
                         <i class="material-icons">perm_identity</i>
                     </div>
                     <h4 class="card-title">{!! trans('panel.appraisal.title_singular') !!} {!! trans('panel.global.list') !!}
-                        <span class="pull-right">
-                            <div class="btn-group">
-                                    <form class="d-flex" action="{{ route('appraisal.download') }}" method="post">
-                                        @csrf
+                        <span class="">
+                            <div class="btn-group header-frm-btn">
+                                <form action="{{ route('appraisal.download') }}" method="post">
+                                    <div class="d-flex flex-wrap flex-row">
+                                    @csrf
                                     <div class="p-2" style="width: 250px;">
                                         <select class="selectpicker" multiple name="branch_id" id="branch_id" data-style="select-with-transition" title="Select Branch">
                                             <option value="">Select Branch</option>
@@ -21,7 +22,7 @@
                                             @endif
                                         </select>
                                     </div>
-        
+
                                     <div class="p-2" style="width: 250px;">
                                         <select class="selectpicker" name="executive_id" id="executive_id" data-style="select-with-transition" title="Select User">
                                             <option value="">Select User</option>
@@ -45,33 +46,23 @@
                                     </div>
 
 
-
-                                    <!-- <div class="p-2" style="width: 250px;">
-                                        <select class="selectpicker" name="financial_year" id="financial_year" data-style="select-with-transition" title="Select Financial Year">
-                                            <option value="">Select Financial Year</option>
-                                            <option value="{{Carbon\Carbon::now()->format('Y')-2}}_{{Carbon\Carbon::now()->format('y')-1}}">{{Carbon\Carbon::now()->format('Y')-2}}-{{Carbon\Carbon::now()->format('y')-1}}</option>
-                                            <option value="{{Carbon\Carbon::now()->format('Y')-1}}_{{Carbon\Carbon::now()->format('y')}}">{{Carbon\Carbon::now()->format('Y')-1}}-{{Carbon\Carbon::now()->format('y')}}</option>
-                                        </select>
-                                    </div> -->
-
-
                                     <div class="p-2" style="width: 250px;">
                                         <select class="selectpicker" name="financial_year" id="financial_year" data-style="select-with-transition">
                                             <option value="">Select Financial Year</option>
-                                             @foreach($sale_weightage_years as $sale_weightage_year)
+                                            @foreach($sale_weightage_years as $sale_weightage_year)
                                             <option value="{{$sale_weightage_year->financial_year}}">{{$sale_weightage_year->financial_year}}</option>
-                                             @endforeach
+                                            @endforeach
                                         </select>
                                     </div>
 
 
 
-
-                                    <button type="submit" style="border-right: 1px solid;" href="" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.appraisal.title') !!}"><i class="material-icons">cloud_download</i></button>
+                                    <div class="p-2">
+                                    <button type="submit" href="" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.appraisal.title') !!}"><i class="material-icons">cloud_download</i></button>
+                                    </div>
+                                    </div>
                                 </form>
-                               <!--  <a href="{{url('appraisal/create')}}" class="btn btn-just-icon btn-theme create" title="Add Appraisal">
-                                    <i class="material-icons">add_circle</i>
-                                </a> -->
+                                <div class="next-btn"></div>
                             </div>
                         </span>
                     </h4>
@@ -111,11 +102,11 @@
         </div>
     </div>
     <script src="{{ asset('public/assets/js/jquery.custom.js') }}"></script>
-<script src="{{ asset('public/assets/js/validation_products.js') }}"></script>
+    <script src="{{ asset('public/assets/js/validation_products.js') }}"></script>
     <script type="text/javascript">
-         $(function () {
+        $(function() {
             $.ajaxSetup({
-            headers: {
+                headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
@@ -128,21 +119,67 @@
                 //"dom": 'Bfrtip',
                 ajax: {
                     url: "{{ route('appraisal.index') }}",
-                    data: function (d) {
-                            d.user_id = $('#executive_id').val(),
+                    data: function(d) {
+                        d.user_id = $('#executive_id').val(),
                             d.division_id = $('#division_id').val()
-                        }
+                    }
+                },
+                columns: [{
+                        data: 'DT_RowIndex',
+                        name: 'DT_RowIndex',
+                        orderable: false,
+                        searchable: false
                     },
-                columns: [
-                    {data: 'DT_RowIndex',name: 'DT_RowIndex',orderable: false,searchable: false},
-                     {data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
-                    {data: 'name',name: 'name',orderable: false,searchable: false},
-                    {data: 'designation_name',name: 'designation_name',orderable: false,searchable: false},
-                    {data: 'division_name',name: 'division_name',orderable: false,searchable: false},
-                    {data: 'branch_name',name: 'branch_name',orderable: false,searchable: false},
-                    {data: 'financial_year',name: 'financial_year',orderable: false,searchable: false},
-                    {data: 'grade',name: 'grade',orderable: false,searchable: false},
-                    {data: 'date',name: 'date',orderable: false,searchable: false},
+                    {
+                        data: 'action',
+                        name: 'action',
+                        "defaultContent": '',
+                        className: 'td-actions text-center',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'name',
+                        name: 'name',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'designation_name',
+                        name: 'designation_name',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'division_name',
+                        name: 'division_name',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'branch_name',
+                        name: 'branch_name',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'financial_year',
+                        name: 'financial_year',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'grade',
+                        name: 'grade',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'date',
+                        name: 'date',
+                        orderable: false,
+                        searchable: false
+                    },
                 ]
             });
 
@@ -175,6 +212,5 @@
             });
 
         })
-
     </script>
 </x-app-layout>

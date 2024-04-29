@@ -209,10 +209,15 @@ class ServicesController extends Controller
 
     public function serial_number_history_update(Request $request)
     {
+        $product = Product::where('product_code', $request->product_code)->first();
         $service = Services::find($request->service_id);
         
         $service->serial_no = $request->serial_no;
         $service->product_code = $request->product_code;
+        $service->product_name = $product->product_name;
+        $service->product_description = $product->description;
+        $service->new_group = $product->new_group;
+        $service->group = $product->sub_group;  
         $service->party_name = $request->party_name;
         $service->branch_code = $request->branch_code;
         $service->invoice_date = $request->invoice_date;

@@ -7,8 +7,9 @@
           <i class="material-icons">perm_identity</i>
         </div>
         <h4 class="card-title ">{!! trans('panel.task.title_singular') !!}{!! trans('panel.global.list') !!}
-              <span class="pull-right">
-                <div class="btn-group">
+              <span class="">
+                <div class="btn-group header-frm-btn">
+                  <div class="next-btn">
                   @if(auth()->user()->can(['tasks_upload']))
                   <form action="{{ URL::to('tasks-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                   {{ csrf_field() }}
@@ -30,6 +31,7 @@
                   </div>
                   </form>
                   @endif
+                  
                   @if(auth()->user()->can(['tasks_download']))
                   <a href="{{ URL::to('tasks-download') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.task.title') !!}"><i class="material-icons">cloud_download</i></a>
                   @endif
@@ -40,6 +42,7 @@
                   <a href="{{ route('tasks.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.task.title_singular') !!}"><i class="material-icons">add_circle</i></a>
                   @endif
                   <a href="{{ route('tasks.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.task.title_singular') !!}"><i class="material-icons">add_circle</i></a>
+                </div>
                 </div>
               </span>
           </h4>

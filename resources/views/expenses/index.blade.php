@@ -7,18 +7,12 @@
            <i class="material-icons">perm_identity</i>
          </div>
          <h4 class="card-title ">{!! trans('panel.expenses.title_singular') !!} {!! trans('panel.global.list') !!}
-               <span class="pull-right">
-                 <div class="btn-group">
+               <span class="">
+                 <div class="btn-group header-frm-btn">
 
          
                @if(auth()->user()->can(['expense_download']))
                <form method="GET" action="{{ URL::to('expenses-download') }}">
-
-
-
-
-
-
 
 
                 <div class="d-flex flex-row">
@@ -100,26 +94,23 @@
                      <div class="p-2" style="width:140px;">
                        <input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly>
                      </div>
+
+                        <div class="p-2"><button type="button" class="btn btn-just-icon btn-theme" title="Reset Fliter" onclick="resetFilter();"><i class="fa fa-refresh" aria-hidden="true"></i></button></div>
                  
                      <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.customers.title') !!}"><i class="material-icons">cloud_download</i></button></div>
 
                      
                    </div> 
                </form>
-               <div class="p-2"><button class="btn btn-just-icon btn-theme" title="Reset Fliter" onclick="resetFilter();"><i class="fa fa-refresh" aria-hidden="true"></i></button></div>
+
+            
                @endif
 
-
-                   @if(auth()->user()->can(['role_download']))
-                   <a href="{{ URL::to('roles-download') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.role.title') !!}"><i class="material-icons">cloud_download</i></a>
-                   @endif
-
-                   @if(auth()->user()->can(['role_template']))
-                   <a href="{{ URL::to('roles-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.role.title_singular') !!}"><i class="material-icons">text_snippet</i></a>
-                   @endif
+                <div class="next-btn">
                    @if(auth()->user()->can(['expenses_create'])) 
-                   <a href="{{ route('expenses.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.role.title_singular') !!}"><i class="material-icons">add_circle</i></a>
+                   <a href="{{ route('expenses.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.expenses.title_singular') !!}"><i class="material-icons">add_circle</i></a>
                    @endif
+               </div>
                  </div>
                </span>
            </h4>
@@ -286,7 +277,7 @@
              {data: 'date_create', name: 'date_create', orderable: false, searchable: false },
              {data: 'users.getbranch.branch_name', name: 'users.getbranch.branch_name', orderable: false, searchable: false },
              {data: 'total_km', name: 'total_km', orderable: false, searchable: false },
-             {data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
+             {data: 'action', name: 'action',"defaultContent": '', orderable: false, searchable: false},
          ]
      });
     

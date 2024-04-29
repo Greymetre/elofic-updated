@@ -7,8 +7,8 @@
           <i class="material-icons">perm_identity</i>
         </div>
         <h4 class="card-title ">{!! trans('panel.order.title_singular') !!}{!! trans('panel.global.list') !!}
-              <span class="pull-right">
-                <div class="btn-group">
+              <span class="">
+                <div class="btn-group header-frm-btn">
 
 
                   @if(auth()->user()->can(['order_download']))
@@ -37,10 +37,10 @@
                   </div>
                </form>
                     @endif
+                
+                <div class="next-btn">
 
-
-
-
+                  
                   @if(auth()->user()->can(['order_upload']))
                   <form action="{{ URL::to('orders-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                   {{ csrf_field() }}
@@ -73,6 +73,7 @@
                   @if(auth()->user()->can(['order_create']))
                   <a href="{{ route('orders.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.order.title_singular') !!}"><i class="material-icons">add_circle</i></a>
                   @endif
+                </div>
                 </div>
               </span>
           </h4>

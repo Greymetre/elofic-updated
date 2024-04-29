@@ -7,8 +7,9 @@
           <i class="material-icons">perm_identity</i>
         </div>
         <h4 class="card-title ">{!! trans('panel.gift_subcategory.title_singular') !!} {!! trans('panel.global.list') !!}
-              <span class="pull-right">
-                <div class="btn-group">
+              <span class="">
+                <div class="d-flex flex-wrap flex-row">
+                  <div class="next-btn">
                   @if(auth()->user()->can(['gift_subcategory_upload']))
                   <form action="{{ URL::to('gift-subcategories-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                   {{ csrf_field() }}
@@ -39,6 +40,7 @@
                   @if(auth()->user()->can(['gift_subcategory_create']))
                    <a data-toggle="modal" data-target="#createsubcategory" class="btn btn-just-icon btn-theme create" title="{!!  trans('panel.global.add') !!} {!! trans('panel.gift_subcategory.title_singular') !!}"><i class="material-icons">add_circle</i></a>
                   @endif
+                </div>
                 </div>
               </span>
           </h4>
@@ -179,8 +181,8 @@
         ajax: "{{ route('gift-subcategories.index') }}",
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-            {data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
-            {data: 'active', name: 'active',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
+            {data: 'action', name: 'action',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'active', name: 'active',"defaultContent": '', orderable: false, searchable: false},
             {data: 'image', name: 'image',"defaultContent": '', orderable: false, searchable: false},
             {data: 'subcategory_name', name: 'subcategory_name',"defaultContent": ''},
              {data: 'categories.category_name', name: 'categories.category_name',"defaultContent": ''},

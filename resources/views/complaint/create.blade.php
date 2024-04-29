@@ -14,6 +14,12 @@
       .select2-container {
          border-bottom: 1px solid lightgray;
       }
+
+      button.delete-img-btn {
+         position: absolute;
+         top: 7px;
+         right: 8px;
+      }
    </style>
    <div class="row">
       <div class="col-md-12">
@@ -173,7 +179,7 @@
                      <div class="form-group">
                         <!-- <label class="bmd-label-floating">Complaint Number</label> -->
                         <select name="party_name" id="party_name" class="select2 form-control">
-                        @if(old('party_name', $complaints['party_name']))
+                           @if(old('party_name', $complaints['party_name']))
                            <option selected value="{{$complaints['party_name']}}">{{$complaints['party']['name']}}</option>
                            @endif
                         </select>
@@ -191,12 +197,12 @@
                         <!-- <label class="bmd-label-floating">Assign User </label> -->
                         <select name="product_laying" id="product_laying" class="select2 form-control">
                            <option value="">Product Laying at</option>
-                           <option value="Customer" {!! old('product_laying', $complaints['product_laying'])=='Customer' ? 'selected':'' !!} >Customer</option>
-                           <option value="Dealer" {!! old('product_laying', $complaints['product_laying'])=='Dealer' ? 'selected':'' !!} >Dealer</option>
-                           <option value="Distributor" {!! old('product_laying', $complaints['product_laying'])=='Distributor' ? 'selected':'' !!} >Distributor</option>
-                           <option value="Retailer" {!! old('product_laying', $complaints['product_laying'])=='Retailer' ? 'selected':'' !!} >Retailer</option>
-                           <option value="ASC" {!! old('product_laying', $complaints['product_laying'])=='ASC' ? 'selected':'' !!} >ASC</option>
-                           <option value="Branch" {!! old('product_laying', $complaints['product_laying'])=='Branch' ? 'selected':'' !!} >Branch</option>
+                           <option value="Customer" {!! old('product_laying', $complaints['product_laying'])=='Customer' ? 'selected' :'' !!}>Customer</option>
+                           <option value="Dealer" {!! old('product_laying', $complaints['product_laying'])=='Dealer' ? 'selected' :'' !!}>Dealer</option>
+                           <option value="Distributor" {!! old('product_laying', $complaints['product_laying'])=='Distributor' ? 'selected' :'' !!}>Distributor</option>
+                           <option value="Retailer" {!! old('product_laying', $complaints['product_laying'])=='Retailer' ? 'selected' :'' !!}>Retailer</option>
+                           <option value="ASC" {!! old('product_laying', $complaints['product_laying'])=='ASC' ? 'selected' :'' !!}>ASC</option>
+                           <option value="Branch" {!! old('product_laying', $complaints['product_laying'])=='Branch' ? 'selected' :'' !!}>Branch</option>
                         </select>
                         @if ($errors->has('product_laying'))
                         <div class="error col-lg-12">
@@ -221,12 +227,12 @@
                         <!-- <label class="bmd-label-floating">Assign User </label> -->
                         <select name="complaint_status" id="complaint_status" class="select2 form-control">
                            <option value="">Complaint Status</option>
-                           <option value="0" {!! old('complaint_status', $complaints['complaint_status'])=='0' ? 'selected':'' !!}>Open</option>
-                           <option value="1" {!! old('complaint_status', $complaints['complaint_status'])=='1' ? 'selected':'' !!} >Pendding</option>
-                           <option value="2" {!! old('complaint_status', $complaints['complaint_status'])=='2' ? 'selected':'' !!} >Work Done</option>
-                           <option value="3" {!! old('complaint_status', $complaints['complaint_status'])=='3' ? 'selected':'' !!} >Completed</option>
-                           <option value="3" {!! old('complaint_status', $complaints['complaint_status'])=='4' ? 'selected':'' !!} >Closed</option>
-                           <option value="3" {!! old('complaint_status', $complaints['complaint_status'])=='5' ? 'selected':'' !!} >Cancel</option>
+                           <option value="0" {!! old('complaint_status', $complaints['complaint_status'])=='0' ? 'selected' :'' !!}>Open</option>
+                           <option value="1" {!! old('complaint_status', $complaints['complaint_status'])=='1' ? 'selected' :'' !!}>Pendding</option>
+                           <option value="2" {!! old('complaint_status', $complaints['complaint_status'])=='2' ? 'selected' :'' !!}>Work Done</option>
+                           <option value="3" {!! old('complaint_status', $complaints['complaint_status'])=='3' ? 'selected' :'' !!}>Completed</option>
+                           <option value="3" {!! old('complaint_status', $complaints['complaint_status'])=='4' ? 'selected' :'' !!}>Closed</option>
+                           <option value="3" {!! old('complaint_status', $complaints['complaint_status'])=='5' ? 'selected' :'' !!}>Cancel</option>
                         </select>
                         @if ($errors->has('complaint_status'))
                         <div class="error col-lg-12">
@@ -431,8 +437,8 @@
                            <!-- <label class="bmd-label-floating">Assign User </label> -->
                            <select name="under_warranty" id="under_warranty" class="select2 form-control">
                               <option value="">Under Warranty</option>
-                              <option value="Yes" {!! old('under_warranty', $complaints['under_warranty'])=='Yes' ? 'selected':'' !!} >Yes</option>
-                              <option value="No" {!! old('under_warranty', $complaints['under_warranty'])=='No' ? 'selected':'' !!} >No</option>
+                              <option value="Yes" {!! old('under_warranty', $complaints['under_warranty'])=='Yes' ? 'selected' :'' !!}>Yes</option>
+                              <option value="No" {!! old('under_warranty', $complaints['under_warranty'])=='No' ? 'selected' :'' !!}>No</option>
                            </select>
                            @if ($errors->has('under_warranty'))
                            <div class="error col-lg-12">
@@ -448,9 +454,9 @@
                            <!-- <label class="bmd-label-floating">Assign User </label> -->
                            <select name="service_type" id="service_type" class="select2 form-control">
                               <option value="">Service Paid/Free</option>
-                              <option value="Paid" {!! old('service_type', $complaints['service_type'])=='Paid' ? 'selected':'' !!}>Paid</option>
-                              <option value="Free" {!! old('service_type', $complaints['service_type'])=='Free' ? 'selected':'' !!}>Free</option>
-                              <option value="later_update" {!! old('service_type', $complaints['service_type'])=='later_update' ? 'selected':'' !!}>F&A Later Update</option>
+                              <option value="Paid" {!! old('service_type', $complaints['service_type'])=='Paid' ? 'selected' :'' !!}>Paid</option>
+                              <option value="Free" {!! old('service_type', $complaints['service_type'])=='Free' ? 'selected' :'' !!}>Free</option>
+                              <option value="later_update" {!! old('service_type', $complaints['service_type'])=='later_update' ? 'selected' :'' !!}>F&A Later Update</option>
                            </select>
                            @if ($errors->has('service_type'))
                            <div class="error col-lg-12">
@@ -475,8 +481,8 @@
                            <!-- <label class="bmd-label-floating">Assign User </label> -->
                            <select name="warranty_bill" id="warranty_bill" class="select2 form-control">
                               <option value="">Warranty/Bill</option>
-                              <option value="Yes" {!! old('warranty_bill', $complaints['warranty_bill'])=='Yes' ? 'selected':'' !!} >Yes</option>
-                              <option value="No" {!! old('warranty_bill', $complaints['warranty_bill'])=='No' ? 'selected':'' !!} >No</option>
+                              <option value="Yes" {!! old('warranty_bill', $complaints['warranty_bill'])=='Yes' ? 'selected' :'' !!}>Yes</option>
+                              <option value="No" {!! old('warranty_bill', $complaints['warranty_bill'])=='No' ? 'selected' :'' !!}>No</option>
                            </select>
                            @if ($errors->has('warranty_bill'))
                            <div class="error col-lg-12">
@@ -490,8 +496,8 @@
                            <!-- <label class="bmd-label-floating">Assign User </label> -->
                            <select name="fault_type" id="fault_type" class="select2 form-control">
                               <option value="">Fault Type</option>
-                              <option value="Site" {!! old('fault_type', $complaints['fault_type'])=='Site' ? 'selected':'' !!} >Site</option>
-                              <option value="Company" {!! old('fault_type', $complaints['fault_type'])=='Company' ? 'selected':'' !!} >Company</option>
+                              <option value="Site" {!! old('fault_type', $complaints['fault_type'])=='Site' ? 'selected' :'' !!}>Site</option>
+                              <option value="Company" {!! old('fault_type', $complaints['fault_type'])=='Company' ? 'selected' :'' !!}>Company</option>
                            </select>
                            @if ($errors->has('fault_type'))
                            <div class="error col-lg-12">
@@ -677,12 +683,12 @@
                            <!-- <label class="bmd-label-floating">Assign User </label> -->
                            <select name="register_by" id="register_by" class="select2 form-control">
                               <option value="">Complaint Register By</option>
-                              <option value="Dealer" {!! old( 'register_by' , $complaints['register_by'])=='Dealer'?'selected':'' !!}>Dealer</option>
-                              <option value="Distributor" {!! old( 'register_by' , $complaints['register_by'])=='Distributor'?'selected':'' !!}>Distributor</option>
-                              <option value="Retailer" {!! old( 'register_by' , $complaints['register_by'])=='Retailer'?'selected':'' !!}>Retailer</option>
-                              <option value="Marketing Team" {!! old( 'register_by' , $complaints['register_by'])=='Marketing Team'?'selected':'' !!}>Marketing Team</option>
-                              <option value="ASC" {!! old( 'register_by' , $complaints['register_by'])=='ASC'?'selected':'' !!}>ASC</option>
-                              <option value="Service Enginer" {!! old( 'register_by' , $complaints['register_by'])=='Service Enginer'?'selected':'' !!}>Service Enginer</option>
+                              <option value="Dealer" {!! old( 'register_by' , $complaints['register_by'])=='Dealer' ?'selected':'' !!}>Dealer</option>
+                              <option value="Distributor" {!! old( 'register_by' , $complaints['register_by'])=='Distributor' ?'selected':'' !!}>Distributor</option>
+                              <option value="Retailer" {!! old( 'register_by' , $complaints['register_by'])=='Retailer' ?'selected':'' !!}>Retailer</option>
+                              <option value="Marketing Team" {!! old( 'register_by' , $complaints['register_by'])=='Marketing Team' ?'selected':'' !!}>Marketing Team</option>
+                              <option value="ASC" {!! old( 'register_by' , $complaints['register_by'])=='ASC' ?'selected':'' !!}>ASC</option>
+                              <option value="Service Enginer" {!! old( 'register_by' , $complaints['register_by'])=='Service Enginer' ?'selected':'' !!}>Service Enginer</option>
                            </select>
                            @if ($errors->has('register_by'))
                            <div class="error col-lg-12">
@@ -723,6 +729,33 @@
                         </div>
                      </div>
                   </div>
+                  <div class="row mt-3">
+                     <div class="col-md-12">
+                        <div class="">
+                           <label class="bmd-label-floating">Attachments </label>
+                           <input type="file" multiple name="images[]" class="form-controll">
+                           <div class="row mt-3">
+                              @if($complaints->exists && $complaints->getMedia('complaint_attach')->count() > 0 && file_exists($complaints->getFirstMedia('complaint_attach')->getPath()))
+                              @foreach($complaints->getMedia('complaint_attach') as $k=>$media)
+                              <div style="position: relative;" class="img-div">
+                                 <button type="button" class="badge badge-danger delete-img-btn" data-mediaid="{{$media->id}}">X</button>
+                                 <a href="{{$media->getFullUrl()}}" data-lightbox="mygallery">
+                                    <img class="m-2 rounded img-fluid" src="{!! $media->getFullUrl() !!}" width="180">
+                                 </a>
+                              </div>
+                              @endforeach
+                              @else
+                              <img class="ml-2 rounded" width="150" src="{!! url('/').'/'.asset('assets/img/placeholder.jpg') !!}">
+                              @endif
+                           </div>
+                           @if ($errors->has('description'))
+                           <div class="error col-lg-12">
+                              <p class="text-danger">{{ $errors->first('description') }}</p>
+                           </div>
+                           @endif
+                        </div>
+                     </div>
+                  </div>
                </div>
                <div class="card-footer pull-right mt-5">
                   {{ Form::submit('Submit', array('class' => 'btn btn-theme')) }}
@@ -732,6 +765,8 @@
          </div>
       </div>
    </div>
+   <link rel="stylesheet" href="{{ url('/').'/'.asset('lightboxx/css/lightbox.min.css') }}">
+   <script src="{{ url('/').'/'.asset('lightboxx/js/lightbox-plus-jquery.min.js') }}"></script>
    <script>
       setTimeout(() => {
          var $customerSelect = $('#party_name').select2({
@@ -830,7 +865,7 @@
                   $("#specification").prop('readonly', true);
                   $("#product_no").prop('readonly', true);
                   $("#phase").prop('readonly', true);
-                  if(res.check_Warranty != null){
+                  if (res.check_Warranty != null) {
                      $("#company_sale_bill_date").val(res.check_Warranty.sale_bill_date);
                      $("#customer_bill_date").val(res.check_Warranty.warranty_date);
                      $("#company_sale_bill_no").val(res.check_Warranty.sale_bill_no);
@@ -838,7 +873,7 @@
                      $("#customer_number").keyup();
                      $("#company_sale_bill_date").change();
                      $("#customer_bill_date").change();
-                  }else{
+                  } else {
                      $("#company_sale_bill_date").val(" ");
                      $("#customer_bill_date").val(" ");
                      $("#company_sale_bill_no").val(" ");
@@ -966,5 +1001,35 @@
             });
          }
       });
+      $(document).on("click", ".delete-img-btn", function() {
+         var id = $(this).data('mediaid');
+         Swal.fire({
+            title: "ARE YOU SURE TO DELETE ATTACHMENT ?",
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: "YES",
+            denyButtonText: `Don't`
+         }).then((result) => {
+            if (result.value) {
+               $(this).closest('.img-div').remove();
+               $.ajax({
+                  url: "{{ url('complaint-attach-delete') }}",
+                  dataType: "json",
+                  type: "POST",
+                  data: {
+                     _token: "{{csrf_token()}}",
+                     id: id
+                  },
+                  success: function(res) {
+                     if (res.status === true) {
+                        Swal.fire("Attachment delete successfully !", res.msg, "success");
+                     } else {
+                        Swal.fire("Somthing went wrong", "", "error");
+                     }
+                  }
+               });
+            }
+         });
+      })
    </script>
 </x-app-layout>

@@ -7,8 +7,8 @@
             <i class="material-icons">perm_identity</i>
           </div>
           <h4 class="card-title ">{!! trans('panel.mobile_app_login.title') !!} {!! trans('panel.global.list') !!}
-            <span class="pull-right">
-              <div class="btn-group">
+            <span class="">
+              <div class="btn-group header-frm-btn">
                 <form method="post" action="{{ URL::to('mobile_user/login_list/download') }}" class="form-horizontal">
                   @csrf
                   <div class="d-flex flex-row">
@@ -28,26 +28,6 @@
                     <div class="p-2">
                       <input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly>
                     </div>
-                 <!--    <div class="p-2" style="width:160px;">
-                      <select class="selectpicker" name="month" id="month" data-style="select-with-transition" title="Month">
-                          <option value="" disabled selected>{!! trans('panel.sales_users.month') !!}</option>
-                          @for ($month = 1; $month <= 12; $month++)
-                              <option value="{!! date('M', mktime(0, 0, 0, $month, 1)) !!}">{!! date('M', mktime(0, 0, 0, $month, 1)) !!}</option>
-                          @endfor
-                      </select>
-                    </div>
-                    <div class="p-2" style="width:160px;">
-                      <select class="selectpicker" name="financial_year" id="financial_year" required data-style="select-with-transition" title="Year">
-                          <option value="" disabled selected>{!! trans('panel.sales_users.year') !!}</option>
-                          @foreach($years as $year)
-                          @php 
-                          $startYear = $year - 1;
-                          $endYear = $year;
-                          @endphp
-                              <option value="{!!$startYear!!}-{!!$endYear!!}">{!! $startYear!!} - {!! $endYear !!}</option>
-                          @endforeach
-                      </select>
-                    </div> -->
                     <div class="p-2">
                     @if(auth()->user()->can(['mobile_app_login_details_download']))
                       <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.mobile_app_login.mobile_app_login_details_download') !!}" name="export_branch" value="true"><i class="material-icons">cloud_download</i></button>
@@ -55,6 +35,9 @@
                     </div>
                     </div>
                 </form>
+                <div class="next-btn">
+                  
+                </div>
               </div>
             </span>
           </h4>

@@ -13,7 +13,7 @@
             </a>
          </li>
          <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#primarysales" role="tablist" onclick="getPrimarySalesDashboard()">
+            <a class="nav-link" data-toggle="tab" href="#primarysalestab" role="tablist" onclick="getPrimarySalesDashboard()">
             <i class="material-icons">monetization_on</i> Primary Sales Dashboard
             </a>
          </li>
@@ -335,6 +335,29 @@
          </div>
       </div>
    </div>
+   <!-- primary sales dashboard -->
+   <div class="tab-pane" id="primarysalestab">
+    <div class="row">
+         <div class="col-md-12 text-center">
+            <h4 class="section-heading mb-3 h4 mt-0">Primary Sales</h4>
+         </div>
+         <div class="col-md-12">
+            <div class="row">
+               <div class="col-sm">
+                  <div class="card text-center">
+                     <div class="card-body">
+                        <h4 class="card-title registredretailercount">0</h4>
+                        <p class="card-text">Primary Registred Retailer</p>
+                     </div>
+                  </div>
+               </div>
+
+               
+            </div>
+         </div>
+      </div>
+   </div>
+   <!-- primary sales dashboard -->
    <div class="tab-pane" id="travelsummarytab">
     <div class="row">
          <div class="col-md-12 text-center">
@@ -1140,7 +1163,7 @@
             break;
          case  '#secondaryordersreport':
             break;
-         case '#primarysales':
+         case '#primarysalestab':
             getPrimarySalesDashboard();
          break;   
         case '#travelsummarytab':
@@ -1170,6 +1193,9 @@
         case '#kpistab':
           getDashboardData();
           break;
+        case '#primarysalestab':
+             getPrimarySalesDashboard();
+          break;   
         case '#secondarysaleskpi':
             getSecondarySalesKpi();
             break; 

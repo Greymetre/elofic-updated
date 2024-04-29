@@ -284,6 +284,7 @@ class DashboardController extends Controller
                     'file_path'     => fileupload($image, $path, $filename),
                     'document_name' =>  'gstin',
                 ]);
+                CustomerDetails::where('customer_id', $request->id)->update(['gstin_no_status' => '0']);
             }
             if ($request->file('imgpan')) {
                 $path = 'customers/';
@@ -295,6 +296,7 @@ class DashboardController extends Controller
                     'file_path'     => fileupload($image, $path, $filename),
                     'document_name' =>  'pan',
                 ]);
+                CustomerDetails::where('customer_id', $request->id)->update(['pan_no_status' => '0']);
             }
             if ($request->file('imgaadhar')) {
                 $path = 'customers/';
@@ -306,6 +308,7 @@ class DashboardController extends Controller
                     'file_path'     => fileupload($image, $path, $filename),
                     'document_name' =>  'aadhar',
                 ]);
+                CustomerDetails::where('customer_id', $request->id)->update(['aadhar_no_status' => '0']);
             }
             if ($request->file('imgaadharback')) {
                 $path = 'customers/';
@@ -317,6 +320,7 @@ class DashboardController extends Controller
                     'file_path'     => fileupload($image, $path, $filename),
                     'document_name' =>  'aadharback',
                 ]);
+                CustomerDetails::where('customer_id', $request->id)->update(['aadhar_no_status' => '0']);
             }
             if ($request->file('imgbankpass')) {
                 $path = 'customers/';
@@ -328,6 +332,7 @@ class DashboardController extends Controller
                     'file_path'     => fileupload($image, $path, $filename),
                     'document_name' =>  'bankpass',
                 ]);
+                CustomerDetails::where('customer_id', $request->id)->update(['bank_status' => '0']);
             }
 
             foreach ($docimages as $docimage) {

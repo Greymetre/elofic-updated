@@ -7,8 +7,8 @@
             <i class="material-icons">perm_identity</i>
           </div>
           <h4 class="card-title ">{!! trans('panel.sidemenu.serial_number_transaction') !!} {!! trans('panel.global.list') !!}
-            <span class="pull-right">
-              <div class="btn-group">
+            <span class="">
+              <div class="btn-group header-frm-btn">
                 @if(auth()->user()->can(['serial_number_transaction_download']))
                 <form method="GET" action="{{ URL::to('services/serial_number_transaction/download') }}" class="form-horizontal">
                   <div class="d-flex flex-row">
@@ -38,6 +38,7 @@
                   </div>
                 </form>
                 @endif
+                <div class="next-btn">
                 @if(auth()->user()->can(['serial_number_transaction_upload']))
                 <form action="{{ URL::to('services/serial_number_transaction/upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                   {{ csrf_field() }}
@@ -47,7 +48,7 @@
                         <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
                         <span class="fileinput-exists">Change</span>
                         <input type="hidden">
-                        <input type="file" name="import_file" required accept=".xls,.xlsx" />
+                        <input type="file" title="Select File" name="import_file" required accept=".xls,.xlsx" />
                       </span>
                     </div>
                     <div class="input-group-append">
@@ -59,6 +60,7 @@
                   </div>
                 </form>
                 @endif
+              </div>
               </div>
             </span>
           </h4>

@@ -7,8 +7,9 @@
           <i class="material-icons">perm_identity</i>
         </div>
         <h4 class="card-title ">{!! trans('panel.district.title_singular') !!}{!! trans('panel.global.list') !!}
-              <span class="pull-right">
-                <div class="btn-group">
+              <span class="">
+                <div class="btn-group header-frm-btn">
+                  <div class="next-btn">
                   @if(auth()->user()->can(['district_upload']))
                   <form action="{{ URL::to('district-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                   {{ csrf_field() }}
@@ -30,6 +31,7 @@
                   </div>
                   </form>
                   @endif
+                  
                   @if(auth()->user()->can(['district_download']))
                   <a href="{{ URL::to('district-download') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.district.title') !!}"><i class="material-icons">cloud_download</i></a>
                   @endif
@@ -39,6 +41,7 @@
                   @if(auth()->user()->can(['district_create']))
                    <a data-toggle="modal" data-target="#createdistrict" class="btn btn-just-icon btn-theme create" title="{!!  trans('panel.global.add') !!} {!! trans('panel.district.title_singular') !!}"><i class="material-icons">add_circle</i></a>
                   @endif
+                </div>
                 </div>
               </span>
           </h4>
@@ -159,8 +162,8 @@
         ajax: "{{ route('district.index') }}",
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-            {data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
-            {data: 'active', name: 'active',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
+            {data: 'action', name: 'action',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'active', name: 'active',"defaultContent": '', orderable: false, searchable: false},
             {data: 'district_name', name: 'district_name',"defaultContent": ''},
             {data: 'statename.state_name', name: 'statename.state_name',"defaultContent": ''},
              {data: 'createdbyname.name', name: 'createdbyname.name',"defaultContent": '' , orderable: false},

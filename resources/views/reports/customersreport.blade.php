@@ -7,8 +7,8 @@
           <i class="material-icons">perm_identity</i>
         </div>
         <h4 class="card-title">{!! trans('panel.customers.title') !!}{!! trans('panel.global.list') !!}
-          <span class="pull-right">
-            <div class="btn-group">
+          <span class="">
+            <div class="btn-group header-frm-btn">
               @if(auth()->user()->can(['customer_download']))
               <form method="GET" action="{{ URL::to('customers-download') }}">
                   <div class="d-flex flex-row">
@@ -73,6 +73,19 @@
     </div>
   </div>
 </div>
+
+<style type="text/css">
+  
+  select#executive_id {
+    border-bottom: 1px solid #d2d2d2 !important;
+    border-radius: 0px;
+    height: 38px;
+    text-transform: uppercase;
+    font-size: 13px!important;
+    color: #000;
+    font-weight: 400;
+}
+</style>
 
 <script type="text/javascript">
   $(function () {
