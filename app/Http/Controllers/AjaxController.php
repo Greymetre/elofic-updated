@@ -212,9 +212,13 @@ class AjaxController extends Controller
     {
         try {
             $sub_category = $request->sub_cat;
-            $data = Product::where(function ($query) use ($sub_category) {
+            $category = $request->category;
+            $data = Product::where(function ($query) use ($sub_category, $category) {
                 if ($sub_category && $sub_category != null) {
                     $query->where('subcategory_id', $sub_category);
+                }
+                if ($category && $category != null) {
+                    $query->where('category_id', $category);
                 }
                 $query->where('active', '=', 'Y');
             })

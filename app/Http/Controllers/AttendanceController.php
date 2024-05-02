@@ -200,40 +200,69 @@ class AttendanceController extends Controller
         $check_date_attendance  = explode(',', $hoday_dates);
 
         if (in_array($check, $check_date_attendance)) {
-          $label_data[] = 'Holiday';
+          $label_data[] = 'H';
         } else {
 
 
           ///nnn  
 
+          $dayname = date('l', strtotime($check));
+
           if (!empty($attendance_details)) {
 
             if ($attendance_details->attendance_status == '1') {
               if ($attendance_details->working_type == 'Leave') {
-                $label_data[] =  'L';
+                $label_data[] =  'LOP';
+              } elseif ($dayname == 'Sunday') {
+                $label_data[] =  'PW';
+              } elseif ($attendance_details->working_type == 'Second Half Leave' || $attendance_details->working_type == 'First Half Leave') {
+                $label_data[] =  '1/2P+1/2LOP';
+              } elseif ($attendance_details->working_type == 'Full Day Leave') {
+                $label_data[] =  'LOP';
               } elseif ($attendance_details->working_type == 'Local Market Visit') {
-                $label_data[] =  'P';
+                if ($attendance_details->worked_time > '00:04:30') {
+                  $label_data[] =  'P';
+                } else {
+                  $label_data[] =  '1/2P+1/2LOP';
+                }
               } elseif ($attendance_details->working_type == 'Office Work') {
-                $label_data[] = 'P';
+                if ($attendance_details->worked_time > '00:04:30') {
+                  $label_data[] =  'P';
+                } else {
+                  $label_data[] =  '1/2P+1/2LOP';
+                }
               } elseif ($attendance_details->working_type == 'Plumber Meet') {
-                $label_data[] = 'P';
+                if ($attendance_details->worked_time > '00:04:30') {
+                  $label_data[] =  'P';
+                } else {
+                  $label_data[] =  '1/2P+1/2LOP';
+                }
               } elseif ($attendance_details->working_type == 'Retailer Meet') {
-                $label_data[] = 'P';
+                if ($attendance_details->worked_time > '00:04:30') {
+                  $label_data[] =  'P';
+                } else {
+                  $label_data[] =  '1/2P+1/2LOP';
+                }
               } elseif ($attendance_details->working_type == 'Service Center Visit') {
-                $label_data[] = 'P';
+                if ($attendance_details->worked_time > '00:04:30') {
+                  $label_data[] =  'P';
+                } else {
+                  $label_data[] =  '1/2P+1/2LOP';
+                }
               } elseif ($attendance_details->working_type == 'Tour') {
-                $label_data[] = 'P';
+                if ($attendance_details->worked_time > '00:04:30') {
+                  $label_data[] =  'P';
+                } else {
+                  $label_data[] =  '1/2P+1/2LOP';
+                }
+              } elseif ($attendance_details->working_type == 'Holiday') {
+                $label_data[] = 'H';
               }
-              // else{
-              //   $label_data[]='W/o';
-              // } 
-
             } else {
               $label_data[] = 'A';
             }
           } else {
 
-            $dayname = date('l', strtotime($check));
             if ($dayname == 'Sunday') {
               $label_data[] = 'W/o';
             } else {
@@ -362,9 +391,9 @@ class AttendanceController extends Controller
         'worked_time' => '',
         'updated_at' => getcurentDateTime(),
       ])) {
-        return response()->json(['status' => 'success','message' => 'Punchout Remeoved Successfully'], 200);
+        return response()->json(['status' => 'success', 'message' => 'Punchout Remeoved Successfully'], 200);
       }
-      return response()->json(['status' => 'error','message' => 'Error in Punchout Remeoved'], 404);
+      return response()->json(['status' => 'error', 'message' => 'Error in Punchout Remeoved'], 404);
     } catch (\Exception $e) {
       return redirect()->back()->withErrors($e->getMessage())->withInput();
     }
@@ -418,51 +447,45 @@ class AttendanceController extends Controller
   }
 
   public function punchoutnow(Request $request)
-    {
-        try
-        { 
-            $user = $request->user();
-            $validator = Validator::make($request->all(), [
-                'id' => 'required|exists:attendances,id',
-            ]); 
-            if ($validator->fails()) {
-                return response()->json(['status' => 'error','message' =>  $validator->errors()], $this->badrequest); 
-            }
-          
-            $punchout = Attendance::where('id',$request->id)->first();
-            $punchout->punchout_date = getcurentDate() ; 
-            $punchout->punchout_time = getcurentTime() ;
-            $punchout->punchout_summary = !empty($request['punchout_summary']) ? $request['punchout_summary'] :'';
-            $punchout->worked_time = gmdate("H:i:s", strtotime(getcurentDateTime()) - strtotime($punchout->punchin_date.' '.$punchout->punchin_time) );
-            if($punchout->save())
-            {
-                // $useractivity = array(
-                //         'userid' => $user->id, 
-                //         'latitude' => $request['punchout_latitude'], 
-                //         'longitude' => $request['punchout_longitude'], 
-                //         'type' => 'Punchout',
-                //         'description' => 'User Logout',
-                //     );
-                // submitUserActivity($useractivity);
-                // $zsmnotify = collect([
-                //     'title' => 'Successfully punched out',
-                //     'body' =>  $user->name.' has Punched out'
-                // ]);
-                // sendNotification($user->reportingid,$zsmnotify);
-                // $asmnotify = collect([
-                //     'title' => 'Successfully punched out',
-                //     'body' =>  'You have successfully Punched out'
-                // ]);
-                // sendNotification($user->id,$asmnotify);
-                return response()->json(['status' => 'success','message' => 'Punch Out successfully' ,'punchout' => $punchout], 200);
-            }
-            return response()->json(['status' => 'error','message' => 'Error in Punch Out' ], 404);
-        }
-        catch(\Exception $e)
-        {
-            return response()->json(['status' => 'error','message' => $e->getMessage() ], 500);
-        }        
+  {
+    try {
+      $user = $request->user();
+      $validator = Validator::make($request->all(), [
+        'id' => 'required|exists:attendances,id',
+      ]);
+      if ($validator->fails()) {
+        return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
+      }
+
+      $punchout = Attendance::where('id', $request->id)->first();
+      $punchout->punchout_date = getcurentDate();
+      $punchout->punchout_time = getcurentTime();
+      $punchout->punchout_summary = !empty($request['punchout_summary']) ? $request['punchout_summary'] : '';
+      $punchout->worked_time = gmdate("H:i:s", strtotime(getcurentDateTime()) - strtotime($punchout->punchin_date . ' ' . $punchout->punchin_time));
+      if ($punchout->save()) {
+        // $useractivity = array(
+        //         'userid' => $user->id, 
+        //         'latitude' => $request['punchout_latitude'], 
+        //         'longitude' => $request['punchout_longitude'], 
+        //         'type' => 'Punchout',
+        //         'description' => 'User Logout',
+        //     );
+        // submitUserActivity($useractivity);
+        // $zsmnotify = collect([
+        //     'title' => 'Successfully punched out',
+        //     'body' =>  $user->name.' has Punched out'
+        // ]);
+        // sendNotification($user->reportingid,$zsmnotify);
+        // $asmnotify = collect([
+        //     'title' => 'Successfully punched out',
+        //     'body' =>  'You have successfully Punched out'
+        // ]);
+        // sendNotification($user->id,$asmnotify);
+        return response()->json(['status' => 'success', 'message' => 'Punch Out successfully', 'punchout' => $punchout], 200);
+      }
+      return response()->json(['status' => 'error', 'message' => 'Error in Punch Out'], 404);
+    } catch (\Exception $e) {
+      return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
     }
-
-
+  }
 }

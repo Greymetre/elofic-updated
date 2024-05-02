@@ -189,7 +189,34 @@
                   <div class="table-responsive">
                     <table class="table">
                       <tbody>
-                        
+                        @if($orders->product_cat_id == '2')
+                        <tr>
+                          <th style="width:50%">DOD Discount :</th>
+                          <td>{!! $orders->dod_discount !!}%</td>
+                          <td>-</td>
+                        </tr>
+                        <tr>
+                          <th style="width:50%">Special Distribution Discount :</th>
+                          <td>{!! $orders->special_distribution_discount !!}%</td>
+                          <td>-</td>
+                        </tr>
+                        <tr>
+                          <th style="width:50%">Distribution Margin Discount :</th>
+                          <td>{!! $orders->distribution_margin_discount !!}%</td>
+                          <td>-</td>
+                        </tr>
+                        <tr>
+                          <th style="width:50%">Cash Discount% :</th>
+                          <td>{!! $orders->cash_discount !!} %</td>
+                          <td>-</td>
+                        </tr>
+
+                        <tr>
+                          <th style="width:50%">Total Discount% :</th>
+                          <td>{!! $orders->total_fan_discount !!}%</td>
+                          <td>{!! $orders->total_fan_discount_amount !!}</td>
+                        </tr>
+                        @else
                         <tr>
                           <th style="width:50%">Scheme Discount :</th>
                           <td>-</td>
@@ -231,6 +258,7 @@
                           <td>{!! $orders->cash_discount !!}</td>
                           <td>{!! $orders->cash_amount !!}</td>
                         </tr>
+                        @endif
                         <tr>
                           <th style="width:50%">Subtotal :</th>
                           <td>-</td>

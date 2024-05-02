@@ -31,7 +31,7 @@
                         <div class="col-md-3">
                             <div class="dropdown bootstrap-select show-tick">
                                 <select class="selectpicker" multiple id="branch_id" name="branch_id" data-style="select-with-transition" title="Choose Branch" data-size="10" tabindex="-98">
-                                    <option disabled=""> Select Brnch</option>
+                                    <option disabled=""> Select Branch</option>
                                     @if(@isset($branches ))
                                     @foreach($branches as $branch)
                                     <option value="{!! $branch['id'] !!}">{!! $branch['name'] !!}</option>
@@ -42,8 +42,32 @@
                         </div>
                         <div class="col-md-3">
                             <div class="dropdown bootstrap-select show-tick">
-                                <select class="selectpicker" id="user_id" name="user_id" data-style="select-with-transition" title="Choose User" data-size="10" tabindex="-98">
-                                    <option disabled=""> Select Users</option>
+                                <select class="selectpicker" multiple id="division_id" name="division_id" data-style="select-with-transition" title="Choose Division" data-size="10" tabindex="-98">
+                                    <option disabled=""> Select Division</option>
+                                    @if(@isset($divisions ))
+                                    @foreach($divisions as $division)
+                                    <option value="{!! $division['id'] !!}">{!! $division['name'] !!}</option>
+                                    @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="dropdown bootstrap-select show-tick">
+                                <select class="selectpicker" multiple id="department_id" name="department_id" data-style="select-with-transition" title="Choose Department" data-size="10" tabindex="-98">
+                                    <option disabled=""> Select Department</option>
+                                    @if(@isset($departments ))
+                                    @foreach($departments as $department)
+                                    <option value="{!! $department['id'] !!}">{!! $department['name'] !!}</option>
+                                    @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="dropdown bootstrap-select show-tick">
+                                <select class="select2" id="user_id" name="user_id" data-style="select-with-transition" title="Choose User" data-size="10" tabindex="-98">
+                                    <option disabled="" selected> Select Users</option>
                                     @if(@isset($users ))
                                     @foreach($users as $user)
                                     <option value="{!! $user['id'] !!}">{!! $user['name'] !!}</option>
@@ -192,5 +216,48 @@
             });
 
         })
+
+        $("#division_id").on('change', function() {
+         var search_divisions = $(this).val();
+         $.ajax({
+             url: "{{ url('livelocation') }}",
+             data: {
+                 "search_divisions": search_divisions
+             },
+             success: function(res) {
+                 if (res.status == true) {
+                     var select = $('#user_id');
+                     select.empty();
+                     select.append('<option>Select User</option>');
+                     $.each(res.users, function(k, v) {
+                         select.append('<option value="' + v.id + '" >' + v.name + '</option>');
+                     });
+                     select.selectpicker('refresh');
+                 }
+             }
+         });
+
+     })
+
+        $("#department_id").on('change', function() {
+         var search_departments = $(this).val();
+         $.ajax({
+             url: "{{ url('livelocation') }}",
+             data: {
+                 "search_departments": search_departments
+             },
+             success: function(res) {
+                 if (res.status == true) {
+                     var select = $('#user_id');
+                     select.empty();
+                     select.append('<option>Select User</option>');
+                     $.each(res.users, function(k, v) {
+                         select.append('<option value="' + v.id + '" >' + v.name + '</option>');
+                     });
+                     select.selectpicker('refresh');
+                 }
+             }
+         });
+     })
     </script>
 </x-app-layout>

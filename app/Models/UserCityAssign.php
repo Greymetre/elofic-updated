@@ -15,12 +15,12 @@ class UserCityAssign extends Model
 
     public function userinfo()
     {
-        return $this->belongsTo('App\Models\User', 'userid', 'id')->select('id','name','location');
+        return $this->belongsTo('App\Models\User', 'userid', 'id');
     }
 
     public function reportinginfo()
     {
-        return $this->belongsTo('App\Models\User', 'reportingid', 'id')->select('id','name');
+        return $this->belongsTo('App\Models\User', 'reportingid', 'id');
     }
 
     public function cityname()

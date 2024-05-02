@@ -182,7 +182,7 @@ class CustomersExport implements FromCollection,WithHeadings,ShouldAutoSize,With
             $data['customer_code'], 
             $data['active'], 
             isset($data['customertypes']['customertype_name']) ? $data['customertypes']['customertype_name'] :'',
-            $data['createdbyname'] = isset($data['createdbyname']['name']) ? $data['createdbyname']['name'] : '',
+            $data['createdbyname'] = isset($data['createdbyname']['name']) ? $data['createdbyname']['name'] : 'Self',
             $data['name'],
             //$data->parentdetail->first_name??'',
             implode(',',$parent),

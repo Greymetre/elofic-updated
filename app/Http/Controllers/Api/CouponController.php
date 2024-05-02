@@ -132,6 +132,7 @@ class CouponController extends Controller
                     $data['products'][0]['name'] = $product->product_name;
                     $data['products'][0]['expiry_interval'] = $product->expiry_interval;
                     $data['products'][0]['expiry_interval_preiod'] = $product->expiry_interval_preiod;
+                    $data['products'][0]['serial_no'] = $product->product_code;
                     $slected = true;
                 }
             }
@@ -222,32 +223,25 @@ class CouponController extends Controller
                 $request->end_user_id = $end_user->id;
             }
             $customer = Customers::with('customerdetails')->find($request->customer_id);
-            $checkTrans = TransactionHistory::where('coupon_code', $request->product_serail_number)->first();
-            if ($checkTrans) {
-                $checkTrans->status = '1';
-                $checkTrans->save();
-                $status = '1';
-                $noti_data = [
-                    'fcm_token' =>  $customer->customerdetails->fcm_token,
-                    'title' => 'Points Activated ✅',
-                    'msg' => $customer->name . ' your ' . $checkTrans->point . ' provisional points are successfully activated in Silver Saarthi.',
-                ];
-                $send_notification = SendNotifications::send($noti_data);
-            } else {
-                $status = '0';
+            // $checkTrans = TransactionHistory::where('coupon_code', $request->product_serail_number)->first();
+            $data = WarrantyActivation::where('product_serail_number', $request->product_serail_number)->first();
+            if($data){
+                return response()->json(['status' => 'error', 'message' => 'This serial number already inWarranty Activation.', 'data' => $data], 200);
+            }else{
+                $data = WarrantyActivation::create([
+                    'product_serail_number' => $request->product_serail_number ?? NULL,
+                    'product_id' => $request->product_id ?? NULL,
+                    'end_user_id' => $request->end_user_id ?? NULL,
+                    'branch_id' => $request->branch_id ?? NULL,
+                    'customer_id' => $request->customer_id ?? NULL,
+                    'status' => 0,
+                    'remark' => $request->remark ?? NULL,
+                    'sale_bill_no' => $request->sale_bill_no ?? NULL,
+                    'sale_bill_date' => $request->sale_bill_date ?? NULL,
+                    'warranty_date' => $request->warranty_date ?? NULL
+                ]);
+
             }
-            $data = WarrantyActivation::create([
-                'product_serail_number' => $request->product_serail_number ?? NULL,
-                'product_id' => $request->product_id ?? NULL,
-                'end_user_id' => $request->end_user_id ?? NULL,
-                'branch_id' => $request->branch_id ?? NULL,
-                'customer_id' => $request->customer_id ?? NULL,
-                'status' => 0,
-                'remark' => $request->remark ?? NULL,
-                'sale_bill_no' => $request->sale_bill_no ?? NULL,
-                'sale_bill_date' => $request->sale_bill_date ?? NULL,
-                'warranty_date' => $request->warranty_date ?? NULL
-            ]);
             if ($request->hasFile('warranty_activation_attach')) {
                 $file = $request->file('warranty_activation_attach');
                 $customname = time() . '.' . $file->getClientOriginalExtension();

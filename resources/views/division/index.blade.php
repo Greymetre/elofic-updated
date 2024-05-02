@@ -13,6 +13,12 @@
                   @if(auth()->user())
                   <a data-toggle="modal" data-target="#createDivision" class="btn btn-just-icon btn-theme create" title="{!!  trans('panel.global.add') !!} {!! trans('panel.division.title_singular') !!}"><i class="material-icons">add_circle</i></a>
                   @endif
+                  <form method="post" action="{{ URL::to('division_report/download') }}" class="form-horizontal">
+                    @csrf
+                    @if(auth()->user()->can(['division_report_download']))
+                    <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Division Report" name="export_division_report" value="true"><i class="material-icons">cloud_download</i></button>
+                    @endif
+                  </form>
                 </div>
                 </div>
               </span>

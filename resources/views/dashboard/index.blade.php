@@ -18,12 +18,17 @@
             </a>
          </li>
          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#primarysaleskpitab" role="tablist" onclick="getPrimarySalesKpi()">
+            <i class="material-icons">home</i> Primary KPI
+            </a>
+         </li>
+         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#secondarysaleskpi" role="tablist" onclick="getSecondarySalesKpi()">
             <i class="material-icons">monetization_on</i> Secondary Sales KPIS
             </a>
          </li>
          <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#secondaryordersreport" role="tablist" onclick="getPrimarySalesDashboard()">
+            <a class="nav-link" data-toggle="tab" href="#secondarysalesreport" role="tablist" onclick="">
             <i class="material-icons">home</i> Secondary Order Detailed Report
             </a>
          </li>
@@ -32,27 +37,27 @@
             <i class="material-icons">home</i> Saarthi
             </a>
          </li>
-         <li class="nav-item">
+         <li class="nav-item" style="display: none;">
             <a class="nav-link" data-toggle="tab" href="#travelsummarytab" role="tablist" onclick="travelSummaryDashboard()">
             <i class="material-icons">flight</i> Travel
             </a>
          </li>
-         <li class="nav-item">
+         <li class="nav-item" style="display: none;">
             <a class="nav-link" data-toggle="tab" href="#visitsummarytab" role="tablist" onclick="visitSummaryDashboard()">
             <i class="material-icons">location_city</i> Visit
             </a>
          </li>
-         <li class="nav-item">
+         <li class="nav-item" style="display: none;">
             <a class="nav-link" data-toggle="tab" href="#couponsummarytab" role="tablist" onclick="couponSummaryDashboard()">
             <i class="material-icons">payment</i> Coupons
             </a>
          </li>
-         <li class="nav-item">
+         <li class="nav-item" style="display: none;">
             <a class="nav-link" data-toggle="tab" href="#ordersummarytab" id="li_ordertab" role="tablist" onclick="orderSummaryDashboard()">
             <i class="material-icons">business_center</i> Orders
             </a>
          </li>
-         <li class="nav-item">
+         <li class="nav-item" style="display: none;">
             <a class="nav-link" data-toggle="tab" href="#salessummarytab" id="li_salestab" role="tablist"  onclick="saleSummaryDashboard()">
             <i class="material-icons">monetization_on</i> Sales
             </a>
@@ -64,8 +69,8 @@
          </li>
       </ul>
     </div>
-    <div class="row">
-   <div class="col col1">
+    <div class="row" id="main_dashboard_filters">
+   <!--  <div class="col col1">
       <label class="bmd-label-floating">User</label>
       <div class="form-group has-default bmd-form-group">
         <select class="form-control select2" name="user_id" id="user_id" data-style="select-with-transition" title="Select User">
@@ -77,20 +82,20 @@
           @endif
         </select>
       </div>
-    </div>
-    <div class="col col2">
+    </div> -->
+   <!--  <div class="col col2">
       <label class="bmd-label-floating">From Date</label>
       <div class="form-group has-default bmd-form-group">
         <input type="text" class="form-control datepicker" id="fromdate" name="fromdate" autocomplete="off" readonly>
       </div>
-    </div>
-    <div class="col col3">
+    </div> -->
+   <!--  <div class="col col3">
       <label class="bmd-label-floating">To Date</label>
        <div class="form-group has-default bmd-form-group">
           <input type="text" class="form-control datepicker" id="todate" name="todate" autocomplete="off" readonly>
        </div>
-    </div>
-    <div class="col col4">
+    </div> -->
+    <!-- <div class="col col4">
        <label class="bmd-label-floating">Division</label>
        <select class="form-control select2" name="division_id" id="division_id" data-style="select-with-transition" title="Select User">
            <option value="">Division</option>
@@ -100,8 +105,8 @@
           @endforeach
           @endif
         </select>
-    </div>
-    <div class="col col5">
+    </div> -->
+   <!--  <div class="col col5">
        <label class="bmd-label-floating">Branch</label>
        <select class="form-control select2" name="branch_id" id="branch_id" data-style="select-with-transition" title="Select User">
            <option value="">Branch</option>
@@ -111,8 +116,8 @@
           @endforeach
           @endif
         </select>
-    </div>
-    <div class="col col6">
+    </div> -->
+    <!-- <div class="col col6">
        <label class="bmd-label-floating">Financial Year</label>
         <select class="form-control select2" name="financial_year" id="financial_year" required data-style="select-with-transition" title="Year">
           <option value="" disabled selected>Financial Year</option>
@@ -124,8 +129,8 @@
           <option value="{!!$startYear!!}-{!!$endYear!!}">{!! $startYear!!} - {!! $endYear !!}</option>
           @endforeach
         </select>
-    </div>
-    <div class="col col7">
+    </div> -->
+<!--     <div class="col col7">
       <label class="bmd-label-floating">Branch</label>
        <select class="form-control select2" name="month" id="month" data-style="select-with-transition" title="Month">
          <option value="" disabled selected>Month</option>
@@ -133,8 +138,8 @@
          <option value="{!! date('M', mktime(0, 0, 0, $month, 1)) !!}">{!! date('M', mktime(0, 0, 0, $month, 1)) !!}</option>
          @endfor
        </select>
-    </div>
-    <div class="col col5">
+    </div> -->
+    <!-- <div class="col col5">
        <label class="bmd-label-floating">Sales Person</label>
        <select class="form-control select2" name="sales_id" id="sales_id" data-style="select-with-transition" title="Select User">
            <option value="">Sales Person</option>
@@ -144,7 +149,7 @@
           @endforeach
           @endif
         </select>
-    </div>
+    </div> -->
 </div>
 <div class="tab-content tab-space tab-subcategories">
    <div class="tab-pane active show" id="kpistab">
@@ -340,24 +345,304 @@
     <div class="row">
          <div class="col-md-12 text-center">
             <h4 class="section-heading mb-3 h4 mt-0">Primary Sales</h4>
-         </div>
-         <div class="col-md-12">
-            <div class="row">
-               <div class="col-sm">
-                  <div class="card text-center">
-                     <div class="card-body">
-                        <h4 class="card-title registredretailercount">0</h4>
-                        <p class="card-text">Primary Registred Retailer</p>
-                     </div>
-                  </div>
-               </div>
-
-               
+            <div class="flex-container">
+               <form method="GET" action="">
+                   <div class="d-flex flex-wrap flex-row">
+                     <!-- division filter -->
+                   <div class="p-2" style="width:200px;">
+                     <select class="select2" name="division" id="ps_division_id" data-style="select-with-transition" title="{!! trans('panel.secondary_dashboard.division') !!}">
+                       <option value="" disabled selected>{!! trans('panel.secondary_dashboard.division') !!}</option>
+                       @if(@isset($ps_divisions ))
+                       @foreach($ps_divisions as $division)
+                       <option value="{!! $division->division !!}">{!! $division->division !!}</option>
+                       @endforeach
+                       @endif
+                     </select>                  
+                   </div>
+                   <!-- branch filter -->
+                   <div class="p-2" style="width:180px;">
+                     <select class="select2" name="branch_id" id="ps_branch_id" data-style="select-with-transition" title="panel.sales_users.branch">
+                       <option value="" disabled selected>{!! trans('panel.secondary_dashboard.branch') !!}</option>
+                       @if(@isset($ps_branches ))
+                       @foreach($ps_branches as $branch)
+                       <option value="{!! $branch->final_branch !!}">{!! $branch->final_branch !!}</option>
+                       @endforeach
+                       @endif
+                     </select>
+                   </div>
+                   <!-- financial year filter -->
+                   <div class="p-2" style="width:200px;">
+                     <select class="select2" name="financial_year" id="ps_financial_year" required data-style="select-with-transition" title="Year">
+                       <option value="" disabled selected>{!! trans('panel.secondary_dashboard.year') !!}</option>
+                       @foreach($years as $year)
+                       @php 
+                       $startYear = $year - 1;
+                       $endYear = $year;
+                       @endphp
+                       <option value="{!!$startYear!!}-{!!$endYear!!}">{!! $startYear!!} - {!! $endYear !!}</option>
+                       @endforeach
+                     </select>
+                   </div>
+                   <!-- month filter-->
+                   <div class="p-2" style="width:200px;">
+                     <select class="selectpicker" name="month" id="ps_month" disabled data-style="select-with-transition" title="Month">
+                       <option value="" selected>{!! trans('panel.secondary_dashboard.month') !!}</option>
+                       @for ($month = 1; $month <= 12; $month++)
+                       <option value="{!! date('M', mktime(0, 0, 0, $month, 1)) !!}">{!! date('M', mktime(0, 0, 0, $month, 1)) !!}</option>
+                       @endfor
+                     </select>
+                   </div>
+                   <!-- dealer/distributors filter -->
+                    <div class="p-2" style="width:200px;">
+                     <select class="select2" name="dealer" id="ps_dealer_id" data-style="select-with-transition" title="{!! trans('panel.sales_users.user_name') !!}">
+                       <option value="" selected>{!! trans('panel.secondary_dashboard.dealers_and_distibutors') !!}</option>
+                       @if(@isset($ps_dealers ))
+                       @foreach($ps_dealers as $dealer)
+                       <option value="{!! $dealer->dealer !!}">{!! $dealer->dealer !!}</option>
+                       @endforeach
+                       @endif
+                     </select>
+                    </div>
+                    <!-- sales persons filter -->
+                    <div class="p-2" style="width:200px;">
+                     <select class="select2" name="sales_person" id="ps_executive_id" data-style="select-with-transition" title="{!! trans('panel.sales_users.user_name') !!}">
+                       <option value="" selected>{!! trans('panel.secondary_dashboard.sales_person') !!}</option>
+                       @if(@isset($ps_sales_persons ))
+                       @foreach($ps_sales_persons as $sales_person)
+                       <option value="{!! $sales_person->sales_person !!}">{!! $sales_person->sales_person !!}</option>
+                       @endforeach
+                       @endif
+                     </select>
+                    </div>
+                    <!-- product models filter -->
+                    <div class="p-2" style="width:200px;">
+                     <select class="select2" name="product_model" id="ps_product_model" data-style="select-with-transition" title="{!! trans('panel.secondary_dashboard.product_model') !!}">
+                       <option value="" selected>{!! trans('panel.secondary_dashboard.product_model') !!}</option>
+                       @if(@isset($ps_product_models ))
+                       @foreach($ps_product_models as $product)
+                       <option value="{!! $product->product_name !!}">{!! $product->product_name !!}</option>
+                       @endforeach
+                       @endif
+                     </select>
+                    </div>
+                    <!-- new group name filter -->
+                    <div class="p-2" style="width:200px;">
+                     <select class="select2" name="new_group" id="ps_new_group" data-style="select-with-transition" title="{!! trans('panel.secondary_dashboard.new_group_name') !!}">
+                       <option value="" selected>{!! trans('panel.secondary_dashboard.new_group_name') !!}</option>
+                       @if(@isset($ps_new_group_names ))
+                       @foreach($ps_new_group_names as $product)
+                       <option value="{!! $product->new_group !!}">{!! $product->new_group !!}</option>
+                       @endforeach
+                       @endif
+                     </select>
+                    </div>  
+                   </div>
+               </form>
+               <!-- primary sales import -->
+               <!-- sales achievemnts download-->
+               @if(auth()->user()->can(['primary_sales_upload']))
+               <form action="{{ URL::to('primary_sales/upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
+                 {{ csrf_field() }}
+                 <div class="input-group" style="flex-wrap:nowrap;">
+                   <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                     <span class="btn btn-just-icon btn-theme btn-file">
+                       <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
+                       <span class="fileinput-exists">Change</span>
+                       <input type="hidden">
+                       <input type="file" name="import_file" style="flex-wrap: nowrap;" required accept=".xls,.xlsx" />
+                     </span>
+                   </div>
+                   <div class="input-group-append">
+                     <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.upload') !!} {!! trans('panel.sales_achievement.title') !!}">
+                       <i class="material-icons">cloud_upload</i>
+                       <div class="ripple-container"></div>
+                     </button>
+                   </div>
+                 </div>
+               </form>
+               @endif
+               <!-- primary sales import -->
+                  @if(auth()->user()->can(['primary_sales_template']))
+                  <!-- primary sales template creation -->
+                  <a href="{{ URL::to('primary_sales_template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.primary_dashboard.primary_sale') !!}"><i class="material-icons">text_snippet</i></a>
+                  @endif
+            </div>
+            <div class="table-responsive">
+                <table id="getprimarysales" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
+                <thead class=" text-primary">
+                  <th>S. No</th>
+                  <th>{!! trans('panel.primary_dashboard.invoice_no') !!}</th>
+                  <th>{!! trans('panel.primary_dashboard.invoice_date') !!}</th>
+                  <th>{!! trans('panel.primary_dashboard.month') !!}</th>
+                  <th>DIV</th>
+                  <th>Dealer</th>
+                  <th>{!! trans('panel.primary_dashboard.city') !!}</th>
+                  <th>{!! trans('panel.primary_dashboard.state') !!}</th>
+                  <th>Final Branch</th>
+                  <th>Sales person</th>
+                  <th>Product Name</th>
+                  <th>Qty.</th>
+                  <th>Rate</th>
+                  <th>Net Amount</th>
+                  <th>CGST Amt</th>
+                  <th>SGST Amt</th>
+                  <th>IGST Amt</th>
+                  <th>Total</th>
+                  <th>Store Name</th>
+                  <th>Group</th>
+                  <th>Branch</th>
+                  <th>New Group Name</th>
+                  <th>Product ID</th>
+                </thead>
+                <tbody>
+                </tbody>
+              </table>
             </div>
          </div>
       </div>
    </div>
    <!-- primary sales dashboard -->
+   <!-- primary sales kpi -->
+   <div class="tab-pane" id="primarysaleskpitab">
+      <div class="row">
+          <div class="col-md-12 text-center">
+             <h4 class="section-heading mb-3 h4 mt-0">Primary KPI</h4>
+          </div>
+      </div>
+      <div class="col-md-12">
+         <div class="row">
+            <div class="col-sm">
+               <div class="card text-center">
+                  <div class="card-body">
+                     <h4 class="card-title daystouredcount">0</h4>
+                     <p class="card-text">Days Toured</p>
+                  </div>
+               </div>
+            </div>
+            <div class="col-sm">
+               <div class="card text-center">
+                  <div class="card-body">
+                     <h4 class="card-title daystouredcount">0</h4>
+                     <p class="card-text">Days Toured</p>
+                  </div>
+               </div>
+            </div>
+            <div class="col-sm">
+               <div class="card text-center">
+                  <div class="card-body">
+                     <h4 class="card-title daystouredcount">0</h4>
+                     <p class="card-text">Days Toured</p>
+                  </div>
+               </div>
+            </div>
+            <div class="col-sm">
+               <div class="card text-center">
+                  <div class="card-body">
+                     <h4 class="card-title daystouredcount">0</h4>
+                     <p class="card-text">Days Toured</p>
+                  </div>
+               </div>
+            </div>
+            <div class="col-sm">
+               <div class="card text-center">
+                  <div class="card-body">
+                     <h4 class="card-title daystouredcount">0</h4>
+                     <p class="card-text">Days Toured</p>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div class="col-md-12">
+         <div class="row">
+            <div class="col-sm">
+               <div class="card text-center">
+                  <div class="card-body">
+                     <h4 class="card-title daystouredcount">0</h4>
+                     <p class="card-text">Days Toured</p>
+                  </div>
+               </div>
+            </div>
+            <div class="col-sm">
+               <div class="card text-center">
+                  <div class="card-body">
+                     <h4 class="card-title daystouredcount">0</h4>
+                     <p class="card-text">Days Toured</p>
+                  </div>
+               </div>
+            </div>
+            <div class="col-sm">
+               <div class="card text-center">
+                  <div class="card-body">
+                     <h4 class="card-title daystouredcount">0</h4>
+                     <p class="card-text">Days Toured</p>
+                  </div>
+               </div>
+            </div>
+            <div class="col-sm">
+               <div class="card text-center">
+                  <div class="card-body">
+                     <h4 class="card-title daystouredcount">0</h4>
+                     <p class="card-text">Days Toured</p>
+                  </div>
+               </div>
+            </div>
+            <div class="col-sm">
+               <div class="card text-center">
+                  <div class="card-body">
+                     <h4 class="card-title daystouredcount">0</h4>
+                     <p class="card-text">Days Toured</p>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div class="col-md-12">
+         <div class="row">
+            <div class="col-sm">
+               <div class="card text-center">
+                  <div class="card-body">
+                     <h4 class="card-title daystouredcount">0</h4>
+                     <p class="card-text">Days Toured</p>
+                  </div>
+               </div>
+            </div>
+            <div class="col-sm">
+               <div class="card text-center">
+                  <div class="card-body">
+                     <h4 class="card-title daystouredcount">0</h4>
+                     <p class="card-text">Days Toured</p>
+                  </div>
+               </div>
+            </div>
+            <div class="col-sm">
+               <div class="card text-center">
+                  <div class="card-body">
+                     <h4 class="card-title daystouredcount">0</h4>
+                     <p class="card-text">Days Toured</p>
+                  </div>
+               </div>
+            </div>
+            <div class="col-sm">
+               <div class="card text-center">
+                  <div class="card-body">
+                     <h4 class="card-title daystouredcount">0</h4>
+                     <p class="card-text">Days Toured</p>
+                  </div>
+               </div>
+            </div>
+            <div class="col-sm">
+               <div class="card text-center">
+                  <div class="card-body">
+                     <h4 class="card-title daystouredcount">0</h4>
+                     <p class="card-text">Days Toured</p>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <!-- primary sales kpi -->
    <div class="tab-pane" id="travelsummarytab">
     <div class="row">
          <div class="col-md-12 text-center">
@@ -458,6 +743,88 @@
          <div class="col-md-12 text-center">
             <h4 class="section-heading mb-3 h4 mt-0">Secondary KPIS</h4>
          </div>
+             <div class="row" id="main_dashboard_filters">
+             <div class="col col1">
+               <label class="bmd-label-floating">User</label>
+               <div class="form-group has-default bmd-form-group">
+                 <select class="form-control select2" name="user_id" id="user_id" data-style="select-with-transition" title="Select User">
+                    <option value="">Select User</option>
+                   @if(@isset($users ))
+                   @foreach($users as $user)
+                    <option value="{!! $user['id'] !!}" {{ old( 'user_id') == $user->id ? 'selected' : '' }}>{!! $user['name'] !!} ({{(count($user->getRoleNames())>0)?$user->getRoleNames()[0]:''}})</option>
+                   @endforeach
+                   @endif
+                 </select>
+               </div>
+             </div>
+            <div class="col col2">
+               <label class="bmd-label-floating">From Date</label>
+               <div class="form-group has-default bmd-form-group">
+                 <input type="text" class="form-control datepicker" id="fromdate" name="fromdate" autocomplete="off" readonly>
+               </div>
+             </div>
+             <div class="col col3">
+               <label class="bmd-label-floating">To Date</label>
+                <div class="form-group has-default bmd-form-group">
+                   <input type="text" class="form-control datepicker" id="todate" name="todate" autocomplete="off" readonly>
+                </div>
+             </div>
+             <div class="col col4">
+                <label class="bmd-label-floating">Division</label>
+                <select class="form-control select2" name="division_id" id="division_id" data-style="select-with-transition" title="Select User">
+                    <option value="">Division</option>
+                   @if(@isset($divisions ))
+                   @foreach($divisions as $division)
+                    <option value="{!! $division['id'] !!}" {{ old( 'division_id') == $division->id ? 'selected' : '' }}>{!! $division['division_name'] !!} </option>
+                   @endforeach
+                   @endif
+                 </select>
+             </div>
+             <div class="col col5">
+                <label class="bmd-label-floating">Branch</label>
+                <select class="form-control select2" name="branch_id" id="branch_id" data-style="select-with-transition" title="Select User">
+                    <option value="">Branch</option>
+                   @if(@isset($branches ))
+                   @foreach($branches as $branch)
+                    <option value="{!! $branch['id'] !!}" {{ old( 'branch_id') == $branch->id ? 'selected' : '' }}>{!! $branch['branch_name'] !!}</option>
+                   @endforeach
+                   @endif
+                 </select>
+             </div>
+             <div class="col col6">
+                <label class="bmd-label-floating">Financial Year</label>
+                 <select class="form-control select2" name="financial_year" id="financial_year" required data-style="select-with-transition" title="Year">
+                   <option value="" disabled selected>Financial Year</option>
+                   @foreach($years as $year)
+                   @php 
+                   $startYear = $year - 1;
+                   $endYear = $year;
+                   @endphp
+                   <option value="{!!$startYear!!}-{!!$endYear!!}">{!! $startYear!!} - {!! $endYear !!}</option>
+                   @endforeach
+                 </select>
+             </div>
+             <div class="col col7">
+               <label class="bmd-label-floating">Branch</label>
+                <select class="form-control select2" name="month" id="month" data-style="select-with-transition" title="Month">
+                  <option value="" disabled selected>Month</option>
+                  @for ($month = 1; $month <= 12; $month++)
+                  <option value="{!! date('M', mktime(0, 0, 0, $month, 1)) !!}">{!! date('M', mktime(0, 0, 0, $month, 1)) !!}</option>
+                  @endfor
+                </select>
+             </div>
+             <div class="col col5">
+                <label class="bmd-label-floating">Sales Person</label>
+                <select class="form-control select2" name="sales_id" id="sales_id" data-style="select-with-transition" title="Select User">
+                    <option value="">Sales Person</option>
+                   @if(@isset($branches ))
+                   @foreach($branches as $branch)
+                    <option value="{!! $branch['id'] !!}" {{ old( 'sales_id') == $branch->id ? 'selected' : '' }}>$value</option>
+                   @endforeach
+                   @endif
+                 </select>
+             </div>
+         </div>
          <div class="col-md-12">
             <div class="row">
                <div class="col-sm">
@@ -552,95 +919,178 @@
          </div>
       </div>
    </div>
-   <div class="tab-pane" id="secondaryordersreport">
+   <div class="tab-pane" id="secondarysalesreport">
     <div class="row">
          <div class="col-md-12 text-center">
-            <h4 class="section-heading mb-3 h4 mt-0">Travel Summary</h4>
+            <h4 class="section-heading mb-3 h4 mt-0">Secondary Sales Summary</h4>
          </div>
+         <form method="GET" action="{{ URL::to('customers-download') }}">
+             <div class="d-flex flex-wrap flex-row">
+               <!-- division filter -->
+             <div class="p-2" style="width:200px;">
+               <select class="select2" name="division" id="ss_division_id" data-style="select-with-transition" title="{!! trans('panel.secondary_dashboard.division') !!}">
+                 <option value="" disabled selected>{!! trans('panel.secondary_dashboard.division') !!}</option>
+                 @if(@isset($divisions ))
+                 @foreach($divisions as $division)
+                 <option value="{!! $division->id !!}">{!! $division->division_name !!}</option>
+                 @endforeach
+                 @endif
+               </select>                  
+             </div>
+             <!-- branch filter -->
+             <div class="p-2" style="width:180px;">
+               <select class="select2" name="branch_id" id="ss_branch_id" data-style="select-with-transition" title="panel.sales_users.branch">
+                 <option value="" disabled selected>{!! trans('panel.secondary_dashboard.branch') !!}</option>
+                 @if(@isset($branches ))
+                 @foreach($branches as $branch)
+                 <option value="{!! $branch->id !!}">{!! $branch->branch_name !!}</option>
+                 @endforeach
+                 @endif
+               </select>
+             </div>
+             <!-- financial year filter -->
+             <div class="p-2" style="width:200px;">
+               <select class="select2" name="financial_year" id="ss_financial_year" required data-style="select-with-transition" title="Year">
+                 <option value="" disabled selected>{!! trans('panel.secondary_dashboard.year') !!}</option>
+                 @foreach($years as $year)
+                 @php 
+                 $startYear = $year - 1;
+                 $endYear = $year;
+                 @endphp
+                 <option value="{!!$startYear!!}-{!!$endYear!!}">{!! $startYear!!} - {!! $endYear !!}</option>
+                 @endforeach
+               </select>
+             </div>
+             <!-- month filter-->
+             <div class="p-2" style="width:200px;">
+               <select class="selectpicker" name="ss_month" disabled id="ss_month" data-style="select-with-transition" title="Month">
+                 <option value="" disabled selected>{!! trans('panel.secondary_dashboard.month') !!}</option>
+                 @for ($month = 4; $month <= 12; $month++)
+                 <option value="{!! date('M', mktime(0, 0, 0, $month, 1)) !!}">{!! date('M', mktime(0, 0, 0, $month, 1)) !!}</option>
+                 @endfor
+                 @for ($month = 1; $month <= 3; $month++)
+                 <option value="{!! date('M', mktime(0, 0, 0, $month, 1)) !!}">{!! date('M', mktime(0, 0, 0, $month, 1)) !!}</option>
+                 @endfor
+               </select>
+             </div>
+             <!-- retailer filter -->
+             <div class="p-2" style="width:200px;">
+               <select class="select2" name="user" id="ss_retailer_id" data-style="select-with-transition" title="{!! trans('panel.sales_users.user_name') !!}">
+                 <option value="" disabled selected>{!! trans('panel.secondary_dashboard.retailer_name') !!}</option>
+                 @if(@isset($retailers ))
+                 @foreach($retailers as $retailer)
+                 <option value="{!! $retailer->id !!}">{!! $retailer->name !!}</option>
+                 @endforeach
+                 @endif
+               </select>
+             </div>
+             <!-- dealer/distributors filter -->
+              <div class="p-2" style="width:200px;">
+               <select class="select2" name="dealer" id="ss_dealer_id" data-style="select-with-transition" title="{!! trans('panel.sales_users.user_name') !!}">
+                 <option value="" disabled selected>{!! trans('panel.secondary_dashboard.dealers_and_distibutors') !!}</option>
+                 @if(@isset($dealers_and_distibutors ))
+                 @foreach($dealers_and_distibutors as $dealer)
+                 <option value="{!! $dealer->id !!}">{!! $dealer->first_name !!} {!! $dealer->last_name !!}</option>
+                 @endforeach
+                 @endif
+               </select>
+              </div>
+              <!-- sales persons filter -->
+              <div class="p-2" style="width:200px;">
+               <select class="select2" name="sales_person" id="ss_executive_id" data-style="select-with-transition" title="{!! trans('panel.sales_users.user_name') !!}">
+                 <option value="" disabled selected>{!! trans('panel.secondary_dashboard.sales_person') !!}</option>
+                 @if(@isset($sales_persons ))
+                 @foreach($sales_persons as $sales_person)
+                 <option value="{!! $sales_person->id !!}">{!! $sales_person->name !!}</option>
+                 @endforeach
+                 @endif
+               </select>
+              </div>
+              <!-- product models filter -->
+              <div class="p-2" style="width:200px;">
+               <select class="select2" name="product_model" id="ss_product_model" data-style="select-with-transition" title="{!! trans('panel.secondary_dashboard.product_model') !!}">
+                 <option value="" disabled selected>{!! trans('panel.secondary_dashboard.product_model') !!}</option>
+                 @if(@isset($products ))
+                 @foreach($products as $product)
+                 <option value="{!! $product->id !!}">{!! $product->model_no !!}</option>
+                 @endforeach
+                 @endif
+               </select>
+              </div>
+              <!-- new group name filter -->
+              <div class="p-2" style="width:200px;">
+               <select class="select2" name="new_group" id="ss_new_group" data-style="select-with-transition" title="{!! trans('panel.secondary_dashboard.new_group_name') !!}">
+                 <option value="" disabled selected>{!! trans('panel.secondary_dashboard.new_group_name') !!}</option>
+                 @if(@isset($uniqueProductsNewGroup ))
+                 @foreach($uniqueProductsNewGroup as $product)
+                 <option value="{!! $product->id !!}">{!! $product->new_group !!}</option>
+                 @endforeach
+                 @endif
+               </select>
+              </div>  
+             </div>
+         </form>
          <div class="col-md-12">
             <div class="row">
                <div class="col-sm">
                   <div class="card text-center">
                      <div class="card-body">
-                        <h4 class="card-title daystouredcount">0</h4>
-                        <p class="card-text">Days Toured</p>
+                        <h4 class="card-title" id="total_order_value">0</h4>
+                        <p class="card-text">Total Order Value</p>
                      </div>
                   </div>
                </div>
                <div class="col-sm">
                   <div class="card text-center">
                      <div class="card-body">
-                        <h4 class="card-title citiescoveredcount">0</h4>
-                        <p class="card-text text-center">Cities Covered</p>
+                        <h4 class="card-title" id="total_order_qty">0</h4>
+                        <p class="card-text text-center">Total Order Quantity</p>
                      </div>
                   </div>
                </div>
                <div class="col-sm">
-                  <div class="card">
+                  <div class="card text-center">
                      <div class="card-body">
-                        <h4 class="card-title text-center daysCentralMarketcount">0</h4>
-                        <p class="card-text text-center">Days Central Market</p>
-                     </div>
-                  </div>
-               </div>
-               <div class="col-sm">
-                  <div class="card">
-                     <div class="card-body">
-                        <h4 class="card-title text-center daysSuburbancount">0</h4>
-                        <p class="card-text text-center">Days Suburban</p>
-                     </div>
-                  </div>
-               </div>
-               <div class="col-sm">
-                  <div class="card">
-                     <div class="card-body">
-                        <h4 class="card-title text-center daysOfficeWorkCount">0</h4>
-                        <p class="card-text text-center">Days Office Work</p>
+                        <h4 class="card-title" id="total_order">0</h4>
+                        <p class="card-text text-center">Total Order</p>
                      </div>
                   </div>
                </div>
             </div>
          </div>
-         <div class="col-md-9">
-            <div class="row">
-               <div class="col-sm">
-                  <div class="card">
-                     <div class="card-body">
-                        <h4 class="card-title">Travel Summary in {!! date('F') !!}</h4>
-                        <div id="MonthlyCitiesTours" class="ct-chart"></div>
-                     </div>
-                     <!-- <div class="card-footer">
-                        <div class="row">
-                           <div class="col-md-12 pr-6">
-                              <i class="fa fa-circle text-info pr-6"></i> Toured
-                              <i class="fa fa-circle text-danger pr-6"></i> Central Market
-                              <i class="fa fa-circle text-warning pr-6"></i> Suburban
-                              <i class="fa fa-circle text-primary pr-6"></i> Office Work
-                           </div>
-                        </div>
-                     </div> -->
-                  </div>
-               </div>
-             </div>
-         </div>
          <div class="col-md-12">
             <div class="row">
                <div class="col-sm">
-                  <div class="card">
-                     <div class="card-body">
-                        <h4 class="card-title">Travel Summary in {!! date('Y') !!}</h4>
-                        <div id="YearCitiesTours" class="ct-chart ct-perfect-fourth"></div>
-                     </div>
-                     <div class="card-footer">
-                        <div class="row">
-                           <div class="col-md-12 pr-6">
-                              <i class="fa fa-circle text-info pr-6"></i> Toured
-                              <i class="fa fa-circle text-danger pr-6"></i> Central Market
-                              <i class="fa fa-circle text-warning pr-6"></i> Suburban
-                              <!-- <i class="fa fa-circle text-primary pr-6"></i> Office Work -->
-                           </div>
-                        </div>
-                     </div>
+                  <div class="table-responsive">
+                      <table id="getsecondarysales" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
+                      <thead class=" text-primary">
+                        <th>S. No</th>
+                        <th>{!! trans('panel.secondary_dashboard.invoice_no') !!}</th>
+                        <th>{!! trans('panel.secondary_dashboard.invoice_date') !!}</th>
+                        <th>{!! trans('panel.secondary_dashboard.month') !!}</th>
+                        <th>{!! trans('panel.secondary_dashboard.division') !!}</th>
+                        <th>{!! trans('panel.secondary_dashboard.party_name') !!}</th>
+                        <th>{!! trans('panel.secondary_dashboard.city') !!}</th>
+                        <th>{!! trans('panel.secondary_dashboard.state') !!}</th>
+                        <th>{!! trans('panel.secondary_dashboard.distributor_dealer_name') !!}</th>
+                        <th>{!! trans('panel.secondary_dashboard.distributor_dealer_city') !!}</th>
+                        <th>{!! trans('panel.secondary_dashboard.final_branch') !!}</th>
+                        <th>{!! trans('panel.secondary_dashboard.sales_person') !!}</th>
+                        <th>{!! trans('panel.secondary_dashboard.product_name') !!}</th>
+                        <th>{!! trans('panel.secondary_dashboard.quantity') !!}</th>
+                        <th>{!! trans('panel.secondary_dashboard.rate') !!}</th>
+                        <th>{!! trans('panel.secondary_dashboard.net_amount') !!}</th>
+                        <th>{!! trans('panel.secondary_dashboard.tax_percentage') !!}</th>
+                        <th>{!! trans('panel.secondary_dashboard.gst_amount') !!}</th>
+                        <th>{!! trans('panel.secondary_dashboard.total') !!}</th>
+                        <th>{!! trans('panel.secondary_dashboard.store_name') !!}</th>
+                        <th>{!! trans('panel.secondary_dashboard.branch') !!}</th>
+                        <th>{!! trans('panel.secondary_dashboard.new_group_name') !!}</th>
+                        <th>{!! trans('panel.secondary_dashboard.product_id') !!}</th>
+                      </thead>
+                      <tbody>
+                      </tbody>
+                    </table>
                   </div>
                </div>
             </div>
@@ -1152,6 +1602,14 @@
        });
    });
 
+   $(document).ready(function() {
+       $('.nav-link[href="#secondarysalesreport"]').on('click', function(event) {
+           event.preventDefault();
+           getTotalOrderValueQty();
+       });
+   });
+
+
   $('#fromdate').change(function(){
      var activetabs = $("#tabs .active").attr("href");
       switch (activetabs) {
@@ -1161,11 +1619,15 @@
          case '#secondarysaleskpi':
             getSecondarySalesKpi();
             break;
-         case  '#secondaryordersreport':
+         case  '#secondarysalesreport':
+            getTotalOrderValueQty()
             break;
          case '#primarysalestab':
-            getPrimarySalesDashboard();
-         break;   
+            getPrimarySalesDashboard()
+         break;
+         case '#primarysaleskpitab':
+            getPrimarySalesKpi()
+         break;  
         case '#travelsummarytab':
           travelSummaryDashboard()
           break;
@@ -1194,12 +1656,17 @@
           getDashboardData();
           break;
         case '#primarysalestab':
-             getPrimarySalesDashboard();
-          break;   
+           getPrimarySalesDashboard()
+        break;
+        case '#primarysaleskpitab':
+           getPrimarySalesKpi()
+        break;     
         case '#secondarysaleskpi':
             getSecondarySalesKpi();
             break; 
-        case  '#secondaryordersreport':
+        case  '#secondarysalesreport':
+
+         getTotalOrderValueQty();
             break; 
         case '#travelsummarytab':
           travelSummaryDashboard()
@@ -1229,6 +1696,12 @@
         case '#kpistab':
           getDashboardData();
           break;
+        case '#primarysalestab':
+           getPrimarySalesDashboard()
+        break;
+        case '#primarysaleskpitab':
+           getPrimarySalesKpi()
+        break;  
         case '#secondarysaleskpi':
            getSecondarySalesKpi();
            break;  
@@ -1294,7 +1767,6 @@
      switch (activetabs) {
        case '#secondarysaleskpi':
          getSecondarySalesKpi();
-         alert('financial_year');
          break;
         default:
          getSecondarySalesKpi();
@@ -1306,7 +1778,6 @@
      switch (activetabs) {
        case '#secondarysaleskpi':
          getSecondarySalesKpi();
-         alert('month');
          break;
         default:
          getSecondarySalesKpi();
@@ -1371,6 +1842,39 @@
             console.error(xhr.responseText);
         }
     });
+  }
+
+  function getPrimarySalesKpi() {
+     var fromdate = $("input[name=fromdate]").val();
+     var todate = $("input[name=todate]").val();
+     var user_id = $("select[name=user_id]").val();
+     var branch_id = $("select[name=branch_id]").val();
+     var division_id = $("select[name=division_id]").val();
+     var sales_id = $("select[name=sales_id]").val();
+     var financial_year = $("select[name=financial_year]").val();
+     var month = $("select[name=month]").val();
+
+     $.ajax({
+         url: "{{ url('primarySalesKpiData') }}",
+         dataType: "json",
+         type: 'POST',
+         data:{ _token: "{{csrf_token()}}", fromdate:fromdate,todate:todate,user_id:user_id, branch_id:branch_id,division_id:division_id,sales_id:sales_id,financial_year:financial_year,month:month },
+         success: function(response) {
+             $('.registredretailercount').text(response.registeredRetailerCount);
+             $('.activeretailercount').text(response.activeRetailerCount);
+             $('.activeRetailerPercent').text(response.activeRetailerPercent);
+             $('.nosOfRetailerRegistredSaarthi').text(response.nosOfRetailerRegistredSaarthi);
+             $('.nosOfRetailerRegistredSaarthiPercent').text(response.nosOfRetailerRegistredSaarthiPercent);
+             $('.orderTarget').text(response.orderTarget);
+             $('.orderAchievement').text(response.orderAchievement);
+             $('.achievementPercent').text(response.achievementPercent);
+             $('.perDayAverageSales').text(response.perDayAverageSales);
+             $('.perDayAverageVisit').text(response.perDayAverageVisit);
+         },
+         error: function(xhr, status, error) {
+             console.error(xhr.responseText);
+         }
+     });
   }
 
   function visitSummaryDashboard()
@@ -2335,5 +2839,540 @@
          }
       })
   }
+</script>
+<script type="text/javascript">
+  $(function () {
+    $.ajaxSetup({
+          headers: {
+              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+          }
+    });
+    var table = $('#getsecondarysales').DataTable({
+        processing: true,
+        serverSide: true,
+        columnDefs: [ {
+            className: 'control',
+            orderable: false,
+            targets:   -1
+        } ],
+        "order": [ [0, 'desc'] ],
+        "retrieve": true,
+        ajax: {
+          url: "{{ route('secondary_dashboard.sales.list') }}",
+          data: function (d) {
+                d.executive_id = $('#ss_executive_id').val(),
+                d.division_id = $('#ss_division_id').val(),
+                d.branch_id = $('#ss_branch_id').val(),
+                d.financial_year = $('#ss_financial_year').val(),
+                d.month = $('#ss_month').val(),
+                d.retailer_id = $('#ss_retailer_id').val(),
+                d.dealer_id = $('#ss_dealer_id').val(),  
+                d.product_model = $('#ss_product_model').val(),  
+                d.new_group = $('#ss_new_group').val(),
+                d.search = $('input[type="search"]').val()
+            }
+        },
+        columns: [
+             // {
+             //   data: 'action',
+             //   name: 'action',
+             //   "defaultContent": ''
+             // },
+             {
+               data: 'id',
+               name: 'id',
+               orderable: true, 
+               searchable: true,
+               "defaultContent": 'orderno'
+             },
+             {
+               data: 'orders.orderno',
+               name: 'orders.orderno',
+               orderable: false, 
+               searchable: false,
+               "defaultContent": 'orderno'
+             },
+             {
+               data: 'order_date',
+               name: 'order_date',
+               orderable: false, 
+               searchable: false,
+               "defaultContent": 'test'
+             },
+             {
+               data: 'month',
+               name: 'month',
+               orderable: false, 
+               searchable: false,
+               "defaultContent": 'month'
+             },
+             {
+               data: 'orders.getuserdetails.getdivision.division_name',
+               name: 'orders.getuserdetails.getdivision.division_name',
+               orderable: false, 
+               searchable: false,
+               "defaultContent": ''
+             },
+             {
+               data: 'orders.buyers.name',
+               name: 'orders.buyers.name',
+               orderable: false, 
+               searchable: false,
+               "defaultContent": ''
+             },
+             {
+               data: 'orders.buyers.customeraddress.cityname.city_name',
+               name: 'orders.buyers.customeraddress.cityname.city_name',
+               orderable: false, 
+               searchable: false,
+               "defaultContent": ''
+             },
+             {
+               data: 'orders.buyers.customeraddress.statename.state_name',
+               name: 'orders.buyers.customeraddress.statename.state_name',
+               searchable: false,
+               "defaultContent": ''
+             },
+             {
+               data: 'orders.sellers.name',
+               name: 'orders.sellers.name',
+               "defaultContent": ''
+             },
+             {
+               data: 'orders.sellers.customeraddress.cityname.city_name',
+               name: 'orders.sellers.customeraddress.cityname.city_name',
+               "defaultContent": ''
+             },
+             {
+               data: 'orders.getuserdetails.getbranch.branch_name',
+               name: 'orders.getuserdetails.getbranch.branch_name',
+               "defaultContent": ''
+             },
+             {
+               data: 'orders.createdbyname.name',
+               name: 'orders.createdbyname.name',
+               "defaultContent": ''
+             },
+             {
+               data: 'products.model_no',
+               name: 'products.model_no',
+               "defaultContent": 'product name'
+             },
+             {
+               data: 'quantity',
+               name: 'quantity',
+               "defaultContent": 'total_qty'
+             },
+             {
+               data: 'products.productpriceinfo.mrp',
+               name: 'products.productpriceinfo.mrp',
+               "defaultContent": 'mrpsss'
+             },
+             {
+               data: 'line_total',
+               name: 'line_total',
+               "defaultContent": ''
+             },
+             {
+               data: 'products.productpriceinfo.gst',
+               name: 'products.productpriceinfo.gst',
+               "defaultContent": 'tax amount'
+             },
+             {
+               data: 'gst_amount',
+               name: 'gst_amount',
+               "defaultContent": 'gst_amount'
+             },
+             {
+               data: 'total_amount',
+               name: 'total_amount',
+               "defaultContent": 'total_amount'
+             },
+             {
+               data: '',
+               name: '',
+               "defaultContent": ''
+             },
+             {
+               data: 'orders.getuserdetails.getbranch.branch_code',
+               name: 'orders.getuserdetails.getbranch.branch_code',
+               "defaultContent": ''
+             },
+             {
+               data: 'products.new_group',
+               name: 'products.new_group',
+               "defaultContent": ''
+             },
+             {
+              data: 'products.id',
+              name: 'products.id',
+              "defaultContent": ''
+             },
+        ]
+    });
+
+    $('#ss_executive_id').change(function(){
+        table.draw();
+        getTotalOrderValueQty();
+    });
+    $('#ss_division_id').change(function(){
+        table.draw();
+        getTotalOrderValueQty();
+    });
+    $('#ss_branch_id').change(function(){
+        table.draw();
+        getTotalOrderValueQty();
+    });
+    $('#ss_financial_year').change(function(){
+      alert('ggggggg');
+        $('#ss_month').prop('disabled', false);
+        $('#ss_month').selectpicker('refresh');
+        table.draw();
+        getTotalOrderValueQty();
+    });
+    $('#ss_retailer_id').change(function(){
+        table.draw();
+        getTotalOrderValueQty();
+    });
+    $('#ss_dealer_id').change(function(){
+        table.draw();
+        getTotalOrderValueQty();
+    });
+    $('#ss_product_model').change(function(){
+        table.draw();
+        getTotalOrderValueQty();
+    });
+    $('#ss_new_group').change(function(){
+        table.draw();
+        getTotalOrderValueQty();
+    });
+    $('#ss_month').change(function(){
+        table.draw();
+        getTotalOrderValueQty();
+    });
+    
+         
+    $('body').on('click', '.customerActive', function () {
+        var id = $(this).attr("id");
+        var active = $(this).attr("value");
+        var status = '';
+        if(active == 'Y')
+        {
+          status = 'Incative ?';
+        }
+        else
+        {
+           status = 'Ative ?';
+        }
+        var token = $("meta[name='csrf-token']").attr("content");
+        if(!confirm("Are You sure want "+status)) {
+           return false;
+        }
+        $.ajax({
+            url: "{{ url('customers-active') }}",
+            type: 'POST',
+            data: {_token: token,id: id,active:active},
+            success: function (data) {
+              $('.message').empty();
+              $('.alert').show();
+              if(data.status == 'success')
+              {
+                $('.alert').addClass("alert-success");
+              }
+              else
+              {
+                $('.alert').addClass("alert-danger");
+              }
+              $('.message').append(data.message);
+              table.draw();
+            },
+        });
+    });
+    
+    $('body').on('click', '.delete', function () {
+        var id = $(this).attr("value");
+        var token = $("meta[name='csrf-token']").attr("content");
+        if(!confirm("Are You sure want to delete ?")) {
+           return false;
+        }
+        $.ajax({
+            url: "{{ url('customers') }}"+'/'+id,
+            type: 'DELETE',
+            data: {_token: token,id: id},
+            success: function (data) {
+              $('.alert').show();
+              if(data.status == 'success')
+              {
+                $('.alert').addClass("alert-success");
+              }
+              else
+              {
+                $('.alert').addClass("alert-danger");
+              }
+              $('.message').append(data.message);
+              table.draw();
+            },
+        });
+    });
+    setTimeout(() => {
+         var $customerSelect = $('#dealer_id').select2({
+            placeholder: 'Select Parent',
+            allowClear: true,
+            ajax: {
+               url: "{{ route('getDealerDisDataSelect') }}",
+               dataType: 'json',
+               delay: 250,
+               data: function(params) {
+                  return {
+                     term: params.term || '',
+                     page: params.page || 1
+                  }
+               },
+               cache: true
+            }
+         });
+      }, 1500);
+     
+    });
+
+  function getTotalOrderValueQty() {
+
+    var executive_id = $('#executive_id').val();
+    var division_id = $('#division_id').val();
+    var branch_id = $('#branch_id').val();
+    var financial_year = $('#financial_year').val();
+    var month = $('#month').val();
+    var retailer_id = $('#retailer_id').val();
+    var dealer_id = $('#dealer_id').val();  
+    var product_model = $('#product_model').val();  
+    var new_group = $('#new_group').val();
+
+    var token = $("meta[name='csrf-token']").attr("content");
+    $.ajax({
+        url: "{{ url('secondary_dashboard/total_order_value') }}",
+        type: 'POST',
+        data: {
+          _token: token,
+           executive_id:executive_id,
+           division_id:division_id,
+           branch_id:branch_id,
+           financial_year:financial_year,
+           month:month,
+           retailer_id:retailer_id,
+           dealer_id:dealer_id,
+           product_model:product_model,
+           new_group:new_group,
+         },
+        success: function (response) {
+          var totalOrderValue = parseFloat(response.total_order_value);
+          var totalOrderValueInLacs = (totalOrderValue / 100000).toFixed(2);
+
+          $('#total_order_value').text(totalOrderValueInLacs + ' Lacs');
+          $('#total_order_qty').text(response.total_order_qty);
+          $('#total_order').text(response.total_order);
+        },
+    });
+  }
+</script>
+<script type="text/javascript">
+  $(function () {
+    $.ajaxSetup({
+          headers: {
+              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+          }
+    });
+    var table = $('#getprimarysales').DataTable({
+        processing: true,
+        serverSide: true,
+        columnDefs: [ {
+            className: 'control',
+            orderable: false,
+            targets:   -1
+        } ],
+        "order": [ [0, 'desc'] ],
+        "retrieve": true,
+        ajax: {
+          url: "{{ route('primary_dashboard.sales.list') }}",
+          data: function (d) {
+                d.executive_id = $('#ps_executive_id').val(),
+                d.division_id = $('#ps_division_id').val(),
+                d.branch_id = $('#ps_branch_id').val(),
+                d.financial_year = $('#ps_financial_year').val(),
+                d.month = $('#ps_month').val(),
+                d.retailer_id = $('#ps_retailer_id').val(),
+                d.dealer_id = $('#ps_dealer_id').val(),  
+                d.product_model = $('#ps_product_model').val(),  
+                d.new_group = $('#ps_new_group').val(),
+                d.search = $('input[type="search"]').val()
+            }
+        },
+        columns: [
+             // {
+             //   data: 'action',
+             //   name: 'action',
+             //   "defaultContent": ''
+             // },
+             {
+               data: 'id',
+               name: 'id',
+               orderable: true, 
+               searchable: true,
+               "defaultContent": 'orderno'
+             },
+             {
+               data: 'invoiceno',
+               name: 'invoiceno',
+               orderable: false, 
+               searchable: false,
+               "defaultContent": 'orderno'
+             },
+             {
+               data: 'invoice_date',
+               name: 'invoice_date',
+               orderable: false, 
+               searchable: false,
+               "defaultContent": ''
+             },
+             {
+               data: 'month',
+               name: 'month',
+               orderable: false, 
+               searchable: false,
+               "defaultContent": 'month'
+             },
+             {
+               data: 'division',
+               name: 'division',
+               orderable: false, 
+               searchable: false,
+               "defaultContent": 'division'
+             },
+             {
+               data: 'dealer',
+               name: 'dealer',
+               orderable: false, 
+               searchable: false,
+               "defaultContent": ''
+             },
+             {
+               data: 'city',
+               name: 'city',
+               orderable: false, 
+               searchable: false,
+               "defaultContent": ''
+             },
+             {
+               data: 'state',
+               name: 'state',
+               searchable: false,
+               "defaultContent": ''
+             },
+             {
+               data: 'final_branch',
+               name: 'final_branch',
+               "defaultContent": ''
+             },
+             {
+               data: 'sales_person',
+               name: 'sales_person',
+               "defaultContent": ''
+             },
+             {
+               data: 'product_name',
+               name: 'product_name',
+               "defaultContent": 'final branch'
+             },
+             {
+               data: 'quantity',
+               name: 'quantity',
+               "defaultContent": ''
+             },
+             {
+               data: 'rate',
+               name: 'rate',
+               "defaultContent": 'product name'
+             },
+             {
+               data: 'net_amount',
+               name: 'net_amount',
+               "defaultContent": 'total_qty'
+             },
+             {
+               data: 'cgst_amount',
+               name: 'cgst_amount',
+               "defaultContent": ''
+             },
+             {
+               data: 'sgst_amount',
+               name: 'sgst_amount',
+               "defaultContent": 'tax amount'
+             },
+             {
+               data: 'igst_amount',
+               name: 'igst_amount',
+               "defaultContent": ''
+             },
+             {
+               data: 'total_amount',
+               name: 'total_amount',
+               "defaultContent": 'total'
+             },
+             {
+               data: 'store_name',
+               name: 'store_name',
+               "defaultContent": ''
+             },
+             {
+               data: 'new_group',
+               name: 'new_group',
+               "defaultContent": ''
+             },
+             {
+               data: 'branch',
+               name: 'branch',
+               "defaultContent": 'branch'
+             },
+             {
+              data: 'new_group_name',
+              name: 'new_group_name',
+              "defaultContent": ''
+             },
+             {
+              data: 'product_id',
+              name: 'product_id',
+              "defaultContent": ''
+             },
+        ]
+    });
+   $('#ps_executive_id').change(function(){
+       table.draw();
+   });
+   $('#ps_division_id').change(function(){
+       table.draw();
+   });
+   $('#ps_branch_id').change(function(){
+       table.draw();
+   });
+   $('#ps_financial_year').change(function(){
+      $('#ps_month').prop('disabled', false);
+      $('#ps_month').selectpicker('refresh');
+       table.draw();
+   });
+   $('#ps_retailer_id').change(function(){
+       table.draw();
+   });
+   $('#ps_dealer_id').change(function(){
+       table.draw();
+   });
+   $('#ps_product_model').change(function(){
+       table.draw();
+   });
+   $('#ps_new_group').change(function(){
+       table.draw();
+   });
+   $('#ps_month').change(function(){
+       table.draw();
+   });
+});
 </script>
 </x-app-layout>

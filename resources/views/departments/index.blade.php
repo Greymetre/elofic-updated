@@ -18,6 +18,12 @@
               <!-- @if(auth()->user()->can(['customer_create'])) -->
               <a href="{{ route('departments.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.departments.title_singular') !!}"><i class="material-icons">add_circle</i></a>
               <!-- @endif  -->
+              <form method="post" action="{{ URL::to('department_report/download') }}" class="form-horizontal">
+                @csrf
+                @if(auth()->user()->can(['department_report_download']))
+                <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Department Report" name="export_department_report" value="true"><i class="material-icons">cloud_download</i></button>
+                @endif
+              </form>
               </div>
 
             </div>

@@ -25,13 +25,45 @@
                   </div>
 
                   <div class="p-2" style="width: 250px;">
-                    <select class="selectpicker" name="executive_id" id="executive_id" data-style="select-with-transition" title="Select User">
+                    <select class="selectpicker" name="division_id" id="division_id" data-style="select-with-transition" title="Select Division">
+                     <option value="">Select Division</option>
+                    @if(@isset($divisions ))
+                    @foreach($divisions as $division)
+                     <option value="{!! $division['id'] !!}" {{ old( 'division') == $division['id'] ? 'selected' : '' }}>{!! $division['division_name'] !!}</option>
+                    @endforeach
+                    @endif
+                   </select>
+                  </div>
+
+                  <div class="p-2" style="width: 250px;">
+                    <select class="selectpicker" name="department_id" id="department_id" data-style="select-with-transition" title="Select Department">
+                     <option value="">Select Department</option>
+                    @if(@isset($all_user_departments ))
+                    @foreach($all_user_departments as $department)
+                     <option value="{!! $department['id'] !!}" {{ old( 'department') == $department['id'] ? 'selected' : '' }}>{!! $department['name'] !!}</option>
+                    @endforeach
+                    @endif
+                   </select>
+                  </div>
+
+                  <div class="p-2" style="width: 250px;">
+                    <select class="select2" name="executive_id" id="executive_id" data-style="select-with-transition" title="Select User">
                      <option value="">Select User</option>
                     @if(@isset($users ))
                     @foreach($users as $user)
                      <option value="{!! $user['id'] !!}" {{ old( 'executive_id') == $user['id'] ? 'selected' : '' }}>{!! $user['name'] !!}</option>
                     @endforeach
                     @endif
+                   </select>
+                  </div>
+
+                  <div class="p-2" style="width: 250px;">
+                    <select class="select2" name="status" id="status" data-style="select-with-transition" title="Select User">
+                     <option value="">Select Status</option>
+                     <option value="0">Pending</option>
+                     <option value="1">Approved</option>
+                     <option value="2">Rejected</option>
+                  
                    </select>
                   </div>
 
@@ -237,7 +269,10 @@
           data: function (d) {
                 d.executive_id = $('#executive_id').val(),
                 d.start_date = $('#start_date').val(),
-                d.end_date = $('#end_date').val()
+                d.division_id = $('#division_id').val(),
+                d.department_id = $('#department_id').val(),
+                d.end_date = $('#end_date').val(),
+                d.status = $('#status').val()
             }
         },
 
@@ -270,7 +305,15 @@
     $('#executive_id').change(function(){
         table.draw();
     });
-
+    $('#division_id').change(function(){
+        table.draw();
+    });
+    $('#department_id').change(function(){
+        table.draw();
+    });
+    $('#status').change(function(){
+        table.draw();
+    });
     $('#start_date').change(function(){
         table.draw();
     });

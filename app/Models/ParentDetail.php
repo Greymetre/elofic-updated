@@ -18,4 +18,14 @@ class ParentDetail extends Model
     {
         return $this->belongsTo('App\Models\Customers', 'parent_id', 'id');
     }
+
+    public function transactions()
+    {
+        return $this->hasMany('App\Models\TransactionHistory', 'customer_id', 'customer_id');
+    }
+
+    public function redemption()
+    {
+        return $this->hasMany('App\Models\Redemption', 'customer_id', 'customer_id');
+    }
 }

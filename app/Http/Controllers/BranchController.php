@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
+use App\Exports\BranchExport;
 use DataTables;
 use Validator;
 use Gate;
@@ -148,5 +148,22 @@ class BranchController extends Controller
             return response()->json(['status' => 'success','message' => 'Branch deleted successfully!']);
         }
         return response()->json(['status' => 'error','message' => 'Error in Branch Delete!']);
+    }
+
+    /**
+     *  Export the branch report.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function branch_report_download(Request $request) {
+        if($request->export_branch_report) {
+
+            abort_if(Gate::denies('branch_report_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+            if (ob_get_contents()) ob_end_clean();
+            ob_start();
+
+            return Excel::download(new BranchExport($request), 'branch.xlsx');
+        }
     }
 }

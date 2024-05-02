@@ -14,7 +14,7 @@ return [
     ],
     'pay_roll' => [
         '1' => 'Silver',
-        '2' => 'Greymetre'
+        '2' => 'FOS'
     ],
     'redeem_mode' => [
         '1' => 'Gift',

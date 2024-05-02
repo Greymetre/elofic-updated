@@ -21,13 +21,17 @@ use Validator;
 use Gate;
 use Excel;
 use App\DataTables\OrderDataTable;
+use App\Exports\OrderEmailExport;
 use App\Imports\OrderImport;
 use App\Exports\OrderExport;
 use App\Exports\OrderTemplate;
 use App\Http\Requests\OrderRequest;
+use App\Mail\OrderMailWithAttachment;
+use App\Models\Category;
 use App\Models\Division;
 use Dompdf\Dompdf;
 use Dompdf\Options;
+use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
@@ -40,7 +44,7 @@ class OrderController extends Controller
     public function index(OrderDataTable $dataTable)
     {
         abort_if(Gate::denies('order_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        $divisions = Division::where('active', 'Y')->select('id', 'division_name')->get();
+        $divisions = Category::where('active', 'Y')->get();
         return $dataTable->render('orders.index', compact('divisions'));
     }
 
@@ -113,9 +117,8 @@ class OrderController extends Controller
             }
         })->select('id', 'name')->orderBy('id', 'desc')->get();
 
-
-
-        return view('orders.create', compact('products', 'sellers', 'buyers', 'users'))->with('orders', $this->orders);
+        $category = Category::where('active', 'Y')->get();
+        return view('orders.create', compact('products', 'sellers', 'buyers', 'users', 'category'))->with('orders', $this->orders);
     }
 
     /**
@@ -127,7 +130,6 @@ class OrderController extends Controller
     public function store(OrderRequest $request)
     {
         try {
-
             abort_if(Gate::denies('order_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
             $request['created_by'] = Auth::user()->id;
             $request['orderno'] = isset($request['orderno']) ? $request['orderno'] : date('Ymd') . '_' . autoIncrementId('Order', 'id');
@@ -195,9 +197,27 @@ class OrderController extends Controller
                     ]);
                 }
 
-                if ($orderdetail->isNotEmpty()) {
-                    OrderDetails::insert($orderdetail->toArray());
+                OrderDetails::insert($orderdetail->toArray());
+                $exportData = new Request();
+                $exportData->merge([
+                    'order_id' => $response['order_id'],
+                ]);
+
+                Excel::store(new OrderEmailExport($exportData), '/assets/orderDetails.xlsx', 'local');
+
+                $user = User::find($request->executive_id);
+
+                if ($user->userinfo->order_mails  && $user->userinfo->order_mails != null && $user->userinfo->order_mails != '') {
+                    $mail_id_array = explode(',', $user->userinfo->order_mails);
+                    $buyer = Customers::find($request['buyer_id']);
+                    $seller = Customers::find($request['seller_id']);
+                    $attachmentPath = base_path('storage/app/assets/orderDetails.xlsx');
+
+                    // foreach ($mail_id_array as $k => $val) {
+                    //  Mail::to($val)->send(new OrderMailWithAttachment($attachmentPath, $orderdetail, Order::find($response['order_id'])));
+                    // }
                 }
+
                 return Redirect::to('orders')->with('message_success', 'Order Store Successfully');
             }
             return redirect()->back()->with('message_danger', 'Error in Purchases Store')->withInput();
@@ -300,8 +320,8 @@ class OrderController extends Controller
             }
         })->where('active', 'Y')->select('id', 'name')->orderBy('id', 'desc')->get();
 
-
-        return view('orders.edit', compact('products', 'sellers', 'buyers', 'orderdetail', 'users'))->with('orders', $orders);
+        $category = Category::where('active', 'Y')->get();
+        return view('orders.edit', compact('products', 'sellers', 'buyers', 'orderdetail', 'users', 'category'))->with('orders', $orders);
     }
 
     /**
@@ -354,6 +374,14 @@ class OrderController extends Controller
         $orders->distributor_amount = isset($request['distributor_amount']) ? $request['distributor_amount'] : null;
         $orders->frieght_discount = isset($request['frieght_discount']) ? $request['frieght_discount'] : null;
         $orders->frieght_amount = isset($request['frieght_amount']) ? $request['frieght_amount'] : null;
+        $orders->product_cat_id = isset($request['product_cat_id']) ? $request['product_cat_id'] : null;
+        $orders->dod_discount = isset($request['dod_discount']) ? $request['dod_discount'] : null;
+        $orders->cash_discount = isset($request['cash_discount']) ? $request['cash_discount'] : null;
+        $orders->special_distribution_discount = isset($request['special_distribution_discount']) ? $request['special_distribution_discount'] : null;
+        $orders->distribution_margin_discount = isset($request['distribution_margin_discount']) ? $request['distribution_margin_discount'] : null;
+        $orders->total_fan_discount = isset($request['total_fan_discount']) ? $request['total_fan_discount'] : null;
+        $orders->total_fan_discount_amount = isset($request['total_fan_discount_amount']) ? $request['total_fan_discount_amount'] : null;
+
         $orders->gst5_amt = isset($request['gst5_amt']) ? $request['gst5_amt'] : null;
         $orders->gst12_amt = isset($request['gst12_amt']) ? $request['gst12_amt'] : null;
         $orders->gst18_amt = isset($request['gst18_amt']) ? $request['gst18_amt'] : null;
@@ -561,7 +589,8 @@ class OrderController extends Controller
 
         $orderid = decrypt($orderid);
         $orders = $this->orders->with('orderdetails')->find($orderid);
-        return view('orders.full_dispatched')->with('orders', $orders);
+        $category = Category::where('active', 'Y')->get();
+        return view('orders.full_dispatched', compact('category'))->with('orders', $orders);
     }
 
     public function submitFullyDispatched(Request $request)
@@ -635,7 +664,8 @@ class OrderController extends Controller
     {
         $orderid = decrypt($orderid);
         $orders = $this->orders->with('orderdetails')->find($orderid);
-        return view('orders.dispatched')->with('orders', $orders);
+        $category = Category::where('active', 'Y')->get();
+        return view('orders.dispatched', compact('category'))->with('orders', $orders);
     }
 
     public function orderCancle($orderid, Request $request)

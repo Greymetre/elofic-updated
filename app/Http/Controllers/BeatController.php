@@ -441,11 +441,95 @@ class BeatController extends Controller
       return view('beats.schedule')->with('beats',$beats);
     }
 
+    // public function livelocation(Request $request)
+    // {
+    //   $search_branches = $request->input('search_branches');
+    //   $user_id = auth()->user()->id;
+    //   $all_reporting_user_ids = getUsersReportingToAuth($user_id);
+    //   $all_user_branches = User::with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
+    //   $all_user_divisions = User::with('getdivision')->orderBy('division_id')->get();
+    //   $all_user_departments = User::with('getdepartment')->orderBy('department_id')->get();
+    //     $branches= array();
+    //     $all_branch= array();
+    //     $bkey = 0;
+    //     foreach ($all_user_branches as $k => $val) {
+    //       if($val->getbranch){
+    //         if(!in_array($val->getbranch->id, $all_branch)){
+    //             array_push($all_branch, $val->getbranch->id);
+    //             $branches[$bkey]['id'] = $val->getbranch->id;
+    //             $branches[$bkey]['name'] = $val->getbranch->branch_name;
+    //             $bkey++;
+    //         }
+    //       }
+    //     }
+
+    //     $divisions = array();
+    //     $all_division = array();
+    //     $dkey = 0;
+
+    //     foreach ($all_user_divisions as $k => $val) {
+
+    //       if($val->getdivision){
+    //         if(!in_array($val->getdivision->id, $all_division)){
+    //             array_push($all_division, $val->getdivision->id);
+    //             $divisions[$dkey]['id'] = $val->getdivision->id;
+    //             $divisions[$dkey]['name'] = $val->getdivision->division_name;
+    //             $dkey++;
+    //         }
+    //       }
+    //     }
+
+
+    //     $departments = array();
+    //     $all_department = array();
+    //     $dp_key = 0;
+
+    //     foreach($all_user_departments as $k=>$val) {
+    //       if($val->getdepartment){
+    //         if(!in_array($val->getdepartment->id, $all_department)){
+    //             array_push($all_department, $val->getdepartment->id);
+    //             $departments[$dp_key]['id'] = $val->getdepartment->id;
+    //             $departments[$dp_key]['name'] = $val->getdepartment->name;
+    //             $dp_key++;
+    //         }
+    //       }
+    //     }
+        
+    //     if($search_branches && count($search_branches) > 0 && $search_branches[0] != null){
+    //       $all_reporting_user_ids = User::whereIn('id', $all_reporting_user_ids)->whereIn('branch_id', $search_branches)->pluck('id')->toArray();
+    //     }
+
+    //     if(!empty($search_divisions) && count($search_divisions) > 0 && $search_divisions[0] != null){
+    //       $all_reporting_user_ids = User::whereIn('id', $all_reporting_user_ids)->whereIn('division_id', $search_divisions)->pluck('id')->toArray();
+    //     }
+
+    //     if(!empty($search_departments) && count($search_departments) > 0 && $search_departments[0] != null){
+    //       $all_reporting_user_ids = User::whereIn('id', $all_reporting_user_ids)->whereIn('department_id', $search_departments)->pluck('id')->toArray();
+    //     }
+
+    //     $all_user_details = User::with('getbranch','getdivision','getdepartment')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
+    //     $all_users= array();
+    //     foreach ($all_user_details as $k => $val) {
+    //         $users[$k]['id'] = $val->id;
+    //         $users[$k]['name'] = $val->name;
+    //     }
+    //     if($request->ajax()){
+    //         $response = ["users"=>$users, "status"=>true];
+    //         return response()->json($response);
+    //     }
+    //   return view('beats.livelocation',compact('users', 'branches','divisions','departments'));
+    // }
+
     public function livelocation(Request $request)
     {
       $search_branches = $request->input('search_branches');
+      $search_divisions = $request->input('search_divisions');
+      $search_departments = $request->input('search_departments');
       $user_id = auth()->user()->id;
       $all_reporting_user_ids = getUsersReportingToAuth($user_id);
+      $all_user_divisions = User::with('getdivision')->orderBy('division_id')->get();
+      $all_user_departments = User::with('getdepartment')->orderBy('department_id')->get();
+
       $all_user_branches = User::with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
         $branches= array();
         $all_branch= array();
@@ -460,10 +544,52 @@ class BeatController extends Controller
             }
           }
         }
+
+        $divisions = array();
+        $all_division = array();
+        $dkey = 0;
+
+        foreach ($all_user_divisions as $k => $val) {
+
+          if($val->getdivision){
+            if(!in_array($val->getdivision->id, $all_division)){
+                array_push($all_division, $val->getdivision->id);
+                $divisions[$dkey]['id'] = $val->getdivision->id;
+                $divisions[$dkey]['name'] = $val->getdivision->division_name;
+                $dkey++;
+            }
+          }
+        }
+
+
+        $departments = array();
+        $all_department = array();
+        $dp_key = 0;
+
+        foreach($all_user_departments as $k=>$val) {
+          if($val->getdepartment){
+            if(!in_array($val->getdepartment->id, $all_department)){
+                array_push($all_department, $val->getdepartment->id);
+                $departments[$dp_key]['id'] = $val->getdepartment->id;
+                $departments[$dp_key]['name'] = $val->getdepartment->name;
+                $dp_key++;
+            }
+          }
+        }
+
         if($search_branches && count($search_branches) > 0 && $search_branches[0] != null){
           $all_reporting_user_ids = User::whereIn('id', $all_reporting_user_ids)->whereIn('branch_id', $search_branches)->pluck('id')->toArray();
-      }
-        $all_user_details = User::with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
+        }
+
+        if(!empty($search_divisions) && count($search_divisions) > 0 && $search_divisions[0] != null){
+          $all_reporting_user_ids = User::whereIn('id', $all_reporting_user_ids)->whereIn('division_id', $search_divisions)->pluck('id')->toArray();
+        }
+
+        if(!empty($search_departments) && count($search_departments) > 0 && $search_departments[0] != null){
+          $all_reporting_user_ids = User::whereIn('id', $all_reporting_user_ids)->whereIn('department_id', $search_departments)->pluck('id')->toArray();
+        }
+
+        $all_user_details = User::with('getbranch','getdivision','getdepartment')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
         $all_users= array();
         foreach ($all_user_details as $k => $val) {
             $users[$k]['id'] = $val->id;
@@ -473,7 +599,8 @@ class BeatController extends Controller
             $response = ["users"=>$users, "status"=>true];
             return response()->json($response);
         }
-      return view('beats.livelocation',compact('users', 'branches'));
+
+      return view('beats.livelocation',compact('users', 'branches','divisions','departments'));
     }
 
 }

@@ -58,7 +58,7 @@
          <div class="row gx-4 mb-2 view-tab">
             <div class="col-auto">
                <div class="avatar avatar-xl position-relative">
-                  <img style="border-radius: 30%;" src="{!! !empty($customers['shop_image']) ? asset('uploads/'.$customers['shop_image']) : asset('/assets/img/placeholder.jpg') !!}" alt="profile_image" class="w-100 border-radius-lg shadow-sm imageDisplayModel">
+                  <img style="border-radius: 10%;" src="{!! !empty($customers['shop_image']) ? asset('uploads/'.$customers['shop_image']) : asset('/assets/img/placeholder.jpg') !!}" alt="profile_image" class="w-100 border-radius-lg shadow-sm imageDisplayModel">
                </div>
             </div>
             <div class="col-auto my-auto">

@@ -19,7 +19,7 @@
                     <select class="selectpicker"  name="dividion_id" id="dividion_id" data-style="select-with-transition">
                       <option value="">Select Division</option>
                       @foreach($divisions as $division)
-                      <option value="{{$division->id}}">{{$division->division_name}}</option>
+                      <option value="{{$division->id}}">{{$division->category_name}}</option>
                       @endforeach
                    </select>
                   </div>     
