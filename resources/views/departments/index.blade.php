@@ -54,7 +54,8 @@
             <table id="getcustomers" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
             <thead class=" text-primary">
               <th>{!! trans('panel.global.no') !!}</th>
-              <th>{!! trans('panel.global.action') !!}</th>
+              <!-- <th>{!! trans('panel.global.action') !!}</th> -->
+              <th>{!! trans('panel.global.active') !!}</th>
               <th>{!! trans('panel.departments.fields.department_name') !!}</th>
               <th>{!! trans('panel.global.created_by') !!}</th>
               <th>{!! trans('panel.global.created_at') !!}</th>
@@ -98,7 +99,7 @@
         },
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-            { data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
+            { data: 'action', name: 'action',"defaultContent": '', orderable: false, searchable: false},
             {data: 'name', name: 'name',"defaultContent": ''},
             {data: 'createdbyname.name', name: 'createdbyname.name',"defaultContent": '', orderable: false},
             {data: 'created_at', name: 'created_at',"defaultContent": ''},

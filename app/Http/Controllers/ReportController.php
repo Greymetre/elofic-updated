@@ -809,13 +809,14 @@ class ReportController extends Controller
                 })
                 ->addColumn('total_registered_retailers', function ($data) {
                     $registeredRetailerCount = $data->getretailers->count();
+
                     return isset($registeredRetailerCount) ? $registeredRetailerCount : '';
                 })
                 ->addColumn('total_registered_retailers_under_saarthi', function ($data) {
 
                     $customerIds= $data->getretailers->pluck('customer_id');
-
                     $nosOfRetailerRegistredSaarthi = TransactionHistory::whereIn('customer_id',$customerIds)->groupBy('customer_id')->count();
+
                     return isset($nosOfRetailerRegistredSaarthi) ? $nosOfRetailerRegistredSaarthi : '';
                 })
                 ->addColumn('coupon_scan_nos', function ($data) {
@@ -930,41 +931,33 @@ class ReportController extends Controller
                 ->addColumn('total_registered_retailers', function ($data) {
 
                     $usersIds = User::where('branch_id', $data->id)->pluck('id')->toArray();
-                    $employeeIds = EmployeeDetail::whereIn('user_id', $usersIds)->pluck('customer_id');
-                    $customerIds= Customers::whereIn('id', $employeeIds)->pluck('id');
-                    $registeredRetailerCount = $customerIds->count();
+                    // $employeeIds = EmployeeDetail::whereIn('user_id', $usersIds)->pluck('customer_id');
 
+                    $customerIds=  Customers::whereIn('executive_id', $usersIds)->where('customertype','2')->pluck('id');
+                    $registeredRetailerCount = $customerIds->count();
                     return isset($registeredRetailerCount) ? $registeredRetailerCount : '';
                 })
                 ->addColumn('total_registered_retailers_under_saarthi', function ($data) {
 
                     $usersIds = User::where('branch_id', $data->id)->pluck('id')->toArray();
-                    $employeeIds = EmployeeDetail::whereIn('user_id', $usersIds)->pluck('customer_id');
-                    $customerIds= Customers::whereIn('id', $employeeIds)->pluck('id');
-
+                    $customerIds=  Customers::whereIn('executive_id', $usersIds)->where('customertype','2')->pluck('id');
 
                     $nosOfRetailerRegistredSaarthi = TransactionHistory::whereIn('customer_id',$customerIds)->groupBy('customer_id')->count();
-
                     
                     return isset($nosOfRetailerRegistredSaarthi) ? $nosOfRetailerRegistredSaarthi : '';
                 })
                 ->addColumn('coupon_scan_nos', function ($data) {
 
                     $usersIds = User::where('branch_id', $data->id)->pluck('id')->toArray();
-                    $employeeIds = EmployeeDetail::whereIn('user_id', $usersIds)->pluck('customer_id');
-                    $customerIds= Customers::whereIn('id', $employeeIds)->pluck('id');
-
-
+                    $customerIds=  Customers::whereIn('executive_id', $usersIds)->where('customertype','2')->pluck('id');
                     $coupon_scan_nos = TransactionHistory::whereIn('customer_id',$customerIds)->count();
 
-                    
                     return isset($coupon_scan_nos) ? $coupon_scan_nos : '';
                 })
                 ->addColumn('mobile_app_downloads', function ($data) {
 
                     $usersIds = User::where('branch_id', $data->id)->pluck('id')->toArray();
-                    $employeeIds = EmployeeDetail::whereIn('user_id', $usersIds)->pluck('customer_id');
-                    $customerIds= Customers::whereIn('id', $employeeIds)->pluck('id');
+                    $customerIds=  Customers::whereIn('executive_id', $usersIds)->where('customertype','2')->pluck('id');
                     $mobile_app_downloads = MobileUserLoginDetails::whereIn('customer_id',$customerIds)->count();
                     
                     return isset($mobile_app_downloads) ? $mobile_app_downloads : '';
@@ -972,51 +965,45 @@ class ReportController extends Controller
                 ->addColumn('provision_point', function ($data) {
 
                     $usersIds = User::where('branch_id', $data->id)->pluck('id')->toArray();
-                    $employeeIds = EmployeeDetail::whereIn('user_id', $usersIds)->pluck('customer_id');
-                    $customerIds= Customers::whereIn('id', $employeeIds)->pluck('id');
-                    $provision_point = TransactionHistory::whereIn('customer_id',$customerIds)->where('point','0')->sum('point');
+                    $customerIds=  Customers::whereIn('executive_id', $usersIds)->where('customertype','2')->pluck('id');
+                    $provision_point = TransactionHistory::whereIn('customer_id',$customerIds)->where('status','0')->sum('point');
                     
                     return isset($provision_point) ? $provision_point : '';
                 })
                 ->addColumn('active_point', function ($data) {
 
                     $usersIds = User::where('branch_id', $data->id)->pluck('id')->toArray();
-                    $employeeIds = EmployeeDetail::whereIn('user_id', $usersIds)->pluck('customer_id');
-                    $customerIds= Customers::whereIn('id', $employeeIds)->pluck('id');
-                    $active_point = TransactionHistory::whereIn('customer_id',$customerIds)->where('point','1')->sum('point');
+                    $customerIds=  Customers::whereIn('executive_id', $usersIds)->where('customertype','2')->pluck('id');
+                    $active_point = TransactionHistory::whereIn('customer_id',$customerIds)->where('status','1')->sum('point');
                     
                     return isset($active_point) ? $active_point : '';
                 })
                 ->addColumn('total_point', function ($data) {
                     $usersIds = User::where('branch_id', $data->id)->pluck('id')->toArray();
-                    $employeeIds = EmployeeDetail::whereIn('user_id', $usersIds)->pluck('customer_id');
-                    $customerIds= Customers::whereIn('id', $employeeIds)->pluck('id');
-                    $active_point = TransactionHistory::whereIn('customer_id',$customerIds)->where('point','1')->sum('point');
-                    $provision_point = TransactionHistory::whereIn('customer_id',$customerIds)->where('point','0')->sum('point');
+                    $customerIds=  Customers::whereIn('executive_id', $usersIds)->where('customertype','2')->pluck('id');
+                    $active_point = TransactionHistory::whereIn('customer_id',$customerIds)->where('status','1')->sum('point');
+                    $provision_point = TransactionHistory::whereIn('customer_id',$customerIds)->where('status','0')->sum('point');
                     $total_point = $provision_point + $active_point;
                     // $total_point = '1000';
                     return isset($total_point) ? $total_point : '';
                 })
                 ->addColumn('redeem_gift', function ($data) {
                     $usersIds = User::where('branch_id', $data->id)->pluck('id')->toArray();
-                    $employeeIds = EmployeeDetail::whereIn('user_id', $usersIds)->pluck('customer_id');
-                    $customerIds= Customers::whereIn('id', $employeeIds)->pluck('id');
+                    $customerIds=  Customers::whereIn('executive_id', $usersIds)->where('customertype','2')->pluck('id');
                     $redeem_gift = Redemption::with('customer')->where('status','!=' , '2')->whereIn('customer_id',$customerIds)->where('redeem_mode','1')->sum('redeem_amount');
                    
                     return isset($redeem_gift) ? $redeem_gift : '';
                 })
                 ->addColumn('redeem_neft', function ($data) {
                     $usersIds = User::where('branch_id', $data->id)->pluck('id')->toArray();
-                    $employeeIds = EmployeeDetail::whereIn('user_id', $usersIds)->pluck('customer_id');
-                    $customerIds= Customers::whereIn('id', $employeeIds)->pluck('id');
-                    $redeem_neft = Redemption::with('customer')->where('status','!=' , '2')->where('redeem_mode','2')->sum('redeem_amount');
+                    $customerIds=  Customers::whereIn('executive_id', $usersIds)->where('customertype','2')->pluck('id');
+                    $redeem_neft = Redemption::with('customer')->whereIn('customer_id',$customerIds)->where('status','!=' , '2')->where('redeem_mode','2')->sum('redeem_amount');
                    
                     return isset($redeem_neft) ? $redeem_neft : '';
                 })
                 ->addColumn('total_redeem', function ($data) {
                     $usersIds = User::where('branch_id', $data->id)->pluck('id')->toArray();
-                    $employeeIds = EmployeeDetail::whereIn('user_id', $usersIds)->pluck('customer_id');
-                    $customerIds= Customers::whereIn('id', $employeeIds)->pluck('id');
+                    $customerIds=  Customers::whereIn('executive_id', $usersIds)->where('customertype','2')->pluck('id');
                     $redeem_neft = Redemption::with('customer')->where('status','!=' , '2')->whereIn('customer_id',$customerIds)->where('redeem_mode','2')->sum('redeem_amount');
                     $redeem_gift = Redemption::with('customer')->where('status','!=' , '2')->whereIn('customer_id',$customerIds)->where('redeem_mode','1')->sum('redeem_amount');
                     $total_redeem = $redeem_gift + $redeem_neft;
@@ -1024,8 +1011,7 @@ class ReportController extends Controller
                 })
                 ->addColumn('balance_active_point', function ($data) {
                     $usersIds = User::where('branch_id', $data->id)->pluck('id')->toArray();
-                    $employeeIds = EmployeeDetail::whereIn('user_id', $usersIds)->pluck('customer_id');
-                    $customerIds= Customers::whereIn('id', $employeeIds)->pluck('id');
+                    $customerIds=  Customers::whereIn('executive_id', $usersIds)->where('customertype','2')->pluck('id');
                     $redeem_neft = Redemption::with('customer')->where('status','!=' , '2')->whereIn('customer_id',$customerIds)->where('redeem_mode','2')->sum('redeem_amount');
                     $redeem_gift = Redemption::with('customer')->where('status','!=' , '2')->whereIn('customer_id',$customerIds)->where('redeem_mode','1')->sum('redeem_amount');
                     $total_redeem = $redeem_gift + $redeem_neft;

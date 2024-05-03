@@ -139,134 +139,66 @@
                   </a>
                 </li>
                 @endif
-              </ul>
-            </div>
-          </li>
-          @endif
-          @if(auth()->user()->can('country_access'))
-          <li class="nav-item {{ request()->is('country*') || request()->is('state*') || request()->is('district*') || request()->is('city*') || request()->is('pincode*') ? 'active' : '' }}">
-            <a class="nav-link collapsed" data-toggle="collapse" href="#addressMenu" aria-expanded="false">
-              <i class="material-icons">room</i>
-              <p> {!! trans('panel.sidemenu.address_master') !!}
-
-              </p>
-            </a>
-            <div class="collapse" id="addressMenu" style="">
-              <ul class="nav">
                 @if(auth()->user()->can('country_access'))
-                <li class="nav-item {{ request()->is('country*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('country') }}">
+                <li class="nav-item {{ request()->is('country*') || request()->is('state*') || request()->is('district*') || request()->is('city*') || request()->is('pincode*') ? 'active' : '' }}">
+                  <a class="nav-link collapsed" data-toggle="collapse" href="#addressMenu" aria-expanded="false">
                     <i class="material-icons">room</i>
-                    <p>{!! trans('panel.sidemenu.address_country') !!}</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('state_access'))
-                <li class="nav-item {{ request()->is('state*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('state') }}">
-                    <i class="material-icons">room</i>
-                    <p>{!! trans('panel.sidemenu.address_state') !!}</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('district_access'))
-                <li class="nav-item {{ request()->is('district*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('district') }}">
-                    <i class="material-icons">room</i>
-                    <p>{!! trans('panel.sidemenu.address_district') !!}</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('city_access'))
-                <li class="nav-item {{ request()->is('city') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('city') }}">
-                    <i class="material-icons">room</i>
-                    <p>{!! trans('panel.sidemenu.address_city') !!}</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('pincode_access'))
-                <li class="nav-item {{ request()->is('pincode*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('pincode') }}">
-                    <i class="material-icons">room</i>
-                    <p>{!! trans('panel.sidemenu.address_pincode') !!}</p>
-                  </a>
-                </li>
-                @endif
-              </ul>
-            </div>
-          </li>
-          @endif
-          @if(auth()->user()->can('user_access'))
-          <li class="nav-item {{ request()->is('users*') || request()->is('targets*') || request()->is('livelocation*') || request()->is('roles*') || request()->is('permissions*') || request()->is('tours*') || request()->is('usercity*') ? 'active' : '' }}">
-            <a class="nav-link collapsed" data-toggle="collapse" href="#userMenu" aria-expanded="false">
-              <i class="material-icons">people</i>
-              <p> {!! trans('panel.sidemenu.users_master') !!}
+                    <p> {!! trans('panel.sidemenu.address_master') !!}
 
-              </p>
-            </a>
-            <div class="collapse" id="userMenu" style="">
-              <ul class="nav">
-                <!--                 @if(auth()->user()->can('appraisal_pms'))
-                <li class="nav-item {{ request()->is('appraisal/create') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('appraisal/index') }}">
-                    <i class="material-icons">verified_user</i>
-                    <p>Appraisal(PMS)</p>
+                    </p>
                   </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('sales_weightage'))
-                <li class="nav-item {{ request()->is('sales_weightage') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('sales_weightage') }}">
-                    <i class="material-icons">check</i>
-                    <p>{!! trans('panel.sales_weightage.title') !!}</p>
-                  </a>
-                </li>
-                @endif -->
-                @if(auth()->user()->can('user_access'))
-                <li class="nav-item {{ request()->is('users*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('users') }}">
-                    <i class="material-icons">verified_user</i>
-                    <p>{!! trans('panel.sidemenu.users') !!}</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('target_access'))
-                <li class="nav-item {{ request()->is('targets*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('targets') }}">
-                    <i class="material-icons">verified_user</i>
-                    <p>User Target</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('user_location'))
-                <li class="nav-item {{ request()->is('livelocation*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('livelocation') }}">
-                    <i class="material-icons">input</i>
-                    <p>User Live Location</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('tours'))
-                <li class="nav-item {{ request()->is('tours*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('tours') }}">
-                    <i class="material-icons">flight</i>
-                    <p>Tours</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('city_assigned'))
-                <li class="nav-item {{ request()->is('usercity*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('usercity') }}">
-                    <i class="material-icons">flight</i>
-                    <p>City Assigned</p>
-                  </a>
+                  <div class="collapse" id="addressMenu" style="">
+                    <ul class="nav">
+                      @if(auth()->user()->can('country_access'))
+                      <li class="nav-item {{ request()->is('country*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ url('country') }}">
+                          <i class="material-icons">room</i>
+                          <p>{!! trans('panel.sidemenu.address_country') !!}</p>
+                        </a>
+                      </li>
+                      @endif
+                      @if(auth()->user()->can('state_access'))
+                      <li class="nav-item {{ request()->is('state*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ url('state') }}">
+                          <i class="material-icons">room</i>
+                          <p>{!! trans('panel.sidemenu.address_state') !!}</p>
+                        </a>
+                      </li>
+                      @endif
+                      @if(auth()->user()->can('district_access'))
+                      <li class="nav-item {{ request()->is('district*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ url('district') }}">
+                          <i class="material-icons">room</i>
+                          <p>{!! trans('panel.sidemenu.address_district') !!}</p>
+                        </a>
+                      </li>
+                      @endif
+                      @if(auth()->user()->can('city_access'))
+                      <li class="nav-item {{ request()->is('city') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ url('city') }}">
+                          <i class="material-icons">room</i>
+                          <p>{!! trans('panel.sidemenu.address_city') !!}</p>
+                        </a>
+                      </li>
+                      @endif
+                      @if(auth()->user()->can('pincode_access'))
+                      <li class="nav-item {{ request()->is('pincode*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ url('pincode') }}">
+                          <i class="material-icons">room</i>
+                          <p>{!! trans('panel.sidemenu.address_pincode') !!}</p>
+                        </a>
+                      </li>
+                      @endif
+                    </ul>
+                  </div>
                 </li>
                 @endif
               </ul>
             </div>
           </li>
           @endif
+
+
           @if(auth()->user()->can(['expenses_type']))
           <!-- <li class="nav-item {{ request()->is('expenses_type') ? 'active' : '' }}">
             <a class="nav-link" href="{{ url('expenses_type') }}">
@@ -481,6 +413,76 @@
                     <i class="material-icons">check_circle</i>
                     <p>{!! trans('panel.sidemenu.task') !!}</p>
                   </a>
+                </li>
+                @endif
+                @if(auth()->user()->can('user_access'))
+                <li class="nav-item {{ request()->is('users*') || request()->is('targets*') || request()->is('livelocation*') || request()->is('roles*') || request()->is('permissions*') || request()->is('tours*') || request()->is('usercity*') ? 'active' : '' }}">
+                  <a class="nav-link collapsed" data-toggle="collapse" href="#userMenu" aria-expanded="false">
+                    <i class="material-icons">people</i>
+                    <p> {!! trans('panel.sidemenu.users_master') !!}
+
+                    </p>
+                  </a>
+                  <div class="collapse" id="userMenu" style="">
+                    <ul class="nav">
+                      <!--                 @if(auth()->user()->can('appraisal_pms'))
+                      <li class="nav-item {{ request()->is('appraisal/create') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ url('appraisal/index') }}">
+                          <i class="material-icons">verified_user</i>
+                          <p>Appraisal(PMS)</p>
+                        </a>
+                      </li>
+                      @endif
+                      @if(auth()->user()->can('sales_weightage'))
+                      <li class="nav-item {{ request()->is('sales_weightage') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ url('sales_weightage') }}">
+                          <i class="material-icons">check</i>
+                          <p>{!! trans('panel.sales_weightage.title') !!}</p>
+                        </a>
+                      </li>
+                      @endif -->
+                      @if(auth()->user()->can('user_access'))
+                      <li class="nav-item {{ request()->is('users*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ url('users') }}">
+                          <i class="material-icons">verified_user</i>
+                          <p>{!! trans('panel.sidemenu.users') !!}</p>
+                        </a>
+                      </li>
+                      @endif
+                      @if(auth()->user()->can('target_access'))
+                      <li class="nav-item {{ request()->is('targets*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ url('targets') }}">
+                          <i class="material-icons">verified_user</i>
+                          <p>User Target</p>
+                        </a>
+                      </li>
+                      @endif
+                      @if(auth()->user()->can('user_location'))
+                      <li class="nav-item {{ request()->is('livelocation*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ url('livelocation') }}">
+                          <i class="material-icons">input</i>
+                          <p>User Live Location</p>
+                        </a>
+                      </li>
+                      @endif
+                      @if(auth()->user()->can('tours'))
+                      <li class="nav-item {{ request()->is('tours*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ url('tours') }}">
+                          <i class="material-icons">flight</i>
+                          <p>Tours</p>
+                        </a>
+                      </li>
+                      @endif
+                      @if(auth()->user()->can('city_assigned'))
+                      <li class="nav-item {{ request()->is('usercity*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ url('usercity') }}">
+                          <i class="material-icons">flight</i>
+                          <p>City Assigned</p>
+                        </a>
+                      </li>
+                      @endif
+                    </ul>
+                  </div>
                 </li>
                 @endif
               </ul>
@@ -877,6 +879,14 @@
                   </a>
                 </li>
                 @endif -->
+                @if(auth()->user()->can('reports_sale'))
+                <li class="nav-item {{ request()->is('reports_sale*') ? 'active' : '' }}" >
+                  <a class="nav-link" href="{{ url('reports/reports_sale') }}">
+                    <i class="material-icons">check_circle</i>
+                    <p>Sales </p>
+                  </a>
+                </li>
+                @endif
                 @if(auth()->user()->can('adherence_report'))
                 <li class="nav-item {{ request()->is('reports/beatadherence*') ? 'active' : '' }}" style="display:none;">
                   <a class="nav-link" href="{{ url('reports/beatadherence') }}">

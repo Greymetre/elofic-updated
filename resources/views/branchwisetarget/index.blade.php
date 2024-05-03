@@ -16,11 +16,11 @@
 
 
                     <div class="p-2" style="width:160px;">
-                      <select class="selectpicker" name="branch_id" id="branch_id" data-style="select-with-transition" title="panel.sales_users.branch">
+                      <select class="select2" name="branch_id" id="branch_id" data-style="select-with-transition" title="panel.sales_users.branch">
                         <option value="" disabled selected>{!! trans('panel.sales_users.branch') !!}</option>
                         @if(@isset($branches ))
                         @foreach($branches as $branch)
-                        <option value="{!! $branch->id !!}">{!! $branch->branch_name !!}</option>
+                        <option value="{!! $branch->branch_name !!}">{!! $branch->branch_name !!}</option>
                         @endforeach
                         @endif
                       </select>
@@ -36,11 +36,11 @@
                       </select>
                     </div>
                     <div class="p-2" style="width:160px;">
-                      <select class="selectpicker" name="division" id="division" data-style="select-with-transition" title="{!! trans('panel.sales_users.select-divisions') !!}">
+                      <select class="select2" name="division" id="division" data-style="select-with-transition" title="{!! trans('panel.sales_users.select-divisions') !!}">
                         <option value="" disabled selected>{!! trans('panel.sales_users.select-divisions') !!}</option>
                         @if(@isset($divisions ))
                         @foreach($divisions as $division)
-                        <option value="{!! $division->id !!}">{!! $division->division_name !!}</option>
+                        <option value="{!! $division->division_name !!}">{!! $division->division_name !!}</option>
                         @endforeach
                         @endif
                       </select>
@@ -394,15 +394,15 @@
             "defaultContent": ''
           },
           {
-            data: 'user.getdivision.division_name',
-            name: 'division',
+            data: 'division_name',
+            name: 'division_name',
             orderable: false,
             searchable: false,
             "defaultContent": ''
           },
           {
-            data: 'user.getbranch.branch_name',
-            name: 'branch',
+            data: 'branch_name',
+            name: 'branch_name',
             orderable: false,
             searchable: false,
             "defaultContent": ''

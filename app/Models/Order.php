@@ -87,7 +87,7 @@ class Order extends Model
                 'distributor_amount' => isset($request['distributor_amount']) ? $request['distributor_amount'] :null,   
                 'frieght_discount' => isset($request['frieght_discount']) ? $request['frieght_discount'] :null,   
                 'frieght_amount' => isset($request['frieght_amount']) ? $request['frieght_amount'] :null,   
-                'cash_discount' => isset($request['cash_discount']) ? $request['cash_discount'] :null,   
+                'cash_discount' => isset($request['cash_discount']) ? $request['cash_discount'] :0,   
                 'product_cat_id' => isset($request['product_cat_id']) ? $request['product_cat_id'] :null,   
                 'dod_discount' => isset($request['dod_discount']) ? $request['dod_discount'] :null,   
                 'special_distribution_discount' => isset($request['special_distribution_discount']) ? $request['special_distribution_discount'] :null,   

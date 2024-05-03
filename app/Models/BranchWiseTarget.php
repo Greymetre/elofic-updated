@@ -19,4 +19,12 @@ class BranchWiseTarget extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function branch()  {
+        return $this->belongsTo(Branch::class);
+    }
+
+    public function division()  {
+        return $this->belongsTo(Division::class);
+    }
+
 }

@@ -47,10 +47,13 @@ class BranchAchievementImport implements ToCollection,WithValidation,WithHeading
             $carbonYear = $carbonDate->format('Y');
             // dd($carbonDate->format('Y'));
 
+
             $salesTargetUsers = BranchWiseTarget::updateOrCreate([
                 'user_id' => $row['user_id'],
                 'month' => $carbonMonth,
-                'year' => $carbonYear
+                'year' => $carbonYear,
+                'branch_id' => $row['branch_id'],
+                'div_id' => $row['div_id'],
                 ],[
 
                 'user_id' => $row['user_id'],
@@ -64,6 +67,8 @@ class BranchAchievementImport implements ToCollection,WithValidation,WithHeading
                 'year' => $carbonYear,
                 'achievement' => $row['achievement']
             ]);
+
+            // dd($salesTargetUsers);
         }
     }
     public function rules(): array

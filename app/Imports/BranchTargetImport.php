@@ -47,12 +47,26 @@ class BranchTargetImport implements ToCollection,WithValidation,WithHeadingRow, 
             $carbonYear = $carbonDate->format('Y');
             // dd($carbonDate->format('Y'));
 
-            $salesTargetUsers = BranchWiseTarget::updateOrCreate([
-                'user_id' => $row['user_id'],
-                'month' => $carbonMonth,
-                'year' => $carbonYear
-                ],[
+            // $salesTargetUsers = BranchWiseTarget::updateOrCreate([
+            //     'user_id' => $row['user_id'],
+            //     'month' => $carbonMonth,
+            //     'year' => $carbonYear
+            //     ],[
 
+            //     'user_id' => $row['user_id'],
+            //     'user_name' => $row['user_name'],
+            //     'div_id' => $row['div_id'],
+            //     'division_name' => $row['div_name'],
+            //     'branch_id' => $row['branch_id'],
+            //     'branch_name' => $row['branch_name'],
+            //     'type' => $row['type'],
+            //     'month' => $carbonMonth,
+            //     'year' => $carbonYear,
+            //     'target' => $row['target_value']
+            // ]);
+
+
+            $salesTargetUsers = BranchWiseTarget::create([
                 'user_id' => $row['user_id'],
                 'user_name' => $row['user_name'],
                 'div_id' => $row['div_id'],

@@ -25,7 +25,7 @@ class VisitReport extends Model
 
     public function customers()
     {
-        return $this->belongsTo('App\Models\Customers', 'customer_id', 'id')->select('id','active','name','mobile','first_name', 'last_name');
+        return $this->belongsTo('App\Models\Customers', 'customer_id', 'id');
     }
 
     public function visittypename()

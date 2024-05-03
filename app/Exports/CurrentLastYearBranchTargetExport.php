@@ -37,14 +37,28 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
 	{
 		$f_year_array = explode('-', $this->financial_year);
 
-        $data = BranchWiseTarget::join('users', 'branchwise_targets.user_id', '=', 'users.id')->select([
-         DB::raw('SUM(achievement) as achievements'),
+        // $data = BranchWiseTarget::join('users', 'branchwise_targets.user_id', '=', 'users.id')->select([
+        //  DB::raw('SUM(achievement) as achievements'),
+        //  DB::raw('GROUP_CONCAT(month) as months'),  
+        //  DB::raw('GROUP_CONCAT(user_id) as user_ids'),
+        //  DB::raw('GROUP_CONCAT(year) as years'),
+        //  'users.branch_id',
+        //  'users.division_id',
+        //  'users.designation_id',
+        // ]);
+
+
+        $data = BranchWiseTarget::with('user')->select([
          DB::raw('GROUP_CONCAT(month) as months'),  
          DB::raw('GROUP_CONCAT(user_id) as user_ids'),
          DB::raw('GROUP_CONCAT(year) as years'),
-         'users.branch_id',
-         'users.division_id',
-         'users.designation_id',
+         DB::raw('branch_name'),
+         DB::raw('division_name'),
+         'branch_id',
+         'div_id',
+         'user_id',
+         'target',
+         'achievement',
         ]);
 
         if($this->month == '' && empty($this->month)){
@@ -65,7 +79,7 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
             });
         }
         
-        $data = $data->groupBy('users.branch_id', 'users.division_id')->orderBy('month')->get();
+        $data = $data->groupBy('branch_id','div_id','user_id')->orderBy('month')->get();
 
 		return $data;
 	}
@@ -126,8 +140,8 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
     $response = array();
     $response[0] = $users['employee_codes'] ?? '';
     $response[1] = $users['name'] ?? '';
-    $response[2] = $branch->branch_name ?? '';
-    $response[3] = $division->division_name ?? '';
+    $response[2] = $data['branch_name'] ?? '';
+    $response[3] = $data['division_name'] ?? '';
     $f_year_array = explode('-', $this->financial_year);
     $data['months'] = explode(',', $data['months']);
 
@@ -143,16 +157,21 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
             $sales_data_current_year = DB::table('branchwise_targets')
                 ->where('month', 'Apr')
                 ->where('year', $currentYear)
-                ->whereIn('user_id', $userIds)
+                ->where('user_id', $data['user_id'])
+                ->where('branch_id', $data['branch_id'])
+                ->where('div_id', $data['div_id'])
                 ->select(DB::raw('SUM(achievement) as achievements_current_year'))
                 ->first();
+
 
             $sales_data_last_year = DB::table('branchwise_targets')
                 ->where('month', 'Apr')
                 ->where('year', $previousYear)
-                ->whereIn('user_id', $userIds)
+                ->where('user_id', $data['user_id'])
+                ->where('branch_id', $data['branch_id'])
+                ->where('div_id', $data['div_id'])
                 ->select(DB::raw('SUM(achievement) as achievements_last_year'))
-                ->first(); 
+                ->first();
 
 
             $response[4] = isset($sales_data_last_year->achievements_last_year) ? $sales_data_last_year->achievements_last_year : '0';
@@ -201,14 +220,18 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
             $sales_data_current_year = DB::table('branchwise_targets')
             ->where('month', 'May')
             ->where('year', $currentYear)
-            ->whereIn('user_id', $userIds)
+            ->where('user_id', $data['user_id'])
+            ->where('branch_id', $data['branch_id'])
+            ->where('div_id', $data['div_id'])
             ->select(DB::raw('SUM(achievement) as achievements_current_year'))
             ->first();
 
             $sales_data_last_year = DB::table('branchwise_targets')
             ->where('month', 'May')
             ->where('year', $previousYear)
-            ->whereIn('user_id', $userIds)
+            ->where('user_id', $data['user_id'])
+            ->where('branch_id', $data['branch_id'])
+            ->where('div_id', $data['div_id'])
             ->select(DB::raw('SUM(achievement) as achievements_last_year'))
             ->first();    
 
@@ -257,14 +280,18 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
             $sales_data_current_year = DB::table('branchwise_targets')
             ->where('month', 'Jun')
             ->where('year', $currentYear)
-            ->whereIn('user_id', $userIds)
+            ->where('user_id', $data['user_id'])
+            ->where('branch_id', $data['branch_id'])
+            ->where('div_id', $data['div_id'])
             ->select(DB::raw('SUM(achievement) as achievements_current_year'))
             ->first();
 
             $sales_data_last_year = DB::table('branchwise_targets')
             ->where('month', 'Jun')
             ->where('year', $previousYear)
-            ->whereIn('user_id', $userIds)
+            ->where('user_id', $data['user_id'])
+            ->where('branch_id', $data['branch_id'])
+            ->where('div_id', $data['div_id'])
             ->select(DB::raw('SUM(achievement) as achievements_last_year'))
             ->first();    
 
@@ -318,14 +345,18 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
             $sales_data_current_year = DB::table('branchwise_targets')
             ->where('month', 'Jul')
             ->where('year', $currentYear)
-            ->whereIn('user_id', $userIds)
+            ->where('user_id', $data['user_id'])
+            ->where('branch_id', $data['branch_id'])
+            ->where('div_id', $data['div_id'])
             ->select(DB::raw('SUM(achievement) as achievements_current_year'))
             ->first();
 
             $sales_data_last_year = DB::table('branchwise_targets')
             ->where('month', 'Jul')
             ->where('year', $previousYear)
-            ->whereIn('user_id', $userIds)
+            ->where('user_id', $data['user_id'])
+            ->where('branch_id', $data['branch_id'])
+            ->where('div_id', $data['div_id'])
             ->select(DB::raw('SUM(achievement) as achievements_last_year'))
             ->first();    
 
@@ -372,14 +403,18 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
             $sales_data_current_year = DB::table('branchwise_targets')
             ->where('month', 'Aug')
             ->where('year', $currentYear)
-            ->whereIn('user_id', $userIds)
+            ->where('user_id', $data['user_id'])
+            ->where('branch_id', $data['branch_id'])
+            ->where('div_id', $data['div_id'])
             ->select(DB::raw('SUM(achievement) as achievements_current_year'))
             ->first();
 
             $sales_data_last_year = DB::table('branchwise_targets')
             ->where('month', 'Aug')
             ->where('year', $previousYear)
-            ->whereIn('user_id', $userIds)
+            ->where('user_id', $data['user_id'])
+            ->where('branch_id', $data['branch_id'])
+            ->where('div_id', $data['div_id'])
             ->select(DB::raw('SUM(achievement) as achievements_last_year'))
             ->first();    
 
@@ -426,14 +461,18 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
                        $sales_data_current_year = DB::table('branchwise_targets')
                        ->where('month', 'Sep')
                        ->where('year', $currentYear)
-                       ->whereIn('user_id', $userIds)
+                       ->where('user_id', $data['user_id'])
+                       ->where('branch_id', $data['branch_id'])
+                       ->where('div_id', $data['div_id'])
                        ->select(DB::raw('SUM(achievement) as achievements_current_year'))
                        ->first();
 
                        $sales_data_last_year = DB::table('branchwise_targets')
                        ->where('month', 'Sep')
                        ->where('year', $previousYear)
-                       ->whereIn('user_id', $userIds)
+                       ->where('user_id', $data['user_id'])
+                       ->where('branch_id', $data['branch_id'])
+                       ->where('div_id', $data['div_id'])
                        ->select(DB::raw('SUM(achievement) as achievements_last_year'))
                        ->first();    
 
@@ -486,14 +525,18 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
                     $sales_data_current_year = DB::table('branchwise_targets')
                     ->where('month', 'Oct')
                     ->where('year', $currentYear)
-                    ->whereIn('user_id', $userIds)
+                   ->where('user_id', $data['user_id'])
+                   ->where('branch_id', $data['branch_id'])
+                   ->where('div_id', $data['div_id'])
                     ->select(DB::raw('SUM(achievement) as achievements_current_year'))
                     ->first();
 
                     $sales_data_last_year = DB::table('branchwise_targets')
                     ->where('month', 'Oct')
                     ->where('year', $previousYear)
-                    ->whereIn('user_id', $userIds)
+                    ->where('user_id', $data['user_id'])
+                    ->where('branch_id', $data['branch_id'])
+                    ->where('div_id', $data['div_id'])
                     ->select(DB::raw('SUM(achievement) as achievements_last_year'))
                     ->first();    
 
@@ -535,14 +578,18 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
                       $sales_data_current_year = DB::table('branchwise_targets')
                           ->where('month', 'Nov')
                           ->where('year', $currentYear)
-                          ->whereIn('user_id', $userIds)
+                          ->where('user_id', $data['user_id'])
+                          ->where('branch_id', $data['branch_id'])
+                          ->where('div_id', $data['div_id'])
                           ->select(DB::raw('SUM(achievement) as achievements_current_year'))
                           ->first();
 
                       $sales_data_last_year = DB::table('branchwise_targets')
                           ->where('month', 'Nov')
                           ->where('year', $previousYear)
-                          ->whereIn('user_id', $userIds)
+                          ->where('user_id', $data['user_id'])
+                          ->where('branch_id', $data['branch_id'])
+                          ->where('div_id', $data['div_id'])
                           ->select(DB::raw('SUM(achievement) as achievements_last_year'))
                           ->first(); 
 
@@ -592,14 +639,18 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
             $sales_data_current_year = DB::table('branchwise_targets')
             ->where('month', 'Dec')
             ->where('year', $currentYear)
-            ->whereIn('user_id', $userIds)
+            ->where('user_id', $data['user_id'])
+            ->where('branch_id', $data['branch_id'])
+            ->where('div_id', $data['div_id'])
             ->select(DB::raw('SUM(achievement) as achievements_current_year'))
             ->first();
 
             $sales_data_last_year = DB::table('branchwise_targets')
             ->where('month', 'Dec')
             ->where('year', $previousYear)
-            ->whereIn('user_id', $userIds)
+            ->where('user_id', $data['user_id'])
+            ->where('branch_id', $data['branch_id'])
+            ->where('div_id', $data['div_id'])
             ->select(DB::raw('SUM(achievement) as achievements_last_year'))
             ->first(); 
 
@@ -654,14 +705,18 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
             $sales_data_current_year = DB::table('branchwise_targets')
             ->where('month', 'Jan')
             ->where('year', $currentYear)
-            ->whereIn('user_id', $userIds)
+            ->where('user_id', $data['user_id'])
+            ->where('branch_id', $data['branch_id'])
+            ->where('div_id', $data['div_id'])
             ->select(DB::raw('SUM(achievement) as achievements_current_year'))
             ->first();
 
             $sales_data_last_year = DB::table('branchwise_targets')
             ->where('month', 'Jan')
             ->where('year', $previousYear)
-            ->whereIn('user_id', $userIds)
+            ->where('user_id', $data['user_id'])
+            ->where('branch_id', $data['branch_id'])
+            ->where('div_id', $data['div_id'])
             ->select(DB::raw('SUM(achievement) as achievements_last_year'))
             ->first(); 
 
@@ -711,14 +766,18 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
             $sales_data_current_year = DB::table('branchwise_targets')
             ->where('month', 'Feb')
             ->where('year', $currentYear)
-            ->whereIn('user_id', $userIds)
+            ->where('user_id', $data['user_id'])
+            ->where('branch_id', $data['branch_id'])
+            ->where('div_id', $data['div_id'])
             ->select(DB::raw('SUM(achievement) as achievements_current_year'))
             ->first();
 
             $sales_data_last_year = DB::table('branchwise_targets')
             ->where('month', 'Feb')
             ->where('year', $previousYear)
-            ->whereIn('user_id', $userIds)
+            ->where('user_id', $data['user_id'])
+            ->where('branch_id', $data['branch_id'])
+            ->where('div_id', $data['div_id'])
             ->select(DB::raw('SUM(achievement) as achievements_last_year'))
             ->first(); 
 
@@ -768,14 +827,18 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
             $sales_data_current_year = DB::table('branchwise_targets')
             ->where('month', 'Mar')
             ->where('year', $currentYear)
-            ->whereIn('user_id', $userIds)
+            ->where('user_id', $data['user_id'])
+            ->where('branch_id', $data['branch_id'])
+            ->where('div_id', $data['div_id'])
             ->select(DB::raw('SUM(achievement) as achievements_current_year'))
             ->first();
 
             $sales_data_last_year = DB::table('branchwise_targets')
             ->where('month', 'Mar')
             ->where('year', $previousYear)
-            ->whereIn('user_id', $userIds)
+            ->where('user_id', $data['user_id'])
+            ->where('branch_id', $data['branch_id'])
+            ->where('div_id', $data['div_id'])
             ->select(DB::raw('SUM(achievement) as achievements_last_year'))
             ->first(); 
 

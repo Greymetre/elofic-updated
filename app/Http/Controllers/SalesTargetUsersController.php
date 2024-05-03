@@ -500,9 +500,10 @@ class SalesTargetUsersController extends Controller
 
     public function branches_sales_target(Request $request) {
         $sales_target_users = SalesTargetUsers::latest()->get();
-        $users = User::latest()->get();
-        $branches = Branch::latest()->get(); 
-        $divisions = Division::latest()->get();
+        $userIds = BranchWiseTarget::select('user_id')->distinct()->get();
+        $users = User::whereIn('id',$userIds)->get();
+        $branches =  BranchWiseTarget::select('branch_name')->distinct()->get();
+        $divisions = BranchWiseTarget::select('division_name')->distinct()->get();
         $currentYear = Carbon::now()->year;
         $years = range($currentYear - 2, $currentYear + 2);
         
@@ -518,8 +519,8 @@ class SalesTargetUsersController extends Controller
             }
 
             if($request->branch_id && $request->branch_id != '' && $request->branch_id != null){
-                $userIds = User::where('branch_id', $request->branch_id)->pluck('id');
-                $query->whereIn('user_id',$userIds) ;
+                // $userIds = User::where('branch_id', $request->branch_id)->pluck('id');
+                $query->where('branch_name',$request->branch_id) ;
             }
 
             if($request->user_id && $request->user_id != '' && $request->user_id != null){
@@ -528,8 +529,8 @@ class SalesTargetUsersController extends Controller
             }
 
             if($request->division && $request->division != '' && $request->division != null){
-                $divisionIds = User::where('division_id', $request->division)->pluck('id');
-                $query->whereIn('user_id',$divisionIds) ;
+                // $divisionIds = User::where('division_id', $request->division)->pluck('id');
+                $query->where('division_name',$request->division) ;
             }
 
             if($request->type && $request->type != '' && $request->type != null){

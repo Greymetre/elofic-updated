@@ -37,16 +37,31 @@ class BranchTargetExport implements FromCollection,WithHeadings,ShouldAutoSize,W
     {
         $f_year_array = explode('-', $this->financial_year);
 
-        $data = BranchWiseTarget::join('users', 'branchwise_targets.user_id', '=', 'users.id')->select([
-         // DB::raw('SUM(target) as targets'),
-         // DB::raw('SUM(achievement) as achievements'),
+        // $data = BranchWiseTarget::join('users', 'branchwise_targets.user_id', '=', 'users.id')->select([
+        //  // DB::raw('SUM(target) as targets'),
+        //  // DB::raw('SUM(achievement) as achievements'),
+        //  DB::raw('GROUP_CONCAT(month) as months'),  
+        //  DB::raw('GROUP_CONCAT(user_id) as user_ids'),
+        //  DB::raw('GROUP_CONCAT(year) as years'),
+        //  DB::raw('branch_name'),
+        //  DB::raw('division_name'),
+        //  // DB::raw('GROUP_CONCAT(achievement_percent) as achievement_percents'),
+        //  'users.branch_id',
+        //  'users.division_id',
+        //  'users.designation_id',
+        // ]);
+
+
+        $data = BranchWiseTarget::with('user')->select([
          DB::raw('GROUP_CONCAT(month) as months'),  
          DB::raw('GROUP_CONCAT(user_id) as user_ids'),
          DB::raw('GROUP_CONCAT(year) as years'),
-         // DB::raw('GROUP_CONCAT(achievement_percent) as achievement_percents'),
-         'users.branch_id',
-         'users.division_id',
-         'users.designation_id',
+         DB::raw('branch_name'),
+         DB::raw('division_name'),
+         'branch_id',
+         'div_id',
+         'target',
+         'user_id',
         ]);
 
         if($this->month == '' && empty($this->month)){
@@ -67,7 +82,7 @@ class BranchTargetExport implements FromCollection,WithHeadings,ShouldAutoSize,W
             });
         }
         
-        $data = $data->groupBy('users.branch_id', 'users.division_id')->orderBy('month')->get();
+        $data = $data->groupBy('branch_id','div_id','user_id')->orderBy('month')->get();
 
         return $data;
     }
@@ -129,8 +144,8 @@ class BranchTargetExport implements FromCollection,WithHeadings,ShouldAutoSize,W
     $response = array();
     $response[0] = $users['employee_codes'] ?? '';
     $response[1] = $users['name'] ?? '';
-    $response[2] = $branch->branch_name ?? '';
-    $response[3] = $division->division_name ?? '';
+    $response[2] = $data['branch_name'] ?? '';
+    $response[3] = $data['division_name'] ?? '';
     $f_year_array = explode('-', $this->financial_year);
     $data['months'] = explode(',', $data['months']);
 
@@ -140,20 +155,21 @@ class BranchTargetExport implements FromCollection,WithHeadings,ShouldAutoSize,W
         if($month == 'Apr' && $f_year_array[0] == $year[$key]) {
 
         $sales_data = DB::table('branchwise_targets')
-            ->where(['month'=> 'Apr', 'year' => $f_year_array[0]])->whereIn('user_id', $userIds)->select(
-                DB::raw('SUM(target ) as targets'),
-                DB::raw('SUM(achievement) as achievements')
-            )
+            ->where(['month'=> 'Apr', 'year' => $f_year_array[0]])->where('user_id', $data['user_id'])
+            ->where('branch_id', $data['branch_id'])
+            ->where('div_id', $data['div_id'])
             ->get();
 
-        if(isset($sales_data[0]->achievements) && isset($sales_data[0]->targets) && !empty($sales_data[0]->achievements) && !empty($sales_data[0]->targets)) {
-            $achievementPercent = ($sales_data[0]->targets == 0) ? 0 : ($sales_data[0]->achievements * 100 / $sales_data[0]->targets);
+        if(isset($sales_data[0]->achievement) && isset($sales_data[0]->targets) && !empty($sales_data[0]->achievement) && !empty($sales_data[0]->targets)) {
+            $achievementPercent = ($sales_data[0]->targets == 0) ? 0 : ($sales_data[0]->achievement * 100 / $sales_data[0]->targets);
+            $achievementPercent = number_format($achievementPercent, 2);
+
         }else{
             $achievementPercent = '';
         }    
 
-            $response[4] = $sales_data[0]->targets  ?? '';
-            $response[5] = $sales_data[0]->achievements ?? '';
+            $response[4] = $sales_data[0]->target  ?? '';
+            $response[5] = $sales_data[0]->achievement ?? '';
             $response[6] = $achievementPercent;
         }else{
             if(!isset($response[4])) {
@@ -172,20 +188,17 @@ class BranchTargetExport implements FromCollection,WithHeadings,ShouldAutoSize,W
         $year = explode(',',$data['years']);
         
         if($month == 'May' && $f_year_array[0] == $year[$key]) {
-            $sales_data = DB::table('branchwise_targets')
-                        ->where(['month'=> 'May', 'year' => $f_year_array[0]])->whereIn('user_id', $userIds)->select(
-                            DB::raw('SUM(target ) as targets'),
-                            DB::raw('SUM(achievement) as achievements')
-                        )
-                        ->get();
-            if(isset($sales_data[0]->achievements) && isset($sales_data[0]->targets) && !empty($sales_data[0]->achievements) && !empty($sales_data[0]->targets)) {
-                $achievementPercent = ($sales_data[0]->targets == 0) ? 0 : ($sales_data[0]->achievements * 100 / $sales_data[0]->targets);
+            $sales_data = DB::table('branchwise_targets')->where(['month'=> 'May', 'year' => $f_year_array[0],'user_id' => $data['user_id'], 'branch_id'=> $data['branch_id'],'div_id'=> $data['div_id']])->get();
+
+            if(isset($sales_data[0]->achievement) && isset($sales_data[0]->targets) && !empty($sales_data[0]->achievement) && !empty($sales_data[0]->targets)) {
+                $achievementPercent = ($sales_data[0]->targets == 0) ? 0 : ($sales_data[0]->achievement * 100 / $sales_data[0]->targets);
+                $achievementPercent = number_format($achievementPercent, 2);
             }else{
                 $achievementPercent = '';
             }  
                         
-            $response[7] = $sales_data[0]->targets  ?? '';
-            $response[8] = $sales_data[0]->achievements ??'';
+            $response[7] = $sales_data[0]->target ?? '';
+            $response[8] = $sales_data[0]->achievement ??'';
             $response[9] = $achievementPercent;
         }else{
             if(!isset($response[7])) {
@@ -206,19 +219,17 @@ class BranchTargetExport implements FromCollection,WithHeadings,ShouldAutoSize,W
         
         if($month == 'Jun' && $f_year_array[0] == $year[$key]) {
             $sales_data = DB::table('branchwise_targets')
-                        ->where(['month'=> 'Jun', 'year' => $f_year_array[0]])->whereIn('user_id', $userIds)->select(
-                            DB::raw('SUM(target ) as targets'),
-                            DB::raw('SUM(achievement) as achievements')
-                        )
+                        ->where(['month'=> 'Jun', 'year' => $f_year_array[0],'user_id' => $data['user_id'], 'branch_id'=> $data['branch_id'],'div_id'=> $data['div_id']])
                         ->get();
-            if(isset($sales_data[0]->achievements) && isset($sales_data[0]->targets) && !empty($sales_data[0]->achievements) && !empty($sales_data[0]->targets)) {
-                $achievementPercent = ($sales_data[0]->targets == 0) ? 0 : ($sales_data[0]->achievements * 100 / $sales_data[0]->targets);
+            if(isset($sales_data[0]->achievement) && isset($sales_data[0]->target) && !empty($sales_data[0]->achievement) && !empty($sales_data[0]->target)) {
+                $achievementPercent = ($sales_data[0]->target == 0) ? 0 : ($sales_data[0]->achievement * 100 / $sales_data[0]->target);
+                $achievementPercent = number_format($achievementPercent, 2);
             }else{
                 $achievementPercent = '';
             }
 
-            $response[10] = $sales_data[0]->targets  ?? '';
-            $response[11] = $sales_data[0]->achievements ??'';
+            $response[10] = $sales_data[0]->target  ?? '';
+            $response[11] = $sales_data[0]->achievement ??'';
             $response[12] = $achievementPercent;
         }else{
             if(!isset($response[10])) {
@@ -242,19 +253,17 @@ class BranchTargetExport implements FromCollection,WithHeadings,ShouldAutoSize,W
         
         if($month == 'Jul' && $f_year_array[0] == $year[$key]) {
             $sales_data = DB::table('branchwise_targets')
-                        ->where(['month'=> 'Jul', 'year' => $f_year_array[0]])->whereIn('user_id', $userIds)->select(
-                            DB::raw('SUM(target ) as targets'),
-                            DB::raw('SUM(achievement) as achievements')
-                        )
+                        ->where(['month'=> 'Jul', 'year' => $f_year_array[0],'user_id' => $data['user_id'], 'branch_id'=> $data['branch_id'],'div_id'=> $data['div_id']])
                         ->get();
             
-            if(isset($sales_data[0]->achievements) && isset($sales_data[0]->targets) && !empty($sales_data[0]->achievements) && !empty($sales_data[0]->targets)) {
-                $achievementPercent = ($sales_data[0]->targets == 0) ? 0 : ($sales_data[0]->achievements * 100 / $sales_data[0]->targets);
+            if(isset($sales_data[0]->achievement) && isset($sales_data[0]->target) && !empty($sales_data[0]->achievement) && !empty($sales_data[0]->target)) {
+                $achievementPercent = ($sales_data[0]->target == 0) ? 0 : ($sales_data[0]->achievement * 100 / $sales_data[0]->target);
+                $achievementPercent = number_format($achievementPercent, 2);
             }else{
                 $achievementPercent = '';
             }
-            $response[16] = $sales_data[0]->targets  ?? '';
-            $response[17] = $sales_data[0]->achievements ??'';
+            $response[16] = $sales_data[0]->target ?? '';
+            $response[17] = $sales_data[0]->achievement ??'';
             $response[18] = $achievementPercent;
         }else{
             if(!isset($response[16])) {
@@ -274,19 +283,17 @@ class BranchTargetExport implements FromCollection,WithHeadings,ShouldAutoSize,W
         
         if($month == 'Aug' && $f_year_array[0] == $year[$key]) {
             $sales_data = DB::table('branchwise_targets')
-                        ->where(['month'=> 'Aug', 'year' => $f_year_array[0]])->whereIn('user_id', $userIds)->select(
-                            DB::raw('SUM(target ) as targets'),
-                            DB::raw('SUM(achievement) as achievements')
-                        )
+                        ->where(['month'=> 'Aug', 'year' => $f_year_array[0],'user_id' => $data['user_id'], 'branch_id'=> $data['branch_id'],'div_id'=> $data['div_id']])
                         ->get();
-            if(isset($sales_data[0]->achievements) && isset($sales_data[0]->targets) && !empty($sales_data[0]->achievements) && !empty($sales_data[0]->targets)) {
-                $achievementPercent = ($sales_data[0]->targets == 0) ? 0 : ($sales_data[0]->achievements * 100 / $sales_data[0]->targets);
+            if(isset($sales_data[0]->achievement) && isset($sales_data[0]->target) && !empty($sales_data[0]->achievement) && !empty($sales_data[0]->target)) {
+                $achievementPercent = ($sales_data[0]->target == 0) ? 0 : ($sales_data[0]->achievement * 100 / $sales_data[0]->target);
+                $achievementPercent = number_format($achievementPercent, 2);
             }else{
                 $achievementPercent = '';
             }
                         
-            $response[19] = $sales_data[0]->targets  ?? '';
-            $response[20] = $sales_data[0]->achievements ??'';
+            $response[19] = $sales_data[0]->target  ?? '';
+            $response[20] = $sales_data[0]->achievement ??'';
             $response[21] = $achievementPercent;
         }else{
             if(!isset($response[19])) {
@@ -306,20 +313,18 @@ class BranchTargetExport implements FromCollection,WithHeadings,ShouldAutoSize,W
         
         if($month == 'Sep' && $f_year_array[0] == $year[$key]) {
             $sales_data = DB::table('branchwise_targets')
-                        ->where(['month'=> 'Sep', 'year' => $f_year_array[0]])->whereIn('user_id', $userIds)->select(
-                            DB::raw('SUM(target ) as targets'),
-                            DB::raw('SUM(achievement) as achievements')
-                        )
+                        ->where(['month'=> 'Sep', 'year' => $f_year_array[0],'user_id' => $data['user_id'], 'branch_id'=> $data['branch_id'],'div_id'=> $data['div_id']])
                         ->get();
             
-            if(isset($sales_data[0]->achievements) && isset($sales_data[0]->targets) && !empty($sales_data[0]->achievements) && !empty($sales_data[0]->targets)) {
-                $achievementPercent = ($sales_data[0]->targets == 0) ? 0 : ($sales_data[0]->achievements * 100 / $sales_data[0]->targets);
+            if(isset($sales_data[0]->achievement) && isset($sales_data[0]->target) && !empty($sales_data[0]->achievement) && !empty($sales_data[0]->target)) {
+                $achievementPercent = ($sales_data[0]->target == 0) ? 0 : ($sales_data[0]->achievement * 100 / $sales_data[0]->target);
+                $achievementPercent = number_format($achievementPercent, 2);
             }else{
                 $achievementPercent = '';
             }
 
-            $response[22] = $sales_data[0]->targets  ?? '';
-            $response[23] = $sales_data[0]->achievements ??'';
+            $response[22] = $sales_data[0]->target ?? '';
+            $response[23] = $sales_data[0]->achievement ??'';
             $response[24] = $achievementPercent;
         }else{
             if(!isset($response[22])) {
@@ -345,20 +350,18 @@ class BranchTargetExport implements FromCollection,WithHeadings,ShouldAutoSize,W
         
         if($month == 'Oct' && $f_year_array[0] == $year[$key]) {
             $sales_data = DB::table('branchwise_targets')
-                        ->where(['month'=> 'Oct', 'year' => $f_year_array[0]])->whereIn('user_id', $userIds)->select(
-                            DB::raw('SUM(target ) as targets'),
-                            DB::raw('SUM(achievement) as achievements')
-                        )
+                        ->where(['month'=> 'Oct', 'year' => $f_year_array[0],'user_id' => $data['user_id'], 'branch_id'=> $data['branch_id'],'div_id'=> $data['div_id']])
                         ->get();
 
-            if(isset($sales_data[0]->achievements) && isset($sales_data[0]->targets) && !empty($sales_data[0]->achievements) && !empty($sales_data[0]->targets)) {
-                $achievementPercent = ($sales_data[0]->targets == 0) ? 0 : ($sales_data[0]->achievements * 100 / $sales_data[0]->targets);
+            if(isset($sales_data[0]->achievement) && isset($sales_data[0]->target) && !empty($sales_data[0]->achievement) && !empty($sales_data[0]->target)) {
+                $achievementPercent = ($sales_data[0]->target == 0) ? 0 : ($sales_data[0]->achievement * 100 / $sales_data[0]->target);
+                $achievementPercent = number_format($achievementPercent, 2);
             }else{
                 $achievementPercent = '';
             }
                         
-            $response[28] = $sales_data[0]->targets ?? '';
-            $response[29] = $sales_data[0]->achievements??'';
+            $response[28] = $sales_data[0]->target ?? '';
+            $response[29] = $sales_data[0]->achievement??'';
             $response[30] = $achievementPercent;
         }else{
             if(!isset($response[28])) {
@@ -378,18 +381,16 @@ class BranchTargetExport implements FromCollection,WithHeadings,ShouldAutoSize,W
         
         if($month == 'Nov' && $f_year_array[0] == $year[$key]) {
             $sales_data = DB::table('branchwise_targets')
-                        ->where(['month'=> 'Nov', 'year' => $f_year_array[0]])->whereIn('user_id', $userIds)->select(
-                            DB::raw('SUM(target ) as targets'),
-                            DB::raw('SUM(achievement) as achievements')
-                        )
+                        ->where(['month'=> 'Nov', 'year' => $f_year_array[0],'user_id' => $data['user_id'], 'branch_id'=> $data['branch_id'],'div_id'=> $data['div_id']])
                         ->get();
-            if(isset($sales_data[0]->achievements) && isset($sales_data[0]->targets) && !empty($sales_data[0]->achievements) && !empty($sales_data[0]->targets)) {
-                $achievementPercent = ($sales_data[0]->targets == 0) ? 0 : ($sales_data[0]->achievements * 100 / $sales_data[0]->targets);
+            if(isset($sales_data[0]->achievement) && isset($sales_data[0]->target) && !empty($sales_data[0]->achievement) && !empty($sales_data[0]->target)) {
+                $achievementPercent = ($sales_data[0]->target == 0) ? 0 : ($sales_data[0]->achievement * 100 / $sales_data[0]->target);
+                $achievementPercent = number_format($achievementPercent, 2);
             }else{
                 $achievementPercent = '';
             }
-            $response[31] = $sales_data[0]->targets  ?? '';
-            $response[32] = $sales_data[0]->achievements ??'';
+            $response[31] = $sales_data[0]->target ?? '';
+            $response[32] = $sales_data[0]->achievement ??'';
             $response[33] = $achievementPercent;
         }else{
             if(!isset($response[31])) {
@@ -409,19 +410,17 @@ class BranchTargetExport implements FromCollection,WithHeadings,ShouldAutoSize,W
         
         if($month == 'Dec' && $f_year_array[0] == $year[$key]) {
             $sales_data = DB::table('branchwise_targets')
-                        ->where(['month'=> 'Dec', 'year' => $f_year_array[0]])->whereIn('user_id', $userIds)->select(
-                            DB::raw('SUM(target ) as targets'),
-                            DB::raw('SUM(achievement) as achievements')
-                        )
+                        ->where(['month'=> 'Dec', 'year' => $f_year_array[0],'user_id' => $data['user_id'], 'branch_id'=> $data['branch_id'],'div_id'=> $data['div_id']])
                         ->get();
-            if(isset($sales_data[0]->achievements) && isset($sales_data[0]->targets) && !empty($sales_data[0]->achievements) && !empty($sales_data[0]->targets)) {
-                $achievementPercent = ($sales_data[0]->targets == 0) ? 0 : ($sales_data[0]->achievements * 100 / $sales_data[0]->targets);
+            if(isset($sales_data[0]->achievement) && isset($sales_data[0]->target) && !empty($sales_data[0]->achievement) && !empty($sales_data[0]->target)) {
+                $achievementPercent = ($sales_data[0]->target == 0) ? 0 : ($sales_data[0]->achievement * 100 / $sales_data[0]->target);
+                $achievementPercent = number_format($achievementPercent, 2);
             }else{
                 $achievementPercent = '';
             }
 
-            $response[34] = $sales_data[0]->targets ?? '';
-            $response[35] = $sales_data[0]->achievements??'';
+            $response[34] = $sales_data[0]->target ?? '';
+            $response[35] = $sales_data[0]->achievement??'';
             $response[36] = $achievementPercent;
         }else{
             if(!isset($response[34])) {
@@ -445,19 +444,17 @@ class BranchTargetExport implements FromCollection,WithHeadings,ShouldAutoSize,W
         
         if($month == 'Jan' && $f_year_array[1] == $year[$key]) {
             $sales_data = DB::table('branchwise_targets')
-                        ->where(['month'=> 'Jan', 'year' => $f_year_array[1]])->whereIn('user_id', $userIds)->select(
-                            DB::raw('SUM(target ) as targets'),
-                            DB::raw('SUM(achievement) as achievements')
-                        )
+                        ->where(['month'=> 'Jan', 'year' => $f_year_array[1],'user_id' => $data['user_id'], 'branch_id'=> $data['branch_id'],'div_id'=> $data['div_id']])
                         ->get();
-            if(isset($sales_data[0]->achievements) && isset($sales_data[0]->targets) && !empty($sales_data[0]->achievements) && !empty($sales_data[0]->targets)) {
-                $achievementPercent = ($sales_data[0]->targets == 0) ? 0 : ($sales_data[0]->achievements * 100 / $sales_data[0]->targets);
+            if(isset($sales_data[0]->achievement) && isset($sales_data[0]->target) && !empty($sales_data[0]->achievement) && !empty($sales_data[0]->target)) {
+                $achievementPercent = ($sales_data[0]->target == 0) ? 0 : ($sales_data[0]->achievement * 100 / $sales_data[0]->target);
+                $achievementPercent = number_format($achievementPercent, 2);
             }else{
                 $achievementPercent = '';
             }
 
-            $response[40] = $sales_data[0]->targets ?? '';
-            $response[41] = $sales_data[0]->achievements??'';
+            $response[40] = $sales_data[0]->target ?? '';
+            $response[41] = $sales_data[0]->achievement??'';
             $response[42] = $achievementPercent;
         }else{
             if(!isset($response[40])) {
@@ -477,19 +474,17 @@ class BranchTargetExport implements FromCollection,WithHeadings,ShouldAutoSize,W
         
         if($month == 'Feb' && $f_year_array[1] == $year[$key]) {
             $sales_data = DB::table('branchwise_targets')
-                        ->where(['month'=> 'Feb', 'year' => $f_year_array[1]])->whereIn('user_id', $userIds)->select(
-                            DB::raw('SUM(target ) as targets'),
-                            DB::raw('SUM(achievement) as achievements')
-                        )
+                        ->where(['month'=> 'Feb', 'year' => $f_year_array[1],'user_id' => $data['user_id'], 'branch_id'=> $data['branch_id'],'div_id'=> $data['div_id']])
                         ->get();
-            if(isset($sales_data[0]->achievements) && isset($sales_data[0]->targets) && !empty($sales_data[0]->achievements) && !empty($sales_data[0]->targets)) {
-                $achievementPercent = ($sales_data[0]->targets == 0) ? 0 : ($sales_data[0]->achievements * 100 / $sales_data[0]->targets);
+            if(isset($sales_data[0]->achievement) && isset($sales_data[0]->target) && !empty($sales_data[0]->achievement) && !empty($sales_data[0]->target)) {
+                $achievementPercent = ($sales_data[0]->target == 0) ? 0 : ($sales_data[0]->achievement * 100 / $sales_data[0]->target);
+                $achievementPercent = number_format($achievementPercent, 2);
             }else{
                 $achievementPercent = '';
             }
                         
-            $response[43] = $sales_data[0]->targets  ?? '';
-            $response[44] = $sales_data[0]->achievements ??'';
+            $response[43] = $sales_data[0]->target  ?? '';
+            $response[44] = $sales_data[0]->achievement ??'';
             $response[45] = $achievementPercent;
         }else{
             if(!isset($response[43])) {
@@ -509,19 +504,17 @@ class BranchTargetExport implements FromCollection,WithHeadings,ShouldAutoSize,W
         
         if($month == 'Mar' && $f_year_array[1] == $year[$key]) {
             $sales_data = DB::table('branchwise_targets')
-                        ->where(['month'=> 'Mar', 'year' => $f_year_array[1]])->whereIn('user_id', $userIds)->select(
-                            DB::raw('SUM(target ) as targets'),
-                            DB::raw('SUM(achievement) as achievements')
-                        )
+                        ->where(['month'=> 'Mar', 'year' => $f_year_array[1],'user_id' => $data['user_id'], 'branch_id'=> $data['branch_id'],'div_id'=> $data['div_id']])
                         ->get();
-            if(isset($sales_data[0]->achievements) && isset($sales_data[0]->targets) && !empty($sales_data[0]->achievements) && !empty($sales_data[0]->targets)) {
-                $achievementPercent = ($sales_data[0]->targets == 0) ? 0 : ($sales_data[0]->achievements * 100 / $sales_data[0]->targets);
+            if(isset($sales_data[0]->achievement) && isset($sales_data[0]->target) && !empty($sales_data[0]->achievement) && !empty($sales_data[0]->target)) {
+                $achievementPercent = ($sales_data[0]->target == 0) ? 0 : ($sales_data[0]->achievement * 100 / $sales_data[0]->target);
+                $achievementPercent = number_format($achievementPercent, 2);
             }else{
                 $achievementPercent = '';
             }
          
-            $response[46] = $sales_data[0]->targets ?? '';
-            $response[47] = $sales_data[0]->achievements??'';
+            $response[46] = $sales_data[0]->target ?? '';
+            $response[47] = $sales_data[0]->achievement??'';
             $response[48] = $achievementPercent;
         }else{
             if(!isset($response[46])) {
@@ -538,8 +531,8 @@ class BranchTargetExport implements FromCollection,WithHeadings,ShouldAutoSize,W
     }
 
     $response[49] = '=AO'.$this->rowIndex.' + AR'.$this->rowIndex.' + AU'.$this->rowIndex;
-    $response[50] = '=AP'.$this->rowIndex.' + AS'.$this->rowIndex.' + AT'.$this->rowIndex;
-    $response[51] = '=(AU'.$this->rowIndex.' + AV'.$this->rowIndex.' + AW'.$this->rowIndex.') / 3';
+    $response[50] = '=AP'.$this->rowIndex.' + AS'.$this->rowIndex.' + AV'.$this->rowIndex;
+    $response[51] = '=(AQ'.$this->rowIndex.' + AT'.$this->rowIndex.' + AW'.$this->rowIndex.') / 3';
 
     $response[52] = '=N'.$this->rowIndex.' + Z'.$this->rowIndex.' + AL'.$this->rowIndex.' + AX'.$this->rowIndex;
     $response[53] = '=O'.$this->rowIndex.' + AA'.$this->rowIndex.' + AM'.$this->rowIndex.' + AY'.$this->rowIndex;

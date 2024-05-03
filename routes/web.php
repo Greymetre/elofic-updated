@@ -529,6 +529,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('counterVisitReportDownload', [ ReportController::class, 'counterVisitReportDownload']);
     Route::any('beatAdherenceDetailDownload', [ ReportController::class, 'beatAdherenceDetailDownload']);
     Route::any('reports/attendancereport', [ ReportController::class, 'attendancereport']);
+    Route::any('reports/reports_sale', [ UsersController::class, 'reports_sale']);
+    Route::get('user_sales_report_download', [ UsersController::class, 'user_sales_report_download']);
     Route::any('reports/customersreport', [ ReportController::class, 'customersReport']);
     Route::any('reports/loyalty_summary_report', [ ReportController::class, 'loyaltySummaryReport'])->name('loyaltySummaryReport');
     Route::any('reports/loyalty_dealer_wise_summary_report', [ ReportController::class, 'loyaltyDealerWiseSummaryReport'])->name('loyaltyDealerWiseSummaryReport');
