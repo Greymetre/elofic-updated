@@ -105,6 +105,13 @@ Route::group(['middleware' => ['auth']], function () {
     // Secondary Sales Dashboard
     Route::get('secondary_dashboard/sales', [DashboardController::class, 'secondary_dashboard_sales'])->name('secondary_dashboard.sales');
     Route::any('secondary_dashboard/sales/list', [DashboardController::class, 'secondary_dashboard_sales_list'])->name('secondary_dashboard.sales.list');
+
+        // Primary Sales Dashboard
+    Route::any('primary_sales_template', [DashboardController::class, 'primary_sales_template'])->name('primary_sales_template');
+    Route::post('primary_sales/upload', [DashboardController::class, 'primary_sales_upload'])->name('primary_sales.upload');
+    Route::any('primary_dashboard/sales/list', [DashboardController::class, 'primary_dashboard_sales_list'])->name('primary_dashboard.sales.list');
+    Route::post('secondary_dashboard/total_order_value', [DashboardController::class, 'total_order_value'])->name('secondary_dashboard.total_order_value');
+    Route::post('primarySalesKpiData', [ DashboardController::class, 'primarySalesKpiData']);
     
      //Customers
     Route::resource('customertype', CustomerTypeController::class);
@@ -164,8 +171,10 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('roles-upload', [ RolesController::class, 'upload'])->name('roles.upload');
     //braches 
     Route::resource('branches', BranchController::class);
+    Route::any('branch_report/download', [BranchController::class, 'branch_report_download'])->name('branch_report.download');
     //Division 
     Route::resource('division', DivisionController::class);
+    Route::any('division_report/download', [DivisionController::class, 'division_report_download'])->name('division_report.download');
     //Designation 
     Route::resource('designation', DesignationController::class);
     //holidays
@@ -255,6 +264,18 @@ Route::group(['middleware' => ['auth']], function () {
       Route::post('sales-dealer-users/store', [SalesTargetUsersController::class, 'update_target_dealer_update'])->name('sales-target-dealer.store');
       Route::get('sales_dealer/delete', [SalesTargetUsersController::class, 'sales_target_dealer_delete'])->name('sales_dealer.delete');
       Route::post('sales_dealers/target/upload', [SalesTargetUsersController::class, 'sales_target_dealers_upload'])->name('sales_target_dealers_upload.target.upload');
+
+      // Branch wise sales target
+      Route::get('branches_sales_target', [SalesTargetUsersController::class, 'branches_sales_target'])->name('branches_sales_target');
+      Route::any('branch-target-template', [ SalesTargetUsersController::class, 'branch_target_template'])->name('branch-target-template');
+      Route::post('branch_target_upload', [SalesTargetUsersController::class, 'branch_target_upload'])->name('branch_target_upload');
+      Route::post('branch_target/list', [SalesTargetUsersController::class, 'branch_target_list'])->name('branch_target.list');
+      Route::get('branch_target/delete', [SalesTargetUsersController::class, 'branch_target_delete'])->name('branch_target.delete');
+      Route::any('branch_target/download', [SalesTargetUsersController::class, 'branch_target_download'])->name('branch_target.download');
+
+      // Branch wise achievement
+      Route::any('branch/achievement/template', [ SalesTargetUsersController::class, 'branch_achievement_template'])->name('branch.achievement.template');
+      Route::post('branch/achievement/upload', [SalesTargetUsersController::class, 'branch_achievement_upload'])->name('branch.achievement.upload');
 
       // Sales dealers distributors achievement
       Route::any('sales-dealers-achievement-template', [ SalesTargetUsersController::class, 'sales_dealers_achievement_template'])->name('sales.dealers.achievement.template');
@@ -508,8 +529,19 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('counterVisitReportDownload', [ ReportController::class, 'counterVisitReportDownload']);
     Route::any('beatAdherenceDetailDownload', [ ReportController::class, 'beatAdherenceDetailDownload']);
     Route::any('reports/attendancereport', [ ReportController::class, 'attendancereport']);
+    Route::any('reports/reports_sale', [ UsersController::class, 'reports_sale']);
+    Route::get('user_sales_report_download', [ UsersController::class, 'user_sales_report_download']);
     Route::any('reports/customersreport', [ ReportController::class, 'customersReport']);
+    Route::any('reports/loyalty_summary_report', [ ReportController::class, 'loyaltySummaryReport'])->name('loyaltySummaryReport');
+    Route::any('reports/loyalty_dealer_wise_summary_report', [ ReportController::class, 'loyaltyDealerWiseSummaryReport'])->name('loyaltyDealerWiseSummaryReport');
     Route::any('reports/per_day_counter_visit_report', [ ReportController::class, 'perDayCounterVisitReport']);
+    // loyalty summary report export
+    Route::any('loyalty-summary-report-download', [ ReportController::class, 'loyaltySummaryReportDownload'])->name('loyalty-summary-report-download');
+    // loyalty summary dealer wise report export
+    Route::any('loyalty-delaer-wise-report-download', [ ReportController::class, 'loyaltyDealerSummaryReportDownload'])->name('loyalty-delaer-wise-report-download');
+
+    
+
     Route::any('reports/fieldactivity', [ ReportController::class, 'fieldActivity']);
     Route::any('fieldActivityReportData', [ ReportController::class, 'fieldActivityReportData']);
     Route::any('reports/tourprogramme', [ ReportController::class, 'tourProgramme']);
@@ -573,6 +605,7 @@ Route::group(['middleware' => ['auth']], function () {
      // departments
      Route::resource('departments', DepartmentController::class);
      Route::post('departments-active', [ DepartmentController::class, 'active'])->name('departments.active');
+     Route::any('department_report/download', [DivisionController::class, 'department_report_download'])->name('department_report.download');
 
       //order scheme
      Route::resource('orderschemes', OrderSchemeController::class);

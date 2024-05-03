@@ -135,6 +135,14 @@ class ComplaintController extends Controller
                 'created_by_device' => 'customer',
                 'created_by' => $request->customer_id ?? NULL
             ]);
+            if($request->images && count($request->images) > 0){
+                foreach($request->images as $file){
+                    $customname = time() . '.' . $file->getClientOriginalExtension();
+                    $data->addMedia($file)
+                        ->usingFileName($customname)
+                        ->toMediaCollection('complaint_attach');
+                }
+            }
             $noti_data = [
                 'fcm_token' =>  $customer->customerdetails->fcm_token,
                 'title' => 'Complaint open Successfully ✅',

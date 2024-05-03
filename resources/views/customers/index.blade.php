@@ -6,7 +6,7 @@
         <div class="card-icon">
           <i class="material-icons">perm_identity</i>
         </div>
-        <h4 class="card-title">{!! trans('panel.customers.title') !!}{!! trans('panel.global.list') !!}
+        <h4 class="card-title">{!! trans('panel.customers.title') !!} {!! trans('panel.global.list') !!}
           <span class="">
             <div class="btn-group header-frm-btn">
               @if(auth()->user()->can(['customer_download']))
@@ -271,7 +271,7 @@
             // { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
             { data: 'checkbox', name: 'checkbox', orderable: false, searchable: false },
             { data: 'action', name: 'action',"defaultContent": '', orderable: false, searchable: false},
-            {data: 'name', name: 'name',"defaultContent": '',orderable: false,},
+            {data: 'name', name: 'name',"defaultContent": '',className: 'td-actions text-center',orderable: false,},
             {data: 'first_name', name: 'first_name',"defaultContent": '',orderable: false,},
             {data: 'last_name', name: 'last_name',"defaultContent": '',orderable: false,},
             {data: 'mobile', name: 'mobile',"defaultContent": '',orderable: false,},
@@ -389,7 +389,6 @@
             }
          });
       }, 1500);
-     
     });
 </script>
 </x-app-layout>

@@ -14,16 +14,23 @@ use App\Exports\SalesTargetUsersTemplate;
 use App\Exports\SalesTargetDealersTemplate;
 use App\Exports\SalesAchievementTemplate;
 use App\Exports\SalesDealersAchievementTemplate;
+use App\Exports\BranchAchievementTemplate;
 use App\Exports\SalesTargetUsersExport;
 use App\Exports\SalesTargetBranchExport;
 use App\Exports\CurrentLastYearSalesGrowthExport;
 use App\Exports\SalesDealersTargetBranchExport;
 use App\Exports\SalesTargetDealersExport;
 use App\Exports\CurrentLastYearDealersSalesGrowthExport;
+use App\Exports\CurrentLastYearBranchTargetExport;
+use App\Exports\BranchTargetExport;
 use App\Imports\SalesTargetUsersImport;
 use App\Imports\SalesAchievementImport;
 use App\Imports\SalesTargetDealersImport;
 use App\Imports\SalesDealersAchievementImport;
+use App\Imports\BranchAchievementImport;
+use App\Imports\BranchTargetImport;
+use App\Exports\BranchTargetTemplate;
+use App\Models\BranchWiseTarget;
 use App\Models\Branch;
 use App\Models\Division;
 use App\Models\User;
@@ -378,7 +385,6 @@ class SalesTargetUsersController extends Controller
 
 
     public function sales_target_dealers_download(Request $request) {
-
         if($request->export_branch) {
             $validator = Validator::make($request->all(), [
                 'financial_year' => 'required',
@@ -490,6 +496,189 @@ class SalesTargetUsersController extends Controller
         Excel::import(new SalesDealersAchievementImport, request()->file('import_file'));
 
         return back()->with('success', 'Sales Dealers Achievement Import successfully !!'); 
+    }
+
+    public function branches_sales_target(Request $request) {
+        $sales_target_users = SalesTargetUsers::latest()->get();
+        $userIds = BranchWiseTarget::select('user_id')->distinct()->get();
+        $users = User::whereIn('id',$userIds)->get();
+        $branches =  BranchWiseTarget::select('branch_name')->distinct()->get();
+        $divisions = BranchWiseTarget::select('division_name')->distinct()->get();
+        $currentYear = Carbon::now()->year;
+        $years = range($currentYear - 2, $currentYear + 2);
+        
+        abort_if(Gate::denies('branch_wise_sales_target_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        return view('branchwisetarget.index', compact('sales_target_users','branches','years','users','divisions'));
+    }
+
+    public function branch_target_list(Request $request) {
+        $query = BranchWiseTarget::with(['user','user.getbranch','user.getdesignation','user.getdivision'])->where(function ($query) use ($request) {
+
+            if($request->month && $request->month != '' && $request->month != null){
+                $query->where('month',$request->month) ;
+            }
+
+            if($request->branch_id && $request->branch_id != '' && $request->branch_id != null){
+                // $userIds = User::where('branch_id', $request->branch_id)->pluck('id');
+                $query->where('branch_name',$request->branch_id) ;
+            }
+
+            if($request->user_id && $request->user_id != '' && $request->user_id != null){
+                $userIds = User::where('id', $request->user_id)->pluck('id');
+                $query->whereIn('user_id',$userIds);
+            }
+
+            if($request->division && $request->division != '' && $request->division != null){
+                // $divisionIds = User::where('division_id', $request->division)->pluck('id');
+                $query->where('division_name',$request->division) ;
+            }
+
+            if($request->type && $request->type != '' && $request->type != null){
+                $query->where('type',$request->type) ;
+            }
+
+            if($request->year && $request->year != '' && $request->year != null){
+
+                $f_year_array = explode('-', $request->year);
+
+                $query->where(function ($query) use ($f_year_array) {
+                    $query->where('year', '=', $f_year_array[0])
+                        ->where('month', '>=', 'Apr');
+                })->orWhere(function ($query) use ($f_year_array) {
+                    $query->where('year', '=', $f_year_array[1])
+                        ->where('month', '<=', 'Mar');
+                });
+            }
+
+            if($request->min_range && $request->min_range != '' && $request->min_range != null && $request->max_range && $request->max_range != '' && $request->max_range != null){
+                $query->whereBetween('points',[$request->min_range,$request->max_range]) ;
+            }
+        })->orderBy('id', 'asc');
+
+        // $data = SalesTargetUsers::with(['user','user.getbranch'])->get();
+
+        return Datatables::of($query)
+            ->addIndexColumn()
+            ->addColumn('achievement_percent', function ($data) {
+                if(isset($data['achievement']) && isset($data['target']) && !empty($data['achievement']) && !empty($data['target'])) {
+                    $achievementPercent = ($data['target'] == 0) ? 0 : ($data['achievement'] * 100 / $data['target']);
+                    return $achievementPercent;
+                } else {
+                    return '';
+                }
+
+            })
+            ->addColumn('action', function ($data) {
+                $btn = '';
+                $activebtn = '';
+
+                if(auth()->user()->can(['target_users_access_edit']))
+                {
+                  $btn = $btn.'<a href"javascript:void(0)" class="btn btn-info btn-just-icon btn-sm edit" id="'.encrypt($data->id).'" title="'.trans('panel.global.edit').' '.trans('panel.sales_target_user.title_singular').'">
+                        <i class="material-icons">edit</i>
+                      </a>';
+                }
+
+                if (auth()->user()->can(['target_users_access_delete'])) {
+                    $btn = $btn . ' <a href="#" class="btn btn-danger btn-just-icon btn-sm delete" value="' . $data->id . '" title="'.trans('panel.global.delete').' '.trans('panel.sales_target_user.title_singular').'">
+                              <i class="material-icons">clear</i>
+                            </a>';
+                }
+                return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
+                              ' . $btn . '
+                          </div>';
+         
+            })
+            ->rawColumns(['action','achievement_percent'])
+            ->make(true);
+    }
+
+    public function branch_target_template(Request $request) {
+        abort_if(Gate::denies('branch_wise_target_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new BranchTargetTemplate, 'branch_target.xlsx');
+    }
+
+    public function branch_target_upload(Request $request) {
+
+        abort_if(Gate::denies('branch_wise_target_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');                
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        // Excel::import(new SalesTargetUsersImport, request()->file('import_file'));
+        Excel::import(new BranchTargetImport, $request->file('import_file')->store('temp'));
+
+        return back()->with('success', 'Branch Wise Target Import successfully !!'); 
+    }
+
+    public function branch_target_delete(Request $request)
+    {
+        BranchWiseTarget::where('id', $request->id)->delete();
+
+        return response()->json(['status' => 'success', 'message' => 'Branch Target Deleted successfully']);
+    }
+
+    /*Branch target report download
+    */
+
+    public function branch_target_download(Request $request) {
+
+        if($request->export_branch_target) {
+            $validator = Validator::make($request->all(), [
+                'financial_year' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+            }
+
+            abort_if(Gate::denies('branch_wise_target_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+            if (ob_get_contents()) ob_end_clean();
+            ob_start();
+
+            return Excel::download(new BranchTargetExport($request), 'branch_target.xlsx');
+        }elseif($request->cy_ly_branch_target){
+            $validator = Validator::make($request->all(), [
+                'financial_year' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+            }
+
+            abort_if(Gate::denies('cy_ly_branch_target_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+            if (ob_get_contents()) ob_end_clean();
+            ob_start();
+
+            return Excel::download(new CurrentLastYearBranchTargetExport($request), 'LY_CY_Branch_Target.xlsx');
+        }
+
+    }
+
+    /*
+    Branch achievement
+    */
+    public function branch_achievement_template(Request $request) {
+
+        abort_if(Gate::denies('branch_target_achievement_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new BranchAchievementTemplate, 'branch_achievements.xlsx');
+    }
+
+    public function branch_achievement_upload(Request $request) {
+
+        abort_if(Gate::denies('branch_target_achievement_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');                
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        Excel::import(new BranchAchievementImport, request()->file('import_file'));
+        // Excel::import(new SalesAchievementImport, $request->file('import_file')->store('temp'));
+
+        return back()->with('success', 'Branch Achievement Import successfully !!'); 
     }
 
 }

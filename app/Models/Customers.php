@@ -272,6 +272,10 @@ class Customers extends Authenticatable
         return $this->hasMany(TransactionHistory::class, 'customer_id', 'id');
     }
 
+    public function getretailers() {
+        return $this->hasMany(ParentDetail::class, 'parent_id', 'id');
+    }
+
     
 
 

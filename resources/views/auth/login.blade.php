@@ -59,7 +59,7 @@
                   </span>
                 </div>
                 <div class="card-footer justify-content-center pb-4" >
-                  <button class="btn btn-theme btn-link btn-lg blue-login-button color-white" style="color:white !important;">Login</button>
+                  <button class="btn btn-theme btn-link btn-lg blue-login-button color-white" onClick="this.form.submit(); this.disabled=true; this.value='Sending…'; " style="color:white !important;">Login</button>
                 </div>
                 @if (Route::has('password.request'))
                   <!-- <a class="btn btn-link" href="{{ route('password.request') }}">

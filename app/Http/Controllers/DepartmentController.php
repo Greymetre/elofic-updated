@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-
+use Excel;
+use App\Exports\DepartmentExport;
 
 
 
@@ -188,6 +189,17 @@ class DepartmentController extends Controller
             return response()->json(['status' => 'success','message' => 'Department '.$message.' Successfully!']);
         }
         return response()->json(['status' => 'error','message' => 'Error in Status Update']);
+    }
+
+    public function department_report_download(Request $request) {
+        if($request->export_department_report) {
+
+            abort_if(Gate::denies('department_report_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+            if (ob_get_contents()) ob_end_clean();
+            ob_start();
+
+            return Excel::download(new DepartmentExport($request), 'departments.xlsx');
+        }
     }
 
 

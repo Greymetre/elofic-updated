@@ -18,6 +18,12 @@
               <!-- @if(auth()->user()->can(['customer_create'])) -->
               <a href="{{ route('departments.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.departments.title_singular') !!}"><i class="material-icons">add_circle</i></a>
               <!-- @endif  -->
+              <form method="post" action="{{ URL::to('department_report/download') }}" class="form-horizontal">
+                @csrf
+                @if(auth()->user()->can(['department_report_download']))
+                <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Department Report" name="export_department_report" value="true"><i class="material-icons">cloud_download</i></button>
+                @endif
+              </form>
               </div>
 
             </div>
@@ -48,7 +54,8 @@
             <table id="getcustomers" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
             <thead class=" text-primary">
               <th>{!! trans('panel.global.no') !!}</th>
-              <th>{!! trans('panel.global.action') !!}</th>
+              <!-- <th>{!! trans('panel.global.action') !!}</th> -->
+              <th>{!! trans('panel.global.active') !!}</th>
               <th>{!! trans('panel.departments.fields.department_name') !!}</th>
               <th>{!! trans('panel.global.created_by') !!}</th>
               <th>{!! trans('panel.global.created_at') !!}</th>
@@ -92,7 +99,7 @@
         },
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-            { data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
+            { data: 'action', name: 'action',"defaultContent": '', orderable: false, searchable: false},
             {data: 'name', name: 'name',"defaultContent": ''},
             {data: 'createdbyname.name', name: 'createdbyname.name',"defaultContent": '', orderable: false},
             {data: 'created_at', name: 'created_at',"defaultContent": ''},

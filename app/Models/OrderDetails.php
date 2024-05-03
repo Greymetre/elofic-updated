@@ -15,7 +15,7 @@ class OrderDetails extends Model
 
     public function products()
     {
-        return $this->belongsTo('App\Models\Product', 'product_id', 'id')->select('id','product_name','display_name','product_image', 'specification', 'part_no', 'product_no', 'model_no','category_id','subcategory_id','suc_del','new_group');
+        return $this->belongsTo('App\Models\Product', 'product_id', 'id');
     }
 
     public function orders()

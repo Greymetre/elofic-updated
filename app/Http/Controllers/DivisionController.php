@@ -9,11 +9,11 @@ use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
+use App\Exports\DivisionExport;
 use DataTables;
 use Validator;
 use Gate;
-
+use Excel;
 use App\DataTables\DivisionDataTable;
 
 class DivisionController extends Controller
@@ -137,4 +137,16 @@ class DivisionController extends Controller
         }
         return response()->json(['status' => 'error','message' => 'Error in Division Delete!']);
     }
+
+    public function division_report_download(Request $request) {
+
+     if($request->export_division_report) {
+
+         abort_if(Gate::denies('division_report_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+         if (ob_get_contents()) ob_end_clean();
+         ob_start();
+
+         return Excel::download(new DivisionExport($request), 'divisions.xlsx');
+     }
+ }
 }

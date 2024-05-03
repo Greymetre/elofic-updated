@@ -114,7 +114,7 @@ $(document).ready(function() {
         ajax: "{{ route('designation.index') }}",
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-            {data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
+            {data: 'action', name: 'action',"defaultContent": '', orderable: false, searchable: false},
             {data: 'active', name: 'active',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
             {data: 'designation_name', name: 'brand_name',"defaultContent": ''},
         ]

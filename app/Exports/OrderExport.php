@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\Customers;
+use App\Models\Order;
 use App\Models\OrderDetails;
 use App\Models\User;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -58,11 +59,12 @@ class OrderExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapp
                     }  
                     if($this->dividion_id)
                     {
-                        $users = User::where('division_id', $this->dividion_id)->pluck('id');
-                        $query->whereIn('created_by',$users);
+                        $order_ids = Order::where('product_cat_id', $this->dividion_id)->pluck('id');
+                        $query->whereIn('order_id',$order_ids);
+                        // $query->where('orders.product_cat_id',$this->dividion_id);
                     }  
                    
-                })->latest()->get();      
+                })->latest()->get();
 
             }else{
 
@@ -85,8 +87,10 @@ class OrderExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapp
                     }  
                     if($this->dividion_id)
                     {
-                        $users = User::where('division_id', $this->dividion_id)->pluck('id');
-                        $query->whereIn('created_by',$users);
+                        
+                        $order_ids = Order::where('product_cat_id', $this->dividion_id)->pluck('id');
+                        $query->whereIn('order_id',$order_ids);
+                        // $query->where('orders.product_cat_id',$this->dividion_id);
                     }  
                    
                 })->select('id','order_id', 'product_id', 'product_detail_id', 'quantity', 'shipped_qty', 'price', 'discount', 'discount_amount', 'tax_amount', 'line_total', 'status_id', 'created_at','scheme_name','scheme_discount','scheme_amount','cluster_discount','cluster_amount','deal_discount','deal_amount','distributor_discount','distributor_amount')->latest()->get();          

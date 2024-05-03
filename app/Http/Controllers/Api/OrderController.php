@@ -171,6 +171,8 @@ class OrderController extends Controller
                 return response()->json(['status' => 'error', 'message' => $validator->messages()->all()], $this->badrequest);
             }
             $request['order_remark'] = $request['remark'] ?? '';
+            $fprodu = Product::find($request->orderdetail[0]['product_id']);
+            $request['product_cat_id'] = $fprodu->category_id;
             $response =  $this->orders->save_data($request);
             if ($response['status'] == 'success') {
                 $orderdetail = collect([]);

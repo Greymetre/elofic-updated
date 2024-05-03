@@ -77,7 +77,7 @@ class SalesAchievementImport implements ToCollection,WithValidation,WithHeadingR
             'user_id.required' => 'The user id is required.',
             'month.required' => 'The month name field is required.',
             'type.in' => 'The type name field either have primary or secondary value.',
-            'target_value.required' => 'The target value is required.',
+            // 'target_value.required' => 'The target value is required.',
             'achievement.required' => 'The achievement value is required.',
             'achievement.numeric' => 'The achievement value must be numeric.'
         ];

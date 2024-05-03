@@ -184,6 +184,20 @@
                   </div>
                   @endif
                </div>
+
+               <div class="row">
+                  <label class="col-md-2 col-form-label">Division : </label>
+                  <div class="col-md-4">
+                     <select name="product_cat_id" readonly id="product_cat_id" class="form-control select2" onchange="getProductlist()">
+                        @if(count($category) > 0)
+                        <option value="" disabled>Select Division</option>
+                        @foreach($category as $cat)
+                        <option {{(old('product_cat_id', $orders['product_cat_id']) == $cat->id)?'selected':'disabled'}} value="{{$cat->id}}">{{$cat->category_name}}</option>
+                        @endforeach
+                        @endif
+                     </select>
+                  </div>
+               </div>
                <br>
 
 
@@ -455,156 +469,256 @@
 
                      ?>
 
-
-                     <div class="form-group row">
-                        <div class="col-sm-4">
-                           <label class="bmd-label">Scheme Discount</label>
-                        </div>
-                        <div class="col-sm-8">
-                           <!-- <input type="number" name='scheme_discount' id="scheme_discount" class="form-control scheme_discount" value="{!! old( 'scheme_discount', $orders['scheme_discount']) !!}" readonly/> -->
-
-                           <input type="number" name='scheme_discount' id="scheme_discount" class="form-control scheme_discount" value="{!! old( 'scheme_discount', $scheme_dicount_sum) !!}" readonly />
-                           @if($errors->has('scheme_discount'))
-                           <div class="invalid-feedback">
-                              {{ $errors->first('scheme_discount') }}
+                     <div id="all-discount-div-pump">
+                        <div class="form-group row">
+                           <div class="col-sm-4">
+                              <label class="bmd-label">Scheme Discount</label>
                            </div>
-                           @endif
+                           <div class="col-sm-8">
+                              <!-- <input type="number" name='scheme_discount' id="scheme_discount" class="form-control scheme_discount" value="{!! old( 'scheme_discount', $orders['scheme_discount']) !!}" readonly/> -->
+
+                              <input type="number" name='scheme_discount' id="scheme_discount" class="form-control scheme_discount" value="{!! old( 'scheme_discount', $scheme_dicount_sum) !!}" readonly />
+                              @if($errors->has('scheme_discount'))
+                              <div class="invalid-feedback">
+                                 {{ $errors->first('scheme_discount') }}
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+
+                        <div class="form-group row">
+                           <div class="col-sm-4">
+                              <label class="bmd-label">EBD Discount%</label>
+                           </div>
+                           <div class="col-sm-4">
+                              <select name='ebd_discount' class="form-control ebd_discount">
+                                 <option value="">Select EBD Discount</option>
+                                 <option value="1" {{($orders['ebd_discount'] == '1')?'selected':''}}>1%</option>
+                                 <option value="2" {{($orders['ebd_discount'] == '2')?'selected':''}}>2%</option>
+                                 <option value="3" {{($orders['ebd_discount'] == '3')?'selected':''}}>3%</option>
+                              </select>
+                           </div>
+                           <div class="col-sm-4">
+                              <input type="text" name="extra_ebd_discount" class="extra_ebd_discount form-control" value="{{$orders['ebd_amount']}}" readonly>
+                           </div>
+                        </div>
+
+                        <div class="form-group row">
+                           <div class="col-sm-4">
+                              <label class="bmd-label">MOU Discount%</label>
+                           </div>
+                           <div class="col-sm-8">
+                              <div class="input-group">
+                                 <div class="input-group-prepend">
+                                 </div>
+
+                                 <input type="number" name='distributor_discount' class="form-control distributor_discount" value="{!! old( 'distributor_discount', $orders['distributor_discount']) !!}" />
+
+                                 <input type="number" step="00.01" name="distributor_discount_amount" class="form-control distributor_discount_amount" readonly value="{!! old( 'distributor_discount_amount', $orders['distributor_amount']) !!}">
+                              </div>
+                              @if($errors->has('distributor_discount'))
+                              <div class="invalid-feedback">
+                                 {{ $errors->first('distributor_discount') }}
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+
+                        <div class="form-group row">
+                           <div class="col-sm-4">
+                              <label class="bmd-label">Special Discount%</label>
+                           </div>
+                           <div class="col-sm-8">
+                              <div class="input-group">
+                                 <div class="input-group-prepend">
+                                 </div>
+                                 <input type="number" name='special_discount' class="form-control special_discount" value="{!! old( 'special_discount', $orders['special_discount']) !!}" />
+
+                                 <input type="text" name="special_discount_amount" class="form-control special_discount_amount" value="{!! old( 'special_discount_amount', $orders['special_amount']) !!}" readonly>
+                              </div>
+                              @if($errors->has('special_discount'))
+                              <div class="invalid-feedback">
+                                 {{ $errors->first('special_discount') }}
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+
+                        <div class="form-group row">
+                           <div class="col-sm-4">
+                              <label class="bmd-label">frieght Discount%</label>
+                           </div>
+                           <div class="col-sm-8">
+                              <div class="input-group">
+                                 <div class="input-group-prepend">
+                                 </div>
+
+                                 <div class="col-sm-4">
+                                    <select name='frieght_discount' class="form-control frieght_discount">
+                                       <option value="">Select Frieght Discount</option>
+                                       <option value="1" {!! old( 'frieght_discount' , $orders['frieght_discount'])=='1' ?'selected':'' !!}>1%</option>
+                                    </select>
+                                 </div>
+                                 <div class="col-sm-4">
+                                    <input type="text" name="frieght_discount_amount" class="form-control frieght_discount_amount" readonly value="{!! old( 'frieght_discount_amount', $orders['frieght_amount']) !!}">
+                                 </div>
+                              </div>
+                              @if($errors->has('frieght_discount'))
+                              <div class="invalid-feedback">
+                                 {{ $errors->first('frieght_discount') }}
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+
+                        <div class="form-group row">
+                           <div class="col-sm-4">
+                              <label class="bmd-label">Cluster Discount%</label>
+                           </div>
+                           <div class="col-sm-4">
+                              <select name='cluster_discount' class="form-control cluster_discount">
+                                 <option value="">Select Cluster Discount</option>
+                                 <option value="1" <?php if ($orders['cluster_discount'] == 1) {
+                                                      echo "selected";
+                                                   } ?>>1%</option>
+                                 <option value="2" <?php if ($orders['cluster_discount'] == 2) {
+                                                      echo "selected";
+                                                   } ?>>2%</option>
+                                 <option value="3" <?php if ($orders['cluster_discount'] == 3) {
+                                                      echo "selected";
+                                                   } ?>>3%</option>
+                              </select>
+                           </div>
+                           <div class="col-sm-4">
+                              <!-- <input type="text" name="extra_cluster_discount" class="extra_cluster_discount" readonly>   -->
+                              <input type="text" name="extra_cluster_discount" class="extra_cluster_discount form-control" readonly value="{!! old( 'extra_cluster_discount', $orders['cluster_amount']) !!}">
+                           </div>
+
+                        </div>
+
+
+                        <div class="form-group row">
+                           <div class="col-sm-4">
+                              <!-- <label class="bmd-label">{!! trans('panel.order.extra_discount') !!}</label> -->
+                              <label class="bmd-label">Deal Discount%</label>
+                           </div>
+                           <div class="col-sm-8">
+                              <div class="input-group">
+                                 <div class="input-group-prepend">
+                                 </div>
+                                 <!-- <input type="number" name='extra_discount' class="form-control deal_discnt" value="{!! old( 'extra_discount', $orders['extra_discount']) !!}"/> -->
+
+                                 <!-- <input type="text" name="extra_discount_amount" class="form-control extra_discount_amount" readonly> -->
+
+                                 <input type="number" name='extra_discount' class="form-control deal_discnt" value="{!! old( 'extra_discount', $deal_discount) !!}" />
+
+                                 <input type="text" name="extra_discount_amount" class="form-control extra_discount_amount" readonly value="{!! old( 'extra_discount_amount', $orders['deal_amount']) !!}">
+                              </div>
+                              @if($errors->has('extra_discount'))
+                              <div class="invalid-feedback">
+                                 {{ $errors->first('extra_discount') }}
+                              </div>
+                              @endif
+                           </div>
                         </div>
                      </div>
 
-                     <div class="form-group row">
-                        <div class="col-sm-4">
-                           <label class="bmd-label">EBD Discount%</label>
-                        </div>
-                        <div class="col-sm-4">
-                           <select name='ebd_discount' class="form-control ebd_discount">
-                              <option value="">Select EBD Discount</option>
-                              <option value="1" {{($orders['ebd_discount'] == '1')?'selected':''}}>1%</option>
-                              <option value="2" {{($orders['ebd_discount'] == '2')?'selected':''}}>2%</option>
-                              <option value="3" {{($orders['ebd_discount'] == '3')?'selected':''}}>3%</option>
-                           </select>
-                        </div>
-                        <div class="col-sm-4">
-                           <input type="text" name="extra_ebd_discount" class="extra_ebd_discount form-control" value="{{$orders['ebd_amount']}}" readonly>
-                        </div>
-                     </div>
+                     <div id="all-discount-div-fan">
 
-                     <div class="form-group row">
-                        <div class="col-sm-4">
-                           <label class="bmd-label">MOU Discount%</label>
-                        </div>
-                        <div class="col-sm-8">
-                           <div class="input-group">
-                              <div class="input-group-prepend">
+                        <div class="form-group row">
+                           <div class="col-sm-4">
+                              <label class="bmd-label">DOD%</label>
+                           </div>
+                           <div class="col-sm-8">
+                              <div class="input-group">
+                                 <div class="input-group-prepend">
+                                 </div>
+                                 <input type="number" step="0.01" name='dod_discount' class="form-control dod_discount" value="{!! old( 'dod_discount', $orders['dod_discount']) !!}" />
                               </div>
-                         
-                              <input type="number" name='distributor_discount' class="form-control distributor_discount" value="{!! old( 'distributor_discount', $orders['distributor_discount']) !!}" />
-
-                              <input type="number" step="00.01" name="distributor_discount_amount" class="form-control distributor_discount_amount" readonly value="{!! old( 'distributor_discount_amount', $orders['distributor_amount']) !!}">
-                           </div>
-                           @if($errors->has('distributor_discount'))
-                           <div class="invalid-feedback">
-                              {{ $errors->first('distributor_discount') }}
-                           </div>
-                           @endif
-                        </div>
-                     </div>
-
-                     <div class="form-group row">
-                        <div class="col-sm-4">
-                           <label class="bmd-label">Special Discount%</label>
-                        </div>
-                        <div class="col-sm-8">
-                           <div class="input-group">
-                              <div class="input-group-prepend">
+                              @if($errors->has('dod_discount'))
+                              <div class="invalid-feedback">
+                                 {{ $errors->first('dod_discount') }}
                               </div>
-                              <input type="number" name='special_discount' class="form-control special_discount" value="{!! old( 'special_discount', $orders['special_discount']) !!}" />
-
-                              <input type="text" name="special_discount_amount" class="form-control special_discount_amount" value="{!! old( 'special_discount_amount', $orders['special_amount']) !!}" readonly>
+                              @endif
                            </div>
-                           @if($errors->has('special_discount'))
-                           <div class="invalid-feedback">
-                              {{ $errors->first('special_discount') }}
-                           </div>
-                           @endif
                         </div>
-                     </div>
 
-                     <div class="form-group row">
-                        <div class="col-sm-4">
-                           <label class="bmd-label">frieght Discount%</label>
-                        </div>
-                        <div class="col-sm-8">
-                           <div class="input-group">
-                              <div class="input-group-prepend">
+                        <div class="form-group row">
+                           <div class="col-sm-4">
+                              <label class="bmd-label">Special Distribution Discount%</label>
+                           </div>
+                           <div class="col-sm-8">
+                              <div class="input-group">
+                                 <div class="input-group-prepend">
+                                 </div>
+                                 <input type="number" step="0.01" name='special_distribution_discount' class="form-control special_distribution_discount" value="{!! old( 'special_distribution_discount', $orders['special_distribution_discount']) !!}" />
                               </div>
-
-                              <div class="col-sm-4">
-                                 <select name='frieght_discount' class="form-control frieght_discount">
-                                    <option value="">Select Frieght Discount</option>
-                                    <option value="1" {!! old( 'frieght_discount' , $orders['frieght_discount'])=='1' ?'selected':'' !!}>1%</option>
-                                 </select>
+                              @if($errors->has('special_distribution_discount'))
+                              <div class="invalid-feedback">
+                                 {{ $errors->first('special_distribution_discount') }}
                               </div>
-                              <div class="col-sm-4">
-                                 <input type="text" name="frieght_discount_amount" class="form-control frieght_discount_amount" readonly value="{!! old( 'frieght_discount_amount', $orders['frieght_amount']) !!}">
+                              @endif
+                           </div>
+                        </div>
+
+                        <div class="form-group row">
+                           <div class="col-sm-4">
+                              <!-- <label class="bmd-label">{!! trans('panel.order.extra_discount') !!}</label> -->
+                              <label class="bmd-label">Distribution Margin Discount%</label>
+                           </div>
+                           <div class="col-sm-8">
+                              <div class="input-group">
+                                 <div class="input-group-prepend">
+                                 </div>
+                                 <input type="number" step="0.01" name='distribution_margin_discount' class="form-control distribution_margin_discount" value="{!! old( 'distribution_margin_discount', $orders['distribution_margin_discount']) !!}" />
+
                               </div>
-                           </div>
-                           @if($errors->has('frieght_discount'))
-                           <div class="invalid-feedback">
-                              {{ $errors->first('frieght_discount') }}
-                           </div>
-                           @endif
-                        </div>
-                     </div>
-
-                     <div class="form-group row">
-                        <div class="col-sm-4">
-                           <label class="bmd-label">Cluster Discount%</label>
-                        </div>
-                        <div class="col-sm-4">
-                           <select name='cluster_discount' class="form-control cluster_discount">
-                              <option value="">Select Cluster Discount</option>
-                              <option value="1" <?php if ($orders['cluster_discount'] == 1) {
-                                                   echo "selected";
-                                                } ?>>1%</option>
-                              <option value="2" <?php if ($orders['cluster_discount'] == 2) {
-                                                   echo "selected";
-                                                } ?>>2%</option>
-                              <option value="3" <?php if ($orders['cluster_discount'] == 3) {
-                                                   echo "selected";
-                                                } ?>>3%</option>
-                           </select>
-                        </div>
-                        <div class="col-sm-4">
-                           <!-- <input type="text" name="extra_cluster_discount" class="extra_cluster_discount" readonly>   -->
-                           <input type="text" name="extra_cluster_discount" class="extra_cluster_discount form-control" readonly value="{!! old( 'extra_cluster_discount', $orders['cluster_amount']) !!}">
-                        </div>
-
-                     </div>
-
-
-                     <div class="form-group row">
-                        <div class="col-sm-4">
-                           <!-- <label class="bmd-label">{!! trans('panel.order.extra_discount') !!}</label> -->
-                           <label class="bmd-label">Deal Discount%</label>
-                        </div>
-                        <div class="col-sm-8">
-                           <div class="input-group">
-                              <div class="input-group-prepend">
+                              @if($errors->has('distribution_margin_discount'))
+                              <div class="invalid-feedback">
+                                 {{ $errors->first('distribution_margin_discount') }}
                               </div>
-                              <!-- <input type="number" name='extra_discount' class="form-control deal_discnt" value="{!! old( 'extra_discount', $orders['extra_discount']) !!}"/> -->
-
-                              <!-- <input type="text" name="extra_discount_amount" class="form-control extra_discount_amount" readonly> -->
-
-                              <input type="number" name='extra_discount' class="form-control deal_discnt" value="{!! old( 'extra_discount', $deal_discount) !!}" />
-
-                              <input type="text" name="extra_discount_amount" class="form-control extra_discount_amount" readonly value="{!! old( 'extra_discount_amount', $orders['deal_amount']) !!}">
+                              @endif
                            </div>
-                           @if($errors->has('extra_discount'))
-                           <div class="invalid-feedback">
-                              {{ $errors->first('extra_discount') }}
+                        </div>
+
+                        <div class="form-group row">
+                           <div class="col-sm-4">
+                              <label class="bmd-label">Cash Discount%</label>
                            </div>
-                           @endif
+                           <div class="col-sm-8">
+                              <div class="input-group">
+                                 <div class="input-group-prepend">
+                                 </div>
+
+                                 <input type="number" name='cash_discount' class="form-control cash_discount" value="{!! old( 'cash_discount', $orders['cash_discount']) !!}" />
+
+                              </div>
+                              @if($errors->has('cash_discount'))
+                              <div class="invalid-feedback">
+                                 {{ $errors->first('cash_discount') }}
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+
+                        <div class="form-group row">
+                           <div class="col-sm-4">
+                              <!-- <label class="bmd-label">{!! trans('panel.order.extra_discount') !!}</label> -->
+                              <label class="bmd-label">Total Discount%</label>
+                           </div>
+                           <div class="col-sm-8">
+                              <div class="input-group">
+                                 <div class="input-group-prepend">
+                                 </div>
+                                 <input readonly type="number" step="0.01" name='total_fan_discount' class="form-control total_fan_discount" step="0.01" value="{!! old( 'total_fan_discount', $orders['total_fan_discount']) !!}" />
+                                 <input type="text" name="total_fan_discount_amount" class="form-control total_fan_discount_amount" value="{!! old( 'total_fan_discount_amount', $orders['total_fan_discount_amount']) !!}" readonly>
+                              </div>
+                              @if($errors->has('total_fan_discount'))
+                              <div class="invalid-feedback">
+                                 {{ $errors->first('total_fan_discount') }}
+                              </div>
+                              @endif
+                           </div>
                         </div>
                      </div>
 
@@ -632,7 +746,7 @@
                         </div>
                         <div class="col-sm-8">
                            <div class="input-group">
-                              <input type="text" name='5_gst' class="form-control 5_gst" value="{!! old( '5_gst', $orders['gst5_amt']) !!}" disabled />
+                              <input type="text" name='5_gst' class="form-control 5_gst" value="{!! old( '5_gst', $orders['gst5_amt']) !!}" readonly />
                            </div>
                         </div>
                      </div>
@@ -643,7 +757,7 @@
                         </div>
                         <div class="col-sm-8">
                            <div class="input-group">
-                              <input type="number" name='12_gst' class="form-control 12_gst" readonly value="{!! old( '12_gst', $orders['gst12_amt']) !!}" disabled />
+                              <input type="number" name='12_gst' class="form-control 12_gst" readonly value="{!! old( '12_gst', $orders['gst12_amt']) !!}" readonly />
                            </div>
                         </div>
                      </div>
@@ -654,7 +768,7 @@
                         </div>
                         <div class="col-sm-8">
                            <div class="input-group">
-                              <input type="number" name='18_gst' class="form-control 18_gst" readonly value="{!! old( '18_gst', $orders['gst18_amt']) !!}" disabled />
+                              <input type="number" name='18_gst' class="form-control 18_gst" readonly value="{!! old( '18_gst', $orders['gst18_amt']) !!}" readonly />
                            </div>
                         </div>
                      </div>
@@ -665,7 +779,7 @@
                         </div>
                         <div class="col-sm-8">
                            <div class="input-group">
-                              <input type="number" name='28_gst' class="form-control 28_gst" readonly value="{!! old( '28_gst', $orders['gst28_amt']) !!}" disabled />
+                              <input type="number" name='28_gst' class="form-control 28_gst" readonly value="{!! old( '28_gst', $orders['gst28_amt']) !!}" readonly />
                            </div>
                         </div>
                      </div>
@@ -913,10 +1027,30 @@
 
                      $('.seller_address').append(res.address1 + '<br> ' + res.address2 + '<br>Phone : ' + res.mobile + '<br>Email: ' + res.email);
 
+                     var category = $('#product_cat_id').val();
                      if (res.customertype == '2') {
                         $('#de_dis').show();
-                        buyerinfo();
+                        $('#all-discount-div-pump').css('opacity', '0');
+                        $('#all-discount-div-pump').css('height', '0px');
+                        $('#all-discount-div-fan').css('opacity', '0');
+                        $('#all-discount-div-fan').css('height', '0px');
                      } else {
+                        if (category == '1') {
+                           $('#all-discount-div-pump').css('opacity', '1');
+                           $('#all-discount-div-pump').css('height', 'auto');
+                           $('#all-discount-div-fan').css('opacity', '0');
+                           $('#all-discount-div-fan').css('height', '0px');
+                        } else if (category == '2') {
+                           $('#all-discount-div-fan').css('opacity', '1');
+                           $('#all-discount-div-fan').css('height', 'auto');
+                           $('#all-discount-div-pump').css('opacity', '0');
+                           $('#all-discount-div-pump').css('height', '0px');
+                        } else {
+                           $('#all-discount-div-pump').css('opacity', '0');
+                           $('#all-discount-div-pump').css('height', '0px');
+                           $('#all-discount-div-fan').css('opacity', '0');
+                           $('#all-discount-div-fan').css('height', '0px');
+                        }
                         $('#de_dis').hide();
                      }
 
@@ -1270,7 +1404,7 @@
          //new skm end
 
          //$('#scheme_discount').val((scheme_discount).toFixed(2));
-         if(total_scheme > 0){
+         if (total_scheme > 0) {
             $('#scheme_discount').val((total_scheme).toFixed(2));
          }
          //scheme discount end
@@ -1381,6 +1515,20 @@
 
          subtotal = total;
 
+          //Fan calculations start
+
+          var distribution_margin_discount = ($('.distribution_margin_discount').val() && $('.distribution_margin_discount').val() != '')?$('.distribution_margin_discount').val():0;
+         var special_distribution_discount = ($('.special_distribution_discount').val() && $('.special_distribution_discount').val() != '')?$('.special_distribution_discount').val():0;
+         var dod_discount = $('.dod_discount').val() && $('.dod_discount').val() != '' ?$('.dod_discount').val():0;
+         var cash_discount = $('.cash_discount').val() && $('.cash_discount').val() != '' ?$('.cash_discount').val():0;
+         
+         var ttdis = parseFloat(dod_discount)+parseFloat(special_distribution_discount)+parseFloat(distribution_margin_discount)+parseFloat(cash_discount);
+         $('.total_fan_discount').val(ttdis.toFixed(2));
+         $('.total_fan_discount_amount').val((total*ttdis)/100);
+         subtotal = ((total-(total*ttdis)/100));
+
+         //Fan calculations end
+
          //end ne calculation
 
          discount_amount = total * extra_discount / 100;
@@ -1421,7 +1569,7 @@
          //$('#grandtotal').val((total+taxamount+transportation).toFixed(2));
          //$('#grandtotal').val((total+five_gst+transportation).toFixed(2));
 
-         $('#grandtotal').val((total + five_gst + twelve_gst + eighteen_gst + twenti_eight_gst).toFixed(2));
+         $('#grandtotal').val((subtotal + five_gst + twelve_gst + eighteen_gst + twenti_eight_gst).toFixed(2));
 
          estimatedDelivery();
       }
@@ -1483,7 +1631,25 @@
 
 
 
-
+      $('#product_cat_id').on('change', function() {
+         var category = $(this).val();
+         if (category == '1') {
+            $('#all-discount-div-pump').css('opacity', '1');
+            $('#all-discount-div-pump').css('height', 'auto');
+            $('#all-discount-div-fan').css('opacity', '0');
+            $('#all-discount-div-fan').css('height', '0px');
+         } else if (category == '2') {
+            $('#all-discount-div-fan').css('opacity', '1');
+            $('#all-discount-div-fan').css('height', 'auto');
+            $('#all-discount-div-pump').css('opacity', '0');
+            $('#all-discount-div-pump').css('height', '0px');
+         } else {
+            $('#all-discount-div-pump').css('opacity', '0');
+            $('#all-discount-div-pump').css('height', '0px');
+            $('#all-discount-div-fan').css('opacity', '0');
+            $('#all-discount-div-fan').css('height', '0px');
+         }
+      })
 
 
 

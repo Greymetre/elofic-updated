@@ -69,7 +69,9 @@
                 <th>{!! trans('panel.global.no') !!}</th>
                 <th>{!! trans('panel.global.action') !!}</th>
                 <th>User Name</th>
+                <th>User Designation</th>
                 <th>Reporting Name</th>
+                <th>Reporting Designation</th>
                 <th>City Name</th>
                 <th>Grade</th>
                 <th>District Name</th>
@@ -113,7 +115,6 @@
             data: 'action',
             name: 'action',
             "defaultContent": '',
-            className: 'td-actions text-center',
             orderable: false,
             searchable: false
           },
@@ -123,8 +124,18 @@
             "defaultContent": ''
           },
           {
+            data: 'userinfo.getdesignation.designation_name',
+            name: 'userinfo.getdesignation.designation_name',
+            "defaultContent": ''
+          },
+          {
             data: 'reportinginfo.name',
             name: 'reportinginfo.name',
+            "defaultContent": ''
+          },
+          {
+            data: 'reportinginfo.getdesignation.designation_name',
+            name: 'reportinginfo.getdesignation.designation_name',
             "defaultContent": ''
           },
           {

@@ -14,6 +14,12 @@
                   @if(auth()->user())
                   <a data-toggle="modal" data-target="#createbranch" class="btn btn-just-icon btn-theme create" title="{!!  trans('panel.global.add') !!} {!! trans('panel.branch.title_singular') !!}"><i class="material-icons">add_circle</i></a>
                   @endif
+                  <form method="post" action="{{ URL::to('branch_report/download') }}" class="form-horizontal">
+                      @csrf
+                      @if(auth()->user()->can(['branch_report_download']))
+                      <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Branch Report" name="export_branch_report" value="true"><i class="material-icons">cloud_download</i></button>
+                      @endif
+                  </form>
                 </div>
                 </div>
               </span>
@@ -129,8 +135,8 @@ $(document).ready(function() {
         ajax: "{{ route('branches.index') }}",
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-            {data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
-            {data: 'active', name: 'active',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
+            {data: 'action', name: 'action',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'active', name: 'active',"defaultContent": '', orderable: false, searchable: false},
             {data: 'branch_name', name: 'branch_name',"defaultContent": ''},
             {data: 'branch_code', name: 'branch_code',"defaultContent": ''},
             {data: 'getuser.name', name: 'getuser.name',"defaultContent": ''},
