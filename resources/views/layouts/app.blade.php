@@ -314,7 +314,7 @@
           </li>
           @endif
           @if(auth()->user()->can('hr_access'))
-          <li class="nav-item {{ request()->is('reports*') || request()->is('holidays*') || request()->is('leaves*') || request()->is('appraisal*') || request()->is('sales_weightage*') ? 'active' : '' }}">
+          <li class="nav-item {{ request()->is('reports/attendancereport*') || request()->is('reports/attendancereportSummary*') || request()->is('holidays*') || request()->is('leaves*') || request()->is('appraisal*') || request()->is('sales_weightage*') ? 'active' : '' }}">
             <a class="nav-link collapsed" data-toggle="collapse" href="#hr" aria-expanded="false">
               <i class="material-icons">star</i>
               <p> {!! trans('panel.sidemenu.hr') !!}
@@ -863,7 +863,7 @@
           </li>
           @endif
           @if(auth()->user()->can('reports'))
-          <li class="nav-item ">
+          <li class="nav-item {{ request()->is('reports/reports_sale') ? 'active' : '' }}">
             <a class="nav-link collapsed" data-toggle="collapse" href="#tasksMenu" aria-expanded="false">
               <i class="material-icons">airplay</i>
               <p> Reports
@@ -880,7 +880,7 @@
                 </li>
                 @endif -->
                 @if(auth()->user()->can('reports_sale'))
-                <li class="nav-item {{ request()->is('reports_sale*') ? 'active' : '' }}" >
+                <li class="nav-item {{ request()->is('reports/reports_sale*') ? 'active' : '' }}" >
                   <a class="nav-link" href="{{ url('reports/reports_sale') }}">
                     <i class="material-icons">check_circle</i>
                     <p>Sales </p>

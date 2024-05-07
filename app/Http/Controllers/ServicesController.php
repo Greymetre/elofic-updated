@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\SerialNumberHistoryExport;
 use App\Exports\SerialNumberTransactionExport;
 use App\Imports\SerialNumberTransactionImport;
 use App\Models\Services;
@@ -145,10 +146,14 @@ class ServicesController extends Controller
 
     public function serial_number_history_list(Request $request)
     {
-        $data = Services::with('product', 'warrantyDetails')->orderBy('invoice_date', 'desc');
+        $data = Services::with('product', 'warrantyDetails');
         if($request->search['value'] && $request->search['value'] != '' && $request->search['value'] != NULL){
             $data = $data->where('serial_no', $request->search['value']);
         }
+        if($request->start_date && $request->start_date != '' && $request->start_date != NULL && $request->end_date && $request->end_date != '' && $request->end_date != NULL){
+            $data->whereBetween('created_at', [$request->start_date, $request->end_date]);
+        }
+        $data = $data->orderBy('invoice_date', 'desc');
         return Datatables::of($data)
             ->addIndexColumn()
             ->addColumn('expiry_date', function ($data) {
@@ -167,7 +172,7 @@ class ServicesController extends Controller
             })
             ->addColumn('invoice_date', function ($data) {
                
-                    return date("d/m/Y", strtotime($data->invoice_date)) ?? '';
+                    return $data->invoice_date?date("d/m/Y", strtotime($data->invoice_date)) : '';
             })
             ->addColumn('warranty_status', function ($data) {
                
@@ -226,6 +231,13 @@ class ServicesController extends Controller
         $service->save();
 
         return redirect()->route('service.serial_number_history')->with('message_success', 'Serial number updated successfully.');
+    }
+    public function serial_number_history_download(Request $request)
+    {
+        abort_if(Gate::denies('serial_number_history_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new SerialNumberHistoryExport($request), 'SerialNumberHistory.xlsx');
     }
 
 }

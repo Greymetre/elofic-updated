@@ -30,12 +30,22 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
         $this->month = $request->input('month');
         $this->financial_year = $request->input('financial_year');
         $this->target = $request->input('target');  
+        $this->branch_id = $request->input('branch_id');  
+        $this->user = $request->input('user');  
+        $this->division = $request->input('division');  
+        $this->type = $request->input('type');  
       
     }
 
 	public function collection()
 	{
 		$f_year_array = explode('-', $this->financial_year);
+        $division = $this->division;
+        $branch = $this->branch_id;
+        $user = $this->user;
+        $type = $this->type;
+        $month = $this->month;
+
 
         // $data = BranchWiseTarget::join('users', 'branchwise_targets.user_id', '=', 'users.id')->select([
         //  DB::raw('SUM(achievement) as achievements'),
@@ -62,21 +72,125 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
         ]);
 
         if($this->month == '' && empty($this->month)){
-            $data->where(function ($query) use($f_year_array) {
-                $query->where('year', '=', $f_year_array[0])
-                      ->where('month', '>=', 'Apr');
-            })->orWhere(function ($query) use($f_year_array) {
-                $query->where('year', '=', $f_year_array[1])
-                      ->where('month', '<=', 'Mar');
-            });
+
+            if($this->division != '' && !empty($this->division)){
+                $data->where(function ($query) use($f_year_array, $division) {
+                    $query->where('year', '=', $f_year_array[0])
+                    ->where('month', '>=', 'Apr')
+                    ->where('division_name',$division);
+                })->orWhere(function ($query) use($f_year_array, $division) {
+                    $query->where('year', '=', $f_year_array[1])
+                    ->where('month', '<=', 'Mar')
+                    ->where('division_name',$division);
+                });
+            }elseif($this->branch_id != '' && !empty($this->branch_id)){
+
+                $data->where(function ($query) use($f_year_array, $branch) {
+                    $query->where('year', '=', $f_year_array[0])
+                    ->where('month', '>=', 'Apr')
+                    ->where('branch_name',$branch);
+                })->orWhere(function ($query) use($f_year_array, $branch) {
+                    $query->where('year', '=', $f_year_array[1])
+                    ->where('month', '<=', 'Mar')
+                    ->where('branch_name',$branch);
+                });
+            }elseif($this->user != '' && !empty($this->user)){
+
+                $data->where(function ($query) use($f_year_array, $user) {
+                    $query->where('year', '=', $f_year_array[0])
+                    ->where('month', '>=', 'Apr')
+                    ->where('user_id',$user);
+                })->orWhere(function ($query) use($f_year_array, $user) {
+                    $query->where('year', '=', $f_year_array[1])
+                    ->where('month', '<=', 'Mar')
+                    ->where('user_id',$user);
+                });
+            }elseif($this->type != '' && !empty($this->type)){
+
+                $data->where(function ($query) use($f_year_array, $type) {
+                    $query->where('year', '=', $f_year_array[0])
+                    ->where('month', '>=', 'Apr')
+                    ->where('type',$type);
+                })->orWhere(function ($query) use($f_year_array, $type) {
+                    $query->where('year', '=', $f_year_array[1])
+                    ->where('month', '<=', 'Mar')
+                    ->where('type',$type);
+                });
+            }else{
+                $data->where(function ($query) use($f_year_array) {
+                    $query->where('year', '=', $f_year_array[0])
+                          ->where('month', '>=', 'Apr');
+                })->orWhere(function ($query) use($f_year_array) {
+                    $query->where('year', '=', $f_year_array[1])
+                          ->where('month', '<=', 'Mar');
+                });
+            }
+            
         }else {
-           $data->where(function ($query) use($f_year_array) {
-                $query->where('year', '=', $f_year_array[0])
-                      ->where('month', '>=', $this->month);
-            })->orWhere(function ($query) use($f_year_array) {
-                $query->where('year', '=', $f_year_array[1])
-                      ->where('month', '<=', $this->month);
-            });
+            if($this->division != '' && !empty($this->division)){
+                $data->where(function ($query) use($f_year_array,$division) {
+                     $query->where('year', '=', $f_year_array[0])
+                           ->where('month', '>=', $this->month)
+                           ->where('division_name', $division);
+                 })->orWhere(function ($query) use($f_year_array,$division) {
+                     $query->where('year', '=', $f_year_array[1])
+                           ->where('month', '<=', $this->month)
+                           ->where('division_name', $division);
+                 }); 
+            }elseif($this->branch_id != '' && !empty($this->branch_id)){
+                $data->where(function ($query) use($f_year_array,$branch) {
+                     $query->where('year', '=', $f_year_array[0])
+                           ->where('month', '>=', $this->month)
+                           ->where('branch_name', $branch);
+                 })->orWhere(function ($query) use($f_year_array,$branch) {
+                     $query->where('year', '=', $f_year_array[1])
+                           ->where('month', '<=', $this->month)
+                           ->where('branch_name', $branch);
+                 }); 
+            }elseif($this->user != '' && !empty($this->user)){
+                $data->where(function ($query) use($f_year_array,$user) {
+                     $query->where('year', '=', $f_year_array[0])
+                           ->where('month', '>=', $this->month)
+                           ->where('user_id', $user);
+                 })->orWhere(function ($query) use($f_year_array,$user) {
+                     $query->where('year', '=', $f_year_array[1])
+                           ->where('month', '<=', $this->month)
+                           ->where('user_id', $user);
+                 });
+            }elseif($this->type != '' && !empty($this->type)){
+                $data->where(function ($query) use($f_year_array,$type) {
+                     $query->where('year', '=', $f_year_array[0])
+                           ->where('month', '>=', $this->month)
+                           ->where('type', $type);
+                 })->orWhere(function ($query) use($f_year_array,$type) {
+                     $query->where('year', '=', $f_year_array[1])
+                           ->where('month', '<=', $this->month)
+                           ->where('type', $type);
+                 });
+            }else{
+                if($this->month != '' && !empty($this->month) && $this->month != null ){
+                    if($this->month == 'Jan' || $this->month == 'Feb' || $this->month == 'Mar') {
+                         $data->where(function ($query) use($f_year_array,$month) {
+                            $query->where('year', '=', $f_year_array[1])
+                            ->where('month', '=', $month);
+                        });
+                     }else{
+                         $data->where(function ($query) use($f_year_array,$month) {
+                            $query->where('year', '=', $f_year_array[0])
+                            ->where('month', '=', $month);
+                        });
+                     }
+
+                }else{
+                    $data->where(function ($query) use($f_year_array) {
+                         $query->where('year', '=', $f_year_array[0])
+                               ->where('month', '>=', $this->month);
+                     })->orWhere(function ($query) use($f_year_array) {
+                         $query->where('year', '=', $f_year_array[1])
+                               ->where('month', '<=', $this->month);
+                     });
+                }
+            }
         }
         
         $data = $data->groupBy('branch_id','div_id','user_id')->orderBy('month')->get();
@@ -182,7 +296,10 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
                 $currentYearAchievements = $sales_data_current_year->achievements_current_year;
 
                 if ($lastYearAchievements != null) {
-                    $growthPercent = (($currentYearAchievements - $lastYearAchievements) / $lastYearAchievements) * 100;
+                    // $growthPercent = (($currentYearAchievements - $lastYearAchievements) / $lastYearAchievements) * 100;
+
+                    $growthPercent = (($currentYearAchievements - $lastYearAchievements) / abs($lastYearAchievements)) * 100;
+                    $growthPercent = number_format($growthPercent, 2);
                 }else{
                     if ($lastYearAchievements == null || $lastYearAchievements == 0) {
                         if (($currentYearAchievements == null || $currentYearAchievements == 0) && ($lastYearAchievements==null || $lastYearAchievements==0)) {
@@ -243,7 +360,8 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
                 $currentYearAchievements = $sales_data_current_year->achievements_current_year;
 
                 if ($lastYearAchievements != 0) {
-                    $growthPercent = (($currentYearAchievements - $lastYearAchievements) / $lastYearAchievements) * 100;
+                    $growthPercent = (($currentYearAchievements - $lastYearAchievements) / abs($lastYearAchievements)) * 100;
+                    $growthPercent = number_format($growthPercent, 2);
                 }else{
                     if ($lastYearAchievements == 0 ) {
                         if ($currentYearAchievements == null && $lastYearAchievements==null) {
@@ -303,7 +421,8 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
                 $currentYearAchievements = $sales_data_current_year->achievements_current_year;
 
                 if ($lastYearAchievements != 0) {
-                    $growthPercent = (($currentYearAchievements - $lastYearAchievements) / $lastYearAchievements) * 100;
+                    $growthPercent = (($currentYearAchievements - $lastYearAchievements) / abs($lastYearAchievements)) * 100;
+                    $growthPercent = number_format($growthPercent, 2);
                 }else{
                     if ($lastYearAchievements == 0 ) {
                         if ($currentYearAchievements == null && $lastYearAchievements==null) {
@@ -329,11 +448,15 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
       }
     }
 
-    $response[13] = '=C'.$this->rowIndex.' + F'.$this->rowIndex.' + I'.$this->rowIndex;
-    $response[14] = '=D'.$this->rowIndex.' + G'.$this->rowIndex.' + J'.$this->rowIndex;
+//     EFG
+// HIJ
+// KLM
+
+    $response[13] = '=E'.$this->rowIndex.' + H'.$this->rowIndex.' + G'.$this->rowIndex;
+    $response[14] = '=F'.$this->rowIndex.' + I'.$this->rowIndex.' + L'.$this->rowIndex;
     // $response[13] = '=((L'.$this->rowIndex.' - M'.$this->rowIndex.') / K'.$this->rowIndex.') * 100';
 
-    $response[15] = '=IF(AND(M'.$this->rowIndex.'=0, L'.$this->rowIndex.'=0), "0", IF(L'.$this->rowIndex.'=0, 100, ((M'.$this->rowIndex.' - L'.$this->rowIndex.') / L'.$this->rowIndex.') * 100))';
+    $response[15] = '=IF(AND(O'.$this->rowIndex.'=0, N'.$this->rowIndex.'=0), "0", IF(O'.$this->rowIndex.'=0, 100, ((O'.$this->rowIndex.' - N'.$this->rowIndex.') / O'.$this->rowIndex.') * 100))';
 
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
@@ -367,7 +490,8 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
                 $currentYearAchievements = $sales_data_current_year->achievements_current_year;
 
                 if ($lastYearAchievements != 0) {
-                    $growthPercent = (($currentYearAchievements - $lastYearAchievements) / $lastYearAchievements) * 100;
+                    $growthPercent = (($currentYearAchievements - $lastYearAchievements) / abs($lastYearAchievements)) * 100;
+                    $growthPercent = number_format($growthPercent, 2);
                 }else{
                     if ($lastYearAchievements == 0 ) {
                         if ($currentYearAchievements == null && $lastYearAchievements==null) {
@@ -425,7 +549,8 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
                 $currentYearAchievements = $sales_data_current_year->achievements_current_year;
 
                 if ($lastYearAchievements != 0) {
-                    $growthPercent = (($currentYearAchievements - $lastYearAchievements) / $lastYearAchievements) * 100;
+                    $growthPercent = (($currentYearAchievements - $lastYearAchievements) / abs($lastYearAchievements)) * 100;
+                    $growthPercent = number_format($growthPercent, 2);
                 }else{
                     if ($lastYearAchievements == 0 ) {
                         if ($currentYearAchievements == null && $lastYearAchievements==null) {
@@ -483,7 +608,8 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
                            $currentYearAchievements = $sales_data_current_year->achievements_current_year;
 
                            if ($lastYearAchievements != 0) {
-                               $growthPercent = (($currentYearAchievements - $lastYearAchievements) / $lastYearAchievements) * 100;
+                               $growthPercent = (($currentYearAchievements - $lastYearAchievements) / abs($lastYearAchievements)) * 100;
+                               $growthPercent = number_format($growthPercent, 2);
                            }else{
                                if ($lastYearAchievements == 0 ) {
                                    if ($currentYearAchievements == null && $lastYearAchievements==null) {
@@ -508,11 +634,10 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
 
       }
 
-
-    $response[24] = '=O'.$this->rowIndex.' + R'.$this->rowIndex.' + U'.$this->rowIndex;
-    $response[25] = '=P'.$this->rowIndex.' + S'.$this->rowIndex.' + V'.$this->rowIndex;
+    $response[24] = '=Q'.$this->rowIndex.' + T'.$this->rowIndex.' + W'.$this->rowIndex;
+    $response[25] = '=R'.$this->rowIndex.' + U'.$this->rowIndex.' + X'.$this->rowIndex;
     // $response[25] = '=(Q'.$this->rowIndex.' + T'.$this->rowIndex.' + W'.$this->rowIndex.') / 3';
-    $response[26] = '=IF(AND(Y'.$this->rowIndex.'=0, X'.$this->rowIndex.'=0), "0", IF(X'.$this->rowIndex.'=0, 100, ((Y'.$this->rowIndex.' - X'.$this->rowIndex.') / L'.$this->rowIndex.') * 100))';
+    $response[26] = '=IF(AND(AA'.$this->rowIndex.'=0, Z'.$this->rowIndex.'=0), "0", IF(Z'.$this->rowIndex.'=0, 100, ((AA'.$this->rowIndex.' - Z'.$this->rowIndex.') / AA'.$this->rowIndex.') * 100))';
 
 
     foreach($data['months'] as $key=>$month) {
@@ -547,7 +672,8 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
                         $currentYearAchievements = $sales_data_current_year->achievements_current_year;
 
                         if ($lastYearAchievements != 0) {
-                            $growthPercent = (($currentYearAchievements - $lastYearAchievements) / $lastYearAchievements) * 100;
+                            $growthPercent = (($currentYearAchievements - $lastYearAchievements) / abs($lastYearAchievements)) * 100;
+                            $growthPercent = number_format($growthPercent, 2);
                         } else {
                             $growthPercent = 0;
                         }
@@ -602,7 +728,8 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
                           $currentYearAchievements = $sales_data_current_year->achievements_current_year;
 
                           if ($lastYearAchievements != 0) {
-                              $growthPercent = (($currentYearAchievements - $lastYearAchievements) / $lastYearAchievements) * 100;
+                              $growthPercent = (($currentYearAchievements - $lastYearAchievements) / abs($lastYearAchievements)) * 100;
+                              $growthPercent = number_format($growthPercent, 2);
                           }else{
                               if ($lastYearAchievements == 0 ) {
                                   if ($currentYearAchievements == null && $lastYearAchievements==null) {
@@ -663,7 +790,8 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
               $currentYearAchievements = $sales_data_current_year->achievements_current_year;
 
               if ($lastYearAchievements != 0) {
-                  $growthPercent = (($currentYearAchievements - $lastYearAchievements) / $lastYearAchievements) * 100;
+                  $growthPercent = (($currentYearAchievements - $lastYearAchievements) / abs($lastYearAchievements)) * 100;
+                  $growthPercent = number_format($growthPercent, 2);
               }else{
                   if ($lastYearAchievements == 0 ) {
                       if ($currentYearAchievements == null && $lastYearAchievements==null) {
@@ -689,10 +817,10 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
         }
     }
 
-    $response[36] = '=AA'.$this->rowIndex.' + AD'.$this->rowIndex.' + AG'.$this->rowIndex;
-    $response[37] = '=AB'.$this->rowIndex.' + AE'.$this->rowIndex.' + AH'.$this->rowIndex;
+    $response[36] = '=AC'.$this->rowIndex.' + AF'.$this->rowIndex.' + AI'.$this->rowIndex;
+    $response[37] = '=AF'.$this->rowIndex.' + AG'.$this->rowIndex.' + AJ'.$this->rowIndex;
     // $response[37] = '=(AC'.$this->rowIndex.' + AF'.$this->rowIndex.' + AI'.$this->rowIndex.') / 3';
-    $response[38] = '=IF(AND(AK'.$this->rowIndex.'=0, AJ'.$this->rowIndex.'=0), "0", IF(AJ'.$this->rowIndex.'=0, 100, ((AK'.$this->rowIndex.' - AJ'.$this->rowIndex.') / AK'.$this->rowIndex.') * 100))';
+    $response[38] = '=IF(AND(AL'.$this->rowIndex.'=0, AM'.$this->rowIndex.'=0), "0", IF(AM'.$this->rowIndex.'=0, 100, ((AM'.$this->rowIndex.' - AL'.$this->rowIndex.') / AM'.$this->rowIndex.') * 100))';
 
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
@@ -729,7 +857,8 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
               $currentYearAchievements = $sales_data_current_year->achievements_current_year;
 
               if ($lastYearAchievements != 0) {
-                  $growthPercent = (($currentYearAchievements - $lastYearAchievements) / $lastYearAchievements) * 100;
+                  $growthPercent = (($currentYearAchievements - $lastYearAchievements) / abs($lastYearAchievements)) * 100;
+                  $growthPercent = number_format($growthPercent, 2);
               }else{
                   if ($lastYearAchievements == 0 ) {
                       if ($currentYearAchievements == null && $lastYearAchievements==null) {
@@ -790,7 +919,8 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
               $currentYearAchievements = $sales_data_current_year->achievements_current_year;
 
               if ($lastYearAchievements != 0) {
-                  $growthPercent = (($currentYearAchievements - $lastYearAchievements) / $lastYearAchievements) * 100;
+                  $growthPercent = (($currentYearAchievements - $lastYearAchievements) / abs($lastYearAchievements)) * 100;
+                  $growthPercent = number_format($growthPercent, 2);
               }else{
                   if ($lastYearAchievements == 0 ) {
                       if ($currentYearAchievements == null && $lastYearAchievements==null) {
@@ -851,7 +981,8 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
               $currentYearAchievements = $sales_data_current_year->achievements_current_year;
 
               if ($lastYearAchievements != 0) {
-                  $growthPercent = (($currentYearAchievements - $lastYearAchievements) / $lastYearAchievements) * 100;
+                  $growthPercent = (($currentYearAchievements - $lastYearAchievements) / abs($lastYearAchievements)) * 100;
+                  $growthPercent = number_format($growthPercent, 2);
               }else{
                   if ($lastYearAchievements == 0 ) {
                       if ($currentYearAchievements == null && $lastYearAchievements==null) {
@@ -878,16 +1009,14 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
         }
     }
 
-
-
-    $response[48] = '=AM'.$this->rowIndex.' + AP'.$this->rowIndex.' + AS'.$this->rowIndex;
-    $response[49] = '=AN'.$this->rowIndex.' + AQ'.$this->rowIndex.' + AT'.$this->rowIndex;
+    $response[48] = '=AO'.$this->rowIndex.' + AR'.$this->rowIndex.' + AU'.$this->rowIndex;
+    $response[49] = '=AP'.$this->rowIndex.' + AS'.$this->rowIndex.' + AT'.$this->rowIndex;
     // $response[49] = '=(AQ'.$this->rowIndex.' + AR'.$this->rowIndex.' + AU'.$this->rowIndex.') / 3';
-    $response[50] = '=IF(AND(AW'.$this->rowIndex.'=0, AV'.$this->rowIndex.'=0), "0", IF(AV'.$this->rowIndex.'=0, 100, ((AW'.$this->rowIndex.' - AV'.$this->rowIndex.') / AW'.$this->rowIndex.') * 100))';
+    $response[50] = '=IF(AND(AY'.$this->rowIndex.'=0, AW'.$this->rowIndex.'=0), "0", IF(AW'.$this->rowIndex.'=0, 100, ((AY'.$this->rowIndex.' - AX'.$this->rowIndex.') / AY'.$this->rowIndex.') * 100))';
 
-    $response[51] = '=L'.$this->rowIndex.' + X'.$this->rowIndex.' + AJ'.$this->rowIndex.' + AV'.$this->rowIndex;
-    $response[52] = '=M'.$this->rowIndex.' + Y'.$this->rowIndex.' + AK'.$this->rowIndex.' + AW'.$this->rowIndex;
-    $response[53] = '=(N'.$this->rowIndex.' + Z'.$this->rowIndex.' + AL'.$this->rowIndex.' + AX'.$this->rowIndex.') / 4';
+    $response[51] = '=N'.$this->rowIndex.' + Z'.$this->rowIndex.' + AL'.$this->rowIndex.' + AX'.$this->rowIndex;
+    $response[52] = '='.$this->rowIndex.' + O'.$this->rowIndex.' + AA'.$this->rowIndex.' + AM'.$this->rowIndex;
+    $response[53] = '=(P'.$this->rowIndex.' + AB'.$this->rowIndex.' + AN'.$this->rowIndex.' + AZ'.$this->rowIndex.') / 4';
 
     $response[54] = '=IF(AND(AZ'.$this->rowIndex.'=0, AY'.$this->rowIndex.'=0), "0", IF(AY'.$this->rowIndex.'=0, 100, ((AZ'.$this->rowIndex.' - AY'.$this->rowIndex.') / AW'.$this->rowIndex.') * 100))';
 

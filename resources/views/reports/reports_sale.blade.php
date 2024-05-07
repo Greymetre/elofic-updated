@@ -6,11 +6,11 @@
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
-          <h4 class="card-title">User Sales Report
+          <h4 class="card-title">User Working Report
             <span class="">
               <div class="btn-group header-frm-btn">
                 @if(auth()->user()->can(['checkin_download']))
-                <form method="GET" action="{{ URL::to('user_sales_report_download_') }}">
+                <form method="GET" action="{{ URL::to('user_sales_report_download') }}">
                   <div class="d-flex flex-wrap flex-row">
                     <div class="p-2" style="width: 200px;">
                       <select name="user_id" id="user_id" class="form-control select2">
@@ -148,22 +148,26 @@
           {
             data: 'employee_codes',
             name: 'employee_codes',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: false
           },
           {
             data: 'name',
             name: 'name',
             "defaultContent": '',
+            orderable: false
           },
           {
             data: 'getdesignation.designation_name',
             name: 'getdesignation.designation_name',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: false
           },
           {
             data: 'getbranch.branch_name',
             name: 'getbranch.branch_name',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: false
           },
           {
             data: 'getdivision.division_name',

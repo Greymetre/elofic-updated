@@ -37,7 +37,7 @@ class LoyaltySummaryReportExport implements FromCollection,WithHeadings,ShouldAu
 
             if(!empty($this->branch_id))
             {
-             $branch_user_id = User::where('branch_id',$this->branch_id)->pluck('id');
+              $query->where('id',$this->branch_id);
             }
 
         })
@@ -52,6 +52,8 @@ class LoyaltySummaryReportExport implements FromCollection,WithHeadings,ShouldAu
 
     public function map($data): array
     {
+
+        // dd($data);
         $usersIds = User::where('branch_id', $data['id'])->pluck('id')->toArray();
         $customerIds = Customers::whereIn('executive_id', $usersIds)->where('customertype','2')->pluck('id');
         $total_retailers = $customerIds->count();

@@ -53,8 +53,8 @@
                       </select>
                     </div>
                     <div class="p-2" style="width:160px;">
-                      <select class="selectpicker" name="month" id="month" data-style="select-with-transition" title="Month">
-                        <option value="" disabled selected>{!! trans('panel.sales_users.month') !!}</option>
+                      <select class="selectpicker" name="month[]" multiple id="month" data-style="select-with-transition" title="Month">
+                        <option value="" disabled>{!! trans('panel.sales_users.month') !!}</option>
                         @for ($month = 1; $month <= 12; $month++) <option value="{!! date('M', mktime(0, 0, 0, $month, 1)) !!}">{!! date('M', mktime(0, 0, 0, $month, 1)) !!}</option>
                           @endfor
                       </select>

@@ -3024,7 +3024,6 @@
         getTotalOrderValueQty();
     });
     $('#ss_financial_year').change(function(){
-      alert('ggggggg');
         $('#ss_month').prop('disabled', false);
         $('#ss_month').selectpicker('refresh');
         table.draw();
