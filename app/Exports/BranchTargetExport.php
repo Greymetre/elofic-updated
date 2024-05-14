@@ -393,7 +393,7 @@ class BranchTargetExport implements FromCollection,WithHeadings,ShouldAutoSize,W
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
         
-        if(isset($month) && isset($year[$key]) && in_array('Jul',$data['months']) && $f_year_array[0] == $year[$key]) {
+        if(isset($month) && isset($year[$key]) && in_array('Jul',$data['months']) && $f_year_array[0]) {
             $sales_data = DB::table('branchwise_targets')
                         ->where(['month'=> 'Jul', 'year' => $f_year_array[0],'user_id' => $data['user_id'], 'branch_id'=> $data['branch_id'],'div_id'=> $data['div_id']])
                         ->get();

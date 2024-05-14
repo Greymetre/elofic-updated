@@ -42,41 +42,46 @@ class UserImport implements ToCollection, WithValidation, WithHeadingRow, WithBa
         $userdetails = collect([]);
         $addressdetails = collect([]);
         foreach ($rows as $row) {
-            
+
             if (!empty($row['id'])) {
-
-                $excelDate = $row['spouse_date_of_birth'] - 25569; // Adjust for Excel's epoch
-                $unixTimestamp = strtotime('+'.$excelDate.' days', strtotime('1970-01-01'));
-                $row['spouse_date_of_birth'] = !empty($row['spouse_date_of_birth'])?Carbon::createFromTimestamp($unixTimestamp):'';
-
-                $excelDate = $row['children_1_dob'] - 25569; // Adjust for Excel's epoch
-                $unixTimestamp = strtotime('+'.$excelDate.' days', strtotime('1970-01-01'));
-                $row['children_1_dob'] = !empty($row['children_1_dob'])?Carbon::createFromTimestamp($unixTimestamp):'';
-
-                $excelDate = $row['children_2_dob'] - 25569; // Adjust for Excel's epoch
-                $unixTimestamp = strtotime('+'.$excelDate.' days', strtotime('1970-01-01'));
-                $row['children_2_dob'] = !empty($row['children_2_dob'])?Carbon::createFromTimestamp($unixTimestamp):'';
-
-                $excelDate = $row['children_3_dob'] - 25569; // Adjust for Excel's epoch
-                $unixTimestamp = strtotime('+'.$excelDate.' days', strtotime('1970-01-01'));
-                $row['children_3_dob'] = !empty($row['children_3_dob'])?Carbon::createFromTimestamp($unixTimestamp):'';
-
-                $excelDate = $row['children_4_dob'] - 25569; // Adjust for Excel's epoch
-                $unixTimestamp = strtotime('+'.$excelDate.' days', strtotime('1970-01-01'));
-                $row['children_4_dob'] = !empty($row['children_4_dob'])?Carbon::createFromTimestamp($unixTimestamp):'';
-
-                $excelDate = $row['children_5_dob'] - 25569; // Adjust for Excel's epoch
-                $unixTimestamp = strtotime('+'.$excelDate.' days', strtotime('1970-01-01'));
-                $row['children_5_dob'] = !empty($row['children_5_dob'])?Carbon::createFromTimestamp($unixTimestamp):'';
-
+                if (is_numeric($row['spouse_date_of_birth'])) {
+                    $excelDate = $row['spouse_date_of_birth'] - 25569; // Adjust for Excel's epoch
+                    $unixTimestamp = strtotime('+' . $excelDate . ' days', strtotime('1970-01-01'));
+                    $row['spouse_date_of_birth'] = !empty($row['spouse_date_of_birth']) ? Carbon::createFromTimestamp($unixTimestamp) : '';
+                }
+                if (is_numeric($row['children_1_dob'])) {
+                    $excelDate = $row['children_1_dob'] - 25569; // Adjust for Excel's epoch
+                    $unixTimestamp = strtotime('+' . $excelDate . ' days', strtotime('1970-01-01'));
+                    $row['children_1_dob'] = !empty($row['children_1_dob']) ? Carbon::createFromTimestamp($unixTimestamp) : '';
+                }
+                if (is_numeric($row['children_2_dob'])) {
+                    $excelDate = $row['children_2_dob'] - 25569; // Adjust for Excel's epoch
+                    $unixTimestamp = strtotime('+' . $excelDate . ' days', strtotime('1970-01-01'));
+                    $row['children_2_dob'] = !empty($row['children_2_dob']) ? Carbon::createFromTimestamp($unixTimestamp) : '';
+                }
+                if (is_numeric($row['children_3_dob'])) {
+                    $excelDate = $row['children_3_dob'] - 25569; // Adjust for Excel's epoch
+                    $unixTimestamp = strtotime('+' . $excelDate . ' days', strtotime('1970-01-01'));
+                    $row['children_3_dob'] = !empty($row['children_3_dob']) ? Carbon::createFromTimestamp($unixTimestamp) : '';
+                }
+                if (is_numeric($row['children_4_dob'])) {
+                    $excelDate = $row['children_4_dob'] - 25569; // Adjust for Excel's epoch
+                    $unixTimestamp = strtotime('+' . $excelDate . ' days', strtotime('1970-01-01'));
+                    $row['children_4_dob'] = !empty($row['children_4_dob']) ? Carbon::createFromTimestamp($unixTimestamp) : '';
+                }
+                if (is_numeric($row['children_5_dob'])) {
+                    $excelDate = $row['children_5_dob'] - 25569; // Adjust for Excel's epoch
+                    $unixTimestamp = strtotime('+' . $excelDate . ' days', strtotime('1970-01-01'));
+                    $row['children_5_dob'] = !empty($row['children_5_dob']) ? Carbon::createFromTimestamp($unixTimestamp) : '';
+                }
                 $name = trim($row['user_name']);
                 $last_name = (strpos($name, ' ') === false) ? '' : preg_replace('#.*\s([\w-]*)$#', '$1', $name);
                 $first_name = trim(preg_replace('#' . preg_quote($last_name, '#') . '#', '', $name));
 
                 User::where('id', '=', $row['id'])->update([
                     'name' => !empty($name) ? ucfirst(strtolower($name)) : '',
-                    'first_name' => !empty($first_name)? ucfirst(strtolower($first_name)):'',
-                    'last_name' => !empty($last_name)? ucfirst(strtolower($last_name)):'',
+                    'first_name' => !empty($first_name) ? ucfirst(strtolower($first_name)) : '',
+                    'last_name' => !empty($last_name) ? ucfirst(strtolower($last_name)) : '',
                     //'mobile' => $row['mobile'],
                     // 'mobile' => !empty($row['mobile']) ? $row['mobile'] : null,
                     'email' => !empty($row['email']) ? $row['email'] : null,
@@ -93,6 +98,7 @@ class UserImport implements ToCollection, WithValidation, WithHeadingRow, WithBa
                     'payroll' => !empty($row['payroll']) ? $row['payroll'] : '',
                     'reportingid' => !empty($row['reporting_id']) ? $row['reporting_id'] : '',
                     'sales_type' => !empty($row['sales_type']) ? $row['sales_type'] : '',
+                    'show_attandance_report' => !empty($row['attandance_summary_report']) ? (int)$row['attandance_summary_report'] : '',
                     //'created_at' => getcurentDateTime(),
                     //'updated_at' => getcurentDateTime()
                 ]);
@@ -101,10 +107,10 @@ class UserImport implements ToCollection, WithValidation, WithHeadingRow, WithBa
 
 
                 UserDetails::where('user_id', '=', $row['id'])->update([
-                    'date_of_joining' => (!empty($row['date_of_joining'])&&$row['date_of_joining']!=null) ? date('Y-m-d', strtotime($row['date_of_joining'])) : null,
-                    'date_of_birth' => (!empty($row['date_of_birth'])&& $row['date_of_birth'] != null) ? date('Y-m-d', strtotime($row['date_of_birth'])) : null,
+                    'date_of_joining' => (!empty($row['date_of_joining']) && $row['date_of_joining'] != null) ? date('Y-m-d', strtotime($row['date_of_joining'])) : null,
+                    'date_of_birth' => (!empty($row['date_of_birth']) && $row['date_of_birth'] != null) ? date('Y-m-d', strtotime($row['date_of_birth'])) : null,
                     'last_year_increments' => !empty($row['last_year_increments']) ? $row['last_year_increments'] : null,
-                    'last_year_increment_percent' => !empty($row['last_year_increment_percent']) ? ($row['last_year_increment_percent']*100).'%' : null,
+                    'last_year_increment_percent' => !empty($row['last_year_increment_percent']) ? ($row['last_year_increment_percent'] * 100) . '%' : null,
                     'last_promotion' => !empty($row['last_promotion']) ? $row['last_promotion'] : null,
                     'ctc_annual' => !empty($row['ctc_annual']) ? $row['ctc_annual'] : 0.00,
                     'gross_salary_monthly' => !empty($row['gross_salary_monthly']) ? $row['gross_salary_monthly'] : 0.00,
@@ -241,10 +247,10 @@ class UserImport implements ToCollection, WithValidation, WithHeadingRow, WithBa
                     $user->givePermissionTo($permissions);
                     $userdetails->push([
                         'user_id' => $user['id'],
-                        'date_of_joining' => (!empty($row['date_of_joining'])&&$row['date_of_joining']!=null) ? date('Y-m-d', strtotime($row['date_of_joining'])) : null,
-                        'date_of_birth' => (!empty($row['date_of_birth'])&& $row['date_of_birth'] != null) ? date('Y-m-d', strtotime($row['date_of_birth'])) : null,
+                        'date_of_joining' => (!empty($row['date_of_joining']) && $row['date_of_joining'] != null) ? date('Y-m-d', strtotime($row['date_of_joining'])) : null,
+                        'date_of_birth' => (!empty($row['date_of_birth']) && $row['date_of_birth'] != null) ? date('Y-m-d', strtotime($row['date_of_birth'])) : null,
                         'last_year_increments' => !empty($row['last_year_increments']) ? $row['last_year_increments'] : null,
-                        'last_year_increment_percent' => !empty($row['last_year_increment_percent']) ? ($row['last_year_increment_percent']*100).'%' : null,
+                        'last_year_increment_percent' => !empty($row['last_year_increment_percent']) ? ($row['last_year_increment_percent'] * 100) . '%' : null,
                         'last_promotion' => !empty($row['last_promotion']) ? $row['last_promotion'] : null,
                         'ctc_annual' => !empty($row['ctc_annual']) ? $row['ctc_annual'] : 0.00,
                         'gross_salary_monthly' => !empty($row['gross_salary_monthly']) ? $row['gross_salary_monthly'] : 0.00,

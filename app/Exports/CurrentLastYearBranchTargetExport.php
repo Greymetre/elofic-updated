@@ -199,49 +199,109 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
 	}
 
 
-    public function headings(): array
-    {
-     $f_year_array = explode('-', $this->financial_year);
+   //  public function headings(): array
+   //  {
+   //   $f_year_array = explode('-', $this->financial_year);
 
-     $startYear = $f_year_array[0];
+   //   $startYear = $f_year_array[0];
 
-     $endYear = $f_year_array[1];
+   //   $endYear = $f_year_array[1];
 
-     $headings = ['EMP Code', 'Emp Name','Branch','Division'];
+   //   $headings = ['EMP Code', 'Emp Name','Branch','Division'];
 
-     $quarterNames = ['Q1', 'Q2', 'Q3', 'Q4'];
+   //   $quarterNames = ['Q1', 'Q2', 'Q3', 'Q4'];
 
-     $quarterIndex = 0;
+   //   $quarterIndex = 0;
 
-     for ($year = $startYear; $year <= $endYear; $year++) {
-         $startMonth = ($year == $startYear) ? 4 : 1;
-         $endMonth = ($year == $endYear) ? 3 : 12;
+   //   for ($year = $startYear; $year <= $endYear; $year++) {
+   //       $startMonth = ($year == $startYear) ? 4 : 1;
+   //       $endMonth = ($year == $endYear) ? 3 : 12;
 
 
-         for ($month = $startMonth; $month <= $endMonth; $month++) {
+   //       for ($month = $startMonth; $month <= $endMonth; $month++) {
 
-               $formattedMonth = str_pad($month, 2, '0', STR_PAD_LEFT);
-               $headings[] = "$formattedMonth/$year";
-               $headings[] = "";
-               $headings[] = "";
+   //             $formattedMonth = str_pad($month, 2, '0', STR_PAD_LEFT);
+   //             $headings[] = "$formattedMonth/$year";
+   //             $headings[] = "";
+   //             $headings[] = "";
 
-               if($month == '06' || $month == '09' || $month == '12' || $month == '03' ) {
-                   $headings[] = $quarterNames[$quarterIndex];
-                   $quarterIndex++;
-                   $headings[] = "";
-                   $headings[] = "";
+   //             if($month == '06' || $month == '09' || $month == '12' || $month == '03' ) {
+   //                 $headings[] = $quarterNames[$quarterIndex];
+   //                 $quarterIndex++;
+   //                 $headings[] = "";
+   //                 $headings[] = "";
+   //             }
+
+   //         }
+   //     }
+
+   //     $headings[] = 'Total';
+
+   //     $sub_headings = ['','','','','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%'];
+
+   //     $final_heading = [$headings, $sub_headings];
+
+   //     return $final_heading;
+   // }
+
+   // new heading
+   public function headings(): array
+   {
+       $f_year_array = explode('-', $this->financial_year);
+       $headings = ['EMP Code', 'Emp Name', 'Branch', 'Division'];
+       $quarterNames = ['Q1', 'Q2', 'Q3', 'Q4'];
+       $sub_headings = ['','','',''];
+       $quarterIndex = 0;
+
+        // If no month is selected, include all months for the financial year
+        if (empty($this->month)) {
+            $startYear = $f_year_array[0];
+            $endYear = $f_year_array[1];
+            $allMonths = ['EMP Code', 'Emp Name', 'Branch','Division','Apr', '','','May', '','', 'Jun', '','','Q1',  '','','Jul', '','', 'Aug', '','', 'Sep', '','','Q2', '','', 'Oct', '','', 'Nov', '','', 'Dec', '','','Q3', '','', 'Jan', '','', 'Feb', '','', 'Mar', '','','Q4', '','','Total'];
+            // $this->month = $allMonths;
+            $quarterIndex %= count($quarterNames);
+            $sub_headings = ['','','','','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%'];
+            $final_heading = [$allMonths, $sub_headings];
+        }
+
+
+        if (!empty($this->month) && count($this->month)>0) {
+           foreach ($this->month as $selectedMonth) {
+               array_push($sub_headings, 'LY', 'CY', 'Growth%');
+               $selectedMonth = trim($selectedMonth);
+               if (in_array($selectedMonth, ['Jan', 'Feb', 'Mar'])) {
+                   $startYear = $f_year_array[1];
+                   $endYear = $f_year_array[1];
+               } else {
+                   // $startYear = $f_year_array[0];
+                   // $endYear = $f_year_array[0];
+
+                $startYear = $f_year_array[0];
+                $endYear = $f_year_array[0];
                }
 
+               for ($year = $startYear; $year <= $endYear; $year++) {
+                   $startMonth = date('m', strtotime("$selectedMonth 1, $year"));
+                   $endMonth = date('m', strtotime("$selectedMonth 1, $year"));
+
+                   for ($month = $startMonth; $month <= $endMonth; $month++) {        
+                       if (!in_array(date('M', strtotime("$year-$month-01")), $this->month)) {
+                           continue;
+                       }
+
+                       $formattedMonth = str_pad($month, 2, '0', STR_PAD_LEFT);
+                       $headings[] = "$formattedMonth/$year";
+                       $headings[] = "";
+                       $headings[] = "";
+                   }
+                }
+                $final_heading = [$headings, $sub_headings];
            }
-       }
+        }
 
-       $headings[] = 'Total';
+        // dd($final_heading);
 
-       $sub_headings = ['','','','','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%','LY','CY','Growth%'];
-
-       $final_heading = [$headings, $sub_headings];
-
-       return $final_heading;
+        return $final_heading;
    }
 
 
@@ -258,11 +318,17 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
     $response[3] = $data['division_name'] ?? '';
     $f_year_array = explode('-', $this->financial_year);
     $data['months'] = explode(',', $data['months']);
+    $status = true;
+
+    if($data['months'] == null) {
+        $data['months'] =  ['Apr','May','Jun','Jul', 'Aug', 'Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
+        $status = false;
+    }
 
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
 
-        if($month == 'Apr' && $f_year_array[0] == $year[$key]) {
+        if($month == 'Apr' && $f_year_array[0] && in_array('Apr',$data['months'])) {
 
             $currentYear = $f_year_array[0];
             $previousYear = $f_year_array[0] - 1;
@@ -299,7 +365,7 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
                     // $growthPercent = (($currentYearAchievements - $lastYearAchievements) / $lastYearAchievements) * 100;
 
                     $growthPercent = (($currentYearAchievements - $lastYearAchievements) / abs($lastYearAchievements)) * 100;
-                    $growthPercent = number_format($growthPercent, 2);
+                    $growthPercent = ROUND($growthPercent, 2);
                 }else{
                     if ($lastYearAchievements == null || $lastYearAchievements == 0) {
                         if (($currentYearAchievements == null || $currentYearAchievements == 0) && ($lastYearAchievements==null || $lastYearAchievements==0)) {
@@ -312,7 +378,7 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
             }
 
             $response[6] = (string)$growthPercent;
-        }else{
+        }elseif($status == false){
             if(!isset($response[4])) {
                $response[4] = '0';
             }
@@ -328,7 +394,7 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
 
-        if($month == 'May' && $f_year_array[0] == $year[$key]) {
+        if($month == 'May' && $f_year_array[0] && in_array('May',$data['months'])) {
 
             $currentYear = $f_year_array[0];
             $previousYear = $f_year_array[0] - 1;
@@ -374,7 +440,7 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
             }
 
             $response[9] = (string)$growthPercent;
-        }else{
+        }elseif($status == false){
             if(!isset($response[7])) {
               $response[7] = '0';
           }
@@ -391,7 +457,7 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
       foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
 
-        if($month == 'Jun' && $f_year_array[0] == $year[$key]) {
+        if($month == 'Jun' && $f_year_array[0] && in_array('Jun',$data['months'])) {
             $currentYear = $f_year_array[0];
             $previousYear = $f_year_array[0] - 1;
             $growthPercent = ''; 
@@ -434,7 +500,7 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
                 }
             } 
             $response[12] = (string)$growthPercent;
-        }else{
+        }elseif($status == false){
             if(!isset($response[10])) {
               $response[10] = '0';
           }
@@ -451,17 +517,18 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
 //     EFG
 // HIJ
 // KLM
-
+    if($status == false) {
     $response[13] = '=E'.$this->rowIndex.' + H'.$this->rowIndex.' + G'.$this->rowIndex;
     $response[14] = '=F'.$this->rowIndex.' + I'.$this->rowIndex.' + L'.$this->rowIndex;
     // $response[13] = '=((L'.$this->rowIndex.' - M'.$this->rowIndex.') / K'.$this->rowIndex.') * 100';
 
     $response[15] = '=IF(AND(O'.$this->rowIndex.'=0, N'.$this->rowIndex.'=0), "0", IF(O'.$this->rowIndex.'=0, 100, ((O'.$this->rowIndex.' - N'.$this->rowIndex.') / O'.$this->rowIndex.') * 100))';
+    }
 
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
 
-        if($month == 'Jul' && $f_year_array[0] == $year[$key]) {
+        if($month == 'Jul' && $f_year_array[0] && in_array('Jul',$data['months'])) {
             $currentYear = $f_year_array[0];
             $previousYear = $f_year_array[0] - 1;
             $growthPercent = ''; 
@@ -503,7 +570,7 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
                 }
             }   
             $response[18] = (string)$growthPercent;
-        }else{
+        }elseif($status == false){
             if(!isset($response[16])) {
               $response[16] = '0';
           }
@@ -520,7 +587,7 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
       foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
 
-        if($month == 'Aug' && $f_year_array[0] == $year[$key]) {
+        if($month == 'Aug' && $f_year_array[0] && in_array('Aug',$data['months'])) {
             $currentYear = $f_year_array[0];
             $previousYear = $f_year_array[0] - 1;
             $growthPercent = ''; 
@@ -562,7 +629,7 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
                 }
             }   
             $response[21] = (string)$growthPercent;
-        }else{
+        }elseif($status == false){
             if(!isset($response[19])) {
               $response[19] = '0';
           }
@@ -579,7 +646,7 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
 
-        if($month == 'Sep' && $f_year_array[0] == $year[$key]) {
+        if($month == 'Sep' && $f_year_array[0] && in_array('Sep',$data['months'])) {
             $currentYear = $f_year_array[0];
                        $previousYear = $f_year_array[0] - 1;
                        $growthPercent = ''; 
@@ -621,7 +688,7 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
                            }
                        }   
                        $response[24] = (string)$growthPercent;
-        }else{
+        }elseif($status == false){
             if(!isset($response[21])) {
               $response[21] = '0';
           }
@@ -634,16 +701,18 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
 
       }
 
+    if($status == false) {
+
     $response[24] = '=Q'.$this->rowIndex.' + T'.$this->rowIndex.' + W'.$this->rowIndex;
     $response[25] = '=R'.$this->rowIndex.' + U'.$this->rowIndex.' + X'.$this->rowIndex;
     // $response[25] = '=(Q'.$this->rowIndex.' + T'.$this->rowIndex.' + W'.$this->rowIndex.') / 3';
     $response[26] = '=IF(AND(AA'.$this->rowIndex.'=0, Z'.$this->rowIndex.'=0), "0", IF(Z'.$this->rowIndex.'=0, 100, ((AA'.$this->rowIndex.' - Z'.$this->rowIndex.') / AA'.$this->rowIndex.') * 100))';
-
+    }
 
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
                 
-                if($month == 'Oct' && $f_year_array[0] == $year[$key]) {
+                if($month == 'Oct' && $f_year_array[0] && in_array('Oct',$data['months'])) {
                     $currentYear = $f_year_array[0];
                     $previousYear = $f_year_array[0] - 1;
                     $growthPercent = ''; 
@@ -679,7 +748,7 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
                         }
                     }   
                     $response[29] = (string)$growthPercent;
-                }else{
+                }elseif($status == false){
                     if(!isset($response[27])) {
                       $response[27] = '0';
                     }
@@ -696,7 +765,7 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
         
-        if($month == 'Nov' && $f_year_array[0] == $year[$key]) {
+        if($month == 'Nov' && $f_year_array[0] && in_array('Nov',$data['months'])) {
             $currentYear = $f_year_array[0];
                       $previousYear = $f_year_array[0] - 1;
                       $growthPercent = '';
@@ -742,7 +811,7 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
                       }
 
                       $response[32] = (string)$growthPercent;
-        }else{
+        }elseif($status == false){
             if(!isset($response[30])) {
                $response[30] = '0';
             }
@@ -758,7 +827,7 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
         
-        if($month == 'Dec' && $f_year_array[0] == $year[$key]) {
+        if($month == 'Dec' && $f_year_array[0] && in_array('Dec',$data['months'])) {
             $currentYear = $f_year_array[0];
             $previousYear = $f_year_array[0] - 1;
             $growthPercent = '';
@@ -804,7 +873,7 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
           }
 
           $response[35] = (string)$growthPercent;
-        }else{
+        }elseif($status == false){
             if(!isset($response[33])) {
               $response[33] = '0';
             }
@@ -817,15 +886,18 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
         }
     }
 
+    if($status == false) {
+
     $response[36] = '=AC'.$this->rowIndex.' + AF'.$this->rowIndex.' + AI'.$this->rowIndex;
     $response[37] = '=AF'.$this->rowIndex.' + AG'.$this->rowIndex.' + AJ'.$this->rowIndex;
     // $response[37] = '=(AC'.$this->rowIndex.' + AF'.$this->rowIndex.' + AI'.$this->rowIndex.') / 3';
     $response[38] = '=IF(AND(AL'.$this->rowIndex.'=0, AM'.$this->rowIndex.'=0), "0", IF(AM'.$this->rowIndex.'=0, 100, ((AM'.$this->rowIndex.' - AL'.$this->rowIndex.') / AM'.$this->rowIndex.') * 100))';
+    }
 
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
         
-        if($month == 'Jan' && $f_year_array[1] == $year[$key]) {
+        if($month == 'Jan' && $f_year_array[1] && in_array('Jan',$data['months'])) {
             $currentYear = $f_year_array[1];
             $previousYear = $f_year_array[1] - 1;
             $growthPercent = '';
@@ -871,7 +943,7 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
           }
 
           $response[41] = (string)$growthPercent;
-        }else{
+        }elseif($status == false){
             if(!isset($response[39])) {
               $response[39] = '0';
             }
@@ -887,7 +959,7 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
         
-        if($month == 'Feb' && $f_year_array[1] == $year[$key]) {
+        if($month == 'Feb' && $f_year_array[1] && in_array('Feb',$data['months'])) {
             $currentYear = $f_year_array[1];
             $previousYear = $f_year_array[1] - 1;
             $growthPercent = '';
@@ -933,7 +1005,7 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
           }
 
           $response[44] = (string)$growthPercent;
-        }else{
+        }elseif($status == false){
             if(!isset($response[42])) {
               $response[42] = '0';
             }
@@ -949,7 +1021,7 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
         
-        if($month == 'Mar' && $f_year_array[1] == $year[$key]) {
+        if($month == 'Mar' && $f_year_array[1] && in_array('Mar',$data['months'])) {
             $currentYear = $f_year_array[1];
             $previousYear = $f_year_array[1] - 1;
             $growthPercent = '';
@@ -995,7 +1067,7 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
           }
 
           $response[47] = (string)$growthPercent;
-        }else{
+        }elseif($status == false){
             if(!isset($response[45])) {
               $response[45] = '0';
             }
@@ -1009,6 +1081,7 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
         }
     }
 
+    if($status == false) {
     $response[48] = '=AO'.$this->rowIndex.' + AR'.$this->rowIndex.' + AU'.$this->rowIndex;
     $response[49] = '=AP'.$this->rowIndex.' + AS'.$this->rowIndex.' + AT'.$this->rowIndex;
     // $response[49] = '=(AQ'.$this->rowIndex.' + AR'.$this->rowIndex.' + AU'.$this->rowIndex.') / 3';
@@ -1019,6 +1092,7 @@ class CurrentLastYearBranchTargetExport implements FromCollection,WithHeadings,S
     $response[53] = '=(P'.$this->rowIndex.' + AB'.$this->rowIndex.' + AN'.$this->rowIndex.' + AZ'.$this->rowIndex.') / 4';
 
     $response[54] = '=IF(AND(AZ'.$this->rowIndex.'=0, AY'.$this->rowIndex.'=0), "0", IF(AY'.$this->rowIndex.'=0, 100, ((AZ'.$this->rowIndex.' - AY'.$this->rowIndex.') / AW'.$this->rowIndex.') * 100))';
+    }
 
     $this->rowIndex++;
 

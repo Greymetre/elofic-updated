@@ -68,6 +68,7 @@ use App\Http\Controllers\RedemptionController;
 use App\Http\Controllers\WarrantyActivationController;
 use App\Http\Controllers\SalesTargetUsersController;
 use App\Http\Controllers\MobileUserLoginDetailsController;
+use App\Http\Controllers\NewJoiningController;
 
 /*
 |--------------------------------------------------------------------------
@@ -89,6 +90,12 @@ Route::get('aboutus/abridgemspl', function () { return view('abridgemspl'); });
 Route::get('aboutus/abridgeit', function () { return view('abridgeit'); });
 Route::get('contactus', function () { return view('contactus'); });
 Route::get('/home', [ HomeController::class, 'index'])->name('home');
+
+//New Joining without auth Route
+Route::get('/new-joining-form', [NewJoiningController::class, 'create'])->name('joining-form');
+Route::get('/new-joining-thanks', [NewJoiningController::class, 'thanks'])->name('joining-thanks');
+Route::post('/new-joining-submit', [NewJoiningController::class, 'store'])->name('joining-form.store');
+Route::any('/new-joining/download', [NewJoiningController::class, 'download'])->name('new-joining.download');
 
 Route::group(['middleware' => ['auth']], function () {
     //Dashboard
@@ -716,6 +723,12 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('damage_entries/download', [DamageEntryController::class, 'damage_entries_download'])->name('damage_entries.download');
     
     Route::get('logout', '\App\Http\Controllers\Auth\AuthenticatedSessionController@destroy');
+
+    //New Joining with auth Route
+    Route::get('/new-joinings', [NewJoiningController::class, 'index'])->name('new-joining');
+    Route::get('/new-joinings-show/{newJoining}', [NewJoiningController::class, 'show'])->name('new-joining.show');
+    Route::get('/new-joinings/download', [NewJoiningController::class, 'download'])->name('new-joining-download');
+
 });
 
     Route::any('getState', [ AjaxController::class, 'getState']);
@@ -757,6 +770,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('getProductInfoBySerialNo', [ AjaxController::class, 'getProductInfoBySerialNo']);
     Route::any('getEndUserData', [ AjaxController::class, 'getEndUserData']);
     Route::any('getComplaintsData', [ AjaxController::class, 'getComplaintsData']);
+    Route::any('/fetchPieChartData', [ AjaxController::class, 'fetchPieChartData'])->name('fetchPieChartData');
 
 
 

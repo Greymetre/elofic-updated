@@ -2,90 +2,128 @@
 
 namespace App\Exports;
 
-use App\Models\Services;
-use App\Models\Branch;
-use App\Models\Product;
+use App\Models\Customers;
+use App\Models\DamageEntry;
+use App\Models\OrderDetails;
+use App\Models\User;
+use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Illuminate\Support\Facades\Auth;
-use App\Models\DamageEntry;
-use App\Models\User;
-use DB;
-use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Illuminate\Support\Facades\Auth;
 
-class DamageEntriesExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapping
+
+class DamageEntriesExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithEvents
 {
-
-    private $rowIndex = 3;
-
     public function __construct($request)
-    {    
-        $this->status = $request->input('status');
+    {
+        $this->user_id = $request->input('user_id');
         $this->start_date = $request->input('start_date');
         $this->end_date = $request->input('end_date');
+        $this->designation_id = $request->input('designation_id');
+        $this->division_id = $request->input('division_id');
+        $this->branch_id = $request->input('branch_id');
     }
 
     public function collection()
-    {        
+    {
 
-        // $data = SalesTargetUsers::with(['user'])->whereBetween('year', $f_year_array)->toSql();
-        $data = DamageEntry::with(['createdbyname','scheme','customer'])->select('*'); 
-        if($this->status != '' && !empty($this->status && $this->status != null)) {
-            $data->where('status',$this->status);
+        $query = DamageEntry::with('customer', 'scheme', 'scheme_details', 'createdbyname');
+        if ($this->user_id && $this->user_id != '' && $this->user_id != NULL) {
+            $query->where('id', $this->user_id);
         }
+        if ($this->designation_id && $this->designation_id != '' && $this->designation_id != NULL) {
+            $query->where('designation_id', $this->designation_id);
+        }
+        if ($this->division_id && $this->division_id != '' && $this->division_id != NULL) {
+            $query->where('division_id', $this->division_id);
+        }
+        if ($this->branch_id && $this->branch_id != '' && $this->branch_id != NULL) {
+            $query->where('branch_id', $this->branch_id);
+        }
+        $query = $query->latest()->get();
 
-        // dd($data);
-
-        // if($this->month == '' && empty($this->month)){
-        //     $data->where(function ($query) use($f_year_array) {
-        //         $query->where('year', '=', $f_year_array[0])
-        //               ->where('month', '>=', 'Apr');
-        //     })->orWhere(function ($query) use($f_year_array) {
-        //         $query->where('year', '=', $f_year_array[1])
-        //               ->where('month', '<=', 'Mar');
-        //     });
-        // }else {
-        //    $data->where(function ($query) use($f_year_array) {
-        //         $query->where('year', '=', $f_year_array[0])
-        //               ->where('month', '>=', $this->month);
-        //     })->orWhere(function ($query) use($f_year_array) {
-        //         $query->where('year', '=', $f_year_array[1])
-        //               ->where('month', '<=', $this->month);
-        //     });
-        // }
-        
-        $data = $data->orderBy('id')->get();
-
-        return $data;
+        return $query;
     }
-
 
     public function headings(): array
     {
-     $headings = ['Firm Name', 'Contact Person', 'Parent Name', 'Mobile Number', 'Coupon Code','Status','Remark'];
-
-     return $headings;
+        return ['Date', 'Firm Name', 'Contact Person', 'Parent Name', 'Mobile Number', 'Copoun Code', 'Status', 'Remark'];
     }
-
 
     public function map($data): array
     {
-
-        $response = array();
-        $response[0] = $data['customer_id']??'';
-        $response[1] = $data['coupon_code']??'';
-        $response[2] = $data['point']??'';
-        $response[3] = $data['scheme_id'] ?? '';
-        $response[4] = isset($data['status']) ? ($data['status'] == 0 ? 'Rejected' : ($data['status'] == 1 ? 'Approved' : ($data['status'] == 2 ? 'Pending' : ''))) : '',
-
-        $response[5] = $data['remark']??'';
-
-        return $response;
+        $parents = '';
+        if (!empty($data->customer->getparentdetail)) {
+            foreach ($data->customer->getparentdetail as $key => $parent_data) {
+                if ($key == (count($data->customer->getemployeedetail) - 1)) {
+                    $parents .= isset($parent_data->parent_detail->name) ? $parent_data->parent_detail->name : '';
+                } else {
+                    $parents .= isset($parent_data->parent_detail->name) ? $parent_data->parent_detail->name . ', ' : '';
+                }
+            }
+        }
+        if($data->status == "0"){
+            $status = 'Pennding';
+        }elseif($data->status == "1"){
+            $status = 'Approved';
+        }elseif($data->status == "2"){
+            $status = 'Reject';
+        }
+        return [
+            isset($data->created_at) ? showdatetimeformat($data->created_at) : '',
+            $data['customer']['name'] ?? '',
+            ($data['customer']['first_name'] ?? '') . ' ' . ($data['customer']['last_name'] ?? ''),
+            $parents,
+            $data['customer']['mobile'] ?? '',
+            $data['coupon_code'] ?? '',
+            $status,
+            $data['remark'] ?? '',
+        ];
+        
     }
 
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function (AfterSheet $event) {
+                $lastRow = $event->sheet->getHighestDataRow() + 2;
+                $event->sheet->mergeCells('A' . $lastRow . ':F' . $lastRow);
+
+                $event->sheet->getStyle('A1:AA1')->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                        'color' => ['rgb' => 'FFFFFF'],
+                    ],
+                    'alignment' => [
+                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                        'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                    ],
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => '336677'],
+                    ],
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['argb' => '000000'],
+                        ],
+                    ],
+                ]);
+
+                $event->sheet->getStyle('A' . $lastRow . ':AA' . $lastRow)->applyFromArray([
+                    'borders' => [
+                        'top' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['argb' => '000000'], // Border color
+                        ],
+                    ],
+                ]);
+            },
+        ];
+    }
 }

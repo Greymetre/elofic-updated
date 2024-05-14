@@ -98,16 +98,6 @@ a.nav-link[aria-expanded="true"] {
     font-weight: bold;
 }
 
-.sidebar[data-color="yellow"] li.active>a p {
-    font-size: 16px !important;
-    color: #FFF !important;
-    text-shadow: 0px 2px 5px #000 !important;
-}
-.sidebar[data-color="yellow"] li.active>a i{
-    font-size: 28px !important;
-    color: #FFF !important;
-    text-shadow: 0px 2px 4px #000 !important;
-}
 
 a.nav-link[aria-expanded="false"]:after {
     position: absolute;

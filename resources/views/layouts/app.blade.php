@@ -314,7 +314,7 @@
           </li>
           @endif
           @if(auth()->user()->can('hr_access'))
-          <li class="nav-item {{ request()->is('reports/attendancereport*') || request()->is('reports/attendancereportSummary*') || request()->is('holidays*') || request()->is('leaves*') || request()->is('appraisal*') || request()->is('sales_weightage*') ? 'active' : '' }}">
+          <li class="nav-item {{ request()->is('reports/attendancereport*') || request()->is('reports/attendancereportSummary*') || request()->is('holidays*') || request()->is('leaves*') || request()->is('appraisal*') || request()->is('sales_weightage*') || request()->is('users*') || request()->is('targets*') || request()->is('livelocation*') || request()->is('roles*') || request()->is('permissions*') || request()->is('tours*') || request()->is('usercity*') || request()->is('new-joinings*') ? 'active' : '' }}">
             <a class="nav-link collapsed" data-toggle="collapse" href="#hr" aria-expanded="false">
               <i class="material-icons">star</i>
               <p> {!! trans('panel.sidemenu.hr') !!}
@@ -416,7 +416,7 @@
                 </li>
                 @endif
                 @if(auth()->user()->can('user_access'))
-                <li class="nav-item {{ request()->is('users*') || request()->is('targets*') || request()->is('livelocation*') || request()->is('roles*') || request()->is('permissions*') || request()->is('tours*') || request()->is('usercity*') ? 'active' : '' }}">
+                <li class="nav-item {{ request()->is('users*') || request()->is('targets*') || request()->is('livelocation*') || request()->is('roles*') || request()->is('permissions*') || request()->is('tours*') || request()->is('usercity*') || request()->is('new-joinings*') ? 'active' : '' }}">
                   <a class="nav-link collapsed" data-toggle="collapse" href="#userMenu" aria-expanded="false">
                     <i class="material-icons">people</i>
                     <p> {!! trans('panel.sidemenu.users_master') !!}
@@ -441,6 +441,14 @@
                         </a>
                       </li>
                       @endif -->
+                      @if(auth()->user()->can('new_joining_access'))
+                      <li class="nav-item {{ request()->is('new-joinings*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ url('new-joinings') }}">
+                          <i class="material-icons">verified_user</i>
+                          <p>New Joining</p>
+                        </a>
+                      </li>
+                      @endif
                       @if(auth()->user()->can('user_access'))
                       <li class="nav-item {{ request()->is('users*') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ url('users') }}">

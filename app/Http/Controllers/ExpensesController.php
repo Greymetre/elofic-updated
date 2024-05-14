@@ -30,6 +30,11 @@ class ExpensesController extends Controller
     public function index(Request $request)
     {
         $userids = getUsersReportingToAuth();
+
+        if ($request->executive_id && !empty(session('executive_id'))) {
+            $request->session()->put('executive_id', $request->executive_id);
+        }
+
         $users = User::where('active', '=', 'Y')->where(function ($query) use ($userids) {
             if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                 $query->whereIn('id', $userids);
@@ -79,7 +84,7 @@ class ExpensesController extends Controller
 
         if ($request->ajax()) {
 
-            $data = Expenses::with(['expense_type', 'users'])->orderBy('id', 'desc');
+            $data = Expenses::with(['expense_type', 'users']);
             if (!empty($request['payroll'])) {
                 // $payrollid = $request['payroll']; 
                 // $userid = User::where('payroll',$payrollid)->pluck('id');
@@ -100,8 +105,16 @@ class ExpensesController extends Controller
             }
 
             if (!empty($request['executive_id'])) {
+                if ($request->executive_id) {
+                    $request->session()->put('executive_id', $request->executive_id);
+                }
                 $data->where('user_id', $request['executive_id']);
             }
+
+            if (!empty($request['search']['value']) && $request['search']['value'] != '' && $request['search']['value'] != NULL) {
+                $data->where('claim_amount', $request['search']['value']);
+            }
+
             if (!empty($request['expenses_type'])) {
                 $data->where('expenses_type', $request['expenses_type']);
             }
@@ -153,7 +166,7 @@ class ExpensesController extends Controller
 
                 ->editColumn('date', function ($query) {
                     // return $query->date ?? '';
-                    return date("d/m/Y", strtotime($query->date)) ?? '';
+                    return $query->date ? date("d/m/Y", strtotime($query->date)) : date("d/m/Y", strtotime($query->created_at));
                 })
                 ->editColumn('claim_amount', function ($query) {
                     return $query->claim_amount ?? '';
@@ -430,8 +443,13 @@ class ExpensesController extends Controller
      * @param  \App\Models\Expenses  $expenses
      * @return \Illuminate\Http\Response
      */
-    public function show(Expenses $expense)
+    public function show(Expenses $expense, Request $request)
     {
+
+        $exce_session = session('executive_id');
+        if (!empty($exce_session) && $exce_session != $expense->user_id) {
+            $request->session()->put('executive_id', $expense->user_id);
+        }
 
         $logdetails = ExpenseLog::with('logusers')->where('expense_id', $expense->id)->orderBy('id', 'desc')->get();
         //$expense->update(['accountant_status'=>'3','checker_status'=>'3']);
@@ -509,6 +527,7 @@ class ExpensesController extends Controller
                     'start_km' => $request->start_km ?? NULL,
                     'stop_km' => $request->stop_km ?? NULL,
                     'total_km' => $request->total_km ?? NULL,
+                    'reason' => $request->reason ?? NULL,
                     'note' => $request->note ?? NULL,
                     'created_by' => Auth::user()->id ?? NULL,
                     'created_at' => $current_date_time
@@ -525,6 +544,7 @@ class ExpensesController extends Controller
                     'stop_km' => NULL,
                     'total_km' => NULL,
                     'note' => $request->note ?? NULL,
+                    'reason' => $request->reason ?? NULL,
                     'created_by' => Auth::user()->id ?? NULL,
                     'created_at' => $current_date_time
                 );
@@ -632,14 +652,13 @@ class ExpensesController extends Controller
             // } else {
             //     $status = "Pending";
             // }
-            if($item->checker_status == '1'){
+            if ($item->checker_status == '1') {
                 $status = "Approved";
-            }
-            elseif($item->checker_status == '2') {
+            } elseif ($item->checker_status == '2') {
                 $status = "Rejected";
-            }elseif($item->checker_status == '3') {
+            } elseif ($item->checker_status == '3') {
                 $status = "Checked";
-            }elseif($item->checker_status == '0'){
+            } elseif ($item->checker_status == '0') {
                 $status = "Pending";
             }
 
@@ -665,16 +684,16 @@ class ExpensesController extends Controller
 
                 $item->id ?? "",
                 // $item->date ?? "",
-                isset($item->date) ? date("d-m-Y", strtotime($item->date)) :'',
+                isset($item->date) ? date("d-m-Y", strtotime($item->date)) : '',
                 $item->users->employee_codes ?? "",
                 $item->users->name ?? "",
                 $item->users->getdesignation->designation_name ?? '',
                 $item->users->getbranch->branch_name ?? '',
                 $item->users->getdivision->division_name ?? '',
                 $item->expense_type->name ?? "",
-                $item->expense_type->rate ?? "",
-                $item->claim_amount ?? "",
-                $item->approve_amount ?? "",
+                ($item->expense_type->rate && $item->expense_type->rate > 0) ? $item->expense_type->rate : "0",
+                ($item->claim_amount && $item->claim_amount > 0) ? $item->claim_amount : "0",
+                ($item->approve_amount && $item->approve_amount > 0) ? $item->approve_amount : "0",
                 $item->note ?? "",
                 $item->total_km ?? "",
                 $item->reason ?? "",
