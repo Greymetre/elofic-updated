@@ -807,6 +807,9 @@ class ReportController extends Controller
                 ->editColumn('created_at', function ($data) {
                     return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
                 })
+                ->editColumn('branch', function ($data) {
+                    return $data->createdbyname?$data->createdbyname->getbranch->branch_name:'';
+                })
                 ->addColumn('total_registered_retailers', function ($data) {
                     $registeredRetailerCount = $data->getretailers->count();
 

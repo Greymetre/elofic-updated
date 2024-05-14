@@ -121,7 +121,7 @@ $(document).ready(function() {
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
             {data: 'action', name: 'action',"defaultContent": '', orderable: false, searchable: false},
-            {data: 'active', name: 'active',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
+            {data: 'active', name: 'active',"defaultContent": '', orderable: false, searchable: false},
 
             {data: 'division_name', name: 'division_name',"defaultContent": ''},
         ]
@@ -166,6 +166,7 @@ $(document).ready(function() {
     });
     $('.create').click(function () {
         $('#brand_id').val('');
+        $('#division_name').val('');
         $('#createBrandForm').trigger("reset");
         $("#brand_image").attr({ "src": '{!! asset('assets/img/placeholder.jpg') !!}' });
         $('.modal-title').text('{!! trans('panel.global.add') !!}');
@@ -188,6 +189,7 @@ $(document).ready(function() {
 	        $('.modal-title').text(title);
 	        $('#action_button').val('Edit');
 	        $('#createDivision').modal('show');
+          $('#brand_id').val(data.id);
          },
          error: function (error) {
             console.error('Error updating branch data:', error);

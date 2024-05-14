@@ -186,7 +186,7 @@ class Customers extends Authenticatable
     }
     public function createdbyname()
     {
-        return $this->belongsTo('App\Models\User', 'created_by', 'id')->select('id','name','profile_image');
+        return $this->belongsTo('App\Models\User', 'created_by', 'id');
     }
 
     public function employeename()

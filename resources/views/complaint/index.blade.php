@@ -17,6 +17,35 @@
           <h4 class="card-title ">{!! trans('panel.complaint.title_singular') !!} {!! trans('panel.global.list') !!}
             <span class="">
               <div class="btn-group header-frm-btn">
+              @if(auth()->user()->can(['complaint_download']))
+                <form method="GET" action="{{ URL::to('complaint_download') }}" class="form-horizontal">
+                  <div class="d-flex flex-wrap flex-row">
+                    <!-- <div class="p-2" style="width:200px;">
+                      <select class="select2" name="branch_id" id="branch_id" data-style="select-with-transition" title="Select Branch">
+                        <option value="">Select Branch</option>
+                        @if(@isset($branches ))
+                        @foreach($branches as $branch)
+                        <option value="{!! $branch->id !!}">{!! $branch->branch_name !!}</option>
+                        @endforeach
+                        @endif
+                      </select>
+                    </div>
+                    <div class="p-2" style="width:200px;">
+                      <select class="select2" name="product_id" id="product_id" data-style="select-with-transition" title="Select Product">
+                        <option value="">Select Product</option>
+                        @if(@isset($products ))
+                        @foreach($products as $product)
+                        <option value="{!! $product->id !!}">{!! $product->product_name !!}</option>
+                        @endforeach
+                        @endif
+                      </select>
+                    </div>  -->
+                    <div class="p-2" style="width:180px;"><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
+                    <div class="p-2" style="width:180px;"><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
+                    <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.complaint.title_singular') !!}"><i class="material-icons">cloud_download</i></button></div>
+                  </div>
+                </form>
+                @endif
                 <div class="next-btn">
                 @if(auth()->user()->can(['complaint_create']))
                 <a href="{{ route('complaints.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.complaint.title_singular') !!}"><i class="material-icons">add_circle</i></a>

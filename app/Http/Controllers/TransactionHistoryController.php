@@ -55,8 +55,8 @@ class TransactionHistoryController extends Controller
     public function create()
     {
         abort_if(Gate::denies('transaction_history_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        $customers = Customers::where('customertype', '2')->select('id', 'name', 'mobile')->get();
-        return view('transaction_history.create', compact('customers'))->with('transaction_history', $this->transaction_history);
+
+        return view('transaction_history.create')->with('transaction_history', $this->transaction_history);
     }
 
     /**
@@ -67,8 +67,7 @@ class TransactionHistoryController extends Controller
     public function manualcreate()
     {
         abort_if(Gate::denies('transaction_history_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        $customers = Customers::where('customertype', '2')->select('id', 'name', 'mobile')->get();
-        return view('transaction_history.manualcreate', compact('customers'))->with('transaction_history', $this->transaction_history);;
+        return view('transaction_history.manualcreate')->with('transaction_history', $this->transaction_history);;
     }
 
     /**
@@ -101,42 +100,57 @@ class TransactionHistoryController extends Controller
                 return !is_null($value);
             });
             $expire_schemes = array();
+            $notInsert = array();
             foreach ($nonNullCoupenCodes as $nonNullCoupenCode) {
                 $exists = TransactionHistory::where('coupon_code', $nonNullCoupenCode)->exists();
                 $notexists = Services::where('serial_no', $nonNullCoupenCode)->exists();
-
-                if ($exists) {
-                    throw ValidationException::withMessages([
-                        'coupon_code' => "The coupon code '$nonNullCoupenCode' already Scanned.",
+                // if ($exists) {
+                //     throw ValidationException::withMessages([
+                //         'coupon_code' => "The coupon code '$nonNullCoupenCode' already Scanned.",
+                //     ]);
+                // }
+                // if (!$notexists) {
+                //     throw ValidationException::withMessages([
+                //         'coupon_code' => "The coupon code '$nonNullCoupenCode' is Invalid.",
+                //     ]);
+                // }
+                if (!$exists && $notexists) {
+                    $scheme = Services::where('serial_no', $nonNullCoupenCode)->first();
+                    $scheme_details = SchemeDetails::where('product_id', $scheme->product->id)->first();
+                    $start_date = Carbon::createFromFormat('Y-m-d', $scheme_details->scheme->start_date);
+                    $end_date = Carbon::createFromFormat('Y-m-d', $scheme_details->scheme->end_date);
+                    $current_date = Carbon::today();
+                    if ($current_date->isSameDay($start_date) || ($current_date->gte($start_date) && $current_date->lte($end_date))) {
+                        $point = ($scheme_details) ? $scheme_details->points : NULL;
+                    } else {
+                        array_push($expire_schemes, $nonNullCoupenCode);
+                        $point = '0';
+                    }
+                    $tHistory = TransactionHistory::create([
+                        'customer_id' => $request->customer_id,
+                        'coupon_code' => $nonNullCoupenCode,
+                        'scheme_id' => $scheme_details->scheme_id,
+                        'point' => $point,
+                        'created_by' => auth()->user()->id,
                     ]);
-                }
-                if (!$notexists) {
-                    throw ValidationException::withMessages([
-                        'coupon_code' => "The coupon code '$nonNullCoupenCode' is Invalid.",
-                    ]);
-                }
-                $scheme = Services::where('serial_no', $nonNullCoupenCode)->first();
-                $scheme_details = SchemeDetails::where('product_id', $scheme->product->id)->first();
-                $start_date = Carbon::createFromFormat('Y-m-d', $scheme_details->scheme->start_date);
-                $end_date = Carbon::createFromFormat('Y-m-d', $scheme_details->scheme->end_date);
-                $current_date = Carbon::today();
-                if ($current_date->isSameDay($start_date) || ($current_date->gte($start_date) && $current_date->lte($end_date))) {
-                    $point = ($scheme_details) ? $scheme_details->points : NULL;
                 } else {
-                    array_push($expire_schemes, $nonNullCoupenCode);
-                    $point = '0';
+                    if($exists){
+                        $push_is = $nonNullCoupenCode.' - already Scanned';
+                    }elseif(!$notexists){
+                        $push_is = $nonNullCoupenCode.' - Invalid';
+                    }
+                    array_push($notInsert, $push_is);
                 }
-                $tHistory = TransactionHistory::create([
-                    'customer_id' => $request->customer_id,
-                    'coupon_code' => $nonNullCoupenCode,
-                    'scheme_id' => $scheme_details->scheme_id,
-                    'point' => $point,
-                    'created_by' => auth()->user()->id,
-                ]);
             }
             if (count($expire_schemes) > 0) {
+                if (count($notInsert) > 0) {
+                    return Redirect::to('transaction_history')->with('message_info', 'Transaction History Store Successfully but coupon code (' . implode(',', $expire_schemes) . ') scheme has either expired or has not started yet so you earned 0 point And also check (' . implode(',', $notInsert) . ').');
+                }
                 return Redirect::to('transaction_history')->with('message_info', 'Transaction History Store Successfully but coupon code (' . implode(',', $expire_schemes) . ') scheme has either expired or has not started yet so you earned 0 point.');
             } else {
+                if (count($notInsert) > 0) {
+                    return Redirect::to('transaction_history')->with('message_success', 'Transaction History Store Successfully And And also check (' . implode(',', $notInsert) . ').');
+                }
                 return Redirect::to('transaction_history')->with('message_success', 'Transaction History Store Successfully');
             }
         } catch (\Exception $e) {
@@ -245,14 +259,12 @@ class TransactionHistoryController extends Controller
         return Excel::download(new TransactionTemplate($request), 'ManualTransactionTamplate.xlsx');
     }
 
-    public function upload(Request $request) 
+    public function upload(Request $request)
     {
         abort_if(Gate::denies('transaction_history_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        Excel::import(new ManualTransactionImport,request()->file('import_file'));
+        Excel::import(new ManualTransactionImport, request()->file('import_file'));
         return back()->with('message_success', 'Manual Points import successfully !');
     }
-
-
 }

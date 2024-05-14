@@ -1036,6 +1036,24 @@
                         </div>
                      </div>
                      <!-- user sales type -->
+                     <div class="col-md-6">
+                        <div class="row">
+                           <label class="col-md-3 col-form-label">Attandance Summary Report</label>
+                           <div class="col-md-9">
+                              <div class="form-group has-default bmd-form-group">
+                                 
+                                 <input type="radio" name="show_attandance_report" class="" value="1" {{old( 'show_attandance_report', $user->show_attandance_report) == '1'?'checked':''}}> Yes
+                                 <input type="radio" name="show_attandance_report" class="" value="0" {{old( 'show_attandance_report', $user->show_attandance_report) == '0'?'checked':''}}> No
+                                 
+                                 @if ($errors->has('show_attandance_report'))
+                                 <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('show_attandance_report') }}</p>
+                                 </div>
+                                 @endif
+                              </div>
+                           </div>
+                        </div>
+                     </div>
 
                   </div>
                   </div>

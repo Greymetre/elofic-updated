@@ -69,7 +69,7 @@ class LoyaltyDealerSummaryReportExport implements FromCollection,WithHeadings,Sh
                 }
 
                 if ($this->dealer_id && $this->dealer_id != '' && $this->dealer_id != null) {
-                    $query->where('id', $request->dealer_id);
+                    $query->where('id', $this->dealer_id);
                 }
             })->limit(5000)->latest()->get();
 

@@ -1114,4 +1114,21 @@ class AjaxController extends Controller
             return $e;
         }
     }
+
+    public function fetchPieChartData()
+    {
+        $labels = ['Active', 'Provision', 'Redeem'];
+        $total_points = TransactionHistory::sum('point')??0;
+        $active_points = TransactionHistory::where('status', '1')->sum('point')??0;
+        $provision_points = TransactionHistory::where('status', '0')->sum('point')??0;
+        $total_redemption = Redemption::whereNot('status', '2')->sum('redeem_amount')??0;
+        $total_rejected = Redemption::where('status', '2')->sum('redeem_amount')??0;
+        $total_balance = (int)$active_points-(int)$total_redemption;
+        $values = [$active_points, $provision_points, $total_redemption];
+
+        return response()->json([
+            'labels' => $labels,
+            'values' => $values
+        ]);
+    }
 }

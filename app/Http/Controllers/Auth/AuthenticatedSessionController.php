@@ -43,6 +43,8 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request)
     {
+        $request->session()->forget('executive_id');
+        
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

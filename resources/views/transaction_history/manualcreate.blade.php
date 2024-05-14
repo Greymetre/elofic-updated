@@ -62,13 +62,8 @@
                         <label for="customer_id" class="form-control">Customer :</label>
                      </div>
                      <div class="col-md-10">
-                        <select name="customer_id" placeholder="Select Customers" class="select2 form-control" required>
-                           <option value="" disabled selected>Select Customer</option>
-                           @if($customers && count($customers) > 0)
-                           @foreach($customers as $customer)
-                           <option value="{{$customer->id}}" {!! in_array($customer->id, old( 'customer[]', explode(',', $transaction_history['customer_id']))) ?'selected':'' !!}>{{$customer->name}}({{$customer->mobile}})</option>
-                           @endforeach
-                           @endif
+                        <select name="customer_id" id="customer_id" placeholder="Select Customers" class="select2 form-control" required>
+                           
                         </select>
                         @if ($errors->has('customer_id'))
                         <div class="error col-lg-12">
@@ -130,4 +125,24 @@
       </div>
    </div>
    <script src="{{ url('/').'/'.asset('assets/js/validation_loyalty.js') }}"></script>
+   <script>
+      setTimeout(() => {
+         $('#customer_id').select2({
+            placeholder: 'Select Customer',
+            allowClear: true,
+            ajax: {
+               url: "{{ route('getRetailerDataSelect') }}",
+               dataType: 'json',
+               delay: 250,
+               data: function(params) {
+                  return {
+                     term: params.term || '',
+                     page: params.page || 1
+                  }
+               },
+               cache: true
+            }
+         }).trigger('change');
+      }, 1000);
+   </script>
 </x-app-layout>

@@ -5,16 +5,18 @@ namespace App\Exports;
 use App\Models\Customers;
 use App\Models\OrderDetails;
 use App\Models\User;
+use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\WithMapping;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Illuminate\Support\Facades\Auth;
 
 
-class UserSalesReportExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping
+class UserSalesReportExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithEvents
 {
     public function __construct($request)
     {
@@ -54,8 +56,6 @@ class UserSalesReportExport implements FromCollection, WithHeadings, ShouldAutoS
 
     public function map($data): array
     {
-
-
         return [
             $data['employee_codes'] ?? '',
             $data['name'] ?? '',
@@ -63,27 +63,115 @@ class UserSalesReportExport implements FromCollection, WithHeadings, ShouldAutoS
             $data['getbranch']['branch_name'] ?? '',
             $data['getdivision']['division_name'] ?? '',
             $data['reportinginfo']['name'] ?? '',
+
             (count($data->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Leave', 'Holiday'])->whereBetween('punchin_date', [$this->start_date, $this->end_date])) > 0) ? count($data->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Leave', 'Holiday'])->whereBetween('punchin_date', [$this->start_date, $this->end_date])) : '0',
+
             (count($data->all_attendance_details->whereIn('working_type', ['Office Work', 'Leave', 'Holiday'])->whereBetween('punchin_date', [$this->start_date, $this->end_date])) > 0) ? count($data->all_attendance_details->whereIn('working_type', ['Office Work', 'Leave', 'Holiday'])->whereBetween('punchin_date', [$this->start_date, $this->end_date])) : '0',
+
             (count($data->all_attendance_details->whereBetween('punchin_date', [$this->start_date, $this->end_date])) > 0) ? count($data->all_attendance_details->whereBetween('punchin_date', [$this->start_date, $this->end_date])) : '0',
-            (count($data->visits->where('customers.customertype', '1')->whereBetween('created_at', [$this->start_date, $this->end_date])) > 0) ? count($data->visits->where('customers.customertype', '1')->whereBetween('created_at', [$this->start_date, $this->end_date])) : '0',
-            (count($data->visits->where('customers.customertype', '1')->groupBy('customers.id')) > 0) ? count($data->visits->where('customers.customertype', '1')->groupBy('customers.id')) : '0',
-            (count($data->visits->where('customers.customertype', '3')) > 0) ? count($data->visits->where('customers.customertype', '3')) : '0',
-            (count($data->visits->where('customers.customertype', '3')->groupBy('customers.id')) > 0) ? count($data->visits->where('customers.customertype', '3')->groupBy('customers.id')) : '0',
-            (count($data->visits->where('customers.customertype', '2')) > 0) ? count($data->visits->where('customers.customertype', '2')) : '0',
-            (count($data->visits->where('customers.customertype', '2')->groupBy('customers.id')) > 0) ? count($data->visits->where('customers.customertype', '2')->groupBy('customers.id')) : '0',
-            (count($data->visits->where('customers.customertype', '4')) > 0) ? count($data->visits->where('customers.customertype', '4')) : '0',
-            (count($data->visits->where('customers.customertype', '4')->groupBy('customers.id')) > 0) ? count($data->visits->where('customers.customertype', '4')->groupBy('customers.id')) : '0',
+
+            (count($data->visits->where('customers.customertype', '1')->whereBetween('checkin_date', [$this->start_date, $this->end_date])) > 0) ? count($data->visits->where('customers.customertype', '1')->whereBetween('checkin_date', [$this->start_date, $this->end_date])) : '0',
+
+            (count($data->visits->where('customers.customertype', '1')->whereBetween('checkin_date', [$this->start_date, $this->end_date])->groupBy('customers.id')) > 0) ? count($data->visits->where('customers.customertype', '1')->whereBetween('checkin_date', [$this->start_date, $this->end_date])->groupBy('customers.id')) : '0',
+
+            (count($data->visits->where('customers.customertype', '3')->whereBetween('checkin_date', [$this->start_date, $this->end_date])) > 0) ? count($data->visits->where('customers.customertype', '3')->whereBetween('checkin_date', [$this->start_date, $this->end_date])) : '0',
+
+            (count($data->visits->where('customers.customertype', '3')->whereBetween('checkin_date', [$this->start_date, $this->end_date])->groupBy('customers.id')) > 0) ? count($data->visits->where('customers.customertype', '3')->whereBetween('checkin_date', [$this->start_date, $this->end_date])->groupBy('customers.id')) : '0',
+
+            (count($data->visits->where('customers.customertype', '2')->whereBetween('checkin_date', [$this->start_date, $this->end_date])) > 0) ? count($data->visits->where('customers.customertype', '2')->whereBetween('checkin_date', [$this->start_date, $this->end_date])) : '0',
+
+            (count($data->visits->where('customers.customertype', '2')->whereBetween('checkin_date', [$this->start_date, $this->end_date])->groupBy('customers.id')) > 0) ? count($data->visits->where('customers.customertype', '2')->whereBetween('checkin_date', [$this->start_date, $this->end_date])->groupBy('customers.id')) : '0',
+
+            (count($data->visits->where('customers.customertype', '4')->whereBetween('checkin_date', [$this->start_date, $this->end_date])) > 0) ? count($data->visits->where('customers.customertype', '4')->whereBetween('checkin_date', [$this->start_date, $this->end_date])) : '0',
+
+            (count($data->visits->where('customers.customertype', '4')->whereBetween('checkin_date', [$this->start_date, $this->end_date])->groupBy('customers.id')) > 0) ? count($data->visits->where('customers.customertype', '4')->whereBetween('checkin_date', [$this->start_date, $this->end_date])->groupBy('customers.id')) : '0',
+
             (count($data->visits->where('customers.customertype', '5')) > 0) ? count($data->visits->where('customers.customertype', '5')) : '0',
-            (count($data->visits->where('customers.customertype', '5')->groupBy('customers.id')) > 0) ? count($data->visits->where('customers.customertype', '5')->groupBy('customers.id')) : '0',
-            (count($data->visits) > 0) ? count($data->visits) : '0',
-            (count($data->visits->groupBy('customers.id')) > 0) ? count($data->visits->groupBy('customers.id')) : '0',
-            (count($data->customers->where('customertype', '1')) > 0) ? count($data->customers->where('customertype', '1')) : '0',
-            (count($data->customers->where('customertype', '3')) > 0) ? count($data->customers->where('customertype', '3')) : '0',
-            (count($data->customers->where('customertype', '2')) > 0) ? count($data->customers->where('customertype', '2')) : '0',
-            (count($data->customers->where('customertype', '4')) > 0) ? count($data->customers->where('customertype', '4')) : '0',
-            (count($data->customers->where('customertype', '5')) > 0) ? count($data->customers->where('customertype', '5')) : '0',
-            (count($data->customers) > 0) ? count($data->customers) : '0'
+
+            (count($data->visits->where('customers.customertype', '5')->whereBetween('checkin_date', [$this->start_date, $this->end_date])->groupBy('customers.id')) > 0) ? count($data->visits->where('customers.customertype', '5')->whereBetween('checkin_date', [$this->start_date, $this->end_date])->groupBy('customers.id')) : '0',
+
+            (count($data->visits->whereBetween('checkin_date', [$this->start_date, $this->end_date])) > 0) ? count($data->visits->whereBetween('checkin_date', [$this->start_date, $this->end_date])) : '0',
+
+            (count($data->visits->whereBetween('checkin_date', [$this->start_date, $this->end_date])->groupBy('customers.id')) > 0) ? count($data->visits->whereBetween('checkin_date', [$this->start_date, $this->end_date])->groupBy('customers.id')) : '0',
+
+            (count($data->customers->where('customertype', '1')->whereBetween('created_at', [$this->start_date, $this->end_date])) > 0) ? count($data->customers->where('customertype', '1')->whereBetween('created_at', [$this->start_date, $this->end_date])) : '0',
+
+            (count($data->customers->where('customertype', '3')->whereBetween('created_at', [$this->start_date, $this->end_date])) > 0) ? count($data->customers->where('customertype', '3')->whereBetween('created_at', [$this->start_date, $this->end_date])) : '0',
+
+            (count($data->customers->where('customertype', '2')->whereBetween('created_at', [$this->start_date, $this->end_date])) > 0) ? count($data->customers->where('customertype', '2')->whereBetween('created_at', [$this->start_date, $this->end_date])) : '0',
+
+            (count($data->customers->where('customertype', '4')->whereBetween('created_at', [$this->start_date, $this->end_date])) > 0) ? count($data->customers->where('customertype', '4')->whereBetween('created_at', [$this->start_date, $this->end_date])) : '0',
+
+            (count($data->customers->where('customertype', '5')->whereBetween('created_at', [$this->start_date, $this->end_date])) > 0) ? count($data->customers->where('customertype', '5')->whereBetween('created_at', [$this->start_date, $this->end_date])) : '0',
+
+            (count($data->customers->whereBetween('created_at', [$this->start_date, $this->end_date])) > 0) ? count($data->customers->whereBetween('created_at', [$this->start_date, $this->end_date])) : '0'
+        ];
+    }
+
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function (AfterSheet $event) {
+                $lastRow = $event->sheet->getHighestDataRow() + 2;
+                $event->sheet->mergeCells('A' . $lastRow . ':F' . $lastRow);
+
+                $event->sheet->getStyle('A1:AA1')->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                        'color' => ['rgb' => 'FFFFFF'],
+                    ],
+                    'alignment' => [
+                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                        'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                    ],
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => '336677'],
+                    ],
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['argb' => '000000'],
+                        ],
+                    ],
+                ]);
+
+                $event->sheet->getStyle('A' . $lastRow . ':AA' . $lastRow)->applyFromArray([
+                    'font' => ['bold' => true],
+                    'alignment' => [
+                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,
+                        'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+                    ],
+                    'borders' => [
+                        'top' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['argb' => '000000'], // Border color
+                        ],
+                    ],
+                ]);
+                $event->sheet->setCellValue('A' . $lastRow, 'Total');
+                $event->sheet->setCellValue('G' . $lastRow, '=SUM(G3:G' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('H' . $lastRow, '=SUM(H3:H' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('I' . $lastRow, '=SUM(I3:I' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('J' . $lastRow, '=SUM(J3:J' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('K' . $lastRow, '=SUM(K3:K' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('L' . $lastRow, '=SUM(L3:L' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('M' . $lastRow, '=SUM(M3:M' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('N' . $lastRow, '=SUM(N3:N' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('O' . $lastRow, '=SUM(O3:O' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('P' . $lastRow, '=SUM(P3:P' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('Q' . $lastRow, '=SUM(Q3:Q' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('R' . $lastRow, '=SUM(R3:R' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('S' . $lastRow, '=SUM(S3:S' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('T' . $lastRow, '=SUM(T3:T' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('U' . $lastRow, '=SUM(U3:U' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('V' . $lastRow, '=SUM(V3:V' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('W' . $lastRow, '=SUM(W3:W' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('X' . $lastRow, '=SUM(X3:X' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('Y' . $lastRow, '=SUM(Y3:Y' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('Z' . $lastRow, '=SUM(Z3:Z' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('AA' . $lastRow, '=SUM(AA3:AA' . ($lastRow - 2) . ')');
+            },
         ];
     }
 }

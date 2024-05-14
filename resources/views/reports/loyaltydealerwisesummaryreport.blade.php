@@ -63,7 +63,7 @@
         </div>
         <div class="row">
         <div class="table-responsive">
-            <table id="getbranchsummarydealerwise" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
+            <table id="getbranchsummarydealerwise" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
             <thead class=" text-primary">
               <th>{!! trans('panel.global.no') !!}</th>
               <th>Dealer & Distributor Firm Name</th>

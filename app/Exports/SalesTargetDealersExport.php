@@ -25,7 +25,8 @@ class SalesTargetDealersExport implements FromCollection,WithHeadings,ShouldAuto
     private $rowIndex = 3;
 
     public function __construct($request)
-    {    
+    {   
+        // dd($request->all()); 
         $this->user_id = $request->input('user');
         $this->month = $request->input('month');
         $this->financial_year = $request->input('financial_year');
@@ -35,6 +36,7 @@ class SalesTargetDealersExport implements FromCollection,WithHeadings,ShouldAuto
     public function collection()
     {
         $f_year_array = explode('-', $this->financial_year);
+        $month = $this->month;
         
 
         $data = SalesTargetCustomers::with(['customer','customer.userdetails'])->select([
@@ -61,20 +63,34 @@ class SalesTargetDealersExport implements FromCollection,WithHeadings,ShouldAuto
         if($this->month == '' && empty($this->month)){
             $data->where(function ($query) use($f_year_array) {
                 $query->where('year', '=', $f_year_array[0])
-                      ->where('month', '>=', 'Apr');
+                ->where('month', '>=', 'Apr');
             })->orWhere(function ($query) use($f_year_array) {
                 $query->where('year', '=', $f_year_array[1])
-                      ->where('month', '<=', 'Mar');
+                ->where('month', '<=', 'Mar');
             });
         }else {
-           $data->where(function ($query) use($f_year_array) {
-                $query->where('year', '=', $f_year_array[0])
-                      ->where('month', '>=', $this->month);
-            })->orWhere(function ($query) use($f_year_array) {
-                $query->where('year', '=', $f_year_array[1])
-                      ->where('month', '<=', $this->month);
-            });
-        }
+            if($this->month != '' && !empty($this->month)){
+                if($this->month == 'Jan' || $this->month == 'Feb' || $this->month == 'Mar') {
+                    $data->where(function ($query) use($f_year_array,$month) {
+                       $query->where('year', '=', $f_year_array[1])
+                       ->where('month', '=', $month);
+                   });
+                }else{
+                    $data->where(function ($query) use($f_year_array,$month) {
+                       $query->where('year', '=', $f_year_array[0])
+                       ->where('month', '=', $month);
+                   });
+                }
+            }else{
+                $data->where(function ($query) use($f_year_array) {
+                   $query->where('year', '=', $f_year_array[0])
+                   ->where('month', '>=', $this->month);
+               })->orWhere(function ($query) use($f_year_array) {
+                   $query->where('year', '=', $f_year_array[1])
+                   ->where('month', '<=', $this->month);
+               });
+           } 
+       }
         
         $data = $data->groupBy('customer_id')->orderBy('month')->get();
 
@@ -99,6 +115,14 @@ class SalesTargetDealersExport implements FromCollection,WithHeadings,ShouldAuto
      $quarterIndex = 0;
 
      for ($year = $startYear; $year <= $endYear; $year++) {
+
+        // if($this->month){
+        //     $startMonth = date('m',strtotime($this->month));
+        //     $endMonth =date('m',strtotime($this->month));
+        // }else{
+        //     $startMonth = ($year == $startYear) ? 4 : 1;
+        //     $endMonth = ($year == $endYear) ? 3 : 12;
+        // }
          $startMonth = ($year == $startYear) ? 4 : 1;
          $endMonth = ($year == $endYear) ? 3 : 12;
 

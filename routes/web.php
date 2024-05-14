@@ -68,6 +68,7 @@ use App\Http\Controllers\RedemptionController;
 use App\Http\Controllers\WarrantyActivationController;
 use App\Http\Controllers\SalesTargetUsersController;
 use App\Http\Controllers\MobileUserLoginDetailsController;
+use App\Http\Controllers\NewJoiningController;
 
 /*
 |--------------------------------------------------------------------------
@@ -89,6 +90,12 @@ Route::get('aboutus/abridgemspl', function () { return view('abridgemspl'); });
 Route::get('aboutus/abridgeit', function () { return view('abridgeit'); });
 Route::get('contactus', function () { return view('contactus'); });
 Route::get('/home', [ HomeController::class, 'index'])->name('home');
+
+//New Joining without auth Route
+Route::get('/new-joining-form', [NewJoiningController::class, 'create'])->name('joining-form');
+Route::get('/new-joining-thanks', [NewJoiningController::class, 'thanks'])->name('joining-thanks');
+Route::post('/new-joining-submit', [NewJoiningController::class, 'store'])->name('joining-form.store');
+Route::any('/new-joining/download', [NewJoiningController::class, 'download'])->name('new-joining.download');
 
 Route::group(['middleware' => ['auth']], function () {
     //Dashboard
@@ -620,6 +627,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('services/serial_number_transaction/delete', [ServicesController::class, 'serial_number_transaction_delete'])->name('service.serial_number_transaction.delete');
     Route::post('services/serial_number_transaction/upload', [ServicesController::class, 'serial_number_transaction_upload'])->name('service.serial_number_transaction.upload');
     Route::get('services/serial_number_transaction/download', [ServicesController::class, 'serial_number_transaction_download'])->name('service.serial_number_transaction.download');
+    Route::get('services/serial_number_history/download', [ServicesController::class, 'serial_number_history_download'])->name('service.serial_number_history.download');
     Route::post('services/serial_number_transaction/list', [ServicesController::class, 'serial_number_transaction_list'])->name('service.serial_number_transaction.list');
     Route::get('services/serial_number_history', [ServicesController::class, 'serial_number_history'])->name('service.serial_number_history');
     Route::post('services/serial_number_history/list', [ServicesController::class, 'serial_number_history_list'])->name('service.serial_number_history.list');
@@ -699,6 +707,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('complaint-attach-delete', [ ComplaintController::class, 'deleteAttachment'])->name('deleteAttachment');
     Route::post('complaint-cancel', [ ComplaintController::class, 'cancelComplaint'])->name('cancelComplaint');
     Route::post('complaint-pending', [ ComplaintController::class, 'pendingComplaint'])->name('pendingComplaint');
+    Route::any('complaint_download', [ ComplaintController::class, 'complaint_download'])->name('complaint_download');
 
     // Leaves Route
     Route::resource('leaves', LeaveController::class);
@@ -711,8 +720,15 @@ Route::group(['middleware' => ['auth']], function () {
     // Damage Entry Route
     Route::resource('damage_entries', DamageEntryController::class);
     Route::get('damage-entries-change-status', [DamageEntryController::class, 'changeStatus'])->name('damage_entries.changeStatus');
+    Route::any('damage_entries/download', [DamageEntryController::class, 'damage_entries_download'])->name('damage_entries.download');
     
     Route::get('logout', '\App\Http\Controllers\Auth\AuthenticatedSessionController@destroy');
+
+    //New Joining with auth Route
+    Route::get('/new-joinings', [NewJoiningController::class, 'index'])->name('new-joining');
+    Route::get('/new-joinings-show/{newJoining}', [NewJoiningController::class, 'show'])->name('new-joining.show');
+    Route::get('/new-joinings/download', [NewJoiningController::class, 'download'])->name('new-joining-download');
+
 });
 
     Route::any('getState', [ AjaxController::class, 'getState']);
@@ -754,6 +770,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('getProductInfoBySerialNo', [ AjaxController::class, 'getProductInfoBySerialNo']);
     Route::any('getEndUserData', [ AjaxController::class, 'getEndUserData']);
     Route::any('getComplaintsData', [ AjaxController::class, 'getComplaintsData']);
+    Route::any('/fetchPieChartData', [ AjaxController::class, 'fetchPieChartData'])->name('fetchPieChartData');
 
 
 

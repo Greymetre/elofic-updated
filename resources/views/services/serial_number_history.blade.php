@@ -7,12 +7,12 @@
             <i class="material-icons">perm_identity</i>
           </div>
           <h4 class="card-title ">{!! trans('panel.sidemenu.serial_number_history') !!} {!! trans('panel.global.list') !!}
-            <span class="pull-right">
-              <!-- <div class="btn-group">
-                @if(auth()->user()->can(['serial_number_transaction_download']))
-                <form method="GET" action="{{ URL::to('services/serial_number_transaction/download') }}" class="form-horizontal">
-                  <div class="d-flex flex-row">
-                    <div class="p-2" style="width:200px;">
+            <span class="">
+               <div class="btn-group header-frm-btn">
+                @if(auth()->user()->can(['serial_number_history_download']))
+                <form method="GET" action="{{ URL::to('services/serial_number_history/download') }}" class="form-horizontal">
+                  <div class="d-flex flex-wrap flex-row">
+                    <!-- <div class="p-2" style="width:200px;">
                       <select class="select2" name="branch_id" id="branch_id" data-style="select-with-transition" title="Select Branch">
                         <option value="">Select Branch</option>
                         @if(@isset($branches ))
@@ -31,14 +31,14 @@
                         @endforeach
                         @endif
                       </select>
-                    </div>
-                    <div class="p-2" style="width:180px;"><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Invoice Start Date" autocomplete="off" readonly></div>
-                    <div class="p-2" style="width:180px;"><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="Invoice End Date" autocomplete="off" readonly></div>
+                    </div>  -->
+                    <div class="p-2" style="width:180px;"><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
+                    <div class="p-2" style="width:180px;"><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
                     <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.sidemenu.serial_number_transaction') !!}"><i class="material-icons">cloud_download</i></button></div>
                   </div>
                 </form>
                 @endif
-                @if(auth()->user()->can(['serial_number_transaction_upload']))
+                {{--@if(auth()->user()->can(['serial_number_transaction_upload']))
                 <form action="{{ URL::to('services/serial_number_transaction/upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                   {{ csrf_field() }}
                   <div class="input-group">
@@ -58,8 +58,8 @@
                     </div>
                   </div>
                 </form>
-                @endif
-              </div> -->
+                @endif --}}
+              </div>
             </span>
           </h4>
         </div>
@@ -139,8 +139,6 @@
           'url': "{{ url('services/serial_number_history/list') }}",
           'data': function(d) {
             d._token = token,
-              d.branch_id = $('#branch_id').val(),
-              d.product_id = $('#product_id').val(),
               d.start_date = $('#start_date').val(),
               d.end_date = $('#end_date').val()
           }

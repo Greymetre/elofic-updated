@@ -22,7 +22,7 @@ class User extends Authenticatable implements HasMedia
      * @var array<int, string>
      */
     protected $fillable = [
-        'active', 'name', 'first_name', 'last_name', 'mobile', 'email', 'email_verified_at', 'password', 'notification_id', 'device_type', 'gender', 'profile_image', 'latitude', 'longitude', 'region_id', 'remember_token', 'deleted_at', 'created_at', 'updated_at', 'location', 'reportingid', 'branch_id', 'branch_show', 'designation_id', 'employee_codes', 'department_id', 'division_id','payroll','sales_type'
+        'active', 'name', 'first_name', 'last_name', 'mobile', 'email', 'email_verified_at', 'password', 'notification_id', 'device_type', 'gender', 'profile_image', 'latitude', 'longitude', 'region_id', 'remember_token', 'deleted_at', 'created_at', 'updated_at', 'location', 'reportingid', 'branch_id', 'branch_show', 'designation_id', 'employee_codes', 'department_id', 'division_id','payroll','sales_type','show_attandance_report'
     ];
 
     public function registerMediaCollections(): void
@@ -154,14 +154,21 @@ class User extends Authenticatable implements HasMedia
         return $this->hasMany(Attendance::class);
     }
 
-    public function visits()
-    {
-        return $this->hasMany(VisitReport::class, 'user_id', 'id');
-    }
+    // public function visits()
+    // {
+    //     return $this->hasMany(VisitReport::class, 'user_id', 'id');
+    // }
 
     public function customers()
     {
-        return $this->hasMany(Customers::class, 'executive_id', 'id');
+        return $this->hasMany(Customers::class, 'created_by', 'id');
     }
+
+
+    public function visits()
+    {
+        return $this->hasMany(CheckIn::class, 'user_id', 'id');
+    }
+
 
 }

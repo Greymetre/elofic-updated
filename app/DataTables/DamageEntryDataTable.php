@@ -62,7 +62,7 @@ class DamageEntryDataTable extends DataTable
                 $attachments = $data->getMedia("*");
                 if(count($attachments) > 0){
                     foreach($attachments  as $attachment){
-                        $html .= '<a href="'. $attachment->getFullUrl().'" data-lightbox="mygallery">
+                        $html .= '<a target="_blank" href="'. $attachment->getFullUrl().'" data-lightbox="mygallery">
                         <img class="img-fluid rounded m-2" src="'.$attachment->getFullUrl().'"  width="100">
                          </a>';
                     }

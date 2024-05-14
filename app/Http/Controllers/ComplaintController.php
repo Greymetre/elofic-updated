@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Redirect;
 use App\DataTables\ComplaintDataTable;
+use App\Exports\ComplaintExport;
 use App\Models\Branch;
 use App\Models\Complaint;
 use App\Models\ComplaintType;
@@ -18,6 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Gate;
 use DB;
+use Excel;
 
 class ComplaintController extends Controller
 {
@@ -262,5 +264,13 @@ class ComplaintController extends Controller
 
     public function pendingComplaint(Request $request){
         dd($request->all());
+    }
+
+    public function complaint_download(Request $request)
+    {
+        abort_if(Gate::denies('complaint_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new ComplaintExport($request), 'Complaint.xlsx');
     }
 }

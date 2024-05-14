@@ -134,13 +134,13 @@ class OrderController extends Controller
             $request['created_by'] = Auth::user()->id;
             $request['orderno'] = isset($request['orderno']) ? $request['orderno'] : date('Ymd') . '_' . autoIncrementId('Order', 'id');
 
-
+            
             if (!empty($request['buyer_id'])) {
                 $buyer = $request['buyer_id'];
             } else {
                 $buyer = $request['seller_id'];
             }
-
+            
 
             $request['buyer_id'] = isset($request['seller_id']) ? $request['seller_id'] : null;
             $request['seller_id'] = $buyer;
@@ -158,6 +158,7 @@ class OrderController extends Controller
 
 
             $response =  $this->orders->save_data($request);
+            // dd($response);
             if ($response['status'] == 'success') {
                 $orderdetail = collect([]);
                 foreach ($request['orderdetail'] as $key => $rows) {

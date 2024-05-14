@@ -1,4 +1,4 @@
-  <x-app-layout>
+ <x-app-layout>
  <div class="row">
    <div class="col-md-12">
      <div class="card">
@@ -198,7 +198,9 @@
  <script>
 
  function resetFilter() {
-    window.location.reload();
+   localStorage.setItem("is_reset", '1');
+   localStorage.setItem("executive_id", '');
+    window.location.href = '{{url("/expenses")}}';
  }   
  function checkPageLoad() {
      if (performance.navigation.type === 1) {
@@ -246,6 +248,7 @@
          "order": [ [0, 'desc'] ],
          "stateSave": true,
          "bStateSave": true,
+         "lengthMenu": [[10, 25, 50, 100, 500, 1000], [10, 25, 50, 100, 500, 1000]],
 
           ajax: {
            url: "{{ route('expenses.index') }}",
@@ -266,7 +269,7 @@
          columns: [
              // {data: 'DT_RowIndex',name: 'DT_RowIndex',orderable: false,searchable: false},
              {data: 'id',name: 'id',orderable: false,searchable: false},
-             {data: 'date',name: 'date',orderable: false,searchable: false},
+             {data: 'date',name: 'date',searchable: false},
              {data: 'users.name',name: 'users.name',orderable: false,searchable: false},
              {data: 'users.getdesignation.designation_name', name: 'users.getdesignation.designation_name', orderable: false, searchable: false },
              {data: 'expense_type.name',name: 'expense_type.name',orderable: false,searchable: false},
@@ -295,6 +298,7 @@
      });
      $('#executive_id').change(function(){
          localStorage.setItem("executive_id", $(this).val());
+         localStorage.setItem("is_reset", '0');
          oTable.draw();
      });
 
@@ -323,9 +327,14 @@
 
 
     $(document).ready(function() {
-        
+        var session_exec = "{{ session('executive_id') }}";
         var payroll = localStorage.getItem('payroll');
-        var executive_id = localStorage.getItem('executive_id');
+        var reset = localStorage.getItem('is_reset');
+        if(session_exec && session_exec != '' && session_exec != null && reset != '1'){
+          var executive_id = session_exec;
+        }else{
+          var executive_id = localStorage.getItem('executive_id');
+        }
         var expenses_type = localStorage.getItem('expenses_type');
         var branch_id = localStorage.getItem('branch_id');
         var division_id = localStorage.getItem('division_id');

@@ -154,7 +154,7 @@
                            <label for="customer_email" class="form-control">Email</label>
                         </div>
                         <div class="col-md-4">
-                           <input type="email" name="customer_email" id="customer_email" class="form-control" value="{!! old( 'customer_email' , $warranty_activation['customer']?$warranty_activation['customer']['customer_email']:'') !!}" required>
+                           <input type="text" name="customer_email" id="customer_email" class="form-control" value="{!! old( 'customer_email' , $warranty_activation['customer']?$warranty_activation['customer']['customer_email']:'') !!}">
                            @if ($errors->has('customer_email'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('customer_email') }}</p>
@@ -165,7 +165,7 @@
                            <label for="customer_place" class="form-control">Place</label>
                         </div>
                         <div class="col-md-4">
-                           <input type="text" name="customer_place" id="customer_place" class="form-control" value="{!! old( 'customer_place' , $warranty_activation['customer']?$warranty_activation['customer']['customer_place']:'') !!}" required>
+                           <input type="text" name="customer_place" id="customer_place" class="form-control" value="{!! old( 'customer_place' , $warranty_activation['customer']?$warranty_activation['customer']['customer_place']:'') !!}" >
                            @if ($errors->has('customer_place'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('customer_place') }}</p>
@@ -267,7 +267,7 @@
                            <label for="customer_id" class="form-control">Seller</label>
                         </div>
                         <div class="col-md-4">
-                           <select name="customer_id" placeholder="Select Customers" class="select2 form-control" required>
+                           <select name="customer_id" placeholder="Select Customers" class="select2 form-control">
                               <option value="" disabled selected>Select Customer</option>
                               @if($customers && count($customers) > 0)
                               @foreach($customers as $customer)

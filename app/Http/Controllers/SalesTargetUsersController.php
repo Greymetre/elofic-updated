@@ -310,14 +310,31 @@ class SalesTargetUsersController extends Controller
          if($request->year && $request->year != '' && $request->year != null){
 
              $f_year_array = explode('-', $request->year);
+             $month = $request->month;
 
-             $query->where(function ($query) use ($f_year_array) {
-                 $query->where('year', '=', $f_year_array[0])
-                 ->where('month', '>=', 'Apr');
-             })->orWhere(function ($query) use ($f_year_array) {
-                 $query->where('year', '=', $f_year_array[1])
-                 ->where('month', '<=', 'Mar');
-             });
+             if($request->month && $request->month != '' && $request->month != null && $request->year && $request->year != '' && $request->year != null) {
+
+                if($request->month == 'Jan' || $request->month == 'Feb' || $request->month == 'Mar') {
+                    $query->where(function ($query) use ($f_year_array, $month) {
+                        $query->where('year', '=', $f_year_array[1])
+                        ->where('month', '=',$month);
+                    });
+                }else{
+                    $query->where(function ($query) use ($f_year_array, $month) {
+                        $query->where('year', '=', $f_year_array[0])
+                        ->where('month', '=',$month);
+                    });
+                }
+
+             }else{
+                $query->where(function ($query) use ($f_year_array) {
+                    $query->where('year', '=', $f_year_array[0])
+                    ->where('month', '>=', 'Apr');
+                })->orWhere(function ($query) use ($f_year_array) {
+                    $query->where('year', '=', $f_year_array[1])
+                    ->where('month', '<=', 'Mar');
+                });
+             }  
          }
 
          if($request->min_range && $request->min_range != '' && $request->min_range != null && $request->max_range && $request->max_range != '' && $request->max_range != null){
@@ -332,7 +349,7 @@ class SalesTargetUsersController extends Controller
         ->addColumn('achievement_percent', function ($data) {
            if(isset($data['achievement']) && isset($data['target']) && !empty($data['achievement']) && !empty($data['target'])) {
                $achievementPercent = ($data['target'] == 0) ? 0 : ($data['achievement'] * 100 / $data['target']);
-               return $achievementPercent;
+               return number_format($achievementPercent,2);
            } else {
                return '';
            }
@@ -540,14 +557,30 @@ class SalesTargetUsersController extends Controller
             if($request->year && $request->year != '' && $request->year != null){
 
                 $f_year_array = explode('-', $request->year);
+                $month = $request->month;
 
-                $query->where(function ($query) use ($f_year_array) {
-                    $query->where('year', '=', $f_year_array[0])
-                        ->where('month', '>=', 'Apr');
-                })->orWhere(function ($query) use ($f_year_array) {
-                    $query->where('year', '=', $f_year_array[1])
-                        ->where('month', '<=', 'Mar');
-                });
+                if($request->month && $request->month != '' && $request->month != null){
+
+                    if($request->month == 'Jan' || $request->month == 'Feb' || $request->month == 'Mar') {
+                         $query->where(function ($query) use($f_year_array,$month) {
+                            $query->where('year', '=', $f_year_array[1])
+                            ->where('month', '=', $month);
+                        });
+                     }else{
+                         $query->where(function ($query) use($f_year_array,$month) {
+                            $query->where('year', '=', $f_year_array[0])
+                            ->where('month', '=', $month);
+                        });
+                     }
+                }else{
+                    $query->where(function ($query) use ($f_year_array) {
+                        $query->where('year', '=', $f_year_array[0])
+                            ->where('month', '>=', 'Apr');
+                    })->orWhere(function ($query) use ($f_year_array) {
+                        $query->where('year', '=', $f_year_array[1])
+                            ->where('month', '<=', 'Mar');
+                    });
+                }
             }
 
             if($request->min_range && $request->min_range != '' && $request->min_range != null && $request->max_range && $request->max_range != '' && $request->max_range != null){
@@ -562,7 +595,7 @@ class SalesTargetUsersController extends Controller
             ->addColumn('achievement_percent', function ($data) {
                 if(isset($data['achievement']) && isset($data['target']) && !empty($data['achievement']) && !empty($data['target'])) {
                     $achievementPercent = ($data['target'] == 0) ? 0 : ($data['achievement'] * 100 / $data['target']);
-                    return $achievementPercent;
+                    return number_format($achievementPercent,2);
                 } else {
                     return '';
                 }

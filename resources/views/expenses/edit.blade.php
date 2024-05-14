@@ -202,6 +202,22 @@
                 </div>
               </div>
 
+              <div class="col-md-6">
+                <div class="row">
+                  <label class="col-md-2 col-form-label">Status Change Reason<span class="text-danger"> *</span></label>
+                  <div class="col-md-10">
+                    <div class="form-group has-default bmd-form-group">
+                      <input placeholder="reason" class="form-control {{ $errors->has('reason') ? 'is-invalid' : '' }} " type="text" name="reason" id="reason" value="{{ old('reason', $expense->reason??'') }}"  autocomplete="off">
+                      @if($errors->has('reason'))
+                      <div class="invalid-feedback">
+                        {{ $errors->first('reason') }}
+                      </div>
+                      @endif
+                    </div>
+                  </div>
+                </div>
+              </div>
+
          
               <div class="col-md-6">
                   @if(isset($expense) && $expense->getMedia('expense_file')->count() > 0 && file_exists($expense->getFirstMedia('expense_file')->getPath()))

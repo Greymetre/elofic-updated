@@ -114,7 +114,7 @@ class AttendanceController extends Controller
     /// get all user
 
 
-    $attendancesummary = User::with(['attendance_details', 'createdbyname', 'getbranch'])->where('active', 'Y');
+    $attendancesummary = User::with(['attendance_details', 'createdbyname', 'getbranch'])->where('active', 'Y')->where('show_attandance_report', '1');
     if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
       $attendancesummary = $attendancesummary->whereIn('id', getUsersReportingToAuth());
     }
@@ -220,41 +220,17 @@ class AttendanceController extends Controller
               } elseif ($attendance_details->working_type == 'Full Day Leave') {
                 $label_data[] =  'LOP';
               } elseif ($attendance_details->working_type == 'Local Market Visit') {
-                if ($attendance_details->worked_time > '00:04:30') {
-                  $label_data[] =  'P';
-                } else {
-                  $label_data[] =  '1/2P+1/2LOP';
-                }
+                $label_data[] =  'P';
               } elseif ($attendance_details->working_type == 'Office Work') {
-                if ($attendance_details->worked_time > '00:04:30') {
-                  $label_data[] =  'P';
-                } else {
-                  $label_data[] =  '1/2P+1/2LOP';
-                }
+                $label_data[] =  'P';
               } elseif ($attendance_details->working_type == 'Plumber Meet') {
-                if ($attendance_details->worked_time > '00:04:30') {
-                  $label_data[] =  'P';
-                } else {
-                  $label_data[] =  '1/2P+1/2LOP';
-                }
+                $label_data[] =  'P';
               } elseif ($attendance_details->working_type == 'Retailer Meet') {
-                if ($attendance_details->worked_time > '00:04:30') {
-                  $label_data[] =  'P';
-                } else {
-                  $label_data[] =  '1/2P+1/2LOP';
-                }
+                $label_data[] =  'P';
               } elseif ($attendance_details->working_type == 'Service Center Visit') {
-                if ($attendance_details->worked_time > '00:04:30') {
-                  $label_data[] =  'P';
-                } else {
-                  $label_data[] =  '1/2P+1/2LOP';
-                }
+                $label_data[] =  'P';
               } elseif ($attendance_details->working_type == 'Tour') {
-                if ($attendance_details->worked_time > '00:04:30') {
-                  $label_data[] =  'P';
-                } else {
-                  $label_data[] =  '1/2P+1/2LOP';
-                }
+                $label_data[] =  'P';
               } elseif ($attendance_details->working_type == 'Holiday') {
                 $label_data[] = 'H';
               }

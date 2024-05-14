@@ -14,8 +14,10 @@ use App\Models\TransactionHistory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Exports\DamageEntriesExport;
 use Gate;
 use Validator;
+use Excel;
 
 class DamageEntryController extends Controller
 {
@@ -260,5 +262,16 @@ class DamageEntryController extends Controller
         }else{
             return response()->json(['status' => 'error','message' => 'Error in change status of Damage Entry!']);
         }
+    }
+
+    /*
+    Damage entries export
+    */
+    public function damage_entries_download(Request $request) {
+        abort_if(Gate::denies('damage_entry_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+
+        return Excel::download(new DamageEntriesExport($request), 'damage_entry.xlsx');
     }
 }

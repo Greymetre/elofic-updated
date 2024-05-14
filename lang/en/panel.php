@@ -880,7 +880,7 @@ return [
             'total_km'          => 'Total Km',
             'expense_file'      => 'Expense File',
             'rate'              => 'Rate',
-            'created_at'        => 'Created at',
+            'created_at'        => 'Generate Date',
             'branch'            => 'Branch',
             'designation'       => 'Designation',
 

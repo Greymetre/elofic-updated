@@ -60,7 +60,7 @@ class TransactionHistoryDataTable extends DataTable
             ->addColumn('action', function ($query) {
                 $btn = '';
                 $activebtn = '';
-                if (auth()->user()->can(['scheme_delete'])) {
+                if (auth()->user()->can(['transaction_history_delete'])) {
                     $btn = $btn . ' <a href="" class="btn btn-danger btn-just-icon btn-sm delete" value="' . $query->id . '" title="' . trans('panel.global.delete') . ' Transaction History">
                                 <i class="material-icons">clear</i>
                               </a>';
