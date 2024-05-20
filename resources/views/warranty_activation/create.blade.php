@@ -335,7 +335,7 @@
                            <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
                         </div>
                         <div class="fileinput-new thumbnail">
-                           @if($warranty_activation->exists && $warranty_activation->getMedia('warranty_activation_attach')->count() > 0 && file_exists($warranty_activation->getFirstMedia('warranty_activation_attach')->getPath()))
+                           @if($warranty_activation->exists && $warranty_activation->getMedia('warranty_activation_attach')->count() > 0 && Storage::disk('s3')->exists($warranty_activation->getFirstMedia('warranty_activation_attach')->getPath()))
                            <img src="{!! $warranty_activation->getMedia('warranty_activation_attach')[0]->getFullUrl() !!}" class="imagepreview1">
                            @else
                            <img src="{!! url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview1">

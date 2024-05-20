@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\DataTables\VisitorDataTable;
 use Illuminate\Http\Request;
 use App\Models\{User, Customers, Order, Branch, Division, CheckIn, BeatSchedule, Sales, SalesTarget, OrderDetails, TourProgramme, Wallet, Product, UserActivity, UserCityAssign, Address, TourDetail, TransactionHistory, EmployeeDetail, SalesTargetUsers, Attendance, VisitReport, PrimarySales, Redemption};
 use Symfony\Component\HttpFoundation\Response;
@@ -73,10 +74,10 @@ class DashboardController extends Controller
         }
 
         $userData2 = TransactionHistory::select(DB::raw('YEAR(created_at) as year, MONTH(created_at) as month, SUM(point) as count'))
-        ->groupBy('year', 'month')
-        ->orderBy('year', 'asc')
-        ->orderBy('month', 'asc')
-        ->get();
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'asc')
+            ->orderBy('month', 'asc')
+            ->get();
 
         $labels2 = [];
         $data2 = [];
@@ -88,11 +89,11 @@ class DashboardController extends Controller
         }
 
         $userData3 = Redemption::select(DB::raw('YEAR(created_at) as year, MONTH(created_at) as month, SUM(redeem_amount) as count'))
-        ->where('status' , '!=', '2')
-        ->groupBy('year', 'month')
-        ->orderBy('year', 'asc')
-        ->orderBy('month', 'asc')
-        ->get();
+            ->where('status', '!=', '2')
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'asc')
+            ->orderBy('month', 'asc')
+            ->get();
 
         $labels3 = [];
         $data3 = [];
@@ -1466,5 +1467,12 @@ class DashboardController extends Controller
         $data['perDayAverageVisit'] = $perDayAverageVisit;
 
         return response()->json($data);
+    }
+
+
+    public function visitors(VisitorDataTable $dataTable)
+    {
+        abort_if(Gate::denies('visitor_log_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        return $dataTable->render('visitor.index');
     }
 }

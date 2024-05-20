@@ -600,7 +600,19 @@ class BeatController extends Controller
             return response()->json($response);
         }
 
-      return view('beats.livelocation',compact('users', 'branches','divisions','departments'));
+        if($request->user_id){
+          $user_id = $request->user_id;
+        }else{
+          $user_id = NULL;
+        }
+
+        if($request->date){
+          $date = $request->date;
+        }else{
+          $date = NULL;
+        }
+
+      return view('beats.livelocation',compact('users', 'branches','divisions','departments', 'date', 'user_id'));
     }
 
 }

@@ -378,9 +378,10 @@ class AttendanceController extends Controller
   {
     ////abort_if(Gate::denies('customer_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
     try {
-      $attendance = Attendance::whereDate('punchin_date', '=', date('Y-m-d'))->where('id', '=', $id)->first();
-      TourProgramme::whereDate('date', '=', date('Y-m-d'))->where('userid', '=', $attendance['user_id'])->update(['type' => '']);
-      BeatSchedule::whereDate('beat_date', '=', date('Y-m-d'))->where('user_id', '=', $attendance['user_id'])->delete();
+      $attendance_details = Attendance::where('id', '=', $id)->first();
+      $attendance = Attendance::whereDate('punchin_date', '=', $attendance_details->punchin_date)->where('id', '=', $id)->first();
+      TourProgramme::whereDate('date', '=', $attendance_details->punchin_date)->where('userid', '=', $attendance['user_id'])->update(['type' => '']);
+      BeatSchedule::whereDate('beat_date', '=', $attendance_details->punchin_date)->where('user_id', '=', $attendance['user_id'])->delete();
       if ($attendance->delete()) {
         return response()->json(['status' => 'success', 'message' => 'Attendance deleted successfully!']);
       }

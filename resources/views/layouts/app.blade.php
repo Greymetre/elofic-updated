@@ -193,6 +193,14 @@
                   </div>
                 </li>
                 @endif
+                @if(auth()->user()->can('dealer_appointment'))
+                <li class="nav-item {{ request()->is('dealer_appointment*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('dealer_appointment') }}">
+                    <i class="material-icons">pending_actions</i>
+                    <p>Dealer / Distributor Appointment</p>
+                  </a>
+                </li>
+                @endif
               </ul>
             </div>
           </li>
@@ -321,7 +329,7 @@
 
               </p>
             </a>
-            <div class="collapse" id="hr" style="">
+            <div class="collapse" id="hr">
               <ul class="nav">
                 @if(auth()->user()->can('attendance_report'))
                 <li class="nav-item {{ request()->is('reports/attendancereport') ? 'active' : '' }}">
@@ -532,7 +540,7 @@
                     <i class="material-icons">paid</i>
                     <p>Payments</p>
                   </a>
-                  <li class="nav-item ">
+                <li class="nav-item ">
                   <div class="collapse" id="paymentManu" style="">
                     <ul class="nav">
                       @if(auth()->user()->can('payments_create'))
@@ -552,72 +560,72 @@
                     </ul>
                   </div>
                 </li>
-                </li>
-                @endif
-              </ul>
-            </div>
           </li>
           @endif
+        </ul>
+      </div>
+      </li>
+      @endif
 
 
 
 
-          @if(auth()->user()->can('services_access'))
-          <li class="nav-item {{ request()->is('services*') || request()->is('warranty_activation*') || request()->is('complaint-type*') || request()->is('complaints*') ? 'active' : '' }}">
-            <a class="nav-link collapsed" data-toggle="collapse" href="#serviceMenu" aria-expanded="false">
-              <i class="material-icons">design_services</i>
-              <p> {!! trans('panel.sidemenu.services') !!}
+      @if(auth()->user()->can('services_access'))
+      <li class="nav-item {{ request()->is('services*') || request()->is('warranty_activation*') || request()->is('complaint-type*') || request()->is('complaints*') ? 'active' : '' }}">
+        <a class="nav-link collapsed" data-toggle="collapse" href="#serviceMenu" aria-expanded="false">
+          <i class="material-icons">design_services</i>
+          <p> {!! trans('panel.sidemenu.services') !!}
 
-              </p>
-            </a>
-            <div class="collapse" id="serviceMenu" style="">
-              <ul class="nav">
-                @if(auth()->user()->can('serial_number_transaction'))
-                <li class="nav-item {{ request()->is('services/serial_number_transaction*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('services/serial_number_transaction') }}">
-                    <i class="material-icons">receipt_long</i>
-                    <p>{!! trans('panel.sidemenu.serial_number_transaction') !!}</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('serial_number_history'))
-                <li class="nav-item {{ request()->is('services/serial_number_history*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('services/serial_number_history') }}">
-                    <i class="material-icons">history</i>
-                    <p>{!! trans('panel.sidemenu.serial_number_history') !!}</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('complaint_type_access'))
-                <li class="nav-item {{ request()->is('complaint-type*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('complaint-type') }}">
-                    <i class="material-icons">history</i>
-                    <p>{!! trans('panel.sidemenu.complaint_type') !!}</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('complaint_access'))
-                <li class="nav-item {{ request()->is('complaints*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('complaints') }}">
-                    <i class="material-icons">history</i>
-                    <p>{!! trans('panel.sidemenu.complaint') !!}</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('warranty_activation_access'))
-                <li class="nav-item {{ request()->is('warranty_activation*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('warranty_activation') }}">
-                    <i class="material-icons">history</i>
-                    <p>{!! trans('panel.sidemenu.warranty_activation') !!}</p>
-                  </a>
-                </li>
-                @endif
-              </ul>
-            </div>
-          </li>
-          @endif
+          </p>
+        </a>
+        <div class="collapse" id="serviceMenu" style="">
+          <ul class="nav">
+            @if(auth()->user()->can('serial_number_transaction'))
+            <li class="nav-item {{ request()->is('services/serial_number_transaction*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('services/serial_number_transaction') }}">
+                <i class="material-icons">receipt_long</i>
+                <p>{!! trans('panel.sidemenu.serial_number_transaction') !!}</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('serial_number_history'))
+            <li class="nav-item {{ request()->is('services/serial_number_history*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('services/serial_number_history') }}">
+                <i class="material-icons">history</i>
+                <p>{!! trans('panel.sidemenu.serial_number_history') !!}</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('complaint_type_access'))
+            <li class="nav-item {{ request()->is('complaint-type*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('complaint-type') }}">
+                <i class="material-icons">history</i>
+                <p>{!! trans('panel.sidemenu.complaint_type') !!}</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('complaint_access'))
+            <li class="nav-item {{ request()->is('complaints*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('complaints') }}">
+                <i class="material-icons">history</i>
+                <p>{!! trans('panel.sidemenu.complaint') !!}</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('warranty_activation_access'))
+            <li class="nav-item {{ request()->is('warranty_activation*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('warranty_activation') }}">
+                <i class="material-icons">history</i>
+                <p>{!! trans('panel.sidemenu.warranty_activation') !!}</p>
+              </a>
+            </li>
+            @endif
+          </ul>
+        </div>
+      </li>
+      @endif
 
-          <!--           @if(auth()->user()->can('order_access')) 
+      <!--           @if(auth()->user()->can('order_access')) 
           <li class="nav-item {{ request()->is('orders*') ? 'active' : '' }}">
             <a class="nav-link" href="{{ url('orders') }}">
               <i class="material-icons">shopping_bag</i>
@@ -626,47 +634,47 @@
           </li>
           @endif -->
 
-          @if(auth()->user()->can('order_access'))
-          <li class="nav-item {{ request()->is('orders*') || request()->is('orderschemes*') || request()->is('sales') ? 'active' : '' }}">
-            <a class="nav-link collapsed" data-toggle="collapse" href="#orderMenu" aria-expanded="false">
-              <i class="material-icons">star</i>
-              <p>{!! trans('panel.sidemenu.orders') !!}</p>
-            </a>
+      @if(auth()->user()->can('order_access'))
+      <li class="nav-item {{ request()->is('orders*') || request()->is('orderschemes*') || request()->is('sales') ? 'active' : '' }}">
+        <a class="nav-link collapsed" data-toggle="collapse" href="#orderMenu" aria-expanded="false">
+          <i class="material-icons">star</i>
+          <p>{!! trans('panel.sidemenu.orders') !!}</p>
+        </a>
 
-            <div class="collapse" id="orderMenu" style="">
-              <ul class="nav">
-                @if(auth()->user()->can('order_access'))
-                <li class="nav-item {{ request()->is('orders*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('orders') }}">
-                    <i class="material-icons">shopping_bag</i>
-                    <p>{!! trans('panel.sidemenu.orders') !!}</p>
-                  </a>
-                </li>
-                @endif
+        <div class="collapse" id="orderMenu" style="">
+          <ul class="nav">
+            @if(auth()->user()->can('order_access'))
+            <li class="nav-item {{ request()->is('orders*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('orders') }}">
+                <i class="material-icons">shopping_bag</i>
+                <p>{!! trans('panel.sidemenu.orders') !!}</p>
+              </a>
+            </li>
+            @endif
 
-                @if(auth()->user()->can('orderscheme'))
-                <li class="nav-item {{ request()->is('orderschemes*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('orderschemes') }}">
-                    <i class="material-icons">flaky</i>
-                    <p>Order Schemes</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('sale_access'))
-                <li class="nav-item {{ request()->is('sales') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('sales') }}">
-                    <i class="material-icons">shopping_cart</i>
-                    <p>{!! trans('panel.sidemenu.order_dispatch') !!}</p>
-                  </a>
-                </li>
-                @endif
-              </ul>
-            </div>
-          </li>
-          @endif
+            @if(auth()->user()->can('orderscheme'))
+            <li class="nav-item {{ request()->is('orderschemes*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('orderschemes') }}">
+                <i class="material-icons">flaky</i>
+                <p>Order Schemes</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('sale_access'))
+            <li class="nav-item {{ request()->is('sales') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('sales') }}">
+                <i class="material-icons">shopping_cart</i>
+                <p>{!! trans('panel.sidemenu.order_dispatch') !!}</p>
+              </a>
+            </li>
+            @endif
+          </ul>
+        </div>
+      </li>
+      @endif
 
-          @if(auth()->user()->can('wallet_access'))
-          <!-- <li class="nav-item ">
+      @if(auth()->user()->can('wallet_access'))
+      <!-- <li class="nav-item ">
             <a class="nav-link collapsed" data-toggle="collapse" href="#walletMenu" aria-expanded="false">
               <i class="material-icons">account_balance_wallet</i>
               <p> {!! trans('panel.sidemenu.wallet_master') !!}
@@ -694,192 +702,192 @@
               </ul>
             </div>
           </li> -->
-          @endif
-          @if(auth()->user()->can('scheme_access'))
-          <li class="nav-item {{ request()->is('schemes*') || request()->is('transaction_history*') || request()->is('gifts*') || request()->is('gift-categories*') || request()->is('gift-subcategories*') || request()->is('gift-model*') || request()->is('gift-brands*') || request()->is('redemptions*') || request()->is('damage_entries*') || request()->is('mobile_user_login*') || request()->is('customer-kyc*') ? 'active' : '' }}">
-            <a class="nav-link collapsed" data-toggle="collapse" href="#schemesMenu" aria-expanded="false">
-              <i class="material-icons">loyalty</i>
-              <p> Loyalty Engine </p>
-            </a>
-            <div class="collapse" id="schemesMenu">
-              <ul class="nav">
-                @if(auth()->user()->can('scheme_access'))
-                <li class="nav-item {{ request()->is('schemes*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('schemes') }}">
-                    <i class="material-icons">create</i>
-                    <p>Loyalty {!! trans('panel.sidemenu.scheme_master') !!}</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('transaction_history_access'))
-                <li class="nav-item {{ request()->is('transaction_history*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('transaction_history') }}">
-                    <i class="material-icons">history</i>
-                    <p>Transaction Coupon History</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('loyalty_mobile_app_users_access'))
-                <li class="nav-item {{ request()->is('mobile_user_login') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('mobile_user_login') }}">
-                    <i class="material-icons">verified_user</i>
-                    <p>Mobile App Users</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('damage_entry_access'))
-                <li class="nav-item {{ request()->is('damage_entries*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('damage_entries') }}">
-                    <i class="material-icons">insert_page_break</i>
-                    <p>Damage QR Entries</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('redemption_access'))
-                <li class="nav-item {{ request()->is('redemptions*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('redemptions') }}">
-                    <i class="material-icons">mp</i>
-                    <p>Redemption</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('gift_access'))
-                <li class="nav-item {{ request()->is('gifts*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('gifts') }}">
-                    <i class="material-icons">redeem</i>
-                    <p>Gift Catalogue</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('gift_category_access'))
-                <li class="nav-item {{ request()->is('gift-categories*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('gift-categories') }}">
-                    <i class="material-icons">redeem</i>
-                    <p>Gift Categories</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('gift_subcategory_access'))
-                <li class="nav-item {{ request()->is('gift-subcategories*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('gift-subcategories') }}">
-                    <i class="material-icons">redeem</i>
-                    <p>Gift Sub Categories</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('gift_model_access'))
-                <li class="nav-item {{ request()->is('gift-model*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('gift-model') }}">
-                    <i class="material-icons">redeem</i>
-                    <p>Gift Model</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('gift_brand_access'))
-                <li class="nav-item {{ request()->is('gift-brands*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('gift-brands') }}">
-                    <i class="material-icons">redeem</i>
-                    <p>Gift Brand</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('customer_kyc_access'))
-                <li class="nav-item {{ request()->is('customer-kyc*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('customer-kyc') }}">
-                    <i class="material-icons">verified</i>
-                    <p>Customer KYC</p>
-                  </a>
-                </li>
-                @endif
-              </ul>
-            </div>
-          </li>
-          @endif
-          @if(auth()->user()->can('status_access'))
-          <li class="nav-item {{request()->is('loyalty-app-setting*') ? 'active' : '' }}">
-            <a class="nav-link collapsed" data-toggle="collapse" href="#settingMenu" aria-expanded="false">
-              <i class="material-icons">settings</i>
-              <p> {!! trans('panel.sidemenu.setting_master') !!}
+      @endif
+      @if(auth()->user()->can('scheme_access'))
+      <li class="nav-item {{ request()->is('schemes*') || request()->is('transaction_history*') || request()->is('gifts*') || request()->is('gift-categories*') || request()->is('gift-subcategories*') || request()->is('gift-model*') || request()->is('gift-brands*') || request()->is('redemptions*') || request()->is('damage_entries*') || request()->is('mobile_user_login*') || request()->is('customer-kyc*') ? 'active' : '' }}">
+        <a class="nav-link collapsed" data-toggle="collapse" href="#schemesMenu" aria-expanded="false">
+          <i class="material-icons">loyalty</i>
+          <p> Loyalty Engine </p>
+        </a>
+        <div class="collapse" id="schemesMenu">
+          <ul class="nav">
+            @if(auth()->user()->can('scheme_access'))
+            <li class="nav-item {{ request()->is('schemes*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('schemes') }}">
+                <i class="material-icons">create</i>
+                <p>Loyalty {!! trans('panel.sidemenu.scheme_master') !!}</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('transaction_history_access'))
+            <li class="nav-item {{ request()->is('transaction_history*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('transaction_history') }}">
+                <i class="material-icons">history</i>
+                <p>Transaction Coupon History</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('loyalty_mobile_app_users_access'))
+            <li class="nav-item {{ request()->is('mobile_user_login') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('mobile_user_login') }}">
+                <i class="material-icons">verified_user</i>
+                <p>Mobile App Users</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('damage_entry_access'))
+            <li class="nav-item {{ request()->is('damage_entries*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('damage_entries') }}">
+                <i class="material-icons">insert_page_break</i>
+                <p>Damage QR Entries</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('redemption_access'))
+            <li class="nav-item {{ request()->is('redemptions*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('redemptions') }}">
+                <i class="material-icons">mp</i>
+                <p>Redemption</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('gift_access'))
+            <li class="nav-item {{ request()->is('gifts*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('gifts') }}">
+                <i class="material-icons">redeem</i>
+                <p>Gift Catalogue</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('gift_category_access'))
+            <li class="nav-item {{ request()->is('gift-categories*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('gift-categories') }}">
+                <i class="material-icons">redeem</i>
+                <p>Gift Categories</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('gift_subcategory_access'))
+            <li class="nav-item {{ request()->is('gift-subcategories*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('gift-subcategories') }}">
+                <i class="material-icons">redeem</i>
+                <p>Gift Sub Categories</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('gift_model_access'))
+            <li class="nav-item {{ request()->is('gift-model*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('gift-model') }}">
+                <i class="material-icons">redeem</i>
+                <p>Gift Model</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('gift_brand_access'))
+            <li class="nav-item {{ request()->is('gift-brands*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('gift-brands') }}">
+                <i class="material-icons">redeem</i>
+                <p>Gift Brand</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('customer_kyc_access'))
+            <li class="nav-item {{ request()->is('customer-kyc*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('customer-kyc') }}">
+                <i class="material-icons">verified</i>
+                <p>Customer KYC</p>
+              </a>
+            </li>
+            @endif
+          </ul>
+        </div>
+      </li>
+      @endif
+      @if(auth()->user()->can('status_access'))
+      <li class="nav-item {{request()->is('loyalty-app-setting*') ? 'active' : '' }}">
+        <a class="nav-link collapsed" data-toggle="collapse" href="#settingMenu" aria-expanded="false">
+          <i class="material-icons">settings</i>
+          <p> {!! trans('panel.sidemenu.setting_master') !!}
 
-              </p>
-            </a>
-            <div class="collapse" id="settingMenu" style="">
-              <ul class="nav">
-                @if(auth()->user()->can('setting_access'))
-                <!-- <li class="nav-item ">
+          </p>
+        </a>
+        <div class="collapse" id="settingMenu" style="">
+          <ul class="nav">
+            @if(auth()->user()->can('setting_access'))
+            <!-- <li class="nav-item ">
                   <a class="nav-link" href="{{ url('settings') }}">
                     <i class="material-icons">settings</i>
                     <p>{!! trans('panel.sidemenu.setting') !!}</p>
                   </a>
                 </li> -->
-                @endif
-                @if(auth()->user()->can('loyalty_app_setting_access'))
-                <li class="nav-item {{request()->is('loyalty-app-setting*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('loyalty-app-setting') }}">
-                    <i class="material-icons">settings</i>
-                    <p>Loyalty App {!! trans('panel.sidemenu.setting') !!}</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('status_access'))
-                <li class="nav-item {{ request()->is('status*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('status') }}">
-                    <i class="material-icons">reorder</i>
-                    <p>{!! trans('panel.sidemenu.status') !!}</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('role_access'))
-                <li class="nav-item {{ request()->is('roles*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('roles') }}">
-                    <i class="material-icons">person_pin</i>
-                    <p>{!! trans('panel.sidemenu.roles') !!}</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('permission_access'))
-                <li class="nav-item {{ request()->is('permissions*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('permissions') }}">
-                    <i class="material-icons">check_circle</i>
-                    <p>{!! trans('panel.sidemenu.permissions') !!}</p>
-                  </a>
-                </li>
-                @endif
-              </ul>
-            </div>
-          </li>
-          @endif
-          @if(auth()->user()->can('supports_access'))
-          <li class="nav-item ">
-            <a class="nav-link collapsed" data-toggle="collapse" href="#supportMenu" aria-expanded="false">
-              <i class="material-icons">headset</i>
-              <p> {!! trans('panel.sidemenu.support_master') !!}
-              </p>
-            </a>
-            <div class="collapse" id="supportMenu" style="">
-              <ul class="nav">
-                @if(auth()->user()->can('supports_access'))
-                <li class="nav-item ">
-                  <a class="nav-link" href="{{ url('supports') }}">
-                    <i class="material-icons">headset_mic</i>
-                    <p>{!! trans('panel.sidemenu.support') !!}</p>
-                  </a>
-                </li>
-                @endif
-              </ul>
-            </div>
-          </li>
-          @endif
-          @if(auth()->user()->can('reports'))
-          <li class="nav-item {{ request()->is('reports/reports_sale') ? 'active' : '' }}">
-            <a class="nav-link collapsed" data-toggle="collapse" href="#tasksMenu" aria-expanded="false">
-              <i class="material-icons">airplay</i>
-              <p> Reports
-              </p>
-            </a>
-            <div class="collapse" id="tasksMenu" style="">
-              <ul class="nav">
-                <!--                 @if(auth()->user()->can('attendance_report'))
+            @endif
+            @if(auth()->user()->can('loyalty_app_setting_access'))
+            <li class="nav-item {{request()->is('loyalty-app-setting*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('loyalty-app-setting') }}">
+                <i class="material-icons">settings</i>
+                <p>Loyalty App {!! trans('panel.sidemenu.setting') !!}</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('status_access'))
+            <li class="nav-item {{ request()->is('status*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('status') }}">
+                <i class="material-icons">reorder</i>
+                <p>{!! trans('panel.sidemenu.status') !!}</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('role_access'))
+            <li class="nav-item {{ request()->is('roles*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('roles') }}">
+                <i class="material-icons">person_pin</i>
+                <p>{!! trans('panel.sidemenu.roles') !!}</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('permission_access'))
+            <li class="nav-item {{ request()->is('permissions*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('permissions') }}">
+                <i class="material-icons">check_circle</i>
+                <p>{!! trans('panel.sidemenu.permissions') !!}</p>
+              </a>
+            </li>
+            @endif
+          </ul>
+        </div>
+      </li>
+      @endif
+      @if(auth()->user()->can('supports_access'))
+      <li class="nav-item ">
+        <a class="nav-link collapsed" data-toggle="collapse" href="#supportMenu" aria-expanded="false">
+          <i class="material-icons">headset</i>
+          <p> {!! trans('panel.sidemenu.support_master') !!}
+          </p>
+        </a>
+        <div class="collapse" id="supportMenu" style="">
+          <ul class="nav">
+            @if(auth()->user()->can('supports_access'))
+            <li class="nav-item ">
+              <a class="nav-link" href="{{ url('supports') }}">
+                <i class="material-icons">headset_mic</i>
+                <p>{!! trans('panel.sidemenu.support') !!}</p>
+              </a>
+            </li>
+            @endif
+          </ul>
+        </div>
+      </li>
+      @endif
+      @if(auth()->user()->can('reports'))
+      <li class="nav-item {{ request()->is('reports/reports_sale') ? 'active' : '' }}">
+        <a class="nav-link collapsed" data-toggle="collapse" href="#tasksMenu" aria-expanded="false">
+          <i class="material-icons">airplay</i>
+          <p> Reports
+          </p>
+        </a>
+        <div class="collapse" id="tasksMenu" style="">
+          <ul class="nav">
+            <!--                 @if(auth()->user()->can('attendance_report'))
                 <li class="nav-item {{ request()->is('reports/attendancereport*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('reports/attendancereport') }}">
                     <i class="material-icons">check_circle</i>
@@ -887,324 +895,327 @@
                   </a>
                 </li>
                 @endif -->
-                @if(auth()->user()->can('reports_sale'))
-                <li class="nav-item {{ request()->is('reports/reports_sale*') ? 'active' : '' }}" >
-                  <a class="nav-link" href="{{ url('reports/reports_sale') }}">
-                    <i class="material-icons">check_circle</i>
-                    <p>Sales </p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('adherence_report'))
-                <li class="nav-item {{ request()->is('reports/beatadherence*') ? 'active' : '' }}" style="display:none;">
-                  <a class="nav-link" href="{{ url('reports/beatadherence') }}">
-                    <i class="material-icons">check_circle</i>
-                    <p>Beat Adherence </p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('summary_report'))
-                <li class="nav-item {{ request()->is('reports/adherencesummary*') ? 'active' : '' }}" style="display:none;">
-                  <a class="nav-link" href="{{ url('reports/adherencesummary') }}">
-                    <i class="material-icons">check_circle</i>
-                    <p>Adherence Summary</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('daily_visit_report'))
-                <li class="nav-item " style="display:none;">
-                  <a class="nav-link" href="{{ url('reports/per_day_counter_visit_report') }}">
-                    <i class="material-icons">store</i>
-                    <p>Perday Counter Visit Report</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('fielda_ctivity_report'))
-                <li class="nav-item " style="display:none;">
-                  <a class="nav-link" href="{{ url('reports/fieldactivity') }}">
-                    <i class="material-icons">store</i>
-                    <p>Field Activity Report</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('tour_programme_report'))
-                <li class="nav-item " style="display:none;">
-                  <a class="nav-link" href="{{ url('reports/tourprogramme') }}">
-                    <i class="material-icons">store</i>
-                    <p>Tour Programme Report</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('monthly_movement_report'))
-                <li class="nav-item " style="display:none;">
-                  <a class="nav-link" href="{{ url('reports/monthlymovement') }}">
-                    <i class="material-icons">store</i>
-                    <p>Monthly Movement Report</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('point_collections_report'))
-                <li class="nav-item " style="display:none;">
-                  <a class="nav-link" href="{{ url('reports/pointcollections') }}">
-                    <i class="material-icons">store</i>
-                    <p>Point Collections Report</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('territory_coverage_report'))
-                <li class="nav-item " style="display:none;">
-                  <a class="nav-link" href="{{ url('reports/territorycoverage') }}">
-                    <i class="material-icons">store</i>
-                    <p>Territory Coverage Report</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('performance_parameter_report'))
-                <li class="nav-item " style="display:none;">
-                  <a class="nav-link" href="{{ url('reports/performanceparameter') }}">
-                    <i class="material-icons">store</i>
-                    <p>Performance Parameter</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('mechanics_points_report'))
-                <li class="nav-item " style="display:none;">
-                  <a class="nav-link" href="{{ url('reports/asmwisemechanicspoints') }}">
-                    <i class="material-icons">store</i>
-                    <p>Mechanics Points Report</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('targetvs_sales_report'))
-                <li class="nav-item " style="display:none;">
-                  <a class="nav-link" href="{{ url('reports/targetvssales') }}">
-                    <i class="material-icons">store</i>
-                    <p>Target Vs Sales Report</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('survey_analysis_report'))
-                <li class="nav-item " style="display:none;">
-                  <a class="nav-link" href="{{ url('reports/surveyanalysis') }}">
-                    <i class="material-icons">store</i>
-                    <p>Survey Analysis Report</p>
-                  </a>
-                </li>
-                @endif
-                @if(auth()->user()->can('loyalty_report_access'))
-                <li class="nav-item ">
-                  <a class="nav-link collapsed" data-toggle="collapse" href="#customerReportsMenu" aria-expanded="false">
-                    <i class="material-icons">loyalty</i>
-                    <p>Customers</p>
-                  </a>
+            @if(auth()->user()->can('reports_sale'))
+            <li class="nav-item {{ request()->is('reports/reports_sale*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('reports/reports_sale') }}">
+                <i class="material-icons">check_circle</i>
+                <p>Sales </p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('adherence_report'))
+            <li class="nav-item {{ request()->is('reports/beatadherence*') ? 'active' : '' }}" style="display:none;">
+              <a class="nav-link" href="{{ url('reports/beatadherence') }}">
+                <i class="material-icons">check_circle</i>
+                <p>Beat Adherence </p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('summary_report'))
+            <li class="nav-item {{ request()->is('reports/adherencesummary*') ? 'active' : '' }}" style="display:none;">
+              <a class="nav-link" href="{{ url('reports/adherencesummary') }}">
+                <i class="material-icons">check_circle</i>
+                <p>Adherence Summary</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('daily_visit_report'))
+            <li class="nav-item " style="display:none;">
+              <a class="nav-link" href="{{ url('reports/per_day_counter_visit_report') }}">
+                <i class="material-icons">store</i>
+                <p>Perday Counter Visit Report</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('fielda_ctivity_report'))
+            <li class="nav-item " style="display:none;">
+              <a class="nav-link" href="{{ url('reports/fieldactivity') }}">
+                <i class="material-icons">store</i>
+                <p>Field Activity Report</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('tour_programme_report'))
+            <li class="nav-item " style="display:none;">
+              <a class="nav-link" href="{{ url('reports/tourprogramme') }}">
+                <i class="material-icons">store</i>
+                <p>Tour Programme Report</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('monthly_movement_report'))
+            <li class="nav-item " style="display:none;">
+              <a class="nav-link" href="{{ url('reports/monthlymovement') }}">
+                <i class="material-icons">store</i>
+                <p>Monthly Movement Report</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('point_collections_report'))
+            <li class="nav-item " style="display:none;">
+              <a class="nav-link" href="{{ url('reports/pointcollections') }}">
+                <i class="material-icons">store</i>
+                <p>Point Collections Report</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('territory_coverage_report'))
+            <li class="nav-item " style="display:none;">
+              <a class="nav-link" href="{{ url('reports/territorycoverage') }}">
+                <i class="material-icons">store</i>
+                <p>Territory Coverage Report</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('performance_parameter_report'))
+            <li class="nav-item " style="display:none;">
+              <a class="nav-link" href="{{ url('reports/performanceparameter') }}">
+                <i class="material-icons">store</i>
+                <p>Performance Parameter</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('mechanics_points_report'))
+            <li class="nav-item " style="display:none;">
+              <a class="nav-link" href="{{ url('reports/asmwisemechanicspoints') }}">
+                <i class="material-icons">store</i>
+                <p>Mechanics Points Report</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('targetvs_sales_report'))
+            <li class="nav-item " style="display:none;">
+              <a class="nav-link" href="{{ url('reports/targetvssales') }}">
+                <i class="material-icons">store</i>
+                <p>Target Vs Sales Report</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('survey_analysis_report'))
+            <li class="nav-item " style="display:none;">
+              <a class="nav-link" href="{{ url('reports/surveyanalysis') }}">
+                <i class="material-icons">store</i>
+                <p>Survey Analysis Report</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('loyalty_report_access'))
+            <li class="nav-item ">
+              <a class="nav-link collapsed" data-toggle="collapse" href="#customerReportsMenu" aria-expanded="false">
+                <i class="material-icons">loyalty</i>
+                <p>Customers</p>
+              </a>
+            <li class="nav-item ">
+              <div class="collapse" id="customerReportsMenu" style="">
+                <ul class="nav">
+                  @if(auth()->user()->can('visit_report'))
+                  <li class="nav-item {{ request()->is('reports/customervisit*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('reports/customervisit') }}">
+                      <i class="material-icons">check_circle</i>
+                      <p>Customer Visit</p>
+                    </a>
+                  </li>
+                  @endif
+                  @if(auth()->user()->can('customers_report'))
                   <li class="nav-item ">
-                  <div class="collapse" id="customerReportsMenu" style="">
-                    <ul class="nav">
-                     @if(auth()->user()->can('visit_report'))
-                     <li class="nav-item {{ request()->is('reports/customervisit*') ? 'active' : '' }}">
-                      <a class="nav-link" href="{{ url('reports/customervisit') }}">
-                        <i class="material-icons">check_circle</i>
-                        <p>Customer Visit</p>
-                      </a>
-                    </li>
-                    @endif
-                    @if(auth()->user()->can('customers_report'))
-                    <li class="nav-item ">
-                      <a class="nav-link" href="{{ url('reports/customersreport') }}">
-                        <i class="material-icons">store</i>
-                        <p>Customer Master</p>
-                      </a>
-                    </li>
-                    @endif
-                    @if(auth()->user()->can('calling_report'))
-                    <li class="nav-item ">
-                      <a class="nav-link" href="{{ url('notes') }}">
-                        <i class="material-icons">store</i>
-                        <p>Calling Report</p>
-                      </a>
-                    </li>
-                    @endif
-                    </ul>
-                  </div>
-                </li>
-                </li>
-                @endif
-                @if(auth()->user()->can('loyalty_report_access'))
-                <li class="nav-item ">
-                  <a class="nav-link collapsed" data-toggle="collapse" href="#loyaltyMenu" aria-expanded="false">
-                    <i class="material-icons">loyalty</i>
-                    <p>Loyalty</p>
-                  </a>
+                    <a class="nav-link" href="{{ url('reports/customersreport') }}">
+                      <i class="material-icons">store</i>
+                      <p>Customer Master</p>
+                    </a>
+                  </li>
+                  @endif
+                  @if(auth()->user()->can('calling_report'))
                   <li class="nav-item ">
-                  <div class="collapse" id="loyaltyMenu" style="">
-                    <ul class="nav">
-                      @if(auth()->user()->can('loyalty_summary_report'))
-                      <li class="nav-item {{ request()->is('reports/loyalty_summary_report') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ url('reports/loyalty_summary_report') }}">
-                          <i class="material-icons">airplay</i>
-                          <p>Loyalty Summary Report</p>
-                        </a>
-                      </li>
-                      @endif
-                      @if(auth()->user()->can('loyalty_dealer_wise_summary_report'))
-                      <li class="nav-item {{ request()->is('reports/loyalty_dealer_wise_summary_report') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ url('reports/loyalty_dealer_wise_summary_report') }}">
-                          <i class="material-icons">airplay</i>
-                          <p>Loyalty Dealer Wise Summary Report</p>
-                        </a>
-                      </li>
-                      @endif
-                    </ul>
-                  </div>
-                </li>
-                </li>
-                @endif
-                @if(auth()->user()->can('visitreport_access') || auth()->user()->can('beat_access'))
-                <li class="nav-item ">
-                  <a class="nav-link collapsed" data-toggle="collapse" href="#beatMenu" aria-expanded="false">
-                    <i class="material-icons">schedule</i>
-                    <p> Beats
-                    </p>
-                  </a>
-                  <div class="collapse" id="beatMenu" style="">
-                    <ul class="nav">
-                      @if(auth()->user()->can('beat_access'))
-                      <li class="nav-item {{ request()->is('beats*') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ url('beats') }}">
-                          <i class="material-icons">rowing</i>
-                          <p>{!! trans('panel.sidemenu.beats') !!}</p>
-                        </a>
-                      </li>
-                      @endif
-                      @if(auth()->user()->can('beatdetail_access'))
-                      <li class="nav-item {{ request()->is('beatdetail*') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ url('beatdetail') }}">
-                          <i class="material-icons">opacity</i>
-                          <p>{!! trans('panel.sidemenu.beatdetail') !!}</p>
-                        </a>
-                      </li>
-                      @endif
-                      @if(auth()->user()->can('checkin_access'))
-                      <li class="nav-item {{ request()->is('checkin*') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ url('checkin') }}">
-                          <i class="material-icons">assignment_turned_in</i>
-                          <p>{!! trans('panel.sidemenu.checkin') !!}</p>
-                        </a>
-                      </li>
-                      @endif
-                      @if(auth()->user()->can('visitreport_access'))
-                      <li class="nav-item {{ request()->is('visitreports*') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ url('visitreports') }}">
-                          <i class="material-icons">analytics</i>
-                          <p>{!! trans('panel.sidemenu.visitreport') !!}</p>
-                        </a>
-                      </li>
-                      @endif
-                      @if(auth()->user()->can('visittype_access'))
-                      <li class="nav-item {{ request()->is('visittypes*') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ url('visittypes') }}">
-                          <i class="material-icons">input</i>
-                          <p>{!! trans('panel.sidemenu.visittype') !!}</p>
-                        </a>
-                      </li>
-                      @endif
-                      @if(auth()->user()->can('visitreport_access'))
-                      <li class="nav-item ">
-                        <a class="nav-link" href="{{ url('mastervisitreport') }}">
-                          <i class="material-icons">store</i>
-                          <p>Master VisitReport</p>
-                        </a>
-                      </li>
-                      @endif
-                    </ul>
-                  </div>
-                </li>
-                @endif
-              </ul>
-            </div>
-          </li>
-          @endif
-        </ul>
-      </div>
+                    <a class="nav-link" href="{{ url('notes') }}">
+                      <i class="material-icons">store</i>
+                      <p>Calling Report</p>
+                    </a>
+                  </li>
+                  @endif
+                </ul>
+              </div>
+            </li>
+      </li>
+      @endif
+      @if(auth()->user()->can('loyalty_report_access'))
+      <li class="nav-item ">
+        <a class="nav-link collapsed" data-toggle="collapse" href="#loyaltyMenu" aria-expanded="false">
+          <i class="material-icons">loyalty</i>
+          <p>Loyalty</p>
+        </a>
+      <li class="nav-item ">
+        <div class="collapse" id="loyaltyMenu" style="">
+          <ul class="nav">
+            @if(auth()->user()->can('loyalty_summary_report'))
+            <li class="nav-item {{ request()->is('reports/loyalty_summary_report') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('reports/loyalty_summary_report') }}">
+                <i class="material-icons">airplay</i>
+                <p>Loyalty Summary Report</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('loyalty_dealer_wise_summary_report'))
+            <li class="nav-item {{ request()->is('reports/loyalty_dealer_wise_summary_report') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('reports/loyalty_dealer_wise_summary_report') }}">
+                <i class="material-icons">airplay</i>
+                <p>Loyalty Dealer Wise Summary Report</p>
+              </a>
+            </li>
+            @endif
+          </ul>
+        </div>
+      </li>
+      </li>
+      @endif
+      @if(auth()->user()->can('visitreport_access') || auth()->user()->can('beat_access'))
+      <li class="nav-item ">
+        <a class="nav-link collapsed" data-toggle="collapse" href="#beatMenu" aria-expanded="false">
+          <i class="material-icons">schedule</i>
+          <p> Beats
+          </p>
+        </a>
+        <div class="collapse" id="beatMenu" style="">
+          <ul class="nav">
+            @if(auth()->user()->can('beat_access'))
+            <li class="nav-item {{ request()->is('beats*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('beats') }}">
+                <i class="material-icons">rowing</i>
+                <p>{!! trans('panel.sidemenu.beats') !!}</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('beatdetail_access'))
+            <li class="nav-item {{ request()->is('beatdetail*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('beatdetail') }}">
+                <i class="material-icons">opacity</i>
+                <p>{!! trans('panel.sidemenu.beatdetail') !!}</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('checkin_access'))
+            <li class="nav-item {{ request()->is('checkin*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('checkin') }}">
+                <i class="material-icons">assignment_turned_in</i>
+                <p>{!! trans('panel.sidemenu.checkin') !!}</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('visitreport_access'))
+            <li class="nav-item {{ request()->is('visitreports*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('visitreports') }}">
+                <i class="material-icons">analytics</i>
+                <p>{!! trans('panel.sidemenu.visitreport') !!}</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('visittype_access'))
+            <li class="nav-item {{ request()->is('visittypes*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('visittypes') }}">
+                <i class="material-icons">input</i>
+                <p>{!! trans('panel.sidemenu.visittype') !!}</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('visitreport_access'))
+            <li class="nav-item ">
+              <a class="nav-link" href="{{ url('mastervisitreport') }}">
+                <i class="material-icons">store</i>
+                <p>Master VisitReport</p>
+              </a>
+            </li>
+            @endif
+          </ul>
+        </div>
+      </li>
+      @endif
+      </ul>
     </div>
-    <div class="main-panel">
-      <!-- Navbar -->
-      <nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top ">
-        <div class="container-fluid bg-theme p-2" style="background: #fff !important">
-          <img src="{!! url('/').'/'.asset('assets/img/bediya.jpg') !!}" width="100">
-          <img src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" width="100">
-          <!-- <img src="{!! url('/').'/'.asset('assets/img/logo.png') !!}" width="50"> -->
-          <div class="navbar-wrapper">
-            <div class="navbar-minimize">
-              <!--               <button id="minimizeSidebar" class="btn btn-just-icon btn-white btn-fab btn-round">
+    </li>
+    @endif
+    </ul>
+  </div>
+  </div>
+  <div class="main-panel">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top ">
+      <div class="container-fluid bg-theme p-2" style="background: #fff !important">
+        <img src="{!! url('/').'/'.asset('assets/img/bediya.jpg') !!}" width="100">
+        <img src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" width="100">
+        <!-- <img src="{!! url('/').'/'.asset('assets/img/logo.png') !!}" width="50"> -->
+        <div class="navbar-wrapper">
+          <div class="navbar-minimize">
+            <!--               <button id="minimizeSidebar" class="btn btn-just-icon btn-white btn-fab btn-round">
                 <i class="material-icons text_align-center visible-on-sidebar-regular">more_vert</i>
                 <i class="material-icons design_bullet-list-67 visible-on-sidebar-mini">view_list</i>
               <div class="ripple-container"></div></button> -->
-            </div>
           </div>
-          <button class="navbar-toggler" type="button" data-toggle="collapse" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="navbar-toggler-icon icon-bar"></span>
-            <span class="navbar-toggler-icon icon-bar"></span>
-            <span class="navbar-toggler-icon icon-bar"></span>
-          </button>
-          @auth
-          <div class="collapse navbar-collapse justify-content-end">
-            <ul class="navbar-nav">
-              <li class="nav-item dropdown">
-                <a class="nav-link" href="http://example.com" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <i class="material-icons">notifications</i>
-                  <span class="notification">5</span>
-                  <p class="d-lg-none d-md-block">
-                    Some Actions
-                  </p>
-                </a>
-                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-                  <a class="dropdown-item" href="#">Mike John responded to your email</a>
-                  <a class="dropdown-item" href="#">You have 5 new tasks</a>
-                  <a class="dropdown-item" href="#">You're now friend with Andrew</a>
-                  <a class="dropdown-item" href="#">Another Notification</a>
-                  <a class="dropdown-item" href="#">Another One</a>
-                </div>
-              </li>
-              <li class="nav-item dropdown">
-                <a class="nav-link" href="javascript:;" id="navbarDropdownProfile" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <i class="material-icons">person</i>
-                  <p class="d-lg-none d-md-block">
-                    Account
-                  </p>
-                </a>
-                @auth
-                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownProfile">
-                  <a class="dropdown-item" href="{{ url('change-password') }}">Change Password</a>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item" href="{{ url('logout') }}">Log out</a>
-                </div>
-                @endauth
-              </li>
-            </ul>
-          </div>
-          @endauth
         </div>
-      </nav>
-      <!-- End Navbar -->
-      <div class="content">
-        <div class="container-fluid">
-          {{ $slot }}
+        <button class="navbar-toggler" type="button" data-toggle="collapse" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="navbar-toggler-icon icon-bar"></span>
+          <span class="navbar-toggler-icon icon-bar"></span>
+          <span class="navbar-toggler-icon icon-bar"></span>
+        </button>
+        @auth
+        <div class="collapse navbar-collapse justify-content-end">
+          <ul class="navbar-nav">
+            <li class="nav-item dropdown">
+              <a class="nav-link" href="http://example.com" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="material-icons">notifications</i>
+                <span class="notification">5</span>
+                <p class="d-lg-none d-md-block">
+                  Some Actions
+                </p>
+              </a>
+              <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
+                @if(auth()->user()->can('visitor_log_access'))
+                <a href="{{route('visitor')}}" class="btn btn-info btn-sm float-right">Visitor Logs</a>
+                @endif
+                <a class="dropdown-item" href="#">Mike John responded to your email</a>
+                <a class="dropdown-item" href="#">You have 5 new tasks</a>
+                <a class="dropdown-item" href="#">You're now friend with Andrew</a>
+                <a class="dropdown-item" href="#">Another Notification</a>
+                <a class="dropdown-item" href="#">Another One</a>
+              </div>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link" href="javascript:;" id="navbarDropdownProfile" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="material-icons">person</i>
+                <p class="d-lg-none d-md-block">
+                  Account
+                </p>
+              </a>
+              @auth
+              <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownProfile">
+                <a class="dropdown-item" href="{{ url('change-password') }}">Change Password</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="{{ url('logout') }}">Log out</a>
+              </div>
+              @endauth
+            </li>
+          </ul>
+        </div>
+        @endauth
+      </div>
+    </nav>
+    <!-- End Navbar -->
+    <div class="content">
+      <div class="container-fluid">
+        {{ $slot }}
+      </div>
+    </div>
+    <footer class="footer">
+      <div class="baseurl" data-baseurl="{{ url('/')}}"></div>
+      <div class="token" data-token="{{ csrf_token() }}"></div>
+      <div class="container-fluid">
+        <nav class="float-left">
+
+        </nav>
+        <div class="copyright float-right">
         </div>
       </div>
-      <footer class="footer">
-        <div class="baseurl" data-baseurl="{{ url('/')}}"></div>
-        <div class="token" data-token="{{ csrf_token() }}"></div>
-        <div class="container-fluid">
-          <nav class="float-left">
-
-          </nav>
-          <div class="copyright float-right">
-          </div>
-        </div>
-      </footer>
-    </div>
+    </footer>
+  </div>
   </div>
   <div class="modal fade bd-example-modal-lg" id="previewimageInModel" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">

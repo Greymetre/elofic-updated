@@ -216,7 +216,7 @@
                 <div class="col-md-6 mb-3">
                   <div class="row invoice-info" style="align-items: center;border:1px solid lightgrey;border-radius: 5px;padding: 0px 10px;width: 90%;">
                     @if($complaint->warranty_details)
-                    @if($complaint->warranty_details->exists && $complaint->warranty_details->getMedia('warranty_activation_attach')->count() > 0 && file_exists($complaint->warranty_details->getFirstMedia('warranty_activation_attach')->getPath()))
+                    @if($complaint->warranty_details->exists && $complaint->warranty_details->getMedia('warranty_activation_attach')->count() > 0 && Storage::disk('s3')->exists($complaint->warranty_details->getMedia('warranty_activation_attach')[0]->getPath()))
                     <a href="{!! $complaint->warranty_details->getMedia('warranty_activation_attach')[0]->getFullUrl() !!}" data-lightbox="mygallery" data-title="Invoice">
                       <img width="50" style="height: 50px !important;" src="{!! $complaint->warranty_details->getMedia('warranty_activation_attach')[0]->getFullUrl() !!}" class="img-fluid rounded"></a>
                     <h6 class="ml-2 mb-0">{{$complaint->warranty_details->getMedia('warranty_activation_attach')[0]->name}}</h6>
@@ -226,7 +226,7 @@
                     @endif
                   </div>
                 </div>
-                @if($complaint->exists && $complaint->getMedia('complaint_attach')->count() > 0 && file_exists($complaint->getFirstMedia('complaint_attach')->getPath()))
+                @if($complaint->exists && $complaint->getMedia('complaint_attach')->count() > 0 && Storage::disk('s3')->exists($complaint->getMedia('complaint_attach')[0]->getPath()))
                 @foreach($complaint->getMedia('complaint_attach') as $k=>$media)
                 <div class="col-md-6 mb-2">
                   <div class="row invoice-info" style="align-items: center;border:1px solid lightgrey;border-radius: 5px;padding: 0px 10px;width: 90%;">

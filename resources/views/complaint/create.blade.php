@@ -735,7 +735,7 @@
                            <label class="bmd-label-floating">Attachments </label>
                            <input type="file" multiple name="images[]" class="form-controll">
                            <div class="row mt-3">
-                              @if($complaints->exists && $complaints->getMedia('complaint_attach')->count() > 0 && file_exists($complaints->getFirstMedia('complaint_attach')->getPath()))
+                              @if($complaints->exists && $complaints->getMedia('complaint_attach')->count() > 0 && Storage::disk('s3')->exists($complaints->getMedia('complaint_attach')[0]->getPath()))
                               @foreach($complaints->getMedia('complaint_attach') as $k=>$media)
                               <div style="position: relative;" class="img-div">
                                  <button type="button" class="badge badge-danger delete-img-btn" data-mediaid="{{$media->id}}">X</button>

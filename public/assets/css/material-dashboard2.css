@@ -18024,7 +18024,7 @@ a .material-icons {
   position: relative;
   display: block;
   height: auto;
-  white-space: nowrap;
+  white-space: initial;
 }
 
 .sidebar .nav i {

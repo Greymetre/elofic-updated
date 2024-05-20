@@ -69,7 +69,7 @@
                {{ session('error') }}
             </div>
             @endif
-            @if(isset($loyalty_app_setting) && $loyalty_app_setting->getMedia('slider_image')->count() > 0 && file_exists($loyalty_app_setting->getFirstMedia('slider_image')->getPath()))
+            @if(isset($loyalty_app_setting) && $loyalty_app_setting->getMedia('slider_image')->count() > 0 && Storage::disk('s3')->exists($loyalty_app_setting->getMedia('slider_image')[0]->getPath()))
             <h3>Main Slider Images</h3>
             <div class="row image_preview p-4 m-4">
                @foreach($loyalty_app_setting->getMedia('slider_image') as $loyalty_app_setting_image)
@@ -111,7 +111,7 @@
                      @endif
                   </div>
                </div>
-               @if(isset($loyalty_app_setting) && $loyalty_app_setting->getMedia('gift_slider_image')->count() > 0 && file_exists($loyalty_app_setting->getFirstMedia('gift_slider_image')->getPath()))
+               @if(isset($loyalty_app_setting) && $loyalty_app_setting->getMedia('gift_slider_image')->count() > 0 && Storage::disk('s3')->exists($loyalty_app_setting->getMedia('gift_slider_image')[0]->getPath()))
                <h3>Gift Slider Images</h3>
                <div class="row image_preview p-4 m-4">
                   @foreach($loyalty_app_setting->getMedia('gift_slider_image') as $loyalty_app_setting_image)
@@ -187,7 +187,7 @@
                            @endif
                         </div>
                      </div>
-                     @if(isset($loyalty_app_setting) && $loyalty_app_setting->getMedia('product_catalogue')->count() > 0 && file_exists($loyalty_app_setting->getFirstMedia('product_catalogue')->getPath()))
+                     @if(isset($loyalty_app_setting) && $loyalty_app_setting->getMedia('product_catalogue')->count() > 0 && Storage::disk('s3')->exists($loyalty_app_setting->getMedia('product_catalogue')[0]->getPath()))
                      <h3>Product Catalogue</h3>
                      <div class="row image_preview p-4 m-4">
                         <iframe src="{{ $loyalty_app_setting->getMedia('product_catalogue')[0]->getFullUrl() }}" width="100%" height="400px" frameborder="0"></iframe>
@@ -208,7 +208,7 @@
                            @endif
                         </div>
                      </div>
-                     @if(isset($loyalty_app_setting) && $loyalty_app_setting->getMedia('scheme_catalogue')->count() > 0 && file_exists($loyalty_app_setting->getFirstMedia('scheme_catalogue')->getPath()))
+                     @if(isset($loyalty_app_setting) && $loyalty_app_setting->getMedia('scheme_catalogue')->count() > 0 && Storage::disk('s3')->exists($loyalty_app_setting->getMedia('scheme_catalogue')[0]->getPath()))
                      <h3>Scheme Catalogue</h3>
                      <div class="row image_preview p-4 m-4">
                         <iframe src="{{ $loyalty_app_setting->getMedia('scheme_catalogue')[0]->getFullUrl() }}" width="100%" height="400px" frameborder="0"></iframe>
@@ -231,7 +231,7 @@
                            @endif
                         </div>
                      </div>
-                     @if(isset($loyalty_app_setting) && $loyalty_app_setting->getMedia('terms_condition')->count() > 0 && file_exists($loyalty_app_setting->getFirstMedia('terms_condition')->getPath()))
+                     @if(isset($loyalty_app_setting) && $loyalty_app_setting->getMedia('terms_condition')->count() > 0 && Storage::disk('s3')->exists($loyalty_app_setting->getMedia('terms_condition')[0]->getPath()))
                      <h3>Terms & Condition</h3>
                      <div class="row image_preview p-4 m-4">
                         <iframe src="{{ $loyalty_app_setting->getMedia('terms_condition')[0]->getFullUrl() }}" width="100%" height="400px" frameborder="0"></iframe>

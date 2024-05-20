@@ -43,7 +43,7 @@ class MobileAppLoginUsersExport implements FromCollection,WithHeadings,ShouldAut
     public function headings(): array
     {
 
-     $headings = ['S. No.','Firm Name', 'Contact Person', 'Mobile Number', 'App Version', 'Device Type','Device Name','First Login date','Last Login date','Login Status'];
+     $headings = ['S. No.','Customer ID','Firm Name', 'Contact Person', 'Mobile Number', 'App Version', 'Device Type','Device Name','First Login date','Last Login date','Login Status'];
 
 
 
@@ -55,6 +55,7 @@ class MobileAppLoginUsersExport implements FromCollection,WithHeadings,ShouldAut
    	// dd($data);
        return [
            $data['id'],
+           $data['customer']['id'],
            isset($data['customer']['name']) ? $data['customer']['name'] :'',
            isset($data['customer']['first_name']) ? $data['customer']['first_name'] :'',
            isset($data['customer']['mobile']) ? $data['customer']['mobile'] :'',

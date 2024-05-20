@@ -7,10 +7,16 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Console\Commands\EveryNight;
 use App\Console\Commands\AutoPunchOut;
 use App\Console\Commands\AddressUpdate;
+use App\Console\Commands\MoveStorageToS3;
 use App\Models\User;
 
 class Kernel extends ConsoleKernel
 {
+
+    protected $commands = [
+        \App\Console\Commands\MoveStorageToS3::class,
+    ];
+
     /**
      * Define the application's command schedule.
      *
@@ -24,16 +30,16 @@ class Kernel extends ConsoleKernel
         $schedule->command(AutoPunchOut::class)->timezone('Asia/Kolkata')->dailyAt('22:30');
         $schedule->command(AddressUpdate::class)->timezone('Asia/Kolkata')->everyFourHours();
 
-        $schedule->call(function () {
-            $users = User::where('active', 'Y')->get();
-            foreach ($users as $user) {
-                $pinchinnotify = collect([
-                    'title' => 'Punch In Now',
-                    'body' =>  $user->name . 'Please Punch In Now.'
-                ]);
-                sendNotification($user->id, $pinchinnotify);
-            }
-        })->timezone('Asia/Kolkata')->dailyAt('10:00');
+        // $schedule->call(function () {
+        //     $users = User::where('active', 'Y')->get();
+        //     foreach ($users as $user) {
+        //         $pinchinnotify = collect([
+        //             'title' => 'Punch In Now',
+        //             'body' =>  $user->name . 'Please Punch In Now.'
+        //         ]);
+        //         sendNotification($user->id, $pinchinnotify);
+        //     }
+        // })->timezone('Asia/Kolkata')->dailyAt('10:00');
     }
 
     /**

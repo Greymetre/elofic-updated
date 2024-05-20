@@ -47,6 +47,7 @@ use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\ComplaintTypeController;
 use App\Http\Controllers\CustomerKycController;
 use App\Http\Controllers\DamageEntryController;
+use App\Http\Controllers\DealerAppointmentController;
 use App\Http\Controllers\DivisionController;
 use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\ExpensesController;
@@ -95,7 +96,12 @@ Route::get('/home', [ HomeController::class, 'index'])->name('home');
 Route::get('/new-joining-form', [NewJoiningController::class, 'create'])->name('joining-form');
 Route::get('/new-joining-thanks', [NewJoiningController::class, 'thanks'])->name('joining-thanks');
 Route::post('/new-joining-submit', [NewJoiningController::class, 'store'])->name('joining-form.store');
-Route::any('/new-joining/download', [NewJoiningController::class, 'download'])->name('new-joining.download');
+
+//Dealer Appointment without auth Route
+Route::get('/dealer-appointment-form', [DealerAppointmentController::class, 'create'])->name('dealer-appointment-form');
+Route::get('/dealer-appointment-thanks', [DealerAppointmentController::class, 'thanks'])->name('dealer-appointment-thanks');
+Route::post('/dealer-appointment-submit', [DealerAppointmentController::class, 'store'])->name('dealer-appointment-form.store');
+
 
 Route::group(['middleware' => ['auth']], function () {
     //Dashboard
@@ -638,7 +644,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('transaction_history', TransactionHistoryController::class);
     Route::get('transaction_history_download', [TransactionHistoryController::class, 'download'])->name('transaction_history.download');
     Route::post('transaction_history_upload', [TransactionHistoryController::class, 'upload'])->name('transaction_history.upload');
+    Route::post('transaction_history_main_upload', [TransactionHistoryController::class, 'upload_main'])->name('transaction_history_main.upload');
     Route::get('transaction_history_template', [TransactionHistoryController::class, 'template'])->name('transaction_history.template');
+    Route::get('transaction_history_main_template', [TransactionHistoryController::class, 'template_main'])->name('transaction_history_main.template');
     Route::get('transaction_history_manualcreate', [TransactionHistoryController::class, 'manualcreate'])->name('transaction_history.manualcreate');
     Route::POST('transaction_history_manualstore', [TransactionHistoryController::class, 'manualstore'])->name('transaction_history.manualstore');
     Route::POST('transaction_history_manualupdate', [TransactionHistoryController::class, 'manualupdate'])->name('transaction_history.manualupdate');
@@ -727,7 +735,10 @@ Route::group(['middleware' => ['auth']], function () {
     //New Joining with auth Route
     Route::get('/new-joinings', [NewJoiningController::class, 'index'])->name('new-joining');
     Route::get('/new-joinings-show/{newJoining}', [NewJoiningController::class, 'show'])->name('new-joining.show');
-    Route::get('/new-joinings/download', [NewJoiningController::class, 'download'])->name('new-joining-download');
+    Route::any('/new-joining/download', [NewJoiningController::class, 'download'])->name('new-joining.download');
+
+    // Damage Entry Route
+    Route::any('visitors', [DashboardController::class, 'visitors'])->name('visitor');
 
 });
 

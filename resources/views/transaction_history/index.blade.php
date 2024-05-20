@@ -52,37 +52,59 @@
                 </form>
                 @endif
                 <div class="next-btn">
-                @if(auth()->user()->can(['transaction_history_upload']))
-                <form action="{{ URL::to('transaction_history_upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
-                        {{ csrf_field() }}
-                        <div class="d-flex">
-                          <div class="fileinput-new text-center" data-provides="fileinput">
-                            <span class="btn btn-just-icon btn-theme btn-file">
-                              <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
-                              <span class="fileinput-exists">Change</span>
-                              <input type="hidden">
-                              <input type="file" title="Select File" name="import_file" required accept=".xls,.xlsx" />
-                            </span>
-                          </div>
-                          <div class="input-group-append">
-                            <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.upload') !!} Manual Transaction">
-                              <i class="material-icons">cloud_upload</i>
-                              <div class="ripple-container"></div>
-                            </button>
-                          </div>
-                        </div>
-                      </form>
-                      @endif
-                      @if(auth()->user()->can(['transaction_history_template']))
-                      <a href="{{ URL::to('transaction_history_template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} Manual Transaction"><i class="material-icons">text_snippet</i></a>
-                      @endif
-                      @if(auth()->user()->can(['transaction_history_create']))
-                      <a href="{{ route('transaction_history.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Transaction"><i class="material-icons">add_circle</i></a>
-                      <a href="{{ route('transaction_history.manualcreate') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Manual Transaction"><i class="material-icons">add_circle</i></a>
-                      @endif
+                  @if(auth()->user()->can(['transaction_history_upload']))
+                  <form action="{{ URL::to('transaction_history_upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
+                    {{ csrf_field() }}
+                    <div class="d-flex">
+                      <div class="fileinput-new text-center" data-provides="fileinput">
+                        <span class="btn btn-just-icon btn-theme btn-file">
+                          <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
+                          <span class="fileinput-exists">Change</span>
+                          <input type="hidden">
+                          <input type="file" title="Select File" name="import_file" required accept=".xls,.xlsx" />
+                        </span>
+                      </div>
+                      <div class="input-group-append">
+                        <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.upload') !!} Manual Transaction">
+                          <i class="material-icons">cloud_upload</i>
+                          <div class="ripple-container"></div>
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                  @endif
+                  @if(auth()->user()->can(['transaction_history_upload']))
+                  <form action="{{ URL::to('transaction_history_main_upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
+                    {{ csrf_field() }}
+                    <div class="d-flex">
+                      <div class="fileinput-new text-center" data-provides="fileinput">
+                        <span class="btn btn-just-icon btn-theme btn-file">
+                          <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
+                          <span class="fileinput-exists">Change</span>
+                          <input type="hidden">
+                          <input type="file" title="Select File" name="import_file_main" required accept=".xls,.xlsx" />
+                        </span>
+                      </div>
+                      <div class="input-group-append">
+                        <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.upload') !!} Transaction">
+                          <i class="material-icons">cloud_upload</i>
+                          <div class="ripple-container"></div>
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                  @endif
+                  @if(auth()->user()->can(['transaction_history_template']))
+                  <a href="{{ URL::to('transaction_history_template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} Manual Transaction"><i class="material-icons">text_snippet</i></a>
+                  <a href="{{ URL::to('transaction_history_main_template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} Transaction"><i class="material-icons">text_snippet</i></a>
+                  @endif
+                  @if(auth()->user()->can(['transaction_history_create']))
+                  <a href="{{ route('transaction_history.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Transaction"><i class="material-icons">add_circle</i></a>
+                  <a href="{{ route('transaction_history.manualcreate') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Manual Transaction"><i class="material-icons">add_circle</i></a>
+                  @endif
                 </div>
               </div>
-              
+
             </span>
           </h4>
         </div>

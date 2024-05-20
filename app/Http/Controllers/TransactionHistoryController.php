@@ -16,7 +16,9 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 use App\DataTables\TransactionHistoryDataTable;
+use App\Exports\TransactionMainTemplate;
 use App\Exports\TransactionTemplate;
+use App\Imports\MainTransactionImport;
 use App\Imports\ManualTransactionImport;
 use App\Models\SchemeDetails;
 use App\Models\SchemeHeader;
@@ -135,9 +137,9 @@ class TransactionHistoryController extends Controller
                     ]);
                 } else {
                     if($exists){
-                        $push_is = $nonNullCoupenCode.' - already Scanned';
+                        $push_is = $nonNullCoupenCode.' - already Scanned ';
                     }elseif(!$notexists){
-                        $push_is = $nonNullCoupenCode.' - Invalid';
+                        $push_is = $nonNullCoupenCode.' - Invalid ';
                     }
                     array_push($notInsert, $push_is);
                 }
@@ -149,7 +151,7 @@ class TransactionHistoryController extends Controller
                 return Redirect::to('transaction_history')->with('message_info', 'Transaction History Store Successfully but coupon code (' . implode(',', $expire_schemes) . ') scheme has either expired or has not started yet so you earned 0 point.');
             } else {
                 if (count($notInsert) > 0) {
-                    return Redirect::to('transaction_history')->with('message_success', 'Transaction History Store Successfully And And also check (' . implode(',', $notInsert) . ').');
+                    return Redirect::to('transaction_history')->with('message_success', 'Transaction History Store Successfully And also check (' . implode(',', $notInsert) . ').');
                 }
                 return Redirect::to('transaction_history')->with('message_success', 'Transaction History Store Successfully');
             }
@@ -259,6 +261,14 @@ class TransactionHistoryController extends Controller
         return Excel::download(new TransactionTemplate($request), 'ManualTransactionTamplate.xlsx');
     }
 
+    public function template_main(Request $request)
+    {
+        abort_if(Gate::denies('transaction_history_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new TransactionMainTemplate($request), 'TransactionTamplate.xlsx');
+    }
+
     public function upload(Request $request)
     {
         abort_if(Gate::denies('transaction_history_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
@@ -266,5 +276,15 @@ class TransactionHistoryController extends Controller
         ob_start();
         Excel::import(new ManualTransactionImport, request()->file('import_file'));
         return back()->with('message_success', 'Manual Points import successfully !');
+    }
+
+    public function upload_main(Request $request)
+    {
+        abort_if(Gate::denies('transaction_history_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        $result = Excel::import(new MainTransactionImport, request()->file('import_file_main'));
+        
+        return back()->with('message_success', $_SESSION['tr_msg']);
     }
 }

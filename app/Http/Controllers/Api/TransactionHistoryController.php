@@ -406,7 +406,7 @@ class TransactionHistoryController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'customer_id' => 'required|exists:customers,id',
-                'damageattach1' => 'required|image',
+                'damageattach1' => 'required',
             ]);
             $validator->setCustomMessages([
                 'damageattach1.required' => 'Please attach at least one attachment.',
@@ -490,4 +490,5 @@ class TransactionHistoryController extends Controller
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
     }
+
 }
