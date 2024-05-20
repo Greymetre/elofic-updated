@@ -464,7 +464,7 @@ class ReportController extends Controller
 
                  
                      if(auth()->user()->can(['attendance_delete'])){
-                     $btn = $btn. '<a href="" class="btn btn-danger btn-just-icon btn-sm deleteAttendance" value="' . $query->id . '" title="Delete Attendance">
+                     $btn = $btn. '<a href="javascript:void(0)" class="btn btn-danger btn-just-icon btn-sm deleteAttendance" value="' . $query->id . '" title="Delete Attendance">
                                         <i class="material-icons">clear</i>
                                       </a>';
                         }  

@@ -15,10 +15,10 @@
                     <div class="p-2" style="width:180px;">
                       <!-- <label for="status">Status</label> -->
                       <select class="select2" placeholder="Select Branch" name="status" id="status" data-style="select-with-transition" title="Select Branch">
-                      <option value="0">In Verification</option>
-                        <option value="1">Activated</option>
-                        <option value="2">Pending Activated</option>
-                        <option value="3">Rejected</option>
+                      <option value="0" {{$currunt_status=='0'?'selected':''}}>In Verification</option>
+                        <option value="1" {{$currunt_status=='1'?'selected':''}}>Activated</option>
+                        <option value="2" {{$currunt_status=='2'?'selected':''}}>Pending Activated</option>
+                        <option value="3" {{$currunt_status=='3'?'selected':''}}>Rejected</option>
                       </select>
                     </div>
                     <div class="p-2" style="width:180px;">

@@ -172,11 +172,24 @@
                   </address>
                 </div>
                 <!-- /.col -->
-                <div class="col-sm-4 invoice-col">
+                <div class="col-sm-3 invoice-col">
                   Status Change Reason
                   <address>
                     <strong>{{$expense->reason??""}}</strong><br>
                   </address>
+                </div>
+                <div class="col-sm-5 invoice-col">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <h6>Today Plan - {{$paln->town??""}} </h6>
+                      <h6>Today Visit - {{$paln->town??""}}</h6>
+                      <h6>Live Location - <a href="{{url('/livelocation').'?user_id='.$expense->user_id.'&date='.$expense->date}}"><i class="material-icons">location_on</i></a></h6>
+                    </div>
+                    <div class="col-md-6">
+                      <h6>Total Visit - {{$total_visit??"0"}}</h6>
+                      <h6>Total KM Run - {{$total_dis? number_format($total_dis, 2) :"0.00"}}</h6>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -283,9 +296,9 @@
                   <p class="lead"></p>
                   <p class="text-muted well well-sm shadow-none" style="margin-top: 10px;">
                     <strong> Image and doc:</strong>
-                    @if(isset($expense) && $expense->getMedia('expense_file')->count() > 0 && file_exists($expense->getFirstMedia('expense_file')->getPath()))
-                  <div class="form-group col-md-12">
-                    @foreach($expense->getMedia('expense_file') as $image)
+                    @if(isset($expense) && $expense->getMedia('expense_file')->count() > 0 && Storage::disk('s3')->exists($expense->getMedia('expense_file')[0]->getPath()))
+                    <div class="form-group col-md-12">
+                      @foreach($expense->getMedia('expense_file') as $image)
 
                     <?php
                     $infoPath = pathinfo($image->getFullUrl());

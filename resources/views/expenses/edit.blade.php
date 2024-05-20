@@ -220,7 +220,7 @@
 
          
               <div class="col-md-6">
-                  @if(isset($expense) && $expense->getMedia('expense_file')->count() > 0 && file_exists($expense->getFirstMedia('expense_file')->getPath()))
+                  @if(isset($expense) && $expense->getMedia('expense_file')->count() > 0 && Storage::disk('s3')->exists($expense->getMedia('expense_file')[0]->getPath()))
                          <div class="form-group col-md-12">
                             @foreach($expense->getMedia('expense_file') as $image)
                          <!-- <img class="img-fluid" src="{{ $image->getFullUrl() }}" style="width:80px;height: 80px;"> -->

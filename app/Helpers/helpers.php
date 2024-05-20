@@ -369,7 +369,7 @@ if (! function_exists('getLatLongToCity')) {
         $results = json_decode($json, true);
         if(!empty($results['data']))
         {
-            $addressline = $results['data'][0]['county'];
+            $addressline = $results['data'][0]?$results['data'][0]['county']:'';
             
         }
         return $addressline;
@@ -805,4 +805,20 @@ function getAllChild($users_id, $all_user){
 function getCustomerAttachmentByDocumentName($document_name, $customer_id)
 {
     return Attachment::where('document_name', $document_name)->where('customer_id', $customer_id)->first();
+}
+
+function haversineGreatCircleDistance($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371)
+{
+    // convert from degrees to radians
+    $latFrom = deg2rad($latitudeFrom);
+    $lonFrom = deg2rad($longitudeFrom);
+    $latTo = deg2rad($latitudeTo);
+    $lonTo = deg2rad($longitudeTo);
+
+    $latDelta = $latTo - $latFrom;
+    $lonDelta = $lonTo - $lonFrom;
+
+    $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
+        cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
+    return $angle * $earthRadius;
 }

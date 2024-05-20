@@ -186,9 +186,10 @@
             </div>
 
             <hr>
+
             <h6 style="text-decoration: underline;">Attachments :</h6>
             <div class="row">
-              @if($newJoining->exists && $newJoining->getMedia('adhar_images')->count() > 0 && Storage::disk('s3')->exists($newJoining->getFirstMedia('adhar_images')->getPath()))
+              @if($newJoining->exists && $newJoining->getMedia('adhar_images')->count() > 0 && file_exists($newJoining->getFirstMedia('adhar_images')->getPath()))
               @foreach($newJoining->getMedia('adhar_images') as $k=>$media)
               <div class="card col-md-5 ml-5">
                 <img class="card-img-top" src="{{$media->getFullUrl()}}" alt="Adhar Card">
@@ -201,7 +202,7 @@
               @endforeach
               @endif
 
-              @if($newJoining->exists && $newJoining->getMedia('pan_images')->count() > 0 && Storage::disk('s3')->exists($newJoining->getFirstMedia('pan_images')->getPath()))
+              @if($newJoining->exists && $newJoining->getMedia('pan_images')->count() > 0 && file_exists($newJoining->getFirstMedia('pan_images')->getPath()))
               @foreach($newJoining->getMedia('pan_images') as $k=>$media)
               <div class="card col-md-5 ml-5">
                 <img width="150" class="card-img-top" src="{{$media->getFullUrl()}}" alt="PAN Card">
@@ -214,7 +215,7 @@
               @endforeach
               @endif
 
-              @if($newJoining->exists && $newJoining->getMedia('passport_images')->count() > 0 && Storage::disk('s3')->exists($newJoining->getFirstMedia('passport_images')->getPath()))
+              @if($newJoining->exists && $newJoining->getMedia('passport_images')->count() > 0 && file_exists($newJoining->getFirstMedia('passport_images')->getPath()))
               @foreach($newJoining->getMedia('passport_images') as $k=>$media)
               <div class="card col-md-5 ml-5">
                 <img width="150" class="card-img-top" src="{{$media->getFullUrl()}}" alt="Passport">
@@ -227,7 +228,7 @@
               @endforeach
               @endif
 
-              @if($newJoining->exists && $newJoining->getMedia('ssc_images')->count() > 0 && Storage::disk('s3')->exists($newJoining->getFirstMedia('ssc_images')->getPath()))
+              @if($newJoining->exists && $newJoining->getMedia('ssc_images')->count() > 0 && file_exists($newJoining->getFirstMedia('ssc_images')->getPath()))
               @foreach($newJoining->getMedia('ssc_images') as $k=>$media)
               <div class="card col-md-5 ml-5">
                 <img width="150" class="card-img-top" src="{{$media->getFullUrl()}}" alt="SSC Image">
@@ -240,7 +241,7 @@
               @endforeach
               @endif
 
-              @if($newJoining->exists && $newJoining->getMedia('hsc_images')->count() > 0 && Storage::disk('s3')->exists($newJoining->getFirstMedia('hsc_images')->getPath()))
+              @if($newJoining->exists && $newJoining->getMedia('hsc_images')->count() > 0 && file_exists($newJoining->getFirstMedia('hsc_images')->getPath()))
               @foreach($newJoining->getMedia('hsc_images') as $k=>$media)
               <div class="card col-md-5 ml-5">
                 <img width="150" class="card-img-top" src="{{$media->getFullUrl()}}" alt="HSC Image">
@@ -253,7 +254,7 @@
               @endforeach
               @endif
 
-              @if($newJoining->exists && $newJoining->getMedia('graduation_images')->count() > 0 && Storage::disk('s3')->exists($newJoining->getFirstMedia('graduation_images')->getPath()))
+              @if($newJoining->exists && $newJoining->getMedia('graduation_images')->count() > 0 && file_exists($newJoining->getFirstMedia('graduation_images')->getPath()))
               @foreach($newJoining->getMedia('graduation_images') as $k=>$media)
               <div class="card col-md-5 ml-5">
                 <img width="150" class="card-img-top" src="{{$media->getFullUrl()}}" alt="Graduation">
@@ -266,7 +267,7 @@
               @endforeach
               @endif
 
-              @if($newJoining->exists && $newJoining->getMedia('birth_images')->count() > 0 && Storage::disk('s3')->exists($newJoining->getFirstMedia('birth_images')->getPath()))
+              @if($newJoining->exists && $newJoining->getMedia('birth_images')->count() > 0 && file_exists($newJoining->getFirstMedia('birth_images')->getPath()))
               @foreach($newJoining->getMedia('birth_images') as $k=>$media)
               <div class="card col-md-5 ml-5">
                 <img width="50" class="card-img-top" src="{{$media->getFullUrl()}}" alt="Birth Certificate">
@@ -279,7 +280,7 @@
               @endforeach
               @endif
 
-              @if($newJoining->exists && $newJoining->getMedia('relieving_images')->count() > 0 && Storage::disk('s3')->exists($newJoining->getFirstMedia('relieving_images')->getPath()))
+              @if($newJoining->exists && $newJoining->getMedia('relieving_images')->count() > 0 && file_exists($newJoining->getFirstMedia('relieving_images')->getPath()))
               @foreach($newJoining->getMedia('relieving_images') as $k=>$media)
               <div class="card col-md-5 ml-5">
                 <img width="150" class="card-img-top" src="{{$media->getFullUrl()}}" alt="Experience Certificate cum Relieving Latter">
@@ -292,7 +293,7 @@
               @endforeach
               @endif
 
-              @if($newJoining->exists && $newJoining->getMedia('last_salray_images')->count() > 0 && Storage::disk('s3')->exists($newJoining->getFirstMedia('last_salray_images')->getPath()))
+              @if($newJoining->exists && $newJoining->getMedia('last_salray_images')->count() > 0 && file_exists($newJoining->getFirstMedia('last_salray_images')->getPath()))
               @foreach($newJoining->getMedia('last_salray_images') as $k=>$media)
               <div class="card col-md-5 ml-5">
                 <img width="150" class="card-img-top" src="{{$media->getFullUrl()}}" alt="Last Salary Slip">
@@ -305,7 +306,7 @@
               @endforeach
               @endif
 
-              @if($newJoining->exists && $newJoining->getMedia('bank_images')->count() > 0 && Storage::disk('s3')->exists($newJoining->getFirstMedia('bank_images')->getPath()))
+              @if($newJoining->exists && $newJoining->getMedia('bank_images')->count() > 0 && file_exists($newJoining->getFirstMedia('bank_images')->getPath()))
               @foreach($newJoining->getMedia('bank_images') as $k=>$media)
               <div class="card col-md-5 ml-5">
                 <img width="150" class="card-img-top" src="{{$media->getFullUrl()}}" alt="Bank Details">
@@ -318,7 +319,7 @@
               @endforeach
               @endif
 
-              @if($newJoining->exists && $newJoining->getMedia('offer_images')->count() > 0 && Storage::disk('s3')->exists($newJoining->getFirstMedia('offer_images')->getPath()))
+              @if($newJoining->exists && $newJoining->getMedia('offer_images')->count() > 0 && file_exists($newJoining->getFirstMedia('offer_images')->getPath()))
               @foreach($newJoining->getMedia('offer_images') as $k=>$media)
               <div class="card col-md-5 ml-5">
                 <img width="150" class="card-img-top" src="{{$media->getFullUrl()}}" alt="Silver Offer">

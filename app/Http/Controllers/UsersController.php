@@ -107,10 +107,7 @@ class UsersController extends Controller
         $user->givePermissionTo($permissions);
 
         if ($request->file('image')) {
-            $image = $request->file('image');
-            $filename = 'profile_' . $user['id'];
-            $profile = fileupload($image, $this->path, $filename);
-            User::where('id', $user['id'])->update(['profile_image' => $profile]);
+            $user->addMedia($request->file('image'))->toMediaCollection('profile_image');
         }
         if (!empty($request['cities'])) {
             foreach ($request['cities'] as $key => $city) {
@@ -464,7 +461,7 @@ class UsersController extends Controller
             }
             $data = $data->latest();
 
-            
+
             return Datatables::of($data)
                 ->addIndexColumn()
                 ->addColumn('attendance_count', function ($query) use ($request) {

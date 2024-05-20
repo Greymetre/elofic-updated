@@ -41,8 +41,11 @@ class UserImport implements ToCollection, WithValidation, WithHeadingRow, WithBa
     {
         $userdetails = collect([]);
         $addressdetails = collect([]);
-        foreach ($rows as $row) {
-
+        foreach ($rows as $k=>$row) {
+            if(!is_numeric($row['last_year_increment_percent'])){
+                $row['last_year_increment_percent'] = (int) str_replace('%', '', $row['last_year_increment_percent']);
+            }
+   
             if (!empty($row['id'])) {
                 if (is_numeric($row['spouse_date_of_birth'])) {
                     $excelDate = $row['spouse_date_of_birth'] - 25569; // Adjust for Excel's epoch
@@ -96,7 +99,7 @@ class UserImport implements ToCollection, WithValidation, WithHeadingRow, WithBa
                     'division_id' => !empty($row['division_id']) ? $row['division_id'] : '',
                     'department_id' => !empty($row['department_id']) ? $row['department_id'] : '',
                     'payroll' => !empty($row['payroll']) ? $row['payroll'] : '',
-                    'reportingid' => !empty($row['reporting_id']) ? $row['reporting_id'] : '',
+                    // 'reportingid' => !empty($row['reporting_id']) ? $row['reporting_id'] : '',
                     'sales_type' => !empty($row['sales_type']) ? $row['sales_type'] : '',
                     'show_attandance_report' => !empty($row['attandance_summary_report']) ? (int)$row['attandance_summary_report'] : '',
                     //'created_at' => getcurentDateTime(),
@@ -110,12 +113,12 @@ class UserImport implements ToCollection, WithValidation, WithHeadingRow, WithBa
                     'date_of_joining' => (!empty($row['date_of_joining']) && $row['date_of_joining'] != null) ? date('Y-m-d', strtotime($row['date_of_joining'])) : null,
                     'date_of_birth' => (!empty($row['date_of_birth']) && $row['date_of_birth'] != null) ? date('Y-m-d', strtotime($row['date_of_birth'])) : null,
                     'last_year_increments' => !empty($row['last_year_increments']) ? $row['last_year_increments'] : null,
-                    'last_year_increment_percent' => !empty($row['last_year_increment_percent']) ? ($row['last_year_increment_percent'] * 100) . '%' : null,
+                    'last_year_increment_percent' => !empty($row['last_year_increment_percent']) ? $row['last_year_increment_percent'] . '%' : null,
                     'last_promotion' => !empty($row['last_promotion']) ? $row['last_promotion'] : null,
                     'ctc_annual' => !empty($row['ctc_annual']) ? $row['ctc_annual'] : 0.00,
                     'gross_salary_monthly' => !empty($row['gross_salary_monthly']) ? $row['gross_salary_monthly'] : 0.00,
                     'salary' => !empty($row['ctc_per_month']) ? $row['ctc_per_month'] : 0.00,
-                    'last_year_increment_value' => !empty($row['last_year_increments_value']) ? $row['last_year_increments_value'] : 0.00,
+                    'last_year_increment_value' => !empty($row['last_year_increments_value']) ? (int)$row['last_year_increments_value'] : 0.00,
                     'marital_status' => !empty($row['marital_status']) ? $row['marital_status'] : 0.00,
                     'father_name' => !empty($row['father_name']) ? $row['father_name'] : null,
                     'father_date_of_birth' => !empty($row['father_date_of_birth']) ? date('Y-m-d', strtotime($row['father_date_of_birth'])) : null,
@@ -250,7 +253,7 @@ class UserImport implements ToCollection, WithValidation, WithHeadingRow, WithBa
                         'date_of_joining' => (!empty($row['date_of_joining']) && $row['date_of_joining'] != null) ? date('Y-m-d', strtotime($row['date_of_joining'])) : null,
                         'date_of_birth' => (!empty($row['date_of_birth']) && $row['date_of_birth'] != null) ? date('Y-m-d', strtotime($row['date_of_birth'])) : null,
                         'last_year_increments' => !empty($row['last_year_increments']) ? $row['last_year_increments'] : null,
-                        'last_year_increment_percent' => !empty($row['last_year_increment_percent']) ? ($row['last_year_increment_percent'] * 100) . '%' : null,
+                        'last_year_increment_percent' => !empty($row['last_year_increment_percent']) ? $row['last_year_increment_percent'] . '%' : null,
                         'last_promotion' => !empty($row['last_promotion']) ? $row['last_promotion'] : null,
                         'ctc_annual' => !empty($row['ctc_annual']) ? $row['ctc_annual'] : 0.00,
                         'gross_salary_monthly' => !empty($row['gross_salary_monthly']) ? $row['gross_salary_monthly'] : 0.00,

@@ -18,7 +18,9 @@ use DB;
 use Auth;
 use Excel;
 use App\Exports\ExcelExport;
+use App\Models\CheckIn;
 use App\Models\Customers;
+use App\Models\TourProgramme;
 
 class ExpensesController extends Controller
 {
@@ -186,7 +188,12 @@ class ExpensesController extends Controller
                 })
 
                 ->addColumn('date_create', function ($query) {
-                    return  date("d/m/Y", strtotime($query->created_at));
+                    $genrate = $query->get_time_history->where('status_type', 'generated')->first();
+                    if ($genrate) {
+                        return  date("d/m/Y", strtotime($genrate->created_at));
+                    } else {
+                        return  date("d/m/Y", strtotime($query->created_at));
+                    }
                 })
 
                 ->addColumn('checker_status', function ($query) {
@@ -320,7 +327,7 @@ class ExpensesController extends Controller
         //            $customname = time() . '.' . $file->getClientOriginalExtension();
         //            $expenses->addMedia($file)
         //                    ->usingFileName($customname)
-        //                    ->toMediaCollection('expense_file');
+        //                    ->toMediaCollection('expense_file', 's3');
         //             }       
 
         //        }
@@ -380,9 +387,10 @@ class ExpensesController extends Controller
                     $files = $request->file('expense_file');
                     foreach ($files as $file) {
                         $customname = time() . '.' . $file->getClientOriginalExtension();
+
                         $expenses->addMedia($file)
                             ->usingFileName($customname)
-                            ->toMediaCollection('expense_file');
+                            ->toMediaCollection('expense_file', 's3');
                     }
                 }
             } else {
@@ -422,7 +430,7 @@ class ExpensesController extends Controller
                             $customname = time() . '.' . $file->getClientOriginalExtension();
                             $expenses->addMedia($file)
                                 ->usingFileName($customname)
-                                ->toMediaCollection('expense_file');
+                                ->toMediaCollection('expense_file', 's3');
                         }
                     }
                 } else {
@@ -451,9 +459,23 @@ class ExpensesController extends Controller
             $request->session()->put('executive_id', $expense->user_id);
         }
 
+        $paln = TourProgramme::where('userid', $expense->user_id)->where('date', $expense->date)->first();
+        $total_visit = CheckIn::where('user_id', $expense->user_id)->where('checkin_date', $expense->date)->groupBy('customer_id')->count();
+
+        $checkins = CheckIn::where('user_id', $expense->user_id)
+            ->where('checkin_date', $expense->date)
+            ->orderBy('checkin_time', 'asc')
+            ->get();
+        $total_dis = 0;
+        foreach ($checkins as $checkin) {
+            if (!empty($checkin->checkin_latitude) && !empty($checkin->checkin_longitude) && !empty($checkin->checkout_latitude) && !empty($checkin->checkout_longitude)) {
+                $total_dis += haversineGreatCircleDistance($checkin->checkin_latitude, $checkin->checkin_longitude, $checkin->checkout_latitude, $checkin->checkout_longitude);
+            }
+        }
+
         $logdetails = ExpenseLog::with('logusers')->where('expense_id', $expense->id)->orderBy('id', 'desc')->get();
         //$expense->update(['accountant_status'=>'3','checker_status'=>'3']);
-        return view('expenses.show', compact('expense', 'logdetails'));
+        return view('expenses.show', compact('expense', 'logdetails', 'paln', 'total_visit', 'total_dis'));
     }
 
     /**
@@ -529,8 +551,8 @@ class ExpensesController extends Controller
                     'total_km' => $request->total_km ?? NULL,
                     'reason' => $request->reason ?? NULL,
                     'note' => $request->note ?? NULL,
-                    'created_by' => Auth::user()->id ?? NULL,
-                    'created_at' => $current_date_time
+                    'created_by' => Auth::user()->id ?? NULL
+
                 );
                 $expense->update($data);
             } else {
@@ -545,8 +567,7 @@ class ExpensesController extends Controller
                     'total_km' => NULL,
                     'note' => $request->note ?? NULL,
                     'reason' => $request->reason ?? NULL,
-                    'created_by' => Auth::user()->id ?? NULL,
-                    'created_at' => $current_date_time
+                    'created_by' => Auth::user()->id ?? NULL
                 );
                 $expense->update($data);
             }
@@ -556,8 +577,7 @@ class ExpensesController extends Controller
                     'log_date' => date('Y-m-d'),
                     'expense_id' => $expense->id,
                     'created_by' => Auth::user()->id,
-                    'status_type' => 'updated',
-                    'created_at' => $current_date_time
+                    'status_type' => 'updated'
                 );
                 ExpenseLog::create($logdata);
             }
@@ -572,7 +592,7 @@ class ExpensesController extends Controller
                     $customname = time() . '.' . $file->getClientOriginalExtension();
                     $expense->addMedia($file)
                         ->usingFileName($customname)
-                        ->toMediaCollection('expense_file');
+                        ->toMediaCollection('expense_file', 's3');
                 }
             }
             return redirect(route('expenses.index'))->with('message', 'expense updated successfully');
@@ -641,7 +661,7 @@ class ExpensesController extends Controller
 
 
 
-        $expenses = $expenses->orderBy('id', 'desc')->get();
+        $expenses = $expenses->with('get_time_history')->orderBy('id', 'desc')->get();
 
         $data = $expenses->map(function ($item, $key) {
 
@@ -678,6 +698,13 @@ class ExpensesController extends Controller
                 }
             }
 
+            $genrate = $item->get_time_history->where('status_type', 'generated')->first();
+            if ($genrate) {
+                $cd_at =  date("d/m/Y", strtotime($genrate->created_at));
+            } else {
+                $cd_at =  date("d/m/Y", strtotime($query->created_at));
+            }
+
 
 
             return [
@@ -701,13 +728,13 @@ class ExpensesController extends Controller
                 // $item->approve_reject->name??"",
                 implode(',', $checke_by),
                 implode(',', $approved_by),
-
+                $cd_at,
             ];
         })->toArray();
 
         $export = new ExcelExport([
             '#Expense Id',
-            'Created at',
+            'Expense Date',
             'Emp Code',
             'User Name',
             'Designation',
@@ -724,6 +751,7 @@ class ExpensesController extends Controller
             // 'Status BY'
             'Checked By Name',
             'Approved BY Name',
+            'Created At'
         ], $data);
 
         return Excel::download($export, $filename);
@@ -744,8 +772,7 @@ class ExpensesController extends Controller
                 'log_date' => date('Y-m-d'),
                 'expense_id' => $expense_id,
                 'created_by' => Auth::user()->id,
-                'status_type' => 'rejected',
-                'created_at' => $current_date_time
+                'status_type' => 'rejected'
             );
             ExpenseLog::create($logdata);
         }
@@ -773,8 +800,7 @@ class ExpensesController extends Controller
                 'log_date' => date('Y-m-d'),
                 'expense_id' => $expense_id,
                 'created_by' => Auth::user()->id,
-                'status_type' => 'approved',
-                'created_at' => $current_date_time
+                'status_type' => 'approved'
             );
             ExpenseLog::create($logdata);
         }
@@ -821,7 +847,6 @@ class ExpensesController extends Controller
                 'expense_id' => $request->id,
                 'created_by' => Auth::user()->id,
                 'status_type' => 'checked',
-                'created_at' => $current_date_time
             );
             ExpenseLog::create($logdata);
         }
@@ -846,8 +871,7 @@ class ExpensesController extends Controller
                 'log_date' => date('Y-m-d'),
                 'expense_id' => $request->id,
                 'created_by' => Auth::user()->id,
-                'status_type' => 'unchecked',
-                'created_at' => $current_date_time
+                'status_type' => 'unchecked'
             );
             ExpenseLog::create($logdata);
         }

@@ -102,7 +102,7 @@
                               </a>
                            </li>
                            <li class="nav-item">
-                              <a class="nav-link" href="{{ url('warranty_activation') }}">
+                              <a class="nav-link" href="{{ url('warranty_activation'). '?status_is=' . $warrantyactivation->status }}">
                                  <i class="material-icons">next_plan</i> Back
                                  <div class="ripple-container"></div>
                               </a>
@@ -225,7 +225,8 @@
                      <h3 class="mt-4">Invoice Attachment</h3>
                      <hr>
                      <div class="row text-center">
-                        @if($warrantyactivation->exists && $warrantyactivation->getMedia('warranty_activation_attach')->count() > 0 && file_exists($warrantyactivation->getFirstMedia('warranty_activation_attach')->getPath()))
+                        
+                        @if($warrantyactivation->exists && $warrantyactivation->getMedia('warranty_activation_attach')->count() > 0 && Storage::disk('s3')->exists($warrantyactivation->getFirstMedia('warranty_activation_attach')->getPath()))
                         <a href="{!! $warrantyactivation->getMedia('warranty_activation_attach')[0]->getFullUrl() !!}" data-lightbox="mygallery" data-title="Invoice">
                            <img width="250" src="{!! $warrantyactivation->getMedia('warranty_activation_attach')[0]->getFullUrl() !!}" class="img-fluid rounded"></a>
                         @else

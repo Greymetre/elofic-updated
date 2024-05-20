@@ -198,6 +198,8 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        Jenssegers\Agent\AgentServiceProvider::class,
+
     ],
 
     /*
@@ -216,6 +218,7 @@ return [
         'Image' => Intervention\Image\Facades\Image::class,
         // 'ExampleClass' => App\Example\ExampleClass::class,
         'Firebase' => Kreait\Laravel\Firebase\Facades\Firebase::class,
+        'Agent' => Jenssegers\Agent\Facades\Agent::class,
     ])->toArray(),
 
 ];

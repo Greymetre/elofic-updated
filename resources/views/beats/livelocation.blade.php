@@ -1,5 +1,5 @@
 <x-app-layout>
-    <script src="http://maps.google.com/maps/api/js?key=AIzaSyAVSDwHbKULnZa93kYpYINTqX4eaWy9q18" type="text/javascript"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAVSDwHbKULnZa93kYpYINTqX4eaWy9q18" type="text/javascript"></script>
     <div class="row mt-4">
         <div class="col-lg-12">
             <div class="card mt-4" data-animation="true">
@@ -70,7 +70,7 @@
                                     <option disabled="" selected> Select Users</option>
                                     @if(@isset($users ))
                                     @foreach($users as $user)
-                                    <option value="{!! $user['id'] !!}">{!! $user['name'] !!}</option>
+                                    <option {{(!empty($user_id) && $user_id == $user['id'])?'selected':''}} value="{!! $user['id'] !!}">{!! $user['name'] !!}</option>
                                     @endforeach
                                     @endif
                                 </select>
@@ -78,7 +78,7 @@
                         </div>
                         <div class="col-md-3">
                             <div class="form-group has-default bmd-form-group">
-                                <input type="text" class="form-control datepicker" id="date" name="date" placeholder="Select Date" autocomplete="off" readonly>
+                                <input type="text" class="form-control datepicker" id="date" name="date" value="{{$date??''}}" placeholder="Select Date" autocomplete="off" readonly>
                             </div>
                         </div>
                         <div class="col-md-3">
@@ -105,12 +105,13 @@
         $(document).ready(function() {
             // getActivityData();
             $('#loader').hide();
+            getActivityData();
         })
 
         function getLocationData(lat, lang) {
             if (lat != '' && lang != '') {
                 var map = new google.maps.Map(document.getElementById('map'), {
-                    zoom: 15,
+                    zoom: 18,
                     center: new google.maps.LatLng(lat, lang),
                     mapTypeId: google.maps.MapTypeId.ROADMAP
                 });

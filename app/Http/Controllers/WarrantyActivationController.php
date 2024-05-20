@@ -39,7 +39,12 @@ class WarrantyActivationController extends Controller
         $branches = Branch::where('active', 'Y')->get();
         $parent_customers = [];
         $scheme_names = SchemeHeader::where('active', 'Y')->select('id', 'scheme_name')->get();
-        return $dataTable->render('warranty_activation.index', compact('branches', 'parent_customers', 'scheme_names'));
+        if($request->status_is && $request->status_is != '' && $request->status_is != NULL){
+            $currunt_status = $request->status_is;
+        }else{
+            $currunt_status = '0';
+        }
+        return $dataTable->render('warranty_activation.index', compact('branches', 'parent_customers', 'scheme_names', 'currunt_status'));
     }
 
     /**
