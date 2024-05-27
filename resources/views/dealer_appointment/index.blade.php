@@ -11,61 +11,22 @@
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
-          <h4 class="card-title ">New Joining {!! trans('panel.global.list') !!}
+          <h4 class="card-title ">Dealer / Distributor Appointment {!! trans('panel.global.list') !!}
             <span class="">
               <div class="btn-group header-frm-btn">
-                @if(auth()->user()->can(['new_joining_download']))
-                <form method="POST" action="{{ URL::to('new-joining/download') }}" class="form-horizontal">
-                  @csrf 
-                  <div class="d-flex flex-wrap flex-row">                   
+                @if(auth()->user()->can(['dealer_appointment_download']))
+                <form method="POST" action="{{ URL::to('/dealer-appointment/download') }}" class="form-horizontal">
+                  @csrf
+                  <div class="d-flex flex-wrap flex-row">
                     <div class="p-2" style="width:160px;"><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
                     <div class="p-2" style="width:160px;"><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
-                    <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Damage Entries"><i class="material-icons">cloud_download</i></button></div>
-                </div>
+                    <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Dealer Appointment"><i class="material-icons">cloud_download</i></button></div>
+                  </div>
                 </form>
                 @endif
-                <!-- </div> -->
-                <!-- <button class="btn btn-just-icon btn-theme" type="button" data-toggle="collapse" data-target="#multiCollapseExample2" aria-expanded="false" aria-controls="multiCollapseExample2"><i class="material-icons">menu</i></button> -->
-                <!-- <div class="row">
-                <div class="col"> -->
-                <!-- <div class="collapse multi-collapse" id="multiCollapseExample2">
-                    <div class="d-flex" style="font-size: 14px;align-items: center;justify-content: space-between;"> -->
-                @if(auth()->user()->can(['transaction_history_upload']))
-                <!-- <p>Upload Manual Transaction</p>
-                      <form action="{{ URL::to('transaction_history_upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
-                        {{ csrf_field() }}
-                        <div class="d-flex">
-                          <div class="fileinput-new text-center" data-provides="fileinput">
-                            <span class="btn btn-just-icon btn-theme btn-file">
-                              <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
-                              <span class="fileinput-exists">Change</span>
-                              <input type="hidden">
-                              <input type="file" name="import_file" required accept=".xls,.xlsx" />
-                            </span>
-                          </div>
-                          <div class="input-group-append">
-                            <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.upload') !!} Manual Transaction">
-                              <i class="material-icons">cloud_upload</i>
-                              <div class="ripple-container"></div>
-                            </button>
-                          </div>
-                        </div>
-                      </form> -->
-                @endif
+
                 <div class="next-btn">
-                  @if(auth()->user()->can(['transaction_history_template']))
-                  <!-- <p>{!!  trans('panel.global.template') !!} Manual Transaction</p>
-                      <a href="{{ URL::to('transaction_history_template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} Manual Transaction"><i class="material-icons">text_snippet</i></a> -->
-                  @endif
-                  @if(auth()->user()->can(['transaction_history_create']))
-                  <!-- <p>{!!  trans('panel.global.add') !!} Transaction</p> -->
-                  <!-- <a href="{{ route('damage_entries.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Damage Entry"><i class="material-icons">add_circle</i></a> -->
-                  <!-- <p>{!!  trans('panel.global.add') !!} Manual Transaction</p>
-                      <a href="{{ route('transaction_history.manualcreate') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Manual Transaction"><i class="material-icons">add_circle</i></a> -->
-                  @endif
-                  <!-- </div>
-                  </div> -->
-                 
+                <a class="btn btn-just-icon btn-theme" href="{{url('/dealer-appointment-form')}}" title="{!!  trans('panel.global.add') !!} Dealer Appointment"><i class="material-icons">add</i></a>
                 </div>
               </div>
             </span>
@@ -115,13 +76,14 @@
             <table id="getDamageEntries" class="table table-striped- table-bschemeed table-hover table-checkable no-wrap">
               <thead class=" text-primary">
                 <th>{!! trans('panel.global.no') !!}</th>
-                <th>{!! trans('panel.expenses.fields.date') !!}</th>
-                <th>Email</th>
-                <th>Name</th>
-                <th>Mobile Number</th>
+                <th>Appointment {!! trans('panel.expenses.fields.date') !!}</th>
                 <th>Branch</th>
-                <th>Department</th>
-                <th>Designation</th>
+                <th>District</th>
+                <th>City</th>
+                <th>Firm Name</th>
+                <th>Firm type</th>
+                <th>Customer Type</th>
+                <th>division</th>
                 <th>Show Detais</th>
               </thead>
               <tbody>
@@ -150,7 +112,7 @@
           [0, 'desc']
         ],
         "ajax": {
-          'url': "{{ route('new-joining') }}",
+          'url': "{{ route('dealer-appointment') }}",
           'data': function(d) {
             d.status = $('#status').val(),
               d.parent_customer = $('#parent_customer').val(),
@@ -166,29 +128,11 @@
             searchable: false
           },
           {
-            data: 'created_at',
-            name: 'created_at',
+            data: 'appointment_date',
+            name: 'appointment_date',
             "defaultContent": '',
             orderable: false,
             searchable: false
-          },
-          {
-            data: 'email',
-            name: 'email',
-            "defaultContent": '',
-            orderable: false
-          },
-          {
-            data: 'name',
-            name: 'first_name',
-            "defaultContent": '',
-            orderable: false
-          },
-          {
-            data: 'mobile_number',
-            name: 'mobile_number',
-            "defaultContent": '',
-            orderable: false
           },
           {
             data: 'branch_details.branch_name',
@@ -198,18 +142,42 @@
             searchable: false
           },
           {
-            data: 'department_details.name',
-            name: 'department_details.name',
+            data: 'district_details.district_name',
+            name: 'district_details.district_name',
             "defaultContent": '',
             orderable: false,
             searchable: false
           },
           {
-            data: 'designation_details.designation_name',
-            name: 'designation_details.designation_name',
+            data: 'city_details.city_name',
+            name: 'city_details.city_name',
             "defaultContent": '',
             orderable: false,
             searchable: false
+          },
+          {
+            data: 'firm_name',
+            name: 'firm_name',
+            "defaultContent": '',
+            orderable: false
+          },
+          {
+            data: 'firm_type',
+            name: 'firm_type',
+            "defaultContent": '',
+            orderable: false
+          },
+          {
+            data: 'customertype',
+            name: 'customertype',
+            "defaultContent": '',
+            orderable: false
+          },
+          {
+            data: 'division',
+            name: 'division',
+            "defaultContent": '',
+            orderable: false
           },
           {
             data: 'action',

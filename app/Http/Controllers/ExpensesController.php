@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\DataTables\ExpensesDataTable;
 use App\Http\Requests\StoreExpensesRequest;
 use App\Http\Requests\UpdateExpensesRequest;
 use App\Models\Expenses;
@@ -29,7 +30,7 @@ class ExpensesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(ExpensesDataTable $dataTable, Request $request)
     {
         $userids = getUsersReportingToAuth();
 
@@ -80,167 +81,11 @@ class ExpensesController extends Controller
 
 
 
-        $expense_ids = Expenses::orderBy('id', 'desc')->get();
+        // $expense_ids = Expenses::orderBy('id', 'desc')->get();
 
         $pay_rolls = Config('constants.pay_roll');
 
-        if ($request->ajax()) {
-
-            $data = Expenses::with(['expense_type', 'users']);
-            if (!empty($request['payroll'])) {
-                // $payrollid = $request['payroll']; 
-                // $userid = User::where('payroll',$payrollid)->pluck('id');
-                // $data->whereIn('user_id', $userid);
-
-                $payrollid = $request['payroll'];
-
-                // $userid = User::where('payroll',$payrollid)->pluck('id');
-                // $data->whereIn('user_id', $userid); 
-
-                $userid = User::where('active', '=', 'Y')->where(function ($query) use ($userids) {
-                    if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
-                        $query->whereIn('id', $userids);
-                    }
-                })->where('payroll', $payrollid)->pluck('id');
-
-                $data->whereIn('user_id', $userid);
-            }
-
-            if (!empty($request['executive_id'])) {
-                if ($request->executive_id) {
-                    $request->session()->put('executive_id', $request->executive_id);
-                }
-                $data->where('user_id', $request['executive_id']);
-            }
-
-            if (!empty($request['search']['value']) && $request['search']['value'] != '' && $request['search']['value'] != NULL) {
-                $data->where('claim_amount', $request['search']['value']);
-            }
-
-            if (!empty($request['expenses_type'])) {
-                $data->where('expenses_type', $request['expenses_type']);
-            }
-
-            if (!empty($request['branch_id'])) {
-                $branch_user_id = User::where('branch_id', $request['branch_id'])->pluck('id');
-                if (!empty($branch_user_id)) {
-                    $data->whereIn('user_id', $branch_user_id);
-                }
-            }
-            if (!empty($request['division_id'])) {
-                $division_user_id = User::where('division_id', $request['division_id'])->pluck('id');
-                if (!empty($division_user_id)) {
-                    $data->whereIn('user_id', $division_user_id);
-                }
-            }
-
-            if (!empty($request['expense_id'])) {
-                $data->where('id', $request['expense_id']);
-            }
-
-
-            if (!empty($request['start_date']) && !empty($request['end_date'])) {
-                $data->whereBetween('date', [$request['start_date'], $request['end_date']]);
-            }
-
-
-            if ($request['status'] != NULL) {
-                $data->where('checker_status', $request['status']);
-            }
-
-            $data = $data->select(\DB::raw(with(new Expenses)->getTable() . '.*'))->groupBy('id');
-
-            return Datatables::of($data)
-                ->addIndexColumn()
-                ->addColumn('id', function ($query) {
-                    return $query->id ?? '';
-                })
-                ->addColumn('users.name', function ($query) {
-                    $name = '(' . $query->users->employee_codes . ')' . $query->users->name;
-                    return $name;
-                })
-                ->addColumn('users.getdesignation.designation_name', function ($query) {
-                    return $query->users->getdesignation->designation_name ?? '';
-                })
-                ->addColumn('expense_type.name', function ($query) {
-                    return $query->expense_type->name ?? '';
-                })
-
-                ->editColumn('date', function ($query) {
-                    // return $query->date ?? '';
-                    return $query->date ? date("d/m/Y", strtotime($query->date)) : date("d/m/Y", strtotime($query->created_at));
-                })
-                ->editColumn('claim_amount', function ($query) {
-                    return $query->claim_amount ?? '';
-                })
-                ->editColumn('approve_amount', function ($query) {
-                    return $query->approve_amount ?? '';
-                })
-                ->editColumn('note', function ($query) {
-                    return $query->note ?? '';
-                })
-                ->editColumn('total_km', function ($query) {
-                    return $query->total_km ?? '';
-                })
-
-                ->addColumn('users.getbranch.branch_name', function ($query) {
-                    return $query->users->getbranch->branch_name ?? '';
-                })
-
-                ->addColumn('date_create', function ($query) {
-                    $genrate = $query->get_time_history->where('status_type', 'generated')->first();
-                    if ($genrate) {
-                        return  date("d/m/Y", strtotime($genrate->created_at));
-                    } else {
-                        return  date("d/m/Y", strtotime($query->created_at));
-                    }
-                })
-
-                ->addColumn('checker_status', function ($query) {
-                    $btn = '';
-                    $activebtn = '';
-                    if ($query->checker_status == '1') {
-                        $btn = $btn . "<a href='" . route("expenses.show", ["expense" => $query->id]) . "'><span class='btn btn-success'>Approved</span></a>";
-                    } elseif ($query->checker_status == '2') {
-                        $btn = $btn . "<a href='" . route("expenses.show", ["expense" => $query->id]) . "'><span class='btn btn-danger'>Rejected</span></a>";
-                    } elseif ($query->checker_status == '3') {
-                        $btn = $btn . "<a href='" . route("expenses.show", ["expense" => $query->id]) . "'><span class='btn btn-dark'>Checked</span></a>";
-                    } else {
-                        $btn = $btn . "<a href='" . route("expenses.show", ["expense" => $query->id]) . "'><span class='btn btn-warning'>Pending</span></a>";
-                    }
-                    return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
-                                            ' . $btn . '
-                                        </div>' . $activebtn;
-                })
-
-                ->addColumn('action', function ($query) {
-                    $btn = '';
-                    $activebtn = '';
-
-                    //  if(auth()->user()->can(['expenses_edit']))
-                    //   {
-
-                    // $btn = $btn . '<a href="'.route("expenses.edit", ["expense" => $query->id]).'" class="btn btn-info btn-just-icon btn-sm" title="' . trans('panel.global.edit') . ' ' . trans('panel.expenses.title_singular') . '">
-                    //            <i class="material-icons">edit</i>
-                    //             </a>';
-                    //   }
-
-                    if (auth()->user()->can(['expenses_delete'])) {
-
-                        $btn = $btn . ' <a href="" class="btn btn-danger btn-just-icon btn-sm delete" value="' . $query->id . '" title="' . trans('panel.global.delete') . ' ' . trans('panel.expenses.title_singular') . '">
-                                            <i class="material-icons">clear</i>
-                                          </a>';
-                    }
-
-
-                    return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
-                                            ' . $btn . '
-                                        </div>' . $activebtn;
-                })
-                ->rawColumns(['checker_status', 'action', 'users.name'])
-                ->make(true);
-        }
-        return view('expenses.index', compact('users', 'branches', 'pay_rolls', 'divisions', 'expense_ids'));
+        return $dataTable->render('expenses.index', compact('users', 'branches', 'pay_rolls', 'divisions'));
     }
 
     /**
@@ -460,7 +305,7 @@ class ExpensesController extends Controller
         }
 
         $paln = TourProgramme::where('userid', $expense->user_id)->where('date', $expense->date)->first();
-        $total_visit = CheckIn::where('user_id', $expense->user_id)->where('checkin_date', $expense->date)->groupBy('customer_id')->count();
+        $total_visit = count(CheckIn::where('user_id', $expense->user_id)->where('checkin_date', $expense->date)->groupBy('customer_id')->get());
 
         $checkins = CheckIn::where('user_id', $expense->user_id)
             ->where('checkin_date', $expense->date)
@@ -475,7 +320,7 @@ class ExpensesController extends Controller
 
         $logdetails = ExpenseLog::with('logusers')->where('expense_id', $expense->id)->orderBy('id', 'desc')->get();
         //$expense->update(['accountant_status'=>'3','checker_status'=>'3']);
-        return view('expenses.show', compact('expense', 'logdetails', 'paln', 'total_visit', 'total_dis'));
+        return view('expenses.show', compact('expense', 'logdetails', 'paln', 'total_visit', 'total_dis'))->render();
     }
 
     /**
@@ -551,6 +396,7 @@ class ExpensesController extends Controller
                     'total_km' => $request->total_km ?? NULL,
                     'reason' => $request->reason ?? NULL,
                     'note' => $request->note ?? NULL,
+                    'approve_amount' => $request->approve_amount ?? NULL,
                     'created_by' => Auth::user()->id ?? NULL
 
                 );
@@ -566,6 +412,7 @@ class ExpensesController extends Controller
                     'stop_km' => NULL,
                     'total_km' => NULL,
                     'note' => $request->note ?? NULL,
+                    'approve_amount' => $request->approve_amount ?? NULL,
                     'reason' => $request->reason ?? NULL,
                     'created_by' => Auth::user()->id ?? NULL
                 );
@@ -776,8 +623,8 @@ class ExpensesController extends Controller
             );
             ExpenseLog::create($logdata);
         }
-
-        return redirect(route('expenses.show', ["expense" => $expense_id]))->with('danger', 'Expense rejected');
+        return response()->json(['status' => 'success', 'message' => 'Expense reject successfully']);
+        // return redirect(route('expenses.show', ["expense" => $expense_id]))->with('danger', 'Expense rejected');
     }
 
     public function approveExpense(Request $request)
@@ -790,7 +637,8 @@ class ExpensesController extends Controller
         $reason = $request->reasons ?? NULL;
 
         if ($expense_detail->claim_amount < $approve_amnt) {
-            return redirect(route('expenses.show', ["expense" => $expense_id]))->with('success', 'Approve amount greater than to claim amount');
+            return response()->json(['status' => 'error', 'message' => 'Approve amount greater than to claim amount']);
+            // return redirect(route('expenses.show', ["expense" => $expense_id]))->with('success', 'Approve amount greater than to claim amount');
         }
 
         Expenses::where('id', $expense_id)->update(['reason' => $reason, 'checker_status' => '1', 'approve_reject_by' => Auth::user()->id, 'approve_amount' => $approve_amnt]);
@@ -805,8 +653,8 @@ class ExpensesController extends Controller
             ExpenseLog::create($logdata);
         }
 
-        //return redirect(route('expenses.index'));
-        return redirect(route('expenses.show', ["expense" => $expense_id]))->with('success', 'Approved amount');
+        return response()->json(['status' => 'success', 'message' => 'Approve amount.']);
+        // return redirect(route('expenses.show', ["expense" => $expense_id]))->with('success', 'Approved amount');
     }
 
 

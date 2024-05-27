@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, CustomerDetails, EndUser, GiftModel, GiftSubcategory, Notes, OrderSchemeDetail, Redemption, SchemeDetails, Services, Subcategory, TourProgramme, TransactionHistory, UserCityAssign, WarrantyActivation};
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, CustomerDetails, EndUser, Expenses, GiftModel, GiftSubcategory, Notes, OrderSchemeDetail, Redemption, SchemeDetails, Services, Subcategory, TourProgramme, TransactionHistory, UserCityAssign, WarrantyActivation};
 use App\Models\User;
 use Carbon\Carbon;
 use App\Models\UserLiveLocation;
@@ -693,7 +693,7 @@ class AjaxController extends Controller
     public function removeSchemesdetails(Request $request)
     {
         try {
-            $scheme_details = OrderSchemeDetail::find($request->id);
+            $scheme_details = SchemeDetails::find($request->id);
             $scheme_details->delete();
 
             return response()->json(["status" => true]);
@@ -826,12 +826,12 @@ class AjaxController extends Controller
     public function changeDocumnetStatus(Request $request)
     {
         if ($request->ajax()) {
-            
+
             $column = $request->type;
             $customer_id = $request->customer_id;
             $status = $request->status;
             $update = CustomerDetails::where('customer_id', $customer_id)->update([$column => $status, 'status_update_by' => auth()->user()->id]);
-            if($request->status == '2'){
+            if ($request->status == '2') {
                 switch ($request->type) {
                     case 'aadhar_no_status':
                         $update = CustomerDetails::where('customer_id', $customer_id)->update(['aadhar_no' => NULL, 'status_update_by' => auth()->user()->id]);
@@ -850,7 +850,7 @@ class AjaxController extends Controller
                         break;
 
                     case 'bank_status':
-                        $update = CustomerDetails::where('customer_id', $customer_id)->update(['account_holder' => NULL,'account_number' => NULL,'bank_name' => NULL,'ifsc_code' => NULL]);
+                        $update = CustomerDetails::where('customer_id', $customer_id)->update(['account_holder' => NULL, 'account_number' => NULL, 'bank_name' => NULL, 'ifsc_code' => NULL]);
                         Attachment::where('customer_id', $customer_id)->where('document_name', 'bankpass')->delete();
                         break;
 
@@ -858,9 +858,9 @@ class AjaxController extends Controller
                         $update = CustomerDetails::where('customer_id', $customer_id)->update(['otherid_no' => NULL]);
                         Attachment::where('customer_id', $customer_id)->where('document_name', 'other')->delete();
                         break;
-                
+
                     default:
-                        
+
                         break;
                 }
             }
@@ -912,6 +912,30 @@ class AjaxController extends Controller
             return response()->json($data);
         } catch (\Exception $e) {
             return $e;
+        }
+    }
+
+    public function getExpensesData(Request $request)
+    {
+        if ($request->ajax()) {
+
+            $term = trim($request->term);
+
+            $coins = Expenses::select("id as id", "id as text")->where('id', 'LIKE',  '%' . $term . '%')->orderBy('id', 'desc')->simplePaginate(10);
+
+
+            $morePages = true;
+            $pagination_obj = json_encode($coins);
+            if (empty($coins->nextPageUrl())) {
+                $morePages = false;
+            }
+            $results = array(
+                "results" => $coins->items(),
+                "pagination" => array(
+                    "more" => $morePages
+                )
+            );
+            return response()->json($results);
         }
     }
 
@@ -1020,7 +1044,7 @@ class AjaxController extends Controller
     {
         try {
             $serial_no = $request->input('serial_no');
-            if($serial_no != NULL && $serial_no != ''){
+            if ($serial_no != NULL && $serial_no != '') {
                 $data = Services::with('product')
                     ->where(function ($query) use ($serial_no) {
                         if (isset($serial_no)) {
@@ -1030,8 +1054,8 @@ class AjaxController extends Controller
                     ->first();
                 if ($data) {
                     $data->product->categories = $data->product->categories;
-                    $check_Warranty = WarrantyActivation::with('customer')->where('product_serail_number', $serial_no)->first();
-                    return response()->json(['status' => true, 'data' => $data->product, 'check_Warranty'=>$check_Warranty]);
+                    $check_Warranty = WarrantyActivation::with('media','customer')->where('product_serail_number', $serial_no)->first();
+                    return response()->json(['status' => true, 'data_all' => $data, 'data' => $data->product, 'check_Warranty' => $check_Warranty]);
                 } else {
                     return response()->json(['status' => false, 'data' => null]);
                 }
@@ -1087,6 +1111,8 @@ class AjaxController extends Controller
                     $html .= '</td><td>';
                     $html .= date('d M Y', strtotime($val->complaint_date));
                     $html .= '</td><td>';
+                    $html .= strtoupper($val->product_serail_number);
+                    $html .= '</td><td>';
                     $html .= $val->claim_amount;
                     $html .= '</td><td>';
                     if ($val->complaint_status == '0') {
@@ -1096,13 +1122,12 @@ class AjaxController extends Controller
                     }
 
                     $html .= '</td><td>';
-                    $html .= strtoupper($val->product_serail_number);
-                    $html .= '</td><td>';
                     $html .= $val->service_center_details ? $val->service_center_details->name : '';
                     $html .= '</td><td>';
                     $html .= $val->seller_details ? $val->seller_details->name : '';
                     $html .= '</td><td>';
                     $html .= $val->party ? $val->party->name : '';
+                    $html .= '</td><td>';
                     $html .= '</td><tr>';
                 }
                 return response()->json(['status' => true, 'data' => $html]);
@@ -1118,17 +1143,23 @@ class AjaxController extends Controller
     public function fetchPieChartData()
     {
         $labels = ['Active', 'Provision', 'Redeem'];
-        $total_points = TransactionHistory::sum('point')??0;
-        $active_points = TransactionHistory::where('status', '1')->sum('point')??0;
-        $provision_points = TransactionHistory::where('status', '0')->sum('point')??0;
-        $total_redemption = Redemption::whereNot('status', '2')->sum('redeem_amount')??0;
-        $total_rejected = Redemption::where('status', '2')->sum('redeem_amount')??0;
-        $total_balance = (int)$active_points-(int)$total_redemption;
+        $total_points = TransactionHistory::sum('point') ?? 0;
+        $active_points = TransactionHistory::where('status', '1')->sum('point') ?? 0;
+        $provision_points = TransactionHistory::where('status', '0')->sum('point') ?? 0;
+        $total_redemption = Redemption::whereNot('status', '2')->sum('redeem_amount') ?? 0;
+        $total_rejected = Redemption::where('status', '2')->sum('redeem_amount') ?? 0;
+        $total_balance = (int)$active_points - (int)$total_redemption;
         $values = [$active_points, $provision_points, $total_redemption];
 
         return response()->json([
             'labels' => $labels,
             'values' => $values
         ]);
+    }
+
+    public function remove_session(Request $request)
+    {
+        $request->session()->forget('executive_id');
+        return response()->json(['status' => 'success']);
     }
 }

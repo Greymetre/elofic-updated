@@ -42,6 +42,10 @@
         input {
             border-bottom: 1px solid #000 !important;
         }
+
+        .uppercase {
+            text-transform: uppercase;
+        }
     </style>
 </head>
 
@@ -105,7 +109,6 @@
                         <div class="col-md-8">
                             <select class="form-select" name="city" id="city">
                                 <option value="" disabled selected>Select City</option>
-
                             </select>
                         </div>
                     </div>
@@ -117,7 +120,7 @@
                     <label for="appointment_date">Date of Appointment </label>
                 </div>
                 <div class="col-md-4">
-                    <input type="date" name="appointment_date" id="appointment_date" class="form-control">
+                    <input type="date" name="appointment_date" id="appointment_date" class="form-control uppercase">
                 </div>
             </div>
 
@@ -190,7 +193,7 @@
                             <label> PUMP & MOTORS </label>
                         </div>
                         <div class="col-md-6">
-                            <input class="form-control mr-3" type="text" name="SDPUMPMOTORS" value="10000" readonly>
+                            <input class="form-control mr-3" type="text" oninput="this.value = this.value.toUpperCase()" name="SDPUMPMOTORS" value="10000" readonly>
                         </div>
                     </div>
                 </div>
@@ -200,7 +203,7 @@
                             <label> F&A </label>
                         </div>
                         <div class="col-md-6">
-                            <input class="form-control mr-3" type="text" name="SDF&A" value="5000" readonly>
+                            <input class="form-control mr-3" type="text" oninput="this.value = this.value.toUpperCase()" name="SDF&A" value="5000" readonly>
                         </div>
                     </div>
                 </div>
@@ -210,7 +213,7 @@
                             <label> AGRI </label>
                         </div>
                         <div class="col-md-6">
-                            <input class="form-control mr-3" type="text" name="SDPUMPMOTORS" value="100000" readonly>
+                            <input class="form-control mr-3" type="text" oninput="this.value = this.value.toUpperCase()" name="SDPUMPMOTORS" value="100000" readonly>
                         </div>
                     </div>
                 </div>
@@ -246,7 +249,7 @@
                             <label> GST No. </label>
                         </div>
                         <div class="col-md-8">
-                            <input class="form-control mr-3" type="text" name="gst_no" value="">
+                            <input class="form-control mr-3" type="text" oninput="this.value = this.value.toUpperCase()" name="gst_no" value="">
                         </div>
                     </div>
                 </div>
@@ -285,7 +288,7 @@
                                 <label> Name of the Company/Firm </label>
                             </div>
                             <div class="col-md-8">
-                                <input class="form-control" type="text" name="firm_name" value="">
+                                <input class="form-control uppercase" type="text" oninput="this.value = this.value.toUpperCase()" name="firm_name" value="">
                             </div>
                         </div>
                     </div>
@@ -295,7 +298,7 @@
                                 <label> CIN No in case of Company </label>
                             </div>
                             <div class="col-md-8">
-                                <input class="form-control" type="text" name="cin_no" value="">
+                                <input class="form-control uppercase" type="text" oninput="this.value = this.value.toUpperCase()" name="cin_no" value="">
                             </div>
                         </div>
                     </div>
@@ -305,7 +308,7 @@
                                 <label> Name of Related Firm in which presently dealing </label>
                             </div>
                             <div class="col-md-8">
-                                <input class="form-control" type="text" name="related_firm_name" value="">
+                                <input class="form-control uppercase" type="text" oninput="this.value = this.value.toUpperCase()" name="related_firm_name" value="">
                             </div>
                         </div>
                     </div>
@@ -315,7 +318,7 @@
                                 <label> Line of Business </label>
                             </div>
                             <div class="col-md-8">
-                                <textarea name="line_business" class="form-control" id="line_business"></textarea>
+                                <textarea name="line_business" class="form-control uppercase" id="line_business"></textarea>
                             </div>
                         </div>
                     </div>
@@ -325,7 +328,7 @@
                                 <label> Office Address: </label>
                             </div>
                             <div class="col-md-12">
-                                <input class="form-control" type="text" name="office_address" value="">
+                                <input class="form-control uppercase" type="text" oninput="this.value = this.value.toUpperCase()" name="office_address" value="">
                             </div>
                         </div>
                         <div class="form-group row">
@@ -333,7 +336,7 @@
                                 <label> Pin: </label>
                             </div>
                             <div class="col-md-9">
-                                <input class="form-control" type="text" name="office_pincode" value="">
+                                <input class="form-control uppercase" type="text" oninput="this.value = this.value.toUpperCase()" name="office_pincode" value="">
                             </div>
                         </div>
                         <div class="form-group row">
@@ -341,7 +344,7 @@
                                 <label> Mobile No.: </label>
                             </div>
                             <div class="col-md-9">
-                                <input class="form-control" type="text" name="office_mobile" value="">
+                                <input class="form-control uppercase" type="text" oninput="this.value = this.value.toUpperCase()" name="office_mobile" value="">
                             </div>
                         </div>
                         <div class="form-group row">
@@ -349,7 +352,7 @@
                                 <label> Email: </label>
                             </div>
                             <div class="col-md-9">
-                                <input class="form-control" type="text" name="office_email" value="">
+                                <input class="form-control uppercase" type="text" oninput="this.value = this.value.toUpperCase()" name="office_email" value="">
                             </div>
                         </div>
                     </div>
@@ -359,7 +362,7 @@
                                 <label> Showroom Address / GODOWN: </label>
                             </div>
                             <div class="col-md-12">
-                                <input class="form-control" type="text" name="godown_address" value="">
+                                <input class="form-control uppercase" type="text" oninput="this.value = this.value.toUpperCase()" name="godown_address" value="">
                             </div>
                         </div>
                         <div class="form-group row">
@@ -367,7 +370,7 @@
                                 <label> Pin: </label>
                             </div>
                             <div class="col-md-9">
-                                <input class="form-control" type="text" name="godown_pincode" value="">
+                                <input class="form-control uppercase" type="text" oninput="this.value = this.value.toUpperCase()" name="godown_pincode" value="">
                             </div>
                         </div>
                         <div class="form-group row">
@@ -375,7 +378,7 @@
                                 <label> Mobile No.: </label>
                             </div>
                             <div class="col-md-9">
-                                <input class="form-control" type="text" name="godown_mobile" value="">
+                                <input class="form-control uppercase" type="text" oninput="this.value = this.value.toUpperCase()" name="godown_mobile" value="">
                             </div>
                         </div>
                         <div class="form-group row">
@@ -383,7 +386,7 @@
                                 <label> Email: </label>
                             </div>
                             <div class="col-md-9">
-                                <input class="form-control" type="text" name="godown_email" value="">
+                                <input class="form-control uppercase" type="text" oninput="this.value = this.value.toUpperCase()" name="godown_email" value="">
                             </div>
                         </div>
                     </div>
@@ -400,7 +403,7 @@
                                 <label> status </label>
                             </div>
                             <div class="col-md-8">
-                                <select name="status" id="status" class="form-control">
+                                <select name="status" id="status" class="form-control uppercase">
                                     <option value="" disabled selected>Please Select Status</option>
                                     <option value="Proprietor">Proprietor</option>
                                     <option value="Partnership">Partnership</option>
@@ -420,45 +423,45 @@
                                 </tr>
                                 <tr>
                                     <th rowspan="4" style="width: 15%;">Name of the Proprietor/Partners/Direct ors (Self attested copy Of AADHAR Card and PAN No to be attached)</th>
-                                    <td><input type="text" name="ppd_name_1" class="form-control"></td>
-                                    <td><input type="text" name="ppd_adhar_1" class="form-control"></td>
-                                    <td><input type="text" name="ppd_pan_1" class="form-control"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="ppd_name_1" class="form-control uppercase"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="ppd_adhar_1" class="form-control uppercase"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="ppd_pan_1" class="form-control uppercase"></td>
                                 </tr>
                                 <tr>
-                                    <td><input type="text" name="ppd_name_2" class="form-control"></td>
-                                    <td><input type="text" name="ppd_adhar_2" class="form-control"></td>
-                                    <td><input type="text" name="ppd_pan_2" class="form-control"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="ppd_name_2" class="form-control uppercase"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="ppd_adhar_2" class="form-control uppercase"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="ppd_pan_2" class="form-control uppercase"></td>
                                 </tr>
                                 <tr>
-                                    <td><input type="text" name="ppd_name_3" class="form-control"></td>
-                                    <td><input type="text" name="ppd_adhar_3" class="form-control"></td>
-                                    <td><input type="text" name="ppd_pan_3" class="form-control"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="ppd_name_3" class="form-control uppercase"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="ppd_adhar_3" class="form-control uppercase"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="ppd_pan_3" class="form-control uppercase"></td>
                                 </tr>
                                 <tr>
-                                    <td><input type="text" name="ppd_name_4" class="form-control"></td>
-                                    <td><input type="text" name="ppd_adhar_4" class="form-control"></td>
-                                    <td><input type="text" name="ppd_pan_4" class="form-control"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="ppd_name_4" class="form-control uppercase"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="ppd_adhar_4" class="form-control uppercase"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="ppd_pan_4" class="form-control uppercase"></td>
                                 </tr>
                                 <tr>
                                     <th>Contact Person / Name</th>
-                                    <td colspan="3"><input type="text" name="contact_person_name" class="form-control"></td>
+                                    <td colspan="3"><input type="text" oninput="this.value = this.value.toUpperCase()" name="contact_person_name" class="form-control uppercase"></td>
                                 </tr>
                                 <tr>
                                     <th>Mobile No./ E-Mail</th>
-                                    <td colspan="3"><input type="text" name="mobile_email" class="form-control"></td>
+                                    <td colspan="3"><input type="text" oninput="this.value = this.value.toUpperCase()" name="mobile_email" class="form-control uppercase"></td>
                                 </tr>
                                 <tr>
                                     <th>Name of your Bankers</th>
-                                    <td colspan="3"><input type="text" name="bank_name" class="form-control"></td>
+                                    <td colspan="3"><input type="text" oninput="this.value = this.value.toUpperCase()" name="bank_name" class="form-control uppercase"></td>
                                 </tr>
                                 <tr>
                                     <th>Address of the Banker</th>
-                                    <td colspan="3"><input type="text" name="bank_address" class="form-control"></td>
+                                    <td colspan="3"><input type="text" oninput="this.value = this.value.toUpperCase()" name="bank_address" class="form-control uppercase"></td>
                                 </tr>
                                 <tr>
                                     <th>Account Type</th>
                                     <td colspan="3">
-                                        <select name="account_type" id="account_type" class="form-control">
+                                        <select name="account_type" id="account_type" class="form-control uppercase">
                                             <option value="" disabled selected>Please Select Account Type</option>
                                             <option value="Current Account">Current Account</option>
                                             <option value="CC Account">CC Account</option>
@@ -468,16 +471,16 @@
                                 </tr>
                                 <tr>
                                     <th>Account No.</th>
-                                    <td colspan="3"><input type="text" name="account_number" class="form-control"></td>
+                                    <td colspan="3"><input type="text" oninput="this.value = this.value.toUpperCase()" name="account_number" class="form-control uppercase"></td>
                                 </tr>
                                 <tr>
                                     <th>IFSC CODE</th>
-                                    <td colspan="3"><input type="text" name="ifsc_code" class="form-control"></td>
+                                    <td colspan="3"><input type="text" oninput="this.value = this.value.toUpperCase()" name="ifsc_code" class="form-control uppercase"></td>
                                 </tr>
                                 <tr>
                                     <th>Payment terms</th>
                                     <td colspan="3">
-                                        <select name="payment_term" id="payment_term" class="form-control">
+                                        <select name="payment_term" id="payment_term" class="form-control uppercase">
                                             <option value="" disabled selected>Please Select Payment Term</option>
                                             <option value="Direct">Direct</option>
                                             <option value="against">against</option>
@@ -488,12 +491,12 @@
                                 </tr>
                                 <tr>
                                     <th>Maximum Credit period</th>
-                                    <td colspan="3"><input type="text" name="credit_period" class="form-control"></td>
+                                    <td colspan="3"><input type="text" oninput="this.value = this.value.toUpperCase()" name="credit_period" class="form-control uppercase"></td>
                                 </tr>
                                 <tr>
                                     <th colspan="3">Whether two (2) Cheque (s) have been collected – MCL CHEQUES (Nationalize) <span class="text-info">*(To Be filled at HO)</span></th>
                                     <td>
-                                        <select name="payment_term" disabled id="payment_term" class="form-control">
+                                        <select name="payment_term" disabled id="payment_term" class="form-control uppercase">
                                             <option value="" disabled selected>Please Select</option>
                                             <option value="Yes">Yes</option>
                                             <option value="No">No</option>
@@ -516,15 +519,15 @@
                                         <tbody>
                                             <tr>
                                                 <td>1</td>
-                                                <td><input type="text" name="cheque_no_1" class="form-control"></td>
-                                                <td><input type="text" name="cheque_account_number_1" class="form-control"></td>
-                                                <td><input type="text" name="cheque_bank_1" class="form-control"></td>
+                                                <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="cheque_no_1" class="form-control uppercase"></td>
+                                                <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="cheque_account_number_1" class="form-control uppercase"></td>
+                                                <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="cheque_bank_1" class="form-control uppercase"></td>
                                             </tr>
                                             <tr>
                                                 <td>2</td>
-                                                <td><input type="text" name="cheque_no_2" class="form-control"></td>
-                                                <td><input type="text" name="cheque_account_number_2" class="form-control"></td>
-                                                <td><input type="text" name="cheque_bank_2" class="form-control"></td>
+                                                <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="cheque_no_2" class="form-control uppercase"></td>
+                                                <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="cheque_account_number_2" class="form-control uppercase"></td>
+                                                <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="cheque_bank_2" class="form-control uppercase"></td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -554,16 +557,16 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><input type="text" name="manufacture_company_1" class="form-control"></td>
-                                    <td><input type="text" name="manufacture_product_1" class="form-control"></td>
-                                    <td><input type="text" name="manufacture_business_1" class="form-control"></td>
-                                    <td><input type="text" name="manufacture_turn_over_1" class="form-control"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="manufacture_company_1" class="form-control uppercase"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="manufacture_product_1" class="form-control uppercase"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="manufacture_business_1" class="form-control uppercase"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="manufacture_turn_over_1" class="form-control uppercase"></td>
                                 </tr>
                                 <tr>
-                                    <td><input type="text" name="manufacture_company_2" class="form-control"></td>
-                                    <td><input type="text" name="manufacture_product_2" class="form-control"></td>
-                                    <td><input type="text" name="manufacture_business_2" class="form-control"></td>
-                                    <td><input type="text" name="manufacture_turn_over_2" class="form-control"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="manufacture_company_2" class="form-control uppercase"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="manufacture_product_2" class="form-control uppercase"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="manufacture_business_2" class="form-control uppercase"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="manufacture_turn_over_2" class="form-control uppercase"></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -574,7 +577,7 @@
                                 <label> Present Annual Turnover </label>
                             </div>
                             <div class="col-md-8">
-                                <input class="form-control" type="text" name="present_annual_turnover" value="">
+                                <input class="form-control uppercase" type="text" oninput="this.value = this.value.toUpperCase()" name="present_annual_turnover" value="">
                             </div>
                         </div>
                     </div>
@@ -600,37 +603,37 @@
                             <tbody>
                                 <tr>
                                     <td>MOTROS</td>
-                                    <td><input type="text" name="motor_anticipated_business_1" class="form-control"></td>
-                                    <td><input type="text" name="motor_next_year_business_1" class="form-control"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="motor_anticipated_business_1" class="form-control uppercase"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="motor_next_year_business_1" class="form-control uppercase"></td>
                                 </tr>
                                 <tr>
                                     <td>PUMP</td>
-                                    <td><input type="text" name="pump_anticipated_business_1" class="form-control"></td>
-                                    <td><input type="text" name="pump_next_year_business_1" class="form-control"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="pump_anticipated_business_1" class="form-control uppercase"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="pump_next_year_business_1" class="form-control uppercase"></td>
                                 </tr>
                                 <tr>
                                     <td>FAN & APP</td>
-                                    <td><input type="text" name="F&A_anticipated_business_1" class="form-control"></td>
-                                    <td><input type="text" name="F&A_next_year_business_1" class="form-control"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="F&A_anticipated_business_1" class="form-control uppercase"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="F&A_next_year_business_1" class="form-control uppercase"></td>
                                 </tr>
                                 <tr>
                                     <td>LIGHTING</td>
-                                    <td><input type="text" name="lighting_anticipated_business_1" class="form-control"></td>
-                                    <td><input type="text" name="lighting_next_year_business_1" class="form-control"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="lighting_anticipated_business_1" class="form-control uppercase"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="lighting_next_year_business_1" class="form-control uppercase"></td>
                                 </tr>
                                 <tr>
                                     <td>AGRI</td>
-                                    <td><input type="text" name="agri_anticipated_business_1" class="form-control"></td>
-                                    <td><input type="text" name="agri_next_year_business_1" class="form-control"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="agri_anticipated_business_1" class="form-control uppercase"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="agri_next_year_business_1" class="form-control uppercase"></td>
                                 </tr>
                                 <tr>
                                     <td>SOLAR – PUMP</td>
-                                    <td><input type="text" name="solar_anticipated_business_1" class="form-control"></td>
-                                    <td><input type="text" name="solar_next_year_business_1" class="form-control"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="solar_anticipated_business_1" class="form-control uppercase"></td>
+                                    <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="solar_next_year_business_1" class="form-control uppercase"></td>
                                 </tr>
                                 <tr>
                                     <th>Total</th>
-                                    <td colspan="2"><input type="text" name="anticipated_business_total" class="form-control"></td>
+                                    <td colspan="2"><input type="text" oninput="this.value = this.value.toUpperCase()" name="anticipated_business_total" class="form-control uppercase"></td>
                                 </tr>
                                 <tr>
                                     <th colspan="3"><b>Note: Please sign Target sheets for TOD incentives</b></th>
@@ -666,7 +669,7 @@
                                 <label>Credit limit (Lacs)</label>
                             </div>
                             <div class="col-md-8">
-                                <input readonly type="text" name="credit_limit" class="form-control">
+                                <input readonly type="text" oninput="this.value = this.value.toUpperCase()" name="credit_limit" class="form-control uppercase">
                             </div>
                         </div>
                     </div>
@@ -676,7 +679,7 @@
                                 <label>Credit Rating (in grade)</label>
                             </div>
                             <div class="col-md-8">
-                                <input readonly type="text" name="credit_rating" class="form-control">
+                                <input readonly type="text" oninput="this.value = this.value.toUpperCase()" name="credit_rating" class="form-control uppercase">
                             </div>
                         </div>
                     </div>

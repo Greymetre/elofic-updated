@@ -11,7 +11,7 @@ use Yajra\DataTables\Services\DataTable;
 
 use Illuminate\Support\Facades\Auth;
 
-class ComplaintDataTable extends DataTable
+class ServiceBillDataTable extends DataTable
 {
 
     public function dataTable($query)

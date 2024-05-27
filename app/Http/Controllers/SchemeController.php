@@ -203,6 +203,7 @@ class SchemeController extends Controller
             if($scheme->save())
             {
                 if(!$request->import_file){
+                    
                     $existdetails = SchemeDetails::where('scheme_id',$id)->select('id','product_id','category_id','minimum','maximum','points')->get();
                     $schmedetils = collect([]);
                     if($request['points'] && $request['points'] != null && count($request['points']) > 0){

@@ -7,12 +7,15 @@ use App\DataTables\ComplaintDataTable;
 use App\Exports\ComplaintExport;
 use App\Models\Branch;
 use App\Models\Complaint;
+use App\Models\ComplaintTimeline;
 use App\Models\ComplaintType;
+use App\Models\ComplaintWorkDone;
 use App\Models\Customers;
 use App\Models\Division;
 use App\Models\EndUser;
 use App\Models\Media;
 use App\Models\Pincode;
+use App\Models\ServiceBill;
 use App\Models\User;
 use App\Models\WarrantyActivation;
 use Illuminate\Http\Request;
@@ -50,7 +53,7 @@ class ComplaintController extends Controller
     public function create()
     {
         $newComplaintNumber = $this->getComplaintNumber();
-        
+
         $roleName = "Service Eng";
 
         $assign_users = User::whereHas('roles', function ($query) use ($roleName) {
@@ -76,8 +79,8 @@ class ComplaintController extends Controller
      */
     public function store(Request $request)
     {
-        if(!$request->end_user_id || $request->end_user_id == NULL || $request->end_user_id == ''){
-            $end_user = EndUser::updateOrCreate(['customer_number' => $request->customer_number ?? ''],[
+        if (!$request->end_user_id || $request->end_user_id == NULL || $request->end_user_id == '') {
+            $end_user = EndUser::updateOrCreate(['customer_number' => $request->customer_number ?? ''], [
                 'customer_name' => $request->customer_name ?? '',
                 'customer_number' => $request->customer_number ?? '',
                 'customer_email' => $request->customer_email ?? '',
@@ -92,23 +95,22 @@ class ComplaintController extends Controller
             $request->end_user_id = $end_user->id;
         }
         $check_warranty = WarrantyActivation::with('customer', 'media')->where('product_serail_number', $request->product_serail_number)->first();
-        if(!$check_warranty)
-        {
-            WarrantyActivation::create([
-                'product_serail_number' => $request->product_serail_number ?? NULL,
-                'product_id' => $request->product_id ?? NULL,
-                'end_user_id' => $request->end_user_id ?? NULL,
-                'branch_id' => $request->branch_id ?? NULL,
-                'customer_id' => $request->seller ?? NULL,
-                'status' => 0,
-                'sale_bill_no' => $request->sale_bill_no ?? NULL,
-                'sale_bill_date' => $request->sale_bill_date ?? NULL,
-                'warranty_date' => $request->customer_bill_date ?? NULL,
-                'created_by' => auth()->user()->id
-            ]);
-        }
+        // if (!$check_warranty) {
+        //     WarrantyActivation::create([
+        //         'product_serail_number' => $request->product_serail_number ?? NULL,
+        //         'product_id' => $request->product_id ?? NULL,
+        //         'end_user_id' => $request->end_user_id ?? NULL,
+        //         'branch_id' => $request->branch_id ?? NULL,
+        //         'customer_id' => $request->seller ?? NULL,
+        //         'status' => 0,
+        //         'sale_bill_no' => $request->sale_bill_no ?? NULL,
+        //         'sale_bill_date' => $request->sale_bill_date ?? NULL,
+        //         'warranty_date' => $request->customer_bill_date ?? NULL,
+        //         'created_by' => auth()->user()->id
+        //     ]);
+        // }
         $newComplaintNumber = $this->getComplaintNumber();
-        Complaint::create([
+        $complaint = Complaint::create([
             'complaint_number' => $newComplaintNumber,
             'complaint_date' => $request->complaint_date ?? NULL,
             'claim_amount' => $request->claim_amount ?? NULL,
@@ -140,7 +142,7 @@ class ComplaintController extends Controller
             'warranty_bill' => $request->warranty_bill ?? NULL,
             'fault_type' => $request->fault_type ?? NULL,
             'service_centre_remark' => $request->service_centre_remark ?? NULL,
-            'complaint_status' => $request->complaint_status ?? 0,
+            'complaint_status' => $request->complaint_status ?? 1,
             'remark' => $request->remark ?? NULL,
             'division' => $request->division ?? NULL,
             'register_by' => $request->register_by ?? NULL,
@@ -149,8 +151,8 @@ class ComplaintController extends Controller
             'created_by_device' => 'user',
             'created_by' => auth()->user()->id
         ]);
-        if($request->images && count($request->images) > 0){
-            foreach($request->images as $file){
+        if ($request->images && count($request->images) > 0) {
+            foreach ($request->images as $file) {
                 $customname = time() . '.' . $file->getClientOriginalExtension();
                 $complaint->addMedia($file)
                     ->usingFileName($customname)
@@ -158,8 +160,7 @@ class ComplaintController extends Controller
             }
         }
 
-        return Redirect::to('complaints')->with('message_success', 'Complaint Store Successfully and the complaint number is <span title="Copy" id="copyText">'. $newComplaintNumber .'</span>');
-
+        return Redirect::to('complaints')->with('message_success', 'Complaint Store Successfully and the complaint number is <span title="Copy" id="copyText">' . $newComplaintNumber . '</span>');
     }
 
     /**
@@ -170,7 +171,17 @@ class ComplaintController extends Controller
      */
     public function show(Complaint $complaint)
     {
-        return view('complaint.show', compact('complaint'));
+        $timelines = ComplaintTimeline::with('created_by_details')->where('complaint_id', $complaint->id)->orderBy('created_at', 'desc')->get();
+        $roleName='Service Eng';
+        $assign_users = User::whereHas('roles', function ($query) use ($roleName) {
+            $query->where('name', $roleName);
+        })
+            ->with(['roles' => function ($query) {
+                $query->with('permissions');
+            }])->select('id', 'name')
+            ->get();
+        $service_centers = Customers::where('customertype', '4')->select('id', 'name')->get();
+        return view('complaint.show', compact('complaint', 'timelines', 'assign_users','service_centers'));
     }
 
     /**
@@ -208,8 +219,8 @@ class ComplaintController extends Controller
      */
     public function update(Request $request, Complaint $complaint)
     {
-        if($request->images && count($request->images) > 0){
-            foreach($request->images as $file){
+        if ($request->images && count($request->images) > 0) {
+            foreach ($request->images as $file) {
                 $customname = time() . '.' . $file->getClientOriginalExtension();
                 $complaint->addMedia($file)
                     ->usingFileName($customname)
@@ -219,7 +230,7 @@ class ComplaintController extends Controller
         $complaint->update($request->all());
         $newComplaintNumber = $complaint->complaint_number;
 
-        return Redirect::to('complaints')->with('message_success', 'Complaint Update Successfully and the complaint number is <span title="Copy" id="copyText">'. $newComplaintNumber .'</span>');
+        return Redirect::to('complaints')->with('message_success', 'Complaint Update Successfully and the complaint number is <span title="Copy" id="copyText">' . $newComplaintNumber . '</span>');
     }
 
     /**
@@ -233,7 +244,8 @@ class ComplaintController extends Controller
         //
     }
 
-    public function getComplaintNumber(){
+    public function getComplaintNumber()
+    {
         $currentYear = date('y');
         $nextYear = $currentYear + 1;
         $financialYear = "$currentYear-$nextYear";
@@ -253,17 +265,67 @@ class ComplaintController extends Controller
         return "SEC/HO/$financialYear/$nextComplaintNumberPadded";
     }
 
-    public function deleteAttachment(Request $request){
+    public function deleteAttachment(Request $request)
+    {
         Media::where('id', $request->id)->delete();
-        return response()->json(['status'=>true]);
+        return response()->json(['status' => true]);
     }
 
-    public function cancelComplaint(Request $request){
-        dd($request->all());
+    public function cancelComplaint(Request $request)
+    {
+        try {
+            $compalint = Complaint::find($request->id);
+            $compalint->complaint_status = '5';
+            $compalint->save();
+
+            ComplaintTimeline::create([
+                'complaint_id' => $request->id,
+                'created_by' => auth()->user()->id,
+                'status' => '5',
+            ]);
+
+            return response()->json(['status' => 'success', 'message' => 'Complaint Status update successfully !']);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => 'error', 'message' => $th->getMessage()]);
+        }
     }
 
-    public function pendingComplaint(Request $request){
-        dd($request->all());
+    public function pendingComplaint(Request $request)
+    {
+        try {
+            $compalint = Complaint::find($request->id);
+            $compalint->complaint_status = '1';
+            $compalint->save();
+
+            ComplaintTimeline::create([
+                'complaint_id' => $request->id,
+                'created_by' => auth()->user()->id,
+                'status' => '1',
+            ]);
+
+            return response()->json(['status' => 'success', 'message' => 'Complaint Status update successfully !']);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => 'error', 'message' => $th->getMessage()]);
+        }
+    }
+
+    public function openComplaint(Request $request)
+    {
+        try {
+            $compalint = Complaint::find($request->id);
+            $compalint->complaint_status = '0';
+            $compalint->save();
+
+            ComplaintTimeline::create([
+                'complaint_id' => $request->id,
+                'created_by' => auth()->user()->id,
+                'status' => '0',
+            ]);
+
+            return response()->json(['status' => 'success', 'message' => 'Complaint Status update successfully !']);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => 'error', 'message' => $th->getMessage()]);
+        }
     }
 
     public function complaint_download(Request $request)
@@ -272,5 +334,50 @@ class ComplaintController extends Controller
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         return Excel::download(new ComplaintExport($request), 'Complaint.xlsx');
+    }
+
+    public function work_done(Complaint $complaint)
+    {
+        return view('complaint.work_done', compact('complaint'));
+    }
+
+    public function work_done_submit(Request $request)
+    {
+        $word_done = ComplaintWorkDone::create([
+            'complaint_id' => $request->complaint_id,
+            'done_by' => $request->done_by,
+            'remark' => $request->remark,
+        ]);
+        if ($request->work_done_attach && count($request->work_done_attach) > 0) {
+            foreach ($request->work_done_attach as $file) {
+                $customname = time() . '.' . $file->getClientOriginalExtension();
+                $word_done->addMedia($file)
+                    ->usingFileName($customname)
+                    ->toMediaCollection('complaint_work_done_attach');
+            }
+        }
+
+        $compalint = Complaint::find($request->complaint_id);
+        $compalint->complaint_status = '2';
+        $compalint->save();
+
+        ComplaintTimeline::create([
+            'complaint_id' => $request->complaint_id,
+            'created_by' => auth()->user()->id,
+            'remark' => $request->remark,
+            'status' => '2',
+        ]);
+
+        return redirect()->route('complaints.show', $compalint->id);
+    }
+
+    public function completeComplaint(Request $request)
+    {
+        $service_bill = ServiceBill::where('complaint_id', $request->id)->first();
+        if ($service_bill) {
+            return response()->json(['status' => 'success', 'message' => 'Complaint complete successfully.']);
+        } else {
+            return response()->json(['status' => 'error', 'message' => 'In order to complete this complaint, You need to add service bill.']);
+        }
     }
 }

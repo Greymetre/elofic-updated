@@ -51,11 +51,11 @@ class TransactionHistoryDataTable extends DataTable
             })
             ->editColumn('subcategory_name', function ($data) {
 
-                return $data->scheme ? $data->scheme->product->subcategories->subcategory_name : '';
+                return $data->scheme ? (isset($data->scheme->product->subcategories->subcategory_name)?$data->scheme->product->subcategories->subcategory_name:'') : '';
             })
             ->editColumn('product_name', function ($data) {
 
-                return $data->scheme ? $data->scheme->product->product_name : '';
+                return $data->scheme ? (isset($data->scheme->product->product_name)?$data->scheme->product->product_name:'') : '';
             })
             ->addColumn('action', function ($query) {
                 $btn = '';
