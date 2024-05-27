@@ -15,6 +15,10 @@
     Party Name  -#({{$order->buyers->customertypes->customertype_name}}) - {{$order->buyers->name}}# - {{$order->buyers->customeraddress->cityname->city_name}} <br> <br>
     
     Thanks
+    <br>
+    Created By Username
+    <br>
+    <b>{{$order->createdbyname->name}}</b>
     </p>
 </body>
 </html>

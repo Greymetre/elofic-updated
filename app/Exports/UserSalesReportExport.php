@@ -30,10 +30,12 @@ class UserSalesReportExport implements FromCollection, WithHeadings, ShouldAutoS
 
     public function collection()
     {
-
+        $user_ids = getUsersReportingToAuth();
         $query = User::with('reportinginfo', 'getbranch', 'getdivision', 'getdesignation', 'all_attendance_details', 'visits', 'customers');
         if ($this->user_id && $this->user_id != '' && $this->user_id != NULL) {
             $query->where('id', $this->user_id);
+        }else{
+            $query->whereIn('id', $user_ids);
         }
         if ($this->designation_id && $this->designation_id != '' && $this->designation_id != NULL) {
             $query->where('designation_id', $this->designation_id);
@@ -64,9 +66,9 @@ class UserSalesReportExport implements FromCollection, WithHeadings, ShouldAutoS
             $data['getdivision']['division_name'] ?? '',
             $data['reportinginfo']['name'] ?? '',
 
-            (count($data->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Leave', 'Holiday'])->whereBetween('punchin_date', [$this->start_date, $this->end_date])) > 0) ? count($data->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Leave', 'Holiday'])->whereBetween('punchin_date', [$this->start_date, $this->end_date])) : '0',
+            (count($data->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Leave', 'Full Day Leave', 'Holiday'])->whereBetween('punchin_date', [$this->start_date, $this->end_date])) > 0) ? count($data->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Leave', 'Holiday'])->whereBetween('punchin_date', [$this->start_date, $this->end_date])) : '0',
 
-            (count($data->all_attendance_details->whereIn('working_type', ['Office Work', 'Leave', 'Holiday'])->whereBetween('punchin_date', [$this->start_date, $this->end_date])) > 0) ? count($data->all_attendance_details->whereIn('working_type', ['Office Work', 'Leave', 'Holiday'])->whereBetween('punchin_date', [$this->start_date, $this->end_date])) : '0',
+            (count($data->all_attendance_details->whereIn('working_type', ['Office Work', 'Leave', 'Full Day Leave', 'Holiday'])->whereBetween('punchin_date', [$this->start_date, $this->end_date])) > 0) ? count($data->all_attendance_details->whereIn('working_type', ['Office Work', 'Leave', 'Holiday'])->whereBetween('punchin_date', [$this->start_date, $this->end_date])) : '0',
 
             (count($data->all_attendance_details->whereBetween('punchin_date', [$this->start_date, $this->end_date])) > 0) ? count($data->all_attendance_details->whereBetween('punchin_date', [$this->start_date, $this->end_date])) : '0',
 

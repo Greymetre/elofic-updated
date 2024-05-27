@@ -46,7 +46,7 @@
       <div class="logo"><a href="{{ url('dashboard') }}" class="simple-text logo-normal">
           <!-- GAJRA GEARS -->
           <div class="text-center logo-main">
-            <img src="{{ url('/').'/'.asset('assets/img/brand_logo.jpg') }}" class="rounded" alt="...">
+            <img width="250" src="{{ url('/').'/'.asset('assets/img/brand_logo.png') }}" class="rounded" alt="...">
           </div>
 
         </a>
@@ -54,7 +54,7 @@
       <div class="sidebar-wrapper">
         <div class="user">
           <div class="photo">
-            <img src="{!! (Auth::user()->profile_image) ? '/public/uploads/'.Auth::user()->profile_image : url('/').'/'.asset('assets/img/placeholder.jpg') !!}">
+            <img src="{!! (count(Auth::user()->getMedia('profile_image')) > 0 ? Auth::user()->getMedia('profile_image')[0]->getFullUrl() : asset('assets/img/placeholder.jpg')) !!}">
           </div>
           <div class="user-info">
             <a data-toggle="collapse" href="#collapseExample" class="username">
@@ -194,8 +194,8 @@
                 </li>
                 @endif
                 @if(auth()->user()->can('dealer_appointment'))
-                <li class="nav-item {{ request()->is('dealer_appointment*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ url('dealer_appointment') }}">
+                <li class="nav-item {{ request()->is('dealer-appointment*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('dealer-appointments') }}">
                     <i class="material-icons">pending_actions</i>
                     <p>Dealer / Distributor Appointment</p>
                   </a>
@@ -609,6 +609,14 @@
               <a class="nav-link" href="{{ url('complaints') }}">
                 <i class="material-icons">history</i>
                 <p>{!! trans('panel.sidemenu.complaint') !!}</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('service_bill_access'))
+            <li class="nav-item {{ request()->is('service_bills*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('service_bills') }}">
+                <i class="material-icons">history</i>
+                <p>Service Bill</p>
               </a>
             </li>
             @endif

@@ -70,6 +70,7 @@ use App\Http\Controllers\WarrantyActivationController;
 use App\Http\Controllers\SalesTargetUsersController;
 use App\Http\Controllers\MobileUserLoginDetailsController;
 use App\Http\Controllers\NewJoiningController;
+use App\Http\Controllers\ServiceBillController;
 
 /*
 |--------------------------------------------------------------------------
@@ -715,7 +716,11 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('complaint-attach-delete', [ ComplaintController::class, 'deleteAttachment'])->name('deleteAttachment');
     Route::post('complaint-cancel', [ ComplaintController::class, 'cancelComplaint'])->name('cancelComplaint');
     Route::post('complaint-pending', [ ComplaintController::class, 'pendingComplaint'])->name('pendingComplaint');
+    Route::post('complaint-open', [ ComplaintController::class, 'openComplaint'])->name('openComplaint');
+    Route::post('complaint-complete', [ ComplaintController::class, 'completeComplaint'])->name('completeComplaint');
     Route::any('complaint_download', [ ComplaintController::class, 'complaint_download'])->name('complaint_download');
+    Route::any('complaint-work-done/{complaint}', [ ComplaintController::class, 'work_done'])->name('complaint_work_done');
+    Route::any('complaint-work-done-submit', [ ComplaintController::class, 'work_done_submit'])->name('complaint_work_done_submit');
 
     // Leaves Route
     Route::resource('leaves', LeaveController::class);
@@ -737,8 +742,16 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/new-joinings-show/{newJoining}', [NewJoiningController::class, 'show'])->name('new-joining.show');
     Route::any('/new-joining/download', [NewJoiningController::class, 'download'])->name('new-joining.download');
 
+    //Dealer Appointment with auth Route
+    Route::get('/dealer-appointments', [DealerAppointmentController::class, 'index'])->name('dealer-appointment');
+    Route::get('/dealer-appointments-show/{dealerAppointment}', [DealerAppointmentController::class, 'show'])->name('dealer-appointment.show');
+    Route::any('/dealer-appointment/download', [DealerAppointmentController::class, 'download'])->name('dealer-appointment.download');
+
     // Damage Entry Route
     Route::any('visitors', [DashboardController::class, 'visitors'])->name('visitor');
+
+    // Service Bill Route
+    Route::resource('service_bills', ServiceBillController::class);
 
 });
 
@@ -756,6 +769,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('getProductDataSelect', [ AjaxController::class, 'getProductDataSelect'])->name('getProductDataSelect');
     Route::any('getStateDataSelect', [ AjaxController::class, 'getStateDataSelect'])->name('getStateDataSelect');
     Route::any('getCategoryData', [ AjaxController::class, 'getCategoryData']);
+    Route::any('getExpensesData', [ AjaxController::class, 'getExpensesData'])->name('getExpensesData');
     Route::any('getSubCategoryData', [ AjaxController::class, 'getSubCategoryData']);
     Route::any('getGiftSubCategoryData', [ AjaxController::class, 'getGiftSubCategoryData']);
     Route::any('getGiftModelData', [ AjaxController::class, 'getGiftModelData']);
@@ -782,6 +796,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('getEndUserData', [ AjaxController::class, 'getEndUserData']);
     Route::any('getComplaintsData', [ AjaxController::class, 'getComplaintsData']);
     Route::any('/fetchPieChartData', [ AjaxController::class, 'fetchPieChartData'])->name('fetchPieChartData');
+    Route::any('/remove_session', [ AjaxController::class, 'remove_session'])->name('remove.session');
 
 
 

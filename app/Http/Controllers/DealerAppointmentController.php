@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\DataTables\DealerAppointmentDataTable;
+use App\Exports\DealerAppointmentExport;
 use App\Models\Branch;
 use App\Models\DealerAppointment;
 use App\Models\District;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Gate;
+use Excel;
 
 class DealerAppointmentController extends Controller
 {
@@ -14,9 +19,11 @@ class DealerAppointmentController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(DealerAppointmentDataTable $dataTable)
     {
-        return view('dealer_appointment.index');
+        abort_if(Gate::denies('dealer_appointment'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        return $dataTable->render('dealer_appointment.index');
     }
 
     /**
@@ -39,7 +46,8 @@ class DealerAppointmentController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request->all());
+        $dealer_appointment = DealerAppointment::create($request->all());
+        return redirect(route('dealer-appointment-thanks'));
     }
 
     /**
@@ -50,7 +58,7 @@ class DealerAppointmentController extends Controller
      */
     public function show(DealerAppointment $dealerAppointment)
     {
-        //
+        return view('dealer_appointment.show', compact('dealerAppointment'));
     }
 
     /**
@@ -86,4 +94,20 @@ class DealerAppointmentController extends Controller
     {
         //
     }
+
+    public function thanks(Request $request)
+    {
+        return view('dealer_appointment.thanks');
+    }
+
+
+    public function download(Request $request)
+    {
+        abort_if(Gate::denies('dealer_appointment_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        // return $request;
+        return Excel::download(new DealerAppointmentExport($request), 'new_dealer_appointment.xlsx');
+    }
+    
 }

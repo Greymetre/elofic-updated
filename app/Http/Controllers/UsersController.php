@@ -441,14 +441,19 @@ class UsersController extends Controller
 
     public function reports_sale(Request $request)
     {
-        $users = User::where('active', 'Y')->get();
+        $user_ids = getUsersReportingToAuth();
+        $users = User::where('active', 'Y')->whereIn('id', $user_ids)->get();
         $designations = Designation::where('active', 'Y')->get();
         $divisions = Division::where('active', 'Y')->get();
         $branchs = Branch::where('active', 'Y')->get();
+
+
         if ($request->ajax()) {
             $data = User::with('reportinginfo', 'getbranch', 'getdivision', 'getdesignation', 'all_attendance_details', 'visits', 'customers');
             if ($request->user_id && $request->user_id != '' && $request->user_id != NULL) {
                 $data->where('id', $request->user_id);
+            }else{
+                $data->whereIn('id', $user_ids);
             }
             if ($request->designation_id && $request->designation_id != '' && $request->designation_id != NULL) {
                 $data->where('designation_id', $request->designation_id);
@@ -465,10 +470,10 @@ class UsersController extends Controller
             return Datatables::of($data)
                 ->addIndexColumn()
                 ->addColumn('attendance_count', function ($query) use ($request) {
-                    return count($query->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Leave', 'Holiday'])->whereBetween('punchin_date', [$request->start_date, $request->end_date]));
+                    return count($query->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Full Day Leave', 'Leave', 'Holiday'])->whereBetween('punchin_date', [$request->start_date, $request->end_date]));
                 })
                 ->addColumn('other_attendance_count', function ($query) use ($request) {
-                    return count($query->all_attendance_details->whereIn('working_type', ['Office Work', 'Leave', 'Holiday'])->whereBetween('punchin_date', [$request->start_date, $request->end_date]));
+                    return count($query->all_attendance_details->whereIn('working_type', ['Office Work', 'Full Day Leave', 'Leave', 'Holiday'])->whereBetween('punchin_date', [$request->start_date, $request->end_date]));
                 })
                 ->addColumn('total_attendance_count', function ($query) use ($request) {
                     return count($query->all_attendance_details->whereBetween('punchin_date', [$request->start_date, $request->end_date]));

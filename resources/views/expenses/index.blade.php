@@ -35,11 +35,7 @@
                      <div class="p-2" style="width:150px;">
                        <select class="selectpicker1 select2" name="expense_id" id="expense_id" data-style="select-with-transition" title="Select Expense">
                          <option value="">Select Expense Id</option>
-                         @if(@isset($expense_ids ))
-                         @foreach($expense_ids as $expense_id)
-                         <option value="{!! $expense_id['id'] !!}">#{!! $expense_id['id'] !!}</option>
-                         @endforeach
-                         @endif
+
                        </select>
                      </div>
 
@@ -146,7 +142,7 @@
            </div>
 
            <div class="table-responsive">
-             <table id="getexpensestype" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
+             <table id="getallexpenses" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
                <thead class=" text-primary">
                  <th>{!! trans('panel.expenses.fields.expense_id') !!}</th>
                  <th>Expense Date</th>
@@ -171,6 +167,27 @@
      </div>
    </div>
 
+   <!-- Bootstrap Modal -->
+
+   <div class="modal fade" id="expenseModal" tabindex="-1" role="dialog" aria-labelledby="expenseModalLabel" aria-hidden="true">
+     <div class="modal-dialog modal-fullscreen" role="document">
+       <div class="modal-content">
+         <div class="modal-header">
+           <h5 class="modal-title" id="expenseModalLabel">Expense Details</h5>
+           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+             <span aria-hidden="true">&times;</span>
+           </button>
+         </div>
+         <div class="modal-body" id="expenseDetails">
+           <!-- Expense details will be loaded here -->
+         </div>
+         <div class="modal-footer">
+         <button type="button" class="close" data-dismiss="modal" aria-label="Close">Close</button>
+         </div>
+       </div>
+     </div>
+   </div>
+
    <style type="text/css">
      .flex-row .p-2 {
        width: 20% !important;
@@ -189,353 +206,63 @@
        line-height: 43px;
      }
 
-     span#select2-executive_id-container {}
+     .modal-fullscreen {
+       width: 90%;
+       height: 100%;
+       margin: auto;
+       padding: 0;
+       max-width: none;
+     }
+
+     .modal-fullscreen .modal-content {
+       height: 100vh;
+       /* Viewport height */
+     }
+
+     .modal-fullscreen .modal-body {
+       overflow-y: auto;
+     }
    </style>
    <script>
+     var expensesIndexUrl = "{{ route('expenses.index') }}";
+     var expensesTypeUrl = "{{ route('getexpenseType') }}";
+     var expensesActiveUrl = "{{ url('expenses-active') }}";
+     var expensesDataUrl = "{{ route('getExpensesData') }}";
+     var expensesUncheckUrl = "{{ url('expenses-uncheck') }}";
+     var expensesMainUrl = "{{ url('expenses') }}";
+     var removeSessionUrl = "{{ route('remove.session') }}";
+     var session_exec = "{{ session('executive_id') }}";
+     var token = $("meta[name='csrf-token']").attr("content");
+
+
      function resetFilter() {
        localStorage.setItem("is_reset", '1');
        localStorage.setItem("executive_id", '');
-       window.location.href = '{{url("/expenses")}}';
-     }
-
-     function checkPageLoad() {
-       if (performance.navigation.type === 1) {
-         if (localStorage.getItem('payroll')) {
-           localStorage.removeItem('payroll');
+       fetch(removeSessionUrl, {
+         method: 'POST',
+         headers: {
+           'Content-Type': 'application/json',
+           'X-CSRF-TOKEN': token
          }
-         if (localStorage.getItem('executive_id')) {
-           localStorage.removeItem('executive_id');
-         }
-         if (localStorage.getItem('expenses_type')) {
-           localStorage.removeItem('expenses_type');
-         }
-         if (localStorage.getItem('branch_id')) {
-           localStorage.removeItem('branch_id');
-         }
-         if (localStorage.getItem('division_id')) {
-           localStorage.removeItem('division_id');
-         }
-         if (localStorage.getItem('expense_id')) {
-           localStorage.removeItem('expense_id');
-         }
-         if (localStorage.getItem('status')) {
-           localStorage.removeItem('status');
-         }
-         if (localStorage.getItem('start_date')) {
-           localStorage.removeItem('start_date');
-         }
-         if (localStorage.getItem('end_date')) {
-           localStorage.removeItem('end_date');
-         }
-       } else {}
-     }
-     document.addEventListener('DOMContentLoaded', function() {
-       checkPageLoad();
-     });
-   </script>
-
-   <script type="text/javascript">
-     $(document).ready(function() {
-       $('.selectpicker').selectpicker();
-       oTable = $('#getexpensestype').DataTable({
-         "processing": true,
-         "serverSide": true,
-         "order": [
-           [0, 'desc']
-         ],
-         "stateSave": true,
-         "bStateSave": true,
-         "lengthMenu": [
-           [10, 25, 50, 100, 500, 1000],
-           [10, 25, 50, 100, 500, 1000]
-         ],
-
-         ajax: {
-           url: "{{ route('expenses.index') }}",
-           data: function(d) {
-             d.payroll = $('#payroll').val(),
-               d.executive_id = $('#executive_id').val(),
-               d.expenses_type = $('#expenses_type').val(),
-               d.branch_id = $('#branch_id').val(),
-               d.division_id = $('#division_id').val(),
-               d.expense_id = $('#expense_id').val(),
-               d.status = $('#status').val(),
-               d.start_date = $('#start_date').val(),
-               d.end_date = $('#end_date').val()
-
-           }
-         },
-
-         columns: [
-           // {data: 'DT_RowIndex',name: 'DT_RowIndex',orderable: false,searchable: false},
-           {
-             data: 'id',
-             name: 'id',
-             orderable: false,
-             searchable: false
-           },
-           {
-             data: 'date',
-             name: 'date',
-             searchable: false
-           },
-           {
-             data: 'users.name',
-             name: 'users.name',
-             orderable: false,
-             searchable: false
-           },
-           {
-             data: 'users.getdesignation.designation_name',
-             name: 'users.getdesignation.designation_name',
-             orderable: false,
-             searchable: false
-           },
-           {
-             data: 'expense_type.name',
-             name: 'expense_type.name',
-             orderable: false,
-             searchable: false
-           },
-           {
-             data: 'claim_amount',
-             name: 'claim_amount',
-             orderable: false,
-             searchable: false
-           },
-           {
-             data: 'approve_amount',
-             name: 'approve_amount',
-             orderable: false,
-             searchable: false
-           },
-           {
-             data: 'checker_status',
-             name: 'checker_status',
-             orderable: false,
-             searchable: false
-           },
-           {
-             data: 'note',
-             name: 'note',
-             orderable: false,
-             searchable: false
-           },
-           {
-             data: 'date_create',
-             name: 'date_create',
-             orderable: false,
-             searchable: false
-           },
-           {
-             data: 'users.getbranch.branch_name',
-             name: 'users.getbranch.branch_name',
-             orderable: false,
-             searchable: false
-           },
-           {
-             data: 'total_km',
-             name: 'total_km',
-             orderable: false,
-             searchable: false
-           },
-           {
-             data: 'action',
-             name: 'action',
-             "defaultContent": '',
-             orderable: false,
-             searchable: false
-           },
-         ]
-       });
-
-       $('#payroll').change(function() {
-         localStorage.setItem("payroll", $(this).val());
-         oTable.draw();
-       });
-       $('#branch_id').change(function() {
-         localStorage.setItem("branch_id", $(this).val());
-         oTable.draw();
-       });
-       $('#status').change(function() {
-         localStorage.setItem("status", $(this).val());
-         oTable.draw();
-       });
-       $('#executive_id').change(function() {
-         localStorage.setItem("executive_id", $(this).val());
-         localStorage.setItem("is_reset", '0');
-         oTable.draw();
-       });
-
-       $('#expenses_type').change(function() {
-         localStorage.setItem("expenses_type", $(this).val());
-         oTable.draw();
-       });
-       $('#start_date').change(function() {
-         localStorage.setItem("start_date", $(this).val());
-         oTable.draw();
-       });
-       $('#end_date').change(function() {
-         localStorage.setItem("end_date", $(this).val());
-         oTable.draw();
-       });
-       $('#division_id').change(function() {
-         localStorage.setItem("division_id", $(this).val());
-         oTable.draw();
-       });
-       $('#expense_id').change(function() {
-         localStorage.setItem("expense_id", $(this).val());
-         oTable.draw();
-       });
-
-     });
-
-
-     $(document).ready(function() {
-       var session_exec = "{{ session('executive_id') }}";
-       var payroll = localStorage.getItem('payroll');
-       var reset = localStorage.getItem('is_reset');
-       if (session_exec && session_exec != '' && session_exec != null && reset != '1') {
-         var executive_id = session_exec;
-       } else {
-         var executive_id = localStorage.getItem('executive_id');
-       }
-       var expenses_type = localStorage.getItem('expenses_type');
-       var branch_id = localStorage.getItem('branch_id');
-       var division_id = localStorage.getItem('division_id');
-       var expense_id = localStorage.getItem('expense_id');
-       var status = localStorage.getItem('status');
-       var start_date = localStorage.getItem('start_date');
-       var end_date = localStorage.getItem('end_date');
-
-       if (payroll) {
-         $('#payroll').val(payroll).trigger('change');
-       }
-       if (executive_id) {
-         $('#executive_id').val(executive_id).trigger('change');
-       }
-       if (expenses_type) {
-         // $('#expenses_type').val(expenses_type).trigger('change');
-         $.post("{{ route('getexpenseType') }}", {
-           'payroll': $('#payroll').val(),
-           '_token': "{{ csrf_token() }}"
-         }, function(response) {
-           var select = $('#expenses_type');
-           select.empty();
-           select.append(response);
-           select.val(expenses_type);
-           setTimeout(() => {
-             select.selectpicker('refresh');
-           }, 1500);
-           oTable.draw();
-         });
-       }
-       if (branch_id) {
-         $('#branch_id').val(branch_id).trigger('change');
-       }
-       if (division_id) {
-         $('#division_id').val(division_id).trigger('change');
-       }
-       if (expense_id) {
-         $('#expense_id').val(expense_id).trigger('change');
-       }
-       if (status) {
-         $('#status').val(status);
-         $('#status').selectpicker('refresh');
-       }
-       if (start_date) {
-         $('#start_date').val(start_date).trigger('change');
-       }
-       if (end_date) {
-         $('#end_date').val(end_date).trigger('change');
-       }
-     });
-
-     $('body').on('click', '.activeRecord', function() {
-       var id = $(this).attr("id");
-       var active = $(this).attr("value");
-       var status = '';
-       if (active == '1') {
-         status = 'Incative ?';
-       } else {
-         status = 'Ative ?';
-       }
-       var token = $("meta[name='csrf-token']").attr("content");
-       if (!confirm("Are You sure want " + status)) {
-         return false;
-       }
-       $.ajax({
-         url: "{{ url('expenses-active') }}",
-         type: 'POST',
-         data: {
-           _token: token,
-           id: id,
-           active: active
-         },
-         success: function(data) {
-           $('.message').empty();
-           $('.alert').show();
-           if (data.status == 'success') {
-             $('.alert').addClass("alert-success");
-           } else {
-             $('.alert').addClass("alert-danger");
-           }
-           $('.message').append(data.message);
-           oTable.draw();
-         },
-       });
-     });
-
-
-
-     $('body').on('click', '.delete', function() {
-       var id = $(this).attr("value");
-       var token = $("meta[name='csrf-token']").attr("content");
-       if (!confirm("Are You sure want to delete ?")) {
-         return false;
-       }
-       $.ajax({
-         url: "{{ url('expenses') }}" + '/' + id,
-         type: 'DELETE',
-         data: {
-           _token: token,
-           id: id
-         },
-         success: function(data) {
-           $('.alert').show();
-           if (data.status == 'success') {
-             $('.alert').addClass("alert-success");
-           } else {
-             $('.alert').addClass("alert-danger");
-           }
-           $('.message').append(data.message);
-           oTable.draw();
-         },
-       });
-     });
-   </script>
-
-
-   <script type="text/javascript">
-     // for get expense type
-     $('#payroll').change(function() {
-       var payroll = $(this).val();
-
-       $.post("{{ route('getexpenseType') }}", {
-         'payroll': payroll,
-         '_token': "{{ csrf_token() }}"
-       }, function(response) {
-
-         var select = $('#expenses_type');
-         select.empty();
-         select.append(response);
-         setTimeout(() => {
-           select.selectpicker('refresh');
-         }, 1500);
-
        })
+       window.location.href = expensesMainUrl;
+     }
 
-     }).trigger('change');
+     function showExpense(eid) {
+       $.ajax({
+         url: '/expenses/' + eid, // The URL to the route that returns the expense details
+         method: 'GET',
+         success: function(response) {
+           
+           $('#expenseDetails').html(response);
+           // Show the modal
+           $('#expenseModal').modal('show');
+         },
+         error: function(xhr, status, error) {
+           console.error('Error fetching expense details:', error);
+         }
+       });
+     }
    </script>
-
+   <script src="{{asset('assets/js/expense_filter.js')}}"></script>
  </x-app-layout>

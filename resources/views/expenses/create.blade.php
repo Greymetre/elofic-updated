@@ -290,12 +290,5 @@ $(document).ready(function(){
     
 </script>
 
-
-
-
-
-
-
-
-  <script src="{{ url('/').'/'.asset('assets/js/validation_expenses_type.js') }}"></script>
+<script src="{{ url('/').'/'.asset('assets/js/validation_expenses_type.js') }}"></script>
 </x-app-layout> 

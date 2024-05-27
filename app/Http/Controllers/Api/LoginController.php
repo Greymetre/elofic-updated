@@ -60,6 +60,9 @@ class LoginController extends Controller
             if (!$user = $this->users->where('mobile', $username)->orWhere('email', $username)->first()) {
                 return response()->json(['status' => 'error', 'message' => 'User not found'], $this->notFound);
             }
+            // if($user->active != 'Y'){
+            //     return response()->json(['status' => 'error', 'message' => 'Your account is deactivated don\'t hesitate to get in touch with admin.'], $this->notFound);
+            // }
             $password = $request->input('password');
             if (Hash::check($password, $user['password'])) {
                 $token = $user->createToken('gSQ01LKOg1JV0O9eMsDiAN0TqkQlOpulK7vWemPF')->accessToken;

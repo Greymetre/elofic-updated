@@ -4,10 +4,9 @@
     .table.new-table td {
       border-top: 0px !important;
     }
-
     b {
-      font-weight: 600;
-    }
+    font-weight: 600;
+}
   </style>
   <div class="content-header">
     <div class="container-fluid">
@@ -89,44 +88,6 @@
               <!-- /.col -->
             </div>
             <input type="hidden" id="complaint_id" name="expense" value="{{$complaint['id']}}">
-            <div class="row">
-              <div class="col-md-6">
-                <div class="">
-                  <label>Assign User </label>
-                  <select name="assign_user" id="assign_user" class="select2 form-control">
-                    <option value="">Select User</option>
-                    @if($assign_users)
-                    @foreach($assign_users as $assign_user)
-                    <option value="{{$assign_user->id}}" {!! old('assign_user', $complaint['assign_user'])==$assign_user->id ? 'selected':'' !!} >[{{$assign_user->id}}] {{$assign_user->name}}</option>
-                    @endforeach
-                    @endif
-                  </select>
-                  @if ($errors->has('assign_user'))
-                  <div class="error col-lg-12">
-                    <p class="text-danger">{{ $errors->first('assign_user') }}</p>
-                  </div>
-                  @endif
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="">
-                  <label>Service Center </label>
-                  <select name="service_center" id="service_center" class="select2 form-control">
-                    <option value="">Select Service Center</option>
-                    @if($service_centers)
-                    @foreach($service_centers as $service_center)
-                    <option value="{{$service_center->id}}" {!! old('service_center', $complaint['service_center'])==$service_center->id ? 'selected':'' !!} >[{{$service_center->id}}] {{$service_center->name}}</option>
-                    @endforeach
-                    @endif
-                  </select>
-                  @if ($errors->has('service_center'))
-                  <div class="error col-lg-12">
-                    <p class="text-danger">{{ $errors->first('service_center') }}</p>
-                  </div>
-                  @endif
-                </div>
-              </div>
-            </div>
             <hr>
 
             <div class="invoice p-3 mb-3">
@@ -501,7 +462,7 @@
                 <div class="d-flex">
                   <i class="material-icons">double_arrow</i>
                   <p>
-                    Complaint <b> {!! $complaint['complaint_number'] !!} </b> moved to <b>{{$status_is}}</b> by <b>{{$timeline->created_by_details->name}}</b> on <b>{{date("d M Y, h:i a", strtotime($timeline->created_at));}}.</b>
+                     Complaint <b> {!! $complaint['complaint_number'] !!} </b> moved to <b>{{$status_is}}</b> by <b>{{$timeline->created_by_details->name}}</b> on <b>{{date("d M Y, h:i a", strtotime($timeline->created_at));}}.</b>
                   </p>
                 </div>
                 @endforeach

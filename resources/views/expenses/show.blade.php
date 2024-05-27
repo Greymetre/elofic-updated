@@ -1,12 +1,4 @@
-<x-app-layout>
-  <div class="content-header">
-    <div class="container-fluid">
-      <div class="row mb-2">
-      </div><!-- /.row -->
-    </div><!-- /.container-fluid -->
-  </div>
-  <!-- Main content -->
-  <section class="content">
+
     <div class="row">
       <div class="col-9">
 
@@ -91,15 +83,21 @@
                   ?>
 
                     @if($expense->checker_status=='3' || $expense->checker_status=='1')
+                    @if(auth()->user()->can(['expenses_edit']))
                     <a class="btn btn-warning" href="javascript:void(0)" role="button">Edit</a>
+                    @endif
                     @else
+                    @if(auth()->user()->can(['expenses_edit']))
                     <a class="btn btn-warning" href="{{route('expenses.edit', ['expense' => $expense->id])}}" role="button">Edit</a>
+                    @endif
                     @endif
 
                   <?php
                   } else {
                   ?>
+                    @if(auth()->user()->can(['expenses_edit']))
                     <a class="btn btn-warning" href="javascript:void(0)" role="button">Edit</a>
+                    @endif
                 <?php
                   }
                 }
@@ -107,7 +105,7 @@
                 ?>
 
 
-                <a class="btn btn-primary" href="{{route('expenses.index')}}?executive_id={{$expense->user_id}}" role="button">Back</a>
+                <!-- <a class="btn btn-primary" href="{{route('expenses.index')}}?executive_id={{$expense->user_id}}" role="button">Back</a> -->
 
 
               </div>
@@ -297,20 +295,20 @@
                   <p class="text-muted well well-sm shadow-none" style="margin-top: 10px;">
                     <strong> Image and doc:</strong>
                     @if(isset($expense) && $expense->getMedia('expense_file')->count() > 0 && Storage::disk('s3')->exists($expense->getMedia('expense_file')[0]->getPath()))
-                    <div class="form-group col-md-12">
-                      @foreach($expense->getMedia('expense_file') as $image)
+                  <div class="form-group col-md-12">
+                    @foreach($expense->getMedia('expense_file') as $image)
 
                     <?php
                     $infoPath = pathinfo($image->getFullUrl());
                     $extension = $infoPath['extension'];
                     if ($extension == 'png' || $extension == 'jpg' || $extension == 'jpeg') {
                     ?>
-                      <a href="{{ $image->getFullUrl()}}" data-lightbox="mygallery">
+                      <a target="_blank" href="{{ $image->getFullUrl()}}" data-lightbox="mygallery">
                         <img class="img-fluid" src="{{ $image->getFullUrl() }}" style="width:80px;height: 80px;">
                       </a>
                     <?php } else { ?>
                       <p>
-                        <a href="{{ $image->getFullUrl()}}" download>Download File</a>
+                        <a target="_blank" href="{{ $image->getFullUrl()}}" download>Download File</a>
                       </p>
                     <?php } ?>
 
@@ -384,13 +382,13 @@
               </h4>
             </div>
             <div class="modal-body">
-              <form method="POST" action="{{ route('rejectExpense') }}" enctype="multipart/form-data" id="createleadstagesForm_new"> @csrf
+              <form method="POST" action="{{ route('rejectExpense') }}" enctype="multipart/form-data" id="rejectExpenseForm"> @csrf
                 <div class="row">
                   <div class="col-md-6">
                     <div class="input-group input-group-outline my-3">
                       <label class="form-label">Reason</label>
                       <input type="text" name="reason" id="reason" class="form-control" value="{!! old( 'reason') !!}" required> <br><br>
-                      <input type="text" name="expense_id" id="expense_id" class="form-control" hidden>
+                      <input type="text" name="expense_id" id="reject_expense_id" class="form-control" hidden>
                     </div>
                   </div>
                 </div>
@@ -422,7 +420,7 @@
               </h4>
             </div>
             <div class="modal-body">
-              <form method="POST" action="{{ route('approveExpense') }}" enctype="multipart/form-data" id="createleadstagesForms"> @csrf
+              <form method="POST" action="{{ route('approveExpense') }}" enctype="multipart/form-data" id="approveExpenseForms"> @csrf
                 <div class="row">
                   <div class="col-md-6">
                     <div class="input-group input-group-outline my-3">
@@ -449,128 +447,6 @@
       <!-- end model for status -->
 
       <!-- Custom styles for this page -->
-      <link rel="stylesheet" href="{{ url('/').'/'.asset('lightboxx/css/lightbox.min.css') }}">
-
-      <script src="{{ url('/').'/'.asset('lightboxx/js/lightbox-plus-jquery.min.js') }}"></script>
-
-
-
-
-      <script type="text/javascript">
-        $('body').on('click', '.reject_status', function() {
-          var id = $('#expenseid').val();
-          var token = $("meta[name='csrf-token']").attr("content");
-          if (!confirm("Are You sure do you want to reject expense status")) {
-            return false;
-          } else {
-            $('#expense_id').val(id);
-            $("#reject_expense").modal();
-          }
-
-        });
-      </script>
-
-
-      <script type="text/javascript">
-        $('body').on('click', '.approve_status', function() {
-          var id = $('#expenseid').val();
-          var claimamount = $('#claim_new_amount').val();
-          var token = $("meta[name='csrf-token']").attr("content");
-          $('#expense_new_id').val(id);
-          $('#approve_amnt').val(claimamount);
-          $("#approve_expense").modal();
-          
-        });
-      </script>
-
-
-      <!-- for checked -->
-      <script type="text/javascript">
-        $('body').on('click', '.checked_status', function() {
-          var id = $('#expenseid').val();
-          var token = $("meta[name='csrf-token']").attr("content");
-          if (!confirm("Are You sure do you want to checked expense status")) {
-            return false;
-          } else {
-
-            $.ajax({
-              url: "{{ url('expenses-active') }}",
-              type: 'POST',
-              data: {
-                _token: token,
-                id: id
-              },
-              success: function(data) {
-                $('.message').empty();
-                $('.alert').show();
-                if (data.status == 'success') {
-                  $('.alert').addClass("alert-success");
-                  setTimeout(function() {
-                    location.reload();
-                  }, 3000);
-
-                } else {
-                  $('.alert').addClass("alert-danger");
-                  setTimeout(function() {
-                    location.reload();
-                  }, 3000);
-                }
-                $('.message').append(data.message);
-
-              },
-            });
-
-
-          }
-
-        });
-      </script>
-
-
-
-      <!-- for unchecked -->
-      <script type="text/javascript">
-        $('body').on('click', '.unchecked_status', function() {
-          var id = $('#expenseid').val();
-          var token = $("meta[name='csrf-token']").attr("content");
-          if (!confirm("Are You sure do you want to unchecked expense status")) {
-            return false;
-          } else {
-
-            $.ajax({
-              url: "{{ url('expenses-uncheck') }}",
-              type: 'POST',
-              data: {
-                _token: token,
-                id: id
-              },
-              success: function(data) {
-                $('.message').empty();
-                $('.alert').show();
-                if (data.status == 'success') {
-                  $('.alert').addClass("alert-success");
-                  setTimeout(function() {
-                    location.reload();
-                  }, 3000);
-
-                } else {
-                  $('.alert').addClass("alert-danger");
-                  setTimeout(function() {
-                    location.reload();
-                  }, 3000);
-                }
-                $('.message').append(data.message);
-
-              },
-            });
-
-
-          }
-
-        });
-      </script>
-
-
 
       <script type="text/javascript">
         $("document").ready(function() {
@@ -588,29 +464,6 @@
           }, 3000);
         });
 
-        function disableButton() {
-          var btn = document.querySelector('.save-apr');
-          btn.disabled = true;
 
-          document.getElementById("createleadstagesForms").submit();
-        }
-        function disableButtonreject() {
-          var btn = document.querySelector('.save-rjc');
-          btn.disabled = true;
-
-          document.getElementById("createleadstagesForm_new").submit();
-        }
       </script>
 
-
-      <script type="text/javascript">
-        //     $("document").ready(function(){
-        //     setTimeout(function(){
-        //        $("#hide_check").remove();
-        //     }, 3000 ); 
-        // });
-      </script>
-
-  </section>
-  <!-- /.content -->
-</x-app-layout>

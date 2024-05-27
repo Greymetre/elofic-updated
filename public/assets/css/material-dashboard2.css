@@ -17860,7 +17860,7 @@ a .material-icons {
 .wrapper {
   position: relative;
   top: 0;
-  height: 100vh;
+  height: 100%;
 }
 
 .sidebar {
@@ -18072,7 +18072,6 @@ a .material-icons {
 }
 
 .sidebar .logo {
-  padding: 15px 0px;
   margin: 0;
   display: block;
   position: relative;

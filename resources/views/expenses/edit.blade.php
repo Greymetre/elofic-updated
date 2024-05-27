@@ -218,6 +218,22 @@
                 </div>
               </div>
 
+              <div class="col-md-6">
+                <div class="row">
+                  <label class="col-md-2 col-form-label">Approved Amount<span class="text-danger"> *</span></label>
+                  <div class="col-md-10">
+                    <div class="form-group has-default bmd-form-group">
+                      <input placeholder="Approve Amount" class="form-control {{ $errors->has('approve_amount') ? 'is-invalid' : '' }} " type="text" name="approve_amount" id="approve_amount" value="{{ old('approve_amount', $expense->approve_amount??'') }}"  autocomplete="off">
+                      @if($errors->has('approve_amount'))
+                      <div class="invalid-feedback">
+                        {{ $errors->first('approve_amount') }}
+                      </div>
+                      @endif
+                    </div>
+                  </div>
+                </div>
+              </div>
+
          
               <div class="col-md-6">
                   @if(isset($expense) && $expense->getMedia('expense_file')->count() > 0 && Storage::disk('s3')->exists($expense->getMedia('expense_file')[0]->getPath()))
