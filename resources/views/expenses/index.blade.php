@@ -76,6 +76,7 @@
                      <div class="p-2" style="width:160px;">
                        <select class="selectpicker" name="status" id="status" data-style="select-with-transition" title="Select Status">
                          <option value="">Select Status</option>
+                         <option value="4">Checked By Reporting</option>
                          <option value="3">Checked</option>
                          <option value="1">Approved</option>
                          <option value="2">Rejected</option>
@@ -227,6 +228,7 @@
      var expensesIndexUrl = "{{ route('expenses.index') }}";
      var expensesTypeUrl = "{{ route('getexpenseType') }}";
      var expensesActiveUrl = "{{ url('expenses-active') }}";
+     var expensesCheckedUrl = "{{ url('expenses-checked-by-reporting') }}";
      var expensesDataUrl = "{{ route('getExpensesData') }}";
      var expensesUncheckUrl = "{{ url('expenses-uncheck') }}";
      var expensesMainUrl = "{{ url('expenses') }}";

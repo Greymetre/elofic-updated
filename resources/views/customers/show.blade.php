@@ -1206,8 +1206,8 @@
                   "defaultContent": ''
                },
                {
-                  data: 'coupen_code',
-                  name: 'coupen_code',
+                  data: 'coupon_code',
+                  name: 'coupon_code',
                   "defaultContent": ''
                },
                {

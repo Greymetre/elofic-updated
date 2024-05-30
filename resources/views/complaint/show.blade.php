@@ -8,6 +8,14 @@
     b {
       font-weight: 600;
     }
+
+    .all-attach {
+      align-items: center;
+      border: 1px solid lightgrey;
+      border-radius: 5px;
+      padding: 5px 10px;
+      width: 90%;
+    }
   </style>
   <div class="content-header">
     <div class="container-fluid">
@@ -108,6 +116,7 @@
                   @endif
                 </div>
               </div>
+              <input type="hidden" name="complaint_id" id="complaint_id" value="{{$complaint->id}}">
               <div class="col-md-6">
                 <div class="">
                   <label>Service Center </label>
@@ -129,7 +138,7 @@
             </div>
             <hr>
 
-            <div class="invoice p-3 mb-3">
+            <div class="invoice p-3 mb-1">
               <!-- title row -->
               <div class="row">
                 <div class="col-4">
@@ -141,7 +150,7 @@
                 <!-- /.col -->
               </div>
               <!-- info row -->
-              <div class="row invoice-info mt-5">
+              <div class="row invoice-info mt-1">
                 <div class="col-md-6">
                   <h4><em>Complaint From</em></h4>
                   <h6 style="color: #5252b7;">{{$complaint->customer->customer_name}}</h6>
@@ -220,7 +229,7 @@
                   <td><em>Seller</em></td>
                 </tr>
                 <tr>
-                  <th class="pt-0">{{($complaint->seller_details && $complaint->seller_details->name != '')?'['.$complaint->seller_details->id.'] '.$complaint->seller_details->name:'-'}}</th>
+                  <th class="pt-0">{{$complaint->seller??'-'}}</th>
                 </tr>
               </table>
 
@@ -257,11 +266,12 @@
 
               <div class="row invoice-info">
                 <div class="col-md-6 mb-3">
-                  <div class="row invoice-info" style="align-items: center;border:1px solid lightgrey;border-radius: 5px;padding: 0px 10px;width: 90%;">
+                  <h6 class="mr-2 mb-0">Invoice(Warranty) Image : </h6>
+                  <div class="d-flex invoice-info all-attach">
                     @if($complaint->warranty_details)
                     @if($complaint->warranty_details->exists && $complaint->warranty_details->getMedia('warranty_activation_attach')->count() > 0 && Storage::disk('s3')->exists($complaint->warranty_details->getMedia('warranty_activation_attach')[0]->getPath()))
                     <a href="{!! $complaint->warranty_details->getMedia('warranty_activation_attach')[0]->getFullUrl() !!}" data-lightbox="mygallery" data-title="Invoice">
-                      <img width="50" style="height: 50px !important;" src="{!! $complaint->warranty_details->getMedia('warranty_activation_attach')[0]->getFullUrl() !!}" class="img-fluid rounded"></a>
+                      <img width="60" style="height: 65px !important;" src="{!! $complaint->warranty_details->getMedia('warranty_activation_attach')[0]->getFullUrl() !!}" class="img-fluid rounded"></a>
                     <h6 class="ml-2 mb-0">{{$complaint->warranty_details->getMedia('warranty_activation_attach')[0]->name}}</h6>
                     @else
                     <img width="50" src="{!! url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview1">
@@ -272,9 +282,10 @@
                 @if($complaint->exists && $complaint->getMedia('complaint_attach')->count() > 0 && Storage::disk('s3')->exists($complaint->getMedia('complaint_attach')[0]->getPath()))
                 @foreach($complaint->getMedia('complaint_attach') as $k=>$media)
                 <div class="col-md-6 mb-2">
-                  <div class="row invoice-info" style="align-items: center;border:1px solid lightgrey;border-radius: 5px;padding: 0px 10px;width: 90%;">
+                  <h6 class="mr-2 mb-0">Complaint Attachments : </h6>
+                  <div class="d-flex invoice-info all-attach">
                     <a href="{{$media->getFullUrl()}}" data-lightbox="mygallery">
-                      <img width="50" style="height: 50px !important;" class="img-fluid rounded" src="{!! $media->getFullUrl() !!}">
+                      <img width="60" style="height: 65px !important;" class="img-fluid rounded" src="{!! $media->getFullUrl() !!}">
                     </a>
                     <h6 class="ml-2 mb-0">{{$media->name}}</h6>
                   </div>
@@ -360,9 +371,9 @@
                   <td><em>Work Done At</em></td>
                 </tr>
                 <tr>
-                  <th class="pt-0">-</th>
-                  <th class="pt-0">{{$complaint->service_centre_remark??'-'}}</th>
-                  <th class="pt-0">-</th>
+                  <th class="pt-0">{{$work_done?$work_done->done_by:'-'}}</th>
+                  <th class="pt-0">{{$work_done?$work_done->remark:'-'}}</th>
+                  <th class="pt-0">{{$work_done?date('d M Y h:i A', strtotime($work_done->created_at)):'-'}}</th>
                 </tr>
               </table>
 
@@ -485,7 +496,11 @@
                 <p class="lead"></p>
                 @if(count($timelines) > 0)
                 @foreach($timelines as $timeline)
-                @if($timeline->status == '0')
+                @if($timeline->status == '100')
+                @php $assign_user = App\Models\User::find($timeline->remark); @endphp
+                @elseif($timeline->status == '101')
+                @php $assign_customer = App\Models\Customers::find($timeline->remark); @endphp
+                @elseif($timeline->status == '0')
                 @php $status_is = 'Open'; @endphp
                 @elseif($timeline->status == '1')
                 @php $status_is = 'Pending'; @endphp
@@ -498,12 +513,31 @@
                 @elseif($timeline->status == '5')
                 @php $status_is = 'Canceled'; @endphp
                 @endif
+
+                @if($timeline->status == '100' || $timeline->status == '101')
+                @if($timeline->status == '100')
+                <div class="d-flex">
+                  <i class="material-icons">double_arrow</i>
+                  <p>
+                    Complaint <b> {!! $complaint['complaint_number'] !!} </b> assign to <b>{{$assign_user->name}}</b> by <b>{{$timeline->created_by_details->name}}</b> on <b>{{date("d M Y, h:i a", strtotime($timeline->created_at));}}.</b>
+                  </p>
+                </div>
+                @else
+                <div class="d-flex">
+                  <i class="material-icons">double_arrow</i>
+                  <p>
+                    Complaint <b> {!! $complaint['complaint_number'] !!} </b> assign to <b>{{$assign_customer->name}}</b> Service Center by <b>{{$timeline->created_by_details->name}}</b> on <b>{{date("d M Y, h:i a", strtotime($timeline->created_at));}}.</b>
+                  </p>
+                </div>
+                @endif
+                @else
                 <div class="d-flex">
                   <i class="material-icons">double_arrow</i>
                   <p>
                     Complaint <b> {!! $complaint['complaint_number'] !!} </b> moved to <b>{{$status_is}}</b> by <b>{{$timeline->created_by_details->name}}</b> on <b>{{date("d M Y, h:i a", strtotime($timeline->created_at));}}.</b>
                   </p>
                 </div>
+                @endif
                 @endforeach
                 @endif
 
@@ -613,9 +647,9 @@
 
       <!-- for checked -->
       <script type="text/javascript">
+        var token = $("meta[name='csrf-token']").attr("content");
         $('body').on('click', '.open_status', function() {
           var id = $('#complaint_id').val();
-          var token = $("meta[name='csrf-token']").attr("content");
           $.ajax({
             url: "{{ url('complaint-open') }}",
             type: 'POST',
@@ -645,7 +679,6 @@
 
         $('body').on('click', '.pending_status', function() {
           var id = $('#complaint_id').val();
-          var token = $("meta[name='csrf-token']").attr("content");
           $.ajax({
             url: "{{ url('complaint-pending') }}",
             type: 'POST',
@@ -675,7 +708,6 @@
 
         $('body').on('click', '.cancel_status', function() {
           var id = $('#complaint_id').val();
-          var token = $("meta[name='csrf-token']").attr("content");
           $.ajax({
             url: "{{ url('complaint-cancel') }}",
             type: 'POST',
@@ -705,7 +737,6 @@
 
         $('body').on('click', '.complete_status', function() {
           var id = $('#complaint_id').val();
-          var token = $("meta[name='csrf-token']").attr("content");
           $.ajax({
             url: "{{ url('complaint-complete') }}",
             type: 'POST',
@@ -724,14 +755,67 @@
 
               } else {
                 $('.alert').addClass("alert-danger");
-                // setTimeout(function() {
-                //   location.reload();
-                // }, 3000);
               }
               $('.message').append(data.message);
             },
           });
         });
+
+        $(document).on('change', '#assign_user', function() {
+          var user_id = $(this).val();
+          var complaint_id = $('#complaint_id').val();
+          $.ajax({
+            url: "{{ url('complaint-assign-user') }}",
+            type: 'POST',
+            data: {
+              _token: token,
+              user_id: user_id,
+              complaint_id: complaint_id
+            },
+            success: function(data) {
+              $('.message').empty();
+              $('.alert').show();
+              if (data.status == 'success') {
+                $('.alert').addClass("alert-success");
+                setTimeout(function() {
+                  location.reload();
+                }, 1000);
+
+              } else {
+                $('.alert').addClass("alert-danger");
+              }
+              $('.message').append(data.message);
+            },
+          });
+        })
+
+        $(document).on('change', '#service_center', function() {
+          var service_center_id = $(this).val();
+          var complaint_id = $('#complaint_id').val();
+          $.ajax({
+            url: "{{ url('complaint-assign-service-center') }}",
+            type: 'POST',
+            data: {
+              _token: token,
+              service_center_id: service_center_id,
+              complaint_id: complaint_id
+            },
+            success: function(data) {
+              $('.message').empty();
+              $('.alert').show();
+              if (data.status == 'success') {
+                $('.alert').addClass("alert-success");
+                setTimeout(function() {
+                  location.reload();
+                }, 1000);
+
+              } else {
+                $('.alert').addClass("alert-danger");
+              }
+              $('.message').append(data.message);
+            },
+          });
+        })
       </script>
   </section>
   <!-- /.content -->

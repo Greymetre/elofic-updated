@@ -214,4 +214,6 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::any('allExpenseListing', [ExpensesTypeController::class, 'allExpenseListing']);
     Route::post('expenseDetails', [ExpensesTypeController::class, 'expenseDetails']);
     Route::post('updateExpense', [ExpensesTypeController::class, 'updateExpense']);
+    Route::post('approveExpense', [ExpensesTypeController::class, 'approveExpense']);
+    Route::post('rejectExpense', [ExpensesTypeController::class, 'rejectExpense']);
 });

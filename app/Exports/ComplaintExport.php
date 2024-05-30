@@ -51,7 +51,7 @@ class ComplaintExport implements FromCollection, WithHeadings, ShouldAutoSize, W
         }elseif($data->complaint_status == '1'){
             $status = 'Pending';
         }elseif($data->complaint_status == '2'){
-            $status = '<sDone';
+            $status = 'Work Done';
         }elseif($data->complaint_status == '3'){
             $status = 'Completed';
         }elseif($data->complaint_status == '4'){

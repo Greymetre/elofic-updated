@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\DataTables\ServiceBillDataTable;
+use App\Models\Category;
+use App\Models\Complaint;
+use App\Models\Division;
 use App\Models\ServiceBill;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -11,6 +14,15 @@ use Gate;
 
 class ServiceBillController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->service_bill = new ServiceBill();
+        $this->path = 'service_bill';
+    }
+
+
     /**
      * Display a listing of the resource.
      *
@@ -27,9 +39,20 @@ class ServiceBillController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        if($request->complaint_id){
+            $complaint = Complaint::find($request->complaint_id);
+        }else{
+            $complaint = Complaint::find(0);
+        }
+        $all_complaint_number = Complaint::with('product_details')->get();
+        $lastServiceBillId = ServiceBill::max('id');
+        $newserviceBillNo = $lastServiceBillId ? $lastServiceBillId + 1 : 1;
+        $serviceBillNo = str_pad($newserviceBillNo, 3, '0', STR_PAD_LEFT);
+        $divisions = Category::where('active', 'Y')->select('id', 'category_name')->get();
+
+        return view('service_bill.create', compact('complaint', 'serviceBillNo', 'all_complaint_number', 'divisions'))->with('service_bill', $this->service_bill);
     }
 
     /**
@@ -40,7 +63,7 @@ class ServiceBillController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        dd($request->all());
     }
 
     /**

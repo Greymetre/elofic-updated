@@ -77,7 +77,7 @@
                            <label for="product_serail_number" class="form-control">Product Serial Number</label>
                         </div>
                         <div class="col-md-4">
-                           <input type="text" name="product_serail_number" id="product_serail_number" class="form-control" value="{!! old( 'product_serail_number' , $warranty_activation['product_serail_number']) !!}">
+                           <input type="text" name="product_serail_number" id="product_serail_number" class="form-control" value="{!! old( 'product_serail_number' , $warranty_activation['product_serail_number'])??(isset($request)?$request->serial_no:'') !!}">
                            @if ($errors->has('product_serail_number'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('product_serail_number') }}</p>
@@ -363,6 +363,12 @@
    <script src="{{ url('/').'/'.asset('assets/js/validation_loyalty.js') }}"></script>
    <script src="{{ url('/').'/'.asset('assets/js/jquery.custom.js') }}"></script>
    <script>
+      $(document).ready(function(){
+         var sr_no = '{{$request->serial_no}}';
+         if(sr_no != ''){
+            $("#product_serail_number").keyup();
+         }
+      })
       $("#product_serail_number").on("keyup", function() {
          var serial_no = $(this).val();
          $.ajax({

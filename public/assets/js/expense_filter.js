@@ -501,6 +501,49 @@ $('body').on('click', '.unchecked_status', function () {
 
 });
 
+$('body').on('click', '.checked_by_reporting_status', function () {
+    var id = $('#expenseid').val();
+    var token = $("meta[name='csrf-token']").attr("content");
+    if (!confirm("Are You sure do you want to checked expense status")) {
+        return false;
+    } else {
+
+        $.ajax({
+            url: expensesCheckedUrl,
+            type: 'POST',
+            data: {
+                _token: token,
+                id: id,
+                status:'4'
+            },
+            success: function (data) {
+                $('.message').empty();
+                $('.alert').show();
+                if (data.status == 'success') {
+                    $('.alert').addClass("alert-success");
+                    // setTimeout(function() {
+                    //   location.reload();
+                    // }, 3000);
+                    $('#expenseModal').modal('hide');
+                    oTable.draw();
+
+                } else {
+                    $('.alert').addClass("alert-danger");
+                    // setTimeout(function() {
+                    //   location.reload();
+                    // }, 3000);
+                    $('#expenseModal').modal('hide');
+                    oTable.draw();
+                }
+                $('.message').append(data.message);
+
+            },
+        });
+
+
+    }
+
+});
 $('body').on('click', '.checked_status', function () {
     var id = $('#expenseid').val();
     var token = $("meta[name='csrf-token']").attr("content");
@@ -513,7 +556,8 @@ $('body').on('click', '.checked_status', function () {
             type: 'POST',
             data: {
                 _token: token,
-                id: id
+                id: id,
+                status:'3'
             },
             success: function (data) {
                 $('.message').empty();

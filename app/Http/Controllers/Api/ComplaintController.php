@@ -127,11 +127,11 @@ class ComplaintController extends Controller
                 'fault_type' => $request->fault_type ?? NULL,
                 'service_centre_remark' => $request->service_centre_remark ?? NULL,
                 'complaint_status' => $request->complaint_status ?? 0,
-                'remark' => $request->remark ?? NULL,
+                'description' => $request->remark ?? NULL,
                 'division' => $request->division ?? NULL,
                 'register_by' => $request->register_by ?? NULL,
                 'complaint_type' => $request->complaint_type ?? NULL,
-                'description' => $request->description ?? NULL,
+                // 'description' => $request->description ?? NULL,
                 'created_by_device' => 'customer',
                 'created_by' => $request->customer_id ?? NULL
             ]);

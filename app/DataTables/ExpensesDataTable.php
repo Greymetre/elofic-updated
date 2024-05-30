@@ -78,6 +78,8 @@ class ExpensesDataTable extends DataTable
                     $btn = $btn . "<button type='button' onclick='showExpense($query->id)' class='btn btn-danger'>Rejected</span></button>";
                 } elseif ($query->checker_status == '3') {
                     $btn = $btn . "<button type='button' onclick='showExpense($query->id)' class='btn btn-dark'>Checked</span></button>";
+                } elseif ($query->checker_status == '4') {
+                    $btn = $btn . "<button type='button' onclick='showExpense($query->id)' class='btn btn-info'>Checked By Reporting</span></button>";
                 } else {
                     $btn = $btn . "<button type='button' onclick='showExpense($query->id)' class='btn btn-warning'>Pending</span></button>";
                 }
@@ -134,7 +136,6 @@ class ExpensesDataTable extends DataTable
             }
             $data->where('user_id', $request['executive_id']);
         }
-
         if (!empty($request['search']['value']) && $request['search']['value'] != '' && $request['search']['value'] != NULL) {
             $data->where('claim_amount', $request['search']['value']);
         }

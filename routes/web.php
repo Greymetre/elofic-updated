@@ -604,6 +604,7 @@ Route::group(['middleware' => ['auth']], function () {
     // /Expenses
      Route::resource('expenses', ExpensesController::class);
      Route::post('expenses-active', [ExpensesController::class, 'changeStatus']);
+     Route::post('expenses-checked-by-reporting', [ExpensesController::class, 'changeStatus']);
      Route::post('expenses-uncheck', [ExpensesController::class, 'uncheckStatus']);
      Route::any('expenses-download', [ ExpensesController::class, 'expenseDownload'])->name('expenses.download');
      Route::post('rejectExpense', [ ExpensesController::class, 'rejectExpense'])->name('rejectExpense');
@@ -721,6 +722,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('complaint_download', [ ComplaintController::class, 'complaint_download'])->name('complaint_download');
     Route::any('complaint-work-done/{complaint}', [ ComplaintController::class, 'work_done'])->name('complaint_work_done');
     Route::any('complaint-work-done-submit', [ ComplaintController::class, 'work_done_submit'])->name('complaint_work_done_submit');
+    Route::any('complaint-assign-user', [ ComplaintController::class, 'assign_user'])->name('complaint_assign_user');
+    Route::any('complaint-assign-service-center', [ ComplaintController::class, 'assign_service_center'])->name('complaint_assign_service_center');
 
     // Leaves Route
     Route::resource('leaves', LeaveController::class);
@@ -795,6 +798,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('getProductInfoBySerialNo', [ AjaxController::class, 'getProductInfoBySerialNo']);
     Route::any('getEndUserData', [ AjaxController::class, 'getEndUserData']);
     Route::any('getComplaintsData', [ AjaxController::class, 'getComplaintsData']);
+    Route::any('getComplaintsDataProduct', [ AjaxController::class, 'getComplaintsDataProduct']);
     Route::any('/fetchPieChartData', [ AjaxController::class, 'fetchPieChartData'])->name('fetchPieChartData');
     Route::any('/remove_session', [ AjaxController::class, 'remove_session'])->name('remove.session');
 

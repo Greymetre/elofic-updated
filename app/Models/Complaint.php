@@ -9,9 +9,9 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Complaint extends Model implements HasMedia
 {
-    use HasFactory,InteractsWithMedia;
+    use HasFactory, InteractsWithMedia;
 
-    protected $fillable = ['complaint_number','complaint_date','claim_amount','complaint_status','seller','end_user_id','party_name','product_laying','service_center','assign_user','product_id','product_serail_number','product_code','product_name','category','specification','product_no','phase','seller_branch','purchased_branch','product_group','company_sale_bill_no','company_sale_bill_date','customer_bill_date','customer_bill_no','company_bill_date_month','under_warranty','service_type','customer_bill_date_month','warranty_bill','fault_type','service_centre_remark','remark','division','register_by','complaint_type','description','created_by_device','created_by','created_at','updated_at'];
+    protected $fillable = ['complaint_number', 'complaint_date', 'claim_amount', 'complaint_status', 'seller', 'end_user_id', 'party_name', 'product_laying', 'service_center', 'assign_user', 'product_id', 'product_serail_number', 'product_code', 'product_name', 'category', 'specification', 'product_no', 'phase', 'seller_branch', 'purchased_branch', 'product_group', 'company_sale_bill_no', 'company_sale_bill_date', 'customer_bill_date', 'customer_bill_no', 'company_bill_date_month', 'under_warranty', 'service_type', 'customer_bill_date_month', 'warranty_bill', 'fault_type', 'service_centre_remark', 'remark', 'division', 'register_by', 'complaint_type', 'description', 'created_by_device', 'created_by', 'created_at', 'updated_at'];
 
     public $timestamps = true;
 
@@ -30,11 +30,6 @@ class Complaint extends Model implements HasMedia
         return $this->belongsTo(Customers::class, 'service_center', 'id');
     }
 
-    public function seller_details()
-    {
-        return $this->belongsTo(Customers::class, 'seller', 'id');
-    }
-
     public function customer()
     {
         return $this->belongsTo(EndUser::class, 'end_user_id', 'id');
@@ -47,12 +42,7 @@ class Complaint extends Model implements HasMedia
 
     public function createdbyname()
     {
-        if ($this->created_by_device === 'user') {
-            return $this->belongsTo('App\Models\User', 'created_by', 'id')->select('id', 'name');
-        } elseif ($this->created_by_device === 'customer') {
-            return $this->belongsTo('App\Models\Customers', 'created_by', 'id')->select('id', 'name');
-        }
-        return $this->belongsTo('App\Models\User')->select('id', 'name')->where('id', '=', null);
+        return $this->belongsTo('App\Models\User', 'created_by', 'id')->select('id', 'name');
     }
 
     public function product_details()
@@ -75,9 +65,10 @@ class Complaint extends Model implements HasMedia
         return $this->belongsTo('App\Models\Division', 'division', 'id');
     }
 
-    public function registerMediaCollections(): void {
+    public function registerMediaCollections(): void
+    {
         $this->addMediaCollection('complaint_attach')
-             ->useFallbackUrl(asset(config('constants.NO_IMAGE_URL')))
-             ->useFallbackPath(public_path(config('constants.NO_IMAGE_URL')));
+            ->useFallbackUrl(asset(config('constants.NO_IMAGE_URL')))
+            ->useFallbackPath(public_path(config('constants.NO_IMAGE_URL')));
     }
 }

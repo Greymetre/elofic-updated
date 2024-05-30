@@ -49,8 +49,7 @@ class DamageEntryController extends Controller
     public function create()
     {
         abort_if(Gate::denies('damage_entry_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        $customers = Customers::where('customertype', '2')->select('id', 'name', 'mobile')->get();
-        return view('damage_entry.create', compact('customers'))->with('DamageEntry', $this->DamageEntry);
+        return view('damage_entry.create')->with('DamageEntry', $this->DamageEntry);
     }
 
     /**
@@ -78,16 +77,16 @@ class DamageEntryController extends Controller
             $expire_schemes = array();
             if ($request->coupen_code && $request->coupen_code != NULL && $request->coupen_code != '') {
                 $exists = TransactionHistory::where('coupon_code', $request->coupen_code)->exists();
-                $existsDamage = DamageEntry::where('coupon_code', $request->coupon_code)->exists();
+                $existsDamage = DamageEntry::where('coupon_code', $request->coupen_code)->exists();
 
                 if ($exists) {
                     throw ValidationException::withMessages([
-                        'coupon_code' => "The coupon code '$request->coupon_code' already Scanned.",
+                        'coupon_code' => "The coupon code '$request->coupen_code' already Scanned.",
                     ]);
                 }
                 if ($existsDamage) {
                     throw ValidationException::withMessages([
-                        'coupon_code' => "The coupon code '$request->coupon_code' already Scanned.",
+                        'coupon_code' => "The coupon code '$request->coupen_code' already Scanned.",
                     ]);
                 }
                 $scheme = Services::where('serial_no', $request->coupen_code)->first();

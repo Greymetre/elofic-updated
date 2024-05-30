@@ -53,7 +53,27 @@
                 @if(auth()->user()->can(['expense_reject']))
                 <button type="button" class="btn btn-danger reject_status">Rejected</button>
                 @endif
+
+                @elseif($expense->checker_status=='4')
+
+                @if(auth()->user()->can(['expense_unchecked']))
+                <button type="button" class="btn btn-dark checked_status">Checked</button>
+                @endif
+
+                @if(auth()->user()->can(['expense_approve']))
+                <button type="button" class="btn btn-success approve_status">Approved</button>
+                @endif
+
+                @if(auth()->user()->can(['expense_reject']))
+                <button type="button" class="btn btn-danger reject_status">Rejected</button>
+                @endif
+
                 @else
+
+                @if(auth()->user()->can(['expense_checked']))
+                <button type="button" class="btn btn-info checked_by_reporting_status">Checked By Reporting</button>
+                @endif
+
                 @if(auth()->user()->can(['expense_checked']))
                 <button type="button" class="btn btn-dark checked_status">Checked</button>
                 @endif
@@ -162,6 +182,10 @@
                       Approve
                       @elseif($expense->checker_status=='2')
                       Reject
+                      @elseif($expense->checker_status=='3')
+                      Checked
+                      @elseif($expense->checker_status=='4')
+                      Checked By Reporting
                       @else
                       Pending
                       @endif

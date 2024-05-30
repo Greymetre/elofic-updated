@@ -682,19 +682,25 @@ class ExpensesController extends Controller
 
     public function changeStatus(Request $request)
     {
+        $status = $request->status;
         $dates = Carbon::now();
         $current_date_time = $dates->setTimezone('Asia/Kolkata');
         $expenses = Expenses::find($request->id);
-        $expenses->checker_status = '3';
+        $expenses->checker_status = $status;
         $expenses->approve_reject_by = Auth::user()->id;
         $expenses->save();
+        if($status == '3'){
+            $status_type = 'Checked';
+        }elseif($status == '4'){
+            $status_type = 'Checked By Reporting';
+        }
 
         if ($request->id) {
             $logdata = array(
                 'log_date' => date('Y-m-d'),
                 'expense_id' => $request->id,
                 'created_by' => Auth::user()->id,
-                'status_type' => 'checked',
+                'status_type' => $status_type,
             );
             ExpenseLog::create($logdata);
         }
