@@ -246,9 +246,9 @@ class OrderController extends Controller
                         $seller = Customers::find($request['seller_id']);
                         $attachmentPath = base_path('storage/app/assets/orderDetails.xlsx');
 
-                        foreach ($mail_id_array as $k => $val) {
-                         Mail::to($val)->send(new OrderMailWithAttachment($attachmentPath, $orderdetail, Order::find($response['order_id'])));
-                        }
+                        // foreach ($mail_id_array as $k => $val) {
+                        //  Mail::to($val)->send(new OrderMailWithAttachment($attachmentPath, $orderdetail, Order::find($response['order_id'])));
+                        // }
                     }
                 }
                 // $useractivity = array(

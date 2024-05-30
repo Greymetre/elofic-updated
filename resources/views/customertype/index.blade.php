@@ -67,7 +67,7 @@
         <div class="table-responsive">
           <table id="getcustomertype" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
             <thead class=" text-primary">
-              <th>{!! trans('panel.global.no') !!}</th>
+              <th>ID</th>
               <th>{!! trans('panel.global.action') !!}</th>
               <th>{!! trans('panel.global.active') !!}</th>
               <th>{!! trans('panel.customertype.fields.customertype_name') !!}</th>
@@ -158,7 +158,7 @@
         "order": [ [0, 'desc'] ],
         ajax: "{{ route('customertype.index') }}",
         columns: [
-            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+            { data: 'id', name: 'id', searchable: false },
             {data: 'action', name: 'action',"defaultContent": '', orderable: false, searchable: false},
             {data: 'active', name: 'active',"defaultContent": '', orderable: false, searchable: false},
             {data: 'customertype_name', name: 'customertype_name',"defaultContent": ''},

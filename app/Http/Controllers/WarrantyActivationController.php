@@ -52,14 +52,14 @@ class WarrantyActivationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
         abort_if(Gate::denies('warranty_activation_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $branches = Branch::where('active', 'Y')->get();
         $customers = Customers::where('customertype', '2')->select('id', 'name', 'mobile')->get();
         $customers_dealer = Customers::where('customertype', ['1', '3'])->select('id', 'name', 'mobile')->get();
         $pincodes = Pincode::all();
-        return view('warranty_activation.create', compact('customers', 'pincodes', 'branches'))->with('warranty_activation', $this->warranty_activation);
+        return view('warranty_activation.create', compact('customers', 'pincodes', 'branches', 'request'))->with('warranty_activation', $this->warranty_activation);
     }
 
     /**

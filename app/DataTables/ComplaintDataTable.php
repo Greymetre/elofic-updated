@@ -76,7 +76,7 @@ class ComplaintDataTable extends DataTable
      */
     public function query(Complaint $model)
     {
-        return $model->with('party', 'service_center_details', 'seller_details', 'customer', 'complaint_type_details')->newQuery();
+        return $model->with('party', 'service_center_details', 'customer', 'complaint_type_details')->newQuery();
     }
 
     /**

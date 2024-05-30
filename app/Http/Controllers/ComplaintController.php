@@ -180,8 +180,9 @@ class ComplaintController extends Controller
                 $query->with('permissions');
             }])->select('id', 'name')
             ->get();
+        $work_done = ComplaintWorkDone::where('complaint_id', $complaint->id)->latest()->first();
         $service_centers = Customers::where('customertype', '4')->select('id', 'name')->get();
-        return view('complaint.show', compact('complaint', 'timelines', 'assign_users','service_centers'));
+        return view('complaint.show', compact('complaint', 'timelines', 'assign_users','service_centers', 'work_done'));
     }
 
     /**
@@ -371,13 +372,48 @@ class ComplaintController extends Controller
         return redirect()->route('complaints.show', $compalint->id);
     }
 
+    public function assign_user(Request $request)
+    {
+        
+        $compalint = Complaint::find($request->complaint_id);
+        $compalint->assign_user = $request->user_id;
+        $compalint->save();
+
+        ComplaintTimeline::create([
+            'complaint_id' => $request->complaint_id,
+            'created_by' => auth()->user()->id,
+            'remark' => $request->user_id,
+            'status' => '100',
+        ]);
+
+        return response()->json(['status' => 'success', 'message' => 'User assign successfully.']);
+    }
+
+    public function assign_service_center(Request $request)
+    {
+        
+        $compalint = Complaint::find($request->complaint_id);
+        $compalint->service_center = $request->service_center_id;
+        $compalint->save();
+
+        ComplaintTimeline::create([
+            'complaint_id' => $request->complaint_id,
+            'created_by' => auth()->user()->id,
+            'remark' => $request->service_center_id,
+            'status' => '101',
+        ]);
+
+        return response()->json(['status' => 'success', 'message' => 'Service Center assign successfully.']);
+    }
+
     public function completeComplaint(Request $request)
     {
         $service_bill = ServiceBill::where('complaint_id', $request->id)->first();
         if ($service_bill) {
             return response()->json(['status' => 'success', 'message' => 'Complaint complete successfully.']);
         } else {
-            return response()->json(['status' => 'error', 'message' => 'In order to complete this complaint, You need to add service bill.']);
+            return response()->json(['status' => 'error', 'message' => 'In order to complete this complaint, You need to add service bill. <a href="'.route('service_bills.create').'?complaint_id='.$request->id.'" style="color:blue;">Click here</a> to add.']);
         }
     }
+
 }

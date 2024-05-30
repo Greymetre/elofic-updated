@@ -156,6 +156,8 @@ class UserImport implements ToCollection, WithValidation, WithHeadingRow, WithBa
                     'current_company_tenture' => !empty($row['current_company_tenure']) ? $row['current_company_tenure'] : 0,
                     'previous_exp' => !empty($row['previous_exp']) ? $row['previous_exp'] : null,
                     'total_exp' => !empty($row['total_exp']) ? $row['total_exp'] : 0,
+                    'order_mails'   =>  isset($row['order_mails']) ? $row['order_mails'] : '',
+                    'order_mails_type'   =>  isset($row['order_mail_type_id']) ? $row['order_mail_type_id'] : '',
                     'created_at' => getcurentDateTime(),
                     'updated_at' => getcurentDateTime()
                 ]);

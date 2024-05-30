@@ -47,6 +47,7 @@ use App\Exports\LoyaltyDealerSummaryReportExport;
 use App\Models\DealIn;
 use App\DataTables\GamificationDataTable;
 use App\Exports\CustomerAnalysisExport;
+use Carbon\Carbon;
 
 class ReportController extends Controller
 {
@@ -392,7 +393,7 @@ class ReportController extends Controller
                         });
                     }
 
-                    if (!empty($request['status']) && $request['status'] != null && $request['status'] != "") {
+                    if ($request['status'] != null && $request['status'] != "") {
                         $query->where('attendance_status', $request['status']);
                     }
 
@@ -596,7 +597,13 @@ class ReportController extends Controller
                     }
 
                     if (!empty($request['start_date']) && !empty($request['end_date'])) {
-                        $query->whereBetween('punchin_date', [$request['start_date'], $request['end_date']]);
+                        $start_date = Carbon::parse($request->start_date)->startOfDay();
+                        $end_date = Carbon::parse($request->end_date)->endOfDay();
+                        $query->whereBetween('punchin_date', [$start_date, $end_date]);
+                    }
+
+                    if ($request['status'] != null && $request['status'] != "") {
+                        $query->where('attendance_status', $request['status']);
                     }
 
                     // if(!empty($request['search']) && is_array($request['search']) == false){

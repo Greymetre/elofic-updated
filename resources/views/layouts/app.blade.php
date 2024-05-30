@@ -21,6 +21,7 @@
   <link href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css" rel="stylesheet">
   <script src="{{ url('/').'/'.asset('assets/js/core/jquery.min.js') }}"></script>
   <script src="{{ url('/').'/'.asset('assets/js/core/jquery-ui.js') }}"></script>
+  <script src="{{ url('/').'/'.asset('assets/js/plugins/moment.min.js') }}"></script>
   <meta http-equiv="Cache-Control" content="no-store" />
   <style>
     .toggle.ios,
@@ -1253,7 +1254,6 @@
   <script src="{{ url('/').'/'.asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
 
   <script src="{{ url('/').'/'.asset('assets/js/plugins/perfect-scrollbar.jquery.min.js') }}"></script>
-  <script src="{{ url('/').'/'.asset('assets/js/plugins/moment.min.js') }}"></script>
   <script src="{{ url('/').'/'.asset('assets/js/plugins/sweetalert2.js') }}"></script>
   <script src="{{ url('/').'/'.asset('assets/js/plugins/jquery.validate.min.js') }}"></script>
   <!-- jquery-validation -->

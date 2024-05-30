@@ -14,7 +14,7 @@
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
-          <h4 class="card-title ">{!! trans('panel.complaint.title_singular') !!} {!! trans('panel.global.list') !!}
+          <h4 class="card-title ">Service Bill {!! trans('panel.global.list') !!}
             <span class="">
               <div class="btn-group header-frm-btn">
               @if(auth()->user()->can(['complaint_download']))
@@ -48,7 +48,7 @@
                 @endif
                 <div class="next-btn">
                 @if(auth()->user()->can(['complaint_create']))
-                <a href="{{ route('complaints.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.complaint.title_singular') !!}"><i class="material-icons">add_circle</i></a>
+                <a href="{{ route('service_bills.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.complaint.title_singular') !!}"><i class="material-icons">add_circle</i></a>
                 @endif
               </div>
               </div>
@@ -86,10 +86,10 @@
             <span class="message"></span>
           </div>
           <div class="table-responsive">
-            <table id="getscheme" class="table table-striped- table-bschemeed table-hover table-checkable responsive no-wrap">
+            <!-- <table id="getscheme" class="table table-striped- table-bschemeed table-hover table-checkable responsive no-wrap">
               <thead class=" text-primary">
                 <th>{!! trans('panel.global.no') !!}</th>
-                <!-- <th>{!! trans('panel.global.action') !!}</th> -->
+                <th>{!! trans('panel.global.action') !!}</th>
                 <th>Complaint Number</th>
                 <th>Customer</th>
                 <th>Complaint Date</th>
@@ -100,7 +100,7 @@
               </thead>
               <tbody>
               </tbody>
-            </table>
+            </table> -->
           </div>
         </div>
       </div>

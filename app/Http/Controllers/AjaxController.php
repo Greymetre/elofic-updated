@@ -804,7 +804,14 @@ class AjaxController extends Controller
 
             $term = trim($request->term);
 
-            $coins = Customers::select("id as id", "name as text")->where('customertype', '2')->where('name', 'LIKE',  '%' . $term . '%')->orderBy('id', 'asc')->simplePaginate(10);
+            $coins = Customers::select("id as id", "name as text")
+            ->where('customertype', '2')
+            ->where(function ($query) use ($term) {
+                $query->where('name', 'LIKE', '%' . $term . '%')
+                      ->orWhere('mobile', 'LIKE', '%' . $term . '%');
+            })
+            ->orderBy('id', 'asc')
+            ->simplePaginate(10);
 
 
             $morePages = true;
@@ -1054,7 +1061,7 @@ class AjaxController extends Controller
                     ->first();
                 if ($data) {
                     $data->product->categories = $data->product->categories;
-                    $check_Warranty = WarrantyActivation::with('media','customer')->where('product_serail_number', $serial_no)->first();
+                    $check_Warranty = WarrantyActivation::with('media','customer')->where('status', '!=', '3')->where('product_serail_number', $serial_no)->first();
                     return response()->json(['status' => true, 'data_all' => $data, 'data' => $data->product, 'check_Warranty' => $check_Warranty]);
                 } else {
                     return response()->json(['status' => false, 'data' => null]);
@@ -1161,5 +1168,17 @@ class AjaxController extends Controller
     {
         $request->session()->forget('executive_id');
         return response()->json(['status' => 'success']);
+    }
+
+    public function getComplaintsDataProduct(Request $request)
+    {
+        $complaint = Complaint::with('createdbyname')->where('complaint_number', $request->complaint_number)->first();
+
+        $product = $complaint->product_details??'';
+
+        $data['complaint'] = $complaint;
+        $data['product'] = $product;
+
+        return response()->json(['status'=> 'success', 'data' => $data]);
     }
 }

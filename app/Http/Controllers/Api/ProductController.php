@@ -272,28 +272,28 @@ class ProductController extends Controller
                 $query->where('active', '=', 'Y');
             })
                 ->select('id', 'category_name', 'category_image', 'ranking')
-                ->orderBy('ranking', 'asc')->latest();
+                ->orderBy('id', 'asc')->latest();
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
 
-            $querysubcategory = Subcategory::where(function ($query) use ($db_data) {
-                if (!empty($db_data)) {
-                    $query->where('category_id', '=', $db_data->pluck('id')->first());
-                }
-                $query->where('active', '=', 'Y');
-            })
-                ->select('id', 'subcategory_name', 'subcategory_image', 'category_id', 'ranking')
-                ->orderBy('ranking', 'asc')
-                ->latest();
-            $subcategory_data = (!empty($pageSize)) ? $querysubcategory->paginate($pageSize) : $querysubcategory->get();
-            $query_product = Product::with('productdetails', 'productpriceinfo', 'getSchemeDetail')->where(function ($query) use ($subcategory_data) {
-                if (!empty($subcategory_data)) {
-                    $query->where('subcategory_id', '=', $subcategory_data->pluck('id')->first());
-                }
-                $query->where('active', '=', 'Y');
-            })
-                ->select('id', 'product_name', 'display_name', 'description', 'subcategory_id', 'category_id', 'brand_id', 'product_image', 'unit_id', 'specification', 'part_no', 'product_no', 'model_no', 'suc_del')->latest();
+            // $querysubcategory = Subcategory::where(function ($query) use ($db_data) {
+            //     if (!empty($db_data)) {
+            //         $query->where('category_id', '=', $db_data->pluck('id')->first());
+            //     }
+            //     $query->where('active', '=', 'Y');
+            // })
+            //     ->select('id', 'subcategory_name', 'subcategory_image', 'category_id', 'ranking')
+            //     ->orderBy('ranking', 'asc')
+            //     ->latest();
+            // $subcategory_data = (!empty($pageSize)) ? $querysubcategory->paginate($pageSize) : $querysubcategory->get();
+            // $query_product = Product::with('productdetails', 'productpriceinfo', 'getSchemeDetail')->where(function ($query) use ($subcategory_data) {
+            //     if (!empty($subcategory_data)) {
+            //         $query->where('subcategory_id', '=', $subcategory_data->pluck('id')->first());
+            //     }
+            //     $query->where('active', '=', 'Y');
+            // })
+            //     ->select('id', 'product_name', 'display_name', 'description', 'subcategory_id', 'category_id', 'brand_id', 'product_image', 'unit_id', 'specification', 'part_no', 'product_no', 'model_no', 'suc_del')->latest();
 
-            $product_data = (!empty($pageSize)) ? $query_product->paginate($pageSize) : $query_product->get();
+            // $product_data = (!empty($pageSize)) ? $query_product->paginate($pageSize) : $query_product->get();
 
             $data = collect([]);
             $subcategories = collect([]);
@@ -306,90 +306,90 @@ class ProductController extends Controller
                         'category_image' => isset($value['category_image']) ? $value['category_image'] : '',
                     ]);
                 }
-                if ($subcategory_data->isNotEmpty()) {
-                    foreach ($subcategory_data as $key => $rows) {
-                        $subcategories->push([
-                            'id' => isset($rows['id']) ? $rows['id'] : 0,
-                            'subcategory_name' => isset($rows['subcategory_name']) ? $rows['subcategory_name'] : '',
-                            'subcategory_image' => isset($rows['subcategory_image']) ? $rows['subcategory_image'] : '',
-                            'category_id' => isset($rows['category_id']) ? $rows['category_id'] : 0,
-                            'category_name' => isset($rows['categories']['category_name']) ? $rows['categories']['category_name'] : '',
-                        ]);
-                    }
-                }
-                if ($product_data->isNotEmpty()) {
+                // if ($subcategory_data->isNotEmpty()) {
+                //     foreach ($subcategory_data as $key => $rows) {
+                //         $subcategories->push([
+                //             'id' => isset($rows['id']) ? $rows['id'] : 0,
+                //             'subcategory_name' => isset($rows['subcategory_name']) ? $rows['subcategory_name'] : '',
+                //             'subcategory_image' => isset($rows['subcategory_image']) ? $rows['subcategory_image'] : '',
+                //             'category_id' => isset($rows['category_id']) ? $rows['category_id'] : 0,
+                //             'category_name' => isset($rows['categories']['category_name']) ? $rows['categories']['category_name'] : '',
+                //         ]);
+                //     }
+                // }
+                // if ($product_data->isNotEmpty()) {
 
-                    foreach ($product_data as $key => $product) {
-                        //$prodcutdetails = $value['prodcutdetails']->where('isprimary',1);
-
-
-                        $discount_amount = 0;
-                        $total_amount = 0;
-                        $ebd_amount = 0;
-                        $product_ebd_amount = 0;
-                        $ebd_discount = 0;
+                //     foreach ($product_data as $key => $product) {
+                //         //$prodcutdetails = $value['prodcutdetails']->where('isprimary',1);
 
 
-                        $discount = $product['productpriceinfo']['discount'] ?? 0;
-                        $mrp = $product['productpriceinfo']['mrp'] ?? 0;
-
-                        $discount_amount = $mrp * $discount / 100;
-                        $total_amount = $mrp - $discount_amount;
-                        $total_amount = number_format($total_amount, 2, ".", "");
-
-
-                        $ebd_discount = $product['getSchemeDetail']['points'] ?? 0;
-                        $scheme_type = $product['getSchemeDetail']['orderscheme']['scheme_type'] ?? '';
-                        $scheme_value_type = $product['getSchemeDetail']['orderscheme']['scheme_basedon'] ?? '';
-
-                        $minimum = $product['getSchemeDetail']['orderscheme']['minimum'] ?? 0;
-                        $maximum = $product['getSchemeDetail']['orderscheme']['maximum'] ?? 0;
-
-                        if ($scheme_value_type == 'percentage') {
-                            $ebd_amount = $total_amount * $ebd_discount / 100;
-                            $product_ebd_amount = $total_amount - $ebd_amount;
-                        }
-
-                        if ($scheme_value_type == 'value') {
-
-                            $ebd_amount = $ebd_discount;
-                            $product_ebd_amount = $total_amount - $ebd_discount;
-                        }
-
-                        $ebd_amount = number_format($ebd_amount, 2, ".", "");
-                        $product_ebd_amount = number_format($product_ebd_amount, 2, ".", "");
+                //         $discount_amount = 0;
+                //         $total_amount = 0;
+                //         $ebd_amount = 0;
+                //         $product_ebd_amount = 0;
+                //         $ebd_discount = 0;
 
 
+                //         $discount = $product['productpriceinfo']['discount'] ?? 0;
+                //         $mrp = $product['productpriceinfo']['mrp'] ?? 0;
 
-                        $products->push([
-                            'id' => isset($product['id']) ? $product['id'] : 0,
-                            'product_name' => isset($product['product_name']) ? $product['product_name'] : '',
-                            'display_name' => isset($product['display_name']) ? $product['display_name'] : '',
-                            'description' => isset($product['description']) ? $product['description'] : '',
-                            'product_image' => isset($product['product_image']) ? $product['product_image'] : '',
-                            'subcategory_id' => isset($product['subcategory_id']) ? $product['subcategory_id'] : 0,
-                            'subcategory_name' => isset($product['subcategories']['subcategory_name']) ? $product['subcategories']['subcategory_name'] : '',
-                            'category_id' => isset($product['category_id']) ? $product['category_id'] : 0,
-                            'category_name' => isset($product['categories']['category_name']) ? $product['categories']['category_name'] : '',
-                            'brand_id' => isset($product['brand_id']) ? $product['brand_id'] : 0,
-                            'brand_name' => isset($product['brands']['brand_name']) ? $product['brands']['brand_name'] : '',
-                            'unit_id' => isset($product['unit_id']) ? $product['unit_id'] : 0,
-                            'unit_code' => isset($product['unitmeasures']['unit_code']) ? $product['unitmeasures']['unit_code'] : '',
-                            'detail_id' => isset($product['productpriceinfo']['id']) ? $product['productpriceinfo']['id'] : 0,
-                            'mrp' => isset($product['productpriceinfo']['mrp']) ? $product['productpriceinfo']['mrp'] : 0.00,
-                            'price' => isset($product['productpriceinfo']['price']) ? $product['productpriceinfo']['price'] : 0.00,
-                            'selling_price' => isset($product['productpriceinfo']['selling_price']) ? $product['productpriceinfo']['selling_price'] : 0.00,
-                            'gst' => isset($product['productpriceinfo']['gst']) ? $product['productpriceinfo']['gst'] : 0.00,
-                            'specification' => isset($product['suc_del']) ? $product['suc_del'] : '',
-                            'part_no' => isset($product['part_no']) ? $product['part_no'] : '',
-                            'product_no' => isset($product['product_no']) ? $product['product_no'] : '',
-                            'model_no'  => isset($product['model_no']) ? $product['model_no'] : '',
-                            'hp' => isset($product['specification']) ? $product['specification'] : '',
-                            'ebd_amount' => (string)$ebd_amount,
-                            'product_ebd_amount' => (string)$product_ebd_amount,
-                        ]);
-                    }
-                }
+                //         $discount_amount = $mrp * $discount / 100;
+                //         $total_amount = $mrp - $discount_amount;
+                //         $total_amount = number_format($total_amount, 2, ".", "");
+
+
+                //         $ebd_discount = $product['getSchemeDetail']['points'] ?? 0;
+                //         $scheme_type = $product['getSchemeDetail']['orderscheme']['scheme_type'] ?? '';
+                //         $scheme_value_type = $product['getSchemeDetail']['orderscheme']['scheme_basedon'] ?? '';
+
+                //         $minimum = $product['getSchemeDetail']['orderscheme']['minimum'] ?? 0;
+                //         $maximum = $product['getSchemeDetail']['orderscheme']['maximum'] ?? 0;
+
+                //         if ($scheme_value_type == 'percentage') {
+                //             $ebd_amount = $total_amount * $ebd_discount / 100;
+                //             $product_ebd_amount = $total_amount - $ebd_amount;
+                //         }
+
+                //         if ($scheme_value_type == 'value') {
+
+                //             $ebd_amount = $ebd_discount;
+                //             $product_ebd_amount = $total_amount - $ebd_discount;
+                //         }
+
+                //         $ebd_amount = number_format($ebd_amount, 2, ".", "");
+                //         $product_ebd_amount = number_format($product_ebd_amount, 2, ".", "");
+
+
+
+                //         $products->push([
+                //             'id' => isset($product['id']) ? $product['id'] : 0,
+                //             'product_name' => isset($product['product_name']) ? $product['product_name'] : '',
+                //             'display_name' => isset($product['display_name']) ? $product['display_name'] : '',
+                //             'description' => isset($product['description']) ? $product['description'] : '',
+                //             'product_image' => isset($product['product_image']) ? $product['product_image'] : '',
+                //             'subcategory_id' => isset($product['subcategory_id']) ? $product['subcategory_id'] : 0,
+                //             'subcategory_name' => isset($product['subcategories']['subcategory_name']) ? $product['subcategories']['subcategory_name'] : '',
+                //             'category_id' => isset($product['category_id']) ? $product['category_id'] : 0,
+                //             'category_name' => isset($product['categories']['category_name']) ? $product['categories']['category_name'] : '',
+                //             'brand_id' => isset($product['brand_id']) ? $product['brand_id'] : 0,
+                //             'brand_name' => isset($product['brands']['brand_name']) ? $product['brands']['brand_name'] : '',
+                //             'unit_id' => isset($product['unit_id']) ? $product['unit_id'] : 0,
+                //             'unit_code' => isset($product['unitmeasures']['unit_code']) ? $product['unitmeasures']['unit_code'] : '',
+                //             'detail_id' => isset($product['productpriceinfo']['id']) ? $product['productpriceinfo']['id'] : 0,
+                //             'mrp' => isset($product['productpriceinfo']['mrp']) ? $product['productpriceinfo']['mrp'] : 0.00,
+                //             'price' => isset($product['productpriceinfo']['price']) ? $product['productpriceinfo']['price'] : 0.00,
+                //             'selling_price' => isset($product['productpriceinfo']['selling_price']) ? $product['productpriceinfo']['selling_price'] : 0.00,
+                //             'gst' => isset($product['productpriceinfo']['gst']) ? $product['productpriceinfo']['gst'] : 0.00,
+                //             'specification' => isset($product['suc_del']) ? $product['suc_del'] : '',
+                //             'part_no' => isset($product['part_no']) ? $product['part_no'] : '',
+                //             'product_no' => isset($product['product_no']) ? $product['product_no'] : '',
+                //             'model_no'  => isset($product['model_no']) ? $product['model_no'] : '',
+                //             'hp' => isset($product['specification']) ? $product['specification'] : '',
+                //             'ebd_amount' => (string)$ebd_amount,
+                //             'product_ebd_amount' => (string)$product_ebd_amount,
+                //         ]);
+                //     }
+                // }
                 return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data, 'subcategories' => $subcategories, 'products' => $products], $this->successStatus);
             }
             return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data, 'subcategories' => $subcategories, 'products' => $products], 200);
@@ -415,15 +415,15 @@ class ProductController extends Controller
                 ->latest();
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
 
-            $query_product = Product::with('productdetails', 'productpriceinfo', 'getSchemeDetail')->where(function ($query) use ($db_data) {
-                if (!empty($db_data)) {
-                    $query->where('subcategory_id', '=', $db_data->pluck('id')->first());
-                }
-                $query->where('active', '=', 'Y');
-            })
-                ->select('id', 'product_name', 'display_name', 'description', 'subcategory_id', 'category_id', 'brand_id', 'product_image', 'unit_id', 'specification', 'part_no', 'product_no', 'model_no', 'suc_del')->latest();
+            // $query_product = Product::with('productdetails', 'productpriceinfo', 'getSchemeDetail')->where(function ($query) use ($db_data) {
+            //     if (!empty($db_data)) {
+            //         $query->where('subcategory_id', '=', $db_data->pluck('id')->first());
+            //     }
+            //     $query->where('active', '=', 'Y');
+            // })
+            //     ->select('id', 'product_name', 'display_name', 'description', 'subcategory_id', 'category_id', 'brand_id', 'product_image', 'unit_id', 'specification', 'part_no', 'product_no', 'model_no', 'suc_del')->latest();
 
-            $product_data = (!empty($pageSize)) ? $query_product->paginate($pageSize) : $query_product->get();
+            // $product_data = (!empty($pageSize)) ? $query_product->paginate($pageSize) : $query_product->get();
 
             $data = collect([]);
             $products = collect([]);
@@ -439,79 +439,79 @@ class ProductController extends Controller
                         ]);
                     }
                 }
-                if ($product_data->isNotEmpty()) {
+                // if ($product_data->isNotEmpty()) {
 
-                    foreach ($product_data as $key => $product) {
-                        //$prodcutdetails = $value['prodcutdetails']->where('isprimary',1);
+                //     foreach ($product_data as $key => $product) {
+                //         //$prodcutdetails = $value['prodcutdetails']->where('isprimary',1);
 
-                        $discount_amount = 0;
-                        $total_amount = 0;
-                        $ebd_amount = 0;
-                        $product_ebd_amount = 0;
-                        $ebd_discount = 0;
-
-
-                        $discount = $product['productpriceinfo']['discount'] ?? 0;
-                        $mrp = $product['productpriceinfo']['mrp'] ?? 0;
-
-                        $discount_amount = $mrp * $discount / 100;
-                        $total_amount = $mrp - $discount_amount;
-                        $total_amount = number_format($total_amount, 2, ".", "");
+                //         $discount_amount = 0;
+                //         $total_amount = 0;
+                //         $ebd_amount = 0;
+                //         $product_ebd_amount = 0;
+                //         $ebd_discount = 0;
 
 
-                        $ebd_discount = $product['getSchemeDetail']['points'] ?? 0;
-                        $scheme_type = $product['getSchemeDetail']['orderscheme']['scheme_type'] ?? '';
-                        $scheme_value_type = $product['getSchemeDetail']['orderscheme']['scheme_basedon'] ?? '';
+                //         $discount = $product['productpriceinfo']['discount'] ?? 0;
+                //         $mrp = $product['productpriceinfo']['mrp'] ?? 0;
 
-                        $minimum = $product['getSchemeDetail']['orderscheme']['minimum'] ?? 0;
-                        $maximum = $product['getSchemeDetail']['orderscheme']['maximum'] ?? 0;
-
-                        if ($scheme_value_type == 'percentage') {
-                            $ebd_amount = $total_amount * $ebd_discount / 100;
-                            $product_ebd_amount = $total_amount - $ebd_amount;
-                        }
-
-                        if ($scheme_value_type == 'value') {
-
-                            $ebd_amount = $ebd_discount;
-                            $product_ebd_amount = $total_amount - $ebd_discount;
-                        }
-
-                        $ebd_amount = number_format($ebd_amount, 2, ".", "");
-                        $product_ebd_amount = number_format($product_ebd_amount, 2, ".", "");
+                //         $discount_amount = $mrp * $discount / 100;
+                //         $total_amount = $mrp - $discount_amount;
+                //         $total_amount = number_format($total_amount, 2, ".", "");
 
 
+                //         $ebd_discount = $product['getSchemeDetail']['points'] ?? 0;
+                //         $scheme_type = $product['getSchemeDetail']['orderscheme']['scheme_type'] ?? '';
+                //         $scheme_value_type = $product['getSchemeDetail']['orderscheme']['scheme_basedon'] ?? '';
+
+                //         $minimum = $product['getSchemeDetail']['orderscheme']['minimum'] ?? 0;
+                //         $maximum = $product['getSchemeDetail']['orderscheme']['maximum'] ?? 0;
+
+                //         if ($scheme_value_type == 'percentage') {
+                //             $ebd_amount = $total_amount * $ebd_discount / 100;
+                //             $product_ebd_amount = $total_amount - $ebd_amount;
+                //         }
+
+                //         if ($scheme_value_type == 'value') {
+
+                //             $ebd_amount = $ebd_discount;
+                //             $product_ebd_amount = $total_amount - $ebd_discount;
+                //         }
+
+                //         $ebd_amount = number_format($ebd_amount, 2, ".", "");
+                //         $product_ebd_amount = number_format($product_ebd_amount, 2, ".", "");
 
 
-                        $products->push([
-                            'id' => isset($product['id']) ? $product['id'] : 0,
-                            'product_name' => isset($product['product_name']) ? $product['product_name'] : '',
-                            'display_name' => isset($product['display_name']) ? $product['display_name'] : '',
-                            'description' => isset($product['description']) ? $product['description'] : '',
-                            'product_image' => isset($product['product_image']) ? $product['product_image'] : '',
-                            'subcategory_id' => isset($product['subcategory_id']) ? $product['subcategory_id'] : 0,
-                            'subcategory_name' => isset($product['subcategories']['subcategory_name']) ? $product['subcategories']['subcategory_name'] : '',
-                            'category_id' => isset($product['category_id']) ? $product['category_id'] : 0,
-                            'category_name' => isset($product['categories']['category_name']) ? $product['categories']['category_name'] : '',
-                            'brand_id' => isset($product['brand_id']) ? $product['brand_id'] : 0,
-                            'brand_name' => isset($product['brands']['brand_name']) ? $product['brands']['brand_name'] : '',
-                            'unit_id' => isset($product['unit_id']) ? $product['unit_id'] : 0,
-                            'unit_code' => isset($product['unitmeasures']['unit_code']) ? $product['unitmeasures']['unit_code'] : '',
-                            'detail_id' => isset($product['productpriceinfo']['id']) ? $product['productpriceinfo']['id'] : 0,
-                            'mrp' => isset($product['productpriceinfo']['mrp']) ? $product['productpriceinfo']['mrp'] : 0.00,
-                            'price' => isset($product['productpriceinfo']['price']) ? $product['productpriceinfo']['price'] : 0.00,
-                            'selling_price' => isset($product['productpriceinfo']['selling_price']) ? $product['productpriceinfo']['selling_price'] : 0.00,
-                            'gst' => isset($product['productpriceinfo']['gst']) ? $product['productpriceinfo']['gst'] : 0.00,
-                            'specification' => isset($product['suc_del']) ? $product['suc_del'] : '',
-                            'part_no' => isset($product['part_no']) ? $product['part_no'] : '',
-                            'product_no' => isset($product['product_no']) ? $product['product_no'] : '',
-                            'model_no'  => isset($product['model_no']) ? $product['model_no'] : '',
-                            'hp'  => isset($product['specification']) ? $product['specification'] : '',
-                            'ebd_amount' => (string)$ebd_amount,
-                            'product_ebd_amount' => (string)$product_ebd_amount,
-                        ]);
-                    }
-                }
+
+
+                //         $products->push([
+                //             'id' => isset($product['id']) ? $product['id'] : 0,
+                //             'product_name' => isset($product['product_name']) ? $product['product_name'] : '',
+                //             'display_name' => isset($product['display_name']) ? $product['display_name'] : '',
+                //             'description' => isset($product['description']) ? $product['description'] : '',
+                //             'product_image' => isset($product['product_image']) ? $product['product_image'] : '',
+                //             'subcategory_id' => isset($product['subcategory_id']) ? $product['subcategory_id'] : 0,
+                //             'subcategory_name' => isset($product['subcategories']['subcategory_name']) ? $product['subcategories']['subcategory_name'] : '',
+                //             'category_id' => isset($product['category_id']) ? $product['category_id'] : 0,
+                //             'category_name' => isset($product['categories']['category_name']) ? $product['categories']['category_name'] : '',
+                //             'brand_id' => isset($product['brand_id']) ? $product['brand_id'] : 0,
+                //             'brand_name' => isset($product['brands']['brand_name']) ? $product['brands']['brand_name'] : '',
+                //             'unit_id' => isset($product['unit_id']) ? $product['unit_id'] : 0,
+                //             'unit_code' => isset($product['unitmeasures']['unit_code']) ? $product['unitmeasures']['unit_code'] : '',
+                //             'detail_id' => isset($product['productpriceinfo']['id']) ? $product['productpriceinfo']['id'] : 0,
+                //             'mrp' => isset($product['productpriceinfo']['mrp']) ? $product['productpriceinfo']['mrp'] : 0.00,
+                //             'price' => isset($product['productpriceinfo']['price']) ? $product['productpriceinfo']['price'] : 0.00,
+                //             'selling_price' => isset($product['productpriceinfo']['selling_price']) ? $product['productpriceinfo']['selling_price'] : 0.00,
+                //             'gst' => isset($product['productpriceinfo']['gst']) ? $product['productpriceinfo']['gst'] : 0.00,
+                //             'specification' => isset($product['suc_del']) ? $product['suc_del'] : '',
+                //             'part_no' => isset($product['part_no']) ? $product['part_no'] : '',
+                //             'product_no' => isset($product['product_no']) ? $product['product_no'] : '',
+                //             'model_no'  => isset($product['model_no']) ? $product['model_no'] : '',
+                //             'hp'  => isset($product['specification']) ? $product['specification'] : '',
+                //             'ebd_amount' => (string)$ebd_amount,
+                //             'product_ebd_amount' => (string)$product_ebd_amount,
+                //         ]);
+                //     }
+                // }
                 return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data, 'products' => $products], $this->successStatus);
             }
             return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data, 'products' => $products], 200);

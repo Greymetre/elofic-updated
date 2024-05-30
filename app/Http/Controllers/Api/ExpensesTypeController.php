@@ -181,6 +181,8 @@ class ExpensesTypeController extends Controller
                         $exp_status = 'Rejected';
                     } elseif ($expense->checker_status == '3') {
                         $exp_status = 'Checked';
+                    } elseif ($expense->checker_status == '4') {
+                        $exp_status = 'Checked By Reporting';
                     } else {
                         $exp_status = 'Pending';
                     }
@@ -244,6 +246,8 @@ class ExpensesTypeController extends Controller
                     $exp_status = 'Rejected';
                 } elseif ($expense->checker_status == '3') {
                     $exp_status = 'Checked';
+                } elseif ($expense->checker_status == '4') {
+                    $exp_status = 'Checked By Reporting';
                 } else {
                     $exp_status = 'Pending';
                 }
@@ -285,7 +289,7 @@ class ExpensesTypeController extends Controller
                 $datas['status'] = $exp_status;
                 $datas['reason'] = $expense->reason ?? "";
 
-                $paln = TourProgramme::where('userid', $expense->user_id)->where('date', $expense->date)->first();
+                $plan = TourProgramme::where('userid', $expense->user_id)->where('date', $expense->date)->first();
                 $total_visit = count(CheckIn::where('user_id', $expense->user_id)->where('checkin_date', $expense->date)->groupBy('customer_id')->get());
 
                 $checkins = CheckIn::where('user_id', $expense->user_id)
@@ -299,7 +303,7 @@ class ExpensesTypeController extends Controller
                     }
                 }
 
-                $datas['paln'] = $paln;
+                $datas['plan'] = $plan;
                 $datas['total_visit'] = (string)$total_visit;
                 $datas['total_dis'] = (string)number_format($total_dis, '2');
 
@@ -429,6 +433,8 @@ class ExpensesTypeController extends Controller
                         $exp_status = 'Rejected';
                     } elseif ($expense->checker_status == '3') {
                         $exp_status = 'Checked';
+                    } elseif ($expense->checker_status == '4') {
+                        $exp_status = 'Checked By Reporting';
                     } else {
                         $exp_status = 'Pending';
                     }
@@ -445,6 +451,7 @@ class ExpensesTypeController extends Controller
                         'stop_km' => $expense->stop_km ?? "",
                         'total_km' => $expense->total_km ?? "",
                         'claim_amount' => $expense->claim_amount ?? "",
+                        'approve_amount' => $expense->approve_amount ?? "",
                         'status' => $exp_status,
                         // 'claim_amount' => '$'.number_format($expense->claim_amount ?? 0,2),
                         //'expense_image' =>  $expense->getFirstMedia('expense_file')->getFullUrl(),
@@ -482,5 +489,68 @@ class ExpensesTypeController extends Controller
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
+    }
+
+    public function approveExpense(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'expense_id'  => "required",
+            'approve_amnt'  => "required",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
+        }
+        $dates = Carbon::now();
+        $current_date_time = $dates->setTimezone('Asia/Kolkata');
+        $expense_detail = Expenses::where('id', $request->expense_id)->first();
+        $approve_amnt = $request->approve_amnt;
+        $expense_id = $request->expense_id;
+        $reason = $request->reasons ?? NULL;
+
+        if ($expense_detail->claim_amount < $approve_amnt) {
+            return response()->json(['status' => 'error', 'message' => 'Approve amount greater than to claim amount']);
+        }
+
+        Expenses::where('id', $expense_id)->update(['reason' => $reason, 'checker_status' => '4', 'approve_reject_by' => Auth::user()->id, 'approve_amount' => $approve_amnt]);
+
+        if ($expense_id) {
+            $logdata = array(
+                'log_date' => date('Y-m-d'),
+                'expense_id' => $expense_id,
+                'created_by' => Auth::user()->id,
+                'status_type' => 'approved'
+            );
+            ExpenseLog::create($logdata);
+        }
+
+        return response()->json(['status' => 'success', 'message' => 'Approve amount.']);
+    }
+
+    public function rejectExpense(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'expense_id'  => "required",
+            'reasons'  => "required"
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
+        }
+        $dates = Carbon::now();
+        $current_date_time = $dates->setTimezone('Asia/Kolkata');
+        $expense_id = $request->expense_id;
+        $reason = $request->reason ?? NULL;
+        Expenses::where('id', $expense_id)->update(['reason' => $reason, 'checker_status' => '2', 'approve_reject_by' => Auth::user()->id, 'approve_amount' => NULL]);
+        //return redirect(route('expenses.index')); 
+
+        if ($expense_id) {
+            $logdata = array(
+                'log_date' => date('Y-m-d'),
+                'expense_id' => $expense_id,
+                'created_by' => Auth::user()->id,
+                'status_type' => 'rejected'
+            );
+            ExpenseLog::create($logdata);
+        }
+        return response()->json(['status' => 'success', 'message' => 'Expense reject successfully']);
     }
 }
