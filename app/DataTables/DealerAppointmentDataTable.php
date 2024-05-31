@@ -48,9 +48,13 @@ class DealerAppointmentDataTable extends DataTable
     {
         
         $data = $model->with('branch_details', 'district_details', 'city_details');
-        
-        if($request->status != null  && $request->status != ''){
-            $data->where('status', $request->status);
+
+        if ($request->startdate && $request->startdate != '' && $request->startdate != NULL && $request->enddate && $request->enddate != '' && $request->enddate != NULL) {
+            
+            $startDate = date('Y-m-d', strtotime($request->startdate));
+            $endDate = date('Y-m-d', strtotime($request->enddate));
+            $data = $data->whereDate('appointment_date', '>=', $startDate)
+                ->whereDate('appointment_date', '<=', $endDate);
         }
 
         $data = $data->latest()->newQuery();

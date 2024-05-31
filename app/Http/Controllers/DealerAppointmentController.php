@@ -46,6 +46,7 @@ class DealerAppointmentController extends Controller
      */
     public function store(Request $request)
     {
+        dd($request->all());
         $dealer_appointment = DealerAppointment::create($request->all());
         return redirect(route('dealer-appointment-thanks'));
     }

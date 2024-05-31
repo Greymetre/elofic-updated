@@ -395,7 +395,7 @@
                </div>
                </div>
 
-               <!-- <h3 class="mt-2"><b>Service: </b></h3>
+               <h3 class="mt-2"><b>Service: </b></h3>
                <hr>
                <div class="row mt-2 mb-2">
                   <table class="table" id="table-service">
@@ -411,7 +411,7 @@
                   <button type="button" class="btn btn-info btn-sm" id="add-service">ADD</button>
                </div>
 
-               <h3 class="mt-2"><b>Spare Part: </b></h3>
+               <!-- <h3 class="mt-2"><b>Spare Part: </b></h3>
                <hr>
                <div class="row mt-2 mb-2">
                   <table class="table" id="table-spare">

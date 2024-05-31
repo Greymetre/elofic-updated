@@ -7,6 +7,7 @@
     <title>New Dealer / Distributor Appointment (Greymeter)</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://silver.fieldkonnect.io//public/assets/plugins/select2/css/select2.css">
     <style>
         .inner-border {
             padding: 5px;
@@ -90,7 +91,7 @@
                             <label for="district">District </label>
                         </div>
                         <div class="col-md-9">
-                            <select class="form-select" name="district" id="district">
+                            <select class="form-select select2" name="district" id="district">
                                 <option value="" disabled selected>Your answer</option>
                                 @if($districts && count($districts) > 0)
                                 @foreach($districts as $district)
@@ -107,7 +108,7 @@
                             <label for="city">Town / City </label>
                         </div>
                         <div class="col-md-8">
-                            <select class="form-select" name="city" id="city">
+                            <select class="form-select select2" name="city" id="city">
                                 <option value="" disabled selected>Select City</option>
                             </select>
                         </div>
@@ -120,7 +121,7 @@
                     <label for="appointment_date">Date of Appointment </label>
                 </div>
                 <div class="col-md-4">
-                    <input type="date" name="appointment_date" id="appointment_date" class="form-control uppercase">
+                    <input type="date" name="appointment_date" id="appointment_date" class="form-control uppercase" required>
                 </div>
             </div>
 
@@ -128,19 +129,19 @@
                 <div class="col-md-4">
                     <div class="form-check">
                         <label class="form-check-label" for="distributor"> Distributor </label>
-                        <input class="form-check-input mr-3" type="radio" name="customertype" value="distributor" id="distributor">
+                        <input required class="form-check-input mr-3" type="radio" name="customertype" value="distributor" id="distributor">
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-check">
                         <label class="form-check-label" for="dealer"> Dealer </label>
-                        <input class="form-check-input mr-3" type="radio" name="customertype" value="dealer" id="dealer">
+                        <input required class="form-check-input mr-3" type="radio" name="customertype" value="dealer" id="dealer">
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-check">
                         <label class="form-check-label" for="shopee"> Shopee </label>
-                        <input class="form-check-input mr-3" type="radio" name="customertype" value="shopee" id="shopee">
+                        <input required class="form-check-input mr-3" type="radio" name="customertype" value="shopee" id="shopee">
                     </div>
                 </div>
             </div>
@@ -149,37 +150,37 @@
                 <div class="col-md-4">
                     <div class="form-check">
                         <label class="form-check-label" for="PUMPMOTORS"> PUMP & MOTORS </label>
-                        <input class="form-check-input" type="radio" value="PUMP&MOTORS" name="division" id="PUMPMOTORS">
+                        <input required class="form-check-input" type="radio" value="PUMP&MOTORS" name="division" id="PUMPMOTORS">
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-check">
                         <label class="form-check-label" for="FAN&APP"> FAN & APP </label>
-                        <input class="form-check-input" type="radio" name="division" value="FAN&APP" id="FAN&APP">
+                        <input required class="form-check-input" type="radio" name="division" value="FAN&APP" id="FAN&APP">
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-check">
                         <label class="form-check-label" for="AGRI"> AGRI </label>
-                        <input class="form-check-input" type="radio" name="division" value="AGRI" id="AGRI">
+                        <input required class="form-check-input" type="radio" name="division" value="AGRI" id="AGRI">
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-check">
                         <label class="form-check-label" for="SOLAR"> SOLAR </label>
-                        <input class="form-check-input" type="radio" name="division" value="SOLAR" id="SOLAR">
+                        <input required class="form-check-input" type="radio" name="division" value="SOLAR" id="SOLAR">
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-check">
                         <label class="form-check-label" for="LIGHTING"> LIGHTING </label>
-                        <input class="form-check-input" type="radio" name="division" id="LIGHTING" value="LIGHTING">
+                        <input required class="form-check-input" type="radio" name="division" id="LIGHTING" value="LIGHTING">
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-check">
                         <label class="form-check-label" for="Others"> Others </label>
-                        <input class="form-check-input" type="radio" name="division" id="Others" value="Others">
+                        <input required class="form-check-input" type="radio" name="division" id="Others" value="Others">
                     </div>
                 </div>
             </div>
@@ -189,8 +190,11 @@
             <div class="row mt-4">
                 <div class="col-md-4">
                     <div class="form-group row">
-                        <div class="col-md-6">
-                            <label> PUMP & MOTORS </label>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <label class="form-check-label" for="pumo"> PUMP & MOTORS </label>
+                                <input required class="form-check-input" type="radio" name="security_deposit" id="pumo" value="10000">
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <input class="form-control mr-3" type="text" oninput="this.value = this.value.toUpperCase()" name="SDPUMPMOTORS" value="10000" readonly>
@@ -199,8 +203,11 @@
                 </div>
                 <div class="col-md-4">
                     <div class="form-group row">
-                        <div class="col-md-2">
-                            <label> F&A </label>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <label class="form-check-label" for="F&A"> F&A </label>
+                                <input required class="form-check-input" type="radio" name="security_deposit" id="F&A" value="5000">
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <input class="form-control mr-3" type="text" oninput="this.value = this.value.toUpperCase()" name="SDF&A" value="5000" readonly>
@@ -209,8 +216,11 @@
                 </div>
                 <div class="col-md-4">
                     <div class="form-group row">
-                        <div class="col-md-2">
-                            <label> AGRI </label>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <label class="form-check-label" for="agri"> AGRI </label>
+                                <input required class="form-check-input" type="radio" name="security_deposit" id="agri" value="100000">
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <input class="form-control mr-3" type="text" oninput="this.value = this.value.toUpperCase()" name="SDPUMPMOTORS" value="100000" readonly>
@@ -230,7 +240,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="form-check">
-                        <label class="form-check-label" for="Composition"> Composition </label>
+                        <label class="form-check-label" for="Composition"> COMPOSITION </label>
                         <input class="form-check-input mr-3" type="radio" name="gst_type" value="Composition" id="Composition">
                     </div>
                 </div>
@@ -260,7 +270,7 @@
             <div class="row mt-2">
                 <div class="col-md-4">
                     <div class="form-check">
-                        <label class="form-check-label" for="Prop"> Prop </label>
+                        <label class="form-check-label" for="Prop"> Proprietorship </label>
                         <input class="form-check-input mr-3" type="radio" name="firm_type" value="Prop" id="Prop">
                     </div>
                 </div>
@@ -400,7 +410,7 @@
                     <div class="col-md-12 mt-4">
                         <div class="form-group row">
                             <div class="col-md-3">
-                                <label> status </label>
+                                <label> Status </label>
                             </div>
                             <div class="col-md-8">
                                 <select name="status" id="status" class="form-control uppercase">
@@ -750,6 +760,7 @@
     </div>
     <div class="baseurl" data-baseurl="{{ url('/')}}">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://silver.fieldkonnect.io//public/assets/plugins/select2/js/select2.full.min.js"></script>
         <script>
             $(document).ready(function() {
                 $('#printButton').click(function() {
@@ -770,13 +781,14 @@
                     success: function(res) {
                         var html = '<option value="">Select City</option>';
                         $.each(res, function(index, value) {
-                            html += '<option value="'+value.id+'">'+value.city_name+'</option>';
+                            html += '<option value="' + value.id + '">' + value.city_name + '</option>';
                         });
                         $("#city").html(html);
 
                     }
                 });
             })
+            $('.select2').select2()
         </script>
 </body>
 
