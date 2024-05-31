@@ -18,6 +18,32 @@
                 <form method="POST" action="{{ URL::to('/dealer-appointment/download') }}" class="form-horizontal">
                   @csrf
                   <div class="d-flex flex-wrap flex-row">
+                    <!-- <div class="p-2" style="width:160px;">
+                      <div class="form-group">
+                        <label class="bmd-label-floating">{!! trans('panel.global.district') !!} </label>
+                        <select class="form-control select2 district" name="district_id" id="district_id" style="width: 100%;" onchange="getCityList()">
+                          <option value="">Select {!! trans('panel.global.district') !!}</option>
+                        </select>
+                        @if ($errors->has('district_id'))
+                        <div class="error col-lg-12">
+                          <p class="text-danger">{{ $errors->first('district_id') }}</p>
+                        </div>
+                        @endif
+                      </div>
+                    </div>
+                    <div class="p-2" style="width:160px;">
+                      <div class="form-group">
+                        <label class="bmd-label-floating">{!! trans('panel.global.city') !!} </label>
+                        <select class="form-control select2 city" id="city_id" name="city_id" style="width: 100%;">
+                          <option value="">Select {!! trans('panel.global.city') !!}</option>
+                        </select>
+                        @if ($errors->has('city_id'))
+                        <div class="error col-lg-12">
+                          <p class="text-danger">{{ $errors->first('city_id') }}</p>
+                        </div>
+                        @endif
+                      </div>
+                    </div> -->
                     <div class="p-2" style="width:160px;"><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
                     <div class="p-2" style="width:160px;"><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
                     <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Dealer Appointment"><i class="material-icons">cloud_download</i></button></div>
@@ -26,7 +52,7 @@
                 @endif
 
                 <div class="next-btn">
-                <a class="btn btn-just-icon btn-theme" href="{{url('/dealer-appointment-form')}}" title="{!!  trans('panel.global.add') !!} Dealer Appointment"><i class="material-icons">add</i></a>
+                  <a class="btn btn-just-icon btn-theme" href="{{url('/dealer-appointment-form')}}" title="{!!  trans('panel.global.add') !!} Dealer Appointment"><i class="material-icons">add</i></a>
                 </div>
               </div>
             </span>
@@ -115,10 +141,10 @@
           'url': "{{ route('dealer-appointment') }}",
           'data': function(d) {
             d.status = $('#status').val(),
-              d.parent_customer = $('#parent_customer').val(),
-              d.scheme_name = $('#scheme_name').val(),
-              d.start_date = $('#start_date').val(),
-              d.end_date = $('#end_date').val()
+              d.city_id = $('#city_id').val(),
+              d.district_id = $('#district_id').val(),
+              d.startdate = $('#start_date').val(),
+              d.enddate = $('#end_date').val()
           }
         },
         columns: [{
@@ -193,6 +219,46 @@
       });
       $('#end_date').change(function() {
         table.draw();
+      });
+      $('#city_id').change(function() {
+        table.draw();
+      });
+      $('#district_id').change(function() {
+        table.draw();
+      });
+    });
+
+    $(document).ready(function() {
+      $.ajax({
+        url: "{{ url('getDistrict') }}",
+        dataType: "json",
+        type: "POST",
+        data: {
+          _token: "{{csrf_token()}}"
+        },
+        success: function(res) {
+          var options = '<option value="">Select District</option>';
+          $.each(res, function(key, val) {
+            options += '<option value="' + val.id + '">' + val.district_name + '</option>';
+          })
+          $("#district_id").html(options);
+        }
+      });
+
+      $.ajax({
+        url: "{{ url('getCity') }}",
+        dataType: "json",
+        type: "POST",
+        data: {
+          _token: "{{csrf_token()}}"
+        },
+        success: function(res) {
+          var options = '<option value="">Select City</option>';
+          $.each(res, function(key, val) {
+            options += '<option value="' + val.id + '">' + val.city_name + '</option>';
+          })
+          $("#city_id").html(options);
+        }
       });
     });
   </script>

@@ -634,6 +634,59 @@
       </li>
       @endif
 
+      @if(auth()->user()->can('services_product_access'))
+      <li class="nav-item {{ request()->is('service-charge*') ? 'active' : '' }}">
+        <a class="nav-link collapsed" data-toggle="collapse" href="#serviceProductMenu" aria-expanded="false">
+          <i class="material-icons">design_services</i>
+          <p> Service Charge Products</p>
+        </a>
+        <div class="collapse" id="serviceProductMenu" style="">
+          <ul class="nav">
+            @if(auth()->user()->can('services_product_division'))
+            <li class="nav-item {{ request()->is('service-charge/dividsions*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('service-charge/dividsions') }}">
+                <i class="material-icons">receipt_long</i>
+                <p>Division</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('services_product_category'))
+            <li class="nav-item {{ request()->is('service-charge/categories*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('service-charge/categories') }}">
+                <i class="material-icons">history</i>
+                <p>Categories</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('services_product_subcategory'))
+            <li class="nav-item {{ request()->is('complaint-type*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('complaint-type') }}">
+                <i class="material-icons">history</i>
+                <p>{!! trans('panel.sidemenu.complaint_type') !!}</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('services_product_product'))
+            <li class="nav-item {{ request()->is('complaints*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('complaints') }}">
+                <i class="material-icons">history</i>
+                <p>{!! trans('panel.sidemenu.complaint') !!}</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('services_product_chargetype'))
+            <li class="nav-item {{ request()->is('service_bills*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('service_bills') }}">
+                <i class="material-icons">history</i>
+                <p>Service Bill</p>
+              </a>
+            </li>
+            @endif
+          </ul>
+        </div>
+      </li>
+      @endif
+
       <!--           @if(auth()->user()->can('order_access')) 
           <li class="nav-item {{ request()->is('orders*') ? 'active' : '' }}">
             <a class="nav-link" href="{{ url('orders') }}">

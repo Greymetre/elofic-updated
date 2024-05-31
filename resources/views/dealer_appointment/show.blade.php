@@ -220,7 +220,7 @@
               </div>
               <div class="col-md-4">
                 <div class="form-check">
-                  <label class="form-check-label" for="Composition"> Composition </label>
+                  <label class="form-check-label" for="Composition"> COMPOSITION </label>
                   <input disabled class="form-check-input mr-3" type="radio" name="gst_type" value="Composition" id="Composition" {{($dealerAppointment->gst_type == 'Composition')?'checked':''}}>
                 </div>
               </div>
@@ -250,7 +250,7 @@
             <div class="row mt-2">
               <div class="col-md-4">
                 <div class="form-check">
-                  <label class="form-check-label" for="Prop"> Prop </label>
+                  <label class="form-check-label" for="Prop"> Proprietorship </label>
                   <input disabled class="form-check-input mr-3" type="radio" name="firm_type" value="Prop" id="Prop" {{($dealerAppointment->firm_type == 'Prop')?'checked':''}}>
                 </div>
               </div>
@@ -314,11 +314,11 @@
                 </div>
                 <div class="col-md-6 mt-2">
                   <div class="form-group row">
-                    <div class="col-md-3">
+                    <div class="col-md-6">
                       <label> Office Address: </label>
                     </div>
                     <div class="col-md-12">
-                      <input disabled class="form-control" type="text" name="office_address" value="{{$dealerAppointment->office_address}}">
+                      <textarea class="form-control">{{$dealerAppointment->office_address}}</textarea>
                     </div>
                   </div>
                   <div class="form-group row">
@@ -352,7 +352,7 @@
                       <label> Showroom Address / GODOWN: </label>
                     </div>
                     <div class="col-md-12">
-                      <input disabled class="form-control" type="text" name="godown_address" value="{{$dealerAppointment->godown_address}}">
+                      <textarea class="form-control">{{$dealerAppointment->godown_address}}</textarea>
                     </div>
                   </div>
                   <div class="form-group row">
@@ -390,7 +390,7 @@
                 <div class="col-md-12 mt-4">
                   <div class="form-group row">
                     <div class="col-md-3">
-                      <label> status </label>
+                      <label> Status </label>
                     </div>
                     <div class="col-md-8">
                       <select disabled name="status" id="status" class="form-control">

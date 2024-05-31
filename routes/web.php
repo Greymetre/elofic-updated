@@ -71,6 +71,7 @@ use App\Http\Controllers\SalesTargetUsersController;
 use App\Http\Controllers\MobileUserLoginDetailsController;
 use App\Http\Controllers\NewJoiningController;
 use App\Http\Controllers\ServiceBillController;
+use App\Http\Controllers\ServiceChargeProductsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -755,6 +756,22 @@ Route::group(['middleware' => ['auth']], function () {
 
     // Service Bill Route
     Route::resource('service_bills', ServiceBillController::class);
+
+    // Service Charge Product Route
+    // Division Route
+    Route::get('service-charge/dividsions', [ServiceChargeProductsController::class, 'divisionindex'])->name('servicecharge.dividsions.index');
+    Route::any('service-charge/dividsions/add', [ServiceChargeProductsController::class, 'divisionstore'])->name('servicecharge.dividsions.add');
+    Route::any('service-charge/dividsions/{id}/edit', [ServiceChargeProductsController::class, 'divisionedit'])->name('servicecharge.dividsions.edit');
+    Route::any('service-charge/dividsions/{id}/active', [ServiceChargeProductsController::class, 'divisionactive'])->name('servicecharge.dividsions.active');
+    Route::any('service-charge/dividsions/{id}/delete', [ServiceChargeProductsController::class, 'divisiondelete'])->name('servicecharge.dividsions.delete');
+    // Category Route
+    Route::get('service-charge/categories', [ServiceChargeProductsController::class, 'categoryindex'])->name('servicecharge.categories.index');
+    Route::any('service-charge/categories/add', [ServiceChargeProductsController::class, 'categorystore'])->name('servicecharge.categories.add');
+    Route::any('service-charge/categories/{id}/edit', [ServiceChargeProductsController::class, 'categoryedit'])->name('servicecharge.categories.edit');
+    Route::any('service-charge/categories/{id}/active', [ServiceChargeProductsController::class, 'categoryactive'])->name('servicecharge.categories.active');
+    Route::any('service-charge/categories/{id}/delete', [ServiceChargeProductsController::class, 'categorydelete'])->name('servicecharge.categories.delete');
+    Route::any('service-charge/categories/download', [ServiceChargeProductsController::class, 'categorydownload'])->name('servicecharge.categories.download');
+    Route::any('service-charge/categories/upload', [ServiceChargeProductsController::class, 'categoryupload'])->name('servicecharge.categories.upload');
 
 });
 
