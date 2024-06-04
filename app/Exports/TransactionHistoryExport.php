@@ -83,12 +83,6 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
 
     public function map($data): array
     {
-        // $data['gmap_address'] = UserActivity::where('customerid','=',$data['id'])->where('type','=','Counter Created')->pluck('address')->first();
-        $data['gmap_address'] = UserActivity::where('customerid', '=', $data['customer']['id'])->pluck('address')->first();
-
-
-        //new fields start
-
         $employee = array();
         $employee_id = array();
 

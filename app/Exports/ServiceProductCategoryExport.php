@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\ServiceChargeCategories;
+use AWS\CRT\HTTP\Request;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -13,9 +14,20 @@ use Illuminate\Support\Facades\Auth;
 
 class ServiceProductCategoryExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapping
 {
+
+    public function __construct($request)
+    {
+        $this->division = $request->input('division');
+    }
+
     public function collection()
     {
-        return ServiceChargeCategories::select('id','category_name','division_id')->latest()->get();   
+        $data = ServiceChargeCategories::with('createdbyname','division');
+        if(!empty($this->division)){
+            $data->where('division_id', $this->division);
+        }
+        
+        return $data->latest()->get();
     }
 
     public function headings(): array

@@ -10,6 +10,7 @@ use Yajra\DataTables\Html\Editor\Fields;
 use Yajra\DataTables\Services\DataTable;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class ServiceProductCategoryDataTable extends DataTable
 {
@@ -68,9 +69,14 @@ class ServiceProductCategoryDataTable extends DataTable
      * @param \App\SubCategory $model
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function query(ServiceChargeCategories $model)
+    public function query(ServiceChargeCategories $model, Request $request)
     {
-        return $model->with('createdbyname','division')->latest()->newQuery();
+        $data = $model->with('createdbyname','division');
+        if(!empty($request->division)){
+            $data->where('division_id', $request->division);
+        }
+        
+        return $data->latest()->newQuery();
     }
 
     /**

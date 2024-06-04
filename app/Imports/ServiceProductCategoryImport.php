@@ -20,22 +20,32 @@ use Log;
 
 use Illuminate\Support\Facades\Auth;
 
-class ServiceProductCategoryImport implements ToModel,WithValidation,WithHeadingRow, WithBatchInserts , WithChunkReading
+class ServiceProductCategoryImport implements ToCollection,WithValidation,WithHeadingRow, WithBatchInserts , WithChunkReading
 {
     use Importable, SkipsFailures;
-
     
     
     public function model(array $row)
     {
         return new ServiceChargeCategories([
-            'active' => 'Y',
-            'category_name' => isset($row['category_name'])? $row['category_name']:'',
-            'division_id' => isset($row['division_id'])? $row['division_id']:null,
-            'created_by' => Auth::user()->id,
-            'created_at' => getcurentDateTime(),
-            'updated_at' => getcurentDateTime()
+           
         ]);
+    }
+
+    public function collection(Collection $rows)
+    {
+        
+        foreach ($rows as $row) {
+            ServiceChargeCategories::updateOrCreate(['category_name' => isset($row['category_name'])? $row['category_name']:'',
+            'division_id' => isset($row['division_id'])? $row['division_id']:null],[
+                'active' => 'Y',
+                'category_name' => isset($row['category_name'])? $row['category_name']:'',
+                'division_id' => isset($row['division_id'])? $row['division_id']:null,
+                'created_by' => Auth::user()->id,
+                'created_at' => getcurentDateTime(),
+                'updated_at' => getcurentDateTime()
+            ]);
+        }
     }
 
     public function rules(): array

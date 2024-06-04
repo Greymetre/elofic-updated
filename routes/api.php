@@ -128,6 +128,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     // Dashboard
     Route::any('dashboard', [DashboardController::class, 'dashboard']);
     Route::any('pendingCounts', [DashboardController::class, 'pendingCounts']);
+    Route::any('getUserDashboardData', [DashboardController::class, 'getUserDashboardData']);
 
     Route::any('getProfile', [LoginController::class, 'getProfile']);
     Route::post('updateProfile', [LoginController::class, 'updateProfile']);

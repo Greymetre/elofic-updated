@@ -336,7 +336,7 @@
                            </div>
                         </div>
                         <div class="col-md-3">
-                           <div class="form-group">
+                           <!-- <div class="form-group">
                               <label class="bmd-label-floating">Seller Branch </label>
                               <select disabled name="seller_branch" id="seller_branch" class="select2 form-control">
                                  <option value="">Seller Branch</option>
@@ -351,7 +351,7 @@
                                  <p class="text-danger">{{ $errors->first('seller_branch') }}</p>
                               </div>
                               @endif
-                           </div>
+                           </div> -->
                         </div>
                      </div>
                      <div class="row mt-3">
@@ -422,7 +422,7 @@
                         <div class="col-md-3">
                            <div class="form-group">
                               <label class="bmd-label-floating">Customer Bill No.</label>
-                              <input type="text" name="customer_bill_no" class="form-control" value="{!! old( 'customer_bill_no', $complaints['customer_bill_no']) !!}">
+                              <input type="text" name="customer_bill_no" id="customer_bill_no" class="form-control" value="{!! old( 'customer_bill_no', $complaints['customer_bill_no']) !!}">
                               @if ($errors->has('customer_bill_no'))
                               <div class="error col-lg-12">
                                  <p class="text-danger">{{ $errors->first('customer_bill_no') }}</p>
@@ -875,11 +875,11 @@
                      today.setHours(0, 0, 0, 0);
 
                      if (warrantyDate > today) {
-                        $("#warranty_bill").val('Yes');
-                        $("#warranty_bill").change();
+                        $("#under_warranty").val('Yes');
+                        $("#under_warranty").change();
                      } else {
-                        $("#warranty_bill").val('No');
-                        $("#warranty_bill").change();
+                        $("#under_warranty").val('No');
+                        $("#under_warranty").change();
                      }
 
                      if (res.check_Warranty.media.length > 0) {

@@ -572,7 +572,7 @@
 
 
       @if(auth()->user()->can('services_access'))
-      <li class="nav-item {{ request()->is('services*') || request()->is('warranty_activation*') || request()->is('complaint-type*') || request()->is('complaints*') ? 'active' : '' }}">
+      <li class="nav-item {{ request()->is('services*') || request()->is('warranty_activation*') || request()->is('complaint-type*') || request()->is('complaints*') || request()->is('service-charge*') ? 'active' : '' }}">
         <a class="nav-link collapsed" data-toggle="collapse" href="#serviceMenu" aria-expanded="false">
           <i class="material-icons">design_services</i>
           <p> {!! trans('panel.sidemenu.services') !!}
@@ -621,64 +621,55 @@
               </a>
             </li>
             @endif
+            @if(auth()->user()->can('services_product_access'))
+            <li class="nav-item {{ request()->is('service-charge*') ? 'active' : '' }}">
+              <a class="nav-link collapsed" data-toggle="collapse" href="#serviceProductMenu" aria-expanded="false">
+                <i class="material-icons">design_services</i>
+                <p> Service Charge Products</p>
+              </a>
+              <div class="collapse" id="serviceProductMenu" style="">
+                <ul class="nav">
+                  @if(auth()->user()->can('services_product_division'))
+                  <li class="nav-item {{ request()->is('service-charge/dividsions*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('service-charge/dividsions') }}">
+                      <i class="material-icons">receipt_long</i>
+                      <p>Division</p>
+                    </a>
+                  </li>
+                  @endif
+                  @if(auth()->user()->can('services_product_category'))
+                  <li class="nav-item {{ request()->is('service-charge/categories*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('service-charge/categories') }}">
+                      <i class="material-icons">history</i>
+                      <p>Categories</p>
+                    </a>
+                  </li>
+                  @endif
+                  @if(auth()->user()->can('services_product_products'))
+                  <li class="nav-item {{ request()->is('service-charge/products*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('service-charge/products') }}">
+                      <i class="material-icons">history</i>
+                      <p>Products</p>
+                    </a>
+                  </li>
+                  @endif
+                  @if(auth()->user()->can('services_product_chargetype'))
+                  <li class="nav-item {{ request()->is('service-charge/chargetype*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('service-charge/chargetype') }}">
+                      <i class="material-icons">power</i>
+                      <p>Charge Type</p>
+                    </a>
+                  </li>
+                  @endif
+                </ul>
+              </div>
+            </li>
+            @endif
             @if(auth()->user()->can('warranty_activation_access'))
             <li class="nav-item {{ request()->is('warranty_activation*') ? 'active' : '' }}">
               <a class="nav-link" href="{{ url('warranty_activation') }}">
                 <i class="material-icons">history</i>
                 <p>{!! trans('panel.sidemenu.warranty_activation') !!}</p>
-              </a>
-            </li>
-            @endif
-          </ul>
-        </div>
-      </li>
-      @endif
-
-      @if(auth()->user()->can('services_product_access'))
-      <li class="nav-item {{ request()->is('service-charge*') ? 'active' : '' }}">
-        <a class="nav-link collapsed" data-toggle="collapse" href="#serviceProductMenu" aria-expanded="false">
-          <i class="material-icons">design_services</i>
-          <p> Service Charge Products</p>
-        </a>
-        <div class="collapse" id="serviceProductMenu" style="">
-          <ul class="nav">
-            @if(auth()->user()->can('services_product_division'))
-            <li class="nav-item {{ request()->is('service-charge/dividsions*') ? 'active' : '' }}">
-              <a class="nav-link" href="{{ url('service-charge/dividsions') }}">
-                <i class="material-icons">receipt_long</i>
-                <p>Division</p>
-              </a>
-            </li>
-            @endif
-            @if(auth()->user()->can('services_product_category'))
-            <li class="nav-item {{ request()->is('service-charge/categories*') ? 'active' : '' }}">
-              <a class="nav-link" href="{{ url('service-charge/categories') }}">
-                <i class="material-icons">history</i>
-                <p>Categories</p>
-              </a>
-            </li>
-            @endif
-            @if(auth()->user()->can('services_product_subcategory'))
-            <li class="nav-item {{ request()->is('complaint-type*') ? 'active' : '' }}">
-              <a class="nav-link" href="{{ url('complaint-type') }}">
-                <i class="material-icons">history</i>
-                <p>{!! trans('panel.sidemenu.complaint_type') !!}</p>
-              </a>
-            </li>
-            @endif
-            @if(auth()->user()->can('services_product_product'))
-            <li class="nav-item {{ request()->is('complaints*') ? 'active' : '' }}">
-              <a class="nav-link" href="{{ url('complaints') }}">
-                <i class="material-icons">history</i>
-                <p>{!! trans('panel.sidemenu.complaint') !!}</p>
-              </a>
-            </li>
-            @endif
-            @if(auth()->user()->can('services_product_chargetype'))
-            <li class="nav-item {{ request()->is('service_bills*') ? 'active' : '' }}">
-              <a class="nav-link" href="{{ url('service_bills') }}">
-                <i class="material-icons">history</i>
-                <p>Service Bill</p>
               </a>
             </li>
             @endif

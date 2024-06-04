@@ -65,6 +65,7 @@
                 <div class="inner-border">
                   <div class="text-center mt-3 content">
                     <img src="{{asset('assets/img/dealer_appointment_logo.png')}}" alt="">
+                    <p style="font-weight: 900;font-family: revert;" >SILVER CONSUMER ELECTRICALS (P) LTD</p>
                   </div>
                 </div>
               </div>

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, CustomerDetails, EndUser, Expenses, GiftModel, GiftSubcategory, Notes, OrderSchemeDetail, Redemption, SchemeDetails, Services, Subcategory, TourProgramme, TransactionHistory, UserCityAssign, WarrantyActivation};
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, CustomerDetails, EndUser, Expenses, GiftModel, GiftSubcategory, Notes, OrderSchemeDetail, Redemption, SchemeDetails, ServiceChargeCategories, Services, Subcategory, TourProgramme, TransactionHistory, UserCityAssign, WarrantyActivation};
 use App\Models\User;
 use Carbon\Carbon;
 use App\Models\UserLiveLocation;
@@ -1180,5 +1180,16 @@ class AjaxController extends Controller
         $data['product'] = $product;
 
         return response()->json(['status'=> 'success', 'data' => $data]);
+    }
+
+    public function getServiceCategory(Request $request)
+    {
+        if ($request->ajax()) {
+
+            $data = ServiceChargeCategories::where('division_id', $request->division_id)->get();
+
+            return response()->json($data);
+
+        }
     }
 }

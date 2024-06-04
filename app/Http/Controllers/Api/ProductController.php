@@ -433,7 +433,7 @@ class ProductController extends Controller
                         $data->push([
                             'id' => isset($rows['id']) ? $rows['id'] : 0,
                             'subcategory_name' => isset($rows['subcategory_name']) ? $rows['subcategory_name'] : '',
-                            'subcategory_image' => isset($rows['subcategory_image']) ? $rows['subcategory_image'] : '',
+                            'subcategory_image' => (isset($rows['subcategory_image']) && !empty($rows['subcategory_image']) ) ? url('/public/uploads').'/'.$rows['subcategory_image'] : url('/public/assets/img/placeholder.jpg'),
                             'category_id' => isset($rows['category_id']) ? $rows['category_id'] : 0,
                             'category_name' => isset($rows['categories']['category_name']) ? $rows['categories']['category_name'] : '',
                         ]);

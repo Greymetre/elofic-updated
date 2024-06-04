@@ -6,17 +6,17 @@
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
-          <h4 class="card-title ">Service Product {!! trans('panel.division.title_singular') !!} {!! trans('panel.global.list') !!}
+          <h4 class="card-title ">Service Product Charge Type {!! trans('panel.global.list') !!}
             <span class="">
               <div class="btn-group header-frm-btn">
                 <div class="next-btn">
-                @if(auth()->user()->can(['services_product_division_create']))
-                  <a data-toggle="modal" data-target="#createDivision" class="btn btn-just-icon btn-theme create" title="{!!  trans('panel.global.add') !!} {!! trans('panel.division.title_singular') !!}"><i class="material-icons">add_circle</i></a>
+                @if(auth()->user()->can(['services_product_chargetype_create']))
+                  <a data-toggle="modal" data-target="#createDivision" class="btn btn-just-icon btn-theme create" title="{!!  trans('panel.global.add') !!} Charge Type"><i class="material-icons">add_circle</i></a>
                   @endif
-                  <form method="post" action="{{ URL::to('service-charge/dividsions/download') }}" class="form-horizontal">
+                  <form method="post" action="{{ URL::to('service-charge/chargetype/download') }}" class="form-horizontal">
                     @csrf
-                    @if(auth()->user()->can(['services_product_division_download']))
-                    <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Division Report" name="export_division_report" value="true"><i class="material-icons">cloud_download</i></button>
+                    @if(auth()->user()->can(['services_product_chargetype_download']))
+                    <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Charge Type" name="export_chargetype_report" value="true"><i class="material-icons">cloud_download</i></button>
                     @endif
                   </form>
                 </div>
@@ -61,7 +61,7 @@
                 <th>{!! trans('panel.global.action') !!}</th>
                 <th>{!! trans('panel.global.active') !!}</th>
 
-                <th>{!! trans('panel.division.fields.division_name') !!}</th>
+                <th>Charge Type</th>
               </thead>
               <tbody>
               </tbody>
@@ -79,21 +79,21 @@
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
-          <h4 class="card-title"><span class="modal-title">{!! trans('panel.global.add') !!}</span> {!! trans('panel.division.title_singular') !!}
+          <h4 class="card-title"><span class="modal-title">{!! trans('panel.global.add') !!}</span> Charge Type
             <span class="pull-right">
               <a href="javascript:void(0)" class="btn btn-just-icon btn-danger" data-dismiss="modal"><i class="material-icons">clear</i></a>
             </span>
           </h4>
         </div>
         <div class="modal-body">
-          {!! Form::open(['route' => 'servicecharge.dividsions.add','id' => 'createDivisionForm','files'=>true ]) !!}
+          {!! Form::open(['route' => 'servicecharge.chargetype.add','id' => 'createDivisionForm','files'=>true ]) !!}
           <div class="row">
             <div class="col-md-8">
               <div class="row">
-                <label class="col-md-3 col-form-label">{!! trans('panel.division.fields.division_name') !!} <span class="text-danger"> *</span></label>
+                <label class="col-md-3 col-form-label">Charge Type <span class="text-danger"> *</span></label>
                 <div class="col-md-9">
                   <div class="form-group has-default bmd-form-group">
-                    <input type="text" name="division_name" class="form-control" id="division_name" value="{!! old( 'division_name') !!}" maxlength="200" required>
+                    <input type="text" name="charge_type" class="form-control" id="division_name" value="{!! old( 'division_name') !!}" maxlength="200" required>
                     @if ($errors->has('division_name'))
                     <div class="error col-lg-12">
                       <p class="text-danger">{{ $errors->first('division_name') }}</p>
@@ -129,7 +129,7 @@
         var table = $('#getbrand').DataTable({
           processing: true,
           serverSide: true,
-          ajax: "{{ route('servicecharge.dividsions.index') }}",
+          ajax: "{{ route('servicecharge.chargetype.index') }}",
           columns: [{
               data: 'id',
               name: 'id',
@@ -152,8 +152,8 @@
             },
 
             {
-              data: 'division_name',
-              name: 'division_name',
+              data: 'charge_type',
+              name: 'charge_type',
               "defaultContent": ''
             },
           ]
@@ -174,7 +174,7 @@
             return false;
           }
           $.ajax({
-            url: "{{ url('service-charge/dividsions') }}/" + id + '/active',
+            url: "{{ url('service-charge/chargetype') }}/" + id + '/active',
             type: 'PATCH',
             data: {
               _token: token,
@@ -205,14 +205,14 @@
           var divisionId = $(this).data('division-id');
           // Make AJAX request to update data
           $.ajax({
-            url: "{{ url('service-charge/dividsions') }}/" + divisionId + '/edit',
+            url: "{{ url('service-charge/chargetype') }}/" + divisionId + '/edit',
             type: 'GET',
             dataType: 'json',
             data: {
 
             },
             success: function(data) {
-              $('#division_name').val(data.division_name);
+              $('#division_name').val(data.charge_type);
               $('#division_id').val(data.id);
               var title = '{!! trans("panel.global.edit") !!}';
               $('.modal-title').text(title);
@@ -234,7 +234,7 @@
             return false;
           }
           $.ajax({
-            url: "{{ url('service-charge/dividsions') }}" + '/' + id + '/delete',
+            url: "{{ url('service-charge/chargetype') }}" + '/' + id + '/delete',
             type: 'DELETE',
             data: {
               _token: token,

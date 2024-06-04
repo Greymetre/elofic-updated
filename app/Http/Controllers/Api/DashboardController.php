@@ -33,9 +33,11 @@ use App\Models\LoyaltyAppSetting;
 use App\Models\ParentDetail;
 use App\Models\Pincode;
 use App\Models\Redemption;
+use App\Models\SalesTargetUsers;
 use App\Models\State;
 use App\Models\TourProgramme;
 use App\Models\TransactionHistory;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -489,5 +491,54 @@ class DashboardController extends Controller
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
+    }
+
+    public function getUserDashboardData(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|exists:users,id',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
+        }
+
+        $month = Carbon::now()->format('M');
+        $year = Carbon::now()->format('Y');
+        if($request->start_date && !empty($request->start_date) && $request->end_date && !empty($request->end_date)){
+            $startOfWeek = $request->start_date;
+            $endOfWeek = $request->end_date;
+        }else{
+            $startOfWeek = Carbon::now()->startOfWeek()->toDateString();
+            $endOfWeek = Carbon::now()->endOfWeek()->toDateString();
+
+        }
+
+        $targetAchivment = SalesTargetUsers::where(['user_id' => $request->user_id, 'month' => $month, 'year' => $year])->first();
+
+        $order_value = Order::whereBetween('order_date', [$startOfWeek, $endOfWeek])->where('created_by', $request->user_id)->sum('sub_total');
+        $order_ids = Order::whereBetween('order_date', [$startOfWeek, $endOfWeek])->where('created_by', $request->user_id)->pluck('id');
+        $order_qty = OrderDetails::whereIn('order_id', $order_ids)->sum('quantity');
+        $customer_visit = CheckIn::whereBetween('checkin_date', [$startOfWeek, $endOfWeek])->where('user_id', $request->user_id)->count();
+        if(!empty($targetAchivment)){
+            $data['target'] = $targetAchivment->target;
+            $data['achievement'] = $targetAchivment->achievement??"";
+            if($targetAchivment->achievement){
+                $data['achiv_per'] = number_format((($targetAchivment->achievement/$targetAchivment->target)*100), 2);
+                $data['target_per'] = number_format((100-$data['achiv_per']), 2);
+            }else{
+                $data['achiv_per'] = "0";
+                $data['target_per'] = "100";    
+            }
+        }else{
+            $data['target'] = "";
+            $data['achievement'] = "";
+            $data['achiv_per'] = "";
+            $data['target_per'] = "";
+        }
+        $data['order_value'] = $order_value>0?$order_value:"";
+        $data['order_qty'] = $order_qty>0?$order_qty:"";
+        $data['customer_visit'] = $customer_visit>0?(string)$customer_visit:"";
+
+        return response()->json(['status'=>'success', 'data'=>$data], 200);
     }
 }

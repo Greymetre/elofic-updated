@@ -147,6 +147,7 @@ class WarrantyActivationController extends Controller
         $customers = Customers::where('customertype', '2')->select('id', 'name', 'mobile')->get();
         $customers_dealer = Customers::where('customertype', ['1', '3'])->select('id', 'name', 'mobile')->get();
         $pincodes = Pincode::all();
+        $serial_no = $this->warranty_activation->product_serail_number;
         return view('warranty_activation.create', compact('customers', 'pincodes', 'branches'))->with('warranty_activation', $this->warranty_activation);
     }
 
@@ -162,12 +163,21 @@ class WarrantyActivationController extends Controller
         try {
             // dd($request->all());
             $warrantyactivation = WarrantyActivation::find($request->warranty_id);
+            if($warrantyactivation->status != $request->status){
+                WarrantyTimeline::create([
+                    'warranty_id' => $request->warranty_id,
+                    'created_by' => auth()->user()->id,
+                    'status' => $request->status,
+                    'remark' => $request->remark??NULL,
+                ]);
+            }
             $warrantyactivation->product_serail_number = $request->product_serail_number ?? NULL;
             $warrantyactivation->product_id = $request->select_product_id ?? NULL;
             $warrantyactivation->end_user_id = $request->end_user_id ?? NULL;
             $warrantyactivation->branch_id = $request->branch_id ?? NULL;
             $warrantyactivation->customer_id = $request->customer_id ?? NULL;
             $warrantyactivation->status = $request->status ?? 0;
+            $warrantyactivation->remark = $request->remark ?? NULL;
             $warrantyactivation->sale_bill_no = $request->sale_bill_no ?? NULL;
             $warrantyactivation->sale_bill_date = $request->sale_bill_date ?? NULL;
             $warrantyactivation->warranty_date = $request->warranty_date ?? NULL;
@@ -180,7 +190,9 @@ class WarrantyActivationController extends Controller
                     ->usingFileName($customname)
                     ->toMediaCollection('warranty_activation_attach');
             }
-            TransactionHistory::where('coupon_code', $request->product_serail_number)->update(['status' => '1']);
+            if($request->status == '1'){
+                TransactionHistory::where('coupon_code', $request->product_serail_number)->update(['status' => '1']);
+            }
 
             return Redirect::to('warranty_activation')->with('message_success', 'Warranty Activation Update Successfully.');
         } catch (\Exception $e) {
@@ -216,12 +228,18 @@ class WarrantyActivationController extends Controller
 
     public function statuschange(Request $request)
     {
-        WarrantyActivation::where('id', $request->id)->update(['status' => $request->status]);
+        if($request->status == '3'){
+            $remark = $request->remark;
+        }else{
+            $remark = '';
+        }
+        WarrantyActivation::where('id', $request->id)->update(['status' => $request->status, 'remark' => $remark,]);
 
         WarrantyTimeline::create([
             'warranty_id' => $request->id,
             'created_by' => auth()->user()->id,
             'status' => $request->status,
+            'remark' => $remark,
         ]);
 
         $wararanty = WarrantyActivation::find($request->id);

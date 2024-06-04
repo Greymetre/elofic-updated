@@ -9,6 +9,24 @@
           <h4 class="card-title ">Service Product Category {!! trans('panel.global.list') !!}
             <span class="">
               <div class="btn-group header-frm-btn">
+                <form method="GET" action="{{ URL::to('service-charge/categories/download') }}">
+                  <div class="d-flex flex-wrap flex-row">
+                    <div class="p-2" style="width:200px;">
+                      <select name="division" id="division" class="select2">
+                        <option value="">Select Division</option>
+                        @if(count($categories) > 0)
+                        @foreach($categories as $category)
+                        <option value="{{$category->id}}">{{ $category->division_name}}</option>
+                        @endforeach
+                        @endif
+                      </select>
+                    </div>
+                    @if(auth()->user()->can(['services_product_category_download']))
+                    <div class="p-2" style="width:200px;">
+                      <button href="{{ URL::to('service-charge/categories/download') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.category.title') !!}"><i class="material-icons">cloud_download</i></button>
+                    </div>
+                    @endif
+                </form>
                 <div class="next-btn">
                   @if(auth()->user()->can(['services_product_category_upload']))
                   <form action="{{ URL::to('service-charge/categories/upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
@@ -19,7 +37,7 @@
                           <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
                           <span class="fileinput-exists">Change</span>
                           <input type="hidden">
-                          <input type="file" name="import_file" required accept=".xls,.xlsx" />
+                          <input type="file" title="Select File For Import Data" name="import_file" required accept=".xls,.xlsx" />
                         </span>
                       </div>
                       <div class="input-group-append">
@@ -32,9 +50,6 @@
                   </form>
                   @endif
 
-                  @if(auth()->user()->can(['services_product_category_download']))
-                  <a href="{{ URL::to('service-charge/categories/download') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.category.title') !!}"><i class="material-icons">cloud_download</i></a>
-                  @endif
                   @if(auth()->user()->can(['category_template']))
                   <!-- <a href="{{ URL::to('subcategories-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.category.title_singular') !!}"><i class="material-icons">text_snippet</i></a> -->
                   @endif
@@ -193,7 +208,12 @@
         "order": [
           [0, 'desc']
         ],
-        ajax: "{{ route('servicecharge.categories.index') }}",
+        "ajax": {
+          'url': "{{ route('servicecharge.categories.index') }}",
+          'data': function(d) {
+            d.division = $('#division').val()
+          }
+        },
         columns: [{
             data: 'DT_RowIndex',
             name: 'DT_RowIndex',
@@ -236,6 +256,9 @@
             "defaultContent": ''
           },
         ]
+      });
+      $('#division').change(function() {
+        table.draw();
       });
       var base_url = $('.baseurl').data('baseurl');
 
@@ -310,7 +333,7 @@
           return false;
         }
         $.ajax({
-          url: "{{ url('subcategories') }}" + '/' + id,
+          url: "{{ url('service-charge/categories') }}/" + id + '/active',
           type: 'DELETE',
           data: {
             _token: token,

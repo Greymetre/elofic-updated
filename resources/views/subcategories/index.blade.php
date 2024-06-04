@@ -182,8 +182,8 @@
         ajax: "{{ route('subcategories.index') }}",
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-            {data: 'action', name: 'action',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
-            {data: 'active', name: 'active',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
+            {data: 'action', name: 'action',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'active', name: 'active',"defaultContent": '', orderable: false, searchable: false},
             {data: 'image', name: 'image',"defaultContent": '', orderable: false, searchable: false},
             {data: 'subcategory_name', name: 'subcategory_name',"defaultContent": ''},
              {data: 'categories.category_name', name: 'categories.category_name',"defaultContent": ''},

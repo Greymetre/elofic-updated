@@ -312,9 +312,11 @@ class ExpensesController extends Controller
             ->orderBy('checkin_time', 'asc')
             ->get();
         $total_dis = 0;
-        foreach ($checkins as $checkin) {
-            if (!empty($checkin->checkin_latitude) && !empty($checkin->checkin_longitude) && !empty($checkin->checkout_latitude) && !empty($checkin->checkout_longitude)) {
-                $total_dis += haversineGreatCircleDistance($checkin->checkin_latitude, $checkin->checkin_longitude, $checkin->checkout_latitude, $checkin->checkout_longitude);
+        foreach ($checkins as $k=>$checkin) {
+            if($k <= (count($checkins) - 2)){
+                if (!empty($checkin->checkin_latitude) && !empty($checkin->checkin_longitude) && !empty($checkin->checkout_latitude) && !empty($checkin->checkout_longitude)) {
+                    $total_dis += haversineGreatCircleDistance($checkin->checkin_latitude, $checkin->checkin_longitude, $checkins[$k+1]->checkin_latitude,$checkins[$k+1]->checkin_longitude,);
+                }
             }
         }
 
