@@ -57,17 +57,27 @@
                'files'=>true
                ]) !!}
                <div class="form-group">
-                  <div class="col-md-3">
-                     <label for="status" class="form-control"><b>Warranty Activation Status</b></label>
+                  <div class="row">
+                     <div class="col-md-3">
+                        <label for="status" class="form-control"><b>Warranty Activation Status</b></label>
+                     </div>
+                     <div class="col-md-3">
+                        <select name="status" id="status" class="select2" required>
+                           <option value="">Select Status</option>
+                           <option value="0" {{($warranty_activation->exists && $warranty_activation->status == '0')?'selected':''}}>In Verification</option>
+                           <option value="1" {{($warranty_activation->exists && $warranty_activation->status == '1')?'selected':''}}>Activated</option>
+                           <option value="2" {{($warranty_activation->exists && $warranty_activation->status == '2')?'selected':''}}>Pending Activated</option>
+                           <option value="3" {{($warranty_activation->exists && $warranty_activation->status == '3')?'selected':''}}>Rejected</option>
+                        </select>
+                     </div>
+                     <div class="col-md-2 reject-remark d-none">
+                        <label for="remark" class="form-control"><b>Reject Remark <span class="text-danger">*</span></b></label>
+                     </div>
+                     <div class="col-md-4 reject-remark d-none">
+                        <textarea name="remark" id="remark" class="form-control">{{$warranty_activation->remark??""}}</textarea>
+                     </div>
                   </div>
-                  <div class="col-md-3" style="margin-top: -25px;">
-                     <select name="status" id="status" class="select2" required>
-                        <option value="">Select Status</option>
-                        <option value="0" {{($warranty_activation->exists && $warranty_activation->status == '0')?'selected':''}}>In Verification</option>
-                        <option value="1" {{($warranty_activation->exists && $warranty_activation->status == '1')?'selected':''}}>Activated</option>
-                        <option value="2" {{($warranty_activation->exists && $warranty_activation->status == '2')?'selected':''}}>Pending Activated</option>
-                        <option value="3" {{($warranty_activation->exists && $warranty_activation->status == '3')?'selected':''}}>Rejected</option>
-                     </select>
+                  <div class="row">
                   </div>
                   <div class="mt-5">
                      <h5>Warranty Details</h5>
@@ -165,7 +175,7 @@
                            <label for="customer_place" class="form-control">Place</label>
                         </div>
                         <div class="col-md-4">
-                           <input type="text" name="customer_place" id="customer_place" class="form-control" value="{!! old( 'customer_place' , $warranty_activation['customer']?$warranty_activation['customer']['customer_place']:'') !!}" >
+                           <input type="text" name="customer_place" id="customer_place" class="form-control" value="{!! old( 'customer_place' , $warranty_activation['customer']?$warranty_activation['customer']['customer_place']:'') !!}">
                            @if ($errors->has('customer_place'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('customer_place') }}</p>
@@ -360,12 +370,11 @@
          </div>
       </div>
    </div>
-   <script src="{{ url('/').'/'.asset('assets/js/validation_loyalty.js') }}"></script>
    <script src="{{ url('/').'/'.asset('assets/js/jquery.custom.js') }}"></script>
    <script>
-      $(document).ready(function(){
-         var sr_no = '{{$request->serial_no}}';
-         if(sr_no != ''){
+      $(document).ready(function() {
+         var sr_no = '{{$request->serial_no??""}}';
+         if (sr_no != '') {
             $("#product_serail_number").keyup();
          }
       })
@@ -475,6 +484,14 @@
                }
             }
          });
+      }).trigger('change');
+
+      $('#status').on('change', function(){
+         if($(this).val() == '3'){
+            $('.reject-remark').removeClass('d-none');
+         }else{
+            $('.reject-remark').addClass('d-none');
+         }
       }).trigger('change');
    </script>
 </x-app-layout>

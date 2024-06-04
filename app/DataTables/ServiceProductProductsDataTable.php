@@ -2,7 +2,7 @@
 
 namespace App\DataTables;
 
-use App\Models\ServiceChargeDivision;
+use App\Models\ServiceChargeProducts;
 use Yajra\DataTables\Html\Button;
 use Yajra\DataTables\Html\Column;
 use Yajra\DataTables\Html\Editor\Editor;
@@ -11,9 +11,8 @@ use Yajra\DataTables\Services\DataTable;
 
 use Illuminate\Support\Facades\Auth;
 
-class ServiceProductDivisionDataTable extends DataTable
+class ServiceProductProductsDataTable extends DataTable
 {
-
     
     public function dataTable($query)
     {
@@ -27,15 +26,15 @@ class ServiceProductDivisionDataTable extends DataTable
             ->addColumn('action', function ($query) {
                   $btn = '';
                   $activebtn ='';
-                  if(auth()->user()->can(['services_product_division_edit']))
+                  if(auth()->user()->can(['services_product_products_edit']))
                   {
-                    $btn = $btn.'<a data-division-id="' . $query->id . '"  class="btn btn-info btn-just-icon btn-sm edit"  title="'.trans('panel.global.edit').' '.trans('panel.brand.title_singular').'">
+                    $btn = $btn.'<a href="'.route('servicecharge.products.create').'?id='.$query->id.'" class="btn btn-info btn-just-icon btn-sm" title="'.trans('panel.global.edit').' Product">
                           <i class="material-icons">edit</i>
                         </a>';
                   }
-                  if(auth()->user()->can(['services_product_division_delete']))
+                  if(auth()->user()->can(['services_product_products_delete']))
                   {
-                    $btn = $btn.' <a href="" class="btn btn-danger btn-just-icon btn-sm delete" value="'.$query->id.'" title="'.trans('panel.global.delete').' '.trans('panel.brand.title_singular').'">
+                    $btn = $btn.' <a href="javascript:void(0)" class="btn btn-danger btn-just-icon btn-sm delete" value="'.$query->id.'" title="'.trans('panel.global.delete').' Product">
                                 <i class="material-icons">clear</i>
                               </a>';
                   }
@@ -44,29 +43,29 @@ class ServiceProductDivisionDataTable extends DataTable
                             </div>';
             })
             ->addColumn('active', function ($query) {
-              if(auth()->user()->can(['services_product_division_active']))
-              {
-                $active = ($query->active == 'Y') ? 'checked="" value="'.$query->active.'"' : 'value="'.$query->active.'"';
-                return '<div class="togglebutton">
-                    <label>
-                      <input type="checkbox"'.$active.' id="'.$query->id.'" class="divisionActive">
-                      <span class="toggle"></span>
-                    </label>
-                  </div>';
-              }
+                  if(auth()->user()->can(['services_product_products_active']))
+                  {
+                    $active = ($query->active == 'Y') ? 'checked="" value="'.$query->active.'"' : 'value="'.$query->active.'"';
+                    return '<div class="togglebutton">
+                        <label>
+                          <input type="checkbox"'.$active.' id="'.$query->id.'" class="activeRecord">
+                          <span class="toggle"></span>
+                        </label>
+                      </div>';
+                  }
             })
-            ->rawColumns(['action','active','image']);
+            ->rawColumns(['action','image','active']);
     }
 
     /**
      * Get query source of dataTable.
      *
-     * @param \App\Brand $model
+     * @param \App\SubCategory $model
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function query(ServiceChargeDivision $model)
+    public function query(ServiceChargeProducts $model)
     {
-        return $model->latest()->newQuery();
+        return $model->with('charge_type','division', 'category')->latest()->newQuery();
     }
 
     /**
@@ -77,7 +76,7 @@ class ServiceProductDivisionDataTable extends DataTable
     public function html()
     {
         return $this->builder()
-                    ->setTableId('brand-table')
+                    ->setTableId('subcategory-table')
                     ->columns($this->getColumns())
                     ->minifiedAjax()
                     ->dom('Bfrtip')
@@ -110,5 +109,4 @@ class ServiceProductDivisionDataTable extends DataTable
             Column::make('updated_at'),
         ];
     }
-
 }

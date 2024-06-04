@@ -58,6 +58,8 @@ class UserSalesReportExport implements FromCollection, WithHeadings, ShouldAutoS
 
     public function map($data): array
     {
+        $start_date = Carbon::parse($this->start_date)->startOfDay();
+        $end_date = Carbon::parse($this->end_date)->endOfDay();
         return [
             $data['employee_codes'] ?? '',
             $data['name'] ?? '',
@@ -96,17 +98,17 @@ class UserSalesReportExport implements FromCollection, WithHeadings, ShouldAutoS
 
             (count($data->visits->whereBetween('checkin_date', [$this->start_date, $this->end_date])->groupBy('customers.id')) > 0) ? count($data->visits->whereBetween('checkin_date', [$this->start_date, $this->end_date])->groupBy('customers.id')) : '0',
 
-            (count($data->customers->where('customertype', '1')->whereBetween('created_at', [$this->start_date, $this->end_date])) > 0) ? count($data->customers->where('customertype', '1')->whereBetween('created_at', [$this->start_date, $this->end_date])) : '0',
+            (count($data->customers->where('customertype', '1')->whereBetween('created_at', [$start_date, $end_date])) > 0) ? count($data->customers->where('customertype', '1')->whereBetween('created_at', [$start_date, $end_date])) : '0',
 
-            (count($data->customers->where('customertype', '3')->whereBetween('created_at', [$this->start_date, $this->end_date])) > 0) ? count($data->customers->where('customertype', '3')->whereBetween('created_at', [$this->start_date, $this->end_date])) : '0',
+            (count($data->customers->where('customertype', '3')->whereBetween('created_at', [$start_date, $end_date])) > 0) ? count($data->customers->where('customertype', '3')->whereBetween('created_at', [$start_date, $end_date])) : '0',
 
-            (count($data->customers->where('customertype', '2')->whereBetween('created_at', [$this->start_date, $this->end_date])) > 0) ? count($data->customers->where('customertype', '2')->whereBetween('created_at', [$this->start_date, $this->end_date])) : '0',
+            (count($data->customers->where('customertype', '2')->whereBetween('created_at', [$start_date, $end_date])) > 0) ? count($data->customers->where('customertype', '2')->whereBetween('created_at', [$start_date, $end_date])) : '0',
 
-            (count($data->customers->where('customertype', '4')->whereBetween('created_at', [$this->start_date, $this->end_date])) > 0) ? count($data->customers->where('customertype', '4')->whereBetween('created_at', [$this->start_date, $this->end_date])) : '0',
+            (count($data->customers->where('customertype', '4')->whereBetween('created_at', [$start_date, $end_date])) > 0) ? count($data->customers->where('customertype', '4')->whereBetween('created_at', [$start_date, $end_date])) : '0',
 
-            (count($data->customers->where('customertype', '5')->whereBetween('created_at', [$this->start_date, $this->end_date])) > 0) ? count($data->customers->where('customertype', '5')->whereBetween('created_at', [$this->start_date, $this->end_date])) : '0',
+            (count($data->customers->where('customertype', '5')->whereBetween('created_at', [$start_date, $end_date])) > 0) ? count($data->customers->where('customertype', '5')->whereBetween('created_at', [$start_date, $end_date])) : '0',
 
-            (count($data->customers->whereBetween('created_at', [$this->start_date, $this->end_date])) > 0) ? count($data->customers->whereBetween('created_at', [$this->start_date, $this->end_date])) : '0'
+            (count($data->customers->whereBetween('created_at', [$start_date, $end_date])) > 0) ? count($data->customers->whereBetween('created_at', [$start_date, $end_date])) : '0'
         ];
     }
 

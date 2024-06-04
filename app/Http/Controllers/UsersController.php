@@ -482,46 +482,46 @@ class UsersController extends Controller
                     return count($query->all_attendance_details->whereBetween('punchin_date', [$request->start_date, $request->end_date]));
                 })
 
-                ->addColumn('dis_visit_total', function ($query) use ($start_date, $end_date) {
-                    return count($query->visits->where('customers.customertype', '1')->whereBetween('checkin_date', [$start_date, $end_date]));
+                ->addColumn('dis_visit_total', function ($query) use ($request) {
+                    return count($query->visits->where('customers.customertype', '1')->whereBetween('checkin_date', [$request->start_date, $request->end_date]));
                 })
-                ->addColumn('dis_visit_unique', function ($query) use ($start_date, $end_date) {
-                    return count($query->visits->where('customers.customertype', '1')->whereBetween('checkin_date', [$start_date, $end_date])->groupBy('customers.id'));
-                })
-
-                ->addColumn('dil_visit_total', function ($query) use ($start_date, $end_date) {
-                    return count($query->visits->where('customers.customertype', '3')->whereBetween('checkin_date', [$start_date, $end_date]));
-                })
-                ->addColumn('dil_visit_unique', function ($query) use ($start_date, $end_date) {
-                    return count($query->visits->where('customers.customertype', '3')->whereBetween('checkin_date', [$start_date, $end_date])->groupBy('customers.id'));
+                ->addColumn('dis_visit_unique', function ($query) use ($request) {
+                    return count($query->visits->where('customers.customertype', '1')->whereBetween('checkin_date', [$request->start_date, $request->end_date])->groupBy('customers.id'));
                 })
 
-                ->addColumn('ret_visit_total', function ($query) use ($start_date, $end_date) {
-                    return count($query->visits->where('customers.customertype', '2')->whereBetween('checkin_date', [$start_date, $end_date]));
+                ->addColumn('dil_visit_total', function ($query) use ($request) {
+                    return count($query->visits->where('customers.customertype', '3')->whereBetween('checkin_date', [$request->start_date, $request->end_date]));
                 })
-                ->addColumn('ret_visit_unique', function ($query) use ($start_date, $end_date) {
-                    return count($query->visits->where('customers.customertype', '2')->whereBetween('checkin_date', [$start_date, $end_date])->groupBy('customers.id'));
-                })
-
-                ->addColumn('serv_visit_total', function ($query) use ($start_date, $end_date) {
-                    return count($query->visits->where('customers.customertype', '4')->whereBetween('checkin_date', [$start_date, $end_date]));
-                })
-                ->addColumn('serv_visit_unique', function ($query) use ($start_date, $end_date) {
-                    return count($query->visits->where('customers.customertype', '4')->whereBetween('checkin_date', [$start_date, $end_date])->groupBy('customers.id'));
+                ->addColumn('dil_visit_unique', function ($query) use ($request) {
+                    return count($query->visits->where('customers.customertype', '3')->whereBetween('checkin_date', [$request->start_date, $request->end_date])->groupBy('customers.id'));
                 })
 
-                ->addColumn('inf_visit_total', function ($query) use ($start_date, $end_date) {
-                    return count($query->visits->where('customers.customertype', '5')->whereBetween('checkin_date', [$start_date, $end_date]));
+                ->addColumn('ret_visit_total', function ($query) use ($request) {
+                    return count($query->visits->where('customers.customertype', '2')->whereBetween('checkin_date', [$request->start_date, $request->end_date]));
                 })
-                ->addColumn('inf_visit_unique', function ($query) use ($start_date, $end_date) {
-                    return count($query->visits->where('customers.customertype', '5')->whereBetween('checkin_date', [$start_date, $end_date])->groupBy('customers.id'));
+                ->addColumn('ret_visit_unique', function ($query) use ($request) {
+                    return count($query->visits->where('customers.customertype', '2')->whereBetween('checkin_date', [$request->start_date, $request->end_date])->groupBy('customers.id'));
                 })
 
-                ->addColumn('tot_visit_total', function ($query) use ($start_date, $end_date) {
-                    return count($query->visits->whereBetween('checkin_date', [$start_date, $end_date]));
+                ->addColumn('serv_visit_total', function ($query) use ($request) {
+                    return count($query->visits->where('customers.customertype', '4')->whereBetween('checkin_date', [$request->start_date, $request->end_date]));
                 })
-                ->addColumn('tot_visit_unique', function ($query) use ($start_date, $end_date) {
-                    return count($query->visits->whereBetween('checkin_date', [$start_date, $end_date])->groupBy('customers.id'));
+                ->addColumn('serv_visit_unique', function ($query) use ($request) {
+                    return count($query->visits->where('customers.customertype', '4')->whereBetween('checkin_date', [$request->start_date, $request->end_date])->groupBy('customers.id'));
+                })
+
+                ->addColumn('inf_visit_total', function ($query) use ($request) {
+                    return count($query->visits->where('customers.customertype', '5')->whereBetween('checkin_date', [$request->start_date, $request->end_date]));
+                })
+                ->addColumn('inf_visit_unique', function ($query) use ($request) {
+                    return count($query->visits->where('customers.customertype', '5')->whereBetween('checkin_date', [$request->start_date, $request->end_date])->groupBy('customers.id'));
+                })
+
+                ->addColumn('tot_visit_total', function ($query) use ($request) {
+                    return count($query->visits->whereBetween('checkin_date', [$request->start_date, $request->end_date]));
+                })
+                ->addColumn('tot_visit_unique', function ($query) use ($request) {
+                    return count($query->visits->whereBetween('checkin_date', [$request->start_date, $request->end_date])->groupBy('customers.id'));
                 })
 
                 ->addColumn('dis_registration', function ($query) use ($start_date, $end_date) {

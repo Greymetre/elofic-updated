@@ -20,7 +20,7 @@ use App\Models\OrderDetails;
 use App\Models\Division;
 use App\Models\Department;
 use App\Models\Branch;
-use App\Models\{EmployeeDetail,TransactionHistory,MobileUserLoginDetails,Redemption,ParentDetail};
+use App\Models\{EmployeeDetail, TransactionHistory, MobileUserLoginDetails, Redemption, ParentDetail};
 use Excel;
 use App\Exports\CounterVisitReportExport;
 use App\Exports\AdherenceDetailReportExport;
@@ -277,14 +277,14 @@ class ReportController extends Controller
                     if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                         $query->whereIn('id', $userids);
                     }
-                    if($request->user_id && $request->user_id != null && $request->user_id != ''){
+                    if ($request->user_id && $request->user_id != null && $request->user_id != '') {
                         $query->where('user_id', $request->user_id);
                     }
-                    if($request->start_date && $request->start_date != null && $request->start_date != '' && $request->end_date && $request->end_date != null && $request->end_date != ''){
+                    if ($request->start_date && $request->start_date != null && $request->start_date != '' && $request->end_date && $request->end_date != null && $request->end_date != '') {
                         $startDate = date('Y-m-d', strtotime($request->start_date));
                         $endDate = date('Y-m-d', strtotime($request->end_date));
                         $query->whereDate('checkin_date', '>=', $startDate)
-                         ->whereDate('checkin_date', '<=', $endDate);
+                            ->whereDate('checkin_date', '<=', $endDate);
                     }
                 })
                 ->select('id', 'checkin_date', 'checkin_time', 'user_id', 'customer_id', 'checkout_time', 'beatscheduleid')
@@ -292,8 +292,17 @@ class ReportController extends Controller
             return Datatables::of($data)
                 ->addIndexColumn()
                 ->addColumn('visit_time', function ($query) {
-                    $interval = strtotime($query->checkout_time) - strtotime($query->checkin_time);
-                    return date("H:i:s", ($interval));
+                    if(!empty($query->checkout_time) && !empty($query->checkin_time)){
+                        $parsedTime1 = Carbon::createFromFormat('H:i:s', $query->checkout_time);
+                        $parsedTime2 = Carbon::createFromFormat('H:i:s', $query->checkin_time);
+    
+                        $difference = $parsedTime1->diff($parsedTime2);
+                        $interval = $difference->format('%H:%I:%S');
+                        return $interval;
+                    }else{
+                        return '-';
+                    }
+                    
                 })
                 ->addColumn('beat_name', function ($query) {
                     return isset($query['beatschedules']['beats']['beat_name']) ? $query['beatschedules']['beats']['beat_name'] : '';
@@ -347,8 +356,8 @@ class ReportController extends Controller
         $all_branch = array();
         $bkey = 0;
         foreach ($all_user_branches as $k => $val) {
-            if($val->getbranch){
-                if(!in_array($val->getbranch->id, $all_branch)){
+            if ($val->getbranch) {
+                if (!in_array($val->getbranch->id, $all_branch)) {
                     array_push($all_branch, $val->getbranch->id);
                     $branches[$bkey]['id'] = $val->getbranch->id;
                     $branches[$bkey]['name'] = $val->getbranch->branch_name;
@@ -364,11 +373,10 @@ class ReportController extends Controller
         foreach ($all_user_details as $k => $val) {
             $users[$k]['id'] = $val->id;
             $users[$k]['name'] = $val->name;
-        
         }
         if ($search_branches && count($search_branches) > 0 && $search_branches[0] != null) {
             if ($request->ajax()) {
-                $response = ["users"=>$users, "status"=>true];
+                $response = ["users" => $users, "status" => true];
                 return response()->json($response);
             }
         }
@@ -381,15 +389,15 @@ class ReportController extends Controller
 
                     if (!empty($request['division_id']) && $request['division_id'] != null && $request['division_id'] != "") {
                         $division_id = $request['division_id'];
-                        $query->whereHas('users', function ($query) use($division_id){
-                            $query->where('division_id',$division_id);
+                        $query->whereHas('users', function ($query) use ($division_id) {
+                            $query->where('division_id', $division_id);
                         });
                     }
 
                     if (!empty($request['department_id']) && $request['department_id'] != null && $request['department_id'] != "") {
                         $department_id = $request['department_id'];
-                        $query->whereHas('users', function ($query) use($department_id){
-                            $query->where('department_id',$department_id);
+                        $query->whereHas('users', function ($query) use ($department_id) {
+                            $query->where('department_id', $department_id);
                         });
                     }
 
@@ -463,19 +471,19 @@ class ReportController extends Controller
 
                     // }
 
-                 
-                     if(auth()->user()->can(['attendance_delete'])){
-                     $btn = $btn. '<a href="javascript:void(0)" class="btn btn-danger btn-just-icon btn-sm deleteAttendance" value="' . $query->id . '" title="Delete Attendance">
+
+                    if (auth()->user()->can(['attendance_delete'])) {
+                        $btn = $btn . '<a href="javascript:void(0)" class="btn btn-danger btn-just-icon btn-sm deleteAttendance" value="' . $query->id . '" title="Delete Attendance">
                                         <i class="material-icons">clear</i>
                                       </a>';
-                        }  
-                      
-                    if(auth()->user()->can(['attendance_punchout'])){              
+                    }
 
-                     $btn = $btn.'<a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm removePunchout" value="' . $query->id . '" title="Remove Puncout">
+                    if (auth()->user()->can(['attendance_punchout'])) {
+
+                        $btn = $btn . '<a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm removePunchout" value="' . $query->id . '" title="Remove Puncout">
                                     <i class="material-icons">schedule</i>
                                   </a>';
-                           }       
+                    }
 
 
 
@@ -532,10 +540,11 @@ class ReportController extends Controller
     }
 
 
-        // new summary attendance report start
+    // new summary attendance report start
 
 
-    public function attendancereportSummary(Request $request){
+    public function attendancereportSummary(Request $request)
+    {
 
         $search_branches = $request->input('search_branches');
         $all_reporting_user_ids = getUsersReportingToAuth();
@@ -552,8 +561,8 @@ class ReportController extends Controller
         $dkey = 0;
 
         foreach ($all_user_branches as $k => $val) {
-            if($val->getbranch){
-                if(!in_array($val->getbranch->id, $all_branch)){
+            if ($val->getbranch) {
+                if (!in_array($val->getbranch->id, $all_branch)) {
                     array_push($all_branch, $val->getbranch->id);
                     $branches[$bkey]['id'] = $val->getbranch->id;
                     $branches[$bkey]['name'] = $val->getbranch->branch_name;
@@ -563,8 +572,8 @@ class ReportController extends Controller
         }
 
         foreach ($all_user_divisions as $k => $val) {
-            if($val->getdivision){
-                if(!in_array($val->getdivision->id, $all_division)){
+            if ($val->getdivision) {
+                if (!in_array($val->getdivision->id, $all_division)) {
                     array_push($all_branch, $val->getdivision->id);
                     $divisions[$dkey]['id'] = $val->getdivision->id;
                     $divisions[$dkey]['name'] = $val->getdivision->division_name;
@@ -581,11 +590,10 @@ class ReportController extends Controller
         foreach ($all_user_details as $k => $val) {
             $users[$k]['id'] = $val->id;
             $users[$k]['name'] = $val->name;
-        
         }
         if ($search_branches && count($search_branches) > 0 && $search_branches[0] != null) {
             if ($request->ajax()) {
-                $response = ["users"=>$users, "status"=>true];
+                $response = ["users" => $users, "status" => true];
                 return response()->json($response);
             }
         }
@@ -667,18 +675,18 @@ class ReportController extends Controller
 
                     // }
 
-                      if(auth()->user()->can(['attendance_delete'])){
-                    $btn = $btn. '<a href="" class="btn btn-danger btn-just-icon btn-sm deleteAttendance" value="' . $query->id . '" title="Delete Attendance">
+                    if (auth()->user()->can(['attendance_delete'])) {
+                        $btn = $btn . '<a href="" class="btn btn-danger btn-just-icon btn-sm deleteAttendance" value="' . $query->id . '" title="Delete Attendance">
                                         <i class="material-icons">clear</i>
                                       </a>';
-                        }
-                        
-                         if(auth()->user()->can(['attendance_punchout'])){                 
+                    }
 
-                    $btn = $btn.'<a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm removePunchout" value="' . $query->id . '" title="Remove Puncout">
+                    if (auth()->user()->can(['attendance_punchout'])) {
+
+                        $btn = $btn . '<a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm removePunchout" value="' . $query->id . '" title="Remove Puncout">
                                     <i class="material-icons">schedule</i>
                                   </a>';
-                            }      
+                    }
 
 
 
@@ -731,9 +739,8 @@ class ReportController extends Controller
                 ->make(true);
         }
 
-     
-    return view('reports.attendancereport_summary', compact('users', 'branches','divisions','all_user_departments'));
 
+        return view('reports.attendancereport_summary', compact('users', 'branches', 'divisions', 'all_user_departments'));
     }
 
 
@@ -795,10 +802,10 @@ class ReportController extends Controller
     {
         $userids = getUsersReportingToAuth();
         $branches = Branch::latest()->get();
-        $dealers = Customers::where('customertype',['1','3'])->get();
+        $dealers = Customers::where('customertype', ['1', '3'])->get();
 
         if ($request->ajax()) {
-            $data = Customers::with('customertypes', 'firmtypes', 'createdbyname','getretailers','customeraddress.cityname','customeraddress.statename','getretailers.redemption','getretailers.transactions')->where('customertype',['1','3'])
+            $data = Customers::with('customertypes', 'firmtypes', 'createdbyname', 'getretailers', 'customeraddress.cityname', 'customeraddress.statename', 'getretailers.redemption', 'getretailers.transactions')->where('customertype', ['1', '3'])
                 ->where(function ($query) use ($request) {
                     if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
                         $userIds = User::where('branch_id', $request->branch_id)->pluck('id');
@@ -815,7 +822,7 @@ class ReportController extends Controller
                     return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
                 })
                 ->editColumn('branch', function ($data) {
-                    return $data->createdbyname?$data->createdbyname->getbranch->branch_name:'';
+                    return $data->createdbyname ? $data->createdbyname->getbranch->branch_name : '';
                 })
                 ->addColumn('total_registered_retailers', function ($data) {
                     $registeredRetailerCount = $data->getretailers->count();
@@ -824,56 +831,55 @@ class ReportController extends Controller
                 })
                 ->addColumn('total_registered_retailers_under_saarthi', function ($data) {
 
-                    $customerIds= $data->getretailers->pluck('customer_id');
-                    $nosOfRetailerRegistredSaarthi = TransactionHistory::whereIn('customer_id',$customerIds)->groupBy('customer_id')->count();
+                    $customerIds = $data->getretailers->pluck('customer_id');
+                    $nosOfRetailerRegistredSaarthi = TransactionHistory::whereIn('customer_id', $customerIds)->groupBy('customer_id')->count();
 
                     return isset($nosOfRetailerRegistredSaarthi) ? $nosOfRetailerRegistredSaarthi : '';
                 })
                 ->addColumn('coupon_scan_nos', function ($data) {
 
-                    $customerIds= $data->getretailers->pluck('customer_id');
-                    $coupon_scan_nos = TransactionHistory::whereIn('customer_id',$customerIds)->count();
-                    
+                    $customerIds = $data->getretailers->pluck('customer_id');
+                    $coupon_scan_nos = TransactionHistory::whereIn('customer_id', $customerIds)->count();
+
                     return isset($coupon_scan_nos) ? $coupon_scan_nos : '';
                 })
                 ->addColumn('mobile_app_downloads', function ($data) {
 
-                    $customerIds= $data->getretailers->pluck('customer_id');
-                    $mobile_app_downloads = MobileUserLoginDetails::whereIn('customer_id',$customerIds)->count();
-                    
+                    $customerIds = $data->getretailers->pluck('customer_id');
+                    $mobile_app_downloads = MobileUserLoginDetails::whereIn('customer_id', $customerIds)->count();
+
                     return isset($mobile_app_downloads) ? $mobile_app_downloads : '';
                 })
                 ->addColumn('provision_point', function ($data) {
 
-                    $customerIds= $data->getretailers->pluck('customer_id');
-                    if(count($customerIds) > 0) {
-                        $provision_point = TransactionHistory::whereIn('customer_id',$customerIds)->where('status','0')->sum('point');
-
-                    }else{
+                    $customerIds = $data->getretailers->pluck('customer_id');
+                    if (count($customerIds) > 0) {
+                        $provision_point = TransactionHistory::whereIn('customer_id', $customerIds)->where('status', '0')->sum('point');
+                    } else {
                         $provision_point = 0;
                     }
-                    
+
                     return isset($provision_point) ? $provision_point : '';
                 })
                 ->addColumn('active_point', function ($data) {
 
-                    $customerIds= $data->getretailers->pluck('customer_id');
-                    if(count($customerIds) > 0) {
-                        $active_point = TransactionHistory::whereIn('customer_id',$customerIds)->where('status','1')->sum('point');
-                    }else{
+                    $customerIds = $data->getretailers->pluck('customer_id');
+                    if (count($customerIds) > 0) {
+                        $active_point = TransactionHistory::whereIn('customer_id', $customerIds)->where('status', '1')->sum('point');
+                    } else {
                         $active_point = 0;
                     }
-                    
+
                     return isset($active_point) ? $active_point : '';
                 })
                 ->addColumn('total_point', function ($data) {
-                    $customerIds= $data->getretailers->pluck('customer_id');
+                    $customerIds = $data->getretailers->pluck('customer_id');
 
-                    if(count($customerIds) > 0) {
-                        $active_point = TransactionHistory::whereIn('customer_id',$customerIds)->where('status','1')->sum('point');
-                        $provision_point = TransactionHistory::whereIn('customer_id',$customerIds)->where('status','0')->sum('point');
+                    if (count($customerIds) > 0) {
+                        $active_point = TransactionHistory::whereIn('customer_id', $customerIds)->where('status', '1')->sum('point');
+                        $provision_point = TransactionHistory::whereIn('customer_id', $customerIds)->where('status', '0')->sum('point');
                         $total_point = $provision_point + $active_point;
-                    }else{
+                    } else {
                         $active_point = 0;
                         $provision_point = 0;
                     }
@@ -881,39 +887,39 @@ class ReportController extends Controller
                     return isset($total_point) ? $total_point : '';
                 })
                 ->addColumn('redeem_gift', function ($data) {
-                    $customerIds= $data->getretailers->pluck('customer_id');
-                    $redeem_gift = Redemption::with('customer')->where('status','!=' , '2')->whereIn('customer_id',$customerIds)->where('redeem_mode','1')->sum('redeem_amount');
-                   
+                    $customerIds = $data->getretailers->pluck('customer_id');
+                    $redeem_gift = Redemption::with('customer')->where('status', '!=', '2')->whereIn('customer_id', $customerIds)->where('redeem_mode', '1')->sum('redeem_amount');
+
                     return isset($redeem_gift) ? $redeem_gift : '';
                 })
                 ->addColumn('redeem_neft', function ($data) {
-                    $customerIds= $data->getretailers->pluck('customer_id');
-                    $redeem_neft = Redemption::with('customer')->where('status','!=' , '2')->whereIn('customer_id',$customerIds)->where('redeem_mode','2')->sum('redeem_amount');
-                   
+                    $customerIds = $data->getretailers->pluck('customer_id');
+                    $redeem_neft = Redemption::with('customer')->where('status', '!=', '2')->whereIn('customer_id', $customerIds)->where('redeem_mode', '2')->sum('redeem_amount');
+
                     return isset($redeem_neft) ? $redeem_neft : '';
                 })
                 ->addColumn('total_redeem', function ($data) {
-                    $customerIds= $data->getretailers->pluck('customer_id');
-                    $redeem_neft = Redemption::with('customer')->where('status','!=' , '2')->whereIn('customer_id',$customerIds)->where('redeem_mode','2')->sum('redeem_amount');
-                    $redeem_gift = Redemption::with('customer')->where('status','!=' , '2')->whereIn('customer_id',$customerIds)->where('redeem_mode','1')->sum('redeem_amount');
+                    $customerIds = $data->getretailers->pluck('customer_id');
+                    $redeem_neft = Redemption::with('customer')->where('status', '!=', '2')->whereIn('customer_id', $customerIds)->where('redeem_mode', '2')->sum('redeem_amount');
+                    $redeem_gift = Redemption::with('customer')->where('status', '!=', '2')->whereIn('customer_id', $customerIds)->where('redeem_mode', '1')->sum('redeem_amount');
                     $total_redeem = $redeem_gift + $redeem_neft;
                     return isset($total_redeem) ? $total_redeem : '';
                 })
                 ->addColumn('balance_active_point', function ($data) {
-                    $customerIds= $data->getretailers->pluck('customer_id');
-                    $redeem_neft =Redemption::with('customer')->where('status','!=' , '2')->whereIn('customer_id',$customerIds)->where('redeem_mode','2')->sum('redeem_amount');
-                    $redeem_gift = Redemption::with('customer')->where('status','!=' , '2')->whereIn('customer_id',$customerIds)->where('redeem_mode','1')->sum('redeem_amount');
+                    $customerIds = $data->getretailers->pluck('customer_id');
+                    $redeem_neft = Redemption::with('customer')->where('status', '!=', '2')->whereIn('customer_id', $customerIds)->where('redeem_mode', '2')->sum('redeem_amount');
+                    $redeem_gift = Redemption::with('customer')->where('status', '!=', '2')->whereIn('customer_id', $customerIds)->where('redeem_mode', '1')->sum('redeem_amount');
                     $total_redeem = $redeem_gift + $redeem_neft;
-                    $active_point = TransactionHistory::whereIn('customer_id',$customerIds)->where('point','1')->sum('point');
-                    $provision_point = TransactionHistory::whereIn('customer_id',$customerIds)->where('point','0')->sum('point');
+                    $active_point = TransactionHistory::whereIn('customer_id', $customerIds)->where('point', '1')->sum('point');
+                    $provision_point = TransactionHistory::whereIn('customer_id', $customerIds)->where('point', '0')->sum('point');
                     $total_point = $provision_point + $active_point;
 
                     $balance_active_point = $total_redeem - $total_point;
-                   
+
                     return isset($balance_active_point) ? $balance_active_point : '';
                 })
 
-                ->rawColumns(['total_registered_retailers','total_registered_retailers_under_saarthi','coupon_scan_nos','mobile_app_downloads','provision_point','active_point','total_point','redeem_gift','redeem_neft','balance_active_point','created_at'])
+                ->rawColumns(['total_registered_retailers', 'total_registered_retailers_under_saarthi', 'coupon_scan_nos', 'mobile_app_downloads', 'provision_point', 'active_point', 'total_point', 'redeem_gift', 'redeem_neft', 'balance_active_point', 'created_at'])
                 ->make(true);
         }
         $users = User::where('active', '=', 'Y')->where(function ($query) use ($userids) {
@@ -921,21 +927,21 @@ class ReportController extends Controller
                 $query->whereIn('id', $userids);
             }
         })->select('id', 'name')->get();
-        return view('reports.loyaltydealerwisesummaryreport', compact('branches','dealers'));
+        return view('reports.loyaltydealerwisesummaryreport', compact('branches', 'dealers'));
     }
 
-    public function loyaltySummaryReport(Request $request) {
+    public function loyaltySummaryReport(Request $request)
+    {
         $userids = getUsersReportingToAuth();
         $branches = Branch::latest()->get();
         if ($request->ajax()) {
-            $data = Branch::with('getuser','getuser.createdbyname','getuser.getbranch')
-            ->where(function ($query) use ($request) {
-                if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
-                    $query->where('id', $request->branch_id);
-                }
-
-            })->orderBy('id', 'asc');
-                // ->latest();
+            $data = Branch::with('getuser', 'getuser.createdbyname', 'getuser.getbranch')
+                ->where(function ($query) use ($request) {
+                    if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
+                        $query->where('id', $request->branch_id);
+                    }
+                })->orderBy('id', 'asc');
+            // ->latest();
             return Datatables::of($data)
                 ->addIndexColumn()
                 ->addColumn('total_registered_retailers', function ($data) {
@@ -943,99 +949,99 @@ class ReportController extends Controller
                     $usersIds = User::where('branch_id', $data->id)->pluck('id')->toArray();
                     // $employeeIds = EmployeeDetail::whereIn('user_id', $usersIds)->pluck('customer_id');
 
-                    $customerIds=  Customers::whereIn('executive_id', $usersIds)->where('customertype','2')->pluck('id');
+                    $customerIds =  Customers::whereIn('executive_id', $usersIds)->where('customertype', '2')->pluck('id');
                     $registeredRetailerCount = $customerIds->count();
                     return isset($registeredRetailerCount) ? $registeredRetailerCount : '';
                 })
                 ->addColumn('total_registered_retailers_under_saarthi', function ($data) {
 
                     $usersIds = User::where('branch_id', $data->id)->pluck('id')->toArray();
-                    $customerIds=  Customers::whereIn('executive_id', $usersIds)->where('customertype','2')->pluck('id');
+                    $customerIds =  Customers::whereIn('executive_id', $usersIds)->where('customertype', '2')->pluck('id');
 
-                    $nosOfRetailerRegistredSaarthi = TransactionHistory::whereIn('customer_id',$customerIds)->groupBy('customer_id')->count();
-                    
+                    $nosOfRetailerRegistredSaarthi = TransactionHistory::whereIn('customer_id', $customerIds)->groupBy('customer_id')->count();
+
                     return isset($nosOfRetailerRegistredSaarthi) ? $nosOfRetailerRegistredSaarthi : '';
                 })
                 ->addColumn('coupon_scan_nos', function ($data) {
 
                     $usersIds = User::where('branch_id', $data->id)->pluck('id')->toArray();
-                    $customerIds=  Customers::whereIn('executive_id', $usersIds)->where('customertype','2')->pluck('id');
-                    $coupon_scan_nos = TransactionHistory::whereIn('customer_id',$customerIds)->count();
+                    $customerIds =  Customers::whereIn('executive_id', $usersIds)->where('customertype', '2')->pluck('id');
+                    $coupon_scan_nos = TransactionHistory::whereIn('customer_id', $customerIds)->count();
 
                     return isset($coupon_scan_nos) ? $coupon_scan_nos : '';
                 })
                 ->addColumn('mobile_app_downloads', function ($data) {
 
                     $usersIds = User::where('branch_id', $data->id)->pluck('id')->toArray();
-                    $customerIds=  Customers::whereIn('executive_id', $usersIds)->where('customertype','2')->pluck('id');
-                    $mobile_app_downloads = MobileUserLoginDetails::whereIn('customer_id',$customerIds)->count();
-                    
+                    $customerIds =  Customers::whereIn('executive_id', $usersIds)->where('customertype', '2')->pluck('id');
+                    $mobile_app_downloads = MobileUserLoginDetails::whereIn('customer_id', $customerIds)->count();
+
                     return isset($mobile_app_downloads) ? $mobile_app_downloads : '';
                 })
                 ->addColumn('provision_point', function ($data) {
 
                     $usersIds = User::where('branch_id', $data->id)->pluck('id')->toArray();
-                    $customerIds=  Customers::whereIn('executive_id', $usersIds)->where('customertype','2')->pluck('id');
-                    $provision_point = TransactionHistory::whereIn('customer_id',$customerIds)->where('status','0')->sum('point');
-                    
+                    $customerIds =  Customers::whereIn('executive_id', $usersIds)->where('customertype', '2')->pluck('id');
+                    $provision_point = TransactionHistory::whereIn('customer_id', $customerIds)->where('status', '0')->sum('point');
+
                     return isset($provision_point) ? $provision_point : '';
                 })
                 ->addColumn('active_point', function ($data) {
 
                     $usersIds = User::where('branch_id', $data->id)->pluck('id')->toArray();
-                    $customerIds=  Customers::whereIn('executive_id', $usersIds)->where('customertype','2')->pluck('id');
-                    $active_point = TransactionHistory::whereIn('customer_id',$customerIds)->where('status','1')->sum('point');
-                    
+                    $customerIds =  Customers::whereIn('executive_id', $usersIds)->where('customertype', '2')->pluck('id');
+                    $active_point = TransactionHistory::whereIn('customer_id', $customerIds)->where('status', '1')->sum('point');
+
                     return isset($active_point) ? $active_point : '';
                 })
                 ->addColumn('total_point', function ($data) {
                     $usersIds = User::where('branch_id', $data->id)->pluck('id')->toArray();
-                    $customerIds=  Customers::whereIn('executive_id', $usersIds)->where('customertype','2')->pluck('id');
-                    $active_point = TransactionHistory::whereIn('customer_id',$customerIds)->where('status','1')->sum('point');
-                    $provision_point = TransactionHistory::whereIn('customer_id',$customerIds)->where('status','0')->sum('point');
+                    $customerIds =  Customers::whereIn('executive_id', $usersIds)->where('customertype', '2')->pluck('id');
+                    $active_point = TransactionHistory::whereIn('customer_id', $customerIds)->where('status', '1')->sum('point');
+                    $provision_point = TransactionHistory::whereIn('customer_id', $customerIds)->where('status', '0')->sum('point');
                     $total_point = $provision_point + $active_point;
                     // $total_point = '1000';
                     return isset($total_point) ? $total_point : '';
                 })
                 ->addColumn('redeem_gift', function ($data) {
                     $usersIds = User::where('branch_id', $data->id)->pluck('id')->toArray();
-                    $customerIds=  Customers::whereIn('executive_id', $usersIds)->where('customertype','2')->pluck('id');
-                    $redeem_gift = Redemption::with('customer')->where('status','!=' , '2')->whereIn('customer_id',$customerIds)->where('redeem_mode','1')->sum('redeem_amount');
-                   
+                    $customerIds =  Customers::whereIn('executive_id', $usersIds)->where('customertype', '2')->pluck('id');
+                    $redeem_gift = Redemption::with('customer')->where('status', '!=', '2')->whereIn('customer_id', $customerIds)->where('redeem_mode', '1')->sum('redeem_amount');
+
                     return isset($redeem_gift) ? $redeem_gift : '';
                 })
                 ->addColumn('redeem_neft', function ($data) {
                     $usersIds = User::where('branch_id', $data->id)->pluck('id')->toArray();
-                    $customerIds=  Customers::whereIn('executive_id', $usersIds)->where('customertype','2')->pluck('id');
-                    $redeem_neft = Redemption::with('customer')->whereIn('customer_id',$customerIds)->where('status','!=' , '2')->where('redeem_mode','2')->sum('redeem_amount');
-                   
+                    $customerIds =  Customers::whereIn('executive_id', $usersIds)->where('customertype', '2')->pluck('id');
+                    $redeem_neft = Redemption::with('customer')->whereIn('customer_id', $customerIds)->where('status', '!=', '2')->where('redeem_mode', '2')->sum('redeem_amount');
+
                     return isset($redeem_neft) ? $redeem_neft : '';
                 })
                 ->addColumn('total_redeem', function ($data) {
                     $usersIds = User::where('branch_id', $data->id)->pluck('id')->toArray();
-                    $customerIds=  Customers::whereIn('executive_id', $usersIds)->where('customertype','2')->pluck('id');
-                    $redeem_neft = Redemption::with('customer')->where('status','!=' , '2')->whereIn('customer_id',$customerIds)->where('redeem_mode','2')->sum('redeem_amount');
-                    $redeem_gift = Redemption::with('customer')->where('status','!=' , '2')->whereIn('customer_id',$customerIds)->where('redeem_mode','1')->sum('redeem_amount');
+                    $customerIds =  Customers::whereIn('executive_id', $usersIds)->where('customertype', '2')->pluck('id');
+                    $redeem_neft = Redemption::with('customer')->where('status', '!=', '2')->whereIn('customer_id', $customerIds)->where('redeem_mode', '2')->sum('redeem_amount');
+                    $redeem_gift = Redemption::with('customer')->where('status', '!=', '2')->whereIn('customer_id', $customerIds)->where('redeem_mode', '1')->sum('redeem_amount');
                     $total_redeem = $redeem_gift + $redeem_neft;
                     return isset($total_redeem) ? $total_redeem : '';
                 })
                 ->addColumn('balance_active_point', function ($data) {
                     $usersIds = User::where('branch_id', $data->id)->pluck('id')->toArray();
-                    $customerIds=  Customers::whereIn('executive_id', $usersIds)->where('customertype','2')->pluck('id');
-                    $redeem_neft = Redemption::with('customer')->where('status','!=' , '2')->whereIn('customer_id',$customerIds)->where('redeem_mode','2')->sum('redeem_amount');
-                    $redeem_gift = Redemption::with('customer')->where('status','!=' , '2')->whereIn('customer_id',$customerIds)->where('redeem_mode','1')->sum('redeem_amount');
+                    $customerIds =  Customers::whereIn('executive_id', $usersIds)->where('customertype', '2')->pluck('id');
+                    $redeem_neft = Redemption::with('customer')->where('status', '!=', '2')->whereIn('customer_id', $customerIds)->where('redeem_mode', '2')->sum('redeem_amount');
+                    $redeem_gift = Redemption::with('customer')->where('status', '!=', '2')->whereIn('customer_id', $customerIds)->where('redeem_mode', '1')->sum('redeem_amount');
                     $total_redeem = $redeem_gift + $redeem_neft;
 
-                    $active_point = TransactionHistory::whereIn('customer_id',$customerIds)->where('point','1')->sum('point');
-                    $provision_point = TransactionHistory::whereIn('customer_id',$customerIds)->where('point','0')->sum('point');
+                    $active_point = TransactionHistory::whereIn('customer_id', $customerIds)->where('point', '1')->sum('point');
+                    $provision_point = TransactionHistory::whereIn('customer_id', $customerIds)->where('point', '0')->sum('point');
                     $total_point = $provision_point + $active_point;
                     // $total_point = '1000';
 
                     $balance_active_point = $total_redeem - $total_point;
-                   
+
                     return isset($balance_active_point) ? $balance_active_point : '';
                 })
-                ->rawColumns(['total_registered_retailers','total_registered_retailers_under_saarthi','coupon_scan_nos','mobile_app_downloads','provision_point','active_point','total_point','redeem_gift','redeem_neft','balance_active_point','created_at'])
+                ->rawColumns(['total_registered_retailers', 'total_registered_retailers_under_saarthi', 'coupon_scan_nos', 'mobile_app_downloads', 'provision_point', 'active_point', 'total_point', 'redeem_gift', 'redeem_neft', 'balance_active_point', 'created_at'])
                 ->make(true);
         }
         // $users = User::where('active', '=', 'Y')->where(function ($query) use ($userids) {
@@ -1051,18 +1057,20 @@ class ReportController extends Controller
     Loyalty summary report export
     */
 
-    public function loyaltySummaryReportDownload(Request $request) {
+    public function loyaltySummaryReportDownload(Request $request)
+    {
         abort_if(Gate::denies('loyalty_summary_report_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         return Excel::download(new LoyaltySummaryReportExport($request), 'loyalty_summary.xlsx');
     }
 
-    public function loyaltyDealerSummaryReportDownload(Request $request) {
+    public function loyaltyDealerSummaryReportDownload(Request $request)
+    {
         abort_if(Gate::denies('loyalty_summary_dealer_wise_report_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        return Excel::download(new LoyaltyDealerSummaryReportExport($request), 'loyalty_dealer_wise_summary.xlsx');   
+        return Excel::download(new LoyaltyDealerSummaryReportExport($request), 'loyalty_dealer_wise_summary.xlsx');
     }
 
     public function perDayCounterVisitReport(Request $request)

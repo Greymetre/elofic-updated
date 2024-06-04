@@ -15,6 +15,9 @@ return new class extends Migration
     {
         Schema::create('service_charge_charge_types', function (Blueprint $table) {
             $table->id();
+            $table->string('active');
+            $table->string('charge_type')->nullable();
+            $table->string('created_by')->nullable();
             $table->timestamps();
         });
     }

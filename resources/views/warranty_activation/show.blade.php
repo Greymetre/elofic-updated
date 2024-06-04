@@ -225,7 +225,7 @@
                      <h3 class="mt-4">Invoice Attachment</h3>
                      <hr>
                      <div class="row text-center">
-                        
+
                         @if($warrantyactivation->exists && $warrantyactivation->getMedia('warranty_activation_attach')->count() > 0 && Storage::disk('s3')->exists($warrantyactivation->getFirstMedia('warranty_activation_attach')->getPath()))
                         <a href="{!! $warrantyactivation->getMedia('warranty_activation_attach')[0]->getFullUrl() !!}" data-lightbox="mygallery" data-title="Invoice">
                            <img width="250" src="{!! $warrantyactivation->getMedia('warranty_activation_attach')[0]->getFullUrl() !!}" class="img-fluid rounded"></a>
@@ -254,11 +254,11 @@
                         @php $status = 'Rejected'; @endphp
                         @endif
                         <div class="d-flex"><i class="material-icons">military_tech</i>
-                        @if($timeline->status == '0')
-                        <p>Warranty <span class="theadl">{{$warrantyactivation->product_serail_number}}</span> Move to {{$status}}. By <span class="theadl">{{$timeline->createdByName->name}}</span> on {{date('d M Y h:i A', strtotime($timeline->created_at))}}</p>
-                        @else
-                        <p>Warranty <span class="theadl">{{$warrantyactivation->product_serail_number}}</span> {{$status}}. By <span class="theadl">{{$timeline->createdByName->name}}</span> on {{date('d M Y h:i A', strtotime($timeline->created_at))}}</p>
-                        @endif
+                           @if($timeline->status == '0')
+                           <p>Warranty <span class="theadl">{{$warrantyactivation->product_serail_number}}</span> Move to {{$status}}. By <span class="theadl">{{$timeline->createdByName->name}}</span> on {{date('d M Y h:i A', strtotime($timeline->created_at))}}</p>
+                           @else
+                           <p>Warranty <span class="theadl">{{$warrantyactivation->product_serail_number}}</span> {{$status}}. By <span class="theadl">{{$timeline->createdByName->name}}</span> on {{date('d M Y h:i A', strtotime($timeline->created_at))}}</p>
+                           @endif
                         </div>
                         @endforeach
                         @endif
@@ -284,37 +284,85 @@
       function changeStatus(element) {
          var id = $(element).data('waid');
          var status = $(element).data('status');
-         Swal.fire({
-            title: "ARE YOU SURE TO CHANGE STATUS ?",
-            showDenyButton: true,
-            showCancelButton: true,
-            confirmButtonText: "Yes",
-            denyButtonText: `No`
-         }).then((result) => {
-            console.log(result);
-            if (result.value) {
-               $.ajax({
-                  url: "{{ url('warranty-status-change') }}",
-                  dataType: "json",
-                  type: "POST",
-                  data: {
-                     _token: "{{csrf_token()}}",
-                     id: id,
-                     status: status
-                  },
-                  success: function(res) {
-                     if (res.status === true) {
-                        Swal.fire("Status Update successfully!", res.msg, "success");
-                        setTimeout(() => {
-                           location.reload();
-                        }, 3000);
-                     } else {
-                        Swal.fire("Somthing went wrong", "", "error");
-                     }
+         if (status == '3') {
+            Swal.fire({
+               title: "ARE YOU SURE TO CHANGE STATUS?",
+               input: 'text',
+               inputPlaceholder: 'Enter your reason',
+               inputAttributes: {
+                  maxlength: 100,
+                  autocapitalize: 'off',
+                  autocorrect: 'off'
+               },
+               showDenyButton: true,
+               showCancelButton: true,
+               confirmButtonText: "Yes",
+               denyButtonText: `No`,
+               preConfirm: (value) => {
+                  if (!value) {
+                     $('.swal2-input').css('border', '1px solid red');
+                     return false;
                   }
-               });
-            }
-         });
+                  return value;
+               }
+            }).then((result) => {
+               if (result.value) {
+                  $.ajax({
+                     url: "{{ url('warranty-status-change') }}",
+                     dataType: "json",
+                     type: "POST",
+                     data: {
+                        _token: "{{csrf_token()}}",
+                        id: id,
+                        status: status,
+                        remark: result.value
+                     },
+                     success: function(res) {
+                        if (res.status === true) {
+                           Swal.fire("Status Update successfully!", res.msg, "success");
+                           setTimeout(() => {
+                              location.reload();
+                           }, 3000);
+                        } else {
+                           Swal.fire("Somthing went wrong", "", "error");
+                        }
+                     }
+                  });
+               }
+            })
+         } else {
+            Swal.fire({
+               title: "ARE YOU SURE TO CHANGE STATUS ?",
+               showDenyButton: true,
+               showCancelButton: true,
+               confirmButtonText: "Yes",
+               denyButtonText: `No`
+            }).then((result) => {
+               console.log(result);
+               if (result.value) {
+                  $.ajax({
+                     url: "{{ url('warranty-status-change') }}",
+                     dataType: "json",
+                     type: "POST",
+                     data: {
+                        _token: "{{csrf_token()}}",
+                        id: id,
+                        status: status
+                     },
+                     success: function(res) {
+                        if (res.status === true) {
+                           Swal.fire("Status Update successfully!", res.msg, "success");
+                           setTimeout(() => {
+                              location.reload();
+                           }, 3000);
+                        } else {
+                           Swal.fire("Somthing went wrong", "", "error");
+                        }
+                     }
+                  });
+               }
+            });
+         }
       }
    </script>
 

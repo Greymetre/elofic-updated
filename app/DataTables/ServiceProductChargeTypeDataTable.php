@@ -2,7 +2,7 @@
 
 namespace App\DataTables;
 
-use App\Models\ServiceChargeDivision;
+use App\Models\ServiceChargeChargeType;
 use Yajra\DataTables\Html\Button;
 use Yajra\DataTables\Html\Column;
 use Yajra\DataTables\Html\Editor\Editor;
@@ -11,7 +11,7 @@ use Yajra\DataTables\Services\DataTable;
 
 use Illuminate\Support\Facades\Auth;
 
-class ServiceProductDivisionDataTable extends DataTable
+class ServiceProductChargeTypeDataTable extends DataTable
 {
 
     
@@ -27,15 +27,15 @@ class ServiceProductDivisionDataTable extends DataTable
             ->addColumn('action', function ($query) {
                   $btn = '';
                   $activebtn ='';
-                  if(auth()->user()->can(['services_product_division_edit']))
+                  if(auth()->user()->can(['services_product_chargetype_edit']))
                   {
-                    $btn = $btn.'<a data-division-id="' . $query->id . '"  class="btn btn-info btn-just-icon btn-sm edit"  title="'.trans('panel.global.edit').' '.trans('panel.brand.title_singular').'">
+                    $btn = $btn.'<a data-division-id="' . $query->id . '"  class="btn btn-info btn-just-icon btn-sm edit"  title="'.trans('panel.global.edit').' Charge Type">
                           <i class="material-icons">edit</i>
                         </a>';
                   }
-                  if(auth()->user()->can(['services_product_division_delete']))
+                  if(auth()->user()->can(['services_product_chargetype_delete']))
                   {
-                    $btn = $btn.' <a href="" class="btn btn-danger btn-just-icon btn-sm delete" value="'.$query->id.'" title="'.trans('panel.global.delete').' '.trans('panel.brand.title_singular').'">
+                    $btn = $btn.' <a href="" class="btn btn-danger btn-just-icon btn-sm delete" value="'.$query->id.'" title="'.trans('panel.global.delete').' Charge Type">
                                 <i class="material-icons">clear</i>
                               </a>';
                   }
@@ -44,7 +44,7 @@ class ServiceProductDivisionDataTable extends DataTable
                             </div>';
             })
             ->addColumn('active', function ($query) {
-              if(auth()->user()->can(['services_product_division_active']))
+              if(auth()->user()->can(['services_product_chargetype_active']))
               {
                 $active = ($query->active == 'Y') ? 'checked="" value="'.$query->active.'"' : 'value="'.$query->active.'"';
                 return '<div class="togglebutton">
@@ -64,7 +64,7 @@ class ServiceProductDivisionDataTable extends DataTable
      * @param \App\Brand $model
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function query(ServiceChargeDivision $model)
+    public function query(ServiceChargeChargeType $model)
     {
         return $model->latest()->newQuery();
     }

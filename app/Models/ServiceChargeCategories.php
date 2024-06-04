@@ -9,7 +9,7 @@ class ServiceChargeCategories extends Model
 {
     use HasFactory;
 
-    protected $fillable = [ 'active', 'ranking' ,'category_name', 'subcategory_image','division_id', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at' ];
+    protected $fillable = [ 'active', 'ranking' ,'category_name','division_id', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at' ];
 
 
     public function createdbyname()

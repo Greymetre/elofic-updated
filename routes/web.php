@@ -761,6 +761,7 @@ Route::group(['middleware' => ['auth']], function () {
     // Division Route
     Route::get('service-charge/dividsions', [ServiceChargeProductsController::class, 'divisionindex'])->name('servicecharge.dividsions.index');
     Route::any('service-charge/dividsions/add', [ServiceChargeProductsController::class, 'divisionstore'])->name('servicecharge.dividsions.add');
+    Route::any('service-charge/dividsions/download', [ServiceChargeProductsController::class, 'divisiondownload'])->name('servicecharge.dividsions.download');
     Route::any('service-charge/dividsions/{id}/edit', [ServiceChargeProductsController::class, 'divisionedit'])->name('servicecharge.dividsions.edit');
     Route::any('service-charge/dividsions/{id}/active', [ServiceChargeProductsController::class, 'divisionactive'])->name('servicecharge.dividsions.active');
     Route::any('service-charge/dividsions/{id}/delete', [ServiceChargeProductsController::class, 'divisiondelete'])->name('servicecharge.dividsions.delete');
@@ -772,7 +773,24 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('service-charge/categories/{id}/delete', [ServiceChargeProductsController::class, 'categorydelete'])->name('servicecharge.categories.delete');
     Route::any('service-charge/categories/download', [ServiceChargeProductsController::class, 'categorydownload'])->name('servicecharge.categories.download');
     Route::any('service-charge/categories/upload', [ServiceChargeProductsController::class, 'categoryupload'])->name('servicecharge.categories.upload');
-
+    // Charge Type Route
+    Route::get('service-charge/chargetype', [ServiceChargeProductsController::class, 'chargetypeindex'])->name('servicecharge.chargetype.index');
+    Route::any('service-charge/chargetype/add', [ServiceChargeProductsController::class, 'chargetypestore'])->name('servicecharge.chargetype.add');
+    Route::any('service-charge/chargetype/download', [ServiceChargeProductsController::class, 'chargetypedownload'])->name('servicecharge.chargetype.download');
+    Route::any('service-charge/chargetype/{id}/edit', [ServiceChargeProductsController::class, 'chargetypeedit'])->name('servicecharge.chargetype.edit');
+    Route::any('service-charge/chargetype/{id}/active', [ServiceChargeProductsController::class, 'chargetypeactive'])->name('servicecharge.chargetype.active');
+    Route::any('service-charge/chargetype/{id}/delete', [ServiceChargeProductsController::class, 'chargetypedelete'])->name('servicecharge.chargetype.delete');
+    // Product Route
+    Route::get('service-charge/products', [ServiceChargeProductsController::class, 'productindex'])->name('servicecharge.products.index');
+    Route::any('service-charge/products/create', [ServiceChargeProductsController::class, 'productcreate'])->name('servicecharge.products.create');
+    Route::any('service-charge/products/add', [ServiceChargeProductsController::class, 'productstore'])->name('servicecharge.products.add');
+    Route::any('service-charge/products/update', [ServiceChargeProductsController::class, 'productstore'])->name('servicecharge.products.update');
+    Route::any('service-charge/products/{id}/edit', [ServiceChargeProductsController::class, 'productedit'])->name('servicecharge.products.edit');
+    Route::any('service-charge/products/{id}/active', [ServiceChargeProductsController::class, 'productactive'])->name('servicecharge.products.active');
+    Route::any('service-charge/products/{id}/delete', [ServiceChargeProductsController::class, 'productdelete'])->name('servicecharge.products.delete');
+    Route::any('service-charge/products/download', [ServiceChargeProductsController::class, 'productdownload'])->name('servicecharge.products.download');
+    Route::any('service-charge/products/upload', [ServiceChargeProductsController::class, 'productupload'])->name('servicecharge.products.upload');
+    
 });
 
     Route::any('getState', [ AjaxController::class, 'getState']);
@@ -787,6 +805,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('getDealerDisDataSelect', [ AjaxController::class, 'getDealerDisDataSelect'])->name('getDealerDisDataSelect');
     Route::any('getRetailerDataSelect', [ AjaxController::class, 'getRetailerDataSelect'])->name('getRetailerDataSelect');
     Route::any('getProductDataSelect', [ AjaxController::class, 'getProductDataSelect'])->name('getProductDataSelect');
+    Route::any('getServiceCategory', [ AjaxController::class, 'getServiceCategory'])->name('getServiceCategory');
     Route::any('getStateDataSelect', [ AjaxController::class, 'getStateDataSelect'])->name('getStateDataSelect');
     Route::any('getCategoryData', [ AjaxController::class, 'getCategoryData']);
     Route::any('getExpensesData', [ AjaxController::class, 'getExpensesData'])->name('getExpensesData');

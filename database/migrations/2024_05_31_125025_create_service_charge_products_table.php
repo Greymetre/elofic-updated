@@ -15,6 +15,11 @@ return new class extends Migration
     {
         Schema::create('service_charge_products', function (Blueprint $table) {
             $table->id();
+            $table->bigInteger('charge_type_id')->nullable();
+            $table->string('product_name')->nullable();
+            $table->bigInteger('division_id')->nullable();
+            $table->bigInteger('category_id')->nullable();
+            $table->string('price')->nullable();
             $table->timestamps();
         });
     }

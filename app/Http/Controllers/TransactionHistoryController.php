@@ -133,6 +133,7 @@ class TransactionHistoryController extends Controller
                         'coupon_code' => $nonNullCoupenCode,
                         'scheme_id' => $scheme_details->scheme_id,
                         'point' => $point,
+                        'remark' => 'Coupon scan',
                         'created_by' => auth()->user()->id,
                     ]);
                 } else {
