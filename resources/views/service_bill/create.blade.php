@@ -5,12 +5,6 @@
          max-height: 200px !important;
       }
 
-      .select2-results,
-      .select2-search--dropdown,
-      .select2-dropdown--above {
-         min-width: 250px !important;
-      }
-
       .select2-container {
          border-bottom: 1px solid lightgray;
       }
@@ -45,6 +39,12 @@
       .inp-div i:first-child {
          font-size: 40px !important;
       }
+
+      .remove-tr {
+         font-size: 15px !important;
+         font-weight: 900 !important;
+         padding: 4px 10px 4px 10px !important;
+      }
    </style>
    <div class="row">
       <div class="col-md-12">
@@ -53,7 +53,7 @@
                <div class="nav-tabs-navigation">
                   <div class="nav-tabs-wrapper">
                      <h3 class="card-title ">
-                        Service Bill Creation
+                     {{$service_bill->exists?'Edit':'Create'}} Service Bill
                         @if(auth()->user()->can(['district_access']))
                         <ul class="nav nav-tabs pull-right" data-tabs="tabs">
                            <li class="nav-item">
@@ -97,7 +97,7 @@
                   <div class="col-md-3">
                      <div class="form-group">
                         <label for="complaint_number">Complaint Number</label>
-                        <select name="complaint_number" id="complaint_number" class="select2">
+                        <select name="complaint_number" id="complaint_number" class="select2" required>
                            <option value="">Select Complaint Number</option>
                            @if(count($all_complaint_number) > 0)
                            @foreach($all_complaint_number as $val)
@@ -106,6 +106,8 @@
                            @endif
                         </select>
                         <input type="hidden" readonly name="product_division" id="product_division" value="{{($complaint?($complaint->product_details?$complaint->product_details->categories->id:''):'')}}">
+                        <input type="hidden" readonly name="complaint_id" id="complaint_id" value="{{($complaint?($complaint->id?$complaint->id:''):'')}}">
+                        <input type="hidden" readonly name="service_bill_id" id="service_bill_id" value="{{($service_bill?($service_bill->id?$service_bill->id:''):'')}}">
                      </div>
                   </div>
                   <div class="col-md-3">
@@ -227,206 +229,193 @@
 
                <h3 class="mt-2"><b>Complaint Category: </b></h3>
                <div class="border border-dark rounded p-4">
-               <div class="row mt-2 mb-2">
-                  <div class="col-md-3">
-                     <div class="form-group">
-                        <label for="category">Category Of Complaint</label>
-                        <select name="category" id="category" class="select2">
-                           <option value="">Select Category</option>
-                           <option value="Electrical Fault">Electrical Fault</option>
-                           <option value="Mechanical Fault">Mechanical Fault</option>
-                           <option value="Physical Fault">Physical Fault</option>
-                        </select>
+                  <div class="row mt-2 mb-2">
+                     <div class="col-md-3">
+                        <div class="form-group">
+                           <label for="category">Category Of Complaint</label>
+                           <select name="category" id="category" class="select2">
+                              <option value="">Select Category</option>
+                              <option value="Electrical Fault" {{($service_bill && $service_bill->category == 'Electrical Fault')?'selected':''}}>Electrical Fault</option>
+                              <option value="Mechanical Fault" {{($service_bill && $service_bill->category == 'Mechanical Fault')?'selected':''}}>Mechanical Fault</option>
+                              <option value="Physical Fault" {{($service_bill && $service_bill->category == 'Physical Fault')?'selected':''}}>Physical Fault</option>
+                           </select>
+                        </div>
+                     </div>
+                     <div class="col-md-3">
+                        <div class="form-group">
+                           <label for="complaint_type">Complaint Type</label>
+                           <select name="complaint_type" id="complaint_type" class="select2">
+                              <option value="">Select Complaint Type</option>
+                              <option value="Auto ON-OFF" {{($service_bill && $service_bill->complaint_type == 'Auto ON-OFF')?'selected':''}}>Auto ON-OFF</option>
+                              <option value="Body Current" {{($service_bill && $service_bill->complaint_type == 'Body Current')?'selected':''}}>Body Current</option>
+                              <option value="Body Damage" {{($service_bill && $service_bill->complaint_type == 'Body Damage')?'selected':''}}>Body Damage</option>
+                              <option value="Fan Does Not Start" {{($service_bill && $service_bill->complaint_type == 'Fan Does Not Start')?'selected':''}}>Fan Does Not Start</option>
+                              <option value="Fan Running Slow" {{($service_bill && $service_bill->complaint_type == 'Fan Running Slow')?'selected':''}}>Fan Running Slow</option>
+                              <option value="Fan Wobbling" {{($service_bill && $service_bill->complaint_type == 'Fan Wobbling')?'selected':''}}>Fan Wobbling</option>
+                              <option value="Noise Problem" {{($service_bill && $service_bill->complaint_type == 'Noise Problem')?'selected':''}}>Noise Problem</option>
+                              <option value="Oscillation Issue" {{($service_bill && $service_bill->complaint_type == 'Oscillation Issue')?'selected':''}}>Oscillation Issue</option>
+                              <option value="Poor Flow Of Air" {{($service_bill && $service_bill->complaint_type == 'Poor Flow Of Air')?'selected':''}}>Poor Flow Of Air</option>
+                           </select>
+                        </div>
+                     </div>
+                     <div class="col-md-3">
+                        <div class="form-group">
+                           <label for="complaint_reason">Complaint Reason</label>
+                           <select name="complaint_reason" id="complaint_reason" class="select2">
+                              <option value="">Select Complaint Reason</option>
+                              <option value="Stator Dead" {{($service_bill && $service_bill->complaint_reason == 'Stator Dead')?'selected':''}}>Stator Dead</option>
+                              <option value="PCB Burn" {{($service_bill && $service_bill->complaint_reason == 'PCB Burn')?'selected':''}}>PCB Burn</option>
+                              <option value="CutOff Issue" {{($service_bill && $service_bill->complaint_reason == 'CutOff Issue')?'selected':''}}>CutOff Issue</option>
+                              <option value="Loose Connection" {{($service_bill && $service_bill->complaint_reason == 'Loose Connection')?'selected':''}}>Loose Connection</option>
+                              <option value="Low Voltage" {{($service_bill && $service_bill->complaint_reason == 'Low Voltage')?'selected':''}}>Low Voltage</option>
+                           </select>
+                        </div>
+                     </div>
+                     <div class="col-md-3">
+                        <div class="form-group">
+                           <label for="condition_of_service">Condition Of Service</label>
+                           <select name="condition_of_service" id="condition_of_service" class="select2">
+                              <option value="">Select Condition Of Service</option>
+                              <option value="Full Finish" {{($service_bill && $service_bill->condition_of_service == 'Full Finish')?'selected':''}}>Full Finish</option>
+                              <option value="Regular Repair" {{($service_bill && $service_bill->condition_of_service == 'Regular Repair')?'selected':''}}>Regular Repair</option>
+                              <option value="Field Visit" {{($service_bill && $service_bill->condition_of_service == 'Field Visit')?'selected':''}}>Field Visit</option>
+                           </select>
+                        </div>
+                     </div>
+                     <div class="col-md-3">
+                        <div class="form-group">
+                           <label for="received_product">Received Product</label>
+                           <select name="received_product" id="received_product" class="select2">
+                              <option value="">Select Received Product</option>
+                              <option value="Pump" {{($service_bill && $service_bill->received_product == 'Pump')?'selected':''}}>Pump</option>
+                              <option value="Motor" {{($service_bill && $service_bill->received_product == 'Motor')?'selected':''}}>Motor</option>
+                              <option value="Pump Set" {{($service_bill && $service_bill->received_product == 'Pump Set')?'selected':''}}>Pump Set</option>
+                              <option value="Fan" {{($service_bill && $service_bill->received_product == 'Fan')?'selected':''}}>Fan</option>
+                              <option value="Heater" {{($service_bill && $service_bill->received_product == 'Heater')?'selected':''}}>Heater</option>
+                              <option value="Induction CookTop" {{($service_bill && $service_bill->received_product == 'Induction CookTop')?'selected':''}}>Induction CookTop</option>
+                           </select>
+                        </div>
+                     </div>
+                     <div class="col-md-3">
+                        <div class="form-group">
+                           <label for="nature_of_fault">Nature Of Fault</label>
+                           <select name="nature_of_fault" id="nature_of_fault" class="select2">
+                              <option value="">Select Nature Of Fault</option>
+                              <option value="Transit Damage" {{($service_bill && $service_bill->nature_of_fault == 'Transit Damage')?'selected':''}}>Transit Damage</option>
+                              <option value="Manufacturing Fault" {{($service_bill && $service_bill->nature_of_fault == 'Manufacturing Fault')?'selected':''}}>Manufacturing Fault</option>
+                              <option value="Customer Field Fault" {{($service_bill && $service_bill->nature_of_fault == 'Customer Field Fault')?'selected':''}}>Customer Field Fault</option>
+                           </select>
+                        </div>
+                     </div>
+                     <div class="col-md-3">
+                        <div class="form-group">
+                           <label for="service_location">Service Location</label>
+                           <select name="service_location" id="service_location" class="select2">
+                              <option value="">Select Service Location</option>
+                              <option value="Site Visit" {{($service_bill && $service_bill->service_location == 'Site Visit')?'selected':''}}>Site Visit</option>
+                              <option value="At ASC" {{($service_bill && $service_bill->service_location == 'At ASC')?'selected':''}}>At ASC</option>
+                           </select>
+                        </div>
                      </div>
                   </div>
-                  <div class="col-md-3">
-                     <div class="form-group">
-                        <label for="complaint_type">Complaint Type</label>
-                        <select name="complaint_type" id="complaint_type" class="select2">
-                           <option value="">Select Complaint Type</option>
-                           <option value="Auto ON-OFF">Auto ON-OFF</option>
-                           <option value="Body Current">Body Current</option>
-                           <option value="Body Damage">Body Damage</option>
-                           <option value="Fan Does Not Start">Fan Does Not Start</option>
-                           <option value="Fan Running Slow">Fan Running Slow</option>
-                           <option value="Fan Wobbling">Fan Wobbling</option>
-                           <option value="Noise Problem">Noise Problem</option>
-                           <option value="Oscillation Issue">Oscillation Issue</option>
-                           <option value="Poor Flow Of Air">Poor Flow Of Air</option>
-                        </select>
-                     </div>
-                  </div>
-                  <div class="col-md-3">
-                     <div class="form-group">
-                        <label for="complaint_reason">Complaint Reason</label>
-                        <select name="complaint_reason" id="complaint_reason" class="select2">
-                           <option value="">Select Complaint Reason</option>
-                           <option value="Stator Dead">Stator Dead</option>
-                           <option value="PCB Burn">PCB Burn</option>
-                           <option value="CutOff Issue">CutOff Issue</option>
-                           <option value="Loose Connection">Loose Connection</option>
-                           <option value="Low Voltage">Low Voltage</option>
-                        </select>
-                     </div>
-                  </div>
-                  <div class="col-md-3">
-                     <div class="form-group">
-                        <label for="condition_fo_service">Condition Of Service</label>
-                        <select name="condition_fo_service" id="condition_fo_service" class="select2">
-                           <option value="">Select Condition Of Service</option>
-                           <option value="Full Finish">Full Finish</option>
-                           <option value="Regular Repair">Regular Repair</option>
-                           <option value="Field Visit">Field Visit</option>
-                        </select>
-                     </div>
-                  </div>
-                  <div class="col-md-3">
-                     <div class="form-group">
-                        <label for="received_product">Received Product</label>
-                        <select name="received_product" id="received_product" class="select2">
-                           <option value="">Select Received Product</option>
-                           <option value="Pump">Pump</option>
-                           <option value="Motor">Motor</option>
-                           <option value="Pump Set">Pump Set</option>
-                           <option value="Fan">Fan</option>
-                           <option value="Heater">Heater</option>
-                           <option value="Induction CookTop">Induction CookTop</option>
-                        </select>
-                     </div>
-                  </div>
-                  <div class="col-md-3">
-                     <div class="form-group">
-                        <label for="nature_of_fault">Nature Of Fault</label>
-                        <select name="nature_of_fault" id="nature_of_fault" class="select2">
-                           <option value="">Select Nature Of Fault</option>
-                           <option value="Transit Damage">Transit Damage</option>
-                           <option value="Manufacturing Fault">Manufacturing Fault</option>
-                           <option value="Customer Field Fault">Customer Field Fault</option>
-                        </select>
-                     </div>
-                  </div>
-                  <div class="col-md-3">
-                     <div class="form-group">
-                        <label for="service_location">Service Location</label>
-                        <select name="service_location" id="service_location" class="select2">
-                           <option value="">Select Service Location</option>
-                           <option value="Site Visit">Site Visit</option>
-                           <option value="At ASC">At ASC</option>
-                        </select>
-                     </div>
-                  </div>
-               </div>
                </div>
 
                <h3 class="mt-2"><b>Service Type: </b></h3>
                <div class="border border-dark rounded p-4">
-               <div class="row mt-2 mb-2">
-                  <div class="col-md-3">
-                     <div class="form-group">
-                        <label for="repaired_replacement">Repaired / Replacement</label>
-                        <select name="repaired_replacement" id="repaired_replacement" class="select2">
-                           <option value="">Select Repaired / Replacement</option>
-                           <option value="Repaired">Repaired</option>
-                           <option value="Replacement">Replacement</option>
-                        </select>
+                  <div class="row mt-2 mb-2">
+                     <div class="col-md-3">
+                        <div class="form-group">
+                           <label for="repaired_replacement">Repaired / Replacement</label>
+                           <select name="repaired_replacement" id="repaired_replacement" class="select2" required>
+                              <option value="">Please Select</option>
+                              <option value="Repaired" {{($service_bill && $service_bill->repaired_replacement == 'Repaired')?'selected':''}}>Repaired</option>
+                              <option value="Replacement" {{($service_bill && $service_bill->repaired_replacement == 'Replacement')?'selected':''}}>Replacement</option>
+                           </select>
+                        </div>
+                     </div>
+                     <div class="col-md-3">
+                        <div class="form-group">
+                           <label for="replacement_tag">Replacement Tag</label>
+                           <select disabled name="replacement_tag" id="replacement_tag" class="select2">
+                              <option value="">Select Replacement Tag</option>
+                              <option value="Yes">Yes</option>
+                              <option value="No">No</option>
+                           </select>
+                        </div>
+                     </div>
+                     <div class="col-md-3 d-none" id="tag-number">
+                        <div class="form-group">
+                           <input type="text" name="replacement_tag_number" id="replacement_tag_number" placeholder="Replacement Tag Number" value="{{($service_bill?($service_bill->replacement_tag_number?$service_bill->replacement_tag_number:''):'')}}" class="form-control">
+                        </div>
                      </div>
                   </div>
-                  <div class="col-md-3">
-                     <div class="form-group">
-                        <label for="replacement_tag">Replacement Tag</label>
-                        <select disabled name="replacement_tag" id="replacement_tag" class="select2">
-                           <option value="">Select Replacement Tag</option>
-                           <option value="Yes">Yes</option>
-                           <option value="No">No</option>
-                        </select>
-                     </div>
-                  </div>
-                  <div class="col-md-3 d-none" id="tag-number">
-                     <div class="form-group">
-                        <input type="text" name="replacement_tag_number" id="replacement_tag_number" placeholder="Replacement Tag Number" class="form-control">
-                     </div>
-                  </div>
-               </div>
                </div>
 
                <h3 class="mt-2"><b>Photos: </b></h3>
                <div class="border border-dark rounded p-4">
-               <div class="row mt-2 mb-2">
-                  <div class="col-md-2">
-                     <label for="product_sr_no">Product Sr. No.</label>
-                     <div class="inp-div">
-                        <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
-                        <p class="m-0">Attach a File</p>
-                        <input type="file" name="product_sr_no" id="product_sr_no" class="form-control" accept="image/*">
+                  <div class="row mt-2 mb-2">
+                     <div class="col-md-2">
+                        <label for="product_sr_no">Product Sr. No.</label>
+                        <div class="inp-div">
+                           <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                           <p class="m-0">Attach a File</p>
+                           <input type="file" name="product_sr_no" id="product_sr_no" class="form-control" accept="image/*">
+                        </div>
+                     </div>
+                     <div class="col-md-2">
+                        <label for="scr_job_card">SCR-Job Card</label>
+                        <div class="inp-div">
+                           <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                           <p class="m-0">Attach a File</p>
+                           <input type="file" name="scr_job_card" id="scr_job_card" class="form-control" accept="image/*">
+                        </div>
+                     </div>
+                     <div class="col-md-2">
+                        <label for="photo_3">Photo 3</label>
+                        <div class="inp-div">
+                           <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                           <p class="m-0">Attach a File</p>
+                           <input type="file" name="photo_3" id="photo_3" class="form-control" accept="image/*">
+                        </div>
+                     </div>
+                     <div class="col-md-2">
+                        <label for="photo_4">Photo 4</label>
+                        <div class="inp-div">
+                           <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                           <p class="m-0">Attach a File</p>
+                           <input type="file" name="photo_4" id="photo_4" class="form-control" accept="image/*">
+                        </div>
+                     </div>
+                     <div class="col-md-2">
+                        <label for="photo_5">Photo 5</label>
+                        <div class="inp-div">
+                           <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                           <p class="m-0">Attach a File</p>
+                           <input type="file" name="photo_5" id="photo_5" class="form-control" accept="image/*">
+                        </div>
                      </div>
                   </div>
-                  <div class="col-md-2">
-                     <label for="scr_job_card">SCR-Job Card</label>
-                     <div class="inp-div">
-                        <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
-                        <p class="m-0">Attach a File</p>
-                        <input type="file" name="scr_job_card" id="scr_job_card" class="form-control" accept="image/*">
-                     </div>
-                  </div>
-                  <div class="col-md-2">
-                     <label for="photo_3">Photo 3</label>
-                     <div class="inp-div">
-                        <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
-                        <p class="m-0">Attach a File</p>
-                        <input type="file" name="photo_3" id="photo_3" class="form-control" accept="image/*">
-                     </div>
-                  </div>
-                  <div class="col-md-2">
-                     <label for="photo_4">Photo 4</label>
-                     <div class="inp-div">
-                        <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
-                        <p class="m-0">Attach a File</p>
-                        <input type="file" name="photo_4" id="photo_4" class="form-control" accept="image/*">
-                     </div>
-                  </div>
-                  <div class="col-md-2">
-                     <label for="photo_5">Photo 5</label>
-                     <div class="inp-div">
-                        <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
-                        <p class="m-0">Attach a File</p>
-                        <input type="file" name="photo_5" id="photo_5" class="form-control" accept="image/*">
-                     </div>
-                  </div>
-               </div>
                </div>
 
                <h3 class="mt-2"><b>Service: </b></h3>
                <hr>
                <div class="row mt-2 mb-2">
-                  <table class="table" id="table-service">
+                  <table class="table table-striped" id="table-service">
                      <thead>
                         <tr>
-                           <td>Service</td>
+                           <td style="width: 220px !important;">Service Type</td>
+                           <td style="width: 320px !important;">Job Type / Description /HP</td>
                            <td>Quantity</td>
-                           <td>Price</td>
+                           <td>Distance (KM)</td>
+                           <td>Appreciation Charges</td>
+                           <td>Charge Value</td>
                            <td>Sub Total</td>
+                           <td>#</td>
                         </tr>
                      </thead>
                   </table>
                   <button type="button" class="btn btn-info btn-sm" id="add-service">ADD</button>
                </div>
-
-               <!-- <h3 class="mt-2"><b>Spare Part: </b></h3>
-               <hr>
-               <div class="row mt-2 mb-2">
-                  <table class="table" id="table-spare">
-                     <thead>
-                        <tr>
-                           <td>Product</td>
-                           <td>Unit</td>
-                           <td>Quantity</td>
-                           <td>Price</td>
-                           <td>Sub Total</td>
-                        </tr>
-                     </thead>
-                  </table>
-                  <button type="button" class="btn btn-info btn-sm" id="add-spare">ADD</button>
-               </div> -->
 
                <input type="submit" value="Add" class="btn btn-success float-right mt-2">
                {{ Form::close() }}
@@ -449,7 +438,16 @@
             },
             success: function(res) {
                if (res.status == 'success') {
-                  console.log(res.data);
+                  if (res.data.service_bill != null) {
+                     $('#complaint_number').val('');
+                     Swal.fire({
+                        title: "Already Exists",
+                        text: "The service bill with this complaint number is already exists please check service bill list and edit them.",
+                        type: "error"
+                     });
+                     return false;
+                  }
+                  $("#complaint_id").val(res.data.complaint.id);
                   var html = '<tr><td>';
                   html += complaint_number;
                   html += '</td><td>';
@@ -494,7 +492,6 @@
                      html2 += '-';
                   }
                   html2 += '</td><td>';
-
                   if (res.data.complaint.customer_bill_date && res.data.complaint.customer_bill_date != null && res.data.complaint.customer_bill_date != '') {
                      var date = new Date(res.data.complaint.customer_bill_date);
                      var dateupto = moment(res.data.complaint.customer_bill_date);
@@ -509,6 +506,7 @@
                   } else {
                      var formattedDate = '-';
                      var formattedDateupto = '-';
+                     var dateupto = null;
                   }
 
                   html2 += formattedDate;
@@ -517,9 +515,13 @@
 
                   html2 += '</td><td>';
                   var today = moment();
-                  if (dateupto.isAfter(today)) {
-                     html2 += '<span class="badge badge-success">In Warranty</span>';
-                  } else {
+                  if(dateupto != null){
+                     if (dateupto.isAfter(today)) {
+                        html2 += '<span class="badge badge-success">In Warranty</span>';
+                     } else {
+                        html2 += '<span class="badge badge-danger">Out Of Warranty</span>';
+                     }
+                  }else{
                      html2 += '<span class="badge badge-danger">Out Of Warranty</span>';
                   }
                   html2 += '</td></tr>';
@@ -545,7 +547,7 @@
             $('#division').change();
          }
       })
-      $(document).on('change', '#repaired_replacement', function() {
+      $('#repaired_replacement').on('change', function() {
          if ($(this).val() == 'Replacement') {
             $("#replacement_tag").val('Yes');
             $("#replacement_tag").change();
@@ -559,19 +561,84 @@
             $("#replacement_tag").change();
             $("#tag-number").addClass('d-none');
          }
-      });
+      }).trigger('change');
       $(document).on("click", "#add-service", function() {
-         var newTR = '<tr><td><select name="service['+counter+'][service]" class="form-control select2"><option value="">Select Service</option></select></td><td><input name="service['+counter+'][quantity]" class="form-control" /></td><td><input name="service['+counter+'][price]" readonly class="form-control" /></td><td><input name="service['+counter+'][subtotal]" readonly class="form-control" /></td></tr>';
+         var chargeType = @json($charge_type);
+         var options = '<option value="">Select Service</option>';
+         $.each(chargeType, function(k, v) {
+            options += '<option value="' + v.id + '">' + v.charge_type + '</option>';
+         });
+         var newTR = '<tr><td><select required name="service[' + counter + '][service_type]" class="form-control select2 chargety">' + options + '</select></td><td><select required name="service[' + counter + '][product_id]" class="form-control select2 chargeprod"></select></td><td><input type="number" readonly name="service[' + counter + '][quantity]" value="1" class="form-control" /></td><td><input type="number" readonly name="service[' + counter + '][distance]"  class="form-control" /></td><td><input type="number" readonly name="service[' + counter + '][appreciation]" class="form-control" /></td><td><input name="service[' + counter + '][price]" readonly class="form-control sprice" /></td><td><input name="service[' + counter + '][subtotal]" readonly class="form-control ssubtotal" /></td><td><button type="button" class="btn btn-danger btn-sm remove-tr m-0">X</button></td></tr>';
          counter++;
          $("#table-service").append(newTR);
          $('.select2').select2();
       });
 
-      $(document).on("click", "#add-spare", function() {
-         var newTR = '<tr><td><select name="spare['+counter2+'][product]" class="form-control select2"><option value="">Select Product</option></select></td><td><input name="spare['+counter2+'][unit]" class="form-control" /></td><td><input name="spare['+counter2+'][quantity]" class="form-control" /></td><td><input name="spare['+counter2+'][price]" readonly class="form-control" /></td><td><input name="spare['+counter2+'][subtotal]" readonly class="form-control" /></td></tr>';
-         counter2++;
-         $("#table-spare").append(newTR);
-         $('.select2').select2();
-      });
+      $(document).on("change", ".chargety", function() {
+         var selectedValues = [];
+         var id = $(this).val();
+         $('.chargety').each(function() {
+            selectedValues.push($(this).val());
+         });
+         var count3 = 0;
+         var count5 = 0;
+         $.each(selectedValues, function(index, value) {
+            if (value == "3") {
+               count3++;
+            }
+            if (value == "5") {
+               count5++;
+            }
+         });
+         if (count3 > 1 || count5 > 1) {
+            $(this).val('');
+            $(this).change();
+            Swal.fire({
+               title: "Wroung Selecation",
+               text: "You can not select this type multiple time",
+               type: "error"
+            });
+            return false;
+         }
+         var currentRow = $(this).closest('tr');
+         var serviceProductSelect = currentRow.find('select.chargeprod');
+         $.ajax({
+            url: "{{url('/getServiceProduct')}}",
+            data: {
+               'charge_type_id': id
+            },
+            success: function(data) {
+               var html = '<option value="">Select Product</option>';
+               $.each(data, function(k, v) {
+                  html += '<option value="' + v.id + '">' + v.product_name + '</option>';
+               });
+               serviceProductSelect.html(html);
+            }
+         });
+      })
+
+      $(document).on("change", ".chargeprod", function() {
+         var id = $(this).val();
+         var currentRow = $(this).closest('tr');
+         var servicePrice = currentRow.find('input.sprice');
+         var serviceSubTotal = currentRow.find('input.ssubtotal');
+         $.ajax({
+            url: "{{url('/getServiceProductDetails')}}",
+            data: {
+               'id': id
+            },
+            success: function(data) {
+               servicePrice.val(data.price);
+               serviceSubTotal.val(data.price);
+            }
+         });
+      })
+
+      $(document).on("click", ".remove-tr", function() {
+         if (confirm('Are you sure to remove this?')) {
+            var currentRow = $(this).closest('tr');
+            currentRow.remove();
+         }
+      })
    </script>
 </x-app-layout>

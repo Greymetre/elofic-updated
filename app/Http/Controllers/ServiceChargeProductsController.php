@@ -6,10 +6,12 @@ use App\DataTables\ServiceProductCategoryDataTable;
 use App\DataTables\ServiceProductChargeTypeDataTable;
 use App\DataTables\ServiceProductDivisionDataTable;
 use App\DataTables\ServiceProductProductsDataTable;
+use App\Exports\ServiceChargeProductExport;
 use App\Exports\ServiceProductCategoryExport;
 use App\Exports\ServiceProductChargeTypeExport;
 use App\Exports\ServiceProductDivisionExport;
 use App\Imports\ServiceProductCategoryImport;
+use App\Imports\ServiceProductImport;
 use App\Models\ServiceChargeCategories;
 use App\Models\ServiceChargeChargeType;
 use App\Models\ServiceChargeDivision;
@@ -248,13 +250,9 @@ class ServiceChargeProductsController extends Controller
 
     public function productindex(ServiceProductProductsDataTable $dataTable, Request $request)
     {
-        if ($request->ip() == '111.118.252.250' || $request->ip() == 'http://192.168.0.210/') {
-            abort_if(Gate::denies('services_product_products'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-            $categories = ServiceChargeDivision::all();
-            return $dataTable->render('service_product.index', compact('categories'));
-        } else {
-            return '<h1>Comeing Soon...</h1><p>We are working on it.</p>';
-        }
+        abort_if(Gate::denies('services_product_products'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $categories = ServiceChargeDivision::all();
+        return $dataTable->render('service_product.index', compact('categories'));
     }
 
     public function productcreate(Request $request)
@@ -328,15 +326,15 @@ class ServiceChargeProductsController extends Controller
         abort_if(Gate::denies('services_product_category_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        return Excel::download(new ServiceProductCategoryExport($request), 'service_product_categorycategories.xlsx');
+        return Excel::download(new ServiceChargeProductExport($request), 'service_charge_products.xlsx');
     }
 
     public function productupload(Request $request)
     {
-        abort_if(Gate::denies('services_product_category_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('services_product_products_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        Excel::import(new ServiceProductCategoryImport, request()->file('import_file'));
+        Excel::import(new ServiceProductImport, request()->file('import_file'));
         return back();
     }
 }

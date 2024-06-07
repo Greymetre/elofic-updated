@@ -439,32 +439,54 @@
                   </form>
                   <!-- primary sales import -->
                   <!-- sales achievemnts download-->
-                  @if(auth()->user()->can(['primary_sales_upload']))
-                  <form action="{{ URL::to('primary_sales/upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
-                     {{ csrf_field() }}
-                     <div class="input-group" style="flex-wrap:nowrap;">
-                        <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                           <span class="btn btn-just-icon btn-theme btn-file">
-                              <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
-                              <span class="fileinput-exists">Change</span>
-                              <input type="hidden">
-                              <input type="file" name="import_file" style="flex-wrap: nowrap;" required accept=".xls,.xlsx" />
-                           </span>
+                  <div class="row next-btn">
+                     @if(auth()->user()->can(['primary_sales_upload']))
+                     <form action="{{ URL::to('primary_sales/upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
+                        {{ csrf_field() }}
+                        <div class="input-group" style="flex-wrap:nowrap;">
+                           <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                              <span class="btn btn-just-icon btn-theme btn-file">
+                                 <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
+                                 <span class="fileinput-exists">Change</span>
+                                 <input type="hidden">
+                                 <input type="file" title="Select file for upload data" name="import_file" style="flex-wrap: nowrap;" required accept=".xls,.xlsx" />
+                              </span>
+                           </div>
+                           <div class="input-group-append">
+                              <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.upload') !!} {!! trans('panel.sales_achievement.title') !!}">
+                                 <i class="material-icons">cloud_upload</i>
+                                 <div class="ripple-container"></div>
+                              </button>
+                           </div>
                         </div>
-                        <div class="input-group-append">
-                           <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.upload') !!} {!! trans('panel.sales_achievement.title') !!}">
-                              <i class="material-icons">cloud_upload</i>
-                              <div class="ripple-container"></div>
-                           </button>
+                     </form>
+                     @endif
+                     <!-- primary sales import -->
+                     @if(auth()->user()->can(['primary_sales_template']))
+                     <!-- primary sales template creation -->
+                     <a href="{{ URL::to('primary_sales_template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} Primary Sales"><i class="material-icons">text_snippet</i></a>
+                     @endif
+                  </div>
+               </div>
+               <div class="col-md-12">
+                  <div class="row">
+                     <div class="col-sm">
+                        <div class="card text-center">
+                           <div class="card-body">
+                              <h4 class="card-title" id="total_primary_sale_value">{{$total_sale}}</h4>
+                              <p class="card-text">Total Sale Value</p>
+                           </div>
                         </div>
                      </div>
-                  </form>
-                  @endif
-                  <!-- primary sales import -->
-                  @if(auth()->user()->can(['primary_sales_template']))
-                  <!-- primary sales template creation -->
-                  <a href="{{ URL::to('primary_sales_template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.primary_dashboard.primary_sale') !!}"><i class="material-icons">text_snippet</i></a>
-                  @endif
+                     <div class="col-sm">
+                        <div class="card text-center">
+                           <div class="card-body">
+                              <h4 class="card-title" id="total_primary_qty">{{$total_qty}}</h4>
+                              <p class="card-text text-center">Total Quantity</p>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
                </div>
                <div class="table-responsive">
                   <table id="getprimarysales" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
@@ -2896,7 +2918,9 @@
             data: {
                _token: "{{csrf_token()}}"
             },
-            success: function(res) {}
+            success: function(res) {
+               console.log(res);
+            }
          })
       }
    </script>
@@ -3408,32 +3432,212 @@
          });
          $('#ps_executive_id').change(function() {
             table.draw();
+            $.ajax({
+               url: "{{ route('getPrimaryTotal') }}",
+               data: {
+                  executive_id: $('#ps_executive_id').val(),
+                  division_id: $('#ps_division_id').val(),
+                  branch_id: $('#ps_branch_id').val(),
+                  financial_year: $('#ps_financial_year').val(),
+                  month: $('#ps_month').val(),
+                  retailer_id: $('#ps_retailer_id').val(),
+                  dealer_id: $('#ps_dealer_id').val(),
+                  product_model: $('#ps_product_model').val(),
+                  new_group: $('#ps_new_group').val(),
+                  search: $('input[type="search"]').val()
+               },
+               method: "GET",
+               success: function(data) {
+                  $("#total_primary_sale_value").html(data.total_sale);
+                  $("#total_primary_qty").html(data.total_qty);
+               }
+            });
          });
          $('#ps_division_id').change(function() {
             table.draw();
+            $.ajax({
+               url: "{{ route('getPrimaryTotal') }}",
+               data: {
+                  executive_id: $('#ps_executive_id').val(),
+                  division_id: $('#ps_division_id').val(),
+                  branch_id: $('#ps_branch_id').val(),
+                  financial_year: $('#ps_financial_year').val(),
+                  month: $('#ps_month').val(),
+                  retailer_id: $('#ps_retailer_id').val(),
+                  dealer_id: $('#ps_dealer_id').val(),
+                  product_model: $('#ps_product_model').val(),
+                  new_group: $('#ps_new_group').val(),
+                  search: $('input[type="search"]').val()
+               },
+               method: "GET",
+               success: function(data) {
+                  $("#total_primary_sale_value").html(data.total_sale);
+                  $("#total_primary_qty").html(data.total_qty);
+               }
+            });
          });
          $('#ps_branch_id').change(function() {
             table.draw();
+            $.ajax({
+               url: "{{ route('getPrimaryTotal') }}",
+               data: {
+                  executive_id: $('#ps_executive_id').val(),
+                  division_id: $('#ps_division_id').val(),
+                  branch_id: $('#ps_branch_id').val(),
+                  financial_year: $('#ps_financial_year').val(),
+                  month: $('#ps_month').val(),
+                  retailer_id: $('#ps_retailer_id').val(),
+                  dealer_id: $('#ps_dealer_id').val(),
+                  product_model: $('#ps_product_model').val(),
+                  new_group: $('#ps_new_group').val(),
+                  search: $('input[type="search"]').val()
+               },
+               method: "GET",
+               success: function(data) {
+                  $("#total_primary_sale_value").html(data.total_sale);
+                  $("#total_primary_qty").html(data.total_qty);
+               }
+            });
          });
          $('#ps_financial_year').change(function() {
             $('#ps_month').prop('disabled', false);
             $('#ps_month').selectpicker('refresh');
             table.draw();
+            $.ajax({
+               url: "{{ route('getPrimaryTotal') }}",
+               data: {
+                  executive_id: $('#ps_executive_id').val(),
+                  division_id: $('#ps_division_id').val(),
+                  branch_id: $('#ps_branch_id').val(),
+                  financial_year: $('#ps_financial_year').val(),
+                  month: $('#ps_month').val(),
+                  retailer_id: $('#ps_retailer_id').val(),
+                  dealer_id: $('#ps_dealer_id').val(),
+                  product_model: $('#ps_product_model').val(),
+                  new_group: $('#ps_new_group').val(),
+                  search: $('input[type="search"]').val()
+               },
+               method: "GET",
+               success: function(data) {
+                  $("#total_primary_sale_value").html(data.total_sale);
+                  $("#total_primary_qty").html(data.total_qty);
+               }
+            });
          });
          $('#ps_retailer_id').change(function() {
             table.draw();
+            $.ajax({
+               url: "{{ route('getPrimaryTotal') }}",
+               data: {
+                  executive_id: $('#ps_executive_id').val(),
+                  division_id: $('#ps_division_id').val(),
+                  branch_id: $('#ps_branch_id').val(),
+                  financial_year: $('#ps_financial_year').val(),
+                  month: $('#ps_month').val(),
+                  retailer_id: $('#ps_retailer_id').val(),
+                  dealer_id: $('#ps_dealer_id').val(),
+                  product_model: $('#ps_product_model').val(),
+                  new_group: $('#ps_new_group').val(),
+                  search: $('input[type="search"]').val()
+               },
+               method: "GET",
+               success: function(data) {
+                  $("#total_primary_sale_value").html(data.total_sale);
+                  $("#total_primary_qty").html(data.total_qty);
+               }
+            });
          });
          $('#ps_dealer_id').change(function() {
             table.draw();
+            $.ajax({
+               url: "{{ route('getPrimaryTotal') }}",
+               data: {
+                  executive_id: $('#ps_executive_id').val(),
+                  division_id: $('#ps_division_id').val(),
+                  branch_id: $('#ps_branch_id').val(),
+                  financial_year: $('#ps_financial_year').val(),
+                  month: $('#ps_month').val(),
+                  retailer_id: $('#ps_retailer_id').val(),
+                  dealer_id: $('#ps_dealer_id').val(),
+                  product_model: $('#ps_product_model').val(),
+                  new_group: $('#ps_new_group').val(),
+                  search: $('input[type="search"]').val()
+               },
+               method: "GET",
+               success: function(data) {
+                  $("#total_primary_sale_value").html(data.total_sale);
+                  $("#total_primary_qty").html(data.total_qty);
+               }
+            });
          });
          $('#ps_product_model').change(function() {
             table.draw();
+            $.ajax({
+               url: "{{ route('getPrimaryTotal') }}",
+               data: {
+                  executive_id: $('#ps_executive_id').val(),
+                  division_id: $('#ps_division_id').val(),
+                  branch_id: $('#ps_branch_id').val(),
+                  financial_year: $('#ps_financial_year').val(),
+                  month: $('#ps_month').val(),
+                  retailer_id: $('#ps_retailer_id').val(),
+                  dealer_id: $('#ps_dealer_id').val(),
+                  product_model: $('#ps_product_model').val(),
+                  new_group: $('#ps_new_group').val(),
+                  search: $('input[type="search"]').val()
+               },
+               method: "GET",
+               success: function(data) {
+                  $("#total_primary_sale_value").html(data.total_sale);
+                  $("#total_primary_qty").html(data.total_qty);
+               }
+            });
          });
          $('#ps_new_group').change(function() {
             table.draw();
+            $.ajax({
+               url: "{{ route('getPrimaryTotal') }}",
+               data: {
+                  executive_id: $('#ps_executive_id').val(),
+                  division_id: $('#ps_division_id').val(),
+                  branch_id: $('#ps_branch_id').val(),
+                  financial_year: $('#ps_financial_year').val(),
+                  month: $('#ps_month').val(),
+                  retailer_id: $('#ps_retailer_id').val(),
+                  dealer_id: $('#ps_dealer_id').val(),
+                  product_model: $('#ps_product_model').val(),
+                  new_group: $('#ps_new_group').val(),
+                  search: $('input[type="search"]').val()
+               },
+               method: "GET",
+               success: function(data) {
+                  $("#total_primary_sale_value").html(data.total_sale);
+                  $("#total_primary_qty").html(data.total_qty);
+               }
+            });
          });
          $('#ps_month').change(function() {
             table.draw();
+            $.ajax({
+               url: "{{ route('getPrimaryTotal') }}",
+               data: {
+                  executive_id: $('#ps_executive_id').val(),
+                  division_id: $('#ps_division_id').val(),
+                  branch_id: $('#ps_branch_id').val(),
+                  financial_year: $('#ps_financial_year').val(),
+                  month: $('#ps_month').val(),
+                  retailer_id: $('#ps_retailer_id').val(),
+                  dealer_id: $('#ps_dealer_id').val(),
+                  product_model: $('#ps_product_model').val(),
+                  new_group: $('#ps_new_group').val(),
+                  search: $('input[type="search"]').val()
+               },
+               method: "GET",
+               success: function(data) {
+                  $("#total_primary_sale_value").html(data.total_sale);
+                  $("#total_primary_qty").html(data.total_qty);
+               }
+            });
          });
       });
 

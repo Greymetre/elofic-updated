@@ -11,8 +11,7 @@ class SalesTargetUsers extends Model
 
     protected $table = 'salestargetusers';
 
-    protected $fillable = [ 'user_id', 'type', 'month' ,'year', 'target', 'achievement',
-            'achievement_percent','created_at', 'updated_at' ];
+    protected $fillable = [ 'user_id', 'type', 'month' ,'year', 'target', 'achievement','achievement_percent','created_at', 'updated_at' ];
 
     public $timestamps = true;
 

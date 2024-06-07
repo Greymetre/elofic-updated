@@ -15,13 +15,20 @@ return new class extends Migration
     {
         Schema::create('service_bills', function (Blueprint $table) {
             $table->id();
-            $table->string('bill_no');
-            $table->string('complaint_id');
-            $table->string('complaint_no');
-            $table->string('division');
-            $table->string('category');
-            $table->string('complaint_type');
-            $table->string('complaint_reason');
+            $table->string('bill_no')->nullable();
+            $table->string('complaint_id')->nullable();
+            $table->string('complaint_no')->nullable();
+            $table->string('division')->nullable();
+            $table->string('category')->nullable();
+            $table->string('complaint_type')->nullable();
+            $table->string('complaint_reason')->nullable();
+            $table->string('condition_fo_service')->nullable();
+            $table->string('received_product')->nullable();
+            $table->string('nature_of_fault')->nullable();
+            $table->string('service_location')->nullable();
+            $table->string('repaired_replacement')->nullable();
+            $table->string('replacement_tag')->nullable();
+            $table->string('replacement_tag_number')->nullable();
             $table->timestamps();
         });
     }

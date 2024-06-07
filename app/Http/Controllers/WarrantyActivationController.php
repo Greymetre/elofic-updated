@@ -245,14 +245,17 @@ class WarrantyActivationController extends Controller
         $wararanty = WarrantyActivation::find($request->id);
 
         if($request->status == '1'){
-            $checkTrans = TransactionHistory::where('coupon_code', $wararanty->product_serail_number)->update(['status' => '1']);
-            $customer = Customers::find($wararanty->customer_id);
-            $noti_data = [
-                'fcm_token' =>  $customer->customerdetails->fcm_token,
-                'title' => 'Points Activated ✅',
-                'msg' => $customer->name . ' your ' . $checkTrans->point . ' provisional points are successfully activated in Silver Saarthi.',
-            ];
-            $send_notification = SendNotifications::send($noti_data);
+            $checkTrans = TransactionHistory::where('coupon_code', $wararanty->product_serail_number)->first();
+            if($checkTrans){
+                TransactionHistory::where('coupon_code', $wararanty->product_serail_number)->update(['status' => '1']);
+                $customer = Customers::find($wararanty->customer_id);
+                $noti_data = [
+                    'fcm_token' =>  $customer->customerdetails->fcm_token,
+                    'title' => 'Points Activated ✅',
+                    'msg' => $customer->name . ' your ' . $checkTrans->point . ' provisional points are successfully activated in Silver Saarthi.',
+                ];
+                $send_notification = SendNotifications::send($noti_data);
+            }
         }
 
         return response()->json(['status' => true,]);

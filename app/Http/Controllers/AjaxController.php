@@ -11,12 +11,13 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, CustomerDetails, EndUser, Expenses, GiftModel, GiftSubcategory, Notes, OrderSchemeDetail, Redemption, SchemeDetails, ServiceChargeCategories, Services, Subcategory, TourProgramme, TransactionHistory, UserCityAssign, WarrantyActivation};
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, CustomerDetails, EndUser, Expenses, GiftModel, GiftSubcategory, Notes, OrderSchemeDetail, PrimarySales, Redemption, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, UserCityAssign, WarrantyActivation};
 use App\Models\User;
 use Carbon\Carbon;
 use App\Models\UserLiveLocation;
 use App\Models\UserActivity;
 use App\Http\Controllers\SendNotifications;
+use LDAP\Result;
 
 class AjaxController extends Controller
 {
@@ -1173,11 +1174,13 @@ class AjaxController extends Controller
     public function getComplaintsDataProduct(Request $request)
     {
         $complaint = Complaint::with('createdbyname')->where('complaint_number', $request->complaint_number)->first();
+        $service_bill = ServiceBill::where('complaint_no', $request->complaint_number)->first();
 
         $product = $complaint->product_details??'';
 
         $data['complaint'] = $complaint;
         $data['product'] = $product;
+        $data['service_bill'] = $service_bill;
 
         return response()->json(['status'=> 'success', 'data' => $data]);
     }
@@ -1187,6 +1190,103 @@ class AjaxController extends Controller
         if ($request->ajax()) {
 
             $data = ServiceChargeCategories::where('division_id', $request->division_id)->get();
+
+            return response()->json($data);
+
+        }
+    }
+
+    public function getPrimaryTotal(Request $request)
+    {
+        $query = PrimarySales::query();
+        if ($request->user_id && $request->user_id != '' && $request->user_id != null) {
+            $usersIds = User::where('id', $request->user_id)->where('sales_type', 'Secondary')->pluck('id');
+        } else {
+            $usersIds = User::with('attendance_details')->where('sales_type', 'Secondary')->pluck('id');
+        }
+
+        if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
+            $query->where('final_branch', $request->branch_id);
+        }
+
+        if ($request->division_id && $request->division_id != '' && $request->division_id != null) {
+            $query->where('division', $request->division_id);
+        }
+
+        if ($request->dealer_id && $request->dealer_id != '' && $request->dealer_id != null) {
+            $query->where('dealer', 'like', '%' . $request->dealer_id . '%');
+        }
+
+        if ($request->product_model && $request->product_model != '' && $request->product_model != null) {
+            $query->where('product_name', $request->product_model);
+        }
+
+        if ($request->new_group && $request->new_group != '' && $request->new_group != null) {
+            $query->where('new_group', $request->new_group);
+        }
+
+        if ($request->executive_id && $request->executive_id != '' && $request->executive_id != null) {
+            $query->where('sales_person', $request->executive_id);
+        }
+
+        if ($request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
+            $f_year_array = explode('-', $request->financial_year);
+
+            $financial_year_start = $f_year_array[0] . '-04-01';
+            $financial_year_end = $f_year_array[1] . '-03-31';
+
+            $query->where(function ($q) use ($f_year_array, $financial_year_start, $financial_year_end) {
+                $q->where('invoice_date', '>=', $financial_year_start)
+                    ->where('invoice_date', '<=', $financial_year_end);;
+            });
+        }
+
+        if ($request->month && $request->month != '' && $request->month != null && $request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
+
+            $f_year_array = explode('-', $request->financial_year);
+
+            if ($request->month == 'Jan' || $request->month == 'Feb' || $request->month == 'Mar') {
+                $currentYear = $f_year_array[1];
+                $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->startOfMonth();
+                $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->endOfMonth();
+                $startDateFormatted = $startDate->toDateString();
+                $endDateFormatted = $endDate->toDateString();
+            } else {
+                $currentYear = $f_year_array[0];
+                $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->startOfMonth();
+                $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->endOfMonth();
+                $startDateFormatted = $startDate->toDateString();
+                $endDateFormatted = $endDate->toDateString();
+            }
+
+            $query->whereHas('orders', function ($q) use ($startDateFormatted, $endDateFormatted) {
+                $q->whereDate('order_date', '>=', $startDateFormatted)
+                    ->whereDate('order_date', '<=', $endDateFormatted);
+            });
+        }
+
+        $data['total_qty'] = $query->sum('quantity');
+        $data['total_sale'] = $query->sum('rate');
+
+        return response()->json($data);
+    }
+
+    public function getServiceProduct(Request $request)
+    {
+        if ($request->ajax()) {
+
+            $data = ServiceChargeProducts::where('charge_type_id', $request->charge_type_id)->get();
+
+            return response()->json($data);
+
+        }
+    }
+
+    public function getServiceProductDetails(Request $request)
+    {
+        if ($request->ajax()) {
+
+            $data = ServiceChargeProducts::where('id', $request->id)->first();
 
             return response()->json($data);
 

@@ -4,9 +4,25 @@
     .table.new-table td {
       border-top: 0px !important;
     }
+
     b {
-    font-weight: 600;
-}
+      font-weight: 600;
+    }
+
+    .img-div {
+      width: 25%;
+      text-align: center;
+      border: 1px solid #ab9a9a;
+      margin: 2px 10px;
+      border-radius: 5px;
+      background: radial-gradient(#c5b0b0, transparent);
+    }
+
+    button.delete-img-btn {
+      position: absolute;
+      cursor: pointer;
+      right: 0;
+    }
   </style>
   <div class="content-header">
     <div class="container-fluid">
@@ -17,7 +33,7 @@
   <!-- Main content -->
   <section class="content">
     <div class="row">
-      <div class="col-9">
+      <div class="col-12">
 
         @if(Session::has('success'))
         <div class="alert alert-success" id="hide_div">
@@ -47,284 +63,103 @@
           <div class="card-body">
             <div class="row">
               <div class="col-4">
-                <h3 class="card-title pb-3">Complaint View</h3>
+                <h3 class="card-title pb-3">Service Bill View</h3>
               </div>
               <div class="col-8 text-right">
 
 
-                @if(auth()->user()->can(['compalint_change_status']))
+                @if(auth()->user()->can(['service_bill_change_status']))
 
-                @if($complaint->complaint_status=='0')
-                <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending Complaint</b></button>
-                <a href="{{route('complaint_work_done', $complaint)}}" type="button" class="btn btn-sm btn-info done_status"><b>Work Done</b></a>
-                @elseif($complaint->complaint_status=='1')
-                <button type="button" class="btn btn-sm btn-success open_status"><b>Open Complaint</b></button>
-                <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel Complaint</b></button>
-                @elseif($complaint->complaint_status=='2')
-                <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending Complaint</b></button>
-                <button type="button" class="btn btn-sm btn-success open_status"><b>Open Complaint</b></button>
-                <button type="button bg-primary" class="btn btn-sm complete_status"><b>Complete Complaint</b></button>
-                @elseif($complaint->complaint_status=='3')
-                <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending Complaint</b></button>
-                <button type="button" class="btn btn-sm btn-success open_status"><b>Open Complaint</b></button>
-                @elseif($complaint->complaint_status=='5')
-                <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending Complaint</b></button>
-                <button type="button" class="btn btn-sm btn-success open_status"><b>Open Complaint</b></button>
+                @if($serviceBill->status=='0')
+                <button type="button" class="btn btn-sm btn-warning company_claim"><b>Claim to company</b></button>
+                <button type="button" class="btn btn-sm btn-info customer_pay"><b>Customer payble</b></button>
+                <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
+                @elseif($serviceBill->status=='1')
+                <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
+                <button type="button" class="btn btn-sm btn-success approve_status"><b>Approve</b></button>
+                <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
+                @elseif($serviceBill->status=='2')
+                <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
+                <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
+                @elseif($serviceBill->status=='3')
+                <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
+                <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
+                @elseif($serviceBill->status=='4')
+                <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
                 @endif
 
                 @endif
 
                 <?php
-                if (auth()->user()->can(['complaint_edit'])) { ?>
+                if (auth()->user()->can(['service_bill_edit'])) { ?>
 
-                  <a class="btn btn-warning btn-sm" href="{{route('complaints.edit', $complaint->id)}}"><b>Edit</b></a>
+                  <a class="btn btn-warning btn-sm" href="{{route('service_bills.edit', $serviceBill->id)}}"><b>Edit</b></a>
 
                 <?php } ?>
 
-                <a class="btn btn-primary btn-sm" href="{{route('complaints.index')}}"><b>Back</b></a>
+                <a class="btn btn-primary btn-sm" href="{{route('service_bills.index')}}"><b>Back</b></a>
 
 
               </div>
               <!-- /.col -->
             </div>
-            <input type="hidden" id="complaint_id" name="expense" value="{{$complaint['id']}}">
+            <input type="hidden" id="service_bill_id" name="service_bill_id" value="{{$serviceBill['id']}}">
             <hr>
 
             <div class="invoice p-3 mb-3">
               <!-- title row -->
               <div class="row">
-                <div class="col-4">
-                  <h4>
-                    <small class="float-left">COMPLAINT <p style="font-size: 22px; color:#5252b7">#{!! $complaint['complaint_number'] !!}</p></small>
+                <div class="col-11">
+                  <h4 class="float-left">
+                    <small>Service Bill No. <p style="font-size: 22px; color:#5252b7">#{!! $serviceBill['bill_no'] !!}</p></small>
+                  </h4>
+                  <h4 class="float-right">
+                    <small>Complaint No. <p style="font-size: 22px; color:#5252b7">#{!! $serviceBill->complaint->complaint_number !!}</p></small>
                   </h4>
                 </div>
-
                 <!-- /.col -->
               </div>
               <!-- info row -->
-              <div class="row invoice-info mt-5">
-                <div class="col-md-6">
-                  <h4><em>Complaint From</em></h4>
-                  <h6 style="color: #5252b7;">{{$complaint->customer->customer_name}}</h6>
-                  <p>At - {{$complaint->customer->customer_address}} {{$complaint->customer->customer_place}} Po - {{$complaint->customer->customer_city}} District - {{$complaint->customer->customer_district}} State - {{$complaint->customer->customer_state}} Pin - {{$complaint->customer->pincodeDetails->pincode}}</p>
-                  <p>{{$complaint->customer->customer_district}}, {{$complaint->customer->customer_state}}, {{$complaint->customer->customer_country}}</p>
-                  <p>{{$complaint->customer->customer_number}}</p>
-                </div>
-                <div class="col-md-6 text-right">
-                  <p>Complaint Status :
-                    @if($complaint->complaint_status == '0')
-                    <span class="badge badge-secondary">Open</span>
-                    @elseif($complaint->complaint_status == '1')
-                    <span class="badge badge-warning">Pending</span>
-                    @elseif($complaint->complaint_status == '2')
-                    <span class="badge badge-info">Work Done</span>
-                    @elseif($complaint->complaint_status == '3')
-                    <span class="badge badge-success">Completed</span>
-                    @elseif($complaint->complaint_status == '4')
-                    <span class="badge badge-primary">Closed</span>
-                    @elseif($complaint->complaint_status == '5')
-                    <span class="badge badge-danger">Cancel</span>
-                    @endif
-                  </p>
-                  <p>Complaint Date : {{date('d-m-Y', strtotime($complaint->complaint_date))}}</p>
-                  <p>Created By : {{$complaint->createdbyname?$complaint->createdbyname->name:'-'}}</p>
-                  <p>Closed Date : -</p>
-                </div>
-              </div>
-
               <hr>
 
-              <div class="row invoice-info">
-                <div class="col-md-4"></div>
-                <div class="col-md-4 text-center" style="line-height: 0px;">
-                  <h5><em>Complaint Type</em></h5>
-                  <p><b>{{$complaint->complaint_type_details->name}}</b></p>
-                </div>
-                <div class="col-md-4"></div>
-              </div>
-
               <table class="table responsive border-0 mt-4 new-table">
                 <tr>
-                  <td><em>Category</em></td>
-                  <td><em>Product/Model(Code)</em></td>
-                  <td><em>Description</em></td>
+                  <td><em>Division</em></td>
+                  <td><em>Category Of Complaint </em></td>
+                  <td><em>Complaint Type</em></td>
+                  <td><em>Complaint Reason</em></td>
                 </tr>
                 <tr>
-                  <th class="pt-0">{{$complaint->product_details?$complaint->product_details->categories->category_name:'-'}}</th>
-                  <th class="pt-0">{{$complaint->product_code??'-'}}</th>
-                  <th class="pt-0">{{$complaint->product_details?$complaint->product_details->description:'-'}}</th>
+                  <th class="pt-0">{{$serviceBill->division_details?$serviceBill->division_details->category_name:'-'}}</th>
+                  <th class="pt-0">{{$serviceBill->category??'-'}}</th>
+                  <th class="pt-0">{{$serviceBill->complaint_type??'-'}}</th>
+                  <th class="pt-0">{{$serviceBill->complaint_reason??'-'}}</th>
                 </tr>
 
                 <tr>
-                  <td><em>Product Serial Number</em></td>
-                  <td><em>HP</em></td>
-                  <td><em>Stage</em></td>
+                  <td><em>Condition Of Service </em></td>
+                  <td><em>Received Product </em></td>
+                  <td><em>Nature Of Fault </em></td>
+                  <td><em>Service Location </em></td>
                 </tr>
                 <tr>
-                  <th class="pt-0">{{$complaint->product_serail_number??'-'}}</th>
-                  <th class="pt-0">{{$complaint->product_details?$complaint->product_details->specification:'-'}}</th>
-                  <th class="pt-0">{{$complaint->product_details?$complaint->product_details->product_no:''}}</th>
+                  <th class="pt-0">{{$serviceBill->condition_of_service??'-'}}</th>
+                  <th class="pt-0">{{$serviceBill->received_product??'-'}}</th>
+                  <th class="pt-0">{{$serviceBill->nature_of_fault??'-'}}</th>
+                  <th class="pt-0">{{$serviceBill->service_location??'-'}}</th>
                 </tr>
 
                 <tr>
-                  <td><em>Phase</em></td>
-                  <td><em>Warranty/Customer Bill Date</em></td>
-                  <td><em>Service Paid/Free</em></td>
+                  <td><em>Repaired / Replacement </em></td>
+                  <td><em>Replacement Tag </em></td>
+                  <td colspan="2"><em>Replacement Tag Number </em></td>
                 </tr>
                 <tr>
-                  <th class="pt-0">{{($complaint->product_details && $complaint->product_details->phase != '')?$complaint->product_details->phase:'-'}}</th>
-                  <th class="pt-0">{{$complaint->customer_bill_date?date('d-m-Y', strtotime($complaint->customer_bill_date)):'-'}}</th>
-                  <th class="pt-0">{{$complaint->service_type??'-'}}</th>
+                  <th class="pt-0">{{$serviceBill->repaired_replacement??'-'}}</th>
+                  <th class="pt-0">{{$serviceBill->replacement_tag??'-'}}</th>
+                  <th colspan="2" class="pt-0">{{$serviceBill->replacement_tag_number??'-'}}</th>
                 </tr>
 
-                <tr>
-                  <td><em>Seller</em></td>
-                </tr>
-                <tr>
-                  <th class="pt-0">{{($complaint->seller_details && $complaint->seller_details->name != '')?'['.$complaint->seller_details->id.'] '.$complaint->seller_details->name:'-'}}</th>
-                </tr>
-              </table>
-
-              <div class="row invoice-info">
-                <div class="col-md-4"></div>
-                <div class="col-md-4 text-center" style="line-height: 0px;">
-                  <h5><em>Complaint Feedback Type</em></h5>
-                  <p><b>-</b></p>
-                </div>
-                <div class="col-md-4"></div>
-
-                <div class="col-md-4"></div>
-                <div class="col-md-4 text-center" style="line-height: 0px;">
-                  <h6><em>Feedback</em></h6>
-                  <p><b>-</b></p>
-                </div>
-                <div class="col-md-4"></div>
-              </div>
-
-              <table class="table responsive border-0 mt-4 new-table">
-                <tr>
-                  <td><em>Replacement Tag</em></td>
-                  <td><em>Replacement Tag Serial Number</em></td>
-                  <td><em>Replacement Tag Description</em></td>
-                </tr>
-                <tr>
-                  <th class="pt-0">-</th>
-                  <th class="pt-0">-</th>
-                  <th class="pt-0">-</th>
-                </tr>
-              </table>
-
-              <hr class="mb-4">
-
-              <div class="row invoice-info">
-                <div class="col-md-6 mb-3">
-                  <div class="row invoice-info" style="align-items: center;border:1px solid lightgrey;border-radius: 5px;padding: 0px 10px;width: 90%;">
-                    @if($complaint->warranty_details)
-                    @if($complaint->warranty_details->exists && $complaint->warranty_details->getMedia('warranty_activation_attach')->count() > 0 && Storage::disk('s3')->exists($complaint->warranty_details->getMedia('warranty_activation_attach')[0]->getPath()))
-                    <a href="{!! $complaint->warranty_details->getMedia('warranty_activation_attach')[0]->getFullUrl() !!}" data-lightbox="mygallery" data-title="Invoice">
-                      <img width="50" style="height: 50px !important;" src="{!! $complaint->warranty_details->getMedia('warranty_activation_attach')[0]->getFullUrl() !!}" class="img-fluid rounded"></a>
-                    <h6 class="ml-2 mb-0">{{$complaint->warranty_details->getMedia('warranty_activation_attach')[0]->name}}</h6>
-                    @else
-                    <img width="50" src="{!! url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview1">
-                    @endif
-                    @endif
-                  </div>
-                </div>
-                @if($complaint->exists && $complaint->getMedia('complaint_attach')->count() > 0 && Storage::disk('s3')->exists($complaint->getMedia('complaint_attach')[0]->getPath()))
-                @foreach($complaint->getMedia('complaint_attach') as $k=>$media)
-                <div class="col-md-6 mb-2">
-                  <div class="row invoice-info" style="align-items: center;border:1px solid lightgrey;border-radius: 5px;padding: 0px 10px;width: 90%;">
-                    <a href="{{$media->getFullUrl()}}" data-lightbox="mygallery">
-                      <img width="50" style="height: 50px !important;" class="img-fluid rounded" src="{!! $media->getFullUrl() !!}">
-                    </a>
-                    <h6 class="ml-2 mb-0">{{$media->name}}</h6>
-                  </div>
-                </div>
-                @endforeach
-                @endif
-              </div>
-
-              <hr class="mt-4">
-              <h4>ATTACHMENT</h4>
-              <table class="table responsive border-0 mt-4 new-table">
-                <tr>
-                  <th class="pb-0">SITE/SERVICE</th>
-                  <th class="pb-0">BRANCH</th>
-                  <th class="pb-0">Parchased Party Name</th>
-                  <th class="pb-0">Warranty / Bill</th>
-                </tr>
-                <tr>
-                  <td class="pt-0">-</td>
-                  <td class="pt-0">{{$complaint->purchased_branch_details?$complaint->purchased_branch_details->branch_name:'-'}}</td>
-                  <td class="pt-0">{{$complaint->party?$complaint->party->name:'-'}}</td>
-                  <td class="pt-0">{{$complaint->warranty_bill??'-'}}</td>
-                </tr>
-
-                <tr>
-                  <th class="pb-0">Customer Bill No.</th>
-                  <th class="pb-0">Warranty/Custtomer Bill Date</th>
-                  <th class="pb-0">Under Warranty</th>
-                  <th class="pb-0">Serbvice Paid/Free</th>
-                </tr>
-                <tr>
-                  <td class="pt-0">{{$complaint->customer_bill_no??'-'}}</td>
-                  <td class="pt-0">{{$complaint->customer_bill_date?date('d-m-Y', strtotime($complaint->customer_bill_date)):'-'}}</td>
-                  <td class="pt-0">{{$complaint->under_warranty??'-'}}</td>
-                  <td class="pt-0">{{$complaint->service_type??'-'}}</td>
-                </tr>
-
-                <tr>
-                  <th class="pb-0">Company Sale Bill No.</th>
-                  <th class="pb-0">Company Sale Bill Date</th>
-                  <th class="pb-0">Service Centre Remarks</th>
-                  <th class="pb-0">Fault Type</th>
-                </tr>
-                <tr>
-                  <td class="pt-0">{{$complaint->company_sale_bill_no??'-'}}</td>
-                  <td class="pt-0">{{$complaint->company_sale_bill_date?date('d-m-Y', strtotime($complaint->company_sale_bill_date)):'-'}}</td>
-                  <td class="pt-0">{{$complaint->service_centre_remark??'-'}}</td>
-                  <td class="pt-0">{{$complaint->fault_type??'-'}}</td>
-                </tr>
-
-                <tr>
-                  <th class="pb-0">Remark</th>
-                  <th class="pb-0">Complaint Register By</th>
-                  <th class="pb-0">Division</th>
-                  <th class="pb-0"> </th>
-                </tr>
-                <tr>
-                  <td class="pt-0">{{$complaint->remark??'-'}}</td>
-                  <td class="pt-0">{{$complaint->register_by??'-'}}</td>
-
-                  <td class="pt-0">{{$complaint->division_details?$complaint->division_details->division_name:'-'}}</td>
-                  <td class="pt-0"> </td>
-                </tr>
-
-
-              </table>
-
-              <hr class="mt-3 mb-3">
-
-              <div class="row invoice-info mt-4">
-                <div class="col-md-4">
-                  <h4><b>Work Done Detail</b></h4>
-                </div>
-                <div class="col-md-4 text-center">
-                </div>
-                <div class="col-md-4"></div>
-              </div>
-
-              <table class="table responsive border-0 new-table">
-                <tr>
-                  <td><em>Action Done by ASC</em></td>
-                  <td><em>Service centre remark</em></td>
-                  <td><em>Work Done At</em></td>
-                </tr>
-                <tr>
-                  <th class="pt-0">-</th>
-                  <th class="pt-0">{{$complaint->service_centre_remark??'-'}}</th>
-                  <th class="pt-0">-</th>
-                </tr>
               </table>
 
               <hr class="mt-3 mb-3">
@@ -347,20 +182,20 @@
                   <th>Warranty Status</th>
                 </tr>
                 <tr>
-                  <td>{{strtoupper($complaint->product_serail_number)}}</td>
-                  <td>[{{$complaint->product_code}}] {{$complaint->product_name}}</td>
+                  <td>{{strtoupper($serviceBill->complaint->product_serail_number)}}</td>
+                  <td>[{{$serviceBill->complaint->product_code}}] {{$serviceBill->complaint->product_name}}</td>
                   <td>
-                    @if ($complaint->customer_bill_date)
-                    {{ date('d-m-Y', strtotime($complaint->customer_bill_date)) }}
+                    @if ($serviceBill->complaint->customer_bill_date)
+                    {{ date('d-m-Y', strtotime($serviceBill->complaint->customer_bill_date)) }}
                     @else
                     -
                     @endif
                   </td>
                   <td>
-                    @if ($complaint->customer_bill_date)
+                    @if ($serviceBill->complaint->customer_bill_date)
                     @php
                     $today = Carbon\Carbon::today();
-                    $date = Carbon\Carbon::parse($complaint->customer_bill_date);
+                    $date = Carbon\Carbon::parse($serviceBill->complaint->customer_bill_date);
                     if ($date !== false) {
                     $date->addMonths(18);
                     } else {
@@ -377,7 +212,7 @@
                     @endif
                   </td>
                   <td>
-                    @if ($complaint->customer_bill_date)
+                    @if ($serviceBill->complaint->customer_bill_date)
                     @if ($date)
                     @if ($date->gt($today))
                     <span class="badge badge-success">In Warranty</span>
@@ -399,7 +234,7 @@
 
               <div class="row invoice-info mt-4">
                 <div class="col-md-4">
-                  <h4><b>Service Bill Details</b></h4>
+                  <h4><b>Service Bill Product Details</b></h4>
                 </div>
                 <div class="col-md-4 text-center">
                 </div>
@@ -408,17 +243,63 @@
 
               <table class="table table-striped responsive">
                 <tr>
-                  <th>Serial No.</th>
-                  <th>Total Amount</th>
-                  <th>Service Bill Status</th>
+                  <th>Service Type</th>
+                  <th>Job Type / Description /HP</th>
+                  <th>Quantity</th>
+                  <th>Distance (KM)</th>
+                  <th>Appreciation Charges</th>
+                  <th>Charge Value</th>
+                  <th>Sub Total</th>
                 </tr>
+                @php $total_pr = 0; $total_qua = 0; @endphp
+                @if(count($serviceBill->service_bill_products) > 0)
+                @foreach($serviceBill->service_bill_products as $service_bill_products)
                 <tr>
-                  <td>{{strtoupper($complaint->product_serail_number)}}</td>
+                  <td>{{ucfirst($service_bill_products->service_type_details?$service_bill_products->service_type_details->charge_type:'-')}}</td>
+                  <td>{{ucfirst($service_bill_products->product?$service_bill_products->product->product_name:'-')}}</td>
+                  <td>{{$service_bill_products->quantity??'-'}}</td>
                   <td>-</td>
                   <td>-</td>
+                  <td>{{$service_bill_products->price??'0'}}</td>
+                  <td>{{$service_bill_products->subtotal??'0'}}</td>
+                </tr>
+                @php $total_pr += $service_bill_products->subtotal??0; $total_qua += $service_bill_products->quantity??0; @endphp
+                @endforeach
+                @endif
+                <tr>
+                  <th colspan="2">Total : </th>
+                  <th>{{$total_qua}}</th>
+                  <th></th>
+                  <th></th>
+                  <th>{{$total_pr}}</th>
+                  <th>{{$total_pr}}</th>
                 </tr>
 
               </table>
+
+              <hr class="mt-3 mb-3">
+
+              <div class="row invoice-info mt-4">
+                <div class="col-md-4">
+                  <h4><b>Photos :</b></h4>
+                </div>
+                <div class="col-md-4 text-center">
+                </div>
+                <div class="col-md-4"></div>
+              </div>
+
+              <div class="row">
+                @if($serviceBill->exists && $serviceBill->getMedia('*')->count() > 0)
+                @foreach($serviceBill->getMedia('*') as $k=>$media)
+                <div style="position: relative;" class="img-div">
+                  <button title="Delete Image" type="button" class="badge badge-danger delete-img-btn" data-mediaid="{{$media->id}}">X</button>
+                  <a href="{{$media->getFullUrl()}}" download target="_blank">
+                    <img class="m-2 rounded img-fluid" src="{!! $media->getFullUrl() !!}" style="width: 170px;height:170px;">
+                  </a>
+                </div>
+                @endforeach
+                @endif
+              </div>
 
 
               <!-- /.row -->
@@ -432,19 +313,19 @@
 
 
 
-      <div class="col-3">
-        <!-- <h4>Time Line</h4> -->
+      <!-- <div class="col-3">
+        <h4>Time Line</h4>
 
         <div class="card">
           <div class="card-body">
-            <!-- <h4>Time Line</h4> -->
+            <h4>Time Line</h4>
 
             <div class="row">
               <div class="col-12">
                 <h3 class="card-title pb-3">Time Line</h3>
                 <hr>
                 <p class="lead"></p>
-                @if(count($timelines) > 0)
+                {{--@if(count($timelines) > 0)
                 @foreach($timelines as $timeline)
                 @if($timeline->status == '0')
                 @php $status_is = 'Open'; @endphp
@@ -462,238 +343,269 @@
                 <div class="d-flex">
                   <i class="material-icons">double_arrow</i>
                   <p>
-                     Complaint <b> {!! $complaint['complaint_number'] !!} </b> moved to <b>{{$status_is}}</b> by <b>{{$timeline->created_by_details->name}}</b> on <b>{{date("d M Y, h:i a", strtotime($timeline->created_at));}}.</b>
-                  </p>
-                </div>
-                @endforeach
-                @endif
-
-                <p>
-                  <b> #{!! $complaint['complaint_number'] !!} Created on {{date("d M Y, h:i a", strtotime($complaint->created_at));}}
+                     Complaint <b> {!! $serviceBill->complaint['complaint_number'] !!} </b> moved to <b>{{$status_is}}</b> by <b>{{$timeline->created_by_details->name}}</b> on <b>{{date("d M Y, h:i a", strtotime($timeline->created_at));}}.</b>
                 </p>
-
-
-
               </div>
+              @endforeach
+              @endif
+
+              <p>
+                <b> #{!! $serviceBill->complaint['complaint_number'] !!} Created on {{date("d M Y, h:i a", strtotime($serviceBill->complaint->created_at));}}
+              </p> --}}
+
+
 
             </div>
+
           </div>
         </div>
-      </div>
+      </div> -->
+    </div>
 
 
-      <!-- /.row -->
+    <!-- /.row -->
 
 
-      <!-- new model for reject status -->
+    <!-- new model for reject status -->
 
-      <div class="modal fade bd-example-modal-lg" id="reject_expense" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-          <div class="modal-content card">
-            <div class="card-header card-header-icon card-header-theme">
-              <div class="card-icon">
-                <i class="material-icons">perm_identity</i>
-              </div>
-              <h4 class="card-title">
-                <span class="modal-title">Submit </span> Reject <span class="pull-right">
-                  <a href="javascript:void(0)" class="btn btn-just-icon btn-danger" data-dismiss="modal">
-                    <i class="material-icons">clear</i>
-                  </a>
-                </span>
-              </h4>
+    <div class="modal fade bd-example-modal-lg" id="reject_expense" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content card">
+          <div class="card-header card-header-icon card-header-theme">
+            <div class="card-icon">
+              <i class="material-icons">perm_identity</i>
             </div>
-            <div class="modal-body">
-              <form method="POST" action="{{ route('cancelComplaint') }}" enctype="multipart/form-data" id="createleadstagesForm_new"> @csrf
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="input-group input-group-outline my-3">
-                      <label class="form-label">Reason</label>
-                      <input type="text" name="reason" id="reason" class="form-control" value="{!! old( 'reason') !!}" required> <br><br>
-                      <input type="text" name="cancel_complaint_id" id="cancel_complaint_id" class="form-control" hidden>
-                    </div>
+            <h4 class="card-title">
+              <span class="modal-title">Submit </span> Reject <span class="pull-right">
+                <a href="javascript:void(0)" class="btn btn-just-icon btn-danger" data-dismiss="modal">
+                  <i class="material-icons">clear</i>
+                </a>
+              </span>
+            </h4>
+          </div>
+          <div class="modal-body">
+            <form method="POST" action="{{ route('cancelComplaint') }}" enctype="multipart/form-data" id="createleadstagesForm_new"> @csrf
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="input-group input-group-outline my-3">
+                    <label class="form-label">Reason</label>
+                    <input type="text" name="reason" id="reason" class="form-control" value="{!! old( 'reason') !!}" required> <br><br>
+                    <input type="text" name="cancel_complaint_id" id="cancel_complaint_id" class="form-control" hidden>
                   </div>
                 </div>
-                <button class="btn btn-info save">Reject</button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- end model for status -->
-
-
-      <!-- new model for approve status -->
-
-      <div class="modal fade bd-example-modal-lg" id="approve_expense" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-          <div class="modal-content card">
-            <div class="card-header card-header-icon card-header-theme">
-              <div class="card-icon">
-                <i class="material-icons">perm_identity</i>
               </div>
-              <h4 class="card-title">
-                <span class="modal-title">Submit </span> Approve <span class="pull-right">
-                  <a href="javascript:void(0)" class="btn btn-just-icon btn-danger" data-dismiss="modal">
-                    <i class="material-icons">clear</i>
-                  </a>
-                </span>
-              </h4>
-            </div>
-            <div class="modal-body">
-              <form method="POST" action="{{ route('approveExpense') }}" enctype="multipart/form-data" id="createleadstagesForms"> @csrf
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="input-group input-group-outline my-3">
-                      <label class="form-label">Approve Amount</label>
-                      <input type="text" name="approve_amnt" id="approve_amnt" class="form-control" value="{!! old( 'reason') !!}" required> <br><br>
-                      <input type="text" name="expense_new_id" id="expense_new_id" class="form-control" hidden>
-                    </div>
-
-                    <div class="input-group input-group-outline my-3">
-                      <label class="form-label">Reason</label>
-                      <input type="text" name="reasons" id="reasons" class="form-control" value="{!! old( 'reasons') !!}"> <br><br>
-                    </div>
-
-
-                  </div>
-                </div>
-                <button class="btn btn-info save">Approve</button>
-              </form>
-            </div>
+              <button class="btn btn-info save">Reject</button>
+            </form>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- end model for status -->
+    <!-- end model for status -->
 
-      <!-- Custom styles for this page -->
-      <link rel="stylesheet" href="{{ url('/').'/'.asset('lightboxx/css/lightbox.min.css') }}">
 
-      <script src="{{ url('/').'/'.asset('lightboxx/js/lightbox-plus-jquery.min.js') }}"></script>
+    <!-- new model for approve status -->
 
-      <!-- for checked -->
-      <script type="text/javascript">
-        $('body').on('click', '.open_status', function() {
-          var id = $('#complaint_id').val();
-          var token = $("meta[name='csrf-token']").attr("content");
-          $.ajax({
-            url: "{{ url('complaint-open') }}",
-            type: 'POST',
-            data: {
-              _token: token,
-              id: id
-            },
-            success: function(data) {
-              $('.message').empty();
-              $('.alert').show();
-              if (data.status == 'success') {
-                $('.alert').addClass("alert-success");
-                setTimeout(function() {
-                  location.reload();
-                }, 500);
+    <div class="modal fade bd-example-modal-lg" id="approve_expense" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content card">
+          <div class="card-header card-header-icon card-header-theme">
+            <div class="card-icon">
+              <i class="material-icons">perm_identity</i>
+            </div>
+            <h4 class="card-title">
+              <span class="modal-title">Submit </span> Approve <span class="pull-right">
+                <a href="javascript:void(0)" class="btn btn-just-icon btn-danger" data-dismiss="modal">
+                  <i class="material-icons">clear</i>
+                </a>
+              </span>
+            </h4>
+          </div>
+          <div class="modal-body">
+            <form method="POST" action="{{ route('approveExpense') }}" enctype="multipart/form-data" id="createleadstagesForms"> @csrf
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="input-group input-group-outline my-3">
+                    <label class="form-label">Approve Amount</label>
+                    <input type="text" name="approve_amnt" id="approve_amnt" class="form-control" value="{!! old( 'reason') !!}" required> <br><br>
+                    <input type="text" name="expense_new_id" id="expense_new_id" class="form-control" hidden>
+                  </div>
 
-              } else {
-                $('.alert').addClass("alert-danger");
-                // setTimeout(function() {
-                //   location.reload();
-                // }, 3000);
-              }
-              $('.message').append(data.message);
-            },
-          });
+                  <div class="input-group input-group-outline my-3">
+                    <label class="form-label">Reason</label>
+                    <input type="text" name="reasons" id="reasons" class="form-control" value="{!! old( 'reasons') !!}"> <br><br>
+                  </div>
+
+
+                </div>
+              </div>
+              <button class="btn btn-info save">Approve</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- end model for status -->
+
+    <!-- Custom styles for this page -->
+    <link rel="stylesheet" href="{{ url('/').'/'.asset('lightboxx/css/lightbox.min.css') }}">
+
+    <script src="{{ url('/').'/'.asset('lightboxx/js/lightbox-plus-jquery.min.js') }}"></script>
+
+    <!-- for checked -->
+    <script type="text/javascript">
+      $('body').on('click', '.draft_status', function() {
+        var id = $('#service_bill_id').val();
+        var token = $("meta[name='csrf-token']").attr("content");
+        $.ajax({
+          url: "{{ url('service-bill-draft') }}",
+          type: 'POST',
+          data: {
+            _token: token,
+            id: id
+          },
+          success: function(data) {
+            $('.message').empty();
+            $('.alert').show();
+            if (data.status == 'success') {
+              $('.alert').addClass("alert-success");
+              setTimeout(function() {
+                location.reload();
+              }, 500);
+
+            } else {
+              $('.alert').addClass("alert-danger");
+              // setTimeout(function() {
+              //   location.reload();
+              // }, 3000);
+            }
+            $('.message').append(data.message);
+          },
         });
+      });
 
-        $('body').on('click', '.pending_status', function() {
-          var id = $('#complaint_id').val();
-          var token = $("meta[name='csrf-token']").attr("content");
-          $.ajax({
-            url: "{{ url('complaint-pending') }}",
-            type: 'POST',
-            data: {
-              _token: token,
-              id: id
-            },
-            success: function(data) {
-              $('.message').empty();
-              $('.alert').show();
-              if (data.status == 'success') {
-                $('.alert').addClass("alert-success");
-                setTimeout(function() {
-                  location.reload();
-                }, 500);
+      $('body').on('click', '.company_claim', function() {
+        var id = $('#service_bill_id').val();
+        var token = $("meta[name='csrf-token']").attr("content");
+        $.ajax({
+          url: "{{ url('service-bill-company-claim') }}",
+          type: 'POST',
+          data: {
+            _token: token,
+            id: id
+          },
+          success: function(data) {
+            $('.message').empty();
+            $('.alert').show();
+            if (data.status == 'success') {
+              $('.alert').addClass("alert-success");
+              setTimeout(function() {
+                location.reload();
+              }, 500);
 
-              } else {
-                $('.alert').addClass("alert-danger");
-                // setTimeout(function() {
-                //   location.reload();
-                // }, 3000);
-              }
-              $('.message').append(data.message);
-            },
-          });
+            } else {
+              $('.alert').addClass("alert-danger");
+              // setTimeout(function() {
+              //   location.reload();
+              // }, 3000);
+            }
+            $('.message').append(data.message);
+          },
         });
+      });
 
-        $('body').on('click', '.cancel_status', function() {
-          var id = $('#complaint_id').val();
-          var token = $("meta[name='csrf-token']").attr("content");
-          $.ajax({
-            url: "{{ url('complaint-cancel') }}",
-            type: 'POST',
-            data: {
-              _token: token,
-              id: id
-            },
-            success: function(data) {
-              $('.message').empty();
-              $('.alert').show();
-              if (data.status == 'success') {
-                $('.alert').addClass("alert-success");
-                setTimeout(function() {
-                  location.reload();
-                }, 500);
+      $('body').on('click', '.cancel_status', function() {
+        var id = $('#service_bill_id').val();
+        var token = $("meta[name='csrf-token']").attr("content");
+        $.ajax({
+          url: "{{ url('service-bill-cancel') }}",
+          type: 'POST',
+          data: {
+            _token: token,
+            id: id
+          },
+          success: function(data) {
+            $('.message').empty();
+            $('.alert').show();
+            if (data.status == 'success') {
+              $('.alert').addClass("alert-success");
+              setTimeout(function() {
+                location.reload();
+              }, 500);
 
-              } else {
-                $('.alert').addClass("alert-danger");
-                // setTimeout(function() {
-                //   location.reload();
-                // }, 3000);
-              }
-              $('.message').append(data.message);
-            },
-          });
+            } else {
+              $('.alert').addClass("alert-danger");
+              // setTimeout(function() {
+              //   location.reload();
+              // }, 3000);
+            }
+            $('.message').append(data.message);
+          },
         });
+      });
 
-        $('body').on('click', '.complete_status', function() {
-          var id = $('#complaint_id').val();
-          var token = $("meta[name='csrf-token']").attr("content");
-          $.ajax({
-            url: "{{ url('complaint-complete') }}",
-            type: 'POST',
-            data: {
-              _token: token,
-              id: id
-            },
-            success: function(data) {
-              $('.message').empty();
-              $('.alert').show();
-              if (data.status == 'success') {
-                $('.alert').addClass("alert-success");
-                setTimeout(function() {
-                  location.reload();
-                }, 500);
+      $('body').on('click', '.customer_pay', function() {
+        var id = $('#service_bill_id').val();
+        var token = $("meta[name='csrf-token']").attr("content");
+        $.ajax({
+          url: "{{ url('service-bill-customer-pay') }}",
+          type: 'POST',
+          data: {
+            _token: token,
+            id: id
+          },
+          success: function(data) {
+            $('.message').empty();
+            $('.alert').show();
+            if (data.status == 'success') {
+              $('.alert').addClass("alert-success");
+              setTimeout(function() {
+                location.reload();
+              }, 500);
 
-              } else {
-                $('.alert').addClass("alert-danger");
-                // setTimeout(function() {
-                //   location.reload();
-                // }, 3000);
-              }
-              $('.message').append(data.message);
-            },
-          });
+            } else {
+              $('.alert').addClass("alert-danger");
+              // setTimeout(function() {
+              //   location.reload();
+              // }, 3000);
+            }
+            $('.message').append(data.message);
+          },
         });
-      </script>
+      });
+
+      $(document).on("click", ".delete-img-btn", function() {
+         var id = $(this).data('mediaid');
+         Swal.fire({
+            title: "ARE YOU SURE TO DELETE ATTACHMENT ?",
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: "YES",
+            denyButtonText: `Don't`
+         }).then((result) => {
+            if (result.value) {
+               $(this).closest('.img-div').remove();
+               $.ajax({
+                  url: "{{ url('service-bill-attach-delete') }}",
+                  dataType: "json",
+                  type: "POST",
+                  data: {
+                     _token: "{{csrf_token()}}",
+                     id: id
+                  },
+                  success: function(res) {
+                     if (res.status === true) {
+                        Swal.fire("Attachment delete successfully !", res.msg, "success");
+                     } else {
+                        Swal.fire("Somthing went wrong", "", "error");
+                     }
+                  }
+               });
+            }
+         });
+      })
+    </script>
   </section>
   <!-- /.content -->
 </x-app-layout>

@@ -52,7 +52,7 @@ class SalesAchievementImport implements ToCollection,WithValidation,WithHeadingR
                 'month' => $carbonMonth,
                 'year' => $carbonYear],[
                     'user_id' => $row['user_id'],
-                    'type' => $row['user_id'],
+                    'type' => $row['type'],
                     'month' => $carbonMonth,
                     'year' => $carbonYear,
                     'achievement' => $row['achievement']                

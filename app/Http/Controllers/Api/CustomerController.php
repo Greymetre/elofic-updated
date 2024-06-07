@@ -460,7 +460,7 @@ class CustomerController extends Controller
             
             $pageSize = $request->input('pageSize');
             $search = $request['search'] ;
-            $query = $this->customers->with('customeraddress','customerdetails','customertypes')
+            $query = $this->customers->with('customeraddress','customerdetails','customertypes')->where('active', 'Y')
                             ->where(function($query) use($search, $userids,$customer_id,$branch_user_id) {
                                 if(!empty($search))
                                 {

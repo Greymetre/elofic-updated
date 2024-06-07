@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\TourProgramme;
+use App\Models\User;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -22,6 +23,7 @@ class TourExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
         $this->userids = getUsersReportingToAuth();
 
         $this->user_id = $request->input('executive_id');
+        $this->division_id = $request->input('division_id');
         $this->start_date = $request->input('start_date');
         $this->end_date = $request->input('end_date');
 
@@ -43,6 +45,11 @@ class TourExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
                                 {
                                     $query->where('userid', $this->user_id);
                                 }
+                                if($this->division_id)
+                                {
+                                    $userIds = User::where('division_id', $this->division_id)->pluck('id');
+                                    $query->whereIn('userid', $userIds);
+                                }
                                 if($this->start_date)
                                 {
                                     $query->whereDate('date','>=',$this->start_date);
@@ -59,7 +66,10 @@ class TourExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
            }else{
 
             return TourProgramme::with('tourdetails','userinfo')->where(function ($query)  {
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
+                                if(!empty($this->division_id)){
+                                    $userIds = User::where('division_id', $request['division_id'])->pluck('id');
+                                    $query->whereIn('executive_id', $userIds);
+                                }elseif(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
                                 {
                                     $query->whereIn('executive_id', $this->userids);
                                 }

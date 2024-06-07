@@ -19,6 +19,7 @@ use App\Models\User;
 use App\Models\City;
 use App\Imports\TourImport;
 use App\Exports\TourExport;
+use App\Models\Division;
 
 class TourController extends Controller
 {
@@ -58,6 +59,7 @@ class TourController extends Controller
         $all_user_branches = User::with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
         $branches = array();
         $all_branch = array();
+        $divisions = Division::where('active', 'Y')->get();
         $bkey = 0;
         foreach ($all_user_branches as $k => $val) {
             if($val->getbranch){
@@ -103,6 +105,11 @@ class TourController extends Controller
                             if(!empty($request['executive_id']))
                             {
                                 $query->where('userid', $request['executive_id']);
+                            }
+                            if(!empty($request['division_id']))
+                            {
+                                $userIds = User::where('division_id', $request['division_id'])->pluck('id');
+                                $query->whereIn('userid', $userIds);
                             }
 
                             if(!empty($request['start_date']) && !empty($request['end_date']))
@@ -213,7 +220,7 @@ class TourController extends Controller
         }
       
        // return $dataTable->render('tours.index',compact('users','branches'));
-        return view('tours.index', compact('users','branches'));
+        return view('tours.index', compact('users','branches', 'divisions'));
     }
 
 

@@ -5,7 +5,7 @@
 			<div class="card-body">
 				<h5 class="mb-4">Product Details</h5>
 				<div class="row">
-					<div class="col-xl4 col-lg-4 text-center"> <img class="w-100 border-radius-lg shadow-lg mx-auto imageDisplayModel" src="{!! isset($products['product_image']) ? $products['product_image'] :'' !!}" alt="chair">
+					<div class="col-xl4 col-lg-4 text-center"> <img class="w-100 border-radius-lg shadow-lg mx-auto imageDisplayModel" src="{!! isset($products['product_image']) ? asset('/uploads/'.$products['product_image']) :'' !!}" alt="Product Image">
 					</div>
 					<div class="col-lg-8 mx-auto">
               <ul class="list-group">
