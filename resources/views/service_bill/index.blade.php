@@ -79,6 +79,16 @@
             </span>
           </div>
           @endif
+          @if(session()->has('message_error'))
+          <div class="alert alert-danger">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <i class="material-icons">close</i>
+            </button>
+            <span>
+              {!!session()->get('message_error') !!}
+            </span>
+          </div>
+          @endif
           <div class="alert " style="display: none;">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
               <i class="material-icons">close</i>
@@ -86,21 +96,22 @@
             <span class="message"></span>
           </div>
           <div class="table-responsive">
-            <!-- <table id="getscheme" class="table table-striped- table-bschemeed table-hover table-checkable responsive no-wrap">
+            <table id="getscheme" class="table table-striped- table-bschemeed table-hover table-checkable responsive no-wrap">
               <thead class=" text-primary">
                 <th>{!! trans('panel.global.no') !!}</th>
-                <th>{!! trans('panel.global.action') !!}</th>
+                <!-- <th>{!! trans('panel.global.action') !!}</th> -->
+                <th>Service Bill Number</th>
                 <th>Complaint Number</th>
-                <th>Customer</th>
-                <th>Complaint Date</th>
                 <th>Complaint Type</th>
-                <th>Purchased Party Name</th>
-                <th>Service Center</th>
-                <th>Complaint Status</th>
+                <th>Complaint Reason</th>
+                <th>Condition of Service</th>
+                <th>Received Product</th>
+                <th>Nature of Fault</th>                
+                <th>Status</th>
               </thead>
               <tbody>
               </tbody>
-            </table> -->
+            </table>
           </div>
         </div>
       </div>
@@ -120,7 +131,7 @@
         "order": [
           [0, 'desc']
         ],
-        "ajax": "{{ route('complaints.index') }}",
+        "ajax": "{{ route('service_bills.index') }}",
         columns: [{
             data: 'DT_RowIndex',
             name: 'DT_RowIndex',
@@ -136,39 +147,44 @@
           //   searchable: false
           // },
           {
-            data: 'complaint_number',
-            name: 'complaint_number',
+            data: 'bill_no',
+            name: 'bill_no',
             orderable: false,
             "defaultContent": ''
           },
           {
-            data: null,
-            orderable: false,
-            render: function(data, type, full, meta) {
-                return data.customer.customer_name + ' (' + data.customer.customer_number + ')';
-            }
-          },
-          {
-            data: 'complaint_date',
-            name: 'complaint_date',
+            data: 'complaint_no',
+            name: 'complaint_no',
             orderable: false,
             "defaultContent": ''
           },
           {
-            data: 'complaint_type_details.name',
-            name: 'complaint_type_details.name',
+            data: 'complaint_type',
+            name: 'complaint_type',
             orderable: false,
             "defaultContent": ''
           },
           {
-            data: 'party.name',
-            name: 'party.name',
+            data: 'complaint_reason',
+            name: 'complaint_reason',
             orderable: false,
             "defaultContent": ''
           },
           {
-            data: 'service_center_details.name',
-            name: 'service_center_details.name',
+            data: 'condition_of_service',
+            name: 'condition_of_service',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'received_product',
+            name: 'received_product',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'nature_of_fault',
+            name: 'nature_of_fault',
             orderable: false,
             "defaultContent": ''
           },
@@ -266,7 +282,7 @@
         });
         Toast.fire({
           icon: "success",
-          title: "Complaint number copied to clipboard: " + textToCopy
+          title: "Service Bill number copied to clipboard: " + textToCopy
         });
       });
     });

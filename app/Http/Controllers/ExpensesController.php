@@ -19,6 +19,7 @@ use DB;
 use Auth;
 use Excel;
 use App\Exports\ExcelExport;
+use App\Models\Attendance;
 use App\Models\CheckIn;
 use App\Models\Customers;
 use App\Models\TourProgramme;
@@ -825,5 +826,31 @@ class ExpensesController extends Controller
         // $model = Model::find($media->id);
         //$media->deleteMedia($media->id);
         return redirect()->route('expenses.show', ['expense' => $expense_id]);
+    }
+
+    public function all_map(Request $request)
+    {
+        $coordinates = [];
+
+        $attan = Attendance::where('user_id', $request->id)->where('punchin_date', '2024-03-02')->first();
+        $checks = CheckIn::where('user_id', $request->id)->where('checkin_date', '2024-03-02')->get();
+
+        $coordinates[0]['latitude'] = $attan->punchin_latitude;
+        $coordinates[0]['longitude'] = $attan->punchin_longitude;
+        $coordinates[0]['name'] = 'Punch In';
+        $i = 1;
+        foreach($checks as $check){
+            $coordinates[$i]['latitude'] = $check->checkin_latitude;
+            $coordinates[$i]['longitude'] = $check->checkin_longitude;
+            $coordinates[$i]['name'] = 'Check In';
+            $i++;
+        }
+
+        $coordinates[$i]['latitude'] = $attan->punchout_latitude;
+        $coordinates[$i]['longitude'] = $attan->punchout_longitude;
+        $coordinates[$i]['name'] = 'Punch Out';
+
+        return view('map.route', compact('coordinates'));
+
     }
 }

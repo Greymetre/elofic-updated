@@ -2,7 +2,7 @@
 
 namespace App\DataTables;
 
-use App\Models\Complaint;
+use App\Models\ServiceBill;
 use Yajra\DataTables\Html\Button;
 use Yajra\DataTables\Html\Column;
 use Yajra\DataTables\Html\Editor\Editor;
@@ -20,52 +20,63 @@ class ServiceBillDataTable extends DataTable
             ->eloquent($query)
             ->addIndexColumn()
             ->addColumn('status', function ($query) {
-                if($query->complaint_status == '0'){
-                    return '<a href="'.route('complaints.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Complaint"><span class="badge badge-secondary">Open</span></a>';
-                }elseif($query->complaint_status == '1'){
-                    return '<a href="'.route('complaints.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Complaint"><span class="badge badge-warning">Pending</span></a>';
-                }elseif($query->complaint_status == '2'){
-                    return '<a href="'.route('complaints.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Complaint"><span class="badge badge-info">Work Done</span></a>';
-                }elseif($query->complaint_status == '3'){
-                    return '<a href="'.route('complaints.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Complaint"><span class="badge badge-success">Completed</span></a>';
-                }elseif($query->complaint_status == '4'){
-                    return '<a href="'.route('complaints.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Complaint"><span class="badge badge-primary">Closed</span></a>';
-                }elseif($query->complaint_status == '5'){
-                    return '<a href="'.route('complaints.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Complaint"><span class="badge badge-danger">Canceled</span></a>';
+                if($query->status == '0'){
+                    return '<a href="'.route('service_bills.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Service Bill"><span class="badge badge-secondary">Draft</span></a>';
+                }elseif($query->status == '1'){
+                    return '<a href="'.route('service_bills.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Service Bill"><span class="badge badge-warning">Claimed</span></a>';
+                }elseif($query->status == '2'){
+                    return '<a href="'.route('service_bills.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Service Bill"><span class="badge badge-info">Customer payble</span></a>';
+                }elseif($query->status == '3'){
+                    return '<a href="'.route('service_bills.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Service Bill"><span class="badge badge-success">Approve</span></a>';
+                }elseif($query->status == '4'){
+                    return '<a href="'.route('service_bills.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Service Bill"><span class="badge badge-danger">Cancel</span></a>';
                 }
             })
-            // ->addColumn('action', function ($query) {
-            //     $btn = '';
-            //     $activebtn = '';
-            //     if (auth()->user()->can(['complaint_edit'])) {
-            //         $btn = $btn . '<a href="'.route('complaints.edit', $query->id).'" class="btn btn-success btn-just-icon btn-sm" title="' . trans('panel.global.edit') . ' Complaint">
-            //               <i class="material-icons">edit</i>
-            //               </a>';
-            //     }
-            //     if (auth()->user()->can(['complaint_view'])) {
-            //         $btn = $btn . ' <a href="'.route('complaints.show', $query->id).'" class="btn btn-info btn-just-icon btn-sm" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Complaint">
-            //                     <i class="material-icons">visibility</i>
-            //                     </a>';
-            //     }
-            //     // $btn = '';
-            //     return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
-            //                     ' . $btn . '
-            //                 </div>';
-            // })
-            ->addColumn('complaint_number', function ($query) {
+            ->addColumn('action', function ($query) {
+                $btn = '';
+                $activebtn = '';
+                if (auth()->user()->can(['complaint_edit'])) {
+                    $btn = $btn . '<a href="'.route('complaints.edit', $query->id).'" class="btn btn-success btn-just-icon btn-sm" title="' . trans('panel.global.edit') . ' Service Bill">
+                          <i class="material-icons">edit</i>
+                          </a>';
+                }
                 if (auth()->user()->can(['complaint_view'])) {
-                    $btn = ' <a href="'.route('complaints.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Complaint">
-                                '.$query->complaint_number.'
+                    $btn = $btn . '<a href="'.route('complaints.show', $query->id).'" class="btn btn-info btn-just-icon btn-sm" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Service Bill">
+                                <i class="material-icons">visibility</i>
                                 </a>';
-                }else{
-                    $btn = $query->complaint_number;
                 }
                 // $btn = '';
                 return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
                                 ' . $btn . '
                             </div>';
             })
-            ->rawColumns(['action', 'status','complaint_number']);
+            ->addColumn('complaint_no', function ($query) {
+                if (auth()->user()->can(['complaint_view'])) {
+                    $btn = '<a href="'.route('complaints.show', $query->complaint_id).'" value="' . $query->complaint_id . '" title="' . trans('panel.global.show') . ' Complaint">
+                                '.$query->complaint_no.'
+                                </a>';
+                }else{
+                    $btn = $query->complaint_no;
+                }
+                // $btn = '';
+                return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
+                                ' . $btn . '
+                            </div>';
+            })
+            ->addColumn('bill_no', function ($query) {
+                if (auth()->user()->can(['service_bill_view'])) {
+                    $btn = '<a href="'.route('service_bills.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Service Bill">
+                                '.$query->bill_no.'
+                                </a>';
+                }else{
+                    $btn = $query->bill_no;
+                }
+                // $btn = '';
+                return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
+                                ' . $btn . '
+                            </div>';
+            })
+            ->rawColumns(['action', 'status','complaint_no', 'bill_no']);
     }
 
     /**
@@ -74,9 +85,9 @@ class ServiceBillDataTable extends DataTable
      * @param \App\City $model
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function query(Complaint $model)
+    public function query(ServiceBill $model)
     {
-        return $model->with('party', 'service_center_details', 'seller_details', 'customer', 'complaint_type_details')->newQuery();
+        return $model->newQuery();
     }
 
     /**

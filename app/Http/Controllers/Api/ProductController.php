@@ -530,8 +530,7 @@ class ProductController extends Controller
                 $query->where('active', '=', 'Y');
                 $query->where('id', '=', $product_id);
             })
-                ->select('id', 'product_name', 'display_name', 'description', 'subcategory_id', 'category_id', 'brand_id', 'product_image', 'unit_id', 'specification', 'part_no', 'product_no', 'model_no', 'suc_del')
-                ->first();
+            ->first();
 
             $detail = collect([]);
             $data = collect([]);
@@ -646,7 +645,7 @@ class ProductController extends Controller
                     'product_name' => isset($query['product_name']) ? $query['product_name'] : '',
                     'display_name' => isset($query['display_name']) ? $query['display_name'] : '',
                     'description' => isset($query['description']) ? $query['description'] : '',
-                    'product_image' => isset($query['product_image']) ? $query['product_image'] : '',
+                    'product_image' => isset($query['product_image']) ? url('/public/uploads').'/'.$query['product_image'] : '',
                     'subcategory_id' => isset($query['subcategory_id']) ? $query['subcategory_id'] : 0,
                     'subcategory_name' => isset($query['subcategories']['subcategory_name']) ? $query['subcategories']['subcategory_name'] : '',
                     'category_id' => isset($query['category_id']) ? $query['category_id'] : 0,
@@ -669,6 +668,10 @@ class ProductController extends Controller
                     'product_no' => isset($query['product_no']) ? $query['product_no'] : '',
                     'model_no' => isset($query['model_no']) ? $query['model_no'] : '',
                     'hp' => isset($query['specification']) ? $query['specification'] : '',
+                    'stage' => isset($query['product_no']) ? $query['product_no'] : '',
+                    'expiry_interval' => isset($query['expiry_interval']) ? $query['expiry_interval'] : '',
+                    'expiry_interval_preiod' => isset($query['expiry_interval_preiod']) ? $query['expiry_interval_preiod'] : '',
+                    'phase' => isset($query['phase']) ? $query['phase'] : '',
                     'ebd_amount' => (string)$ebd_amount,
                     'scheme_amount' => (string)$ebd_amount,
                     'product_ebd_amount' => (string)$product_ebd_amount,

@@ -24,10 +24,21 @@
                     @endif
                    </select>
                   </div>
+
+                  <div class="p-2" style="width:250px;">
+                    <select class="selectpicker" name="division_id" id="division_id" data-style="select-with-transition" title="Select Division">
+                     <option value="">Select Division</option>
+                    @if(@isset($divisions ))
+                        @foreach($divisions as $division)
+                          <option value="{!! $division['id'] !!}">{!! $division['division_name'] !!}</option>
+                        @endforeach
+                    @endif
+                   </select>
+                  </div>
   
 
                  <div class="p-2" style="width: 250px;">
-                    <select class="selectpicker1 select2" name="executive_id" id="executive_id" data-style="select-with-transition" title="Select User">
+                    <select class="form-control select2" name="executive_id" id="executive_id" data-style="select-with-transition" title="Select User">
                      <option value="">Select User</option>
                     @if(@isset($users ))
                     @foreach($users as $user)
@@ -234,6 +245,7 @@
                 d.executive_id = $('#executive_id').val(),
                 d.start_date = $('#start_date').val(),
                 d.end_date = $('#end_date').val()
+                d.division_id = $('#division_id').val()
             }
         },
         columns: [
@@ -258,6 +270,9 @@
         table.draw();
     });
     $('#end_date').change(function(){
+        table.draw();
+    });
+    $('#division_id').change(function(){
         table.draw();
     });
 

@@ -13,12 +13,33 @@
                   @if(auth()->user()->can(['services_product_products_create']))
                   <a class="btn btn-just-icon btn-theme" href="{{route('servicecharge.products.create')}}" title="{!!  trans('panel.global.add') !!} Service Charge Product"><i class="material-icons">add_circle</i></a>
                   @endif
-                  <form method="post" action="{{ URL::to('division_report/download') }}" class="form-horizontal">
+                  <form method="post" action="{{ URL::to('service-charge/products/download') }}" class="form-horizontal">
                     @csrf
                     @if(auth()->user()->can(['services_product_products_download']))
-                    <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Division Report" name="export_division_report" value="true"><i class="material-icons">cloud_download</i></button>
+                    <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Service Charge Products" name="export_division_report" value="true"><i class="material-icons">cloud_download</i></button>
                     @endif
                   </form>
+                  @if(auth()->user()->can(['services_product_products_upload']))
+                  <form action="{{ URL::to('service-charge/products/upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
+                    {{ csrf_field() }}
+                    <div class="input-group">
+                      <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                        <span class="btn btn-just-icon btn-theme btn-file">
+                          <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
+                          <span class="fileinput-exists">Change</span>
+                          <input type="hidden">
+                          <input type="file" title="Select File For Import Data" name="import_file" required accept=".xls,.xlsx" />
+                        </span>
+                      </div>
+                      <div class="input-group-append">
+                        <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.upload') !!} Service Charge Products">
+                          <i class="material-icons">cloud_upload</i>
+                          <div class="ripple-container"></div>
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                  @endif
                 </div>
               </div>
             </span>
@@ -162,7 +183,7 @@
             },
           });
         });
-        
+
         $('body').on('click', '.delete', function() {
           var id = $(this).attr("value");
           var token = $("meta[name='csrf-token']").attr("content");

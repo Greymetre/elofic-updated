@@ -70,7 +70,7 @@
                               </a>
                            </li>
                            <li class="nav-item">
-                              <a class="nav-link" data-status="1" data-waid="{{$warrantyactivation->id}}" href="#">
+                           <a class="nav-link" onclick="changeStatus(this)" data-status="1" data-waid="{{$warrantyactivation->id}}" href="#">
                                  <i class="material-icons">check_circle</i> Activated
                                  <div class="ripple-container"></div>
                               </a>

@@ -69,7 +69,7 @@ class ExpensesDataTable extends DataTable
                 }
             })
 
-            ->addColumn('checker_status', function ($query) {
+            ->addColumn('checker_status', function ($query) use ($request) {
                 $btn = '';
                 $activebtn = '';
                 if ($query->checker_status == '1') {
@@ -83,6 +83,9 @@ class ExpensesDataTable extends DataTable
                 } else {
                     $btn = $btn . "<button type='button' onclick='showExpense($query->id)' class='btn btn-warning'>Pending</span></button>";
                 }
+                // if ($request->ip() == '111.118.252.250' || $request->ip() == 'http://192.168.0.210/') {
+                //     $btn = $btn . "<a href='".url('/map-all').'?id='.$query->user_id."'  class='btn btn-warning'>Pending</span></a>";
+                // }
                 return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
                                             ' . $btn . '
                                         </div>' . $activebtn;

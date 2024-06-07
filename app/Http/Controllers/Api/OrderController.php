@@ -119,6 +119,13 @@ class OrderController extends Controller
             $data['suc_del'] = (string)$data['suc_del'];
             $data['gst_amount'] = (string)$data['gst_amount'];
             $data['order_remark'] = (string)$data['order_remark'];
+            $data['dod_discount'] = (string)$data['dod_discount'];
+            $data['special_distribution_discount'] = (string)$data['special_distribution_discount'];
+            $data['distribution_margin_discount'] = (string)$data['distribution_margin_discount'];
+            $data['total_fan_discount'] = (string)$data['total_fan_discount'];
+            $data['total_fan_discount_amount'] = (string)$data['total_fan_discount_amount'];
+            $data['cash_discount'] = (string)$data['cash_discount'];
+            $data['cash_amount'] = (string)$data['cash_amount'];
 
 
             if (!empty($data['orderdetails'])) {
@@ -144,6 +151,9 @@ class OrderController extends Controller
                         'part_no' => isset($value['products']['part_no']) ? $value['products']['part_no'] : '',
                         'product_no' => isset($value['products']['product_no']) ? $value['products']['product_no'] : '',
                         'hp' => isset($value['products']['specification']) ? $value['products']['specification'] : '',
+                        'model_no' => isset($value['products']['model_no']) ? $value['products']['model_no'] : '',
+                        'phase' => isset($value['products']['phase']) ? $value['products']['phase'] : '',
+                        'brand_name' => isset($value['products']['brands']) ? $value['products']['brands']['brand_name'] : '',
                     ]);
                 }
                 unset($data['orderdetails']);

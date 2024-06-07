@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use App\Models\CheckIn;
 use App\Models\OrderDetails;
+use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -59,7 +60,15 @@ class CheckinExport implements FromCollection, WithHeadings, ShouldAutoSize, Wit
 
 
 
-        $interval = strtotime($data->checkout_time) - strtotime($data->checkin_time);
+        if(!empty($data->checkout_time) && !empty($data->checkin_time)){
+            $parsedTime1 = Carbon::createFromFormat('H:i:s', $data->checkout_time);
+            $parsedTime2 = Carbon::createFromFormat('H:i:s', $data->checkin_time);
+
+            $difference = $parsedTime1->diff($parsedTime2);
+            $interval = $difference->format('%H:%I:%S');
+        }else{
+            $interval = '-';
+        }
 
         return [
             $data['id'],
@@ -73,7 +82,7 @@ class CheckinExport implements FromCollection, WithHeadings, ShouldAutoSize, Wit
 
             isset($data['checkin_time']) ? $data['checkin_time'] : '',
             isset($data['checkout_time']) ? $data['checkout_time'] : '',
-            date("H:i:s", ($interval)),
+            $interval,
             isset($data['checkin_address']) ? $data['checkin_address'] : '',
             isset($data['checkout_address']) ? $data['checkout_address'] : '',
             isset($data['distance']) ? $data['distance'] : '',

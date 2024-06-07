@@ -521,7 +521,7 @@ class DashboardController extends Controller
         $customer_visit = CheckIn::whereBetween('checkin_date', [$startOfWeek, $endOfWeek])->where('user_id', $request->user_id)->count();
         if(!empty($targetAchivment)){
             $data['target'] = $targetAchivment->target;
-            $data['achievement'] = $targetAchivment->achievement??"";
+            $data['achievement'] = $targetAchivment->achievement?$targetAchivment->achievement:"";
             if($targetAchivment->achievement){
                 $data['achiv_per'] = number_format((($targetAchivment->achievement/$targetAchivment->target)*100), 2);
                 $data['target_per'] = number_format((100-$data['achiv_per']), 2);
@@ -535,7 +535,7 @@ class DashboardController extends Controller
             $data['achiv_per'] = "";
             $data['target_per'] = "";
         }
-        $data['order_value'] = $order_value>0?$order_value:"";
+        $data['order_value'] = $order_value>0?number_format(($order_value/100000), 2):"";
         $data['order_qty'] = $order_qty>0?$order_qty:"";
         $data['customer_visit'] = $customer_visit>0?(string)$customer_visit:"";
 

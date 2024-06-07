@@ -221,7 +221,7 @@ Route::group(['middleware' => ['auth']], function () {
     // Route::any('appraisal-download', [ AppraisalController::class, 'download'])->name('appraisal.download');
     // Route::any('getappraisal', [ AppraisalController::class, 'getappraisal'])->name('appraisal.getappraisal');
 
-        Route::get('appraisal/{id}/create', [AppraisalController::class, 'create']);
+    Route::get('appraisal/{id}/create', [AppraisalController::class, 'create']);
     Route::get('appraisal/index', [AppraisalController::class, 'index'])->name('appraisal.index');
     Route::any('appraisal/store', [AppraisalController::class, 'store'])->name('appraisal.store');
     Route::post('appraisal/update', [AppraisalController::class, 'update'])->name('appraisal.update');
@@ -605,6 +605,7 @@ Route::group(['middleware' => ['auth']], function () {
     // /Expenses
      Route::resource('expenses', ExpensesController::class);
      Route::post('expenses-active', [ExpensesController::class, 'changeStatus']);
+     Route::any('map-all', [ExpensesController::class, 'all_map']);
      Route::post('expenses-checked-by-reporting', [ExpensesController::class, 'changeStatus']);
      Route::post('expenses-uncheck', [ExpensesController::class, 'uncheckStatus']);
      Route::any('expenses-download', [ ExpensesController::class, 'expenseDownload'])->name('expenses.download');
@@ -756,6 +757,10 @@ Route::group(['middleware' => ['auth']], function () {
 
     // Service Bill Route
     Route::resource('service_bills', ServiceBillController::class);
+    Route::post('service-bill-company-claim', [ ServiceBillController::class, 'company_claim'])->name('company_claim');
+    Route::post('service-bill-draft', [ ServiceBillController::class, 'draftBill'])->name('draftBill');
+    Route::post('service-bill-cancel', [ ServiceBillController::class, 'cancelBill'])->name('cancelBill');
+    Route::post('service-bill-customer-pay', [ ServiceBillController::class, 'customer_pay'])->name('customer_pay');
 
     // Service Charge Product Route
     // Division Route
@@ -837,6 +842,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('getComplaintsDataProduct', [ AjaxController::class, 'getComplaintsDataProduct']);
     Route::any('/fetchPieChartData', [ AjaxController::class, 'fetchPieChartData'])->name('fetchPieChartData');
     Route::any('/remove_session', [ AjaxController::class, 'remove_session'])->name('remove.session');
+    Route::any('/getPrimaryTotal', [ AjaxController::class, 'getPrimaryTotal'])->name('getPrimaryTotal');
+    Route::any('getServiceProduct', [ AjaxController::class, 'getServiceProduct'])->name('getServiceProduct');
+    Route::any('getServiceProductDetails', [ AjaxController::class, 'getServiceProductDetails'])->name('getServiceProductDetails');
 
 
 

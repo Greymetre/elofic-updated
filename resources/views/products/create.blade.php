@@ -405,7 +405,7 @@
                   <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
                 </div>
                 <div class="fileinput-new thumbnail">
-                  <img src="{!! ($products['product_image']) ? asset($products['product_image']) : asset('public/assets/img/placeholder.jpg') !!}" class="imagepreview1">
+                  <img src="{!! ($products['product_image']) ? asset('/uploads/'.$products['product_image']) : asset('public/assets/img/placeholder.jpg') !!}" class="imagepreview1">
                 </div>
                 <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
                 <label class="bmd-label-floating">{!! trans('panel.product.fields.product_image') !!}</label>

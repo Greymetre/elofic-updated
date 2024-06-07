@@ -600,7 +600,7 @@
             @if(auth()->user()->can('complaint_type_access'))
             <li class="nav-item {{ request()->is('complaint-type*') ? 'active' : '' }}">
               <a class="nav-link" href="{{ url('complaint-type') }}">
-                <i class="material-icons">history</i>
+                <i class="material-icons">checklist</i>
                 <p>{!! trans('panel.sidemenu.complaint_type') !!}</p>
               </a>
             </li>
@@ -608,7 +608,7 @@
             @if(auth()->user()->can('complaint_access'))
             <li class="nav-item {{ request()->is('complaints*') ? 'active' : '' }}">
               <a class="nav-link" href="{{ url('complaints') }}">
-                <i class="material-icons">history</i>
+                <i class="material-icons">editor_choice</i>
                 <p>{!! trans('panel.sidemenu.complaint') !!}</p>
               </a>
             </li>
@@ -624,7 +624,7 @@
             @if(auth()->user()->can('services_product_access'))
             <li class="nav-item {{ request()->is('service-charge*') ? 'active' : '' }}">
               <a class="nav-link collapsed" data-toggle="collapse" href="#serviceProductMenu" aria-expanded="false">
-                <i class="material-icons">design_services</i>
+                <i class="material-icons">home_repair_service</i>
                 <p> Service Charge Products</p>
               </a>
               <div class="collapse" id="serviceProductMenu" style="">
@@ -640,7 +640,7 @@
                   @if(auth()->user()->can('services_product_category'))
                   <li class="nav-item {{ request()->is('service-charge/categories*') ? 'active' : '' }}">
                     <a class="nav-link" href="{{ url('service-charge/categories') }}">
-                      <i class="material-icons">history</i>
+                      <i class="material-icons">category</i>
                       <p>Categories</p>
                     </a>
                   </li>
@@ -648,7 +648,7 @@
                   @if(auth()->user()->can('services_product_products'))
                   <li class="nav-item {{ request()->is('service-charge/products*') ? 'active' : '' }}">
                     <a class="nav-link" href="{{ url('service-charge/products') }}">
-                      <i class="material-icons">history</i>
+                      <i class="material-icons">storefront</i>
                       <p>Products</p>
                     </a>
                   </li>
@@ -1052,7 +1052,7 @@
               </a>
             </li>
             @endif
-            @if(auth()->user()->can('loyalty_report_access'))
+            @if(auth()->user()->can('customers_report_access'))
             <li class="nav-item ">
               <a class="nav-link collapsed" data-toggle="collapse" href="#customerReportsMenu" aria-expanded="false">
                 <i class="material-icons">loyalty</i>
