@@ -47,7 +47,34 @@
         .uppercase {
             text-transform: uppercase;
         }
+
+        .inp-div {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: #ebe7e7;
+            border-radius: 5px;
+            padding: 15px;
+        }
+
+        .inp-div input {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0 !important;
+            cursor: pointer !important;
+        }
+
+        .inp-div p {
+            font-size: 14px;
+        }
+
+        .inp-div i:first-child {
+            font-size: 35px !important;
+        }
     </style>
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
 </head>
 
 <body>
@@ -57,7 +84,7 @@
                 <div class="inner-border">
                     <div class="text-center mt-3 content">
                         <img src="{{asset('assets/img/dealer_appointment_logo.png')}}" alt="">
-                        <p style="font-weight: 900;font-family: revert;" >SILVER CONSUMER ELECTRICALS (P) LTD</p>
+                        <p style="font-weight: 900;font-family: revert;">SILVER CONSUMER ELECTRICALS (P) LTD</p>
                     </div>
                 </div>
             </div>
@@ -75,7 +102,7 @@
                             <label for="branch">Branch </label>
                         </div>
                         <div class="col-md-9">
-                            <select class="form-select" name="branch" id="blood_group">
+                            <select class="form-select" name="branch" id="blood_group" required>
                                 <option value="" disabled selected>Your answer</option>
                                 @if($branchs && count($branchs) > 0)
                                 @foreach($branchs as $branch)
@@ -92,7 +119,7 @@
                             <label for="district">District </label>
                         </div>
                         <div class="col-md-9">
-                            <select class="form-select select2" name="district" id="district">
+                            <select class="form-select select2" name="district" id="district" required>
                                 <option value="" disabled selected>Your answer</option>
                                 @if($districts && count($districts) > 0)
                                 @foreach($districts as $district)
@@ -109,7 +136,7 @@
                             <label for="city">Town / City </label>
                         </div>
                         <div class="col-md-8">
-                            <select class="form-select select2" name="city" id="city">
+                            <select class="form-select select2" name="city" id="city" required>
                                 <option value="" disabled selected>Select City</option>
                             </select>
                         </div>
@@ -654,6 +681,85 @@
                     </div>
                 </div>
             </div>
+
+            <h5 class="mt-5">Attachments:</h5>
+            <div class="border border-dark rounded p-4">
+                <div class="row mt-2 mb-2">
+                    <div class="col-md-4 mb-3">
+                        <label for="service_policy">Service Policy</label>
+                        <div class="inp-div">
+                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                            <p class="m-0">Attach a File</p>
+                            <input type="file" name="service_policy" id="service_policy" class="form-control" accept="image/*">
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="dealer_policy">Dealer Policy</label>
+                        <div class="inp-div">
+                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                            <p class="m-0">Attach a File</p>
+                            <input type="file" name="dealer_policy" id="dealer_policy" class="form-control" accept="image/*">
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="mou_sheet">MOU Sheet</label>
+                        <div class="inp-div">
+                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                            <p class="m-0">Attach a File</p>
+                            <input type="file" name="mou_sheet" id="mou_sheet" class="form-control" accept="image/*">
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="mcl_cheque_1">MCL(cheque) 1</label>
+                        <div class="inp-div">
+                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                            <p class="m-0">Attach a File</p>
+                            <input type="file" name="mcl_cheque_1" id="mcl_cheque_1" class="form-control" accept="image/*">
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="mcl_cheque_2">MCL(cheque) 2</label>
+                        <div class="inp-div">
+                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                            <p class="m-0">Attach a File</p>
+                            <input type="file" name="mcl_cheque_2" id="mcl_cheque_2" class="form-control" accept="image/*">
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="gst_certificate">GST Certificate</label>
+                        <div class="inp-div">
+                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                            <p class="m-0">Attach a File</p>
+                            <input type="file" name="gst_certificate" id="gst_certificate" class="form-control" accept="image/*">
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="adhar_card">Adhar Card</label>
+                        <div class="inp-div">
+                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                            <p class="m-0">Attach a File</p>
+                            <input type="file" name="adhar_card" id="adhar_card" class="form-control" accept="image/*">
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="pan_card">PAN Card</label>
+                        <div class="inp-div">
+                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                            <p class="m-0">Attach a File</p>
+                            <input type="file" name="pan_card" id="pan_card" class="form-control" accept="image/*">
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="bank_statement">6 Month Bank Statement</label>
+                        <div class="inp-div">
+                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                            <p class="m-0">Attach a File</p>
+                            <input type="file" name="bank_statement" id="bank_statement" class="form-control" accept="image/*">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
 
             <h5 class="mt-5">Signatures of Dealer:</h5>
 

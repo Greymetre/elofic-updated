@@ -32,7 +32,14 @@ class DealerAppointmentDataTable extends DataTable
                 return $data->first_name.' '.$data->middle_name.' '.$data->last_name;
             })
             ->editColumn('action', function ($data) {
-                return '<a href="'.route('dealer-appointment.show', $data->id).'" class="btn btn-info btn-just-icon btn-sm" title="Show New Joining" ><i class="material-icons">visibility</i></a>';
+                $btn = '';
+                if(auth()->user()->can(['dealer_appointment_edit'])){
+                    $btn .= '<a href="'.route('dealer-appointment.edit', $data->id).'" class="btn btn-success btn-just-icon btn-sm" title="Edit Appointment Form" ><i class="material-icons">edit</i></a>';
+                }
+                if(auth()->user()->can(['dealer_appointment_show'])){
+                    $btn .= '<a href="'.route('dealer-appointment.show', $data->id).'" class="btn btn-info btn-just-icon btn-sm" title="Show Appointment Form" ><i class="material-icons">visibility</i></a>';
+                }
+                return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">'.$btn.'</div>';
             })
 
             ->rawColumns(['appointment_date', 'action']);

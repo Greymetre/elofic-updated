@@ -67,17 +67,22 @@ class ServiceBillController extends Controller
      */
     public function store(Request $request)
     {
-        $lastServiceBillId = ServiceBill::max('bill_no');
-        $newserviceBillNo = $lastServiceBillId ? $lastServiceBillId + 1 : 1;
-        $serviceBillNo = str_pad($newserviceBillNo, 3, '0', STR_PAD_LEFT);
-        if($request->repaired_replacement == 'Replacement'){
+
+        if ($request->service_bill_id && !empty($request->service_bill_id)) {
+            $serviceBillNo = $request->service_bill_no;
+        } else {
+            $lastServiceBillId = ServiceBill::max('bill_no');
+            $newserviceBillNo = $lastServiceBillId ? $lastServiceBillId + 1 : 1;
+            $serviceBillNo = str_pad($newserviceBillNo, 3, '0', STR_PAD_LEFT);
+        }
+        if ($request->repaired_replacement == 'Replacement') {
             $replacement_tag = 'Yes';
             $replacement_tag_number = $request->replacement_tag_number;
-        }else{
+        } else {
             $replacement_tag = 'No';
             $replacement_tag_number = NULL;
         }
-        $new_service_bill = ServiceBill::updateOrCreate(['complaint_id' => $request->complaint_id,'complaint_no' => $request->complaint_number],[
+        $new_service_bill = ServiceBill::updateOrCreate(['complaint_id' => $request->complaint_id, 'complaint_no' => $request->complaint_number], [
             'bill_no' => $serviceBillNo,
             'complaint_id' => $request->complaint_id,
             'complaint_no' => $request->complaint_number,
@@ -130,24 +135,36 @@ class ServiceBillController extends Controller
                     ->usingFileName($customname)
                     ->toMediaCollection('photo_5');
             }
-            if($request->service && count($request->service) > 0){
-                foreach($request->service as $service){
-                    ServiceBillProductDetails::create([
-                        'service_bill_id' => $new_service_bill->id,
-                        'service_type' => $service['service_type'],
-                        'product_id' => $service['product_id'],
-                        'quantity' => $service['quantity'],
-                        'distance' => $service['distance'],
-                        'appreciation' => $service['appreciation'],
-                        'price' => $service['price'],
-                        'subtotal' => $service['subtotal']
-                    ]);
+            if ($request->service && count($request->service) > 0) {
+                foreach ($request->service as $service) {
+                    if (isset($service['service_bill_product_id']) && !empty($service['service_bill_product_id'])) {
+                        ServiceBillProductDetails::where('id', $service['service_bill_product_id'])->update([
+                            'service_type' => $service['service_type'],
+                            'product_id' => $service['product_id'],
+                            'quantity' => $service['quantity'],
+                            'distance' => $service['distance'],
+                            'appreciation' => $service['appreciation'],
+                            'price' => $service['price'],
+                            'subtotal' => $service['subtotal']
+                        ]);
+                    } else {
+                        ServiceBillProductDetails::create([
+                            'service_bill_id' => $new_service_bill->id,
+                            'service_type' => $service['service_type'],
+                            'product_id' => $service['product_id'],
+                            'quantity' => $service['quantity'],
+                            'distance' => $service['distance'],
+                            'appreciation' => $service['appreciation'],
+                            'price' => $service['price'],
+                            'subtotal' => $service['subtotal']
+                        ]);
+                    }
                 }
             }
 
 
             return Redirect::to('service_bills')->with('message_success', 'Service Bill Store Successfully and the Service Bill number is <span title="Copy" id="copyText">' . $serviceBillNo . '</span>');
-        }else{
+        } else {
             return Redirect::to('service_bills')->with('message_error', 'Service Bill Not store.');
         }
     }
@@ -171,7 +188,6 @@ class ServiceBillController extends Controller
      */
     public function edit(ServiceBill $serviceBill, Request $request)
     {
-        if ($request->ip() == '111.118.252.250' || $request->ip() == 'http://192.168.0.210/') {
         $complaint = $serviceBill->complaint;
         $this->service_bill = $serviceBill;
         $charge_type = ServiceChargeChargeType::all();
@@ -180,9 +196,6 @@ class ServiceBillController extends Controller
         $divisions = Category::where('active', 'Y')->select('id', 'category_name')->get();
 
         return view('service_bill.create', compact('complaint', 'serviceBillNo', 'all_complaint_number', 'divisions', 'charge_type'))->with('service_bill', $this->service_bill);
-        }else{
-            echo '<h1>Coming Soon...</h1>';
-        }
     }
 
     /**
@@ -281,6 +294,16 @@ class ServiceBillController extends Controller
             return response()->json(['status' => 'success', 'message' => 'Service Bill Status update successfully !']);
         } catch (\Throwable $th) {
             return response()->json(['status' => 'error', 'message' => $th->getMessage()]);
+        }
+    }
+
+    public function remove_product(Request $request)
+    {
+        if(!empty($request->id)){
+            ServiceBillProductDetails::where('id', $request->id)->delete();
+            return response()->json(['status'=>'success', 'msg'=>'Service bill product delete successfully.']);
+        }else{
+            return response()->json(['status'=>'success', 'msg'=>'Service bill product not found.']);
         }
     }
 }

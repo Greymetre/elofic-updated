@@ -65,11 +65,6 @@
                      <div class="p-2" style="width:150px;">
                        <select class="select2" name="executive_id" id="executive_id" data-style="select-with-transition" title="Select User">
                          <option value="">Select User</option>
-                         @if(@isset($users ))
-                         @foreach($users as $user)
-                         <option value="{!! $user['id'] !!}"> ({!! $user['employee_codes']??'' !!}) {!! $user['name'] !!}</option>
-                         @endforeach
-                         @endif
                        </select>
                      </div>
 
@@ -183,7 +178,7 @@
            <!-- Expense details will be loaded here -->
          </div>
          <div class="modal-footer">
-         <button type="button" class="close" data-dismiss="modal" aria-label="Close">Close</button>
+           <button type="button" class="close" data-dismiss="modal" aria-label="Close">Close</button>
          </div>
        </div>
      </div>
@@ -255,7 +250,7 @@
          url: '/expenses/' + eid, // The URL to the route that returns the expense details
          method: 'GET',
          success: function(response) {
-           
+
            $('#expenseDetails').html(response);
            // Show the modal
            $('#expenseModal').modal('show');
@@ -265,6 +260,26 @@
          }
        });
      }
+     $("#payroll").on("change", function() {
+      localStorage.removeItem('executive_id');
+       var payroll = $(this).val();
+       $.ajax({
+         url: "{{ url('getUserList') }}",
+         dataType: "json",
+         type: "POST",
+         data: {
+           _token: "{{csrf_token()}}",
+           payroll: payroll
+         },
+         success: function(res) {
+          var html = '<option value="">Select User</option>';
+          $.each(res, function(k, v) {
+            html += '<option value="'+v.id+'"> ('+v.employee_codes+') '+v.name+'</option>';
+          });
+          $("#executive_id").html(html);
+         }
+       });
+     }).trigger("chnage");
    </script>
    <script src="{{asset('assets/js/expense_filter.js')}}"></script>
  </x-app-layout>

@@ -90,7 +90,7 @@
             <tr>
                 <td>{{ $detail->products->product_name }}</td>
                 <td>{{ $detail->quantity }}</td>
-                <td>{{ $detail->price }}</td>
+                <td>{{ $detail->products->productpriceinfo->mrp }}</td>
                 <td>{{ $detail->products->productpriceinfo->gst }}</td>
                 <td>{{ $detail->products->productpriceinfo->discount }}</td>
                 <td>{{ $detail->line_total }}</td>
@@ -101,6 +101,24 @@
     </table>
     <table>
         <tbody>
+            @if($order->product_cat_id == '2')
+            <tr>
+                <th colspan="5">DOD Discount %</th>
+                <th>{{$order->dod_discount}}</th>
+            </tr>
+            <tr>
+                <th colspan="5">Special Distribution Discount %</th>
+                <th>{{$order->special_distribution_discount}}</th>
+            </tr>
+            <tr>
+                <th colspan="5">Distribution Margin Discount%</th>
+                <th>{{$order->distribution_margin_discount}}</th>
+            </tr>
+            <tr>
+                <th colspan="5">total Discount %</th>
+                <th>{{$order->total_fan_discount}}</th>
+            </tr>
+            @elseif($order->product_cat_id == '1')
             <tr>
                 <th colspan="5">Scheme Discount</th>
                 <th>{{$order->schme_amount}}</th>
@@ -135,7 +153,7 @@
                 <th>{{$order->deal_discount}}</th>
                 <th>{{$order->deal_amount}}</th>
             </tr>
-
+            @endif
             <tr>
                 <th colspan="5">Sub Total</th>
                 <th>{{$order->sub_total}}</th>

@@ -249,7 +249,7 @@
                         @elseif($timeline->status == '1')
                         @php $status = 'Activated'; @endphp
                         @elseif($timeline->status == '2')
-                        @php $status = 'Pending Activated'; @endphp
+                        @php $status = 'Pending'; @endphp
                         @elseif($timeline->status == '3')
                         @php $status = 'Rejected'; @endphp
                         @endif

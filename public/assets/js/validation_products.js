@@ -79,18 +79,6 @@ $(document).ready(function () {
         required: true,
         minlength: 3,
         maxlength: 250,
-        remote: {
-          url: base_url + "/uniqueValidation",
-          type: "post",
-          data: {
-            "_token": token,
-            value: function () { return $("#subcategory_name").val(); },
-            table: 'subcategories',
-            column: 'subcategory_name',
-            id: function () { return $("#category_id").val(); },
-          }
-        }
-      },
       category_id:
       {
         required: true,
@@ -105,7 +93,6 @@ $(document).ready(function () {
     },
     messages: {
       subcategory_name: {
-        remote: "This SubCategory Name already exits.",
         required: "Please enter SubCategory Name",
       },
       category_id: {
@@ -165,17 +152,6 @@ $(document).ready(function () {
         required: true,
         minlength: 3,
         maxlength: 250,
-        remote: {
-          url: base_url + "/uniqueValidation",
-          type: "post",
-          data: {
-            "_token": token,
-            value: function () { return $("#subcategory_name").val(); },
-            table: 'giftsubcategories',
-            column: 'subcategory_name',
-            id: function () { return $("#category_id").val(); },
-          }
-        }
       },
       category_id:
       {

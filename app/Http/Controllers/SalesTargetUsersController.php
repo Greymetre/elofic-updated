@@ -35,6 +35,7 @@ use App\Models\Branch;
 use App\Models\Division;
 use App\Models\User;
 use App\Models\Customers;
+use App\Models\Order;
 use Carbon\Carbon;
 use DataTables;
 use Validator;
@@ -50,7 +51,26 @@ class SalesTargetUsersController extends Controller
      */
 
     public function __construct() 
-    {     
+    { 
+        $all_targets = SalesTargetUsers::all();
+        foreach ($all_targets as $key => $value) {
+            if($value->type == 'secondary'){
+                $monthNumber = Carbon::parse("1 $value->month")->month;
+                $firstDay = Carbon::create($value->year, $monthNumber, 1);
+                $lastDay = $firstDay->copy()->endOfMonth();
+                $firstDayFormatted = $firstDay->format('Y-m-d');
+                $lastDayFormatted = $lastDay->format('Y-m-d');
+                $orders_total = Order::whereBetween('order_date', [$firstDayFormatted, $lastDayFormatted])->where('created_by', $value->user_id)->sum('sub_total');
+                if($orders_total > 1){
+                    $achiv = ($orders_total - (($orders_total*35)/100))/100000;
+                    $achiv_per = (100*$achiv)/$value->target;
+                }else{
+                    $achiv = 0.00;
+                    $achiv_per = 0.00;
+                }
+                SalesTargetUsers::where('id', $value->id)->update(['achievement' => $achiv, 'achievement_percent' => $achiv_per]);
+            }
+        }
         $this->middleware('auth');   
         $this->subcategories = new SalesTargetUsers();
         $this->path = 'salestargetusers';
@@ -108,7 +128,7 @@ class SalesTargetUsersController extends Controller
             ->addColumn('achievement_percent', function ($data) {
                 if(isset($data['achievement']) && isset($data['target']) && !empty($data['achievement']) && !empty($data['target'])) {
                     $achievementPercent = ($data['target'] == 0) ? 0 : ($data['achievement'] * 100 / $data['target']);
-                    return $achievementPercent;
+                    return number_format(($achievementPercent), 2). '%';
                 } else {
                     return '';
                 }

@@ -6,6 +6,7 @@ use App\DataTables\DealerAppointmentDataTable;
 use App\Exports\DealerAppointmentExport;
 use App\Models\Branch;
 use App\Models\DealerAppointment;
+use App\Models\DealerAppointmentKyc;
 use App\Models\District;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -38,6 +39,14 @@ class DealerAppointmentController extends Controller
         return view('dealer_appointment.form', compact('branchs', 'districts'));
     }
 
+    public function create_kyc()
+    {
+        // $branchs = Branch::where('active', 'Y')->get();
+        // $districts = District::where('active', 'Y')->get();
+        $kyc_ckeckbox = config('constants.kyc_ckeckbox');
+        return view('dealer_appointment.kyc_form', compact('kyc_ckeckbox'));
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -46,9 +55,74 @@ class DealerAppointmentController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request->all());
+        // dd($request->all());
         $dealer_appointment = DealerAppointment::create($request->all());
-        return redirect(route('dealer-appointment-thanks'));
+
+        if ($request->hasFile('service_policy')) {
+            $file = $request->file('service_policy');
+            $customname = time() . '.' . $file->getClientOriginalExtension();
+            $dealer_appointment->addMedia($file)
+                ->usingFileName($customname)
+                ->toMediaCollection('service_policy', 's3');
+        }
+        if ($request->hasFile('dealer_policy')) {
+            $file = $request->file('dealer_policy');
+            $customname = time() . '.' . $file->getClientOriginalExtension();
+            $dealer_appointment->addMedia($file)
+                ->usingFileName($customname)
+                ->toMediaCollection('dealer_policy', 's3');
+        }
+        if ($request->hasFile('mou_sheet')) {
+            $file = $request->file('mou_sheet');
+            $customname = time() . '.' . $file->getClientOriginalExtension();
+            $dealer_appointment->addMedia($file)
+                ->usingFileName($customname)
+                ->toMediaCollection('mou_sheet', 's3');
+        }
+        if ($request->hasFile('mcl_cheque_1')) {
+            $file = $request->file('mcl_cheque_1');
+            $customname = time() . '.' . $file->getClientOriginalExtension();
+            $dealer_appointment->addMedia($file)
+                ->usingFileName($customname)
+                ->toMediaCollection('mcl_cheque_1', 's3');
+        }
+        if ($request->hasFile('mcl_cheque_2')) {
+            $file = $request->file('mcl_cheque_2');
+            $customname = time() . '.' . $file->getClientOriginalExtension();
+            $dealer_appointment->addMedia($file)
+                ->usingFileName($customname)
+                ->toMediaCollection('mcl_cheque_2', 's3');
+        }
+        if ($request->hasFile('gst_certificate')) {
+            $file = $request->file('gst_certificate');
+            $customname = time() . '.' . $file->getClientOriginalExtension();
+            $dealer_appointment->addMedia($file)
+                ->usingFileName($customname)
+                ->toMediaCollection('gst_certificate', 's3');
+        }
+        if ($request->hasFile('adhar_card')) {
+            $file = $request->file('adhar_card');
+            $customname = time() . '.' . $file->getClientOriginalExtension();
+            $dealer_appointment->addMedia($file)
+                ->usingFileName($customname)
+                ->toMediaCollection('adhar_card', 's3');
+        }
+        if ($request->hasFile('pan_card')) {
+            $file = $request->file('pan_card');
+            $customname = time() . '.' . $file->getClientOriginalExtension();
+            $dealer_appointment->addMedia($file)
+                ->usingFileName($customname)
+                ->toMediaCollection('pan_card', 's3');
+        }
+        if ($request->hasFile('bank_statement')) {
+            $file = $request->file('bank_statement');
+            $customname = time() . '.' . $file->getClientOriginalExtension();
+            $dealer_appointment->addMedia($file)
+                ->usingFileName($customname)
+                ->toMediaCollection('bank_statement', 's3');
+        }
+        $kyc_ckeckbox = config('constants.kyc_ckeckbox');
+        return view('dealer_appointment.kyc_form', compact('kyc_ckeckbox', 'dealer_appointment'));
     }
 
     /**
@@ -59,7 +133,8 @@ class DealerAppointmentController extends Controller
      */
     public function show(DealerAppointment $dealerAppointment)
     {
-        return view('dealer_appointment.show', compact('dealerAppointment'));
+        $kyc_ckeckbox = config('constants.kyc_ckeckbox');
+        return view('dealer_appointment.show', compact('dealerAppointment', 'kyc_ckeckbox'));
     }
 
     /**
@@ -70,7 +145,9 @@ class DealerAppointmentController extends Controller
      */
     public function edit(DealerAppointment $dealerAppointment)
     {
-        //
+        $branchs = Branch::where('active', 'Y')->get();
+        $districts = District::where('active', 'Y')->get();
+        return view('dealer_appointment.edit', compact('dealerAppointment', 'branchs', 'districts'));
     }
 
     /**
@@ -82,7 +159,72 @@ class DealerAppointmentController extends Controller
      */
     public function update(Request $request, DealerAppointment $dealerAppointment)
     {
-        //
+        $dealer_appointment = DealerAppointment::where('id', $dealerAppointment->id)->update($request->except(['_token']));
+
+        if ($request->hasFile('service_policy')) {
+            $file = $request->file('service_policy');
+            $customname = time() . '.' . $file->getClientOriginalExtension();
+            $dealer_appointment->addMedia($file)
+                ->usingFileName($customname)
+                ->toMediaCollection('service_policy', 's3');
+        }
+        if ($request->hasFile('dealer_policy')) {
+            $file = $request->file('dealer_policy');
+            $customname = time() . '.' . $file->getClientOriginalExtension();
+            $dealer_appointment->addMedia($file)
+                ->usingFileName($customname)
+                ->toMediaCollection('dealer_policy', 's3');
+        }
+        if ($request->hasFile('mou_sheet')) {
+            $file = $request->file('mou_sheet');
+            $customname = time() . '.' . $file->getClientOriginalExtension();
+            $dealer_appointment->addMedia($file)
+                ->usingFileName($customname)
+                ->toMediaCollection('mou_sheet', 's3');
+        }
+        if ($request->hasFile('mcl_cheque_1')) {
+            $file = $request->file('mcl_cheque_1');
+            $customname = time() . '.' . $file->getClientOriginalExtension();
+            $dealer_appointment->addMedia($file)
+                ->usingFileName($customname)
+                ->toMediaCollection('mcl_cheque_1', 's3');
+        }
+        if ($request->hasFile('mcl_cheque_2')) {
+            $file = $request->file('mcl_cheque_2');
+            $customname = time() . '.' . $file->getClientOriginalExtension();
+            $dealer_appointment->addMedia($file)
+                ->usingFileName($customname)
+                ->toMediaCollection('mcl_cheque_2', 's3');
+        }
+        if ($request->hasFile('gst_certificate')) {
+            $file = $request->file('gst_certificate');
+            $customname = time() . '.' . $file->getClientOriginalExtension();
+            $dealer_appointment->addMedia($file)
+                ->usingFileName($customname)
+                ->toMediaCollection('gst_certificate', 's3');
+        }
+        if ($request->hasFile('adhar_card')) {
+            $file = $request->file('adhar_card');
+            $customname = time() . '.' . $file->getClientOriginalExtension();
+            $dealer_appointment->addMedia($file)
+                ->usingFileName($customname)
+                ->toMediaCollection('adhar_card', 's3');
+        }
+        if ($request->hasFile('pan_card')) {
+            $file = $request->file('pan_card');
+            $customname = time() . '.' . $file->getClientOriginalExtension();
+            $dealer_appointment->addMedia($file)
+                ->usingFileName($customname)
+                ->toMediaCollection('pan_card', 's3');
+        }
+        if ($request->hasFile('bank_statement')) {
+            $file = $request->file('bank_statement');
+            $customname = time() . '.' . $file->getClientOriginalExtension();
+            $dealer_appointment->addMedia($file)
+                ->usingFileName($customname)
+                ->toMediaCollection('bank_statement', 's3');
+        }
+        return redirect(route('dealer-appointment'));
     }
 
     /**
@@ -110,5 +252,22 @@ class DealerAppointmentController extends Controller
         // return $request;
         return Excel::download(new DealerAppointmentExport($request), 'new_dealer_appointment.xlsx');
     }
-    
+
+
+    public function kyc_store(Request $request)
+    {
+        DealerAppointmentKyc::updateOrCreate(['appointment_id' => $request->appointment_id,],[
+            'appointment_id' => $request->appointment_id,
+            'channel_partner' => $request->channel_partner,
+            'place' => $request->place,
+            'concerned_branch' => $request->concerned_branch,
+            'dealer_code' => $request->dealer_code,
+            'division' => $request->division,
+            'proprietary_concern' => json_encode($request->proprietary_concern),
+            'partnership_firm' => json_encode($request->partnership_firm),
+            'ltd_pvt' => json_encode($request->ltd_pvt),
+            'distribution_channel' => $request->distribution_channel,
+        ]);
+        return redirect(route('dealer-appointment-thanks'));
+    }
 }

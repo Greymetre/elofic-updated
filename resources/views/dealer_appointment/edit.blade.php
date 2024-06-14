@@ -5,19 +5,6 @@
       width: 20px !important;
       height: 20px !important;
       opacity: 1 !important;
-      float: right !important;
-      position: relative !important;
-      z-index: 99999 !important;
-    }
-
-    .form-check,
-    label {
-      color: #4e4a4a !important;
-    }
-
-    #print-section {
-      border: 1px solid #000;
-      padding: 20px;
     }
 
     /* Landscape print layout */
@@ -38,7 +25,7 @@
       height: 5px;
       top: 24px;
       background: radial-gradient(#00aadb, transparent);
-      left: 40px;
+      left: 50px;
     }
 
     p.attach-p {
@@ -48,18 +35,38 @@
     }
 
     .col-md-3.mb-3.ml-5.text-center.border.rounded {
-      transition: transform 0.3s, box-shadow 0.3s;
+      transition: transform 0.5s, box-shadow 0.5s;
     }
 
     .col-md-3.mb-3.ml-5.text-center.border.rounded:hover {
-      transform: scale(1.1);
+      transform: scale(1.2);
       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
     }
 
-    td,
-    th {
-      padding: 15px 10px;
-      border: 1px solid #000;
+    .inp-div {
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: #ebe7e7;
+      border-radius: 5px;
+      padding: 15px;
+    }
+
+    .inp-div input {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0 !important;
+      cursor: pointer !important;
+    }
+
+    .inp-div p {
+      font-size: 14px;
+    }
+
+    .inp-div i:first-child {
+      font-size: 35px !important;
     }
   </style>
   <div class="content-header">
@@ -98,20 +105,10 @@
 
         <div id="print-section">
 
-          <div class="container-fluid">
-            <div class="outer-border">
-              <div class="middle-border">
-                <div class="inner-border">
-                  <div class="text-center mt-3 content">
-                    <img src="{{asset('assets/img/dealer_appointment_logo.png')}}" alt="">
-                    <p style="font-weight: 900;font-family: revert;">SILVER CONSUMER ELECTRICALS (P) LTD</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <h2 class="text-center">DEALER / DISTRIBUTOR DATA SHEET</h2>
-            <p>(All information furnished by you will be treated as strictly confidential)</p>
+          <h2 class="text-center">EDIT DEALER / DISTRIBUTOR DATA SHEET</h2>
+          <p>(All information furnished by you will be treated as strictly confidential)</p>
+          <form action="{{route('dealer-appointment-form.update', $dealerAppointment)}}" method="post" enctype="multipart/form-data">
+            @csrf
             <div class="row mt-3">
               <div class="col-md-4 content-frm bg-light">
                 <div class="form-group row">
@@ -119,7 +116,14 @@
                     <label for="branch">Branch </label>
                   </div>
                   <div class="col-md-9">
-                    <input type="text" class="form-control" disabled value="{{$dealerAppointment->branch_details->branch_name}}">
+                    <select class="form-select select2" name="branch" id="blood_group" required>
+                      <option value="" disabled selected>Your answer</option>
+                      @if($branchs && count($branchs) > 0)
+                      @foreach($branchs as $branch)
+                      <option value="{{$branch->id}}" {{($dealerAppointment->branch == $branch->id)?'selected':''}}>{{$branch->branch_name}}</option>
+                      @endforeach
+                      @endif
+                    </select>
                   </div>
                 </div>
               </div>
@@ -129,7 +133,14 @@
                     <label for="district">District </label>
                   </div>
                   <div class="col-md-9">
-                    <input type="text" class="form-control" disabled value="{{$dealerAppointment->district_details->district_name}}">
+                    <select class="form-select select2" name="district" id="district" required>
+                      <option value="" disabled selected>Your answer</option>
+                      @if($districts && count($districts) > 0)
+                      @foreach($districts as $district)
+                      <option value="{{$district->id}}" {{($dealerAppointment->district == $district->id)?'selected':''}}>{{$district->district_name}}</option>
+                      @endforeach
+                      @endif
+                    </select>
                   </div>
                 </div>
               </div>
@@ -139,7 +150,9 @@
                     <label for="city">Town / City </label>
                   </div>
                   <div class="col-md-8">
-                    <input type="text" disabled class="form-control" value="{{$dealerAppointment->city_details->city_name}}">
+                    <select class="form-select select2" name="city" id="city" required>
+                      <option value="" disabled selected>Select City</option>
+                    </select>
                   </div>
                 </div>
               </div>
@@ -150,7 +163,7 @@
                 <label for="appointment_date">Date of Appointment </label>
               </div>
               <div class="col-md-4">
-                <input type="date" disabled value="{{$dealerAppointment->appointment_date}}" name="appointment_date" id="appointment_date" class="form-control">
+                <input type="date" value="{{$dealerAppointment->appointment_date}}" name="appointment_date" id="appointment_date" class="form-control">
               </div>
             </div>
 
@@ -158,19 +171,19 @@
               <div class="col-md-4">
                 <div class="form-check">
                   <label class="form-check-label" for="distributor"> Distributor </label>
-                  <input disabled class="form-check-input mr-3" type="radio" name="customertype" value="distributor" id="distributor" {{($dealerAppointment->customertype == 'distributor')?'checked':''}}>
+                  <input class="form-check-input mr-3" type="radio" name="customertype" value="distributor" id="distributor" {{($dealerAppointment->customertype == 'distributor')?'checked':''}}>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="form-check">
                   <label class="form-check-label" for="dealer"> Dealer </label>
-                  <input disabled class="form-check-input mr-3" type="radio" name="customertype" value="dealer" id="dealer" {{($dealerAppointment->customertype == 'dealer')?'checked':''}}>
+                  <input class="form-check-input mr-3" type="radio" name="customertype" value="dealer" id="dealer" {{($dealerAppointment->customertype == 'dealer')?'checked':''}}>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="form-check">
                   <label class="form-check-label" for="shopee"> Shopee </label>
-                  <input disabled class="form-check-input mr-3" type="radio" name="customertype" value="shopee" id="shopee" {{($dealerAppointment->customertype == 'shopee')?'checked':''}}>
+                  <input class="form-check-input mr-3" type="radio" name="customertype" value="shopee" id="shopee" {{($dealerAppointment->customertype == 'shopee')?'checked':''}}>
                 </div>
               </div>
             </div>
@@ -179,37 +192,37 @@
               <div class="col-md-4">
                 <div class="form-check">
                   <label class="form-check-label" for="PUMPMOTORS"> PUMP & MOTORS </label>
-                  <input disabled class="form-check-input" type="radio" value="PUMP&MOTORS" name="division" id="PUMPMOTORS" {{($dealerAppointment->division == 'PUMPMOTORS')?'checked':''}}>
+                  <input class="form-check-input" type="radio" value="PUMP&MOTORS" name="division" id="PUMPMOTORS" {{($dealerAppointment->division == 'PUMPMOTORS')?'checked':''}}>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="form-check">
                   <label class="form-check-label" for="FAN&APP"> FAN & APP </label>
-                  <input disabled class="form-check-input" type="radio" name="division" value="FAN&APP" id="FAN&APP" {{($dealerAppointment->division == 'FAN&APP')?'checked':''}}>
+                  <input class="form-check-input" type="radio" name="division" value="FAN&APP" id="FAN&APP" {{($dealerAppointment->division == 'FAN&APP')?'checked':''}}>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="form-check">
                   <label class="form-check-label" for="AGRI"> AGRI </label>
-                  <input disabled class="form-check-input" type="radio" name="division" value="AGRI" id="AGRI" {{($dealerAppointment->division == 'AGRI')?'checked':''}}>
+                  <input class="form-check-input" type="radio" name="division" value="AGRI" id="AGRI" {{($dealerAppointment->division == 'AGRI')?'checked':''}}>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="form-check">
                   <label class="form-check-label" for="SOLAR"> SOLAR </label>
-                  <input disabled class="form-check-input" type="radio" name="division" value="SOLAR" id="SOLAR" {{($dealerAppointment->division == 'SOLAR')?'checked':''}}>
+                  <input class="form-check-input" type="radio" name="division" value="SOLAR" id="SOLAR" {{($dealerAppointment->division == 'SOLAR')?'checked':''}}>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="form-check">
                   <label class="form-check-label" for="LIGHTING"> LIGHTING </label>
-                  <input disabled class="form-check-input" type="radio" name="division" id="LIGHTING" value="LIGHTING" {{($dealerAppointment->division == 'LIGHTING')?'checked':''}}>
+                  <input class="form-check-input" type="radio" name="division" id="LIGHTING" value="LIGHTING" {{($dealerAppointment->division == 'LIGHTING')?'checked':''}}>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="form-check">
                   <label class="form-check-label" for="Others"> Others </label>
-                  <input disabled class="form-check-input" type="radio" name="division" id="Others" value="Others" {{($dealerAppointment->division == 'Others')?'checked':''}}>
+                  <input class="form-check-input" type="radio" name="division" id="Others" value="Others" {{($dealerAppointment->division == 'Others')?'checked':''}}>
                 </div>
               </div>
             </div>
@@ -223,7 +236,7 @@
                     <label> PUMP & MOTORS </label>
                   </div>
                   <div class="col-md-6">
-                    <input class="form-check-input ml-3" type="radio" name="security_deposit" value="10000" disabled {{($dealerAppointment->security_deposit == '10000')?'checked':''}}>
+                    <input class="form-check-input ml-3" type="radio" name="security_deposit" value="10000" {{($dealerAppointment->security_deposit == '10000')?'checked':''}}>
                   </div>
                 </div>
               </div>
@@ -233,7 +246,7 @@
                     <label> F&A </label>
                   </div>
                   <div class="col-md-6">
-                    <input class="form-check-input ml-3" type="radio" name="security_deposit&A" value="5000" disabled {{($dealerAppointment->security_deposit == '5000')?'checked':''}}>
+                    <input class="form-check-input ml-3" type="radio" name="security_deposit" value="5000" {{($dealerAppointment->security_deposit == '5000')?'checked':''}}>
                   </div>
                 </div>
               </div>
@@ -243,7 +256,7 @@
                     <label> AGRI </label>
                   </div>
                   <div class="col-md-6">
-                    <input class="form-check-input ml-3" type="radio" name="security_deposit" value="100000" disabled {{($dealerAppointment->security_deposit == '100000')?'checked':''}}>
+                    <input class="form-check-input ml-3" type="radio" name="security_deposit" value="100000" {{($dealerAppointment->security_deposit == '100000')?'checked':''}}>
                   </div>
                 </div>
               </div>
@@ -255,19 +268,19 @@
               <div class="col-md-4">
                 <div class="form-check">
                   <label class="form-check-label" for="REGULAR"> REGULAR </label>
-                  <input disabled class="form-check-input mr-3" type="radio" name="gst_type" value="REGULAR" id="REGULAR" {{($dealerAppointment->gst_type == 'REGULAR')?'checked':''}}>
+                  <input class="form-check-input mr-3" type="radio" name="gst_type" value="REGULAR" id="REGULAR" {{($dealerAppointment->gst_type == 'REGULAR')?'checked':''}}>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="form-check">
                   <label class="form-check-label" for="Composition"> COMPOSITION </label>
-                  <input disabled class="form-check-input mr-3" type="radio" name="gst_type" value="Composition" id="Composition" {{($dealerAppointment->gst_type == 'Composition')?'checked':''}}>
+                  <input class="form-check-input mr-3" type="radio" name="gst_type" value="Composition" id="Composition" {{($dealerAppointment->gst_type == 'Composition')?'checked':''}}>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="form-check">
                   <label class="form-check-label" for="UNREGD"> UNREGD </label>
-                  <input disabled class="form-check-input mr-3" type="radio" name="gst_type" value="UNREGD" id="UNREGD" {{($dealerAppointment->gst_type == 'UNREGD')?'checked':''}}>
+                  <input class="form-check-input mr-3" type="radio" name="gst_type" value="UNREGD" id="UNREGD" {{($dealerAppointment->gst_type == 'UNREGD')?'checked':''}}>
                 </div>
               </div>
             </div>
@@ -279,7 +292,7 @@
                     <label> GST No. </label>
                   </div>
                   <div class="col-md-8">
-                    <input disabled class="form-control mr-3" type="text" name="gst_no" value="{{$dealerAppointment->gst_no}}">
+                    <input class="form-control mr-3" type="text" name="gst_no" value="{{$dealerAppointment->gst_no}}">
                   </div>
                 </div>
               </div>
@@ -291,19 +304,19 @@
               <div class="col-md-4">
                 <div class="form-check">
                   <label class="form-check-label" for="Prop"> Proprietorship </label>
-                  <input disabled class="form-check-input mr-3" type="radio" name="firm_type" value="Prop" id="Prop" {{($dealerAppointment->firm_type == 'Prop')?'checked':''}}>
+                  <input class="form-check-input mr-3" type="radio" name="firm_type" value="Prop" id="Prop" {{($dealerAppointment->firm_type == 'Prop')?'checked':''}}>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="form-check">
                   <label class="form-check-label" for="Partnership"> Partnership Firm </label>
-                  <input disabled class="form-check-input mr-3" type="radio" name="firm_type" value="Partnership" id="Partnership" {{($dealerAppointment->firm_type == 'Partnership')?'checked':''}}>
+                  <input class="form-check-input mr-3" type="radio" name="firm_type" value="Partnership" id="Partnership" {{($dealerAppointment->firm_type == 'Partnership')?'checked':''}}>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="form-check">
                   <label class="form-check-label" for="LTD"> (P) LTD </label>
-                  <input disabled class="form-check-input mr-3" type="radio" name="firm_type" value="LTD" id="LTD" {{($dealerAppointment->firm_type == 'LTD')?'checked':''}}>
+                  <input class="form-check-input mr-3" type="radio" name="firm_type" value="LTD" id="LTD" {{($dealerAppointment->firm_type == 'LTD')?'checked':''}}>
                 </div>
               </div>
             </div>
@@ -318,7 +331,7 @@
                       <label> Name of the Company/Firm </label>
                     </div>
                     <div class="col-md-8">
-                      <input disabled class="form-control" type="text" name="firm_name" value="{{$dealerAppointment->firm_name}}">
+                      <input class="form-control" type="text" name="firm_name" value="{{$dealerAppointment->firm_name}}">
                     </div>
                   </div>
                 </div>
@@ -328,7 +341,7 @@
                       <label> CIN No in case of Company </label>
                     </div>
                     <div class="col-md-8">
-                      <input disabled class="form-control" type="text" name="cin_no" value="{{$dealerAppointment->cin_no}}">
+                      <input class="form-control" type="text" name="cin_no" value="{{$dealerAppointment->cin_no}}">
                     </div>
                   </div>
                 </div>
@@ -338,7 +351,7 @@
                       <label> Name of Related Firm in which presently dealing </label>
                     </div>
                     <div class="col-md-8">
-                      <input disabled class="form-control" type="text" name="related_firm_name" value="{{$dealerAppointment->related_firm_name}}">
+                      <input class="form-control" type="text" name="related_firm_name" value="{{$dealerAppointment->related_firm_name}}">
                     </div>
                   </div>
                 </div>
@@ -348,7 +361,7 @@
                       <label> Line of Business </label>
                     </div>
                     <div class="col-md-8">
-                      <textarea disabled name="line_business" class="form-control" id="line_business">{{$dealerAppointment->line_business}}</textarea>
+                      <textarea name="line_business" class="form-control" id="line_business">{{$dealerAppointment->line_business}}</textarea>
                     </div>
                   </div>
                 </div>
@@ -366,7 +379,7 @@
                       <label> Pin: </label>
                     </div>
                     <div class="col-md-9">
-                      <input disabled class="form-control" type="text" name="office_pincode" value="{{$dealerAppointment->office_pincode}}">
+                      <input class="form-control" type="text" name="office_pincode" value="{{$dealerAppointment->office_pincode}}">
                     </div>
                   </div>
                   <div class="form-group row">
@@ -374,7 +387,7 @@
                       <label> Mobile No.: </label>
                     </div>
                     <div class="col-md-9">
-                      <input disabled class="form-control" type="text" name="office_mobile" value="{{$dealerAppointment->office_mobile}}">
+                      <input class="form-control" type="text" name="office_mobile" value="{{$dealerAppointment->office_mobile}}">
                     </div>
                   </div>
                   <div class="form-group row">
@@ -382,7 +395,7 @@
                       <label> Email: </label>
                     </div>
                     <div class="col-md-9">
-                      <input disabled class="form-control" type="text" name="office_email" value="{{$dealerAppointment->office_email}}">
+                      <input class="form-control" type="text" name="office_email" value="{{$dealerAppointment->office_email}}">
                     </div>
                   </div>
                 </div>
@@ -400,7 +413,7 @@
                       <label> Pin: </label>
                     </div>
                     <div class="col-md-9">
-                      <input disabled class="form-control" type="text" name="godown_pincode" value="{{$dealerAppointment->godown_pincode}}">
+                      <input class="form-control" type="text" name="godown_pincode" value="{{$dealerAppointment->godown_pincode}}">
                     </div>
                   </div>
                   <div class="form-group row">
@@ -408,7 +421,7 @@
                       <label> Mobile No.: </label>
                     </div>
                     <div class="col-md-9">
-                      <input disabled class="form-control" type="text" name="godown_mobile" value="{{$dealerAppointment->godown_mobile}}">
+                      <input class="form-control" type="text" name="godown_mobile" value="{{$dealerAppointment->godown_mobile}}">
                     </div>
                   </div>
                   <div class="form-group row">
@@ -416,7 +429,7 @@
                       <label> Email: </label>
                     </div>
                     <div class="col-md-9">
-                      <input disabled class="form-control" type="text" name="godown_email" value="{{$dealerAppointment->godown_email}}">
+                      <input class="form-control" type="text" name="godown_email" value="{{$dealerAppointment->godown_email}}">
                     </div>
                   </div>
                 </div>
@@ -433,8 +446,8 @@
                       <label> Status </label>
                     </div>
                     <div class="col-md-8">
-                      <select disabled name="status" id="status" class="form-control">
-                        <option value="" disabled selected>Please Select Status</option>
+                      <select name="status" id="status" class="form-control">
+                        <option value="" selected>Please Select Status</option>
                         <option value="Proprietor" {{($dealerAppointment->status == 'Proprietor')?'selected':''}}>Proprietor</option>
                         <option value="Partnership" {{($dealerAppointment->status == 'Partnership')?'selected':''}}>Partnership</option>
                         <option value="Private" {{($dealerAppointment->status == 'Private')?'selected':''}}>Private LTD</option>
@@ -474,49 +487,49 @@
                       </tr>
                       <tr>
                         <th>Contact Person / Name</th>
-                        <td colspan="3"><input disabled value="{{$dealerAppointment->contact_person_name}}" type="text" name="contact_person_name" class="form-control"></td>
+                        <td colspan="3"><input value="{{$dealerAppointment->contact_person_name}}" type="text" name="contact_person_name" class="form-control"></td>
                       </tr>
                       <tr>
                         <th>Mobile No./ E-Mail</th>
-                        <td colspan="3"><input disabled value="{{$dealerAppointment->mobile_email}}" type="text" name="mobile_email" class="form-control"></td>
+                        <td colspan="3"><input value="{{$dealerAppointment->mobile_email}}" type="text" name="mobile_email" class="form-control"></td>
                       </tr>
                       <tr>
                         <th>Name of your Bankers</th>
-                        <td colspan="3"><input disabled value="{{$dealerAppointment->bank_name}}" type="text" name="bank_name" class="form-control"></td>
+                        <td colspan="3"><input value="{{$dealerAppointment->bank_name}}" type="text" name="bank_name" class="form-control"></td>
                       </tr>
                       <tr>
                         <th>Address of the Banker</th>
-                        <td colspan="3"><input disabled value="{{$dealerAppointment->bank_address}}" type="text" name="bank_address" class="form-control"></td>
+                        <td colspan="3"><input value="{{$dealerAppointment->bank_address}}" type="text" name="bank_address" class="form-control"></td>
                       </tr>
                       <tr>
                         <th>Account Type</th>
                         <td colspan="3">
-                          <input disabled value="{{$dealerAppointment->account_type}}" type="text" class="form-control">
+                          <input value="{{$dealerAppointment->account_type}}" type="text" class="form-control">
                         </td>
                       </tr>
                       <tr>
                         <th>Account No.</th>
-                        <td colspan="3"><input disabled value="{{$dealerAppointment->account_number}}" type="text" name="account_number" class="form-control"></td>
+                        <td colspan="3"><input value="{{$dealerAppointment->account_number}}" type="text" name="account_number" class="form-control"></td>
                       </tr>
                       <tr>
                         <th>IFSC CODE</th>
-                        <td colspan="3"><input disabled value="{{$dealerAppointment->ifsc_code}}" type="text" name="ifsc_code" class="form-control"></td>
+                        <td colspan="3"><input value="{{$dealerAppointment->ifsc_code}}" type="text" name="ifsc_code" class="form-control"></td>
                       </tr>
                       <tr>
                         <th>Payment terms</th>
                         <td colspan="3">
-                          <input type="text" value="{{$dealerAppointment->payment_term}}" disabled class="form-control">
+                          <input type="text" value="{{$dealerAppointment->payment_term}}" class="form-control">
                         </td>
                       </tr>
                       <tr>
                         <th>Maximum Credit period</th>
-                        <td colspan="3"><input disabled value="{{$dealerAppointment->credit_period}}" type="text" name="credit_period" class="form-control"></td>
+                        <td colspan="3"><input value="{{$dealerAppointment->credit_period}}" type="text" name="credit_period" class="form-control"></td>
                       </tr>
                       <tr>
                         <th colspan="3">Whether two (2) Cheque (s) have been collected – MCL CHEQUES (Nationalize) <span class="text-info">*(To Be filled at HO)</span></th>
                         <td>
-                          <select name="payment_term" disabled id="payment_term" class="form-control">
-                            <option value="" disabled selected>Please Select</option>
+                          <select name="payment_term" id="payment_term" class="form-control">
+                            <option value="" selected>Please Select</option>
                             <option value="Yes">Yes</option>
                             <option value="No">No</option>
                           </select>
@@ -538,15 +551,15 @@
                           <tbody>
                             <tr>
                               <td>1</td>
-                              <td><input disabled value="{{$dealerAppointment->cheque_no_1}}" type="text" name="cheque_no_1" class="form-control"></td>
-                              <td><input disabled value="{{$dealerAppointment->cheque_account_number_1}}" type="text" name="cheque_account_number_1" class="form-control"></td>
-                              <td><input disabled value="{{$dealerAppointment->cheque_bank_1}}" type="text" name="cheque_bank_1" class="form-control"></td>
+                              <td><input value="{{$dealerAppointment->cheque_no_1}}" type="text" name="cheque_no_1" class="form-control"></td>
+                              <td><input value="{{$dealerAppointment->cheque_account_number_1}}" type="text" name="cheque_account_number_1" class="form-control"></td>
+                              <td><input value="{{$dealerAppointment->cheque_bank_1}}" type="text" name="cheque_bank_1" class="form-control"></td>
                             </tr>
                             <tr>
                               <td>2</td>
-                              <td><input disabled value="{{$dealerAppointment->cheque_no_2}}" type="text" name="cheque_no_2" class="form-control"></td>
-                              <td><input disabled value="{{$dealerAppointment->cheque_account_number_2}}" type="text" name="cheque_account_number_2" class="form-control"></td>
-                              <td><input disabled value="{{$dealerAppointment->cheque_bank_2}}" type="text" name="cheque_bank_2" class="form-control"></td>
+                              <td><input value="{{$dealerAppointment->cheque_no_2}}" type="text" name="cheque_no_2" class="form-control"></td>
+                              <td><input value="{{$dealerAppointment->cheque_account_number_2}}" type="text" name="cheque_account_number_2" class="form-control"></td>
+                              <td><input value="{{$dealerAppointment->cheque_bank_2}}" type="text" name="cheque_bank_2" class="form-control"></td>
                             </tr>
                           </tbody>
                         </table>
@@ -576,16 +589,16 @@
                     </thead>
                     <tbody>
                       <tr>
-                        <td><input disabled value="{{$dealerAppointment->manufacture_company_1}}" type="text" name="manufacture_company_1" class="form-control"></td>
-                        <td><input disabled value="{{$dealerAppointment->manufacture_product_1}}" type="text" name="manufacture_product_1" class="form-control"></td>
-                        <td><input disabled value="{{$dealerAppointment->manufacture_business_1}}" type="text" name="manufacture_business_1" class="form-control"></td>
-                        <td><input disabled value="{{$dealerAppointment->manufacture_turn_over_1}}" type="text" name="manufacture_turn_over_1" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->manufacture_company_1}}" type="text" name="manufacture_company_1" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->manufacture_product_1}}" type="text" name="manufacture_product_1" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->manufacture_business_1}}" type="text" name="manufacture_business_1" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->manufacture_turn_over_1}}" type="text" name="manufacture_turn_over_1" class="form-control"></td>
                       </tr>
                       <tr>
-                        <td><input disabled value="{{$dealerAppointment->manufacture_company_2}}" type="text" name="manufacture_company_2" class="form-control"></td>
-                        <td><input disabled value="{{$dealerAppointment->manufacture_product_2}}" type="text" name="manufacture_product_2" class="form-control"></td>
-                        <td><input disabled value="{{$dealerAppointment->manufacture_business_2}}" type="text" name="manufacture_business_2" class="form-control"></td>
-                        <td><input disabled value="{{$dealerAppointment->manufacture_turn_over_2}}" type="text" name="manufacture_turn_over_2" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->manufacture_company_2}}" type="text" name="manufacture_company_2" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->manufacture_product_2}}" type="text" name="manufacture_product_2" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->manufacture_business_2}}" type="text" name="manufacture_business_2" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->manufacture_turn_over_2}}" type="text" name="manufacture_turn_over_2" class="form-control"></td>
                       </tr>
                     </tbody>
                   </table>
@@ -596,7 +609,7 @@
                       <label> Present Annual Turnover </label>
                     </div>
                     <div class="col-md-8">
-                      <input disabled value="{{$dealerAppointment->present_annual_turnover}}" class="form-control" type="text" name="present_annual_turnover" value="">
+                      <input value="{{$dealerAppointment->present_annual_turnover}}" class="form-control" type="text" name="present_annual_turnover" value="">
                     </div>
                   </div>
                 </div>
@@ -622,37 +635,37 @@
                     <tbody>
                       <tr>
                         <td>MOTROS</td>
-                        <td><input disabled value="{{$dealerAppointment->motor_anticipated_business_1}}" type="text" name="motor_anticipated_business_1" class="form-control"></td>
-                        <td><input disabled value="{{$dealerAppointment->motor_next_year_business_1}}" type="text" name="motor_next_year_business_1" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->motor_anticipated_business_1}}" type="text" name="motor_anticipated_business_1" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->motor_next_year_business_1}}" type="text" name="motor_next_year_business_1" class="form-control"></td>
                       </tr>
                       <tr>
                         <td>PUMP</td>
-                        <td><input disabled value="{{$dealerAppointment->motor_next_year_business_1}}" type="text" name="pump_anticipated_business_1" class="form-control"></td>
-                        <td><input disabled value="{{$dealerAppointment->motor_next_year_business_1}}" type="text" name="pump_next_year_business_1" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->motor_next_year_business_1}}" type="text" name="pump_anticipated_business_1" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->motor_next_year_business_1}}" type="text" name="pump_next_year_business_1" class="form-control"></td>
                       </tr>
                       <tr>
                         <td>FAN & APP</td>
-                        <td><input disabled value="{{$dealerAppointment['F&A_anticipated_business_1']}}" type="text" name="F&A_anticipated_business_1" class="form-control"></td>
-                        <td><input disabled value="{{$dealerAppointment['F&A_next_year_business_1']}}" type="text" name="F&A_next_year_business_1" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment['F&A_anticipated_business_1']}}" type="text" name="F&A_anticipated_business_1" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment['F&A_next_year_business_1']}}" type="text" name="F&A_next_year_business_1" class="form-control"></td>
                       </tr>
                       <tr>
                         <td>LIGHTING</td>
-                        <td><input disabled value="{{$dealerAppointment->lighting_anticipated_business_1}}" type="text" name="lighting_anticipated_business_1" class="form-control"></td>
-                        <td><input disabled value="{{$dealerAppointment->lighting_next_year_business_1}}" type="text" name="lighting_next_year_business_1" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->lighting_anticipated_business_1}}" type="text" name="lighting_anticipated_business_1" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->lighting_next_year_business_1}}" type="text" name="lighting_next_year_business_1" class="form-control"></td>
                       </tr>
                       <tr>
                         <td>AGRI</td>
-                        <td><input disabled value="{{$dealerAppointment->agri_anticipated_business_1}}" type="text" name="agri_anticipated_business_1" class="form-control"></td>
-                        <td><input disabled value="{{$dealerAppointment->agri_next_year_business_1}}" type="text" name="agri_next_year_business_1" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->agri_anticipated_business_1}}" type="text" name="agri_anticipated_business_1" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->agri_next_year_business_1}}" type="text" name="agri_next_year_business_1" class="form-control"></td>
                       </tr>
                       <tr>
                         <td>SOLAR – PUMP</td>
-                        <td><input disabled value="{{$dealerAppointment->solar_anticipated_business_1}}" type="text" name="solar_anticipated_business_1" class="form-control"></td>
-                        <td><input disabled value="{{$dealerAppointment->solar_next_year_business_1}}" type="text" name="solar_next_year_business_1" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->solar_anticipated_business_1}}" type="text" name="solar_anticipated_business_1" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->solar_next_year_business_1}}" type="text" name="solar_next_year_business_1" class="form-control"></td>
                       </tr>
                       <tr>
                         <th>Total</th>
-                        <td colspan="2"><input disabled value="{{$dealerAppointment->anticipated_business_total}}" type="text" name="anticipated_business_total" class="form-control"></td>
+                        <td colspan="2"><input value="{{$dealerAppointment->anticipated_business_total}}" type="text" name="anticipated_business_total" class="form-control"></td>
                       </tr>
                       <tr>
                         <th colspan="3"><b>Note: Please sign Target sheets for TOD incentives</b></th>
@@ -664,11 +677,87 @@
             </div>
 
             <h5 class="mt-5 all-attachments">Attachments:</h5>
-            <div class="row">
+            <div class="border border-dark rounded p-4">
+              <div class="row mt-2 mb-2">
+                <div class="col-md-4 mb-3">
+                  <label for="service_policy">Service Policy</label>
+                  <div class="inp-div">
+                    <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                    <p class="m-0">Attach a File</p>
+                    <input type="file" name="service_policy" id="service_policy" class="form-control" accept="image/*">
+                  </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="dealer_policy">Dealer Policy</label>
+                  <div class="inp-div">
+                    <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                    <p class="m-0">Attach a File</p>
+                    <input type="file" name="dealer_policy" id="dealer_policy" class="form-control" accept="image/*">
+                  </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="mou_sheet">MOU Sheet</label>
+                  <div class="inp-div">
+                    <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                    <p class="m-0">Attach a File</p>
+                    <input type="file" name="mou_sheet" id="mou_sheet" class="form-control" accept="image/*">
+                  </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="mcl_cheque_1">MCL(cheque) 1</label>
+                  <div class="inp-div">
+                    <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                    <p class="m-0">Attach a File</p>
+                    <input type="file" name="mcl_cheque_1" id="mcl_cheque_1" class="form-control" accept="image/*">
+                  </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="mcl_cheque_2">MCL(cheque) 2</label>
+                  <div class="inp-div">
+                    <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                    <p class="m-0">Attach a File</p>
+                    <input type="file" name="mcl_cheque_2" id="mcl_cheque_2" class="form-control" accept="image/*">
+                  </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="gst_certificate">GST Certificate</label>
+                  <div class="inp-div">
+                    <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                    <p class="m-0">Attach a File</p>
+                    <input type="file" name="gst_certificate" id="gst_certificate" class="form-control" accept="image/*">
+                  </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="adhar_card">Adhar Card</label>
+                  <div class="inp-div">
+                    <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                    <p class="m-0">Attach a File</p>
+                    <input type="file" name="adhar_card" id="adhar_card" class="form-control" accept="image/*">
+                  </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="pan_card">PAN Card</label>
+                  <div class="inp-div">
+                    <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                    <p class="m-0">Attach a File</p>
+                    <input type="file" name="pan_card" id="pan_card" class="form-control" accept="image/*">
+                  </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="bank_statement">6 Month Bank Statement</label>
+                  <div class="inp-div">
+                    <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                    <p class="m-0">Attach a File</p>
+                    <input type="file" name="bank_statement" id="bank_statement" class="form-control" accept="image/*">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row mt-5">
               @if($dealerAppointment->exists && $dealerAppointment->getMedia('*')->count() > 0)
               @foreach($dealerAppointment->getMedia('*') as $k=>$media)
               <div class="col-md-3 mb-3 ml-5 text-center border rounded">
-                <p class="attach-p">{{ucfirst(str_replace('_','',$media->collection_name))}}</p>
+                <p class="attach-p">{{ucwords(str_replace('_',' ',$media->collection_name))}}</p>
                 <a href="{{$media->getFullUrl()}}" download target="_blank">
                   <img class="m-2 rounded img-fluid" src="{!! $media->getFullUrl() !!}" style="width: 170px;height:170px;">
                 </a>
@@ -704,7 +793,7 @@
                       <label>Credit limit (Lacs)</label>
                     </div>
                     <div class="col-md-8">
-                      <input readonly type="text" name="credit_limit" class="form-control">
+                      <input readonly type="text" name="credit_limit" disabled class="form-control">
                     </div>
                   </div>
                 </div>
@@ -714,7 +803,7 @@
                       <label>Credit Rating (in grade)</label>
                     </div>
                     <div class="col-md-8">
-                      <input readonly type="text" name="credit_rating" class="form-control">
+                      <input readonly type="text" name="credit_rating" disabled class="form-control">
                     </div>
                   </div>
                 </div>
@@ -760,111 +849,57 @@
               <div class="col-md-3 text-center"><b>(SIGN) </b></div>
               <div class="col-md-3 text-center"><b>(SIGN) </b></div>
             </div>
-          </div>
-          <!-- <div class="row mt-5 border border-dark rounded p-4">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Sr No</th>
-                  <th>PROPRIETARY CONCERN</th>
-                  <th>PARTNERSHIP FIRM</th>
-                  <th>LTD. / PVT LTD</th>
-                </tr>
-              </thead>
-              <tbody>
-                @if($dealerAppointment->appointment_kyc_detail && !empty($dealerAppointment->appointment_kyc_detail))
-                @php
-                $proprietary_concern_array = json_decode($dealerAppointment->appointment_kyc_detail->proprietary_concern);
-                $partnership_firm_array = json_decode($dealerAppointment->appointment_kyc_detail->partnership_firm);
-                $ltd_pvt_array = json_decode($dealerAppointment->appointment_kyc_detail->ltd_pvt);
-                @endphp
-                @else
-                @php
-                $proprietary_concern_array = [];
-                $partnership_firm_array = [];
-                $ltd_pvt_array = [];
-                @endphp
-                @endif
-                @foreach($kyc_ckeckbox as $key => $val)
-                @if ($key < 60 && ($key==0 || $key % 3==0)) <tr>
-                  <td>{{($key / 3)+1}}</td>
-                  <td>
-                    <div class="form-group">
-                      <label for="proprietary_concern"> {{$kyc_ckeckbox[$key]}} </label>
-                      <input disabled class="form-check-input" type="checkbox" value="{{($key / 3)+1}}" {{in_array(($key / 3)+1, $proprietary_concern_array)?'checked':''}}>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="form-group">
-                      <label for="partnership_firm"> {{$kyc_ckeckbox[$key+1]}} </label>
-                      <input disabled class="form-check-input" type="checkbox" value="{{($key / 3)+1}}" {{in_array(($key / 3)+1, $partnership_firm_array)?'checked':''}}>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="form-group">
-                      <label for="ltd_pvt"> {{$kyc_ckeckbox[$key+2]}} </label>
-                      <input disabled class="form-check-input" type="checkbox" value="{{($key / 3)+1}}" {{in_array(($key / 3)+1, $ltd_pvt_array)?'checked':''}}>
-                    </div>
-                  </td>
-                  </tr>
-                  @endif
-                  @endforeach
-                  <tr>
-                    <td colspan="2">* TYPE OF DISTRIBUTION CHANNEL</td>
-                    <td colspan="2">
-                      <div class="row" style="margin-left: 10px;">
-                        <div class="form-check col-md-3">
-                          <label for="partnership_firm"> Dealer </label>
-                          <input class="form-check-input" type="radio" value="Dealer" {{($dealerAppointment->appointment_kyc_detail&&$dealerAppointment->appointment_kyc_detail->distribution_channel=='Dealer')?'checked':''}}>
-                        </div>
-                        <div class="form-check col-md-3">
-                          <label for="partnership_firm"> Distributor </label>
-                          <input class="form-check-input" type="radio" value="Distributor" {{($dealerAppointment->appointment_kyc_detail&&$dealerAppointment->appointment_kyc_detail->distribution_channel=='Distributor')?'checked':''}}>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-              </tbody>
-            </table>
-          </div> -->
+
+
+
+            <div class="row mt-5">
+              <div class="col-md-4">
+                <button class="btn btn-success"><b>Update</b></button>
+              </div>
+              <div class="col-md-4"></div>
+              <div class="col-md-4" style="text-align: right;">
+                <!-- <button type="button" id="printButton" class="btn btn-info">Print Form</button> -->
+              </div>
+            </div>
+
+            <div class="row mt-5"></div>
+          </form>
         </div>
 
+        <div class="col-1"></div>
 
-        <div class="row mt-5">
-          <div class="col-md-4">
-          </div>
-          <div class="col-md-4"></div>
-          <div class="col-md-4" style="text-align: right;">
-            <button type="button" id="printButton" class="btn btn-info">Print Form</button>
-          </div>
-        </div>
-
-        <div class="row mt-5"></div>
-
-      </div>
-      <div class="col-1"></div>
-
-
-      <link rel="stylesheet" href="{{ url('/').'/'.asset('lightboxx/css/lightbox.min.css') }}">
-
-      <script src="{{ url('/').'/'.asset('lightboxx/js/lightbox-plus-jquery.min.js') }}"></script>
-
-      <script>
-        $(document).ready(function() {
-          $('#printButton').click(function() {
-            var printContents = document.getElementById('print-section').innerHTML;
-            var printWindow = window.open('', '_blank', 'width=800,height=600');
-            printWindow.document.write('<html><head><title>Grey-Meter</title>');
-            printWindow.document.write('<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">');
-            printWindow.document.write('<style>p.attach-p{font-weight: 900;font-family: cursive;position: relative;}p.attach-p:before {content: " ";position: absolute;width: 100px;height: 5px;top: 24px;background: radial-gradient(#00aadb, transparent);left: 105px;}	input[type="checkbox"].form-check-input {border: 2px solid !important;width: 20px !important;height: 20px !important;opacity: 1 !important;float: right !important;position: relative !important;z-index: 99999 !important;}</style>');
-            printWindow.document.write('</head><body>');
-            printWindow.document.write(printContents);
-            printWindow.document.write('<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"><\/script>');
-            printWindow.document.write('</body></html>');
-            printWindow.document.close();
-            printWindow.print();
-          });
-        });
-      </script>
-
+        <div class="baseurl" data-baseurl="{{ url('/')}}">
+          <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+          <script src="https://silver.fieldkonnect.io//public/assets/plugins/select2/js/select2.full.min.js"></script>
+          <script>
+            $(document).ready(function() {
+              $('#district').trigger('change');
+            });
+            $(document).on('change', '#district', function() {
+              var district_id = $(this).val();
+              var base_url = $('.baseurl').data('baseurl');
+              $.ajax({
+                url: base_url + '/getCity',
+                dataType: "json",
+                type: "GET",
+                data: {
+                  _token: "{{csrf_token()}}",
+                  district_id: district_id
+                },
+                success: function(res) {
+                  var html = '<option value="">Select City</option>';
+                  $.each(res, function(index, value) {
+                    html += '<option value="' + value.id + '">' + value.city_name + '</option>';
+                  });
+                  $("#city").html(html);
+                  var city_is = '{{$dealerAppointment->city}}';
+                  if (city_is != '') {
+                    $("#city").val(city_is);
+                    $("#city").change();
+                  }
+                }
+              });
+            }).trigger('change');
+            $('.select2').select2()
+          </script>
 </x-app-layout>

@@ -3657,10 +3657,10 @@
          data: {
             labels: labels,
             datasets: [{
-               label: 'Monthly Retailer Activation Line Chart',
+               label: 'Monthly Retailer Activation',
                data: data,
                backgroundColor: 'rgba(54, 162, 235, 0.5)',
-               borderColor: 'rgba(54, 162, 235, 1)',
+               borderColor: '#1c81c5',
                borderWidth: 1,
                datalabels: {
                   color: 'black',
@@ -3756,9 +3756,9 @@
                            '#5858f1'
                         ],
                         borderColor: [
-                           '#379737',
-                           '#787831',
-                           '#1b1bb7'
+                           '#59dd59',
+                           '#cbcb5e',
+                           '#5858f1'
                         ],
                         borderWidth: 1
                      }]
