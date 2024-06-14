@@ -234,20 +234,26 @@ class AjaxController extends Controller
     public function getUserList(Request $request)
     {
         try {
+
+            session()->forget('executive_id');
             $beat_id = $request->input('beat_id');
+            $payroll = $request->input('payroll');
             $userids = getUsersReportingToAuth();
-            $data = User::where(function ($query) use ($beat_id, $userids) {
+            $data = User::where(function ($query) use ($beat_id, $userids, $payroll) {
                 if (isset($beat_id)) {
                     $query->whereHas('userbeats', function ($query) use ($beat_id) {
                         $query->where('beat_id', '=', $beat_id);
                     });
+                }
+                if (isset($payroll)) {
+                    $query->where('payroll', '=', $payroll);
                 }
                 if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                     $query->whereIn('id', $userids);
                 }
                 $query->where('active', '=', 'Y');
             })
-                ->select('id', 'name', 'mobile', 'first_name', 'last_name')
+                ->select('id', 'name', 'mobile', 'first_name', 'last_name', 'employee_codes')
                 ->orderBy('name', 'asc')
                 ->get();
             return response()->json($data);

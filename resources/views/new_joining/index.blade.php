@@ -57,11 +57,11 @@
                   <!-- <p>{!!  trans('panel.global.template') !!} Manual Transaction</p>
                       <a href="{{ URL::to('transaction_history_template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} Manual Transaction"><i class="material-icons">text_snippet</i></a> -->
                   @endif
-                  @if(auth()->user()->can(['transaction_history_create']))
+                  @if(auth()->user()->can(['new_joining_create']))
                   <!-- <p>{!!  trans('panel.global.add') !!} Transaction</p> -->
                   <!-- <a href="{{ route('damage_entries.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Damage Entry"><i class="material-icons">add_circle</i></a> -->
-                  <!-- <p>{!!  trans('panel.global.add') !!} Manual Transaction</p>
-                      <a href="{{ route('transaction_history.manualcreate') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Manual Transaction"><i class="material-icons">add_circle</i></a> -->
+                  <!-- <p>{!!  trans('panel.global.add') !!} Manual Transaction</p> -->
+                      <a href="{{ route('joining-form') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} New Joining"><i class="material-icons">add_circle</i></a>
                   @endif
                   <!-- </div>
                   </div> -->

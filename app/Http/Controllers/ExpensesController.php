@@ -38,14 +38,6 @@ class ExpensesController extends Controller
         if ($request->executive_id && !empty(session('executive_id'))) {
             $request->session()->put('executive_id', $request->executive_id);
         }
-
-        $users = User::where('active', '=', 'Y')->where(function ($query) use ($userids) {
-            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
-                $query->whereIn('id', $userids);
-            }
-        })->select('id', 'name', 'employee_codes')->get();
-
-
         $all_user_branches = User::with('getbranch')->whereIn('id', $userids)->orderBy('branch_id')->get();
         $branches = array();
         $all_branch = array();
@@ -86,7 +78,7 @@ class ExpensesController extends Controller
 
         $pay_rolls = Config('constants.pay_roll');
 
-        return $dataTable->render('expenses.index', compact('users', 'branches', 'pay_rolls', 'divisions'));
+        return $dataTable->render('expenses.index', compact('branches', 'pay_rolls', 'divisions'));
     }
 
     /**
@@ -833,7 +825,7 @@ class ExpensesController extends Controller
         $coordinates = [];
 
         $attan = Attendance::where('user_id', $request->id)->where('punchin_date', '2024-03-02')->first();
-        $checks = CheckIn::where('user_id', $request->id)->where('checkin_date', '2024-03-02')->get();
+        $checks = CheckIn::with('customers')->where('user_id', $request->id)->where('checkin_date', '2024-03-02')->get();
 
         $coordinates[0]['latitude'] = $attan->punchin_latitude;
         $coordinates[0]['longitude'] = $attan->punchin_longitude;
@@ -842,7 +834,7 @@ class ExpensesController extends Controller
         foreach($checks as $check){
             $coordinates[$i]['latitude'] = $check->checkin_latitude;
             $coordinates[$i]['longitude'] = $check->checkin_longitude;
-            $coordinates[$i]['name'] = 'Check In';
+            $coordinates[$i]['name'] = ($check->customers?$check->customers->name:'-').' : Check In';
             $i++;
         }
 

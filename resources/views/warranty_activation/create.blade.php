@@ -26,7 +26,7 @@
                         @if(auth()->user()->can(['district_access']))
                         <ul class="nav nav-tabs pull-right" data-tabs="tabs">
                            <li class="nav-item">
-                              <a class="nav-link" href="{{ url('warranty_activation') }}">
+                              <a class="nav-link" href="javascript:void(0);" onclick="window.history.back();">
                                  <i class="material-icons">next_plan</i> Back
                                  <div class="ripple-container"></div>
                               </a>
@@ -199,7 +199,7 @@
                            <label for="customer_pindcode" class="form-control">Pincode</label>
                         </div>
                         <div class="col-md-4">
-                           <select name="customer_pindcode" id="customer_pindcode" placeholder="Select Pincode" class="select2 form-control" required>
+                           <select name="customer_pindcode" id="customer_pindcode" placeholder="Select Pincode" class="select2 form-control">
                               <option value="" disabled selected>Select Pincode</option>
                               @if($pincodes && count($pincodes) > 0)
                               @foreach($pincodes as $pincode)
@@ -230,7 +230,14 @@
                            <label for="customer_state" class="form-control">State</label>
                         </div>
                         <div class="col-md-2">
-                           <input type="text" readonly name="customer_state" id="customer_state" class="form-control">
+                        <select name="customer_state" id="customer_state" placeholder="Select State" class="select2 form-control" required>
+                              <option value="" disabled selected>Select State</option>
+                              @if($states && count($states) > 0)
+                              @foreach($states as $state)
+                              <option value="{{$state->id}}" {!! old( 'customer_state' , $warranty_activation['customer']?$warranty_activation['customer']['customer_state']:'')==$state->id?'selected':'' !!}>{{$state->state_name}}</option>
+                              @endforeach
+                              @endif
+                           </select>
                            @if ($errors->has('customer_state'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('customer_state') }}</p>
@@ -417,7 +424,8 @@
             },
             success: function(res) {
                $("#customer_country").val(res.country_name);
-               $("#customer_state").val(res.state_name);
+               $("#customer_state").val(res.state_id);
+               $("#customer_state").change();
                $("#customer_district").val(res.district_name);
                $("#customer_city").val(res.city_name);
             }
@@ -447,7 +455,8 @@
                   $("#customer_address").val(res.data.customer_address);
                   $("#customer_place").val(res.data.customer_place);
                   $("#customer_pindcode").val(res.data.customer_pindcode).trigger("change");;
-                  $("#customer_state").val(res.data.customer_state);
+                  $("#customer_state").val(res.data.customer_id);
+                  $("#customer_state").change();
                   $("#customer_district").val(res.data.customer_district);
                   $("#customer_city").val(res.data.customer_city);
 
@@ -468,6 +477,7 @@
                   $("#customer_place").val("");
                   $("#customer_pindcode").val("").trigger("change");;
                   $("#customer_state").val("");
+                  $("#customer_state").change("");
                   $("#customer_district").val("");
                   $("#customer_city").val("");
 

@@ -151,7 +151,10 @@ $(document).ready(function () {
     });
 
     $('#payroll').change(function () {
+        $('#executive_id').val('');
+        $('#executive_id').change();
         localStorage.setItem("payroll", $(this).val());
+        localStorage.removeItem('executive_id');
         oTable.draw();
     });
     $('#branch_id').change(function () {

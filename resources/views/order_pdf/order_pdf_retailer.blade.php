@@ -76,7 +76,7 @@
             <tr>
                 <td>{{ $detail->products->product_name }}</td>
                 <td>{{ $detail->quantity }}</td>
-                <td>{{ $detail->price }}</td>
+                <td>{{ $detail->products->productpriceinfo->mrp }}</td>
                 <td>{{ $detail->products->productpriceinfo->gst }}</td>
                 <td>{{ $detail->line_total }}</td>
             </tr>

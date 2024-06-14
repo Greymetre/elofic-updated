@@ -102,6 +102,7 @@
             <table id="getDamageEntries" class="table table-striped- table-bschemeed table-hover table-checkable no-wrap">
               <thead class=" text-primary">
                 <th>{!! trans('panel.global.no') !!}</th>
+                <th>Action</th>
                 <th>Appointment {!! trans('panel.expenses.fields.date') !!}</th>
                 <th>Branch</th>
                 <th>District</th>
@@ -110,7 +111,6 @@
                 <th>Firm type</th>
                 <th>Customer Type</th>
                 <th>division</th>
-                <th>Show Detais</th>
               </thead>
               <tbody>
               </tbody>
@@ -150,6 +150,13 @@
         columns: [{
             data: 'DT_RowIndex',
             name: 'DT_RowIndex',
+            orderable: false,
+            searchable: false
+          },
+          {
+            data: 'action',
+            name: 'action',
+            "defaultContent": '',
             orderable: false,
             searchable: false
           },
@@ -204,13 +211,6 @@
             name: 'division',
             "defaultContent": '',
             orderable: false
-          },
-          {
-            data: 'action',
-            name: 'action',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
           },
         ]
       });

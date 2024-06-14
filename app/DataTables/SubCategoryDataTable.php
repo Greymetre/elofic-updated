@@ -61,7 +61,7 @@ class SubCategoryDataTable extends DataTable
                   }
             })
             ->addColumn('image', function ($query) {
-                $subcategory_image = !empty($query->subcategory_image) ? env('IMAGE_UPLOADS').$query->subcategory_image : asset('assets/img/placeholder.jpg') ;
+                $subcategory_image = !empty($query->subcategory_image) ? url('/public/uploads').'/'.$query->subcategory_image : asset('assets/img/placeholder.jpg') ;
                 return '<img src="'.$subcategory_image.'" border="0" width="70" class="img-rounded imageDisplayModel" align="center" />';
             })
             ->rawColumns(['action','image','active']);

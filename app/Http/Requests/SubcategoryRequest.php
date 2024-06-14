@@ -22,7 +22,7 @@ class SubcategoryRequest extends FormRequest
         switch($this) {
             case !empty($this->id) :
                 $rules = [
-                    'subcategory_name'   => 'required|min:2|max:100|string|regex:/[a-zA-Z0-9\s]+/',
+                    'subcategory_name'   => 'required|min:2|max:100',
                     'image'        => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                     'category_id'     => 'required|numeric|exists:categories,id',
                     
@@ -30,7 +30,7 @@ class SubcategoryRequest extends FormRequest
                 break;
             default :
                 $rules = [
-                    'subcategory_name'   => 'required|min:2|max:100|string|regex:/[a-zA-Z0-9\s]+/',
+                    'subcategory_name'   => 'required|min:2|max:100',
                     'image'        => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                     'category_id'     => 'required|numeric|exists:categories,id',
                 ];

@@ -45,6 +45,21 @@
          font-weight: 900 !important;
          padding: 4px 10px 4px 10px !important;
       }
+
+      .imgdiv img {
+         border-radius: 10px;
+         width: 100%;
+         height: 120px !important;
+      }
+
+      .imgdiv {
+         margin: 2px;
+         padding: 5px;
+         border: 1px dashed;
+         border-radius: 10px;
+         width: 100%;
+         height: 135px !important;
+      }
    </style>
    <div class="row">
       <div class="col-md-12">
@@ -53,11 +68,11 @@
                <div class="nav-tabs-navigation">
                   <div class="nav-tabs-wrapper">
                      <h3 class="card-title ">
-                     {{$service_bill->exists?'Edit':'Create'}} Service Bill
+                        {{$service_bill->exists?'Edit':'Create'}} Service Bill
                         @if(auth()->user()->can(['district_access']))
                         <ul class="nav nav-tabs pull-right" data-tabs="tabs">
                            <li class="nav-item">
-                              <a class="nav-link" href="{{ url('service_bills') }}">
+                              <a class="nav-link" href="javascript:void(0);" onclick="window.history.back();">
                                  <i class="material-icons">next_plan</i> Service Bills
                                  <div class="ripple-container"></div>
                               </a>
@@ -82,8 +97,8 @@
                </div>
                @endif
                {!! Form::model($service_bill,[
-               'route' => $service_bill->exists ? ['service_bills.update', $service_bill->id ] : 'service_bills.store',
-               'method' => $service_bill->exists ? 'PUT' : 'POST',
+               'route' => 'service_bills.store',
+               'method' => 'POST',
                'id' => 'storeServiceBillData',
                'files'=>true
                ]) !!}
@@ -92,12 +107,15 @@
                      <div class="form-group">
                         <label for="service_bill_no">Service Bill No.</label>
                         <input class="form-control" type="text" readonly name="service_bill_no" id="service_bill_no" value="{{$serviceBillNo}}">
+                        @if($service_bill->exists)
+                        <input type="hidden" name="complaint_number" id="complaint_number" value="{{$complaint->complaint_number}}">
+                        @endif
                      </div>
                   </div>
                   <div class="col-md-3">
                      <div class="form-group">
                         <label for="complaint_number">Complaint Number</label>
-                        <select name="complaint_number" id="complaint_number" class="select2" required>
+                        <select {{$service_bill->exists?'disabled':''}} name="complaint_number" id="complaint_number" class="select2" required>
                            <option value="">Select Complaint Number</option>
                            @if(count($all_complaint_number) > 0)
                            @foreach($all_complaint_number as $val)
@@ -361,6 +379,13 @@
                            <p class="m-0">Attach a File</p>
                            <input type="file" name="product_sr_no" id="product_sr_no" class="form-control" accept="image/*">
                         </div>
+                        @if($service_bill->exists && $service_bill->getMedia('product_sr_no')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('product_sr_no')[0]->getPath()))
+                        <div class="imgdiv">
+                           <a target="_blank" href="{{ $service_bill->getMedia('product_sr_no')[0]->getFullUrl() }}">
+                              <img width="150" src="{{ $service_bill->getMedia('product_sr_no')[0]->getFullUrl() }}" alt="">
+                           </a>
+                        </div>
+                        @endif
                      </div>
                      <div class="col-md-2">
                         <label for="scr_job_card">SCR-Job Card</label>
@@ -369,6 +394,13 @@
                            <p class="m-0">Attach a File</p>
                            <input type="file" name="scr_job_card" id="scr_job_card" class="form-control" accept="image/*">
                         </div>
+                        @if($service_bill->exists && $service_bill->getMedia('scr_job_card')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('scr_job_card')[0]->getPath()))
+                        <div class="imgdiv">
+                           <a target="_blank" href="{{ $service_bill->getMedia('scr_job_card')[0]->getFullUrl() }}">
+                              <img width="150" src="{{ $service_bill->getMedia('scr_job_card')[0]->getFullUrl() }}" alt="">
+                           </a>
+                        </div>
+                        @endif
                      </div>
                      <div class="col-md-2">
                         <label for="photo_3">Photo 3</label>
@@ -377,6 +409,13 @@
                            <p class="m-0">Attach a File</p>
                            <input type="file" name="photo_3" id="photo_3" class="form-control" accept="image/*">
                         </div>
+                        @if($service_bill->exists && $service_bill->getMedia('photo_3')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('photo_3')[0]->getPath()))
+                        <div class="imgdiv">
+                           <a target="_blank" href="{{ $service_bill->getMedia('photo_3')[0]->getFullUrl() }}">
+                              <img width="150" src="{{ $service_bill->getMedia('photo_3')[0]->getFullUrl() }}" alt="">
+                           </a>
+                        </div>
+                        @endif
                      </div>
                      <div class="col-md-2">
                         <label for="photo_4">Photo 4</label>
@@ -385,6 +424,13 @@
                            <p class="m-0">Attach a File</p>
                            <input type="file" name="photo_4" id="photo_4" class="form-control" accept="image/*">
                         </div>
+                        @if($service_bill->exists && $service_bill->getMedia('photo_4')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('photo_4')[0]->getPath()))
+                        <div class="imgdiv">
+                           <a target="_blank" href="{{ $service_bill->getMedia('photo_4')[0]->getFullUrl() }}">
+                              <img width="150" src="{{ $service_bill->getMedia('photo_4')[0]->getFullUrl() }}" alt="">
+                           </a>
+                        </div>
+                        @endif
                      </div>
                      <div class="col-md-2">
                         <label for="photo_5">Photo 5</label>
@@ -393,6 +439,13 @@
                            <p class="m-0">Attach a File</p>
                            <input type="file" name="photo_5" id="photo_5" class="form-control" accept="image/*">
                         </div>
+                        @if($service_bill->exists && $service_bill->getMedia('photo_5')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('photo_5')[0]->getPath()))
+                        <div class="imgdiv">
+                           <a target="_blank" href="{{ $service_bill->getMedia('photo_5')[0]->getFullUrl() }}">
+                              <img width="150" src="{{ $service_bill->getMedia('photo_5')[0]->getFullUrl() }}" alt="">
+                           </a>
+                        </div>
+                        @endif
                      </div>
                   </div>
                </div>
@@ -413,6 +466,38 @@
                            <td>#</td>
                         </tr>
                      </thead>
+                     @if($service_bill->exists && count($service_bill->service_bill_products) > 0)
+                     <tbody>
+                        @foreach($service_bill->service_bill_products as $k=>$product)
+                        <tr>
+                           <input type="hidden" name="service[{{$k}}][service_bill_product_id]" id="service_bill_product_id" value="{{$product->id}}">
+                           <td>
+                              <select required name="service[{{$k}}][service_type]" class="form-control select2 chargety">
+                                 @if(count($charge_type) > 0)
+                                 @foreach($charge_type as $ch_type)
+                                 <option value="{{$ch_type->id}}" {{($product->service_type == $ch_type->id)?'selected':''}}>{{$ch_type->charge_type}}</option>
+                                 @endforeach
+                                 @endif
+                              </select>
+                           </td>
+                           <td>
+                              <select required name="service[{{$k}}][product_id]" class="form-control select2 chargeprod">
+                                 <option value="{{$product->product_id}}">{{$product->product->product_name}}</option>
+                              </select>
+                           </td>
+                           <td><input type="number" readonly name="service[{{$k}}][quantity]" value="1" class="form-control" /></td>
+                           <td><input type="number" readonly name="service[{{$k}}][distance]" class="form-control" /></td>
+                           <td><input type="number" readonly name="service[{{$k}}][appreciation]" class="form-control" /></td>
+                           <td><input name="service[{{$k}}][price]" readonly class="form-control sprice" value="{{$product->price}}" /></td>
+                           <td><input name="service[{{$k}}][subtotal]" readonly class="form-control ssubtotal" value="{{$product->subtotal}}" /></td>
+                           <td><button type="button" class="btn btn-danger btn-sm remove-tr m-0">X</button></td>
+                        </tr>
+                        @endforeach
+                     </tbody>
+                     @endif
+                     <tbody>
+
+                     </tbody>
                   </table>
                   <button type="button" class="btn btn-info btn-sm" id="add-service">ADD</button>
                </div>
@@ -424,8 +509,8 @@
       </div>
    </div>
    <script>
-      var counter = 0;
-      var counter2 = 0;
+      var counter = '{{($service_bill->exists && count($service_bill->service_bill_products) > 0)?count($service_bill->service_bill_products):"0"}}';
+      console.log(counter);
       $(document).on('change', '#complaint_number', function() {
          var complaint_number = $(this).val();
          $.ajax({
@@ -440,6 +525,7 @@
                if (res.status == 'success') {
                   if (res.data.service_bill != null) {
                      $('#complaint_number').val('');
+                     $('#complaint_number').change();
                      Swal.fire({
                         title: "Already Exists",
                         text: "The service bill with this complaint number is already exists please check service bill list and edit them.",
@@ -515,13 +601,13 @@
 
                   html2 += '</td><td>';
                   var today = moment();
-                  if(dateupto != null){
+                  if (dateupto != null) {
                      if (dateupto.isAfter(today)) {
                         html2 += '<span class="badge badge-success">In Warranty</span>';
                      } else {
                         html2 += '<span class="badge badge-danger">Out Of Warranty</span>';
                      }
-                  }else{
+                  } else {
                      html2 += '<span class="badge badge-danger">Out Of Warranty</span>';
                   }
                   html2 += '</td></tr>';
@@ -574,6 +660,10 @@
          $('.select2').select2();
       });
 
+      $(document).ready(function() {
+         // $(".chargety").trigger("change");
+      })
+
       $(document).on("change", ".chargety", function() {
          var selectedValues = [];
          var id = $(this).val();
@@ -615,7 +705,7 @@
                serviceProductSelect.html(html);
             }
          });
-      })
+      }).trigger('change');
 
       $(document).on("change", ".chargeprod", function() {
          var id = $(this).val();
@@ -632,11 +722,23 @@
                serviceSubTotal.val(data.price);
             }
          });
-      })
+      }).trigger('change');
 
       $(document).on("click", ".remove-tr", function() {
          if (confirm('Are you sure to remove this?')) {
             var currentRow = $(this).closest('tr');
+            var checkOldDataId = currentRow.find('input#service_bill_product_id');
+            if (checkOldDataId.length > 0) {
+               $.ajax({
+                  url: "{{ url('service-bill-product-remove') }}",
+                  data: {
+                     "id": checkOldDataId.val(),
+                  },
+                  success: function(res) {
+
+                  }
+               });
+            }
             currentRow.remove();
          }
       })

@@ -9,6 +9,7 @@ use App\Models\Customers;
 use App\Models\EndUser;
 use App\Models\Pincode;
 use App\Models\SchemeHeader;
+use App\Models\State;
 use App\Models\TransactionHistory;
 use App\Models\WarrantyActivation;
 use App\Models\WarrantyTimeline;
@@ -39,9 +40,9 @@ class WarrantyActivationController extends Controller
         $branches = Branch::where('active', 'Y')->get();
         $parent_customers = [];
         $scheme_names = SchemeHeader::where('active', 'Y')->select('id', 'scheme_name')->get();
-        if($request->status_is && $request->status_is != '' && $request->status_is != NULL){
+        if ($request->status_is && $request->status_is != '' && $request->status_is != NULL) {
             $currunt_status = $request->status_is;
-        }else{
+        } else {
             $currunt_status = '0';
         }
         return $dataTable->render('warranty_activation.index', compact('branches', 'parent_customers', 'scheme_names', 'currunt_status'));
@@ -59,7 +60,8 @@ class WarrantyActivationController extends Controller
         $customers = Customers::where('customertype', '2')->select('id', 'name', 'mobile')->get();
         $customers_dealer = Customers::where('customertype', ['1', '3'])->select('id', 'name', 'mobile')->get();
         $pincodes = Pincode::all();
-        return view('warranty_activation.create', compact('customers', 'pincodes', 'branches', 'request'))->with('warranty_activation', $this->warranty_activation);
+        $states = State::all();
+        return view('warranty_activation.create', compact('customers', 'pincodes', 'branches', 'request', 'states'))->with('warranty_activation', $this->warranty_activation);
     }
 
     /**
@@ -73,12 +75,18 @@ class WarrantyActivationController extends Controller
         try {
             abort_if(Gate::denies('warranty_activation_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
             if (!$request->end_user_id || $request->end_user_id == NULL || $request->end_user_id == '') {
-                $pincodes = Pincode::with('cityname', 'cityname.districtname')->where('pincode', '=', $request['customer_pindcode'])->first();
-                $request['customer_state'] = !empty($pincodes['cityname']['districtname']['statename']) ? $pincodes['cityname']['districtname']['statename']['state_name'] : '';
-                $request['state_id'] = !empty($pincodes['cityname']['districtname']['state_id']) ? $pincodes['cityname']['districtname']['state_id'] : '';
-                $request['customer_district'] = !empty($pincodes['cityname']['districtname']) ? $pincodes['cityname']['districtname']['district_name'] : '';
-                $request['customer_city'] = !empty($pincodes['cityname']) ? $pincodes['cityname']['city_name'] : '';
-                $request['customer_country'] = !empty($pincodes['cityname']['districtname']['statename']['countryname']) ? $pincodes['cityname']['districtname']['statename']['countryname']['country_name'] : '';
+                if (!empty($request['customer_pindcode'])) {
+                    $pincodes = Pincode::with('cityname', 'cityname.districtname')->where('pincode', '=', $request['customer_pindcode'])->first();
+                    $request['customer_state'] = !empty($pincodes['cityname']['districtname']['statename']) ? $pincodes['cityname']['districtname']['statename']['state_name'] : '';
+                    $request['state_id'] = !empty($pincodes['cityname']['districtname']['state_id']) ? $pincodes['cityname']['districtname']['state_id'] : '';
+                    $request['customer_district'] = !empty($pincodes['cityname']['districtname']) ? $pincodes['cityname']['districtname']['district_name'] : '';
+                    $request['customer_city'] = !empty($pincodes['cityname']) ? $pincodes['cityname']['city_name'] : '';
+                    $request['customer_country'] = !empty($pincodes['cityname']['districtname']['statename']['countryname']) ? $pincodes['cityname']['districtname']['statename']['countryname']['country_name'] : '';
+                } else {
+                    $state_is = State::find($request['customer_state']);
+                    $request['customer_state'] = $state_is->state_name;
+                    $request['state_id'] = $state_is->id;
+                }
                 $end_user = EndUser::updateOrCreate(['customer_number' => $request->customer_number ?? ''], [
                     'customer_name' => $request->customer_name ?? '',
                     'customer_number' => $request->customer_number ?? '',
@@ -88,6 +96,7 @@ class WarrantyActivationController extends Controller
                     'customer_pindcode' => $request->customer_pindcode ?? '',
                     'customer_country' => $request->customer_country ?? '',
                     'customer_state' => $request->customer_state ?? '',
+                    'state_id' => $request->state_id ?? '',
                     'customer_district' => $request->customer_district ?? '',
                     'customer_city' => $request->customer_city ?? '',
                     'status' => $request->customer_status ?? ''
@@ -106,6 +115,19 @@ class WarrantyActivationController extends Controller
                 'warranty_date' => $request->warranty_date ?? NULL,
                 'created_by' => auth()->user()->id
             ]);
+            if ($request->status == '1') {
+                $checkTrans = TransactionHistory::where('coupon_code', $wararanty->product_serail_number)->first();
+                if ($checkTrans) {
+                    TransactionHistory::where('coupon_code', $wararanty->product_serail_number)->update(['status' => '1']);
+                    $customer = Customers::find($wararanty->customer_id);
+                    $noti_data = [
+                        'fcm_token' =>  $customer->customerdetails->fcm_token,
+                        'title' => 'Points Activated ✅',
+                        'msg' => $customer->name . ' your ' . $checkTrans->point . ' provisional points are successfully activated in Silver Saarthi.',
+                    ];
+                    $send_notification = SendNotifications::send($noti_data);
+                }
+            }
             if ($request->hasFile('warranty_activation_attach')) {
                 $file = $request->file('warranty_activation_attach');
                 $customname = time() . '.' . $file->getClientOriginalExtension();
@@ -147,8 +169,9 @@ class WarrantyActivationController extends Controller
         $customers = Customers::where('customertype', '2')->select('id', 'name', 'mobile')->get();
         $customers_dealer = Customers::where('customertype', ['1', '3'])->select('id', 'name', 'mobile')->get();
         $pincodes = Pincode::all();
+        $states = State::all();
         $serial_no = $this->warranty_activation->product_serail_number;
-        return view('warranty_activation.create', compact('customers', 'pincodes', 'branches'))->with('warranty_activation', $this->warranty_activation);
+        return view('warranty_activation.create', compact('customers', 'pincodes', 'branches', 'states'))->with('warranty_activation', $this->warranty_activation);
     }
 
     /**
@@ -163,12 +186,12 @@ class WarrantyActivationController extends Controller
         try {
             // dd($request->all());
             $warrantyactivation = WarrantyActivation::find($request->warranty_id);
-            if($warrantyactivation->status != $request->status){
+            if ($warrantyactivation->status != $request->status) {
                 WarrantyTimeline::create([
                     'warranty_id' => $request->warranty_id,
                     'created_by' => auth()->user()->id,
                     'status' => $request->status,
-                    'remark' => $request->remark??NULL,
+                    'remark' => $request->remark ?? NULL,
                 ]);
             }
             $warrantyactivation->product_serail_number = $request->product_serail_number ?? NULL;
@@ -190,7 +213,7 @@ class WarrantyActivationController extends Controller
                     ->usingFileName($customname)
                     ->toMediaCollection('warranty_activation_attach');
             }
-            if($request->status == '1'){
+            if ($request->status == '1') {
                 TransactionHistory::where('coupon_code', $request->product_serail_number)->update(['status' => '1']);
             }
 
@@ -209,13 +232,13 @@ class WarrantyActivationController extends Controller
     public function destroy($id)
     {
         $warrantyactivation = WarrantyActivation::find($id);
-        if($warrantyactivation){
+        if ($warrantyactivation) {
             TransactionHistory::where('coupon_code', $warrantyactivation->product_serail_number)->update(['status' => '0']);
             if ($warrantyactivation->delete()) {
                 return response()->json(['status' => 'success', 'message' => 'Warranty Activation deleted successfully!']);
             }
         }
-            return response()->json(['status' => 'error', 'message' => 'Error in Warranty Activation Delete!']);
+        return response()->json(['status' => 'error', 'message' => 'Error in Warranty Activation Delete!']);
     }
 
     public function download(Request $request)
@@ -228,9 +251,9 @@ class WarrantyActivationController extends Controller
 
     public function statuschange(Request $request)
     {
-        if($request->status == '3'){
+        if ($request->status == '3') {
             $remark = $request->remark;
-        }else{
+        } else {
             $remark = '';
         }
         WarrantyActivation::where('id', $request->id)->update(['status' => $request->status, 'remark' => $remark,]);
@@ -244,9 +267,9 @@ class WarrantyActivationController extends Controller
 
         $wararanty = WarrantyActivation::find($request->id);
 
-        if($request->status == '1'){
+        if ($request->status == '1') {
             $checkTrans = TransactionHistory::where('coupon_code', $wararanty->product_serail_number)->first();
-            if($checkTrans){
+            if ($checkTrans) {
                 TransactionHistory::where('coupon_code', $wararanty->product_serail_number)->update(['status' => '1']);
                 $customer = Customers::find($wararanty->customer_id);
                 $noti_data = [

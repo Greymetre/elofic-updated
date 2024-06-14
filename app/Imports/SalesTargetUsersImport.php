@@ -39,13 +39,12 @@ class SalesTargetUsersImport implements ToCollection,WithValidation,WithHeadingR
     public function collection(Collection $rows)
     {
         foreach ($rows as $row) {
-            // dd($row);
             $excelDate = $row['month'] - 25569; // Adjust for Excel's epoch
             $unixTimestamp = strtotime('+'.$excelDate.' days', strtotime('1970-01-01'));
             $carbonDate = Carbon::createFromTimestamp($unixTimestamp);
             $carbonMonth = $carbonDate->format('M');
             $carbonYear = $carbonDate->format('Y');
-            // dd($carbonDate->format('Y'));
+            // dd($row );
 
             $salesTargetUsers = SalesTargetUsers::updateOrCreate([
                 'user_id' => $row['user_id'],

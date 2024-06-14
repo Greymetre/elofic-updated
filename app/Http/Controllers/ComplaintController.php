@@ -172,7 +172,7 @@ class ComplaintController extends Controller
     public function show(Complaint $complaint)
     {
         $timelines = ComplaintTimeline::with('created_by_details')->where('complaint_id', $complaint->id)->orderBy('created_at', 'desc')->get();
-        $roleName='Service Eng';
+        $roleName = 'Service Eng';
         $assign_users = User::whereHas('roles', function ($query) use ($roleName) {
             $query->where('name', $roleName);
         })
@@ -182,7 +182,7 @@ class ComplaintController extends Controller
             ->get();
         $work_done = ComplaintWorkDone::where('complaint_id', $complaint->id)->latest()->first();
         $service_centers = Customers::where('customertype', '4')->select('id', 'name')->get();
-        return view('complaint.show', compact('complaint', 'timelines', 'assign_users','service_centers', 'work_done'));
+        return view('complaint.show', compact('complaint', 'timelines', 'assign_users', 'service_centers', 'work_done'));
     }
 
     /**
@@ -374,7 +374,7 @@ class ComplaintController extends Controller
 
     public function assign_user(Request $request)
     {
-        
+
         $compalint = Complaint::find($request->complaint_id);
         $compalint->assign_user = $request->user_id;
         $compalint->save();
@@ -391,7 +391,7 @@ class ComplaintController extends Controller
 
     public function assign_service_center(Request $request)
     {
-        
+
         $compalint = Complaint::find($request->complaint_id);
         $compalint->service_center = $request->service_center_id;
         $compalint->save();
@@ -408,12 +408,19 @@ class ComplaintController extends Controller
 
     public function completeComplaint(Request $request)
     {
-        $service_bill = ServiceBill::where('complaint_id', $request->id)->first();
-        if ($service_bill) {
-            return response()->json(['status' => 'success', 'message' => 'Complaint complete successfully.']);
+        $complaint = Complaint::find($request->id);
+        if ($complaint) {
+            $warranty = WarrantyActivation::where('product_serail_number', $complaint->product_serail_number)->first();
+            $service_bill = ServiceBill::where('complaint_id', $request->id)->first();
+            if (!$warranty) {
+                return response()->json(['status' => 'error', 'message' => 'In order to complete this complaint, You need to Activate Warranty. <a href="' . route('warranty_activation.create') . '?serial_no=' . $complaint->product_serail_number . '" style="color:blue;">Click here</a> to Activate Warranty.']);
+            } else if (!$service_bill) {
+                return response()->json(['status' => 'error', 'message' => 'In order to complete this complaint, You need to add service bill. <a href="' . route('service_bills.create') . '?complaint_id=' . $request->id . '" style="color:blue;">Click here</a> to add.']);
+            } else {
+                return response()->json(['status' => 'success', 'message' => 'Complaint complete successfully.']);
+            }
         } else {
-            return response()->json(['status' => 'error', 'message' => 'In order to complete this complaint, You need to add service bill. <a href="'.route('service_bills.create').'?complaint_id='.$request->id.'" style="color:blue;">Click here</a> to add.']);
+            return response()->json(['status' => 'error', 'message' => 'Complaint Not Found.']);
         }
     }
-
 }

@@ -126,6 +126,7 @@ class OrderController extends Controller
             $data['total_fan_discount_amount'] = (string)$data['total_fan_discount_amount'];
             $data['cash_discount'] = (string)$data['cash_discount'];
             $data['cash_amount'] = (string)$data['cash_amount'];
+            $data['product_cat_id'] = (string)$data['product_cat_id'];
 
 
             if (!empty($data['orderdetails'])) {

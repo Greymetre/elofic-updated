@@ -645,7 +645,7 @@ class ProductController extends Controller
                     'product_name' => isset($query['product_name']) ? $query['product_name'] : '',
                     'display_name' => isset($query['display_name']) ? $query['display_name'] : '',
                     'description' => isset($query['description']) ? $query['description'] : '',
-                    'product_image' => isset($query['product_image']) ? url('/public/uploads').'/'.$query['product_image'] : '',
+                    'product_image' => (isset($query['product_image']) && !empty($query['product_image'])) ? url('/public/uploads').'/'.$query['product_image'] : url('/public/assets/img/placeholder.jpg'),
                     'subcategory_id' => isset($query['subcategory_id']) ? $query['subcategory_id'] : 0,
                     'subcategory_name' => isset($query['subcategories']['subcategory_name']) ? $query['subcategories']['subcategory_name'] : '',
                     'category_id' => isset($query['category_id']) ? $query['category_id'] : 0,
