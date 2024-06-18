@@ -20,6 +20,6 @@ class SchemeHeader extends Model
 
     public function schemedetails()
     {
-        return $this->hasMany('App\Models\SchemeDetails','scheme_id','id')->where('active','Y')->select('id','scheme_id','product_id','category_id','subcategory_id','minimum','maximum','points');
+        return $this->hasMany('App\Models\SchemeDetails','scheme_id','id')->where('active','Y');
     }
 }

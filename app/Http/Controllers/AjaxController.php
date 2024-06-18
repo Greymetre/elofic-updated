@@ -238,6 +238,7 @@ class AjaxController extends Controller
             session()->forget('executive_id');
             $beat_id = $request->input('beat_id');
             $payroll = $request->input('payroll');
+            $branch_id = $request->input('branch_id');
             $userids = getUsersReportingToAuth();
             $data = User::where(function ($query) use ($beat_id, $userids, $payroll) {
                 if (isset($beat_id)) {
@@ -247,6 +248,9 @@ class AjaxController extends Controller
                 }
                 if (isset($payroll)) {
                     $query->where('payroll', '=', $payroll);
+                }
+                if (isset($branch_id)) {
+                    $query->where('branch_id', '=', $branch_id);
                 }
                 if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                     $query->whereIn('id', $userids);

@@ -37,7 +37,8 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         
 
         // $data = SalesTargetUsers::with(['user'])->whereBetween('year', $f_year_array)->toSql();
-        $data = SalesTargetUsers::with(['user','user.getdesignation','user.getdivision','user.getbranch'])->select([
+        $userIds = getUsersReportingToAuth();
+        $data = SalesTargetUsers::with(['user','user.getdesignation','user.getdivision','user.getbranch'])->whereIn('user_id', $userIds)->select([
          DB::raw('GROUP_CONCAT(target) as targets'),
          DB::raw('GROUP_CONCAT(achievement) as achievements'),
          DB::raw('GROUP_CONCAT(month) as months'),  
@@ -66,8 +67,6 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         }
         
         $data = $data->groupBy('user_id')->orderBy('month')->get();
-
-        // dd($data);
 
         return $data;
     }

@@ -9,7 +9,7 @@ use App\Models\User;
 use App\Models\Division;
 use App\Models\Designation;
 use App\Models\EmployeeDetail;
-use App\Models\{ParentDetail,TransactionHistory,Redemption,MobileUserLoginDetails};
+use App\Models\{ParentDetail, TransactionHistory, Redemption, MobileUserLoginDetails};
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -19,52 +19,53 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
-class LoyaltySummaryReportExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapping,WithEvents
+class LoyaltySummaryReportExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithEvents
 {
     public function __construct($request)
-    {    
+    {
         $this->startdate = $request->input('start_date');
         $this->enddate = $request->input('end_date');
-        $this->branch_id = $request->input('branch_id');   
-
-      
+        $this->branch_id = $request->input('branch_id');
     }
 
     public function collection()
     {
 
-        return Branch::with(['getuser','getuser.createdbyname','getuser.getbranch'])->where(function ($query)  {
-
-            if(!empty($this->branch_id))
-            {
-              $query->where('id',$this->branch_id);
+        return Branch::with(['getuser', 'getuser.createdbyname', 'getuser.getbranch'])->where(function ($query) {
+            $userid = Auth::user()->id;
+            $userinfo = User::where('id', '=', $userid)->first();
+            if (!empty($this->branch_id)) {
+                $query->where('id', $this->branch_id);
             }
-
+            if (!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin') && !$userinfo->hasRole('Sub_Admin') && !$userinfo->hasRole('HR_Admin') && !$userinfo->hasRole('HO_Account')  && !$userinfo->hasRole('Sub_Support') && !$userinfo->hasRole('Accounts Order') && !$userinfo->hasRole('Service Admin') && !$userinfo->hasRole('All Customers')) {
+                $query->where('id', auth()->user()->branch_id);
+            }
         })
-        ->limit(5000)->latest()->get();
+            ->limit(5000)->latest()->get();
     }
 
     public function headings(): array
     {
 
-        return ['Branch','Total Retailer Registred Nos','Total Retailer Under Saarthi Nos','Coupon Scan Nos','Mobile App Donwload Nos','Provision Point','Active Point','Total Point','Redeem Gift','Redeem Neft','Total Redeem','Balance Active Point'];
+        return ['Branch', 'Total Retailer Registred Nos', 'Total Retailer Under Saarthi Nos', 'Coupon Scan Nos', 'Mobile App Donwload Nos', 'Provision Point', 'Active Point', 'Total Point', 'Redeem Gift', 'Redeem Neft', 'Total Redeem', 'Balance Active Point'];
     }
 
     public function map($data): array
     {
 
         // dd($data);
-        $usersIds = User::where('branch_id', $data['id'])->pluck('id')->toArray();
-        $customerIds = Customers::whereIn('executive_id', $usersIds)->where('customertype','2')->pluck('id');
+        $userids = getUsersReportingToAuth();
+        $usersIds = User::where('branch_id', $data['id'])->whereIn('id', $userids)->pluck('id')->toArray();
+        $customerIds = Customers::whereIn('executive_id', $usersIds)->where('customertype', '2')->pluck('id');
         $total_retailers = $customerIds->count();
-        $nosOfRetailerRegistredSaarthi = TransactionHistory::whereIn('customer_id',$customerIds)->groupBy('customer_id')->count();
-        $coupon_scan_nos = TransactionHistory::whereIn('customer_id',$customerIds)->count();
-        $mobile_app_downloads = MobileUserLoginDetails::whereIn('customer_id',$customerIds)->count();
-        $provision_point = TransactionHistory::whereIn('customer_id',$customerIds)->where('status','0')->sum('point');
-        $active_point = TransactionHistory::whereIn('customer_id',$customerIds)->where('status','1')->sum('point');
+        $nosOfRetailerRegistredSaarthi = TransactionHistory::whereIn('customer_id', $customerIds)->groupBy('customer_id')->count();
+        $coupon_scan_nos = TransactionHistory::whereIn('customer_id', $customerIds)->count();
+        $mobile_app_downloads = MobileUserLoginDetails::whereIn('customer_id', $customerIds)->count();
+        $provision_point = TransactionHistory::whereIn('customer_id', $customerIds)->where('status', '0')->sum('point');
+        $active_point = TransactionHistory::whereIn('customer_id', $customerIds)->where('status', '1')->sum('point');
         $total_point = $provision_point + $active_point;
-       $redeem_gift = Redemption::with('customer')->where('status','!=' , '2')->whereIn('customer_id',$customerIds)->where('redeem_mode','1')->sum('redeem_amount');
-        $redeem_neft = Redemption::with('customer')->where('status','!=' , '2')->whereIn('customer_id',$customerIds)->where('redeem_mode','2')->sum('redeem_amount');
+        $redeem_gift = Redemption::with('customer')->where('status', '!=', '2')->whereIn('customer_id', $customerIds)->where('redeem_mode', '1')->sum('redeem_amount');
+        $redeem_neft = Redemption::with('customer')->where('status', '!=', '2')->whereIn('customer_id', $customerIds)->where('redeem_mode', '2')->sum('redeem_amount');
         $total_redeem = $redeem_gift + $redeem_neft;
         $balance_active_point = $total_redeem - $total_point;
 

@@ -223,7 +223,7 @@
                   <div class="col-md-6" id="customer">
                      <div class="form-group">
                         <!-- <select name="customer[]" id='customer_select' value="{!! old( 'customer', $schemes['customer']) !!}" ></select> -->
-                        {!! Form::select('customer[]',[], old( 'customer', $schemes['customer']), ['id'=>'customer_select', 'class' => 'form-control']) !!} 
+                        {!! Form::select('customer[]',[], old( 'customer', $schemes['customer']), ['id'=>'customer_select', 'class' => 'form-control']) !!}
                         @if ($errors->has('state'))
                         <div class="error col-lg-12">
                            <p class="text-danger">{{ $errors->first('state') }}</p>
@@ -289,7 +289,7 @@
                                     <input type="hidden">
                                     <input type="file" name="import_file" accept=".xls,.xlsx" />
                                  </span>
-                                 <a href="{{ URL::to('schemes-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.scheme.title_singular') !!}"><i class="material-icons">text_snippet</i></a>
+                                 <!-- <a href="{{ URL::to('schemes-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.scheme.title_singular') !!}"><i class="material-icons">text_snippet</i></a> -->
                                  @if( $schemes->exists && isset($schemes['schemedetails']) )
                                  <a href="{{ URL::to('schemes-download') }}?id={{$schemes->id}}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.scheme.title') !!}"><i class="material-icons">cloud_download</i></a>
                                  @endif
@@ -297,59 +297,22 @@
                            </div>
                         </div>
                      </span>
-                     <table class="table kvcodes-dynamic-rows-example" id="tab_logic">
-                        <thead>
-                           <tr>
-                              <th class="text-center"> # </th>
-                              <th class="text-center category"> {!! trans('panel.scheme.fields.category_id') !!} </th>
-                              <th class="text-center"> Sub Category</th>
-                              <th class="text-center product"> {!! trans('panel.scheme.fields.product_id') !!} </th>
-                              <!-- <th class="text-center"> {!! trans('panel.scheme.fields.maximum') !!}</th> -->
-                              <th class="text-center"> {!! trans('panel.scheme.fields.points') !!} </th>
-                              <th class="text-center"> </th>
-                           </tr>
-                        </thead>
-                        <tbody>
-                           <tr id='addr1'></tr>
-                           @if( $schemes->exists && isset($schemes['schemedetails']) )
-                           @foreach($schemes['schemedetails'] as $k=>$row)
-                           <tr>
-                              <td>
-                                 <input type="hidden" name="detail_id[]" id="detail_id" value="{{$row['id']}}">
-                                 {{$k+1}}
-                              </td>
-                              @if( isset($row['categories']['category_name']))
-                              <td>
-                                 <select name="category_id[]" class="form-control category rowchange" />
-                                 <option value="{{ $row['category_id'] }}">{{ $row['categories']['category_name'] }}</option>
-                                 </select>
-                              </td>
-                              @endif
-                              @if( isset($row['subcategories']['subcategory_name']))
-                              <td>
-                                 <select name="subcategory_id[]" class="form-control category rowchange" />
-                                 <option value="{{ $row['subcategory_id'] }}">{{ $row['subcategories']['subcategory_name'] }}</option>
-                                 </select>
-                              </td>
-                              @endif
-                              @if( isset($row['products']['product_name']))
-                              <td>
-                                 <select name="product_id[]" class="form-control product rowchange" />
-                                 <option value="{{ $row['product_id'] }}">{{ $row['products']['product_name'] }}</option>
-                                 </select>
-                              </td>
-                              @endif
-                              <td>
-                                 <input type="text" name="points[]" class="form-control points rowchange" value="{{ $row['points'] }}" />
-                              </td>
-                              <td class="td-actions text-center">
-                                 <a class="remove-rows btn btn-danger btn-just-icon btn-sm"><i class="fa fa-minus"></i></a>
-                              </td>
-                           </tr>
-                           @endforeach
-                           @endif
-                        </tbody>
-                     </table>
+                     <div class="table-responsive">
+                        <table id="tab_logic" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
+                           <thead>
+                              <tr>
+                                 <th class="text-center"> # </th>
+                                 <th class="text-center category"> {!! trans('panel.scheme.fields.category_id') !!} </th>
+                                 <th class="text-center"> Sub Category</th>
+                                 <th class="text-center product"> {!! trans('panel.scheme.fields.product_id') !!} </th>
+                                 <th class="text-center"> Active Points</th>
+                                 <th class="text-center"> Provision Points</th>
+                                 <th class="text-center"> Total {!! trans('panel.scheme.fields.points') !!} </th>
+                                 <th class="text-center"> </th>
+                              </tr>
+                           </thead>
+                        </table>
+                     </div>
                   </div>
                   <div class="row clearfix">
                      <div class="col-md-12">
@@ -402,7 +365,7 @@
 
          // }
          columnDisplay();
-         var $table = $('table.kvcodes-dynamic-rows-example');
+         var $table = $('table#tab_logic');
          $('a.add-rows').click(function(event) {
             event.preventDefault();
             var schemetype = $("#schemetype option:selected").val();
@@ -418,6 +381,8 @@
                   '<td class="category"><select required name="category_id[]' + counter + '" class="form-control set_cat_' + counter + ' category_drop rowchange"> </select></td>' +
                   '<td style="max-width: 300px;" class="subCat"><select required style="max-width: 300px;" name="subcategory_id[]' + counter + '" class="form-control select2bs4 sub_category rowchange" /> </select></td>' +
                   '<td class="product"><select required name="product_id[]' + counter + '" class="form-control select2bs4 product_drop rowchange"/></select></td>' +
+                  '<td><input required type="number" name="active_point[]' + counter + '"class="form-control active_point rowchange" /></td>' +
+                  '<td><input required type="number" name="provision_point[]' + counter + '"class="form-control provision_point rowchange" /></td>' +
                   '<td><input required type="number" name="points[]' + counter + '"class="form-control points rowchange" /></td>' +
                   '<td class="td-actions text-center"><a class="remove-rows btn btn-danger btn-just-icon btn-sm"><i class="fa fa-minus"></i></a></td> </tr>';
             }
@@ -582,4 +547,62 @@
 
       }).trigger('change');
    </script>
+   <script type="text/javascript">
+        $(function() {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            var table = $('#tab_logic').DataTable({
+                "processing": true,
+                "serverSide": true,
+                "order": [
+                    [0, 'desc']
+                ],
+                //"dom": 'Bfrtip',
+                ajax: {
+                    url: "{{ route('scheme.product.ist') }}",
+                    data: function(d) {
+                        d.scheme_id = '{{$schemes->exists?$schemes->id:"0"}}'
+                    }
+                },
+                columns: [{
+                        data: 'DT_RowIndex',
+                        name: 'DT_RowIndex',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'categories.category_name',
+                        name: 'categories.category_name',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'subcategories.subcategory_name',
+                        name: 'subcategories.subcategory_name',
+                        orderable: false
+                    },
+                    {
+                        data: 'products.product_name',
+                        name: 'products.product_name',
+                        orderable: false
+                    },
+                    {
+                        data: 'active_point',
+                        name: 'active_point'
+                    },
+                    {
+                        data: 'provision_point',
+                        name: 'provision_point'
+                    },
+                    {
+                        data: 'points',
+                        name: 'points'
+                    },
+                ]
+            });
+        });
+    </script>
 </x-app-layout>

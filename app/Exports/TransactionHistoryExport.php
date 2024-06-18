@@ -37,12 +37,20 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
     {
 
         $data = TransactionHistory::with('customer', 'scheme');
+        $userids = getUsersReportingToAuth();
         if ($this->branch_id && $this->branch_id != null && count($this->branch_id) > 0) {
-            $branch_user_id = User::whereIn('branch_id', $this->branch_id)->pluck('id');
+            $branch_user_id = User::whereIn('branch_id', $this->branch_id)->whereIn('id', $userids)->pluck('id');
             if (!empty($branch_user_id)) {
                 $branch_customer_id = Customers::whereIn('executive_id', $branch_user_id)->pluck('id');
             }
             if (!empty($branch_customer_id)) {
+                $data->whereIn('customer_id', $branch_customer_id);
+            }
+        } else {
+            $userid = Auth::user()->id;
+            $userinfo = User::where('id', '=', $userid)->first();
+            if (!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin') && !$userinfo->hasRole('Sub_Admin') && !$userinfo->hasRole('HR_Admin') && !$userinfo->hasRole('HO_Account')  && !$userinfo->hasRole('Sub_Support') && !$userinfo->hasRole('Accounts Order') && !$userinfo->hasRole('Service Admin') && !$userinfo->hasRole('All Customers')) {
+                $branch_customer_id = Customers::whereIn('executive_id', $userids)->pluck('id');
                 $data->whereIn('customer_id', $branch_customer_id);
             }
         }
@@ -56,12 +64,12 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
         if ($this->customer_id && $this->customer_id != null  && $this->customer_id != '') {
             $data->where('customer_id', $this->customer_id);
         }
-        if($this->scheme_name && $this->scheme_name != null  && $this->scheme_name != ''){
-            $scheme_details = SchemeDetails::with('products')->where('scheme_id',$this->scheme_name)->get();
+        if ($this->scheme_name && $this->scheme_name != null  && $this->scheme_name != '') {
+            $scheme_details = SchemeDetails::with('products')->where('scheme_id', $this->scheme_name)->get();
             $all_product_code = $scheme_details->pluck('products.product_code')->flatten()->unique();
             $all_serial_number = Services::whereIn('product_code', $all_product_code)->pluck('serial_no');
-            
-            if(!empty($all_serial_number)){
+
+            if (!empty($all_serial_number)) {
                 $data->whereIn('coupon_code', $all_serial_number);
             }
         }
@@ -72,7 +80,7 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
                 ->whereDate('created_at', '<=', $endDate);
         }
         $data = $data->latest()->get();
-        
+
         return $data;
     }
 
@@ -118,20 +126,20 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
                 $empcode_arr[] = isset($datas->employee_detail->employee_codes) ? $datas->employee_detail->employee_codes : '';
             }
         }
-        if($data['scheme']){
+        if ($data['scheme']) {
             $scheme_details = SchemeDetails::where('product_id', $data['scheme']['product']['id'])->first();
         }
 
 
         //new fields end
-        if($data['status'] == '1'){
+        if ($data['status'] == '1') {
 
             return [
                 $data['id'],
                 $data['created_at'] = isset($data['created_at']) ? date("d-M-Y", strtotime($data['created_at'])) : '',
                 $data['customer']['id'],
                 $data['customer']['name'],
-                $data['customer']['first_name'].' '.$data['customer']['last_name'],
+                $data['customer']['first_name'] . ' ' . $data['customer']['last_name'],
                 // implode(',', $employee),
                 implode(',', $parent_code),
                 implode(',', $parent_id),
@@ -143,23 +151,23 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
                 implode(',', $branch_arr),
                 implode(',', $division_arr),
                 $data['coupon_code'],
-                $data['scheme']?$data['scheme']['product']['subcategories']['subcategory_name']:'',
-                $data['scheme']?$data['scheme']['product']['id']:'',
-                $data['scheme']?$data['scheme']['product']['product_name']:'',
-                (isset($scheme_details)) ? $scheme_details->scheme->scheme_name:'',
+                $data['scheme'] ? $data['scheme']['product']['subcategories']['subcategory_name'] : '',
+                $data['scheme'] ? $data['scheme']['product']['id'] : '',
+                $data['scheme'] ? $data['scheme']['product']['product_name'] : '',
+                (isset($scheme_details)) ? $scheme_details->scheme->scheme_name : '',
                 $data['point'],
                 '',
                 $data['remark'],
                 implode(',', $empcode_arr),
                 implode(',', $employee),
             ];
-        }else{
+        } else {
             return [
                 $data['id'],
                 $data['created_at'] = isset($data['created_at']) ? date("d-M-Y", strtotime($data['created_at'])) : '',
                 $data['customer']['id'],
                 $data['customer']['name'],
-                $data['customer']['first_name'].' '.$data['customer']['last_name'],
+                $data['customer']['first_name'] . ' ' . $data['customer']['last_name'],
                 // implode(',', $employee),
                 implode(',', $parent_code),
                 implode(',', $parent_id),
@@ -171,17 +179,16 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
                 implode(',', $branch_arr),
                 implode(',', $division_arr),
                 $data['coupon_code'],
-                $data['scheme']?$data['scheme']['product']['subcategories']['subcategory_name']:'',
-                $data['scheme']?$data['scheme']['product']['id']:'',
-                $data['scheme']?$data['scheme']['product']['product_name']:'',
+                $data['scheme'] ? $data['scheme']['product']['subcategories']['subcategory_name'] : '',
+                $data['scheme'] ? $data['scheme']['product']['id'] : '',
+                $data['scheme'] ? $data['scheme']['product']['product_name'] : '',
                 (isset($scheme_details)) ? $scheme_details->scheme->scheme_name : '',
                 '',
                 $data['point'],
                 $data['remark'],
                 implode(',', $empcode_arr),
                 implode(',', $employee),
-            ];            
+            ];
         }
-
     }
 }

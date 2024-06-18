@@ -54,7 +54,9 @@ class SchemeImport implements ToCollection,WithValidation,WithHeadingRow, WithBa
                 'product_id' => isset($row['product_id'])? $row['product_id']:null,
                 'category_id' => isset($row['category_id'])? $row['category_id']:null,
                 'subcategory_id' => isset($row['sub_category_id'])? $row['sub_category_id']:null,
-                'points' => isset($row['point'])? $row['point']:null
+                'active_point' => isset($row['active_point'])? $row['active_point']:"0",
+                'provision_point' => isset($row['provision_point'])? $row['provision_point']:"0",
+                'points' => isset($row['points'])? $row['points']:"0"
             ]);
         }
     }

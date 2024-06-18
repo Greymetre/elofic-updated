@@ -258,6 +258,11 @@
                           <td>{!! $orders->cash_discount !!}</td>
                           <td>{!! $orders->cash_amount !!}</td>
                         </tr>
+                        <tr>
+                          <th style="width:50%">Total Discount% :</th>
+                          <td>{!! $ttdis !!}</td>
+                          <td>{!! $totalLP-$orders['sub_total'] !!}</td>
+                        </tr>
                         @endif
                         <tr>
                           <th style="width:50%">Subtotal :</th>

@@ -63,9 +63,12 @@ class LoyaltyDealerSummaryReportExport implements FromCollection,WithHeadings,Sh
 
     return Customers::with('customertypes', 'firmtypes', 'createdbyname','getretailers','customeraddress.cityname','customeraddress.statename','getretailers.redemption','getretailers.transactions','userdetails.getbranch')->where('customertype',['1','3'])
             ->where(function ($query) {
+                $userids = getUsersReportingToAuth();
                 if ($this->branch_id && $this->branch_id != '' && $this->branch_id != null) {
-                    $userIds = User::where('branch_id', $this->branch_id)->pluck('id');
-                    $query->whereIn('executive_id', $userIds);
+                    $userIdsss = User::where('branch_id', $this->branch_id)->whereIn('id', $userids)->pluck('id');
+                    $query->whereIn('executive_id', $userIdsss);
+                }else{
+                    $query->whereIn('executive_id', $userids);
                 }
 
                 if ($this->dealer_id && $this->dealer_id != '' && $this->dealer_id != null) {

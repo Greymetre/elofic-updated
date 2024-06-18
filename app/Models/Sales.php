@@ -11,7 +11,7 @@ class Sales extends Model
 
     protected $table = 'sales';
 
-    protected $fillable = [ 'active', 'buyer_id', 'seller_id', 'order_id', 'total_qty', 'shipped_qty', 'orderno', 'fiscal_year', 'sales_no', 'invoice_no', 'invoice_date', 'total_gst', 'sub_total', 'grand_total', 'paid_amount','payment_status','description', 'status_id', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at'];
+    protected $fillable = [ 'active', 'buyer_id', 'seller_id', 'order_id', 'total_qty', 'shipped_qty', 'orderno', 'fiscal_year', 'sales_no', 'invoice_no', 'invoice_date', 'transport_details', 'total_gst', 'sub_total', 'grand_total', 'paid_amount','payment_status','description', 'status_id', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at'];
 
     public function message()
     {

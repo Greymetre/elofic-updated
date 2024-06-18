@@ -105,7 +105,7 @@
 
         <div id="print-section">
 
-          <h2 class="text-center">EDIT DEALER / DISTRIBUTOR DATA SHEET</h2>
+          <h2 class="text-center">Dealer/Distributor Data Sheet</h2>
           <p>(All information furnished by you will be treated as strictly confidential)</p>
           <form action="{{route('dealer-appointment-form.update', $dealerAppointment)}}" method="post" enctype="multipart/form-data">
             @csrf

@@ -58,6 +58,13 @@ class DealerAppointmentController extends Controller
         // dd($request->all());
         $dealer_appointment = DealerAppointment::create($request->all());
 
+        if ($request->hasFile('profile_picture')) {
+            $file = $request->file('profile_picture');
+            $customname = time() . '.' . $file->getClientOriginalExtension();
+            $dealer_appointment->addMedia($file)
+                ->usingFileName($customname)
+                ->toMediaCollection('profile_picture', 's3');
+        }
         if ($request->hasFile('service_policy')) {
             $file = $request->file('service_policy');
             $customname = time() . '.' . $file->getClientOriginalExtension();
@@ -120,6 +127,13 @@ class DealerAppointmentController extends Controller
             $dealer_appointment->addMedia($file)
                 ->usingFileName($customname)
                 ->toMediaCollection('bank_statement', 's3');
+        }
+        if ($request->hasFile('shop_image')) {
+            $file = $request->file('shop_image');
+            $customname = time() . '.' . $file->getClientOriginalExtension();
+            $dealer_appointment->addMedia($file)
+                ->usingFileName($customname)
+                ->toMediaCollection('shop_image', 's3');
         }
         $kyc_ckeckbox = config('constants.kyc_ckeckbox');
         return view('dealer_appointment.kyc_form', compact('kyc_ckeckbox', 'dealer_appointment'));

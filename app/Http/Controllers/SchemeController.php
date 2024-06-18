@@ -108,8 +108,8 @@ class SchemeController extends Controller
                                 'product_id' => !empty($request['product_id']) ? $request['product_id'][$key] : null,
                                 'category_id' => !empty($request['category_id']) ? $request['category_id'][$key] : null,
                                 'subcategory_id' => !empty($request['subcategory_id']) ? $request['subcategory_id'][$key] : null,
-                                'minimum' => isset($request['minimum']) ? $request['minimum'][$key] : null,
-                                'maximum' => isset($request['maximum']) ? $request['maximum'][$key] : null,
+                                'active_point' => isset($request['active_point']) ? $request['active_point'][$key] : 0,
+                                'provision_point' => isset($request['provision_point']) ? $request['provision_point'][$key] : 0,
                                 'points' => isset($request['points']) ? $request['points'][$key] : 0,
                             ]);
                         }
@@ -204,7 +204,7 @@ class SchemeController extends Controller
             {
                 if(!$request->import_file){
                     
-                    $existdetails = SchemeDetails::where('scheme_id',$id)->select('id','product_id','category_id','minimum','maximum','points')->get();
+                    // $existdetails = SchemeDetails::where('scheme_id',$id)->select('id','product_id','category_id','minimum','maximum','points')->get();
                     $schmedetils = collect([]);
                     if($request['points'] && $request['points'] != null && count($request['points']) > 0){
                         foreach ($request['points'] as $key => $value) {
@@ -221,9 +221,9 @@ class SchemeController extends Controller
                             $schmedetils->product_id = !empty($request['product_id']) ? $request['product_id'][$key] : null;
                             $schmedetils->category_id = !empty($request['category_id']) ? $request['category_id'][$key] : null;
                             $schmedetils->subcategory_id = !empty($request['subcategory_id']) ? $request['subcategory_id'][$key] : null;
-                            $schmedetils->minimum = !empty($request['minimum']) ? $request['minimum'][$key] : null;
-                            $schmedetils->maximum = !empty($request['maximum']) ? $request['maximum'][$key] : null;
-                            $schmedetils->points = !empty($request['points']) ? $request['points'][$key] : null;
+                            $schmedetils->active_point = !empty($request['active_point']) ? $request['active_point'][$key] : "0";
+                            $schmedetils->provision_point = !empty($request['provision_point']) ? $request['provision_point'][$key] : "0";
+                            $schmedetils->points = !empty($request['points']) ? $request['points'][$key] : "0";
                             $schmedetils->save();
                         }
                     }
@@ -285,4 +285,27 @@ class SchemeController extends Controller
         ob_start();
         return Excel::download(new SchemeTepmlate, 'schemesProductTemplate.xlsx');
     }
+
+    public function scheme_product_list(Request $request)
+    {
+        
+        $data = SchemeDetails::with(['products', 'categories', 'subcategories'])->where('scheme_id', $request->scheme_id)->latest();
+
+        return Datatables::of($data)
+            ->addIndexColumn()
+            ->addColumn('active_point', function ($query) {
+                return '<input type="text" name="active_point[]" class="form-control active_point rowchange" value="'.$query->active_point.'" />';
+            })
+            ->addColumn('provision_point', function ($query) {
+                return '<input type="text" name="provision_point[]" class="form-control provision_point rowchange" value="'.$query->provision_point.'" />';
+            })
+            ->addColumn('points', function ($query) {
+                return '<input type="text" name="points[]" class="form-control points rowchange" value="'.$query->points.'" />';
+            })
+            ->addColumn('categories.category_name', function ($query) {
+                return '<input type="hidden" name="detail_id[]" value="'.$query->id.'"><input type="hidden" name="category_id[]" value="'.$query->category_id.'"><input type="hidden" name="subcategory_id[]" value="'.$query->subcategory_id.'"><input type="hidden" name="product_id[]" value="'.$query->product_id.'">'.$query->categories->category_name;
+            })
+            ->rawColumns(['active_point','provision_point','points','categories.category_name'])
+            ->make(true);
+    }   
 }

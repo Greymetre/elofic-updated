@@ -42,66 +42,77 @@ class MobileUserLoginDetailsController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function mobile_user_login(Request $request) {
+    public function mobile_user_login(Request $request)
+    {
 
         $mobile_users = MobileUserLoginDetails::latest()->get();
-        $branches = Branch::latest()->get(); 
+        $branches = Branch::latest()->get();
         $divisions = Division::latest()->get();
         $currentYear = Carbon::now()->year;
         $years = range($currentYear - 2, $currentYear + 2);
 
         abort_if(Gate::denies('loyalty_mobile_app_users_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return view('loyalty_app_mobile_users.index', compact('mobile_users','branches','years','divisions'));
+        return view('loyalty_app_mobile_users.index', compact('mobile_users', 'branches', 'years', 'divisions'));
     }
 
 
     public function mobile_user_login_list(Request $request)
     {
-        $query = MobileUserLoginDetails::with(['customer'])->where(function ($query) use ($request) {
+        $query = MobileUserLoginDetails::with(['customer', 'customer.customeraddress', 'customer.customeraddress.statename', 'customer.customeraddress.districtname', 'customer.customeraddress.cityname'])->where(function ($query) use ($request) {
 
-            if($request->user_id && $request->user_id != '' && $request->user_id != null){
+            if ($request->user_id && $request->user_id != '' && $request->user_id != null) {
                 $userIds = Customers::where('id', $request->user_id)->pluck('id');
-                $query->whereIn('customer_id',$userIds);
+                $query->whereIn('customer_id', $userIds);
             }
 
-            if($request->start_date && $request->start_date != null && $request->start_date != '' && $request->end_date && $request->end_date != null && $request->end_date != ''){
+            if ($request->start_date && $request->start_date != null && $request->start_date != '' && $request->end_date && $request->end_date != null && $request->end_date != '') {
                 $startDate = date('Y-m-d', strtotime($request->start_date));
                 $endDate = date('Y-m-d', strtotime($request->end_date));
                 $query->whereDate('first_login_date', '>=', $startDate)
-                ->whereDate('first_login_date', '<=', $endDate);
+                    ->whereDate('first_login_date', '<=', $endDate);
             }
-
         })->orderBy('last_login_date', 'desc');
 
         // $data = SalesTargetUsers::with(['user','user.getbranch'])->get();
 
         return Datatables::of($query)
-        ->addIndexColumn()
-        ->addColumn('contact_person', function ($data) {
+            ->addIndexColumn()
+            ->addColumn('contact_person', function ($data) {
 
-           $first_name = !empty($data['customer']['first_name']) ? $data['customer']['first_name'] : '';
-           $last_name = !empty($data['customer']['last_name']) ? $data['customer']['last_name'] : '';
+                $first_name = !empty($data['customer']['first_name']) ? $data['customer']['first_name'] : '';
+                $last_name = !empty($data['customer']['last_name']) ? $data['customer']['last_name'] : '';
 
-           return $first_name.' '.$last_name;
-        })
-        ->addColumn('login_status1', function ($data) {
-            if ($data['login_status'] == '0') {
-                return '<span class="badge badge-danger">Logout</span>';
-            } elseif ($data['login_status'] == '1') {
-                return '<span class="badge badge-info">Login</span>';
-            }
-        })
-        ->addColumn('first_login_date', function ($data) {
-            return $data->first_login_date?date('d M y h:i A', strtotime($data->first_login_date)):'';
-        })
-        ->addColumn('last_login_date', function ($data) {
-            return $data->last_login_date?date('d M y h:i A', strtotime($data->last_login_date)):'';
-        })
+                return $first_name . ' ' . $last_name;
+            })
+            ->addColumn('login_status1', function ($data) {
+                if ($data['login_status'] == '0') {
+                    return '<span class="badge badge-danger">Logout</span>';
+                } elseif ($data['login_status'] == '1') {
+                    return '<span class="badge badge-info">Login</span>';
+                }
+            })
+            ->addColumn('first_login_date', function ($data) {
+                return $data->first_login_date ? date('d M y h:i A', strtotime($data->first_login_date)) : '';
+            })
+            ->addColumn('last_login_date', function ($data) {
+                return $data->last_login_date ? date('d M y h:i A', strtotime($data->last_login_date)) : '';
+            })
+            ->addColumn('branches', function ($data) {
+                $branch_arr = array();
+                if ($data->customer->getemployeedetail && !empty($data->customer->getemployeedetail) && count($data->customer->getemployeedetail) > 0) {
+                    foreach ($data->customer->getemployeedetail as $key_new => $datas) {
+                        if(isset($datas->employee_detail->getbranch->branch_name) && !in_array($datas->employee_detail->getbranch->branch_name, $branch_arr)){
+                            $branch_arr[] =$datas->employee_detail->getbranch->branch_name;
+                        }
+                    }
+                }
+                return implode(',',$branch_arr);
+            })
 
-        ->addColumn('action', function ($data) {
-        })
-        ->rawColumns(['action','contact_person','login_status1','last_login_date','first_login_date'])
-        ->make(true);
+            ->addColumn('action', function ($data) {
+            })
+            ->rawColumns(['action', 'contact_person', 'login_status1', 'last_login_date', 'first_login_date','branches'])
+            ->make(true);
     }
 
 

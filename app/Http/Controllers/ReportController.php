@@ -806,10 +806,12 @@ class ReportController extends Controller
 
         if ($request->ajax()) {
             $data = Customers::with('customertypes', 'firmtypes', 'createdbyname', 'getretailers', 'customeraddress.cityname', 'customeraddress.statename', 'getretailers.redemption', 'getretailers.transactions')->where('customertype', ['1', '3'])
-                ->where(function ($query) use ($request) {
+                ->where(function ($query) use ($request, $userids) {
                     if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
-                        $userIds = User::where('branch_id', $request->branch_id)->pluck('id');
-                        $query->whereIn('executive_id', $userIds);
+                        $userIdsss = User::where('branch_id', $request->branch_id)->whereIn('id', $userids)->pluck('id');
+                        $query->whereIn('executive_id', $userIdsss);
+                    }else{
+                        $query->whereIn('executive_id', $userids);
                     }
 
                     if ($request->dealer_id && $request->dealer_id != '' && $request->dealer_id != null) {
@@ -937,8 +939,13 @@ class ReportController extends Controller
         if ($request->ajax()) {
             $data = Branch::with('getuser', 'getuser.createdbyname', 'getuser.getbranch')
                 ->where(function ($query) use ($request) {
+                    $userid = Auth::user()->id;
+                    $userinfo = User::where('id','=',$userid)->first();
                     if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
                         $query->where('id', $request->branch_id);
+                    }
+                    if(!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin') && !$userinfo->hasRole('Sub_Admin') && !$userinfo->hasRole('HR_Admin') && !$userinfo->hasRole('HO_Account')  && !$userinfo->hasRole('Sub_Support') && !$userinfo->hasRole('Accounts Order') && !$userinfo->hasRole('Service Admin') && !$userinfo->hasRole('All Customers')){
+                        $query->where('id', auth()->user()->branch_id);
                     }
                 })->orderBy('id', 'asc');
             // ->latest();

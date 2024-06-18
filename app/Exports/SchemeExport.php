@@ -25,7 +25,7 @@ class SchemeExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMap
 
     public function headings(): array
     {
-        return ['Product Id', 'Product Name', 'Category Id', 'Category Name', 'Sub Category Id', 'Sub Category Name', 'Point'];
+        return ['Product Id', 'Product Name', 'Category Id', 'Category Name', 'Sub Category Id', 'Sub Category Name', 'Active Point','Provision Point', 'Points'];
     }
 
     public function map($data): array
@@ -37,7 +37,9 @@ class SchemeExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMap
             $data['categories']?$data['categories']['category_name']:'',
             $data['subcategory_id'],
             $data['subcategories']['subcategory_name'],
-            $data['points'],
+            $data['active_point']??"0",
+            $data['provision_point']??"0",
+            $data['points']??"0",
         ];
     }
 
