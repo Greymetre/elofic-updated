@@ -134,13 +134,13 @@ class OrderController extends Controller
             $request['created_by'] = Auth::user()->id;
             $request['orderno'] = isset($request['orderno']) ? $request['orderno'] : date('Ymd') . '_' . autoIncrementId('Order', 'id');
 
-            
+
             if (!empty($request['buyer_id'])) {
                 $buyer = $request['buyer_id'];
             } else {
                 $buyer = $request['seller_id'];
             }
-            
+
 
             $request['buyer_id'] = isset($request['seller_id']) ? $request['seller_id'] : null;
             $request['seller_id'] = $buyer;
@@ -233,13 +233,24 @@ class OrderController extends Controller
      * @param  \App\Models\Order  $order
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id, Request $request)
     {
         abort_if(Gate::denies('order_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $id = decrypt($id);
         $orders = $this->orders->with('sellers', 'createdbyname')->find($id);
         $orderdetails = OrderDetails::with('products')->where('order_id', '=', $id)->get();
-        return view('orders.show', compact('orderdetails', 'orders'));
+            if ($orders->product_cat_id == '1') {
+                $totalLP = 0;
+                foreach ($orderdetails as $key => $value) {
+                    $totalLP += $value->price*$value->quantity;
+                }
+                $ttdis = number_format(((1-($orders->sub_total/$totalLP))*100),2);
+            }else{
+                $ttdis = false;
+                $totalLP = false;
+            }
+        
+        return view('orders.show', compact('orderdetails', 'orders', 'ttdis', 'totalLP'));
     }
 
     /**
@@ -337,7 +348,7 @@ class OrderController extends Controller
         abort_if(Gate::denies('order_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $id = decrypt($id);
 
-        
+
         $request['cluster_amount'] = $request['extra_cluster_discount'];
         $request['deal_discount'] = $request['extra_discount'] ?? NULL;
         $request['deal_amount'] = $request['extra_discount_amount'] ?? NULL;
@@ -349,7 +360,7 @@ class OrderController extends Controller
         $request['gst12_amt'] = $request['12_gst'];
         $request['gst28_amt'] = $request['18_gst'];
         $request['gst18_amt'] = $request['28_gst'];
-        
+
         $orders = Order::with('orderdetails')->find($id);
         $orders->buyer_id = isset($request['seller_id']) ? $request['seller_id'] : null;
         $orders->seller_id = isset($request['buyer_id']) ? $request['buyer_id'] : null;
@@ -407,35 +418,35 @@ class OrderController extends Controller
             //         ]);
             //     }
             foreach ($request['orderdetail'] as $key => $rows) {
-                // dd($rows);
+                // dd($rows['line_total']);
                 OrderDetails::updateOrCreate(['product_id' => $rows['product_id'], 'order_id' => $id], [
-                        'order_id' => $id,
-                        'product_id' => isset($rows['product_id']) ? $rows['product_id'] : null,
-                        'product_detail_id' => isset($rows['product_detail']) ? $rows['product_detail'] : null,
-                        'quantity' => isset($rows['quantity']) ? $rows['quantity'] : 0,
-                        'shipped_qty' => isset($rows['shipped_qty']) ? $rows['shipped_qty'] : 0,
-                        'price' => isset($rows['mrp']) ? $rows['mrp'] : 0.00,
-                        'tax_amount' => isset($rows['tax_amount']) ? $rows['tax_amount'] : 0.00,
-                        'line_total' => isset($rows['line_total']) ? $rows['line_total'] : 0.00,
-                        'gst' => isset($rows['gst']) ? $rows['gst'] : 0.00,
-                        'gst_amount' => $single_product_amount ?? 0.00,
-                        'discount' => isset($rows['discount']) ? $rows['discount'] : 0.00,
-                        'scheme_discount' => isset($rows['scheme_dis']) ? $rows['scheme_dis'] : 0.00,
-                        'scheme_name' => isset($rows['scheme_name']) ? $rows['scheme_name'] : null,
-                        'scheme_amount' => isset($rows['scheme_amount']) ? $rows['scheme_amount'] : 0.00,
-                        'cluster_discount' => isset($rows['clustered_dis']) ? $rows['clustered_dis'] : 0.00,
-                        'cluster_amount' => isset($rows['clus_amounts']) ? $rows['clus_amounts'] : 0.00,
-                        'distributor_discount' => isset($rows['distributot_dis']) ? $rows['distributot_dis'] : 0.00,
-                        'distributor_amount' => isset($rows['distributot_amounts']) ? $rows['distributot_amounts'] : 0.00,
-                        'deal_discount' => isset($rows['deal_dis']) ? $rows['deal_dis'] : 0.00,
-                        'deal_amount' => isset($rows['deal_amounts']) ? $rows['deal_amounts'] : 0.00,
-                        'ebd_dis' => isset($rows['ebd_dis']) ? $rows['ebd_dis'] : 0.00,
-                        'ebd_amount' => isset($rows['ebd_amounts']) ? $rows['ebd_amounts'] : 0.00,
-                        'special_dis' => isset($rows['special_dis']) ? $rows['special_dis'] : 0.00,
-                        'special_amounts' => isset($rows['special_amounts']) ? $rows['special_amounts'] : 0.00,
-                        'frieght_discount' => isset($rows['frieght_dis']) ? $rows['frieght_dis'] : 0.00,
-                        'frieght_amount' => isset($rows['frieght_amounts']) ? $rows['frieght_amounts'] : 0.00,
-                        'created_at' => getcurentDateTime(),
+                    'order_id' => $id,
+                    'product_id' => isset($rows['product_id']) ? $rows['product_id'] : null,
+                    'product_detail_id' => isset($rows['product_detail']) ? $rows['product_detail'] : null,
+                    'quantity' => isset($rows['quantity']) ? $rows['quantity'] : 0,
+                    'shipped_qty' => isset($rows['shipped_qty']) ? $rows['shipped_qty'] : 0,
+                    'price' => isset($rows['mrp']) ? $rows['mrp'] : 0.00,
+                    'tax_amount' => isset($rows['tax_amount']) ? $rows['tax_amount'] : 0.00,
+                    'line_total' => isset($rows['line_total']) ? $rows['line_total'] : 0.00,
+                    'gst' => isset($rows['gst']) ? $rows['gst'] : 0.00,
+                    'gst_amount' => $single_product_amount ?? 0.00,
+                    'discount' => isset($rows['discount']) ? $rows['discount'] : 0.00,
+                    'scheme_discount' => isset($rows['scheme_dis']) ? $rows['scheme_dis'] : 0.00,
+                    'scheme_name' => isset($rows['scheme_name']) ? $rows['scheme_name'] : null,
+                    'scheme_amount' => isset($rows['scheme_amount']) ? $rows['scheme_amount'] : 0.00,
+                    'cluster_discount' => isset($rows['clustered_dis']) ? $rows['clustered_dis'] : 0.00,
+                    'cluster_amount' => isset($rows['clus_amounts']) ? $rows['clus_amounts'] : 0.00,
+                    'distributor_discount' => isset($rows['distributot_dis']) ? $rows['distributot_dis'] : 0.00,
+                    'distributor_amount' => isset($rows['distributot_amounts']) ? $rows['distributot_amounts'] : 0.00,
+                    'deal_discount' => isset($rows['deal_dis']) ? $rows['deal_dis'] : 0.00,
+                    'deal_amount' => isset($rows['deal_amounts']) ? $rows['deal_amounts'] : 0.00,
+                    'ebd_dis' => isset($rows['ebd_dis']) ? $rows['ebd_dis'] : 0.00,
+                    'ebd_amount' => isset($rows['ebd_amounts']) ? $rows['ebd_amounts'] : 0.00,
+                    'special_dis' => isset($rows['special_dis']) ? $rows['special_dis'] : 0.00,
+                    'special_amounts' => isset($rows['special_amounts']) ? $rows['special_amounts'] : 0.00,
+                    'frieght_discount' => isset($rows['frieght_dis']) ? $rows['frieght_dis'] : 0.00,
+                    'frieght_amount' => isset($rows['frieght_amounts']) ? $rows['frieght_amounts'] : 0.00,
+                    'created_at' => getcurentDateTime(),
                 ]);
             }
 
@@ -598,7 +609,7 @@ class OrderController extends Controller
     {
         //$orderid = decrypt($orderid);
         try {
-            
+
             $validator = Validator::make($request->all(), [
                 'invoice_no' => 'required',
                 'order_id' => 'required',
@@ -613,10 +624,11 @@ class OrderController extends Controller
 
             $orderid = $request['order_id'];
             $status_id = Status::where('status_name', '=', 'Dispatched')->pluck('id')->first();
-            Order::where('id', '=', $orderid)->update(['status_id' => $status_id,'cash_discount' => $request->cash_discount,'cash_amount' => $request->cash_amount,'sub_total' => $request->sub_total,'grand_total' => $request->grand_total,'order_remark' => $request->order_remark]);
+            Order::where('id', '=', $orderid)->update(['status_id' => $status_id, 'cash_discount' => $request->cash_discount, 'cash_amount' => $request->cash_amount, 'sub_total' => $request->sub_total, 'grand_total' => $request->grand_total, 'order_remark' => $request->order_remark]);
             $orders = $this->orders->with('orderdetails')->find($orderid);
             $orders['invoice_date'] = $request['invoice_date'];
             $orders['invoice_no'] = $request['invoice_no'];
+            $orders['transport_details'] = $request['transport_details'];
             $orders['order_id'] = $orderid;
             $orders['saledetail'] = $orders['orderdetails'];
             $data = collect([$orders]);
@@ -686,7 +698,6 @@ class OrderController extends Controller
     public function submitDispatched(Request $request)
     {
         try {
-            
             $request['active'] = 'Y';
             $request['created_by'] = Auth::user()->id;
             $validator = Validator::make($request->all(), [
@@ -727,9 +738,9 @@ class OrderController extends Controller
                 }
 
                 if (OrderDetails::where('order_id', '=', $request['order_id'])->where('status_id', '=', $partiallystatus)->exists()) {
-                    Order::where('id', '=', $request['order_id'])->update(['status_id' => $partiallystatus,'cash_discount' => $request->cash_discount,'cash_amount' => $request->cash_amount,'order_remark' => $request->order_remark]);
+                    Order::where('id', '=', $request['order_id'])->update(['status_id' => $partiallystatus, 'cash_discount' => $request->cash_discount, 'cash_amount' => $request->cash_amount, 'order_remark' => $request->order_remark]);
                 } else {
-                    Order::where('id', '=', $request['order_id'])->update(['status_id' => $status_id,'cash_discount' => $request->cash_discount,'cash_amount' => $request->cash_amount,'order_remark' => $request->order_remark]);
+                    Order::where('id', '=', $request['order_id'])->update(['status_id' => $status_id, 'cash_discount' => $request->cash_discount, 'cash_amount' => $request->cash_amount, 'order_remark' => $request->order_remark]);
                 }
                 return Redirect::to('sales')->with('message_success', 'Sales Store Successfully');
             }

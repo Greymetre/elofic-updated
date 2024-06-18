@@ -325,15 +325,21 @@ class TransactionHistoryController extends Controller
                 $scheme = Services::where('serial_no', $nonNullCoupenCode)->first();
                 $scheme_details = SchemeDetails::where('product_id', $scheme->product->id)->first();
                 $point = 0;
+                $active_point = '0';
+                $provision_point = '0';
                 if ($scheme_details) {
                     $scheme_id = $scheme_details->scheme_id;
                     $start_date = Carbon::createFromFormat('Y-m-d', $scheme_details->scheme->start_date);
                     $end_date = Carbon::createFromFormat('Y-m-d', $scheme_details->scheme->end_date);
                     $current_date = Carbon::today();
                     if ($current_date->isSameDay($start_date) || ($current_date->gte($start_date) && $current_date->lte($end_date))) {
+                        $active_point = ($scheme_details) ? $scheme_details->active_point : NULL;
+                        $provision_point = ($scheme_details) ? $scheme_details->provision_point : NULL;
                         $point = ($scheme_details) ? $scheme_details->points : NULL;
                     } else {
                         array_push($expire_schemes, $nonNullCoupenCode);
+                        $active_point = '0';
+                        $provision_point = '0';
                         $point = '0';
                     }
                 } else {
@@ -346,6 +352,8 @@ class TransactionHistoryController extends Controller
                     'customer_id' => $request->customer_id,
                     'coupon_code' => $nonNullCoupenCode,
                     'scheme_id' => $scheme_id,
+                    'active_point' => $active_point,
+                    'provision_point' => $provision_point,
                     'point' => $point,
                     'remark' => 'Coupon scan',
                     'created_at' => $created_at,

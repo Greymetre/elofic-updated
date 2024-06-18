@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Dealer / Distributor Appointment (Greymeter)</title>
+    <title>New Dealer / Distributor Appointment</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://silver.fieldkonnect.io//public/assets/plugins/select2/css/select2.css">
@@ -73,6 +73,40 @@
         .inp-div i:first-child {
             font-size: 35px !important;
         }
+
+        .profile-pic-container {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+        }
+
+        .profile-pic {
+            width: 100%;
+            height: 100%;
+            border-radius: 5%;
+            overflow: hidden;
+            border: 2px solid #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .profile-pic img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+        }
     </style>
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
 </head>
@@ -84,25 +118,25 @@
                 <div class="inner-border">
                     <div class="text-center mt-3 content">
                         <img src="{{asset('assets/img/dealer_appointment_logo.png')}}" alt="">
-                        <p style="font-weight: 900;font-family: revert;">SILVER CONSUMER ELECTRICALS (P) LTD</p>
+                        <p style="font-weight: 900;font-family: revert;">SILVER CONSUMER ELECTRICALS PRIVATE LIMITED</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <h1 class="text-center">DEALER / DISTRIBUTOR DATA SHEET</h1>
+        <h1 class="text-center">Dealer/Distributor Data Sheet</h1>
         <p>(All information furnished by you will be treated as strictly confidential)</p>
 
         <form action="{{route('dealer-appointment-form.store')}}" method="post" enctype="multipart/form-data">
             @csrf
             <div class="row mt-3">
-                <div class="col-md-4 content-frm bg-light">
+                <div class="col-md-3 content-frm bg-light">
                     <div class="form-group row">
                         <div class="col-md-3">
                             <label for="branch">Branch </label>
                         </div>
                         <div class="col-md-9">
-                            <select class="form-select" name="branch" id="blood_group" required>
+                            <select class="form-select" name="branch" id="branch" required>
                                 <option value="" disabled selected>Your answer</option>
                                 @if($branchs && count($branchs) > 0)
                                 @foreach($branchs as $branch)
@@ -113,7 +147,29 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4 content-frm bg-light">
+                <div class="col-md-6 content-frm bg-light">
+                    <div class="form-group row">
+                        <div class="col-md-4">
+                            <label for="branch">User(Created By) </label>
+                        </div>
+                        <div class="col-md-8">
+                            <select class="select2" name="created_by" id="created_by" data-style="select-with-transition" title="Select User">
+                                <option value="">Select User</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="profile-pic-container">
+                        <div class="profile-pic">
+                            <img id="profileImage" src="default-profile.png" alt="Passport Size Profile Picture">
+                        </div>
+                        <input type="file" id="fileInput" name="profile_picture" accept="image/*">
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-3 content-frm bg-light">
                     <div class="form-group row">
                         <div class="col-md-3">
                             <label for="district">District </label>
@@ -130,7 +186,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4 content-frm bg-light">
+                <div class="col-md-3 content-frm bg-light">
                     <div class="form-group row">
                         <div class="col-md-4">
                             <label for="city">Town / City </label>
@@ -139,6 +195,16 @@
                             <select class="form-select select2" name="city" id="city" required>
                                 <option value="" disabled selected>Select City</option>
                             </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 content-frm bg-light">
+                    <div class="form-group row">
+                        <div class="col-md-4">
+                            <label for="place">Place </label>
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" name="place" id="place" class="form-control uppercase">
                         </div>
                     </div>
                 </div>
@@ -173,7 +239,62 @@
                     </div>
                 </div>
             </div>
-
+            <div class="row mt-4">
+                <div class="col-md-10">
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <label for="old_user">Are you already working on another division of <b>Silver/Bediya</b>? </label>
+                        </div>
+                        <div class="col-md-6">
+                            <select class="form-select" name="old_user" id="old_user" required>
+                                <option value="" disabled selected>Your Answer</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4 if_old d-none">
+                <div class="col-md-3">
+                    <div class="form-group row">
+                        <div class="col-md-5">
+                            <label for="old_division">Select devision </label>
+                        </div>
+                        <div class="col-md-7">
+                            <select class="form-select" name="old_division" id="old_division">
+                                <option value="" disabled selected>Your Answer</option>
+                                <option value="PUMP&MOTORS">PUMP & MOTORS</option>
+                                <option value="FAN&APP">FAN & APP</option>
+                                <option value="AGRI">AGRI</option>
+                                <option value="SOLAR">SOLAR</option>
+                                <option value="LIGHTING">LIGHTING</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="form-group row">
+                        <div class="col-md-4">
+                            <label for="old_firm_name">Firm Name / Sister Concern </label>
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" name="old_firm_name" id="old_firm_name" class="form-control uppercase">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group row">
+                        <div class="col-md-3">
+                            <label for="old_gst">GST Number </label>
+                        </div>
+                        <div class="col-md-9">
+                            <input type="text" name="old_gst" id="old_gst" class="form-control uppercase">
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="row mt-4">
                 <div class="col-md-4">
                     <div class="form-check">
@@ -640,7 +761,7 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>MOTROS</td>
+                                    <td>MOTORS</td>
                                     <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="motor_anticipated_business_1" class="form-control uppercase"></td>
                                     <td><input type="text" oninput="this.value = this.value.toUpperCase()" name="motor_next_year_business_1" class="form-control uppercase"></td>
                                 </tr>
@@ -685,76 +806,84 @@
             <h5 class="mt-5">Attachments:</h5>
             <div class="border border-dark rounded p-4">
                 <div class="row mt-2 mb-2">
-                    <div class="col-md-4 mb-3">
-                        <label for="service_policy">Service Policy</label>
+                    <div class="col-md-3 mb-3">
+                        <label for="service_policy">Service Policy(PDF Only)</label>
                         <div class="inp-div">
                             <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                             <p class="m-0">Attach a File</p>
-                            <input type="file" name="service_policy" id="service_policy" class="form-control" accept="image/*">
+                            <input type="file" name="service_policy" id="service_policy" class="form-control uppercase" accept="application/pdf">
                         </div>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="dealer_policy">Dealer Policy</label>
+                    <div class="col-md-3 mb-3">
+                        <label for="dealer_policy">Dealer Policy(PDF Only)</label>
                         <div class="inp-div">
                             <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                             <p class="m-0">Attach a File</p>
-                            <input type="file" name="dealer_policy" id="dealer_policy" class="form-control" accept="image/*">
+                            <input type="file" name="dealer_policy" id="dealer_policy" class="form-control uppercase" accept="application/pdf">
                         </div>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="mou_sheet">MOU Sheet</label>
+                    <div class="col-md-3 mb-3">
+                        <label for="mou_sheet">MOU Sheet(PDF Only)</label>
                         <div class="inp-div">
                             <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                             <p class="m-0">Attach a File</p>
-                            <input type="file" name="mou_sheet" id="mou_sheet" class="form-control" accept="image/*">
+                            <input type="file" name="mou_sheet" id="mou_sheet" class="form-control uppercase" accept="application/pdf">
                         </div>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="mcl_cheque_1">MCL(cheque) 1</label>
+                    <div class="col-md-3 mb-3">
+                        <label for="mcl_cheque_1">MCL(cheque) 1(PDF Only)</label>
                         <div class="inp-div">
                             <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                             <p class="m-0">Attach a File</p>
-                            <input type="file" name="mcl_cheque_1" id="mcl_cheque_1" class="form-control" accept="image/*">
+                            <input type="file" name="mcl_cheque_1" id="mcl_cheque_1" class="form-control uppercase" accept="application/pdf">
                         </div>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="mcl_cheque_2">MCL(cheque) 2</label>
+                    <div class="col-md-3 mb-3">
+                        <label for="mcl_cheque_2">MCL(cheque) 2(PDF Only)</label>
                         <div class="inp-div">
                             <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                             <p class="m-0">Attach a File</p>
-                            <input type="file" name="mcl_cheque_2" id="mcl_cheque_2" class="form-control" accept="image/*">
+                            <input type="file" name="mcl_cheque_2" id="mcl_cheque_2" class="form-control uppercase" accept="application/pdf">
                         </div>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="gst_certificate">GST Certificate</label>
+                    <div class="col-md-3 mb-3">
+                        <label for="gst_certificate">GST Certificate(PDF Only)</label>
                         <div class="inp-div">
                             <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                             <p class="m-0">Attach a File</p>
-                            <input type="file" name="gst_certificate" id="gst_certificate" class="form-control" accept="image/*">
+                            <input type="file" name="gst_certificate" id="gst_certificate" class="form-control uppercase" accept="application/pdf">
                         </div>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="adhar_card">Adhar Card</label>
+                    <div class="col-md-3 mb-3">
+                        <label for="adhar_card">Adhar Card(PDF Only)</label>
                         <div class="inp-div">
                             <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                             <p class="m-0">Attach a File</p>
-                            <input type="file" name="adhar_card" id="adhar_card" class="form-control" accept="image/*">
+                            <input type="file" multiple name="adhar_card" id="adhar_card" class="form-control uppercase" accept="application/pdf">
                         </div>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="pan_card">PAN Card</label>
+                    <div class="col-md-3 mb-3">
+                        <label for="pan_card">PAN Card(PDF Only)</label>
                         <div class="inp-div">
                             <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                             <p class="m-0">Attach a File</p>
-                            <input type="file" name="pan_card" id="pan_card" class="form-control" accept="image/*">
+                            <input type="file" multiple name="pan_card" id="pan_card" class="form-control uppercase" accept="application/pdf">
                         </div>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="bank_statement">6 Month Bank Statement</label>
+                    <div class="col-md-3 mb-3">
+                        <label for="bank_statement">6 Month Bank Statement(PDF Only)</label>
                         <div class="inp-div">
                             <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                             <p class="m-0">Attach a File</p>
-                            <input type="file" name="bank_statement" id="bank_statement" class="form-control" accept="image/*">
+                            <input type="file" name="bank_statement" id="bank_statement" class="form-control uppercase" accept="application/pdf">
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="shop_image">Shop Image</label>
+                        <div class="inp-div">
+                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                            <p class="m-0">Attach a File</p>
+                            <input type="file" name="shop_image" id="shop_image" class="form-control uppercase" accept="image/*">
                         </div>
                     </div>
                 </div>
@@ -895,7 +1024,56 @@
                     }
                 });
             })
+
             $('.select2').select2()
+
+            $("#old_user").on("change", function() {
+                var if_user = $(this).val();
+                console.log(if_user);
+                if (if_user == 'Yes') {
+                    $(".if_old").removeClass('d-none');
+                    $("#old_division").attr('required', true);
+                    $("#old_firm_name").attr('required', true);
+                    $("#old_gst").attr('required', true);
+                } else {
+                    $(".if_old").addClass('d-none');
+                    $("#old_division").attr('required', false);
+                    $("#old_firm_name").attr('required', false);
+                    $("#old_gst").attr('required', false);
+                }
+            })
+
+            document.getElementById('fileInput').addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('profileImage').src = e.target.result;
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            $("#branch").on("change", function() {
+                localStorage.removeItem('executive_id');
+                var branch_id = $(this).val();
+                $.ajax({
+                    url: "{{ url('getUserList') }}",
+                    dataType: "json",
+                    type: "POST",
+                    data: {
+                        _token: "{{csrf_token()}}",
+                        branch_id: branch_id
+                    },
+                    success: function(res) {
+                        var html = '<option value="">Select User</option>';
+                        $.each(res, function(k, v) {
+                            html += '<option value="' + v.id + '"> (' + v.employee_codes + ') ' + v.name + '</option>';
+                        });
+                        $("#created_by").html(html);
+                    }
+                });
+            }).trigger("chnage");
         </script>
 </body>
 

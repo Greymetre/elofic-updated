@@ -11,7 +11,7 @@ class SchemeDetails extends Model
 
     protected $table = 'scheme_details';
 
-    protected $fillable = [ 'active', 'scheme_id', 'product_id', 'category_id', 'subcategory_id', 'minimum', 'maximum', 'points', 'created_at', 'updated_at'];
+    protected $fillable = [ 'active', 'scheme_id', 'product_id', 'category_id', 'subcategory_id', 'active_point', 'provision_point', 'points', 'created_at', 'updated_at'];
 
     public function products()
     {

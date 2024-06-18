@@ -61,6 +61,30 @@
       padding: 15px 10px;
       border: 1px solid #000;
     }
+
+    .profile-pic-container {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+    }
+
+    .profile-pic {
+      width: 100%;
+      height: 100%;
+      border-radius: 5%;
+      overflow: hidden;
+      border: 2px solid #ccc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .profile-pic img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
   </style>
   <div class="content-header">
     <div class="container-fluid">
@@ -104,16 +128,16 @@
                 <div class="inner-border">
                   <div class="text-center mt-3 content">
                     <img src="{{asset('assets/img/dealer_appointment_logo.png')}}" alt="">
-                    <p style="font-weight: 900;font-family: revert;">SILVER CONSUMER ELECTRICALS (P) LTD</p>
+                    <p style="font-weight: 900;font-family: revert;">SILVER CONSUMER ELECTRICALS PRIVATE LIMITED</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <h2 class="text-center">DEALER / DISTRIBUTOR DATA SHEET</h2>
+            <h2 class="text-center">Dealer/Distributor Data Sheet</h2>
             <p>(All information furnished by you will be treated as strictly confidential)</p>
             <div class="row mt-3">
-              <div class="col-md-4 content-frm bg-light">
+              <div class="col-md-3 content-frm bg-light">
                 <div class="form-group row">
                   <div class="col-md-3">
                     <label for="branch">Branch </label>
@@ -123,7 +147,7 @@
                   </div>
                 </div>
               </div>
-              <div class="col-md-4 content-frm bg-light">
+              <div class="col-md-3 content-frm bg-light">
                 <div class="form-group row">
                   <div class="col-md-3">
                     <label for="district">District </label>
@@ -133,13 +157,24 @@
                   </div>
                 </div>
               </div>
-              <div class="col-md-4 content-frm bg-light">
+              <div class="col-md-3 content-frm bg-light">
                 <div class="form-group row">
                   <div class="col-md-4">
                     <label for="city">Town / City </label>
                   </div>
                   <div class="col-md-8">
                     <input type="text" disabled class="form-control" value="{{$dealerAppointment->city_details->city_name}}">
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="profile-pic-container">
+                  <div class="profile-pic">
+                    @if($dealerAppointment->exists && $dealerAppointment->getMedia('profile_picture')->count() > 0 && Storage::disk('s3')->exists($dealerAppointment->getMedia('profile_picture')[0]->getPath()))
+                    <img id="profileImage" src="{{$dealerAppointment->getMedia('profile_picture')[0]->getFullUrl()}}" alt="Profile Picture">
+                    @else
+                    <img id="profileImage" src="default-profile.png" alt="Profile Picture">
+                    @endif
                   </div>
                 </div>
               </div>
@@ -155,19 +190,19 @@
             </div>
 
             <div class="row mt-4">
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <div class="form-check">
                   <label class="form-check-label" for="distributor"> Distributor </label>
                   <input disabled class="form-check-input mr-3" type="radio" name="customertype" value="distributor" id="distributor" {{($dealerAppointment->customertype == 'distributor')?'checked':''}}>
                 </div>
               </div>
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <div class="form-check">
                   <label class="form-check-label" for="dealer"> Dealer </label>
                   <input disabled class="form-check-input mr-3" type="radio" name="customertype" value="dealer" id="dealer" {{($dealerAppointment->customertype == 'dealer')?'checked':''}}>
                 </div>
               </div>
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <div class="form-check">
                   <label class="form-check-label" for="shopee"> Shopee </label>
                   <input disabled class="form-check-input mr-3" type="radio" name="customertype" value="shopee" id="shopee" {{($dealerAppointment->customertype == 'shopee')?'checked':''}}>
@@ -176,10 +211,69 @@
             </div>
 
             <div class="row mt-4">
+              <div class="col-md-10">
+                <div class="form-group row">
+                  <div class="col-md-6">
+                    <label for="old_user">Are you already working on another division of <b>Silver/Bediya</b>? </label>
+                  </div>
+                  <div class="col-md-6">
+                    <select class="form-select select2" disabled name="old_user" id="old_user" required>
+                      <option value="" disabled selected>Your Answer</option>
+                      <option value="Yes" {{($dealerAppointment->old_user == 'Yes')?'selected':''}}>Yes</option>
+                      <option value="No" {{($dealerAppointment->old_user == 'No')?'selected':''}}>No</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            @if($dealerAppointment->old_user == 'Yes')
+            <div class="row mt-4 if_old">
+              <div class="col-md-3">
+                <div class="form-group row">
+                  <div class="col-md-5">
+                    <label for="old_division">Select devision </label>
+                  </div>
+                  <div class="col-md-7">
+                    <select class="form-select" disabled name="old_division" id="old_division" required>
+                      <option value="" disabled selected>Your Answer</option>
+                      <option value="PUMP&MOTORS" {{($dealerAppointment->old_division == 'PUMPMOTORS')?'selected':''}}>PUMP & MOTORS</option>
+                      <option value="FAN&APP" {{($dealerAppointment->old_division == 'FAN&APP')?'selected':''}}>FAN & APP</option>
+                      <option value="AGRI" {{($dealerAppointment->old_division == 'AGRI')?'selected':''}}>AGRI</option>
+                      <option value="SOLAR" {{($dealerAppointment->old_division == 'SOLAR')?'selected':''}}>SOLAR</option>
+                      <option value="LIGHTING" {{($dealerAppointment->old_division == 'LIGHTING')?'selected':''}}>LIGHTING</option>
+                      <option value="Others" {{($dealerAppointment->old_division == 'Others')?'selected':''}}>Others</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-5">
+                <div class="form-group row">
+                  <div class="col-md-4">
+                    <label for="old_firm_name">Frim Name / Sister Concern </label>
+                  </div>
+                  <div class="col-md-8">
+                    <input type="text" readonly name="old_firm_name" value="{{old('old_firm_name', $dealerAppointment->old_firm_name)}}" id="old_firm_name" class="form-control">
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group row">
+                  <div class="col-md-3">
+                    <label for="old_gst">GST Number </label>
+                  </div>
+                  <div class="col-md-9">
+                    <input type="text" readonly name="old_gst" id="old_gst" value="{{old('old_gst', $dealerAppointment->old_gst)}}" class="form-control">
+                  </div>
+                </div>
+              </div>
+            </div>
+            @endif
+
+            <div class="row mt-4">
               <div class="col-md-4">
                 <div class="form-check">
                   <label class="form-check-label" for="PUMPMOTORS"> PUMP & MOTORS </label>
-                  <input disabled class="form-check-input" type="radio" value="PUMP&MOTORS" name="division" id="PUMPMOTORS" {{($dealerAppointment->division == 'PUMPMOTORS')?'checked':''}}>
+                  <input disabled class="form-check-input" type="radio" value="PUMP&MOTORS" name="division" id="PUMPMOTORS" {{($dealerAppointment->division == 'PUMP&MOTORS')?'checked':''}}>
                 </div>
               </div>
               <div class="col-md-4">
@@ -664,16 +758,30 @@
             </div>
 
             <h5 class="mt-5 all-attachments">Attachments:</h5>
-            <div class="row">
-              @if($dealerAppointment->exists && $dealerAppointment->getMedia('*')->count() > 0)
-              @foreach($dealerAppointment->getMedia('*') as $k=>$media)
+            <div class="row all-attachments-div">
+              @if($dealerAppointment->exists)
+              @php
+              $allMediaExceptProfilePictures = $dealerAppointment->getMedia('*')
+              ->filter(function ($mediaItem) {
+              return $mediaItem->collection_name !== 'profile_picture';
+              });
+              @endphp
+              @if($allMediaExceptProfilePictures->count() > 0)
+              @foreach($allMediaExceptProfilePictures as $k=>$media)
               <div class="col-md-3 mb-3 ml-5 text-center border rounded">
-                <p class="attach-p">{{ucfirst(str_replace('_','',$media->collection_name))}}</p>
-                <a href="{{$media->getFullUrl()}}" download target="_blank">
+                <p class="attach-p">{{ucfirst(str_replace('_',' ',$media->collection_name))}}</p>
+                <a href="{{$media->getFullUrl()}}" download="" target="_blank">
+                  @if($media->collection_name == 'shop_image')
                   <img class="m-2 rounded img-fluid" src="{!! $media->getFullUrl() !!}" style="width: 170px;height:170px;">
+                  @else
+                  {{ucfirst(str_replace('_','',$media->collection_name))}}.pdf
+                  @endif
                 </a>
               </div>
               @endforeach
+              @else
+              <h6>No Attachment</h6>
+              @endif
               @else
               <h6>No Attachment</h6>
               @endif
@@ -761,7 +869,7 @@
               <div class="col-md-3 text-center"><b>(SIGN) </b></div>
             </div>
           </div>
-          <!-- <div class="row mt-5 border border-dark rounded p-4">
+          <div class="row mt-5 border border-dark rounded p-4">
             <table class="table">
               <thead>
                 <tr>
@@ -826,7 +934,7 @@
                   </tr>
               </tbody>
             </table>
-          </div> -->
+          </div>
         </div>
 
 
@@ -856,7 +964,7 @@
             var printWindow = window.open('', '_blank', 'width=800,height=600');
             printWindow.document.write('<html><head><title>Grey-Meter</title>');
             printWindow.document.write('<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">');
-            printWindow.document.write('<style>p.attach-p{font-weight: 900;font-family: cursive;position: relative;}p.attach-p:before {content: " ";position: absolute;width: 100px;height: 5px;top: 24px;background: radial-gradient(#00aadb, transparent);left: 105px;}	input[type="checkbox"].form-check-input {border: 2px solid !important;width: 20px !important;height: 20px !important;opacity: 1 !important;float: right !important;position: relative !important;z-index: 99999 !important;}</style>');
+            printWindow.document.write('<style>p.attach-p{font-weight: 900;font-family: cursive;position: relative;}p.attach-p:before {content: " ";position: absolute;width: 100px;height: 5px;top: 24px;background: radial-gradient(#00aadb, transparent);left: 105px;}	input[type="checkbox"].form-check-input {border: 2px solid !important;width: 20px !important;height: 20px !important;opacity: 1 !important;float: right !important;position: relative !important;z-index: 99999 !important;}.all-attachments-div{display:none;}.all-attachments{display:none;}.profile-pic-container {position: absolute;width: 200px;height: 200px;}.profile-pic {width: 100%;height: 100%;border-radius: 5%;overflow: hidden;border: 2px solid #ccc;display: flex;justify-content: center;align-items: center;text-align: center;}.profile-pic img {width: 100%;height: 100%;object-fit: cover;}</style>');
             printWindow.document.write('</head><body>');
             printWindow.document.write(printContents);
             printWindow.document.write('<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"><\/script>');

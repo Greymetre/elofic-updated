@@ -85,6 +85,10 @@
                 <th>{!! trans('panel.mobile_app_login.firm_name') !!}</th>
                 <th>{!! trans('panel.mobile_app_login.contact_person') !!}</th>
                 <th>{!! trans('panel.mobile_app_login.mobile_number') !!}</th>
+                <th>Branch</th>
+                <th>State</th>
+                <th>District</th>
+                <th>City</th>
                 <th>{!! trans('panel.mobile_app_login.app_version') !!}</th>
                 <th>{!! trans('panel.mobile_app_login.device_type') !!}</th>
                 <th>{!! trans('panel.mobile_app_login.device_name') !!}</th>
@@ -155,6 +159,34 @@
           {
             data: 'customer.mobile',
             name: 'customer.mobile',
+            orderable: true, 
+            searchable: true,
+            "defaultContent": ''
+          },
+          {
+            data: 'branches',
+            name: 'branches',
+            orderable: true, 
+            searchable: true,
+            "defaultContent": ''
+          },
+          {
+            data: 'customer.customeraddress.statename.state_name',
+            name: 'customer.customeraddress.statename.state_name',
+            orderable: true, 
+            searchable: true,
+            "defaultContent": ''
+          },
+          {
+            data: 'customer.customeraddress.districtname.district_name',
+            name: 'customer.customeraddress.districtname.district_name',
+            orderable: true, 
+            searchable: true,
+            "defaultContent": ''
+          },
+          {
+            data: 'customer.customeraddress.cityname.city_name',
+            name: 'customer.customeraddress.cityname.city_name',
             orderable: true, 
             searchable: true,
             "defaultContent": ''

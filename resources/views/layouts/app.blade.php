@@ -764,7 +764,7 @@
         </a>
         <div class="collapse" id="schemesMenu">
           <ul class="nav">
-            @if(auth()->user()->can('scheme_access'))
+            @if(auth()->user()->can('scheme_access_list'))
             <li class="nav-item {{ request()->is('schemes*') ? 'active' : '' }}">
               <a class="nav-link" href="{{ url('schemes') }}">
                 <i class="material-icons">create</i>

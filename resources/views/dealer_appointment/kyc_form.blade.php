@@ -17,7 +17,7 @@
 
         td,
         th {
-            padding: 15px 10px;
+            padding: 15px 10px !important;
             border: 1px solid #000;
         }
     </style>
@@ -41,7 +41,7 @@
     <div class="container mt-3">
         <form action="{{route('dealer-appointment-kyc-form.store')}}" method="post">
             @csrf
-            
+            <input type="hidden" name="appointment_id" id="appointment_id" value="{{$dealer_appointment->id}}">
             <div class="form-group">
                 <div class="row mt-3">
                     <div class="col-md-2">
@@ -100,7 +100,7 @@
                     </div>
                 </div>
 
-                <div class="row mt-1 border border-dark rounded p-4">
+                <div class="row mt-1">
                     <table class="table table-striped">
                         <thead>
                             <tr>
@@ -116,20 +116,20 @@
                                 <td>{{($key / 3)+1}}</td>
                                 <td>
                                     <div class="form-group">
-                                        <label for="proprietary_concern"> {{$kyc_ckeckbox[$key]}} </label>
-                                        <input class="form-check-input" type="checkbox" value="{{($key / 3)+1}}" name="proprietary_concern[]">
+                                        <label for="proprietary_concern_{{($key / 3)+1}}"> {{$kyc_ckeckbox[$key]}} </label>
+                                        <input class="form-check-input" type="checkbox" value="{{($key / 3)+1}}" name="proprietary_concern[]" id="proprietary_concern_{{($key / 3)+1}}">
                                     </div>
                                 </td>
                                 <td>
                                     <div class="form-group">
-                                        <label for="partnership_firm"> {{$kyc_ckeckbox[$key+1]}} </label>
-                                        <input class="form-check-input" type="checkbox" value="{{($key / 3)+1}}" name="partnership_firm[]">
+                                        <label for="partnership_firm_{{($key / 3)+1}}"> {{$kyc_ckeckbox[$key+1]}} </label>
+                                        <input class="form-check-input" type="checkbox" value="{{($key / 3)+1}}" name="partnership_firm[]" id="partnership_firm_{{($key / 3)+1}}">
                                     </div>
                                 </td>
                                 <td>
                                     <div class="form-group">
-                                        <label for="ltd_pvt"> {{$kyc_ckeckbox[$key+2]}} </label>
-                                        <input class="form-check-input" type="checkbox" value="{{($key / 3)+1}}" name="ltd_pvt[]">
+                                        <label for="ltd_pvt_{{($key / 3)+1}}"> {{$kyc_ckeckbox[$key+2]}} </label>
+                                        <input class="form-check-input" type="checkbox" value="{{($key / 3)+1}}" name="ltd_pvt[]" id="ltd_pvt_{{($key / 3)+1}}">
                                     </div>
                                 </td>
                                 </tr>
@@ -140,12 +140,12 @@
                                     <td colspan="2">
                                         <div class="row" style="margin-left: 10px;">
                                             <div class="form-check col-md-3">
-                                                <label for="partnership_firm"> Dealer </label>
-                                                <input class="form-check-input" type="radio" value="Dealer" name="distribution_channel">
+                                                <label for="Dealer"> Dealer </label>
+                                                <input class="form-check-input" type="radio" value="Dealer" id="Dealer" name="distribution_channel">
                                             </div>
                                             <div class="form-check col-md-3">
-                                                <label for="partnership_firm"> Distributor </label>
-                                                <input class="form-check-input" type="radio" value="Distributor" name="distribution_channel">
+                                                <label for="Distributor"> Distributor </label>
+                                                <input class="form-check-input" type="radio" value="Distributor" id="Distributor" name="distribution_channel">
                                             </div>
                                         </div>
                                     </td>

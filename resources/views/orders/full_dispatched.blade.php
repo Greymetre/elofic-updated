@@ -125,6 +125,16 @@
                         </div>
                      </div>
                   </div>
+                  <div class="col-sm-6 invoice-col">
+                     <div class="row">
+                        <label class="col-md-4">Transport Detials</label>
+                        <div class="col-md-9">
+                           <div class="form-group has-default bmd-form-group">
+                              <textarea class="form-control" name="transport_details" id="transport_details" cols="30" rows="5"></textarea>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
                </div>
                <br>
 

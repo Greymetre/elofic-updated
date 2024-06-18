@@ -377,6 +377,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('schemes-template', [SchemeController::class, 'template'])->name('schemes.template');
     Route::post('schemes-upload', [SchemeController::class, 'upload'])->name('schemes.upload');
     Route::post('schemes-active', [SchemeController::class, 'active'])->name('schemes.active');
+    Route::any('scheme-product-list', [SchemeController::class, 'scheme_product_list'])->name('scheme.product.ist');
     //Redeemption Products
     Route::resource('gifts', GiftController::class);
     Route::any('gifts-download', [GiftController::class, 'download'])->name('gifts.download');

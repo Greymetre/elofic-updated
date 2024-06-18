@@ -442,6 +442,7 @@ if (! function_exists('insertSales')) {
                             'orderno' => isset($item['orderno']) ? $item['orderno'] : null , 
                             'invoice_no'=> isset($item['invoice_no']) ? $item['invoice_no'] : null ,
                             'invoice_date'=> isset($item['invoice_date']) ? $item['invoice_date'] : null ,
+                            'transport_details'=> isset($item['transport_details']) ? $item['transport_details'] : null ,
                             'total_gst' => isset($item['total_gst']) ? $item['total_gst'] : 0 ,
                             'sub_total'=> isset($item['sub_total']) ? $item['sub_total'] : 0.00 ,
                             'grand_total' => isset($item['grand_total']) ? $item['grand_total'] : 0.00 , 

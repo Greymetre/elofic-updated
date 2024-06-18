@@ -29,11 +29,11 @@ class TransactionHistoryDataTable extends DataTable
                 return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
             })
             ->editColumn('contact_person', function ($data) {
-                return $data->customer->first_name.' '.$data->customer->last_name;
+                return $data->customer->first_name . ' ' . $data->customer->last_name;
             })
             ->editColumn('customer.name', function ($data) {
-                $customer_name = '<a target="_blank" href="'.route('customers.show', [encrypt($data->customer->id)]).'">'.$data->customer->name.'</a>';
-                
+                $customer_name = '<a target="_blank" href="' . route('customers.show', [encrypt($data->customer->id)]) . '">' . $data->customer->name . '</a>';
+
                 return $customer_name;
             })
             ->editColumn('parent_name', function ($data) {
@@ -51,11 +51,11 @@ class TransactionHistoryDataTable extends DataTable
             })
             ->editColumn('subcategory_name', function ($data) {
 
-                return $data->scheme ? (isset($data->scheme->product->subcategories->subcategory_name)?$data->scheme->product->subcategories->subcategory_name:'') : '';
+                return $data->scheme ? (isset($data->scheme->product->subcategories->subcategory_name) ? $data->scheme->product->subcategories->subcategory_name : '') : '';
             })
             ->editColumn('product_name', function ($data) {
 
-                return $data->scheme ? (isset($data->scheme->product->product_name)?$data->scheme->product->product_name:'') : '';
+                return $data->scheme ? (isset($data->scheme->product->product_name) ? $data->scheme->product->product_name : '') : '';
             })
             ->addColumn('action', function ($query) {
                 $btn = '';
@@ -69,7 +69,7 @@ class TransactionHistoryDataTable extends DataTable
                                 ' . $btn . '
                             </div>' . $activebtn;
             })
-            ->rawColumns(['action', 'contact_person', 'parent_name', 'subcategory_name', 'product_name','customer.name']);
+            ->rawColumns(['action', 'contact_person', 'parent_name', 'subcategory_name', 'product_name', 'customer.name']);
     }
 
     /**
@@ -80,40 +80,48 @@ class TransactionHistoryDataTable extends DataTable
      */
     public function query(TransactionHistory $model, Request $request)
     {
-        
+
         $data = $model->with('customer', 'scheme');
-        if($request->branch_id && $request->branch_id != null && count($request->branch_id) > 0){
-            $branch_user_id = User::whereIn('branch_id',$request['branch_id'])->pluck('id');
-            if(!empty($branch_user_id)){
-                $branch_customer_id = Customers::whereIn('executive_id',$branch_user_id)->pluck('id');
+        $userids = getUsersReportingToAuth();
+        if ($request->branch_id && $request->branch_id != null && count($request->branch_id) > 0) {
+            $branch_user_id = User::whereIn('branch_id', $request['branch_id'])->whereIn('id', $userids)->pluck('id');
+            if (!empty($branch_user_id)) {
+                $branch_customer_id = Customers::whereIn('executive_id', $branch_user_id)->pluck('id');
             }
-            if(!empty($branch_customer_id)){
+            if (!empty($branch_customer_id)) {
+                $data->whereIn('customer_id', $branch_customer_id);
+            }
+        } else {
+            $userid = Auth::user()->id;
+            $userinfo = User::where('id','=',$userid)->first();
+            if (!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin') && !$userinfo->hasRole('Sub_Admin') && !$userinfo->hasRole('HR_Admin') && !$userinfo->hasRole('HO_Account')  && !$userinfo->hasRole('Sub_Support') && !$userinfo->hasRole('Accounts Order') && !$userinfo->hasRole('Service Admin') && !$userinfo->hasRole('All Customers')) {
+                $branch_customer_id = Customers::whereIn('executive_id', $userids)->pluck('id');
                 $data->whereIn('customer_id', $branch_customer_id);
             }
         }
-        if($request->parent_customer && $request->parent_customer != null  && count($request->parent_customer) > 0){
-            $parent_customer_id = ParentDetail::whereIn('parent_id',$request->parent_customer)->pluck('customer_id');
-            
-            if(!empty($parent_customer_id)){
+        if ($request->parent_customer && $request->parent_customer != null  && count($request->parent_customer) > 0) {
+            $parent_customer_id = ParentDetail::whereIn('parent_id', $request->parent_customer)->pluck('customer_id');
+
+            if (!empty($parent_customer_id)) {
                 $data->whereIn('customer_id', $parent_customer_id);
             }
         }
-        if($request->scheme_name && $request->scheme_name != null  && $request->scheme_name != ''){
-            $scheme_details = SchemeDetails::with('products')->where('scheme_id',$request->scheme_name)->get();
+        if ($request->scheme_name && $request->scheme_name != null  && $request->scheme_name != '') {
+            $scheme_details = SchemeDetails::with('products')->where('scheme_id', $request->scheme_name)->get();
             $all_product_code = $scheme_details->pluck('products.product_code')->flatten()->unique();
             $all_serial_number = Services::whereIn('product_code', $all_product_code)->pluck('serial_no');
-            
-            if(!empty($all_serial_number)){
+
+            if (!empty($all_serial_number)) {
                 $data->whereIn('coupen_code', $all_serial_number);
             }
         }
-        if($request->start_date && $request->start_date != null && $request->start_date != '' && $request->end_date && $request->end_date != null && $request->end_date != ''){
+        if ($request->start_date && $request->start_date != null && $request->start_date != '' && $request->end_date && $request->end_date != null && $request->end_date != '') {
             $startDate = date('Y-m-d', strtotime($request->start_date));
             $endDate = date('Y-m-d', strtotime($request->end_date));
             $data = $data->whereDate('created_at', '>=', $startDate)
-             ->whereDate('created_at', '<=', $endDate);
+                ->whereDate('created_at', '<=', $endDate);
         }
-        if($request->customer_id && $request->customer_id != null  && $request->customer_id != ''){
+        if ($request->customer_id && $request->customer_id != null  && $request->customer_id != '') {
             $data->where('customer_id', $request->customer_id);
         }
         $data = $data->latest()->newQuery();

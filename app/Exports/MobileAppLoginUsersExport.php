@@ -43,7 +43,7 @@ class MobileAppLoginUsersExport implements FromCollection,WithHeadings,ShouldAut
     public function headings(): array
     {
 
-     $headings = ['S. No.','Customer ID','Firm Name', 'Contact Person', 'Mobile Number', 'App Version', 'Device Type','Device Name','First Login date','Last Login date','Login Status'];
+     $headings = ['S. No.','Customer ID','Firm Name', 'Contact Person', 'Mobile Number','Branch','State','District','City', 'App Version', 'Device Type','Device Name','First Login date','Last Login date','Login Status'];
 
 
 
@@ -53,12 +53,24 @@ class MobileAppLoginUsersExport implements FromCollection,WithHeadings,ShouldAut
    public function map($data): array
    {
    	// dd($data);
+       $branch_arr = array();
+       if ($data->customer->getemployeedetail && !empty($data->customer->getemployeedetail) && count($data->customer->getemployeedetail) > 0) {
+           foreach ($data->customer->getemployeedetail as $key_new => $datas) {
+               if(isset($datas->employee_detail->getbranch->branch_name) && !in_array($datas->employee_detail->getbranch->branch_name, $branch_arr)){
+                   $branch_arr[] =$datas->employee_detail->getbranch->branch_name;
+               }
+           }
+       }
        return [
            $data['id'],
            $data['customer']['id'],
            isset($data['customer']['name']) ? $data['customer']['name'] :'',
            isset($data['customer']['first_name']) ? $data['customer']['first_name'] :'',
            isset($data['customer']['mobile']) ? $data['customer']['mobile'] :'',
+           implode(',',$branch_arr),
+           isset($data['customer']['customeraddress']) ? $data['customer']['customeraddress']['statename']['state_name'] :'',
+           isset($data['customer']['customeraddress']) ? $data['customer']['customeraddress']['districtname']['district_name'] :'',
+           isset($data['customer']['customeraddress']) ? $data['customer']['customeraddress']['cityname']['city_name'] :'',
            isset($data['app_version']) ? $data['app_version'] :'',
            isset($data['device_type']) ? $data['device_type'] :'',
            isset($data['device_name']) ? $data['device_name'] :'',

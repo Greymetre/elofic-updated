@@ -9,7 +9,7 @@ class TransactionHistory extends Model
 {
     use HasFactory;
 
-    protected $fillable = [ 'customer_id', 'coupon_code', 'point', 'scheme_id', 'status', 'remark', 'created_by', 'created_at', 'updated_at'];
+    protected $fillable = [ 'customer_id', 'coupon_code', 'active_point', 'provision_point', 'point', 'scheme_id', 'status', 'remark', 'created_by', 'created_at', 'updated_at'];
 
     public function customer(){
         return $this->belongsTo(Customers::class, 'customer_id', 'id');
