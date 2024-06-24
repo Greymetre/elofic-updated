@@ -314,7 +314,7 @@
                   <th class="pb-0">Customer Bill No.</th>
                   <th class="pb-0">Warranty/Custtomer Bill Date</th>
                   <th class="pb-0">Under Warranty</th>
-                  <th class="pb-0">Serbvice Paid/Free</th>
+                  <th class="pb-0">Service Paid/Free</th>
                 </tr>
                 <tr>
                   <td class="pt-0">{{$complaint->customer_bill_no??'-'}}</td>
@@ -526,7 +526,11 @@
                 <div class="d-flex">
                   <i class="material-icons">double_arrow</i>
                   <p>
+                    @if($assign_customer == NULL)
+                    Complaint <b> {!! $complaint['complaint_number'] !!} </b> Unassign Service Center by <b>{{$timeline->created_by_details->name}}</b> on <b>{{date("d M Y, h:i a", strtotime($timeline->created_at));}}.</b>
+                    @else
                     Complaint <b> {!! $complaint['complaint_number'] !!} </b> assign to <b>{{$assign_customer->name}}</b> Service Center by <b>{{$timeline->created_by_details->name}}</b> on <b>{{date("d M Y, h:i a", strtotime($timeline->created_at));}}.</b>
+                    @endif
                   </p>
                 </div>
                 @endif

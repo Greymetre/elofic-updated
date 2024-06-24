@@ -303,18 +303,22 @@ class AjaxController extends Controller
     {
         try {
             $product_id = $request->input('product_id');
-            $data = Product::with('productdetails')
+            $data = Product::with('productdetails','categories')
                 ->where(function ($query) use ($product_id) {
                     if (isset($product_id)) {
                         $query->where('id', '=', $product_id);
                     }
                     $query->where('active', '=', 'Y');
                 })
-                ->select('id', 'product_name', 'product_image', 'display_name')
                 ->orderBy('product_name', 'asc')
                 ->first();
             $product = collect([
+                'id' => isset($data['id']) ? $data['id'] : '',
                 'product_name' => isset($data['product_name']) ? $data['product_name'] : '',
+                'product_code' => isset($data['product_code']) ? $data['product_code'] : '',
+                'specification' => isset($data['specification']) ? $data['specification'] : '',
+                'product_no' => isset($data['product_no']) ? $data['product_no'] : '',
+                'phase' => isset($data['phase']) ? $data['phase'] : '',
                 'product_image' => isset($data['product_image']) ? $data['product_image'] : '',
                 'display_name' => isset($data['display_name']) ? $data['display_name'] : '',
                 'mrp' => isset($data['productdetails'][0]['mrp']) ? $data['productdetails'][0]['mrp'] : '',
@@ -333,7 +337,8 @@ class AjaxController extends Controller
                 'start_date' => $data['getSchemeDetail']['orderscheme']['start_date'] ?? 0,
                 'end_date' => $data['getSchemeDetail']['orderscheme']['end_date'] ?? 0,
 
-                'productdetails' => $data['productdetails']
+                'productdetails' => $data['productdetails'],
+                'categories' => $data['categories']
             ]);
 
 
@@ -1285,7 +1290,7 @@ class AjaxController extends Controller
     {
         if ($request->ajax()) {
 
-            $data = ServiceChargeProducts::where('charge_type_id', $request->charge_type_id)->get();
+            $data = ServiceChargeProducts::where('charge_type_id', $request->charge_type_id)->where('division_id', $request->charge_cat_id)->get();
 
             return response()->json($data);
 

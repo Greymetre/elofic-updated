@@ -173,17 +173,26 @@ class AttendanceController extends Controller
 
     // $label2[] ="TGT";
 
-    $label2[] = "";
+    // $label2[] = "";
 
     $data = $attendancesummary->map(function ($item, $key) use ($label2, $date1, $date2, $period) {
 
 
       //neww
       $label_data = [];
+      $total_wo = 0;
+      $total_a = 0;
+      $total_lop = 0;
+      $total_mis = 0;
+      $total_pw = 0;
+      $total_h = 0;
+      $total_hd = 0;
+      $total_p = 0;
+      $total_atte = 0;
 
       foreach ($period as $key => $value) {
         $like_date =  $value->format('j-M-Y');
-
+        $total_atte++;
         $check = $value->format('Y-m-d');
 
         //last new
@@ -201,6 +210,7 @@ class AttendanceController extends Controller
 
         if (in_array($check, $check_date_attendance)) {
           $label_data[] = 'H';
+          $total_h++;
         } else {
 
 
@@ -213,36 +223,50 @@ class AttendanceController extends Controller
             if ($attendance_details->attendance_status == '1') {
               if ($attendance_details->working_type == 'Leave') {
                 $label_data[] =  'LOP';
+                $total_lop++;
               } elseif ($dayname == 'Sunday') {
                 $label_data[] =  'PW';
+                $total_pw++;
               } elseif ($attendance_details->working_type == 'Second Half Leave' || $attendance_details->working_type == 'First Half Leave') {
                 $label_data[] =  '1/2P+1/2LOP';
+                $total_hd++;
               } elseif ($attendance_details->working_type == 'Full Day Leave') {
                 $label_data[] =  'LOP';
+                $total_lop++;
               } elseif ($attendance_details->working_type == 'Local Market Visit') {
                 $label_data[] =  'P';
+                $total_p++;
               } elseif ($attendance_details->working_type == 'Office Work') {
                 $label_data[] =  'P';
+                $total_p++;
               } elseif ($attendance_details->working_type == 'Plumber Meet') {
                 $label_data[] =  'P';
+                $total_p++;
               } elseif ($attendance_details->working_type == 'Retailer Meet') {
                 $label_data[] =  'P';
+                $total_p++;
               } elseif ($attendance_details->working_type == 'Service Center Visit') {
                 $label_data[] =  'P';
+                $total_p++;
               } elseif ($attendance_details->working_type == 'Tour') {
                 $label_data[] =  'P';
+                $total_p++;
               } elseif ($attendance_details->working_type == 'Holiday') {
                 $label_data[] = 'H';
+                $total_h++;
               }
             } else {
               $label_data[] = 'A';
+              $total_a++;
             }
           } else {
 
             if ($dayname == 'Sunday') {
               $label_data[] = 'W/o';
+              $total_wo++;
             } else {
               $label_data[] = 'MIS';
+              $total_mis++;
             }
           }
 
@@ -255,7 +279,15 @@ class AttendanceController extends Controller
 
       //neww
 
-      $label_data[] = "";
+      $label_data[] = (string)$total_wo;
+      $label_data[] = (string)$total_a;
+      $label_data[] = (string)$total_lop;
+      $label_data[] = (string)$total_mis;
+      $label_data[] = (string)$total_pw;
+      $label_data[] = (string)$total_h;
+      $label_data[] = (string)$total_hd;
+      $label_data[] = (string)$total_p;
+      $label_data[] = (string)$total_atte;
 
       $return =  [
         $item->id ?? '',
@@ -277,10 +309,21 @@ class AttendanceController extends Controller
       'Branch',
       'Division',
       'Designation',
-
     ];
 
-    $label = array_merge($label1, $label2);
+    $label3 = [
+      'Week Of (W/o)',
+      'Absent (A)',
+      'LOP',
+      'MIS Punch (MIS)',
+      'Present Week of (PW)',
+      'Holiday (H)',
+      'Half Day (1/2P+1/2LOP)',
+      'Present (P)',
+      'TOTAL Days',
+    ];
+
+    $label = array_merge($label1, $label2, $label3);
 
     $export = new ExcelExport($label, $data);
 

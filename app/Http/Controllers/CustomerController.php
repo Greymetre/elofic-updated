@@ -482,17 +482,23 @@ class CustomerController extends Controller
         }
         ////abort_if(Gate::denies('customer_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
          $id = decrypt($id);
-        // $thistorys = TransactionHistory::where('customer_id', $id)->sum('points');
+        $thistorys = TransactionHistory::where('customer_id', $id)->get();
         $total_points = TransactionHistory::where('customer_id', $id)->sum('point')??0;
         $active_points = TransactionHistory::where('customer_id', $id)->where('status', '1')->sum('point')??0;
         $provision_points = TransactionHistory::where('customer_id', $id)->where('status', '0')->sum('point')??0;
+        $active_points = 0;
+        $provision_points = 0;
+        foreach($thistorys as $thistory){
+            if($thistory->status == '1'){
+                $active_points += $thistory->point;
+            }else{
+                $active_points += $thistory->active_point;
+                $provision_points += $thistory->provision_point;
+            }
+        }
         $total_redemption = Redemption::where('customer_id', $id)->whereNot('status', '2')->sum('redeem_amount')??0;
         $total_rejected = Redemption::where('customer_id', $id)->where('status', '2')->sum('redeem_amount')??0;
         $total_balance = (int)$active_points-(int)$total_redemption;
-        // foreach($thistorys as $thistory){
-        //     $scheme_details = SchemeDetails::where('product_id', $thistory->scheme->product->id)->first();
-        //     $total_points += (int)$scheme_details->points;
-        // }
         $customers = Customers::find($id);
         $customers['due_amount'] = totalDueAmount($id);
         return view('customers.show', compact('total_balance','total_points', 'total_redemption', 'active_points', 'provision_points', 'total_rejected', 'kyc'))->with('customers',$customers);

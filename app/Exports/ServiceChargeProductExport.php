@@ -32,7 +32,7 @@ class ServiceChargeProductExport implements FromCollection,WithHeadings,ShouldAu
 
     public function headings(): array
     {
-        return ['id','Charge Type','Product Name','Division','Category','Price','Charge Type Id','Division Id','Category Id'];
+        return ['id','Charge Type','Product Name','Division','Category','Price','Other Charge','Charge Type Id','Division Id','Category Id'];
     }
 
     public function map($data): array
@@ -44,6 +44,7 @@ class ServiceChargeProductExport implements FromCollection,WithHeadings,ShouldAu
             $data['division']['division_name'],
             $data['category']['category_name'],
             $data['price'],
+            $data['other_charge'],
             $data['charge_type_id'],
             $data['division_id'],
             $data['category_id'],

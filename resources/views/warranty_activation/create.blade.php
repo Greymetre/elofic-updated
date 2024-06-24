@@ -60,6 +60,7 @@
                   <div class="row">
                      <div class="col-md-3">
                         <label for="status" class="form-control"><b>Warranty Activation Status</b></label>
+                        <input type="hidden" name="previous_url" value="{{ url()->previous() }}">
                      </div>
                      <div class="col-md-3">
                         <select name="status" id="status" class="select2" required>

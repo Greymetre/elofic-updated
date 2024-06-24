@@ -882,9 +882,11 @@
               <tbody>
                 @if($dealerAppointment->appointment_kyc_detail && !empty($dealerAppointment->appointment_kyc_detail))
                 @php
-                $proprietary_concern_array = json_decode($dealerAppointment->appointment_kyc_detail->proprietary_concern);
-                $partnership_firm_array = json_decode($dealerAppointment->appointment_kyc_detail->partnership_firm);
-                $ltd_pvt_array = json_decode($dealerAppointment->appointment_kyc_detail->ltd_pvt);
+                $proprietary_concern_array = ($dealerAppointment->appointment_kyc_detail->proprietary_concern && $dealerAppointment->appointment_kyc_detail->proprietary_concern!='null' && !empty($dealerAppointment->appointment_kyc_detail->proprietary_concern))?json_decode($dealerAppointment->appointment_kyc_detail->proprietary_concern):array();
+                
+                $partnership_firm_array = ($dealerAppointment->appointment_kyc_detail->partnership_firm && $dealerAppointment->appointment_kyc_detail->partnership_firm!='null' && !empty($dealerAppointment->appointment_kyc_detail->partnership_firm))?json_decode($dealerAppointment->appointment_kyc_detail->partnership_firm):array();
+                
+                $ltd_pvt_array = ($dealerAppointment->appointment_kyc_detail->ltd_pvt && $dealerAppointment->appointment_kyc_detail->ltd_pvt!='null' && !empty($dealerAppointment->appointment_kyc_detail->ltd_pvt))?json_decode($dealerAppointment->appointment_kyc_detail->ltd_pvt):array();
                 @endphp
                 @else
                 @php
@@ -893,6 +895,7 @@
                 $ltd_pvt_array = [];
                 @endphp
                 @endif
+
                 @foreach($kyc_ckeckbox as $key => $val)
                 @if ($key < 60 && ($key==0 || $key % 3==0)) <tr>
                   <td>{{($key / 3)+1}}</td>

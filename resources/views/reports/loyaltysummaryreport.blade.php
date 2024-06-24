@@ -115,7 +115,7 @@
         },
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-            {data: 'branch_name', name: 'name',"defaultContent": ''},
+            {data: 'state_name', name: 'state_name',"defaultContent": ''},
             {data: 'total_registered_retailers', name: 'total_registered_retailers',"defaultContent": ''},
             {data: 'total_registered_retailers_under_saarthi', name: 'total_registered_retailers_under_saarthi',"defaultContent": 'test3'},
             {data: 'coupon_scan_nos', name: 'coupon_scan_nos',"defaultContent": ''},

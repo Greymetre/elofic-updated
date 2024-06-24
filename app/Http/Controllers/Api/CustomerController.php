@@ -76,7 +76,6 @@ class CustomerController extends Controller
                 $request['mobile'] = '91'.preg_replace('/\s+/', '', $request['mobile']);
             }
             
-
              $customerdetails = Customers::where('mobile', $request['mobile'])->first();
              if(!empty($customerdetails)){  
                return response(['status' => 'error', 'message' => 'Mobile Number Already Exist'],400);   

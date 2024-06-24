@@ -30,7 +30,7 @@ class ManualTransactionImport implements ToModel,WithValidation,WithHeadingRow, 
             'point' => isset($row['points'])? $row['points']:'',
             'remark' => isset($row['remark'])? $row['remark']:NULL,
             'created_by' => Auth::user()->id,
-            'created_at' => getcurentDateTime() ,
+            'created_at' => getcurentDateTime(),
             'updated_at' => getcurentDateTime()
         ]);
     }

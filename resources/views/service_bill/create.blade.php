@@ -115,7 +115,7 @@
                   <div class="col-md-3">
                      <div class="form-group">
                         <label for="complaint_number">Complaint Number</label>
-                        <select {{$service_bill->exists?'disabled':''}} name="complaint_number" id="complaint_number" class="select2" required>
+                        <select disabled {{$service_bill->exists?'disabled':''}} name="complaint_number" id="complaint_number" class="select2" required>
                            <option value="">Select Complaint Number</option>
                            @if(count($all_complaint_number) > 0)
                            @foreach($all_complaint_number as $val)
@@ -124,6 +124,7 @@
                            @endif
                         </select>
                         <input type="hidden" readonly name="product_division" id="product_division" value="{{($complaint?($complaint->product_details?$complaint->product_details->categories->id:''):'')}}">
+                        <input type="hidden" readonly name="complaint_details" id="complaint_details" value="{{($complaint?$complaint:'')}}">
                         <input type="hidden" readonly name="complaint_id" id="complaint_id" value="{{($complaint?($complaint->id?$complaint->id:''):'')}}">
                         <input type="hidden" readonly name="service_bill_id" id="service_bill_id" value="{{($service_bill?($service_bill->id?$service_bill->id:''):'')}}">
                      </div>
@@ -131,7 +132,7 @@
                   <div class="col-md-3">
                      <div class="form-group">
                         <label for="division">Division</label>
-                        <select name="division" id="division" class="select2">
+                        <select disabled name="division" id="division" class="select2">
                            <option value="">Select Division</option>
                            @if($divisions && count($divisions) > 0)
                            @foreach($divisions as $division)
@@ -474,6 +475,9 @@
                            <td>
                               <select required name="service[{{$k}}][service_type]" class="form-control select2 chargety">
                                  @if(count($charge_type) > 0)
+                                 @if($complaint->product_details->category_id == '2')
+                                 @php $charge_type = $charge_type->whereIn('id', ['2','3']); @endphp
+                                 @endif
                                  @foreach($charge_type as $ch_type)
                                  <option value="{{$ch_type->id}}" {{($product->service_type == $ch_type->id)?'selected':''}}>{{$ch_type->charge_type}}</option>
                                  @endforeach
@@ -482,12 +486,12 @@
                            </td>
                            <td>
                               <select required name="service[{{$k}}][product_id]" class="form-control select2 chargeprod">
-                                 <option value="{{$product->product_id}}">{{$product->product->product_name}}</option>
+                                 <option value="{{$product->product_id}}">{{$product->product?$product->product->product_name:$product->product_id}}</option>
                               </select>
                            </td>
-                           <td><input type="number" readonly name="service[{{$k}}][quantity]" value="1" class="form-control" /></td>
-                           <td><input type="number" readonly name="service[{{$k}}][distance]" class="form-control" /></td>
-                           <td><input type="number" readonly name="service[{{$k}}][appreciation]" class="form-control" /></td>
+                           <td><input type="number" readonly name="service[{{$k}}][quantity]" value="{{$product->quantity}}" class="form-control quantity" /></td>
+                           <td><input type="number" readonly name="service[{{$k}}][distance]" value="{{$product->distance}}"  class="form-control distance" /></td>
+                           <td><input type="number" readonly name="service[{{$k}}][appreciation]" value="{{$product->appreciation}}"  class="form-control appreciation" /></td>
                            <td><input name="service[{{$k}}][price]" readonly class="form-control sprice" value="{{$product->price}}" /></td>
                            <td><input name="service[{{$k}}][subtotal]" readonly class="form-control ssubtotal" value="{{$product->subtotal}}" /></td>
                            <td><button type="button" class="btn btn-danger btn-sm remove-tr m-0">X</button></td>
@@ -510,9 +514,9 @@
    </div>
    <script>
       var counter = '{{($service_bill->exists && count($service_bill->service_bill_products) > 0)?count($service_bill->service_bill_products):"0"}}';
-      console.log(counter);
       $(document).on('change', '#complaint_number', function() {
          var complaint_number = $(this).val();
+         $("#table-service").html('');
          $.ajax({
             url: "{{ url('getComplaintsDataProduct') }}",
             dataType: "json",
@@ -649,12 +653,17 @@
          }
       }).trigger('change');
       $(document).on("click", "#add-service", function() {
-         var chargeType = @json($charge_type);
+         var pro_cat = '{{ $complaint?$complaint->product_details->category_id:"" }}';
+         if(pro_cat == '2'){
+            var chargeType = @json($charge_type->whereIn('id', ['2','3']));
+         }else{
+            var chargeType = @json($charge_type);
+         }
          var options = '<option value="">Select Service</option>';
          $.each(chargeType, function(k, v) {
             options += '<option value="' + v.id + '">' + v.charge_type + '</option>';
          });
-         var newTR = '<tr><td><select required name="service[' + counter + '][service_type]" class="form-control select2 chargety">' + options + '</select></td><td><select required name="service[' + counter + '][product_id]" class="form-control select2 chargeprod"></select></td><td><input type="number" readonly name="service[' + counter + '][quantity]" value="1" class="form-control" /></td><td><input type="number" readonly name="service[' + counter + '][distance]"  class="form-control" /></td><td><input type="number" readonly name="service[' + counter + '][appreciation]" class="form-control" /></td><td><input name="service[' + counter + '][price]" readonly class="form-control sprice" /></td><td><input name="service[' + counter + '][subtotal]" readonly class="form-control ssubtotal" /></td><td><button type="button" class="btn btn-danger btn-sm remove-tr m-0">X</button></td></tr>';
+         var newTR = '<tr><td><select required name="service[' + counter + '][service_type]" class="form-control select2 chargety">' + options + '</select></td><td class="product_td"><select required name="service[' + counter + '][product_id]" class="form-control select2 chargeprod"></select></td><td><input type="number" readonly name="service[' + counter + '][quantity]" value="1" class="form-control quantity" /></td><td><input type="number" readonly name="service[' + counter + '][distance]"  class="form-control distance" /></td><td><input type="number" readonly name="service[' + counter + '][appreciation]" class="form-control appreciation" /></td><td><input name="service[' + counter + '][price]" readonly class="form-control sprice" /></td><td><input name="service[' + counter + '][subtotal]" readonly class="form-control ssubtotal" /></td><td><button type="button" class="btn btn-danger btn-sm remove-tr m-0">X</button></td></tr>';
          counter++;
          $("#table-service").append(newTR);
          $('.select2').select2();
@@ -691,20 +700,68 @@
             return false;
          }
          var currentRow = $(this).closest('tr');
+         var serviceProductSelecttd = currentRow.find('td.product_td');
+         serviceProductSelecttd.html('<select required name="service[' + (counter - 1) + '][product_id]" class="form-control select2 chargeprod"></select>');
+         var servicePrice = currentRow.find('input.sprice');
+         var serviceDistance = currentRow.find('input.distance');
+         var serviceQuantity = currentRow.find('input.quantity');
+         var pro_cat = '{{ $complaint?$complaint->product_details->category_id:"" }}';
          var serviceProductSelect = currentRow.find('select.chargeprod');
-         $.ajax({
-            url: "{{url('/getServiceProduct')}}",
-            data: {
-               'charge_type_id': id
-            },
-            success: function(data) {
-               var html = '<option value="">Select Product</option>';
-               $.each(data, function(k, v) {
-                  html += '<option value="' + v.id + '">' + v.product_name + '</option>';
-               });
-               serviceProductSelect.html(html);
+         var serviceAppreciation = currentRow.find('input.appreciation');
+         if (id == "3") {
+            servicePrice.prop('readonly', true);
+            serviceQuantity.prop('readonly', true);
+            serviceQuantity.val('1');
+            console.log(pro_cat);
+            if (pro_cat == '2') {
+               serviceDistance.prop('readonly', false);
+            } else {
+               serviceDistance.prop('readonly', true);
             }
-         });
+            $.ajax({
+               url: "{{url('/getServiceProduct')}}",
+               data: {
+                  'charge_type_id': id,
+                  'charge_cat_id': pro_cat
+               },
+               success: function(data) {
+                  var html = '<option value="">Select Product</option>';
+                  $.each(data, function(k, v) {
+                     html += '<option value="' + v.id + '">' + v.product_name + '</option>';
+                  });
+                  serviceProductSelect.html(html);
+                  $('.select2').select2();
+               }
+            });
+         } else {
+            serviceDistance.prop('readonly', true);
+            serviceDistance.val('');
+            serviceAppreciation.val('');
+            if (id == '4' || id == '2') {
+               serviceProductSelecttd.html('<input type="text" name="service[' + (counter - 1) + '][product_id]" class="form-control" />');
+               servicePrice.prop('readonly', false);
+               serviceQuantity.prop('readonly', false);
+            } else {
+               // serviceProductSelecttd.html('<select required name="service[' + (counter - 1) + '][product_id]" class="form-control select2 chargeprod"></select>');
+               servicePrice.prop('readonly', true);
+               serviceQuantity.prop('readonly', true);
+            }
+            $.ajax({
+               url: "{{url('/getServiceProduct')}}",
+               data: {
+                  'charge_type_id': id,
+                  'charge_cat_id': pro_cat
+               },
+               success: function(data) {
+                  var html = '<option value="">Select Product</option>';
+                  $.each(data, function(k, v) {
+                     html += '<option value="' + v.id + '">' + v.product_name + '</option>';
+                  });
+                  serviceProductSelect.html(html);
+                  $('.select2').select2();
+               }
+            });
+         }
       }).trigger('change');
 
       $(document).on("change", ".chargeprod", function() {
@@ -740,6 +797,50 @@
                });
             }
             currentRow.remove();
+         }
+      })
+      $(document).on('keyup', '.sprice', function() {
+         if (!$(this).attr('readonly')) {
+            var rate = $(this).val();
+            var currentRow = $(this).closest('tr');
+            var serviceSubtotal = currentRow.find('input.ssubtotal');
+            var serviceQuantity = currentRow.find('input.quantity').val();
+            var serviceSubtotalss = parseFloat(rate) * parseFloat(serviceQuantity);
+            if (isNaN(serviceSubtotalss)) {
+               serviceSubtotalss = 0;
+            }
+            serviceSubtotal.val(serviceSubtotalss);
+         }
+      })
+      $(document).on('keyup', '.quantity', function() {
+         if (!$(this).attr('readonly')) {
+            var quantit = $(this).val();
+            var currentRow = $(this).closest('tr');
+            var serviceSubtotal = currentRow.find('input.ssubtotal');
+            var servicePrice = currentRow.find('input.sprice').val();
+            var serviceSubtotalss = parseFloat(quantit) * parseFloat(servicePrice);
+            if (isNaN(serviceSubtotalss)) {
+               serviceSubtotalss = 0;
+            }
+            serviceSubtotal.val(serviceSubtotalss);
+         }
+      })
+      $(document).on('keyup', '.distance', function() {
+         if (!$(this).attr('readonly')) {
+            var distance = $(this).val();
+            $(this).prop('min', '0');
+            var currentRow = $(this).closest('tr');
+            var serviceSubtotal = currentRow.find('input.ssubtotal');
+            var serviceAppreciation = currentRow.find('input.appreciation');
+            var servicePrice = currentRow.find('input.sprice').val();
+            var tottal_dis_rate = 0;
+            if (distance <= 120) {
+               tottal_dis_rate = distance * 3;
+            } else {
+               tottal_dis_rate = 360 + ((distance - 120) * 1.75);
+            }
+            serviceAppreciation.val(tottal_dis_rate);
+            serviceSubtotal.val(parseFloat(tottal_dis_rate) + parseFloat(servicePrice));
          }
       })
    </script>

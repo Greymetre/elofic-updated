@@ -48,7 +48,7 @@
                 @endif
                 <div class="next-btn">
                 @if(auth()->user()->can(['complaint_create']))
-                <a href="{{ route('service_bills.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.complaint.title_singular') !!}"><i class="material-icons">add_circle</i></a>
+                <!-- <a href="{{ route('service_bills.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.complaint.title_singular') !!}"><i class="material-icons">add_circle</i></a> -->
                 @endif
               </div>
               </div>
