@@ -52,16 +52,23 @@ class MainTransactionImport implements ToCollection, WithValidation, WithHeading
                     $end_date = Carbon::createFromFormat('Y-m-d', $scheme_details->scheme->end_date);
                     $current_date = Carbon::today();
                     if ($current_date->isSameDay($start_date) || ($current_date->gte($start_date) && $current_date->lte($end_date))) {
+                        $active_point = ($scheme_details) ? $scheme_details->active_point : NULL;
+                        $provision_point = ($scheme_details) ? $scheme_details->provision_point : NULL;
                         $point = ($scheme_details) ? $scheme_details->points : NULL;
                     } else {
                         array_push($expire_schemes, $nonNullCoupenCode);
+                        $active_point = '0';
+                        $provision_point = '0';
                         $point = '0';
                     }
                     $tHistory = TransactionHistory::create([
-                        'customer_id' => $row['customer_id'],
+                        'customer_id' => $request->customer_id,
                         'coupon_code' => $nonNullCoupenCode,
                         'scheme_id' => $scheme_details->scheme_id,
+                        'active_point' => $active_point,
+                        'provision_point' => $provision_point,
                         'point' => $point,
+                        'remark' => 'Coupon scan',
                         'created_by' => auth()->user()->id,
                     ]);
                 } else {

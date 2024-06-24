@@ -15,6 +15,7 @@ use App\Models\Division;
 use App\Models\EndUser;
 use App\Models\Media;
 use App\Models\Pincode;
+use App\Models\Product;
 use App\Models\ServiceBill;
 use App\Models\User;
 use App\Models\WarrantyActivation;
@@ -68,7 +69,8 @@ class ComplaintController extends Controller
         $pincodes = Pincode::where('active', 'Y')->select('id', 'pincode')->get();
         $divisions = Division::where('active', 'Y')->select('id', 'division_name')->get();
         $complaint_types = ComplaintType::where('active', 'Y')->select('id', 'name')->get();
-        return view('complaint.create', compact('assign_users', 'service_centers', 'branchs', 'pincodes', 'divisions', 'complaint_types', 'newComplaintNumber'))->with('complaints', $this->complaint);
+        $products = Product::where('active', 'Y')->select('product_name', 'id')->get();
+        return view('complaint.create', compact('assign_users', 'service_centers', 'branchs', 'pincodes', 'divisions', 'complaint_types', 'newComplaintNumber','products'))->with('complaints', $this->complaint);
     }
 
     /**
@@ -208,7 +210,8 @@ class ComplaintController extends Controller
         $pincodes = Pincode::where('active', 'Y')->select('id', 'pincode')->get();
         $divisions = Division::where('active', 'Y')->select('id', 'division_name')->get();
         $complaint_types = ComplaintType::where('active', 'Y')->select('id', 'name')->get();
-        return view('complaint.create', compact('assign_users', 'service_centers', 'branchs', 'pincodes', 'divisions', 'complaint_types'))->with('complaints', $this->complaint);
+        $products = Product::where('active', 'Y')->select('product_name', 'id')->get();
+        return view('complaint.create', compact('assign_users', 'service_centers', 'branchs', 'pincodes', 'divisions', 'complaint_types','products'))->with('complaints', $this->complaint);
     }
 
     /**
@@ -412,10 +415,12 @@ class ComplaintController extends Controller
         if ($complaint) {
             $warranty = WarrantyActivation::where('product_serail_number', $complaint->product_serail_number)->first();
             $service_bill = ServiceBill::where('complaint_id', $request->id)->first();
-            if (!$warranty) {
-                return response()->json(['status' => 'error', 'message' => 'In order to complete this complaint, You need to Activate Warranty. <a href="' . route('warranty_activation.create') . '?serial_no=' . $complaint->product_serail_number . '" style="color:blue;">Click here</a> to Activate Warranty.']);
+            if(!$complaint->product_serail_number){
+                return response()->json(['status' => 'error', 'message' => 'To complete this complaint, You need to add the product serial number first.']);
+            }else if (!$warranty) {
+                return response()->json(['status' => 'error', 'message' => 'To complete this complaint, You need to Activate Warranty. <a href="' . route('warranty_activation.create') . '?serial_no=' . $complaint->product_serail_number . '" style="color:blue;">Click here</a> to Activate Warranty.']);
             } else if (!$service_bill) {
-                return response()->json(['status' => 'error', 'message' => 'In order to complete this complaint, You need to add service bill. <a href="' . route('service_bills.create') . '?complaint_id=' . $request->id . '" style="color:blue;">Click here</a> to add.']);
+                return response()->json(['status' => 'error', 'message' => 'To complete this complaint, You need to add service bill. <a href="' . route('service_bills.create') . '?complaint_id=' . $request->id . '" style="color:blue;">Click here</a> to add.']);
             } else {
                 return response()->json(['status' => 'success', 'message' => 'Complaint complete successfully.']);
             }

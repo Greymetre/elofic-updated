@@ -43,6 +43,7 @@ class ServiceProductImport implements ToCollection, WithValidation, WithHeadingR
                 $ServiceChargeProducts->division_id = isset($row['division_id']) ? $row['division_id'] : null;
                 $ServiceChargeProducts->category_id = isset($row['category_id']) ? $row['category_id'] : null;
                 $ServiceChargeProducts->price = isset($row['price']) ? $row['price'] : null;
+                $ServiceChargeProducts->other_charge = isset($row['other_charge']) ? $row['other_charge'] : null;
                 $ServiceChargeProducts->created_by = Auth::user()->id;
                 $ServiceChargeProducts->updated_at = getcurentDateTime();
                 $ServiceChargeProducts->save();
@@ -54,6 +55,7 @@ class ServiceProductImport implements ToCollection, WithValidation, WithHeadingR
                     'division_id' => isset($row['division_id']) ? $row['division_id'] : null,
                     'category_id' => isset($row['category_id']) ? $row['category_id'] : null,
                     'price' => isset($row['price']) ? $row['price'] : null,
+                    'other_charge' => isset($row['other_charge']) ? $row['other_charge'] : null,
                     'created_by' => Auth::user()->id,
                     'created_at' => getcurentDateTime(),
                     'updated_at' => getcurentDateTime()

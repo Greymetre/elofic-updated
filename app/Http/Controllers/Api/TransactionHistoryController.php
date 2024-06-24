@@ -426,7 +426,8 @@ class TransactionHistoryController extends Controller
             $expire_schemes = array();
             if ($request->coupon_code && $request->coupon_code != NULL && $request->coupon_code != '') {
                 $exists = TransactionHistory::where('coupon_code', $request->coupon_code)->exists();
-                $existsDamage = DamageEntry::where('coupon_code', $request->coupon_code)->exists();
+                // $existsDamage = DamageEntry::where('coupon_code', $request->coupon_code)->exists();
+                $existsDamage = DamageEntry::where('coupon_code', $request->coupon_code)->where('status', '!=', '2')->exists();
 
                 if ($exists) {
                     throw ValidationException::withMessages([

@@ -82,11 +82,12 @@ class ServiceBillController extends Controller
             $replacement_tag = 'No';
             $replacement_tag_number = NULL;
         }
+        
         $new_service_bill = ServiceBill::updateOrCreate(['complaint_id' => $request->complaint_id, 'complaint_no' => $request->complaint_number], [
             'bill_no' => $serviceBillNo,
             'complaint_id' => $request->complaint_id,
-            'complaint_no' => $request->complaint_number,
-            'division' => $request->division,
+            'complaint_no' => json_decode($request->complaint_details)->complaint_number,
+            'division' => $request->product_division,
             'category' => $request->category,
             'complaint_type' => $request->complaint_type,
             'complaint_reason' => $request->complaint_reason,

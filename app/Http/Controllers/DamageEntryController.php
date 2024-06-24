@@ -90,7 +90,7 @@ class DamageEntryController extends Controller
                     ]);
                 }
                 $scheme = Services::where('serial_no', $request->coupen_code)->first();
-                if($scheme){
+                if ($scheme) {
                     $scheme_details = SchemeDetails::where('product_id', $scheme->product->id)->first();
                     $scheme_id = $scheme_details->scheme_id;
                     $start_date = Carbon::createFromFormat('Y-m-d', $scheme_details->scheme->start_date);
@@ -102,7 +102,7 @@ class DamageEntryController extends Controller
                         array_push($expire_schemes, $request->coupen_code);
                         $point = '0';
                     }
-                }else{
+                } else {
                     $scheme_id = NULL;
                     $point = 0;
                 }
@@ -113,7 +113,7 @@ class DamageEntryController extends Controller
                 $damageEntry->point = $point;
                 $damageEntry->created_by = auth()->user()->id;
                 $damageEntry->save();
-            }else{
+            } else {
                 $damageEntry = new DamageEntry();
                 $damageEntry->customer_id = $request->customer_id;
                 $damageEntry->created_by = auth()->user()->id;
@@ -198,9 +198,9 @@ class DamageEntryController extends Controller
 
     public function changeStatus(Request $request)
     {
-        $updateStatus = DamageEntry::where('id', $request->id)->update(['status' => $request->status, 'coupon_code'=>$request->coupon_code, 'remark' => $request->remark]);
-        if($updateStatus){
-            if($request->status == '1'){
+        $updateStatus = DamageEntry::where('id', $request->id)->update(['status' => $request->status, 'coupon_code' => $request->coupon_code, 'remark' => $request->remark]);
+        if ($updateStatus) {
+            if ($request->status == '1') {
                 $damageEntry = DamageEntry::find($request->id);
                 $damageEntry->status = '1';
                 $damageEntry->save();
@@ -223,7 +223,7 @@ class DamageEntryController extends Controller
 
                 if ($exists) {
                     $mmssgg = "The coupon code '$request->coupon_code' already Scanned.";
-                    return response()->json(['status' => 'error','message' => $mmssgg]);
+                    return response()->json(['status' => 'error', 'message' => $mmssgg]);
                 }
                 $scheme = Services::where('serial_no', $request->coupon_code)->first();
                 $scheme_details = SchemeDetails::where('product_id', $scheme->product->id)->first();
@@ -245,28 +245,57 @@ class DamageEntryController extends Controller
                 }
                 $created_at = Carbon::now();
                 $created_at = $created_at->setTimezone('Asia/Kolkata');
-                $tHistory = TransactionHistory::create([
-                    'customer_id' => $damageEntry->customer_id,
-                    'coupon_code' => $request->coupon_code,
-                    'scheme_id' => $scheme_details?$scheme_id:null,
-                    'point' => $point,
-                    'created_at' => $created_at,
-                ]);
-                return response()->json(['status' => 'success','message' => 'Damage Entry Approved successfully!']);
-            }elseif($request->status == '0'){
-                return response()->json(['status' => 'success','message' => 'Damage Entry Pending successfully!']);    
-            }else{
-                return response()->json(['status' => 'success','message' => 'Damage Entry Rejected successfully!']);
+                if (!empty($request->coupon_code)) {
+                    $scheme = Services::where('serial_no', $request->coupon_code)->first();
+                    $scheme_details = SchemeDetails::where('product_id', $scheme->product->id)->first();
+                    $start_date = Carbon::createFromFormat('Y-m-d', $scheme_details->scheme->start_date);
+                    $end_date = Carbon::createFromFormat('Y-m-d', $scheme_details->scheme->end_date);
+                    $current_date = Carbon::today();
+                    if ($current_date->isSameDay($start_date) || ($current_date->gte($start_date) && $current_date->lte($end_date))) {
+                        $active_point = ($scheme_details) ? $scheme_details->active_point : NULL;
+                        $provision_point = ($scheme_details) ? $scheme_details->provision_point : NULL;
+                        $point = ($scheme_details) ? $scheme_details->points : NULL;
+                    } else {
+                        array_push($expire_schemes, $request->coupon_code);
+                        $active_point = '0';
+                        $provision_point = '0';
+                        $point = '0';
+                    }
+                    $tHistory = TransactionHistory::create([
+                        'customer_id' => $damageEntry->customer_id,
+                        'coupon_code' => $request->coupon_code,
+                        'scheme_id' => $scheme_details->scheme_id,
+                        'active_point' => $active_point,
+                        'provision_point' => $provision_point,
+                        'point' => $point,
+                        'remark' => 'Coupon scan',
+                        'created_by' => auth()->user()->id,
+                    ]);
+                } else {
+                    $tHistory = TransactionHistory::create([
+                        'customer_id' => $damageEntry->customer_id,
+                        'coupon_code' => $request->coupon_code,
+                        'scheme_id' => $scheme_details ? $scheme_id : null,
+                        'point' => $point,
+                        'created_at' => $created_at,
+                    ]);
+                }
+                return response()->json(['status' => 'success', 'message' => 'Damage Entry Approved successfully!']);
+            } elseif ($request->status == '0') {
+                return response()->json(['status' => 'success', 'message' => 'Damage Entry Pending successfully!']);
+            } else {
+                return response()->json(['status' => 'success', 'message' => 'Damage Entry Rejected successfully!']);
             }
-        }else{
-            return response()->json(['status' => 'error','message' => 'Error in change status of Damage Entry!']);
+        } else {
+            return response()->json(['status' => 'error', 'message' => 'Error in change status of Damage Entry!']);
         }
     }
 
     /*
     Damage entries export
     */
-    public function damage_entries_download(Request $request) {
+    public function damage_entries_download(Request $request)
+    {
         abort_if(Gate::denies('damage_entry_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();

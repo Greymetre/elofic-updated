@@ -9,7 +9,7 @@ class ServiceChargeProducts extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['active', 'charge_type_id', 'product_name','division_id', 'category_id', 'price', 'created_by', 'created_at', 'updated_at'];
+    protected $fillable = ['active', 'charge_type_id', 'product_name','division_id', 'category_id', 'price', 'other_charge', 'created_by', 'created_at', 'updated_at'];
 
     public function charge_type()
     {

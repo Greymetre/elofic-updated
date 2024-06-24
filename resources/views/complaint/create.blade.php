@@ -29,7 +29,8 @@
          border-radius: 5px;
          background: radial-gradient(#c5b0b0, transparent);
       }
-      .row{
+
+      .row {
          align-items: end !important;
       }
    </style>
@@ -65,6 +66,26 @@
                      @foreach($errors->all() as $error)
                      <li>{{$error}}</li>
                      @endforeach
+                  </span>
+               </div>
+               @endif
+               @if(session('message_success'))
+               <div class="alert alert-success">
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                     <i class="material-icons">close</i>
+                  </button>
+                  <span>
+                     {{ session('message_success') }}
+                  </span>
+               </div>
+               @endif
+               @if(session('message_info'))
+               <div class="alert alert-info">
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                     <i class="material-icons">close</i>
+                  </button>
+                  <span>
+                     {{ session('message_info') }}
                   </span>
                </div>
                @endif
@@ -259,7 +280,6 @@
                            <div class="form-group">
                               <label class="bmd-label-floating">Product Searial Number </label>
                               <input readonly type="text" name="product_serail_number" id="product_serail_number" class="form-control" value="{!! old( 'product_serail_number', $complaints['product_serail_number']) !!}">
-                              <input type="hidden" name="product_id" id="product_id" value="">
                               @if ($errors->has('product_serail_number'))
                               <div class="error col-lg-12">
                                  <p class="text-danger">{{ $errors->first('product_serail_number') }}</p>
@@ -281,7 +301,15 @@
                         <div class="col-md-3">
                            <div class="form-group">
                               <label class="bmd-label-floating">Product Name </label>
-                              <input readonly type="text" name="product_name" id="product_name" class="form-control" value="{!! old( 'product_name', $complaints['product_name']) !!}">
+                              <select name="product_id" id="product_id" class="select2">
+                                 <option value="">Select Product</option>
+                                 @if(count($products) > 0)
+                                 @foreach($products as $product)
+                                 <option value="{{$product->id}}" {{($complaints && $complaints['product_id']==$product->id)?'selected':''}}>{{$product->product_name}}</option>
+                                 @endforeach
+                                 @endif
+                              </select>
+                              <input readonly type="hidden" name="product_name" id="product_name" class="form-control" value="{!! old( 'product_name', $complaints['product_name']) !!}">
                               @if ($errors->has('product_name'))
                               <div class="error col-lg-12">
                                  <p class="text-danger">{{ $errors->first('product_name') }}</p>
@@ -291,7 +319,7 @@
                         </div>
                         <div class="col-md-3">
                            <div class="form-group">
-                              <label class="bmd-label-floating">Category </label>
+                              <label class="bmd-label-floating">Division </label>
                               <input readonly type="text" name="category" id="category" class="form-control" value="{!! old( 'category', $complaints['category']) !!}">
                               @if ($errors->has('category'))
                               <div class="error col-lg-12">
@@ -837,6 +865,7 @@
       });
       $("#product_serail_number").on("keyup", function() {
          var serial_no = $(this).val();
+         var chekcPro = '{{($complaints && $complaints->product_id)?$complaints->product_id:""}}'
          $.ajax({
             url: "{{ url('getProductInfoBySerialNo') }}",
             dataType: "json",
@@ -848,8 +877,9 @@
             success: function(res) {
                if (res.status === true) {
                   $("#product_code").val(res.data.product_code);
-                  $("#product_name").val(res.data.product_name.trim());
+                  $("#product_name").val(res.data.product_name);
                   $("#product_id").val(res.data.id);
+                  $("#product_id").change();
                   $("#category").val(res.data.categories.category_name);
                   $("#specification").val(res.data.specification);
                   $("#product_no").val(res.data.product_no);
@@ -912,6 +942,7 @@
                   $("#product_code").val(" ");
                   $("#product_name").val(" ");
                   $("#product_id").val(" ");
+                  $("#product_id").change();
                   $("#category").val(" ");
                   $("#specification").val(" ");
                   $("#product_no").val(" ");
@@ -927,6 +958,10 @@
                   $("#phase").prop('readonly', false);
                   $("#seller").prop('readonly', false);
                   $("#company_sale_bill_date").change();
+                  if (chekcPro != "") {
+                     $("#product_id").val(chekcPro);
+                     $("#product_id").change();
+                  }
                }
             }
          });
@@ -1081,6 +1116,46 @@
          }
          if ($(this).val().length > 4) {
             $("#product_serail_number").keyup();
+         }
+      });
+      $("#product_id").on("change", function() {
+         var product_id = $(this).val();
+         if (product_id != null && product_id != '') {
+            $.ajax({
+               url: "{{ url('getProductInfo') }}",
+               dataType: "json",
+               type: "POST",
+               data: {
+                  _token: "{{csrf_token()}}",
+                  product_id: product_id
+               },
+               success: function(res) {
+
+                  $("#product_code").val(res.product_code);
+                  $("#product_name").val(res.product_name);
+                  $("#category").val(res.categories.category_name);
+                  $("#specification").val(res.specification);
+                  $("#product_no").val(res.product_no);
+                  $("#phase").val(res.phase);
+                  $("#product_code").prop('readonly', true);
+                  $("#category").prop('readonly', true);
+                  $("#specification").prop('readonly', true);
+                  $("#product_no").prop('readonly', true);
+                  $("#phase").prop('readonly', true);
+               }
+            });
+         } else {
+            $("#product_code").val("");
+            $("#product_name").val("");
+            $("#category").val("");
+            $("#specification").val("");
+            $("#product_no").val("");
+            $("#phase").val("");
+            $("#product_code").prop('readonly', false);
+            $("#category").prop('readonly', false);
+            $("#specification").prop('readonly', false);
+            $("#product_no").prop('readonly', false);
+            $("#phase").prop('readonly', false);
          }
       });
    </script>

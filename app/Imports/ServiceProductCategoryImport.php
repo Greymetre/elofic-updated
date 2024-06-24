@@ -34,7 +34,7 @@ class ServiceProductCategoryImport implements ToCollection, WithValidation, With
     {
 
         foreach ($rows as $row) {
-            if ($row['id']) {
+            if (isset($row['id']) && !empty($row['id'])) {
                 $ServiceChargeCategories = ServiceChargeCategories::find($row['id']);
                 $ServiceChargeCategories->active = 'Y';
                 $ServiceChargeCategories->category_name = isset($row['category_name']) ? $row['category_name'] : '';

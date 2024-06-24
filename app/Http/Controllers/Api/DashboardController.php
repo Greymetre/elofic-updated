@@ -273,7 +273,7 @@ class DashboardController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
-            $customer = Customers::with('customerdocuments','customerdetails')->find($request->id);
+            $customer = Customers::with('customerdocuments', 'customerdetails')->find($request->id);
             $id = $request->id;
             $docimages = collect([]);
             if ($request->file('imggstin')) {
@@ -357,7 +357,7 @@ class DashboardController extends Controller
                 'msg' => $customer->first_name . ' your KYC details have sent for verification in Silver Saarthi.',
             ];
             $send_notification = SendNotifications::send($noti_data);
-            return response(['status' => 'success', 'message' => 'Data save successfully.', 'data' => $customerdetails, 'push_notification'=>$send_notification], 200);
+            return response(['status' => 'success', 'message' => 'Data save successfully.', 'data' => $customerdetails, 'push_notification' => $send_notification], 200);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
@@ -458,9 +458,20 @@ class DashboardController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
+            $thistorys = TransactionHistory::where('customer_id', $request->id)->get();
             $data['total_points'] = TransactionHistory::where('customer_id', $request->id)->sum('point') ?? 0;
             $data['active_points'] = TransactionHistory::where('customer_id', $request->id)->where('status', '1')->sum('point') ?? 0;
             $data['provision_points'] = TransactionHistory::where('customer_id', $request->id)->where('status', '0')->sum('point') ?? 0;
+            $data['active_points'] = 0;
+            $data['provision_points'] = 0;
+            foreach ($thistorys as $thistory) {
+                if ($thistory->status == '1') {
+                    $data['active_points'] += $thistory->point;
+                } else {
+                    $data['active_points'] += $thistory->active_point;
+                    $data['provision_points'] += $thistory->provision_point;
+                }
+            }
             $data['total_redemption'] = Redemption::where('customer_id', $request->id)->whereNot('status', '2')->sum('redeem_amount') ?? 0;
             $data['total_rejected'] = Redemption::where('customer_id', $request->id)->where('status', '2')->sum('redeem_amount') ?? 0;
             $data['total_balance'] = (int)$data['active_points'] - (int)$data['total_redemption'];
@@ -504,41 +515,40 @@ class DashboardController extends Controller
 
         $month = Carbon::now()->format('M');
         $year = Carbon::now()->format('Y');
-        if($request->start_date && !empty($request->start_date) && $request->end_date && !empty($request->end_date)){
+        if ($request->start_date && !empty($request->start_date) && $request->end_date && !empty($request->end_date)) {
             $startOfWeek = $request->start_date;
             $endOfWeek = $request->end_date;
-        }else{
+        } else {
             $startOfWeek = Carbon::now()->startOfWeek()->toDateString();
             $endOfWeek = Carbon::now()->endOfWeek()->toDateString();
-
         }
-
+        
         $targetAchivment = SalesTargetUsers::where(['user_id' => $request->user_id, 'month' => $month, 'year' => $year])->first();
 
         $order_value = Order::whereBetween('order_date', [$startOfWeek, $endOfWeek])->where('created_by', $request->user_id)->sum('sub_total');
         $order_ids = Order::whereBetween('order_date', [$startOfWeek, $endOfWeek])->where('created_by', $request->user_id)->pluck('id');
         $order_qty = OrderDetails::whereIn('order_id', $order_ids)->sum('quantity');
         $customer_visit = CheckIn::whereBetween('checkin_date', [$startOfWeek, $endOfWeek])->where('user_id', $request->user_id)->count();
-        if(!empty($targetAchivment)){
+        if (!empty($targetAchivment)) {
             $data['target'] = $targetAchivment->target;
-            $data['achievement'] = $targetAchivment->achievement?$targetAchivment->achievement:"";
-            if($targetAchivment->achievement){
-                $data['achiv_per'] = number_format((($targetAchivment->achievement/$targetAchivment->target)*100), 2);
-                $data['target_per'] = number_format((100-$data['achiv_per']), 2);
-            }else{
+            $data['achievement'] = $targetAchivment->achievement ? $targetAchivment->achievement : "";
+            if ($targetAchivment->achievement) {
+                $data['achiv_per'] = number_format((($targetAchivment->achievement / $targetAchivment->target) * 100), 2);
+                $data['target_per'] = number_format((100 - $data['achiv_per']), 2);
+            } else {
                 $data['achiv_per'] = "0";
-                $data['target_per'] = "100";    
+                $data['target_per'] = "100";
             }
-        }else{
+        } else {
             $data['target'] = "";
             $data['achievement'] = "";
             $data['achiv_per'] = "";
             $data['target_per'] = "";
         }
-        $data['order_value'] = $order_value>0?number_format(($order_value/100000), 2):"";
-        $data['order_qty'] = $order_qty>0?$order_qty:"";
-        $data['customer_visit'] = $customer_visit>0?(string)$customer_visit:"";
+        $data['order_value'] = $order_value > 0 ? number_format(($order_value / 100000), 2) : "";
+        $data['order_qty'] = $order_qty > 0 ? $order_qty : "";
+        $data['customer_visit'] = $customer_visit > 0 ? (string)$customer_visit : "";
 
-        return response()->json(['status'=>'success', 'data'=>$data], 200);
+        return response()->json(['status' => 'success', 'data' => $data], 200);
     }
 }

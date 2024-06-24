@@ -256,10 +256,10 @@
                 @foreach($serviceBill->service_bill_products as $service_bill_products)
                 <tr>
                   <td>{{ucfirst($service_bill_products->service_type_details?$service_bill_products->service_type_details->charge_type:'-')}}</td>
-                  <td>{{ucfirst($service_bill_products->product?$service_bill_products->product->product_name:'-')}}</td>
+                  <td>{{ucfirst($service_bill_products->product?$service_bill_products->product->product_name:$service_bill_products->product_id)}}</td>
                   <td>{{$service_bill_products->quantity??'-'}}</td>
-                  <td>-</td>
-                  <td>-</td>
+                  <td>{{$service_bill_products->distance??'0'}}</td>
+                  <td>{{$service_bill_products->appreciation??'0'}}</td>
                   <td>{{$service_bill_products->price??'0'}}</td>
                   <td>{{$service_bill_products->subtotal??'0'}}</td>
                 </tr>
@@ -271,7 +271,8 @@
                   <th>{{$total_qua}}</th>
                   <th></th>
                   <th></th>
-                  <th>{{$total_pr}}</th>
+                  <th></th>
+                  <!-- <th>{{$total_pr}}</th> -->
                   <th>{{$total_pr}}</th>
                 </tr>
 

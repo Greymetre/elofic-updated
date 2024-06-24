@@ -12,6 +12,7 @@ use App\Models\EmployeeDetail;
 use App\Models\ParentDetail;
 use App\Models\SchemeHeader;
 use App\Models\Services;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -35,58 +36,68 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
 
     public function collection()
     {
+        $data = TransactionHistory::with(['customer', 'scheme']);
 
-        $data = TransactionHistory::with('customer', 'scheme');
         $userids = getUsersReportingToAuth();
-        if ($this->branch_id && $this->branch_id != null && count($this->branch_id) > 0) {
-            $branch_user_id = User::whereIn('branch_id', $this->branch_id)->whereIn('id', $userids)->pluck('id');
-            if (!empty($branch_user_id)) {
+
+        if (!empty($this->branch_id) && count($this->branch_id) > 0) {
+            $branch_user_id = User::whereIn('branch_id', $this->branch_id)
+                ->whereIn('id', $userids)
+                ->pluck('id');
+
+            if ($branch_user_id->isNotEmpty()) {
                 $branch_customer_id = Customers::whereIn('executive_id', $branch_user_id)->pluck('id');
-            }
-            if (!empty($branch_customer_id)) {
-                $data->whereIn('customer_id', $branch_customer_id);
+
+                if ($branch_customer_id->isNotEmpty()) {
+                    $data->whereIn('customer_id', $branch_customer_id);
+                }
             }
         } else {
             $userid = Auth::user()->id;
-            $userinfo = User::where('id', '=', $userid)->first();
-            if (!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin') && !$userinfo->hasRole('Sub_Admin') && !$userinfo->hasRole('HR_Admin') && !$userinfo->hasRole('HO_Account')  && !$userinfo->hasRole('Sub_Support') && !$userinfo->hasRole('Accounts Order') && !$userinfo->hasRole('Service Admin') && !$userinfo->hasRole('All Customers')) {
-                $branch_customer_id = Customers::whereIn('executive_id', $userids)->pluck('id');
-                $data->whereIn('customer_id', $branch_customer_id);
-            }
-        }
-        if ($this->parent_customer && $this->parent_customer != null  && count($this->parent_customer) > 0) {
-            $parent_customer_id = ParentDetail::whereIn('parent_id', $this->parent_customer)->pluck('customer_id');
+            $userinfo = User::find($userid);
 
-            if (!empty($parent_customer_id)) {
-                $data->whereIn('customer_id', $parent_customer_id);
+            if (!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin')) {
+                $data->where('user_id', $userid);
             }
         }
-        if ($this->customer_id && $this->customer_id != null  && $this->customer_id != '') {
+
+        if ($this->startdate) {
+            $data->whereDate('created_at', '>=', $this->startdate);
+        }
+
+        if ($this->enddate) {
+            $data->whereDate('created_at', '<=', $this->enddate);
+        }
+
+        if ($this->parent_customer) {
+            $parentCustomerIds = Customers::where('parent_id', $this->parent_customer)->pluck('id');
+            $data->whereIn('customer_id', $parentCustomerIds);
+        }
+
+        if ($this->scheme_name) {
+            $data->whereHas('scheme', function ($query) {
+                $query->where('name', 'LIKE', '%' . $this->scheme_name . '%');
+            });
+        }
+
+        if ($this->customer_id) {
             $data->where('customer_id', $this->customer_id);
         }
-        if ($this->scheme_name && $this->scheme_name != null  && $this->scheme_name != '') {
-            $scheme_details = SchemeDetails::with('products')->where('scheme_id', $this->scheme_name)->get();
-            $all_product_code = $scheme_details->pluck('products.product_code')->flatten()->unique();
-            $all_serial_number = Services::whereIn('product_code', $all_product_code)->pluck('serial_no');
 
-            if (!empty($all_serial_number)) {
-                $data->whereIn('coupon_code', $all_serial_number);
+        $collection = new Collection();
+
+        $data->chunk(1000, function($chunk) use ($collection) {
+            foreach ($chunk as $transaction) {
+                $collection->push($transaction);
             }
-        }
-        if ($this->startdate && $this->startdate != null && $this->startdate != '' && $this->enddate && $this->enddate != null && $this->enddate != '') {
-            $startDate = date('Y-m-d', strtotime($this->startdate));
-            $endDate = date('Y-m-d', strtotime($this->enddate));
-            $data = $data->whereDate('created_at', '>=', $startDate)
-                ->whereDate('created_at', '<=', $endDate);
-        }
-        $data = $data->latest()->get();
+        });
 
-        return $data;
+        return $collection;
     }
 
     public function headings(): array
     {
-        return ['Transaction Id', 'Date', 'Customer Id', 'Firm Name', 'Contact Person', 'Parent Code', 'Parent Id', 'Parent Name', 'Mobile Number', 'City', 'District', 'State', 'Branch', 'Div', 'Coupon Code', 'Sub Category', 'Prodcut Id', 'Prodcut Name', 'Scheme Name', 'Active Point', 'Provision Point', 'Remark', 'Emp Code', 'User Name'];
+        return ['Transaction Id', 'Date', 'Customer Id', 'Firm Name', 'Contact Person', 'Parent Code', 'Parent Id', 'Parent Name', 'Mobile Number', 'City', 'District', 'State', 'Branch', 'Div', 'Coupon Code', 'Sub Category', 'Prodcut Id', 'Prodcut Name', 'Scheme Name', 'Active Point', 'Provision Point', 'Points', 'Remark', 'Emp Code', 'User Name'];
     }
 
     public function map($data): array
@@ -133,7 +144,6 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
 
         //new fields end
         if ($data['status'] == '1') {
-
             return [
                 $data['id'],
                 $data['created_at'] = isset($data['created_at']) ? date("d-M-Y", strtotime($data['created_at'])) : '',
@@ -155,8 +165,9 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
                 $data['scheme'] ? $data['scheme']['product']['id'] : '',
                 $data['scheme'] ? $data['scheme']['product']['product_name'] : '',
                 (isset($scheme_details)) ? $scheme_details->scheme->scheme_name : '',
-                $data['point'],
+                $data['active_point'] + $data['provision_point'],
                 '',
+                $data['point'],
                 $data['remark'],
                 implode(',', $empcode_arr),
                 implode(',', $employee),
@@ -183,7 +194,8 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
                 $data['scheme'] ? $data['scheme']['product']['id'] : '',
                 $data['scheme'] ? $data['scheme']['product']['product_name'] : '',
                 (isset($scheme_details)) ? $scheme_details->scheme->scheme_name : '',
-                '',
+                $data['active_point'],
+                $data['provision_point'],
                 $data['point'],
                 $data['remark'],
                 implode(',', $empcode_arr),

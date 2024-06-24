@@ -129,6 +129,21 @@
                 </div>
               </div>
             </div>
+            <div class="col-md-6">
+              <div class="row">
+                <label class="col-md-5 col-form-label">Other Charges <span class="text-danger"> *</span></label>
+                <div class="col-md-7">
+                  <div class="form-group has-default bmd-form-group">
+                    <input type="text" name="other_charge" id="other_charge" class="form-control" value="{!! old( 'other_charge', $product['other_charge']) !!}">
+                    @if ($errors->has('other_charge'))
+                    <div class="error col-lg-12">
+                      <p class="text-danger">{{ $errors->first('other_charge') }}</p>
+                    </div>
+                    @endif
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="card-footer pull-right">
             {{ Form::submit($product->exists?'Update':'Submit', array('class' => 'btn btn-theme')) }}

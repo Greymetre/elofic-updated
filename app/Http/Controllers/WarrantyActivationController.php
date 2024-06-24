@@ -103,40 +103,45 @@ class WarrantyActivationController extends Controller
                 ]);
                 $request->end_user_id = $end_user->id;
             }
-            $wararanty = WarrantyActivation::create([
-                'product_serail_number' => $request->product_serail_number ?? NULL,
-                'product_id' => $request->product_id ?? NULL,
-                'end_user_id' => $request->end_user_id ?? NULL,
-                'branch_id' => $request->branch_id ?? NULL,
-                'customer_id' => $request->customer_id ?? NULL,
-                'status' => $request->status ?? 0,
-                'sale_bill_no' => $request->sale_bill_no ?? NULL,
-                'sale_bill_date' => $request->sale_bill_date ?? NULL,
-                'warranty_date' => $request->warranty_date ?? NULL,
-                'created_by' => auth()->user()->id
-            ]);
-            if ($request->status == '1') {
-                $checkTrans = TransactionHistory::where('coupon_code', $wararanty->product_serail_number)->first();
-                if ($checkTrans) {
-                    TransactionHistory::where('coupon_code', $wararanty->product_serail_number)->update(['status' => '1']);
-                    $customer = Customers::find($wararanty->customer_id);
-                    $noti_data = [
-                        'fcm_token' =>  $customer->customerdetails->fcm_token,
-                        'title' => 'Points Activated ✅',
-                        'msg' => $customer->name . ' your ' . $checkTrans->point . ' provisional points are successfully activated in Silver Saarthi.',
-                    ];
-                    $send_notification = SendNotifications::send($noti_data);
+            $data = WarrantyActivation::where('product_serail_number', $request->product_serail_number)->where('status', '!=', '3')->first();
+            if ($data) {
+                return Redirect::to('warranty_activation')->with('message_info', 'This serial number('.$request->product_serail_number.') already in Warranty Activation.');
+            } else {
+                $wararanty = WarrantyActivation::create([
+                    'product_serail_number' => $request->product_serail_number ?? NULL,
+                    'product_id' => $request->product_id ?? NULL,
+                    'end_user_id' => $request->end_user_id ?? NULL,
+                    'branch_id' => $request->branch_id ?? NULL,
+                    'customer_id' => $request->customer_id ?? NULL,
+                    'status' => $request->status ?? 0,
+                    'sale_bill_no' => $request->sale_bill_no ?? NULL,
+                    'sale_bill_date' => $request->sale_bill_date ?? NULL,
+                    'warranty_date' => $request->warranty_date ?? NULL,
+                    'created_by' => auth()->user()->id
+                ]);
+                if ($request->status == '1') {
+                    $checkTrans = TransactionHistory::where('coupon_code', $wararanty->product_serail_number)->first();
+                    if ($checkTrans) {
+                        TransactionHistory::where('coupon_code', $wararanty->product_serail_number)->update(['status' => '1']);
+                        $customer = Customers::find($wararanty->customer_id);
+                        $noti_data = [
+                            'fcm_token' =>  $customer->customerdetails->fcm_token,
+                            'title' => 'Points Activated ✅',
+                            'msg' => $customer->name . ' your ' . $checkTrans->point . ' provisional points are successfully activated in Silver Saarthi.',
+                        ];
+                        $send_notification = SendNotifications::send($noti_data);
+                    }
+                }
+                if ($request->hasFile('warranty_activation_attach')) {
+                    $file = $request->file('warranty_activation_attach');
+                    $customname = time() . '.' . $file->getClientOriginalExtension();
+                    $wararanty->addMedia($file)
+                        ->usingFileName($customname)
+                        ->toMediaCollection('warranty_activation_attach');
                 }
             }
-            if ($request->hasFile('warranty_activation_attach')) {
-                $file = $request->file('warranty_activation_attach');
-                $customname = time() . '.' . $file->getClientOriginalExtension();
-                $wararanty->addMedia($file)
-                    ->usingFileName($customname)
-                    ->toMediaCollection('warranty_activation_attach');
-            }
 
-            return Redirect::to('warranty_activation')->with('message_success', 'Warranty Activation Store Successfully.');
+            return Redirect::to($request->previous_url)->with('message_success', 'Warranty Activation Store Successfully.');
         } catch (\Exception $e) {
             return redirect()->back()->withErrors($e->getMessage())->withInput();
         }
