@@ -8,6 +8,7 @@ use App\Models\Branch;
 use App\Models\DealerAppointment;
 use App\Models\DealerAppointmentKyc;
 use App\Models\District;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Gate;
@@ -161,7 +162,8 @@ class DealerAppointmentController extends Controller
     {
         $branchs = Branch::where('active', 'Y')->get();
         $districts = District::where('active', 'Y')->get();
-        return view('dealer_appointment.edit', compact('dealerAppointment', 'branchs', 'districts'));
+        $users = User::where('branch_id', $dealerAppointment->branch)->get();
+        return view('dealer_appointment.edit', compact('dealerAppointment', 'branchs', 'districts', 'users'));
     }
 
     /**
@@ -175,6 +177,13 @@ class DealerAppointmentController extends Controller
     {
         $dealer_appointment = DealerAppointment::where('id', $dealerAppointment->id)->update($request->except(['_token']));
 
+        if ($request->hasFile('profile_picture')) {
+            $file = $request->file('profile_picture');
+            $customname = time() . '.' . $file->getClientOriginalExtension();
+            $dealer_appointment->addMedia($file)
+                ->usingFileName($customname)
+                ->toMediaCollection('profile_picture', 's3');
+        }
         if ($request->hasFile('service_policy')) {
             $file = $request->file('service_policy');
             $customname = time() . '.' . $file->getClientOriginalExtension();

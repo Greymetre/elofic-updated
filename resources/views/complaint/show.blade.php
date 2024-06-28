@@ -76,6 +76,7 @@
                 @elseif($complaint->complaint_status=='3')
                 <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending Complaint</b></button>
                 <button type="button" class="btn btn-sm btn-success open_status"><b>Open Complaint</b></button>
+                <button type="button" class="btn btn-sm btn-info close_status"><b>Close Complaint</b></button>
                 @elseif($complaint->complaint_status=='5')
                 <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending Complaint</b></button>
                 <button type="button" class="btn btn-sm btn-success open_status"><b>Open Complaint</b></button>
@@ -234,19 +235,14 @@
               </table>
 
               <div class="row invoice-info">
-                <div class="col-md-4"></div>
-                <div class="col-md-4 text-center" style="line-height: 0px;">
-                  <h5><em>Complaint Feedback Type</em></h5>
+                <div class="col-md-6 text-center" style="line-height: 15px;">
+                  <h6><em>Complete Remark</em></h6>
+                  <p><b>{{$complete_complaint?$complete_complaint->remark:'-'}}</b></p>
+                </div>
+                <div class="col-md-6 text-center" style="line-height: 0px;">
+                  <h6><em>Close Remark</em></h6>
                   <p><b>-</b></p>
                 </div>
-                <div class="col-md-4"></div>
-
-                <div class="col-md-4"></div>
-                <div class="col-md-4 text-center" style="line-height: 0px;">
-                  <h6><em>Feedback</em></h6>
-                  <p><b>-</b></p>
-                </div>
-                <div class="col-md-4"></div>
               </div>
 
               <table class="table responsive border-0 mt-4 new-table">
@@ -256,8 +252,8 @@
                   <td><em>Replacement Tag Description</em></td>
                 </tr>
                 <tr>
-                  <th class="pt-0">-</th>
-                  <th class="pt-0">-</th>
+                  <th class="pt-0">{{$service_bill?$service_bill->replacement_tag:'-'}}</th>
+                  <th class="pt-0">{{$service_bill?$service_bill->replacement_tag_number:'-'}}</th>
                   <th class="pt-0">-</th>
                 </tr>
               </table>
@@ -270,28 +266,51 @@
                   <div class="d-flex invoice-info all-attach">
                     @if($complaint->warranty_details)
                     @if($complaint->warranty_details->exists && $complaint->warranty_details->getMedia('warranty_activation_attach')->count() > 0 && Storage::disk('s3')->exists($complaint->warranty_details->getMedia('warranty_activation_attach')[0]->getPath()))
-                    <a href="{!! $complaint->warranty_details->getMedia('warranty_activation_attach')[0]->getFullUrl() !!}" data-lightbox="mygallery" data-title="Invoice">
-                      <img width="60" style="height: 65px !important;" src="{!! $complaint->warranty_details->getMedia('warranty_activation_attach')[0]->getFullUrl() !!}" class="img-fluid rounded"></a>
-                    <h6 class="ml-2 mb-0">{{$complaint->warranty_details->getMedia('warranty_activation_attach')[0]->name}}</h6>
+
+                    @php
+                    $media = $complaint->warranty_details->getMedia('warranty_activation_attach')[0];
+                    $mediaUrl = $media->getFullUrl();
+                    $mediaName = $media->name;
+                    @endphp
+
+                    @if($media->mime_type == 'application/pdf')
+                    <a href="{{ $mediaUrl }}" target="_blank" data-title="Invoice">
+                      <img width="60" style="height: 65px !important;" class="img-fluid rounded" src="{{url('/public/assets/img/pdf-icon.jpg')}}">
+                    </a>
+                    <h6 class="ml-2 mb-0">{{ $mediaName }}</h6>
                     @else
-                    <img width="50" src="{!! url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview1">
+                    <a href="{{ $mediaUrl }}" data-lightbox="mygallery" data-title="Invoice">
+                      <img width="60" style="height: 65px !important;" src="{{ $mediaUrl }}" class="img-fluid rounded">
+                    </a>
+                    <h6 class="ml-2 mb-0">{{ $mediaName }}</h6>
+                    @endif
+
+                    @else
+                    <img width="50" src="{{ url('/').'/'.asset('assets/img/placeholder.jpg') }}" class="imagepreview1">
                     @endif
                     @endif
+
                   </div>
                 </div>
                 @if($complaint->exists && $complaint->getMedia('complaint_attach')->count() > 0 && Storage::disk('s3')->exists($complaint->getMedia('complaint_attach')[0]->getPath()))
-                @foreach($complaint->getMedia('complaint_attach') as $k=>$media)
+                @foreach($complaint->getMedia('complaint_attach') as $k => $media)
                 <div class="col-md-6 mb-2">
-                  <h6 class="mr-2 mb-0">Complaint Attachments : </h6>
+                  <h6 class="mr-2 mb-0">Complaint Attachments:</h6>
                   <div class="d-flex invoice-info all-attach">
-                    <a href="{{$media->getFullUrl()}}" data-lightbox="mygallery">
+                    @if($media->mime_type == 'application/pdf')
+                    <a href="{{ $media->getFullUrl() }}" target="_blank"><img width="60" style="height: 65px !important;" class="img-fluid rounded" src="{{url('/public/assets/img/pdf-icon.jpg')}}"></a>
+                    <h6 class="ml-2 mb-0">{{ $mediaName }}</h6>
+                    @else
+                    <a href="{{ $media->getFullUrl() }}" data-lightbox="mygallery">
                       <img width="60" style="height: 65px !important;" class="img-fluid rounded" src="{!! $media->getFullUrl() !!}">
                     </a>
-                    <h6 class="ml-2 mb-0">{{$media->name}}</h6>
+                    <h6 class="ml-2 mb-0">{{ $media->name }}</h6>
+                    @endif
                   </div>
                 </div>
                 @endforeach
                 @endif
+
               </div>
 
               <hr class="mt-4">
@@ -369,11 +388,20 @@
                   <td><em>Action Done by ASC</em></td>
                   <td><em>Service centre remark</em></td>
                   <td><em>Work Done At</em></td>
+                  <td><em>Attachment</em></td>
                 </tr>
                 <tr>
                   <th class="pt-0">{{$work_done?$work_done->done_by:'-'}}</th>
                   <th class="pt-0">{{$work_done?$work_done->remark:'-'}}</th>
                   <th class="pt-0">{{$work_done?date('d M Y h:i A', strtotime($work_done->created_at)):'-'}}</th>
+                  <th class="pt-0">
+                    @if($work_done && !empty($work_done) && $work_done->getMedia('complaint_work_done_attach')->count() > 0 && Storage::disk('s3')->exists($work_done->getMedia('complaint_work_done_attach')[0]->getPath()))
+                    <a href="{!! $work_done->getMedia('complaint_work_done_attach')[0]->getFullUrl() !!}" target="_blank" data-title="Invoice">
+                      <h6 class="ml-2 mb-0">{{$work_done->getMedia('complaint_work_done_attach')[0]->name}}</h6>
+                      @else
+                      -
+                      @endif
+                  </th>
                 </tr>
               </table>
 
@@ -464,8 +492,22 @@
                 </tr>
                 <tr>
                   <td>{{strtoupper($complaint->product_serail_number)}}</td>
+                  <td>{{$service_bill?$service_bill->service_bill_products->sum('subtotal'):'-'}}</td>
+                  @if($service_bill && !empty($service_bill))
+                  @if($service_bill->status == '0')
+                  <td><span class="badge badge-secondary">Draft</span></td>
+                  @elseif($service_bill->status == '1')
+                  <td><span class="badge badge-warning">Claimed</span></td>
+                  @elseif($service_bill->status == '2')
+                  <td><span class="badge badge-info">Customer payble</span></td>
+                  @elseif($service_bill->status == '3')
+                  <td><span class="badge badge-success">Approve</span></td>
+                  @elseif($service_bill->status == '4')
+                  <td><span class="badge badge-danger">Cancel</span></td>
+                  @endif
+                  @else
                   <td>-</td>
-                  <td>-</td>
+                  @endif
                 </tr>
 
               </table>
@@ -742,25 +784,60 @@
         $('body').on('click', '.complete_status', function() {
           var id = $('#complaint_id').val();
           $.ajax({
-            url: "{{ url('complaint-complete') }}",
+            url: "{{ url('check-complaint-complete') }}",
             type: 'POST',
             data: {
               _token: token,
               id: id
             },
             success: function(data) {
-              $('.message').empty();
-              $('.alert').show();
               if (data.status == 'success') {
-                $('.alert').addClass("alert-success");
-                setTimeout(function() {
-                  location.reload();
-                }, 500);
-
+                Swal.fire({
+                  title: 'Enter your remark',
+                  input: 'text',
+                  inputPlaceholder: 'Remark',
+                  showCancelButton: true,
+                  inputValidator: (value) => {
+                    if (!value) {
+                      return 'You need to write something!';
+                    }
+                  }
+                }).then((result) => {
+                  console.log(result);
+                  if (result.value) {
+                    $.ajax({
+                      url: "{{ url('complaint-complete') }}",
+                      type: 'POST',
+                      data: {
+                        _token: token,
+                        id: id,
+                        remark: result.value
+                      },
+                      success: function(data) {
+                        if (data.status == 'success') {
+                          $('.message').empty();
+                          $('.alert').show();
+                          $('.alert').addClass("alert-success");
+                          $('.message').append(data.message);
+                          setTimeout(function() {
+                            location.reload();
+                          }, 700);
+                        } else {
+                          $('.message').empty();
+                          $('.alert').show();
+                          $('.alert').addClass("alert-danger");
+                          $('.message').append(data.message);
+                        }
+                      }
+                    })
+                  }
+                });
               } else {
+                $('.message').empty();
+                $('.alert').show();
                 $('.alert').addClass("alert-danger");
+                $('.message').append(data.message);
               }
-              $('.message').append(data.message);
             },
           });
         });

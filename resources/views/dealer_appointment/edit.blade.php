@@ -68,6 +68,40 @@
     .inp-div i:first-child {
       font-size: 35px !important;
     }
+
+    .profile-pic-container {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+    }
+
+    .profile-pic {
+      width: 100%;
+      height: 100%;
+      border-radius: 5%;
+      overflow: hidden;
+      border: 2px solid #ccc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .profile-pic img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    input[type="file"] {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+    }
   </style>
   <div class="content-header">
     <div class="container-fluid">
@@ -110,7 +144,7 @@
           <form action="{{route('dealer-appointment-form.update', $dealerAppointment)}}" method="post" enctype="multipart/form-data">
             @csrf
             <div class="row mt-3">
-              <div class="col-md-4 content-frm bg-light">
+              <div class="col-md-3 content-frm bg-light">
                 <div class="form-group row">
                   <div class="col-md-3">
                     <label for="branch">Branch </label>
@@ -127,7 +161,38 @@
                   </div>
                 </div>
               </div>
-              <div class="col-md-4 content-frm bg-light">
+              <div class="col-md-6 content-frm bg-light">
+                <div class="form-group row">
+                  <div class="col-md-4">
+                    <label for="branch">User(Created By) </label>
+                  </div>
+                  <div class="col-md-8">
+                    <select class="select2" name="created_by" id="created_by" data-style="select-with-transition" title="Select User">
+                      <option value="">Select User</option>
+                      @if(count($users) > 0)
+                      @foreach($users as $user)
+                      <option value="{{$user->id}}" {{($dealerAppointment->created_by == $user->id)?'selected':''}}>{{$user->name}}</option>
+                      @endforeach
+                      @endif
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="profile-pic-container">
+                  <div class="profile-pic">
+                    @if($dealerAppointment->exists && $dealerAppointment->getMedia('profile_picture')->count() > 0 && Storage::disk('s3')->exists($dealerAppointment->getMedia('profile_picture')[0]->getPath()))
+                    <img id="profileImage" src="{{$dealerAppointment->getMedia('profile_picture')[0]->getFullUrl()}}" alt="Passport Size Profile Picture">
+                    @else
+                    <img id="profileImage" src="default-profile.png" alt="Passport Size Profile Picture">
+                    @endif
+                  </div>
+                  <input type="file" id="fileInput" name="profile_picture" accept="image/*">
+                </div>
+              </div>
+            </div>
+            <div class="row mt-3">
+              <div class="col-md-3 content-frm bg-light">
                 <div class="form-group row">
                   <div class="col-md-3">
                     <label for="district">District </label>
@@ -144,7 +209,7 @@
                   </div>
                 </div>
               </div>
-              <div class="col-md-4 content-frm bg-light">
+              <div class="col-md-3 content-frm bg-light">
                 <div class="form-group row">
                   <div class="col-md-4">
                     <label for="city">Town / City </label>
@@ -153,6 +218,16 @@
                     <select class="form-select select2" name="city" id="city" required>
                       <option value="" disabled selected>Select City</option>
                     </select>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 content-frm bg-light">
+                <div class="form-group row">
+                  <div class="col-md-4">
+                    <label for="place">Place </label>
+                  </div>
+                  <div class="col-md-8">
+                    <input type="text" name="place" id="place" class="form-control uppercase" value="{{$dealerAppointment->place}}">
                   </div>
                 </div>
               </div>
@@ -901,5 +976,37 @@
               });
             }).trigger('change');
             $('.select2').select2()
+
+            document.getElementById('fileInput').addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('profileImage').src = e.target.result;
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            $("#branch").on("change", function() {
+                localStorage.removeItem('executive_id');
+                var branch_id = $(this).val();
+                $.ajax({
+                    url: "{{ url('getUserList') }}",
+                    dataType: "json",
+                    type: "POST",
+                    data: {
+                        _token: "{{csrf_token()}}",
+                        branch_id: branch_id
+                    },
+                    success: function(res) {
+                        var html = '<option value="">Select User</option>';
+                        $.each(res, function(k, v) {
+                            html += '<option value="' + v.id + '"> (' + v.employee_codes + ') ' + v.name + '</option>';
+                        });
+                        $("#created_by").html(html);
+                    }
+                });
+            });
           </script>
 </x-app-layout>

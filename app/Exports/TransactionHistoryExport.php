@@ -57,7 +57,7 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
             $userinfo = User::find($userid);
 
             if (!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin')) {
-                $data->where('user_id', $userid);
+                // $data->where('user_id', $userid);
             }
         }
 

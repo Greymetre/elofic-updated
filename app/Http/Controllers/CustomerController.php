@@ -159,7 +159,7 @@ class CustomerController extends Controller
                                     ->Orwhere('mobile', 'like', "%{$search}%");
                                 });
                             }
-                            if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('Sub_Support')  && !Auth::user()->hasRole('HO_Account')  && !Auth::user()->hasRole('HR_Admin') && !Auth::user()->hasRole('Service Admin') && !Auth::user()->hasRole('All Customers'))
+                            if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('Sub_Support')  && !Auth::user()->hasRole('HO_Account')  && !Auth::user()->hasRole('HR_Admin') && !Auth::user()->hasRole('Service Admin') && !Auth::user()->hasRole('All Customers') && !Auth::user()->hasRole('Sub_Admin'))
                             {
                                 $query->whereIn('executive_id',$userids);
                             }
@@ -484,8 +484,8 @@ class CustomerController extends Controller
          $id = decrypt($id);
         $thistorys = TransactionHistory::where('customer_id', $id)->get();
         $total_points = TransactionHistory::where('customer_id', $id)->sum('point')??0;
-        $active_points = TransactionHistory::where('customer_id', $id)->where('status', '1')->sum('point')??0;
-        $provision_points = TransactionHistory::where('customer_id', $id)->where('status', '0')->sum('point')??0;
+        // $active_points = TransactionHistory::where('customer_id', $id)->where('status', '1')->sum('point')??0;
+        // $provision_points = TransactionHistory::where('customer_id', $id)->where('status', '0')->sum('point')??0;
         $active_points = 0;
         $provision_points = 0;
         foreach($thistorys as $thistory){

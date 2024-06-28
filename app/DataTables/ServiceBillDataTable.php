@@ -27,7 +27,7 @@ class ServiceBillDataTable extends DataTable
                 }elseif($query->status == '2'){
                     return '<a href="'.route('service_bills.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Service Bill"><span class="badge badge-info">Customer payble</span></a>';
                 }elseif($query->status == '3'){
-                    return '<a href="'.route('service_bills.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Service Bill"><span class="badge badge-success">Approve</span></a>';
+                    return '<a href="'.route('service_bills.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Service Bill"><span class="badge badge-success">Approved</span></a>';
                 }elseif($query->status == '4'){
                     return '<a href="'.route('service_bills.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Service Bill"><span class="badge badge-danger">Cancel</span></a>';
                 }
@@ -87,7 +87,7 @@ class ServiceBillDataTable extends DataTable
      */
     public function query(ServiceBill $model)
     {
-        return $model->newQuery();
+        return $model->latest()->newQuery();
     }
 
     /**

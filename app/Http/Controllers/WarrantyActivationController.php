@@ -141,7 +141,7 @@ class WarrantyActivationController extends Controller
                 }
             }
 
-            return Redirect::to($request->previous_url)->with('message_success', 'Warranty Activation Store Successfully.');
+            return Redirect::to($request->previous_url.'?serial_no='.$request->product_serail_number)->with('message_success', 'Warranty Activation Store Successfully.');
         } catch (\Exception $e) {
             return redirect()->back()->withErrors($e->getMessage())->withInput();
         }

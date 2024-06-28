@@ -60,7 +60,7 @@
                   <div class="row">
                      <div class="col-md-3">
                         <label for="status" class="form-control"><b>Warranty Activation Status</b></label>
-                        <input type="hidden" name="previous_url" value="{{ url()->previous() }}">
+                        <input type="hidden" name="previous_url" value="{{ strtok(url()->previous(), '?') }}">
                      </div>
                      <div class="col-md-3">
                         <select name="status" id="status" class="select2" required>
@@ -231,7 +231,7 @@
                            <label for="customer_state" class="form-control">State</label>
                         </div>
                         <div class="col-md-2">
-                        <select name="customer_state" id="customer_state" placeholder="Select State" class="select2 form-control" required>
+                           <select name="customer_state" id="customer_state" placeholder="Select State" class="select2 form-control" required>
                               <option value="" disabled selected>Select State</option>
                               @if($states && count($states) > 0)
                               @foreach($states as $state)
@@ -285,7 +285,7 @@
                            <label for="customer_id" class="form-control">Seller</label>
                         </div>
                         <div class="col-md-4">
-                           <select name="customer_id" placeholder="Select Customers" class="select2 form-control">
+                           <select name="customer_id" placeholder="Select Customers" class="select2 form-control" required>
                               <option value="" disabled selected>Select Customer</option>
                               @if($customers && count($customers) > 0)
                               @foreach($customers as $customer)
@@ -303,7 +303,7 @@
                            <label for="sale_bill_date" class="form-control">Sale Bill Date</label>
                         </div>
                         <div class="col-md-4">
-                           <input type="text" name="sale_bill_date" id="sale_bill_date" class="datepicker form-control" placeholder="Sale Bill Date" autocomplete="off" value="{!! old( 'sale_bill_date' , $warranty_activation['sale_bill_date']) !!}">
+                           <input type="text" name="sale_bill_date" id="sale_bill_date" class="datepicker form-control" placeholder="Sale Bill Date" autocomplete="off" value="{!! old( 'sale_bill_date' , $warranty_activation['sale_bill_date']) !!}" required>
                            @if ($errors->has('sale_bill_date'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('sale_bill_date') }}</p>
@@ -316,7 +316,7 @@
                            <label for="warranty_date" class="form-control">Warranty Date</label>
                         </div>
                         <div class="col-md-4">
-                           <input type="text" name="warranty_date" id="warranty_date" class="datepicker form-control" placeholder="Warranty Date" autocomplete="off" value="{!! old( 'warranty_date' , $warranty_activation['warranty_date']) !!}">
+                           <input type="text" name="warranty_date" id="warranty_date" class="datepicker form-control" placeholder="Warranty Date" autocomplete="off" value="{!! old( 'warranty_date' , $warranty_activation['warranty_date']) !!}" required>
                            @if ($errors->has('warranty_date'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('warranty_date') }}</p>
@@ -327,7 +327,7 @@
                            <label for="sale_bill_no" class="form-control">Co Sale Bill No.</label>
                         </div>
                         <div class="col-md-4">
-                           <input type="text" name="sale_bill_no" id="sale_bill_no" class="form-control" value="{!! old( 'sale_bill_no' , $warranty_activation['sale_bill_no']) !!}">
+                           <input type="text" name="sale_bill_no" id="sale_bill_no" class="form-control" value="{!! old( 'sale_bill_no' , $warranty_activation['sale_bill_no']) !!}" required>
                            @if ($errors->has('sale_bill_no'))
                            <div class="error col-lg-12">
                               <p class="text-danger">{{ $errors->first('sale_bill_no') }}</p>
@@ -347,18 +347,32 @@
                            <span class="btn btn-just-icon btn-round btn-file">
                               <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
                               <span class="fileinput-exists">Change</span>
-                              <input type="file" name="warranty_activation_attach" class="getimage1" accept="image/*">
+                              <input type="file" name="warranty_activation_attach" class="getimage1" accept="image/*,application/pdf">
                            </span>
                            <br>
                            <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
                         </div>
                         <div class="fileinput-new thumbnail">
-                           @if($warranty_activation->exists && $warranty_activation->getMedia('warranty_activation_attach')->count() > 0 && Storage::disk('s3')->exists($warranty_activation->getFirstMedia('warranty_activation_attach')->getPath()))
-                           <img src="{!! $warranty_activation->getMedia('warranty_activation_attach')[0]->getFullUrl() !!}" class="imagepreview1">
+                           @if($warranty_activation->exists && $warranty_activation->getMedia('warranty_activation_attach')->count() > 0)
+                           @php
+                           $media = $warranty_activation->getFirstMedia('warranty_activation_attach');
+                           $filePath = $media->getPath();
+                           @endphp
+
+                           @if(Storage::disk('s3')->exists($filePath))
+                           @if($media->mime_type == 'application/pdf')
+                           <a href="{!! $media->getFullUrl() !!}" target="_blank">{{ $media->file_name }}</a>
+                           @else
+                           <img src="{!! $media->getFullUrl() !!}" class="imagepreview1">
+                           @endif
+                           @else
+                           <img src="{!! url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview1">
+                           @endif
                            @else
                            <img src="{!! url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview1">
                            @endif
                         </div>
+
                         <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
                         <!-- <label class="bmd-label-floating">Attachment 1st</label> -->
                         @if ($errors->has('warranty_activation_attach'))
@@ -497,10 +511,10 @@
          });
       }).trigger('change');
 
-      $('#status').on('change', function(){
-         if($(this).val() == '3'){
+      $('#status').on('change', function() {
+         if ($(this).val() == '3') {
             $('.reject-remark').removeClass('d-none');
-         }else{
+         } else {
             $('.reject-remark').addClass('d-none');
          }
       }).trigger('change');

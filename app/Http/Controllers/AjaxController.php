@@ -11,12 +11,11 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, CustomerDetails, EndUser, Expenses, GiftModel, GiftSubcategory, Notes, OrderSchemeDetail, PrimarySales, Redemption, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, UserCityAssign, WarrantyActivation};
-use App\Models\User;
-use Carbon\Carbon;
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CustomerDetails, DealerAppointment, EndUser, Expenses, GiftModel, GiftSubcategory, Notes, OrderSchemeDetail, PrimarySales, Redemption, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation};
 use App\Models\UserLiveLocation;
 use App\Models\UserActivity;
 use App\Http\Controllers\SendNotifications;
+use Carbon\Carbon;
 use LDAP\Result;
 
 class AjaxController extends Controller
@@ -986,12 +985,23 @@ class AjaxController extends Controller
             $shop_img = Customers::where('id', $request->cust_id)->value('profile_image');
             $customer_bank_details = CustomerDetails::select('account_number', 'account_holder', 'ifsc_code', 'bank_name', 'bank_status')->where('customer_id', $request->cust_id)->first();
             $customer_aadhar_details = CustomerDetails::select('aadhar_no', 'aadhar_no_status')->where('customer_id', $request->cust_id)->first();
-            $trans_history = TransactionHistory::where('customer_id', $request->cust_id)->where('status', '1')->sum('point');
-            $redem_history = Redemption::where('customer_id', $request->cust_id)->whereNotIn('status', ['2'])->sum('redeem_amount');
+            $thistorys = TransactionHistory::where('customer_id', $request->cust_id)->get();
+            $active_points = 0;
+            $provision_points = 0;
+            foreach ($thistorys as $thistory) {
+                if ($thistory->status == '1') {
+                    $active_points += $thistory->point;
+                } else {
+                    $active_points += $thistory->active_point;
+                    $provision_points += $thistory->provision_point;
+                }
+            }
+            $total_redemption = Redemption::where('customer_id', $request->cust_id)->whereNot('status', '2')->sum('redeem_amount') ?? 0;
+            $total_balance = (int)$active_points - (int)$total_redemption;
 
             $data['bank_details'] = $customer_bank_details;
             $data['aadhar_details'] = $customer_aadhar_details;
-            $data['Total_points'] = (int)$trans_history - (int)$redem_history;
+            $data['Total_points'] = $total_balance;
             $data['shop_img'] = $shop_img;
 
             return response()->json($data);
@@ -1077,7 +1087,7 @@ class AjaxController extends Controller
                     ->first();
                 if ($data) {
                     $data->product->categories = $data->product->categories;
-                    $check_Warranty = WarrantyActivation::with('media','customer')->where('status', '!=', '3')->where('product_serail_number', $serial_no)->first();
+                    $check_Warranty = WarrantyActivation::with('media','customer','seller_details')->where('status', '!=', '3')->where('product_serail_number', $serial_no)->first();
                     return response()->json(['status' => true, 'data_all' => $data, 'data' => $data->product, 'check_Warranty' => $check_Warranty]);
                 } else {
                     return response()->json(['status' => false, 'data' => null]);
@@ -1306,5 +1316,33 @@ class AjaxController extends Controller
             return response()->json($data);
 
         }
+    }
+
+    public function changeAppointmentStatus(Request $request)
+    {
+        $update = DealerAppointment::where('id', $request->appo_id)->update(['approval_status'=>$request->status]);
+        if($update){
+            return response()->json(['status'=>'success', 'message'=>'Approved Successfully !!']);
+        }else{
+            return response()->json(['status'=>'error', 'message'=>'Somthing went wrong.']);
+        }
+    }
+
+    public function getWorkDoneTime(Request $request)
+    {
+        $work_done = ComplaintWorkDone::where('complaint_id', $request->complaint_id)->latest()->first();
+        $service_center = ComplaintTimeline::where('complaint_id', $request->complaint_id)->where('status', '101')->latest()->first();
+
+        $start_date_time = $service_center->created_at;
+        $end_date_time = $work_done->created_at;
+
+        $diff = $start_date_time->diff($end_date_time);
+
+        $hoursDifference = $diff->h;
+        $minutesDifference = $diff->i;
+
+        $totalHours = $diff->days * 24 + $hoursDifference + ($minutesDifference / 60);
+
+        return response()->json(['status'=>'success', 'hours'=>$totalHours]);
     }
 }

@@ -572,7 +572,7 @@
 
 
       @if(auth()->user()->can('services_access'))
-      <li class="nav-item {{ request()->is('services*') || request()->is('warranty_activation*') || request()->is('complaint-type*') || request()->is('complaints*') || request()->is('service-charge*') ? 'active' : '' }}">
+      <li class="nav-item {{ request()->is('services*') || request()->is('warranty_activation*') || request()->is('complaint-type*') || request()->is('complaints*') || request()->is('service-charge*') || request()->is('service_bills*') ? 'active' : '' }}">
         <a class="nav-link collapsed" data-toggle="collapse" href="#serviceMenu" aria-expanded="false">
           <i class="material-icons">design_services</i>
           <p> {!! trans('panel.sidemenu.services') !!}
@@ -932,7 +932,7 @@
       </li>
       @endif
       @if(auth()->user()->can('reports'))
-      <li class="nav-item {{ request()->is('reports/reports_sale') ? 'active' : '' }}">
+      <li class="nav-item {{ request()->is('reports*') ? 'active' : '' }}">
         <a class="nav-link collapsed" data-toggle="collapse" href="#tasksMenu" aria-expanded="false">
           <i class="material-icons">airplay</i>
           <p> Reports
@@ -948,12 +948,34 @@
                   </a>
                 </li>
                 @endif -->
-            @if(auth()->user()->can('reports_sale'))
-            <li class="nav-item {{ request()->is('reports/reports_sale*') ? 'active' : '' }}">
-              <a class="nav-link" href="{{ url('reports/reports_sale') }}">
+                @if(auth()->user()->can('reports_sale'))
+            <li class="nav-item {{ request()->is('reports/reports_sale*') || request()->is('reports/fos_rating*') ? 'active' : '' }}">
+              <a class="nav-link collapsed" data-toggle="collapse" href="#salesReportsMenu" aria-expanded="false">
                 <i class="material-icons">check_circle</i>
-                <p>Sales </p>
+                <p>Sales</p>
               </a>
+            <li class="nav-item ">
+              <div class="collapse" id="salesReportsMenu" style="">
+                <ul class="nav">
+                  @if(auth()->user()->can('user_working_report'))
+                  <li class="nav-item {{ request()->is('reports/reports_sale*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('reports/reports_sale') }}">
+                      <i class="material-icons">check_circle</i>
+                      <p>User working report</p>
+                    </a>
+                  </li>
+                  @endif
+                  @if(auth()->user()->can('fos_rating_report'))
+                  <li class="nav-item {{ request()->is('reports/fos_rating*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('reports/fos_rating') }}">
+                      <i class="material-icons">store</i>
+                      <p>FOS Rating Report</p>
+                    </a>
+                  </li>
+                  @endif
+                </ul>
+              </div>
+            </li>
             </li>
             @endif
             @if(auth()->user()->can('adherence_report'))

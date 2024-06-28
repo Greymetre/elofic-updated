@@ -562,7 +562,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('beatAdherenceDetailDownload', [ReportController::class, 'beatAdherenceDetailDownload']);
     Route::any('reports/attendancereport', [ReportController::class, 'attendancereport']);
     Route::any('reports/reports_sale', [UsersController::class, 'reports_sale']);
+    Route::any('reports/fos_rating', [UsersController::class, 'fos_rating']);
     Route::get('user_sales_report_download', [UsersController::class, 'user_sales_report_download']);
+    Route::get('fos_rating_report_download', [UsersController::class, 'fos_rating_report_download']);
     Route::any('reports/customersreport', [ReportController::class, 'customersReport']);
     Route::any('reports/loyalty_summary_report', [ReportController::class, 'loyaltySummaryReport'])->name('loyaltySummaryReport');
     Route::any('reports/loyalty_dealer_wise_summary_report', [ReportController::class, 'loyaltyDealerWiseSummaryReport'])->name('loyaltyDealerWiseSummaryReport');
@@ -738,6 +740,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('complaint-pending', [ComplaintController::class, 'pendingComplaint'])->name('pendingComplaint');
     Route::post('complaint-open', [ComplaintController::class, 'openComplaint'])->name('openComplaint');
     Route::post('complaint-complete', [ComplaintController::class, 'completeComplaint'])->name('completeComplaint');
+    Route::post('check-complaint-complete', [ComplaintController::class, 'checkCompleteComplaint'])->name('checkCompleteComplaint');
     Route::any('complaint_download', [ComplaintController::class, 'complaint_download'])->name('complaint_download');
     Route::any('complaint-work-done/{complaint}', [ComplaintController::class, 'work_done'])->name('complaint_work_done');
     Route::any('complaint-work-done-submit', [ComplaintController::class, 'work_done_submit'])->name('complaint_work_done_submit');
@@ -778,6 +781,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('service_bills', ServiceBillController::class);
     Route::post('service-bill-company-claim', [ServiceBillController::class, 'company_claim'])->name('company_claim');
     Route::post('service-bill-draft', [ServiceBillController::class, 'draftBill'])->name('draftBill');
+    Route::post('service-bill-approve', [ServiceBillController::class, 'approveBill'])->name('approveBill');
     Route::post('service-bill-cancel', [ServiceBillController::class, 'cancelBill'])->name('cancelBill');
     Route::post('service-bill-customer-pay', [ServiceBillController::class, 'customer_pay'])->name('customer_pay');
     Route::any('service-bill-product-remove', [ServiceBillController::class, 'remove_product'])->name('remove_product');
@@ -864,6 +868,8 @@ Route::any('/remove_session', [AjaxController::class, 'remove_session'])->name('
 Route::any('/getPrimaryTotal', [AjaxController::class, 'getPrimaryTotal'])->name('getPrimaryTotal');
 Route::any('getServiceProduct', [AjaxController::class, 'getServiceProduct'])->name('getServiceProduct');
 Route::any('getServiceProductDetails', [AjaxController::class, 'getServiceProductDetails'])->name('getServiceProductDetails');
+Route::any('changeAppointmentStatus', [AjaxController::class, 'changeAppointmentStatus']);
+Route::any('getWorkDoneTime', [AjaxController::class, 'getWorkDoneTime']);
 
 
 

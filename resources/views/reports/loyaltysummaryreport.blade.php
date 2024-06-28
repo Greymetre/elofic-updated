@@ -11,21 +11,21 @@
             <div class="btn-group header-frm-btn">
               @if(auth()->user()->can(['customer_download']))
               <form method="GET" action="{{ URL::to('loyalty-summary-report-download') }}">
-                  <div class="d-flex flex-row">
+                  <div class="d-flex flex-wrap flex-row">
                     <div class="p-2">
-                        <select class="select2" name="branch_id" id="branch_id" data-style="select-with-transition" title="Select User">
-                         <option value="">Select Branch</option>
-                        @if(@isset($branches ))
-                        @foreach($branches as $branch)
-                         <option value="{!! $branch['id'] !!}">{!! $branch['branch_name'] !!}</option>
+                        <select class="select2" name="state_id" id="state_id" data-style="select-with-transition" title="Select User">
+                         <option value="">Select State</option>
+                        @if(@isset($states ))
+                        @foreach($states as $state)
+                         <option value="{!! $state['id'] !!}">{!! $state['state_name'] !!}</option>
                         @endforeach
                         @endif
                       </select>
                     </div>
+                    @if(auth()->user()->can(['loyalty_summary_report_download']))
+                    <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Loyalty  Summary Branch Report"><i class="material-icons">cloud_download</i></button></div>
+                    @endif
                   </div>
-                  @if(auth()->user()->can(['loyalty_summary_report_download']))
-                  <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Loyalty  Summary Branch Report"><i class="material-icons">cloud_download</i></button></div>
-                  @endif
               </form>
               @endif
             </div>
@@ -56,7 +56,7 @@
             <table id="getbranchsummary" class="table table-striped- table-bordered table-hover table-checkable ">
             <thead class=" text-primary">
               <th>{!! trans('panel.global.no') !!}</th>
-              <th>Branch</th>
+              <th>State</th>
               <th>Total Retailer Registred Nos</th>
               <th>Total Retailer Under Saarthi Nos</th>
               <th>Coupon Scan Nos</th>
@@ -110,7 +110,7 @@
         ajax: {
           url: "{{ route('loyaltySummaryReport') }}",
           data: function (d) {
-            d.branch_id = $('#branch_id').val();
+            d.state_id = $('#state_id').val();
           }
         },
         columns: [
@@ -130,7 +130,7 @@
            
         ]
     });
-    $('#branch_id').change(function() {
+    $('#state_id').change(function() {
       table.draw();
     });
   });

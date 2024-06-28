@@ -21,6 +21,7 @@ class DamageEntriesExport implements FromCollection, WithHeadings, ShouldAutoSiz
 {
     public function __construct($request)
     {
+        dd('Working on it....');
         $this->user_id = $request->input('user_id');
         $this->start_date = $request->input('start_date');
         $this->end_date = $request->input('end_date');

@@ -26,10 +26,24 @@ class DealerAppointmentDataTable extends DataTable
             ->eloquent($query)
             ->addIndexColumn()
             ->editColumn('appointment_date', function ($data) {
-                return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
+                return isset($data->appointment_date) ? showdatetimeformat($data->appointment_date) : '';
             })
             ->editColumn('name', function ($data) {
                 return $data->first_name.' '.$data->middle_name.' '.$data->last_name;
+            })
+            ->editColumn('approval_status', function ($data) {
+                if($data->approval_status == '0'){
+                    return '<span class="badge badge-warning">Pending</span>';
+                }elseif($data->approval_status == '1'){
+                    return '<span class="badge badge-dark">Approved By Sales Team</span>';
+                }elseif($data->approval_status == '2'){
+                    return '<span class="badge badge-info">Approved By Account</span>';
+                }elseif($data->approval_status == '3'){
+                    return '<span class="badge badge-success">Approved By HO</span>';
+                }
+            })
+            ->editColumn('createdbyname.name', function ($data) {
+                return $data->createdbyname?$data->createdbyname->name:'-';
             })
             ->editColumn('action', function ($data) {
                 $btn = '';
@@ -42,7 +56,7 @@ class DealerAppointmentDataTable extends DataTable
                 return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">'.$btn.'</div>';
             })
 
-            ->rawColumns(['appointment_date', 'action']);
+            ->rawColumns(['appointment_date', 'action','createdbyname.name','approval_status']);
     }
 
     /**
@@ -62,6 +76,10 @@ class DealerAppointmentDataTable extends DataTable
             $endDate = date('Y-m-d', strtotime($request->enddate));
             $data = $data->whereDate('appointment_date', '>=', $startDate)
                 ->whereDate('appointment_date', '<=', $endDate);
+        }
+
+        if($request->status_id != '' && $request->status_id != NULL){
+            $data->where('approval_status', $request->status_id);
         }
 
         $data = $data->latest()->newQuery();

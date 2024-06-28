@@ -9,43 +9,47 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://silver.fieldkonnect.io//public/assets/plugins/select2/css/select2.css">
     <style>
-        .inner-border {
-            padding: 5px;
-            border-bottom: 1px solid gray;
-        }
-
-        .middle-border {
-            padding: 1px;
-            border-bottom: 6px solid #787373;
-        }
-
-        .outer-border {
-            border-bottom: 2px solid #000;
-        }
-
-        .content {
-            padding: 20px;
-            background-color: white;
-        }
-
         input.form-check-input {
-            border: 2px solid;
-            width: 20px;
-            height: 20px;
+            border: 2px solid !important;
+            width: 20px !important;
+            height: 20px !important;
+            opacity: 1 !important;
         }
 
-        .box-inputs {
-            border: 1px solid;
-            border-radius: 5px;
-            padding: 15px;
+        /* Landscape print layout */
+        @media print {
+            @page {
+                size: landscape;
+            }
         }
 
-        input {
+        input.form-control:read-only {
             border-bottom: 1px solid #000 !important;
         }
 
-        .uppercase {
-            text-transform: uppercase;
+        p.attach-p:before {
+            content: " ";
+            position: absolute;
+            width: 100px;
+            height: 5px;
+            top: 24px;
+            background: radial-gradient(#00aadb, transparent);
+            left: 50px;
+        }
+
+        p.attach-p {
+            font-weight: 900;
+            font-family: cursive;
+            position: relative;
+        }
+
+        .col-md-3.mb-3.ml-5.text-center.border.rounded {
+            transition: transform 0.5s, box-shadow 0.5s;
+        }
+
+        .col-md-3.mb-3.ml-5.text-center.border.rounded:hover {
+            transform: scale(1.2);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
 
         .inp-div {

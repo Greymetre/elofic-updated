@@ -456,6 +456,35 @@
 
     <!-- for checked -->
     <script type="text/javascript">
+      $('body').on('click', '.approve_status', function() {
+        var id = $('#service_bill_id').val();
+        var token = $("meta[name='csrf-token']").attr("content");
+        $.ajax({
+          url: "{{ url('service-bill-approve') }}",
+          type: 'POST',
+          data: {
+            _token: token,
+            id: id
+          },
+          success: function(data) {
+            $('.message').empty();
+            $('.alert').show();
+            if (data.status == 'success') {
+              $('.alert').addClass("alert-success");
+              setTimeout(function() {
+                location.reload();
+              }, 500);
+
+            } else {
+              $('.alert').addClass("alert-danger");
+              // setTimeout(function() {
+              //   location.reload();
+              // }, 3000);
+            }
+            $('.message').append(data.message);
+          },
+        });
+      });
       $('body').on('click', '.draft_status', function() {
         var id = $('#service_bill_id').val();
         var token = $("meta[name='csrf-token']").attr("content");
