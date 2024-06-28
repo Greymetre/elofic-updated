@@ -17,7 +17,7 @@ class ComplaintWorkDone extends Model implements HasMedia
     public function registerMediaCollections(): void {
         $this->addMediaCollection('complaint_work_done_attach')
              ->useFallbackUrl(asset(config('constants.NO_IMAGE_URL')))
-             ->useFallbackPath(public_path(config('constants.NO_IMAGE_URL')));
-             //->singleFile();
+             ->useFallbackPath(public_path(config('constants.NO_IMAGE_URL')))
+             ->singleFile();
     }
 }

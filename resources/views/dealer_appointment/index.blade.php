@@ -18,20 +18,24 @@
                 <form method="POST" action="{{ URL::to('/dealer-appointment/download') }}" class="form-horizontal">
                   @csrf
                   <div class="d-flex flex-wrap flex-row">
-                    <!-- <div class="p-2" style="width:160px;">
+                    <div class="p-2" style="width:160px;">
                       <div class="form-group">
-                        <label class="bmd-label-floating">{!! trans('panel.global.district') !!} </label>
-                        <select class="form-control select2 district" name="district_id" id="district_id" style="width: 100%;" onchange="getCityList()">
-                          <option value="">Select {!! trans('panel.global.district') !!}</option>
+                        <!-- <label class="bmd-label-floating">Status</label> -->
+                        <select class="form-control select2" name="status_id" id="status_id" style="width: 100%;" onchange="getCityList()">
+                          <option value="">Select Status</option>
+                          <option value="0">Pending</option>
+                          <option value="1">Approved By Sales Team</option>
+                          <option value="2">Approved By Account</option>
+                          <option value="3">Approved By HO</option>
                         </select>
-                        @if ($errors->has('district_id'))
+                        @if ($errors->has('status_id'))
                         <div class="error col-lg-12">
-                          <p class="text-danger">{{ $errors->first('district_id') }}</p>
+                          <p class="text-danger">{{ $errors->first('status_id') }}</p>
                         </div>
                         @endif
                       </div>
                     </div>
-                    <div class="p-2" style="width:160px;">
+                    <!-- <div class="p-2" style="width:160px;">
                       <div class="form-group">
                         <label class="bmd-label-floating">{!! trans('panel.global.city') !!} </label>
                         <select class="form-control select2 city" id="city_id" name="city_id" style="width: 100%;">
@@ -103,14 +107,14 @@
               <thead class=" text-primary">
                 <th>{!! trans('panel.global.no') !!}</th>
                 <th>Action</th>
+                <th>Created By</th>
                 <th>Appointment {!! trans('panel.expenses.fields.date') !!}</th>
                 <th>Branch</th>
-                <th>District</th>
                 <th>City</th>
                 <th>Firm Name</th>
-                <th>Firm type</th>
                 <th>Customer Type</th>
                 <th>division</th>
+                <th>Status</th>
               </thead>
               <tbody>
               </tbody>
@@ -141,7 +145,7 @@
           'url': "{{ route('dealer-appointment') }}",
           'data': function(d) {
             d.status = $('#status').val(),
-              d.city_id = $('#city_id').val(),
+              d.status_id = $('#status_id').val(),
               d.district_id = $('#district_id').val(),
               d.startdate = $('#start_date').val(),
               d.enddate = $('#end_date').val()
@@ -161,6 +165,13 @@
             searchable: false
           },
           {
+            data: 'createdbyname.name',
+            name: 'createdbyname.name',
+            "defaultContent": '',
+            orderable: false,
+            searchable: false
+          },
+          {
             data: 'appointment_date',
             name: 'appointment_date',
             "defaultContent": '',
@@ -170,13 +181,6 @@
           {
             data: 'branch_details.branch_name',
             name: 'branch_details.branch_name',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'district_details.district_name',
-            name: 'district_details.district_name',
             "defaultContent": '',
             orderable: false,
             searchable: false
@@ -195,12 +199,6 @@
             orderable: false
           },
           {
-            data: 'firm_type',
-            name: 'firm_type',
-            "defaultContent": '',
-            orderable: false
-          },
-          {
             data: 'customertype',
             name: 'customertype',
             "defaultContent": '',
@@ -212,6 +210,12 @@
             "defaultContent": '',
             orderable: false
           },
+          {
+            data: 'approval_status',
+            name: 'approval_status',
+            "defaultContent": '',
+            orderable: false
+          },
         ]
       });
       $('#start_date').change(function() {
@@ -220,7 +224,7 @@
       $('#end_date').change(function() {
         table.draw();
       });
-      $('#city_id').change(function() {
+      $('#status_id').change(function() {
         table.draw();
       });
       $('#district_id').change(function() {

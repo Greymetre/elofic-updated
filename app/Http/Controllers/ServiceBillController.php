@@ -279,6 +279,25 @@ class ServiceBillController extends Controller
         }
     }
 
+    public function approveBill(Request $request)
+    {
+        try {
+            $service_bill = ServiceBill::find($request->id);
+            $service_bill->status = '3';
+            $service_bill->save();
+
+            // ComplaintTimeline::create([
+            //     'complaint_id' => $request->id,
+            //     'created_by' => auth()->user()->id,
+            //     'status' => '0',
+            // ]);
+
+            return response()->json(['status' => 'success', 'message' => 'Service Bill Approved successfully !']);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => 'error', 'message' => $th->getMessage()]);
+        }
+    }
+
     public function cancelBill(Request $request)
     {
         try {

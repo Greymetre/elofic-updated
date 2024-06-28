@@ -378,8 +378,9 @@
                         <div class="inp-div">
                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                            <p class="m-0">Attach a File</p>
-                           <input type="file" name="product_sr_no" id="product_sr_no" class="form-control" accept="image/*">
+                           <input type="file" name="product_sr_no" id="product_sr_no" class="form-control file-input" accept="image/*">
                         </div>
+                        <span class="file-count">0</span> files selected
                         @if($service_bill->exists && $service_bill->getMedia('product_sr_no')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('product_sr_no')[0]->getPath()))
                         <div class="imgdiv">
                            <a target="_blank" href="{{ $service_bill->getMedia('product_sr_no')[0]->getFullUrl() }}">
@@ -393,8 +394,9 @@
                         <div class="inp-div">
                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                            <p class="m-0">Attach a File</p>
-                           <input type="file" name="scr_job_card" id="scr_job_card" class="form-control" accept="image/*">
+                           <input type="file" name="scr_job_card" id="scr_job_card" class="form-control file-input" accept="image/*">
                         </div>
+                        <span class="file-count">0</span> files selected
                         @if($service_bill->exists && $service_bill->getMedia('scr_job_card')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('scr_job_card')[0]->getPath()))
                         <div class="imgdiv">
                            <a target="_blank" href="{{ $service_bill->getMedia('scr_job_card')[0]->getFullUrl() }}">
@@ -408,8 +410,9 @@
                         <div class="inp-div">
                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                            <p class="m-0">Attach a File</p>
-                           <input type="file" name="photo_3" id="photo_3" class="form-control" accept="image/*">
+                           <input type="file" name="photo_3" id="photo_3" class="form-control file-input" accept="image/*">
                         </div>
+                        <span class="file-count">0</span> files selected
                         @if($service_bill->exists && $service_bill->getMedia('photo_3')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('photo_3')[0]->getPath()))
                         <div class="imgdiv">
                            <a target="_blank" href="{{ $service_bill->getMedia('photo_3')[0]->getFullUrl() }}">
@@ -423,8 +426,9 @@
                         <div class="inp-div">
                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                            <p class="m-0">Attach a File</p>
-                           <input type="file" name="photo_4" id="photo_4" class="form-control" accept="image/*">
+                           <input type="file" name="photo_4" id="photo_4" class="form-control file-input" accept="image/*">
                         </div>
+                        <span class="file-count">0</span> files selected
                         @if($service_bill->exists && $service_bill->getMedia('photo_4')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('photo_4')[0]->getPath()))
                         <div class="imgdiv">
                            <a target="_blank" href="{{ $service_bill->getMedia('photo_4')[0]->getFullUrl() }}">
@@ -438,8 +442,9 @@
                         <div class="inp-div">
                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                            <p class="m-0">Attach a File</p>
-                           <input type="file" name="photo_5" id="photo_5" class="form-control" accept="image/*">
+                           <input type="file" name="photo_5" id="photo_5" class="form-control file-input" accept="image/*">
                         </div>
+                        <span class="file-count">0</span> files selected
                         @if($service_bill->exists && $service_bill->getMedia('photo_5')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('photo_5')[0]->getPath()))
                         <div class="imgdiv">
                            <a target="_blank" href="{{ $service_bill->getMedia('photo_5')[0]->getFullUrl() }}">
@@ -490,8 +495,8 @@
                               </select>
                            </td>
                            <td><input type="number" readonly name="service[{{$k}}][quantity]" value="{{$product->quantity}}" class="form-control quantity" /></td>
-                           <td><input type="number" readonly name="service[{{$k}}][distance]" value="{{$product->distance}}"  class="form-control distance" /></td>
-                           <td><input type="number" readonly name="service[{{$k}}][appreciation]" value="{{$product->appreciation}}"  class="form-control appreciation" /></td>
+                           <td><input type="number" readonly name="service[{{$k}}][distance]" value="{{$product->distance}}" class="form-control distance" /></td>
+                           <td><input type="number" readonly name="service[{{$k}}][appreciation]" value="{{$product->appreciation}}" class="form-control appreciation" /></td>
                            <td><input name="service[{{$k}}][price]" readonly class="form-control sprice" value="{{$product->price}}" /></td>
                            <td><input name="service[{{$k}}][subtotal]" readonly class="form-control ssubtotal" value="{{$product->subtotal}}" /></td>
                            <td><button type="button" class="btn btn-danger btn-sm remove-tr m-0">X</button></td>
@@ -654,9 +659,9 @@
       }).trigger('change');
       $(document).on("click", "#add-service", function() {
          var pro_cat = '{{ $complaint?$complaint->product_details->category_id:"" }}';
-         if(pro_cat == '2'){
-            var chargeType = @json($charge_type->whereIn('id', ['2','3']));
-         }else{
+         if (pro_cat == '2') {
+            var chargeType = @json($charge_type->whereIn('id', ['2', '3']));
+         } else {
             var chargeType = @json($charge_type);
          }
          var options = '<option value="">Select Service</option>';
@@ -712,7 +717,6 @@
             servicePrice.prop('readonly', true);
             serviceQuantity.prop('readonly', true);
             serviceQuantity.val('1');
-            console.log(pro_cat);
             if (pro_cat == '2') {
                serviceDistance.prop('readonly', false);
             } else {
@@ -737,7 +741,7 @@
             serviceDistance.prop('readonly', true);
             serviceDistance.val('');
             serviceAppreciation.val('');
-            if (id == '4' || id == '2') {
+            if (id == '4') {
                serviceProductSelecttd.html('<input type="text" name="service[' + (counter - 1) + '][product_id]" class="form-control" />');
                servicePrice.prop('readonly', false);
                serviceQuantity.prop('readonly', false);
@@ -768,6 +772,7 @@
          var id = $(this).val();
          var currentRow = $(this).closest('tr');
          var servicePrice = currentRow.find('input.sprice');
+         var serviceDistance = currentRow.find('input.distance');
          var serviceSubTotal = currentRow.find('input.ssubtotal');
          $.ajax({
             url: "{{url('/getServiceProductDetails')}}",
@@ -776,7 +781,20 @@
             },
             success: function(data) {
                servicePrice.val(data.price);
-               serviceSubTotal.val(data.price);
+               $.ajax({
+                  url: "{{url('/getWorkDoneTime')}}",
+                  data: {
+                     'complaint_id': '{{$complaint?$complaint->id:"0"}}'
+                  },
+                  success: function(res) {
+                     if(res.hours && res.hours <= 24){
+                        serviceDistance.val(data.other_charge);
+                        serviceSubTotal.val((parseFloat(data.other_charge) || 0) + parseFloat(data.price));
+                     }else{
+                        serviceSubTotal.val(data.price);
+                     }
+                  }
+               });
             }
          });
       }).trigger('change');
@@ -843,5 +861,12 @@
             serviceSubtotal.val(parseFloat(tottal_dis_rate) + parseFloat(servicePrice));
          }
       })
+
+      $(document).ready(function() {
+         $('.file-input').change(function() {
+            var fileCount = this.files.length;
+            $(this).closest('.col-md-2').find('.file-count').text(fileCount);
+         });
+      });
    </script>
 </x-app-layout>

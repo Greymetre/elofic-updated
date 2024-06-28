@@ -120,6 +120,33 @@
           <strong class="message"></strong>
         </div>
 
+        <div class="container">
+          <div class="row">
+            @if($dealerAppointment->approval_status == '0')
+            @if(auth()->user()->can(['dealer_appointment_approve_sale_team']))
+            <button type="button" class="btn btn-sm btn-dark" onclick="changeStatus('1','{{$dealerAppointment->id}}')">Approve By Sales Team</button>
+            @endif
+            @elseif($dealerAppointment->approval_status == '1')
+            @if(auth()->user()->can(['dealer_appointment_approve_account']))
+            <button type="button" class="btn btn-sm btn-info" onclick="changeStatus('2','{{$dealerAppointment->id}}')">Approve By Account</button>
+            <button type="button" class="btn btn-sm btn-warning ml-2" onclick="changeStatus('0','{{$dealerAppointment->id}}')">Pending</button>
+            @endif
+            @elseif($dealerAppointment->approval_status == '2')
+            @if(auth()->user()->can(['dealer_appointment_approve_ho']))
+            <button type="button" class="btn btn-sm btn-success" onclick="changeStatus('3','{{$dealerAppointment->id}}')">Approve HO</button>
+            <button type="button" class="btn btn-sm btn-warning ml-2" onclick="changeStatus('0','{{$dealerAppointment->id}}')">Pending</button>
+            @endif
+            @elseif($dealerAppointment->approval_status == '3')
+            <span class="btn btn-sm btn-success">Approved</span>
+            <button type="button" class="btn btn-sm btn-warning ml-2" onclick="changeStatus('0','{{$dealerAppointment->id}}')">Pending</button>
+            @endif
+            @if(auth()->user()->can(['dealer_appointment_edit']))
+            <a href="{{route('dealer-appointment.edit', $dealerAppointment->id)}}" class="btn btn-info btn-sm ml-2" title="Edit Appointment Form">Edit</a>
+            <a href="{{ url('/dealer-appointments') }}" class="btn btn-primary btn-sm ml-2">Back</a>
+            @endif
+          </div>
+        </div>
+
         <div id="print-section">
 
           <div class="container-fluid">
@@ -147,6 +174,29 @@
                   </div>
                 </div>
               </div>
+              <div class="col-md-6 content-frm bg-light">
+                <div class="form-group row">
+                  <div class="col-md-4">
+                    <label for="branch">User(Created By) </label>
+                  </div>
+                  <div class="col-md-6">
+                    {{$dealerAppointment->createdbyname?$dealerAppointment->createdbyname->name:''}}
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="profile-pic-container">
+                  <div class="profile-pic">
+                    @if($dealerAppointment->exists && $dealerAppointment->getMedia('profile_picture')->count() > 0 && Storage::disk('s3')->exists($dealerAppointment->getMedia('profile_picture')[0]->getPath()))
+                    <img id="profileImage" src="{{$dealerAppointment->getMedia('profile_picture')[0]->getFullUrl()}}" alt="Passport Size Profile Picture">
+                    @else
+                    <img id="profileImage" src="default-profile.png" alt="Passport Size Profile Picture">
+                    @endif
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row mt-3">
               <div class="col-md-3 content-frm bg-light">
                 <div class="form-group row">
                   <div class="col-md-3">
@@ -167,14 +217,13 @@
                   </div>
                 </div>
               </div>
-              <div class="col-md-3">
-                <div class="profile-pic-container">
-                  <div class="profile-pic">
-                    @if($dealerAppointment->exists && $dealerAppointment->getMedia('profile_picture')->count() > 0 && Storage::disk('s3')->exists($dealerAppointment->getMedia('profile_picture')[0]->getPath()))
-                    <img id="profileImage" src="{{$dealerAppointment->getMedia('profile_picture')[0]->getFullUrl()}}" alt="Profile Picture">
-                    @else
-                    <img id="profileImage" src="default-profile.png" alt="Profile Picture">
-                    @endif
+              <div class="col-md-3 content-frm bg-light">
+                <div class="form-group row">
+                  <div class="col-md-4">
+                    <label for="place">Place </label>
+                  </div>
+                  <div class="col-md-8">
+                    <input type="text" readonly name="place" id="place" class="form-control uppercase" value="{{$dealerAppointment->place}}">
                   </div>
                 </div>
               </div>
@@ -883,9 +932,9 @@
                 @if($dealerAppointment->appointment_kyc_detail && !empty($dealerAppointment->appointment_kyc_detail))
                 @php
                 $proprietary_concern_array = ($dealerAppointment->appointment_kyc_detail->proprietary_concern && $dealerAppointment->appointment_kyc_detail->proprietary_concern!='null' && !empty($dealerAppointment->appointment_kyc_detail->proprietary_concern))?json_decode($dealerAppointment->appointment_kyc_detail->proprietary_concern):array();
-                
+
                 $partnership_firm_array = ($dealerAppointment->appointment_kyc_detail->partnership_firm && $dealerAppointment->appointment_kyc_detail->partnership_firm!='null' && !empty($dealerAppointment->appointment_kyc_detail->partnership_firm))?json_decode($dealerAppointment->appointment_kyc_detail->partnership_firm):array();
-                
+
                 $ltd_pvt_array = ($dealerAppointment->appointment_kyc_detail->ltd_pvt && $dealerAppointment->appointment_kyc_detail->ltd_pvt!='null' && !empty($dealerAppointment->appointment_kyc_detail->ltd_pvt))?json_decode($dealerAppointment->appointment_kyc_detail->ltd_pvt):array();
                 @endphp
                 @else
@@ -976,6 +1025,44 @@
             printWindow.print();
           });
         });
+
+        function changeStatus(status, appo_id) {
+          console.log(appo_id, status);
+          Swal.fire({
+            title: "Are You Sure, You Want To Approve This Appointment ?",
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: "YES",
+            denyButtonText: `Don't`
+          }).then((result) => {
+            if (result.value) {
+              $.ajax({
+                url: "{{ url('changeAppointmentStatus') }}",
+                dataType: "json",
+                type: "POST",
+                data: {
+                  _token: "{{csrf_token()}}",
+                  appo_id: appo_id,
+                  status: status
+                },
+                success: function(data) {
+                  $('.message').empty();
+                  $('.alert').show();
+                  if (data.status == 'success') {
+                    $('.alert').addClass("alert-success");
+                    setTimeout(function() {
+                      location.reload();
+                    }, 500);
+
+                  } else {
+                    $('.alert').addClass("alert-danger");
+                  }
+                  $('.message').append(data.message);
+                }
+              });
+            }
+          });
+        }
       </script>
 
 </x-app-layout>

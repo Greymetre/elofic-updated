@@ -71,8 +71,19 @@ class TransactionHistoryController extends Controller
             })->orderBy('created_at', 'desc');
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
             $total_points = TransactionHistory::where('customer_id', $request->id)->sum('point') ?? 0;
-            $active_points = TransactionHistory::where('customer_id', $request->id)->where('status', '1')->sum('point') ?? 0;
-            $provision_points = TransactionHistory::where('customer_id', $request->id)->where('status', '0')->sum('point') ?? 0;
+            // $active_points = TransactionHistory::where('customer_id', $request->id)->where('status', '1')->sum('point') ?? 0;
+            // $provision_points = TransactionHistory::where('customer_id', $request->id)->where('status', '0')->sum('point') ?? 0;
+            $thistorys = TransactionHistory::where('customer_id', $request->id)->get();
+            $active_points = 0;
+            $provision_points = 0;
+            foreach ($thistorys as $thistory) {
+                if ($thistory->status == '1') {
+                    $active_points += $thistory->point;
+                } else {
+                    $active_points += $thistory->active_point;
+                    $provision_points += $thistory->provision_point;
+                }
+            }
             $total_redemption = Redemption::where('customer_id', $request->id)->whereNot('status', '2')->sum('redeem_amount') ?? 0;
             $total_balance = (int)$active_points - (int)$total_redemption;
 
@@ -128,7 +139,18 @@ class TransactionHistoryController extends Controller
             })->orderBy('created_at', 'desc');
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
             $total_redemption = Redemption::where('customer_id', $request->id)->whereNot('status', '2')->sum('redeem_amount') ?? 0;
-            $active_points = TransactionHistory::where('customer_id', $request->id)->where('status', '1')->sum('point') ?? 0;
+            // $active_points = TransactionHistory::where('customer_id', $request->id)->where('status', '1')->sum('point') ?? 0;
+            $thistorys = TransactionHistory::where('customer_id', $request->id)->get();
+            $active_points = 0;
+            $provision_points = 0;
+            foreach ($thistorys as $thistory) {
+                if ($thistory->status == '1') {
+                    $active_points += $thistory->point;
+                } else {
+                    $active_points += $thistory->active_point;
+                    $provision_points += $thistory->provision_point;
+                }
+            }
             $total_rejected = Redemption::where('customer_id', $request->id)->where('status', '2')->sum('redeem_amount') ?? 0;
             $total_balance = (int)$active_points - (int)$total_redemption;
 
@@ -169,7 +191,18 @@ class TransactionHistoryController extends Controller
             if ($last_redemption) {
                 $last_redemption->date = date('d M Y', strtotime($last_redemption->created_at));
             }
-            $active_points = TransactionHistory::where('customer_id', $request->id)->where('status', '1')->sum('point') ?? 0;
+            // $active_points = TransactionHistory::where('customer_id', $request->id)->where('status', '1')->sum('point') ?? 0;
+            $thistorys = TransactionHistory::where('customer_id', $request->id)->get();
+            $active_points = 0;
+            $provision_points = 0;
+            foreach ($thistorys as $thistory) {
+                if ($thistory->status == '1') {
+                    $active_points += $thistory->point;
+                } else {
+                    $active_points += $thistory->active_point;
+                    $provision_points += $thistory->provision_point;
+                }
+            }
             $total_redemption = Redemption::where('customer_id', $request->id)->whereNot('status', '2')->sum('redeem_amount') ?? 0;
             $total_balance = (int)$active_points - (int)$total_redemption;
 
@@ -205,7 +238,18 @@ class TransactionHistoryController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
-            $active_points = TransactionHistory::where('customer_id', $request->customer_id)->where('status', '1')->sum('point') ?? 0;
+            // $active_points = TransactionHistory::where('customer_id', $request->customer_id)->where('status', '1')->sum('point') ?? 0;
+            $thistorys = TransactionHistory::where('customer_id', $request->customer_id)->get();
+            $active_points = 0;
+            $provision_points = 0;
+            foreach ($thistorys as $thistory) {
+                if ($thistory->status == '1') {
+                    $active_points += $thistory->point;
+                } else {
+                    $active_points += $thistory->active_point;
+                    $provision_points += $thistory->provision_point;
+                }
+            }
             $total_redemption = Redemption::where('customer_id', $request->customer_id)->whereNot('status', '2')->sum('redeem_amount') ?? 0;
             $total_balance = (int)$active_points - (int)$total_redemption;
 
@@ -225,7 +269,7 @@ class TransactionHistoryController extends Controller
             $noti_data = [
                 'fcm_token' =>  $customer->customerdetails->fcm_token,
                 'title' => 'Redemption Request Sent 💸',
-                'msg' => $customer->first_name . ', your redemption request of '.$request->redeem_amount.' Points is sent successfully.',
+                'msg' => $customer->first_name . ', your redemption request of ' . $request->redeem_amount . ' Points is sent successfully.',
             ];
             $send_notification = SendNotifications::send($noti_data);
             return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
@@ -251,7 +295,18 @@ class TransactionHistoryController extends Controller
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
 
-            $active_points = TransactionHistory::where('customer_id', $request->customer_id)->where('status', '1')->sum('point') ?? 0;
+            // $active_points = TransactionHistory::where('customer_id', $request->customer_id)->where('status', '1')->sum('point') ?? 0;
+            $thistorys = TransactionHistory::where('customer_id', $request->customer_id)->get();
+            $active_points = 0;
+            $provision_points = 0;
+            foreach ($thistorys as $thistory) {
+                if ($thistory->status == '1') {
+                    $active_points += $thistory->point;
+                } else {
+                    $active_points += $thistory->active_point;
+                    $provision_points += $thistory->provision_point;
+                }
+            }
             $total_redemption = Redemption::where('customer_id', $request->customer_id)->whereNot('status', '2')->sum('redeem_amount') ?? 0;
             $total_balance = (int)$active_points - (int)$total_redemption;
             $tottal_redeem_point = Gifts::whereIn('id', $request->gift_id)->sum('points');
@@ -277,7 +332,7 @@ class TransactionHistoryController extends Controller
             $noti_data = [
                 'fcm_token' =>  $customer->customerdetails->fcm_token,
                 'title' => 'Redemption Request Sent 💸',
-                'msg' => $customer->first_name . ', your redemption request of '.$ttpoints.' Points is sent successfully.',
+                'msg' => $customer->first_name . ', your redemption request of ' . $ttpoints . ' Points is sent successfully.',
             ];
             $send_notification = SendNotifications::send($noti_data);
             return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
@@ -364,26 +419,26 @@ class TransactionHistoryController extends Controller
                 $noti_data = [
                     'fcm_token' =>  $customer->customerdetails->fcm_token,
                     'title' => 'Scan Successful 💸💸',
-                    'msg' => $customer->name . ' you have successfully earned '.$point.' provisional points in Silver Saarthi.',
+                    'msg' => $customer->name . ' you have successfully earned ' . $point . ' provisional points in Silver Saarthi.',
                 ];
                 $send_notification = SendNotifications::send($noti_data);
-                return response(['status' => 'success', 'message' => 'Transaction History Store Successfully but coupon code (' . implode(',', $expire_schemes) . ') scheme has either expired or has not started yet so you earned 0 point.', 'point_earn' => $point, 'data' => $tHistory, 'push_notification'=>$send_notification], 200);
+                return response(['status' => 'success', 'message' => 'Transaction History Store Successfully but coupon code (' . implode(',', $expire_schemes) . ') scheme has either expired or has not started yet so you earned 0 point.', 'point_earn' => $point, 'data' => $tHistory, 'push_notification' => $send_notification], 200);
             } elseif (!$scheme_details) {
                 $noti_data = [
                     'fcm_token' =>  $customer->customerdetails->fcm_token,
                     'title' => 'Scan Successful 💸💸',
-                    'msg' => $customer->name . ' you have successfully earned '.$point.' provisional points in Silver Saarthi.',
+                    'msg' => $customer->name . ' you have successfully earned ' . $point . ' provisional points in Silver Saarthi.',
                 ];
                 $send_notification = SendNotifications::send($noti_data);
-                return response(['status' => 'success', 'message' => 'Scan is successfully but the coupon code (' . implode(',', $no_schemes) . ') is not part of any scheme. So 0 points are credited.', 'point_earn' => $point, 'data' => $tHistory, 'push_notification'=>$send_notification], 200);
+                return response(['status' => 'success', 'message' => 'Scan is successfully but the coupon code (' . implode(',', $no_schemes) . ') is not part of any scheme. So 0 points are credited.', 'point_earn' => $point, 'data' => $tHistory, 'push_notification' => $send_notification], 200);
             } else {
                 $noti_data = [
                     'fcm_token' =>  $customer->customerdetails->fcm_token,
                     'title' => 'Scan Successful 💸💸',
-                    'msg' => $customer->name . ' you have successfully earned '.$point.' provisional points in Silver Saarthi.',
+                    'msg' => $customer->name . ' you have successfully earned ' . $point . ' provisional points in Silver Saarthi.',
                 ];
                 $send_notification = SendNotifications::send($noti_data);
-                return response(['status' => 'success', 'message' => 'Transaction History Store Successfully', 'point_earn' => $point, 'data' => $tHistory, 'push_notification'=>$send_notification], 200);
+                return response(['status' => 'success', 'message' => 'Transaction History Store Successfully', 'point_earn' => $point, 'data' => $tHistory, 'push_notification' => $send_notification], 200);
             }
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
@@ -500,5 +555,4 @@ class TransactionHistoryController extends Controller
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
     }
-
 }

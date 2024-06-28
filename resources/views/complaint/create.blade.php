@@ -279,7 +279,7 @@
                         <div class="col-md-3">
                            <div class="form-group">
                               <label class="bmd-label-floating">Product Searial Number </label>
-                              <input readonly type="text" name="product_serail_number" id="product_serail_number" class="form-control" value="{!! old( 'product_serail_number', $complaints['product_serail_number']) !!}">
+                              <input {{($complaints->exists && empty($complaints['product_serail_number']))?'':'readonly'}} type="text" name="product_serail_number" id="product_serail_number" class="form-control" value="{!! old( 'product_serail_number', $complaints['product_serail_number']) !!}">
                               @if ($errors->has('product_serail_number'))
                               <div class="error col-lg-12">
                                  <p class="text-danger">{{ $errors->first('product_serail_number') }}</p>
@@ -784,7 +784,11 @@
                                  <div style="position: relative;" class="img-div">
                                     <button title="Delete Image" type="button" class="badge badge-danger delete-img-btn" data-mediaid="{{$media->id}}">X</button>
                                     <a href="{{$media->getFullUrl()}}" download target="_blank">
+                                    @if($media->mime_type == 'application/pdf')
+                                       <img class="m-2 rounded img-fluid" src="{{url('/public/assets/img/pdf-icon.jpg')}}" style="width: 170px;height:170px;">
+                                       @else
                                        <img class="m-2 rounded img-fluid" src="{!! $media->getFullUrl() !!}" style="width: 170px;height:170px;">
+                                       @endif
                                     </a>
                                  </div>
                                  @endforeach
@@ -827,8 +831,9 @@
                cache: true
             }
          });
-      }, 2000);
+      }, 1000);
       $(document).ready(function() {
+         $("#serail_number").trigger("keyup");
          $('#company_sale_bill_date').datepicker({
             maxDate: 0,
             dateFormat: 'yy-mm-dd',
@@ -904,6 +909,17 @@
                      var today = new Date();
                      today.setHours(0, 0, 0, 0);
 
+                     if(res.check_Warranty.seller_details && res.check_Warranty.seller_details != null){
+                        console.log(res.check_Warranty.seller_details.id);
+                        var newOption = new Option(res.check_Warranty.seller_details.name, res.check_Warranty.seller_details.id, false, false);
+                        $('#party_name').append(newOption).trigger('change');
+                        $("#party_name").option(res.check_Warranty.seller_details.id);
+                        $("#party_name").trigger('change');
+                     }else{
+                        $("#party_name").val('');
+                        $("#party_name").trigger('change');
+                     }
+
                      if (warrantyDate > today) {
                         $("#under_warranty").val('Yes');
                         $("#under_warranty").change();
@@ -913,9 +929,15 @@
                      }
 
                      if (res.check_Warranty.media.length > 0) {
+                        var attaExt = res.check_Warranty.media[0].original_url.split('.').pop().toLowerCase();
                         $("#invoice-div").removeClass('d-none');
                         $("#invoice-div a").prop('href', res.check_Warranty.media[0].original_url);
-                        $("#invoice-img").attr('src', res.check_Warranty.media[0].original_url);
+                        if(attaExt == 'pdf')
+                        {
+                           $("#invoice-img").attr('src', '{{url("/public/assets/img/pdf-icon.jpg")}}');
+                        }else{
+                           $("#invoice-img").attr('src', res.check_Warranty.media[0].original_url);
+                        }
                      } else {
                         $("#invoice-div").addClass('d-none');
                      }
@@ -937,6 +959,8 @@
                      $("#customer_number").val(" ");
                   }
                } else {
+                  $("#party_name").val('');
+                  $("#party_name").change();
                   $("#company_sale_bill_date").val(" ");
                   $("#company_sale_bill_no").val(" ");
                   $("#product_code").val(" ");
@@ -1117,7 +1141,7 @@
          if ($(this).val().length > 4) {
             $("#product_serail_number").keyup();
          }
-      });
+      }).trigger();
       $("#product_id").on("change", function() {
          var product_id = $(this).val();
          if (product_id != null && product_id != '') {
