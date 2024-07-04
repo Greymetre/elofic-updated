@@ -265,5 +265,9 @@
         }
       });
     });
+
+    function confirmDeletion() {
+      return confirm('Are you sure you want to delete this appointment?');
+    }
   </script>
 </x-app-layout>

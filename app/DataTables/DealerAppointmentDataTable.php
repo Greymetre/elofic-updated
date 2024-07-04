@@ -53,6 +53,9 @@ class DealerAppointmentDataTable extends DataTable
                 if(auth()->user()->can(['dealer_appointment_show'])){
                     $btn .= '<a href="'.route('dealer-appointment.show', $data->id).'" class="btn btn-info btn-just-icon btn-sm" title="Show Appointment Form" ><i class="material-icons">visibility</i></a>';
                 }
+                if(auth()->user()->can(['dealer_appointment_delete'])){
+                    $btn .= '<a href="'.route('dealer-appointment.destroy', $data->id).'" onclick="return confirmDeletion();" class="btn btn-danger btn-just-icon btn-sm" title="Show Appointment Form" ><i class="material-icons">close</i></a>';
+                }
                 return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">'.$btn.'</div>';
             })
 

@@ -26,6 +26,7 @@ use App\Models\Holiday;
 
 use App\Exports\ExcelExport;
 use App\Models\Beat;
+use App\Models\Media;
 use App\Models\TourDetail;
 use DateTime;
 use DatePeriod;
@@ -96,6 +97,31 @@ class AttendanceController extends Controller
 
   public function attendanceSummaryDownload(Request $request)
   {
+
+  //   $label = [
+  //     'File Name',
+  //     'Model',
+  //     'data'
+  // ];
+  // $data = [];
+  // $medi = Media::where('created_at', '>=', '2024-06-15')->where('created_at', '<=', '2024-06-30')->get();
+  // foreach ($medi as $key => $value) {
+  //   $model_is = $value->model_type;
+
+  //   $main_data = $model_is::where('id', $value->model_id)->first();
+  //   if($model_is == 'App\Models\Expenses'){
+  //     $data[$key][0] =  date('d/M/Y',strtotime($value->created_at));
+  //     $data[$key][1] =  $value->file_name;
+  //     $data[$key][2] =  $model_is;
+  //     $data[$key][3] = $main_data->users->name;
+  //     $data[$key][4] = $main_data->checker_status;
+  //   }
+  // }
+
+  // // dd($data);
+  
+  // $export = new ExcelExport($label, $data);
+  // return Excel::download($export, 'testtt.xlsx');
 
     $filename = 'attendance-summary-report.xlsx';
     $start_date = $request->start_date;
@@ -256,8 +282,19 @@ class AttendanceController extends Controller
                 $total_h++;
               }
             } else {
-              $label_data[] = 'A';
-              $total_a++;
+              if ($attendance_details->working_type == 'Full Day Leave') {
+                $label_data[] =  'LOPN';
+                $total_a++;
+              }elseif ($attendance_details->working_type == 'Second Half Leave' || $attendance_details->working_type == 'First Half Leave') {
+                $label_data[] =  '1/2P+1/2LOPN';
+                $total_hd++;
+              }elseif($attendance_details->working_type == 'Leave'){
+                $label_data[] =  'LOPN';
+                $total_lop++;
+              }else{
+                $label_data[] = 'A';
+                $total_a++;
+              }
             }
           } else {
 

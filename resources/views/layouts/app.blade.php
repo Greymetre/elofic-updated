@@ -949,7 +949,7 @@
                 </li>
                 @endif -->
                 @if(auth()->user()->can('reports_sale'))
-            <li class="nav-item {{ request()->is('reports/reports_sale*') || request()->is('reports/fos_rating*') ? 'active' : '' }}">
+            <li class="nav-item {{ request()->is('reports/reports_sale*') || request()->is('reports/fos_rating*') || request()->is('reports/primary_sales*') ? 'active' : '' }}">
               <a class="nav-link collapsed" data-toggle="collapse" href="#salesReportsMenu" aria-expanded="false">
                 <i class="material-icons">check_circle</i>
                 <p>Sales</p>
@@ -970,6 +970,22 @@
                     <a class="nav-link" href="{{ url('reports/fos_rating') }}">
                       <i class="material-icons">store</i>
                       <p>FOS Rating Report</p>
+                    </a>
+                  </li>
+                  @endif
+                  @if(auth()->user()->can('dashboard_primary_sales_access'))
+                  <li class="nav-item {{ request()->is('reports/primary_sales*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('reports/primary_sales') }}">
+                      <i class="material-icons">store</i>
+                      <p>Primary Sales</p>
+                    </a>
+                  </li>
+                  @endif
+                  @if(auth()->user()->can('dashboard_secondary_sales_access'))
+                  <li class="nav-item {{ request()->is('reports/secondary_sales*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('reports/primary_sales') }}">
+                      <i class="material-icons">store</i>
+                      <p>Secondary Sales </p>
                     </a>
                   </li>
                   @endif

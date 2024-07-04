@@ -40,41 +40,66 @@ class PrimarySalesImport implements ToCollection,WithValidation,WithHeadingRow, 
     public function collection(Collection $rows)
     {
         foreach ($rows as $row) {
-           
-            $excelDate = $row['invoice_date'] - 25569; // Adjust for Excel's epoch
-            // $unixTimestamp = strtotime('+'.$excelDate.' days', strtotime('1970-01-01'));
-            $unixTimestamp = strtotime('+'.$excelDate.' days', strtotime('1900-01-01'));
-
-            $row['invoice_date'] = !empty($row['invoice_date'])?Carbon::createFromTimestamp($unixTimestamp):'';
-
-
-            $salesTargetUsers = PrimarySales::updateOrCreate([
-                'invoiceno' => $row['invoice_no'],
-                'product_id' => $row['product_id'],
-                 ],[
+            if(is_numeric($row['invoice_date'])){
+                $excelDate = $row['invoice_date'] - 25569; // Adjust for Excel's epoch
+                $unixTimestamp = strtotime('+'.$excelDate.' days', strtotime('1970-01-01'));
+                $row['invoice_date'] = !empty($row['invoice_date'])?Carbon::createFromTimestamp($unixTimestamp):'';
+            }
+            if(isset($row['id']) && !empty($row['id'])){
+                $salesTargetUsers = PrimarySales::where('id', $row['id'])->update([
                     'invoiceno' => $row['invoice_no'],
                     'invoice_date' => $row['invoice_date'],
                     'month' => $row['month'],
                     'division' => $row['div'],            
                     'dealer' => $row['dealer'],            
-                    'city' => $row['city'],            
+                    'city' => $row['city'],   
                     'state' => $row['state'],            
-                    'final_branch' => $row['final_branch'],            
-                    'sales_person' => $row['sales_person'],            
-                    'product_name' => $row['product_name'],            
+                    'final_branch' => $row['final_branch'],
+                    'sales_person' => $row['sales_person'],
+                    'product_name' => $row['product_name'],       
+                    'model_name' => $row['model_name'],       
                     'quantity' => $row['quantity'],            
                     'rate' => $row['rate'],            
                     'net_amount' => $row['net_amount'],            
+                    'tax_amount' => $row['tax'],            
                     'cgst_amount' => $row['cgst_amt'],            
-                    'sgst_amt' => $row['sgst_amt'],            
-                    'igst_amt' => $row['igst_amt'],            
-                    'total' => $row['total'],            
+                    'sgst_amount' => $row['sgst_amt'],            
+                    'igst_amount' => $row['igst_amt'],            
+                    'total_amount' => $row['total'],            
                     'store_name' => $row['store_name'],            
                     'new_group' => $row['group'],            
                     'branch' => $row['branch'],            
                     'new_group_name' => $row['new_group_name'],            
-                    'product_id' => $row['product_id'],            
+                    'product_id' => $row['product_id']??NULL,            
             ]);
+            }else{
+                $salesTargetUsers = PrimarySales::create([
+                        'invoiceno' => $row['invoice_no'],
+                        'invoice_date' => $row['invoice_date'],
+                        'month' => $row['month'],
+                        'division' => $row['div'],            
+                        'dealer' => $row['dealer'],            
+                        'city' => $row['city'],            
+                        'state' => $row['state'],            
+                        'final_branch' => $row['final_branch'],
+                        'sales_person' => $row['sales_person'],
+                        'product_name' => $row['product_name'],       
+                        'model_name' => $row['model_name'],       
+                        'quantity' => $row['quantity'],            
+                        'rate' => $row['rate'],            
+                        'net_amount' => $row['net_amount'],            
+                        'tax_amount' => $row['tax'],            
+                        'cgst_amount' => $row['cgst_amt'],            
+                        'sgst_amount' => $row['sgst_amt'],            
+                        'igst_amount' => $row['igst_amt'],            
+                        'total_amount' => $row['total'],            
+                        'store_name' => $row['store_name'],            
+                        'new_group' => $row['group'],            
+                        'branch' => $row['branch'],            
+                        'new_group_name' => $row['new_group_name'],            
+                        'product_id' => $row['product_id']??NULL,            
+                ]);
+            }
         }
     }
 

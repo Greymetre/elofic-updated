@@ -16,7 +16,7 @@ class PrimarySalesTemplate implements FromCollection,WithHeadings,ShouldAutoSize
     public function collection()
     {
         return PrimarySales::select('active','invoiceno','invoice_date','month','division','dealer',
-        'city','state','final_branch','sales_person','product_name','quantity','rate','net_amount','tax_amount','cgst_amount','sgst_amount','igst_amount','total_amount',   'store_name','group_name','new_group_name','product_id','created_at','updated_at')->limit(0)->get();   
+        'city','state','final_branch','sales_person','product_name','model_name','quantity','rate','net_amount','tax_amount','cgst_amount','sgst_amount','igst_amount','total_amount',   'store_name','group_name','new_group_name','product_id','created_at','updated_at')->limit(0)->get();   
     }
 
     public function headings(): array
@@ -31,6 +31,7 @@ class PrimarySalesTemplate implements FromCollection,WithHeadings,ShouldAutoSize
             'State',
             'Final Branch',
             'Sales person',
+            'Model Name',
             'Product Name',
             'Quantity',
             'Rate',

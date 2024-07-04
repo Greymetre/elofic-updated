@@ -140,6 +140,7 @@ Route::group(['middleware' => ['auth']], function () {
     // Primary Sales Dashboard
     Route::any('primary_sales_template', [DashboardController::class, 'primary_sales_template'])->name('primary_sales_template');
     Route::post('primary_sales/upload', [DashboardController::class, 'primary_sales_upload'])->name('primary_sales.upload');
+    Route::any('primary_sales/download', [DashboardController::class, 'primary_sales_download'])->name('primary_sales.download');
     Route::any('primary_dashboard/sales/list', [DashboardController::class, 'primary_dashboard_sales_list'])->name('primary_dashboard.sales.list');
     Route::post('secondary_dashboard/total_order_value', [DashboardController::class, 'total_order_value'])->name('secondary_dashboard.total_order_value');
     Route::post('primarySalesKpiData', [DashboardController::class, 'primarySalesKpiData']);
@@ -563,6 +564,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('reports/attendancereport', [ReportController::class, 'attendancereport']);
     Route::any('reports/reports_sale', [UsersController::class, 'reports_sale']);
     Route::any('reports/fos_rating', [UsersController::class, 'fos_rating']);
+    Route::any('reports/primary_sales', [ReportController::class, 'primary_sales']);
+    Route::any('reports/secondary_sales', [ReportController::class, 'secondary_sales']);
     Route::get('user_sales_report_download', [UsersController::class, 'user_sales_report_download']);
     Route::get('fos_rating_report_download', [UsersController::class, 'fos_rating_report_download']);
     Route::any('reports/customersreport', [ReportController::class, 'customersReport']);
@@ -770,6 +773,7 @@ Route::group(['middleware' => ['auth']], function () {
     //Dealer Appointment with auth Route
     Route::get('/dealer-appointments', [DealerAppointmentController::class, 'index'])->name('dealer-appointment');
     Route::get('/dealer-appointments-show/{dealerAppointment}', [DealerAppointmentController::class, 'show'])->name('dealer-appointment.show');
+    Route::get('/dealer-appointments-destroy/{dealerAppointment}', [DealerAppointmentController::class, 'destroy'])->name('dealer-appointment.destroy');
     Route::any('/dealer-appointment/download', [DealerAppointmentController::class, 'download'])->name('dealer-appointment.download');
     Route::get('/dealer-appointment-edit/{dealerAppointment}', [DealerAppointmentController::class, 'edit'])->name('dealer-appointment.edit');
     Route::post('/dealer-appointment-update//{dealerAppointment}', [DealerAppointmentController::class, 'update'])->name('dealer-appointment-form.update');

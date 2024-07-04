@@ -501,6 +501,7 @@
                         <th>{!! trans('panel.primary_dashboard.state') !!}</th>
                         <th>Final Branch</th>
                         <th>Sales person</th>
+                        <th>Model Name</th>
                         <th>Product Name</th>
                         <th>Qty.</th>
                         <th>Rate</th>
@@ -3102,7 +3103,6 @@
             getTotalOrderValueQty();
          });
          $('#ss_division_id').change(function() {
-            alert('ss_division_id');
             table.draw();
             getTotalOrderValueQty();
          });
@@ -3362,6 +3362,11 @@
                   data: 'sales_person',
                   name: 'sales_person',
                   "defaultContent": ''
+               },
+               {
+                  data: 'model_name',
+                  name: 'model_name',
+                  "defaultContent": 'final branch'
                },
                {
                   data: 'product_name',

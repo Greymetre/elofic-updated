@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\DataTables\VisitorDataTable;
+use App\Exports\PrimarySalesExport;
 use Illuminate\Http\Request;
 use App\Models\{User, Customers, Order, Branch, Division, CheckIn, BeatSchedule, Sales, SalesTarget, OrderDetails, TourProgramme, Wallet, Product, UserActivity, UserCityAssign, Address, TourDetail, TransactionHistory, EmployeeDetail, SalesTargetUsers, Attendance, VisitReport, PrimarySales, Redemption};
 use Symfony\Component\HttpFoundation\Response;
@@ -105,7 +106,7 @@ class DashboardController extends Controller
         }
 
         $total_qty = PrimarySales::sum('quantity');
-        $total_sale = PrimarySales::sum('rate');
+        $total_sale = PrimarySales::sum('net_amount');
 
         return view('dashboard.index', compact('users', 'branches', 'divisions', 'years', 'sales_persons', 'retailers', 'dealers_and_distibutors', 'products', 'uniqueProductsNewGroup', 'ps_branches', 'ps_divisions', 'ps_months', 'ps_dealers', 'ps_product_models', 'ps_new_group_names', 'ps_sales_persons', 'labels', 'data', 'labels2', 'data2', 'labels3', 'data3', 'total_qty', 'total_sale'));
     }
@@ -1120,6 +1121,14 @@ class DashboardController extends Controller
         return Excel::download(new PrimarySalesTemplate, 'primary_sales_template.xlsx');
     }
 
+    public function primary_sales_download(Request $request)
+    {
+        abort_if(Gate::denies('primary_sales_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new PrimarySalesExport, 'primary_sales.xlsx');
+    }
+
     public function primary_sales_upload(Request $request)
     {
         abort_if(Gate::denies('primary_sales_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
@@ -1195,14 +1204,18 @@ class DashboardController extends Controller
                 $endDateFormatted = $endDate->toDateString();
             }
 
-            $query->whereHas('orders', function ($q) use ($startDateFormatted, $endDateFormatted) {
-                $q->whereDate('order_date', '>=', $startDateFormatted)
-                    ->whereDate('order_date', '<=', $endDateFormatted);
+            $query->where(function ($q) use ($startDateFormatted, $endDateFormatted) {
+                $q->where('invoice_date', '>=', $startDateFormatted)
+                    ->where('invoice_date', '<=', $endDateFormatted);;
             });
         }
 
         return Datatables::of($query)
             ->addIndexColumn()
+            ->addColumn('invoice_date', function($query){
+                return date('d/M/Y',strtotime($query->invoice_date));
+            })
+            ->rawColumns(['invoice_date'])
             ->make(true);
     }
 
