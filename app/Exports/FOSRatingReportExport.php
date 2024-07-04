@@ -5,8 +5,12 @@ namespace App\Exports;
 use App\Models\City;
 use App\Models\Customers;
 use App\Models\District;
+use App\Models\EmployeeDetail;
+use App\Models\MobileUserLoginDetails;
 use App\Models\Order;
 use App\Models\OrderDetails;
+use App\Models\Redemption;
+use App\Models\TransactionHistory;
 use App\Models\User;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -17,6 +21,7 @@ use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Illuminate\Support\Facades\Auth;
+use Excel;
 
 
 class FOSRatingReportExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithEvents
@@ -52,12 +57,27 @@ class FOSRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
         }
         $query = $query->where('sales_type', 'Secondary')->latest()->get();
 
+        $query = $query->map(function ($query) {
+            $working_days = $query->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Full Day Leave', 'Leave', 'Holiday'])->count("id");
+            $order_value = Order::where('created_by', $query->id)->sum('sub_total');
+            $sale_index = ((($order_value / 100000) / $working_days) * 100);
+            $registered_retailers = Customers::where(['customertype' => '2', 'created_by' => $query->id])->count('id');
+            $registration_index = ((($registered_retailers / $working_days) / 5) * 100);
+            $total_visit = $query->visits->count('id');
+            $visit_index = ((($total_visit / $working_days) / 10) * 100);
+            $sharthi_customer = TransactionHistory::groupBy('customer_id')->pluck('customer_id')->toArray();
+            $activation_retailers = Customers::where(['customertype' => '2', 'created_by' => $query->id])->whereIn('id', $sharthi_customer)->count('id');
+            $activation_index = ((($activation_retailers / $working_days) / 5) * 100);
+            $query->performance_rating = ((($sale_index*0.5) + ($registration_index*0.1) + ($visit_index*0.1) + ($activation_index*0.3)));
+            return $query;
+        })->sortByDesc('performance_rating');
+
         return $query;
     }
 
     public function headings(): array
     {
-        return ['S No', 'Emp Code', 'FOS Name', 'Area Of Operation (Districts Covered)', 'Date of Appointment', 'Yesterday Productivity vs Visit', 'Yesterday Retailer Order Count', 'Yesterday Retailer Order Value in Lacs', 'Yesterday Counter Visit', 'Weekly Visit Count (Last 7 Day)', 'Order Value Jun\'24 (in Lacs After 35%)', 'Total Retailer Registred Fieldkonnect Jun\'24 (Nos)', 'Total Retailer Visited Fieldkonnect Jun\'24 (Nos)', 'Total New Retailer (First_TimeOrder) (Nos)', 'Total Order Value in Lacs After 35%', 'Total No of Field working days till date', 'Average Per day sale', 'Sale Index', 'Total Retailer Registred Till Date Fieldkonnect (Nos)', 'Average No of RetailersRegistered /day', 'Registration Index', 'Total Visited Till Date Fieldkonnect (Nos)', 'Average No of Retailers visited /day', 'Visit Index', 'Total Retailer Registered under Saarthi (Nos)', 'Average No of Retailers Registered under Sarathi / day', 'Sarathi Registration Index', 'Total Active Retailer under Saarthi (Nos)', 'Average No of Activation under Sarathi /day', 'Activation Index', 'Total New Retailer  Activated (Order) (Nos)', 'Performance Rating', 'Total Mobile App Downloaded', 'Total Active Retailer', 'Total Coupon Scan Count', 'Total Points', 'Total Unique Redemption', 'Total Redemption Value', 'last Week Performance Rating'];
+        return ['S No', 'Emp Code', 'FOS Name', 'Area Of Operation (Districts Covered)', 'Date of Appointment', 'Yesterday Productivity vs Visit', 'Yesterday Retailer Order Count', 'Yesterday Retailer Order Value in Lacs', 'Yesterday Counter Visit', 'Weekly Visit Count (Last 7 Day)', 'Order Value Jun\'24 (in Lacs After 35%)', 'Total Retailer Registred Fieldkonnect Jun\'24 (Nos)', 'Total Retailer Visited Fieldkonnect Jun\'24 (Nos)', 'Total New Retailer (First_TimeOrder) (Nos)', 'Total Order Value in Lacs After 35%', 'Total No of Field working days till date', 'Average Per day sale', 'Sale Index', 'Total Retailer Registred Till Date Fieldkonnect (Nos)', 'Average No of RetailersRegistered /day', 'Registration Index', 'Total Visited Till Date Fieldkonnect (Nos)', 'Average No of Retailers visited /day', 'Visit Index', 'Total Retailer Registered under Saarthi (Nos)', 'Average No of Retailers Registered under Sarathi / day', 'Activation Index', 'Total New Retailer  Activated (Order) (Nos)', 'Performance Rating', 'Total Mobile App Downloaded', 'Total Active Retailer', 'Total Coupon Scan Count', 'Total Points', 'Total Unique Redemption', 'Total Redemption Value', 'Last Week Performance Rating'];
     }
 
     public function map($query): array
@@ -72,36 +92,83 @@ class FOSRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
         $yesterday_visit = $query->visits->where('checkin_date', $yesterday)->count('id');
         $weekly_visit = $query->visits->where('checkin_date', '>=', $dateBeforeSixDays)->count('id');
         if ($order_counts < 1) {
-            $yesterday_productivity_visit = "0.00%";
+            $yesterday_productivity_visit = "0.00";
         } else {
             $productvity = number_format((($order_counts / $yesterday_visit) * 100), 2);
-            $yesterday_productivity_visit = $productvity . "%";
+            $yesterday_productivity_visit = $productvity;
         }
         $month_order_value = Order::where('order_date', '>=', date('Y-m-01'))->where('created_by', $query->id)->sum('sub_total');
         $month_registered_retailers = Customers::where('created_at', '>=', date('Y-m-01'))->where(['customertype' => '2', 'created_by' => $query->id])->count('id');
+        $total_registered_retailers = Customers::where(['customertype' => '2', 'created_by' => $query->id])->count('id');
         $month_visit = $query->visits->where('checkin_date', '>=', date('Y-m-01'))->whereIn('customer_id', $retailers)->count('id');
-        $this_month_visit_unique = $query->visits->where('checkin_date', '>=', date('Y-m-01'))->whereIn('customer_id', $retailers)->groupBy('customer_id');
-        $old_visit_unique = $query->visits->where('checkin_date', '<', date('Y-m-01'))->whereIn('customer_id', $retailers)->groupBy('customer_id');
-        if($query->id != 584 && count($old_visit_unique) > 0){
-            dd($this_month_visit_unique, $old_visit_unique, $query->id);
-        }
+        $month_order_unique = Order::where('order_date', '>=', date('Y-m-01'))->where('created_by', $query->id)->whereIn('buyer_id', $retailers)->count('id');
+        $total_order_unique = Order::where('created_by', $query->id)->groupBy('buyer_id')->count('id');
+        $total_order_value = Order::where('created_by', $query->id)->sum('sub_total');
+        $working_days = $query->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Full Day Leave', 'Leave', 'Holiday'])->count("id");
+        $lastw_working_days = $query->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Full Day Leave', 'Leave', 'Holiday'])->where('created_at', '<=', $dateBeforeSixDays)->count("id");
+        $lastw_total_order_value = Order::where('created_by', $query->id)->where('order_date', '<=', $dateBeforeSixDays)->sum('sub_total');
+        $lastw_total_registered_retailers = Customers::where(['customertype' => '2', 'created_by' => $query->id])->where('created_at', '<=', $dateBeforeSixDays)->count('id');
+        
+        $sharthi_customer = TransactionHistory::groupBy('customer_id')->pluck('customer_id')->toArray();
+        $registred_sharthi_retailers = Customers::where(['customertype' => '2', 'created_by' => $query->id])->whereIn('id', $sharthi_customer)->count('id');
+        $lastw_registred_sharthi_retailers = Customers::where(['customertype' => '2', 'created_by' => $query->id])->whereIn('id', $sharthi_customer)->where('created_at', '<=', $dateBeforeSixDays)->count('id');
+
+        $sale_index = $total_order_value > 0 ? number_format(((($total_order_value / 100000) / $working_days) * 100), 0, '.', '') : "0.00";
+        $registration_index = $total_registered_retailers > 0 ? number_format(((($total_registered_retailers / $working_days) / 5) * 100), 0, '.', '') : "0.00";
+        $visit_index = $query->visits->count() > 0 ? number_format(((($query->visits->count() / $working_days) / 10) * 100), 0, '.', '') : "0.00";
+        $activation_index = $registred_sharthi_retailers > 0 ? number_format(((($registred_sharthi_retailers / $working_days) / 5) * 100), 0, '.', '') : "0.00";
+
+        $lastw_sale_index = $lastw_total_order_value > 0 ? number_format(((($lastw_total_order_value / 100000) / $lastw_working_days) * 100), 0, '.', '') : "0.00";
+        $lastw_registration_index = $lastw_total_registered_retailers > 0 ? number_format(((($lastw_total_registered_retailers / $lastw_working_days) / 5) * 100), 0, '.', '') : "0.00";
+        $lastw_visit_index = $query->visits->where('checkin_date', '<=', $dateBeforeSixDays)->count() > 0 ? number_format(((($query->visits->where('checkin_date', '<=', $dateBeforeSixDays)->count() / $lastw_working_days) / 10) * 100), 0, '.', '') : "0.00";
+        $lastw_activation_index = $lastw_registred_sharthi_retailers > 0 ? number_format(((($lastw_registred_sharthi_retailers / $lastw_working_days) / 5) * 100), 0, '.', '') : "0.00";
+
+        $lastw_performance_rating = ((($lastw_sale_index*0.5) + ($lastw_registration_index*0.1) + ($lastw_visit_index*0.1) + ($lastw_activation_index*0.3)));
+
+        $total_assign_customer_ids = EmployeeDetail::where('user_id', $query->id)->pluck('customer_id');
+        $app_download = MobileUserLoginDetails::whereIn('customer_id',$total_assign_customer_ids)->count('id');
+        $active_customer = TransactionHistory::whereIn('customer_id',$total_assign_customer_ids)->groupBy('customer_id')->count('customer_id');
+        $copoun_scan = TransactionHistory::whereIn('customer_id',$total_assign_customer_ids)->count('customer_id');
+        $total_points = TransactionHistory::whereIn('customer_id',$total_assign_customer_ids)->sum('point');
+        $unique_redemption_count = Redemption::whereIn('customer_id',$total_assign_customer_ids)->groupBy('customer_id')->count('customer_id');
+        $redemption_points = Redemption::whereIn('customer_id',$total_assign_customer_ids)->sum('redeem_amount');
         return [
             ++$this->srno,
             $query['employee_codes'] ?? '',
             $query['name'] ?? '',
-            // implode(", ", District::whereIn('id', $dis_ids)->pluck('district_name')->toArray()),
-            '',
+            implode(", ", District::whereIn('id', $dis_ids)->pluck('district_name')->toArray()),
             date('d M y', strtotime($query->userinfo->date_of_joining)),
             $yesterday_productivity_visit,
-            $order_counts>0?$order_counts:"0",
-            $order_value>0?number_format(($order_value/100000),2):"0.00",
-            $yesterday_visit>0?$yesterday_visit:"0",
-            $weekly_visit>0?$weekly_visit:"0",
-            $month_order_value>0?number_format(($month_order_value/100000),2):"0.00",
-            $month_registered_retailers>0?$month_registered_retailers:"0",
-            $month_visit>0?$month_visit:"0",
-            // $monthly_visit_unique>0?$monthly_visit_unique:"0",
-
+            $order_counts > 0 ? $order_counts : "0",
+            $order_value > 0 ? number_format(($order_value / 100000), 0, '.', '') : "0.00",
+            $yesterday_visit > 0 ? $yesterday_visit : "0",
+            $weekly_visit > 0 ? $weekly_visit : "0",
+            $month_order_value > 0 ? number_format(($month_order_value / 100000), 0, '.', '') : "0.00",
+            $month_registered_retailers > 0 ? $month_registered_retailers : "0",
+            $month_visit > 0 ? $month_visit : "0",
+            $month_order_unique > 0 ? $month_order_unique : "0",
+            $total_order_value > 0 ? number_format(($total_order_value / 100000), 0, '.', '') : "0.00",
+            $working_days > 0 ? $working_days : "0",
+            $total_order_value > 0 ? number_format((($total_order_value / 100000) / $working_days), 0, '.', '') : "0.00",
+            $sale_index,
+            $total_registered_retailers > 0 ? $total_registered_retailers : "0",
+            $total_registered_retailers > 0 ? number_format(($total_registered_retailers / $working_days), 0, '.', '') : "0.00",
+            $registration_index,
+            $query->visits->count(),
+            $query->visits->count() > 0 ? number_format(($query->visits->count() / $working_days), 0, '.', '') : "0.00",
+            $visit_index,
+            $registred_sharthi_retailers > 0 ? $registred_sharthi_retailers : "0",
+            $registred_sharthi_retailers > 0 ? number_format(($registred_sharthi_retailers / $working_days), 0, '.', '') : "0.00",
+            $activation_index,
+            $total_order_unique > 0 ? $total_order_unique : "0",
+            number_format($query->performance_rating, 2, '.', ''),
+            $app_download > 0 ? $app_download : "0",
+            $active_customer > 0 ? $active_customer : "0",
+            $copoun_scan > 0 ? $copoun_scan : "0",
+            $total_points > 0 ? $total_points : "0",
+            $unique_redemption_count > 0 ? $unique_redemption_count : "0",
+            $redemption_points > 0 ? $redemption_points : "0",
+            $lastw_performance_rating > 0 ? $lastw_performance_rating : "0",
         ];
     }
 
@@ -110,9 +177,29 @@ class FOSRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
         return [
             AfterSheet::class => function (AfterSheet $event) {
                 $lastRow = $event->sheet->getHighestDataRow() + 2;
-                $event->sheet->mergeCells('A' . $lastRow . ':F' . $lastRow);
+                $lastColumn = $event->sheet->getHighestDataColumn();
+                $rowCount = $event->sheet->getHighestDataRow();
+                $event->sheet->mergeCells('A' . $lastRow . ':E' . $lastRow);
 
-                $event->sheet->getStyle('A1:AA1')->applyFromArray([
+                for ($row = 1; $row <= $rowCount; $row++) {
+                    $cellValue = $event->sheet->getCell('AC' . $row)->getValue();
+                    $color = self::getColorBasedOnValue($cellValue);
+
+                    $event->sheet->getStyle('AC' . $row)->applyFromArray([
+                        'fill' => [
+                            'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                            'startColor' => ['rgb' => $color],
+                        ],
+                    ]);
+                    $event->sheet->getStyle('C' . $row)->applyFromArray([
+                        'fill' => [
+                            'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                            'startColor' => ['rgb' => $color],
+                        ],
+                    ]);
+                }
+
+                $event->sheet->getStyle('A1:AJ1')->applyFromArray([
                     'font' => [
                         'bold' => true,
                         'color' => ['rgb' => 'FFFFFF'],
@@ -133,7 +220,7 @@ class FOSRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
                     ],
                 ]);
 
-                $event->sheet->getStyle('A' . $lastRow . ':AA' . $lastRow)->applyFromArray([
+                $event->sheet->getStyle('A' . $lastRow . ':AJ' . $lastRow)->applyFromArray([
                     'font' => ['bold' => true],
                     'alignment' => [
                         'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,
@@ -146,7 +233,19 @@ class FOSRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
                         ],
                     ],
                 ]);
+                $event->sheet->getStyle('A2:' . $lastColumn . '' . ($lastRow - 2))->applyFromArray([
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['argb' => '000000'],
+                        ],
+                    ],
+                    'alignment' => [
+                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
+                    ],
+                ]);
                 $event->sheet->setCellValue('A' . $lastRow, 'Total');
+                $event->sheet->setCellValue('F' . $lastRow, '=SUM(F3:F' . ($lastRow - 2) . ')/'.($rowCount-1));
                 $event->sheet->setCellValue('G' . $lastRow, '=SUM(G3:G' . ($lastRow - 2) . ')');
                 $event->sheet->setCellValue('H' . $lastRow, '=SUM(H3:H' . ($lastRow - 2) . ')');
                 $event->sheet->setCellValue('I' . $lastRow, '=SUM(I3:I' . ($lastRow - 2) . ')');
@@ -157,18 +256,39 @@ class FOSRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
                 $event->sheet->setCellValue('N' . $lastRow, '=SUM(N3:N' . ($lastRow - 2) . ')');
                 $event->sheet->setCellValue('O' . $lastRow, '=SUM(O3:O' . ($lastRow - 2) . ')');
                 $event->sheet->setCellValue('P' . $lastRow, '=SUM(P3:P' . ($lastRow - 2) . ')');
-                $event->sheet->setCellValue('Q' . $lastRow, '=SUM(Q3:Q' . ($lastRow - 2) . ')');
-                $event->sheet->setCellValue('R' . $lastRow, '=SUM(R3:R' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('Q' . $lastRow, '=SUM(Q3:Q' . ($lastRow - 2) . ')/'.($rowCount-1));
+                $event->sheet->setCellValue('R' . $lastRow, '=SUM(R3:R' . ($lastRow - 2) . ')/'.($rowCount-1));
                 $event->sheet->setCellValue('S' . $lastRow, '=SUM(S3:S' . ($lastRow - 2) . ')');
-                $event->sheet->setCellValue('T' . $lastRow, '=SUM(T3:T' . ($lastRow - 2) . ')');
-                $event->sheet->setCellValue('U' . $lastRow, '=SUM(U3:U' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('T' . $lastRow, '=SUM(T3:T' . ($lastRow - 2) . ')/'.($rowCount-1));
+                $event->sheet->setCellValue('U' . $lastRow, '=SUM(U3:U' . ($lastRow - 2) . ')/'.($rowCount-1));
                 $event->sheet->setCellValue('V' . $lastRow, '=SUM(V3:V' . ($lastRow - 2) . ')');
                 $event->sheet->setCellValue('W' . $lastRow, '=SUM(W3:W' . ($lastRow - 2) . ')');
-                $event->sheet->setCellValue('X' . $lastRow, '=SUM(X3:X' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('X' . $lastRow, '=SUM(X3:X' . ($lastRow - 2) . ')/'.($rowCount-1));
                 $event->sheet->setCellValue('Y' . $lastRow, '=SUM(Y3:Y' . ($lastRow - 2) . ')');
-                $event->sheet->setCellValue('Z' . $lastRow, '=SUM(Z3:Z' . ($lastRow - 2) . ')');
-                $event->sheet->setCellValue('AA' . $lastRow, '=SUM(AA3:AA' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('Z' . $lastRow, '=SUM(Z3:Z' . ($lastRow - 2) . ')/'.($rowCount-1));
+                $event->sheet->setCellValue('AA' . $lastRow, '=SUM(AA3:AA' . ($lastRow - 2) . ')/'.($rowCount-1));
+                $event->sheet->setCellValue('AB' . $lastRow, '=SUM(AB3:AB' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('AC' . $lastRow, '=SUM(AC3:AC' . ($lastRow - 2) . ')/'.($rowCount-1));
+                $event->sheet->setCellValue('AD' . $lastRow, '=SUM(AD3:AD' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('AE' . $lastRow, '=SUM(AE3:AE' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('AF' . $lastRow, '=SUM(AF3:AF' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('AG' . $lastRow, '=SUM(AG3:AG' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('AH' . $lastRow, '=SUM(AH3:AH' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('AI' . $lastRow, '=SUM(AI3:AI' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('AJ' . $lastRow, '=SUM(AJ3:AJ' . ($lastRow - 2) . ')');
             },
         ];
+    }
+
+    private static function getColorBasedOnValue($value)
+    {
+        if ($value <= 24.99) {
+            return 'FF0000'; // Red
+        } elseif ($value >= 25 && $value <= 29.99) {
+            return 'FFFF00'; // Yellow
+        } elseif ($value >= 29.99) {
+            return '00FF00'; // Green
+        }
+            
     }
 }

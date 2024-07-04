@@ -21,8 +21,7 @@ class DamageEntriesExport implements FromCollection, WithHeadings, ShouldAutoSiz
 {
     public function __construct($request)
     {
-        dd('Working on it....');
-        $this->user_id = $request->input('user_id');
+        $this->status = $request->input('status');
         $this->start_date = $request->input('start_date');
         $this->end_date = $request->input('end_date');
         $this->designation_id = $request->input('designation_id');
@@ -34,9 +33,9 @@ class DamageEntriesExport implements FromCollection, WithHeadings, ShouldAutoSiz
     {
 
         $query = DamageEntry::with('customer', 'scheme', 'scheme_details', 'createdbyname');
-        if ($this->user_id && $this->user_id != '' && $this->user_id != NULL) {
-            $query->where('id', $this->user_id);
-        }
+        // if ($this->status != '' && $this->status != NULL) {
+        //     $query->where('status', $this->status);
+        // }
         if ($this->designation_id && $this->designation_id != '' && $this->designation_id != NULL) {
             $query->where('designation_id', $this->designation_id);
         }
@@ -46,6 +45,10 @@ class DamageEntriesExport implements FromCollection, WithHeadings, ShouldAutoSiz
         if ($this->branch_id && $this->branch_id != '' && $this->branch_id != NULL) {
             $query->where('branch_id', $this->branch_id);
         }
+        // if ($this->start_date && !empty($this->start_date) && $this->end_date && !empty($this->end_date)) {
+        //     $query->whereDate('created_at', '>=', $this->start_date)
+        //         ->whereDate('created_at', '<=', $this->end_date);
+        // }
         $query = $query->latest()->get();
 
         return $query;

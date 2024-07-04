@@ -20,7 +20,7 @@ use App\Models\OrderDetails;
 use App\Models\Division;
 use App\Models\Department;
 use App\Models\Branch;
-use App\Models\{Address, EmployeeDetail, TransactionHistory, MobileUserLoginDetails, Redemption, ParentDetail, State};
+use App\Models\{Address, EmployeeDetail, TransactionHistory, MobileUserLoginDetails, Redemption, ParentDetail, PrimarySales, Product, State};
 use Excel;
 use App\Exports\CounterVisitReportExport;
 use App\Exports\AdherenceDetailReportExport;
@@ -2245,5 +2245,41 @@ class ReportController extends Controller
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         return Excel::download(new CustomerAnalysisExport($request), 'customeranalysis.xlsx');
+    }
+
+    public function primary_sales(Request $request)
+    {
+        $ps_branches = PrimarySales::latest()->get()->unique('final_branch');
+        $ps_divisions = PrimarySales::latest()->get()->unique('division');
+        $ps_months = PrimarySales::latest()->get()->unique('month');
+        $ps_dealers = PrimarySales::latest()->get()->unique('dealer');
+        $ps_product_models = PrimarySales::latest()->get()->unique('product_name');
+        $ps_new_group_names = PrimarySales::latest()->get()->unique('new_group');
+        $ps_product_models = PrimarySales::latest()->get()->unique('product_name');
+        $ps_sales_persons = PrimarySales::latest()->get()->unique('sales_person');
+        $users = User::where('active', 'Y')->latest()->get();
+        $currentYear = Carbon::now()->year;
+        $years = range($currentYear - 2, $currentYear + 2);
+        $total_qty = PrimarySales::sum('quantity');
+        $total_sale = PrimarySales::sum('net_amount');
+        return view('reports.primary_sales', compact('years','users','ps_branches', 'ps_divisions', 'ps_months', 'ps_dealers', 'ps_product_models', 'ps_new_group_names', 'ps_sales_persons','total_qty','total_sale'));
+    }
+
+    public function secondary_sales(Request $request)
+    {
+        $retailers = Customers::where('customertype', '2')->get();
+        $dealers_and_distibutors = Customers::where('customertype', [3, 4])->get();
+        $sales_persons = User::latest()->get();
+        $products = Product::latest()->get();;
+        $users = User::latest()->get();
+        $branches = Branch::latest()->get();
+        $divisions = Division::latest()->get();
+        $currentYear = Carbon::now()->year;
+        $years = range($currentYear - 2, $currentYear + 2);
+
+        $orders = Order::with(['buyers', 'orderdetails', 'getuserdetails', 'getsalesdetail'])->get();
+
+        abort_if(Gate::denies('dashboard_secondary_sales_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        return view('reports.secondary_sales', compact('branches', 'years', 'sales_persons', 'divisions', 'retailers', 'dealers_and_distibutors', 'products'));
     }
 }

@@ -29,11 +29,11 @@ class DamageEntryDataTable extends DataTable
                 return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
             })
             ->editColumn('contact_person', function ($data) {
-                return $data->customer->first_name.' '.$data->customer->last_name;
+                return $data->customer->first_name . ' ' . $data->customer->last_name;
             })
             ->editColumn('customer.name', function ($data) {
-                $customer_name = '<a target="_blank" href="'.route('customers.show', [encrypt($data->customer->id)]).'">'.$data->customer->name.'</a>';
-                
+                $customer_name = '<a target="_blank" href="' . route('customers.show', [encrypt($data->customer->id)]) . '">' . $data->customer->name . '</a>';
+
                 return $customer_name;
             })
             ->editColumn('parent_name', function ($data) {
@@ -60,25 +60,25 @@ class DamageEntryDataTable extends DataTable
             ->editColumn('attach', function ($data) {
                 $html = '';
                 $attachments = $data->getMedia("*");
-                if(count($attachments) > 0){
-                    foreach($attachments  as $attachment){
-                        $html .= '<a target="_blank" href="'. $attachment->getFullUrl().'" data-lightbox="mygallery">
-                        <img class="img-fluid rounded m-2" src="'.$attachment->getFullUrl().'"  width="100">
+                if (count($attachments) > 0) {
+                    foreach ($attachments  as $attachment) {
+                        $html .= '<a target="_blank" href="' . $attachment->getFullUrl() . '" data-lightbox="mygallery">
+                        <img class="img-fluid rounded m-2" src="' . $attachment->getFullUrl() . '"  width="100">
                          </a>';
                     }
                 }
                 return $html;
             })
             ->editColumn('status', function ($data) {
-                if($data->status == "0"){
-                    return '<button type="button" data-ccode="'.$data->coupon_code.'" data-status="'.$data->status.'" id="'.$data->id.'" class="btn btn-warning changeStatus">Pennding</button>';
-                }elseif($data->status == "1"){
-                    return '<button type="button" data-ccode="'.$data->coupon_code.'" data-status="'.$data->status.'" id="'.$data->id.'" class="btn btn-success changeStatus">Approved</button>';
-                }elseif($data->status == "2"){
-                    return '<button type="button" data-ccode="'.$data->coupon_code.'" data-status="'.$data->status.'" id="'.$data->id.'" class="btn btn-danger changeStatus">Reject</button>';
+                if ($data->status == "0") {
+                    return '<button type="button" data-ccode="' . $data->coupon_code . '" data-status="' . $data->status . '" id="' . $data->id . '" class="btn btn-warning changeStatus">Pennding</button>';
+                } elseif ($data->status == "1") {
+                    return '<button type="button" data-ccode="' . $data->coupon_code . '" data-status="' . $data->status . '" id="' . $data->id . '" class="btn btn-success changeStatus">Approved</button>';
+                } elseif ($data->status == "2") {
+                    return '<button type="button" data-ccode="' . $data->coupon_code . '" data-status="' . $data->status . '" id="' . $data->id . '" class="btn btn-danger changeStatus">Reject</button>';
                 }
             })
-            ->rawColumns(['contact_person', 'parent_name', 'subcategory_name', 'product_name','customer.name', 'attach', 'status']);
+            ->rawColumns(['contact_person', 'parent_name', 'subcategory_name', 'product_name', 'customer.name', 'attach', 'status']);
     }
 
     /**
@@ -89,12 +89,17 @@ class DamageEntryDataTable extends DataTable
      */
     public function query(DamageEntry $model, Request $request)
     {
-        
+
         $data = $model->with('customer', 'scheme');
-        
-        if($request->status != null  && $request->status != ''){
+
+        if ($request->status != null  && $request->status != '') {
             $data->where('status', $request->status);
         }
+
+        // if ($request->start_date && !empty($request->start_date) && $request->end_date && !empty($request->end_date)) {
+        //     $data->whereDate('created_at', '>=', $request->start_date)
+        //         ->whereDate('created_at', '<=', $request->end_date);
+        // }
 
         $data = $data->latest()->newQuery();
         return $data;

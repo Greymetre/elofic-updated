@@ -258,7 +258,13 @@ class DealerAppointmentController extends Controller
      */
     public function destroy(DealerAppointment $dealerAppointment)
     {
-        //
+        DealerAppointmentKyc::where('appointment_id', $dealerAppointment->id)->delete();
+        $check = DealerAppointment::where('id', $dealerAppointment->id)->delete();
+        if($check){
+            return redirect()->back()->with('message_success', 'Appointment deleted successfully')->withInput();
+        }else{
+            return redirect()->back()->with('message_info', 'Appointment not deleted, Please try again leater.')->withInput();
+        }
     }
 
     public function thanks(Request $request)
