@@ -145,6 +145,16 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('secondary_dashboard/total_order_value', [DashboardController::class, 'total_order_value'])->name('secondary_dashboard.total_order_value');
     Route::post('primarySalesKpiData', [DashboardController::class, 'primarySalesKpiData']);
 
+    // Product Analysis Branch
+    Route::any('reports/product_analysis_branch', [ReportController::class, 'product_analysis_branch']);
+    Route::any('product_analysis_branch/download', [ReportController::class, 'product_analysis_branch_download'])->name('product_analysis_branch.download');
+    Route::any('product_analysis_branch/list', [ReportController::class, 'product_analysis_branch_list'])->name('product_analysis_branch.list');
+
+    // Product Analysis Qty
+    Route::any('reports/product_analysis_qty', [ReportController::class, 'product_analysis_qty']);
+    Route::any('product_analysis_qty/download', [ReportController::class, 'product_analysis_qty_download'])->name('product_analysis_qty.download');
+    Route::any('product_analysis_qty/list', [ReportController::class, 'product_analysis_qty_list'])->name('product_analysis_qty.list');
+
     //Customers
     Route::resource('customertype', CustomerTypeController::class);
     Route::post('customertype-active', [CustomerTypeController::class, 'active'])->name('customertype.active');
