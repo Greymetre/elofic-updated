@@ -949,7 +949,7 @@
                 </li>
                 @endif -->
                 @if(auth()->user()->can('reports_sale'))
-            <li class="nav-item {{ request()->is('reports/reports_sale*') || request()->is('reports/fos_rating*') || request()->is('reports/primary_sales*') ? 'active' : '' }}">
+            <li class="nav-item {{ request()->is('reports/reports_sale*') || request()->is('reports/fos_rating*') || request()->is('reports/primary_sales*') || request()->is('reports/secondary_sales*') ? 'active' : '' }}">
               <a class="nav-link collapsed" data-toggle="collapse" href="#salesReportsMenu" aria-expanded="false">
                 <i class="material-icons">check_circle</i>
                 <p>Sales</p>
@@ -983,9 +983,25 @@
                   @endif
                   @if(auth()->user()->can('dashboard_secondary_sales_access'))
                   <li class="nav-item {{ request()->is('reports/secondary_sales*') ? 'active' : '' }}">
-                    <a class="nav-link" href="{{ url('reports/primary_sales') }}">
+                    <a class="nav-link" href="{{ url('reports/secondary_sales') }}">
                       <i class="material-icons">store</i>
                       <p>Secondary Sales </p>
+                    </a>
+                  </li>
+                  @endif
+                  @if(auth()->user()->can('product_analysis_branch_access'))
+                  <li class="nav-item {{ request()->is('reports/product_analysis_branch*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('reports/product_analysis_branch') }}">
+                      <i class="material-icons">store</i>
+                      <p>Product Analysis Branch Wise</p>
+                    </a>
+                  </li>
+                  @endif
+                  @if(auth()->user()->can('product_analysis_qty_access'))
+                  <li class="nav-item {{ request()->is('reports/product_analysis_qty*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('reports/product_analysis_qty') }}">
+                      <i class="material-icons">store</i>
+                      <p>Product Analysis Qty</p>
                     </a>
                   </li>
                   @endif

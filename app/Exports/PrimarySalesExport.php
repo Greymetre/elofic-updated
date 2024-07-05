@@ -16,7 +16,7 @@ class PrimarySalesExport implements FromCollection,WithHeadings,ShouldAutoSize
     public function collection()
     {
         return PrimarySales::select('id','invoiceno','invoice_date','month','division','dealer',
-        'city','state','final_branch','sales_person','product_name','model_name','quantity','rate','net_amount','tax_amount','cgst_amount','sgst_amount','igst_amount','total_amount', 'store_name','new_group','new_group_name','branch','product_id')->latest()->get();   
+        'city','state','final_branch','sales_person','product_name','model_name','quantity','rate','net_amount','tax_amount','cgst_amount','sgst_amount','igst_amount','total_amount', 'store_name','new_group','new_group_name','branch','product_id','delete_this')->latest()->get();   
     }
 
     public function headings(): array
@@ -47,6 +47,7 @@ class PrimarySalesExport implements FromCollection,WithHeadings,ShouldAutoSize
             'Branch',
             'New Group Name',
             'Product ID',   
+            'Delete This',   
         ];
     }
 
