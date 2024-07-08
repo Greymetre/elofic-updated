@@ -49,6 +49,7 @@ use App\DataTables\GamificationDataTable;
 use App\Exports\CustomerAnalysisExport;
 use App\Exports\ProductAnalysisBranchExport;
 use App\Exports\ProductAnalysisQtyExport;
+use App\Exports\ProductAnalysisValueExport;
 use Carbon\Carbon;
 
 class ReportController extends Controller
@@ -2291,9 +2292,8 @@ class ReportController extends Controller
         $ps_divisions = PrimarySales::latest()->get()->unique('division');
         $ps_months = PrimarySales::latest()->get()->unique('month');
         $ps_dealers = PrimarySales::latest()->get()->unique('dealer');
-        $ps_product_models = PrimarySales::latest()->get()->unique('product_name');
+        $ps_product_models = PrimarySales::latest()->get()->unique('model_name');
         $ps_new_group_names = PrimarySales::latest()->get()->unique('new_group');
-        $ps_product_models = PrimarySales::latest()->get()->unique('product_name');
         $ps_sales_persons = PrimarySales::latest()->get()->unique('sales_person');
         $users = User::where('active', 'Y')->latest()->get();
         $currentYear = Carbon::now()->year;
@@ -2323,36 +2323,6 @@ class ReportController extends Controller
             DB::raw('SUM(net_amount) as total_net_amounts'),
         );
 
-        if ($request->user_id && $request->user_id != '' && $request->user_id != null) {
-            $usersIds = User::where('id', $request->user_id)->where('sales_type', 'Secondary')->pluck('id');
-        } else {
-            $usersIds = User::with('attendance_details')->where('sales_type', 'Secondary')->pluck('id');
-        }
-
-        if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
-            $query->where('final_branch', $request->branch_id);
-        }
-
-        if ($request->division_id && $request->division_id != '' && $request->division_id != null) {
-            $query->where('division', $request->division_id);
-        }
-
-        if ($request->dealer_id && $request->dealer_id != '' && $request->dealer_id != null) {
-            $query->where('dealer', 'like', '%' . $request->dealer_id . '%');
-        }
-
-        if ($request->product_model && $request->product_model != '' && $request->product_model != null) {
-            $query->where('product_name', $request->product_model);
-        }
-
-        if ($request->new_group && $request->new_group != '' && $request->new_group != null) {
-            $query->where('new_group', $request->new_group);
-        }
-
-        if ($request->executive_id && $request->executive_id != '' && $request->executive_id != null) {
-            $query->where('sales_person', $request->executive_id);
-        }
-
         if ($request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
             $f_year_array = explode('-', $request->financial_year);
 
@@ -2371,6 +2341,32 @@ class ReportController extends Controller
                 $q->where('invoice_date', '>=', $startDatethree)
                     ->where('invoice_date', '<=', $endDatethree);
             });
+        }
+
+        $data = $query->get();
+
+        if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
+            $query->where('final_branch', $request->branch_id);
+        }
+
+        if ($request->division_id && $request->division_id != '' && $request->division_id != null) {
+            $query->where('division', $request->division_id);
+        }
+
+        if ($request->dealer_id && $request->dealer_id != '' && $request->dealer_id != null) {
+            $query->where('dealer', 'like', '%' . $request->dealer_id . '%');
+        }
+
+        if ($request->product_model && $request->product_model != '' && $request->product_model != null) {
+            $query->where('model_name', $request->product_model);
+        }
+
+        if ($request->new_group && $request->new_group != '' && $request->new_group != null) {
+            $query->where('new_group', $request->new_group);
+        }
+
+        if ($request->executive_id && $request->executive_id != '' && $request->executive_id != null) {
+            $query->where('sales_person', $request->executive_id);
         }
 
         if ($request->month && $request->month != '' && $request->month != null && $request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
@@ -2396,8 +2392,6 @@ class ReportController extends Controller
                     ->where('invoice_date', '<=', $endDateFormatted);;
             });
         }
-
-        $data = $query->get();
 
         $query = $query->groupBy('final_branch', 'model_name')->orderBy('months');
 
@@ -2530,13 +2524,168 @@ class ReportController extends Controller
 
     public function product_analysis_branch_download(Request $request)
     {
-        return "<h2>Coming Soon ... </h1>";
         abort_if(Gate::denies('product_analysis_branch_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         return Excel::download(new ProductAnalysisBranchExport($request), 'product_analysis_branch_wise.xlsx');
     }
     public function product_analysis_qty(Request $request)
+    {
+        if ($request->ip() != '111.118.252.250') {
+            return "<h2>Coming Soon ... </h1>";
+        }
+        $ps_branches = PrimarySales::latest()->get()->unique('final_branch');
+        $ps_divisions = PrimarySales::latest()->get()->unique('division');
+        $ps_months = PrimarySales::latest()->get()->unique('month');
+        $ps_dealers = PrimarySales::latest()->get()->unique('dealer');
+        $ps_product_models = PrimarySales::latest()->get()->unique('model_name');
+        $ps_new_group_names = PrimarySales::latest()->get()->unique('new_group');
+        $ps_sales_persons = PrimarySales::latest()->get()->unique('sales_person');
+        $users = User::where('active', 'Y')->latest()->get();
+        $currentYear = Carbon::now()->year;
+        $years = range($currentYear - 1, $currentYear + 1);
+        $total_qty = PrimarySales::sum('quantity');
+        $total_sale = PrimarySales::sum('net_amount');
+        $currentDate = Carbon::now();
+        $months = [
+            $currentDate->copy()->subMonthsNoOverflow(3)->format('M'), // Three months ago
+            $currentDate->copy()->subMonthsNoOverflow(2)->format('M'), // Two months ago
+            $currentDate->copy()->subMonthsNoOverflow(1)->format('M'), // Last month
+        ];
+        return view('reports.product_analysis_qty', compact('years', 'users', 'ps_branches', 'ps_divisions', 'ps_months', 'ps_dealers', 'ps_product_models', 'ps_new_group_names', 'ps_sales_persons', 'total_qty', 'total_sale', 'months'));
+    }
+
+    public function product_analysis_qty_list(Request $request)
+    {
+        DB::statement("SET SESSION group_concat_max_len = 10000000");
+        $query = PrimarySales::select(
+            'model_name',
+            DB::raw('GROUP_CONCAT(quantity) as quantitys'),
+            DB::raw('SUM(quantity) as total_quantitys'),
+            DB::raw('GROUP_CONCAT(month) as months'),
+            DB::raw('GROUP_CONCAT(invoice_date) as invoice_dates'),
+            DB::raw('GROUP_CONCAT(net_amount) as net_amounts'),
+            DB::raw('SUM(net_amount) as total_net_amounts'),
+        );
+
+        if ($request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
+            $f_year_array = explode('-', $request->financial_year);
+
+            $financial_year_start = $f_year_array[0] . '-04-01';
+            $financial_year_end = $f_year_array[1] . '-03-31';
+
+            $query->where(function ($q) use ($f_year_array, $financial_year_start, $financial_year_end) {
+                $q->where('invoice_date', '>=', $financial_year_start)
+                    ->where('invoice_date', '<=', $financial_year_end);;
+            });
+        } else {
+            $currentDate = Carbon::now();
+            $startDatethree = $currentDate->copy()->subMonthsNoOverflow(3)->firstOfMonth()->format('Y-m-d');
+            $endDatethree = $currentDate->copy()->subMonthNoOverflow()->endOfMonth()->format('Y-m-d');
+            $query->where(function ($q) use ($startDatethree, $endDatethree) {
+                $q->where('invoice_date', '>=', $startDatethree)
+                    ->where('invoice_date', '<=', $endDatethree);
+            });
+        }
+
+        $data = $query->get();
+
+      
+        if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
+            $query->where('final_branch', $request->branch_id);
+        }
+
+        if ($request->division_id && $request->division_id != '' && $request->division_id != null) {
+            $query->where('division', $request->division_id);
+        }
+
+        if ($request->dealer_id && $request->dealer_id != '' && $request->dealer_id != null) {
+            $query->where('dealer', 'like', '%' . $request->dealer_id . '%');
+        }
+
+        if ($request->product_model && $request->product_model != '' && $request->product_model != null) {
+            $query->where('model_name', $request->product_model);
+        }
+
+        if ($request->new_group && $request->new_group != '' && $request->new_group != null) {
+            $query->where('new_group', $request->new_group);
+        }
+
+        if ($request->executive_id && $request->executive_id != '' && $request->executive_id != null) {
+            $query->where('sales_person', $request->executive_id);
+        }
+
+        
+        $query = $query->groupBy('model_name')->orderBy('months');
+
+        return Datatables::of($query)
+            ->addIndexColumn()
+            ->addColumn('month1_qty', function ($query) {
+                $currentDate = Carbon::now();
+                $month_are = $currentDate->copy()->subMonthsNoOverflow(3)->format('M');
+                $invoice_dates = explode(',', $query->invoice_dates);
+                $quantitys = explode(',', $query->quantitys);
+                $tqty = 0;
+                foreach ($invoice_dates as $key => $value) {
+                    $getMonth = date('M', strtotime($value));
+                    if ($getMonth == $month_are) {
+                        $tqty += $quantitys[$key];
+                    }
+                }
+
+                return $tqty;
+            })
+            ->addColumn('month2_qty', function ($query) {
+                $currentDate = Carbon::now();
+                $month_are = $currentDate->copy()->subMonthsNoOverflow(2)->format('M');
+                $invoice_dates = explode(',', $query->invoice_dates);
+                $quantitys = explode(',', $query->quantitys);
+                $tqty = 0;
+                foreach ($invoice_dates as $key => $value) {
+                    $getMonth = date('M', strtotime($value));
+                    if ($getMonth == $month_are) {
+                        $tqty += $quantitys[$key];
+                    }
+                }
+
+                return $tqty;
+            })
+            ->addColumn('month3_qty', function ($query) {
+                $currentDate = Carbon::now();
+                $month_are = $currentDate->copy()->subMonthsNoOverflow(1)->format('M');
+                $invoice_dates = explode(',', $query->invoice_dates);
+                $quantitys = explode(',', $query->quantitys);
+                $tqty = 0;
+                foreach ($invoice_dates as $key => $value) {
+                    $getMonth = date('M', strtotime($value));
+                    if ($getMonth == $month_are) {
+                        $tqty += $quantitys[$key];
+                    }
+                }
+
+                return $tqty;
+            })
+            ->addColumn('qty_wise', function ($query) use ($data) {
+                
+                if ($query->total_quantitys > 0) {
+                    return number_format((($query->total_quantitys / $data[0]->total_quantitys) * 100), 2, '.', '') . "%";
+                } else {
+                    return $query->total_quantitys;
+                }
+            })
+            ->rawColumns(['month1_qty', 'month2_qty', 'month3_qty', 'qty_wise'])
+            ->make(true);
+    }
+
+    public function product_analysis_qty_download(Request $request)
+    {
+        abort_if(Gate::denies('product_analysis_branch_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new ProductAnalysisQtyExport($request), 'product_analysis_qty.xlsx');
+    }
+
+    public function product_analysis_value(Request $request)
     {
         if ($request->ip() != '111.118.252.250') {
             return "<h2>Coming Soon ... </h1>";
@@ -2560,10 +2709,10 @@ class ReportController extends Controller
             $currentDate->copy()->subMonthsNoOverflow(2)->format('M'), // Two months ago
             $currentDate->copy()->subMonthsNoOverflow(1)->format('M'), // Last month
         ];
-        return view('reports.product_analysis_qty', compact('years', 'users', 'ps_branches', 'ps_divisions', 'ps_months', 'ps_dealers', 'ps_product_models', 'ps_new_group_names', 'ps_sales_persons', 'total_qty', 'total_sale', 'months'));
+        return view('reports.product_analysis_value', compact('years', 'users', 'ps_branches', 'ps_divisions', 'ps_months', 'ps_dealers', 'ps_product_models', 'ps_new_group_names', 'ps_sales_persons', 'total_qty', 'total_sale', 'months'));
     }
 
-    public function product_analysis_qty_list(Request $request)
+    public function product_analysis_value_list(Request $request)
     {
         DB::statement("SET SESSION group_concat_max_len = 10000000");
         $query = PrimarySales::select(
@@ -2656,68 +2805,84 @@ class ReportController extends Controller
 
         return Datatables::of($query)
             ->addIndexColumn()
-            ->addColumn('month1_qty', function ($query) {
+            ->addColumn('month1_sale', function ($query) {
                 $currentDate = Carbon::now();
                 $month_are = $currentDate->copy()->subMonthsNoOverflow(3)->format('M');
                 $invoice_dates = explode(',', $query->invoice_dates);
-                $quantitys = explode(',', $query->quantitys);
-                $tqty = 0;
+                $net_amounts = explode(',', $query->net_amounts);
+                $tsale = 0;
                 foreach ($invoice_dates as $key => $value) {
                     $getMonth = date('M', strtotime($value));
                     if ($getMonth == $month_are) {
-                        $tqty += $quantitys[$key];
+                        $tsale += $net_amounts[$key];
                     }
                 }
-
-                return $tqty;
+                if ($tsale > 0) {
+                    return number_format(($tsale / 100000), 2, '.', '');
+                } else {
+                    return $tsale;
+                }
             })
-            ->addColumn('month2_qty', function ($query) {
+            ->addColumn('month2_sale', function ($query) {
                 $currentDate = Carbon::now();
                 $month_are = $currentDate->copy()->subMonthsNoOverflow(2)->format('M');
                 $invoice_dates = explode(',', $query->invoice_dates);
-                $quantitys = explode(',', $query->quantitys);
-                $tqty = 0;
+                $net_amounts = explode(',', $query->net_amounts);
+                $tsale = 0;
                 foreach ($invoice_dates as $key => $value) {
                     $getMonth = date('M', strtotime($value));
                     if ($getMonth == $month_are) {
-                        $tqty += $quantitys[$key];
+                        $tsale += $net_amounts[$key];
                     }
                 }
-
-                return $tqty;
+                if ($tsale > 0) {
+                    return number_format(($tsale / 100000), 2, '.', '');
+                } else {
+                    return $tsale;
+                }
             })
-            ->addColumn('month3_qty', function ($query) {
+            ->addColumn('month3_sale', function ($query) {
                 $currentDate = Carbon::now();
                 $month_are = $currentDate->copy()->subMonthsNoOverflow(1)->format('M');
                 $invoice_dates = explode(',', $query->invoice_dates);
-                $quantitys = explode(',', $query->quantitys);
-                $tqty = 0;
+                $net_amounts = explode(',', $query->net_amounts);
+                $tsale = 0;
                 foreach ($invoice_dates as $key => $value) {
                     $getMonth = date('M', strtotime($value));
                     if ($getMonth == $month_are) {
-                        $tqty += $quantitys[$key];
+                        $tsale += $net_amounts[$key];
                     }
                 }
-
-                return $tqty;
-            })
-            ->addColumn('qty_wise', function ($query) use ($data) {
-                
-                if ($query->total_quantitys > 0) {
-                    return number_format((($query->total_quantitys / $data[0]->total_quantitys) * 100), 2, '.', '') . "%";
+                if ($tsale > 0) {
+                    return number_format(($tsale / 100000), 2, '.', '');
                 } else {
-                    return $query->total_quantitys;
+                    return $tsale;
                 }
             })
-            ->rawColumns(['month1_qty', 'month1_sale', 'month2_qty', 'month2_sale', 'month3_qty', 'month3_sale', 'total_net_amounts', 'qty_wise'])
+            ->addColumn('total_net_amounts', function ($query) {
+
+                if ($query->total_net_amounts > 0) {
+                    return number_format(($query->total_net_amounts / 100000), 2, '.', '');
+                } else {
+                    return $query->total_net_amounts;
+                }
+            })
+            ->addColumn('sale_wise', function ($query) use ($data) {
+                if ($query->total_net_amounts > 0) {
+                    return number_format((($query->total_net_amounts / $data[0]->total_net_amounts) * 100), 2, '.', '') . "%";
+                } else {
+                    return $query->total_net_amounts;
+                }
+            })
+            ->rawColumns(['month1_sale', 'month2_sale', 'month3_sale', 'total_net_amounts', 'sale_wise'])
             ->make(true);
     }
 
-    public function product_analysis_qty_download(Request $request)
+    public function product_analysis_value_download(Request $request)
     {
         abort_if(Gate::denies('product_analysis_branch_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        return Excel::download(new ProductAnalysisQtyExport($request), 'product_analysis_qty.xlsx');
+        return Excel::download(new ProductAnalysisValueExport($request), 'product_analysis_value.xlsx');
     }
 }

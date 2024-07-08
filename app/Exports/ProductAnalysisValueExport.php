@@ -13,14 +13,14 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Illuminate\Support\Facades\Auth;
 use DB;
 
-class ProductAnalysisQtyExport implements FromCollection, WithHeadings,WithMapping, ShouldAutoSize, WithEvents
+class ProductAnalysisValueExport implements FromCollection, WithHeadings,WithMapping, ShouldAutoSize, WithEvents
 {
 
     public function __construct($request)
     {
         $this->user_id = $request->input('user_id');
         $this->branch_id = $request->input('branch_id');
-        $this->division_id = $request->input('division');
+        $this->division_id = $request->input('division_id');
         $this->dealer_id = $request->input('dealer_id');
         $this->product_model = $request->input('product_model');
         $this->new_group = $request->input('new_group');
@@ -42,29 +42,6 @@ class ProductAnalysisQtyExport implements FromCollection, WithHeadings,WithMappi
             DB::raw('GROUP_CONCAT(net_amount) as net_amounts'),
             DB::raw('SUM(net_amount) as total_net_amounts'),
         );
-
-        if ($this->financial_year && $this->financial_year != '' && $this->financial_year != null) {
-            $f_year_array = explode('-', $this->financial_year);
-
-            $financial_year_start = $f_year_array[0] . '-04-01';
-            $financial_year_end = $f_year_array[1] . '-03-31';
-
-            if ($financial_year_end > $currentDate->toDateString()) {
-                $financial_year_end = $currentDate->copy()->subMonthNoOverflow()->endOfMonth()->format('Y-m-d');
-            }
-            $query->where(function ($q) use ($f_year_array, $financial_year_start, $financial_year_end) {
-                $q->where('invoice_date', '>=', $financial_year_start)
-                    ->where('invoice_date', '<=', $financial_year_end);;
-            });
-        } else {
-            $startDatethree = $currentDate->copy()->subMonthsNoOverflow(3)->firstOfMonth()->format('Y-m-d');
-            $endDatethree = $currentDate->copy()->subMonthNoOverflow()->endOfMonth()->format('Y-m-d');
-            $query->where(function ($q) use ($startDatethree, $endDatethree) {
-                $q->where('invoice_date', '>=', $startDatethree)
-                    ->where('invoice_date', '<=', $endDatethree);
-            });
-        }
-        $this->t_data = $query->get();
 
         if ($this->branch_id && $this->branch_id != '' && $this->branch_id != null) {
             $query->where('final_branch', $this->branch_id);
@@ -89,6 +66,29 @@ class ProductAnalysisQtyExport implements FromCollection, WithHeadings,WithMappi
         if ($this->executive_id && $this->executive_id != '' && $this->executive_id != null) {
             $query->where('sales_person', $this->executive_id);
         }
+
+        if ($this->financial_year && $this->financial_year != '' && $this->financial_year != null) {
+            $f_year_array = explode('-', $this->financial_year);
+
+            $financial_year_start = $f_year_array[0] . '-04-01';
+            $financial_year_end = $f_year_array[1] . '-03-31';
+
+            if ($financial_year_end > $currentDate->toDateString()) {
+                $financial_year_end = $currentDate->copy()->subMonthNoOverflow()->endOfMonth()->format('Y-m-d');
+            }
+            $query->where(function ($q) use ($f_year_array, $financial_year_start, $financial_year_end) {
+                $q->where('invoice_date', '>=', $financial_year_start)
+                    ->where('invoice_date', '<=', $financial_year_end);;
+            });
+        } else {
+            $startDatethree = $currentDate->copy()->subMonthsNoOverflow(3)->firstOfMonth()->format('Y-m-d');
+            $endDatethree = $currentDate->copy()->subMonthNoOverflow()->endOfMonth()->format('Y-m-d');
+            $query->where(function ($q) use ($startDatethree, $endDatethree) {
+                $q->where('invoice_date', '>=', $startDatethree)
+                    ->where('invoice_date', '<=', $endDatethree);
+            });
+        }
+        $this->t_data = $query->get();
 
         $query = $query->groupBy('model_name')->orderBy('months')->get();
         return $query;
@@ -126,7 +126,7 @@ class ProductAnalysisQtyExport implements FromCollection, WithHeadings,WithMappi
 
         $label3 = [
             'Total',
-            'Qty Wise Cont %'
+            'Val Wise Cont %'
         ];
 
         $headings = array_merge($label1, $this->months, $label3);
@@ -137,29 +137,30 @@ class ProductAnalysisQtyExport implements FromCollection, WithHeadings,WithMappi
     {
         $invoice_dates = explode(',', $data->invoice_dates);
         $quantitys = explode(',', $data->quantitys);
+        $net_amounts = explode(',', $data->net_amounts);
         $response[0] = $data->model_name;
         $indx = 0;
         foreach ($this->months as $k => $val) {
-            $tqty = 0;
+            $tsale = 0;
             foreach ($invoice_dates as $key => $value) {
                 $invDate = Carbon::createFromFormat('Y-m-d', $value);
                 $currentDate = $invDate->copy();
                 $monthName = $currentDate->format('F');
                 if ($monthName == $val) {
-                    $tqty += $quantitys[$key];
+                    $tsale += $net_amounts[$key];
                 }
             }
-            if ($tqty > 0) {
-                $response[2+$indx] = $tqty;
+            if ($tsale > 0) {
+                $response[1+$indx] = number_format(($tsale / 100000), 2, '.', '');
                 $indx++;
             } else {
-                $response[2+$indx] = "0";
+                $response[1+$indx] = "0";
                 $indx++;
             }
         }
 
-        $response[3+$indx] = $data->total_quantitys;
-        $response[4+$indx] = number_format((($data->total_quantitys / $this->t_data[0]->total_quantitys) * 100), 2, '.', '') . "%";
+        $response[1+$indx] = number_format(($data->total_net_amounts / 100000), 2, '.', '');
+        $response[2+$indx] = number_format((($data->total_net_amounts / $this->t_data[0]->total_net_amounts) * 100), 2, '.', '') . "%";;
 
         return $response;   
     }

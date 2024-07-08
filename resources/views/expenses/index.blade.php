@@ -153,6 +153,7 @@
                  <th>{!! trans('panel.expenses.fields.branch') !!}</th>
                  <th>{!! trans('panel.expenses.fields.total_km') !!}</th>
                  <th>{!! trans('panel.global.action') !!}</th>
+                 <th>Attechments</th>
                </thead>
                <tbody>
                </tbody>

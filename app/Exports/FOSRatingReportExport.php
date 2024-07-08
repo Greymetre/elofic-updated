@@ -117,11 +117,11 @@ class FOSRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
         $registration_index = $total_registered_retailers > 0 ? number_format(((($total_registered_retailers / $working_days) / 5) * 100), 0, '.', '') : "0.00";
         $visit_index = $query->visits->count() > 0 ? number_format(((($query->visits->count() / $working_days) / 10) * 100), 0, '.', '') : "0.00";
         $activation_index = $registred_sharthi_retailers > 0 ? number_format(((($registred_sharthi_retailers / $working_days) / 5) * 100), 0, '.', '') : "0.00";
-
-        $lastw_sale_index = $lastw_total_order_value > 0 ? number_format(((($lastw_total_order_value / 100000) / $lastw_working_days) * 100), 0, '.', '') : "0.00";
-        $lastw_registration_index = $lastw_total_registered_retailers > 0 ? number_format(((($lastw_total_registered_retailers / $lastw_working_days) / 5) * 100), 0, '.', '') : "0.00";
-        $lastw_visit_index = $query->visits->where('checkin_date', '<=', $dateBeforeSixDays)->count() > 0 ? number_format(((($query->visits->where('checkin_date', '<=', $dateBeforeSixDays)->count() / $lastw_working_days) / 10) * 100), 0, '.', '') : "0.00";
-        $lastw_activation_index = $lastw_registred_sharthi_retailers > 0 ? number_format(((($lastw_registred_sharthi_retailers / $lastw_working_days) / 5) * 100), 0, '.', '') : "0.00";
+        
+        $lastw_sale_index = $lastw_total_order_value > 0 ? number_format(((($lastw_total_order_value / 100000) / $lastw_working_days) * 100), 2, '.', '') : "0.00";
+        $lastw_registration_index = $lastw_total_registered_retailers > 0 ? number_format(((($lastw_total_registered_retailers / $lastw_working_days) / 5) * 100), 2, '.', '') : "0.00";
+        $lastw_visit_index = $query->visits->where('checkin_date', '<=', $dateBeforeSixDays)->count() > 0 ? ($lastw_working_days> 0 ? number_format(((($query->visits->where('checkin_date', '<=', $dateBeforeSixDays)->count() / $lastw_working_days) / 10) * 100), 2, '.', ''): "0.00") : "0.00";
+        $lastw_activation_index = $lastw_registred_sharthi_retailers > 0 ? number_format(((($lastw_registred_sharthi_retailers / $lastw_working_days) / 5) * 100), 2, '.', '') : "0.00";
 
         $lastw_performance_rating = ((($lastw_sale_index*0.5) + ($lastw_registration_index*0.1) + ($lastw_visit_index*0.1) + ($lastw_activation_index*0.3)));
 
@@ -168,7 +168,7 @@ class FOSRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
             $total_points > 0 ? $total_points : "0",
             $unique_redemption_count > 0 ? $unique_redemption_count : "0",
             $redemption_points > 0 ? $redemption_points : "0",
-            $lastw_performance_rating > 0 ? $lastw_performance_rating : "0",
+            $lastw_performance_rating > 0 ?  number_format($lastw_performance_rating, 2, '.', '') : "0",
         ];
     }
 

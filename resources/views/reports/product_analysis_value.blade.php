@@ -6,11 +6,11 @@
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
-          <h4 class="card-title">Product Analysis QTY
+          <h4 class="card-title">Product Analysis Value
             <span class="">
               <div class="btn-group header-frm-btn">
-                @if(auth()->user()->can(['product_analysis_qty_download']))
-                <form method="POST" action="{{url('product_analysis_qty/download')}}">
+                @if(auth()->user()->can(['product_analysis_value_download']))
+                <form method="POST" action="{{url('product_analysis_value/download')}}">
                   @csrf
                   <div class="d-flex flex-wrap flex-row">
                     <!-- division filter -->
@@ -81,10 +81,10 @@
                     <!-- product models filter -->
                     <div class="p-2" style="width:200px;">
                       <select class="select2" name="product_model" id="ps_product_model" data-style="select-with-transition" title="{!! trans('panel.secondary_dashboard.product_model') !!}">
-                        <option value="" selected>Model Name</option>
+                        <option value="" selected>{!! trans('panel.secondary_dashboard.product_model') !!}</option>
                         @if(@isset($ps_product_models ))
                         @foreach($ps_product_models as $product)
-                        <option value="{!! $product->model_name !!}">{!! $product->model_name !!}</option>
+                        <option value="{!! $product->product_name !!}">{!! $product->product_name !!}</option>
                         @endforeach
                         @endif
                       </select>
@@ -137,7 +137,7 @@
                 @endforeach
                 @endif
                 <th>Total</th>
-                <th>Qty Wise Cont %</th>
+                <th>Val Wise Cont %</th>
               </thead>
               <tbody>
               </tbody>
@@ -168,7 +168,7 @@
         ],
         "retrieve": true,
         ajax: {
-          url: "{{ route('product_analysis_qty.list') }}",
+          url: "{{ route('product_analysis_value.list') }}",
           data: function(d) {
             d.executive_id = $('#ps_executive_id').val(),
               d.division_id = $('#ps_division_id').val(),
@@ -189,36 +189,36 @@
             "defaultContent": 'final branch'
           },
           {
-            data: 'month1_qty',
-            name: 'month1_qty',
+            data: 'month1_sale',
+            name: 'month1_sale',
             orderable: false,
             searchable: false,
             "defaultContent": ''
           },
           {
-            data: 'month2_qty',
-            name: 'month2_qty',
+            data: 'month2_sale',
+            name: 'month2_sale',
             orderable: false,
             searchable: false,
             "defaultContent": ''
           },
           {
-            data: 'month3_qty',
-            name: 'month3_qty',
+            data: 'month3_sale',
+            name: 'month3_sale',
             orderable: false,
             searchable: false,
             "defaultContent": ''
           },
           {
-            data: 'total_quantitys',
-            name: 'total_quantitys',
+            data: 'total_net_amounts',
+            name: 'total_net_amounts',
             orderable: false,
             searchable: false,
             "defaultContent": ''
           },
           {
-            data: 'qty_wise',
-            name: 'qty_wise',
+            data: 'sale_wise',
+            name: 'sale_wise',
             orderable: false,
             searchable: false,
             "defaultContent": ''

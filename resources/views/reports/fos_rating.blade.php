@@ -44,12 +44,12 @@
                         @endforeach
                       </select>
                     </div>
-                    <div class="p-2">
+                    <!-- <div class="p-2">
                       <input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly>
                     </div>
                     <div class="p-2">
                       <input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly>
-                    </div>
+                    </div> -->
                     <div class="p-2">
                       <button class="btn btn-just-icon btn-theme" title="Checkin Download">
                         <i class="material-icons">cloud_download</i>
@@ -84,7 +84,7 @@
                 <th>Area Of Operation (Districts Covered)</th>
                 <th>Date of Appointment</th>
                 <th>Yesterday Productivity vs Visit</th>
-                <th>Order Value Jun'24 (in Lacs After 35%)</th>
+                <th>Order Value This Month (in Lacs After 35%)</th>
                 <th>Total Order Value in Lacs After 35%</th>
                 <th>Sale Index</th>
                 <th>Registration Index</th>

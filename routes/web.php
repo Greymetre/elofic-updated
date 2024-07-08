@@ -154,6 +154,11 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('reports/product_analysis_qty', [ReportController::class, 'product_analysis_qty']);
     Route::any('product_analysis_qty/download', [ReportController::class, 'product_analysis_qty_download'])->name('product_analysis_qty.download');
     Route::any('product_analysis_qty/list', [ReportController::class, 'product_analysis_qty_list'])->name('product_analysis_qty.list');
+    
+    // Product Analysis Value
+    Route::any('reports/product_analysis_value', [ReportController::class, 'product_analysis_value']);
+    Route::any('product_analysis_value/download', [ReportController::class, 'product_analysis_value_download'])->name('product_analysis_value.download');
+    Route::any('product_analysis_value/list', [ReportController::class, 'product_analysis_value_list'])->name('product_analysis_value.list');
 
     //Customers
     Route::resource('customertype', CustomerTypeController::class);
