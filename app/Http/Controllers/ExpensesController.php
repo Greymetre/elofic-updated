@@ -427,7 +427,7 @@ class ExpensesController extends Controller
 
             if ($request->hasFile('expense_file')) {
 
-                $expense->clearMediaCollection('expense_file');
+                // $expense->clearMediaCollection('expense_file');
 
                 $files = $request->file('expense_file');
                 foreach ($files as $file) {

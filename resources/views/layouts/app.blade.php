@@ -949,7 +949,7 @@
                 </li>
                 @endif -->
                 @if(auth()->user()->can('reports_sale'))
-            <li class="nav-item {{ request()->is('reports/reports_sale*') || request()->is('reports/fos_rating*') || request()->is('reports/primary_sales*') || request()->is('reports/secondary_sales*') ? 'active' : '' }}">
+            <li class="nav-item {{ request()->is('reports/reports_sale*') || request()->is('reports/fos_rating*') || request()->is('reports/primary_sales*') || request()->is('reports/secondary_sales*') || request()->is('reports/product_analysis_qty*') || request()->is('reports/product_analysis_value*') || request()->is('reports/product_analysis_value*') ? 'active' : '' }}">
               <a class="nav-link collapsed" data-toggle="collapse" href="#salesReportsMenu" aria-expanded="false">
                 <i class="material-icons">check_circle</i>
                 <p>Sales</p>
@@ -1002,6 +1002,14 @@
                     <a class="nav-link" href="{{ url('reports/product_analysis_qty') }}">
                       <i class="material-icons">store</i>
                       <p>Product Analysis Qty</p>
+                    </a>
+                  </li>
+                  @endif
+                  @if(auth()->user()->can('product_analysis_value_access'))
+                  <li class="nav-item {{ request()->is('reports/product_analysis_value*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('reports/product_analysis_value') }}">
+                      <i class="material-icons">store</i>
+                      <p>Product Analysis Value</p>
                     </a>
                   </li>
                   @endif

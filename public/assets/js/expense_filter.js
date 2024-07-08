@@ -147,6 +147,12 @@ $(document).ready(function () {
                 orderable: false,
                 searchable: false
             },
+            {
+                data: 'attech',
+                name: 'attech',
+                orderable: false,
+                searchable: false
+            }
         ]
     });
 

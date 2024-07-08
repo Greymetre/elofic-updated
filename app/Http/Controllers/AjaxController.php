@@ -1291,7 +1291,7 @@ class AjaxController extends Controller
         }
 
         $data['total_qty'] = $query->sum('quantity');
-        $data['total_sale'] = $query->sum('rate');
+        $data['total_sale'] = number_format(($query->sum('rate')/100000),2,'.','')." (Lac)";
 
         return response()->json($data);
     }
