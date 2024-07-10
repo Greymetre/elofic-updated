@@ -90,6 +90,7 @@ Route::group(['middleware' => ['auth:customers']], function () {
     // Get Customer list
     Route::any('customer/parentCustomers', [CustomerController::class, 'customerParentCustomers']);
     Route::any('customer/getRetailers', [CustomerController::class, 'customerRetailers']);
+    Route::post('customers-active', [CustomerController::class, 'active']);
     // Order Master
     Route::post('customer/insertOrder', [OrderController::class, 'customerInsertOrder']);
     Route::any('customer/getOrderList', [OrderController::class, 'customerOrderList']);

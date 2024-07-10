@@ -96,7 +96,10 @@ class TransactionHistoryController extends Controller
                         'scheme_name' => isset($value['scheme_details']) ? $value['scheme_details']['scheme_name'] : '',
                         'coupon_code' => (isset($value['coupon_code']) && $value['coupon_code'] != '' && $value['coupon_code'] != NULL) ? $value['coupon_code'] : 'Manual',
                         'status' => isset($value['status']) ? $value['status'] : '',
+                        'active_point' => isset($value['active_point']) ? $value['active_point'] : '',
+                        'provision_point' => isset($value['provision_point']) ? $value['provision_point'] : '',
                         'point' => isset($value['point']) ? $value['point'] : '',
+                        'remark' => isset($value['remark']) ? $value['remark'] : '',
                         'date' => isset($value['created_at']) ? date('d M Y', strtotime($value['created_at'])) : '',
                         'product_name' => isset($value['scheme']) ? preg_replace('/\s+/', ' ', $value['scheme']['product']['product_name']) : '',
                     ]);
@@ -375,6 +378,7 @@ class TransactionHistoryController extends Controller
                 if (!$notexists) {
                     throw ValidationException::withMessages([
                         'coupon_code' => "The coupon code '$nonNullCoupenCode' is Invalid.",
+                        // 'coupon_code' => "coupon code '$nonNullCoupenCode' is sent for approval, points will be credited once approved.",
                     ]);
                 }
                 $scheme = Services::where('serial_no', $nonNullCoupenCode)->first();
@@ -470,11 +474,11 @@ class TransactionHistoryController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'customer_id' => 'required|exists:customers,id',
-                'damageattach1' => 'required',
+                // 'damageattach1' => 'required',
             ]);
-            $validator->setCustomMessages([
-                'damageattach1.required' => 'Please attach at least one attachment.',
-            ]);
+            // $validator->setCustomMessages([
+            //     'damageattach1.required' => 'Please attach at least one attachment.',
+            // ]);
             if ($validator->fails()) {
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }

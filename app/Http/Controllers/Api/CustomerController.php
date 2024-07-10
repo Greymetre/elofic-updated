@@ -976,4 +976,20 @@ class CustomerController extends Controller
 
     }
 
+    public function active(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id'  => 'required',
+        ]); 
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error','message' => $validator->messages()->all()],$this->badrequest);
+        }
+        if(Customers::where('id',$request['id'])->update(['active' => ($request['active'] == 'Y') ? 'Y' :'N']))
+        {
+            $message = ($request['active'] == 'N') ? 'Inactive' :'Active';
+            return response()->json(['status' => 'success','message' => 'Customer '.$message.' Successfully!']);
+        }
+        return response()->json(['status' => 'error','message' => 'Error in Status Update']);
+    }
+
 }

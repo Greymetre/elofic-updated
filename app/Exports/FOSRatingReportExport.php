@@ -55,6 +55,14 @@ class FOSRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
         if ($this->branch_id && $this->branch_id != '' && $this->branch_id != NULL) {
             $query->where('branch_id', $this->branch_id);
         }
+        if($this->start_date && !empty($this->start_date) && $this->end_date && !empty($this->end_date)){
+            $start_date = $this->start_date;
+            $end_date = $this->end_date;
+            $query->whereHas('userinfo', function($query) use($end_date, $start_date){
+                $query->where('date_of_joining', '>=', $start_date)
+                    ->where('date_of_joining', '<=', $end_date);
+            });
+        }
         $query = $query->where('sales_type', 'Secondary')->latest()->get();
 
         $query = $query->map(function ($query) {
