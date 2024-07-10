@@ -360,7 +360,12 @@ class UsersController extends Controller
             }
             UserCityAssign::whereNotIn('city_id', $request['cities'])->where('userid', $id)->delete();
         }
-        return redirect()->route('users.index');
+        if ($request['password'] && !empty($request['password'])) {
+            Auth::logout();
+            return redirect()->route('login')->with('status', 'Password updated successfully. Please log in with your new password.');
+        }else{
+            return redirect()->route('users.index');
+        }
     }
 
     public function show($id)
@@ -594,6 +599,16 @@ class UsersController extends Controller
             if ($request->branch_id) {
                 $query->where('branch_id', $request->branch_id);
             }
+
+            if ($request->start_date && !empty($request->start_date) && $request->end_date && !empty($request->end_date)) {
+                $start_date = $request->start_date;
+                $end_date = $request->end_date;
+                $query->whereHas('userinfo', function ($query) use ($end_date, $start_date) {
+                    $query->where('date_of_joining', '>=', $start_date)
+                        ->where('date_of_joining', '<=', $end_date);
+                });
+            }
+
 
             $data = $query->get()->map(function ($user) {
                 $working_days = $user->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Full Day Leave', 'Leave', 'Holiday'])->count();

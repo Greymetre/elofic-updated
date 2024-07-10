@@ -26,7 +26,7 @@ class DealerAppointmentDataTable extends DataTable
             ->eloquent($query)
             ->addIndexColumn()
             ->editColumn('appointment_date', function ($data) {
-                return isset($data->appointment_date) ? showdatetimeformat($data->appointment_date) : '';
+                return isset($data->appointment_date) ? date('d M Y', strtotime($data->appointment_date)) : '';
             })
             ->editColumn('name', function ($data) {
                 return $data->first_name.' '.$data->middle_name.' '.$data->last_name;

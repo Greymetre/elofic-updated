@@ -160,6 +160,11 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('product_analysis_value/download', [ReportController::class, 'product_analysis_value_download'])->name('product_analysis_value.download');
     Route::any('product_analysis_value/list', [ReportController::class, 'product_analysis_value_list'])->name('product_analysis_value.list');
 
+    // Group Wise Analysis
+    Route::any('reports/group_wise_analysis', [ReportController::class, 'group_wise_analysis']);
+    Route::any('group_wise_analysis/download', [ReportController::class, 'group_wise_analysis_download'])->name('group_wise_analysis.download');
+    Route::any('group_wise_analysis/list', [ReportController::class, 'group_wise_analysis_list'])->name('group_wise_analysis.list');
+
     //Customers
     Route::resource('customertype', CustomerTypeController::class);
     Route::post('customertype-active', [CustomerTypeController::class, 'active'])->name('customertype.active');

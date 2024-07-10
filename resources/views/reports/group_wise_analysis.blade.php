@@ -6,7 +6,7 @@
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
-          <h4 class="card-title">Product Analysis Branch Wise
+          <h4 class="card-title">Group Wise Analysis
             <span class="">
               <div class="btn-group header-frm-btn">
                 @if(auth()->user()->can(['product_analysis_branch_download']))
@@ -49,13 +49,13 @@
                       </select>
                     </div>
                     <!-- month filter-->
-                    <div class="p-2" style="width:200px;">
-                      <select class="selectpicker" multiple name="month[]" id="ps_month" disabled data-style="select-with-transition" title="Month">
-                        <option value="">{!! trans('panel.secondary_dashboard.month') !!}</option>
+                    {{--<div class="p-2" style="width:200px;">
+                      <select class="selectpicker" name="month" id="ps_month" disabled data-style="select-with-transition" title="Month">
+                        <option value="" selected>{!! trans('panel.secondary_dashboard.month') !!}</option>
                         @for ($month = 1; $month <= 12; $month++) <option value="{!! date('M', mktime(0, 0, 0, $month, 1)) !!}">{!! date('M', mktime(0, 0, 0, $month, 1)) !!}</option>
                           @endfor
                       </select>
-                    </div>
+                    </div>--}}
                     <!-- dealer/distributors filter -->
                     <div class="p-2" style="width:200px;">
                       <select class="select2" name="dealer" id="ps_dealer_id" data-style="select-with-transition" title="{!! trans('panel.sales_users.user_name') !!}">
@@ -130,8 +130,8 @@
           <div class="table-responsive">
             <table id="getprimarysales" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
               <thead class=" text-primary">
+                <th>Group Name</th>
                 <th>Fianl Branch Name</th>
-                <th>Model Name</th>
                 @if(count($months) > 0)
                 @foreach($months as $month)
                 <th>{{$month}}  QTY</th>
@@ -172,7 +172,7 @@
         ],
         "retrieve": true,
         ajax: {
-          url: "{{ route('product_analysis_branch.list') }}",
+          url: "{{ route('group_wise_analysis.list') }}",
           data: function(d) {
             d.executive_id = $('#ps_executive_id').val(),
               d.division_id = $('#ps_division_id').val(),
@@ -188,13 +188,15 @@
         },
         columns: [
           {
-            data: 'final_branch',
-            name: 'final_branch',
+            data: 'new_group',
+            name: 'new_group',
+            orderable: false,
             "defaultContent": ''
           },
           {
-            data: 'model_name',
-            name: 'model_name',
+            data: 'final_branch',
+            name: 'final_branch',
+            orderable: false,
             "defaultContent": 'final branch'
           },
           {

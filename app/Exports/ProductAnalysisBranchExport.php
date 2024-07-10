@@ -26,13 +26,14 @@ class ProductAnalysisBranchExport implements FromCollection, WithHeadings,WithMa
         $this->new_group = $request->input('new_group');
         $this->executive_id = $request->input('executive_id');
         $this->financial_year = $request->input('financial_year');
+        $this->month = $request->input('month');
         $this->months = [];
         $this->t_data = '';
     }
     public function collection()
     {
         $currentDate = Carbon::now();
-        DB::statement("SET SESSION group_concat_max_len = 1000000");
+        DB::statement("SET SESSION group_concat_max_len = 10000000");
         $query = PrimarySales::select(
             'final_branch',
             'model_name',
@@ -43,6 +44,46 @@ class ProductAnalysisBranchExport implements FromCollection, WithHeadings,WithMa
             DB::raw('GROUP_CONCAT(net_amount) as net_amounts'),
             DB::raw('SUM(net_amount) as total_net_amounts'),
         );
+
+        if ($this->month && is_array($this->month) && count($this->month) > 0 && $this->financial_year && !empty($this->financial_year)) {
+            $f_year_array = explode('-', $this->financial_year);
+
+            // Determine if months are in Jan-Mar and set the correct year
+            $isJanToMar = in_array('Jan', $this->month) || in_array('Feb', $this->month) || in_array('Mar', $this->month);
+            $currentYear = $isJanToMar ? $f_year_array[1] : $f_year_array[0];
+
+            // Get the first and last months from the array
+            $firstMonth = $this->month[0];
+            $lastMonth = $this->month[count($this->month) - 1];
+
+            // Format the month and create start and end dates
+            $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$firstMonth")->startOfMonth();
+            $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$lastMonth")->endOfMonth();
+
+            // Convert to date strings
+            $startDateFormatted = $startDate->toDateString();
+            $endDateFormatted = $endDate->toDateString();
+
+            // Apply the date range to the query
+            $query->where(function ($q) use ($startDateFormatted, $endDateFormatted) {
+                $q->where('invoice_date', '>=', $startDateFormatted)
+                    ->where('invoice_date', '<=', $endDateFormatted);
+            });
+        } elseif ($this->financial_year && $this->financial_year != '' && $this->financial_year != null) {
+            $f_year_array = explode('-', $this->financial_year);
+
+            $financial_year_start = $f_year_array[0] . '-04-01';
+            $financial_year_end = $f_year_array[1] . '-03-31';
+
+            $query->whereBetween('invoice_date', [$financial_year_start, $financial_year_end]);
+        } else {
+            $currentDate = Carbon::now();
+            $startDatethree = $currentDate->copy()->subMonthsNoOverflow(3)->firstOfMonth()->format('Y-m-d');
+            $endDatethree = $currentDate->copy()->subMonthNoOverflow()->endOfMonth()->format('Y-m-d');
+            $query->whereBetween('invoice_date', [$startDatethree, $endDatethree]);
+        }
+
+        $this->t_data = $query->get();
 
         if ($this->branch_id && $this->branch_id != '' && $this->branch_id != null) {
             $query->where('final_branch', $this->branch_id);
@@ -57,7 +98,7 @@ class ProductAnalysisBranchExport implements FromCollection, WithHeadings,WithMa
         }
 
         if ($this->product_model && $this->product_model != '' && $this->product_model != null) {
-            $query->where('product_name', $this->product_model);
+            $query->where('model_name', $this->product_model);
         }
 
         if ($this->new_group && $this->new_group != '' && $this->new_group != null) {
@@ -67,32 +108,9 @@ class ProductAnalysisBranchExport implements FromCollection, WithHeadings,WithMa
         if ($this->executive_id && $this->executive_id != '' && $this->executive_id != null) {
             $query->where('sales_person', $this->executive_id);
         }
-
-        if ($this->financial_year && $this->financial_year != '' && $this->financial_year != null) {
-            $f_year_array = explode('-', $this->financial_year);
-
-            $financial_year_start = $f_year_array[0] . '-04-01';
-            $financial_year_end = $f_year_array[1] . '-03-31';
-
-            if ($financial_year_end > $currentDate->toDateString()) {
-                $financial_year_end = $currentDate->copy()->subMonthNoOverflow()->endOfMonth()->format('Y-m-d');
-            }
-            $query->where(function ($q) use ($f_year_array, $financial_year_start, $financial_year_end) {
-                $q->where('invoice_date', '>=', $financial_year_start)
-                    ->where('invoice_date', '<=', $financial_year_end);;
-            });
-        } else {
-            $startDatethree = $currentDate->copy()->subMonthsNoOverflow(3)->firstOfMonth()->format('Y-m-d');
-            $endDatethree = $currentDate->copy()->subMonthNoOverflow()->endOfMonth()->format('Y-m-d');
-            $query->where(function ($q) use ($startDatethree, $endDatethree) {
-                $q->where('invoice_date', '>=', $startDatethree)
-                    ->where('invoice_date', '<=', $endDatethree);
-            });
-        }
-        $this->t_data = $query->get();
-
-        $query = $query->groupBy('final_branch', 'model_name')->orderBy('months')->get();
-        return $query;
+        
+        $query = $query->groupBy('final_branch', 'model_name')->orderBy('final_branch');
+        return $query->get();
     }
 
     public function headings(): array
@@ -102,23 +120,65 @@ class ProductAnalysisBranchExport implements FromCollection, WithHeadings,WithMa
             'Model Name',
         ];
 
-        if ($this->financial_year && $this->financial_year != '' && $this->financial_year != null) {
-            $currentDate = Carbon::now();
+        if ($this->month && is_array($this->month) && count($this->month) > 0 && $this->financial_year && !empty($this->financial_year)) {
+            $f_year_array = explode('-', $this->financial_year);
+
+            // Determine if months are in Jan-Mar and set the correct year
+            $isJanToMar = in_array('Jan', $this->month) || in_array('Feb', $this->month) || in_array('Mar', $this->month);
+            $currentYear = $isJanToMar ? $f_year_array[1] : $f_year_array[0];
+
+            // Get the first and last months from the array
+            $firstMonth = $this->month[0];
+            $lastMonth = $this->month[count($this->month) - 1];
+
+            // Format the month and create start and end dates
+            $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$firstMonth")->startOfMonth();
+            $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$lastMonth")->endOfMonth();
+
+            // Convert to date strings
+            $startDateFormatted = $startDate->toDateString();
+            $endDateFormatted = $endDate->toDateString();
+
+            $startDate = Carbon::createFromFormat('Y-m-d', $startDateFormatted);
+            $endDate = Carbon::createFromFormat('Y-m-d', $endDateFormatted);
+            $currentDate = $startDate->copy();
+
+            while ($currentDate <= $endDate) {
+                $monthName = $currentDate->format('F y');
+                if (!in_array($monthName, $this->months)) {
+                    $this->months[] = $monthName;
+                }
+                $currentDate->addMonth()->startOfMonth();
+            }
+
+        } elseif ($this->financial_year && $this->financial_year != '' && $this->financial_year != null) {
             $f_year_array = explode('-', $this->financial_year);
 
             $financial_year_start = $f_year_array[0] . '-04-01';
             $financial_year_end = $f_year_array[1] . '-03-31';
-
-            if ($financial_year_end > $currentDate->toDateString()) {
-                $financial_year_end = $currentDate->copy()->subMonthNoOverflow()->endOfMonth()->format('Y-m-d');
-            }
 
             $startDate = Carbon::createFromFormat('Y-m-d', $financial_year_start);
             $endDate = Carbon::createFromFormat('Y-m-d', $financial_year_end);
             $currentDate = $startDate->copy();
 
             while ($currentDate <= $endDate) {
-                $monthName = $currentDate->format('F');
+                $monthName = $currentDate->format('F y');
+                if (!in_array($monthName, $this->months)) {
+                    $this->months[] = $monthName;
+                }
+                $currentDate->addMonth()->startOfMonth();
+            }
+
+        } else {
+            $currentDate = Carbon::now();
+            $startDatethree = $currentDate->copy()->subMonthsNoOverflow(3)->firstOfMonth()->format('Y-m-d');
+            $endDatethree = $currentDate->copy()->subMonthNoOverflow()->endOfMonth()->format('Y-m-d');
+            $startDate = Carbon::createFromFormat('Y-m-d', $startDatethree);
+            $endDate = Carbon::createFromFormat('Y-m-d', $endDatethree);
+            $currentDate = $startDate->copy();
+
+            while ($currentDate <= $endDate) {
+                $monthName = $currentDate->format('F y');
                 if (!in_array($monthName, $this->months)) {
                     $this->months[] = $monthName;
                 }

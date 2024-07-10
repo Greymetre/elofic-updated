@@ -949,7 +949,7 @@
                 </li>
                 @endif -->
                 @if(auth()->user()->can('reports_sale'))
-            <li class="nav-item {{ request()->is('reports/reports_sale*') || request()->is('reports/fos_rating*') || request()->is('reports/primary_sales*') || request()->is('reports/secondary_sales*') || request()->is('reports/product_analysis_qty*') || request()->is('reports/product_analysis_value*') || request()->is('reports/product_analysis_value*') ? 'active' : '' }}">
+            <li class="nav-item {{ request()->is('reports/reports_sale*') || request()->is('reports/fos_rating*') || request()->is('reports/primary_sales*') || request()->is('reports/secondary_sales*') || request()->is('reports/product_analysis_qty*') || request()->is('reports/product_analysis_branch*') || request()->is('reports/product_analysis_value*') || request()->is('reports/group_wise_analysis*') ? 'active' : '' }}">
               <a class="nav-link collapsed" data-toggle="collapse" href="#salesReportsMenu" aria-expanded="false">
                 <i class="material-icons">check_circle</i>
                 <p>Sales</p>
@@ -1010,6 +1010,14 @@
                     <a class="nav-link" href="{{ url('reports/product_analysis_value') }}">
                       <i class="material-icons">store</i>
                       <p>Product Analysis Value</p>
+                    </a>
+                  </li>
+                  @endif
+                  @if(auth()->user()->can('group_wise_analysis_access'))
+                  <li class="nav-item {{ request()->is('reports/group_wise_analysis*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('reports/group_wise_analysis') }}">
+                      <i class="material-icons">store</i>
+                      <p>Group Wise Analysis</p>
                     </a>
                   </li>
                   @endif

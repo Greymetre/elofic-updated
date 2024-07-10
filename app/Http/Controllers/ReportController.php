@@ -2323,24 +2323,42 @@ class ReportController extends Controller
             DB::raw('SUM(net_amount) as total_net_amounts'),
         );
 
-        if ($request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
+        if ($request->month && is_array($request->month) && count($request->month) > 0 && $request->financial_year && !empty($request->financial_year)) {
+            $f_year_array = explode('-', $request->financial_year);
+
+            // Determine if months are in Jan-Mar and set the correct year
+            $isJanToMar = in_array('Jan', $request->month) || in_array('Feb', $request->month) || in_array('Mar', $request->month);
+            $currentYear = $isJanToMar ? $f_year_array[1] : $f_year_array[0];
+
+            // Get the first and last months from the array
+            $firstMonth = $request->month[0];
+            $lastMonth = $request->month[count($request->month) - 1];
+
+            // Format the month and create start and end dates
+            $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$firstMonth")->startOfMonth();
+            $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$lastMonth")->endOfMonth();
+
+            // Convert to date strings
+            $startDateFormatted = $startDate->toDateString();
+            $endDateFormatted = $endDate->toDateString();
+
+            // Apply the date range to the query
+            $query->where(function ($q) use ($startDateFormatted, $endDateFormatted) {
+                $q->where('invoice_date', '>=', $startDateFormatted)
+                    ->where('invoice_date', '<=', $endDateFormatted);
+            });
+        } elseif ($request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
             $f_year_array = explode('-', $request->financial_year);
 
             $financial_year_start = $f_year_array[0] . '-04-01';
             $financial_year_end = $f_year_array[1] . '-03-31';
 
-            $query->where(function ($q) use ($f_year_array, $financial_year_start, $financial_year_end) {
-                $q->where('invoice_date', '>=', $financial_year_start)
-                    ->where('invoice_date', '<=', $financial_year_end);;
-            });
+            $query->whereBetween('invoice_date', [$financial_year_start, $financial_year_end]);
         } else {
             $currentDate = Carbon::now();
             $startDatethree = $currentDate->copy()->subMonthsNoOverflow(3)->firstOfMonth()->format('Y-m-d');
             $endDatethree = $currentDate->copy()->subMonthNoOverflow()->endOfMonth()->format('Y-m-d');
-            $query->where(function ($q) use ($startDatethree, $endDatethree) {
-                $q->where('invoice_date', '>=', $startDatethree)
-                    ->where('invoice_date', '<=', $endDatethree);
-            });
+            $query->whereBetween('invoice_date', [$startDatethree, $endDatethree]);
         }
 
         $data = $query->get();
@@ -2368,32 +2386,8 @@ class ReportController extends Controller
         if ($request->executive_id && $request->executive_id != '' && $request->executive_id != null) {
             $query->where('sales_person', $request->executive_id);
         }
-
-        if ($request->month && $request->month != '' && $request->month != null && $request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
-
-            $f_year_array = explode('-', $request->financial_year);
-
-            if ($request->month == 'Jan' || $request->month == 'Feb' || $request->month == 'Mar') {
-                $currentYear = $f_year_array[1];
-                $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->startOfMonth();
-                $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->endOfMonth();
-                $startDateFormatted = $startDate->toDateString();
-                $endDateFormatted = $endDate->toDateString();
-            } else {
-                $currentYear = $f_year_array[0];
-                $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->startOfMonth();
-                $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->endOfMonth();
-                $startDateFormatted = $startDate->toDateString();
-                $endDateFormatted = $endDate->toDateString();
-            }
-
-            $query->where(function ($q) use ($startDateFormatted, $endDateFormatted) {
-                $q->where('invoice_date', '>=', $startDateFormatted)
-                    ->where('invoice_date', '<=', $endDateFormatted);;
-            });
-        }
-
-        $query = $query->groupBy('final_branch', 'model_name')->orderBy('months');
+        
+        $query = $query->groupBy('final_branch', 'model_name')->orderBy('final_branch');
 
         return Datatables::of($query)
             ->addIndexColumn()
@@ -2531,9 +2525,6 @@ class ReportController extends Controller
     }
     public function product_analysis_qty(Request $request)
     {
-        if ($request->ip() != '111.118.252.250') {
-            return "<h2>Coming Soon ... </h1>";
-        }
         $ps_branches = PrimarySales::latest()->get()->unique('final_branch');
         $ps_divisions = PrimarySales::latest()->get()->unique('division');
         $ps_months = PrimarySales::latest()->get()->unique('month');
@@ -2558,6 +2549,8 @@ class ReportController extends Controller
     public function product_analysis_qty_list(Request $request)
     {
         DB::statement("SET SESSION group_concat_max_len = 10000000");
+
+        // Base query with selected fields and total calculations
         $query = PrimarySales::select(
             'model_name',
             DB::raw('GROUP_CONCAT(quantity) as quantitys'),
@@ -2565,60 +2558,85 @@ class ReportController extends Controller
             DB::raw('GROUP_CONCAT(month) as months'),
             DB::raw('GROUP_CONCAT(invoice_date) as invoice_dates'),
             DB::raw('GROUP_CONCAT(net_amount) as net_amounts'),
-            DB::raw('SUM(net_amount) as total_net_amounts'),
+            DB::raw('SUM(net_amount) as total_net_amounts')
         );
 
-        if ($request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
+        // Filter by financial year or last three months
+        if ($request->month && is_array($request->month) && count($request->month) > 0 && $request->financial_year && !empty($request->financial_year)) {
+            $f_year_array = explode('-', $request->financial_year);
+
+            // Determine if months are in Jan-Mar and set the correct year
+            $isJanToMar = in_array('Jan', $request->month) || in_array('Feb', $request->month) || in_array('Mar', $request->month);
+            $currentYear = $isJanToMar ? $f_year_array[1] : $f_year_array[0];
+
+            // Get the first and last months from the array
+            $firstMonth = $request->month[0];
+            $lastMonth = $request->month[count($request->month) - 1];
+
+            // Format the month and create start and end dates
+            $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$firstMonth")->startOfMonth();
+            $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$lastMonth")->endOfMonth();
+
+            // Convert to date strings
+            $startDateFormatted = $startDate->toDateString();
+            $endDateFormatted = $endDate->toDateString();
+
+            // Apply the date range to the query
+            $query->where(function ($q) use ($startDateFormatted, $endDateFormatted) {
+                $q->where('invoice_date', '>=', $startDateFormatted)
+                    ->where('invoice_date', '<=', $endDateFormatted);
+            });
+        } elseif ($request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
             $f_year_array = explode('-', $request->financial_year);
 
             $financial_year_start = $f_year_array[0] . '-04-01';
             $financial_year_end = $f_year_array[1] . '-03-31';
 
-            $query->where(function ($q) use ($f_year_array, $financial_year_start, $financial_year_end) {
-                $q->where('invoice_date', '>=', $financial_year_start)
-                    ->where('invoice_date', '<=', $financial_year_end);;
-            });
+            $query->whereBetween('invoice_date', [$financial_year_start, $financial_year_end]);
         } else {
             $currentDate = Carbon::now();
             $startDatethree = $currentDate->copy()->subMonthsNoOverflow(3)->firstOfMonth()->format('Y-m-d');
             $endDatethree = $currentDate->copy()->subMonthNoOverflow()->endOfMonth()->format('Y-m-d');
-            $query->where(function ($q) use ($startDatethree, $endDatethree) {
-                $q->where('invoice_date', '>=', $startDatethree)
-                    ->where('invoice_date', '<=', $endDatethree);
-            });
+            $query->whereBetween('invoice_date', [$startDatethree, $endDatethree]);
         }
 
-        $data = $query->get();
+        // Get total quantities to calculate percentages
+        $totalQuantities = $query->sum('quantity');
 
-      
-        if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
+        // Apply additional filters
+        if ($request->branch_id) {
             $query->where('final_branch', $request->branch_id);
         }
 
-        if ($request->division_id && $request->division_id != '' && $request->division_id != null) {
+        if ($request->division_id) {
             $query->where('division', $request->division_id);
         }
 
-        if ($request->dealer_id && $request->dealer_id != '' && $request->dealer_id != null) {
+        if ($request->dealer_id) {
             $query->where('dealer', 'like', '%' . $request->dealer_id . '%');
         }
 
-        if ($request->product_model && $request->product_model != '' && $request->product_model != null) {
+        if ($request->product_model) {
             $query->where('model_name', $request->product_model);
         }
 
-        if ($request->new_group && $request->new_group != '' && $request->new_group != null) {
+        if ($request->new_group) {
             $query->where('new_group', $request->new_group);
         }
 
-        if ($request->executive_id && $request->executive_id != '' && $request->executive_id != null) {
+        if ($request->executive_id) {
             $query->where('sales_person', $request->executive_id);
         }
 
-        
-        $query = $query->groupBy('model_name')->orderBy('months');
+        // Group and order by calculated qty_wise percentage
+        $query = $query->groupBy('model_name')
+            ->selectRaw('SUM(quantity) as total_quantitys, SUM(quantity) / ? * 100 as qty_wise', [$totalQuantities])
+            ->orderBy('qty_wise', 'DESC');
 
-        return Datatables::of($query)
+        // Fetch the data
+        $data = $query->get();
+
+        return Datatables::of($data)
             ->addIndexColumn()
             ->addColumn('month1_qty', function ($query) {
                 $currentDate = Carbon::now();
@@ -2632,7 +2650,6 @@ class ReportController extends Controller
                         $tqty += $quantitys[$key];
                     }
                 }
-
                 return $tqty;
             })
             ->addColumn('month2_qty', function ($query) {
@@ -2647,7 +2664,6 @@ class ReportController extends Controller
                         $tqty += $quantitys[$key];
                     }
                 }
-
                 return $tqty;
             })
             ->addColumn('month3_qty', function ($query) {
@@ -2662,20 +2678,15 @@ class ReportController extends Controller
                         $tqty += $quantitys[$key];
                     }
                 }
-
                 return $tqty;
             })
-            ->addColumn('qty_wise', function ($query) use ($data) {
-                
-                if ($query->total_quantitys > 0) {
-                    return number_format((($query->total_quantitys / $data[0]->total_quantitys) * 100), 2, '.', '') . "%";
-                } else {
-                    return $query->total_quantitys;
-                }
+            ->addColumn('qty_wise', function ($query) {
+                return number_format($query->qty_wise, 2, '.', '') . "%";
             })
             ->rawColumns(['month1_qty', 'month2_qty', 'month3_qty', 'qty_wise'])
             ->make(true);
     }
+
 
     public function product_analysis_qty_download(Request $request)
     {
@@ -2687,16 +2698,12 @@ class ReportController extends Controller
 
     public function product_analysis_value(Request $request)
     {
-        if ($request->ip() != '111.118.252.250') {
-            return "<h2>Coming Soon ... </h1>";
-        }
         $ps_branches = PrimarySales::latest()->get()->unique('final_branch');
         $ps_divisions = PrimarySales::latest()->get()->unique('division');
         $ps_months = PrimarySales::latest()->get()->unique('month');
         $ps_dealers = PrimarySales::latest()->get()->unique('dealer');
-        $ps_product_models = PrimarySales::latest()->get()->unique('product_name');
+        $ps_product_models = PrimarySales::latest()->get()->unique('model_name');
         $ps_new_group_names = PrimarySales::latest()->get()->unique('new_group');
-        $ps_product_models = PrimarySales::latest()->get()->unique('product_name');
         $ps_sales_persons = PrimarySales::latest()->get()->unique('sales_person');
         $users = User::where('active', 'Y')->latest()->get();
         $currentYear = Carbon::now()->year;
@@ -2715,6 +2722,8 @@ class ReportController extends Controller
     public function product_analysis_value_list(Request $request)
     {
         DB::statement("SET SESSION group_concat_max_len = 10000000");
+
+        // Base query with selected fields and total calculations
         $query = PrimarySales::select(
             'model_name',
             DB::raw('GROUP_CONCAT(quantity) as quantitys'),
@@ -2722,88 +2731,85 @@ class ReportController extends Controller
             DB::raw('GROUP_CONCAT(month) as months'),
             DB::raw('GROUP_CONCAT(invoice_date) as invoice_dates'),
             DB::raw('GROUP_CONCAT(net_amount) as net_amounts'),
-            DB::raw('SUM(net_amount) as total_net_amounts'),
+            DB::raw('SUM(net_amount) as total_net_amounts')
         );
 
-        if ($request->user_id && $request->user_id != '' && $request->user_id != null) {
-            $usersIds = User::where('id', $request->user_id)->where('sales_type', 'Secondary')->pluck('id');
-        } else {
-            $usersIds = User::with('attendance_details')->where('sales_type', 'Secondary')->pluck('id');
-        }
+        // Filter by financial year or last three months
+        if ($request->month && is_array($request->month) && count($request->month) > 0 && $request->financial_year && !empty($request->financial_year)) {
+            $f_year_array = explode('-', $request->financial_year);
 
-        if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
-            $query->where('final_branch', $request->branch_id);
-        }
+            // Determine if months are in Jan-Mar and set the correct year
+            $isJanToMar = in_array('Jan', $request->month) || in_array('Feb', $request->month) || in_array('Mar', $request->month);
+            $currentYear = $isJanToMar ? $f_year_array[1] : $f_year_array[0];
 
-        if ($request->division_id && $request->division_id != '' && $request->division_id != null) {
-            $query->where('division', $request->division_id);
-        }
+            // Get the first and last months from the array
+            $firstMonth = $request->month[0];
+            $lastMonth = $request->month[count($request->month) - 1];
 
-        if ($request->dealer_id && $request->dealer_id != '' && $request->dealer_id != null) {
-            $query->where('dealer', 'like', '%' . $request->dealer_id . '%');
-        }
+            // Format the month and create start and end dates
+            $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$firstMonth")->startOfMonth();
+            $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$lastMonth")->endOfMonth();
 
-        if ($request->product_model && $request->product_model != '' && $request->product_model != null) {
-            $query->where('product_name', $request->product_model);
-        }
+            // Convert to date strings
+            $startDateFormatted = $startDate->toDateString();
+            $endDateFormatted = $endDate->toDateString();
 
-        if ($request->new_group && $request->new_group != '' && $request->new_group != null) {
-            $query->where('new_group', $request->new_group);
-        }
-
-        if ($request->executive_id && $request->executive_id != '' && $request->executive_id != null) {
-            $query->where('sales_person', $request->executive_id);
-        }
-
-        if ($request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
+            // Apply the date range to the query
+            $query->where(function ($q) use ($startDateFormatted, $endDateFormatted) {
+                $q->where('invoice_date', '>=', $startDateFormatted)
+                    ->where('invoice_date', '<=', $endDateFormatted);
+            });
+        } elseif ($request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
             $f_year_array = explode('-', $request->financial_year);
 
             $financial_year_start = $f_year_array[0] . '-04-01';
             $financial_year_end = $f_year_array[1] . '-03-31';
 
-            $query->where(function ($q) use ($f_year_array, $financial_year_start, $financial_year_end) {
-                $q->where('invoice_date', '>=', $financial_year_start)
-                    ->where('invoice_date', '<=', $financial_year_end);;
-            });
+            $query->whereBetween('invoice_date', [$financial_year_start, $financial_year_end]);
         } else {
             $currentDate = Carbon::now();
             $startDatethree = $currentDate->copy()->subMonthsNoOverflow(3)->firstOfMonth()->format('Y-m-d');
             $endDatethree = $currentDate->copy()->subMonthNoOverflow()->endOfMonth()->format('Y-m-d');
-            $query->where(function ($q) use ($startDatethree, $endDatethree) {
-                $q->where('invoice_date', '>=', $startDatethree)
-                    ->where('invoice_date', '<=', $endDatethree);
-            });
+            $query->whereBetween('invoice_date', [$startDatethree, $endDatethree]);
         }
 
-        if ($request->month && $request->month != '' && $request->month != null && $request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
+        // Get total net amounts to calculate percentages
+        $totalNetAmounts = $query->sum('net_amount');
 
-            $f_year_array = explode('-', $request->financial_year);
-
-            if ($request->month == 'Jan' || $request->month == 'Feb' || $request->month == 'Mar') {
-                $currentYear = $f_year_array[1];
-                $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->startOfMonth();
-                $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->endOfMonth();
-                $startDateFormatted = $startDate->toDateString();
-                $endDateFormatted = $endDate->toDateString();
-            } else {
-                $currentYear = $f_year_array[0];
-                $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->startOfMonth();
-                $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->endOfMonth();
-                $startDateFormatted = $startDate->toDateString();
-                $endDateFormatted = $endDate->toDateString();
-            }
-
-            $query->where(function ($q) use ($startDateFormatted, $endDateFormatted) {
-                $q->where('invoice_date', '>=', $startDateFormatted)
-                    ->where('invoice_date', '<=', $endDateFormatted);;
-            });
+        // Apply additional filters
+        if ($request->branch_id) {
+            $query->where('final_branch', $request->branch_id);
         }
 
+        if ($request->division_id) {
+            $query->where('division', $request->division_id);
+        }
+
+        if ($request->dealer_id) {
+            $query->where('dealer', 'like', '%' . $request->dealer_id . '%');
+        }
+
+        if ($request->product_model) {
+            $query->where('model_name', $request->product_model);
+        }
+
+        if ($request->new_group) {
+            $query->where('new_group', $request->new_group);
+        }
+
+        if ($request->executive_id) {
+            $query->where('sales_person', $request->executive_id);
+        }
+
+        // Group and order by calculated sale_wise percentage
+        $query = $query->groupBy('model_name')
+            ->selectRaw('SUM(net_amount) as total_net_amounts, SUM(net_amount) / ? * 100 as sale_wise', [$totalNetAmounts])
+            ->orderBy('sale_wise', 'DESC');
+
+        // Fetch the data
         $data = $query->get();
 
-        $query = $query->groupBy('model_name')->orderBy('months');
-
-        return Datatables::of($query)
+        return Datatables::of($data)
             ->addIndexColumn()
             ->addColumn('month1_sale', function ($query) {
                 $currentDate = Carbon::now();
@@ -2860,11 +2866,257 @@ class ReportController extends Controller
                 }
             })
             ->addColumn('total_net_amounts', function ($query) {
+                if ($query->total_net_amounts > 0) {
+                    return number_format(($query->total_net_amounts / 100000), 2, '.', '');
+                } else {
+                    return $query->total_net_amounts;
+                }
+            })
+            ->addColumn('sale_wise', function ($query) {
+                return number_format($query->sale_wise, 2, '.', '') . "%";
+            })
+            ->rawColumns(['month1_sale', 'month2_sale', 'month3_sale', 'total_net_amounts', 'sale_wise'])
+            ->make(true);
+    }
+
+
+    public function product_analysis_value_download(Request $request)
+    {
+        // if ($request->ip() != '111.118.252.250') {
+        //     return "<h2>Coming Soon ... </h1>";
+        // }
+        abort_if(Gate::denies('product_analysis_value_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new ProductAnalysisValueExport($request), 'product_analysis_value.xlsx');
+    }
+
+    public function group_wise_analysis(Request $request)
+    {
+        if ($request->ip() != '111.118.252.250') {
+            return "<h2>Coming Soon ... </h1>";
+        }
+        $ps_branches = PrimarySales::latest()->get()->unique('final_branch');
+        $ps_divisions = PrimarySales::latest()->get()->unique('division');
+        $ps_months = PrimarySales::latest()->get()->unique('month');
+        $ps_dealers = PrimarySales::latest()->get()->unique('dealer');
+        $ps_product_models = PrimarySales::latest()->get()->unique('model_name');
+        $ps_new_group_names = PrimarySales::latest()->get()->unique('new_group');
+        $ps_sales_persons = PrimarySales::latest()->get()->unique('sales_person');
+        $users = User::where('active', 'Y')->latest()->get();
+        $currentYear = Carbon::now()->year;
+        $years = range($currentYear - 1, $currentYear + 1);
+        $total_qty = PrimarySales::sum('quantity');
+        $total_sale = PrimarySales::sum('net_amount');
+        $currentDate = Carbon::now();
+        $months = [
+            $currentDate->copy()->subMonthsNoOverflow(3)->format('M'), // Three months ago
+            $currentDate->copy()->subMonthsNoOverflow(2)->format('M'), // Two months ago
+            $currentDate->copy()->subMonthsNoOverflow(1)->format('M'), // Last month
+        ];
+        return view('reports.group_wise_analysis', compact('years', 'users', 'ps_branches', 'ps_divisions', 'ps_months', 'ps_dealers', 'ps_product_models', 'ps_new_group_names', 'ps_sales_persons', 'total_qty', 'total_sale', 'months'));
+    }
+
+    public function group_wise_analysis_list(Request $request)
+    {
+        DB::statement("SET SESSION group_concat_max_len = 10000000");
+        $query = PrimarySales::select(
+            'new_group',
+            'final_branch',
+            DB::raw('GROUP_CONCAT(quantity) as quantitys'),
+            DB::raw('SUM(quantity) as total_quantitys'),
+            DB::raw('GROUP_CONCAT(month) as months'),
+            DB::raw('GROUP_CONCAT(invoice_date) as invoice_dates'),
+            DB::raw('GROUP_CONCAT(net_amount) as net_amounts'),
+            DB::raw('SUM(net_amount) as total_net_amounts'),
+        );
+
+        if ($request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
+            $f_year_array = explode('-', $request->financial_year);
+
+            $financial_year_start = $f_year_array[0] . '-04-01';
+            $financial_year_end = $f_year_array[1] . '-03-31';
+
+            $query->where(function ($q) use ($f_year_array, $financial_year_start, $financial_year_end) {
+                $q->where('invoice_date', '>=', $financial_year_start)
+                    ->where('invoice_date', '<=', $financial_year_end);;
+            });
+        } else {
+            $currentDate = Carbon::now();
+            $startDatethree = $currentDate->copy()->subMonthsNoOverflow(3)->firstOfMonth()->format('Y-m-d');
+            $endDatethree = $currentDate->copy()->subMonthNoOverflow()->endOfMonth()->format('Y-m-d');
+            $query->where(function ($q) use ($startDatethree, $endDatethree) {
+                $q->where('invoice_date', '>=', $startDatethree)
+                    ->where('invoice_date', '<=', $endDatethree);
+            });
+        }
+
+        $data = $query->get();
+
+        if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
+            $query->where('final_branch', $request->branch_id);
+        }
+
+        if ($request->division_id && $request->division_id != '' && $request->division_id != null) {
+            $query->where('division', $request->division_id);
+        }
+
+        if ($request->dealer_id && $request->dealer_id != '' && $request->dealer_id != null) {
+            $query->where('dealer', 'like', '%' . $request->dealer_id . '%');
+        }
+
+        if ($request->product_model && $request->product_model != '' && $request->product_model != null) {
+            $query->where('model_name', $request->product_model);
+        }
+
+        if ($request->new_group && $request->new_group != '' && $request->new_group != null) {
+            $query->where('new_group', $request->new_group);
+        }
+
+        if ($request->executive_id && $request->executive_id != '' && $request->executive_id != null) {
+            $query->where('sales_person', $request->executive_id);
+        }
+
+        if ($request->month && $request->month != '' && $request->month != null && $request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
+
+            $f_year_array = explode('-', $request->financial_year);
+
+            if ($request->month == 'Jan' || $request->month == 'Feb' || $request->month == 'Mar') {
+                $currentYear = $f_year_array[1];
+                $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->startOfMonth();
+                $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->endOfMonth();
+                $startDateFormatted = $startDate->toDateString();
+                $endDateFormatted = $endDate->toDateString();
+            } else {
+                $currentYear = $f_year_array[0];
+                $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->startOfMonth();
+                $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->endOfMonth();
+                $startDateFormatted = $startDate->toDateString();
+                $endDateFormatted = $endDate->toDateString();
+            }
+
+            $query->where(function ($q) use ($startDateFormatted, $endDateFormatted) {
+                $q->where('invoice_date', '>=', $startDateFormatted)
+                    ->where('invoice_date', '<=', $endDateFormatted);;
+            });
+        }
+
+        $query = $query->groupBy('new_group', 'final_branch')->orderBy('months');
+
+        return Datatables::of($query)
+            ->addIndexColumn()
+            ->addColumn('month1_qty', function ($query) {
+                $currentDate = Carbon::now();
+                $month_are = $currentDate->copy()->subMonthsNoOverflow(3)->format('M');
+                $invoice_dates = explode(',', $query->invoice_dates);
+                $quantitys = explode(',', $query->quantitys);
+                $tqty = 0;
+                foreach ($invoice_dates as $key => $value) {
+                    $getMonth = date('M', strtotime($value));
+                    if ($getMonth == $month_are) {
+                        $tqty += $quantitys[$key];
+                    }
+                }
+
+                return $tqty;
+            })
+            ->addColumn('month1_sale', function ($query) {
+                $currentDate = Carbon::now();
+                $month_are = $currentDate->copy()->subMonthsNoOverflow(3)->format('M');
+                $invoice_dates = explode(',', $query->invoice_dates);
+                $net_amounts = explode(',', $query->net_amounts);
+                $tsale = 0;
+                foreach ($invoice_dates as $key => $value) {
+                    $getMonth = date('M', strtotime($value));
+                    if ($getMonth == $month_are) {
+                        $tsale += $net_amounts[$key];
+                    }
+                }
+                if ($tsale > 0) {
+                    return number_format(($tsale / 100000), 2, '.', '');
+                } else {
+                    return $tsale;
+                }
+            })
+            ->addColumn('month2_qty', function ($query) {
+                $currentDate = Carbon::now();
+                $month_are = $currentDate->copy()->subMonthsNoOverflow(2)->format('M');
+                $invoice_dates = explode(',', $query->invoice_dates);
+                $quantitys = explode(',', $query->quantitys);
+                $tqty = 0;
+                foreach ($invoice_dates as $key => $value) {
+                    $getMonth = date('M', strtotime($value));
+                    if ($getMonth == $month_are) {
+                        $tqty += $quantitys[$key];
+                    }
+                }
+
+                return $tqty;
+            })
+            ->addColumn('month2_sale', function ($query) {
+                $currentDate = Carbon::now();
+                $month_are = $currentDate->copy()->subMonthsNoOverflow(2)->format('M');
+                $invoice_dates = explode(',', $query->invoice_dates);
+                $net_amounts = explode(',', $query->net_amounts);
+                $tsale = 0;
+                foreach ($invoice_dates as $key => $value) {
+                    $getMonth = date('M', strtotime($value));
+                    if ($getMonth == $month_are) {
+                        $tsale += $net_amounts[$key];
+                    }
+                }
+                if ($tsale > 0) {
+                    return number_format(($tsale / 100000), 2, '.', '');
+                } else {
+                    return $tsale;
+                }
+            })
+            ->addColumn('month3_qty', function ($query) {
+                $currentDate = Carbon::now();
+                $month_are = $currentDate->copy()->subMonthsNoOverflow(1)->format('M');
+                $invoice_dates = explode(',', $query->invoice_dates);
+                $quantitys = explode(',', $query->quantitys);
+                $tqty = 0;
+                foreach ($invoice_dates as $key => $value) {
+                    $getMonth = date('M', strtotime($value));
+                    if ($getMonth == $month_are) {
+                        $tqty += $quantitys[$key];
+                    }
+                }
+
+                return $tqty;
+            })
+            ->addColumn('month3_sale', function ($query) {
+                $currentDate = Carbon::now();
+                $month_are = $currentDate->copy()->subMonthsNoOverflow(1)->format('M');
+                $invoice_dates = explode(',', $query->invoice_dates);
+                $net_amounts = explode(',', $query->net_amounts);
+                $tsale = 0;
+                foreach ($invoice_dates as $key => $value) {
+                    $getMonth = date('M', strtotime($value));
+                    if ($getMonth == $month_are) {
+                        $tsale += $net_amounts[$key];
+                    }
+                }
+                if ($tsale > 0) {
+                    return number_format(($tsale / 100000), 2, '.', '');
+                } else {
+                    return $tsale;
+                }
+            })
+            ->addColumn('total_net_amounts', function ($query) {
 
                 if ($query->total_net_amounts > 0) {
                     return number_format(($query->total_net_amounts / 100000), 2, '.', '');
                 } else {
                     return $query->total_net_amounts;
+                }
+            })
+            ->addColumn('qty_wise', function ($query) use ($data) {
+                if ($query->total_quantitys > 0) {
+                    return number_format((($query->total_quantitys / $data[0]->total_quantitys) * 100), 2, '.', '') . "%";
+                } else {
+                    return $query->total_quantitys;
                 }
             })
             ->addColumn('sale_wise', function ($query) use ($data) {
@@ -2874,15 +3126,15 @@ class ReportController extends Controller
                     return $query->total_net_amounts;
                 }
             })
-            ->rawColumns(['month1_sale', 'month2_sale', 'month3_sale', 'total_net_amounts', 'sale_wise'])
+            ->rawColumns(['month1_qty', 'month1_sale', 'month2_qty', 'month2_sale', 'month3_qty', 'month3_sale', 'total_net_amounts', 'qty_wise'])
             ->make(true);
     }
 
-    public function product_analysis_value_download(Request $request)
+    public function group_wise_analysis_download(Request $request)
     {
         abort_if(Gate::denies('product_analysis_branch_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        return Excel::download(new ProductAnalysisValueExport($request), 'product_analysis_value.xlsx');
+        return Excel::download(new ProductAnalysisBranchExport($request), 'product_analysis_branch_wise.xlsx');
     }
 }
