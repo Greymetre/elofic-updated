@@ -9,8 +9,8 @@
           <h4 class="card-title">Group Wise Analysis
             <span class="">
               <div class="btn-group header-frm-btn">
-                @if(auth()->user()->can(['product_analysis_branch_download']))
-                <form method="POST" action="{{url('product_analysis_branch/download')}}">
+                @if(auth()->user()->can(['group_wise_analysis_download']))
+                <form method="POST" action="{{url('group_wise_analysis/download')}}">
                   @csrf
                   <div class="d-flex flex-wrap flex-row">
                     <!-- division filter -->
@@ -49,13 +49,13 @@
                       </select>
                     </div>
                     <!-- month filter-->
-                    {{--<div class="p-2" style="width:200px;">
-                      <select class="selectpicker" name="month" id="ps_month" disabled data-style="select-with-transition" title="Month">
-                        <option value="" selected>{!! trans('panel.secondary_dashboard.month') !!}</option>
+                    <div class="p-2" style="width:200px;">
+                      <select class="selectpicker" multiple name="month[]" id="ps_month" disabled data-style="select-with-transition" title="Month">
+                        <option value="">{!! trans('panel.secondary_dashboard.month') !!}</option>
                         @for ($month = 1; $month <= 12; $month++) <option value="{!! date('M', mktime(0, 0, 0, $month, 1)) !!}">{!! date('M', mktime(0, 0, 0, $month, 1)) !!}</option>
                           @endfor
                       </select>
-                    </div>--}}
+                    </div>
                     <!-- dealer/distributors filter -->
                     <div class="p-2" style="width:200px;">
                       <select class="select2" name="dealer" id="ps_dealer_id" data-style="select-with-transition" title="{!! trans('panel.sales_users.user_name') !!}">

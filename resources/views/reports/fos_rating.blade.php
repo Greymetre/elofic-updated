@@ -44,6 +44,16 @@
                         @endforeach
                       </select>
                     </div>
+                    {{--<div class="p-2" style="width: 200px;">
+                      <select name="month" id="month" class="form-control select2">
+                        <option value="" disabled selected>Month</option>
+                        @if(count($months) > 0)
+                        @foreach($months as $k=>$month)
+                        <option value="{{$k}}">{{$month}}</option>
+                        @endforeach
+                        @endif
+                      </select>
+                    </div>--}}
                     <div class="p-2">
                       <input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly>
                     </div>
@@ -121,6 +131,7 @@
               d.branch_id = $('#branch_id').val(),
               d.start_date = $('#start_date').val(),
               d.end_date = $('#end_date').val()
+              d.month = $('#month').val()
           }
         },
         "columns": [{
@@ -229,6 +240,9 @@
         oTable.draw();
       });
       $('#branch_id').change(function() {
+        oTable.draw();
+      });
+      $('#month').change(function() {
         oTable.draw();
       });
     });
