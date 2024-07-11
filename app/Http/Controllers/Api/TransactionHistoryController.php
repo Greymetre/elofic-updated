@@ -458,8 +458,11 @@ class TransactionHistoryController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
-            $data = DamageEntry::where('customer_id', $request->id)->get();
+            $data = DamageEntry::where('customer_id', $request->id)->orderby('id', 'desc')->get();
             if (count($data) > 0) {
+                foreach ($data as $key => $value) {
+                    $data[$key]['date'] = date('d M Y', strtotime($value->created_at));
+                }
                 return response(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], 200);
             } else {
                 return response(['status' => 'error', 'message' => 'No data found'], 200);

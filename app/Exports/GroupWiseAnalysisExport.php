@@ -13,7 +13,7 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Illuminate\Support\Facades\Auth;
 use DB;
 
-class ProductAnalysisBranchExport implements FromCollection, WithHeadings,WithMapping, ShouldAutoSize, WithEvents
+class GroupWiseAnalysisExport implements FromCollection, WithHeadings,WithMapping, ShouldAutoSize, WithEvents
 {
 
     public function __construct($request)
@@ -35,8 +35,8 @@ class ProductAnalysisBranchExport implements FromCollection, WithHeadings,WithMa
         $currentDate = Carbon::now();
         DB::statement("SET SESSION group_concat_max_len = 10000000");
         $query = PrimarySales::select(
+            'new_group',
             'final_branch',
-            'model_name',
             DB::raw('GROUP_CONCAT(quantity) as quantitys'),
             DB::raw('SUM(quantity) as total_quantitys'),
             DB::raw('GROUP_CONCAT(month) as months'),
@@ -109,15 +109,15 @@ class ProductAnalysisBranchExport implements FromCollection, WithHeadings,WithMa
             $query->where('sales_person', $this->executive_id);
         }
         
-        $query = $query->groupBy('final_branch', 'model_name')->orderBy('final_branch');
+        $query = $query->groupBy('new_group', 'final_branch')->orderBy('new_group');
         return $query->get();
     }
 
     public function headings(): array
     {
         $label1 = [
+            'Group Name',
             'Final Branch Name',
-            'Model Name',
         ];
 
         if ($this->month && is_array($this->month) && count($this->month) > 0 && $this->financial_year && !empty($this->financial_year)) {
@@ -209,18 +209,13 @@ class ProductAnalysisBranchExport implements FromCollection, WithHeadings,WithMa
         $invoice_dates = explode(',', $data->invoice_dates);
         $quantitys = explode(',', $data->quantitys);
         $net_amounts = explode(',', $data->net_amounts);
+        $response[1] = $data->new_group;
         $response[0] = $data->final_branch;
-        $response[1] = $data->model_name;
         $indx = 0;
         foreach ($this->months as $k => $val) {
             $tsale = 0;
             $tqty = 0;
             foreach ($invoice_dates as $key => $value) {
-                // try {
-                //     $invDate = Carbon::createFromFormat('Y-m-d', $value);
-                // } catch (\Throwable $th) {
-                //     dd($invoice_dates,$data->final_branch,$data->model_name);
-                // }
                 $invDate = Carbon::createFromFormat('Y-m-d', $value);
                 $currentDate = $invDate->copy();
                 $monthName = $currentDate->format('F');

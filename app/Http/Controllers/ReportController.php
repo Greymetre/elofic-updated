@@ -47,6 +47,7 @@ use App\Exports\LoyaltyDealerSummaryReportExport;
 use App\Models\DealIn;
 use App\DataTables\GamificationDataTable;
 use App\Exports\CustomerAnalysisExport;
+use App\Exports\GroupWiseAnalysisExport;
 use App\Exports\ProductAnalysisBranchExport;
 use App\Exports\ProductAnalysisQtyExport;
 use App\Exports\ProductAnalysisValueExport;
@@ -2386,7 +2387,7 @@ class ReportController extends Controller
         if ($request->executive_id && $request->executive_id != '' && $request->executive_id != null) {
             $query->where('sales_person', $request->executive_id);
         }
-        
+
         $query = $query->groupBy('final_branch', 'model_name')->orderBy('final_branch');
 
         return Datatables::of($query)
@@ -2521,7 +2522,12 @@ class ReportController extends Controller
         abort_if(Gate::denies('product_analysis_branch_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        return Excel::download(new ProductAnalysisBranchExport($request), 'product_analysis_branch_wise.xlsx');
+        if($request->financial_year && !empty($request->financial_year)){
+            $fileName = 'product_analysis_branch_wise_'.$request->financial_year.'.xlsx';
+        }else{
+            $fileName = 'product_analysis_branch_wise.xlsx';
+        }
+        return Excel::download(new ProductAnalysisBranchExport($request), $fileName);
     }
     public function product_analysis_qty(Request $request)
     {
@@ -2693,7 +2699,12 @@ class ReportController extends Controller
         abort_if(Gate::denies('product_analysis_branch_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        return Excel::download(new ProductAnalysisQtyExport($request), 'product_analysis_qty.xlsx');
+        if($request->financial_year && !empty($request->financial_year)){
+            $fileName = 'product_analysis_qty_'.$request->financial_year.'.xlsx';
+        }else{
+            $fileName = 'product_analysis_qty.xlsx';
+        }
+        return Excel::download(new ProductAnalysisQtyExport($request), $fileName);
     }
 
     public function product_analysis_value(Request $request)
@@ -2882,20 +2893,19 @@ class ReportController extends Controller
 
     public function product_analysis_value_download(Request $request)
     {
-        // if ($request->ip() != '111.118.252.250') {
-        //     return "<h2>Coming Soon ... </h1>";
-        // }
         abort_if(Gate::denies('product_analysis_value_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        return Excel::download(new ProductAnalysisValueExport($request), 'product_analysis_value.xlsx');
+        if($request->financial_year && !empty($request->financial_year)){
+            $fileName = 'product_analysis_value_'.$request->financial_year.'.xlsx';
+        }else{
+            $fileName = 'product_analysis_value.xlsx';
+        }
+        return Excel::download(new ProductAnalysisValueExport($request), $fileName);
     }
 
     public function group_wise_analysis(Request $request)
     {
-        if ($request->ip() != '111.118.252.250') {
-            return "<h2>Coming Soon ... </h1>";
-        }
         $ps_branches = PrimarySales::latest()->get()->unique('final_branch');
         $ps_divisions = PrimarySales::latest()->get()->unique('division');
         $ps_months = PrimarySales::latest()->get()->unique('month');
@@ -2931,24 +2941,43 @@ class ReportController extends Controller
             DB::raw('SUM(net_amount) as total_net_amounts'),
         );
 
-        if ($request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
+        // Filter by financial year or last three months
+        if ($request->month && is_array($request->month) && count($request->month) > 0 && $request->financial_year && !empty($request->financial_year)) {
+            $f_year_array = explode('-', $request->financial_year);
+
+            // Determine if months are in Jan-Mar and set the correct year
+            $isJanToMar = in_array('Jan', $request->month) || in_array('Feb', $request->month) || in_array('Mar', $request->month);
+            $currentYear = $isJanToMar ? $f_year_array[1] : $f_year_array[0];
+
+            // Get the first and last months from the array
+            $firstMonth = $request->month[0];
+            $lastMonth = $request->month[count($request->month) - 1];
+
+            // Format the month and create start and end dates
+            $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$firstMonth")->startOfMonth();
+            $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$lastMonth")->endOfMonth();
+
+            // Convert to date strings
+            $startDateFormatted = $startDate->toDateString();
+            $endDateFormatted = $endDate->toDateString();
+
+            // Apply the date range to the query
+            $query->where(function ($q) use ($startDateFormatted, $endDateFormatted) {
+                $q->where('invoice_date', '>=', $startDateFormatted)
+                    ->where('invoice_date', '<=', $endDateFormatted);
+            });
+        } elseif ($request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
             $f_year_array = explode('-', $request->financial_year);
 
             $financial_year_start = $f_year_array[0] . '-04-01';
             $financial_year_end = $f_year_array[1] . '-03-31';
 
-            $query->where(function ($q) use ($f_year_array, $financial_year_start, $financial_year_end) {
-                $q->where('invoice_date', '>=', $financial_year_start)
-                    ->where('invoice_date', '<=', $financial_year_end);;
-            });
+            $query->whereBetween('invoice_date', [$financial_year_start, $financial_year_end]);
         } else {
             $currentDate = Carbon::now();
             $startDatethree = $currentDate->copy()->subMonthsNoOverflow(3)->firstOfMonth()->format('Y-m-d');
             $endDatethree = $currentDate->copy()->subMonthNoOverflow()->endOfMonth()->format('Y-m-d');
-            $query->where(function ($q) use ($startDatethree, $endDatethree) {
-                $q->where('invoice_date', '>=', $startDatethree)
-                    ->where('invoice_date', '<=', $endDatethree);
-            });
+            $query->whereBetween('invoice_date', [$startDatethree, $endDatethree]);
         }
 
         $data = $query->get();
@@ -2977,31 +3006,7 @@ class ReportController extends Controller
             $query->where('sales_person', $request->executive_id);
         }
 
-        if ($request->month && $request->month != '' && $request->month != null && $request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
-
-            $f_year_array = explode('-', $request->financial_year);
-
-            if ($request->month == 'Jan' || $request->month == 'Feb' || $request->month == 'Mar') {
-                $currentYear = $f_year_array[1];
-                $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->startOfMonth();
-                $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->endOfMonth();
-                $startDateFormatted = $startDate->toDateString();
-                $endDateFormatted = $endDate->toDateString();
-            } else {
-                $currentYear = $f_year_array[0];
-                $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->startOfMonth();
-                $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->endOfMonth();
-                $startDateFormatted = $startDate->toDateString();
-                $endDateFormatted = $endDate->toDateString();
-            }
-
-            $query->where(function ($q) use ($startDateFormatted, $endDateFormatted) {
-                $q->where('invoice_date', '>=', $startDateFormatted)
-                    ->where('invoice_date', '<=', $endDateFormatted);;
-            });
-        }
-
-        $query = $query->groupBy('new_group', 'final_branch')->orderBy('months');
+        $query = $query->groupBy('new_group', 'final_branch')->orderBy('new_group');
 
         return Datatables::of($query)
             ->addIndexColumn()
@@ -3132,9 +3137,17 @@ class ReportController extends Controller
 
     public function group_wise_analysis_download(Request $request)
     {
+        if ($request->ip() != '111.118.252.250') {
+            return "<h2>Coming Soon ... </h1>";
+        }
         abort_if(Gate::denies('product_analysis_branch_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        return Excel::download(new ProductAnalysisBranchExport($request), 'product_analysis_branch_wise.xlsx');
+        if($request->financial_year && !empty($request->financial_year)){
+            $fileName = 'group_wise_analysis_'.$request->financial_year.'.xlsx';
+        }else{
+            $fileName = 'group_wise_analysis.xlsx';
+        }
+        return Excel::download(new GroupWiseAnalysisExport($request), $fileName);
     }
 }

@@ -363,7 +363,7 @@ class UsersController extends Controller
         if ($request['password'] && !empty($request['password'])) {
             Auth::logout();
             return redirect()->route('login')->with('status', 'Password updated successfully. Please log in with your new password.');
-        }else{
+        } else {
             return redirect()->route('users.index');
         }
     }
@@ -575,7 +575,27 @@ class UsersController extends Controller
         $divisions = Division::where('active', 'Y')->get();
         $branchs = Branch::where('active', 'Y')->get();
 
-        $yesterday = Carbon::yesterday()->toDateString();
+        $currentMonth = Carbon::now()->month; // Get the current month number
+        $months = [];
+
+        for ($i = 1; $i < $currentMonth; $i++) {
+            $monthNumber = str_pad($i, 2, '0', STR_PAD_LEFT); // Format month number with leading zero
+            $monthName = Carbon::create()->month($i)->format('M'); // Get the abbreviated month name
+            $months[$monthNumber] = $monthName;
+        }
+
+        if ($request->month && !empty($request->month)) {
+            $currentYear = Carbon::now()->year;
+            $currentMonth = Carbon::now()->month;
+            $month = intval($request->month);
+            $firstDate = Carbon::createFromDate($currentYear, $month, 1)->startOfMonth()->toDateString();
+            $lastDate = Carbon::createFromDate($currentYear, $month, 1)->endOfMonth()->toDateString();
+            $yesterday = Carbon::createFromDate($currentYear, $month, 1)->endOfMonth()->subDay()->toDateString();
+        } else {
+            $firstDate = Carbon::now()->startOfMonth()->toDateString();
+            $lastDate = Carbon::now()->toDateString();
+            $yesterday = Carbon::yesterday()->toDateString();
+        }
 
         if ($request->ajax()) {
             $query = User::with(['all_attendance_details', 'visits', 'customers', 'userinfo', 'cities'])
@@ -610,19 +630,19 @@ class UsersController extends Controller
             }
 
 
-            $data = $query->get()->map(function ($user) {
-                $working_days = $user->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Full Day Leave', 'Leave', 'Holiday'])->count();
-                $order_value = Order::where('created_by', $user->id)->sum('sub_total');
+            $data = $query->get()->map(function ($user) use ($lastDate) {
+                $working_days = $user->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Full Day Leave', 'Leave', 'Holiday'])->where('punchin_date', '<=', $lastDate)->count();
+                $order_value = Order::where('created_by', $user->id)->where('order_date', '<=', $lastDate)->sum('sub_total');
                 $sale_index = $working_days ? (($order_value / 100000) / $working_days) * 100 : 0;
 
-                $registered_retailers = Customers::where(['customertype' => '2', 'created_by' => $user->id])->count();
+                $registered_retailers = Customers::where(['customertype' => '2', 'created_by' => $user->id])->where('created_at', '<=', $lastDate . ' 23:59:59')->count();
                 $registration_index = $working_days ? (($registered_retailers / $working_days) / 5) * 100 : 0;
 
-                $total_visit = $user->visits->count();
+                $total_visit = $user->visits->where('checkin_date', '<=', $lastDate)->count();
                 $visit_index = $working_days ? (($total_visit / $working_days) / 10) * 100 : 0;
 
-                $sharthi_customer = TransactionHistory::groupBy('customer_id')->pluck('customer_id')->toArray();
-                $activation_retailers = Customers::where(['customertype' => '2', 'created_by' => $user->id])->whereIn('id', $sharthi_customer)->count();
+                $sharthi_customer = TransactionHistory::where('created_at', '<=', $lastDate . ' 23:59:59')->groupBy('customer_id')->pluck('customer_id')->toArray();
+                $activation_retailers = Customers::where(['customertype' => '2', 'created_by' => $user->id])->where('created_at', '<=', $lastDate . ' 23:59:59')->whereIn('id', $sharthi_customer)->count();
                 $activation_index = $working_days ? (($activation_retailers / $working_days) / 5) * 100 : 0;
 
                 $user->performance_rating = ($sale_index * 0.5) + ($registration_index * 0.1) + ($visit_index * 0.1) + ($activation_index * 0.3);
@@ -644,36 +664,36 @@ class UsersController extends Controller
                     $yesterday_visit = $user->visits->where('checkin_date', $yesterday)->count();
                     return $yesterday_visit ? number_format(($order_counts / $yesterday_visit) * 100, 2) . "%" : "0.00%";
                 })
-                ->addColumn('order_value_current_month', function ($user) {
-                    $order_value = Order::where('order_date', '>=', date('Y-m-01'))->where('created_by', $user->id)->sum('sub_total');
+                ->addColumn('order_value_current_month', function ($user) use ($lastDate, $firstDate) {
+                    $order_value = Order::where('order_date', '>=', $firstDate)->where('order_date', '<=', $lastDate)->where('created_by', $user->id)->sum('sub_total');
                     return $order_value ? number_format(($order_value - ($order_value * 0.35)) / 100000, 2) : "0.00";
                 })
-                ->addColumn('total_order_value', function ($user) {
-                    $order_value = Order::where('created_by', $user->id)->sum('sub_total');
+                ->addColumn('total_order_value', function ($user) use ($lastDate) {
+                    $order_value = Order::where('order_date', '<=', $lastDate)->where('created_by', $user->id)->sum('sub_total');
                     return $order_value ? number_format(($order_value - ($order_value * 0.35)) / 100000, 2) : "0.00";
                 })
-                ->addColumn('sale_index', function ($user) {
-                    $working_days = $user->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Full Day Leave', 'Leave', 'Holiday'])->count();
-                    $order_value = Order::where('created_by', $user->id)->sum('sub_total');
+                ->addColumn('sale_index', function ($user) use ($lastDate) {
+                    $working_days = $user->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Full Day Leave', 'Leave', 'Holiday'])->where('punchin_date', '<=', $lastDate)->count();
+                    $order_value = Order::where('order_date', '<=', $lastDate)->where('created_by', $user->id)->sum('sub_total');
                     $sale_index = $working_days ? (($order_value / 100000) / $working_days) * 100 : 0;
                     return number_format($sale_index, 2) . "%";
                 })
-                ->addColumn('registration_index', function ($user) {
-                    $working_days = $user->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Full Day Leave', 'Leave', 'Holiday'])->count();
-                    $registered_retailers = Customers::where(['customertype' => '2', 'created_by' => $user->id])->count();
+                ->addColumn('registration_index', function ($user) use ($lastDate) {
+                    $working_days = $user->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Full Day Leave', 'Leave', 'Holiday'])->where('punchin_date', '<=', $lastDate)->count();
+                    $registered_retailers = Customers::where(['customertype' => '2', 'created_by' => $user->id])->where('created_at', '<=', $lastDate . ' 23:59:59')->count();
                     $registration_index = $working_days ? (($registered_retailers / $working_days) / 5) * 100 : 0;
                     return number_format($registration_index, 2) . "%";
                 })
-                ->addColumn('visit_index', function ($user) {
-                    $working_days = $user->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Full Day Leave', 'Leave', 'Holiday'])->count();
-                    $total_visit = $user->visits->count();
+                ->addColumn('visit_index', function ($user) use ($lastDate) {
+                    $working_days = $user->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Full Day Leave', 'Leave', 'Holiday'])->where('punchin_date', '<=', $lastDate)->count();
+                    $total_visit = $user->visits->where('checkin_date', '<=', $lastDate)->count();
                     $visit_index = $working_days ? (($total_visit / $working_days) / 10) * 100 : 0;
                     return number_format($visit_index, 2) . "%";
                 })
-                ->addColumn('activation_index', function ($user) {
-                    $working_days = $user->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Full Day Leave', 'Leave', 'Holiday'])->count();
-                    $sharthi_customer = TransactionHistory::groupBy('customer_id')->pluck('customer_id')->toArray();
-                    $activation_retailers = Customers::where(['customertype' => '2', 'created_by' => $user->id])->whereIn('id', $sharthi_customer)->count();
+                ->addColumn('activation_index', function ($user) use ($lastDate) {
+                    $working_days = $user->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Full Day Leave', 'Leave', 'Holiday'])->where('punchin_date', '<=', $lastDate)->count();
+                    $sharthi_customer = TransactionHistory::where('created_at', '<=', $lastDate . ' 23:59:59')->groupBy('customer_id')->pluck('customer_id')->toArray();
+                    $activation_retailers = Customers::where(['customertype' => '2', 'created_by' => $user->id])->where('created_at', '<=', $lastDate . ' 23:59:59')->whereIn('id', $sharthi_customer)->count();
                     $activation_index = $working_days ? (($activation_retailers / $working_days) / 5) * 100 : 0;
                     return number_format($activation_index, 2) . "%";
                 })
@@ -686,7 +706,7 @@ class UsersController extends Controller
                 ->make(true);
         }
 
-        return view('reports.fos_rating', compact('users', 'designations', 'divisions', 'branchs'));
+        return view('reports.fos_rating', compact('months', 'users', 'designations', 'divisions', 'branchs'));
     }
 
 

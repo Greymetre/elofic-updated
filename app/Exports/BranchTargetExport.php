@@ -309,7 +309,6 @@ class BranchTargetExport implements FromCollection,WithHeadings,ShouldAutoSize,W
             $response[6] = $achievementPercent;
 
         }elseif($status == false){
-            dd('mull check');
             if(!isset($response[4])) {
                $response[4] = '';
             }
@@ -578,9 +577,9 @@ class BranchTargetExport implements FromCollection,WithHeadings,ShouldAutoSize,W
     }
 
     if($status == false) {
-        $response[37] = '=AC'.$this->rowIndex.' + AF'.$this->rowIndex.' + AI'.$this->rowIndex;
-        $response[38] = '=AD'.$this->rowIndex.' + AG'.$this->rowIndex.' + AJ'.$this->rowIndex;
-        $response[39] = '=ROUND((AE'.$this->rowIndex.' + AH'.$this->rowIndex.' + AK'.$this->rowIndex.') / 3,2)';
+        $response[37] = '=AC'.$this->rowIndex.'+AF'.$this->rowIndex.'+AI'.$this->rowIndex;
+        $response[38] = '=AD'.$this->rowIndex.'+AG'.$this->rowIndex.'+AJ'.$this->rowIndex;
+        $response[39] = '=ROUND((AE'.$this->rowIndex.'+AH'.$this->rowIndex.'+AK'.$this->rowIndex.')/3,2)';
     }
 
     foreach($data['months'] as $key=>$month) {
@@ -677,13 +676,13 @@ class BranchTargetExport implements FromCollection,WithHeadings,ShouldAutoSize,W
     }
 
     if($status == false) {
-        $response[49] = '=AO'.$this->rowIndex.' + AR'.$this->rowIndex.' + AU'.$this->rowIndex;
-        $response[50] = '=AP'.$this->rowIndex.' + AS'.$this->rowIndex.' + AV'.$this->rowIndex;
-        $response[51] = '=ROUND((AQ'.$this->rowIndex.' + AT'.$this->rowIndex.' + AW'.$this->rowIndex.') / 3,2)';
+        $response[49] = '=AO'.$this->rowIndex.'+AR'.$this->rowIndex.'+AU'.$this->rowIndex;
+        $response[50] = '=AP'.$this->rowIndex.'+AS'.$this->rowIndex.'+AV'.$this->rowIndex;
+        $response[51] = '=ROUND((AQ'.$this->rowIndex.'+AT'.$this->rowIndex.'+AW'.$this->rowIndex.')/3,2)';
 
-        $response[52] = '=N'.$this->rowIndex.' + Z'.$this->rowIndex.' + AL'.$this->rowIndex.' + AX'.$this->rowIndex;
-        $response[53] = '=O'.$this->rowIndex.' + AA'.$this->rowIndex.' + AM'.$this->rowIndex.' + AY'.$this->rowIndex;
-        $response[54] = '=ROUND((P'.$this->rowIndex.' + AB'.$this->rowIndex.' + AN'.$this->rowIndex.' + AZ'.$this->rowIndex.') / 4,2)';
+        $response[52] = '=N'.$this->rowIndex.'+Z'.$this->rowIndex.'+AL'.$this->rowIndex.'+AX'.$this->rowIndex;
+        $response[53] = '=O'.$this->rowIndex.'+AA'.$this->rowIndex.'+AM'.$this->rowIndex.'+AY'.$this->rowIndex;
+        $response[54] = '=ROUND((P'.$this->rowIndex.'+AB'.$this->rowIndex.'+AN'.$this->rowIndex.'+AZ'.$this->rowIndex.')/4,2)';
 
     }
 
