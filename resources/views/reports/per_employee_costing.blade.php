@@ -6,11 +6,11 @@
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
-          <h4 class="card-title">Group Wise Analysis
+          <h4 class="card-title">Per Employee Costing
             <span class="">
               <div class="btn-group header-frm-btn">
-                @if(auth()->user()->can(['group_wise_analysis_download']))
-                <form method="POST" action="{{url('group_wise_analysis/download')}}">
+                @if(auth()->user()->can(['per_employee_costing_download']))
+                <form method="POST" action="{{url('per_employee_costing/download')}}">
                   @csrf
                   <div class="d-flex flex-wrap flex-row">
                     <!-- division filter -->
@@ -19,7 +19,7 @@
                         <option value="" disabled selected>{!! trans('panel.secondary_dashboard.division') !!}</option>
                         @if(@isset($ps_divisions ))
                         @foreach($ps_divisions as $division)
-                        <option value="{!! $division->division !!}">{!! $division->division !!}</option>
+                        <option value="{!! $division->id !!}">{!! $division->division_name !!}</option>
                         @endforeach
                         @endif
                       </select>
@@ -30,7 +30,7 @@
                         <option value="" disabled selected>{!! trans('panel.secondary_dashboard.branch') !!}</option>
                         @if(@isset($ps_branches ))
                         @foreach($ps_branches as $branch)
-                        <option value="{!! $branch->final_branch !!}">{!! $branch->final_branch !!}</option>
+                        <option value="{!! $branch->id !!}">{!! $branch->branch_name !!}</option>
                         @endforeach
                         @endif
                       </select>
@@ -73,7 +73,7 @@
                         <option value="" selected>{!! trans('panel.secondary_dashboard.sales_person') !!}</option>
                         @if(@isset($ps_sales_persons ))
                         @foreach($ps_sales_persons as $sales_person)
-                        <option value="{!! $sales_person->sales_person !!}">{!! $sales_person->sales_person !!}</option>
+                        <option value="{!! $sales_person->id !!}">{!! $sales_person->name !!}</option>
                         @endforeach
                         @endif
                       </select>
@@ -130,18 +130,19 @@
           <div class="table-responsive">
             <table id="getprimarysales" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
               <thead class=" text-primary">
-                <th>Group Name</th>
-                <th>Final Branch Name</th>
-                @if(count($months) > 0)
-                @foreach($months as $month)
-                <th>{{$month}}  QTY</th>
-                <th>{{$month}}  SALE</th>
-                @endforeach
-                @endif
-                <th>T-Qty</th>
-                <th>T-SALE</th>
-                <th>Qty Wise Cont %</th>
-                <th>Value Wise Cont %</th>
+                <th>Division</th>
+                <th>Branch</th>
+                <th>Emp Code</th>
+                <th>Emp Name</th>
+                <th>Designation</th>
+                <th>DOJ</th>
+                <th>Sales/Othe/FOS/FOS-C</th>
+                <th>Sales</th>
+                <th>Salary</th>
+                <th>TA-DA</th>
+                <th>Incentive</th>
+                <th>TOTAL EXP</th>
+                <th>SALARY/EXP %</th>
               </thead>
               <tbody>
               </tbody>
@@ -172,7 +173,7 @@
         ],
         "retrieve": true,
         ajax: {
-          url: "{{ route('group_wise_analysis.list') }}",
+          url: "{{ route('per_employee_costing.list') }}",
           data: function(d) {
             d.executive_id = $('#ps_executive_id').val(),
               d.division_id = $('#ps_division_id').val(),
@@ -188,83 +189,90 @@
         },
         columns: [
           {
-            data: 'new_group',
-            name: 'new_group',
+            data: 'getdivision.division_name',
+            name: 'getdivision.division_name',
             orderable: false,
             "defaultContent": ''
           },
           {
-            data: 'final_branch',
-            name: 'final_branch',
+            data: 'getbranch.branch_name',
+            name: 'getbranch.branch_name',
             orderable: false,
             "defaultContent": 'final branch'
           },
           {
-            data: 'month1_qty',
-            name: 'month1_qty',
+            data: 'employee_codes',
+            name: 'employee_codes',
             orderable: false,
             searchable: false,
             "defaultContent": ''
           },
           {
-            data: 'month1_sale',
-            name: 'month1_sale',
+            data: 'name',
+            name: 'name',
             orderable: false,
             searchable: false,
             "defaultContent": ''
           },
           {
-            data: 'month2_qty',
-            name: 'month2_qty',
+            data: 'getdesignation.designation_name',
+            name: 'getdesignation.designation_name',
             orderable: false,
             searchable: false,
             "defaultContent": ''
           },
           {
-            data: 'month2_sale',
-            name: 'month2_sale',
+            data: 'doj',
+            name: 'doj',
             orderable: false,
             searchable: false,
             "defaultContent": ''
           },
           {
-            data: 'month3_qty',
-            name: 'month3_qty',
+            data: 'sale_yt',
+            name: 'sale_yt',
             orderable: false,
             searchable: false,
             "defaultContent": ''
           },
           {
-            data: 'month3_sale',
-            name: 'month3_sale',
+            data: 'sales',
+            name: 'sales',
             orderable: false,
             searchable: false,
             "defaultContent": ''
           },
           {
-            data: 'total_quantitys',
-            name: 'total_quantitys',
+            data: 'userinfo.gross_salary_monthly',
+            name: 'userinfo.gross_salary_monthly',
             orderable: false,
             searchable: false,
             "defaultContent": ''
           },
           {
-            data: 'total_net_amounts',
-            name: 'total_net_amounts',
+            data: 'ta_da',
+            name: 'ta_da',
             orderable: false,
             searchable: false,
             "defaultContent": ''
           },
           {
-            data: 'qty_wise',
-            name: 'qty_wise',
+            data: 'incentive',
+            name: 'incentive',
             orderable: false,
             searchable: false,
             "defaultContent": ''
           },
           {
-            data: 'sale_wise',
-            name: 'sale_wise',
+            data: 'total_exp',
+            name: 'total_exp',
+            orderable: false,
+            searchable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'sal_exp',
+            name: 'sal_exp',
             orderable: false,
             searchable: false,
             "defaultContent": ''

@@ -113,7 +113,8 @@
                 <th>City</th>
                 <th>Firm Name</th>
                 <th>Customer Type</th>
-                <th>division</th>
+                <th>Division</th>
+                <th>Dealer Code</th>
                 <th>Status</th>
               </thead>
               <tbody>
@@ -207,6 +208,12 @@
           {
             data: 'division',
             name: 'division',
+            "defaultContent": '',
+            orderable: false
+          },
+          {
+            data: 'appointment_kyc_detail.dealer_code',
+            name: 'appointment_kyc_detail.dealer_code',
             "defaultContent": '',
             orderable: false
           },

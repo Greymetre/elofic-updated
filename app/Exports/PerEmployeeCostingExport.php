@@ -13,7 +13,7 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Illuminate\Support\Facades\Auth;
 use DB;
 
-class GroupWiseAnalysisExport implements FromCollection, WithHeadings,WithMapping, ShouldAutoSize, WithEvents
+class PerEmployeeCostingExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithEvents
 {
 
     public function __construct($request)
@@ -34,64 +34,18 @@ class GroupWiseAnalysisExport implements FromCollection, WithHeadings,WithMappin
     {
         $currentDate = Carbon::now();
         DB::statement("SET SESSION group_concat_max_len = 10000000");
-        $query = PrimarySales::select(
-            'new_group',
-            'final_branch',
-            DB::raw('GROUP_CONCAT(quantity) as quantitys'),
-            DB::raw('SUM(quantity) as total_quantitys'),
-            DB::raw('GROUP_CONCAT(month) as months'),
-            DB::raw('GROUP_CONCAT(invoice_date) as invoice_dates'),
-            DB::raw('GROUP_CONCAT(net_amount) as net_amounts'),
-            DB::raw('SUM(net_amount) as total_net_amounts'),
-        );
-
-        if ($this->month && is_array($this->month) && count($this->month) > 0 && $this->financial_year && !empty($this->financial_year)) {
-            $f_year_array = explode('-', $this->financial_year);
-
-            // Determine if months are in Jan-Mar and set the correct year
-            $isJanToMar = in_array('Jan', $this->month) || in_array('Feb', $this->month) || in_array('Mar', $this->month);
-            $currentYear = $isJanToMar ? $f_year_array[1] : $f_year_array[0];
-
-            // Get the first and last months from the array
-            $firstMonth = $this->month[0];
-            $lastMonth = $this->month[count($this->month) - 1];
-
-            // Format the month and create start and end dates
-            $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$firstMonth")->startOfMonth();
-            $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$lastMonth")->endOfMonth();
-
-            // Convert to date strings
-            $startDateFormatted = $startDate->toDateString();
-            $endDateFormatted = $endDate->toDateString();
-
-            // Apply the date range to the query
-            $query->where(function ($q) use ($startDateFormatted, $endDateFormatted) {
-                $q->where('invoice_date', '>=', $startDateFormatted)
-                    ->where('invoice_date', '<=', $endDateFormatted);
-            });
-        } elseif ($this->financial_year && $this->financial_year != '' && $this->financial_year != null) {
-            $f_year_array = explode('-', $this->financial_year);
-
-            $financial_year_start = $f_year_array[0] . '-04-01';
-            $financial_year_end = $f_year_array[1] . '-03-31';
-
-            $query->whereBetween('invoice_date', [$financial_year_start, $financial_year_end]);
-        } else {
-            $currentDate = Carbon::now();
-            $startDatethree = $currentDate->copy()->subMonthsNoOverflow(3)->firstOfMonth()->format('Y-m-d');
-            $endDatethree = $currentDate->copy()->subMonthNoOverflow()->endOfMonth()->format('Y-m-d');
-            $query->whereBetween('invoice_date', [$startDatethree, $endDatethree]);
-        }
-
-        $this->t_data = $query->get();
-
-        if ($this->branch_id && $this->branch_id != '' && $this->branch_id != null) {
-            $query->where('final_branch', $this->branch_id);
-        }
+        $query = User::with('primarySales', 'getdesignation', 'getbranch', 'getdivision', 'userinfo')->where('active', 'Y');
 
         if ($this->division_id && $this->division_id != '' && $this->division_id != null) {
-            $query->where('division', $this->division_id);
+            $query->where('division_id', $this->division_id);
         }
+
+        $data = $query->orderBy('id', 'desc')->get();
+
+        if ($this->branch_id && $this->branch_id != '' && $this->branch_id != null) {
+            $query->where('branch_id', $this->branch_id);
+        }
+
 
         if ($this->dealer_id && $this->dealer_id != '' && $this->dealer_id != null) {
             $query->where('dealer', 'like', '%' . $this->dealer_id . '%');
@@ -106,18 +60,22 @@ class GroupWiseAnalysisExport implements FromCollection, WithHeadings,WithMappin
         }
 
         if ($this->executive_id && $this->executive_id != '' && $this->executive_id != null) {
-            $query->where('sales_person', $this->executive_id);
+            $query->where('id', $this->executive_id);
         }
-        
-        $query = $query->groupBy('new_group', 'final_branch')->orderBy('new_group');
+
+        $query = $query->get();
         return $query->get();
     }
 
     public function headings(): array
     {
         $label1 = [
-            'Group Name',
-            'Final Branch Name',
+            'Division',
+            'Branch',
+            'Emp Code',
+            'Designation',
+            'DOJ',
+            'Sales/Othe/FOS/FOS-C'
         ];
 
         if ($this->month && is_array($this->month) && count($this->month) > 0 && $this->financial_year && !empty($this->financial_year)) {
@@ -150,7 +108,6 @@ class GroupWiseAnalysisExport implements FromCollection, WithHeadings,WithMappin
                 }
                 $currentDate->addMonth()->startOfMonth();
             }
-
         } elseif ($this->financial_year && $this->financial_year != '' && $this->financial_year != null) {
             $f_year_array = explode('-', $this->financial_year);
 
@@ -168,7 +125,6 @@ class GroupWiseAnalysisExport implements FromCollection, WithHeadings,WithMappin
                 }
                 $currentDate->addMonth()->startOfMonth();
             }
-
         } else {
             $currentDate = Carbon::now();
             $startDatethree = $currentDate->copy()->subMonthsNoOverflow(3)->firstOfMonth()->format('Y-m-d');
@@ -225,27 +181,27 @@ class GroupWiseAnalysisExport implements FromCollection, WithHeadings,WithMappin
                 }
             }
             if ($tqty > 0) {
-                $response[2+$indx] = $tqty;
+                $response[2 + $indx] = $tqty;
                 $indx++;
             } else {
-                $response[2+$indx] = "0";
+                $response[2 + $indx] = "0";
                 $indx++;
             }
             if ($tsale > 0) {
-                $response[2+$indx] = number_format(($tsale / 100000), 2, '.', '');
+                $response[2 + $indx] = number_format(($tsale / 100000), 2, '.', '');
                 $indx++;
             } else {
-                $response[2+$indx] = "0";
+                $response[2 + $indx] = "0";
                 $indx++;
             }
         }
 
-        $response[2+$indx] = $data->total_quantitys;
-        $response[3+$indx] = number_format(($data->total_net_amounts / 100000), 2, '.', '');
-        $response[4+$indx] = number_format((($data->total_quantitys / $this->t_data[0]->total_quantitys) * 100), 2, '.', '') . "%";;
-        $response[5+$indx] = number_format((($data->total_net_amounts / $this->t_data[0]->total_net_amounts) * 100), 2, '.', '') . "%";;
+        $response[2 + $indx] = $data->total_quantitys;
+        $response[3 + $indx] = number_format(($data->total_net_amounts / 100000), 2, '.', '');
+        $response[4 + $indx] = number_format((($data->total_quantitys / $this->t_data[0]->total_quantitys) * 100), 2, '.', '') . "%";;
+        $response[5 + $indx] = number_format((($data->total_net_amounts / $this->t_data[0]->total_net_amounts) * 100), 2, '.', '') . "%";;
 
-        return $response;   
+        return $response;
     }
 
     public function registerEvents(): array
@@ -254,8 +210,8 @@ class GroupWiseAnalysisExport implements FromCollection, WithHeadings,WithMappin
             AfterSheet::class => function (AfterSheet $event) {
                 $lastRow = $event->sheet->getHighestDataRow() + 2;
                 $lastColumn = $event->sheet->getHighestDataColumn();
-             
-                $event->sheet->getStyle('A1:'.$lastColumn.'1')->applyFromArray([
+
+                $event->sheet->getStyle('A1:' . $lastColumn . '1')->applyFromArray([
                     'font' => [
                         'bold' => true,
                         'color' => ['rgb' => 'FFFFFF'],

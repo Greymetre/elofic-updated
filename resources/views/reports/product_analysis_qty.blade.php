@@ -10,7 +10,7 @@
             <span class="">
               <div class="btn-group header-frm-btn">
                 @if(auth()->user()->can(['product_analysis_qty_download']))
-                <form method="POST" action="{{url('product_analysis_qty/download')}}">
+                <form method="POST" action="{{url('product_analysis_qty/download')}}" id="prifilfrm">
                   @csrf
                   <div class="d-flex flex-wrap flex-row">
                     <!-- division filter -->
@@ -107,6 +107,12 @@
                       </button>
                     </div>
                   </div>
+                  <div class="p-2" style="width:200px;">
+                      <button class="btn btn-just-icon btn-theme" type="button" id="reset-filter" title="Reset">
+                        <i class="fa fa-refresh"></i>
+                        <div class="ripple-container"></div>
+                      </button>
+                    </div>
                 </form>
                 @endif
               </div>
@@ -256,5 +262,10 @@
         table.draw();
       });
     });
+
+    $('#reset-filter').on('click', function(){
+      $('#prifilfrm').find('input:text, input:password, input:file, select, textarea').val('');
+      $('#prifilfrm').find('select').change();
+    })
   </script>
 </x-app-layout>

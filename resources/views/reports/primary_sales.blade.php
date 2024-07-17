@@ -10,7 +10,7 @@
             <span class="">
               <div class="btn-group header-frm-btn">
                 @if(auth()->user()->can(['primary_sales_download']))
-                <form method="POST" action="{{url('primary_sales/download')}}">
+                <form method="POST" action="{{url('primary_sales/download')}}" id="prifilfrm">
                   @csrf
                   <div class="d-flex flex-wrap flex-row">
                     <!-- division filter -->
@@ -106,6 +106,12 @@
                         <div class="ripple-container"></div>
                       </button>
                     </div>
+                    <div class="p-2" style="width:200px;">
+                      <button class="btn btn-just-icon btn-theme" type="button" id="reset-filter" title="Reset">
+                        <i class="fa fa-refresh"></i>
+                        <div class="ripple-container"></div>
+                      </button>
+                    </div>
                   </div>
                 </form>
                 @endif
@@ -187,6 +193,7 @@
                 <th>{!! trans('panel.primary_dashboard.state') !!}</th>
                 <th>Final Branch</th>
                 <th>Sales person</th>
+                <th>Emp Code</th>
                 <th>Model Name</th>
                 <th>Product Name</th>
                 <th>Qty.</th>
@@ -313,6 +320,11 @@
           {
             data: 'sales_person',
             name: 'sales_person',
+            "defaultContent": ''
+          },
+          {
+            data: 'emp_code',
+            name: 'emp_code',
             "defaultContent": ''
           },
           {
@@ -597,5 +609,10 @@
         });
       });
     });
+
+    $('#reset-filter').on('click', function(){
+      $('#prifilfrm').find('input:text, input:password, input:file, select, textarea').val('');
+      $('#prifilfrm').find('select').change();
+    })
   </script>
 </x-app-layout>

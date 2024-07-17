@@ -1039,7 +1039,7 @@ class DashboardController extends Controller
 
 
         if ($request->month && $request->month != '' && $request->month != null) {
-            $query->where('month', $request->month);
+            $orderDetails->where('month', $request->month);
         }
 
         // user with secondary sales type

@@ -126,7 +126,7 @@
             </span>
           </div>
           @endif
-          
+
           <div class="table-responsive">
             <table id="getprimarysales" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
               <thead class=" text-primary">
@@ -171,19 +171,18 @@
           url: "{{ route('product_analysis_value.list') }}",
           data: function(d) {
             d.executive_id = $('#ps_executive_id').val(),
-              d.division_id = $('#ps_division_id').val(),
-              d.branch_id = $('#ps_branch_id').val(),
-              d.financial_year = $('#ps_financial_year').val(),
-              d.month = $('#ps_month').val(),
-              d.retailer_id = $('#ps_retailer_id').val(),
-              d.dealer_id = $('#ps_dealer_id').val(),
-              d.product_model = $('#ps_product_model').val(),
-              d.new_group = $('#ps_new_group').val(),
-              d.search = $('input[type="search"]').val()
+            d.division_id = $('#ps_division_id').val(),
+            d.branch_id = $('#ps_branch_id').val(),
+            d.financial_year = $('#ps_financial_year').val(),
+            d.month = $('#ps_month').val(),
+            d.retailer_id = $('#ps_retailer_id').val(),
+            d.dealer_id = $('#ps_dealer_id').val(),
+            d.product_model = $('#ps_product_model').val(),
+            d.new_group = $('#ps_new_group').val(),
+            d.search = $('input[type="search"]').val()
           }
         },
-        columns: [
-          {
+        columns: [{
             data: 'model_name',
             name: 'model_name',
             orderable: false,

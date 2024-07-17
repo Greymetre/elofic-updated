@@ -31,6 +31,7 @@ class PrimarySalesTemplate implements FromCollection,WithHeadings,ShouldAutoSize
             'State',
             'Final Branch',
             'Sales person',
+            'Emp Code',
             'Model Name',
             'Product Name',
             'Quantity',

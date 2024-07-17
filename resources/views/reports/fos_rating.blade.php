@@ -44,7 +44,7 @@
                         @endforeach
                       </select>
                     </div>
-                    {{--<div class="p-2" style="width: 200px;">
+                    <div class="p-2" style="width: 200px;">
                       <select name="month" id="month" class="form-control select2">
                         <option value="" disabled selected>Month</option>
                         @if(count($months) > 0)
@@ -53,7 +53,7 @@
                         @endforeach
                         @endif
                       </select>
-                    </div>--}}
+                    </div>
                     <div class="p-2">
                       <input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly>
                     </div>
