@@ -2,7 +2,9 @@
 
 namespace App\Exports;
 
+use App\Models\Order;
 use App\Models\PrimarySales;
+use App\Models\User;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -29,6 +31,8 @@ class PerEmployeeCostingExport implements FromCollection, WithHeadings, WithMapp
         $this->month = $request->input('month');
         $this->months = [];
         $this->t_data = '';
+        $this->startDateFormatted = '';
+        $this->endDateFormatted = '';
     }
     public function collection()
     {
@@ -64,7 +68,7 @@ class PerEmployeeCostingExport implements FromCollection, WithHeadings, WithMapp
         }
 
         $query = $query->get();
-        return $query->get();
+        return $query;
     }
 
     public function headings(): array
@@ -73,6 +77,7 @@ class PerEmployeeCostingExport implements FromCollection, WithHeadings, WithMapp
             'Division',
             'Branch',
             'Emp Code',
+            'Empolyee Name',
             'Designation',
             'DOJ',
             'Sales/Othe/FOS/FOS-C'
@@ -94,112 +99,148 @@ class PerEmployeeCostingExport implements FromCollection, WithHeadings, WithMapp
             $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$lastMonth")->endOfMonth();
 
             // Convert to date strings
-            $startDateFormatted = $startDate->toDateString();
-            $endDateFormatted = $endDate->toDateString();
-
-            $startDate = Carbon::createFromFormat('Y-m-d', $startDateFormatted);
-            $endDate = Carbon::createFromFormat('Y-m-d', $endDateFormatted);
-            $currentDate = $startDate->copy();
-
-            while ($currentDate <= $endDate) {
-                $monthName = $currentDate->format('F');
-                if (!in_array($monthName, $this->months)) {
-                    $this->months[] = $monthName;
-                }
-                $currentDate->addMonth()->startOfMonth();
-            }
+            $this->startDateFormatted = $startDate->toDateString();
+            $this->endDateFormatted = $endDate->toDateString();
         } elseif ($this->financial_year && $this->financial_year != '' && $this->financial_year != null) {
             $f_year_array = explode('-', $this->financial_year);
-
-            $financial_year_start = $f_year_array[0] . '-04-01';
-            $financial_year_end = $f_year_array[1] . '-03-31';
-
-            $startDate = Carbon::createFromFormat('Y-m-d', $financial_year_start);
-            $endDate = Carbon::createFromFormat('Y-m-d', $financial_year_end);
-            $currentDate = $startDate->copy();
-
-            while ($currentDate <= $endDate) {
-                $monthName = $currentDate->format('F');
-                if (!in_array($monthName, $this->months)) {
-                    $this->months[] = $monthName;
-                }
-                $currentDate->addMonth()->startOfMonth();
-            }
+            $this->startDateFormatted = $f_year_array[0] . '-04-01';
+            $this->endDateFormatted = $f_year_array[1] . '-03-31';
         } else {
             $currentDate = Carbon::now();
-            $startDatethree = $currentDate->copy()->subMonthsNoOverflow(3)->firstOfMonth()->format('Y-m-d');
-            $endDatethree = $currentDate->copy()->subMonthNoOverflow()->endOfMonth()->format('Y-m-d');
-            $startDate = Carbon::createFromFormat('Y-m-d', $startDatethree);
-            $endDate = Carbon::createFromFormat('Y-m-d', $endDatethree);
-            $currentDate = $startDate->copy();
+            $this->startDateFormatted = $currentDate->copy()->subMonthsNoOverflow(3)->firstOfMonth()->format('Y-m-d');
+            $this->endDateFormatted = $currentDate->copy()->subMonthNoOverflow()->endOfMonth()->format('Y-m-d');
+        }
 
-            while ($currentDate <= $endDate) {
-                $monthName = $currentDate->format('F');
-                if (!in_array($monthName, $this->months)) {
-                    $this->months[] = $monthName;
-                }
-                $currentDate->addMonth()->startOfMonth();
+        $startDate = Carbon::createFromFormat('Y-m-d', $this->startDateFormatted);
+        $endDate = Carbon::createFromFormat('Y-m-d', $this->endDateFormatted);
+        $today = Carbon::now('Asia/Kolkata');
+        if ($endDate->greaterThan($today)) {
+            $endDate = $today->subMonth()->endOfMonth();
+            $this->endDateFormatted = $endDate->toDateString();
+        }
+        $currentDate = $startDate->copy();
+
+        while ($currentDate <= $endDate) {
+            $monthName = $currentDate->format('F');
+            if (!in_array($monthName, $this->months)) {
+                $this->months[] = $monthName;
             }
+            $currentDate->addMonth()->startOfMonth();
         }
 
         $label2 = [];
 
+        $label2[] = 'Total';
+        $label2[] = '';
+        $label2[] = '';
+        $label2[] = '';
+        $label2[] = '';
+        $label2[] = '';
+        $label2[] = '';
+        $headings2 = ['', '', '', '', '', '', '', 'Sales(L)', 'Salary', 'TA-DA', 'Incentive', 'TOTAL EXP', 'T-Expenes(L)', 'SALARY/EXP %'];
         foreach ($this->months as $key => $value) {
-            $label2[] = $value . ' QTY';
-            $label2[] = $value . ' SALE';
+            $label2[] = $value;
+            $label2[] = '';
+            $label2[] = '';
+            $label2[] = '';
+            $label2[] = '';
+            $label2[] = '';
+            $label2[] = '';
+            $headings2[] = 'Sales(L)';
+            $headings2[] = 'Salary';
+            $headings2[] = 'TA-DA';
+            $headings2[] = 'Incentive';
+            $headings2[] = 'TOTAL EXP';
+            $headings2[] = 'T-Expenes(L)';
+            $headings2[] = 'SALARY/EXP %';
         }
 
-        $label3 = [
-            'T-QTY',
-            'T-SALE',
-            'Qty Wise Cont %',
-            'Value Wise Cont %'
-        ];
+        $headings1 = array_merge($label1, $label2);
+        $main_head = array($headings1, $headings2);
 
-        $headings = array_merge($label1, $label2, $label3);
-        return $headings;
+        return $main_head;
     }
 
     public function map($data): array
     {
-        $invoice_dates = explode(',', $data->invoice_dates);
-        $quantitys = explode(',', $data->quantitys);
-        $net_amounts = explode(',', $data->net_amounts);
-        $response[1] = $data->new_group;
-        $response[0] = $data->final_branch;
-        $indx = 0;
-        foreach ($this->months as $k => $val) {
-            $tsale = 0;
-            $tqty = 0;
-            foreach ($invoice_dates as $key => $value) {
-                $invDate = Carbon::createFromFormat('Y-m-d', $value);
-                $currentDate = $invDate->copy();
-                $monthName = $currentDate->format('F');
-                if ($monthName == $val) {
-                    $tsale += $net_amounts[$key];
-                    $tqty += $quantitys[$key];
-                }
-            }
-            if ($tqty > 0) {
-                $response[2 + $indx] = $tqty;
-                $indx++;
+        $data->userinfo->gross_salary_monthly = $data->userinfo->gross_salary_monthly * count($this->months);
+        if (count($data->expenses) > 0) {
+            $data->total_expe = $data->expenses->where('date', '>=', $this->startDateFormatted)->where('date', '<=', $this->endDateFormatted)->sum('claim_amount') > 0 ? number_format(($data->expenses->where('date', '>=', $this->startDateFormatted)->where('date', '<=', $this->endDateFormatted)->sum('claim_amount') + $data->userinfo->gross_salary_monthly), 2, '.', '') : "0";
+        } else {
+            $data->total_expe = $data->userinfo->gross_salary_monthly;
+        }
+        if ($data->sales_type == 'Primary') {
+            if (count($data->primarySales) > 0) {
+                $data->sales = $data->primarySales->where('invoice_date', '>=', $this->startDateFormatted)->where('invoice_date', '<=', $this->endDateFormatted)->sum('net_amount') > 0 ? number_format(($data->primarySales->where('invoice_date', '>=', $this->startDateFormatted)->where('invoice_date', '<=', $this->endDateFormatted)->sum('net_amount') / 100000), 2, '.', '') : "0";
             } else {
-                $response[2 + $indx] = "0";
-                $indx++;
+                $data->sales = "0";
             }
-            if ($tsale > 0) {
-                $response[2 + $indx] = number_format(($tsale / 100000), 2, '.', '');
-                $indx++;
-            } else {
-                $response[2 + $indx] = "0";
-                $indx++;
-            }
+        } else {
+            $data->sales = Order::where('created_by', $data->id)->where('order_date', '>=', $this->startDateFormatted)->where('order_date', '<=', $this->endDateFormatted)->sum('sub_total') > 0 ? number_format((Order::where('created_by', $data->id)->where('order_date', '>=', $this->startDateFormatted)->where('order_date', '<=', $this->endDateFormatted)->sum('sub_total') / 100000), 2, '.', '') : "0";
         }
 
-        $response[2 + $indx] = $data->total_quantitys;
-        $response[3 + $indx] = number_format(($data->total_net_amounts / 100000), 2, '.', '');
-        $response[4 + $indx] = number_format((($data->total_quantitys / $this->t_data[0]->total_quantitys) * 100), 2, '.', '') . "%";;
-        $response[5 + $indx] = number_format((($data->total_net_amounts / $this->t_data[0]->total_net_amounts) * 100), 2, '.', '') . "%";;
+        $response[0] = $data->getdivision ? $data->getdivision->division_name : '-';
+        $response[1] = $data->getbranch ? $data->getbranch->branch_name : '-';
+        $response[2] = $data->employee_codes ? $data->employee_codes : '-';
+        $response[3] = $data->name ? $data->name : '-';
+        $response[4] = $data->getdesignation ? $data->getdesignation->designation_name : '-';
+        $response[5] = $data->userinfo ? date('d M Y', strtotime($data->userinfo->date_of_joining)) : '-';
+        $response[6] = '-';
+        $response[7] = $data->sales;
+        $response[8] = $data->userinfo->gross_salary_monthly;
+        $response[9] = $data->expenses->where('date', '>=', $this->startDateFormatted)->where('date', '<=', $this->endDateFormatted)->sum('claim_amount') > 0 ? number_format($data->expenses->where('date', '>=', $this->startDateFormatted)->where('date', '<=', $this->endDateFormatted)->sum('claim_amount'), 2, '.', '') : 0;
+        $response[10] = '-';
+        $response[11] = $data->total_expe ?? "0";
+        $response[12] = $data->total_expe > 0 ? $data->total_expe / 100000 : "0";
+        $response[13] = $data->sales > 0 ? number_format(((($data->total_expe / 100000) / $data->sales) * 100), 2, '.', '') . "%" : "0%";
+        $check = 0;
+        foreach ($this->months as $k => $val) {
+            $f_year_array = explode('-', $this->financial_year);
+
+            if ($val == 'January' || $val == 'February' || $val == 'March') {
+                $currentYear = $f_year_array[1];
+                $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$val")->startOfMonth();
+                $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$val")->endOfMonth();
+                $startDateMonthly = $startDate->toDateString();
+                $endDateMonthly = $endDate->toDateString();
+            } else {
+                $currentYear = $f_year_array[0];
+                $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$val")->startOfMonth();
+                $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$val")->endOfMonth();
+                $startDateMonthly = $startDate->toDateString();
+                $endDateMonthly = $endDate->toDateString();
+            }
+
+            if ($data->sales_type == 'Primary') {
+                if (count($data->primarySales) > 0) {
+                    $monthly_sales = $data->primarySales->where('invoice_date', '>=', $startDateMonthly)->where('invoice_date', '<=', $endDateMonthly)->sum('net_amount') > 0 ? number_format(($data->primarySales->where('invoice_date', '>=', $startDateMonthly)->where('invoice_date', '<=', $endDateMonthly)->sum('net_amount') / 100000), 2, '.', '') : "0";
+                } else {
+                    $monthly_sales = "0";
+                }
+            } else {
+                $monthly_sales = Order::where('created_by', $data->id)->where('order_date', '>=', $startDateMonthly)->where('order_date', '<=', $endDateMonthly)->sum('sub_total') > 0 ? number_format((Order::where('created_by', $data->id)->where('order_date', '>=', $startDateMonthly)->where('order_date', '<=', $endDateMonthly)->sum('sub_total') / 100000), 2, '.', '') : "0";
+            }
+
+            if (count($data->expenses) > 0) {
+                $monthly_exp = $data->expenses->where('date', '>=', $startDateMonthly)->where('date', '<=', $endDateMonthly)->sum('claim_amount') > 0 ? number_format($data->expenses->where('date', '>=', $startDateMonthly)->where('date', '<=', $endDateMonthly)->sum('claim_amount'), 2, '.', '') : "0";
+            } else {
+                $monthly_exp = $data->userinfo->gross_salary_monthly / count($this->months);
+            }
+
+            $monthly_tottal_exp = $monthly_exp+($data->userinfo->gross_salary_monthly / count($this->months));
+
+            $response[14 + $check] = $monthly_sales;
+            $response[15 + $check] = $data->userinfo->gross_salary_monthly / count($this->months);
+            
+            
+            $response[16 + $check] = $monthly_exp;
+            $response[17 + $check] = '-';
+
+            $response[18 + $check] = $monthly_tottal_exp;
+            $response[19 + $check] = $monthly_tottal_exp/100000;
+            $response[20 + $check] = $monthly_sales > 0 ? number_format(((($monthly_tottal_exp / 100000) / $monthly_sales) * 100), 2, '.', '') . "%" : "0%";;
+            $check += 7;
+        }
 
         return $response;
     }
@@ -210,6 +251,29 @@ class PerEmployeeCostingExport implements FromCollection, WithHeadings, WithMapp
             AfterSheet::class => function (AfterSheet $event) {
                 $lastRow = $event->sheet->getHighestDataRow() + 2;
                 $lastColumn = $event->sheet->getHighestDataColumn();
+
+                $event->sheet->mergeCells('A1:A2');
+                $event->sheet->mergeCells('B1:B2');
+                $event->sheet->mergeCells('C1:C2');
+                $event->sheet->mergeCells('D1:D2');
+                $event->sheet->mergeCells('E1:E2');
+                $event->sheet->mergeCells('F1:F2');
+                $event->sheet->mergeCells('G1:G2');
+
+                $startColumn = 'H';
+                $columnsPerMerge = 7;
+
+                // Convert column letters to numbers
+                $startColNum = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($startColumn);
+                $lastColNum = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($lastColumn);
+
+                // Loop through and merge columns in groups of 7
+                for ($colNum = $startColNum; $colNum <= $lastColNum; $colNum += $columnsPerMerge) {
+                    $endColNum = min($colNum + $columnsPerMerge - 1, $lastColNum);
+                    $startColLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colNum);
+                    $endColLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($endColNum);
+                    $event->sheet->mergeCells("{$startColLetter}1:{$endColLetter}1");
+                }
 
                 $event->sheet->getStyle('A1:' . $lastColumn . '1')->applyFromArray([
                     'font' => [
@@ -231,8 +295,28 @@ class PerEmployeeCostingExport implements FromCollection, WithHeadings, WithMapp
                         ],
                     ],
                 ]);
+                $event->sheet->getStyle('A2:' . $lastColumn . '2')->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                        'color' => ['rgb' => 'FFFFFF'],
+                    ],
+                    'alignment' => [
+                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                        'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                    ],
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => '336677'],
+                    ],
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['argb' => '000000'],
+                        ],
+                    ],
+                ]);
 
-                $event->sheet->getStyle('A2:' . $lastColumn . '' . ($lastRow - 2))->applyFromArray([
+                $event->sheet->getStyle('A3:' . $lastColumn . '' . ($lastRow - 2))->applyFromArray([
                     'borders' => [
                         'allBorders' => [
                             'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,

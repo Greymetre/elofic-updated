@@ -28,6 +28,7 @@ use App\Models\Payment;
 use App\Models\PaymentDetail;
 use App\Models\SalesTarget;
 use App\Models\Customers;
+use App\Models\DealerAppointment;
 use App\Models\Expenses;
 use App\Models\LoyaltyAppSetting;
 use App\Models\ParentDetail;
@@ -497,6 +498,8 @@ class DashboardController extends Controller
             $data['pending_all_expense'] = Expenses::whereNot('user_id', $request->id)->whereIn('user_id', $userids)->where('checker_status', '0')->count();
             // dd($data['pending_all_expense']);
             $data['pending_order_discount'] = Order::where('created_by', $request->id)->where('cluster_discount', '!=', NULL)->where('discount_status', '0')->count();
+            $data['pending_orders'] = Order::where('status_id', NULL)->count();
+            $data['pending_appointment'] = DealerAppointment::where('approval_status', '0')->count();
 
             return response(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], 200);
         } catch (\Exception $e) {

@@ -3157,10 +3157,6 @@ class ReportController extends Controller
 
     public function per_employee_costing(Request $request)
     {
-        if ($request->ip() != '106.222.215.225') {
-            return 'Coming Soon...';
-        }
-
         $ps_branches = Branch::where('active', 'Y')->select('id', 'branch_name')->get();
         $ps_divisions = Division::where('active', 'Y')->select('id', 'division_name')->get();
         $ps_months = PrimarySales::latest()->get()->unique('month');
@@ -3185,46 +3181,53 @@ class ReportController extends Controller
     public function per_employee_costing_list(Request $request)
     {
         DB::statement("SET SESSION group_concat_max_len = 10000000");
-        $query = User::with('primarySales', 'getdesignation', 'getbranch', 'getdivision', 'userinfo')->where('active', 'Y');
+        $query = User::with('primarySales', 'getdesignation', 'getbranch', 'getdivision', 'userinfo', 'expenses')->where('active', 'Y');
 
         // Filter by financial year or last three months
-        // if ($request->month && is_array($request->month) && count($request->month) > 0 && $request->financial_year && !empty($request->financial_year)) {
-        //     $f_year_array = explode('-', $request->financial_year);
+        if ($request->month && is_array($request->month) && count($request->month) > 0 && $request->financial_year && !empty($request->financial_year)) {
+            $f_year_array = explode('-', $request->financial_year);
 
-        //     // Determine if months are in Jan-Mar and set the correct year
-        //     $isJanToMar = in_array('Jan', $request->month) || in_array('Feb', $request->month) || in_array('Mar', $request->month);
-        //     $currentYear = $isJanToMar ? $f_year_array[1] : $f_year_array[0];
+            // Determine if months are in Jan-Mar and set the correct year
+            $isJanToMar = in_array('Jan', $request->month) || in_array('Feb', $request->month) || in_array('Mar', $request->month);
+            $currentYear = $isJanToMar ? $f_year_array[1] : $f_year_array[0];
 
-        //     // Get the first and last months from the array
-        //     $firstMonth = $request->month[0];
-        //     $lastMonth = $request->month[count($request->month) - 1];
+            // Get the first and last months from the array
+            $firstMonth = $request->month[0];
+            $lastMonth = $request->month[count($request->month) - 1];
 
-        //     // Format the month and create start and end dates
-        //     $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$firstMonth")->startOfMonth();
-        //     $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$lastMonth")->endOfMonth();
+            // Format the month and create start and end dates
+            $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$firstMonth")->startOfMonth();
+            $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$lastMonth")->endOfMonth();
 
-        //     // Convert to date strings
-        //     $startDateFormatted = $startDate->toDateString();
-        //     $endDateFormatted = $endDate->toDateString();
+            // Convert to date strings
+            $startDateFormatted = $startDate->toDateString();
+            $endDateFormatted = $endDate->toDateString();
+        } elseif ($request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
+            $f_year_array = explode('-', $request->financial_year);
+            $startDateFormatted = $f_year_array[0] . '-04-01';
+            $endDateFormatted = $f_year_array[1] . '-03-31';
+        } else {
+            $currentDate = Carbon::now();
+            $startDateFormatted = $currentDate->copy()->subMonthsNoOverflow(3)->firstOfMonth()->format('Y-m-d');
+            $endDateFormatted = $currentDate->copy()->subMonthNoOverflow()->endOfMonth()->format('Y-m-d');
+        }
+        $all_months = [];
+        $startDate = Carbon::createFromFormat('Y-m-d', $startDateFormatted);
+        $endDate = Carbon::createFromFormat('Y-m-d', $endDateFormatted);
+        $today = Carbon::now('Asia/Kolkata');
+        if ($endDate->greaterThan($today)) {
+            $endDate = $today->subMonth()->endOfMonth();
+            $endDateFormatted = $endDate->toDateString();
+        }
+        $currentDate = $startDate->copy();
 
-        //     // Apply the date range to the query
-        //     $query->where(function ($q) use ($startDateFormatted, $endDateFormatted) {
-        //         $q->where('invoice_date', '>=', $startDateFormatted)
-        //             ->where('invoice_date', '<=', $endDateFormatted);
-        //     });
-        // } elseif ($request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
-        //     $f_year_array = explode('-', $request->financial_year);
-
-        //     $financial_year_start = $f_year_array[0] . '-04-01';
-        //     $financial_year_end = $f_year_array[1] . '-03-31';
-
-        //     $query->whereBetween('invoice_date', [$financial_year_start, $financial_year_end]);
-        // } else {
-        //     $currentDate = Carbon::now();
-        //     $startDatethree = $currentDate->copy()->subMonthsNoOverflow(3)->firstOfMonth()->format('Y-m-d');
-        //     $endDatethree = $currentDate->copy()->subMonthNoOverflow()->endOfMonth()->format('Y-m-d');
-        //     $query->whereBetween('invoice_date', [$startDatethree, $endDatethree]);
-        // }
+        while ($currentDate <= $endDate) {
+            $monthName = $currentDate->format('F');
+            if (!in_array($monthName, $all_months)) {
+                $all_months[] = $monthName;
+            }
+            $currentDate->addMonth()->startOfMonth();
+        }
 
         if ($request->division_id && $request->division_id != '' && $request->division_id != null) {
             $query->where('division_id', $request->division_id);
@@ -3255,44 +3258,70 @@ class ReportController extends Controller
 
         $query = $query->get();
 
+        foreach ($query as $key => $value) {
+            $query[$key]->userinfo->gross_salary_monthly = $value->userinfo->gross_salary_monthly*count($all_months);
+            if (count($value->expenses) > 0) {
+                $query[$key]->total_expe = $value->expenses->where('date', '>=', $startDateFormatted)->where('date', '<=', $endDateFormatted)->sum('claim_amount') > 0 ? number_format(($value->expenses->where('date', '>=', $startDateFormatted)->where('date', '<=', $endDateFormatted)->sum('claim_amount') + $value->userinfo->gross_salary_monthly), 2, '.', '') : 0;
+            } else {
+                $query[$key]->total_expe = $value->userinfo->gross_salary_monthly;
+            }
+            if ($value->sales_type == 'Primary') {
+                if (count($value->primarySales) > 0) {
+                    $query[$key]->sales = $value->primarySales->where('invoice_date', '>=', $startDateFormatted)->where('invoice_date', '<=', $endDateFormatted)->sum('net_amount') > 0 ? number_format(($value->primarySales->where('invoice_date', '>=', $startDateFormatted)->where('invoice_date', '<=', $endDateFormatted)->sum('net_amount') / 100000), 2, '.', '') : 0;
+                } else {
+                    $query[$key]->sales = 0;
+                }
+            } else {
+                $query[$key]->sales = Order::where('created_by', $value->id)->where('order_date', '>=', $startDateFormatted)->where('order_date', '<=', $endDateFormatted)->sum('sub_total') > 0 ? number_format((Order::where('created_by', $value->id)->where('order_date', '>=', $startDateFormatted)->where('order_date', '<=', $endDateFormatted)->sum('sub_total') / 100000), 2, '.', '') : 0;
+            }
+        }
+
         return Datatables::of($query)
             ->addIndexColumn()
             ->addColumn('emp_code', function ($query) {
                 return count(explode(',', $query->emp_codes)) > 0 ? explode(',', $query->emp_codes)[0] : '-';
             })
             ->addColumn('doj', function ($query) {
-
                 if ($query->userinfo) {
                     return date('d M Y', strtotime($query->userinfo->date_of_joining));
                 } else {
                     return '-';
                 }
             })
-            ->addColumn('sales', function ($query) {
-                if ($query->sales_type == 'Primary') {
-                    if (count($query->primarySales) > 0) {
-                        return $query->primarySales->sum('net_amount') > 0 ? number_format(($query->primarySales->sum('net_amount') / 100000), 2, '.', '') : 0;
-                    }else{
-                        return 0;
-                    }
+            ->addColumn('sales', function ($query) use ($startDateFormatted, $endDateFormatted) {
+                return $query->sales;
+            })
+            ->addColumn('ta_da', function ($query) use ($startDateFormatted,$endDateFormatted) {
+                if (count($query->expenses) > 0) {
+                    return $query->expenses->where('date', '>=', $startDateFormatted)->where('date', '<=', $endDateFormatted)->sum('claim_amount') > 0 ? number_format($query->expenses->where('date', '>=', $startDateFormatted)->where('date', '<=', $endDateFormatted)->sum('claim_amount'), 2, '.', '') : 0;
                 } else {
-                    return Order::where('created_by', $query->id)->sum('sub_total') > 0 ? number_format((Order::where('created_by', $query->id)->sum('sub_total')/100000),2,'.','') : 0;
+                    return 0;
+                }
+            })
+            ->addColumn('total_exp', function ($query) {
+                return $query->total_expe;
+            })
+            ->addColumn('sal_exp', function ($query) {
+                if ($query->sales > 0) {
+                    return number_format(((($query->total_expe/100000) / $query->sales)*100), 2, '.', '')."%" ;
+                } else {
+                    return "0%";
                 }
             })
 
-            ->rawColumns(['doj', 'sales'])
+            ->rawColumns(['doj', 'sales', 'ta_da', 'total_exp','sal_exp'])
             ->make(true);
     }
 
     public function per_employee_costing_download(Request $request)
     {
-        abort_if(Gate::denies('product_analysis_branch_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('per_employee_costing_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         if ($request->financial_year && !empty($request->financial_year)) {
-            $fileName = 'group_wise_analysis_' . $request->financial_year . '.xlsx';
+            $fileName = 'per_employee_costing_' . $request->financial_year . '.xlsx';
         } else {
-            $fileName = 'group_wise_analysis.xlsx';
+            $fileName = 'per_employee_costing.xlsx';
         }
         return Excel::download(new PerEmployeeCostingExport($request), $fileName);
     }

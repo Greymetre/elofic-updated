@@ -798,6 +798,7 @@ Route::group(['middleware' => ['auth']], function () {
     //Dealer Appointment with auth Route
     Route::get('/dealer-appointments', [DealerAppointmentController::class, 'index'])->name('dealer-appointment');
     Route::get('/dealer-appointments-show/{dealerAppointment}', [DealerAppointmentController::class, 'show'])->name('dealer-appointment.show');
+    Route::get('/dealer-appointments-PDFshow/{dealerAppointment}', [DealerAppointmentController::class, 'PDFshow'])->name('dealer-appointment.PDFshow');
     Route::get('/dealer-appointments-destroy/{dealerAppointment}', [DealerAppointmentController::class, 'destroy'])->name('dealer-appointment.destroy');
     Route::any('/dealer-appointment/download', [DealerAppointmentController::class, 'download'])->name('dealer-appointment.download');
     Route::get('/dealer-appointment-edit/{dealerAppointment}', [DealerAppointmentController::class, 'edit'])->name('dealer-appointment.edit');
@@ -872,6 +873,7 @@ Route::any('getGiftModelData', [AjaxController::class, 'getGiftModelData']);
 Route::any('getProductData', [AjaxController::class, 'getProductData']);
 Route::any('getProductInfo', [AjaxController::class, 'getProductInfo']);
 Route::any('getUserList', [AjaxController::class, 'getUserList']);
+Route::any('getUserListAppoint', [AjaxController::class, 'getUserListAppoint']);
 Route::any('getUserInfo', [AjaxController::class, 'getUserInfo']);
 Route::any('getRetailerlist', [AjaxController::class, 'getRetailerlist']);
 Route::any('getOrderInfo', [AjaxController::class, 'getOrderInfo']);

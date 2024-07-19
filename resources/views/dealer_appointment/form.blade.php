@@ -659,7 +659,7 @@
                                 <tr>
                                     <th colspan="3">Whether two (2) Cheque (s) have been collected – MCL CHEQUES (Nationalize) <span class="text-info">*(To Be filled at HO)</span></th>
                                     <td>
-                                        <select name="payment_term" disabled id="payment_term" class="form-control uppercase">
+                                        <select name="payment_term_bm" disabled id="payment_term_bm" class="form-control uppercase">
                                             <option value="" disabled selected>Please Select</option>
                                             <option value="Yes">Yes</option>
                                             <option value="No">No</option>
@@ -1062,7 +1062,7 @@
                 localStorage.removeItem('executive_id');
                 var branch_id = $(this).val();
                 $.ajax({
-                    url: "{{ url('getUserList') }}",
+                    url: "{{ url('getUserListAppoint') }}",
                     dataType: "json",
                     type: "POST",
                     data: {

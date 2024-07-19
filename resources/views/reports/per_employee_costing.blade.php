@@ -79,7 +79,7 @@
                       </select>
                     </div>
                     <!-- product models filter -->
-                    <div class="p-2" style="width:200px;">
+                    {{--<div class="p-2" style="width:200px;">
                       <select class="select2" name="product_model" id="ps_product_model" data-style="select-with-transition" title="{!! trans('panel.secondary_dashboard.product_model') !!}">
                         <option value="" selected>Model Name</option>
                         @if(@isset($ps_product_models ))
@@ -99,7 +99,7 @@
                         @endforeach
                         @endif
                       </select>
-                    </div>
+                    </div>--}}
                     <div class="p-2" style="width:200px;">
                       <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Primary Sales">
                         <i class="material-icons">cloud_download</i>

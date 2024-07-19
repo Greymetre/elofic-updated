@@ -174,4 +174,9 @@ class User extends Authenticatable implements HasMedia
     {
         return $this->hasMany(PrimarySales::class, 'emp_code', 'employee_codes');
     }
+
+    public function expenses()
+    {
+        return $this->hasMany(Expenses::class, 'user_id', 'id');
+    }
 }

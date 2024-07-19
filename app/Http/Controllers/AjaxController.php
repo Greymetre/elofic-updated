@@ -233,7 +233,6 @@ class AjaxController extends Controller
     public function getUserList(Request $request)
     {
         try {
-
             session()->forget('executive_id');
             $beat_id = $request->input('beat_id');
             $payroll = $request->input('payroll');
@@ -253,6 +252,25 @@ class AjaxController extends Controller
                 }
                 if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                     $query->whereIn('id', $userids);
+                }
+                $query->where('active', '=', 'Y');
+            })
+                ->select('id', 'name', 'mobile', 'first_name', 'last_name', 'employee_codes')
+                ->orderBy('name', 'asc')
+                ->get();
+            return response()->json($data);
+        } catch (\Exception $e) {
+            return $e;
+        }
+    }
+    public function getUserListAppoint(Request $request)
+    {
+        try {
+            $branch_id = $request->input('branch_id');
+            $data = User::where(function ($query) use ($branch_id) {
+                
+                if (isset($branch_id)) {
+                    $query->where('branch_id', '=', $branch_id);
                 }
                 $query->where('active', '=', 'Y');
             })
