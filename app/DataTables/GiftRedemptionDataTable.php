@@ -122,6 +122,12 @@ class GiftRedemptionDataTable extends DataTable
         if ($request->customer_id && $request->customer_id != null  && $request->customer_id != '') {
             $data->where('customer_id', $request->customer_id);
         }
+        if ($request->status != null  && $request->status != '') {
+            if($request->status == '3' || $request->status == '4'){
+                $request->status = $request->status == '4'?'3':'4';
+            }
+            $data->where('status', $request->status);
+        }
         $data = $data->latest()->newQuery();
         return $data;
     }

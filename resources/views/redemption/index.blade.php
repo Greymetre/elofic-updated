@@ -35,6 +35,17 @@
                       </select>
                     </div>
                     <div class="p-2" style="width:160px;">
+                      <label for="status">Status</label>
+                      <select class="select2" name="status" id="status" data-style="select-with-transition" title="Select Parent Customer">
+                        <option value="">Select Status</option>
+                        <option value="0">Pending</option>
+                        <option value="1">Approved</option>
+                        <option value="2">Rejected</option>
+                        <option value="3">Success</option>
+                        <option value="4">Dispatch/Fail</option>
+                      </select>
+                    </div>
+                    <div class="p-2" style="width:160px;">
                       <label for="redeem_mode">Redeem Mode</label>
                       <select class="select2" name="redeem_mode" id="redeem_mode" data-style="select-with-transition" title="Select Scheme Type">
                         @if(@isset($redeem_modes ))
@@ -177,6 +188,7 @@
             d.branch_id = $('#branch_id').val(),
               d.parent_customer = $('#parent_customer').val(),
               d.redeem_mode = $('#redeem_mode').val(),
+              d.status = $('#status').val(),
               d.start_date = $('#start_date').val(),
               d.end_date = $('#end_date').val()
           }
@@ -244,6 +256,9 @@
         table.draw();
       });
       $('#parent_customer').change(function() {
+        table.draw();
+      });
+      $('#status').change(function() {
         table.draw();
       });
       $('#redeem_mode').change(function() {
@@ -423,6 +438,7 @@
             d.branch_id = $('#branch_id').val(),
               d.parent_customer = $('#parent_customer').val(),
               d.redeem_mode = $('#redeem_mode').val(),
+              d.status = $('#status').val(),
               d.start_date = $('#start_date').val(),
               d.end_date = $('#end_date').val()
           }
@@ -500,6 +516,9 @@
         table2.draw();
       });
       $('#parent_customer').change(function() {
+        table2.draw();
+      });
+      $('#status').change(function() {
         table2.draw();
       });
       $('#redeem_mode').change(function() {

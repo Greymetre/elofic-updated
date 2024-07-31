@@ -436,6 +436,15 @@
                                  <td hidden> <input type="text" name="orderdetail[1][clustered_dis]" class="clustered_dis">
                                     <input type="text" name="orderdetail[1][clus_amounts]" class="clus_amounts">
                                  </td>
+                                 <td hidden> <input type="text" name="orderdetail[1][dod_dis]" class="dod_dis">
+                                    <input type="text" name="orderdetail[1][dodp_amounts]" class="dodp_amounts">
+                                 </td>
+                                 <td hidden> <input type="text" name="orderdetail[1][sd_dis]" class="sd_dis">
+                                    <input type="text" name="orderdetail[1][sd_amounts]" class="sd_amounts">
+                                 </td>
+                                 <td hidden> <input type="text" name="orderdetail[1][dm_dis]" class="dm_dis">
+                                    <input type="text" name="orderdetail[1][dm_amounts]" class="dm_amounts">
+                                 </td>
                                  <td hidden> <input type="text" name="orderdetail[1][ebd_dis]" class="ebd_dis">
                                     <input type="text" name="orderdetail[1][ebd_amounts]" class="ebd_amounts">
                                  </td>
@@ -650,11 +659,14 @@
                            <div class="col-sm-4">
                               <label class="bmd-label">DOD Discount%</label>
                            </div>
-                           <div class="col-sm-8">
+                           <div class="col-sm-4">
                               <div class="input-group">
                                  <div class="input-group-prepend">
                                  </div>
-                                 <input type="number" step="0.01" name='dod_discount' class="form-control dod_discount" value="{!! old( 'dod_discount', $orders['dod_discount']) !!}" />
+                                 <select name='dod_discount' class="select2 dod_discount">
+                                    <option value="0">0</option>
+                                    <option value="2.5">2.5%</option>
+                                 </select>
                               </div>
                               @if($errors->has('dod_discount'))
                               <div class="invalid-feedback">
@@ -662,23 +674,32 @@
                               </div>
                               @endif
                            </div>
+                           <div class="col-sm-4">
+                              <input type="text" name="dod_discount_amount" class="dod_discount_amount form-control" readonly>
+                           </div>
                         </div>
 
                         <div class="form-group row">
                            <div class="col-sm-4">
                               <label class="bmd-label">Special Distribution Discount%</label>
                            </div>
-                           <div class="col-sm-8">
+                           <div class="col-sm-4">
                               <div class="input-group">
                                  <div class="input-group-prepend">
                                  </div>
-                                 <input type="number" step="0.01" name='special_distribution_discount' class="form-control special_distribution_discount" value="{!! old( 'special_distribution_discount', $orders['special_distribution_discount']) !!}" />
+                                 <select name='special_distribution_discount' class="select2 special_distribution_discount">
+                                    <option value="0">0</option>
+                                    <option value="2">2%</option>
+                                 </select>
                               </div>
                               @if($errors->has('special_distribution_discount'))
                               <div class="invalid-feedback">
                                  {{ $errors->first('special_distribution_discount') }}
                               </div>
                               @endif
+                           </div>
+                           <div class="col-sm-4">
+                              <input type="text" name="special_distribution_discount_amount" class="special_distribution_discount_amount form-control" readonly>
                            </div>
                         </div>
 
@@ -687,12 +708,14 @@
                               <!-- <label class="bmd-label">{!! trans('panel.order.extra_discount') !!}</label> -->
                               <label class="bmd-label">Distribution Margin Discount%</label>
                            </div>
-                           <div class="col-sm-8">
+                           <div class="col-sm-4">
                               <div class="input-group">
                                  <div class="input-group-prepend">
                                  </div>
-                                 <input type="number" step="0.01" name='distribution_margin_discount' class="form-control distribution_margin_discount" value="{!! old( 'distribution_margin_discount', $orders['distribution_margin_discount']) !!}" />
-                                 
+                                 <select name='distribution_margin_discount' class="select2 distribution_margin_discount">
+                                    <option value="0">0</option>
+                                    <option value="5">5%</option>
+                                 </select>
                               </div>
                               @if($errors->has('distribution_margin_discount'))
                               <div class="invalid-feedback">
@@ -700,25 +723,55 @@
                               </div>
                               @endif
                            </div>
+                           <div class="col-sm-4">
+                              <input type="text" name="distribution_margin_discount_amount" class="distribution_margin_discount_amount form-control" readonly>
+                           </div>
+                        </div>
+
+                        <div class="form-group row">
+                           <div class="col-sm-4">
+                              <label class="bmd-label">Extra Discount%</label>
+                           </div>
+                           <div class="col-sm-4">
+                              <div class="input-group">
+                                 <div class="input-group-prepend">
+                                 </div>
+
+                                 <input type="number" name='fan_extra_discount' class="form-control fan_extra_discount" value="{!! old( 'fan_extra_discount', $orders['fan_extra_discount']) !!}" />
+
+                              </div>
+                              @if($errors->has('fan_extra_discount'))
+                              <div class="invalid-feedback">
+                                 {{ $errors->first('fan_extra_discount') }}
+                              </div>
+                              @endif
+                           </div>
+                           <div class="col-sm-4">
+                              <input type="text" name="fan_extra_discount_amount" class="fan_extra_discount_amount form-control" readonly>
+                           </div>
                         </div>
 
                         <div class="form-group row">
                            <div class="col-sm-4">
                               <label class="bmd-label">Cash Discount%</label>
                            </div>
-                           <div class="col-sm-8">
+                           <div class="col-sm-4">
                               <div class="input-group">
                                  <div class="input-group-prepend">
                                  </div>
-
-                                 <input type="number" name='cash_discount' class="form-control cash_discount" value="{!! old( 'cash_discount', $orders['cash_discount']) !!}" />
-
+                                 <select name='cash_discount' class="select2 cash_discount">
+                                    <option value="0">0</option>
+                                    <option value="5">3%</option>
+                                 </select>
                               </div>
                               @if($errors->has('cash_discount'))
                               <div class="invalid-feedback">
                                  {{ $errors->first('cash_discount') }}
                               </div>
                               @endif
+                           </div>
+                           <div class="col-sm-4">
+                              <input type="text" name="cash_amount" class="cash_amount form-control" readonly>
                            </div>
                         </div>
 
@@ -727,7 +780,7 @@
                               <!-- <label class="bmd-label">{!! trans('panel.order.extra_discount') !!}</label> -->
                               <label class="bmd-label">Total Discount%</label>
                            </div>
-                           <div class="col-sm-8">
+                           <div class="col-sm-4">
                               <div class="input-group">
                                  <div class="input-group-prepend">
                                  </div>
@@ -739,6 +792,9 @@
                                  {{ $errors->first('total_fan_discount') }}
                               </div>
                               @endif
+                           </div>
+                           <div class="col-sm-4">
+                              <input type="text" name="total_fan_discount_amount" class="total_fan_discount_amount form-control" readonly>
                            </div>
                         </div>
                      </div>
@@ -916,6 +972,9 @@
 
                '<td><input type="text" name="orderdetail[' + counter + '][line_total]" class="form-control total rowchange" readonly /></td>' +
                '<td hidden> <input type="text" name="orderdetail[' + counter + '][clustered_dis]" class="clustered_dis"> <input type="text" name="orderdetail[' + counter + '][clus_amounts]" class="clus_amounts" hidden> </td>' +
+               '<td hidden> <input type="text" name="orderdetail[' + counter + '][dod_dis]" class="dod_dis"> <input type="text" name="orderdetail[' + counter + '][dodp_amounts]" class="dodp_amounts" hidden> </td>' +
+               '<td hidden> <input type="text" name="orderdetail[' + counter + '][sd_dis]" class="sd_dis"> <input type="text" name="orderdetail[' + counter + '][sd_amounts]" class="sd_amounts" hidden> </td>' +
+               '<td hidden> <input type="text" name="orderdetail[' + counter + '][dm_dis]" class="dm_dis"> <input type="text" name="orderdetail[' + counter + '][dm_amounts]" class="dm_amounts" hidden> </td>' +
                '<td hidden> <input type="text" name="orderdetail[' + counter + '][ebd_dis]" class="ebd_dis"> <input type="text" name="orderdetail[' + counter + '][ebd_amounts]" class="ebd_amounts" hidden> </td>' +
                '<td hidden><input type="text" name="orderdetail[' + counter + '][deal_dis]" class="deal_dis"><input type="text" name="orderdetail[' + counter + '][deal_amounts]" class="deal_amounts" hidden></td>' +
                '<td hidden><input type="text" name="orderdetail[' + counter + '][special_dis]" class="special_dis"><input type="text" name="orderdetail[' + counter + '][special_amounts]" class="special_amounts" hidden></td>' +
@@ -932,6 +991,9 @@
 
             // setTimeout(function() {
             $('.cluster_discount').change();
+            $('.dod_discount').change();
+            $('.special_distribution_discount').change();
+            $('.distribution_margin_discount').change();
             $('.ebd_discount').change();
             $('.deal_discnt').keyup();
             $('.distributor_discount').keyup();
@@ -964,6 +1026,24 @@
          var cls_dis = $(this).val();
          // $('#tab_logic tbody tr').find('.clustered_dis').val(cls_ter);
          $('.clustered_dis').val(cls_dis);
+      }).trigger('change');
+
+      $('.dod_discount').on('change', function() {
+         var dod_dis = $(this).val();
+         // $('#tab_logic tbody tr').find('.clustered_dis').val(cls_ter);
+         $('.dod_dis').val(dod_dis);
+      }).trigger('change');
+
+      $('.special_distribution_discount').on('change', function() {
+         var sd_dis = $(this).val();
+         // $('#tab_logic tbody tr').find('.clustered_dis').val(cls_ter);
+         $('.sd_dis').val(sd_dis);
+      }).trigger('change');
+
+      $('.distribution_margin_discount').on('change', function() {
+         var dm_dis = $(this).val();
+         // $('#tab_logic tbody tr').find('.clustered_dis').val(cls_ter);
+         $('.dm_dis').val(dm_dis);
       }).trigger('change');
 
       $('.ebd_discount').on('change', function() {
@@ -1253,10 +1333,39 @@
                var clusters_discount = $(this).find('.clustered_dis').val();
                var clus_dis = total * clusters_discount / 100;
                total = total - clus_dis;
-
+               
                $(this).find('.clus_amounts').val((clus_dis).toFixed(2));
 
                //end clustor 
+
+               //new code for dod
+               var dod_discount = $(this).find('.dod_dis').val();
+               var dod_dis = total * dod_discount / 100;
+               total = total - clus_dis;
+               total = total - dod_dis;
+
+               $(this).find('.dodp_amounts').val((dod_dis).toFixed(2));
+
+               //end dod 
+
+               //new code for SD
+               var sd_discount = $(this).find('.sd_dis').val();
+               var sd_dis = total * sd_discount / 100;
+               total = total - sd_dis;
+
+               $(this).find('.sd_amounts').val((sd_dis).toFixed(2));
+
+               //end SD 
+
+               //new code for dm
+               var dm_discount = $(this).find('.dm_dis').val();
+               var dm_dis = total * dm_discount / 100;
+               total = total - dm_dis;
+
+               $(this).find('.dm_amounts').val((dm_dis).toFixed(2));
+
+               //end dm 
+
 
 
                // start deal discount
@@ -1337,6 +1446,9 @@
          twenti_eight_gst = 0;
 
          clus_amounts = 0;
+         dodp_amounts = 0;
+         sd_amounts = 0;
+         dm_amounts = 0;
          ebd_amounts = 0;
          scheme_discount = 0;
          deal_amounts = 0;
@@ -1373,9 +1485,9 @@
             // scheme_discount += parseInt($(this).val());
             scheme_discount += parseFloat($(this).val());
          });
-         if(scheme_discount > 0){
+         if (scheme_discount > 0) {
             $('#scheme_discount').val((scheme_discount).toFixed(2));
-         }else{
+         } else {
             $('#scheme_discount').val((0.00).toFixed(2));
          }
          //scheme discount end
@@ -1392,6 +1504,28 @@
          });
 
          //cluster discout end
+         
+         //dod discout start
+         $('.dodp_amounts').each(function() {
+            dodp_amounts += parseFloat($(this).val());
+            $('.dod_discount_amount').val(dodp_amounts.toFixed(2));
+         });
+         //dod discout end 
+
+         //sd discout start
+         $('.sd_amounts').each(function() {
+            sd_amounts += parseFloat($(this).val());
+            $('.special_distribution_discount_amount').val(sd_amounts.toFixed(2));
+         });
+
+         //sd discout end         
+
+         //dm discout start
+         $('.dm_amounts').each(function() {
+            dm_amounts += parseFloat($(this).val());
+            $('.distribution_margin_discount_amount').val(dm_amounts.toFixed(2));
+         });
+         //dm discout end         
 
          //ebd discout start
          var ebd_amnt = $(".ebd_discount").val();
@@ -1451,20 +1585,6 @@
          //new calculation
 
          subtotal = total;
-
-         //Fan calculations start
-
-         var distribution_margin_discount = ($('.distribution_margin_discount').val() && $('.distribution_margin_discount').val() != '')?$('.distribution_margin_discount').val():0;
-         var special_distribution_discount = ($('.special_distribution_discount').val() && $('.special_distribution_discount').val() != '')?$('.special_distribution_discount').val():0;
-         var dod_discount = $('.dod_discount').val() && $('.dod_discount').val() != '' ?$('.dod_discount').val():0;
-         var cash_discount = $('.cash_discount').val() && $('.cash_discount').val() != '' ?$('.cash_discount').val():0;
-         
-         var ttdis = parseFloat(dod_discount)+parseFloat(special_distribution_discount)+parseFloat(distribution_margin_discount)+parseFloat(cash_discount);
-         $('.total_fan_discount').val(ttdis.toFixed(2));
-         $('.total_fan_discount_amount').val((total*ttdis)/100);
-         subtotal = ((total-(total*ttdis)/100));
-
-         //Fan calculations end
 
          //total -= discount_amount_cluster_new;
 
@@ -1612,6 +1732,7 @@
          }
       })
    </script>
+
 
 
 </x-app-layout>

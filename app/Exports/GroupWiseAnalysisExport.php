@@ -20,7 +20,7 @@ class GroupWiseAnalysisExport implements FromCollection, WithHeadings,WithMappin
     {
         $this->user_id = $request->input('user_id');
         $this->branch_id = $request->input('branch_id');
-        $this->division_id = $request->input('division_id');
+        $this->division_id = $request->input('division');
         $this->dealer_id = $request->input('dealer_id');
         $this->product_model = $request->input('product_model');
         $this->new_group = $request->input('new_group');

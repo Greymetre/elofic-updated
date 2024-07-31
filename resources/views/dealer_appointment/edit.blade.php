@@ -593,7 +593,13 @@
                       <tr>
                         <th>Payment terms</th>
                         <td colspan="3">
-                          <input type="text" value="{{$dealerAppointment->payment_term}}" class="form-control">
+                          <select name="payment_term" id="payment_term" class="form-control uppercase">
+                            <option value="" >Please Select Payment Term</option>
+                            <option value="Direct" {{$dealerAppointment->payment_term == 'Direct' ? 'selected' : ''}}>Direct</option>
+                            <option value="against" {{$dealerAppointment->payment_term == 'against' ? 'selected' : ''}}>against</option>
+                            <option value="Advance" {{$dealerAppointment->payment_term == 'Advance' ? 'selected' : ''}}>Advance</option>
+                            <option value="PDC" {{$dealerAppointment->payment_term == 'PDC' ? 'selected' : ''}}>PDC</option>
+                          </select>
                         </td>
                       </tr>
                       <tr>
@@ -603,7 +609,7 @@
                       <tr>
                         <th colspan="3">Whether two (2) Cheque (s) have been collected – MCL CHEQUES (Nationalize) <span class="text-info">*(To Be filled at HO)</span></th>
                         <td>
-                          <select name="payment_term" id="payment_term" class="form-control">
+                          <select name="payment_term_bm" id="payment_term_bm" class="form-control">
                             <option value="" selected>Please Select</option>
                             <option value="Yes">Yes</option>
                             <option value="No">No</option>
@@ -978,35 +984,35 @@
             $('.select2').select2()
 
             document.getElementById('fileInput').addEventListener('change', function(event) {
-                const file = event.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        document.getElementById('profileImage').src = e.target.result;
-                    }
-                    reader.readAsDataURL(file);
+              const file = event.target.files[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                  document.getElementById('profileImage').src = e.target.result;
                 }
+                reader.readAsDataURL(file);
+              }
             });
 
             $("#branch").on("change", function() {
-                localStorage.removeItem('executive_id');
-                var branch_id = $(this).val();
-                $.ajax({
-                    url: "{{ url('getUserList') }}",
-                    dataType: "json",
-                    type: "POST",
-                    data: {
-                        _token: "{{csrf_token()}}",
-                        branch_id: branch_id
-                    },
-                    success: function(res) {
-                        var html = '<option value="">Select User</option>';
-                        $.each(res, function(k, v) {
-                            html += '<option value="' + v.id + '"> (' + v.employee_codes + ') ' + v.name + '</option>';
-                        });
-                        $("#created_by").html(html);
-                    }
-                });
+              localStorage.removeItem('executive_id');
+              var branch_id = $(this).val();
+              $.ajax({
+                url: "{{ url('getUserList') }}",
+                dataType: "json",
+                type: "POST",
+                data: {
+                  _token: "{{csrf_token()}}",
+                  branch_id: branch_id
+                },
+                success: function(res) {
+                  var html = '<option value="">Select User</option>';
+                  $.each(res, function(k, v) {
+                    html += '<option value="' + v.id + '"> (' + v.employee_codes + ') ' + v.name + '</option>';
+                  });
+                  $("#created_by").html(html);
+                }
+              });
             });
           </script>
 </x-app-layout>

@@ -71,7 +71,7 @@ class DealerAppointmentDataTable extends DataTable
     public function query(DealerAppointment $model, Request $request)
     {
         
-        $data = $model->with('branch_details', 'district_details', 'city_details');
+        $data = $model->with('branch_details', 'district_details', 'city_details', 'appointment_kyc_detail');
 
         if ($request->startdate && $request->startdate != '' && $request->startdate != NULL && $request->enddate && $request->enddate != '' && $request->enddate != NULL) {
             

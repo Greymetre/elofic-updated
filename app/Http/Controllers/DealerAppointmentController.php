@@ -151,6 +151,11 @@ class DealerAppointmentController extends Controller
         $kyc_ckeckbox = config('constants.kyc_ckeckbox');
         return view('dealer_appointment.show', compact('dealerAppointment', 'kyc_ckeckbox'));
     }
+    public function PDFshow(DealerAppointment $dealerAppointment)
+    {
+        $kyc_ckeckbox = config('constants.kyc_ckeckbox');
+        return view('dealer_appointment.pdf', compact('dealerAppointment', 'kyc_ckeckbox'));
+    }
 
     /**
      * Show the form for editing the specified resource.

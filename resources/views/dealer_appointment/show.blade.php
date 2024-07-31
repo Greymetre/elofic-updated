@@ -930,6 +930,17 @@
               </thead>
               <tbody>
                 @if($dealerAppointment->appointment_kyc_detail && !empty($dealerAppointment->appointment_kyc_detail))
+
+
+                <div class="row">
+                  <div class="col-md-6">
+                    Dealer Code -
+                  </div>
+                  <div class="col-md-6">
+                    {{$dealerAppointment->appointment_kyc_detail->dealer_code??'-'}}
+                  </div>
+                </div>
+
                 @php
                 $proprietary_concern_array = ($dealerAppointment->appointment_kyc_detail->proprietary_concern && $dealerAppointment->appointment_kyc_detail->proprietary_concern!='null' && !empty($dealerAppointment->appointment_kyc_detail->proprietary_concern))?json_decode($dealerAppointment->appointment_kyc_detail->proprietary_concern):array();
 
@@ -1027,41 +1038,85 @@
         });
 
         function changeStatus(status, appo_id) {
-          console.log(appo_id, status);
-          Swal.fire({
-            title: "Are You Sure, You Want To Approve This Appointment ?",
-            showDenyButton: true,
-            showCancelButton: true,
-            confirmButtonText: "YES",
-            denyButtonText: `Don't`
-          }).then((result) => {
-            if (result.value) {
-              $.ajax({
-                url: "{{ url('changeAppointmentStatus') }}",
-                dataType: "json",
-                type: "POST",
-                data: {
-                  _token: "{{csrf_token()}}",
-                  appo_id: appo_id,
-                  status: status
-                },
-                success: function(data) {
-                  $('.message').empty();
-                  $('.alert').show();
-                  if (data.status == 'success') {
-                    $('.alert').addClass("alert-success");
-                    setTimeout(function() {
-                      location.reload();
-                    }, 500);
-
-                  } else {
-                    $('.alert').addClass("alert-danger");
-                  }
-                  $('.message').append(data.message);
+          if (status === '3') {
+            Swal.fire({
+              title: "Are You Sure, You Want To Approve This Appointment?",
+              input: 'text',
+              inputPlaceholder: 'Enter Dealer code',
+              showDenyButton: true,
+              showCancelButton: true,
+              confirmButtonText: "YES",
+              denyButtonText: `Don't`,
+              inputValidator: (value) => {
+                if (!value) {
+                  return 'Dealer code1 field is required';
                 }
-              });
-            }
-          });
+              }
+            }).then((result) => {
+              if (result.value) {
+                $.ajax({
+                  url: "{{ url('changeAppointmentStatus') }}",
+                  dataType: "json",
+                  type: "POST",
+                  data: {
+                    _token: "{{csrf_token()}}",
+                    appo_id: appo_id,
+                    status: status,
+                    dealer_code: result.value
+                  },
+                  success: function(data) {
+                    $('.message').empty();
+                    $('.alert').show();
+                    if (data.status == 'success') {
+                      $('.alert').addClass("alert-success");
+                      setTimeout(function() {
+                        location.reload();
+                      }, 500);
+
+                    } else {
+                      $('.alert').addClass("alert-danger");
+                    }
+                    $('.message').append(data.message);
+                  }
+                });
+              }
+            });
+          } else {
+            Swal.fire({
+              title: "Are You Sure, You Want To Approve This Appointment ?",
+              showDenyButton: true,
+              showCancelButton: true,
+              confirmButtonText: "YES",
+              denyButtonText: `Don't`
+            }).then((result) => {
+              if (result.value) {
+                $.ajax({
+                  url: "{{ url('changeAppointmentStatus') }}",
+                  dataType: "json",
+                  type: "POST",
+                  data: {
+                    _token: "{{csrf_token()}}",
+                    appo_id: appo_id,
+                    status: status
+                  },
+                  success: function(data) {
+                    $('.message').empty();
+                    $('.alert').show();
+                    if (data.status == 'success') {
+                      $('.alert').addClass("alert-success");
+                      setTimeout(function() {
+                        location.reload();
+                      }, 500);
+
+                    } else {
+                      $('.alert').addClass("alert-danger");
+                    }
+                    $('.message').append(data.message);
+                  }
+                });
+              }
+            });
+          }
         }
       </script>
 

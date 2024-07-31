@@ -123,6 +123,9 @@ class RedemptionDataTable extends DataTable
         if ($request->customer_id && $request->customer_id != null  && $request->customer_id != '') {
             $data->where('customer_id', $request->customer_id);
         }
+        if ($request->status != null  && $request->status != '') {
+            $data->where('status', $request->status);
+        }
         $data = $data->latest()->newQuery();
         return $data;
     }

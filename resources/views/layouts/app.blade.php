@@ -1021,6 +1021,14 @@
                     </a>
                   </li>
                   @endif
+                  @if(auth()->user()->can('per_employee_costing_access'))
+                  <li class="nav-item {{ request()->is('reports/per_employee_costing*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('reports/per_employee_costing') }}">
+                      <i class="material-icons">store</i>
+                      <p>Per Employee Costing</p>
+                    </a>
+                  </li>
+                  @endif
                 </ul>
               </div>
             </li>

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CustomerDetails, DealerAppointment, EndUser, Expenses, GiftModel, GiftSubcategory, Notes, OrderSchemeDetail, PrimarySales, Redemption, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation};
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CustomerDetails, DealerAppointment, DealerAppointmentKyc, EndUser, Expenses, GiftModel, GiftSubcategory, Notes, OrderSchemeDetail, PrimarySales, Redemption, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation};
 use App\Models\UserLiveLocation;
 use App\Models\UserActivity;
 use App\Http\Controllers\SendNotifications;
@@ -233,7 +233,6 @@ class AjaxController extends Controller
     public function getUserList(Request $request)
     {
         try {
-
             session()->forget('executive_id');
             $beat_id = $request->input('beat_id');
             $payroll = $request->input('payroll');
@@ -253,6 +252,25 @@ class AjaxController extends Controller
                 }
                 if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                     $query->whereIn('id', $userids);
+                }
+                $query->where('active', '=', 'Y');
+            })
+                ->select('id', 'name', 'mobile', 'first_name', 'last_name', 'employee_codes')
+                ->orderBy('name', 'asc')
+                ->get();
+            return response()->json($data);
+        } catch (\Exception $e) {
+            return $e;
+        }
+    }
+    public function getUserListAppoint(Request $request)
+    {
+        try {
+            $branch_id = $request->input('branch_id');
+            $data = User::where(function ($query) use ($branch_id) {
+                
+                if (isset($branch_id)) {
+                    $query->where('branch_id', '=', $branch_id);
                 }
                 $query->where('active', '=', 'Y');
             })
@@ -1284,9 +1302,9 @@ class AjaxController extends Controller
                 $endDateFormatted = $endDate->toDateString();
             }
 
-            $query->whereHas('orders', function ($q) use ($startDateFormatted, $endDateFormatted) {
-                $q->whereDate('order_date', '>=', $startDateFormatted)
-                    ->whereDate('order_date', '<=', $endDateFormatted);
+            $query->where(function ($q) use ($startDateFormatted, $endDateFormatted) {
+                $q->where('invoice_date', '>=', $startDateFormatted)
+                    ->where('invoice_date', '<=', $endDateFormatted);;
             });
         }
 
@@ -1320,7 +1338,12 @@ class AjaxController extends Controller
 
     public function changeAppointmentStatus(Request $request)
     {
-        $update = DealerAppointment::where('id', $request->appo_id)->update(['approval_status'=>$request->status]);
+        if($request->status == '3'){
+            $update = DealerAppointment::where('id', $request->appo_id)->update(['approval_status'=>$request->status]);
+            DealerAppointmentKyc::where('appointment_id', $request->appo_id)->update(['dealer_code'=>$request->dealer_code]);
+        }else{
+            $update = DealerAppointment::where('id', $request->appo_id)->update(['approval_status'=>$request->status]);
+        }
         if($update){
             return response()->json(['status'=>'success', 'message'=>'Approved Successfully !!']);
         }else{
