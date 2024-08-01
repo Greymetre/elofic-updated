@@ -882,6 +882,14 @@
               </a>
             </li>
             @endif
+            @if(auth()->user()->can('loyalty_app_setting_access'))
+            <li class="nav-item {{request()->is('field-konnect-app-setting*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('field-konnect-app-setting') }}">
+                <i class="material-icons">settings</i>
+                <p>FieldKonnect App  {!! trans('panel.sidemenu.setting') !!}</p>
+              </a>
+            </li>
+            @endif
             @if(auth()->user()->can('status_access'))
             <li class="nav-item {{ request()->is('status*') ? 'active' : '' }}">
               <a class="nav-link" href="{{ url('status') }}">

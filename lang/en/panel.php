@@ -1592,6 +1592,10 @@ return [
         'id'                => 'Note ID',
         'note'              => 'Note',
     ],
+    'pdf_module'    => [
+        'download'          => 'Download',
+        'pdf'               => 'pdf'
+    ],
     'shipment'           => [
         'title'             => 'Shipments',
         'title_singular'    => 'Shipment',

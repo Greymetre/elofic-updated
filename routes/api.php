@@ -28,6 +28,8 @@ use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\Api\ReportingActivityController;
 use App\Http\Controllers\Api\TourPlanController;
 use App\Http\Controllers\Api\TransactionHistoryController;
+use App\Http\Controllers\Api\ReportController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -68,6 +70,7 @@ Route::any('gstNumberExists', [CustomController::class, 'gstNumberExists']);
 Route::any('getRetailerList', [CustomController::class, 'getRetailerList']);
 Route::any('getslider', [CustomController::class, 'getslider']);
 Route::get('getsettings', [DashboardController::class, 'getsettings']);
+Route::get('get-field-connet-version', [DashboardController::class, 'getVersion']);
 
 Route::any('emailExists', [CustomController::class, 'emailExists']);
 /*================= Customer Routes ============================*/
@@ -205,6 +208,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     //Reporting Activity
     Route::get('reporting/users', [ReportingActivityController::class, 'allReportingUsers']);
     Route::get('user/activity', [ReportingActivityController::class, 'userActivity']);
+    Route::get('customer/activity', [ReportingActivityController::class, 'customerActivity']);
     //Tour Plan
     Route::get('tour/userlist', [TourPlanController::class, 'user_list']);
     Route::get('tour/show', [TourPlanController::class, 'show']);
@@ -225,4 +229,6 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::get('getappointmentsPDF', [DealerAppointmentController::class, 'getappointmentsPDF']);
     Route::post('approveAppointment', [DealerAppointmentController::class, 'approveAppointment']);
 
+    //Report 
+    Route::get('primary-sales', [ReportController::class, 'primarySales']);
 });

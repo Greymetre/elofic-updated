@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
+use Carbon\Carbon;
 
 use Validator;
 use Gate;
@@ -634,6 +634,114 @@ class CustomerController extends Controller
         }   
     }
 
+    // public function getCustomerInfo(Request $request)
+    // {
+         
+    //      try
+    //     { 
+    //         $validator = Validator::make($request->all(), [
+    //              'customer_id' => 'nullable|exists:customers,id',
+    //         ]); 
+    //         if ($validator->fails()) {
+    //             return response()->json(['status' => 'error','message' => $validator->messages()->all()],$this->badrequest);
+    //         }
+    //         $user = $request->user();
+    //         $user_id = $user->id;
+    //         $fromdate = isset($request->fromDate) ? $request->fromDate : null;
+    //         $todate = isset($request->toDate) ? $request->toDate :null;
+              
+    //         $customer_id = $request->input('customer_id');
+
+    //         $orders = Order::where(function ($query) use($customer_id, $fromdate, $todate){
+
+    //             $query->where('buyer_id', '=', $customer_id);
+               
+    //             if(!empty($fromdate) && !empty($todate))
+    //             {
+    //                 $query->whereBetween('order_date', [$fromdate, $todate]);
+    //             }
+
+    //         })
+    //         ->select('grand_total','id','total_qty')->get();
+
+    //         //nnn
+
+    //             $sum_quantity = 0;
+    //            foreach($orders as $order){
+    //              $sum_quantity = OrderDetails::where('order_id',$order->id)->sum('quantity')??0;
+    //              }
+        
+    //             $sum_quantity = (int)$sum_quantity;
+
+
+    //        ///nnn
+
+    //         $sales = Sales::where(function ($query) use($customer_id, $fromdate, $todate){
+    //             $query->where('buyer_id', '=', $customer_id);
+    //             if(!empty($fromdate) && !empty($todate))
+    //             {
+    //                 $query->whereBetween('invoice_date', [$fromdate, $todate]);
+    //             }
+    //         })->select('grand_total')->get();
+
+    //         $checkins = CheckIn::with('visitreports')->where('customer_id', '=', $customer_id)->select('checkin_date','checkin_time')->latest()->limit(10)->get();
+    //         $last_order_date = Order::where('buyer_id', '=', $customer_id)->latest()->pluck('order_date')->first();
+    //         $data = $this->customers->with('customerdetails','getparentdetail','parentdetail','customeraddress','customerdocuments','surveys','surveys.fields','customeraddress.cityname','customeraddress.districtname','customeraddress.statename','customeraddress.pincodename','customertypes','customerdeals')->where('id', $customer_id)->select('id','name','first_name','last_name','mobile','email','profile_image','customer_code','customertype','contact_number', 'latitude' , 'longitude',
+    //                DB::raw('(SELECT SUM(grand_total) FROM sales WHERE sales.buyer_id = customers.id) as totalamount'), 
+    //                DB::raw('(SELECT SUM(paid_amount) FROM sales WHERE sales.buyer_id = id) as totalpaid'))->first();
+       
+    //         $total_value = $orders->sum('grand_total');
+    //         $total_qty = $orders->sum('total_qty');
+    //         $beatinfo = Beat::whereHas('beatcustomers', function ($query) use($customer_id){
+    //                             $query->where('customer_id','=',$customer_id);
+    //                         })
+    //                         ->select('beat_name','id')->first();
+
+
+    //          //$data['parent_name'] = $data->parentdetail->name??'';
+
+    //          $parent = array();
+    //          $parent_id = array();
+    //          if(!empty($data['getparentdetail']))
+    //         {  
+              
+    //             foreach($data['getparentdetail'] as $key => $parent_data) {
+    //                 $parent[] = isset($parent_data->parent_detail->name) ? $parent_data->parent_detail->name: '';
+    //                 $parent_id[] = isset($parent_data->parent_id) ? $parent_data->parent_id: '';
+    //             }
+                
+    //         }
+
+    //         $data['parent_id'] = implode(',', $parent_id);
+    //         $data['parent_name'] = implode(',', $parent);                
+    //         $data['beat_name'] = isset($beatinfo['beat_name']) ? $beatinfo['beat_name'] : '';
+    //         $data['beat_id'] = isset($beatinfo['id']) ? $beatinfo['id'] : null;
+    //         $data['outstanding'] = $data['totalamount']-$data['totalpaid'];
+    //         $data['total_order_value'] = $total_value;
+    //         // $data['total_order_quantity'] = $total_qty; 
+    //         $data['total_order_quantity'] = $sum_quantity; 
+              
+    //         $data['avg_order_value'] = ($total_value >= 1) ? number_format((float)$total_value/$orders->count(), 1, '.', '').' %'  : '';
+    //         $data['avg_order_quantity'] = ($total_qty >= 1) ? number_format((float)$total_qty/$orders->count(), 1, '.', '').' %'  : '';
+    //         $data['total_sales_value'] = $sales->sum('grand_total');
+    //         $data['last_visited'] = (string)$checkins->pluck('checkin_date')->first();
+    //         $data['last_order_date'] = isset($last_order_date) ? $last_order_date : '';
+    //         $data['visited'] = $checkins;
+    //         $data['email'] = isset($data['email']) ? $data['email'] : '';
+    //         $data['customer_code'] = isset($data['customer_code']) ? $data['customer_code'] : '';
+    //         $data['activities']= UserActivity::with('users')->where('customerid','=',$customer_id)->select('userid','time','description','type')->latest()->limit(5)->get();
+    //         $data['tasks']= Tasks::with('users')->where('completed','=',0)->where('customer_id','=',$customer_id)->select('user_id','title','descriptions','datetime')->orderBy('datetime','asc')->limit(5)->get();
+    //         unset($data['totalamount'] , $data['totalpaid']);
+    //         $data['total_points'] = Wallet::where('customer_id','=',$customer_id)->where('transaction_type','=','Cr')->sum('points');
+    //         $data['total_coupon_scan'] = Wallet::where('customer_id','=',$customer_id)->where('transaction_type','=','Cr')->sum('quantity');
+    //         return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','data' => $data ], $this->successStatus);
+    //     }
+    //     catch(\Exception $e)
+    //     {
+    //         return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
+    //     }   
+    // }
+
     public function getCustomerInfo(Request $request)
     {
          
@@ -659,10 +767,14 @@ class CustomerController extends Controller
                 if(!empty($fromdate) && !empty($todate))
                 {
                     $query->whereBetween('order_date', [$fromdate, $todate]);
+                }else{
+                    $cdate = Carbon::now();
+                    $firstDateOfCurrentMonth = $cdate->startOfMonth()->toDateString();
+                    $query->where('order_date', '>=', $firstDateOfCurrentMonth);
                 }
 
             })
-            ->select('grand_total','id','total_qty')->get();
+            ->select('sub_total','id','total_qty')->get();
 
             //nnn
 
@@ -684,13 +796,13 @@ class CustomerController extends Controller
                 }
             })->select('grand_total')->get();
 
-            $checkins = CheckIn::with('visitreports')->where('customer_id', '=', $customer_id)->select('checkin_date','checkin_time')->latest()->limit(10)->get();
+            $checkins = CheckIn::with('visitreports','visitreports.visittypename')->where('customer_id', '=', $customer_id)->select('checkin_date','checkin_time')->latest()->limit(10)->get();
             $last_order_date = Order::where('buyer_id', '=', $customer_id)->latest()->pluck('order_date')->first();
-            $data = $this->customers->with('customerdetails','getparentdetail','parentdetail','customeraddress','customerdocuments','surveys','surveys.fields','customeraddress.cityname','customeraddress.districtname','customeraddress.statename','customeraddress.pincodename','customertypes','customerdeals')->where('id', $customer_id)->select('id','name','first_name','last_name','mobile','email','profile_image','customer_code','customertype','contact_number', 
+            $data = $this->customers->with('customerdetails', 'visitsinfo','getparentdetail','parentdetail','customeraddress','customerdocuments','surveys','surveys.fields','customeraddress.cityname','customeraddress.districtname','customeraddress.statename','customeraddress.pincodename','customertypes','customerdeals')->where('id', $customer_id)->select('id','name','first_name','last_name','mobile','email','profile_image','customer_code','customertype','contact_number', 'latitude' , 'longitude',
                    DB::raw('(SELECT SUM(grand_total) FROM sales WHERE sales.buyer_id = customers.id) as totalamount'), 
                    DB::raw('(SELECT SUM(paid_amount) FROM sales WHERE sales.buyer_id = id) as totalpaid'))->first();
        
-            $total_value = $orders->sum('grand_total');
+            $total_value = $orders->sum('sub_total');
             $total_qty = $orders->sum('total_qty');
             $beatinfo = Beat::whereHas('beatcustomers', function ($query) use($customer_id){
                                 $query->where('customer_id','=',$customer_id);
@@ -702,7 +814,26 @@ class CustomerController extends Controller
 
              $parent = array();
              $parent_id = array();
-             if(!empty($data['getparentdetail']))
+             $activity = [];
+             if (!empty($data['visitsinfo'])) {
+                foreach ($data['visitsinfo'] as $key => $visit) {
+                        $activity[] = [
+                            "id" => $visit->id,
+                            "customer_id" => $visit->customer_id,
+                            "description" => $visit->description,
+                            "report_title" => $visit->visittypename?$visit->visittypename->type_name:'-',
+                            "visit_image" => $visit->visit_image,
+                            "user_id" => $visit->user_id,
+                            "user_name" => $visit['users']->name ?? '',
+                            "created_at" => Carbon::parse($visit->created_at)->format('d-m-Y'),
+                        ];
+                }
+            
+                // If you need to store this result back into $data, you can do so
+                
+            }
+
+            if(!empty($data['getparentdetail']))
             {  
               
                 foreach($data['getparentdetail'] as $key => $parent_data) {
@@ -711,7 +842,7 @@ class CustomerController extends Controller
                 }
                 
             }
-
+            $data['activity'] = $activity;
             $data['parent_id'] = implode(',', $parent_id);
             $data['parent_name'] = implode(',', $parent);                
             $data['beat_name'] = isset($beatinfo['beat_name']) ? $beatinfo['beat_name'] : '';
@@ -724,8 +855,21 @@ class CustomerController extends Controller
             $data['avg_order_value'] = ($total_value >= 1) ? number_format((float)$total_value/$orders->count(), 1, '.', '').' %'  : '';
             $data['avg_order_quantity'] = ($total_qty >= 1) ? number_format((float)$total_qty/$orders->count(), 1, '.', '').' %'  : '';
             $data['total_sales_value'] = $sales->sum('grand_total');
-            $data['last_visited'] = (string)$checkins->pluck('checkin_date')->first();
-            $data['last_order_date'] = isset($last_order_date) ? $last_order_date : '';
+            if (!empty($last_order_date) && isset($last_order_date)) {
+                $dateTime1 = Carbon::parse($last_order_date);
+                $data['last_order_date'] = $dateTime1->format('d-m-Y');
+            } else {
+                $data['last_order_date'] = ""; 
+            }
+            if (!empty($data['visitsinfo']) && isset($data['visitsinfo'][0]->created_at)) {
+                $dateTime = Carbon::parse($data['visitsinfo'][0]->created_at);
+                $data['last_visited'] = $dateTime->format('d-m-Y');
+            } else {
+                $data['last_visited'] = ""; 
+            }
+            
+            // $data['last_visited'] = isset($data['visitsinfo']) ? $data['visitsinfo'][0]->created_at : '';
+            // $data['last_order_date'] = isset($last_order_date) ? $last_order_date : '';
             $data['visited'] = $checkins;
             $data['email'] = isset($data['email']) ? $data['email'] : '';
             $data['customer_code'] = isset($data['customer_code']) ? $data['customer_code'] : '';
@@ -734,7 +878,7 @@ class CustomerController extends Controller
             unset($data['totalamount'] , $data['totalpaid']);
             $data['total_points'] = Wallet::where('customer_id','=',$customer_id)->where('transaction_type','=','Cr')->sum('points');
             $data['total_coupon_scan'] = Wallet::where('customer_id','=',$customer_id)->where('transaction_type','=','Cr')->sum('quantity');
-            return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','data' => $data ], $this->successStatus);
+            return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','data' => $data  , 'customers' => $data['visitsinfo']], $this->successStatus);
         }
         catch(\Exception $e)
         {

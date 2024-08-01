@@ -500,6 +500,7 @@ class CustomerController extends Controller
         $total_rejected = Redemption::where('customer_id', $id)->where('status', '2')->sum('redeem_amount')??0;
         $total_balance = (int)$active_points-(int)$total_redemption;
         $customers = Customers::find($id);
+        // dd($customers);
         $customers['due_amount'] = totalDueAmount($id);
         return view('customers.show', compact('total_balance','total_points', 'total_redemption', 'active_points', 'provision_points', 'total_rejected', 'kyc'))->with('customers',$customers);
     }

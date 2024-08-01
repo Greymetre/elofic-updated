@@ -23,11 +23,13 @@ class DealerAppointmentController extends Controller
 {
     public function getappointments(Request $request)
     {
+        $user = $request->user();
         $braches = Branch::where('active', 'Y')->select('id', 'branch_name')->get();
-        $users = User::where('active', 'Y')->select('id', 'name')->get();
+        $user_ids = getUsersReportingToAuth($user->id);
+        $users = User::where('active', 'Y')->whereIn('id',$user_ids)->select('id', 'name')->get();
         $pageSize = $request->input('pageSize');
         $all_status = [['id' => '0', 'name' => 'Pending'], ['id' => '1', 'name' => 'Approved By Sales Team'], ['id' => '2', 'name' => 'Approved By Account'], ['id' => '3', 'name' => 'Approved By HO']];
-        $db_data = DealerAppointment::with('branch_details', 'district_details', 'city_details', 'appointment_kyc_detail', 'createdbyname');
+        $db_data = DealerAppointment::with('branch_details', 'district_details', 'city_details', 'appointment_kyc_detail', 'createdbyname')->whereIn('created_by' , $user_ids);
 
         if ($request->startdate && $request->startdate != '' && $request->startdate != NULL && $request->enddate && $request->enddate != '' && $request->enddate != NULL) {
 
@@ -66,6 +68,7 @@ class DealerAppointmentController extends Controller
                     'district' => isset($value['district_details']) ? $value['district_details']['district_name'] : '',
                     'approval_status' => isset($value['approval_status']) ? $value['approval_status'] : 'Pending',
                     'created_by' => ($value['createdbyname'] && isset($value['createdbyname']['name'])) ? $value['createdbyname']['name'] : '',
+                    'created_by_id' => ($value['created_by'] && isset($value['created_by'])) ? $value['created_by'] : '',
                     'appointment_date' => isset($value['appointment_date']) ? date('d M Y',strtotime($value['appointment_date'])) : '',
                     'firm_name' => isset($value['firm_name']) ? $value['firm_name'] : '',
                     'place' => isset($value['place']) ? $value['place'] : '',

@@ -24,7 +24,7 @@ class LoyaltyAppSettingController extends Controller
     {
         $this->loyalty_app_setting = LoyaltyAppSetting::first();
         $customer_types = CustomerType::where('active', 'Y')->get();
-        return view('loyalty_app_setting.index', compact('customer_types'))->with('loyalty_app_setting', $this->loyalty_app_setting);;
+        return view('loyalty_app_setting.index', compact('customer_types'))->with('loyalty_app_setting', $this->loyalty_app_setting);
     }
 
     /**

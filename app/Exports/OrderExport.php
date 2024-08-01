@@ -181,8 +181,8 @@ class OrderExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapp
                 number_format(((1-($data['line_total']/($data['products']['productpriceinfo']['mrp']*$data['quantity'])))*100), 2)??'0',
                 isset($data['products']['productpriceinfo']['gst']) ? $data['products']['productpriceinfo']['gst'] :'',
                 isset($data['line_total'])? $data['line_total'] :'',
-                
-                $grandtotal,
+                isset($data['orders']['grand_total'])  ? $data['orders']['grand_total'] : '',
+                // $grandtotal,
                 isset($data['orders']['order_remark']) ? $data['orders']['order_remark'] :'',
                 isset($data['orders']['order_remark']) ? $data['orders']['order_remark'] :'',
                 isset($data['orders']['updatedbyname']) ? $data['orders']['updatedbyname']['name'] :'',
@@ -227,8 +227,8 @@ class OrderExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapp
                 
                 isset($data['products']['productpriceinfo']['gst']) ? $data['products']['productpriceinfo']['gst'] :'',
                 isset($data['line_total'])? $data['line_total'] :'',
-                
-                $grandtotal,
+                isset($data['orders']['grand_total'])  ?$data['orders']['grand_total'] : '',
+                // $grandtotal,
                 isset($data['orders']['order_remark']) ? $data['orders']['order_remark'] :'',
                 isset($data['orders']['order_remark']) ? $data['orders']['order_remark'] :'',
                 isset($data['orders']['updatedbyname']) ? $data['orders']['updatedbyname']['name'] :'',
@@ -270,8 +270,8 @@ class OrderExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapp
     
                 isset($data['products']['productpriceinfo']['gst']) ? $data['products']['productpriceinfo']['gst'] :'',
                 isset($data['line_total'])? $data['line_total'] :'',
-                
-                $grandtotal,
+                isset($data['orders']['grand_total'])  ?$data['orders']['grand_total'] : '',
+                // $grandtotal,
                 isset($data['orders']['order_remark']) ? $data['orders']['order_remark'] :'',
                 isset($data['orders']['order_remark']) ? $data['orders']['order_remark'] :'',
                 isset($data['orders']['updatedbyname']) ? $data['orders']['updatedbyname']['name'] :'',

@@ -65,7 +65,7 @@
                   <address>
                     <strong>{!! $orders['buyers']['name'] !!}</strong><br>
                     {!! $orders['buyers']['customeraddress']['address1'] !!} ,{!! $orders['buyers']['customeraddress']['address2'] !!}<br>
-                    {!! $orders['buyers']['customeraddress']['locality'] !!}, {!! $orders['buyers']['customeraddress']['cityname']['city_name'] !!} {!! $orders['buyers']['customeraddress']['pincodename']['pincode'] !!}<br>
+                    {!! $orders['buyers']['customeraddress']['locality'] ?? '' !!}, {!! $orders['buyers']['customeraddress']['cityname']['city_name'] ?? '' !!} {!! $orders['buyers']['customeraddress']['pincodename']['pincode'] ?? '' !!}<br>
                     Phone: {!! $orders['buyers']['mobile'] !!}<br>
                     Email: {!! $orders['buyers']['email'] !!}
                   </address>

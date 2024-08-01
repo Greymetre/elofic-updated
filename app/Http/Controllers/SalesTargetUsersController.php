@@ -50,28 +50,28 @@ class SalesTargetUsersController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function __construct() 
-    { 
+    public function __construct()
+    {
         $all_targets = SalesTargetUsers::all();
         foreach ($all_targets as $key => $value) {
-            if($value->type == 'secondary'){
+            if ($value->type == 'secondary') {
                 $monthNumber = Carbon::parse("1 $value->month")->month;
                 $firstDay = Carbon::create($value->year, $monthNumber, 1);
                 $lastDay = $firstDay->copy()->endOfMonth();
                 $firstDayFormatted = $firstDay->format('Y-m-d');
                 $lastDayFormatted = $lastDay->format('Y-m-d');
                 $orders_total = Order::whereBetween('order_date', [$firstDayFormatted, $lastDayFormatted])->where('created_by', $value->user_id)->sum('sub_total');
-                if($orders_total > 1){
-                    $achiv = ($orders_total - (($orders_total*35)/100))/100000;
-                    $achiv_per = (100*$achiv)/$value->target;
-                }else{
+                if ($orders_total > 1) {
+                    $achiv = ($orders_total - (($orders_total * 35) / 100)) / 100000;
+                    $achiv_per = (100 * $achiv) / $value->target;
+                } else {
                     $achiv = 0.00;
                     $achiv_per = 0.00;
                 }
                 SalesTargetUsers::where('id', $value->id)->update(['achievement' => $achiv, 'achievement_percent' => $achiv_per]);
             }
         }
-        $this->middleware('auth');   
+        $this->middleware('auth');
         $this->subcategories = new SalesTargetUsers();
         $this->path = 'salestargetusers';
     }
@@ -79,32 +79,32 @@ class SalesTargetUsersController extends Controller
     public function sales_target_users_list(Request $request)
     {
         $userIds = getUsersReportingToAuth();
-        $query = SalesTargetUsers::with(['user','user.getbranch','user.getdesignation'])->whereIn('user_id', $userIds)->where(function ($query) use ($request) {
+        $query = SalesTargetUsers::with(['user', 'user.getbranch', 'user.getdesignation'])->whereIn('user_id', $userIds)->where(function ($query) use ($request) {
 
-            if($request->month && $request->month != '' && $request->month != null){
-                $query->where('month',$request->month) ;
+            if ($request->month && $request->month != '' && $request->month != null) {
+                $query->where('month', $request->month);
             }
 
-            if($request->branch_id && $request->branch_id != '' && $request->branch_id != null){
+            if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
                 $userIds = User::where('branch_id', $request->branch_id)->pluck('id');
-                $query->whereIn('user_id',$userIds) ;
+                $query->whereIn('user_id', $userIds);
             }
 
-            if($request->user_id && $request->user_id != '' && $request->user_id != null){
+            if ($request->user_id && $request->user_id != '' && $request->user_id != null) {
                 $userIds = User::where('id', $request->user_id)->pluck('id');
-                $query->whereIn('user_id',$userIds);
+                $query->whereIn('user_id', $userIds);
             }
 
-            if($request->division && $request->division != '' && $request->division != null){
+            if ($request->division && $request->division != '' && $request->division != null) {
                 $divisionIds = User::where('division_id', $request->division)->pluck('id');
-                $query->whereIn('user_id',$divisionIds) ;
+                $query->whereIn('user_id', $divisionIds);
             }
 
-            if($request->type && $request->type != '' && $request->type != null){
-                $query->where('type',$request->type) ;
+            if ($request->type && $request->type != '' && $request->type != null) {
+                $query->where('type', $request->type);
             }
 
-            if($request->year && $request->year != '' && $request->year != null){
+            if ($request->year && $request->year != '' && $request->year != null) {
 
                 $f_year_array = explode('-', $request->year);
 
@@ -117,46 +117,52 @@ class SalesTargetUsersController extends Controller
                 });
             }
 
-            if($request->min_range && $request->min_range != '' && $request->min_range != null && $request->max_range && $request->max_range != '' && $request->max_range != null){
-                $query->whereBetween('points',[$request->min_range,$request->max_range]) ;
+            if ($request->min_range && $request->min_range != '' && $request->min_range != null && $request->max_range && $request->max_range != '' && $request->max_range != null) {
+                $query->whereBetween('points', [$request->min_range, $request->max_range]);
             }
         })->orderBy('id', 'asc');
 
-        // $data = SalesTargetUsers::with(['user','user.getbranch'])->get();
 
         return Datatables::of($query)
             ->addIndexColumn()
+            ->addColumn('achievement', function ($data) {
+                if ($data->user->sales_type == 'Primary') {
+                    $monthNumber = Carbon::parse("1 $data->month")->month;
+                    $firstDate = Carbon::createFromDate($data->year, $monthNumber, 1)->startOfMonth()->toDateString();
+                    $lastDate = Carbon::createFromDate($data->year, $monthNumber, 1)->endOfMonth()->toDateString();
+
+                    $data->achievement = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount'))/100000, 2, '.', '');
+                }
+                return $data->achievement;
+            })
             ->addColumn('achievement_percent', function ($data) {
-                if(isset($data['achievement']) && isset($data['target']) && !empty($data['achievement']) && !empty($data['target'])) {
+                if (isset($data['achievement']) && isset($data['target']) && !empty($data['achievement']) && !empty($data['target'])) {
                     $achievementPercent = ($data['target'] == 0) ? 0 : ($data['achievement'] * 100 / $data['target']);
-                    return number_format(($achievementPercent), 2). '%';
+                    return number_format(($achievementPercent), 2) . '%';
                 } else {
                     return '';
                 }
-
             })
             ->addColumn('action', function ($data) {
                 $btn = '';
                 $activebtn = '';
 
-                if(auth()->user()->can(['target_users_access_edit']))
-                {
-                  $btn = $btn.'<a href"javascript:void(0)" class="btn btn-info btn-just-icon btn-sm edit" id="'.encrypt($data->id).'" title="'.trans('panel.global.edit').' '.trans('panel.sales_target_user.title_singular').'">
+                if (auth()->user()->can(['target_users_access_edit'])) {
+                    $btn = $btn . '<a href"javascript:void(0)" class="btn btn-info btn-just-icon btn-sm edit" id="' . encrypt($data->id) . '" title="' . trans('panel.global.edit') . ' ' . trans('panel.sales_target_user.title_singular') . '">
                         <i class="material-icons">edit</i>
                       </a>';
                 }
 
                 if (auth()->user()->can(['target_users_access_delete'])) {
-                    $btn = $btn . ' <a href="#" class="btn btn-danger btn-just-icon btn-sm delete" value="' . $data->id . '" title="'.trans('panel.global.delete').' '.trans('panel.sales_target_user.title_singular').'">
+                    $btn = $btn . ' <a href="#" class="btn btn-danger btn-just-icon btn-sm delete" value="' . $data->id . '" title="' . trans('panel.global.delete') . ' ' . trans('panel.sales_target_user.title_singular') . '">
                               <i class="material-icons">clear</i>
                             </a>';
                 }
                 return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
                               ' . $btn . '
                           </div>';
-         
             })
-            ->rawColumns(['action','achievement_percent'])
+            ->rawColumns(['action', 'achievement_percent', 'achievement'])
             ->make(true);
     }
 
@@ -164,38 +170,40 @@ class SalesTargetUsersController extends Controller
     {
         $sales_target_users = SalesTargetUsers::latest()->get();
         $users = User::latest()->get();
-        $branches = Branch::latest()->get(); 
+        $branches = Branch::latest()->get();
         $divisions = Division::latest()->get();
         $currentYear = Carbon::now()->year;
         $years = range($currentYear - 2, $currentYear + 2);
-       
+
         abort_if(Gate::denies('target_users_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return view('sales_target_users.index', compact('sales_target_users','branches','years','users','divisions'));
+        return view('sales_target_users.index', compact('sales_target_users', 'branches', 'years', 'users', 'divisions'));
     }
 
 
-    public function target_users_upload(Request $request) {
+    public function target_users_upload(Request $request)
+    {
 
-        abort_if(Gate::denies('sales_target_users_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');                
+        abort_if(Gate::denies('sales_target_users_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         // Excel::import(new SalesTargetUsersImport, request()->file('import_file'));
         Excel::import(new SalesTargetUsersImport, $request->file('import_file')->store('temp'));
 
-        return back()->with('success', 'Sales Target User Import successfully !!'); 
+        return back()->with('success', 'Sales Target User Import successfully !!');
     }
 
-    public function target_users_download(Request $request) {
+    public function target_users_download(Request $request)
+    {
 
-        if($request->export_branch) {
+        if ($request->export_branch) {
             $validator = Validator::make($request->all(), [
                 'financial_year' => 'required',
             ]);
 
             if ($validator->fails()) {
                 return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+                    ->withErrors($validator)
+                    ->withInput();
             }
 
             abort_if(Gate::denies('sales_branch_report_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
@@ -203,15 +211,15 @@ class SalesTargetUsersController extends Controller
             ob_start();
 
             return Excel::download(new SalesTargetBranchExport($request), 'sales_target_branch.xlsx');
-        }elseif($request->export_user){
+        } elseif ($request->export_user) {
             $validator = Validator::make($request->all(), [
                 'financial_year' => 'required',
             ]);
 
             if ($validator->fails()) {
                 return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+                    ->withErrors($validator)
+                    ->withInput();
             }
 
             abort_if(Gate::denies('sales_target_users_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
@@ -219,15 +227,15 @@ class SalesTargetUsersController extends Controller
             ob_start();
 
             return Excel::download(new SalesTargetUsersExport($request), 'sales_target_users.xlsx');
-        }elseif($request->cy_ly_sales_report){
+        } elseif ($request->cy_ly_sales_report) {
             $validator = Validator::make($request->all(), [
                 'financial_year' => 'required',
             ]);
 
             if ($validator->fails()) {
                 return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+                    ->withErrors($validator)
+                    ->withInput();
             }
 
             abort_if(Gate::denies('cy_ly_sales_target_report_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
@@ -245,20 +253,23 @@ class SalesTargetUsersController extends Controller
         return response()->json(['status' => 'success', 'message' => 'Sales Target User Deleted successfully']);
     }
 
-    public function template(Request $request) {
+    public function template(Request $request)
+    {
         abort_if(Gate::denies('sales_target_users_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         return Excel::download(new SalesTargetUsersTemplate, 'sales_target_users.xlsx');
     }
 
-    public function update_target_user_modal(Request $request, $id) {
+    public function update_target_user_modal(Request $request, $id)
+    {
         $id = decrypt($id);
         $sales_target_user = SalesTargetUsers::find($id);
         return response()->json($sales_target_user);
     }
 
-    public function update_target_user_updte(Request $request) {
+    public function update_target_user_updte(Request $request)
+    {
 
         $data = $request->all();
         SalesTargetUsers::where('id', $data['id'])->update([
@@ -268,332 +279,88 @@ class SalesTargetUsersController extends Controller
             'target' => $data['target'],
         ]);
 
-        return back()->with('success', 'Sales Target User Updated successfully !!'); 
+        return back()->with('success', 'Sales Target User Updated successfully !!');
     }
 
-    public function achievement_template(Request $request) {
+    public function achievement_template(Request $request)
+    {
         abort_if(Gate::denies('sales_achievement_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         return Excel::download(new SalesAchievementTemplate, 'sales_achievements.xlsx');
     }
 
-    public function achievement_upload(Request $request) {
-        abort_if(Gate::denies('sales_achievement_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');                
+    public function achievement_upload(Request $request)
+    {
+        abort_if(Gate::denies('sales_achievement_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         Excel::import(new SalesAchievementImport, request()->file('import_file'));
         // Excel::import(new SalesAchievementImport, $request->file('import_file')->store('temp'));
 
-        return back()->with('success', 'Sales Achievement Import successfully !!'); 
+        return back()->with('success', 'Sales Achievement Import successfully !!');
     }
 
     public function sales_target_dealers(Request $request)
     {
         $sales_target_users = SalesTargetCustomers::latest()->get();
-        $users = Customers::where('customertype',[3, 4])->get();
-        $branches = Branch::latest()->get(); 
+        $users = Customers::where('customertype', [3, 4])->get();
+        $branches = Branch::latest()->get();
         $divisions = Division::latest()->get();
         $currentYear = Carbon::now()->year;
         $years = range($currentYear - 2, $currentYear + 2);
-       
+
         abort_if(Gate::denies('sales_target_dealers_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return view('sales_target_dealers.index', compact('sales_target_users','branches','years','users','divisions'));
+        return view('sales_target_dealers.index', compact('sales_target_users', 'branches', 'years', 'users', 'divisions'));
     }
 
-    public function sales_dealers_target_achievement(Request $request) {
+    public function sales_dealers_target_achievement(Request $request)
+    {
 
         $query = SalesTargetCustomers::with(['customer'])->where(function ($query) use ($request) {
 
-         if($request->month && $request->month != '' && $request->month != null){
-             $query->where('month',$request->month) ;
-         }
-
-         if($request->branch_id && $request->branch_id != '' && $request->branch_id != null){
-             $userIds = User::where('branch_id', $request->branch_id)->pluck('id');
-             $query->whereIn('customer_id',$userIds) ;
-         }
-
-         if($request->customer_id && $request->customer_id != '' && $request->customer_id != null){
-             $userIds = Customers::where('id', $request->customer_id)->pluck('id');
-             $query->whereIn('customer_id',$userIds);
-         }
-
-         if($request->division && $request->division != '' && $request->division != null){
-             $divisionIds = User::where('division_id', $request->division)->pluck('id');
-             $query->whereIn('customer_id',$divisionIds) ;
-         }
-
-         if($request->type && $request->type != '' && $request->type != null){
-             $query->where('type',$request->type) ;
-         }
-
-         if($request->year && $request->year != '' && $request->year != null){
-
-             $f_year_array = explode('-', $request->year);
-             $month = $request->month;
-
-             if($request->month && $request->month != '' && $request->month != null && $request->year && $request->year != '' && $request->year != null) {
-
-                if($request->month == 'Jan' || $request->month == 'Feb' || $request->month == 'Mar') {
-                    $query->where(function ($query) use ($f_year_array, $month) {
-                        $query->where('year', '=', $f_year_array[1])
-                        ->where('month', '=',$month);
-                    });
-                }else{
-                    $query->where(function ($query) use ($f_year_array, $month) {
-                        $query->where('year', '=', $f_year_array[0])
-                        ->where('month', '=',$month);
-                    });
-                }
-
-             }else{
-                $query->where(function ($query) use ($f_year_array) {
-                    $query->where('year', '=', $f_year_array[0])
-                    ->where('month', '>=', 'Apr');
-                })->orWhere(function ($query) use ($f_year_array) {
-                    $query->where('year', '=', $f_year_array[1])
-                    ->where('month', '<=', 'Mar');
-                });
-             }  
-         }
-
-         if($request->min_range && $request->min_range != '' && $request->min_range != null && $request->max_range && $request->max_range != '' && $request->max_range != null){
-             $query->whereBetween('points',[$request->min_range,$request->max_range]) ;
-         }
-     })->orderBy('id', 'asc');
-
-           // $data = SalesTargetUsers::with(['user','user.getbranch'])->get();
-
-        return Datatables::of($query)
-        ->addIndexColumn()
-        ->addColumn('achievement_percent', function ($data) {
-           if(isset($data['achievement']) && isset($data['target']) && !empty($data['achievement']) && !empty($data['target'])) {
-               $achievementPercent = ($data['target'] == 0) ? 0 : ($data['achievement'] * 100 / $data['target']);
-               return number_format($achievementPercent,2);
-           } else {
-               return '';
-           }
-
-       })
-        ->addColumn('customer_name', function ($data) {
-
-            $first_name = !empty($data['customer']['first_name']) ? $data['customer']['first_name'] : '';
-            $last_name = !empty($data['customer']['last_name']) ? $data['customer']['last_name'] : '';
-            
-            return $first_name.' '.$last_name;
-        })
-        ->addColumn('city_name', function ($data) {
-
-            $city_name = !empty($data['customer']['customeraddress']['cityname']['city_name']) ? $data['customer']['customeraddress']['cityname']['city_name'] : '';            
-            return $city_name;
-        })
-        ->addColumn('branch_name', function ($data) {
-            $branch_name = !empty($data['customer']['userdetails']['getbranch']['branch_name']) ? $data['customer']['userdetails']['getbranch']['branch_name'] : '';            
-            return $branch_name;
-        })
-        ->addColumn('firm_name', function ($data) {
-            $branch_name = !empty($data['customer']['userdetails']['getbranch']['branch_name']) ? $data['customer']['userdetails']['getbranch']['branch_name'] : '';            
-            return $branch_name;
-        })
-        ->addColumn('action', function ($data) {
-         $btn = '';
-         $activebtn = '';
-
-         if(auth()->user()->can(['target_users_access_edit']))
-         {
-           $btn = $btn.'<a href"javascript:void(0)" class="btn btn-info btn-just-icon btn-sm edit" id="'.encrypt($data->id).'" title="'.trans('panel.global.edit').' '.trans('panel.sales_target_user.title_singular').'">
-           <i class="material-icons">edit</i>
-           </a>';
-       }
-
-       if (auth()->user()->can(['target_users_access_delete'])) {
-         $btn = $btn . ' <a href="#" class="btn btn-danger btn-just-icon btn-sm delete" value="' . $data->id . '" title="'.trans('panel.global.delete').' '.trans('panel.sales_target_user.title_singular').'">
-         <i class="material-icons">clear</i>
-         </a>';
-     }
-     return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
-     ' . $btn . '
-     </div>';
-
- })
-        ->rawColumns(['action','achievement_percent','customer_name','city_name','branch_name'])
-        ->make(true);
-    }
-
-
-    public function sales_target_dealers_download(Request $request) {
-        if($request->export_branch) {
-            $validator = Validator::make($request->all(), [
-                'financial_year' => 'required',
-            ]);
-
-            if ($validator->fails()) {
-                return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            if ($request->month && $request->month != '' && $request->month != null) {
+                $query->where('month', $request->month);
             }
 
-            abort_if(Gate::denies('sales_dealers_branch_report_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-            if (ob_get_contents()) ob_end_clean();
-            ob_start();
-
-            return Excel::download(new SalesDealersTargetBranchExport($request), 'sales_target_branch.xlsx');
-        }elseif($request->export_dealer_target){
-            $validator = Validator::make($request->all(), [
-                'financial_year' => 'required',
-            ]);
-
-            if ($validator->fails()) {
-                return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
+                $userIds = User::where('branch_id', $request->branch_id)->pluck('id');
+                $query->whereIn('customer_id', $userIds);
             }
 
-            abort_if(Gate::denies('sales_target_dealers_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-            if (ob_get_contents()) ob_end_clean();
-            ob_start();
-
-            return Excel::download(new SalesTargetDealersExport($request), 'sales_target_dealers.xlsx');
-        }elseif($request->cy_ly_sales_report){
-            $validator = Validator::make($request->all(), [
-                'financial_year' => 'required',
-            ]);
-
-            if ($validator->fails()) {
-                return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            if ($request->customer_id && $request->customer_id != '' && $request->customer_id != null) {
+                $userIds = Customers::where('id', $request->customer_id)->pluck('id');
+                $query->whereIn('customer_id', $userIds);
             }
 
-            abort_if(Gate::denies('cy_ly_sales_dealers_report_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-            if (ob_get_contents()) ob_end_clean();
-            ob_start();
-
-            return Excel::download(new CurrentLastYearDealersSalesGrowthExport($request), 'LY_CY_Sales.xlsx');
-        }
-    }
-
-    public function sales_dealers_achievement_template(Request $request) {
-        abort_if(Gate::denies('sales_dealers_achievement_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        if (ob_get_contents()) ob_end_clean();
-        ob_start();
-        return Excel::download(new SalesDealersAchievementTemplate, 'sales_dealers_achievements.xlsx');
-    }
-
-    public function sales_dealers_target_template(Request $request) {
-        abort_if(Gate::denies('sales_target_dealers_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        if (ob_get_contents()) ob_end_clean();
-        ob_start();
-        return Excel::download(new SalesTargetDealersTemplate, 'sales_target_dealers.xlsx');
-    }
-
-    public function sales_target_dealer_delete(Request $request) {
-        SalesTargetCustomers::where('id', $request->id)->delete();
-
-        return response()->json(['status' => 'success', 'message' => 'Sales Target Dealer Deleted successfully']);
-    }
-
-    public function update_target_dealer_modal(Request $request, $id) {
-        $id = decrypt($id);
-        $sales_target_user = SalesTargetCustomers::find($id);
-        // dd($sales_target_user->customer_id);
-
-        $dealer_firm_name = Customers::where('id',$sales_target_user->customer_id)->first();
-        $sales_target_user['firm_name'] = $dealer_firm_name->name;
-        // dd($dealer_firm_name);
-        return response()->json($sales_target_user);
-    }
-
-    public function update_target_dealer_update(Request $request) {
-
-        $data = $request->all();
-        SalesTargetCustomers::where('id', $data['id'])->update([
-            'customer_id' => $data['customer_id'],
-            'month' => $data['month'],
-            'year' => $data['year'],
-            'target' => $data['target'],
-        ]);
-
-        return back()->with('success', 'Sales Target Dealer Updated successfully !!'); 
-    }
-
-    public function sales_target_dealers_upload(Request $request) {
-        abort_if(Gate::denies('sales_target_dealers_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');                
-        if (ob_get_contents()) ob_end_clean();
-        ob_start();
-        Excel::import(new SalesTargetDealersImport, $request->file('import_file')->store('temp'));
-
-        return back()->with('success', 'Sales Target Dealers Import successfully !!'); 
-    }
-
-    public function sales_dealers_achievement_upload(Request $request) {
-        abort_if(Gate::denies('sales_dealers_achievement_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');                
-        if (ob_get_contents()) ob_end_clean();
-        ob_start();
-        Excel::import(new SalesDealersAchievementImport, request()->file('import_file'));
-
-        return back()->with('success', 'Sales Dealers Achievement Import successfully !!'); 
-    }
-
-    public function branches_sales_target(Request $request) {
-        $sales_target_users = SalesTargetUsers::latest()->get();
-        $userIds = BranchWiseTarget::select('user_id')->distinct()->get();
-        $users = User::whereIn('id',$userIds)->get();
-        $branches =  BranchWiseTarget::select('branch_name')->distinct()->get();
-        $divisions = BranchWiseTarget::select('division_name')->distinct()->get();
-        $currentYear = Carbon::now()->year;
-        $years = range($currentYear - 2, $currentYear + 2);
-        
-        abort_if(Gate::denies('branch_wise_sales_target_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return view('branchwisetarget.index', compact('sales_target_users','branches','years','users','divisions'));
-    }
-
-    public function branch_target_list(Request $request) {
-        $query = BranchWiseTarget::with(['user','user.getbranch','user.getdesignation','user.getdivision'])->where(function ($query) use ($request) {
-
-            if($request->month && $request->month != '' && $request->month != null){
-                $query->where('month',$request->month) ;
+            if ($request->division && $request->division != '' && $request->division != null) {
+                $divisionIds = User::where('division_id', $request->division)->pluck('id');
+                $query->whereIn('customer_id', $divisionIds);
             }
 
-            if($request->branch_id && $request->branch_id != '' && $request->branch_id != null){
-                // $userIds = User::where('branch_id', $request->branch_id)->pluck('id');
-                $query->where('branch_name',$request->branch_id) ;
+            if ($request->type && $request->type != '' && $request->type != null) {
+                $query->where('type', $request->type);
             }
 
-            if($request->user_id && $request->user_id != '' && $request->user_id != null){
-                $userIds = User::where('id', $request->user_id)->pluck('id');
-                $query->whereIn('user_id',$userIds);
-            }
-
-            if($request->division && $request->division != '' && $request->division != null){
-                // $divisionIds = User::where('division_id', $request->division)->pluck('id');
-                $query->where('division_name',$request->division) ;
-            }
-
-            if($request->type && $request->type != '' && $request->type != null){
-                $query->where('type',$request->type) ;
-            }
-
-            if($request->year && $request->year != '' && $request->year != null){
+            if ($request->year && $request->year != '' && $request->year != null) {
 
                 $f_year_array = explode('-', $request->year);
                 $month = $request->month;
 
-                if($request->month && $request->month != '' && $request->month != null){
+                if ($request->month && $request->month != '' && $request->month != null && $request->year && $request->year != '' && $request->year != null) {
 
-                    if($request->month == 'Jan' || $request->month == 'Feb' || $request->month == 'Mar') {
-                         $query->where(function ($query) use($f_year_array,$month) {
+                    if ($request->month == 'Jan' || $request->month == 'Feb' || $request->month == 'Mar') {
+                        $query->where(function ($query) use ($f_year_array, $month) {
                             $query->where('year', '=', $f_year_array[1])
-                            ->where('month', '=', $month);
+                                ->where('month', '=', $month);
                         });
-                     }else{
-                         $query->where(function ($query) use($f_year_array,$month) {
+                    } else {
+                        $query->where(function ($query) use ($f_year_array, $month) {
                             $query->where('year', '=', $f_year_array[0])
-                            ->where('month', '=', $month);
+                                ->where('month', '=', $month);
                         });
-                     }
-                }else{
+                    }
+                } else {
                     $query->where(function ($query) use ($f_year_array) {
                         $query->where('year', '=', $f_year_array[0])
                             ->where('month', '>=', 'Apr');
@@ -604,8 +371,8 @@ class SalesTargetUsersController extends Controller
                 }
             }
 
-            if($request->min_range && $request->min_range != '' && $request->min_range != null && $request->max_range && $request->max_range != '' && $request->max_range != null){
-                $query->whereBetween('points',[$request->min_range,$request->max_range]) ;
+            if ($request->min_range && $request->min_range != '' && $request->min_range != null && $request->max_range && $request->max_range != '' && $request->max_range != null) {
+                $query->whereBetween('points', [$request->min_range, $request->max_range]);
             }
         })->orderBy('id', 'asc');
 
@@ -614,55 +381,307 @@ class SalesTargetUsersController extends Controller
         return Datatables::of($query)
             ->addIndexColumn()
             ->addColumn('achievement_percent', function ($data) {
-                if(isset($data['achievement']) && isset($data['target']) && !empty($data['achievement']) && !empty($data['target'])) {
+                if (isset($data['achievement']) && isset($data['target']) && !empty($data['achievement']) && !empty($data['target'])) {
                     $achievementPercent = ($data['target'] == 0) ? 0 : ($data['achievement'] * 100 / $data['target']);
-                    return number_format($achievementPercent,2);
+                    return number_format($achievementPercent, 2);
                 } else {
                     return '';
                 }
+            })
+            ->addColumn('customer_name', function ($data) {
 
+                $first_name = !empty($data['customer']['first_name']) ? $data['customer']['first_name'] : '';
+                $last_name = !empty($data['customer']['last_name']) ? $data['customer']['last_name'] : '';
+
+                return $first_name . ' ' . $last_name;
+            })
+            ->addColumn('city_name', function ($data) {
+
+                $city_name = !empty($data['customer']['customeraddress']['cityname']['city_name']) ? $data['customer']['customeraddress']['cityname']['city_name'] : '';
+                return $city_name;
+            })
+            ->addColumn('branch_name', function ($data) {
+                $branch_name = !empty($data['customer']['userdetails']['getbranch']['branch_name']) ? $data['customer']['userdetails']['getbranch']['branch_name'] : '';
+                return $branch_name;
+            })
+            ->addColumn('firm_name', function ($data) {
+                $branch_name = !empty($data['customer']['userdetails']['getbranch']['branch_name']) ? $data['customer']['userdetails']['getbranch']['branch_name'] : '';
+                return $branch_name;
             })
             ->addColumn('action', function ($data) {
                 $btn = '';
                 $activebtn = '';
 
-                if(auth()->user()->can(['target_users_access_edit']))
-                {
-                  $btn = $btn.'<a href"javascript:void(0)" class="btn btn-info btn-just-icon btn-sm edit" id="'.encrypt($data->id).'" title="'.trans('panel.global.edit').' '.trans('panel.sales_target_user.title_singular').'">
+                if (auth()->user()->can(['target_users_access_edit'])) {
+                    $btn = $btn . '<a href"javascript:void(0)" class="btn btn-info btn-just-icon btn-sm edit" id="' . encrypt($data->id) . '" title="' . trans('panel.global.edit') . ' ' . trans('panel.sales_target_user.title_singular') . '">
+           <i class="material-icons">edit</i>
+           </a>';
+                }
+
+                if (auth()->user()->can(['target_users_access_delete'])) {
+                    $btn = $btn . ' <a href="#" class="btn btn-danger btn-just-icon btn-sm delete" value="' . $data->id . '" title="' . trans('panel.global.delete') . ' ' . trans('panel.sales_target_user.title_singular') . '">
+         <i class="material-icons">clear</i>
+         </a>';
+                }
+                return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
+     ' . $btn . '
+     </div>';
+            })
+            ->rawColumns(['action', 'achievement_percent', 'customer_name', 'city_name', 'branch_name'])
+            ->make(true);
+    }
+
+
+    public function sales_target_dealers_download(Request $request)
+    {
+        if ($request->export_branch) {
+            $validator = Validator::make($request->all(), [
+                'financial_year' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+
+            abort_if(Gate::denies('sales_dealers_branch_report_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+            if (ob_get_contents()) ob_end_clean();
+            ob_start();
+
+            return Excel::download(new SalesDealersTargetBranchExport($request), 'sales_target_branch.xlsx');
+        } elseif ($request->export_dealer_target) {
+            $validator = Validator::make($request->all(), [
+                'financial_year' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+
+            abort_if(Gate::denies('sales_target_dealers_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+            if (ob_get_contents()) ob_end_clean();
+            ob_start();
+
+            return Excel::download(new SalesTargetDealersExport($request), 'sales_target_dealers.xlsx');
+        } elseif ($request->cy_ly_sales_report) {
+            $validator = Validator::make($request->all(), [
+                'financial_year' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+
+            abort_if(Gate::denies('cy_ly_sales_dealers_report_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+            if (ob_get_contents()) ob_end_clean();
+            ob_start();
+
+            return Excel::download(new CurrentLastYearDealersSalesGrowthExport($request), 'LY_CY_Sales.xlsx');
+        }
+    }
+
+    public function sales_dealers_achievement_template(Request $request)
+    {
+        abort_if(Gate::denies('sales_dealers_achievement_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new SalesDealersAchievementTemplate, 'sales_dealers_achievements.xlsx');
+    }
+
+    public function sales_dealers_target_template(Request $request)
+    {
+        abort_if(Gate::denies('sales_target_dealers_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new SalesTargetDealersTemplate, 'sales_target_dealers.xlsx');
+    }
+
+    public function sales_target_dealer_delete(Request $request)
+    {
+        SalesTargetCustomers::where('id', $request->id)->delete();
+
+        return response()->json(['status' => 'success', 'message' => 'Sales Target Dealer Deleted successfully']);
+    }
+
+    public function update_target_dealer_modal(Request $request, $id)
+    {
+        $id = decrypt($id);
+        $sales_target_user = SalesTargetCustomers::find($id);
+        // dd($sales_target_user->customer_id);
+
+        $dealer_firm_name = Customers::where('id', $sales_target_user->customer_id)->first();
+        $sales_target_user['firm_name'] = $dealer_firm_name->name;
+        // dd($dealer_firm_name);
+        return response()->json($sales_target_user);
+    }
+
+    public function update_target_dealer_update(Request $request)
+    {
+
+        $data = $request->all();
+        SalesTargetCustomers::where('id', $data['id'])->update([
+            'customer_id' => $data['customer_id'],
+            'month' => $data['month'],
+            'year' => $data['year'],
+            'target' => $data['target'],
+        ]);
+
+        return back()->with('success', 'Sales Target Dealer Updated successfully !!');
+    }
+
+    public function sales_target_dealers_upload(Request $request)
+    {
+        abort_if(Gate::denies('sales_target_dealers_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        Excel::import(new SalesTargetDealersImport, $request->file('import_file')->store('temp'));
+
+        return back()->with('success', 'Sales Target Dealers Import successfully !!');
+    }
+
+    public function sales_dealers_achievement_upload(Request $request)
+    {
+        abort_if(Gate::denies('sales_dealers_achievement_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        Excel::import(new SalesDealersAchievementImport, request()->file('import_file'));
+
+        return back()->with('success', 'Sales Dealers Achievement Import successfully !!');
+    }
+
+    public function branches_sales_target(Request $request)
+    {
+        $sales_target_users = SalesTargetUsers::latest()->get();
+        $userIds = BranchWiseTarget::select('user_id')->distinct()->get();
+        $users = User::whereIn('id', $userIds)->get();
+        $branches =  BranchWiseTarget::select('branch_name')->distinct()->get();
+        $divisions = BranchWiseTarget::select('division_name')->distinct()->get();
+        $currentYear = Carbon::now()->year;
+        $years = range($currentYear - 2, $currentYear + 2);
+
+        abort_if(Gate::denies('branch_wise_sales_target_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        return view('branchwisetarget.index', compact('sales_target_users', 'branches', 'years', 'users', 'divisions'));
+    }
+
+    public function branch_target_list(Request $request)
+    {
+        $query = BranchWiseTarget::with(['user', 'user.getbranch', 'user.getdesignation', 'user.getdivision'])->where(function ($query) use ($request) {
+
+            if ($request->month && $request->month != '' && $request->month != null) {
+                $query->where('month', $request->month);
+            }
+
+            if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
+                // $userIds = User::where('branch_id', $request->branch_id)->pluck('id');
+                $query->where('branch_name', $request->branch_id);
+            }
+
+            if ($request->user_id && $request->user_id != '' && $request->user_id != null) {
+                $userIds = User::where('id', $request->user_id)->pluck('id');
+                $query->whereIn('user_id', $userIds);
+            }
+
+            if ($request->division && $request->division != '' && $request->division != null) {
+                // $divisionIds = User::where('division_id', $request->division)->pluck('id');
+                $query->where('division_name', $request->division);
+            }
+
+            if ($request->type && $request->type != '' && $request->type != null) {
+                $query->where('type', $request->type);
+            }
+
+            if ($request->year && $request->year != '' && $request->year != null) {
+
+                $f_year_array = explode('-', $request->year);
+                $month = $request->month;
+
+                if ($request->month && $request->month != '' && $request->month != null) {
+
+                    if ($request->month == 'Jan' || $request->month == 'Feb' || $request->month == 'Mar') {
+                        $query->where(function ($query) use ($f_year_array, $month) {
+                            $query->where('year', '=', $f_year_array[1])
+                                ->where('month', '=', $month);
+                        });
+                    } else {
+                        $query->where(function ($query) use ($f_year_array, $month) {
+                            $query->where('year', '=', $f_year_array[0])
+                                ->where('month', '=', $month);
+                        });
+                    }
+                } else {
+                    $query->where(function ($query) use ($f_year_array) {
+                        $query->where('year', '=', $f_year_array[0])
+                            ->where('month', '>=', 'Apr');
+                    })->orWhere(function ($query) use ($f_year_array) {
+                        $query->where('year', '=', $f_year_array[1])
+                            ->where('month', '<=', 'Mar');
+                    });
+                }
+            }
+
+            if ($request->min_range && $request->min_range != '' && $request->min_range != null && $request->max_range && $request->max_range != '' && $request->max_range != null) {
+                $query->whereBetween('points', [$request->min_range, $request->max_range]);
+            }
+        })->orderBy('id', 'asc');
+
+        // $data = SalesTargetUsers::with(['user','user.getbranch'])->get();
+
+        return Datatables::of($query)
+            ->addIndexColumn()
+            ->addColumn('achievement_percent', function ($data) {
+                if (isset($data['achievement']) && isset($data['target']) && !empty($data['achievement']) && !empty($data['target'])) {
+                    $achievementPercent = ($data['target'] == 0) ? 0 : ($data['achievement'] * 100 / $data['target']);
+                    return number_format($achievementPercent, 2);
+                } else {
+                    return '';
+                }
+            })
+            ->addColumn('action', function ($data) {
+                $btn = '';
+                $activebtn = '';
+
+                if (auth()->user()->can(['target_users_access_edit'])) {
+                    $btn = $btn . '<a href"javascript:void(0)" class="btn btn-info btn-just-icon btn-sm edit" id="' . encrypt($data->id) . '" title="' . trans('panel.global.edit') . ' ' . trans('panel.sales_target_user.title_singular') . '">
                         <i class="material-icons">edit</i>
                       </a>';
                 }
 
                 if (auth()->user()->can(['target_users_access_delete'])) {
-                    $btn = $btn . ' <a href="#" class="btn btn-danger btn-just-icon btn-sm delete" value="' . $data->id . '" title="'.trans('panel.global.delete').' '.trans('panel.sales_target_user.title_singular').'">
+                    $btn = $btn . ' <a href="#" class="btn btn-danger btn-just-icon btn-sm delete" value="' . $data->id . '" title="' . trans('panel.global.delete') . ' ' . trans('panel.sales_target_user.title_singular') . '">
                               <i class="material-icons">clear</i>
                             </a>';
                 }
                 return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
                               ' . $btn . '
                           </div>';
-         
             })
-            ->rawColumns(['action','achievement_percent'])
+            ->rawColumns(['action', 'achievement_percent'])
             ->make(true);
     }
 
-    public function branch_target_template(Request $request) {
+    public function branch_target_template(Request $request)
+    {
         abort_if(Gate::denies('branch_wise_target_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         return Excel::download(new BranchTargetTemplate, 'branch_target.xlsx');
     }
 
-    public function branch_target_upload(Request $request) {
+    public function branch_target_upload(Request $request)
+    {
 
-        abort_if(Gate::denies('branch_wise_target_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');                
+        abort_if(Gate::denies('branch_wise_target_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         // Excel::import(new SalesTargetUsersImport, request()->file('import_file'));
         Excel::import(new BranchTargetImport, $request->file('import_file')->store('temp'));
 
-        return back()->with('success', 'Branch Wise Target Import successfully !!'); 
+        return back()->with('success', 'Branch Wise Target Import successfully !!');
     }
 
     public function branch_target_delete(Request $request)
@@ -675,17 +694,18 @@ class SalesTargetUsersController extends Controller
     /*Branch target report download
     */
 
-    public function branch_target_download(Request $request) {
+    public function branch_target_download(Request $request)
+    {
 
-        if($request->export_branch_target) {
+        if ($request->export_branch_target) {
             $validator = Validator::make($request->all(), [
                 'financial_year' => 'required',
             ]);
 
             if ($validator->fails()) {
                 return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+                    ->withErrors($validator)
+                    ->withInput();
             }
 
             abort_if(Gate::denies('branch_wise_target_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
@@ -693,15 +713,15 @@ class SalesTargetUsersController extends Controller
             ob_start();
 
             return Excel::download(new BranchTargetExport($request), 'branch_target.xlsx');
-        }elseif($request->cy_ly_branch_target){
+        } elseif ($request->cy_ly_branch_target) {
             $validator = Validator::make($request->all(), [
                 'financial_year' => 'required',
             ]);
 
             if ($validator->fails()) {
                 return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+                    ->withErrors($validator)
+                    ->withInput();
             }
 
             abort_if(Gate::denies('cy_ly_branch_target_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
@@ -710,13 +730,13 @@ class SalesTargetUsersController extends Controller
 
             return Excel::download(new CurrentLastYearBranchTargetExport($request), 'LY_CY_Branch_Target.xlsx');
         }
-
     }
 
     /*
     Branch achievement
     */
-    public function branch_achievement_template(Request $request) {
+    public function branch_achievement_template(Request $request)
+    {
 
         abort_if(Gate::denies('branch_target_achievement_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
@@ -724,15 +744,15 @@ class SalesTargetUsersController extends Controller
         return Excel::download(new BranchAchievementTemplate, 'branch_achievements.xlsx');
     }
 
-    public function branch_achievement_upload(Request $request) {
+    public function branch_achievement_upload(Request $request)
+    {
 
-        abort_if(Gate::denies('branch_target_achievement_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');                
+        abort_if(Gate::denies('branch_target_achievement_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         Excel::import(new BranchAchievementImport, request()->file('import_file'));
         // Excel::import(new SalesAchievementImport, $request->file('import_file')->store('temp'));
 
-        return back()->with('success', 'Branch Achievement Import successfully !!'); 
+        return back()->with('success', 'Branch Achievement Import successfully !!');
     }
-
 }
