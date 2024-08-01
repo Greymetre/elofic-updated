@@ -209,4 +209,9 @@ class NewJoiningController extends Controller
         // return $request;
         return Excel::download(new NewJoiningExport($request), 'new_joining_rpoet.xlsx');
     }
+
+    // privacy-policy
+     public function privacyPolicy(Request $request){
+        return view('privacy-policy');
+     }
 }

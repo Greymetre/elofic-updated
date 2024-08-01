@@ -249,7 +249,7 @@ class Customers extends Authenticatable
     }
     public function visitsinfo()
     {
-        return $this->hasMany('App\Models\VisitReport','customer_id','id')->orderBy('created_at', 'desc')->select('id', 'customer_id', 'description','report_title','visit_image','user_id','created_at');
+        return $this->hasMany('App\Models\VisitReport','customer_id','id')->orderBy('created_at', 'desc');
     }
 
     public function customerdeals()

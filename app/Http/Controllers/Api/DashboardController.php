@@ -39,6 +39,7 @@ use App\Models\State;
 use App\Models\TourProgramme;
 use App\Models\TransactionHistory;
 use Carbon\Carbon;
+use App\Models\FieldKonnectAppSetting;
 
 class DashboardController extends Controller
 {
@@ -553,5 +554,12 @@ class DashboardController extends Controller
         $data['customer_visit'] = $customer_visit > 0 ? (string)$customer_visit : "";
 
         return response()->json(['status' => 'success', 'data' => $data], 200);
+    }
+
+    //field connect version
+    public function getVersion(){
+        $fieldConnect = FieldKonnectAppSetting::first();
+        $data["app_version"] = isset($fieldConnect) ? (isset($fieldConnect->app_version) ? $fieldConnect->app_version : '') : ''; 
+        return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], 200);
     }
 }

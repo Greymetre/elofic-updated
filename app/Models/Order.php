@@ -87,19 +87,19 @@ class Order extends Model
                 'distributor_amount' => isset($request['distributor_amount']) ? $request['distributor_amount'] :null,   
                 'frieght_discount' => isset($request['frieght_discount']) ? $request['frieght_discount'] :null,   
                 'frieght_amount' => isset($request['frieght_amount']) ? $request['frieght_amount'] :null,   
-                'cash_discount' => isset($request['cash_discount']) ? $request['cash_discount'] :0,   
-                'cash_amount' => isset($request['cash_amount']) ? $request['cash_amount'] :0,   
+                'cash_discount' => isset($request['cash_discount']) ? $request['cash_discount'] : 0.00,   
+                'cash_amount' => (isset($request['cash_amount']) && $request['cash_amount'] != NULL) ? $request['cash_amount'] : 0.00,   
                 'product_cat_id' => isset($request['product_cat_id']) ? $request['product_cat_id'] :null,   
                 'dod_discount' => isset($request['dod_discount']) ? $request['dod_discount'] :null,   
                 'special_distribution_discount' => isset($request['special_distribution_discount']) ? $request['special_distribution_discount'] :null,   
                 'distribution_margin_discount' => isset($request['distribution_margin_discount']) ? $request['distribution_margin_discount'] :null,   
                 'total_fan_discount' => isset($request['total_fan_discount']) ? $request['total_fan_discount'] :null,   
                 'total_fan_discount_amount' => isset($request['total_fan_discount_amount']) ? $request['total_fan_discount_amount'] :null,
-                'dod_discount_amount' => isset($request['dod_discount_amount']) ? $request['dod_discount_amount'] :0,
-                'special_distribution_discount_amount' => isset($request['special_distribution_discount_amount']) ? $request['special_distribution_discount_amount'] :0,
-                'distribution_margin_discount_amount' => isset($request['distribution_margin_discount_amount']) ? $request['distribution_margin_discount_amount'] :0,
+                'dod_discount_amount' => (isset($request['dod_discount_amount']) && $request['dod_discount_amount'] != NULL) ? $request['dod_discount_amount'] : 0.00,
+                'special_distribution_discount_amount' => (isset($request['special_distribution_discount_amount']) && $request['special_distribution_discount_amount'] != NULL) ? $request['special_distribution_discount_amount'] :0.00,
+                'distribution_margin_discount_amount' => (isset($request['distribution_margin_discount_amount']) && $request['distribution_margin_discount_amount'] != NULL) ? $request['distribution_margin_discount_amount'] :0.00,
                 'fan_extra_discount' => isset($request['fan_extra_discount']) ? $request['fan_extra_discount'] :0,
-                'fan_extra_discount_amount' => isset($request['fan_extra_discount_amount']) ? $request['fan_extra_discount_amount'] :0,
+                'fan_extra_discount_amount' => (isset($request['fan_extra_discount_amount']) && $request['fan_extra_discount_amount'] != NULL) ? $request['fan_extra_discount_amount'] :0.00,
                 'gst5_amt' => isset($request['gst5_amt']) ? $request['gst5_amt'] :0.00,   
                 'gst12_amt' => isset($request['gst12_amt']) ? $request['gst12_amt'] :0.00,   
                 'gst18_amt' => isset($request['gst18_amt']) ? $request['gst18_amt'] :0.00,   
@@ -176,7 +176,4 @@ class Order extends Model
     {
         return $this->hasOne('App\Models\Sales', 'order_id', 'id')->select('invoice_no','invoice_date');
     }
-
-
-
 }

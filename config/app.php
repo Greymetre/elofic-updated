@@ -199,6 +199,7 @@ return [
         App\Providers\RouteServiceProvider::class,
 
         Jenssegers\Agent\AgentServiceProvider::class,
+        Barryvdh\DomPDF\ServiceProvider::class,
 
     ],
 
@@ -219,6 +220,7 @@ return [
         // 'ExampleClass' => App\Example\ExampleClass::class,
         'Firebase' => Kreait\Laravel\Firebase\Facades\Firebase::class,
         'Agent' => Jenssegers\Agent\Facades\Agent::class,
+        'PDF' => Barryvdh\DomPDF\Facade::class,
     ])->toArray(),
 
 ];

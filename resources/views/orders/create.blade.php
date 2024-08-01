@@ -445,12 +445,18 @@
                                  <td hidden> <input type="text" name="orderdetail[1][dm_dis]" class="dm_dis">
                                     <input type="text" name="orderdetail[1][dm_amounts]" class="dm_amounts">
                                  </td>
+                                 <td hidden> <input type="text" name="orderdetail[1][ch_dis]" class="ch_dis">
+                                    <input type="text" name="orderdetail[1][ch_amounts]" class="ch_amounts">
+                                 </td>
                                  <td hidden> <input type="text" name="orderdetail[1][ebd_dis]" class="ebd_dis">
                                     <input type="text" name="orderdetail[1][ebd_amounts]" class="ebd_amounts">
                                  </td>
 
                                  <td hidden><input type="text" name="orderdetail[1][deal_dis]" class="deal_dis">
                                     <input type="text" name="orderdetail[1][deal_amounts]" class="deal_amounts" hidden>
+                                 </td>
+                                 <td hidden><input type="text" name="orderdetail[1][fan_extra_dis]" class="fan_extra_dis">
+                                    <input type="text" name="orderdetail[1][fan_extra_amount]" class="fan_extra_amount" hidden>
                                  </td>
                                  <td hidden><input type="text" name="orderdetail[1][special_dis]" class="special_dis">
                                     <input type="text" name="orderdetail[1][special_amounts]" class="special_amounts" hidden>
@@ -975,8 +981,10 @@
                '<td hidden> <input type="text" name="orderdetail[' + counter + '][dod_dis]" class="dod_dis"> <input type="text" name="orderdetail[' + counter + '][dodp_amounts]" class="dodp_amounts" hidden> </td>' +
                '<td hidden> <input type="text" name="orderdetail[' + counter + '][sd_dis]" class="sd_dis"> <input type="text" name="orderdetail[' + counter + '][sd_amounts]" class="sd_amounts" hidden> </td>' +
                '<td hidden> <input type="text" name="orderdetail[' + counter + '][dm_dis]" class="dm_dis"> <input type="text" name="orderdetail[' + counter + '][dm_amounts]" class="dm_amounts" hidden> </td>' +
+               '<td hidden> <input type="text" name="orderdetail[' + counter + '][ch_dis]" class="ch_dis"> <input type="text" name="orderdetail[' + counter + '][ch_amounts]" class="ch_amounts" hidden> </td>' +
                '<td hidden> <input type="text" name="orderdetail[' + counter + '][ebd_dis]" class="ebd_dis"> <input type="text" name="orderdetail[' + counter + '][ebd_amounts]" class="ebd_amounts" hidden> </td>' +
                '<td hidden><input type="text" name="orderdetail[' + counter + '][deal_dis]" class="deal_dis"><input type="text" name="orderdetail[' + counter + '][deal_amounts]" class="deal_amounts" hidden></td>' +
+               '<td hidden><input type="text" name="orderdetail[' + counter + '][fan_extra_dis]" class="fan_extra_dis"><input type="text" name="orderdetail[' + counter + '][fan_extra_amount]" class="fan_extra_amount" hidden></td>' +
                '<td hidden><input type="text" name="orderdetail[' + counter + '][special_dis]" class="special_dis"><input type="text" name="orderdetail[' + counter + '][special_amounts]" class="special_amounts" hidden></td>' +
                '<td hidden><input type="text" name="orderdetail[' + counter + '][distributot_dis]" class="distributot_dis"><input type="text" name="orderdetail[' + counter + '][distributot_amounts]" class="distributot_amounts" hidden> <input type="text" name="orderdetail[' + counter + '][frieght_dis]" class="frieght_dis"><input type="text" name="orderdetail[' + counter + '][frieght_amounts]" class="frieght_amounts"><input type="text" name="orderdetail[' + counter + '][five_gst]" class="five_gst" hidden> <input type="text" name="orderdetail[' + counter + '][twelve_gst]" class="twelve_gst" hidden> <input type="text" name="orderdetail[' + counter + '][eighteen_gst]" class="eighteen_gst" hidden> <input type="text" name="orderdetail[' + counter + '][twenti_eight_gst]" class="twenti_eight_gst" hidden></td>' +
                '<td class="td-actions text-center"><a href="#" class="remove-rows btn btn-danger btn-xs"><i class="fa fa-minus"></i></a></td> </tr>';
@@ -994,8 +1002,10 @@
             $('.dod_discount').change();
             $('.special_distribution_discount').change();
             $('.distribution_margin_discount').change();
+            $('.cash_discount').change();
             $('.ebd_discount').change();
             $('.deal_discnt').keyup();
+            $('.fan_extra_discount').keyup();
             $('.distributor_discount').keyup();
             $('.special_discount').keyup();
             $('.frieght_discount').change();
@@ -1044,6 +1054,17 @@
          var dm_dis = $(this).val();
          // $('#tab_logic tbody tr').find('.clustered_dis').val(cls_ter);
          $('.dm_dis').val(dm_dis);
+      }).trigger('change');
+
+      $('.fan_extra_discount').on('keyup', function() {
+         var fan_extra_discount = $(this).val();
+         $('.fan_extra_dis').val(fan_extra_discount);
+      }).trigger('keyup');
+
+      $('.cash_discount').on('change', function() {
+         var ch_dis = $(this).val();
+         // $('#tab_logic tbody tr').find('.clustered_dis').val(cls_ter);
+         $('.ch_dis').val(ch_dis);
       }).trigger('change');
 
       $('.ebd_discount').on('change', function() {
@@ -1333,20 +1354,23 @@
                var clusters_discount = $(this).find('.clustered_dis').val();
                var clus_dis = total * clusters_discount / 100;
                total = total - clus_dis;
-               
+               console.log(total);
                $(this).find('.clus_amounts').val((clus_dis).toFixed(2));
 
                //end clustor 
 
+               console.log(total, ' = after cluster');
+
                //new code for dod
                var dod_discount = $(this).find('.dod_dis').val();
                var dod_dis = total * dod_discount / 100;
-               total = total - clus_dis;
                total = total - dod_dis;
 
                $(this).find('.dodp_amounts').val((dod_dis).toFixed(2));
 
                //end dod 
+
+               console.log(total, ' = dod');
 
                //new code for SD
                var sd_discount = $(this).find('.sd_dis').val();
@@ -1357,6 +1381,8 @@
 
                //end SD 
 
+               console.log(total, ' = sd');
+
                //new code for dm
                var dm_discount = $(this).find('.dm_dis').val();
                var dm_dis = total * dm_discount / 100;
@@ -1366,7 +1392,22 @@
 
                //end dm 
 
+               // start fan extra discount
+               var fan_extra_dis = $(this).find('.fan_extra_dis').val();
+               var fan_extra_dis_cal = total * fan_extra_dis / 100;
+               total = total - fan_extra_dis_cal;
 
+               $(this).find('.fan_extra_amount').val((fan_extra_dis_cal).toFixed(2));
+               // end fan extra discount 
+
+               //new code for cash discount
+               var ch_discount = $(this).find('.ch_dis').val();
+               var ch_dis = total * ch_discount / 100;
+               total = total - ch_dis;
+
+               $(this).find('.ch_amounts').val((ch_dis).toFixed(2));
+
+               //end cash discount 
 
                // start deal discount
                var deal_dis = $(this).find('.deal_dis').val();
@@ -1375,9 +1416,8 @@
 
                $(this).find('.deal_amounts').val((deal_dis_cal).toFixed(2));
                // end deal discount 
-
-
-
+               
+               console.log(total, ' = Last');
 
                //new gst single discount
                // var gst = $(this).find('.gst_percent').html();
@@ -1449,9 +1489,11 @@
          dodp_amounts = 0;
          sd_amounts = 0;
          dm_amounts = 0;
+         ch_amounts = 0;
          ebd_amounts = 0;
          scheme_discount = 0;
          deal_amounts = 0;
+         fan_extra_amount = 0;
          special_amounts = 0;
          cluster_amnt = 0;
          ebd_amnt = 0;
@@ -1525,7 +1567,21 @@
             dm_amounts += parseFloat($(this).val());
             $('.distribution_margin_discount_amount').val(dm_amounts.toFixed(2));
          });
-         //dm discout end         
+         //dm discout end     
+         
+         //fan extra discount
+         $('.fan_extra_amount').each(function() {
+            fan_extra_amount += parseFloat($(this).val());
+            $('.fan_extra_discount_amount').val(fan_extra_amount.toFixed(2));
+         });
+         //fan extra discoun
+
+         //cash discout start
+         $('.ch_amounts').each(function() {
+            ch_amounts += parseFloat($(this).val());
+            $('.cash_amount').val(ch_amounts.toFixed(2));
+         });
+         //cash discout end         
 
          //ebd discout start
          var ebd_amnt = $(".ebd_discount").val();

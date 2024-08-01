@@ -103,20 +103,38 @@
         <tbody>
             @if($order->product_cat_id == '2')
             <tr>
-                <th colspan="5">DOD Discount %</th>
-                <th>{{$order->dod_discount}}</th>
+                <th colspan="3">DOD Discount %</th>
+                <th colspan="2">{{$order->dod_discount ?? ''}}</th>
+                <th>{{$order->dod_discount_amount ?? ''}}</th>
             </tr>
             <tr>
-                <th colspan="5">Special Distribution Discount %</th>
-                <th>{{$order->special_distribution_discount}}</th>
+                <th colspan="3">Special Distribution Discount %</th>
+                <th colspan="2">{{$order->special_distribution_discount ?? ''}}</th>
+                <th>{{$order->special_distribution_discount_amount	 ?? ''}}</th>
             </tr>
             <tr>
-                <th colspan="5">Distribution Margin Discount%</th>
-                <th>{{$order->distribution_margin_discount}}</th>
+                <th colspan="3">Distribution Margin Discount%</th>
+                <th colspan="2">{{$order->distribution_margin_discount ?? ''}}</th>
+                <th>{{$order->distribution_margin_discount_amount ?? ''}}</th>
             </tr>
+            @if($order->fan_extra_discount && $order->fan_extra_discount != '' && $order->fan_extra_discount != NULL)
             <tr>
-                <th colspan="5">total Discount %</th>
-                <th>{{$order->total_fan_discount}}</th>
+                <th colspan="3">Extra Discount %</th>
+                <th colspan="2">{{$order->fan_extra_discount}}</th>
+                <th>{{$order->fan_extra_discount_amount ?? ''}}</th>
+            </tr>
+            @endif
+            @if($order->cash_discount && $order->cash_discount != '' && $order->cash_discount != NULL)
+            <tr>
+                <th colspan="3">Cash Discount %</th>
+                <th colspan="2">{{$order->cash_discount}}</th>
+                <th>{{$order->cash_amount ?? ''}}</th>
+            </tr>
+            @endif
+            <tr>
+                <th colspan="3">total Discount %</th>
+                <th colspan="2">{{$order->total_fan_discount ?? ''}}</th>
+                <th>{{$order->total_fan_discount_amount ?? ''}}</th>
             </tr>
             @elseif($order->product_cat_id == '1')
             <tr>
@@ -183,6 +201,7 @@
                 <th>{{$order->gst28_amt}}</th>
             </tr>
             @endif
+          
             <tr>
                 <th colspan="5">Total Order Value</th>
                 <th>{{$order->grand_total}}</th>

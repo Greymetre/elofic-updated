@@ -71,17 +71,41 @@ class OrderDataTable extends DataTable
      * @param \App\Order $model
      * @return \Illuminate\Database\Eloquent\Builder
      */
+    // public function query(Order $model)
+    // {
+    //     $userids = getUsersReportingToAuth() ;
+        
+    //     return $model->with('sellers','buyers','statusname', 'createdbyname')->whereHas('buyers', function($query) use($userids){
+    //                             if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
+    //                             {
+    //                                 $query->whereIn('executive_id',$userids);
+    //                             }
+    //                         })->latest()->newQuery();
+    // }
+
     public function query(Order $model)
     {
-        $userids = getUsersReportingToAuth() ;
+        $userids = getUsersReportingToAuth();
         
-        return $model->with('sellers','buyers','statusname', 'createdbyname')->whereHas('buyers', function($query) use($userids){
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                                {
-                                    $query->whereIn('executive_id',$userids);
-                                }
-                            })->latest()->newQuery();
+        $query = $model->with('sellers', 'buyers', 'statusname', 'createdbyname')
+            ->whereHas('buyers', function($query) use($userids) {
+                if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                    $query->whereIn('executive_id', $userids);
+                }
+            })->newQuery();
+
+        // Apply filters
+        if (request()->has('retailers_id') && request()->get('retailers_id') != '') {
+            $query->where('buyer_id', request()->get('retailers_id'));
+        }
+
+        if (request()->has('distributor_id') && request()->get('distributor_id') != '') {
+            $query->where('seller_id', request()->get('distributor_id'));
+        }
+
+        return $query->latest();
     }
+
 
     /**
      * Optional method if you want to use html builder.

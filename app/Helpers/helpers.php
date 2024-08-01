@@ -381,7 +381,7 @@ if (! function_exists('getUsersReportingToAuth')) {
         $userid = !empty($userid) ? $userid : Auth::user()->id;
         $userinfo = User::where('id','=',$userid)->first();
 
-        $all_users = User::get();
+        $all_users = User::where('active' , 'Y')->get();
      
         // if(!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin'))
         // {
@@ -404,14 +404,14 @@ if (! function_exists('getUsersReportingToAuth')) {
                 $test = getAllChild($test, $all_users);
             }
         }elseif($userinfo->hasRole('Accounts Order')){
-            $all_ids_array = User::whereIn('branch_id', explode(',', $userinfo->branch_show))->pluck('id')->toArray();
+            $all_ids_array = User::where('active' , 'Y')->whereIn('branch_id', explode(',', $userinfo->branch_show))->pluck('id')->toArray();
             $test = getAllChild(array($userid), $all_users);
             while(count($test) > 0){
                 $all_ids_array = array_merge($all_ids_array, $test);
                 $test = getAllChild($test, $all_users);
             }
         }else{
-            $all_ids_array = User::pluck('id')->toArray();
+            $all_ids_array = User::where('active' , 'Y')->pluck('id')->toArray();
         }
 
         return $all_ids_array ;
@@ -447,6 +447,8 @@ if (! function_exists('insertSales')) {
                             'sub_total'=> isset($item['sub_total']) ? $item['sub_total'] : 0.00 ,
                             'grand_total' => isset($item['grand_total']) ? $item['grand_total'] : 0.00 , 
                             'description' => isset($item['description']) ? $item['description'] : '' ,
+                            'lr_no' =>  isset($item['lr_no'])? $item['lr_no'] :null,
+                            'dispatch_date' =>  isset($item['dispatch_date'])? $item['dispatch_date'] :null,
                             // 'status_id' => isset($item['status_id']) ? $item['status_id'] : 6 ,
                             'status_id' => isset($item['status_id']) ? $item['status_id'] : null ,
                             'fiscal_year' => fiscalYear($item['invoice_date']),

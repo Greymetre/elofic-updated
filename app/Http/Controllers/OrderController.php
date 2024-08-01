@@ -29,6 +29,7 @@ use App\Http\Requests\OrderRequest;
 use App\Mail\OrderMailWithAttachment;
 use App\Models\Category;
 use App\Models\Division;
+// use App\Models\Customers;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Illuminate\Support\Facades\Mail;
@@ -44,8 +45,12 @@ class OrderController extends Controller
     public function index(OrderDataTable $dataTable)
     {
         abort_if(Gate::denies('order_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $sellers_ids = $this->orders->distinct()->pluck('seller_id');
+        $buyer_ids = $this->orders->distinct()->pluck('buyer_id');
         $divisions = Category::where('active', 'Y')->get();
-        return $dataTable->render('orders.index', compact('divisions'));
+        $retailers = Customers::whereIn("id" , $buyer_ids)->get();
+        $distributors = Customers::whereIn("id" , $sellers_ids)->get();
+        return $dataTable->render('orders.index', compact('divisions','retailers','distributors'));
     }
 
     /**
@@ -611,10 +616,12 @@ class OrderController extends Controller
         try {
 
             $validator = Validator::make($request->all(), [
-                'invoice_no' => 'required',
-                'order_id' => 'required',
-                'invoice_date' => 'required',
-
+                'invoice_no'       => 'required',
+                'order_id'         => 'required',
+                'invoice_date'     => 'required',
+                // 'transport_name'   => 'required',
+                'lr_no'            => 'required',
+                'dispatch_date'    => 'required'
             ]);
             if ($validator->fails()) {
                 return redirect()->back()
@@ -628,6 +635,9 @@ class OrderController extends Controller
             $orders = $this->orders->with('orderdetails')->find($orderid);
             $orders['invoice_date'] = $request['invoice_date'];
             $orders['invoice_no'] = $request['invoice_no'];
+            // $orders['transport_name'] = $request['transport_name'];
+            $orders['lr_no'] = $request['lr_no'];
+            $orders['dispatch_date'] = $request['dispatch_date'];
             $orders['transport_details'] = $request['transport_details'];
             $orders['order_id'] = $orderid;
             $orders['saledetail'] = $orders['orderdetails'];
@@ -637,19 +647,24 @@ class OrderController extends Controller
 
                 $status_id = Status::where('status_name', '=', 'Dispatched')->pluck('id')->first();
                 $partiallystatus = Status::where('status_name', '=', 'Partially Dispatched')->pluck('id')->first();
-
+              
                 if ($request['orderdetail']) {
                     foreach ($request['orderdetail'] as $key => $rows) {
-
+                        // code chnanges
+                        // $orderdetail = OrderDetails::where('order_id', '=', $request['order_id'])
+                        //     ->where('product_detail_id', '=', $rows['product_detail'])->first();
                         $orderdetail = OrderDetails::where('order_id', '=', $request['order_id'])
-                            ->where('product_detail_id', '=', $rows['product_detail'])->first();
-                        if ($orderdetail['shipped_qty'] + $rows['quantity'] == $orderdetail['quantity']) {
-                            $orderdetail->status_id = $status_id;
-                        } else {
-                            $orderdetail->status_id = $partiallystatus;
+                            ->where('product_detail_id', '=', ($rows['product_detail'] ?? ''))->first();
+                        
+                        if(isset($orderdetail)){
+                            if ($orderdetail['shipped_qty'] + $rows['quantity'] == $orderdetail['quantity']) {
+                                $orderdetail->status_id = $status_id;
+                            } else {
+                                $orderdetail->status_id = $partiallystatus;
+                            }
+                            $orderdetail->increment('shipped_qty', $rows['quantity']);
+                            $orderdetail->save();
                         }
-                        $orderdetail->increment('shipped_qty', $rows['quantity']);
-                        $orderdetail->save();
                     }
                 }
 
@@ -706,12 +721,15 @@ class OrderController extends Controller
                 'invoice_no' => 'required',
                 'order_id' => 'required',
                 'grand_total' => 'required',
+                'lr_no'            => 'required',
+                'dispatch_date'    => 'required'
             ]);
             if ($validator->fails()) {
                 return redirect()->back()
                     ->withErrors($validator)
                     ->withInput();
             }
+           
             $request['saledetail'] = $request['orderdetails'];
             $data = collect([$request]);
             $response = insertSales($data);
@@ -719,21 +737,21 @@ class OrderController extends Controller
                 $status_id = Status::where('status_name', '=', 'Dispatched')->pluck('id')->first();
                 $partiallystatus = Status::where('status_name', '=', 'Partially Dispatched')->pluck('id')->first();
 
-
-                if ($request['orderdetail']) {
+                if (isset($request['orderdetail'])) {
                     foreach ($request['orderdetail'] as $key => $rows) {
-
                         $orderdetail = OrderDetails::where('order_id', '=', $request['order_id'])
-                            ->where('product_detail_id', '=', $rows['product_detail'])->first();
-                        $orderdetail->cash_dis = $rows['cash_dis'];
-                        $orderdetail->cash_amounts = $rows['cash_amounts'];
-                        if ($orderdetail['shipped_qty'] + $rows['quantity'] == $orderdetail['quantity']) {
-                            $orderdetail->status_id = $status_id;
-                        } else {
-                            $orderdetail->status_id = $partiallystatus;
+                            ->where('product_detail_id', '=', ($rows['product_detail'] ?? ''))->first();
+                        if(isset($orderdetail)){
+                            $orderdetail->cash_dis = $rows['cash_dis'];
+                            $orderdetail->cash_amounts = $rows['cash_amounts'];
+                            if ($orderdetail['shipped_qty'] + $rows['quantity'] == $orderdetail['quantity']) {
+                                $orderdetail->status_id = $status_id;
+                            } else {
+                                $orderdetail->status_id = $partiallystatus;
+                            }
+                            $orderdetail->increment('shipped_qty', $rows['quantity']);
+                            $orderdetail->save();
                         }
-                        $orderdetail->increment('shipped_qty', $rows['quantity']);
-                        $orderdetail->save();
                     }
                 }
 

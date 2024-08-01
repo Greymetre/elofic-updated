@@ -72,6 +72,7 @@ use App\Http\Controllers\MobileUserLoginDetailsController;
 use App\Http\Controllers\NewJoiningController;
 use App\Http\Controllers\ServiceBillController;
 use App\Http\Controllers\ServiceChargeProductsController;
+use App\Http\Controllers\FieldKonnectAppSettings;
 
 /*
 |--------------------------------------------------------------------------
@@ -107,6 +108,7 @@ Route::get('contactus', function () {
     return view('contactus');
 });
 Route::get('/home', [HomeController::class, 'index'])->name('home');
+Route::get('/privcay-policy', [NewJoiningController::class, 'privacyPolicy'])->name('privacyPolicy');
 
 //New Joining without auth Route
 Route::get('/new-joining-form', [NewJoiningController::class, 'create'])->name('joining-form');
@@ -410,6 +412,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('gifts-template', [GiftController::class, 'template'])->name('gifts.template');
     Route::post('gifts-upload', [GiftController::class, 'upload'])->name('gifts.upload');
     Route::post('gifts-active', [GiftController::class, 'active'])->name('gifts.active');
+    Route::get('gifts-pdf', [GiftController::class, 'generatePdf'])->name('gifts.pdf');
     //Wallets
     Route::resource('wallets', WalletController::class);
     Route::any('wallets-download', [WalletController::class, 'download'])->name('wallets.download');
@@ -783,6 +786,9 @@ Route::group(['middleware' => ['auth']], function () {
     // Loyalty App Setting Route
     Route::resource('loyalty-app-setting', LoyaltyAppSettingController::class);
 
+    // FieldKonnectAppSetting App Setting Route
+    Route::resource('field-konnect-app-setting', FieldKonnectAppSettings::class);
+    
     // Damage Entry Route
     Route::resource('damage_entries', DamageEntryController::class);
     Route::get('damage-entries-change-status', [DamageEntryController::class, 'changeStatus'])->name('damage_entries.changeStatus');

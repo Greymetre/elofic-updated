@@ -105,12 +105,8 @@
                 <th colspan="3">{{$order->gst18_amt}}</th>
             </tr>
             @endif
-            @if($order->gst28_amt && $order->gst28_amt != '' && $order->gst28_amt != NULL)
-            <tr>
-                <th colspan="2">28% Tax</th>
-                <th colspan="3">{{$order->gst28_amt}}</th>
-            </tr>
-            @endif
+          
+          
             <tr>
                 <th colspan="2">Total Order Value</th>
                 <th colspan="3">{{$order->grand_total}}</th>

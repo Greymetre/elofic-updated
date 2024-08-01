@@ -14,6 +14,7 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Illuminate\Support\Facades\Auth;
 use App\Models\SalesTargetUsers;
 use App\Models\User;
+use Carbon\Carbon;
 use DB;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
@@ -139,7 +140,15 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
 
         if($month == 'Apr' && $f_year_array[0] == $year[$key]) {
             $response[6] = $data['targets'][$key];
-            $response[7] = $data['achievements'][$key]??'';
+            if ($data->user->sales_type == 'Primary') {
+                $monthNumber = Carbon::parse("1 $month")->month;
+                $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
+                $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
+
+                $response[7] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount'))/100000, 2, '.', '');
+            }else{
+                $response[7] = $data['achievements'][$key]??'';
+            }
             if(isset($response[6]) && isset($response[7]) && !empty($response[7]) && !empty($response[6])) {
                 $achievementPercent = ($response[6] == 0) ? 0 : ($response[7] * 100 / $response[6]);
             }else{
@@ -164,7 +173,15 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         $year = explode(',',$data['years']);
         if($month == 'May' && $f_year_array[0] == $year[$key]) {
             $response[9] = $data['targets'][$key];
-            $response[10] = $data['achievements'][$key]??'';
+            if ($data->user->sales_type == 'Primary') {
+                $monthNumber = Carbon::parse("1 $month")->month;
+                $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
+                $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
+
+                $response[10] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount'))/100000, 2, '.', '');
+            }else{
+                $response[10] = $data['achievements'][$key]??'';
+            }
             if(isset($response[9]) && isset($response[10]) && !empty($response[10]) && !empty($response[9])) {
                 $achievementPercent = ($response[9] == 0) ? 0 : ($response[10] * 100 / $response[9]);
             }else{
@@ -189,7 +206,15 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         $year = explode(',',$data['years']);
         if($month == 'Jun' && $f_year_array[0] == $year[$key]) {
             $response[12] = $data['targets'][$key];
-            $response[13] = $data['achievements'][$key]??'';
+            if ($data->user->sales_type == 'Primary') {
+                $monthNumber = Carbon::parse("1 $month")->month;
+                $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
+                $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
+
+                $response[13] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount'))/100000, 2, '.', '');
+            }else{
+                $response[13] = $data['achievements'][$key]??'';
+            }
             if(isset($response[12]) && isset($response[13]) && !empty($response[13]) && !empty($response[12])) {
                 $achievementPercent = ($response[12] == 0) ? 0 : ($response[13] * 100 / $response[12]);
             }else{
@@ -217,7 +242,15 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         $year = explode(',',$data['years']);
         if($month == 'Jul' && $f_year_array[0] == $year[$key]) {
             $response[19] = $data['targets'][$key];
-            $response[20] = $data['achievements'][$key]??'';
+            if ($data->user->sales_type == 'Primary') {
+                $monthNumber = Carbon::parse("1 $month")->month;
+                $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
+                $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
+
+                $response[20] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount'))/100000, 2, '.', '');
+            }else{
+                $response[20] = $data['achievements'][$key]??'';
+            }
             if(isset($response[19]) && isset($response[20]) && !empty($response[20]) && !empty($response[19])) {
                 $achievementPercent = ($response[19] == 0) ? 0 : ($response[20] * 100 / $response[19]);
             }else{
@@ -241,7 +274,15 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         $year = explode(',',$data['years']);
         if($month == 'Aug' && $f_year_array[0] == $year[$key]) {
             $response[22] = $data['targets'][$key];
-            $response[23] = $data['achievements'][$key]??'';
+            if ($data->user->sales_type == 'Primary') {
+                $monthNumber = Carbon::parse("1 $month")->month;
+                $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
+                $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
+
+                $response[23] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount'))/100000, 2, '.', '');
+            }else{
+                $response[23] = $data['achievements'][$key]??'';
+            }
             if(isset($response[22]) && isset($response[23]) && !empty($response[23]) && !empty($response[22])) {
                 $achievementPercent = ($response[22] == 0) ? 0 : ($response[23] * 100 / $response[22]);
             }else{
@@ -265,7 +306,15 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         $year = explode(',',$data['years']);
         if($month == 'Sep' && $f_year_array[0] == $year[$key]) {
             $response[25] = $data['targets'][$key];
-            $response[26] = $data['achievements'][$key]??'';
+            if ($data->user->sales_type == 'Primary') {
+                $monthNumber = Carbon::parse("1 $month")->month;
+                $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
+                $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
+
+                $response[26] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount'))/100000, 2, '.', '');
+            }else{
+                $response[26] = $data['achievements'][$key]??'';
+            }
             if(isset($response[25]) && isset($response[26]) && !empty($response[26]) && !empty($response[25])) {
                 $achievementPercent = ($response[25] == 0) ? 0 : ($response[26] * 100 / $response[25]);
             }else{
@@ -294,7 +343,15 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         $year = explode(',',$data['years']);
         if($month == 'Oct' && $f_year_array[0] == $year[$key]) {
             $response[31] = $data['targets'][$key];
-            $response[32] = $data['achievements'][$key]??'';
+            if ($data->user->sales_type == 'Primary') {
+                $monthNumber = Carbon::parse("1 $month")->month;
+                $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
+                $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
+
+                $response[32] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount'))/100000, 2, '.', '');
+            }else{
+                $response[32] = $data['achievements'][$key]??'';
+            }
             if(isset($response[31]) && isset($response[32]) && !empty($response[32]) && !empty($response[31])) {
                 $achievementPercent = ($response[31] == 0) ? 0 : ($response[32] * 100 / $response[31]);
             }else{
@@ -318,7 +375,15 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         $year = explode(',',$data['years']);
         if($month == 'Nov' && $f_year_array[0] == $year[$key]) {
             $response[34] = $data['targets'][$key];
-            $response[35] = $data['achievements'][$key]??'';
+            if ($data->user->sales_type == 'Primary') {
+                $monthNumber = Carbon::parse("1 $month")->month;
+                $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
+                $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
+
+                $response[35] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount'))/100000, 2, '.', '');
+            }else{
+                $response[35] = $data['achievements'][$key]??'';
+            }
             if(isset($response[34]) && isset($response[35]) && !empty($response[35]) && !empty($response[34])) {
                 $achievementPercent = ($response[34] == 0) ? 0 : ($response[35] * 100 / $response[34]);
             }else{
@@ -342,7 +407,15 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         $year = explode(',',$data['years']);
         if($month == 'Dec' && $f_year_array[0] == $year[$key]) {
             $response[37] = $data['targets'][$key];
-            $response[38] = $data['achievements'][$key]??'';
+            if ($data->user->sales_type == 'Primary') {
+                $monthNumber = Carbon::parse("1 $month")->month;
+                $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
+                $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
+
+                $response[38] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount'))/100000, 2, '.', '');
+            }else{
+                $response[38] = $data['achievements'][$key]??'';
+            }
             if(isset($response[37]) && isset($response[38]) && !empty($response[38]) && !empty($response[37])) {
                 $achievementPercent = ($response[37] == 0) ? 0 : ($response[38] * 100 / $response[37]);
             }else{
@@ -370,7 +443,15 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         $year = explode(',',$data['years']);
         if($month == 'Jan' && $f_year_array[1] == $year[$key]) {
             $response[43] = $data['targets'][$key];
-            $response[44] = $data['achievements'][$key]??'';
+            if ($data->user->sales_type == 'Primary') {
+                $monthNumber = Carbon::parse("1 $month")->month;
+                $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
+                $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
+
+                $response[44] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount'))/100000, 2, '.', '');
+            }else{
+                $response[44] = $data['achievements'][$key]??'';
+            }
             if(isset($response[43]) && isset($response[44]) && !empty($response[44]) && !empty($response[43])) {
                 $achievementPercent = ($response[43] == 0) ? 0 : ($response[44] * 100 / $response[43]);
             }else{
@@ -394,7 +475,15 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         $year = explode(',',$data['years']);
         if($month == 'Feb' && $f_year_array[1] == $year[$key]) {
             $response[46] = $data['targets'][$key];
-            $response[47] = $data['achievements'][$key]??'';
+            if ($data->user->sales_type == 'Primary') {
+                $monthNumber = Carbon::parse("1 $month")->month;
+                $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
+                $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
+
+                $response[47] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount'))/100000, 2, '.', '');
+            }else{
+                $response[47] = $data['achievements'][$key]??'';
+            }
             if(isset($response[46]) && isset($response[47]) && !empty($response[47]) && !empty($response[46])) {
                 $achievementPercent = ($response[46] == 0) ? 0 : ($response[47] * 100 / $response[46]);
             }else{
@@ -418,7 +507,15 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         $year = explode(',',$data['years']);
         if($month == 'Mar' && $f_year_array[1] == $year[$key]) {
             $response[49] = $data['targets'][$key];
-            $response[50] = $data['achievements'][$key]??'';
+            if ($data->user->sales_type == 'Primary') {
+                $monthNumber = Carbon::parse("1 $month")->month;
+                $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
+                $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
+
+                $response[48] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount'))/100000, 2, '.', '');
+            }else{
+                $response[48] = $data['achievements'][$key]??'';
+            }
             if(isset($response[49]) && isset($response[50]) && !empty($response[50]) && !empty($response[49])) {
                 $achievementPercent = ($response[49] == 0) ? 0 : ($response[50] * 100 / $response[49]);
             }else{

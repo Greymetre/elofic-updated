@@ -265,7 +265,14 @@ class AttendanceController extends Controller
               } elseif ($attendance_details->working_type == 'Office Work') {
                 $label_data[] =  'P';
                 $total_p++;
-              } elseif ($attendance_details->working_type == 'Plumber Meet') {
+              } elseif ($attendance_details->working_type == 'Office Meeting') {
+                $label_data[] =  'P';
+                $total_p++;
+              }elseif ($attendance_details->working_type == 'Scouting for market') {
+                $label_data[] =  'P';
+                $total_p++;
+              }
+               elseif ($attendance_details->working_type == 'Plumber Meet') {
                 $label_data[] =  'P';
                 $total_p++;
               } elseif ($attendance_details->working_type == 'Retailer Meet') {

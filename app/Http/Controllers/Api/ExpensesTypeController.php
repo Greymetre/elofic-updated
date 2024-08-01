@@ -146,19 +146,33 @@ class ExpensesTypeController extends Controller
     public function expenseListing(Request $request)
     {
         try {
+            $payroll_id = $request->payroll_id ?? '';
             $userids = getUsersReportingToAuth();
             $pageSize = $request->input('pageSize');
             // $query = Expenses::with('media','expense_type')->whereIn('user_id',$userids)->orderBy('id','desc');
             $query = Expenses::with('media', 'expense_type')->where(['user_id' => Auth::Id()])->orderBy('id', 'desc');
+            $expence_types = ExpensesType::where('payroll_id', $payroll_id)->get()->map(function($item) {
+                return [
+                    'id' => $item->id,
+                    'name' => $item->name
+                ];
+            })->toArray();
             //$expenses = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
             if (!empty($request['start_date']) && !empty($request['end_date'])) {
                 $query->whereBetween('date', [$request['start_date'], $request['end_date']]);
             }
+            if (!empty($request['expenses_type'])) {
+                $query->where('expenses_type',$request['expenses_type']);
+            }
+            if ((!empty($request['status']) || $request['status'] == 0) && $request['status'] != null) {
+                $query->where('checker_status',$request['status']);
+            }
+            $all_status = [['id' => '0', 'name' => 'Pending'], ['id' => '1', 'name' => 'Approved'], ['id' => '2', 'name' => 'Rejected'], ['id' => '3', 'name' => 'Checked'] ,['id' => '4', 'name' => 'Checked By Reporting']];
             $expenses = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->paginate(100);
-
+            $datas = array();
             if ($expenses->isNotEmpty()) {
 
-                $datas = array();
+               
                 foreach ($expenses as $expense) {
 
                     // $image = '';  
@@ -207,9 +221,9 @@ class ExpensesTypeController extends Controller
                     );
                 }
 
-                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $datas], $this->successStatus);
+                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $datas , 'expence_types' => $expence_types , 'all_status' => $all_status], $this->successStatus);
             }
-            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $expenses], 200);
+            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $datas , 'expence_types' => $expence_types , 'all_status' => $all_status], 200);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
@@ -386,6 +400,7 @@ class ExpensesTypeController extends Controller
     public function allExpenseListing(Request $request)
     {
         try {
+
             $user = $request->user();
             $user_id = $user->id;
             $userids = getUsersReportingToAuth($user_id);
@@ -400,6 +415,9 @@ class ExpensesTypeController extends Controller
             if (!empty($request['start_date']) && !empty($request['end_date'])) {
                 $query->whereBetween('date', [$request['start_date'], $request['end_date']]);
             }
+            if ((!empty($request['status']) || $request['status'] == 0) && $request['status'] != null) {
+                $query->where('checker_status',$request['status']);
+            }
             if (!empty($request['user_id'])) {
                 $query->where('user_id', $request['user_id']);
             } else {
@@ -408,9 +426,32 @@ class ExpensesTypeController extends Controller
             // dd($query->toSql());
             $expenses = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->paginate(100);
 
+            $all_status = [['id' => '0', 'name' => 'Pending'], ['id' => '1', 'name' => 'Approved'], ['id' => '2', 'name' => 'Rejected'], ['id' => '3', 'name' => 'Checked'] ,['id' => '4', 'name' => 'Checked By Reporting']];
+            $datas = array();
+            $all_user_branches = User::with('getbranch')->whereIn('id', getUsersReportingToAuth($user_id))->orderBy('branch_id')->get();
+            $branches = array();
+            $all_branch = array();
+            $bkey = 0;
+            foreach ($all_user_branches as $k => $val) {
+                if ($val->getbranch) {
+                    if (!in_array($val->getbranch->id, $all_branch)) {
+                        array_push($all_branch, $val->getbranch->id);
+                        $branches[$bkey]['id'] = $val->getbranch->id;
+                        $branches[$bkey]['name'] = $val->getbranch->branch_name;
+                        $bkey++;
+                    }
+                }
+            }
+
+            $all_user_details = User::with('getbranch')->whereIn('id', $userids)->orderBy('branch_id')->get();
+            $all_users = array();
+            foreach ($all_user_details as $k => $val) {
+                $all_users[$k]['id'] = $val->id;
+                $all_users[$k]['name'] = $val->name;
+            }
             if ($expenses->isNotEmpty()) {
 
-                $datas = array();
+               
                 foreach ($expenses as $expense) {
 
                     // $image = '';  
@@ -461,31 +502,11 @@ class ExpensesTypeController extends Controller
                     );
                 }
 
-                $all_user_branches = User::with('getbranch')->whereIn('id', getUsersReportingToAuth($user_id))->orderBy('branch_id')->get();
-                $branches = array();
-                $all_branch = array();
-                $bkey = 0;
-                foreach ($all_user_branches as $k => $val) {
-                    if ($val->getbranch) {
-                        if (!in_array($val->getbranch->id, $all_branch)) {
-                            array_push($all_branch, $val->getbranch->id);
-                            $branches[$bkey]['id'] = $val->getbranch->id;
-                            $branches[$bkey]['name'] = $val->getbranch->branch_name;
-                            $bkey++;
-                        }
-                    }
-                }
+               
 
-                $all_user_details = User::with('getbranch')->whereIn('id', $userids)->orderBy('branch_id')->get();
-                $all_users = array();
-                foreach ($all_user_details as $k => $val) {
-                    $all_users[$k]['id'] = $val->id;
-                    $all_users[$k]['name'] = $val->name;
-                }
-
-                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'users' => $all_users, 'branches' => $branches, 'data' => $datas], $this->successStatus);
+                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'users' => $all_users, 'branches' => $branches,'all_status'=> $all_status ,'data' => $datas], $this->successStatus);
             }
-            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $expenses], 200);
+            return response(['status' => 'error', 'message' => 'No Record Found.',  'users' => $all_users, 'branches' => $branches,'all_status'=> $all_status ,'data' => $datas , 'dummy' =>$request['status']], 200);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
