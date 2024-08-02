@@ -11,12 +11,16 @@ class SalesTargetUsers extends Model
 
     protected $table = 'salestargetusers';
 
-    protected $fillable = [ 'user_id', 'type', 'month' ,'year', 'target', 'achievement','achievement_percent','created_at', 'updated_at' ];
+    protected $fillable = [ 'user_id', 'branch_id', 'type', 'month' ,'year', 'target', 'achievement','achievement_percent','created_at', 'updated_at' ];
 
     public $timestamps = true;
 
     public function user()  {
         return $this->belongsTo(User::class);
+    }
+
+    public function branch()  {
+        return $this->belongsTo(Branch::class);
     }
 
 }

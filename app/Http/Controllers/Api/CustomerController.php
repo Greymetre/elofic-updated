@@ -437,11 +437,12 @@ class CustomerController extends Controller
     {
 
         $cityid = $request->city_id;
+        $customertype = $request->customertype;
         $customer_id = array();
         if(!empty($cityid) && $cityid[0]!=null){ 
          $customer_id = Address::whereIn('city_id',$cityid)->pluck('customer_id');
         }
-
+        $customerTypes = CustomerType::select('id', 'customertype_name')->get();
         $branch_id = $request->branch_id;
         $branch_user_id = array();
         if(!empty($branch_id) && $branch_id[0]!=null){ 
@@ -460,7 +461,7 @@ class CustomerController extends Controller
             $pageSize = $request->input('pageSize');
             $search = $request['search'] ;
             $query = $this->customers->with('customeraddress','customerdetails','customertypes')->where('active', 'Y')
-                            ->where(function($query) use($search, $userids,$customer_id,$branch_user_id) {
+                            ->where(function($query) use($search, $userids,$customer_id,$branch_user_id,$customertype) {
                                 if(!empty($search))
                                 {
                                     // $query->where('name', 'like', "%{$search}%")->whereIn('executive_id', $userids)
@@ -473,6 +474,10 @@ class CustomerController extends Controller
 
                                 if(!empty($customer_id)){
                                   $query->whereIn('id', $customer_id);
+                                }
+                                
+                                if(!empty($customertype)){
+                                  $query->where('customertype', $customertype);
                                 }
 
                                 // if(!empty($branch_user_id)){
@@ -531,7 +536,7 @@ class CustomerController extends Controller
                         'distance' => '',
                     ]);
                 }
-                return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','data' => $data ], $this->successStatus);
+                return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','customerTypes' => $customerTypes,'data' => $data ], $this->successStatus);
             }
             return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data ],200);  
             

@@ -20,7 +20,7 @@ class SalesTargetUsersTemplate implements FromCollection,WithHeadings,ShouldAuto
 
     public function headings(): array
     {
-        return [['User Id', 'User Name', 'Type', 'Month', 'Target Value'],['','','Add primary or secondary value only.please remove this row before upload.']];
+        return [['User Id', 'Branch Id', 'User Name', 'Type', 'Month', 'Target Value'],['','','Add primary or secondary value only.please remove this row before upload.']];
     }
 
 }

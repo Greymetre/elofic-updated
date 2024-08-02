@@ -92,7 +92,7 @@ class OrderController extends Controller
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
             $data = collect([]);
             $users = User::where('active', 'Y')->whereIn('id',$user_ids)->select('id', 'name')->get();
-            $all_status = [['id' => '0', 'name' => 'Ongoing'], ['id' => '1', 'name' => 'Dispatched'], ['id' => '2', 'name' => 'Partially Dispatched'], ['id' => '3', 'name' => 'Full Dispatch'] ,['id' => '4', 'name' => 'Cancel'] ];
+            $all_status = [['id' => '0', 'name' => 'Pending'], ['id' => '1', 'name' => 'Dispatched'], ['id' => '2', 'name' => 'Partially Dispatched'], ['id' => '3', 'name' => 'Full Dispatch'] ,['id' => '4', 'name' => 'Cancel'] ];
             if ($db_data->isNotEmpty()) {
                 foreach ($db_data as $key => $value) {
                     $data->push([
@@ -109,7 +109,8 @@ class OrderController extends Controller
                         'completed_date' => isset($value['completed_date']) ? $value['completed_date'] : '',
                         'grand_total' => isset($value['grand_total']) ? $value['grand_total'] : 0.00,
                         'sub_total' => isset($value['sub_total']) ? $value['sub_total'] : 0.00,
-                        'order_status' => isset($value['statusname']) ? $value['statusname']['status_name'] : 'Ongoing',
+                        'order_status' => isset($value['statusname']) ? $value['statusname']['status_name'] : 'Pending',
+                        'order_status_id' => (isset($value['status_id']) && $value['status_id'] != NULL) ? $value['status_id'] : '0',
                         'creatd_by'    => isset($value['createdbyname']) ? $value['createdbyname']['name'] : '',
                     ]);
                 }
@@ -137,7 +138,7 @@ class OrderController extends Controller
             $salesdetails = Sales::where('order_id' , $order_id)->first() ?? [];
 
             $data['schme_amount'] = (string)$data['schme_amount'];
-            $data['order_status'] = isset($data['statusname']) ? $data['statusname']['status_name'] : 'Ongoing';
+            $data['order_status'] = isset($data['statusname']) ? $data['statusname']['status_name'] : 'Pending';
             $data['dispatch_date'] = isset($salesdetails) ? (isset($salesdetails['dispatch_date']) ? Carbon::parse($salesdetails['dispatch_date'])->format('d-m-Y') : '') : '';
             $data['lr_no'] = isset($salesdetails) ? isset($salesdetails['lr_no']) ? (string)$salesdetails['lr_no']  : '' :'';
             $data['invoice_no'] = isset($salesdetails) ? (isset($salesdetails['invoice_no']) ? $salesdetails['invoice_no']  : '') :'';
@@ -159,7 +160,7 @@ class OrderController extends Controller
             $data['gst12_amt'] = (string)$data['gst12_amt'];
             $data['gst18_amt'] = (string)$data['gst18_amt'];
             $data['gst28_amt'] = (string)$data['gst28_amt'];
-            $data['status_id'] = (string)$data['status_id'];
+            $data['status_id'] = ($data['status_id'] && $data['status_id'] != NULL)?(string)$data['status_id']:"0";
             $data['address_id'] = (string)$data['address_id'];
             $data['suc_del'] = (string)$data['suc_del'];
             $data['gst_amount'] = (string)$data['gst_amount'];
@@ -563,5 +564,20 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
+    }
+
+    public function deleteOrder(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'order_id' => 'required|exists:orders,id',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
+        }
+
+        OrderDetails::where('order_id', $request->order_id)->delete();
+        Order::where('id', $request->order_id)->delete();
+
+        return response()->json(['status' => 'success', 'message' => 'Order deleted successfully.'], 200);
     }
 }

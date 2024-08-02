@@ -44,14 +44,15 @@ class SalesTargetUsersImport implements ToCollection,WithValidation,WithHeadingR
             $carbonDate = Carbon::createFromTimestamp($unixTimestamp);
             $carbonMonth = $carbonDate->format('M');
             $carbonYear = $carbonDate->format('Y');
-            // dd($row );
-
+            
             $salesTargetUsers = SalesTargetUsers::updateOrCreate([
                 'user_id' => $row['user_id'],
                 'month' => $carbonMonth,
+                'branch_id' => $row['branch_id'],
                 'year' => $carbonYear],[
 
                 'user_id' => $row['user_id'],
+                'branch_id' => $row['branch_id'],
                 'type' => $row['type'],
                 'month' => $carbonMonth,
                 'year' => $carbonYear,

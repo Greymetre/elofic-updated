@@ -1037,6 +1037,14 @@
                     </a>
                   </li>
                   @endif
+                  @if(auth()->user()->can('top_dealer_access'))
+                  <li class="nav-item {{ request()->is('reports/top_dealer*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('reports/top_dealer') }}">
+                      <i class="material-icons">store</i>
+                      <p>Top Dealer</p>
+                    </a>
+                  </li>
+                  @endif
                 </ul>
               </div>
             </li>
