@@ -172,6 +172,11 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('per_employee_costing/download', [ReportController::class, 'per_employee_costing_download'])->name('per_employee_costing.download');
     Route::any('per_employee_costing/list', [ReportController::class, 'per_employee_costing_list'])->name('per_employee_costing.list');
 
+    // Top Dealer
+    Route::any('reports/top_dealer', [ReportController::class, 'top_dealer']);
+    Route::any('top_dealer/download', [ReportController::class, 'top_dealer_download'])->name('top_dealer.download');
+    Route::any('top_dealer/list', [ReportController::class, 'top_dealer_list'])->name('top_dealer.list');
+
     //Customers
     Route::resource('customertype', CustomerTypeController::class);
     Route::post('customertype-active', [CustomerTypeController::class, 'active'])->name('customertype.active');

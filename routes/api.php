@@ -134,6 +134,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::any('dashboard', [DashboardController::class, 'dashboard']);
     Route::any('pendingCounts', [DashboardController::class, 'pendingCounts']);
     Route::any('getUserDashboardData', [DashboardController::class, 'getUserDashboardData']);
+    Route::any('getSarthiPoints', [DashboardController::class, 'getSarthiPoints']);
 
     Route::any('getProfile', [LoginController::class, 'getProfile']);
     Route::post('updateProfile', [LoginController::class, 'updateProfile']);
@@ -157,6 +158,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::post('addCartItems', [OrderController::class, 'addCartItems']);
     Route::get('getCartItems', [OrderController::class, 'getCartItems']);
     Route::any('getOrderPfd', [OrderController::class, 'getOrderPfd']);
+    Route::post('customer/deleteOrder', [OrderController::class, 'deleteOrder']);
 
     //Leave
     Route::any('addLeaves', [LeaveController::class, 'addLeaves']);
@@ -231,4 +233,5 @@ Route::group(['middleware' => ['auth:users']], function () {
 
     //Report 
     Route::get('primary-sales', [ReportController::class, 'primarySales']);
+    Route::get('monthly-sales', [ReportController::class, 'monthlySales']);
 });

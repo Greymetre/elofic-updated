@@ -237,7 +237,7 @@
                   <label class="col-md-3 col-form-label">{!! trans('panel.sales_target_user.fields.user') !!} <span class="text-danger"> *</span></label>
                   <div class="col-md-9">
                     <div class="form-group has-default bmd-form-group">
-                      <select class="form-control select2" name="user_id" id="user_id" title="{!! trans('panel.sales_users.user_name') !!}">
+                      <select class="select2" name="user_id" id="user_id" title="{!! trans('panel.sales_users.user_name') !!}">
                         <option value="form-control" disabled selected>{!! trans('panel.sales_users.target_users') !!}</option>
                         @if(@isset($users ))
                         @foreach($users as $user)
@@ -404,7 +404,7 @@
             "defaultContent": ''
           },
           {
-            data: 'user.getbranch.branch_name',
+            data: 'branch.branch_name',
             name: 'branch',
             orderable: false,
             searchable: false,
@@ -483,7 +483,6 @@
       $(document).on('click', '.edit', function() {
         var base_url = $('.baseurl').data('baseurl');
         var id = $(this).attr('id');
-
         $.ajax({
           url: base_url + '/sales-target-users/' + id,
           dataType: "json",
@@ -494,13 +493,14 @@
             $('#target').val(data.target);
             $('#type').val(data.type);
             $('#sales_target_id').val(data.id);
-
+            
             $('#month option[value="' + data.month + '"]').prop('selected', true);
             $('#year option[value="' + data.year + '"]').prop('selected', true);
             $('#user_id').trigger('change');
-
+            
             $('#action_button').val('Edit');
             $('#editSalesTargetUser').modal('show');
+            $('.select2').select2();
           }
         })
       });

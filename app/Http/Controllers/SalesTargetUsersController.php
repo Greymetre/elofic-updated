@@ -79,7 +79,7 @@ class SalesTargetUsersController extends Controller
     public function sales_target_users_list(Request $request)
     {
         $userIds = getUsersReportingToAuth();
-        $query = SalesTargetUsers::with(['user', 'user.getbranch', 'user.getdesignation'])->whereIn('user_id', $userIds)->where(function ($query) use ($request) {
+        $query = SalesTargetUsers::with(['user', 'branch', 'user.getdesignation'])->whereIn('user_id', $userIds)->where(function ($query) use ($request) {
 
             if ($request->month && $request->month != '' && $request->month != null) {
                 $query->where('month', $request->month);
