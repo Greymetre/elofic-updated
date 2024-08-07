@@ -15,8 +15,9 @@
                   <div class="d-flex flex-wrap flex-row">
                     <!-- division filter -->
                     <div class="p-2" style="width:200px;">
-                      <select class="select2" name="division" id="ps_division_id" data-style="select-with-transition" title="{!! trans('panel.secondary_dashboard.division') !!}">
-                        <option value="" disabled selected>{!! trans('panel.secondary_dashboard.division') !!}</option>
+                      <label for="division">Division</label>
+                      <select class="select2" name="division[]" placeholder="Division" multiple id="ps_division_id" data-style="select-with-transition" title="{!! trans('panel.secondary_dashboard.division') !!}">
+                        <option value="" disabled>{!! trans('panel.secondary_dashboard.division') !!}</option>
                         @if(@isset($ps_divisions ))
                         @foreach($ps_divisions as $division)
                         <option value="{!! $division->division !!}">{!! $division->division !!}</option>
@@ -50,8 +51,9 @@
                     </div>
                     <!-- month filter-->
                     <div class="p-2" style="width:200px;">
-                      <select class="selectpicker" name="month" id="ps_month" disabled data-style="select-with-transition" title="Month">
-                        <option value="" selected>{!! trans('panel.secondary_dashboard.month') !!}</option>
+                      <label for="month">Month </label>
+                      <select class="selectpicker" name="month[]" multiple id="ps_month" disabled data-style="select-with-transition" title="Month">
+                        <option value="" disabled>{!! trans('panel.secondary_dashboard.month') !!}</option>
                         @for ($month = 1; $month <= 12; $month++) <option value="{!! date('M', mktime(0, 0, 0, $month, 1)) !!}">{!! date('M', mktime(0, 0, 0, $month, 1)) !!}</option>
                           @endfor
                       </select>

@@ -83,8 +83,8 @@ class ProductAnalysisBranchExport implements FromCollection, WithHeadings,WithMa
             $query->whereBetween('invoice_date', [$startDatethree, $endDatethree]);
         }
         
-        if ($this->division_id && $this->division_id != '' && $this->division_id != null) {
-            $query->where('division', $this->division_id);
+        if ($this->division_id && $this->division_id != '' && $this->division_id != null && count($this->division_id) > 0) {
+            $query->whereIn('division', $this->division_id);
         }
         $this->t_data = $query->get();
 

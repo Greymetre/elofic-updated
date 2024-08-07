@@ -12,9 +12,8 @@
 
                 @if(auth()->user()->can(['order_download']))
                 <form method="GET" action="{{ URL::to('orders-download') }}">
-                  <div class="d-flex flex-row">
-
-                    <div class="p-2" style="width:190px;">
+                  <div class="d-flex flex-wrap flex-row">
+                  <div class="p-2" style="width:190px;">
                       <select class="select2" name="dividion_id" id="dividion_id" required>
                         <option value="">Select Division</option>
                         @foreach($divisions as $division)
@@ -22,6 +21,31 @@
                         @endforeach
                       </select>
                     </div>
+                    <div class="p-2" style="width:190px;">
+                      <select class="select2" name="retailers_id" id="retailers_id" title="Select Retailers">
+                        <option value="">Select Retailers</option>
+                        @foreach($retailers as $user)
+                        <option value="{!! $user['id'] !!}" {{ old( 'retailers_id') == $user->id ? 'selected' : '' }}>{!! $user['name'] !!}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                    <div class="p-2" style="width:190px;">
+                      <select class="select2" name="customer_type_id" id="customer_type_id" title="Select Retailers">
+                        <option value="">Customer Type</option>
+                        @foreach($customer_types as $customer_type)
+                        <option value="{!! $customer_type['id'] !!}" {{ old( 'customer_type_id') == $customer_type->id ? 'selected' : '' }}>{!! $customer_type['customertype_name'] !!}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                    <div class="p-2" style="width:190px;">
+                      <select class="select2" name="distributor_id" id="distributor_id" title="Select Distributor">
+                        <option value="">Select Distributor</option>
+                        @foreach($distributors as $user)
+                        <option value="{!! $user['id'] !!}" {{ old( 'distributor_id') == $user->id ? 'selected' : '' }}>{!! $user['name'] !!}</option>
+                        @endforeach
+                      </select>
+                    </div>
+
                     <div class="p-2" style="width:190px;">
                       <select class="selectpicker" name="pending_status" id="pending_status" data-style="select-with-transition">
                         <option value="">Select Status</option>
@@ -38,23 +62,7 @@
                 @endif
 
                 <div class="next-btn">
-                    <div class="p-2" style="width:190px;">
-                      <select class="select2" name="retailers_id" id="retailers_id" title="Select Retailers">
-                        <option value="">Select Retailers</option>
-                        @foreach($retailers as $user)
-                        <option value="{!! $user['id'] !!}" {{ old( 'retailers_id') == $user->id ? 'selected' : '' }}>{!! $user['name'] !!}</option>
-                        @endforeach
-                      </select>
-                    </div>
-                    <div class="p-2" style="width:190px;">
-                      <select class="select2" name="distributor_id" id="distributor_id" title="Select Distributor">
-                        <option value="">Select Distributor</option>
-                        @foreach($distributors as $user)
-                        <option value="{!! $user['id'] !!}" {{ old( 'distributor_id') == $user->id ? 'selected' : '' }}>{!! $user['name'] !!}</option>
-                        @endforeach
-                      </select>
-                    </div>
-               
+
                   @if(auth()->user()->can(['order_upload']))
                   <form action="{{ URL::to('orders-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                     {{ csrf_field() }}
@@ -148,14 +156,15 @@
         processing: true,
         serverSide: true,
         "order": [
-            [0, 'desc']
+          [0, 'desc']
         ],
         ajax: {
-            url: "{{ route('orders.index') }}",
-            data: function(d) {
-                d.retailers_id = $('#retailers_id').val();
-                d.distributor_id = $('#distributor_id').val();
-            }
+          url: "{{ route('orders.index') }}",
+          data: function(d) {
+            d.retailers_id = $('#retailers_id').val();
+            d.distributor_id = $('#distributor_id').val();
+            d.customer_type_id = $('#customer_type_id').val();
+          }
         },
         columns: [{
             data: 'DT_RowIndex',
@@ -230,12 +239,15 @@
         ]
       });
 
-      $('#retailers_id').change(function(){
-          table.draw();
+      $('#retailers_id').change(function() {
+        table.draw();
       });
 
-      $('#distributor_id').change(function(){
-          table.draw();
+      $('#distributor_id').change(function() {
+        table.draw();
+      });
+      $('#customer_type_id').change(function() {
+        table.draw();
       });
 
       $('body').on('click', '.activeRecord', function() {

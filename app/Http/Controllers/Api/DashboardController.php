@@ -19,6 +19,7 @@ use App\Models\User;
 use App\Models\Attendance;
 use App\Models\BeatSchedule;
 use App\Models\BeatCustomer;
+use App\Models\Branch;
 use App\Models\Order;
 use App\Models\OrderDetails;
 use App\Models\Sales;
@@ -29,6 +30,7 @@ use App\Models\PaymentDetail;
 use App\Models\SalesTarget;
 use App\Models\Customers;
 use App\Models\DealerAppointment;
+use App\Models\Division;
 use App\Models\Expenses;
 use App\Models\LoyaltyAppSetting;
 use App\Models\ParentDetail;
@@ -531,11 +533,20 @@ class DashboardController extends Controller
             $endOfWeek = Carbon::now()->endOfWeek()->toDateString();
         }
 
+        if ($request->division_id && !empty($request->division_id)) {
+            $user_ids = User::where('division_id', $request->division_id)->pluck('id');
+        }
+
         $query = SalesTargetUsers::with('user')
             ->whereIn('user_id', $user_ids);
 
-        if ($request->tamonth && !empty($request->tamonth)) {
-            $query->where(['month' => $request->tamonth, 'year' => $request->tayear]);
+        if ($request->branch_id && !empty($request->branch_id)) {
+            $query->where(['branch_id' => $request->branch_id]);
+        }
+
+
+        if ($request->tamonth && !empty($request->tamonth) && count($request->tamonth) > 0) {
+            $query->where('year', $request->tayear)->whereIn('month', $request->tamonth);
         } elseif ($request->tayear && !empty($request->tayear)) {
             $query->where(['year' => $request->tayear]);
         } else {
@@ -547,34 +558,43 @@ class DashboardController extends Controller
         $achievement = 0;
 
         foreach ($total_data as $key => $value) {
-            if($value->user_id == $request->user_id){
+            if ($value->user_id == $request->user_id) {
                 $target += $value->target;
                 $achievement += $value->achievement;
-            }elseif($value->type == 'primary'){
+            } elseif ($value->type == 'primary') {
                 $target += $value->target;
                 $achievement += $value->achievement;
             }
         }
-
         $order_value = Order::whereBetween('order_date', [$startOfWeek, $endOfWeek])->whereIn('created_by', $user_ids)->sum('sub_total');
         $order_ids = Order::whereBetween('order_date', [$startOfWeek, $endOfWeek])->whereIn('created_by', $user_ids)->pluck('id');
         $order_qty = OrderDetails::whereIn('order_id', $order_ids)->sum('quantity');
         $customer_visit = CheckIn::whereBetween('checkin_date', [$startOfWeek, $endOfWeek])->whereIn('user_id', $user_ids)->count();
         if ($target > 0) {
-            $data['target'] = $target;
+            $data['target'] = (string)$target;
             if ($achievement < 1) {
                 $all_emp_codes = User::whereIn('id', $user_ids)->pluck('employee_codes');
-                if ($request->tamonth && !empty($request->tamonth)) {
-                    $monthNumber = Carbon::parse($request->tamonth)->month;
+                if ($request->tamonth && !empty($request->tamonth) && count($request->tamonth) > 0) {
+                    $monthNumbers = array_map(function ($month) {
+                        return Carbon::parse($month)->month;
+                    }, $request->tamonth);
 
-                    $firstDate = Carbon::createFromDate($request->tayear, $monthNumber, 1)->startOfMonth();
+                    $firstMonthNumber = min($monthNumbers);
+                    $lastMonthNumber = max($monthNumbers);
 
-                    $lastDate = Carbon::createFromDate($request->tayear, $monthNumber, 1)->endOfMonth();
+                    $firstDate = Carbon::createFromDate($request->tayear, $firstMonthNumber, 1)->startOfMonth();
+                    $lastDate = Carbon::createFromDate($request->tayear, $lastMonthNumber, 1)->endOfMonth();
 
                     $firstDateFormatted = $firstDate->toDateString();
                     $lastDateFormatted = $lastDate->toDateString();
 
-                    $achievement = PrimarySales::whereIn('emp_code', $all_emp_codes)->where('invoice_date', '>=', $firstDateFormatted)->where('invoice_date', '<=', $lastDateFormatted)->sum('net_amount');
+                    $achievement = PrimarySales::whereIn('emp_code', $all_emp_codes)->where('invoice_date', '>=', $firstDateFormatted)->where('invoice_date', '<=', $lastDateFormatted);
+                    
+                    if ($request->branch_id && !empty($request->branch_id)) {
+                        $selected_branch = Branch::find($request->branch_id);
+                        $achievement->where(['final_branch' => $selected_branch->branch_name]);
+                    }
+                    $achievement = $achievement->sum('net_amount');
                     if ($achievement > 0) {
                         $achievement = number_format(($achievement / 100000), 2, '.', '');
                         $data['achievement'] = $achievement;
@@ -588,7 +608,12 @@ class DashboardController extends Controller
 
                     $firstDateFormatted = $firstDate->toDateString();
                     $lastDateFormatted = $lastDate->toDateString();
-                    $achievement = PrimarySales::whereIn('emp_code', $all_emp_codes)->where('invoice_date', '>=', $firstDateFormatted)->where('invoice_date', '<=', $lastDateFormatted)->sum('net_amount');
+                    $achievement = PrimarySales::whereIn('emp_code', $all_emp_codes)->where('invoice_date', '>=', $firstDateFormatted)->where('invoice_date', '<=', $lastDateFormatted);
+                    if ($request->branch_id && !empty($request->branch_id)) {
+                        $selected_branch = Branch::find($request->branch_id);
+                        $achievement->where(['final_branch' => $selected_branch->branch_name]);
+                    }
+                    $achievement = $achievement->sum('net_amount');
                     if ($achievement > 0) {
                         $achievement = number_format(($achievement / 100000), 2, '.', '');
                         $data['achievement'] = $achievement;
@@ -596,7 +621,12 @@ class DashboardController extends Controller
                         $data['achievement'] = "0";
                     }
                 } else {
-                    $achievement = PrimarySales::whereIn('emp_code', $all_emp_codes)->where('invoice_date', '>=', date('Y-m') . '-01')->sum('net_amount');
+                    $achievement = PrimarySales::whereIn('emp_code', $all_emp_codes)->where('invoice_date', '>=', date('Y-m') . '-01');
+                    if ($request->branch_id && !empty($request->branch_id)) {
+                        $selected_branch = Branch::find($request->branch_id);
+                        $achievement->where(['final_branch' => $selected_branch->branch_name]);
+                    }
+                    $achievement = $achievement->sum('net_amount');
                     if ($achievement > 0) {
                         $achievement = number_format(($achievement / 100000), 2, '.', '');
                         $data['achievement'] = (string)$achievement;
@@ -624,7 +654,10 @@ class DashboardController extends Controller
         $data['order_qty'] = $order_qty > 0 ? $order_qty : "";
         $data['customer_visit'] = $customer_visit > 0 ? (string)$customer_visit : "";
 
-        return response()->json(['status' => 'success', 'data' => $data], 200);
+        $branches = Branch::where('active', 'Y')->select('id', 'branch_name')->get();
+        $divisions = Division::where('active', 'Y')->select('id', 'division_name')->get();
+
+        return response()->json(['status' => 'success', 'data' => $data, 'Branches' => $branches, 'divisions' => $divisions], 200);
     }
 
     //field connect version

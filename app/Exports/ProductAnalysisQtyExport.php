@@ -85,7 +85,7 @@ class ProductAnalysisQtyExport implements FromCollection, WithHeadings, WithMapp
         }
 
         if ($this->division_id) {
-            $query->where('division', $this->division_id);
+            $query->whereIn('division', $this->division_id);
         }
         // Get total quantities to calculate percentages
         $this->t_data = $query->sum('quantity');

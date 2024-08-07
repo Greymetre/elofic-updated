@@ -131,13 +131,33 @@ class ExpensesDataTable extends DataTable
      */
     public function query(Expenses $model, Request $request)
     {
-        $userids = getUsersReportingToAuth();
+        $login_userid = Auth::user()->id;
+        $all_users = User::all();
+        $userinfo = User::where('id','=',$login_userid)->first();
+        if(!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin') && !$userinfo->hasRole('Sub_Admin') && !$userinfo->hasRole('HR_Admin') && !$userinfo->hasRole('HO_Account')  && !$userinfo->hasRole('Sub_Support') && !$userinfo->hasRole('Accounts Order') && !$userinfo->hasRole('Service Admin') && !$userinfo->hasRole('All Customers'))
+        {
+            $userids = array($login_userid);
+            $test = getAllChild(array($login_userid), $all_users);
+            while(count($test) > 0){
+                $userids = array_merge($userids, $test);
+                $test = getAllChild($test, $all_users);
+            }
+        }elseif($userinfo->hasRole('Accounts Order')){
+            $userids = User::where('active' , 'Y')->whereIn('branch_id', explode(',', $userinfo->branch_show))->pluck('id')->toArray();
+            $test = getAllChild(array($login_userid), $all_users);
+            while(count($test) > 0){
+                $userids = array_merge($userids, $test);
+                $test = getAllChild($test, $all_users);
+            }
+        }else{
+            $userids = User::where('active' , 'Y')->pluck('id')->toArray();
+        }
         $data = $model->with('expense_type', 'users');
         if (!empty($request['payroll'])) {
 
             $payrollid = $request['payroll'];
 
-            $userid = User::where('active', '=', 'Y')->where(function ($query) use ($userids) {
+            $userid = User::where(function ($query) use ($userids) {
                 if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                     $query->whereIn('id', $userids);
                 }

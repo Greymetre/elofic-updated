@@ -1126,7 +1126,7 @@ class DashboardController extends Controller
         abort_if(Gate::denies('primary_sales_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        return Excel::download(new PrimarySalesExport, 'primary_sales.xlsx');
+        return Excel::download(new PrimarySalesExport($request), 'primary_sales.xlsx');
     }
 
     public function primary_sales_upload(Request $request)
@@ -1154,8 +1154,8 @@ class DashboardController extends Controller
             $query->where('final_branch', $request->branch_id);
         }
 
-        if ($request->division_id && $request->division_id != '' && $request->division_id != null) {
-            $query->where('division', $request->division_id);
+        if ($request->division_id && $request->division_id != '' && count($request->division_id) > 0) {
+            $query->whereIn('division', $request->division_id);
         }
 
         if ($request->dealer_id && $request->dealer_id != '' && $request->dealer_id != null) {
@@ -1186,22 +1186,40 @@ class DashboardController extends Controller
             });
         }
 
-        if ($request->month && $request->month != '' && $request->month != null && $request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
+        if ($request->month && $request->month != '' && count($request->month) > 0 && $request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
 
             $f_year_array = explode('-', $request->financial_year);
 
-            if ($request->month == 'Jan' || $request->month == 'Feb' || $request->month == 'Mar') {
+            if (in_array('Jan', $request->month) || in_array('Feb', $request->month) || in_array('Mar', $request->month)) {
                 $currentYear = $f_year_array[1];
-                $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->startOfMonth();
-                $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->endOfMonth();
-                $startDateFormatted = $startDate->toDateString();
-                $endDateFormatted = $endDate->toDateString();
+                $monthNumbers = array_map(function($month) {
+                    return Carbon::parse($month)->month;
+                }, $request->month);
+            
+                // Get the first month number and the last month number
+                $firstMonthNumber = min($monthNumbers);
+                $lastMonthNumber = max($monthNumbers);
+            
+                // Create Carbon instances for the first and last dates
+                $firstDate = Carbon::createFromDate($currentYear, $firstMonthNumber, 1)->startOfMonth();
+                $lastDate = Carbon::createFromDate($currentYear, $lastMonthNumber, 1)->endOfMonth();
+                $startDateFormatted = $firstDate->toDateString();
+                $endDateFormatted = $lastDate->toDateString();
             } else {
                 $currentYear = $f_year_array[0];
-                $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->startOfMonth();
-                $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->endOfMonth();
-                $startDateFormatted = $startDate->toDateString();
-                $endDateFormatted = $endDate->toDateString();
+                $monthNumbers = array_map(function($month) {
+                    return Carbon::parse($month)->month;
+                }, $request->month);
+            
+                // Get the first month number and the last month number
+                $firstMonthNumber = min($monthNumbers);
+                $lastMonthNumber = max($monthNumbers);
+            
+                // Create Carbon instances for the first and last dates
+                $firstDate = Carbon::createFromDate($currentYear, $firstMonthNumber, 1)->startOfMonth();
+                $lastDate = Carbon::createFromDate($currentYear, $lastMonthNumber, 1)->endOfMonth();
+                $startDateFormatted = $firstDate->toDateString();
+                $endDateFormatted = $lastDate->toDateString();
             }
 
             $query->where(function ($q) use ($startDateFormatted, $endDateFormatted) {

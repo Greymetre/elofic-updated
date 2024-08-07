@@ -86,11 +86,14 @@ class OrderDataTable extends DataTable
     public function query(Order $model)
     {
         $userids = getUsersReportingToAuth();
-        
+
         $query = $model->with('sellers', 'buyers', 'statusname', 'createdbyname')
             ->whereHas('buyers', function($query) use($userids) {
-                if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('Sub_Admin') && !Auth::user()->hasRole('Sub billing')) {
                     $query->whereIn('executive_id', $userids);
+                }
+                if (request()->has('customer_type_id') && request()->get('customer_type_id') != '') {
+                    $query->where('customertype', request()->get('customer_type_id'));
                 }
             })->newQuery();
 
@@ -99,8 +102,8 @@ class OrderDataTable extends DataTable
             $query->where('buyer_id', request()->get('retailers_id'));
         }
 
-        if (request()->has('distributor_id') && request()->get('distributor_id') != '') {
-            $query->where('seller_id', request()->get('distributor_id'));
+        if (request()->has('retailers_id') && request()->get('retailers_id') != '') {
+            $query->where('buyer_id', request()->get('retailers_id'));
         }
 
         return $query->latest();

@@ -13,7 +13,7 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Illuminate\Support\Facades\Auth;
 use DB;
 
-class TopDealerExport implements FromCollection, WithHeadings,WithMapping, ShouldAutoSize, WithEvents
+class TopDealerExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithEvents
 {
 
     public function __construct($request)
@@ -86,8 +86,8 @@ class TopDealerExport implements FromCollection, WithHeadings,WithMapping, Shoul
             $query->where('final_branch', $this->branch_id);
         }
 
-        if ($this->division_id && $this->division_id != '' && $this->division_id != null) {
-            $query->where('division', $this->division_id);
+        if ($this->division_id && $this->division_id != '' && count($this->division_id) > 0) {
+            $query->whereIn('division', $this->division_id);
         }
 
         if ($this->dealer_id && $this->dealer_id != '' && $this->dealer_id != null) {
@@ -105,8 +105,8 @@ class TopDealerExport implements FromCollection, WithHeadings,WithMapping, Shoul
         if ($this->executive_id && $this->executive_id != '' && $this->executive_id != null) {
             $query->where('sales_person', $this->executive_id);
         }
-        
-        $query = $query->groupBy('dealer','final_branch','city')->orderBy('total_net_amounts', 'desc');
+
+        $query = $query->groupBy('dealer', 'final_branch', 'city')->orderBy('total_net_amounts', 'desc');
         return $query->get();
     }
 
@@ -139,6 +139,11 @@ class TopDealerExport implements FromCollection, WithHeadings,WithMapping, Shoul
 
             $startDate = Carbon::createFromFormat('Y-m-d', $startDateFormatted);
             $endDate = Carbon::createFromFormat('Y-m-d', $endDateFormatted);
+            $today = Carbon::today();
+
+            if ($endDate->greaterThan($today)) {
+                $endDate = $today;
+            }
             $currentDate = $startDate->copy();
 
             while ($currentDate <= $endDate) {
@@ -148,7 +153,6 @@ class TopDealerExport implements FromCollection, WithHeadings,WithMapping, Shoul
                 }
                 $currentDate->addMonth()->startOfMonth();
             }
-
         } elseif ($this->financial_year && $this->financial_year != '' && $this->financial_year != null) {
             $f_year_array = explode('-', $this->financial_year);
 
@@ -157,6 +161,11 @@ class TopDealerExport implements FromCollection, WithHeadings,WithMapping, Shoul
 
             $startDate = Carbon::createFromFormat('Y-m-d', $financial_year_start);
             $endDate = Carbon::createFromFormat('Y-m-d', $financial_year_end);
+            $today = Carbon::today();
+
+            if ($endDate->greaterThan($today)) {
+                $endDate = $today;
+            }
             $currentDate = $startDate->copy();
 
             while ($currentDate <= $endDate) {
@@ -166,13 +175,17 @@ class TopDealerExport implements FromCollection, WithHeadings,WithMapping, Shoul
                 }
                 $currentDate->addMonth()->startOfMonth();
             }
-
         } else {
             $currentDate = Carbon::now();
             $startDatethree = $currentDate->copy()->subMonthsNoOverflow(3)->firstOfMonth()->format('Y-m-d');
             $endDatethree = $currentDate->copy()->subMonthNoOverflow()->endOfMonth()->format('Y-m-d');
             $startDate = Carbon::createFromFormat('Y-m-d', $startDatethree);
             $endDate = Carbon::createFromFormat('Y-m-d', $endDatethree);
+            $today = Carbon::today();
+
+            if ($endDate->greaterThan($today)) {
+                $endDate = $today;
+            }
             $currentDate = $startDate->copy();
 
             while ($currentDate <= $endDate) {
@@ -221,19 +234,19 @@ class TopDealerExport implements FromCollection, WithHeadings,WithMapping, Shoul
                 }
             }
             if ($tsale > 0) {
-                $response[3+$indx] = number_format(($tsale / 100000), 2, '.', '');
+                $response[3 + $indx] = number_format(($tsale / 100000), 2, '.', '');
                 $indx++;
             } else {
-                $response[3+$indx] = "0";
+                $response[3 + $indx] = "0";
                 $indx++;
             }
         }
 
-        $response[3+$indx] = $data->total_net_amounts > 0 ? number_format(($data->total_net_amounts/100000),2,'.','') : "0";
-        $response[4+$indx] = $data->total_net_amounts > 0 ? number_format((($data->total_net_amounts/100000)/count($this->months)),2,'.','') : "0";
-        $response[5+$indx] = $data->total_net_amounts > 0 ? (number_format((($data->total_net_amounts/100000)/count($this->months)),2,'.','')*12) : "0";
+        $response[3 + $indx] = $data->total_net_amounts > 0 ? number_format(($data->total_net_amounts / 100000), 2, '.', '') : "0";
+        $response[4 + $indx] = $data->total_net_amounts > 0 ? number_format((($data->total_net_amounts / 100000) / count($this->months)), 2, '.', '') : "0";
+        $response[5 + $indx] = $data->total_net_amounts > 0 ? (number_format((($data->total_net_amounts / 100000) / count($this->months)), 2, '.', '') * 12) : "0";
 
-        return $response;   
+        return $response;
     }
 
     public function registerEvents(): array
@@ -242,8 +255,8 @@ class TopDealerExport implements FromCollection, WithHeadings,WithMapping, Shoul
             AfterSheet::class => function (AfterSheet $event) {
                 $lastRow = $event->sheet->getHighestDataRow() + 2;
                 $lastColumn = $event->sheet->getHighestDataColumn();
-             
-                $event->sheet->getStyle('A1:'.$lastColumn.'1')->applyFromArray([
+
+                $event->sheet->getStyle('A1:' . $lastColumn . '1')->applyFromArray([
                     'font' => [
                         'bold' => true,
                         'color' => ['rgb' => 'FFFFFF'],
