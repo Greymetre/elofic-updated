@@ -94,6 +94,10 @@ class ReportController extends Controller
             if ($request->dealer_id && $request->dealer_id != '' && $request->dealer_id != null) {
                 $query->where('dealer', 'like', '%' . $request->dealer_id . '%');
             }
+
+            if ($request->division_id && $request->division_id != '' && $request->division_id != null) {
+                $query->where('division', 'like', '%' . $request->division_id . '%');
+            }
             
             // Function to get sales data for a period
             $getSalesData = function ($query, $startDate, $endDate, $perPage) {
@@ -145,7 +149,9 @@ class ReportController extends Controller
                 'to' => $lastYearSales->lastItem(),
                 'request->dealer_id' => $request->branch_id ?? ''
             ];
-            return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $salesData, 'users' => $users, 'branches' => $branches,  'year_rang' => $year_range, 'currentYear' => $currentYear, 'pagination' => $pagination], $this->successStatus);
+
+            $ps_divisions = PrimarySales::distinct()->pluck('division');
+            return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $salesData, 'users' => $users, 'branches' => $branches,  'year_rang' => $year_range, 'currentYear' => $currentYear,'ps_divisions'=>$ps_divisions, 'pagination' => $pagination], $this->successStatus);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }

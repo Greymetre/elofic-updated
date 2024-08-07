@@ -2369,8 +2369,8 @@ class ReportController extends Controller
             $query->whereBetween('invoice_date', [$startDatethree, $endDatethree]);
         }
 
-        if ($request->division_id && $request->division_id != '' && $request->division_id != null) {
-            $query->where('division', $request->division_id);
+        if ($request->division_id && $request->division_id != '' && $request->division_id != null && count($request->division_id) > 0) {
+            $query->whereIn('division', $request->division_id);
         }
         $data = $query->get();
 
@@ -2614,7 +2614,7 @@ class ReportController extends Controller
         }
 
         if ($request->division_id) {
-            $query->where('division', $request->division_id);
+            $query->whereIn('division', $request->division_id);
         }
         // Get total quantities to calculate percentages
         $totalQuantities = $query->sum('quantity');
@@ -2791,8 +2791,8 @@ class ReportController extends Controller
             $query->whereBetween('invoice_date', [$startDatethree, $endDatethree]);
         }
 
-        if ($request->division_id) {
-            $query->where('division', $request->division_id);
+        if ($request->division_id && count($request->division_id) > 0) {
+            $query->whereIn('division', $request->division_id);
         }
         // Get total net amounts to calculate percentages
         $totalNetAmounts = $query->sum('net_amount');
@@ -2987,8 +2987,8 @@ class ReportController extends Controller
             $query->whereBetween('invoice_date', [$startDatethree, $endDatethree]);
         }
 
-        if ($request->division_id && $request->division_id != '' && $request->division_id != null) {
-            $query->where('division', $request->division_id);
+        if ($request->division_id && $request->division_id != '' && count($request->division_id) > 0) {
+            $query->whereIn('division', $request->division_id);
         }
 
         $data = $query->get();
@@ -3230,8 +3230,8 @@ class ReportController extends Controller
             $currentDate->addMonth()->startOfMonth();
         }
 
-        if ($request->division_id && $request->division_id != '' && $request->division_id != null) {
-            $query->where('division_id', $request->division_id);
+        if ($request->division_id && $request->division_id != '' && count($request->division_id) > 0) {
+            $query->whereIn('division_id', $request->division_id);
         }
 
         $data = $query->orderBy('id', 'desc')->get();
@@ -3399,8 +3399,8 @@ class ReportController extends Controller
             $query->whereBetween('invoice_date', [$startDatethree, $endDatethree]);
         }
 
-        if ($request->division_id && $request->division_id != '' && $request->division_id != null) {
-            $query->where('division', $request->division_id);
+        if ($request->division_id && $request->division_id != '' && count($request->division_id) > 0) {
+            $query->whereIn('division', $request->division_id);
         }
 
         if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
@@ -3437,9 +3437,6 @@ class ReportController extends Controller
 
     public function top_dealer_download(Request $request)
     {
-        if($request->ip() != '27.59.118.227'){
-            return 'Coming Soon....';
-        }
         abort_if(Gate::denies('product_analysis_branch_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();

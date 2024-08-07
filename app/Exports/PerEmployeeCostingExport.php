@@ -40,8 +40,8 @@ class PerEmployeeCostingExport implements FromCollection, WithHeadings, WithMapp
         DB::statement("SET SESSION group_concat_max_len = 10000000");
         $query = User::with('primarySales', 'getdesignation', 'getbranch', 'getdivision', 'userinfo')->where('active', 'Y');
 
-        if ($this->division_id && $this->division_id != '' && $this->division_id != null) {
-            $query->where('division_id', $this->division_id);
+        if ($this->division_id && $this->division_id != '' && count($this->division_id) > 0) {
+            $query->whereIn('division', $this->division_id);
         }
 
         $data = $query->orderBy('id', 'desc')->get();

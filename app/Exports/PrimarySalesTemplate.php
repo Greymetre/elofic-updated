@@ -46,7 +46,8 @@ class PrimarySalesTemplate implements FromCollection,WithHeadings,ShouldAutoSize
             'Group',
             'Branch',
             'New Group Name',
-            'Product ID',   
+            'Product ID',
+            'Customer Id',
         ];
     }
 

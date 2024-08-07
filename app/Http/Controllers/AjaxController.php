@@ -1290,16 +1290,34 @@ class AjaxController extends Controller
 
             if ($request->month == 'Jan' || $request->month == 'Feb' || $request->month == 'Mar') {
                 $currentYear = $f_year_array[1];
-                $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->startOfMonth();
-                $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->endOfMonth();
-                $startDateFormatted = $startDate->toDateString();
-                $endDateFormatted = $endDate->toDateString();
+                $monthNumbers = array_map(function($month) {
+                    return Carbon::parse($month)->month;
+                }, $request->month);
+            
+                // Get the first month number and the last month number
+                $firstMonthNumber = min($monthNumbers);
+                $lastMonthNumber = max($monthNumbers);
+            
+                // Create Carbon instances for the first and last dates
+                $firstDate = Carbon::createFromDate($currentYear, $firstMonthNumber, 1)->startOfMonth();
+                $lastDate = Carbon::createFromDate($currentYear, $lastMonthNumber, 1)->endOfMonth();
+                $startDateFormatted = $firstDate->toDateString();
+                $endDateFormatted = $lastDate->toDateString();
             } else {
                 $currentYear = $f_year_array[0];
-                $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->startOfMonth();
-                $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->endOfMonth();
-                $startDateFormatted = $startDate->toDateString();
-                $endDateFormatted = $endDate->toDateString();
+                $monthNumbers = array_map(function($month) {
+                    return Carbon::parse($month)->month;
+                }, $request->month);
+            
+                // Get the first month number and the last month number
+                $firstMonthNumber = min($monthNumbers);
+                $lastMonthNumber = max($monthNumbers);
+            
+                // Create Carbon instances for the first and last dates
+                $firstDate = Carbon::createFromDate($currentYear, $firstMonthNumber, 1)->startOfMonth();
+                $lastDate = Carbon::createFromDate($currentYear, $lastMonthNumber, 1)->endOfMonth();
+                $startDateFormatted = $firstDate->toDateString();
+                $endDateFormatted = $lastDate->toDateString();
             }
 
             $query->where(function ($q) use ($startDateFormatted, $endDateFormatted) {

@@ -304,7 +304,7 @@
 
               <div class="col-md-6">
                 <div class="row">
-                  <label class="col-md-3 col-form-label">Creation Dtae</label>
+                  <label class="col-md-3 col-form-label">Creation Date</label>
                   <div class="col-md-9">
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="creation_date" id="creation_date" class="form-control datepicker" value="{!! old( 'contact_number', $customers['creation_date']) !!}" autocomplete="off">

@@ -28,6 +28,7 @@ use App\Exports\OrderTemplate;
 use App\Http\Requests\OrderRequest;
 use App\Mail\OrderMailWithAttachment;
 use App\Models\Category;
+use App\Models\CustomerType;
 use App\Models\Division;
 // use App\Models\Customers;
 use Dompdf\Dompdf;
@@ -50,7 +51,8 @@ class OrderController extends Controller
         $divisions = Category::where('active', 'Y')->get();
         $retailers = Customers::whereIn("id" , $buyer_ids)->get();
         $distributors = Customers::whereIn("id" , $sellers_ids)->get();
-        return $dataTable->render('orders.index', compact('divisions','retailers','distributors'));
+        $customer_types = CustomerType::where('active', 'Y')->get();
+        return $dataTable->render('orders.index', compact('divisions','retailers','distributors','customer_types'));
     }
 
     /**

@@ -89,8 +89,8 @@ class GroupWiseAnalysisExport implements FromCollection, WithHeadings,WithMappin
             $query->where('final_branch', $this->branch_id);
         }
 
-        if ($this->division_id && $this->division_id != '' && $this->division_id != null) {
-            $query->where('division', $this->division_id);
+        if ($this->division_id && $this->division_id != '' && count($this->division_id) > 0) {
+            $query->whereIn('division', $this->division_id);
         }
 
         if ($this->dealer_id && $this->dealer_id != '' && $this->dealer_id != null) {

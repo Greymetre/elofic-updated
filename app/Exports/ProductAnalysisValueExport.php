@@ -82,7 +82,7 @@ class ProductAnalysisValueExport implements FromCollection, WithHeadings,WithMap
             $query->whereBetween('invoice_date', [$startDatethree, $endDatethree]);
         }
         if ($this->division_id && $this->division_id != '' && $this->division_id != null) {
-            $query->where('division', $this->division_id);
+            $query->whereIn('division', $this->division_id);
         }
         $this->t_data = $query->get();
 
