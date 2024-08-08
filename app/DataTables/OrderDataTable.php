@@ -90,12 +90,17 @@ class OrderDataTable extends DataTable
         $query = $model->with('sellers', 'buyers', 'statusname', 'createdbyname')
             ->whereHas('buyers', function($query) use($userids) {
                 if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('Sub_Admin') && !Auth::user()->hasRole('Sub billing')) {
-                    $query->whereIn('executive_id', $userids);
+                    $query->where(function($subQuery) use($userids) {
+                        $subQuery->whereIn('executive_id', $userids)
+                                 ->orWhereIn('created_by', $userids);
+                    });
                 }
                 if (request()->has('customer_type_id') && request()->get('customer_type_id') != '') {
                     $query->where('customertype', request()->get('customer_type_id'));
                 }
             })->newQuery();
+
+            // dd($query->toSql());
 
         // Apply filters
         if (request()->has('retailers_id') && request()->get('retailers_id') != '') {

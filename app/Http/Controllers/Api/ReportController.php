@@ -33,6 +33,10 @@ class ReportController extends Controller
             $perPage = $request->per_page ??  5;
             $user_employee_codes = $user->employee_codes ?? '';
 
+            $user_ids = getUsersReportingToAuth($user->id);
+
+            $all_employee_code = User::whereIn('id', $user_ids)->pluck('employee_codes');
+
             // Get unique dealers and branches
             if (isset($user_employee_codes) && $user_employee_codes != "Greymetre Test") {
                 $all_users = PrimarySales::select('dealer', 'id')->where('emp_code', $user_employee_codes)->latest()->get()->unique('dealer');
@@ -86,7 +90,7 @@ class ReportController extends Controller
             // Query for all the sales
             $query = PrimarySales::query();
             if (isset($user_employee_codes) && $user_employee_codes != "Greymetre Test") {
-                $query->where('emp_code', $user_employee_codes);
+                $query->whereIn('emp_code', $all_employee_code);
             }
             if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
                 $query->where('final_branch', $request->branch_id);

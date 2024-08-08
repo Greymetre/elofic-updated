@@ -177,6 +177,11 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('top_dealer/download', [ReportController::class, 'top_dealer_download'])->name('top_dealer.download');
     Route::any('top_dealer/list', [ReportController::class, 'top_dealer_list'])->name('top_dealer.list');
 
+    // Dealer Growth
+    Route::any('reports/dealer_growth', [ReportController::class, 'dealer_growth']);
+    Route::any('dealer_growth/download', [ReportController::class, 'dealer_growth_download'])->name('dealer_growth.download');
+    Route::any('dealer_growth/list', [ReportController::class, 'dealer_growth_list'])->name('dealer_growth.list');
+
     //Customers
     Route::resource('customertype', CustomerTypeController::class);
     Route::post('customertype-active', [CustomerTypeController::class, 'active'])->name('customertype.active');
@@ -389,6 +394,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('order-partially-dispatched/{id}', [OrderController::class, 'orderPartiallyDispatched'])->name('orders.partiallydispatched');
     Route::any('order-cancle/{id}', [OrderController::class, 'orderCancle'])->name('orders.orderCancle');
     Route::post('submit-dispatched', [OrderController::class, 'submitDispatched'])->name('orders.submitdispatched');
+    Route::any('order-detail-delete', [OrderController::class, 'deleteOrderDtails'])->name('orders.deletedetails');
 
     Route::post('submit-fullydispatched', [OrderController::class, 'submitFullyDispatched'])->name('orders.submitFullyDispatched');
 

@@ -508,6 +508,79 @@ class OrderController extends Controller
                         'order_date' => isset($value['order_date']) ? $value['order_date'] : '',
                         'completed_date' => isset($value['completed_date']) ? $value['completed_date'] : '',
                         'grand_total' => isset($value['grand_total']) ? $value['grand_total'] : 0.00,
+                        'cluster_discount' => isset($value['cluster_discount']) ? $value['cluster_discount'] : 0.00,
+                        'cluster_amount' => isset($value['cluster_amount']) ? $value['cluster_amount'] : 0.00,
+                        'sub_total' => isset($value['sub_total']) ? $value['sub_total'] : 0.00,
+                        'discount_status' => (($value['discount_status'] == '1') ? 'Approved' : (($value['discount_status'] == '2') ? 'Reject' : 'Pending')),
+                    ]);
+                }
+                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data , 'all_users' => $users , 'all_status' => $all_status], $this->successStatus);
+            }
+            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data , 'all_users' => $users , 'all_status' => $all_status], 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
+    }
+
+    public function getSpecialOrderList(Request $request)
+    {
+        try {
+            $user = $request->user();
+            $user_id = $user->id;
+            $pageSize = $request->input('pageSize');
+            $user_ids = getUsersReportingToAuth($user_id);
+
+            $query = $this->orders->where(function ($query) use ($user_ids) {
+                $query->whereIn('created_by', $user_ids);
+            })
+            ->latest()
+            ->where(function ($query) {
+                $query->where('special_discount', '>', 0)
+                      ->orWhere('deal_discount', '>', 0);
+            });
+
+            $start_date = $request->startdate ?? '';
+            $end_date   = $request->enddate ?? '';
+            $selecteduser_id = $request->user_id ?? '';
+            $selectedstatus_id = $request->status_id ?? '';
+
+            if (!empty($start_date) && !empty($end_date)) {
+                $startDate = date('Y-m-d', strtotime($start_date));
+                $endDate = date('Y-m-d', strtotime($end_date));
+                $query->whereDate('order_date', '>=', $startDate)
+                        ->whereDate('order_date', '<=', $endDate);
+            }
+
+            if(!empty($selecteduser_id)){
+                $query->where('created_by', $selecteduser_id);
+            }
+
+            if ((isset($selectedstatus_id) || $selectedstatus_id == 0) && $selectedstatus_id != '') {
+                $query->where('discount_status', $selectedstatus_id);
+            }
+            $all_status = [['id' => '0', 'name' => 'Pending'], ['id' => '1', 'name' => 'Approved'], ['id' => '2', 'name' => 'Reject']];
+            $users = User::where('active', 'Y')->whereIn('id',$user_ids)->select('id', 'name')->get();
+            $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
+            $data = collect([]);
+            if ($db_data->isNotEmpty()) {
+                foreach ($db_data as $key => $value) {
+                    $data->push([
+                        'order_id' => isset($value['id']) ? $value['id'] : 0,
+                        'seller_id' => isset($value['seller_id']) ? $value['seller_id'] : 0,
+                        'seller_name' => isset($value['sellers']['name']) ? $value['sellers']['name'] : '',
+                        'buyer_id' => isset($value['buyer_id']) ? $value['buyer_id'] : 0,
+                        'buyer_name' => isset($value['buyers']['name']) ? $value['buyers']['name'] : '',
+                        // 'total_qty' => isset($value['total_qty']) ? $value['total_qty'] : 0,
+                        'total_qty' => $value->orderdetails->sum('quantity') ?? 0,
+                        'shipped_qty' => isset($value['shipped_qty']) ? $value['shipped_qty'] : 0,
+                        'orderno' => isset($value['orderno']) ? $value['orderno'] : '',
+                        'order_date' => isset($value['order_date']) ? $value['order_date'] : '',
+                        'completed_date' => isset($value['completed_date']) ? $value['completed_date'] : '',
+                        'grand_total' => isset($value['grand_total']) ? $value['grand_total'] : 0.00,
+                        'special_discount' => isset($value['special_discount']) ? $value['special_discount'] : 0.00,
+                        'special_amount' => isset($value['special_amount']) ? $value['special_amount'] : 0.00,
+                        'deal_discount' => isset($value['deal_discount']) ? $value['deal_discount'] : 0.00,
+                        'deal_amount' => isset($value['deal_amount']) ? $value['deal_amount'] : 0.00,
                         'sub_total' => isset($value['sub_total']) ? $value['sub_total'] : 0.00,
                         'discount_status' => (($value['discount_status'] == '1') ? 'Approved' : (($value['discount_status'] == '2') ? 'Reject' : 'Pending')),
                     ]);
@@ -544,8 +617,8 @@ class OrderController extends Controller
                 $order->distributor_amount = $request->distributor_amount ?? '';
                 $order->frieght_discount = $request->frieght_discount ?? '';
                 $order->frieght_amount = $request->frieght_amount ?? '';
-                $order->discount_status = $request->discount_status ?? '';
-                $order->discount_status = $request->discount_status ?? '';
+                $order->discount_status = $request->discount_status ?? '0';
+                $order->sp_discount_status = $request->sp_discount_status ?? '0';
                 $order->gst5_amt = $request->gst5_amt ?? NULL;
                 $order->gst12_amt = $request->gst12_amt ?? NULL;
                 $order->gst18_amt = $request->gst18_amt ?? NULL;

@@ -57,7 +57,7 @@ class LoginController extends Controller
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->noContent);
             }
             $username = $request->input('username');
-            if (!$user = $this->users->where('mobile', $username)->orWhere('email', $username)->first()) {
+            if (!$user = $this->users->with('roles')->where('mobile', $username)->orWhere('email', $username)->first()) {
                 return response()->json(['status' => 'error', 'message' => 'User not found'], $this->notFound);
             }
             if ($user->active != 'Y') {
@@ -80,6 +80,7 @@ class LoginController extends Controller
                 $nestedData['gender'] = isset($user['gender']) ? $user['gender'] : '';
                 $nestedData['payroll_id'] = isset($user['payroll']) ? $user['payroll'] : '';
                 $nestedData['access_token'] = $token;
+                $nestedData['roles'] = $user->roles->pluck('id')->toArray();
                 $user['provider'] = 'users';
                 $user['entry_from'] = 'app';
                 $this->usersLogin->save_data($user);

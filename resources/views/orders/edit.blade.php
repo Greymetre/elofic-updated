@@ -229,6 +229,7 @@
                               @if($orders->exists && isset($orders['orderdetails']))
                               @foreach($orders['orderdetails'] as $key => $rows )
                               <tr id='addr{{ $key }}' value="{{ $key +1 }}">
+                                 <input type="hidden" name="order_detail_id" value="{{$rows->id}}">
                                  <td>{{ $key + 1 }}</td>
                                  <td>
                                     <select class="form-control product rowchange select2" name="orderdetail[{{ $key }}][product_id]">
@@ -926,6 +927,18 @@
          $table.on('click', '.remove-rows', function() {
             $(this).closest('tr').remove();
             calc($(this));
+            var detailID = $(this).closest('tr').find('input[name="order_detail_id"]').val();
+            if (detailID != undefined) {
+               $.ajax({
+                  url: "{{ url('order-detail-delete') }}",
+                  data: {
+                     "detailID": detailID,
+                  },
+                  success: function(res) {
+                     console.log(res);
+                  }
+               });
+            }
          });
 
          // $('#tab_logic tbody').on('keyup change',function(){
@@ -1515,17 +1528,17 @@
 
          subtotal = total;
 
-          //Fan calculations start
+         //Fan calculations start
 
-          var distribution_margin_discount = ($('.distribution_margin_discount').val() && $('.distribution_margin_discount').val() != '')?$('.distribution_margin_discount').val():0;
-         var special_distribution_discount = ($('.special_distribution_discount').val() && $('.special_distribution_discount').val() != '')?$('.special_distribution_discount').val():0;
-         var dod_discount = $('.dod_discount').val() && $('.dod_discount').val() != '' ?$('.dod_discount').val():0;
-         var cash_discount = $('.cash_discount').val() && $('.cash_discount').val() != '' ?$('.cash_discount').val():0;
-         
-         var ttdis = parseFloat(dod_discount)+parseFloat(special_distribution_discount)+parseFloat(distribution_margin_discount)+parseFloat(cash_discount);
+         var distribution_margin_discount = ($('.distribution_margin_discount').val() && $('.distribution_margin_discount').val() != '') ? $('.distribution_margin_discount').val() : 0;
+         var special_distribution_discount = ($('.special_distribution_discount').val() && $('.special_distribution_discount').val() != '') ? $('.special_distribution_discount').val() : 0;
+         var dod_discount = $('.dod_discount').val() && $('.dod_discount').val() != '' ? $('.dod_discount').val() : 0;
+         var cash_discount = $('.cash_discount').val() && $('.cash_discount').val() != '' ? $('.cash_discount').val() : 0;
+
+         var ttdis = parseFloat(dod_discount) + parseFloat(special_distribution_discount) + parseFloat(distribution_margin_discount) + parseFloat(cash_discount);
          $('.total_fan_discount').val(ttdis.toFixed(2));
-         $('.total_fan_discount_amount').val((total*ttdis)/100);
-         subtotal = ((total-(total*ttdis)/100));
+         $('.total_fan_discount_amount').val((total * ttdis) / 100);
+         subtotal = ((total - (total * ttdis) / 100));
 
          //Fan calculations end
 

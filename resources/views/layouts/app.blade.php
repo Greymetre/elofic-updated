@@ -1045,6 +1045,14 @@
                     </a>
                   </li>
                   @endif
+                  @if(auth()->user()->can('dealer_growth_access'))
+                  <li class="nav-item {{ request()->is('reports/dealer_growth*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('reports/dealer_growth') }}">
+                      <i class="material-icons">store</i>
+                      <p>Dealer Growth</p>
+                    </a>
+                  </li>
+                  @endif
                 </ul>
               </div>
             </li>

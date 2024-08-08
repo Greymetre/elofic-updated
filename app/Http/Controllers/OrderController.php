@@ -355,7 +355,6 @@ class OrderController extends Controller
         abort_if(Gate::denies('order_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $id = decrypt($id);
 
-
         $request['cluster_amount'] = $request['extra_cluster_discount'];
         $request['deal_discount'] = $request['extra_discount'] ?? NULL;
         $request['deal_amount'] = $request['extra_discount_amount'] ?? NULL;
@@ -425,8 +424,7 @@ class OrderController extends Controller
             //         ]);
             //     }
             foreach ($request['orderdetail'] as $key => $rows) {
-                // dd($rows['line_total']);
-                OrderDetails::updateOrCreate(['product_id' => $rows['product_id'], 'order_id' => $id], [
+                $check = OrderDetails::updateOrCreate(['product_id' => $rows['product_id'], 'order_id' => $id], [
                     'order_id' => $id,
                     'product_id' => isset($rows['product_id']) ? $rows['product_id'] : null,
                     'product_detail_id' => isset($rows['product_detail']) ? $rows['product_detail'] : null,
@@ -456,7 +454,6 @@ class OrderController extends Controller
                     'created_at' => getcurentDateTime(),
                 ]);
             }
-
             return Redirect::to('orders')->with('message_success', 'Order update Successfully');
         }
         return redirect()->back()->with('message_danger', 'Error in Purchases Store')->withInput();
@@ -731,8 +728,7 @@ class OrderController extends Controller
                     ->withErrors($validator)
                     ->withInput();
             }
-           
-            $request['saledetail'] = $request['orderdetails'];
+            $request['saledetail'] = $request['orderdetail'];
             $data = collect([$request]);
             $response = insertSales($data);
             if ($response['status'] == 'success') {
@@ -789,5 +785,12 @@ class OrderController extends Controller
             }
         }
         return Redirect::to('expected-delivery')->with('message_success', 'PlaceDispatch Update Successfully');
+    }
+
+    public function deleteOrderDtails(Request $request)
+    {
+        OrderDetails::where('id', $request->detailID)->delete();
+
+        return response()->json(['status'=>'success']);
     }
 }
