@@ -1,4 +1,10 @@
 <x-app-layout>
+  <style>
+    table tbody tr{
+      font-size: 12px !important;
+      font-weight: 100 !important;
+    }
+  </style>
   <div class="row">
     <div class="col-md-12">
       <div class="card">
@@ -183,7 +189,7 @@
             </div>
           </div>
           <div class="table-responsive">
-            <table id="getprimarysales" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
+            <table id="getprimarysales" class="table table-striped table-bordered table-hover table-checkable no-wrap">
               <thead class=" text-primary">
                 <th>S. No</th>
                 <th>{!! trans('panel.primary_dashboard.invoice_no') !!}</th>

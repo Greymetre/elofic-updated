@@ -54,7 +54,7 @@ class MobileAppLoginUsersExport implements FromCollection, WithHeadings, ShouldA
     public function headings(): array
     {
 
-        $headings = ['S. No.', 'Customer ID', 'Firm Name', 'Contact Person', 'Mobile Number', 'Branch', 'State', 'District', 'City', 'App Version', 'Device Type', 'Device Name', 'First Login date', 'Last Login date', 'Login Status'];
+        $headings = ['S. No.', 'Customer ID', 'Firm Name', 'Contact Person', 'Mobile Number', 'Branch', 'State', 'District', 'City', 'App Version', 'Device Type', 'Device Name', 'First Login date', 'Last Login date', 'Login Status', 'User Name'];
 
 
 
@@ -70,6 +70,12 @@ class MobileAppLoginUsersExport implements FromCollection, WithHeadings, ShouldA
                 if (isset($datas->employee_detail->getbranch->branch_name) && !in_array($datas->employee_detail->getbranch->branch_name, $branch_arr)) {
                     $branch_arr[] = $datas->employee_detail->getbranch->branch_name;
                 }
+            }
+        }
+        $all_assign_emp = array();
+        if(count($data['customer']['getemployeedetail']) > 0){
+            foreach ($data['customer']['getemployeedetail'] as $key => $value) {
+                array_push($all_assign_emp, $value->employee_detail->name);
             }
         }
         return [
@@ -88,7 +94,7 @@ class MobileAppLoginUsersExport implements FromCollection, WithHeadings, ShouldA
             isset($data['first_login_date']) ? date('Y-m-d', strtotime($data['first_login_date'])) : '',
             isset($data['last_login_date']) ? date('Y-m-d', strtotime($data['last_login_date'])) : '',
             isset($data['login_status']) ? ($data['login_status'] == '0' ? 'Logout' : 'Login') : '',
-
+            count($all_assign_emp)>0?implode(',', $all_assign_emp):'-',
         ];
     }
 }

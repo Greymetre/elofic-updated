@@ -355,7 +355,6 @@ class OrderController extends Controller
         abort_if(Gate::denies('order_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $id = decrypt($id);
 
-
         $request['cluster_amount'] = $request['extra_cluster_discount'];
         $request['deal_discount'] = $request['extra_discount'] ?? NULL;
         $request['deal_amount'] = $request['extra_discount_amount'] ?? NULL;
@@ -425,8 +424,7 @@ class OrderController extends Controller
             //         ]);
             //     }
             foreach ($request['orderdetail'] as $key => $rows) {
-                // dd($rows['line_total']);
-                OrderDetails::updateOrCreate(['product_id' => $rows['product_id'], 'order_id' => $id], [
+                $check = OrderDetails::updateOrCreate(['product_id' => $rows['product_id'], 'order_id' => $id], [
                     'order_id' => $id,
                     'product_id' => isset($rows['product_id']) ? $rows['product_id'] : null,
                     'product_detail_id' => isset($rows['product_detail']) ? $rows['product_detail'] : null,
@@ -456,7 +454,6 @@ class OrderController extends Controller
                     'created_at' => getcurentDateTime(),
                 ]);
             }
-
             return Redirect::to('orders')->with('message_success', 'Order update Successfully');
         }
         return redirect()->back()->with('message_danger', 'Error in Purchases Store')->withInput();
@@ -731,13 +728,12 @@ class OrderController extends Controller
                     ->withErrors($validator)
                     ->withInput();
             }
-           
-            $request['saledetail'] = $request['orderdetails'];
+            $request['saledetail'] = $request['orderdetail'];
+            $request['status_id'] = 2;
             $data = collect([$request]);
             $response = insertSales($data);
             if ($response['status'] == 'success') {
-                $status_id = Status::where('status_name', '=', 'Dispatched')->pluck('id')->first();
-                $partiallystatus = Status::where('status_name', '=', 'Partially Dispatched')->pluck('id')->first();
+                $partiallystatus = 2;
 
                 if (isset($request['orderdetail'])) {
                     foreach ($request['orderdetail'] as $key => $rows) {
@@ -746,21 +742,16 @@ class OrderController extends Controller
                         if(isset($orderdetail)){
                             $orderdetail->cash_dis = $rows['cash_dis'];
                             $orderdetail->cash_amounts = $rows['cash_amounts'];
-                            if ($orderdetail['shipped_qty'] + $rows['quantity'] == $orderdetail['quantity']) {
-                                $orderdetail->status_id = $status_id;
-                            } else {
-                                $orderdetail->status_id = $partiallystatus;
-                            }
+                            $orderdetail->status_id = $partiallystatus;
                             $orderdetail->increment('shipped_qty', $rows['quantity']);
                             $orderdetail->save();
                         }
                     }
                 }
-
                 if (OrderDetails::where('order_id', '=', $request['order_id'])->where('status_id', '=', $partiallystatus)->exists()) {
                     Order::where('id', '=', $request['order_id'])->update(['status_id' => $partiallystatus, 'cash_discount' => $request->cash_discount, 'cash_amount' => $request->cash_amount, 'order_remark' => $request->order_remark]);
                 } else {
-                    Order::where('id', '=', $request['order_id'])->update(['status_id' => $status_id, 'cash_discount' => $request->cash_discount, 'cash_amount' => $request->cash_amount, 'order_remark' => $request->order_remark]);
+                    Order::where('id', '=', $request['order_id'])->update(['status_id' => $partiallystatus, 'cash_discount' => $request->cash_discount, 'cash_amount' => $request->cash_amount, 'order_remark' => $request->order_remark]);
                 }
                 return Redirect::to('sales')->with('message_success', 'Sales Store Successfully');
             }
@@ -789,5 +780,12 @@ class OrderController extends Controller
             }
         }
         return Redirect::to('expected-delivery')->with('message_success', 'PlaceDispatch Update Successfully');
+    }
+
+    public function deleteOrderDtails(Request $request)
+    {
+        OrderDetails::where('id', $request->detailID)->delete();
+
+        return response()->json(['status'=>'success']);
     }
 }

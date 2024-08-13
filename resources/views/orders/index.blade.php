@@ -6,7 +6,7 @@
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
-          <h4 class="card-title ">{!! trans('panel.order.title_singular') !!}{!! trans('panel.global.list') !!}
+          <h4 class="card-title ">{!! trans('panel.order.title_singular') !!} {!! trans('panel.global.list') !!}
             <span class="">
               <div class="btn-group header-frm-btn">
 
@@ -50,7 +50,8 @@
                       <select class="selectpicker" name="pending_status" id="pending_status" data-style="select-with-transition">
                         <option value="">Select Status</option>
                         <option value="1">Dispatch</option>
-                        <option value="2">Pending</option>
+                        <option value="2">Partial Dispatch</option>
+                        <option value="0">Pending</option>
                       </select>
                     </div>
 
@@ -164,6 +165,7 @@
             d.retailers_id = $('#retailers_id').val();
             d.distributor_id = $('#distributor_id').val();
             d.customer_type_id = $('#customer_type_id').val();
+            d.pending_status = $('#pending_status').val();
           }
         },
         columns: [{
@@ -247,6 +249,9 @@
         table.draw();
       });
       $('#customer_type_id').change(function() {
+        table.draw();
+      });
+      $('#pending_status').change(function() {
         table.draw();
       });
 

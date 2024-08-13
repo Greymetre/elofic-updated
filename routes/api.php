@@ -153,6 +153,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::post('insertOrder', [OrderController::class, 'insertOrder']);
     Route::any('getOrderList', [OrderController::class, 'getOrderList']);
     Route::any('getClusterOrderList', [OrderController::class, 'getClusterOrderList']);
+    Route::any('getSpecialOrderList', [OrderController::class, 'getSpecialOrderList']);
     Route::post('updateClusterOrder', [OrderController::class, 'updateClusterOrder']);
     Route::any('getOrderDetails', [OrderController::class, 'getOrderDetails']);
     Route::post('addCartItems', [OrderController::class, 'addCartItems']);
@@ -234,4 +235,5 @@ Route::group(['middleware' => ['auth:users']], function () {
     //Report 
     Route::get('primary-sales', [ReportController::class, 'primarySales']);
     Route::get('monthly-sales', [ReportController::class, 'monthlySales']);
+    Route::get('getDealerGrowth', [ReportController::class, 'getDealerGrowth']);
 });

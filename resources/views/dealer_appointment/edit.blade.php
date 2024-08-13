@@ -765,7 +765,7 @@
                   <div class="inp-div">
                     <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                     <p class="m-0">Attach a File</p>
-                    <input type="file" name="service_policy" id="service_policy" class="form-control" accept="image/*">
+                    <input type="file" name="service_policy" id="service_policy" class="form-control file-input" accept="application/pdf">
                   </div>
                 </div>
                 <div class="col-md-4 mb-3">
@@ -773,7 +773,7 @@
                   <div class="inp-div">
                     <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                     <p class="m-0">Attach a File</p>
-                    <input type="file" name="dealer_policy" id="dealer_policy" class="form-control" accept="image/*">
+                    <input type="file" name="dealer_policy" id="dealer_policy" class="form-control file-input" accept="application/pdf">
                   </div>
                 </div>
                 <div class="col-md-4 mb-3">
@@ -781,7 +781,7 @@
                   <div class="inp-div">
                     <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                     <p class="m-0">Attach a File</p>
-                    <input type="file" name="mou_sheet" id="mou_sheet" class="form-control" accept="image/*">
+                    <input type="file" name="mou_sheet" id="mou_sheet" class="form-control file-input" accept="application/pdf">
                   </div>
                 </div>
                 <div class="col-md-4 mb-3">
@@ -789,7 +789,7 @@
                   <div class="inp-div">
                     <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                     <p class="m-0">Attach a File</p>
-                    <input type="file" name="mcl_cheque_1" id="mcl_cheque_1" class="form-control" accept="image/*">
+                    <input type="file" name="mcl_cheque_1" id="mcl_cheque_1" class="form-control file-input" accept="application/pdf">
                   </div>
                 </div>
                 <div class="col-md-4 mb-3">
@@ -797,7 +797,7 @@
                   <div class="inp-div">
                     <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                     <p class="m-0">Attach a File</p>
-                    <input type="file" name="mcl_cheque_2" id="mcl_cheque_2" class="form-control" accept="image/*">
+                    <input type="file" name="mcl_cheque_2" id="mcl_cheque_2" class="form-control file-input" accept="application/pdf">
                   </div>
                 </div>
                 <div class="col-md-4 mb-3">
@@ -805,7 +805,7 @@
                   <div class="inp-div">
                     <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                     <p class="m-0">Attach a File</p>
-                    <input type="file" name="gst_certificate" id="gst_certificate" class="form-control" accept="image/*">
+                    <input type="file" name="gst_certificate" id="gst_certificate" class="form-control file-input" accept="application/pdf">
                   </div>
                 </div>
                 <div class="col-md-4 mb-3">
@@ -813,7 +813,7 @@
                   <div class="inp-div">
                     <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                     <p class="m-0">Attach a File</p>
-                    <input type="file" name="adhar_card" id="adhar_card" class="form-control" accept="image/*">
+                    <input type="file" name="adhar_card" id="adhar_card" class="form-control file-input" accept="application/pdf">
                   </div>
                 </div>
                 <div class="col-md-4 mb-3">
@@ -821,7 +821,7 @@
                   <div class="inp-div">
                     <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                     <p class="m-0">Attach a File</p>
-                    <input type="file" name="pan_card" id="pan_card" class="form-control" accept="image/*">
+                    <input type="file" name="pan_card" id="pan_card" class="form-control file-input" accept="application/pdf">
                   </div>
                 </div>
                 <div class="col-md-4 mb-3">
@@ -829,24 +829,48 @@
                   <div class="inp-div">
                     <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                     <p class="m-0">Attach a File</p>
-                    <input type="file" name="bank_statement" id="bank_statement" class="form-control" accept="image/*">
+                    <input type="file" name="bank_statement" id="bank_statement" class="form-control file-input" accept="application/pdf">
+                  </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="shop_image">Shop Image</label>
+                  <div class="inp-div">
+                    <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                    <p class="m-0">Attach a File</p>
+                    <input type="file" name="shop_image" id="shop_image" class="form-control file-input" accept="image/*">
                   </div>
                 </div>
               </div>
             </div>
             <div class="row mt-5">
-              @if($dealerAppointment->exists && $dealerAppointment->getMedia('*')->count() > 0)
-              @foreach($dealerAppointment->getMedia('*') as $k=>$media)
+            <div class="row all-attachments-div">
+              @if($dealerAppointment->exists)
+              @php
+              $allMediaExceptProfilePictures = $dealerAppointment->getMedia('*')
+              ->filter(function ($mediaItem) {
+              return $mediaItem->collection_name !== 'profile_picture';
+              });
+              @endphp
+              @if($allMediaExceptProfilePictures->count() > 0)
+              @foreach($allMediaExceptProfilePictures as $k=>$media)
               <div class="col-md-3 mb-3 ml-5 text-center border rounded">
-                <p class="attach-p">{{ucwords(str_replace('_',' ',$media->collection_name))}}</p>
-                <a href="{{$media->getFullUrl()}}" download target="_blank">
+                <p class="attach-p">{{ucfirst(str_replace('_',' ',$media->collection_name))}}</p>
+                <a href="{{$media->getFullUrl()}}" download="" target="_blank">
+                  @if($media->collection_name == 'shop_image')
                   <img class="m-2 rounded img-fluid" src="{!! $media->getFullUrl() !!}" style="width: 170px;height:170px;">
+                  @else
+                  {{ucfirst(str_replace('_','',$media->collection_name))}}.pdf
+                  @endif
                 </a>
               </div>
               @endforeach
               @else
               <h6>No Attachment</h6>
               @endif
+              @else
+              <h6>No Attachment</h6>
+              @endif
+            </div>
             </div>
 
             <h5 class="mt-5">Signatures of Dealer:</h5>
@@ -1013,6 +1037,17 @@
                   $("#created_by").html(html);
                 }
               });
+            });
+
+            $(document).ready(function() {
+                $('.file-input').on('change', function() {
+                    var inpDiv = $(this).closest('.inp-div');
+                    if (this.files && this.files.length > 0) {
+                        inpDiv.css('background-color', '#80ec759e'); // Change to your desired color
+                    } else {
+                        inpDiv.css('background-color', ''); // Reset the background color if no file is selected
+                    }
+                });
             });
           </script>
 </x-app-layout>

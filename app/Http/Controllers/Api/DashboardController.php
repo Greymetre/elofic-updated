@@ -464,7 +464,7 @@ class DashboardController extends Controller
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
             $thistorys = TransactionHistory::where('customer_id', $request->id)->get();
-            $data['total_points'] = TransactionHistory::where('customer_id', $request->id)->sum('point') ?? 0;
+            $data['total_points'] = (int)TransactionHistory::where('customer_id', $request->id)->sum('point') ?? 0;
             $data['active_points'] = TransactionHistory::where('customer_id', $request->id)->where('status', '1')->sum('point') ?? 0;
             $data['provision_points'] = TransactionHistory::where('customer_id', $request->id)->where('status', '0')->sum('point') ?? 0;
             $data['active_points'] = 0;
