@@ -246,7 +246,8 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
         $flabel4 = [
             'Total LY',
             'Total CY',
-            'Growth',
+            'GOLY%',
+            'Remarks',
         ];
 
         $heading1 = array_merge($flabel1, $flabel2, $month_blank_array, $flabel3, $month_blank_array, $flabel4);
@@ -418,6 +419,54 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
                 $lastRow = $event->sheet->getHighestDataRow() + 2;
                 $lastColumn = $event->sheet->getHighestDataColumn();
 
+                $secondLastColumn = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($lastColumn) - 1;
+                $cyLastColumn = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($lastColumn) - 2;
+                $lyLastColumn = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($lastColumn) - 3;
+                $secondLastColumnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($secondLastColumn);
+                $cyLastColumnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($cyLastColumn);
+                $lyLastColumnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($lyLastColumn);
+
+                $rowCount = $event->sheet->getHighestDataRow();
+                for ($row = 4; $row <= $rowCount; $row++) {
+                    $cellValue = $event->sheet->getCell($secondLastColumnLetter.''. $row)->getValue();
+                    $cycellValue = $event->sheet->getCell($cyLastColumnLetter.''. $row)->getValue();
+                    $lycellValue = $event->sheet->getCell($lyLastColumnLetter.''. $row)->getValue();
+                    if($cycellValue <= 0){
+                        $event->sheet->setCellValue($lastColumn.''. $row, 'INACTIVE DEALER');
+                        $event->sheet->getStyle($lastColumn.''. $row)->applyFromArray([
+                            'fill' => [
+                                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                                'startColor' => ['rgb' => 'FFFF00'],
+                            ],
+                        ]);
+                    }elseif($lycellValue <= 0){
+                        $event->sheet->setCellValue($lastColumn.''. $row, 'LY -NO SALE');
+                        $event->sheet->getStyle($lastColumn.''. $row)->applyFromArray([
+                            'fill' => [
+                                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                                'startColor' => ['rgb' => 'FFFFFF'],
+                            ],
+                        ]);
+                    }elseif ($cellValue <= 0) {
+                        $event->sheet->setCellValue($lastColumn.''. $row, 'DE-GROWTH');
+                        $event->sheet->getStyle($lastColumn.''. $row)->applyFromArray([
+                            'fill' => [
+                                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                                'startColor' => ['rgb' => 'FF0000'],
+                            ],
+                        ]);
+                    } elseif ($cellValue > 0) {
+                        $event->sheet->setCellValue($lastColumn.''. $row, 'GROWTH DEALER');
+                        $event->sheet->getStyle($lastColumn.''. $row)->applyFromArray([
+                            'fill' => [
+                                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                                'startColor' => ['rgb' => '00FF00'],
+                            ],
+                        ]);
+                    }
+
+                }
+
                 $event->sheet->mergeCells('A1:A3');
                 $event->sheet->mergeCells('B1:B3');
                 $event->sheet->mergeCells('C1:C3');
@@ -496,4 +545,5 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
             },
         ];
     }
+
 }

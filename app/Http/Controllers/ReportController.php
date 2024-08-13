@@ -58,9 +58,7 @@ use Carbon\Carbon;
 
 class ReportController extends Controller
 {
-    public function __construct()
-    {
-    }
+    public function __construct() {}
     public function beatadherence(Request $request)
     {
         $userids = getUsersReportingToAuth();
@@ -3394,10 +3392,19 @@ class ReportController extends Controller
 
             $query->whereBetween('invoice_date', [$financial_year_start, $financial_year_end]);
         } else {
-            $currentDate = Carbon::now();
-            $startDatethree = $currentDate->copy()->subMonthsNoOverflow(3)->firstOfMonth()->format('Y-m-d');
-            $endDatethree = $currentDate->copy()->subMonthNoOverflow()->endOfMonth()->format('Y-m-d');
-            $query->whereBetween('invoice_date', [$startDatethree, $endDatethree]);
+            $currentMonth = Carbon::now()->month;
+            $last_monts = [1, 2, 3];
+            $currentYear = Carbon::now()->year;
+            if (in_array($currentMonth, $last_monts)) {
+                $request->financial_year = ($currentYear - 1) . '-' . $currentYear;
+            } else {
+                $request->financial_year = $currentYear . '-' . $currentYear + 1;
+            }
+            $f_year_array = explode('-', $request->financial_year);
+            $financial_year_start = $f_year_array[0] . '-04-01';
+            $financial_year_end = $f_year_array[1] . '-03-31';
+
+            $query->whereBetween('invoice_date', [$financial_year_start, $financial_year_end]);
         }
 
         if ($request->division_id && $request->division_id != '' && count($request->division_id) > 0) {
@@ -3480,7 +3487,7 @@ class ReportController extends Controller
             'final_branch',
             'city',
             DB::raw('SUM(net_amount) as total_net_amounts'),
-            DB::raw('0 as last_year_net_amounts') 
+            DB::raw('0 as last_year_net_amounts')
         );
 
         // Determine the financial year date range

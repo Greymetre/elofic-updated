@@ -46,17 +46,17 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                     $query->whereIn('created_by', $this->userids);
                 }
                 if ($this->startdate) {
-                    $query->whereDate('created_at', '>=', $this->startdate);
+                    $query->where('order_date', '>=', $this->startdate);
                 }
                 if ($this->enddate) {
-                    $query->whereDate('created_at', '<=', $this->enddate);
+                    $query->where('order_date', '<=', $this->enddate);
                 }
                 if ($this->order_id) {
-                    $query->where('order_id', $this->order_id);
+                    $query->where('id', $this->order_id);
                 }
                 if ($this->dividion_id) {
                     $order_ids = Order::where('product_cat_id', $this->dividion_id)->pluck('id');
-                    $query->whereIn('order_id', $order_ids);
+                    $query->whereIn('id', $order_ids);
                     // $query->where('orders.product_cat_id',$this->dividion_id);
                 }
 
@@ -69,25 +69,31 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 }
             })->latest()->get();
         } else {
-
             return OrderDetails::with('orders', 'orders.createdbyname')->whereHas('orders', function ($query) {
                 if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                     $query->whereIn('created_by', $this->userids);
                 }
-                if ($this->startdate) {
-                    $query->whereDate('created_at', '>=', $this->startdate);
-                }
-                if ($this->enddate) {
-                    $query->whereDate('created_at', '<=', $this->enddate);
-                }
+    
                 if ($this->order_id) {
-                    $query->where('order_id', $this->order_id);
+                    $query->where('id', $this->order_id);
                 }
                 if ($this->dividion_id) {
-
-                    $order_ids = Order::where('product_cat_id', $this->dividion_id)->pluck('id');
-                    $query->whereIn('order_id', $order_ids);
+                    $order_ids = Order::where(function($query) {
+                        $query->where('product_cat_id', $this->dividion_id)
+                              ->orWhereNull('product_cat_id');
+                    })
+                    ->where('order_date', '>=', $this->startdate)
+                    ->where('order_date', '<=', $this->enddate)
+                    ->pluck('id');
+                    $query->whereIn('id', $order_ids);
                     // $query->where('orders.product_cat_id',$this->dividion_id);
+                }else{
+                    if ($this->startdate) {
+                        $query->where('order_date', '>=', $this->startdate);
+                    }
+                    if ($this->enddate) {
+                        $query->where('order_date', '<=', $this->enddate);
+                    }
                 }
             })->select('id', 'order_id', 'product_id', 'product_detail_id', 'quantity', 'shipped_qty', 'price', 'discount', 'discount_amount', 'tax_amount', 'line_total', 'status_id', 'created_at', 'scheme_name', 'scheme_discount', 'scheme_amount', 'cluster_discount', 'cluster_amount', 'deal_discount', 'deal_amount', 'distributor_discount', 'distributor_amount')->latest()->get();
         }

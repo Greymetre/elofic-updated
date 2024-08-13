@@ -156,6 +156,10 @@ class OrderController extends Controller
             $data['distributor_amount'] = (string)$data['distributor_amount'];
             $data['frieght_discount'] = (string)$data['frieght_discount'];
             $data['frieght_amount'] = (string)$data['frieght_amount'];
+            $data['cash_discount'] = (string)$data['cash_discount'];
+            $data['cash_amount'] = (string)$data['cash_amount'];
+            $data['total_discount'] = (string)$data['total_discount'];
+            $data['total_amount'] = (string)$data['total_amount'];
             $data['gst5_amt'] = (string)$data['gst5_amt'];
             $data['gst12_amt'] = (string)$data['gst12_amt'];
             $data['gst18_amt'] = (string)$data['gst18_amt'];
@@ -619,6 +623,10 @@ class OrderController extends Controller
                 $order->frieght_amount = $request->frieght_amount ?? '';
                 $order->discount_status = $request->discount_status ?? '0';
                 $order->sp_discount_status = $request->sp_discount_status ?? '0';
+                $order->cash_discount = $request->cash_discount ?? '0';
+                $order->cash_amount = $request->cash_amount ?? '0';
+                $order->total_discount = $request->total_discount ?? '0';
+                $order->total_amount = $request->total_amount ?? '0';
                 $order->gst5_amt = $request->gst5_amt ?? NULL;
                 $order->gst12_amt = $request->gst12_amt ?? NULL;
                 $order->gst18_amt = $request->gst18_amt ?? NULL;

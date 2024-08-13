@@ -111,8 +111,8 @@
                 <th>Dealer Name</th>
                 <th>City</th>
                 <th>Final Branch Name</th>
-                <th>LY Total Sale</th>
-                <th>CY Total Sale</th>
+                <th>LYTD</th>
+                <th>CYTD</th>
                 <th>Growth</th>
               </thead>
               <tbody>

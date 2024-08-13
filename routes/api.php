@@ -235,4 +235,5 @@ Route::group(['middleware' => ['auth:users']], function () {
     //Report 
     Route::get('primary-sales', [ReportController::class, 'primarySales']);
     Route::get('monthly-sales', [ReportController::class, 'monthlySales']);
+    Route::get('getDealerGrowth', [ReportController::class, 'getDealerGrowth']);
 });

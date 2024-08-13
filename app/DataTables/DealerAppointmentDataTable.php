@@ -40,6 +40,8 @@ class DealerAppointmentDataTable extends DataTable
                     return '<span class="badge badge-info">Approved By Account</span>';
                 }elseif($data->approval_status == '3'){
                     return '<span class="badge badge-success">Approved By HO</span>';
+                }elseif($data->approval_status == '4'){
+                    return '<span class="badge badge-danger">Rejected</span>';
                 }
             })
             ->editColumn('createdbyname.name', function ($data) {

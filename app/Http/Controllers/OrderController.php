@@ -729,11 +729,11 @@ class OrderController extends Controller
                     ->withInput();
             }
             $request['saledetail'] = $request['orderdetail'];
+            $request['status_id'] = 2;
             $data = collect([$request]);
             $response = insertSales($data);
             if ($response['status'] == 'success') {
-                $status_id = Status::where('status_name', '=', 'Dispatched')->pluck('id')->first();
-                $partiallystatus = Status::where('status_name', '=', 'Partially Dispatched')->pluck('id')->first();
+                $partiallystatus = 2;
 
                 if (isset($request['orderdetail'])) {
                     foreach ($request['orderdetail'] as $key => $rows) {
@@ -742,21 +742,16 @@ class OrderController extends Controller
                         if(isset($orderdetail)){
                             $orderdetail->cash_dis = $rows['cash_dis'];
                             $orderdetail->cash_amounts = $rows['cash_amounts'];
-                            if ($orderdetail['shipped_qty'] + $rows['quantity'] == $orderdetail['quantity']) {
-                                $orderdetail->status_id = $status_id;
-                            } else {
-                                $orderdetail->status_id = $partiallystatus;
-                            }
+                            $orderdetail->status_id = $partiallystatus;
                             $orderdetail->increment('shipped_qty', $rows['quantity']);
                             $orderdetail->save();
                         }
                     }
                 }
-
                 if (OrderDetails::where('order_id', '=', $request['order_id'])->where('status_id', '=', $partiallystatus)->exists()) {
                     Order::where('id', '=', $request['order_id'])->update(['status_id' => $partiallystatus, 'cash_discount' => $request->cash_discount, 'cash_amount' => $request->cash_amount, 'order_remark' => $request->order_remark]);
                 } else {
-                    Order::where('id', '=', $request['order_id'])->update(['status_id' => $status_id, 'cash_discount' => $request->cash_discount, 'cash_amount' => $request->cash_amount, 'order_remark' => $request->order_remark]);
+                    Order::where('id', '=', $request['order_id'])->update(['status_id' => $partiallystatus, 'cash_discount' => $request->cash_discount, 'cash_amount' => $request->cash_amount, 'order_remark' => $request->order_remark]);
                 }
                 return Redirect::to('sales')->with('message_success', 'Sales Store Successfully');
             }

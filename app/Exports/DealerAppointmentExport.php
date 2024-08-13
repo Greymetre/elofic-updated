@@ -33,7 +33,7 @@ class DealerAppointmentExport implements FromCollection, WithHeadings, ShouldAut
 
     public function collection()
     {
-        $query = DealerAppointment::with('branch_details', 'district_details', 'city_details', 'createdbyname', 'appointment_kyc_detail');
+        $query = DealerAppointment::with('branch_details', 'district_details', 'city_details', 'createdbyname', 'appointment_kyc_detail','sales_approve_user','ho_approve_user');
 
         if ($this->designation_id) {
             $query->where('designation_id', $this->designation_id);
@@ -56,7 +56,7 @@ class DealerAppointmentExport implements FromCollection, WithHeadings, ShouldAut
 
     public function headings(): array
     {
-        return ['Submission Date', 'Appointment Date', 'Approval Status', 'Created By Name', 'Created By Emp Code', 'Division', 'Branch', 'Customertype', 'Firm Type', 'ORGANISATION Status', 'Name of the Company/Firm', 'Gst Type', 'Gst No', 'Cin No', 'Related Firm Name', 'Line Business', 'State', 'District', 'City', 'Place', 'Office Address', 'Office Pincode', 'Office Mobile', 'Office Email', 'Godown Address', 'Godown Pincode', 'Godown Mobile', 'Godown Email', 'Are you already working on another division of Silver/Bediya?', 'Old Division', 'Old Firm Name', 'Old Gst', 'Contact Person Name', 'Mobile Email', 'Bank Name', 'Bank Address', 'Account Type', 'Account Number', 'Ifsc Code', 'Ppd Name 1', 'Ppd Adhar 1', 'Ppd Pan 1', 'Ppd Name 2', 'Ppd Adhar 2', 'Ppd Pan 2', 'Ppd Name 3', 'Ppd Adhar 3', 'Ppd Pan 3', 'Ppd Name 4', 'Ppd Adhar 4', 'Ppd Pan 4', 'Security Deposit', 'SDPUMPMOTORS', 'SDF&A', 'SDAGRI', 'Payment Term', 'Credit Period', 'Cheque No 1', 'Cheque Account Number 1', 'Cheque Bank 1', 'Cheque No 2', 'Cheque Account Number 2', 'Cheque Bank 2', 'Manufacture Company 1', 'Manufacture Product 1', 'Manufacture Business 1', 'Manufacture Turn Over 1', 'Manufacture Company 2', 'Manufacture Product 2', 'Manufacture Business 2', 'Manufacture Turn Over 2', 'Present Annual Turnover', 'Motor Anticipated Business 1', 'Motor Next Year Business 1', 'Pump Anticipated Business 1', 'Pump Next Year Business 1', 'F&A Anticipated Business 1', 'F&A Next Year Business 1', 'Lighting Anticipated Business 1', 'Lighting Next Year Business 1', 'Agri Anticipated Business 1', 'Agri Next Year Business 1', 'Solar Anticipated Business 1', 'Solar Next Year Business 1', 'Anticipated Business Total','Dealer Code'];
+        return ['Submission Date', 'Appointment Date', 'Approval Status','Approve By Sales Name','Approve By HO Name', 'Created By Name', 'Created By Emp Code', 'Division', 'Branch', 'Customertype', 'Firm Type', 'ORGANISATION Status', 'Name of the Company/Firm', 'Gst Type', 'Gst No', 'Cin No', 'Related Firm Name', 'Line Business', 'State', 'District', 'City', 'Place', 'Office Address', 'Office Pincode', 'Office Mobile', 'Office Email', 'Godown Address', 'Godown Pincode', 'Godown Mobile', 'Godown Email', 'Are you already working on another division of Silver/Bediya?', 'Old Division', 'Old Firm Name', 'Old Gst', 'Contact Person Name', 'Mobile Email', 'Bank Name', 'Bank Address', 'Account Type', 'Account Number', 'Ifsc Code', 'Ppd Name 1', 'Ppd Adhar 1', 'Ppd Pan 1', 'Ppd Name 2', 'Ppd Adhar 2', 'Ppd Pan 2', 'Ppd Name 3', 'Ppd Adhar 3', 'Ppd Pan 3', 'Ppd Name 4', 'Ppd Adhar 4', 'Ppd Pan 4', 'Security Deposit', 'SDPUMPMOTORS', 'SDF&A', 'SDAGRI', 'Payment Term', 'Credit Period', 'Cheque No 1', 'Cheque Account Number 1', 'Cheque Bank 1', 'Cheque No 2', 'Cheque Account Number 2', 'Cheque Bank 2', 'Manufacture Company 1', 'Manufacture Product 1', 'Manufacture Business 1', 'Manufacture Turn Over 1', 'Manufacture Company 2', 'Manufacture Product 2', 'Manufacture Business 2', 'Manufacture Turn Over 2', 'Present Annual Turnover', 'Motor Anticipated Business 1', 'Motor Next Year Business 1', 'Pump Anticipated Business 1', 'Pump Next Year Business 1', 'F&A Anticipated Business 1', 'F&A Next Year Business 1', 'Lighting Anticipated Business 1', 'Lighting Next Year Business 1', 'Agri Anticipated Business 1', 'Agri Next Year Business 1', 'Solar Anticipated Business 1', 'Solar Next Year Business 1', 'Anticipated Business Total','Dealer Code'];
     }
 
     public function map($row): array
@@ -74,6 +74,8 @@ class DealerAppointmentExport implements FromCollection, WithHeadings, ShouldAut
             date('d M Y', strtotime($row->created_at)),
             date('d M Y', strtotime($row->appointment_date)),
             $aproval_status,
+            $row->sales_approve_user ? $row->sales_approve_user->name : '-',
+            $row->ho_approve_user ? $row->ho_approve_user->name : '-',
             $row->createdbyname ? $row->createdbyname->name : '-',
             $row->createdbyname ? $row->createdbyname->employee_codes : '-',
             $row->division ? $row->division : '-',

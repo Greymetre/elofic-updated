@@ -23,7 +23,6 @@
               <div class="row">
                 <div class="col-12">
                   <h4>
-                    <img src="{!! asset('assets/img/logo.png') !!}" class="brand-image" width="70px" alt="Logo"> <span> {!! config('app.name') !!}</span>
                     <small class="float-right">Date: {!! $sales['invoice_date'] !!}</small>
                   </h4>
                 </div>

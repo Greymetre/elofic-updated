@@ -28,7 +28,7 @@ class DealerAppointmentController extends Controller
         $user_ids = getUsersReportingToAuth($user->id);
         $users = User::where('active', 'Y')->whereIn('id',$user_ids)->select('id', 'name')->get();
         $pageSize = $request->input('pageSize');
-        $all_status = [['id' => '0', 'name' => 'Pending'], ['id' => '1', 'name' => 'Approved By Sales Team'], ['id' => '2', 'name' => 'Approved By Account'], ['id' => '3', 'name' => 'Approved By HO']];
+        $all_status = [['id' => '0', 'name' => 'Pending'], ['id' => '1', 'name' => 'Approved By Sales Team'], ['id' => '2', 'name' => 'Approved By Account'], ['id' => '3', 'name' => 'Approved By HO'], ['id' => '4', 'name' => 'Rejected']];
         $db_data = DealerAppointment::with('branch_details', 'district_details', 'city_details', 'appointment_kyc_detail', 'createdbyname')->whereIn('created_by' , $user_ids);
 
         if ($request->startdate && $request->startdate != '' && $request->startdate != NULL && $request->enddate && $request->enddate != '' && $request->enddate != NULL) {
@@ -61,6 +61,8 @@ class DealerAppointmentController extends Controller
                     $db_data[$key]['approval_status'] =  'Approved By Account';
                 } elseif ($value->approval_status == '3') {
                     $db_data[$key]['approval_status'] =  'Approved By HO';
+                } elseif ($value->approval_status == '4') {
+                    $db_data[$key]['approval_status'] =  'Rejected';
                 }
                 $data->push([
                     'id' => isset($value['id']) ? $value['id'] : '',
@@ -186,9 +188,9 @@ class DealerAppointmentController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], 400);
             }
-            $update = DealerAppointment::where('id', $request->appointment_id)->update(['approval_status'=>$request->status]);
+            $update = DealerAppointment::where('id', $request->appointment_id)->update(['approval_status'=>$request->status,'remark'=>$request->remark,'sales_approve'=>$request->user()->id]);
             if($update){
-                return response()->json(['status'=>'success', 'message'=>'Approved Successfully !!']);
+                return response()->json(['status'=>'success', 'message'=>'Appointment status chnaged successfully !!']);
             }else{
                 return response()->json(['status'=>'error', 'message'=>'Somthing went wrong.']);
             }
