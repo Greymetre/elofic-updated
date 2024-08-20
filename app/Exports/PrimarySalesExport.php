@@ -165,7 +165,7 @@ class PrimarySalesExport implements FromCollection, WithHeadings,WithMapping, Sh
         return[
             $data['id'],
             $data['invoiceno'],
-            date('d M Y', strtotime($data['invoice_date'])),
+            date('Y/m/d', strtotime($data['invoice_date'])),
             $data['month'],
             $data['division'],
             $data['dealer'],

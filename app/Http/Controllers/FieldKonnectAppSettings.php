@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\FieldKonnectAppSetting;
+use App\Models\Media;
 use Validator;
 
 class FieldKonnectAppSettings extends Controller
@@ -59,6 +60,13 @@ class FieldKonnectAppSettings extends Controller
         $field_konnect_app_setting =  FieldKonnectAppSetting::first();
         $data = $request->all();
         if(isset($field_konnect_app_setting)){
+            if ($request->hasFile('product_catalogue')) {
+                $file = $request->file('product_catalogue');
+                $customname = time() . '.' . $file->getClientOriginalExtension();
+                $field_konnect_app_setting->addMedia($file)
+                    ->usingFileName($customname)
+                    ->toMediaCollection('product_catalogue');
+            }
             $field_konnect_app_setting->update($data);
             return redirect('field-konnect-app-setting')->with('success', 'Field Konnect App setting save successfully !!');
         }
@@ -107,7 +115,13 @@ class FieldKonnectAppSettings extends Controller
      */
     public function destroy($id)
     {
-        //
+        $field_konnect_app_setting_media = Media::find($id);
+        if ($field_konnect_app_setting_media) {
+            $field_konnect_app_setting_media->delete();
+            return response()->json(['status' => 'success', 'message' => 'Slider image delete successfully !!']);
+        } else {
+            return response()->json(['status' => 'error', 'message' => 'Slider image not found !!']);
+        }
     }
 
  

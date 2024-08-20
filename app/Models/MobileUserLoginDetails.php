@@ -14,12 +14,14 @@ class MobileUserLoginDetails extends Model
     protected $fillable = [
         'active', 
         'customer_id', 
+        'user_id', 
         'app_version', 
         'device_type', 
         'device_name', 
         'first_login_date', 
         'last_login_date',
         'login_status',
+        'app',
         'created_at', 
         'updated_at'
     ];
@@ -27,5 +29,9 @@ class MobileUserLoginDetails extends Model
     public function customer()
     {
         return $this->belongsTo(Customers::class, 'customer_id', 'id');
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 }

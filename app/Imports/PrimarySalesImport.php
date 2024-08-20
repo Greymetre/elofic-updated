@@ -105,6 +105,7 @@ class PrimarySalesImport implements ToCollection, WithValidation, WithHeadingRow
                     'branch' => $row['branch'],
                     'new_group_name' => $row['new_group_name'],
                     'product_id' => $row['product_id'] ?? NULL,
+                    'customer_id' => $row['customer_id'] ?? NULL,
                 ]);
             }
         }

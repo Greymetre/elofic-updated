@@ -41,7 +41,7 @@ class PerEmployeeCostingExport implements FromCollection, WithHeadings, WithMapp
         $query = User::with('primarySales', 'getdesignation', 'getbranch', 'getdivision', 'userinfo')->where('active', 'Y');
 
         if ($this->division_id && $this->division_id != '' && count($this->division_id) > 0) {
-            $query->whereIn('division', $this->division_id);
+            $query->whereIn('division_id', $this->division_id);
         }
 
         $data = $query->orderBy('id', 'desc')->get();

@@ -24,6 +24,19 @@
          font-weight: 900;
          cursor: pointer;
       }
+
+      i.fa.fa-window-close {
+         position: absolute;
+         top: 26px;
+         right: 42px;
+         font-size: 22px;
+         color: red;
+         cursor: pointer;
+      }
+
+      iframe {
+         position: relative;
+      }
    </style>
    <div class="row">
       <div class="col-md-12">
@@ -32,7 +45,7 @@
                <div class="nav-tabs-navigation">
                   <div class="nav-tabs-wrapper">
                      <h4 class="card-title ">
-                         FieldKonnect App Setting
+                        FieldKonnect App Setting
                         @if(auth()->user()->can(['district_access']))
                         <!-- <ul class="nav nav-tabs pull-right" data-tabs="tabs">
                            <li class="nav-item">
@@ -69,7 +82,7 @@
                {{ session('error') }}
             </div>
             @endif
-          
+
             <div class="card-body">
                @if(count($errors) > 0)
                <div class="alert alert-danger">
@@ -89,11 +102,11 @@
                'id' => 'storeLoyaltyAppSetting',
                'files'=>true
                ]) !!}
-              
-           
-              
+
+
+
                <div class="row">
-                 
+
                   <div class="col-md-6">
                      <div class="form-group">
                         <div class="row">
@@ -112,8 +125,38 @@
                      </div>
                   </div>
                </div>
-              
-            
+               <hr>
+               <div class="row mt-4">
+                  <div class="col-md-12 mt-4">
+                     <div class="row">
+                        <div class="col-md-4">
+                           <label class="bmd-label-floating">Upload Product Catalogue </label>
+                        </div>
+                        <div class="col-md-8">
+                           <input type="file" name="product_catalogue" accept="application/pdf" id="product_catalogue" class="form-control">
+                           <input type="hidden" multiple name="id" id="id" class="form-control" value="{!! old( 'id', $field_konnect_app_setting?$field_konnect_app_setting['id']:'') !!}">
+                           @if ($errors->has('product_catalogue'))
+                           <div class="error col-lg-12">
+                              <p class="text-danger">{{ $errors->first('product_catalogue') }}</p>
+                           </div>
+                           @endif
+                        </div>
+                     </div>
+                     @if(isset($field_konnect_app_setting) && $field_konnect_app_setting->getMedia('product_catalogue')->count() > 0 && Storage::disk('s3')->exists($field_konnect_app_setting->getMedia('product_catalogue')[0]->getPath()))
+                     <h3>Product Catalogue</h3>
+                     <div class="row">
+                        @foreach($field_konnect_app_setting->getMedia('product_catalogue') as $k=>$media)
+                        <div class="col-md-6">
+                           <div class="row image_preview p-4 m-4">
+                              <iframe src="{{ $media->getFullUrl() }}" width="100%" height="400px" frameborder="0"></iframe>
+                              <i class="fa fa-window-close close-btn" data-id="{{$media->id}}" aria-hidden="true"></i>
+                           </div>
+                        </div>
+                        @endforeach
+                     </div>
+                     @endif
+                  </div>
+               </div>
 
                <div class="card-footer pull-right">
                   {{ Form::submit('Submit', array('class' => 'btn btn-theme')) }}
@@ -125,32 +168,33 @@
    </div>
    <script src="{{ url('/').'/'.asset('assets/js/validation_loyalty.js') }}"></script>
    <script>
-   //    $('body').on('click', '.delete-img', function() {
-   //       var deleteButton = $(this);
-   //       var id = $(this).data("id");
-   //       var token = $("meta[name='csrf-token']").attr("content");
-   //       if (!confirm("Are You sure want to delete ?")) {
-   //          return false;
-   //       }
-   //       $.ajax({
-   //          url: "{{ url('loyalty-app-setting') }}" + '/' + id,
-   //          type: 'DELETE',
-   //          data: {
-   //             _token: token,
-   //             id: id
-   //          },
-   //          success: function(data) {
-   //             $('.message').empty();
-   //             $('.alert').show();
-   //             if (data.status == 'success') {
-   //                deleteButton.parent('div').addClass('d-none');
-   //                $('.alert').addClass("alert-success");
-   //             } else {
-   //                $('.alert').addClass("alert-danger");
-   //             }
-   //             $('.message').append(data.message);
-   //          },
-   //       });
-   //    });
-   // </script>
+         $('body').on('click', '.close-btn', function() {
+            var deleteButton = $(this);
+            var id = $(this).data("id");
+            var token = $("meta[name='csrf-token']").attr("content");
+            if (!confirm("Are You sure want to delete ?")) {
+               return false;
+            }
+            $.ajax({
+               url: "{{ url('field-konnect-app-setting') }}" + '/' + id,
+               type: 'DELETE',
+               data: {
+                  _token: token,
+                  id: id
+               },
+               success: function(data) {
+                  $('.message').empty();
+                  $('.alert').show();
+                  if (data.status == 'success') {
+                     deleteButton.parent('div').addClass('d-none');
+                     $('.alert').addClass("alert-success");
+                  } else {
+                     $('.alert').addClass("alert-danger");
+                  }
+                  $('.message').append(data.message);
+               },
+            });
+         });
+      // 
+   </script>
 </x-app-layout>
