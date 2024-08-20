@@ -165,9 +165,7 @@ class SalesController extends Controller
     {
         try {
             abort_if(Gate::denies('sale_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-            if ($request->ip() != '106.222.213.123') {
-                return '<h3>Coming Soon.....</h3><br><p>Working on it.</p>';
-            }
+            
             $sales = Sales::find($request->sales_id);
             $sales->transport_details = $request->transport_details;
             $sales->lr_no = $request->lr_no;
@@ -179,7 +177,6 @@ class SalesController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->withErrors($e->getMessage())->withInput();
         }
-        dd($request->all(), $sales);
     }
 
     public function destroy($id)

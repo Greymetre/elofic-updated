@@ -155,7 +155,9 @@ class ExpensesDataTable extends DataTable
         if (!empty($request['payroll'])) {
 
             $payrollid = $request['payroll'];
-
+            $data->whereHas('users', function ($query) use ($payrollid) {
+                $query->where('payroll', $payrollid);
+            });
             $data->whereIn('user_id', $userids);
         }
 

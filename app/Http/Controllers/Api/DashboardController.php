@@ -589,7 +589,7 @@ class DashboardController extends Controller
                     $lastDateFormatted = $lastDate->toDateString();
 
                     $achievement = PrimarySales::whereIn('emp_code', $all_emp_codes)->where('invoice_date', '>=', $firstDateFormatted)->where('invoice_date', '<=', $lastDateFormatted);
-                    
+
                     if ($request->branch_id && !empty($request->branch_id)) {
                         $selected_branch = Branch::find($request->branch_id);
                         $achievement->where(['final_branch' => $selected_branch->branch_name]);
@@ -663,8 +663,10 @@ class DashboardController extends Controller
     //field connect version
     public function getVersion()
     {
-        $fieldConnect = FieldKonnectAppSetting::first();
+        $fieldConnect = FieldKonnectAppSetting::with('media')->first();
         $data["app_version"] = isset($fieldConnect) ? (isset($fieldConnect->app_version) ? $fieldConnect->app_version : '') : '';
+        $data["media"] = $fieldConnect->media->toArray();
+        
         return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], 200);
     }
 

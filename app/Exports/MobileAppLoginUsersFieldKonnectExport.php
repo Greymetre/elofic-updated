@@ -18,7 +18,7 @@ use DB;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class MobileAppLoginUsersExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithEvents
+class MobileAppLoginUsersFieldKonnectExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithEvents
 {
 
     private $rowIndex = 3;
@@ -36,7 +36,7 @@ class MobileAppLoginUsersExport implements FromCollection, WithHeadings, ShouldA
     {
         $f_year_array = explode('-', $this->financial_year);
 
-        $data = MobileUserLoginDetails::with(['customer'])->where('app', '1');
+        $data = MobileUserLoginDetails::with(['user'])->where('app', '2');
 
         if ($this->start_date && !empty($this->start_date) && $this->end_date && !empty($this->end_date)) {
             $startDate = date('Y-m-d', strtotime($this->start_date));
@@ -54,7 +54,7 @@ class MobileAppLoginUsersExport implements FromCollection, WithHeadings, ShouldA
     public function headings(): array
     {
 
-        $headings = ['S. No.', 'Customer ID', 'Firm Name', 'Contact Person', 'Mobile Number', 'Branch', 'State', 'District', 'City', 'App Version', 'Device Type', 'Device Name', 'First Login date', 'Last Login date', 'Login Status', 'User Name'];
+        $headings = ['S. No.', 'User ID', 'User Name', 'Mobile Number', 'Branch', 'App Version', 'Device Name', 'First Login date', 'Last Login date', 'Login Status'];
 
 
 
@@ -63,38 +63,18 @@ class MobileAppLoginUsersExport implements FromCollection, WithHeadings, ShouldA
 
     public function map($data): array
     {
-        // dd($data);
-        $branch_arr = array();
-        if ($data->customer->getemployeedetail && !empty($data->customer->getemployeedetail) && count($data->customer->getemployeedetail) > 0) {
-            foreach ($data->customer->getemployeedetail as $key_new => $datas) {
-                if (isset($datas->employee_detail->getbranch->branch_name) && !in_array($datas->employee_detail->getbranch->branch_name, $branch_arr)) {
-                    $branch_arr[] = $datas->employee_detail->getbranch->branch_name;
-                }
-            }
-        }
-        $all_assign_emp = array();
-        if(count($data['customer']['getemployeedetail']) > 0){
-            foreach ($data['customer']['getemployeedetail'] as $key => $value) {
-                array_push($all_assign_emp, $value->employee_detail->name);
-            }
-        }
+        
         return [
             $data['id'],
-            $data['customer']['id'],
-            isset($data['customer']['name']) ? $data['customer']['name'] : '',
-            isset($data['customer']['first_name']) ? $data['customer']['first_name'] : '',
-            isset($data['customer']['mobile']) ? $data['customer']['mobile'] : '',
-            implode(',', $branch_arr),
-            isset($data['customer']['customeraddress']) ? ($data['customer']['customeraddress']['statename']?$data['customer']['customeraddress']['statename']['state_name']:'') : '',
-            isset($data['customer']['customeraddress']) ? ($data['customer']['customeraddress']['districtname']?$data['customer']['customeraddress']['districtname']['district_name']:'') : '',
-            isset($data['customer']['customeraddress']) ? ($data['customer']['customeraddress']['cityname']?$data['customer']['customeraddress']['cityname']['city_name']:'') : '',
+            $data['user']['id'],
+            isset($data['user']['name']) ? $data['user']['name'] : '',
+            isset($data['user']['mobile']) ? $data['user']['mobile'] : '',
+            isset($data['user']['getbranch']['branch_name']) ? $data['user']['getbranch']['branch_name'] : '',
             isset($data['app_version']) ? $data['app_version'] : '',
-            isset($data['device_type']) ? $data['device_type'] : '',
             isset($data['device_name']) ? $data['device_name'] : '',
             isset($data['first_login_date']) ? date('Y-m-d', strtotime($data['first_login_date'])) : '',
             isset($data['last_login_date']) ? date('Y-m-d', strtotime($data['last_login_date'])) : '',
             isset($data['login_status']) ? ($data['login_status'] == '0' ? 'Logout' : 'Login') : '',
-            count($all_assign_emp)>0?implode(',', $all_assign_emp):'-',
         ];
     }
 

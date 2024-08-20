@@ -27,6 +27,7 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
         $this->executive_id = $request->input('executive_id');
         $this->financial_year = $request->input('financial_year');
         $this->month = $request->input('month');
+        $this->remark = $request->input('remark');
         $this->months = [];
         $this->t_data = '';
     }
@@ -129,7 +130,7 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
         }
 
         // Grouping and ordering
-        $query->whereIn('division', ['PUMP', 'MOTOR'])->groupBy('dealer', 'final_branch', 'city')->orderBy('dealer', 'asc');
+        $query->whereIn('division', ['PUMP', 'MOTOR'])->groupBy('dealer', 'final_branch', 'city');
 
         // Execute the primary query
         $results = $query->get();
@@ -164,9 +165,53 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
             $item->last_year_division_array = $lastYearAmount ? $lastYearAmount->last_year_division_array : 0;
             $item->last_year_month_array = $lastYearAmount ? $lastYearAmount->last_year_month_array : 0;
             $item->last_year_invoice_date_array = $lastYearAmount ? $lastYearAmount->last_year_invoice_date_array : 0;
+
+            // Calculate growthPercent
+            $currentYearAchievements = $item->total_net_amounts;
+            $lastYearAchievements = $item->last_year_net_amounts;
+
+            $growthPercent = 0;
+            if ($lastYearAchievements != null) {
+                $growthPercent = (($currentYearAchievements - $lastYearAchievements) / abs($lastYearAchievements)) * 100;
+                $growthPercent = ROUND($growthPercent, 2);
+            } else {
+                if ($lastYearAchievements == null || $lastYearAchievements == 0) {
+                    if (($currentYearAchievements == null || $currentYearAchievements == 0) && ($lastYearAchievements == null || $lastYearAchievements == 0)) {
+                        $growthPercent = 0;
+                    } elseif (($lastYearAchievements == null || $lastYearAchievements == 0) && isset($currentYearAchievements) && ($currentYearAchievements != null && $currentYearAchievements > 0)) {
+                        $growthPercent = 0;
+                    }
+                }
+            }
+
+            $item->growthPercent = $growthPercent;
+
             return $item;
         });
-        // dd($results);
+        if ($this->remark && $this->remark != '' && $this->remark != null) {
+            if($this->remark == '1'){
+                // INACTIVE DEALER
+                $results = $results->filter(function ($item) {
+                    return $item->total_net_amounts == 0;
+                });
+            }elseif($this->remark == '2'){
+                // LY -NO SALE
+                $results = $results->filter(function ($item) {
+                    return $item->last_year_net_amounts == 0;
+                });
+            }elseif($this->remark == '3'){
+                // DE-GROWTH
+                $results = $results->filter(function ($item) {
+                    return $item->growthPercent < 0;
+                });
+            }elseif($this->remark == '4'){
+                // GROWTH DEALER
+                $results = $results->filter(function ($item) {
+                    return $item->growthPercent > 0;
+                });
+            }
+        }
+        $results = $results->sortByDesc('growthPercent');
         return $results;
     }
 
@@ -244,8 +289,8 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
             $this->financial_year,
         ];
         $flabel4 = [
-            'Total LY',
-            'Total CY',
+            'LYTD',
+            'CYTD',
             'GOLY%',
             'Remarks',
         ];
@@ -386,28 +431,12 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
             }
         }
 
-        $lastYearAchievements = $data->last_year_net_amounts;
-        $currentYearAchievements = $data->total_net_amounts;
-        $growthPercent = 0;
-        if ($lastYearAchievements != null) {
-            $growthPercent = (($currentYearAchievements - $lastYearAchievements) / abs($lastYearAchievements)) * 100;
-            $growthPercent = ROUND($growthPercent, 2);
-        } else {
-            if ($lastYearAchievements == null || $lastYearAchievements == 0) {
-                if (($currentYearAchievements == null || $currentYearAchievements == 0) && ($lastYearAchievements == null || $lastYearAchievements == 0)) {
-                    $growthPercent = 0;
-                } elseif (($lastYearAchievements == null || $lastYearAchievements == 0) && isset($currentYearAchievements) && ($currentYearAchievements != null && $currentYearAchievements > 0)) {
-                    $growthPercent = 100;
-                }
-            }
-        }
-
         $response[7 + $indx] = (string)number_format(($cytmtsale / 100000), '2', '.', '');
         $response[8 + $indx] = (string)number_format(($cytptsale / 100000), '2', '.', '');
 
         $response[9 + $indx] = $data->last_year_net_amounts > 0 ? number_format(($data->last_year_net_amounts / 100000), 2, '.', '') : "0";
         $response[10 + $indx] = $data->total_net_amounts > 0 ? number_format(($data->total_net_amounts / 100000), 2, '.', '') : "0";
-        $response[11 + $indx] = (string)$growthPercent;
+        $response[11 + $indx] = (string)$data->growthPercent;
 
         return $response;
     }
@@ -428,43 +457,42 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
 
                 $rowCount = $event->sheet->getHighestDataRow();
                 for ($row = 4; $row <= $rowCount; $row++) {
-                    $cellValue = $event->sheet->getCell($secondLastColumnLetter.''. $row)->getValue();
-                    $cycellValue = $event->sheet->getCell($cyLastColumnLetter.''. $row)->getValue();
-                    $lycellValue = $event->sheet->getCell($lyLastColumnLetter.''. $row)->getValue();
-                    if($cycellValue <= 0){
-                        $event->sheet->setCellValue($lastColumn.''. $row, 'INACTIVE DEALER');
-                        $event->sheet->getStyle($lastColumn.''. $row)->applyFromArray([
+                    $cellValue = $event->sheet->getCell($secondLastColumnLetter . '' . $row)->getValue();
+                    $cycellValue = $event->sheet->getCell($cyLastColumnLetter . '' . $row)->getValue();
+                    $lycellValue = $event->sheet->getCell($lyLastColumnLetter . '' . $row)->getValue();
+                    if ($cycellValue <= 0) {
+                        $event->sheet->setCellValue($lastColumn . '' . $row, 'INACTIVE DEALER');
+                        $event->sheet->getStyle($lastColumn . '' . $row)->applyFromArray([
                             'fill' => [
                                 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                                 'startColor' => ['rgb' => 'FFFF00'],
                             ],
                         ]);
-                    }elseif($lycellValue <= 0){
-                        $event->sheet->setCellValue($lastColumn.''. $row, 'LY -NO SALE');
-                        $event->sheet->getStyle($lastColumn.''. $row)->applyFromArray([
+                    } elseif ($lycellValue <= 0) {
+                        $event->sheet->setCellValue($lastColumn . '' . $row, 'LY -NO SALE');
+                        $event->sheet->getStyle($lastColumn . '' . $row)->applyFromArray([
                             'fill' => [
                                 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                                 'startColor' => ['rgb' => 'FFFFFF'],
                             ],
                         ]);
-                    }elseif ($cellValue <= 0) {
-                        $event->sheet->setCellValue($lastColumn.''. $row, 'DE-GROWTH');
-                        $event->sheet->getStyle($lastColumn.''. $row)->applyFromArray([
+                    } elseif ($cellValue <= 0) {
+                        $event->sheet->setCellValue($lastColumn . '' . $row, 'DE-GROWTH');
+                        $event->sheet->getStyle($lastColumn . '' . $row)->applyFromArray([
                             'fill' => [
                                 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                                 'startColor' => ['rgb' => 'FF0000'],
                             ],
                         ]);
                     } elseif ($cellValue > 0) {
-                        $event->sheet->setCellValue($lastColumn.''. $row, 'GROWTH DEALER');
-                        $event->sheet->getStyle($lastColumn.''. $row)->applyFromArray([
+                        $event->sheet->setCellValue($lastColumn . '' . $row, 'GROWTH DEALER');
+                        $event->sheet->getStyle($lastColumn . '' . $row)->applyFromArray([
                             'fill' => [
                                 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                                 'startColor' => ['rgb' => '00FF00'],
                             ],
                         ]);
                     }
-
                 }
 
                 $event->sheet->mergeCells('A1:A3');
@@ -545,5 +573,4 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
             },
         ];
     }
-
 }

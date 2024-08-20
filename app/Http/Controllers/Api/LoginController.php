@@ -85,6 +85,28 @@ class LoginController extends Controller
                 $user['entry_from'] = 'app';
                 $this->usersLogin->save_data($user);
 
+                $checkLastLogin = MobileUserLoginDetails::where('user_id', $user['id'])->first();
+                if ($checkLastLogin) {
+                    MobileUserLoginDetails::updateOrCreate(['user_id' => $user['id']], [
+                        'user_id'   =>  $user['id'],
+                        'app_version'   =>  $request['app_version'],
+                        'device_name'   =>  $request['device_name'],
+                        'last_login_date'   =>  Carbon::now(),
+                        'login_status'   =>  '1',
+                        'app'   =>  '2',
+                    ]);
+                } else {
+                    MobileUserLoginDetails::updateOrCreate(['user_id' => $user['id']], [
+                        'user_id'   =>  $user['id'],
+                        'app_version'   =>  $request['app_version'],
+                        'device_name'   =>  $request['device_name'],
+                        'first_login_date'   =>  Carbon::now(),
+                        'last_login_date'   =>  Carbon::now(),
+                        'login_status'   =>  '1',
+                        'app'   =>  '2',
+                    ]);
+                }
+
                 return response()->json(['status' => 'success', 'userinfo' => $nestedData], $this->successStatus);
             } else {
                 return response()->json(['status' => 'error', 'message' => 'Password not match'], $this->unauthorized);
@@ -143,6 +165,10 @@ class LoginController extends Controller
         try {
             $user = $request->user();
             if ($request->user()->token()->revoke()) {
+                MobileUserLoginDetails::updateOrCreate(['user_id' => $user->id], [
+                    'user_id'   =>  $user->id,
+                    'login_status'   =>  '0',
+                ]);
                 $this->users->where('id', $user->id)->update([
                     'notification_id' => ""
                 ]);
@@ -190,6 +216,7 @@ class LoginController extends Controller
                         'device_name'   =>  $request['device_name'],
                         'last_login_date'   =>  Carbon::now(),
                         'login_status'   =>  '1',
+                        'app'   =>  '1',
                     ]);
                 } else {
                     MobileUserLoginDetails::updateOrCreate(['customer_id' => $user->id], [
@@ -200,6 +227,7 @@ class LoginController extends Controller
                         'first_login_date'   =>  Carbon::now(),
                         'last_login_date'   =>  Carbon::now(),
                         'login_status'   =>  '1',
+                        'app'   =>  '1',
                     ]);
                 }
                 if ($username == '917788996655') {

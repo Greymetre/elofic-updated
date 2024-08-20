@@ -466,6 +466,14 @@
                         </a>
                       </li>
                       @endif
+                      @if(auth()->user()->can('user_app_details_access'))
+                      <li class="nav-item {{ request()->is('user_app_details*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ url('user_app_details') }}">
+                          <i class="material-icons">login</i>
+                          <p>User App details</p>
+                        </a>
+                      </li>
+                      @endif
                       @if(auth()->user()->can('target_access'))
                       <li class="nav-item {{ request()->is('targets*') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ url('targets') }}">
@@ -1050,6 +1058,14 @@
                     <a class="nav-link" href="{{ url('reports/dealer_growth') }}">
                       <i class="material-icons">store</i>
                       <p>Dealer Growth</p>
+                    </a>
+                  </li>
+                  @endif
+                  @if(auth()->user()->can('new_dealer_sale_access'))
+                  <li class="nav-item {{ request()->is('reports/new_dealer_sale*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('reports/new_dealer_sale') }}">
+                      <i class="material-icons">store</i>
+                      <p>New Dealer Sale</p>
                     </a>
                   </li>
                   @endif

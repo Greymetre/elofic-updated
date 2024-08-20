@@ -6,11 +6,11 @@
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
-          <h4 class="card-title">Dealer Growth List
+          <h4 class="card-title">New Dealer Sales List
             <span class="">
               <div class="btn-group header-frm-btn">
-                @if(auth()->user()->can(['dealer_growth_download']))
-                <form method="POST" action="{{url('dealer_growth/download')}}">
+                @if(auth()->user()->can(['new_dealer_sale_download']))
+                <form method="POST" action="{{url('new_dealer_sale/download')}}">
                   @csrf
                   <div class="d-flex flex-wrap flex-row">
                     <!-- division filter -->
@@ -54,16 +54,6 @@
                         <option value="">{!! trans('panel.secondary_dashboard.month') !!}</option>
                         @for ($month = 1; $month <= 12; $month++) <option value="{!! date('M', mktime(0, 0, 0, $month, 1)) !!}">{!! date('M', mktime(0, 0, 0, $month, 1)) !!}</option>
                           @endfor
-                      </select>
-                    </div>
-                    <!-- Growth filter-->
-                    <div class="p-2" style="width:200px;">
-                      <select class="selectpicker" name="remark" id="remark" data-style="select-with-transition" title="Remark">
-                        <option value="">Please Select</option>
-                        <option value="1">INACTIVE DEALER</option>
-                        <option value="2">LY -NO SALE</option>
-                        <option value="3">DE-GROWTH</option>
-                        <option value="4">GROWTH DEALER</option>
                       </select>
                     </div>
                     <!-- dealer/distributors filter -->
@@ -118,12 +108,13 @@
           <div class="table-responsive">
             <table id="getprimarysales" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
               <thead class=" text-primary">
-                <th>Dealer Name</th>
-                <th>City</th>
-                <th>Final Branch Name</th>
-                <th>LYTD</th>
-                <th>CYTD</th>
-                <th>Growth</th>
+                <th>Branch Name</th>
+                <th>Customer Name</th>
+                <th>Creation Date</th>
+                <th>Customer Type</th>
+                <th>Division</th>
+                <th>Total Sale</th>
+                <th>Slab</th>
               </thead>
               <tbody>
               </tbody>
@@ -154,7 +145,7 @@
         ],
         "retrieve": true,
         ajax: {
-          url: "{{ route('dealer_growth.list') }}",
+          url: "{{ route('new_dealer_sale.list') }}",
           data: function(d) {
             d.executive_id = $('#ps_executive_id').val(),
               d.division_id = $('#ps_division_id').val(),
@@ -164,25 +155,11 @@
               d.retailer_id = $('#ps_retailer_id').val(),
               d.dealer_id = $('#ps_dealer_id').val(),
               d.product_model = $('#ps_product_model').val(),
-              d.remark = $('#remark').val(),
               d.new_group = $('#ps_new_group').val(),
               d.search = $('input[type="search"]').val()
           }
         },
         columns: [
-          {
-            data: 'dealer',
-            name: 'dealer',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'city',
-            name: 'city',
-            orderable: false,
-            searchable: false,
-            "defaultContent": ''
-          },
           {
             data: 'final_branch',
             name: 'final_branch',
@@ -190,22 +167,43 @@
             "defaultContent": 'final branch'
           },
           {
-            data: 'ly_total_net_amounts',
-            name: 'ly_total_net_amounts',
+            data: 'dealer',
+            name: 'dealer',
             orderable: false,
             searchable: false,
             "defaultContent": ''
           },
           {
-            data: 'cy_total_net_amounts',
-            name: 'cy_total_net_amounts',
+            data: 'customer.creation_date',
+            name: 'customer.creation_date',
             orderable: false,
             searchable: false,
             "defaultContent": ''
           },
           {
-            data: 'growth',
-            name: 'growth',
+            data: 'customer.customertypes.customertype_name',
+            name: 'customer.customertypes.customertype_name',
+            orderable: false,
+            searchable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'division',
+            name: 'division',
+            orderable: false,
+            searchable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'total_net_amounts',
+            name: 'total_net_amounts',
+            orderable: false,
+            searchable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'slab',
+            name: 'slab',
             orderable: false,
             searchable: false,
             "defaultContent": ''
@@ -213,9 +211,6 @@
         ]
       });
       $('#ps_executive_id').change(function() {
-        table.draw();
-      });
-      $('#remark').change(function() {
         table.draw();
       });
       $('#ps_division_id').change(function() {

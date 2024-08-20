@@ -182,6 +182,11 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('dealer_growth/download', [ReportController::class, 'dealer_growth_download'])->name('dealer_growth.download');
     Route::any('dealer_growth/list', [ReportController::class, 'dealer_growth_list'])->name('dealer_growth.list');
 
+    // New Dealer Sale
+    Route::any('reports/new_dealer_sale', [ReportController::class, 'new_dealer_sale']);
+    Route::any('new_dealer_sale/download', [ReportController::class, 'new_dealer_sale_download'])->name('new_dealer_sale.download');
+    Route::any('new_dealer_sale/list', [ReportController::class, 'new_dealer_sale_list'])->name('new_dealer_sale.list');
+
     //Customers
     Route::resource('customertype', CustomerTypeController::class);
     Route::post('customertype-active', [CustomerTypeController::class, 'active'])->name('customertype.active');
@@ -716,12 +721,19 @@ Route::group(['middleware' => ['auth']], function () {
     Route::POST('transaction_history_manualstore', [TransactionHistoryController::class, 'manualstore'])->name('transaction_history.manualstore');
     Route::POST('transaction_history_manualupdate', [TransactionHistoryController::class, 'manualupdate'])->name('transaction_history.manualupdate');
 
-    // Mobile User Login Details
+    // Mobile User Login Sarthi Details
     Route::get('mobile_user_login', [MobileUserLoginDetailsController::class, 'mobile_user_login'])->name('mobile_user_login');
 
     Route::post('mobile_user/login_list/download', [MobileUserLoginDetailsController::class, 'mobile_user_login_download'])->name('mobile_user.login_list.download');
 
     Route::post('mobile_user_login/list', [MobileUserLoginDetailsController::class, 'mobile_user_login_list'])->name('mobile_user_login.list');
+
+    // Mobile User Login Fildkonnect Details
+    Route::get('user_app_details', [MobileUserLoginDetailsController::class, 'user_app_details'])->name('user_app_details');
+
+    Route::post('user_app_details/login_list/download', [MobileUserLoginDetailsController::class, 'user_app_details_download'])->name('user_app_details.login_list.download');
+
+    Route::post('user_app_details/list', [MobileUserLoginDetailsController::class, 'user_app_details_list'])->name('user_app_details.list');
 
     //Gift Category Route
     Route::resource('gift-categories', GiftCategoryController::class);
