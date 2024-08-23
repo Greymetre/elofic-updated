@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Models\Branch;
 use App\Models\Order;
 use App\Models\PrimarySales;
 use App\Models\User;
@@ -15,7 +16,7 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Illuminate\Support\Facades\Auth;
 use DB;
 
-class PerEmployeeCostingExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithEvents
+class BranchOnlySalesCostingExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithEvents
 {
 
     public function __construct($request)
@@ -38,51 +39,48 @@ class PerEmployeeCostingExport implements FromCollection, WithHeadings, WithMapp
     {
         $currentDate = Carbon::now();
         DB::statement("SET SESSION group_concat_max_len = 10000000");
-        $query = User::with('primarySales', 'getdesignation', 'getbranch', 'getdivision', 'userinfo')->where('active', 'Y')->whereHas('roles', function ($query) {
-            $query->whereIn('id', ['13', '6', '3', '2']);
+        $query = Branch::with('getBranchUsers')->where('active', 'Y')->whereNotIn('id', ['45', '22', '40', '42']);
+
+        $query->whereHas('getBranchUsers', function ($query) {
+
+            if ($this->division_id && $this->division_id != '' && $this->division_id != NULL) {
+                $query->where('division_id', $this->division_id);
+            }
+
+            if ($this->branch_id && $this->branch_id != '' && $this->branch_id != null) {
+                $query->where('branch_id', $this->branch_id);
+            }
+
+
+            if ($this->dealer_id && $this->dealer_id != '' && $this->dealer_id != null) {
+                $query->where('dealer', 'like', '%' . $this->dealer_id . '%');
+            }
+
+            if ($this->product_model && $this->product_model != '' && $this->product_model != null) {
+                $query->where('model_name', $this->product_model);
+            }
+
+            if ($this->new_group && $this->new_group != '' && $this->new_group != null) {
+                $query->where('new_group', $this->new_group);
+            }
+
+            if ($this->executive_id && $this->executive_id != '' && $this->executive_id != null) {
+                $query->where('id', $this->executive_id);
+            }
         });
 
-        if ($this->division_id && $this->division_id != '' && $this->division_id != NULL) {
-            $query->where('division_id', $this->division_id);
-        }
-
-        $data = $query->orderBy('id', 'desc')->get();
-
-        if ($this->branch_id && $this->branch_id != '' && $this->branch_id != null) {
-            $query->where('branch_id', $this->branch_id);
-        }
-
-
-        if ($this->dealer_id && $this->dealer_id != '' && $this->dealer_id != null) {
-            $query->where('dealer', 'like', '%' . $this->dealer_id . '%');
-        }
-
-        if ($this->product_model && $this->product_model != '' && $this->product_model != null) {
-            $query->where('model_name', $this->product_model);
-        }
-
-        if ($this->new_group && $this->new_group != '' && $this->new_group != null) {
-            $query->where('new_group', $this->new_group);
-        }
-
-        if ($this->executive_id && $this->executive_id != '' && $this->executive_id != null) {
-            $query->where('id', $this->executive_id);
-        }
-
         $query = $query->get();
+
         return $query;
     }
 
     public function headings(): array
     {
         $label1 = [
-            'Division',
+            'Cluster Head',
+            'Reginal Manager',
+            'Branch Manager',
             'Branch',
-            'Emp Code',
-            'Empolyee Name',
-            'Designation',
-            'DOJ',
-            'Sales/Othe/FOS/FOS-C'
         ];
 
         if ($this->month && is_array($this->month) && count($this->month) > 0 && $this->financial_year && !empty($this->financial_year)) {
@@ -139,22 +137,17 @@ class PerEmployeeCostingExport implements FromCollection, WithHeadings, WithMapp
         $label2[] = '';
         $label2[] = '';
         $label2[] = '';
-        $headings2 = ['', '', '', '', '', '', '', 'Sales(L)', 'Salary', 'TA-DA', 'Incentive', 'TOTAL EXP', 'T-Expenes(L)', 'SALARY/EXP %'];
+        $label2[] = '';
+        $headings2 = ['', '', '', '', 'Salary', 'Incentive', 'TA-DA', 'TOTAL EXP', 'Total Sales', 'Sale/Emp Exp %', 'Sales Team Count', 'Per Manpower Avr Sale'];
         foreach ($this->months as $key => $value) {
             $label2[] = $value;
             $label2[] = '';
             $label2[] = '';
             $label2[] = '';
-            $label2[] = '';
-            $label2[] = '';
-            $label2[] = '';
-            $headings2[] = 'Sales(L)';
             $headings2[] = 'Salary';
-            $headings2[] = 'TA-DA';
             $headings2[] = 'Incentive';
-            $headings2[] = 'TOTAL EXP';
-            $headings2[] = 'T-Expenes(L)';
-            $headings2[] = 'SALARY/EXP %';
+            $headings2[] = 'TA-DA';
+            $headings2[] = 'Sale';
         }
 
         $headings1 = array_merge($label1, $label2);
@@ -165,36 +158,61 @@ class PerEmployeeCostingExport implements FromCollection, WithHeadings, WithMapp
 
     public function map($data): array
     {
-        $data->userinfo->gross_salary_monthly = $data->userinfo->gross_salary_monthly * count($this->months);
-        if (count($data->expenses) > 0) {
-            $data->total_expe = $data->expenses->where('date', '>=', $this->startDateFormatted)->where('date', '<=', $this->endDateFormatted)->sum('claim_amount') > 0 ? number_format(($data->expenses->where('date', '>=', $this->startDateFormatted)->where('date', '<=', $this->endDateFormatted)->sum('claim_amount') + $data->userinfo->gross_salary_monthly), 2, '.', '') : "0";
+        if ($data->id == '15') {
+            $cluster_head = User::where('id', '135')->get();
         } else {
-            $data->total_expe = $data->userinfo->gross_salary_monthly;
+            $cluster_head = User::where('branch_id', $data->id)
+                ->where('active', 'Y')
+                ->where('division_id', $this->division_id)
+                ->whereHas('roles', function ($query) {
+                    $query->where('id', '6');
+                })->get();
         }
-        if ($data->sales_type == 'Primary') {
-            if (count($data->primarySales) > 0) {
-                $data->sales = $data->primarySales->where('invoice_date', '>=', $this->startDateFormatted)->where('invoice_date', '<=', $this->endDateFormatted)->sum('net_amount') > 0 ? number_format(($data->primarySales->where('invoice_date', '>=', $this->startDateFormatted)->where('invoice_date', '<=', $this->endDateFormatted)->sum('net_amount') / 100000), 2, '.', '') : "0";
-            } else {
-                $data->sales = "0";
-            }
+        if ($data->id == '8') {
+            $reginal_manager = User::where('id', '50')->get();
         } else {
-            $data->sales = Order::where('created_by', $data->id)->where('order_date', '>=', $this->startDateFormatted)->where('order_date', '<=', $this->endDateFormatted)->sum('sub_total') > 0 ? number_format((Order::where('created_by', $data->id)->where('order_date', '>=', $this->startDateFormatted)->where('order_date', '<=', $this->endDateFormatted)->sum('sub_total') / 100000), 2, '.', '') : "0";
+            $reginal_manager = User::where('branch_id', $data->id)
+                ->where('active', 'Y')
+                ->where('division_id', $this->division_id)
+                ->whereHas('roles', function ($query) {
+                    $query->where('id', '13');
+                })->get();
+        }
+        $branch_managver = User::where('branch_id', $data->id)
+            ->where('active', 'Y')
+            ->where('division_id', $this->division_id)
+            ->whereHas('roles', function ($query) {
+                $query->where('id', '3');
+            })->get();
+        $response[0] = count($cluster_head) > 0 ? implode(' / ', $cluster_head->pluck('name')->toArray()) : '-';
+        $response[1] = count($reginal_manager) > 0 ? implode(' / ', $reginal_manager->pluck('name')->toArray()) : '-';
+        $response[2] = count($branch_managver) > 0 ? implode(' / ', $branch_managver->pluck('name')->toArray()) : '-';
+        $response[3] = $data->branch_name ? $data->branch_name : '-';
+        $response[4] = $data->getTotalGrossSalarySales() > 0 ? number_format((($data->getTotalGrossSalarySales() / 100000) * count($this->months)), 2, '.', '') : '0';
+        $total_exp = $data->getBranchUsers()->whereIn('designation_id', [59, 1, 5, 11])->with('expenses')->get()->sum(function ($user) {
+            return $user->expenses->where('date', '>=', $this->startDateFormatted)->where('date', '<=', $this->endDateFormatted)->sum('claim_amount');
+        });
+        $primary_sale = $data->getBranchUsers()->whereIn('designation_id', [59, 1, 5, 11])->with('primarySales')->get()->sum(function ($user) {
+            return $user->primarySales->where('invoice_date', '>=', $this->startDateFormatted)->where('invoice_date', '<=', $this->endDateFormatted)->sum('net_amount');
+        });
+        $other_sale = Order::where('created_by', $data->getBranchUsers->whereIn('designation_id', [59, 1, 5, 11])->pluck('id')->toArray())->where('order_date', '>=', $this->startDateFormatted)->where('order_date', '<=', $this->endDateFormatted)->sum('sub_total');
+        $response[5] = '0';
+        $response[6] = number_format(($total_exp / 100000), 2, '.', '');
+        $response[7] = number_format((($total_exp + ($data->getTotalGrossSalarySales() * count($this->months))) / 100000), 2, '.', '');
+        $response[8] = number_format((($primary_sale + $other_sale) / 100000), 2, '.', '');
+        if ($primary_sale > 0 || $other_sale > 0) {
+            $response[9] = number_format(((($total_exp + ($data->getTotalGrossSalarySales() * count($this->months))) / ($primary_sale + $other_sale)) * 100), 2, '.', '');
+        } else {
+            $response[9] = '100';
+        }
+        $stc = $data->getBranchUsers()->whereIn('designation_id', [59, 1, 5, 11])->get();
+        $response[10] = count($stc);
+        if (count($stc) > 0) {
+            $response[11] = number_format((((($primary_sale + $other_sale) / 100000) / count($stc)) / 4), 2, '.', '');
+        } else {
+            $response[11] = '0';
         }
 
-        $response[0] = $data->getdivision ? $data->getdivision->division_name : '-';
-        $response[1] = $data->getbranch ? $data->getbranch->branch_name : '-';
-        $response[2] = $data->employee_codes ? $data->employee_codes : '-';
-        $response[3] = $data->name ? $data->name : '-';
-        $response[4] = $data->getdesignation ? $data->getdesignation->designation_name : '-';
-        $response[5] = $data->userinfo ? date('d M Y', strtotime($data->userinfo->date_of_joining)) : '-';
-        $response[6] = '-';
-        $response[7] = $data->sales;
-        $response[8] = $data->userinfo->gross_salary_monthly;
-        $response[9] = $data->expenses->where('date', '>=', $this->startDateFormatted)->where('date', '<=', $this->endDateFormatted)->sum('claim_amount') > 0 ? number_format($data->expenses->where('date', '>=', $this->startDateFormatted)->where('date', '<=', $this->endDateFormatted)->sum('claim_amount'), 2, '.', '') : 0;
-        $response[10] = '-';
-        $response[11] = $data->total_expe ?? "0";
-        $response[12] = $data->total_expe > 0 ? $data->total_expe / 100000 : "0";
-        $response[13] = $data->sales > 0 ? number_format(((($data->total_expe / 100000) / $data->sales) * 100), 2, '.', '') . "%" : "0%";
         $check = 0;
         foreach ($this->months as $k => $val) {
             $f_year_array = explode('-', $this->financial_year);
@@ -212,36 +230,22 @@ class PerEmployeeCostingExport implements FromCollection, WithHeadings, WithMapp
                 $startDateMonthly = $startDate->toDateString();
                 $endDateMonthly = $endDate->toDateString();
             }
+            $total_exp = $data->getBranchUsers()->whereIn('designation_id', [59, 1, 5, 11])->with('expenses')->get()->sum(function ($user) use ($startDateMonthly, $endDateMonthly) {
+                return $user->expenses->where('date', '>=', $startDateMonthly)->where('date', '<=', $endDateMonthly)->sum('claim_amount');
+            });
+            $primary_sale = $data->getBranchUsers()->whereIn('designation_id', [59, 1, 5, 11])->with('primarySales')->get()->sum(function ($user) use ($startDateMonthly, $endDateMonthly) {
+                return $user->primarySales->where('invoice_date', '>=', $startDateMonthly)->where('invoice_date', '<=', $endDateMonthly)->sum('net_amount');
+            });
+            $other_sale = Order::where('created_by', $data->getBranchUsers->whereIn('designation_id', [59, 1, 5, 11])->pluck('id')->toArray())->where('order_date', '>=', $startDateMonthly)->where('order_date', '<=', $endDateMonthly)->sum('sub_total');
+            $response[12 + $check] = $data->getTotalGrossSalarySales() > 0 ? number_format(($data->getTotalGrossSalarySales() / 100000), 2, '.', '') : '0';
+            $response[13 + $check] = "0";
 
-            if ($data->sales_type == 'Primary') {
-                if (count($data->primarySales) > 0) {
-                    $monthly_sales = $data->primarySales->where('invoice_date', '>=', $startDateMonthly)->where('invoice_date', '<=', $endDateMonthly)->sum('net_amount') > 0 ? number_format(($data->primarySales->where('invoice_date', '>=', $startDateMonthly)->where('invoice_date', '<=', $endDateMonthly)->sum('net_amount') / 100000), 2, '.', '') : "0";
-                } else {
-                    $monthly_sales = "0";
-                }
-            } else {
-                $monthly_sales = Order::where('created_by', $data->id)->where('order_date', '>=', $startDateMonthly)->where('order_date', '<=', $endDateMonthly)->sum('sub_total') > 0 ? number_format((Order::where('created_by', $data->id)->where('order_date', '>=', $startDateMonthly)->where('order_date', '<=', $endDateMonthly)->sum('sub_total') / 100000), 2, '.', '') : "0";
-            }
 
-            if (count($data->expenses) > 0) {
-                $monthly_exp = $data->expenses->where('date', '>=', $startDateMonthly)->where('date', '<=', $endDateMonthly)->sum('claim_amount') > 0 ? number_format($data->expenses->where('date', '>=', $startDateMonthly)->where('date', '<=', $endDateMonthly)->sum('claim_amount'), 2, '.', '') : "0";
-            } else {
-                $monthly_exp = $data->userinfo->gross_salary_monthly / count($this->months);
-            }
 
-            $monthly_tottal_exp = $monthly_exp+($data->userinfo->gross_salary_monthly / count($this->months));
+            $response[14 + $check] = number_format(($total_exp / 100000), 2, '.', '');
+            $response[15 + $check] = number_format((($primary_sale + $other_sale) / 100000), 2, '.', '');
 
-            $response[14 + $check] = $monthly_sales;
-            $response[15 + $check] = $data->userinfo->gross_salary_monthly / count($this->months);
-            
-            
-            $response[16 + $check] = $monthly_exp;
-            $response[17 + $check] = '-';
-
-            $response[18 + $check] = $monthly_tottal_exp;
-            $response[19 + $check] = $monthly_tottal_exp/100000;
-            $response[20 + $check] = $monthly_sales > 0 ? number_format(((($monthly_tottal_exp / 100000) / $monthly_sales) * 100), 2, '.', '') . "%" : "0%";;
-            $check += 7;
+            $check += 4;
         }
 
         return $response;
@@ -258,12 +262,10 @@ class PerEmployeeCostingExport implements FromCollection, WithHeadings, WithMapp
                 $event->sheet->mergeCells('B1:B2');
                 $event->sheet->mergeCells('C1:C2');
                 $event->sheet->mergeCells('D1:D2');
-                $event->sheet->mergeCells('E1:E2');
-                $event->sheet->mergeCells('F1:F2');
-                $event->sheet->mergeCells('G1:G2');
+                $event->sheet->mergeCells('E1:L1');
 
-                $startColumn = 'H';
-                $columnsPerMerge = 7;
+                $startColumn = 'M';
+                $columnsPerMerge = 4;
 
                 // Convert column letters to numbers
                 $startColNum = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($startColumn);

@@ -15,7 +15,7 @@
                   <div class="d-flex flex-wrap flex-row">
                     <!-- division filter -->
                     <div class="p-2" style="width:200px;">
-                      <select class="selectpicker" name="division[]" multiple id="ps_division_id" data-style="select-with-transition" title="{!! trans('panel.secondary_dashboard.division') !!}">
+                      <select class="selectpicker" name="division" id="ps_division_id" data-style="select-with-transition" title="{!! trans('panel.secondary_dashboard.division') !!}" required>
                         <option value="" disabled>{!! trans('panel.secondary_dashboard.division') !!}</option>
                         @if(@isset($ps_divisions ))
                         @foreach($ps_divisions as $division)
@@ -101,7 +101,19 @@
                       </select>
                     </div>--}}
                     <div class="p-2" style="width:200px;">
-                      <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Primary Sales">
+                      <button class="btn btn-just-icon btn-theme" title="User Wise Costing">
+                        <i class="material-icons">cloud_download</i>
+                        <div class="ripple-container"></div>
+                      </button>
+                    </div>
+                    <div class="p-2" style="width:200px;">
+                      <button class="btn btn-just-icon btn-theme" title="Branch Wise Costing" name="branch_wise" value="true">
+                        <i class="material-icons">cloud_download</i>
+                        <div class="ripple-container"></div>
+                      </button>
+                    </div>
+                    <div class="p-2" style="width:200px;">
+                      <button class="btn btn-just-icon btn-theme" title="Branch Wise Only Sales Costing" name="branch_wise_only_sales" value="true">
                         <i class="material-icons">cloud_download</i>
                         <div class="ripple-container"></div>
                       </button>
@@ -126,7 +138,7 @@
             </span>
           </div>
           @endif
-          
+
           <div class="table-responsive">
             <table id="getprimarysales" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
               <thead class=" text-primary">
@@ -187,8 +199,7 @@
               d.search = $('input[type="search"]').val()
           }
         },
-        columns: [
-          {
+        columns: [{
             data: 'getdivision.division_name',
             name: 'getdivision.division_name',
             orderable: false,

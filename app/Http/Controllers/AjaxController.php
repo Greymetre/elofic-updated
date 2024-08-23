@@ -293,9 +293,9 @@ class AjaxController extends Controller
             $city = $request->input('city_id');
             $users = $request->input('user_id');
             $data = Customers::where(function ($query) use ($users) {
-                if (isset($users)) {
-                    $query->whereIn('executive_id', $users);
-                }
+                // if (isset($users)) {
+                //     $query->whereIn('executive_id', $users);
+                // }
                 $query->where('active', '=', 'Y');
             })
                 ->whereHas('customeraddress', function ($query) use ($state, $district, $city) {

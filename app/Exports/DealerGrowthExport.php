@@ -35,10 +35,11 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
     {
         $currentDate = Carbon::now();
         DB::statement("SET SESSION group_concat_max_len = 100000000");
-        $query = PrimarySales::select(
+        $query = PrimarySales::with('user')->select(
             'dealer',
             'final_branch',
             'city',
+            'emp_code',
             DB::raw('SUM(net_amount) as total_net_amounts'),
             DB::raw('GROUP_CONCAT(net_amount) as net_amounts'),
             DB::raw('GROUP_CONCAT(division) as divisions'),
@@ -130,7 +131,7 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
         }
 
         // Grouping and ordering
-        $query->whereIn('division', ['PUMP', 'MOTOR'])->groupBy('dealer', 'final_branch', 'city');
+        $query->whereIn('division', ['PUMP', 'MOTOR'])->groupBy('dealer', 'final_branch', 'city', 'emp_code');
 
         // Execute the primary query
         $results = $query->get();
@@ -189,22 +190,22 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
             return $item;
         });
         if ($this->remark && $this->remark != '' && $this->remark != null) {
-            if($this->remark == '1'){
+            if ($this->remark == '1') {
                 // INACTIVE DEALER
                 $results = $results->filter(function ($item) {
                     return $item->total_net_amounts == 0;
                 });
-            }elseif($this->remark == '2'){
+            } elseif ($this->remark == '2') {
                 // LY -NO SALE
                 $results = $results->filter(function ($item) {
                     return $item->last_year_net_amounts == 0;
                 });
-            }elseif($this->remark == '3'){
+            } elseif ($this->remark == '3') {
                 // DE-GROWTH
                 $results = $results->filter(function ($item) {
                     return $item->growthPercent < 0;
                 });
-            }elseif($this->remark == '4'){
+            } elseif ($this->remark == '4') {
                 // GROWTH DEALER
                 $results = $results->filter(function ($item) {
                     return $item->growthPercent > 0;
@@ -212,6 +213,7 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
             }
         }
         $results = $results->sortByDesc('growthPercent');
+        
         return $results;
     }
 
@@ -275,6 +277,7 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
         $flabel1 = [
             'Branch',
             'Party Name',
+            'Employee',
             'Sales Return',
         ];
         $f_year_array = explode('-', $this->financial_year);
@@ -298,7 +301,7 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
         $heading1 = array_merge($flabel1, $flabel2, $month_blank_array, $flabel3, $month_blank_array, $flabel4);
 
 
-        $slabel1 = ['', '', ''];
+        $slabel1 = ['', '', '', ''];
 
         $slabel2 = [];
 
@@ -320,7 +323,7 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
 
         $heading2 = array_merge($slabel1, $slabel2);
 
-        $tlabel1 = ['', '', ''];
+        $tlabel1 = ['', '', '', ''];
         $tlabel2 = [];
         foreach ($this->months as $key => $value) {
             $tlabel2[] = 'Motor';
@@ -356,7 +359,8 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
         $last_year_divisions = explode(',', $data->last_year_division_array);
         $response[0] = $data->final_branch;
         $response[1] = $data->dealer;
-        $response[2] = '';
+        $response[2] = $data->user?$data->user->name.'('.$data->emp_code.')':'-';
+        $response[3] = '';
         $indx = 0;
         $lytptsale = 0;
         $lytmtsale = 0;
@@ -382,22 +386,22 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
             $lytptsale += $ptsale;
             $lytmtsale += $mtsale;
             if ($mtsale > 0) {
-                $response[3 + $indx] = number_format(($mtsale / 100000), 2, '.', '');
+                $response[4 + $indx] = number_format(($mtsale / 100000), 2, '.', '');
                 $indx++;
             } else {
-                $response[3 + $indx] = "0";
+                $response[4 + $indx] = "0";
                 $indx++;
             }
             if ($ptsale > 0) {
-                $response[3 + $indx] = number_format(($ptsale / 100000), 2, '.', '');
+                $response[4 + $indx] = number_format(($ptsale / 100000), 2, '.', '');
                 $indx++;
             } else {
-                $response[3 + $indx] = "0";
+                $response[4 + $indx] = "0";
                 $indx++;
             }
         }
-        $response[4 + $indx] = (string)number_format(($lytmtsale / 100000), '2', '.', '');
-        $response[5 + $indx] = (string)number_format(($lytptsale / 100000), '2', '.', '');
+        $response[5 + $indx] = (string)number_format(($lytmtsale / 100000), '2', '.', '');
+        $response[6 + $indx] = (string)number_format(($lytptsale / 100000), '2', '.', '');
         foreach ($this->months as $k => $val) {
             $ptsale = 0;
             $mtsale = 0;
@@ -416,27 +420,27 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
             $cytptsale += $ptsale;
             $cytmtsale += $mtsale;
             if ($mtsale > 0) {
-                $response[6 + $indx] = number_format(($mtsale / 100000), 2, '.', '');
+                $response[7 + $indx] = number_format(($mtsale / 100000), 2, '.', '');
                 $indx++;
             } else {
-                $response[6 + $indx] = "0";
+                $response[7 + $indx] = "0";
                 $indx++;
             }
             if ($ptsale > 0) {
-                $response[6 + $indx] = number_format(($ptsale / 100000), 2, '.', '');
+                $response[7 + $indx] = number_format(($ptsale / 100000), 2, '.', '');
                 $indx++;
             } else {
-                $response[6 + $indx] = "0";
+                $response[7 + $indx] = "0";
                 $indx++;
             }
         }
 
-        $response[7 + $indx] = (string)number_format(($cytmtsale / 100000), '2', '.', '');
-        $response[8 + $indx] = (string)number_format(($cytptsale / 100000), '2', '.', '');
+        $response[8 + $indx] = (string)number_format(($cytmtsale / 100000), '2', '.', '');
+        $response[9 + $indx] = (string)number_format(($cytptsale / 100000), '2', '.', '');
 
-        $response[9 + $indx] = $data->last_year_net_amounts > 0 ? number_format(($data->last_year_net_amounts / 100000), 2, '.', '') : "0";
-        $response[10 + $indx] = $data->total_net_amounts > 0 ? number_format(($data->total_net_amounts / 100000), 2, '.', '') : "0";
-        $response[11 + $indx] = (string)$data->growthPercent;
+        $response[10 + $indx] = $data->last_year_net_amounts > 0 ? number_format(($data->last_year_net_amounts / 100000), 2, '.', '') : "0";
+        $response[11 + $indx] = $data->total_net_amounts > 0 ? number_format(($data->total_net_amounts / 100000), 2, '.', '') : "0";
+        $response[12 + $indx] = (string)$data->growthPercent;
 
         return $response;
     }
@@ -486,20 +490,30 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
                         ]);
                     } elseif ($cellValue > 0) {
                         $event->sheet->setCellValue($lastColumn . '' . $row, 'GROWTH DEALER');
-                        $event->sheet->getStyle($lastColumn . '' . $row)->applyFromArray([
-                            'fill' => [
-                                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                                'startColor' => ['rgb' => '00FF00'],
-                            ],
-                        ]);
+                        if ($cellValue > 30) {
+                            $event->sheet->getStyle($lastColumn . '' . $row)->applyFromArray([
+                                'fill' => [
+                                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                                    'startColor' => ['rgb' => '00FF00'],
+                                ],
+                            ]);
+                        } else {
+                            $event->sheet->getStyle($lastColumn . '' . $row)->applyFromArray([
+                                'fill' => [
+                                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                                    'startColor' => ['rgb' => 'FFFF00'],
+                                ],
+                            ]);
+                        }
                     }
                 }
 
                 $event->sheet->mergeCells('A1:A3');
                 $event->sheet->mergeCells('B1:B3');
                 $event->sheet->mergeCells('C1:C3');
+                $event->sheet->mergeCells('D1:D3');
 
-                $offset = 4;
+                $offset = 5;
                 $endColumnIndex = $offset + (count($this->months) + 1) * 2 - 1;
                 $endColumnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($endColumnIndex);
                 $secondoffset = $endColumnIndex + 1;
@@ -513,7 +527,7 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
                 $fColumnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($foffset);
                 $fiColumnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($fioffset);
 
-                $event->sheet->mergeCells('D1:' . $endColumnLetter . '1');
+                $event->sheet->mergeCells('E1:' . $endColumnLetter . '1');
                 for ($i = $offset; $i <= $endColumnIndex; $i += 2) {
                     $startColumnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i);
                     $endColumnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i + 1);

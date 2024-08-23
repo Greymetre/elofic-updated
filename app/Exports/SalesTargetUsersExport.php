@@ -237,7 +237,7 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
 
     $response[16] = '=H'.$this->rowIndex.' + K'.$this->rowIndex.' + N'.$this->rowIndex;
     $response[17] = '=I'.$this->rowIndex.' + L'.$this->rowIndex.' + O'.$this->rowIndex;
-    $response[18] = '=(J'.$this->rowIndex.' + M'.$this->rowIndex.' + P'.$this->rowIndex.') / 3';
+    $response[18] = '=ROUND((J'.$this->rowIndex.' + M'.$this->rowIndex.' + P'.$this->rowIndex.') / 3, 2)';
 
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
@@ -337,7 +337,7 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
 
     $response[28] = '=T'.$this->rowIndex.' + W'.$this->rowIndex.' + Z'.$this->rowIndex;
     $response[29] = '=u'.$this->rowIndex.' + X'.$this->rowIndex.' + AA'.$this->rowIndex;
-    $response[30] = '=(V'.$this->rowIndex.' + Y'.$this->rowIndex.' + AB'.$this->rowIndex.') / 3';
+    $response[30] = '=ROUND((V'.$this->rowIndex.' + Y'.$this->rowIndex.' + AB'.$this->rowIndex.') / 3,2)';
 
 
     foreach($data['months'] as $key=>$month) {
@@ -438,7 +438,7 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
 
     $response[40] = '=AF'.$this->rowIndex.' + AI'.$this->rowIndex.' + AL'.$this->rowIndex;
     $response[41] = '=AG'.$this->rowIndex.' + AJ'.$this->rowIndex.' + AM'.$this->rowIndex;
-    $response[42] = '=(AH'.$this->rowIndex.' + AK'.$this->rowIndex.' + AN'.$this->rowIndex.') / 3';
+    $response[42] = '=ROUND((AH'.$this->rowIndex.' + AK'.$this->rowIndex.' + AN'.$this->rowIndex.') / 3,2)';
 
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
@@ -538,11 +538,11 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
 
     $response[52] = '=AR'.$this->rowIndex.' + AU'.$this->rowIndex.' + AX'.$this->rowIndex;
     $response[53] = '=AS'.$this->rowIndex.' + AV'.$this->rowIndex.' + AY'.$this->rowIndex;
-    $response[54] = '=(AT'.$this->rowIndex.' + AW'.$this->rowIndex.' + AZ'.$this->rowIndex.') / 3';
+    $response[54] = '=ROUND((AT'.$this->rowIndex.' + AW'.$this->rowIndex.' + AZ'.$this->rowIndex.') / 3,2)';
 
     $response[55] = '=Q'.$this->rowIndex.' + AC'.$this->rowIndex.' + AO'.$this->rowIndex.' + BA'.$this->rowIndex;
     $response[56] = '=R'.$this->rowIndex.' + AD'.$this->rowIndex.' + AP'.$this->rowIndex.' + BB'.$this->rowIndex;
-    $response[57] = '=(S'.$this->rowIndex.' + AE'.$this->rowIndex.' + AQ'.$this->rowIndex.' + BC'.$this->rowIndex.') / 4';
+    $response[57] = '=ROUND((S'.$this->rowIndex.' + AE'.$this->rowIndex.' + AQ'.$this->rowIndex.' + BC'.$this->rowIndex.') / 4,2)';
 
     $this->rowIndex++;
     return $response;

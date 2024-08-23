@@ -79,7 +79,13 @@
                       </select>
                     </div>
                     <div class="p-2" style="width:200px;">
-                      <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Primary Sales">
+                      <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} New Dealer Sales(From This Yesr)">
+                        <i class="material-icons">cloud_download</i>
+                        <div class="ripple-container"></div>
+                      </button>
+                    </div>
+                    <div class="p-2" style="width:200px;">
+                      <button class="btn btn-just-icon btn-theme" name="last_year" value="true" title="{!!  trans('panel.global.download') !!} New Dealer Sales(From Last Yesr)">
                         <i class="material-icons">cloud_download</i>
                         <div class="ripple-container"></div>
                       </button>

@@ -47,7 +47,7 @@ class PrimarySales extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'employee_codes', 'emp_code');
+        return $this->belongsTo(User::class, 'emp_code', 'employee_codes');
     }
 
     public function customer()

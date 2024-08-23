@@ -1233,6 +1233,14 @@
               </a>
             </li>
             @endif
+            @if(auth()->user()->can('loyalty_retailer_wise_summary_report'))
+            <li class="nav-item {{ request()->is('reports/loyalty_retailer_wise_summary_report') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('reports/loyalty_retailer_wise_summary_report') }}">
+                <i class="material-icons">airplay</i>
+                <p>Retailer Wise Loyalty Summary Report</p>
+              </a>
+            </li>
+            @endif
           </ul>
         </div>
       </li>
