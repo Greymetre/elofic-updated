@@ -734,11 +734,10 @@ class OrderController extends Controller
             $response = insertSales($data);
             if ($response['status'] == 'success') {
                 $partiallystatus = 2;
-
                 if (isset($request['orderdetail'])) {
                     foreach ($request['orderdetail'] as $key => $rows) {
                         $orderdetail = OrderDetails::where('order_id', '=', $request['order_id'])
-                            ->where('product_detail_id', '=', ($rows['product_detail'] ?? ''))->first();
+                        ->where('product_id', '=', ($rows['product_id'] ?? ''))->first();
                         if(isset($orderdetail)){
                             $orderdetail->cash_dis = $rows['cash_dis'];
                             $orderdetail->cash_amounts = $rows['cash_amounts'];

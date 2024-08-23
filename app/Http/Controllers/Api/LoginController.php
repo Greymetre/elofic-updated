@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\SendNotifications;
 use App\Models\Address;
+use App\Models\BeatSchedule;
+use App\Models\BeatUser;
 use App\Models\CustomerDetails;
 use App\Models\Customers;
 use App\Models\CustomerType;
@@ -70,6 +72,9 @@ class LoginController extends Controller
                     'notification_id' => !empty($request['device_token']) ? $request['device_token'] : '',
                     'device_type' => isset($request['device_type']) ? $request['device_type'] : ''
                 ]);
+                $todayDate = Carbon::today()->toDateString();
+                $todayBeatSchedule = BeatSchedule::where('user_id',$user['id'])->where('beat_date',$todayDate)->get();
+                $beatUser = BeatUser::where('user_id',$user['id'])->get();
                 $nestedData['id'] = isset($user['id']) ? $user['id'] : 0;
                 $nestedData['name'] = isset($user['name']) ? $user['name'] : '';
                 $nestedData['first_name'] = isset($user['first_name']) ? $user['first_name'] : '';
@@ -79,6 +84,8 @@ class LoginController extends Controller
                 $nestedData['profile_image'] = isset($user['profile_image']) ? $user['profile_image'] : '';
                 $nestedData['gender'] = isset($user['gender']) ? $user['gender'] : '';
                 $nestedData['payroll_id'] = isset($user['payroll']) ? $user['payroll'] : '';
+                $nestedData['todayBeatSchedule'] = count($todayBeatSchedule) > 0 ? true:false;
+                $nestedData['beatUser'] = count($beatUser) > 0 ? true:false;
                 $nestedData['access_token'] = $token;
                 $nestedData['roles'] = $user->roles->pluck('id')->toArray();
                 $user['provider'] = 'users';

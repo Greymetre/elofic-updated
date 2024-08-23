@@ -46,10 +46,13 @@ use App\Exports\LoyaltySummaryReportExport;
 use App\Exports\LoyaltyDealerSummaryReportExport;
 use App\Models\DealIn;
 use App\DataTables\GamificationDataTable;
+use App\Exports\BranchCostingExport;
+use App\Exports\BranchOnlySalesCostingExport;
 use App\Exports\CustomerAnalysisExport;
 use App\Exports\DealerGrowthExport;
 use App\Exports\GroupWiseAnalysisExport;
 use App\Exports\NewDealerSaleExport;
+use App\Exports\NewDealerSaleLastYearExport;
 use App\Exports\PerEmployeeCostingExport;
 use App\Exports\ProductAnalysisBranchExport;
 use App\Exports\ProductAnalysisQtyExport;
@@ -3182,7 +3185,10 @@ class ReportController extends Controller
     public function per_employee_costing_list(Request $request)
     {
         DB::statement("SET SESSION group_concat_max_len = 10000000");
-        $query = User::with('primarySales', 'getdesignation', 'getbranch', 'getdivision', 'userinfo', 'expenses')->where('active', 'Y');
+        $query = User::with('primarySales', 'getdesignation', 'getbranch', 'getdivision', 'userinfo', 'expenses')->where('active', 'Y')
+            ->whereHas('roles', function ($query) {
+                $query->whereIn('id', ['13', '6', '3', '2']);
+            });
 
         // Filter by financial year or last three months
         if ($request->month && is_array($request->month) && count($request->month) > 0 && $request->financial_year && !empty($request->financial_year)) {
@@ -3230,8 +3236,8 @@ class ReportController extends Controller
             $currentDate->addMonth()->startOfMonth();
         }
 
-        if ($request->division_id && $request->division_id != '' && count($request->division_id) > 0) {
-            $query->whereIn('division_id', $request->division_id);
+        if ($request->division_id && $request->division_id != '' && $request->division_id != NULL) {
+            $query->where('division_id', $request->division_id);
         }
 
         $data = $query->orderBy('id', 'desc')->get();
@@ -3319,12 +3325,28 @@ class ReportController extends Controller
         abort_if(Gate::denies('per_employee_costing_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        if ($request->financial_year && !empty($request->financial_year)) {
-            $fileName = 'per_employee_costing_' . $request->financial_year . '.xlsx';
+        if ($request->branch_wise) {
+            if ($request->financial_year && !empty($request->financial_year)) {
+                $fileName = 'branch_costing_' . $request->financial_year . '.xlsx';
+            } else {
+                $fileName = 'branch_costing.xlsx';
+            }
+            return Excel::download(new BranchCostingExport($request), $fileName);
+        } elseif ($request->branch_wise_only_sales) {
+            if ($request->financial_year && !empty($request->financial_year)) {
+                $fileName = 'branch_costing_only_sales_' . $request->financial_year . '.xlsx';
+            } else {
+                $fileName = 'branch_costing_only_sales.xlsx';
+            }
+            return Excel::download(new BranchOnlySalesCostingExport($request), $fileName);
         } else {
-            $fileName = 'per_employee_costing.xlsx';
+            if ($request->financial_year && !empty($request->financial_year)) {
+                $fileName = 'per_employee_costing_' . $request->financial_year . '.xlsx';
+            } else {
+                $fileName = 'per_employee_costing.xlsx';
+            }
+            return Excel::download(new PerEmployeeCostingExport($request), $fileName);
         }
-        return Excel::download(new PerEmployeeCostingExport($request), $fileName);
     }
 
     public function top_dealer(Request $request)
@@ -3570,7 +3592,7 @@ class ReportController extends Controller
         }
 
         // Grouping and ordering
-        $query->whereIn('division', ['PUMP','MOTOR'])->groupBy('dealer', 'final_branch', 'city');
+        $query->whereIn('division', ['PUMP', 'MOTOR'])->groupBy('dealer', 'final_branch', 'city');
 
         // Execute the primary query
         $results = $query->get();
@@ -3618,22 +3640,22 @@ class ReportController extends Controller
         });
 
         if ($request->remark && $request->remark != '' && $request->remark != null) {
-            if($request->remark == '1'){
+            if ($request->remark == '1') {
                 // INACTIVE DEALER
                 $results = $results->filter(function ($item) {
                     return $item->total_net_amounts == 0;
                 });
-            }elseif($request->remark == '2'){
+            } elseif ($request->remark == '2') {
                 // LY -NO SALE
                 $results = $results->filter(function ($item) {
                     return $item->last_year_net_amounts == 0;
                 });
-            }elseif($request->remark == '3'){
+            } elseif ($request->remark == '3') {
                 // DE-GROWTH
                 $results = $results->filter(function ($item) {
                     return $item->growthPercent < 0;
                 });
-            }elseif($request->remark == '4'){
+            } elseif ($request->remark == '4') {
                 // GROWTH DEALER
                 $results = $results->filter(function ($item) {
                     return $item->growthPercent > 0;
@@ -3642,7 +3664,7 @@ class ReportController extends Controller
         }
 
         $results = $results->sortByDesc('growthPercent');
-        
+
         return Datatables::of($results)
             ->addIndexColumn()
             ->addColumn('cy_total_net_amounts', function ($results) {
@@ -3800,41 +3822,334 @@ class ReportController extends Controller
             })
             ->addColumn('slab', function ($query) {
                 $sales = number_format(($query->total_net_amounts / 100000), 2, '.', '');
-                if($sales > 0 && $sales < 2){
+                if ($sales > 0 && $sales < 2) {
                     return '0L-2L';
-                }elseif($sales >= 2 && $sales < 5){
+                } elseif ($sales >= 2 && $sales < 5) {
                     return '2L-5L';
-                }elseif($sales >= 5 && $sales < 10){
+                } elseif ($sales >= 5 && $sales < 10) {
                     return '5L-10L';
-                }elseif($sales >= 10 && $sales < 15){
+                } elseif ($sales >= 10 && $sales < 15) {
                     return '10L-15L';
-                }elseif($sales >= 15 && $sales < 25){
+                } elseif ($sales >= 15 && $sales < 25) {
                     return '15L-25L';
-                }elseif($sales >= 25 && $sales < 75){
+                } elseif ($sales >= 25 && $sales < 75) {
                     return '25L-75L';
-                }elseif($sales >= 75 && $sales < 100){
+                } elseif ($sales >= 75 && $sales < 100) {
                     return '75L-1Cr';
-                }elseif($sales >= 100){
+                } elseif ($sales >= 100) {
                     return '1Cr Plus';
                 }
             })
-            ->rawColumns(['total_net_amounts','customer.creation_date','customer.customertypes.customertype_name','slab'])
+            ->rawColumns(['total_net_amounts', 'customer.creation_date', 'customer.customertypes.customertype_name', 'slab'])
             ->make(true);
     }
 
     public function new_dealer_sale_download(Request $request)
     {
-        if($request->ip() != '110.227.59.163'){
-            return '<h2>Coming Soon...</h2><p>Working on it.</p>';
-        }
         abort_if(Gate::denies('product_analysis_branch_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        if ($request->financial_year && !empty($request->financial_year)) {
-            $fileName = 'new_dealer_sale_' . $request->financial_year . '.xlsx';
+        if ($request->last_year) {
+            if ($request->financial_year && !empty($request->financial_year)) {
+                $fileName = 'new_dealer_sale_last_year_' . $request->financial_year . '.xlsx';
+            } else {
+                $fileName = 'new_dealer_sale_last_year.xlsx';
+            }
+            return Excel::download(new NewDealerSaleLastYearExport($request), $fileName);
         } else {
-            $fileName = 'new_dealer_sale.xlsx';
+            if ($request->financial_year && !empty($request->financial_year)) {
+                $fileName = 'new_dealer_sale_' . $request->financial_year . '.xlsx';
+            } else {
+                $fileName = 'new_dealer_sale.xlsx';
+            }
+            return Excel::download(new NewDealerSaleExport($request), $fileName);
         }
-        return Excel::download(new NewDealerSaleExport($request), $fileName);
+    }
+
+    public function loyaltyRetailerWiseSummaryReport(Request $request)
+    {
+        if ($request->ip() != '106.222.218.108') {
+            return "Working on it....";
+        }
+        $userids = getUsersReportingToAuth();
+        $branches = Branch::latest()->get();
+        $dealers = Customers::where('customertype', ['1', '3'])->get();
+
+        if ($request->ajax()) {
+            $retailers_sarthi = TransactionHistory::groupBy('customer_id')->pluck('customer_id');
+            $data = Customers::with('customertypes', 'firmtypes', 'createdbyname', 'customeraddress.cityname', 'customeraddress.statename','customer_transacation')->whereIn('id', $retailers_sarthi)->where('customertype', ['2'])
+                ->where(function ($query) use ($request, $userids) {
+                    if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
+                        $userIdsss = User::where('branch_id', $request->branch_id)->whereIn('id', $userids)->pluck('id');
+                        $query->whereIn('executive_id', $userIdsss);
+                    } else {
+                        $query->whereIn('executive_id', $userids);
+                    }
+
+                    if ($request->dealer_id && $request->dealer_id != '' && $request->dealer_id != null) {
+                        $query->where('id', $request->dealer_id);
+                    }
+                })->orderBy('id', 'asc');
+            return Datatables::of($data)
+                ->addIndexColumn()
+                ->editColumn('created_at', function ($data) {
+                    return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
+                })
+                ->editColumn('branch', function ($data) {
+                    return $data->createdbyname ? $data->createdbyname->getbranch->branch_name : '';
+                })
+                ->addColumn('coupon_scan_nos', function ($data) {
+
+                    $coupon_scan_nos = TransactionHistory::where('customer_id', $data->id)->count();
+
+                    return isset($coupon_scan_nos) ? $coupon_scan_nos : '';
+                })
+                ->addColumn('mobile_app_downloads', function ($data) {
+
+                    $mobile_app_downloads = MobileUserLoginDetails::where('customer_id', $data->id)->count();
+
+                    return isset($mobile_app_downloads) ? $mobile_app_downloads : '';
+                })
+                ->addColumn('provision_point', function ($data) {
+
+                    $thistorys = TransactionHistory::where('customer_id', $data->id)->get();
+                    $active_points = 0;
+                    $provision_points = 0;
+                    foreach ($thistorys as $thistory) {
+                        if ($thistory->status == '1') {
+                            $active_points += $thistory->point;
+                        } else {
+                            $active_points += $thistory->active_point;
+                            $provision_points += $thistory->provision_point;
+                        }
+                    }
+                    return $provision_points;
+                })
+                ->addColumn('active_point', function ($data) {
+                    $thistorys = TransactionHistory::where('customer_id', $data->id)->get();
+                    $total_points = TransactionHistory::where('customer_id', $data->id)->sum('point') ?? 0;
+                    $active_points = 0;
+                    $provision_points = 0;
+                    foreach ($thistorys as $thistory) {
+                        if ($thistory->status == '1') {
+                            $active_points += $thistory->point;
+                        } else {
+                            $active_points += $thistory->active_point;
+                            $provision_points += $thistory->provision_point;
+                        }
+                    }
+                    $total_redemption = Redemption::where('customer_id', $data->id)->whereNot('status', '2')->sum('redeem_amount') ?? 0;
+                    $total_rejected = Redemption::where('customer_id', $data->id)->where('status', '2')->sum('redeem_amount') ?? 0;
+                    $total_balance = (int)$active_points - (int)$total_redemption;
+                    return  $active_points;
+                })
+                ->addColumn('total_point', function ($data) {
+                    $total_points = TransactionHistory::where('customer_id', $data->id)->sum('point') ?? 0;
+                    return $total_points;
+                })
+                ->addColumn('redeem_gift', function ($data) {
+                    $redeem_gift = Redemption::where('status', '!=', '2')->where('customer_id', $data->id)->where('redeem_mode', '1')->sum('redeem_amount');
+
+                    return isset($redeem_gift) ? $redeem_gift : '';
+                })
+                ->addColumn('redeem_neft', function ($data) {
+                    $redeem_neft = Redemption::where('status', '!=', '2')->where('customer_id', $data->id)->where('redeem_mode', '2')->sum('redeem_amount');
+
+                    return isset($redeem_neft) ? $redeem_neft : '';
+                })
+                ->addColumn('total_redeem', function ($data) {
+                    $total_redemption = Redemption::where('customer_id', $data->id)->whereNot('status', '2')->sum('redeem_amount') ?? 0;
+                    return $total_redemption;
+                })
+                ->addColumn('balance_active_point', function ($data) {
+                    $thistorys = TransactionHistory::where('customer_id', $data->id)->get();
+                    $total_points = TransactionHistory::where('customer_id', $data->id)->sum('point') ?? 0;
+                    $active_points = 0;
+                    $provision_points = 0;
+                    foreach ($thistorys as $thistory) {
+                        if ($thistory->status == '1') {
+                            $active_points += $thistory->point;
+                        } else {
+                            $active_points += $thistory->active_point;
+                            $provision_points += $thistory->provision_point;
+                        }
+                    }
+                    $total_redemption = Redemption::where('customer_id', $data->id)->whereNot('status', '2')->sum('redeem_amount') ?? 0;
+                    $total_rejected = Redemption::where('customer_id', $data->id)->where('status', '2')->sum('redeem_amount') ?? 0;
+                    $total_balance = (int)$active_points - (int)$total_redemption;
+
+                    return $total_balance;
+                })
+
+                ->rawColumns(['total_registered_retailers', 'total_registered_retailers_under_saarthi', 'coupon_scan_nos', 'mobile_app_downloads', 'provision_point', 'active_point', 'total_point', 'redeem_gift', 'redeem_neft', 'balance_active_point', 'created_at'])
+                ->make(true);
+        }
+        $users = User::where('active', '=', 'Y')->where(function ($query) use ($userids) {
+            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                $query->whereIn('id', $userids);
+            }
+        })->select('id', 'name')->get();
+        return view('reports.loyaltyretailerwisesummaryreport', compact('branches', 'dealers'));
+    }
+
+    public function loyaltyRetailerSummaryReport(Request $request)
+    {
+        $userids = getUsersReportingToAuth();
+        $states = State::latest()->get();
+        if ($request->ajax()) {
+            $userid = !empty($userid) ? $userid : Auth::user()->id;
+            $userinfo = User::where('id', '=', $userid)->first();
+            if ($request->state_id && !empty($request->state_id)) {
+                $data = State::where('id', $request->state_id);
+            } else if (!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin') && !$userinfo->hasRole('Sub_Admin') && !$userinfo->hasRole('HR_Admin') && !$userinfo->hasRole('HO_Account')  && !$userinfo->hasRole('Sub_Support') && !$userinfo->hasRole('Accounts Order') && !$userinfo->hasRole('Service Admin') && !$userinfo->hasRole('All Customers')) {
+                $state_ids = City::whereIn('id', auth()->user()->cities->pluck('city_id'))->pluck('state_id');
+                $data = State::whereIn('id', $state_ids)->orderBy('id', 'asc');
+            } else {
+                $data = State::orderBy('id', 'asc');
+            }
+            $retail_ids = Customers::where('customertype', '2')->pluck('id');
+            $customerIdsByState = Address::whereIn('customer_id', $retail_ids)
+                ->get()
+                ->groupBy('state_id')
+                ->map(function ($addresses) {
+                    return $addresses->pluck('customer_id');
+                });
+            return Datatables::of($data)
+                ->addIndexColumn()
+                ->addColumn('total_registered_retailers', function ($data) use ($customerIdsByState) {
+                    $customerIds = $customerIdsByState->get($data->id, collect());
+                    $ttttsss = array();
+                    foreach ($customerIds as $key => $value) {
+                        if (!in_array($value, $ttttsss)) {
+                            array_push($ttttsss, $value);
+                        }
+                    }
+                    return count($ttttsss);
+                })
+                ->addColumn('total_registered_retailers_under_saarthi', function ($data) use ($customerIdsByState) {
+                    $customerIds = $customerIdsByState->get($data->id, collect());
+                    return count(TransactionHistory::whereIn('customer_id', $customerIds)
+                        ->groupBy('customer_id')->get());
+                })
+                ->addColumn('coupon_scan_nos', function ($data) use ($customerIdsByState) {
+                    $customerIds = $customerIdsByState->get($data->id, collect());
+                    return TransactionHistory::whereIn('customer_id', $customerIds)
+                        ->count();
+                })
+                ->addColumn('mobile_app_downloads', function ($data) use ($customerIdsByState) {
+                    $customerIds = $customerIdsByState->get($data->id, collect());
+                    return MobileUserLoginDetails::whereIn('customer_id', $customerIds)
+                        ->count();
+                })
+                ->addColumn('provision_point', function ($data) use ($customerIdsByState) {
+                    $customerIds = $customerIdsByState->get($data->id, collect());
+                    $provision_point = 0;
+                    $thistorys = TransactionHistory::whereIn('customer_id', $customerIds)->get();
+                    foreach ($thistorys as $thistory) {
+                        if ($thistory->status != '1') {
+                            $provision_point += $thistory->provision_point;
+                        }
+                    }
+                    return $provision_point;
+                })
+                ->addColumn('active_point', function ($data) use ($customerIdsByState) {
+                    $customerIds = $customerIdsByState->get($data->id, collect());
+                    $active_point = 0;
+                    $thistorys = TransactionHistory::whereIn('customer_id', $customerIds)->get();
+                    foreach ($thistorys as $thistory) {
+                        if ($thistory->status == '1') {
+                            $active_point += $thistory->point;
+                        } else {
+                            $active_point += $thistory->active_point;
+                        }
+                    }
+                    return $active_point;
+                })
+                ->addColumn('total_point', function ($data) use ($customerIdsByState) {
+                    $customerIds = $customerIdsByState->get($data->id, collect());
+                    return TransactionHistory::whereIn('customer_id', $customerIds)
+                        ->whereNot('status', '2')
+                        ->sum('point');
+                })
+                ->addColumn('redeem_gift', function ($data) use ($customerIdsByState) {
+                    $customerIds = $customerIdsByState->get($data->id, collect());
+                    return Redemption::with('customer')
+                        ->where('status', '!=', '2')
+                        ->whereIn('customer_id', $customerIds)
+                        ->where('redeem_mode', '1')
+                        ->sum('redeem_amount');
+                })
+                ->addColumn('redeem_neft', function ($data) use ($customerIdsByState) {
+                    $customerIds = $customerIdsByState->get($data->id, collect());
+                    return Redemption::with('customer')
+                        ->where('status', '!=', '2')
+                        ->whereIn('customer_id', $customerIds)
+                        ->where('redeem_mode', '2')
+                        ->sum('redeem_amount');
+                })
+                ->addColumn('total_redeem', function ($data) use ($customerIdsByState) {
+                    $customerIds = $customerIdsByState->get($data->id, collect());
+                    $redeem_neft = Redemption::with('customer')
+                        ->where('status', '!=', '2')
+                        ->whereIn('customer_id', $customerIds)
+                        ->where('redeem_mode', '2')
+                        ->sum('redeem_amount');
+                    $redeem_gift = Redemption::with('customer')
+                        ->where('status', '!=', '2')
+                        ->whereIn('customer_id', $customerIds)
+                        ->where('redeem_mode', '1')
+                        ->sum('redeem_amount');
+                    return $redeem_gift + $redeem_neft;
+                })
+                ->addColumn('balance_active_point', function ($data) use ($customerIdsByState) {
+                    $customerIds = $customerIdsByState->get($data->id, collect());
+                    $redeem_neft = Redemption::with('customer')
+                        ->where('status', '!=', '2')
+                        ->whereIn('customer_id', $customerIds)
+                        ->where('redeem_mode', '2')
+                        ->sum('redeem_amount');
+                    $redeem_gift = Redemption::with('customer')
+                        ->where('status', '!=', '2')
+                        ->whereIn('customer_id', $customerIds)
+                        ->where('redeem_mode', '1')
+                        ->sum('redeem_amount');
+                    $total_redeem = $redeem_gift + $redeem_neft;
+
+                    $active_point = 0;
+                    $provision_point = 0;
+                    $thistorys = TransactionHistory::whereIn('customer_id', $customerIds)->get();
+                    foreach ($thistorys as $thistory) {
+                        if ($thistory->status == '1') {
+                            $active_point += $thistory->point;
+                        } else {
+                            $active_point += $thistory->active_point;
+                            $provision_point += $thistory->provision_point;
+                        }
+                    }
+                    $total_point = $provision_point + $active_point;
+
+                    return $total_point - $total_redeem;
+                })
+                ->rawColumns(['total_registered_retailers', 'total_registered_retailers_under_saarthi', 'coupon_scan_nos', 'mobile_app_downloads', 'provision_point', 'active_point', 'total_point', 'redeem_gift', 'redeem_neft', 'balance_active_point', 'created_at'])
+                ->make(true);
+        }
+        // $users = User::where('active', '=', 'Y')->where(function ($query) use ($userids) {
+        //     if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+        //         $query->whereIn('id', $userids);
+        //     }
+        // })->select('id', 'name')->get();
+
+        return view('reports.loyaltysummaryreport', compact('states'));
+    }
+
+    public function loyaltyRetailerSummaryReportDownload(Request $request)
+    {
+        if ($request->ip() != '106.222.216.132') {
+            return 'Working on it...';
+        }
+        abort_if(Gate::denies('loyalty_summary_report_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new LoyaltySummaryReportExport($request), 'loyalty_summary.xlsx');
     }
 }

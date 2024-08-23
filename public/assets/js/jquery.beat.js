@@ -43,6 +43,7 @@ function getRetailerlist()
         type: "POST",
         data:{ "_token": token, state_id : state_id, district_id : district_id, city_id : city_id, user_id : users },
         success: function(res){
+          console.log(res);
             var table = document.getElementById(tab_beat_customer),rIndex;
             if(res){
               $('#tab_beat_customer tr:last').find(".customer").empty();

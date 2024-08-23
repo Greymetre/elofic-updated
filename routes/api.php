@@ -168,6 +168,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::any('getBeatList', [BeatController::class, 'getBeatList']);
     Route::any('getBeatDropdownList', [BeatController::class, 'getBeatDropdownList']);
     Route::any('getBeatCustomers', [BeatController::class, 'getBeatCustomers']);
+    Route::any('getTodaySchedul', [BeatController::class, 'getTodaySchedul']);
     Route::post('userPunchin', [AttendanceController::class, 'userPunchin']);
     Route::post('userPunchout', [AttendanceController::class, 'userPunchout']);
     Route::any('getPunchin', [AttendanceController::class, 'getPunchin']);

@@ -107,7 +107,7 @@ class Sales extends Model
     }
     public function buyers()
     {
-        return $this->belongsTo('App\Models\Customers', 'buyer_id', 'id')->select('id','name', 'first_name', 'last_name','executive_id');
+        return $this->belongsTo('App\Models\Customers', 'buyer_id', 'id');
     }
 
     public function customeraddress()

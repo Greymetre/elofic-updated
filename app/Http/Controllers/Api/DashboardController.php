@@ -19,6 +19,7 @@ use App\Models\User;
 use App\Models\Attendance;
 use App\Models\BeatSchedule;
 use App\Models\BeatCustomer;
+use App\Models\BeatUser;
 use App\Models\Branch;
 use App\Models\Order;
 use App\Models\OrderDetails;
@@ -519,6 +520,10 @@ class DashboardController extends Controller
         if ($validator->fails()) {
             return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
         }
+        $login_user = $request->user();
+        $todayDate = Carbon::today()->toDateString();
+        $todayBeatSchedule = BeatSchedule::where('user_id', $login_user['id'])->where('beat_date', $todayDate)->get();
+        $beatUser = BeatUser::where('user_id', $login_user['id'])->get();
 
         $user_ids = getUsersReportingToAuth($request->user_id);
 
@@ -653,6 +658,8 @@ class DashboardController extends Controller
         $data['order_value'] = $order_value > 0 ? number_format(($order_value / 100000), 2, '.', '') : "";
         $data['order_qty'] = $order_qty > 0 ? $order_qty : "";
         $data['customer_visit'] = $customer_visit > 0 ? (string)$customer_visit : "";
+        $data['todayBeatSchedule'] = count($todayBeatSchedule) > 0 ? true:false;
+        $data['beatUser'] = count($beatUser) > 0 ? true:false;
 
         $branches = Branch::where('active', 'Y')->select('id', 'branch_name')->get();
         $divisions = Division::where('active', 'Y')->select('id', 'division_name')->get();
@@ -666,7 +673,7 @@ class DashboardController extends Controller
         $fieldConnect = FieldKonnectAppSetting::with('media')->first();
         $data["app_version"] = isset($fieldConnect) ? (isset($fieldConnect->app_version) ? $fieldConnect->app_version : '') : '';
         $data["media"] = $fieldConnect->media->toArray();
-        
+
         return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], 200);
     }
 
