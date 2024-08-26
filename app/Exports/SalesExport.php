@@ -27,7 +27,7 @@ class SalesExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
 
     public function collection()
     {
-        return SalesDetails::with('sales', 'sales.buyers', 'sales.buyers.customertypes')->whereHas('sales', function ($query) {
+        return SalesDetails::with('sales', 'sales.buyers', 'sales.buyers.customertypes')->where('quantity', '>', '0')->whereHas('sales', function ($query) {
             if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                 $query->whereIn('created_by', $this->userids);
             }

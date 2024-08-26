@@ -213,7 +213,7 @@
 
         </div>-->
         <div class="table-responsive">
-            <table id="getcustomers" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
+            <table id="getcustomers" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
             <thead class=" text-primary">
               <!-- <th>{!! trans('panel.global.no') !!}</th> -->
               <th><input type="checkbox" class="allCustomerschecked"/></th>
@@ -227,6 +227,7 @@
               <th>{!! trans('panel.customers.fields.customertype') !!}</th>
               <th>{!! trans('panel.global.created_by') !!}</th>
               <th>{!! trans('panel.global.created_at') !!}</th>
+              <th>Beat Name</th>
             </thead>
             <tbody>
             </tbody>
@@ -280,6 +281,7 @@
             {data: 'customertypes.customertype_name', name: 'customertypes.customertype_name',"defaultContent": '', orderable: false},
             {data: 'createdbyname.name', name: 'createdbyname.name',"defaultContent": '', orderable: false},
             {data: 'created_at', name: 'created_at',"defaultContent": ''},
+            {data: 'beat_name', name: 'beat_name',"defaultContent": ''},
            
         ]
     });

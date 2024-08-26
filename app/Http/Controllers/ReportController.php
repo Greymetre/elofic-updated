@@ -51,6 +51,7 @@ use App\Exports\BranchOnlySalesCostingExport;
 use App\Exports\CustomerAnalysisExport;
 use App\Exports\DealerGrowthExport;
 use App\Exports\GroupWiseAnalysisExport;
+use App\Exports\LoyaltyRetialerSummaryReportExport;
 use App\Exports\NewDealerSaleExport;
 use App\Exports\NewDealerSaleLastYearExport;
 use App\Exports\PerEmployeeCostingExport;
@@ -3868,9 +3869,6 @@ class ReportController extends Controller
 
     public function loyaltyRetailerWiseSummaryReport(Request $request)
     {
-        if ($request->ip() != '106.222.218.108') {
-            return "Working on it....";
-        }
         $userids = getUsersReportingToAuth();
         $branches = Branch::latest()->get();
         $dealers = Customers::where('customertype', ['1', '3'])->get();
@@ -3992,164 +3990,14 @@ class ReportController extends Controller
         return view('reports.loyaltyretailerwisesummaryreport', compact('branches', 'dealers'));
     }
 
-    public function loyaltyRetailerSummaryReport(Request $request)
-    {
-        $userids = getUsersReportingToAuth();
-        $states = State::latest()->get();
-        if ($request->ajax()) {
-            $userid = !empty($userid) ? $userid : Auth::user()->id;
-            $userinfo = User::where('id', '=', $userid)->first();
-            if ($request->state_id && !empty($request->state_id)) {
-                $data = State::where('id', $request->state_id);
-            } else if (!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin') && !$userinfo->hasRole('Sub_Admin') && !$userinfo->hasRole('HR_Admin') && !$userinfo->hasRole('HO_Account')  && !$userinfo->hasRole('Sub_Support') && !$userinfo->hasRole('Accounts Order') && !$userinfo->hasRole('Service Admin') && !$userinfo->hasRole('All Customers')) {
-                $state_ids = City::whereIn('id', auth()->user()->cities->pluck('city_id'))->pluck('state_id');
-                $data = State::whereIn('id', $state_ids)->orderBy('id', 'asc');
-            } else {
-                $data = State::orderBy('id', 'asc');
-            }
-            $retail_ids = Customers::where('customertype', '2')->pluck('id');
-            $customerIdsByState = Address::whereIn('customer_id', $retail_ids)
-                ->get()
-                ->groupBy('state_id')
-                ->map(function ($addresses) {
-                    return $addresses->pluck('customer_id');
-                });
-            return Datatables::of($data)
-                ->addIndexColumn()
-                ->addColumn('total_registered_retailers', function ($data) use ($customerIdsByState) {
-                    $customerIds = $customerIdsByState->get($data->id, collect());
-                    $ttttsss = array();
-                    foreach ($customerIds as $key => $value) {
-                        if (!in_array($value, $ttttsss)) {
-                            array_push($ttttsss, $value);
-                        }
-                    }
-                    return count($ttttsss);
-                })
-                ->addColumn('total_registered_retailers_under_saarthi', function ($data) use ($customerIdsByState) {
-                    $customerIds = $customerIdsByState->get($data->id, collect());
-                    return count(TransactionHistory::whereIn('customer_id', $customerIds)
-                        ->groupBy('customer_id')->get());
-                })
-                ->addColumn('coupon_scan_nos', function ($data) use ($customerIdsByState) {
-                    $customerIds = $customerIdsByState->get($data->id, collect());
-                    return TransactionHistory::whereIn('customer_id', $customerIds)
-                        ->count();
-                })
-                ->addColumn('mobile_app_downloads', function ($data) use ($customerIdsByState) {
-                    $customerIds = $customerIdsByState->get($data->id, collect());
-                    return MobileUserLoginDetails::whereIn('customer_id', $customerIds)
-                        ->count();
-                })
-                ->addColumn('provision_point', function ($data) use ($customerIdsByState) {
-                    $customerIds = $customerIdsByState->get($data->id, collect());
-                    $provision_point = 0;
-                    $thistorys = TransactionHistory::whereIn('customer_id', $customerIds)->get();
-                    foreach ($thistorys as $thistory) {
-                        if ($thistory->status != '1') {
-                            $provision_point += $thistory->provision_point;
-                        }
-                    }
-                    return $provision_point;
-                })
-                ->addColumn('active_point', function ($data) use ($customerIdsByState) {
-                    $customerIds = $customerIdsByState->get($data->id, collect());
-                    $active_point = 0;
-                    $thistorys = TransactionHistory::whereIn('customer_id', $customerIds)->get();
-                    foreach ($thistorys as $thistory) {
-                        if ($thistory->status == '1') {
-                            $active_point += $thistory->point;
-                        } else {
-                            $active_point += $thistory->active_point;
-                        }
-                    }
-                    return $active_point;
-                })
-                ->addColumn('total_point', function ($data) use ($customerIdsByState) {
-                    $customerIds = $customerIdsByState->get($data->id, collect());
-                    return TransactionHistory::whereIn('customer_id', $customerIds)
-                        ->whereNot('status', '2')
-                        ->sum('point');
-                })
-                ->addColumn('redeem_gift', function ($data) use ($customerIdsByState) {
-                    $customerIds = $customerIdsByState->get($data->id, collect());
-                    return Redemption::with('customer')
-                        ->where('status', '!=', '2')
-                        ->whereIn('customer_id', $customerIds)
-                        ->where('redeem_mode', '1')
-                        ->sum('redeem_amount');
-                })
-                ->addColumn('redeem_neft', function ($data) use ($customerIdsByState) {
-                    $customerIds = $customerIdsByState->get($data->id, collect());
-                    return Redemption::with('customer')
-                        ->where('status', '!=', '2')
-                        ->whereIn('customer_id', $customerIds)
-                        ->where('redeem_mode', '2')
-                        ->sum('redeem_amount');
-                })
-                ->addColumn('total_redeem', function ($data) use ($customerIdsByState) {
-                    $customerIds = $customerIdsByState->get($data->id, collect());
-                    $redeem_neft = Redemption::with('customer')
-                        ->where('status', '!=', '2')
-                        ->whereIn('customer_id', $customerIds)
-                        ->where('redeem_mode', '2')
-                        ->sum('redeem_amount');
-                    $redeem_gift = Redemption::with('customer')
-                        ->where('status', '!=', '2')
-                        ->whereIn('customer_id', $customerIds)
-                        ->where('redeem_mode', '1')
-                        ->sum('redeem_amount');
-                    return $redeem_gift + $redeem_neft;
-                })
-                ->addColumn('balance_active_point', function ($data) use ($customerIdsByState) {
-                    $customerIds = $customerIdsByState->get($data->id, collect());
-                    $redeem_neft = Redemption::with('customer')
-                        ->where('status', '!=', '2')
-                        ->whereIn('customer_id', $customerIds)
-                        ->where('redeem_mode', '2')
-                        ->sum('redeem_amount');
-                    $redeem_gift = Redemption::with('customer')
-                        ->where('status', '!=', '2')
-                        ->whereIn('customer_id', $customerIds)
-                        ->where('redeem_mode', '1')
-                        ->sum('redeem_amount');
-                    $total_redeem = $redeem_gift + $redeem_neft;
-
-                    $active_point = 0;
-                    $provision_point = 0;
-                    $thistorys = TransactionHistory::whereIn('customer_id', $customerIds)->get();
-                    foreach ($thistorys as $thistory) {
-                        if ($thistory->status == '1') {
-                            $active_point += $thistory->point;
-                        } else {
-                            $active_point += $thistory->active_point;
-                            $provision_point += $thistory->provision_point;
-                        }
-                    }
-                    $total_point = $provision_point + $active_point;
-
-                    return $total_point - $total_redeem;
-                })
-                ->rawColumns(['total_registered_retailers', 'total_registered_retailers_under_saarthi', 'coupon_scan_nos', 'mobile_app_downloads', 'provision_point', 'active_point', 'total_point', 'redeem_gift', 'redeem_neft', 'balance_active_point', 'created_at'])
-                ->make(true);
-        }
-        // $users = User::where('active', '=', 'Y')->where(function ($query) use ($userids) {
-        //     if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
-        //         $query->whereIn('id', $userids);
-        //     }
-        // })->select('id', 'name')->get();
-
-        return view('reports.loyaltysummaryreport', compact('states'));
-    }
-
     public function loyaltyRetailerSummaryReportDownload(Request $request)
     {
-        if ($request->ip() != '106.222.216.132') {
-            return 'Working on it...';
+        if ($request->ip() != '106.222.215.69') {
+            return "Working on it....";
         }
         abort_if(Gate::denies('loyalty_summary_report_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        return Excel::download(new LoyaltySummaryReportExport($request), 'loyalty_summary.xlsx');
+        return Excel::download(new LoyaltyRetialerSummaryReportExport($request), 'loyalty_retailer_summary.xlsx');
     }
 }
