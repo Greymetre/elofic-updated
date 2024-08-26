@@ -621,7 +621,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('loyalty-summary-report-download', [ReportController::class, 'loyaltySummaryReportDownload'])->name('loyalty-summary-report-download');
     // loyalty summary dealer wise report export
     Route::any('loyalty-delaer-wise-report-download', [ReportController::class, 'loyaltyDealerSummaryReportDownload'])->name('loyalty-delaer-wise-report-download');
-    Route::any('loyalty-retailer-wise-report-download', [ReportController::class, 'loyaltyDealerSummaryReportDownload'])->name('loyalty-retailer-wise-report-download');
+    Route::any('loyalty-retailer-wise-report-download', [ReportController::class, 'loyaltyRetailerSummaryReportDownload'])->name('loyalty-retailer-wise-report-download');
 
 
 

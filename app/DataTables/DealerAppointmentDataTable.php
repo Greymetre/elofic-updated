@@ -73,7 +73,10 @@ class DealerAppointmentDataTable extends DataTable
     public function query(DealerAppointment $model, Request $request)
     {
         $user_ids = getUsersReportingToAuth();
-        $data = $model->with('branch_details', 'district_details', 'city_details', 'appointment_kyc_detail')->whereIn('created_by' , $user_ids);
+        $data = $model->with('branch_details', 'district_details', 'city_details', 'appointment_kyc_detail');
+        if(!auth()->user()->hasRole('superadmin')){
+            $data->whereIn('created_by' , $user_ids);
+        }
 
         if ($request->startdate && $request->startdate != '' && $request->startdate != NULL && $request->enddate && $request->enddate != '' && $request->enddate != NULL) {
             

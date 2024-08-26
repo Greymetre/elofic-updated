@@ -179,6 +179,8 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::post('submitCheckin', [CheckinController::class, 'submitCheckin']);
     Route::post('submitCheckout', [CheckinController::class, 'submitCheckout']);
     Route::any('getCheckin', [CheckinController::class, 'getCheckin']);
+    Route::any('addCheckinDraft', [CheckinController::class, 'addCheckinDraft']);
+    Route::any('getCheckinDraft', [CheckinController::class, 'getCheckinDraft']);
     Route::post('submitVisitReports', [VisitReportController::class, 'submitVisitReports']);
     Route::any('getVisitTypes', [VisitReportController::class, 'getVisitTypes']);
     Route::any('getVisitReports', [VisitReportController::class, 'getVisitReports']);

@@ -251,7 +251,11 @@ class OrderController extends Controller
                 foreach ($orderdetails as $key => $value) {
                     $totalLP += $value->price*$value->quantity;
                 }
-                $ttdis = number_format(((1-($orders->sub_total/$totalLP))*100),2);
+                if($totalLP > 0){
+                    $ttdis = number_format(((1-($orders->sub_total/$totalLP))*100),2);
+                }else{
+                    $ttdis = false;
+                }
             }else{
                 $ttdis = false;
                 $totalLP = false;
@@ -294,7 +298,8 @@ class OrderController extends Controller
 
         $sellers = Customers::where(function ($query) use ($userids) {
             if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
-                $query->whereIn('executive_id', $userids);
+                $query->whereIn('executive_id', $userids)
+                      ->orWhereIn('created_by', $userids);
             }
         })
             ->where('active', '=', 'Y')
@@ -319,7 +324,8 @@ class OrderController extends Controller
         $buyers = Customers::whereIn('customertype', ['1', '3', '4', '5', '6'])
             ->where(function ($query) use ($userids) {
                 if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
-                    $query->whereIn('executive_id', $userids);
+                    $query->whereIn('executive_id', $userids)
+                          ->orWhereIn('created_by', $userids);
                 }
             })
             ->where('active', '=', 'Y')
