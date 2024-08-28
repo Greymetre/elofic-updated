@@ -18,6 +18,7 @@ use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use DB;
 
 class LoyaltyRetialerSummaryReportExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithEvents
 {
@@ -31,16 +32,20 @@ class LoyaltyRetialerSummaryReportExport implements FromCollection, WithHeadings
 
     public function collection()
     {
-
+        DB::statement("SET SESSION group_concat_max_len = 100000000");
         $retailers_sarthi = TransactionHistory::groupBy('customer_id')->pluck('customer_id');
         $userids = getUsersReportingToAuth();
-        $data = Customers::with('customertypes', 'firmtypes', 'createdbyname', 'customeraddress.cityname', 'customeraddress.statename', 'customer_transacation')->whereIn('id', $retailers_sarthi)->where('customertype', ['2'])
+        $data = Customers::with('customertypes', 'createdbyname', 'customeraddress.cityname', 'customeraddress.statename', 'customer_transacation')->whereIn('id', $retailers_sarthi)
             ->where(function ($query) use ($userids) {
                 if ($this->branch_id && $this->branch_id != '' && $this->branch_id != null) {
                     $userIdsss = User::where('branch_id', $this->branch_id)->whereIn('id', $userids)->pluck('id');
-                    $query->whereIn('executive_id', $userIdsss);
+                    $query->whereIn('executive_id', $userIdsss)
+                    ->orWhereIn('created_by', $userIdsss);
                 } else {
-                    $query->whereIn('executive_id', $userids);
+                    if(!auth()->user()->hasRole('superadmin') && !auth()->user()->hasRole('Admin') && !auth()->user()->hasRole('Sub_Admin')){
+                        $query->whereIn('executive_id', $userids)
+                        ->orWhereIn('created_by', $userids);
+                    }
                 }
 
                 if ($this->dealer_id && $this->dealer_id != '' && $this->dealer_id != null) {
@@ -80,7 +85,7 @@ class LoyaltyRetialerSummaryReportExport implements FromCollection, WithHeadings
         $all_parents = '';
         if (count($data->getparentdetail) > 0) {
             foreach ($data->getparentdetail as $key => $value) {
-                $all_parents .= $value->parent_detail->name . ' ,';
+                $all_parents .= $value->parent_detail?$value->parent_detail->name . ' ,':'';
             }
         }
 

@@ -135,6 +135,12 @@ class CustomerController extends Controller
                     if (!empty($request['active'])) {
                         $query->where('active', $request['active']);
                     }
+                    if ($request->start_date && !empty($request->start_date)) {
+                        $query->whereDate('created_at', '>=', $request->start_date);
+                    }
+                    if ($request->end_date && !empty($request->end_date)) {
+                        $query->whereDate('created_at', '<=', $request->end_date);
+                    }
                     if (!empty($request['search']) && is_array($request['search']) == false) {
                         $search = $request['search'];
                         $query->where(function ($query) use ($search) {
@@ -165,15 +171,14 @@ class CustomerController extends Controller
                         ->where('customer_id', $data->id)
                         ->get();
 
-                        foreach ($beat_details as $key => $value) {
-                            array_push($beat_names, $value->beats->beat_name);
-                        }
-                        if(count($beat_names) > 0){
-                            dd(implode(',', $beat_names));
-                            return implode(',', $beat_names);
-                        }else{
-                            return '-';
-                        }
+                    foreach ($beat_details as $key => $value) {
+                        array_push($beat_names, $value->beats->beat_name);
+                    }
+                    if (count($beat_names) > 0) {
+                        return implode(',', $beat_names);
+                    } else {
+                        return '-';
+                    }
                 })
                 ->addColumn('action', function ($query) {
                     $btn = '';

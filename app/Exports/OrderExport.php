@@ -39,11 +39,15 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
         //                         }
         //                     })->select('id','order_id', 'product_id', 'product_detail_id', 'quantity', 'shipped_qty', 'price', 'discount', 'discount_amount', 'tax_amount', 'line_total', 'status_id', 'created_at')->latest()->get();  
 
-        if ($this->pending_status == '2') {
-
-            return OrderDetails::with('orders', 'orders.createdbyname', 'orders.buyers')->where('status_id', $this->pending_status)->whereHas('orders', function ($query) {
+        if ($this->pending_status != '' && $this->pending_status != NULL) {
+            return OrderDetails::with('orders', 'orders.createdbyname', 'orders.buyers')->whereHas('orders', function ($query) {
                 if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                     $query->whereIn('created_by', $this->userids);
+                }
+                if ($this->pending_status == '0') {
+                    $query->where('status_id', NULL);
+                }else{
+                    $query->where('status_id', $this->pending_status);
                 }
                 if ($this->startdate) {
                     $query->where('order_date', '>=', $this->startdate);
@@ -102,11 +106,11 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
     public function headings(): array
     {
         if ($this->dividion_id == '1') {
-            return ['id', 'Order Date', 'Employee Code', 'User Name', 'Branch', 'Division', 'Designation', 'Retailer ID', 'Customer', 'Customer Name', 'Dealer ID', 'Dealer & Distributor Name', 'Order No', 'Order ID', 'Order Status', 'Category', 'Subcategory', 'Product Code', 'Product Name', 'Product ID', 'Product Stage', 'kW', 'HP', 'Suc x Del', 'Quantity', 'Shipped Qty', 'Pending Qty', 'Rate(LP)', 'Trade Discount%', 'Scheme Discount%', 'Scheme Name', 'EBD Discount%', 'MOU Discount%', 'Special Discount%', 'Frieght Discount%', 'Cluster Discount%', 'Deal Dicount%', 'Cash Discount%', 'Total Discount%', 'Tax%', 'Sub Total', 'Total', 'Order Remark', 'Discount Approvel Remark', 'Discount Approve By', 'Status'];
+            return ['id', 'Order Date', 'Employee Code', 'User Name', 'Branch', 'Division', 'Designation', 'Retailer ID', 'Customer', 'Customer Name', 'Dealer ID', 'Dealer & Distributor Name', 'Order No', 'Order ID', 'Category', 'Subcategory', 'Product Code', 'Product Name', 'Product ID', 'Product Stage', 'kW', 'HP', 'Suc x Del', 'Quantity', 'Shipped Qty', 'Pending Qty', 'Rate(LP)', 'Trade Discount%', 'Scheme Discount%', 'Scheme Name', 'EBD Discount%', 'MOU Discount%', 'Special Discount%', 'Frieght Discount%', 'Cluster Discount%', 'Deal Dicount%', 'Cash Discount%', 'Total Discount%', 'Tax%', 'Sub Total', 'Total', 'Order Remark', 'Discount Approvel Remark', 'Discount Approve By', 'Status'];
         } elseif ($this->dividion_id == '2') {
-            return ['id', 'Order Date', 'Employee Code', 'User Name', 'Branch', 'Division', 'Designation', 'Retailer ID', 'Customer', 'Customer Name', 'Dealer ID', 'Dealer & Distributor Name', 'Order No', 'Order ID', 'Order Status', 'Category', 'Subcategory', 'Product Code', 'Product Name', 'Product ID', 'Quantity', 'Shipped Qty', 'Pending Qty', 'Rate(LP)', 'DOD Discount%', 'Special Distribution Discount%', 'Distribution Margin Discount%', 'Cash Discount%', 'Total Discount%', 'Total Discount', 'Tax%', 'Sub Total', 'Total', 'Order Remark', 'Discount Approvel Remark', 'Discount Approve By', 'Status'];
+            return ['id', 'Order Date', 'Employee Code', 'User Name', 'Branch', 'Division', 'Designation', 'Retailer ID', 'Customer', 'Customer Name', 'Dealer ID', 'Dealer & Distributor Name', 'Order No', 'Order ID', 'Category', 'Subcategory', 'Product Code', 'Product Name', 'Product ID', 'Quantity', 'Shipped Qty', 'Pending Qty', 'Rate(LP)', 'DOD Discount%', 'Special Distribution Discount%', 'Distribution Margin Discount%', 'Cash Discount%', 'Total Discount%', 'Total Discount', 'Tax%', 'Sub Total', 'Total', 'Order Remark', 'Discount Approvel Remark', 'Discount Approve By', 'Status'];
         } else {
-            return ['id', 'Order Date', 'Employee Code', 'User Name', 'Branch', 'Division', 'Designation', 'Retailer ID', 'Customer', 'Customer Name', 'Dealer ID', 'Dealer & Distributor Name', 'Order No', 'Order ID', 'Order Status', 'Category', 'Subcategory', 'Product Code', 'Product Name', 'Product ID', 'Product Stage', 'kW', 'HP', 'Suc x Del', 'Quantity', 'Shipped Qty', 'Pending Qty', 'Rate(LP)', 'Tax%', 'Sub Total', 'Total', 'Order Remark', 'Discount Approvel Remark', 'Discount Approve By', 'Status'];
+            return ['id', 'Order Date', 'Employee Code', 'User Name', 'Branch', 'Division', 'Designation', 'Retailer ID', 'Customer', 'Customer Name', 'Dealer ID', 'Dealer & Distributor Name', 'Order No', 'Order ID', 'Category', 'Subcategory', 'Product Code', 'Product Name', 'Product ID', 'Product Stage', 'kW', 'HP', 'Suc x Del', 'Quantity', 'Shipped Qty', 'Pending Qty', 'Rate(LP)', 'Tax%', 'Sub Total', 'Total', 'Order Remark', 'Discount Approvel Remark', 'Discount Approve By', 'Status'];
         }
     }
 
@@ -147,7 +151,6 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 isset($data['orders']['orderno']) ? $data['orders']['orderno'] : '',
                 isset($data['orders']['id']) ? $data['orders']['id'] : '',
 
-                isset($data['statusname']['status_name']) ? $data['statusname']['status_name'] : '',
                 isset($data['products']['categories']['category_name']) ? $data['products']['categories']['category_name'] : '',
                 isset($data['products']['subcategories']['subcategory_name']) ? $data['products']['subcategories']['subcategory_name'] : '',
                 isset($data['products']['product_code']) ? $data['products']['product_code'] : '',
@@ -174,7 +177,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 isset($data['orders']['cluster_discount']) ? $data['orders']['cluster_discount'] : '',
                 isset($data['orders']['deal_discount']) ? $data['orders']['deal_discount'] : '',
                 isset($data['orders']['cash_discount']) ? $data['orders']['cash_discount'] : '',
-                number_format(((1 - ($data['line_total'] / ($data['products']['productpriceinfo']['mrp'] * $data['quantity']))) * 100), 2) ?? '0',
+                $data['products'] ? ($data['products']['productpriceinfo']['mrp'] > 0 && $data['quantity'] > 0 ? number_format(((1 - ($data['line_total'] / ($data['products']['productpriceinfo']['mrp'] * $data['quantity']))) * 100), 2): '0') : '0',
                 isset($data['products']['productpriceinfo']['gst']) ? $data['products']['productpriceinfo']['gst'] : '',
                 isset($data['line_total']) ? $data['line_total'] : '',
                 isset($data['orders']['grand_total'])  ? $data['orders']['grand_total'] : '',
@@ -183,7 +186,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 isset($data['orders']['order_remark']) ? $data['orders']['order_remark'] : '',
                 isset($data['orders']['updatedbyname']) ? $data['orders']['updatedbyname']['name'] : '',
 
-                isset($data['statusname']['status_name']) ? $data['statusname']['status_name'] : '',
+                isset($data['orders']['statusname']) ? $data['orders']['statusname']['status_name'] : 'Pending',
             ];
         } elseif ($this->dividion_id == '2') {
             return [
@@ -202,7 +205,6 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 isset($data['orders']['orderno']) ? $data['orders']['orderno'] : '',
                 isset($data['orders']['id']) ? $data['orders']['id'] : '',
 
-                isset($data['statusname']['status_name']) ? $data['statusname']['status_name'] : '',
                 isset($data['products']['categories']['category_name']) ? $data['products']['categories']['category_name'] : '',
                 isset($data['products']['subcategories']['subcategory_name']) ? $data['products']['subcategories']['subcategory_name'] : '',
                 isset($data['products']['product_code']) ? $data['products']['product_code'] : '',
@@ -229,7 +231,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 isset($data['orders']['order_remark']) ? $data['orders']['order_remark'] : '',
                 isset($data['orders']['updatedbyname']) ? $data['orders']['updatedbyname']['name'] : '',
 
-                isset($data['statusname']['status_name']) ? $data['statusname']['status_name'] : '',
+                isset($data['orders']['statusname']) ? $data['orders']['statusname']['status_name'] : 'Pending',
             ];
         } else {
             return [
@@ -248,7 +250,6 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 isset($data['orders']['orderno']) ? $data['orders']['orderno'] : '',
                 isset($data['orders']['id']) ? $data['orders']['id'] : '',
 
-                isset($data['statusname']['status_name']) ? $data['statusname']['status_name'] : '',
                 isset($data['products']['categories']['category_name']) ? $data['products']['categories']['category_name'] : '',
                 isset($data['products']['subcategories']['subcategory_name']) ? $data['products']['subcategories']['subcategory_name'] : '',
                 isset($data['products']['product_code']) ? $data['products']['product_code'] : '',
@@ -272,7 +273,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 isset($data['orders']['order_remark']) ? $data['orders']['order_remark'] : '',
                 isset($data['orders']['updatedbyname']) ? $data['orders']['updatedbyname']['name'] : '',
 
-                isset($data['statusname']['status_name']) ? $data['statusname']['status_name'] : '',
+                isset($data['orders']['statusname']) ? $data['orders']['statusname']['status_name'] : 'Pending',
             ];
         }
     }

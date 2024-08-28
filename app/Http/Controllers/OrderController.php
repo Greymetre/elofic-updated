@@ -659,7 +659,7 @@ class OrderController extends Controller
                         // $orderdetail = OrderDetails::where('order_id', '=', $request['order_id'])
                         //     ->where('product_detail_id', '=', $rows['product_detail'])->first();
                         $orderdetail = OrderDetails::where('order_id', '=', $request['order_id'])
-                            ->where('product_detail_id', '=', ($rows['product_detail'] ?? ''))->first();
+                            ->where('product_id', '=', ($rows['product_id'] ?? ''))->first();
                         
                         if(isset($orderdetail)){
                             if ($orderdetail['shipped_qty'] + $rows['quantity'] == $orderdetail['quantity']) {

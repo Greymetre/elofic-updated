@@ -258,6 +258,8 @@
           url: "{{ route('customers.index') }}",
           data: function (d) {
                 d.executive_id = $('#executive_id').val(),
+                d.start_date = $('#start_date').val(),
+                d.end_date = $('#end_date').val(),
                 d.parent_id = $('#parent_id').val(),
                 d.branch_id = $('#branch_id').val(),
                 d.state_id = $('#state_id').val(),
@@ -287,6 +289,12 @@
     });
 
     $('#executive_id').change(function(){
+        table.draw();
+    });
+    $('#end_date').change(function(){
+        table.draw();
+    });
+    $('#start_date').change(function(){
         table.draw();
     });
     $('#active').change(function(){

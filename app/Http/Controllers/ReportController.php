@@ -20,7 +20,7 @@ use App\Models\OrderDetails;
 use App\Models\Division;
 use App\Models\Department;
 use App\Models\Branch;
-use App\Models\{Address, EmployeeDetail, Media, TransactionHistory, MobileUserLoginDetails, Redemption, ParentDetail, PrimarySales, Product, State};
+use App\Models\{Address, CustomerOutstanting, DealerAppointment, EmployeeDetail, Media, TransactionHistory, MobileUserLoginDetails, Redemption, ParentDetail, PrimarySales, Product, State};
 use Excel;
 use App\Exports\CounterVisitReportExport;
 use App\Exports\AdherenceDetailReportExport;
@@ -49,6 +49,8 @@ use App\DataTables\GamificationDataTable;
 use App\Exports\BranchCostingExport;
 use App\Exports\BranchOnlySalesCostingExport;
 use App\Exports\CustomerAnalysisExport;
+use App\Exports\CutomerOutstantingExport;
+use App\Exports\CutomerOutstantingTemplate;
 use App\Exports\DealerGrowthExport;
 use App\Exports\GroupWiseAnalysisExport;
 use App\Exports\LoyaltyRetialerSummaryReportExport;
@@ -59,6 +61,7 @@ use App\Exports\ProductAnalysisBranchExport;
 use App\Exports\ProductAnalysisQtyExport;
 use App\Exports\ProductAnalysisValueExport;
 use App\Exports\TopDealerExport;
+use App\Imports\CutomerOutstantingImport;
 use Carbon\Carbon;
 
 class ReportController extends Controller
@@ -3874,14 +3877,19 @@ class ReportController extends Controller
         $dealers = Customers::where('customertype', ['1', '3'])->get();
 
         if ($request->ajax()) {
+            DB::statement("SET SESSION group_concat_max_len = 100000000");
             $retailers_sarthi = TransactionHistory::groupBy('customer_id')->pluck('customer_id');
-            $data = Customers::with('customertypes', 'firmtypes', 'createdbyname', 'customeraddress.cityname', 'customeraddress.statename','customer_transacation')->whereIn('id', $retailers_sarthi)->where('customertype', ['2'])
+            $data = Customers::with('customertypes', 'firmtypes', 'createdbyname', 'customeraddress.cityname', 'customeraddress.statename', 'customer_transacation')->whereIn('id', $retailers_sarthi)
                 ->where(function ($query) use ($request, $userids) {
                     if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
                         $userIdsss = User::where('branch_id', $request->branch_id)->whereIn('id', $userids)->pluck('id');
-                        $query->whereIn('executive_id', $userIdsss);
+                        $query->whereIn('executive_id', $userIdsss)
+                            ->orWhereIn('created_by', $userIdsss);
                     } else {
-                        $query->whereIn('executive_id', $userids);
+                        if (!auth()->user()->hasRole('superadmin') && !auth()->user()->hasRole('Admin') && !auth()->user()->hasRole('Sub_Admin')) {
+                            $query->whereIn('executive_id', $userids)
+                                ->orWhereIn('created_by', $userids);
+                        }
                     }
 
                     if ($request->dealer_id && $request->dealer_id != '' && $request->dealer_id != null) {
@@ -3992,12 +4000,81 @@ class ReportController extends Controller
 
     public function loyaltyRetailerSummaryReportDownload(Request $request)
     {
-        if ($request->ip() != '106.222.215.69') {
-            return "Working on it....";
-        }
         abort_if(Gate::denies('loyalty_summary_report_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         return Excel::download(new LoyaltyRetialerSummaryReportExport($request), 'loyalty_retailer_summary.xlsx');
+    }
+
+    public function customer_outstanting(Request $request)
+    {
+        $userids = getUsersReportingToAuth();
+        $branches = Branch::latest()->get();
+        $dealers = Customers::where('customertype', ['1', '3'])->get();
+
+        if ($request->ajax()) {
+            $data = CustomerOutstanting::with('branch','customer')->select(
+                'customer_id',
+                'branch_id',
+                DB::raw('SUM(amount) as total_amounts'),
+                DB::raw('GROUP_CONCAT(amount) as amounts'),
+                DB::raw('GROUP_CONCAT(days) as days'),
+                DB::raw('JSON_OBJECTAGG(days, amount) as day_amount_pairs'),
+            )->groupBy('customer_id','branch_id');
+            
+            return Datatables::of($data)
+                ->addIndexColumn()
+                ->addColumn('first_slot', function ($data) {
+                    $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
+                    return $day_wise_amount_array['0-30']??'0';
+                })
+                ->addColumn('second_slot', function ($data) {
+                    $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
+                    return $day_wise_amount_array['31-60']??'0';
+                })
+                ->addColumn('thired_slot', function ($data) {
+                    $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
+                    return $day_wise_amount_array['61-90']??'0';
+                })
+                ->addColumn('fourth_slot', function ($data) {
+                    $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
+                    return $day_wise_amount_array['91-150']??'0';
+                })
+                ->addColumn('fifth_slot', function ($data) {
+                    $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
+                    return $day_wise_amount_array['>150']??'0';
+                })
+
+                ->rawColumns(['first_slot','second_slot','thired_slot','fourth_slot','fifth_slot'])
+                ->make(true);
+        }
+
+        return view('reports.customer_outstanting', compact('branches', 'dealers'));
+    }
+
+    public function customer_outstanting_upload(Request $request)
+    {
+        abort_if(Gate::denies('customer_outstanting_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        Excel::import(new CutomerOutstantingImport, request()->file('import_file'));
+
+        return back()->with('success', 'Customer Outstanding Import successfully !!');
+    }
+
+    public function customer_outstanting_template(Request $request)
+    {
+        abort_if(Gate::denies('customer_outstanting_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new CutomerOutstantingTemplate, 'customer_outstanding_template.xlsx');
+    }
+
+    public function customer_outstanting_download(Request $request)
+    {
+        abort_if(Gate::denies('customer_outstanting_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new CutomerOutstantingExport($request), 'customer_outstanding.xlsx');
     }
 }

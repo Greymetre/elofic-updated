@@ -405,19 +405,14 @@ class ReportController extends Controller
                         $value->final_branch == $item->final_branch &&
                         $value->city == $item->city;
                 });
-
+    
                 $item->last_year_net_amounts = $lastYearAmount ? $lastYearAmount->last_year_net_amounts : 0;
-                return $item;
-            });
-            foreach ($results as $key => $value) {
-                $results[$key]['total_net_amounts'] = number_format(($value->total_net_amounts/100000),2,'.','');
-                $results[$key]['last_year_net_amounts'] = number_format(($value->last_year_net_amounts/100000),2,'.','');
-
-                $lastYearAchievements = $value->last_year_net_amounts;
-                $currentYearAchievements = $value->total_net_amounts;
-
-                if ($lastYearAchievements != null && $lastYearAchievements != 0) {
-
+    
+                $currentYearAchievements = $item->total_net_amounts;
+                $lastYearAchievements = $item->last_year_net_amounts;
+    
+                $growthPercent = 0;
+                if ($lastYearAchievements != null) {
                     $growthPercent = (($currentYearAchievements - $lastYearAchievements) / abs($lastYearAchievements)) * 100;
                     $growthPercent = ROUND($growthPercent, 2);
                 } else {
@@ -425,25 +420,62 @@ class ReportController extends Controller
                         if (($currentYearAchievements == null || $currentYearAchievements == 0) && ($lastYearAchievements == null || $lastYearAchievements == 0)) {
                             $growthPercent = 0;
                         } elseif (($lastYearAchievements == null || $lastYearAchievements == 0) && isset($currentYearAchievements) && ($currentYearAchievements != null && $currentYearAchievements > 0)) {
-                            $growthPercent = 100;
+                            $growthPercent = 0;
                         }
                     }
                 }
-
-                $results[$key]['goly'] = (string)$growthPercent;
-
-                if($currentYearAchievements <= 0){
-                    $results[$key]['remark'] = 'INACTIVE DEALER';
-                }elseif($lastYearAchievements <= 0){
-                    $results[$key]['remark'] =  'LY -NO SALE';
-                }elseif ($growthPercent <= 0) {
-                    $results[$key]['remark'] =  'DE-GROWTH';
-                } elseif ($growthPercent > 0) {
-                    $results[$key]['remark'] =  'GROWTH DEALER';
+    
+                $item->growthPercent = $growthPercent;
+                return $item;
+            });
+            $remarks = [['id'=>'1','title'=>'INACTIVE DEALER'],['id'=>'2','title'=>'LY -NO SALE'],['id'=>'3','title'=>'DE-GROWTH'],['id'=>'4','title'=>'GROWTH DEALER']];
+            if ($request->remark && $request->remark != '' && $request->remark != null) {
+                if ($request->remark == '1') {
+                    // INACTIVE DEALER
+                    $results = $results->filter(function ($item) {
+                        return $item->total_net_amounts == 0;
+                    });
+                } elseif ($request->remark == '2') {
+                    // LY -NO SALE
+                    $results = $results->filter(function ($item) {
+                        return $item->last_year_net_amounts == 0;
+                    });
+                } elseif ($request->remark == '3') {
+                    // DE-GROWTH
+                    $results = $results->filter(function ($item) {
+                        return $item->growthPercent < 0;
+                    });
+                } elseif ($request->remark == '4') {
+                    // GROWTH DEALER
+                    $results = $results->filter(function ($item) {
+                        return $item->growthPercent > 0;
+                    });
                 }
             }
+    
+            $results = $results->sortByDesc('growthPercent');
+
+            $final_result = array();
+            
+            foreach ($results as $key => $value) {
+                $results[$key]['total_net_amounts'] = number_format(($value->total_net_amounts/100000),2,'.','');
+                $results[$key]['last_year_net_amounts'] = number_format(($value->last_year_net_amounts/100000),2,'.','');
+
+                $results[$key]['goly'] = (string)$value->growthPercent;
+
+                if($value->total_net_amounts <= 0){
+                    $results[$key]['remark'] = 'INACTIVE DEALER';
+                }elseif($value->last_year_net_amounts <= 0){
+                    $results[$key]['remark'] =  'LY -NO SALE';
+                }elseif ($value->growthPercent <= 0) {
+                    $results[$key]['remark'] =  'DE-GROWTH';
+                } elseif ($value->growthPercent > 0) {
+                    $results[$key]['remark'] =  'GROWTH DEALER';
+                }
+                array_push($final_result, $results[$key]);
+            }
             $ps_divisions = PrimarySales::distinct()->pluck('division');
-            return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $results, 'users' => $users, 'branches' => $branches,  'year_rang' => $year_range, 'currentYear' => $currentYear, 'ps_divisions' => $ps_divisions], $this->successStatus);
+            return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $final_result, 'users' => $users, 'branches' => $branches,  'year_rang' => $year_range, 'currentYear' => $currentYear, 'remarks' => $remarks, 'ps_divisions' => $ps_divisions], $this->successStatus);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }

@@ -96,8 +96,8 @@ class ExpensesDataTable extends DataTable
                 } else {
                     $btn = $btn . "<button type='button' onclick='showExpense($query->id)' class='btn btn-warning'>Pending</span></button>";
                 }
-                // if ($request->ip() == '111.118.252.250' || $request->ip() == 'http://192.168.0.210/') {
-                //     $btn = $btn . "<a href='".url('/map-all').'?id='.$query->user_id."'  class='btn btn-warning'>Pending</span></a>";
+                // if ($request->ip() == '106.222.215.69' || $request->ip() == 'http://192.168.0.210/') {
+                //     $btn = $btn . "<a href='".url('/map-all').'?id='.$query->user_id."'  class='btn btn-warning'>LOC</span></a>";
                 // }
                 return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
                                             ' . $btn . '
