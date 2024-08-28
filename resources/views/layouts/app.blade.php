@@ -274,6 +274,14 @@
                   </a>
                 </li>
                 @endif
+                @if(auth()->user()->can('stock_access'))
+                <li class="nav-item {{ request()->is('stock*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('stock') }}">
+                    <i class="material-icons">donut_small</i>
+                    <p>Stock</p>
+                  </a>
+                </li>
+                @endif
                 @if(auth()->user()->can('stockdetails_access'))
                 <!-- <li class="nav-item {{ request()->is('production*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('production') }}">
@@ -1200,6 +1208,14 @@
                     <a class="nav-link" href="{{ url('notes') }}">
                       <i class="material-icons">store</i>
                       <p>Calling Report</p>
+                    </a>
+                  </li>
+                  @endif
+                  @if(auth()->user()->can('customer_outstanting'))
+                  <li class="nav-item {{ request()->is('reports/customer_outstanting*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('reports/customer_outstanting') }}">
+                      <i class="material-icons">store</i>
+                      <p>Cutomer Outstanding</p>
                     </a>
                   </li>
                   @endif

@@ -541,24 +541,24 @@
                       </tr>
                       <tr>
                         <th rowspan="4" style="width: 15%;">Name of the Proprietor/Partners/Direct ors (Self attested copy Of AADHAR Card and PAN No to be attached)</th>
-                        <td>{{$dealerAppointment->ppd_name_1}}</td>
-                        <td>{{$dealerAppointment->ppd_adhar_1}}</td>
-                        <td>{{$dealerAppointment->ppd_pan_1}}</td>
+                        <td><input value="{{$dealerAppointment->ppd_name_1}}" type="text" name="ppd_name_1" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->ppd_adhar_1}}" type="text" name="ppd_adhar_1" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->ppd_pan_1}}" type="text" name="ppd_pan_1" class="form-control"></td>
                       </tr>
                       <tr>
-                        <td>{{$dealerAppointment->ppd_name_2}}</td>
-                        <td>{{$dealerAppointment->ppd_adhar_2}}</td>
-                        <td>{{$dealerAppointment->ppd_pan_2}}</td>
+                        <td><input value="{{$dealerAppointment->ppd_name_2}}" type="text" name="ppd_name_2" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->ppd_adhar_2}}" type="text" name="ppd_adhar_2" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->ppd_pan_2}}" type="text" name="ppd_pan_2" class="form-control"></td>
                       </tr>
                       <tr>
-                        <td>{{$dealerAppointment->ppd_name_3}}</td>
-                        <td>{{$dealerAppointment->ppd_adhar_3}}</td>
-                        <td>{{$dealerAppointment->ppd_pan_3}}</td>
+                        <td><input value="{{$dealerAppointment->ppd_name_3}}" type="text" name="ppd_name_3" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->ppd_adhar_3}}" type="text" name="ppd_adhar_3" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->ppd_pan_3}}" type="text" name="ppd_pan_3" class="form-control"></td>
                       </tr>
                       <tr>
-                        <td>{{$dealerAppointment->ppd_name_4}}</td>
-                        <td>{{$dealerAppointment->ppd_adhar_4}}</td>
-                        <td>{{$dealerAppointment->ppd_pan_4}}</td>
+                        <td><input value="{{$dealerAppointment->ppd_name_4}}" type="text" name="ppd_name_4" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->ppd_adhar_4}}" type="text" name="ppd_adhar_4" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->ppd_pan_4}}" type="text" name="ppd_pan_4" class="form-control"></td>
                       </tr>
                       <tr>
                         <th>Contact Person / Name</th>

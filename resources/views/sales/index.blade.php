@@ -117,9 +117,8 @@
               <thead class=" text-primary">
                 <th>{!! trans('panel.global.no') !!}</th>
                 <th>{!! trans('panel.global.action') !!}</th>
-                <th>{!! trans('panel.global.buyer_id') !!}</th>
+                <td>Order No</td>
                 <th>{!! trans('panel.global.buyer_name') !!}</th>
-                <th>{!! trans('panel.global.seller_id') !!}</th>
                 <th>{!! trans('panel.global.seller_name') !!}</th>
                 <th>{!! trans('panel.sale.fields.invoice_no') !!}</th>
                 <th>{!! trans('panel.sale.fields.invoice_date') !!}</th>
@@ -127,7 +126,6 @@
                 <th>{!! trans('panel.sale.fields.sub_total') !!}</th>
                 <th>{!! trans('panel.sale.fields.total_gst') !!}</th>
                 <th>{!! trans('panel.sale.fields.sales_no') !!}</th>
-                <th>{!! trans('panel.sale.fields.description') !!}</th>
                 <th>{!! trans('panel.sale.fields.status_id') !!}</th>
                 <th>{!! trans('panel.global.created_by') !!}</th>
                 <th>{!! trans('panel.global.created_at') !!}</th>
@@ -181,18 +179,13 @@
             searchable: false
           },
           {
-            data: 'buyer_id',
-            name: 'buyer_id',
+            data: 'orders.orderno',
+            name: 'orders.orderno',
             "defaultContent": ''
           },
           {
             data: 'buyers.name',
             name: 'buyers.name',
-            "defaultContent": ''
-          },
-          {
-            data: 'seller_id',
-            name: 'seller_id',
             "defaultContent": ''
           },
           {
@@ -228,11 +221,6 @@
           {
             data: 'sales_no',
             name: 'sales_no',
-            "defaultContent": ''
-          },
-          {
-            data: 'description',
-            name: 'description',
             "defaultContent": ''
           },
           {

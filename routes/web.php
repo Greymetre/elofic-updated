@@ -187,6 +187,12 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('new_dealer_sale/download', [ReportController::class, 'new_dealer_sale_download'])->name('new_dealer_sale.download');
     Route::any('new_dealer_sale/list', [ReportController::class, 'new_dealer_sale_list'])->name('new_dealer_sale.list');
 
+    // Customer Outstanting
+    Route::any('reports/customer_outstanting_template', [ReportController::class, 'customer_outstanting_template'])->name('reports.customer_outstanting_template');
+    Route::post('reports/customer_outstanting/upload', [ReportController::class, 'customer_outstanting_upload'])->name('reports.customer_outstanting.upload');
+    Route::any('reports/customer_outstanting/download', [ReportController::class, 'customer_outstanting_download'])->name('reports.customer_outstanting.download');
+    Route::any('reports/customer_outstanting', [ReportController::class, 'customer_outstanting'])->name('reports.customer_outstanting');
+
     //Customers
     Route::resource('customertype', CustomerTypeController::class);
     Route::post('customertype-active', [CustomerTypeController::class, 'active'])->name('customertype.active');
@@ -379,12 +385,19 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('products-template', [ProductController::class, 'template'])->name('products.template');
     Route::post('products-upload', [ProductController::class, 'upload'])->name('products.upload');
     Route::post('products-active', [ProductController::class, 'active'])->name('products.active');
-    Route::any('stockinfo', [ProductController::class, 'stockInfo'])->name('products.stockinfo');
-    Route::any('stockupdate', [ProductController::class, 'stockUpdate'])->name('products.stockupdate');
+    // Route::any('stockinfo', [ProductController::class, 'stockInfo'])->name('products.stockinfo');
+    // Route::any('stockupdate', [ProductController::class, 'stockUpdate'])->name('products.stockupdate');
     Route::any('production', [ProductController::class, 'production'])->name('products.production');
     Route::any('productionupdate', [ProductController::class, 'productionUpdate'])->name('products.productionupdate');
     Route::any('products-list', [ProductController::class, 'productList']);
     Route::any('checkProductCode', [ProductController::class, 'checkProductCode'])->name('checkProductCode');
+
+    // Customer Outstanting
+    Route::any('stock', [ProductController::class, 'stock'])->name('stock');
+    Route::any('stock_template', [ProductController::class, 'stock_template'])->name('stock.template');
+    Route::post('stock/upload', [ProductController::class, 'stock_upload'])->name('stock.upload');
+    Route::any('stock/download', [ProductController::class, 'stock_download'])->name('stock.download');
+
     //Orders
     Route::resource('orders', OrderController::class);
     Route::any('orders-download', [OrderController::class, 'download'])->name('orders.download');
@@ -690,7 +703,7 @@ Route::group(['middleware' => ['auth']], function () {
     // departments
     Route::resource('departments', DepartmentController::class);
     Route::post('departments-active', [DepartmentController::class, 'active'])->name('departments.active');
-    Route::any('department_report/download', [DivisionController::class, 'department_report_download'])->name('department_report.download');
+    Route::any('department_report/download', [DepartmentController::class, 'department_report_download'])->name('department_report.download');
 
     //order scheme
     Route::resource('orderschemes', OrderSchemeController::class);

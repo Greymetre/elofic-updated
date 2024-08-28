@@ -27,6 +27,7 @@ class SalesDataTable extends DataTable
             ->editColumn('invoice_date', function ($data) {
                 return isset($data->invoice_date) ? showdateformat($data->invoice_date) : '';
             })
+            
             ->addColumn('action', function ($query) {
                 $btn = '';
                 $activebtn = '';

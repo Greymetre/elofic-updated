@@ -19,9 +19,14 @@ use DataTables;
 // use Validator;
 use Gate;
 use App\DataTables\ProductDataTable;
+use App\Exports\BranchStockExport;
+use App\Exports\BranchStockTemplate;
 use App\Imports\ProductImport;
 use App\Exports\ProductExport;
 use App\Exports\ProductTemplate;
+use App\Imports\BranchStockImport;
+use App\Models\Branch;
+use App\Models\BranchStock;
 use Excel;
 use Illuminate\Support\Facades\Validator;
 
@@ -363,22 +368,22 @@ class ProductController extends Controller
         return Excel::download(new ProductTemplate, 'products.xlsx');
     }
 
-    public function stockInfo(Request $request)
-    {
-        $products = ProductDetails::select('id','product_id','stock_qty','detail_title','mrp')->get();
-        return view('products.stock',compact('products') );
-    }
+    // public function stockInfo(Request $request)
+    // {
+    //     $products = ProductDetails::select('id','product_id','stock_qty','detail_title','mrp')->get();
+    //     return view('products.stock',compact('products') );
+    // }
 
-    public function stockUpdate(Request $request)
-    {
-        foreach ($request['detail'] as $key => $rows) {
-            ProductDetails::where('id',$rows['detail_id'])->update([
-                'stock_qty'      => isset($rows['stock_qty']) ? $rows['stock_qty'] :null,
-                'updated_at'    => getcurentDateTime(),
-            ]);
-        }
-        return Redirect::to('stockinfo')->with('message_success', 'Product Update Successfully');
-    }
+    // public function stockUpdate(Request $request)
+    // {
+    //     foreach ($request['detail'] as $key => $rows) {
+    //         ProductDetails::where('id',$rows['detail_id'])->update([
+    //             'stock_qty'      => isset($rows['stock_qty']) ? $rows['stock_qty'] :null,
+    //             'updated_at'    => getcurentDateTime(),
+    //         ]);
+    //     }
+    //     return Redirect::to('stockinfo')->with('message_success', 'Product Update Successfully');
+    // }
 
     public function production(Request $request)
     {
@@ -404,5 +409,89 @@ class ProductController extends Controller
         }else{
             return true;
         }
+    }
+
+    public function stock(Request $request)
+    {
+        if ($request->ip() != '106.222.216.59') {
+            return 'Working on it....';
+        }
+        $userids = getUsersReportingToAuth();
+        $branches = Branch::where('active', 'Y')->latest()->get();
+
+        if ($request->ajax()) {
+            $data = BranchStock::with('branch','division')->select(
+                'division_id',
+                'branch_id',
+                DB::raw('SUM(amount) as total_amounts'),
+                DB::raw('GROUP_CONCAT(amount) as amounts'),
+                DB::raw('GROUP_CONCAT(days) as days'),
+                DB::raw('JSON_OBJECTAGG(days, amount) as day_amount_pairs'),
+            );
+            if($request->branch_id && !empty($request->branch_id)){
+                $data->where('branch_id', $request->branch_id);
+            }
+            $data = $data->groupBy('division_id','branch_id');
+            
+            return Datatables::of($data)
+                ->addIndexColumn()
+                ->addColumn('first_slot', function ($data) {
+                    $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
+                    return $day_wise_amount_array['0-30']??'0';
+                })
+                ->addColumn('second_slot', function ($data) {
+                    $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
+                    return $day_wise_amount_array['31-60']??'0';
+                })
+                ->addColumn('thired_slot', function ($data) {
+                    $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
+                    return $day_wise_amount_array['61-90']??'0';
+                })
+                ->addColumn('fourth_slot', function ($data) {
+                    $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
+                    return $day_wise_amount_array['91-150']??'0';
+                })
+                ->addColumn('fifth_slot', function ($data) {
+                    $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
+                    return $day_wise_amount_array['>150']??'0';
+                })
+
+                ->rawColumns(['first_slot','second_slot','thired_slot','fourth_slot','fifth_slot'])
+                ->make(true);
+        }
+
+        return view('products.stock', compact('branches'));
+    }
+
+    public function stock_upload(Request $request)
+    {
+        if ($request->ip() != '106.222.216.59') {
+            return 'Working on it....';
+        }
+        abort_if(Gate::denies('stock_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        Excel::import(new BranchStockImport, request()->file('import_file'));
+
+        return back()->with('success', 'Primary Sales Import successfully !!');
+    }
+
+    public function stock_template(Request $request)
+    {
+        abort_if(Gate::denies('stock_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new BranchStockTemplate, 'branch_stock_template.xlsx');
+    }
+
+    public function stock_download(Request $request)
+    {
+        if ($request->ip() != '106.222.216.59') {
+            return 'Working on it....';
+        }
+        abort_if(Gate::denies('stock_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new BranchStockExport($request), 'stock.xlsx');
     }
 }
