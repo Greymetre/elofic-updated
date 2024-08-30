@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\PrimarySales;
+use App\Models\SalesTargetCustomers;
 use Validator;
 use DB;
 
@@ -213,6 +214,7 @@ class ReportController extends Controller
             'dealer',
             'final_branch',
             'city',
+            'customer_id',
             DB::raw('SUM(net_amount) as total_net_amounts'),
             DB::raw('GROUP_CONCAT(net_amount) as net_amounts'),
             DB::raw('GROUP_CONCAT(month) as months'),
@@ -240,7 +242,7 @@ class ReportController extends Controller
             $query->whereBetween('invoice_date', [$financial_year_start, $financial_year_end]);
         }
 
-        $db_data = $query->where('dealer', 'like', '%' . $request->dealer_id . '%')->groupBy('dealer', 'final_branch', 'city')->first();
+        $db_data = $query->where('dealer', 'like', '%' . $request->dealer_id . '%')->groupBy('dealer', 'final_branch', 'city', 'customer_id')->first();
 
         $response = array();
         $invoice_dates = explode(',', $db_data->invoice_dates);
@@ -256,10 +258,34 @@ class ReportController extends Controller
                     $tsale += $net_amounts[$key];
                 }
             }
+            if($val == 'January' || $val == 'February' || $val == 'March'){
+                $date = Carbon::parse($financial_year_end);
+                $year = $date->year;
+                $date = Carbon::createFromFormat('F', $val);
+                $shortMonthName = $date->format('M');
+
+                $target = SalesTargetCustomers::where(['customer_id'=>$db_data->customer_id,'month'=>$shortMonthName,'year'=>$year])->first();
+                // dd($target->target);
+            }else{
+                $date = Carbon::parse($financial_year_start);
+                $year = $date->year;
+                $date = Carbon::createFromFormat('F', $val);
+                $shortMonthName = $date->format('M');
+                $target = SalesTargetCustomers::where(['customer_id'=>$db_data->customer_id,'month'=>$shortMonthName,'year'=>$year])->first();
+            }
             if ($tsale > 0) {
-                $response[$val] = number_format(($tsale / 100000), 2, '.', '');
+                if($target){
+                    $achievementPercent = ($target->target == 0) ? 0 : (($tsale / 100000) * 100 / $target->target);
+                }else{
+                    $achievementPercent = 100;
+                }
+                $response[$val]['achiv'] = number_format(($tsale / 100000), 2, '.', '');
+                $response[$val]['terg'] = $target?$target->target:'0.00';
+                $response[$val]['achivper'] =  number_format($achievementPercent, 2);
             } else {
-                $response[$val] = "0.0";
+                $response[$val]['achiv'] =  "0.0";
+                $response[$val]['terg'] = $target?$target->target:'0.00';
+                $response[$val]['achivper'] =  "0.0";
             }
         }
 

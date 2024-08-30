@@ -234,6 +234,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::get('getappointmentsDetails', [DealerAppointmentController::class, 'getappointmentsDetails']);
     Route::get('getappointmentsPDF', [DealerAppointmentController::class, 'getappointmentsPDF']);
     Route::post('approveAppointment', [DealerAppointmentController::class, 'approveAppointment']);
+    Route::post('addbmremark', [DealerAppointmentController::class, 'addbmremark']);
 
     //Report 
     Route::get('primary-sales', [ReportController::class, 'primarySales']);

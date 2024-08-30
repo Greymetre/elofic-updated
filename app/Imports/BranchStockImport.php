@@ -43,17 +43,22 @@ class BranchStockImport implements ToCollection, WithValidation, WithHeadingRow,
     {
         foreach ($rows as $row) {
 
-            $salesTargetUsers = BranchStock::updateOrCreate(
-                [
-                    'branch_id' => $row['branch_id'],
-                    'days' => $row['days']
-                ],
-                [
-                    'branch_name' => $row['branch_name'],
-                    'division_id' => $row['division_id'],
-                    'amount' => $row['amount']
-                ]
-            );
+            foreach ($row as $k => $val) {
+                if ($k == '0_30' || $k == '31_60' || $k == '61_90' || $k == '91_150' || $k == '150') {
+                    $k = str_replace('_', '-', $k);
+                    $salesTargetUsers = BranchStock::updateOrCreate(
+                        [
+                            'branch_id' => $row['branch_id'],
+                            'days' => $k
+                        ],
+                        [
+                            'branch_name' => $row['branch_name'],
+                            'division_id' => $row['division_id'],
+                            'amount' => $val
+                        ]
+                    );
+                }
+            }
         }
     }
 

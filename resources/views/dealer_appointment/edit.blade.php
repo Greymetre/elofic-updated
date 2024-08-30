@@ -446,7 +446,7 @@
                       <label> Office Address: </label>
                     </div>
                     <div class="col-md-12">
-                      <textarea class="form-control">{{$dealerAppointment->office_address}}</textarea>
+                      <textarea class="form-control" name="office_address">{{$dealerAppointment->office_address}}</textarea>
                     </div>
                   </div>
                   <div class="form-group row">
@@ -480,7 +480,7 @@
                       <label> Showroom Address / GODOWN: </label>
                     </div>
                     <div class="col-md-12">
-                      <textarea class="form-control">{{$dealerAppointment->godown_address}}</textarea>
+                      <textarea class="form-control" name="godown_address">{{$dealerAppointment->godown_address}}</textarea>
                     </div>
                   </div>
                   <div class="form-group row">

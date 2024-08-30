@@ -95,7 +95,7 @@
                 <th>61-90</th>
                 <th>91-150</th>
                 <th>>150</th>
-                <th>Total Outstanting</th>
+                <th>Total Stock</th>
               </thead>
               <tbody>
               </tbody>

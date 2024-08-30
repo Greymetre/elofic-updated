@@ -42,18 +42,23 @@ class CutomerOutstantingImport implements ToCollection, WithValidation, WithHead
     {
         foreach ($rows as $row) {
 
-            $salesTargetUsers = CustomerOutstanting::updateOrCreate(
-                [
-                    'customer_id' => $row['customer_id'],
-                    'days' => $row['days']
-                ],
-                [
-                    'branch_id' => $row['branch_id'],
-                    'user_id' => $row['user_id'],
-                    'customer_name' => $row['customer_name'],
-                    'amount' => $row['amount']
-                ]
-            );
+            foreach ($row as $k => $val) {
+                if($k == '0_30' || $k == '31_60' || $k == '61_90' || $k == '91_150' || $k == '150'){
+                    $k = str_replace('_','-',$k);
+                    $salesTargetUsers = CustomerOutstanting::updateOrCreate(
+                        [
+                            'customer_id' => $row['customer_id'],
+                            'days' => (string)$k
+                        ],
+                        [
+                            'branch_id' => $row['branch_id'],
+                            'user_id' => $row['user_id'],
+                            'customer_name' => $row['customer_name'],
+                            'amount' => $val
+                        ]
+                    );
+                }
+            }
         }
     }
 

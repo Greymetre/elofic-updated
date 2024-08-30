@@ -413,9 +413,6 @@ class ProductController extends Controller
 
     public function stock(Request $request)
     {
-        if ($request->ip() != '106.222.216.59') {
-            return 'Working on it....';
-        }
         $userids = getUsersReportingToAuth();
         $branches = Branch::where('active', 'Y')->latest()->get();
 
@@ -453,7 +450,7 @@ class ProductController extends Controller
                 })
                 ->addColumn('fifth_slot', function ($data) {
                     $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
-                    return $day_wise_amount_array['>150']??'0';
+                    return $day_wise_amount_array['150']??'0';
                 })
 
                 ->rawColumns(['first_slot','second_slot','thired_slot','fourth_slot','fifth_slot'])
@@ -465,9 +462,6 @@ class ProductController extends Controller
 
     public function stock_upload(Request $request)
     {
-        if ($request->ip() != '106.222.216.59') {
-            return 'Working on it....';
-        }
         abort_if(Gate::denies('stock_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();

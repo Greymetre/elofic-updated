@@ -26,10 +26,10 @@ class DealerAppointmentController extends Controller
         $user = $request->user();
         $braches = Branch::where('active', 'Y')->select('id', 'branch_name')->get();
         $user_ids = getUsersReportingToAuth($user->id);
-        $users = User::where('active', 'Y')->whereIn('id',$user_ids)->select('id', 'name')->get();
+        $users = User::where('active', 'Y')->whereIn('id', $user_ids)->select('id', 'name')->get();
         $pageSize = $request->input('pageSize');
         $all_status = [['id' => '0', 'name' => 'Pending'], ['id' => '1', 'name' => 'Approved By Sales Team'], ['id' => '2', 'name' => 'Approved By Account'], ['id' => '3', 'name' => 'Approved By HO'], ['id' => '4', 'name' => 'Rejected']];
-        $db_data = DealerAppointment::with('branch_details', 'district_details', 'city_details', 'appointment_kyc_detail', 'createdbyname')->whereIn('created_by' , $user_ids);
+        $db_data = DealerAppointment::with('branch_details', 'district_details', 'city_details', 'appointment_kyc_detail', 'createdbyname')->whereIn('created_by', $user_ids);
 
         if ($request->startdate && $request->startdate != '' && $request->startdate != NULL && $request->enddate && $request->enddate != '' && $request->enddate != NULL) {
 
@@ -71,7 +71,7 @@ class DealerAppointmentController extends Controller
                     'approval_status' => isset($value['approval_status']) ? $value['approval_status'] : 'Pending',
                     'created_by' => ($value['createdbyname'] && isset($value['createdbyname']['name'])) ? $value['createdbyname']['name'] : '',
                     'created_by_id' => ($value['created_by'] && isset($value['created_by'])) ? $value['created_by'] : '',
-                    'appointment_date' => isset($value['appointment_date']) ? date('d M Y',strtotime($value['appointment_date'])) : '',
+                    'appointment_date' => isset($value['appointment_date']) ? date('d M Y', strtotime($value['appointment_date'])) : '',
                     'firm_name' => isset($value['firm_name']) ? $value['firm_name'] : '',
                     'place' => isset($value['place']) ? $value['place'] : '',
                     'division' => isset($value['division']) ? $value['division'] : '',
@@ -107,9 +107,9 @@ class DealerAppointmentController extends Controller
                     'district' => isset($value['district_details']) ? $value['district_details']['district_name'] : '',
                     'city' => isset($value['city_details']) ? $value['city_details']['city_name'] : '',
                     'place' => isset($value['place']) ? $value['place'] : '',
-                    'appointment_date' => isset($value['appointment_date']) ? date('d M Y',strtotime($value['appointment_date'])) : '',
+                    'appointment_date' => isset($value['appointment_date']) ? date('d M Y', strtotime($value['appointment_date'])) : '',
                     'security_deposit' => isset($value['security_deposit']) ? $value['security_deposit'] : '',
-                    'gst_details' => isset($value['gst_no']) ? $value['gst_no'].'('.$value['gst_type'].')' : '',
+                    'gst_details' => isset($value['gst_no']) ? $value['gst_no'] . '(' . $value['gst_type'] . ')' : '',
                     'firm_type' => isset($value['firm_type']) ? $value['firm_type'] : '',
                     'payment_term' => isset($value['payment_term']) ? $value['payment_term'] : '',
                     'credit_period' => isset($value['credit_period']) ? $value['credit_period'] : '',
@@ -136,6 +136,7 @@ class DealerAppointmentController extends Controller
                     'manufacture_business_2' => isset($value['manufacture_business_2']) ? $value['manufacture_business_2'] : '',
                     'manufacture_turn_over_2' => isset($value['manufacture_turn_over_2']) ? $value['manufacture_turn_over_2'] : '',
                     'approval_status' => isset($value['approval_status']) ? $value['approval_status'] : '0',
+                    'bm_remark' => isset($value['bm_remark']) ? $value['bm_remark'] : '',
                 ];
             }
         }
@@ -188,11 +189,32 @@ class DealerAppointmentController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], 400);
             }
-            $update = DealerAppointment::where('id', $request->appointment_id)->update(['approval_status'=>$request->status,'remark'=>$request->remark,'sales_approve'=>$request->user()->id]);
-            if($update){
-                return response()->json(['status'=>'success', 'message'=>'Appointment status chnaged successfully !!']);
-            }else{
-                return response()->json(['status'=>'error', 'message'=>'Somthing went wrong.']);
+            $update = DealerAppointment::where('id', $request->appointment_id)->update(['approval_status' => $request->status, 'remark' => $request->remark, 'sales_approve' => $request->user()->id]);
+            if ($update) {
+                return response()->json(['status' => 'success', 'message' => 'Appointment status chnaged successfully !!']);
+            } else {
+                return response()->json(['status' => 'error', 'message' => 'Somthing went wrong.']);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function addbmremark(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'appointment_id' => 'required',
+                'bm_remark' => 'required',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['status' => 'error', 'message' =>  $validator->errors()], 400);
+            }
+            $update = DealerAppointment::where('id', $request->appointment_id)->update(['bm_remark' => $request->bm_remark, 'bm_remark_user' => $request->user()->id]);
+            if ($update) {
+                return response()->json(['status' => 'success', 'message' => 'Appointment remark add successfully !!']);
+            } else {
+                return response()->json(['status' => 'error', 'message' => 'Somthing went wrong.']);
             }
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
