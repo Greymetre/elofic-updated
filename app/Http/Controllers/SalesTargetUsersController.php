@@ -36,6 +36,7 @@ use App\Models\Division;
 use App\Models\User;
 use App\Models\Customers;
 use App\Models\Order;
+use App\Models\PrimarySales;
 use Carbon\Carbon;
 use DataTables;
 use Validator;
@@ -131,7 +132,7 @@ class SalesTargetUsersController extends Controller
                     $firstDate = Carbon::createFromDate($data->year, $monthNumber, 1)->startOfMonth()->toDateString();
                     $lastDate = Carbon::createFromDate($data->year, $monthNumber, 1)->endOfMonth()->toDateString();
 
-                    $data->achievement = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount'))/100000, 2, '.', '');
+                    $data->achievement = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
                 }
                 return $data->achievement;
             })
@@ -380,6 +381,16 @@ class SalesTargetUsersController extends Controller
 
         return Datatables::of($query)
             ->addIndexColumn()
+            ->addColumn('achievement', function ($data) {
+
+                $monthNumber = Carbon::parse("1 $data->month")->month;
+                $firstDate = Carbon::createFromDate($data->year, $monthNumber, 1)->startOfMonth()->toDateString();
+                $lastDate = Carbon::createFromDate($data->year, $monthNumber, 1)->endOfMonth()->toDateString();
+
+                $data->achievement = number_format((PrimarySales::where('customer_id', $data->customer_id)->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
+
+                return $data->achievement;
+            })
             ->addColumn('achievement_percent', function ($data) {
                 if (isset($data['achievement']) && isset($data['target']) && !empty($data['achievement']) && !empty($data['target'])) {
                     $achievementPercent = ($data['target'] == 0) ? 0 : ($data['achievement'] * 100 / $data['target']);

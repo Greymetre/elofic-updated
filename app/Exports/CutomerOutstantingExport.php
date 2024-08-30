@@ -59,7 +59,7 @@ class CutomerOutstantingExport implements FromCollection, WithHeadings, ShouldAu
             '61-90',
             '91-150',
             '>150',
-            'Total Outstanting',
+            'Total Outstanding',
         ];
     }
 
@@ -79,7 +79,7 @@ class CutomerOutstantingExport implements FromCollection, WithHeadings, ShouldAu
             $day_wise_amount_array['31-60'] ?? '0',
             $day_wise_amount_array['61-90'] ?? '0',
             $day_wise_amount_array['91-150'] ?? '0',
-            $day_wise_amount_array['>150'] ?? '0',
+            $day_wise_amount_array['150'] ?? '0',
             $data->total_amounts ?? '0',
         ];
     }

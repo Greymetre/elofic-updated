@@ -1077,25 +1077,17 @@
                     </a>
                   </li>
                   @endif
+                  @if(auth()->user()->can('user_incentive_access'))
+                  <li class="nav-item {{ request()->is('reports/user_incentive*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('reports/user_incentive') }}">
+                      <i class="material-icons">store</i>
+                      <p>User Incentive</p>
+                    </a>
+                  </li>
+                  @endif
                 </ul>
               </div>
             </li>
-            </li>
-            @endif
-            @if(auth()->user()->can('adherence_report'))
-            <li class="nav-item {{ request()->is('reports/beatadherence*') ? 'active' : '' }}" style="display:none;">
-              <a class="nav-link" href="{{ url('reports/beatadherence') }}">
-                <i class="material-icons">check_circle</i>
-                <p>Beat Adherence </p>
-              </a>
-            </li>
-            @endif
-            @if(auth()->user()->can('summary_report'))
-            <li class="nav-item {{ request()->is('reports/adherencesummary*') ? 'active' : '' }}" style="display:none;">
-              <a class="nav-link" href="{{ url('reports/adherencesummary') }}">
-                <i class="material-icons">check_circle</i>
-                <p>Adherence Summary</p>
-              </a>
             </li>
             @endif
             @if(auth()->user()->can('daily_visit_report'))
@@ -1316,6 +1308,22 @@
               <a class="nav-link" href="{{ url('mastervisitreport') }}">
                 <i class="material-icons">store</i>
                 <p>Master VisitReport</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('adherence_report'))
+            <li class="nav-item {{ request()->is('reports/beatadherence*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('reports/beatadherence') }}">
+                <i class="material-icons">check_circle</i>
+                <p>Beat Adherence </p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('summary_report'))
+            <li class="nav-item {{ request()->is('reports/adherencesummary*') ? 'active' : '' }}" >
+              <a class="nav-link" href="{{ url('reports/adherencesummary') }}">
+                <i class="material-icons">check_circle</i>
+                <p>Adherence Summary</p>
               </a>
             </li>
             @endif

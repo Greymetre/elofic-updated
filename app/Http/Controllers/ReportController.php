@@ -20,7 +20,7 @@ use App\Models\OrderDetails;
 use App\Models\Division;
 use App\Models\Department;
 use App\Models\Branch;
-use App\Models\{Address, CustomerOutstanting, DealerAppointment, EmployeeDetail, Media, TransactionHistory, MobileUserLoginDetails, Redemption, ParentDetail, PrimarySales, Product, State};
+use App\Models\{Address, BranchStock, CustomerOutstanting, DealerAppointment, EmployeeDetail, Media, TransactionHistory, MobileUserLoginDetails, Redemption, ParentDetail, PrimarySales, Product, SalesTargetUsers, State};
 use Excel;
 use App\Exports\CounterVisitReportExport;
 use App\Exports\AdherenceDetailReportExport;
@@ -61,6 +61,7 @@ use App\Exports\ProductAnalysisBranchExport;
 use App\Exports\ProductAnalysisQtyExport;
 use App\Exports\ProductAnalysisValueExport;
 use App\Exports\TopDealerExport;
+use App\Exports\UserIncentiveExport;
 use App\Imports\CutomerOutstantingImport;
 use Carbon\Carbon;
 
@@ -4009,43 +4010,43 @@ class ReportController extends Controller
     public function customer_outstanting(Request $request)
     {
         $userids = getUsersReportingToAuth();
-        $branches = Branch::latest()->get();
+        $branches = Branch::where('active', 'Y')->latest()->get();
         $dealers = Customers::where('customertype', ['1', '3'])->get();
 
         if ($request->ajax()) {
-            $data = CustomerOutstanting::with('branch','customer')->select(
+            $data = CustomerOutstanting::with('branch', 'customer')->select(
                 'customer_id',
                 'branch_id',
                 DB::raw('SUM(amount) as total_amounts'),
                 DB::raw('GROUP_CONCAT(amount) as amounts'),
                 DB::raw('GROUP_CONCAT(days) as days'),
                 DB::raw('JSON_OBJECTAGG(days, amount) as day_amount_pairs'),
-            )->groupBy('customer_id','branch_id');
-            
+            )->groupBy('customer_id', 'branch_id');
+
             return Datatables::of($data)
                 ->addIndexColumn()
                 ->addColumn('first_slot', function ($data) {
                     $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
-                    return $day_wise_amount_array['0-30']??'0';
+                    return $day_wise_amount_array['0-30'] ?? '0';
                 })
                 ->addColumn('second_slot', function ($data) {
                     $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
-                    return $day_wise_amount_array['31-60']??'0';
+                    return $day_wise_amount_array['31-60'] ?? '0';
                 })
                 ->addColumn('thired_slot', function ($data) {
                     $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
-                    return $day_wise_amount_array['61-90']??'0';
+                    return $day_wise_amount_array['61-90'] ?? '0';
                 })
                 ->addColumn('fourth_slot', function ($data) {
                     $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
-                    return $day_wise_amount_array['91-150']??'0';
+                    return $day_wise_amount_array['91-150'] ?? '0';
                 })
                 ->addColumn('fifth_slot', function ($data) {
                     $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
-                    return $day_wise_amount_array['>150']??'0';
+                    return $day_wise_amount_array['150'] ?? '0';
                 })
 
-                ->rawColumns(['first_slot','second_slot','thired_slot','fourth_slot','fifth_slot'])
+                ->rawColumns(['first_slot', 'second_slot', 'thired_slot', 'fourth_slot', 'fifth_slot'])
                 ->make(true);
         }
 
@@ -4076,5 +4077,307 @@ class ReportController extends Controller
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         return Excel::download(new CutomerOutstantingExport($request), 'customer_outstanding.xlsx');
+    }
+
+    public function user_incentive(Request $request)
+    {
+        $branches =  Branch::where('active', 'Y')->get();
+        $users = User::where('active', 'Y')->latest()->get();
+        $currentYear = Carbon::now()->year;
+        $years = range($currentYear - 1, $currentYear + 1);
+        $currentDate = Carbon::now();
+        return view('reports.user_incentive', compact('years', 'users', 'branches'));
+    }
+
+    public function user_incentive_list(Request $request)
+    {
+        $userIds = getUsersReportingToAuth();
+        $data = SalesTargetUsers::with(['user', 'user.getdesignation', 'user.getdivision', 'branch'])->whereIn('user_id', $userIds)->select([
+            DB::raw('GROUP_CONCAT(target) as targets'),
+            DB::raw('SUM(target) as total_target'),
+            DB::raw('SUM(achievement) as total_achievement'),
+            DB::raw('GROUP_CONCAT(achievement) as achievements'),
+            DB::raw('GROUP_CONCAT(month) as months'),
+            DB::raw('GROUP_CONCAT(year) as years'),
+            DB::raw('GROUP_CONCAT(achievement_percent) as achievement_percents'),
+            DB::raw('user_id'),
+            DB::raw('branch_id'),
+            DB::raw('type'),
+        ]);
+
+        if ($request->financial_year && !empty($request->financial_year)) {
+            $f_year_array = explode('-', $request->financial_year);
+        } else {
+            $currentYear = now()->year;
+            $currentMonth = now()->month;
+            if (!$request->quarter || empty($request->quarter)) {
+                if ($currentMonth == 7 || $currentMonth == 8 || $currentMonth == 9) {
+                    $request->quarter = '1';
+                } elseif ($currentMonth == 10 || $currentMonth == 11 || $currentMonth == 12) {
+                    $request->quarter = '2';
+                } elseif ($currentMonth == 1 || $currentMonth == 2 || $currentMonth == 3) {
+                    $request->quarter = '3';
+                } elseif ($currentMonth == 4 || $currentMonth == 5 || $currentMonth == 6) {
+                    $request->quarter = '4';
+                }
+            }
+
+            if ($currentMonth <= 3) {
+                $f_year_array = [$currentYear - 1, $currentYear];
+            } else {
+                $f_year_array = [$currentYear, $currentYear + 1];
+            }
+        }
+        if ($request->quarter && !empty($request->quarter)) {
+            if ($request->quarter == '1') {
+                $data->where(function ($query) use ($f_year_array) {
+                    $query->where('year', '=', $f_year_array[0])
+                        ->whereIn('month', ['Apr', 'May', 'Jun']);
+                });
+                $months = ['Apr', 'May', 'Jun'];
+            } elseif ($request->quarter == '2') {
+                $data->where(function ($query) use ($f_year_array) {
+                    $query->where('year', '=', $f_year_array[0])
+                        ->whereIn('month', ['Jul', 'Aug', 'Sep']);
+                });
+                $months = ['Jul', 'Aug', 'Sep'];
+            } elseif ($request->quarter == '3') {
+                $data->where(function ($query) use ($f_year_array) {
+                    $query->where('year', '=', $f_year_array[0])
+                        ->whereIn('month', ['Oct', 'Nov', 'Dec']);
+                });
+                $months = ['Oct', 'Nov', 'Dec'];
+            } elseif ($request->quarter == '4') {
+                $data->where(function ($query) use ($f_year_array) {
+                    $query->where('year', '=', $f_year_array[1])
+                        ->whereIn('month', ['Jan', 'Feb', 'Mar']);
+                });
+                $months = ['Oct', 'Nov', 'Dec'];
+            }
+        }
+
+        $data = $data->groupBy('user_id', 'branch_id')->orderBy('month');
+
+        return Datatables::of($data)
+            ->addIndexColumn()
+            ->addColumn('achiv', function ($data) use ($request, $months, $f_year_array) {
+                $fmonth = $months[0];
+                $lmonth = $months[2];
+                if ($request->quarter == '4') {
+                    $monthNumber = Carbon::parse("1 $fmonth")->month;
+                    $monthNumber2 = Carbon::parse("1 $lmonth")->month;
+                    $firstDate = Carbon::createFromDate($f_year_array[1], $monthNumber, 1)->startOfMonth()->toDateString();
+                    $lastDate = Carbon::createFromDate($f_year_array[1], $monthNumber2, 1)->endOfMonth()->toDateString();
+                } else {
+                    $monthNumber = Carbon::parse("1 $fmonth")->month;
+                    $monthNumber2 = Carbon::parse("1 $lmonth")->month;
+                    $firstDate = Carbon::createFromDate($f_year_array[0], $monthNumber, 1)->startOfMonth()->toDateString();
+                    $lastDate = Carbon::createFromDate($f_year_array[0], $monthNumber2, 1)->endOfMonth()->toDateString();
+                }
+                $total_achiv =  number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
+                return $data->total_achievement ?? $total_achiv;
+            })
+            ->addColumn('taper', function ($data) use ($request, $months, $f_year_array) {
+                $fmonth = $months[0];
+                $lmonth = $months[2];
+                if ($request->quarter == '4') {
+                    $monthNumber = Carbon::parse("1 $fmonth")->month;
+                    $monthNumber2 = Carbon::parse("1 $lmonth")->month;
+                    $firstDate = Carbon::createFromDate($f_year_array[1], $monthNumber, 1)->startOfMonth()->toDateString();
+                    $lastDate = Carbon::createFromDate($f_year_array[1], $monthNumber2, 1)->endOfMonth()->toDateString();
+                } else {
+                    $monthNumber = Carbon::parse("1 $fmonth")->month;
+                    $monthNumber2 = Carbon::parse("1 $lmonth")->month;
+                    $firstDate = Carbon::createFromDate($f_year_array[0], $monthNumber, 1)->startOfMonth()->toDateString();
+                    $lastDate = Carbon::createFromDate($f_year_array[0], $monthNumber2, 1)->endOfMonth()->toDateString();
+                }
+                $total_achiv =  number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
+                $total_achievement = $data->total_achievement ?? $total_achiv;
+                $total_target = $data->total_target ?? 0;
+                return number_format((($total_achievement / $total_target) * 100), 2, '.', '');
+            })
+            ->addColumn('ovper', function ($data) use ($request, $months, $f_year_array) {
+                $total_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->sum('amount');
+                $sixty_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->whereNotIn('days', ['0-30', '31-60'])->sum('amount');
+                return $total_outstanding > 0 ? number_format((($sixty_outstanding / $total_outstanding) * 100), 2, '.', '') : '0';
+            })
+            ->addColumn('svper', function ($data) use ($request, $months, $f_year_array) {
+                $total_stock = BranchStock::where('branch_id', $data->branch_id)->sum('amount');
+                $ninty_stock = BranchStock::where('branch_id', $data->branch_id)->whereNotIn('days', ['0-30', '31-60', '61-90'])->sum('amount');
+                return $total_stock > 0 ? number_format((($ninty_stock / $total_stock) * 100), 2, '.', '') : '0';
+            })
+            ->addColumn('total_inc', function ($data) use ($request, $months, $f_year_array) {
+                $fmonth = $months[0];
+                $lmonth = $months[2];
+                if ($request->quarter == '4') {
+                    $monthNumber = Carbon::parse("1 $fmonth")->month;
+                    $monthNumber2 = Carbon::parse("1 $lmonth")->month;
+                    $firstDate = Carbon::createFromDate($f_year_array[1], $monthNumber, 1)->startOfMonth()->toDateString();
+                    $lastDate = Carbon::createFromDate($f_year_array[1], $monthNumber2, 1)->endOfMonth()->toDateString();
+                } else {
+                    $monthNumber = Carbon::parse("1 $fmonth")->month;
+                    $monthNumber2 = Carbon::parse("1 $lmonth")->month;
+                    $firstDate = Carbon::createFromDate($f_year_array[0], $monthNumber, 1)->startOfMonth()->toDateString();
+                    $lastDate = Carbon::createFromDate($f_year_array[0], $monthNumber2, 1)->endOfMonth()->toDateString();
+                }
+                $total_achiv =  number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
+                $total_achievement = $data->total_achievement ?? $total_achiv;
+                $total_target = $data->total_target ?? 0;
+                $total_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->sum('amount');
+                $sixty_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->whereNotIn('days', ['0-30', '31-60'])->sum('amount');
+                $total_stock = BranchStock::where('branch_id', $data->branch_id)->sum('amount');
+                $ninty_stock = BranchStock::where('branch_id', $data->branch_id)->whereNotIn('days', ['0-30', '31-60', '61-90'])->sum('amount');
+                $sixty_outstanding_per = $total_outstanding > 0 ? ($sixty_outstanding / $total_outstanding) * 100 : 0;
+                $ninty_stock_per = $total_stock > 0 ? ($ninty_stock / $total_stock) * 100 : 0;
+                if (($total_achievement / $total_target) * 100 >= 70 && ($total_achievement / $total_target) * 100 <= 79.99) {
+                    $incentive = $data['user']['userinfo'] ? ($data['user']['userinfo']['gross_salary_monthly'] * 50) / 100 : 0;
+                    $fincentive = $incentive;
+                    $wincentive = $incentive;
+                    if ($sixty_outstanding_per > 10) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                    if ($ninty_stock_per > 20) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                } elseif (($total_achievement / $total_target) * 100 >= 80 && ($total_achievement / $total_target) * 100 <= 89.99) {
+                    $incentive = $data['user']['userinfo'] ? ($data['user']['userinfo']['gross_salary_monthly'] * 100) / 100 : '0';
+                    $fincentive = $incentive;
+                    $wincentive = $incentive;
+                    if ($sixty_outstanding_per > 10) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                    if ($ninty_stock_per > 20) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                } elseif (($total_achievement / $total_target) * 100 >= 90 && ($total_achievement / $total_target) * 100 <= 99.99) {
+                    $incentive = $data['user']['userinfo'] ? ($data['user']['userinfo']['gross_salary_monthly'] * 150) / 100 : '0';
+                    $fincentive = $incentive;
+                    $wincentive = $incentive;
+                    if ($sixty_outstanding_per > 10) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                    if ($ninty_stock_per > 20) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                } elseif (($total_achievement / $total_target) * 100 >= 100) {
+                    $incentive = $data['user']['userinfo'] ? ($data['user']['userinfo']['gross_salary_monthly'] * 200) / 100 : '0';
+                    $fincentive = $incentive;
+                    $wincentive = $incentive;
+                    if ($sixty_outstanding_per > 10) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                    if ($ninty_stock_per > 20) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                } else {
+                    $fincentive = '0';
+                    $wincentive =  '0';
+                }
+                return number_format($fincentive,2,'.','');;
+            })
+            ->addColumn('total_inc_w', function ($data) use ($request, $months, $f_year_array) {
+                $fmonth = $months[0];
+                $lmonth = $months[2];
+                if ($request->quarter == '4') {
+                    $monthNumber = Carbon::parse("1 $fmonth")->month;
+                    $monthNumber2 = Carbon::parse("1 $lmonth")->month;
+                    $firstDate = Carbon::createFromDate($f_year_array[1], $monthNumber, 1)->startOfMonth()->toDateString();
+                    $lastDate = Carbon::createFromDate($f_year_array[1], $monthNumber2, 1)->endOfMonth()->toDateString();
+                } else {
+                    $monthNumber = Carbon::parse("1 $fmonth")->month;
+                    $monthNumber2 = Carbon::parse("1 $lmonth")->month;
+                    $firstDate = Carbon::createFromDate($f_year_array[0], $monthNumber, 1)->startOfMonth()->toDateString();
+                    $lastDate = Carbon::createFromDate($f_year_array[0], $monthNumber2, 1)->endOfMonth()->toDateString();
+                }
+                $total_achiv =  number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
+                $total_achievement = $data->total_achievement ?? $total_achiv;
+                $total_target = $data->total_target ?? 0;
+                $total_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->sum('amount');
+                $sixty_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->whereNotIn('days', ['0-30', '31-60'])->sum('amount');
+                $total_stock = BranchStock::where('branch_id', $data->branch_id)->sum('amount');
+                $ninty_stock = BranchStock::where('branch_id', $data->branch_id)->whereNotIn('days', ['0-30', '31-60', '61-90'])->sum('amount');
+                $sixty_outstanding_per = $total_outstanding > 0 ? ($sixty_outstanding / $total_outstanding) * 100 : 0;
+                $ninty_stock_per = $total_stock > 0 ? ($ninty_stock / $total_stock) * 100 : 0;
+                if (($total_achievement / $total_target) * 100 >= 70 && ($total_achievement / $total_target) * 100 <= 79.99) {
+                    $incentive = $data['user']['userinfo'] ? ($data['user']['userinfo']['gross_salary_monthly'] * 50) / 100 : 0;
+                    $fincentive = $incentive;
+                    $wincentive = $incentive;
+                    if ($sixty_outstanding_per > 10) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                    if ($ninty_stock_per > 20) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                } elseif (($total_achievement / $total_target) * 100 >= 80 && ($total_achievement / $total_target) * 100 <= 89.99) {
+                    $incentive = $data['user']['userinfo'] ? ($data['user']['userinfo']['gross_salary_monthly'] * 100) / 100 : '0';
+                    $fincentive = $incentive;
+                    $wincentive = $incentive;
+                    if ($sixty_outstanding_per > 10) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                    if ($ninty_stock_per > 20) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                } elseif (($total_achievement / $total_target) * 100 >= 90 && ($total_achievement / $total_target) * 100 <= 99.99) {
+                    $incentive = $data['user']['userinfo'] ? ($data['user']['userinfo']['gross_salary_monthly'] * 150) / 100 : '0';
+                    $fincentive = $incentive;
+                    $wincentive = $incentive;
+                    if ($sixty_outstanding_per > 10) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                    if ($ninty_stock_per > 20) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                } elseif (($total_achievement / $total_target) * 100 >= 100) {
+                    $incentive = $data['user']['userinfo'] ? ($data['user']['userinfo']['gross_salary_monthly'] * 200) / 100 : '0';
+                    $fincentive = $incentive;
+                    $wincentive = $incentive;
+                    if ($sixty_outstanding_per > 10) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                    if ($ninty_stock_per > 20) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                } else {
+                    $fincentive = '0';
+                    $wincentive =  '0';
+                }
+                return number_format($wincentive,2,'.','');
+            })
+
+            ->rawColumns(['achiv', 'taper', 'ovper', 'svper', 'total_inc', 'total_inc_w'])
+            ->make(true);
+    }
+
+    public function user_incentive_download(Request $request)
+    {
+        if ($request->ip() != '106.222.218.95') {
+            return 'Working on it...';
+        }
+        abort_if(Gate::denies('user_incentive_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        if ($request->financial_year && !empty($request->financial_year)) {
+            $fileName = 'user_incentive_' . $request->financial_year . '_' . $request->quarter . '.xlsx';
+        } else {
+            $fileName = 'user_incentive.xlsx';
+        }
+        return Excel::download(new UserIncentiveExport($request), $fileName);
     }
 }

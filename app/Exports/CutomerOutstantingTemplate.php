@@ -17,11 +17,7 @@ class CutomerOutstantingTemplate implements FromCollection,WithHeadings,ShouldAu
     public function collection()
     {
         return new Collection([
-            ['', '', '', '', '', '', '0-30'],
-            ['', '', '', '', '', '', '31-60'],
-            ['', '', '', '', '', '', '61-90'],
-            ['', '', '', '', '', '', '91-150'],
-            ['', '', '', '', '', '', '>150']
+           
         ]);   
     }
 
@@ -32,9 +28,11 @@ class CutomerOutstantingTemplate implements FromCollection,WithHeadings,ShouldAu
             'Customer ID',
             'User ID',
             'Customer Name', 
-            'Amount',
-            'Days',
-            'Days Example'
+            '0-30',
+            '31-60',
+            '61-90',
+            '91-150',
+            '>150',
         ];
     }
 

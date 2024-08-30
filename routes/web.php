@@ -186,6 +186,11 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('reports/new_dealer_sale', [ReportController::class, 'new_dealer_sale']);
     Route::any('new_dealer_sale/download', [ReportController::class, 'new_dealer_sale_download'])->name('new_dealer_sale.download');
     Route::any('new_dealer_sale/list', [ReportController::class, 'new_dealer_sale_list'])->name('new_dealer_sale.list');
+    
+    // User Incentive
+    Route::any('reports/user_incentive', [ReportController::class, 'user_incentive']);
+    Route::any('user_incentive/download', [ReportController::class, 'user_incentive_download'])->name('user_incentive.download');
+    Route::any('user_incentive/list', [ReportController::class, 'user_incentive_list'])->name('user_incentive.list');
 
     // Customer Outstanting
     Route::any('reports/customer_outstanting_template', [ReportController::class, 'customer_outstanting_template'])->name('reports.customer_outstanting_template');
