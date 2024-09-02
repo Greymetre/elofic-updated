@@ -72,6 +72,7 @@ use App\Http\Controllers\MobileUserLoginDetailsController;
 use App\Http\Controllers\NewJoiningController;
 use App\Http\Controllers\ServiceBillController;
 use App\Http\Controllers\ServiceChargeProductsController;
+use App\Http\Controllers\FieldKonnectAppSettings;
 
 /*
 |--------------------------------------------------------------------------
@@ -107,6 +108,7 @@ Route::get('contactus', function () {
     return view('contactus');
 });
 Route::get('/home', [HomeController::class, 'index'])->name('home');
+Route::get('/privcay-policy', [NewJoiningController::class, 'privacyPolicy'])->name('privacyPolicy');
 
 //New Joining without auth Route
 Route::get('/new-joining-form', [NewJoiningController::class, 'create'])->name('joining-form');
@@ -164,6 +166,37 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('reports/group_wise_analysis', [ReportController::class, 'group_wise_analysis']);
     Route::any('group_wise_analysis/download', [ReportController::class, 'group_wise_analysis_download'])->name('group_wise_analysis.download');
     Route::any('group_wise_analysis/list', [ReportController::class, 'group_wise_analysis_list'])->name('group_wise_analysis.list');
+    
+    // Per Employee Costing
+    Route::any('reports/per_employee_costing', [ReportController::class, 'per_employee_costing']);
+    Route::any('per_employee_costing/download', [ReportController::class, 'per_employee_costing_download'])->name('per_employee_costing.download');
+    Route::any('per_employee_costing/list', [ReportController::class, 'per_employee_costing_list'])->name('per_employee_costing.list');
+
+    // Top Dealer
+    Route::any('reports/top_dealer', [ReportController::class, 'top_dealer']);
+    Route::any('top_dealer/download', [ReportController::class, 'top_dealer_download'])->name('top_dealer.download');
+    Route::any('top_dealer/list', [ReportController::class, 'top_dealer_list'])->name('top_dealer.list');
+
+    // Dealer Growth
+    Route::any('reports/dealer_growth', [ReportController::class, 'dealer_growth']);
+    Route::any('dealer_growth/download', [ReportController::class, 'dealer_growth_download'])->name('dealer_growth.download');
+    Route::any('dealer_growth/list', [ReportController::class, 'dealer_growth_list'])->name('dealer_growth.list');
+
+    // New Dealer Sale
+    Route::any('reports/new_dealer_sale', [ReportController::class, 'new_dealer_sale']);
+    Route::any('new_dealer_sale/download', [ReportController::class, 'new_dealer_sale_download'])->name('new_dealer_sale.download');
+    Route::any('new_dealer_sale/list', [ReportController::class, 'new_dealer_sale_list'])->name('new_dealer_sale.list');
+    
+    // User Incentive
+    Route::any('reports/user_incentive', [ReportController::class, 'user_incentive']);
+    Route::any('user_incentive/download', [ReportController::class, 'user_incentive_download'])->name('user_incentive.download');
+    Route::any('user_incentive/list', [ReportController::class, 'user_incentive_list'])->name('user_incentive.list');
+
+    // Customer Outstanting
+    Route::any('reports/customer_outstanting_template', [ReportController::class, 'customer_outstanting_template'])->name('reports.customer_outstanting_template');
+    Route::post('reports/customer_outstanting/upload', [ReportController::class, 'customer_outstanting_upload'])->name('reports.customer_outstanting.upload');
+    Route::any('reports/customer_outstanting/download', [ReportController::class, 'customer_outstanting_download'])->name('reports.customer_outstanting.download');
+    Route::any('reports/customer_outstanting', [ReportController::class, 'customer_outstanting'])->name('reports.customer_outstanting');
 
     //Customers
     Route::resource('customertype', CustomerTypeController::class);
@@ -357,12 +390,19 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('products-template', [ProductController::class, 'template'])->name('products.template');
     Route::post('products-upload', [ProductController::class, 'upload'])->name('products.upload');
     Route::post('products-active', [ProductController::class, 'active'])->name('products.active');
-    Route::any('stockinfo', [ProductController::class, 'stockInfo'])->name('products.stockinfo');
-    Route::any('stockupdate', [ProductController::class, 'stockUpdate'])->name('products.stockupdate');
+    // Route::any('stockinfo', [ProductController::class, 'stockInfo'])->name('products.stockinfo');
+    // Route::any('stockupdate', [ProductController::class, 'stockUpdate'])->name('products.stockupdate');
     Route::any('production', [ProductController::class, 'production'])->name('products.production');
     Route::any('productionupdate', [ProductController::class, 'productionUpdate'])->name('products.productionupdate');
     Route::any('products-list', [ProductController::class, 'productList']);
     Route::any('checkProductCode', [ProductController::class, 'checkProductCode'])->name('checkProductCode');
+
+    // Customer Outstanting
+    Route::any('stock', [ProductController::class, 'stock'])->name('stock');
+    Route::any('stock_template', [ProductController::class, 'stock_template'])->name('stock.template');
+    Route::post('stock/upload', [ProductController::class, 'stock_upload'])->name('stock.upload');
+    Route::any('stock/download', [ProductController::class, 'stock_download'])->name('stock.download');
+
     //Orders
     Route::resource('orders', OrderController::class);
     Route::any('orders-download', [OrderController::class, 'download'])->name('orders.download');
@@ -377,6 +417,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('order-partially-dispatched/{id}', [OrderController::class, 'orderPartiallyDispatched'])->name('orders.partiallydispatched');
     Route::any('order-cancle/{id}', [OrderController::class, 'orderCancle'])->name('orders.orderCancle');
     Route::post('submit-dispatched', [OrderController::class, 'submitDispatched'])->name('orders.submitdispatched');
+    Route::any('order-detail-delete', [OrderController::class, 'deleteOrderDtails'])->name('orders.deletedetails');
 
     Route::post('submit-fullydispatched', [OrderController::class, 'submitFullyDispatched'])->name('orders.submitFullyDispatched');
 
@@ -405,6 +446,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('gifts-template', [GiftController::class, 'template'])->name('gifts.template');
     Route::post('gifts-upload', [GiftController::class, 'upload'])->name('gifts.upload');
     Route::post('gifts-active', [GiftController::class, 'active'])->name('gifts.active');
+    Route::get('gifts-pdf', [GiftController::class, 'generatePdf'])->name('gifts.pdf');
     //Wallets
     Route::resource('wallets', WalletController::class);
     Route::any('wallets-download', [WalletController::class, 'download'])->name('wallets.download');
@@ -591,11 +633,13 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('reports/customersreport', [ReportController::class, 'customersReport']);
     Route::any('reports/loyalty_summary_report', [ReportController::class, 'loyaltySummaryReport'])->name('loyaltySummaryReport');
     Route::any('reports/loyalty_dealer_wise_summary_report', [ReportController::class, 'loyaltyDealerWiseSummaryReport'])->name('loyaltyDealerWiseSummaryReport');
+    Route::any('reports/loyalty_retailer_wise_summary_report', [ReportController::class, 'loyaltyRetailerWiseSummaryReport'])->name('loyaltyRetailerWiseSummaryReport');
     Route::any('reports/per_day_counter_visit_report', [ReportController::class, 'perDayCounterVisitReport']);
     // loyalty summary report export
     Route::any('loyalty-summary-report-download', [ReportController::class, 'loyaltySummaryReportDownload'])->name('loyalty-summary-report-download');
     // loyalty summary dealer wise report export
     Route::any('loyalty-delaer-wise-report-download', [ReportController::class, 'loyaltyDealerSummaryReportDownload'])->name('loyalty-delaer-wise-report-download');
+    Route::any('loyalty-retailer-wise-report-download', [ReportController::class, 'loyaltyRetailerSummaryReportDownload'])->name('loyalty-retailer-wise-report-download');
 
 
 
@@ -664,7 +708,7 @@ Route::group(['middleware' => ['auth']], function () {
     // departments
     Route::resource('departments', DepartmentController::class);
     Route::post('departments-active', [DepartmentController::class, 'active'])->name('departments.active');
-    Route::any('department_report/download', [DivisionController::class, 'department_report_download'])->name('department_report.download');
+    Route::any('department_report/download', [DepartmentController::class, 'department_report_download'])->name('department_report.download');
 
     //order scheme
     Route::resource('orderschemes', OrderSchemeController::class);
@@ -697,12 +741,19 @@ Route::group(['middleware' => ['auth']], function () {
     Route::POST('transaction_history_manualstore', [TransactionHistoryController::class, 'manualstore'])->name('transaction_history.manualstore');
     Route::POST('transaction_history_manualupdate', [TransactionHistoryController::class, 'manualupdate'])->name('transaction_history.manualupdate');
 
-    // Mobile User Login Details
+    // Mobile User Login Sarthi Details
     Route::get('mobile_user_login', [MobileUserLoginDetailsController::class, 'mobile_user_login'])->name('mobile_user_login');
 
     Route::post('mobile_user/login_list/download', [MobileUserLoginDetailsController::class, 'mobile_user_login_download'])->name('mobile_user.login_list.download');
 
     Route::post('mobile_user_login/list', [MobileUserLoginDetailsController::class, 'mobile_user_login_list'])->name('mobile_user_login.list');
+
+    // Mobile User Login Fildkonnect Details
+    Route::get('user_app_details', [MobileUserLoginDetailsController::class, 'user_app_details'])->name('user_app_details');
+
+    Route::post('user_app_details/login_list/download', [MobileUserLoginDetailsController::class, 'user_app_details_download'])->name('user_app_details.login_list.download');
+
+    Route::post('user_app_details/list', [MobileUserLoginDetailsController::class, 'user_app_details_list'])->name('user_app_details.list');
 
     //Gift Category Route
     Route::resource('gift-categories', GiftCategoryController::class);
@@ -778,6 +829,9 @@ Route::group(['middleware' => ['auth']], function () {
     // Loyalty App Setting Route
     Route::resource('loyalty-app-setting', LoyaltyAppSettingController::class);
 
+    // FieldKonnectAppSetting App Setting Route
+    Route::resource('field-konnect-app-setting', FieldKonnectAppSettings::class);
+    
     // Damage Entry Route
     Route::resource('damage_entries', DamageEntryController::class);
     Route::get('damage-entries-change-status', [DamageEntryController::class, 'changeStatus'])->name('damage_entries.changeStatus');
@@ -793,6 +847,7 @@ Route::group(['middleware' => ['auth']], function () {
     //Dealer Appointment with auth Route
     Route::get('/dealer-appointments', [DealerAppointmentController::class, 'index'])->name('dealer-appointment');
     Route::get('/dealer-appointments-show/{dealerAppointment}', [DealerAppointmentController::class, 'show'])->name('dealer-appointment.show');
+    Route::get('/dealer-appointments-PDFshow/{dealerAppointment}', [DealerAppointmentController::class, 'PDFshow'])->name('dealer-appointment.PDFshow');
     Route::get('/dealer-appointments-destroy/{dealerAppointment}', [DealerAppointmentController::class, 'destroy'])->name('dealer-appointment.destroy');
     Route::any('/dealer-appointment/download', [DealerAppointmentController::class, 'download'])->name('dealer-appointment.download');
     Route::get('/dealer-appointment-edit/{dealerAppointment}', [DealerAppointmentController::class, 'edit'])->name('dealer-appointment.edit');
@@ -867,6 +922,7 @@ Route::any('getGiftModelData', [AjaxController::class, 'getGiftModelData']);
 Route::any('getProductData', [AjaxController::class, 'getProductData']);
 Route::any('getProductInfo', [AjaxController::class, 'getProductInfo']);
 Route::any('getUserList', [AjaxController::class, 'getUserList']);
+Route::any('getUserListAppoint', [AjaxController::class, 'getUserListAppoint']);
 Route::any('getUserInfo', [AjaxController::class, 'getUserInfo']);
 Route::any('getRetailerlist', [AjaxController::class, 'getRetailerlist']);
 Route::any('getOrderInfo', [AjaxController::class, 'getOrderInfo']);

@@ -22,7 +22,7 @@ class User extends Authenticatable implements HasMedia
      * @var array<int, string>
      */
     protected $fillable = [
-        'active', 'name', 'first_name', 'last_name', 'mobile', 'email', 'email_verified_at', 'password', 'notification_id', 'device_type', 'gender', 'profile_image', 'latitude', 'longitude', 'region_id', 'remember_token', 'deleted_at', 'created_at', 'updated_at', 'location', 'reportingid', 'branch_id', 'branch_show', 'designation_id', 'employee_codes', 'department_id', 'division_id','payroll','sales_type','show_attandance_report'
+        'active', 'name', 'first_name', 'last_name', 'mobile', 'email', 'email_verified_at', 'password', 'notification_id', 'device_type', 'gender', 'profile_image', 'latitude', 'longitude', 'region_id', 'remember_token', 'deleted_at', 'created_at', 'updated_at', 'location', 'reportingid', 'branch_id', 'branch_show', 'designation_id', 'employee_codes', 'department_id', 'division_id', 'payroll', 'sales_type', 'show_attandance_report'
     ];
 
     public function registerMediaCollections(): void
@@ -122,7 +122,7 @@ class User extends Authenticatable implements HasMedia
 
     public function getpmsdetail()
     {
-        return $this->hasOne(Appraisal::class,'user_id','id');
+        return $this->hasOne(Appraisal::class, 'user_id', 'id');
     }
 
     public static function tree($user_id)
@@ -146,7 +146,7 @@ class User extends Authenticatable implements HasMedia
 
     public function attendance_details()
     {
-        return $this->hasOne(Attendance::class,'user_id','id');
+        return $this->hasOne(Attendance::class, 'user_id', 'id');
     }
 
     public function all_attendance_details()
@@ -170,5 +170,13 @@ class User extends Authenticatable implements HasMedia
         return $this->hasMany(CheckIn::class, 'user_id', 'id');
     }
 
+    public function primarySales()
+    {
+        return $this->hasMany(PrimarySales::class, 'emp_code', 'employee_codes');
+    }
 
+    public function expenses()
+    {
+        return $this->hasMany(Expenses::class, 'user_id', 'id');
+    }
 }

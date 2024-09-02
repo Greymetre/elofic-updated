@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CustomerDetails, DealerAppointment, EndUser, Expenses, GiftModel, GiftSubcategory, Notes, OrderSchemeDetail, PrimarySales, Redemption, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation};
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CustomerDetails, DealerAppointment, DealerAppointmentKyc, EndUser, Expenses, GiftModel, GiftSubcategory, Notes, OrderSchemeDetail, PrimarySales, Redemption, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation};
 use App\Models\UserLiveLocation;
 use App\Models\UserActivity;
 use App\Http\Controllers\SendNotifications;
@@ -233,13 +233,15 @@ class AjaxController extends Controller
     public function getUserList(Request $request)
     {
         try {
-
             session()->forget('executive_id');
             $beat_id = $request->input('beat_id');
             $payroll = $request->input('payroll');
             $branch_id = $request->input('branch_id');
             $userids = getUsersReportingToAuth();
-            $data = User::where(function ($query) use ($beat_id, $userids, $payroll) {
+            $login_userid = Auth::user()->id;
+            $all_users = User::all();
+            $userinfo = User::where('id', '=', $login_userid)->first();
+            $data = User::where(function ($query) use ($beat_id, $userids, $payroll,$userinfo) {
                 if (isset($beat_id)) {
                     $query->whereHas('userbeats', function ($query) use ($beat_id) {
                         $query->where('beat_id', '=', $beat_id);
@@ -251,8 +253,26 @@ class AjaxController extends Controller
                 if (isset($branch_id)) {
                     $query->where('branch_id', '=', $branch_id);
                 }
-                if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                if (!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin') && !$userinfo->hasRole('Sub_Admin') && !$userinfo->hasRole('HR_Admin') && !$userinfo->hasRole('HO_Account')  && !$userinfo->hasRole('Sub_Support') && !$userinfo->hasRole('Accounts Order') && !$userinfo->hasRole('Service Admin') && !$userinfo->hasRole('All Customers')) {
                     $query->whereIn('id', $userids);
+                }
+            })
+                ->select('id', 'name', 'mobile', 'first_name', 'last_name', 'employee_codes')
+                ->orderBy('name', 'asc')
+                ->get();
+            return response()->json($data);
+        } catch (\Exception $e) {
+            return $e;
+        }
+    }
+    public function getUserListAppoint(Request $request)
+    {
+        try {
+            $branch_id = $request->input('branch_id');
+            $data = User::where(function ($query) use ($branch_id) {
+
+                if (isset($branch_id)) {
+                    $query->where('branch_id', '=', $branch_id);
                 }
                 $query->where('active', '=', 'Y');
             })
@@ -273,9 +293,9 @@ class AjaxController extends Controller
             $city = $request->input('city_id');
             $users = $request->input('user_id');
             $data = Customers::where(function ($query) use ($users) {
-                if (isset($users)) {
-                    $query->whereIn('executive_id', $users);
-                }
+                // if (isset($users)) {
+                //     $query->whereIn('executive_id', $users);
+                // }
                 $query->where('active', '=', 'Y');
             })
                 ->whereHas('customeraddress', function ($query) use ($state, $district, $city) {
@@ -302,7 +322,7 @@ class AjaxController extends Controller
     {
         try {
             $product_id = $request->input('product_id');
-            $data = Product::with('productdetails','categories')
+            $data = Product::with('productdetails', 'categories')
                 ->where(function ($query) use ($product_id) {
                     if (isset($product_id)) {
                         $query->where('id', '=', $product_id);
@@ -820,13 +840,13 @@ class AjaxController extends Controller
             $term = trim($request->term);
 
             $coins = Customers::select("id as id", "name as text")
-            ->where('customertype', '2')
-            ->where(function ($query) use ($term) {
-                $query->where('name', 'LIKE', '%' . $term . '%')
-                      ->orWhere('mobile', 'LIKE', '%' . $term . '%');
-            })
-            ->orderBy('id', 'asc')
-            ->simplePaginate(10);
+                ->where('customertype', '2')
+                ->where(function ($query) use ($term) {
+                    $query->where('name', 'LIKE', '%' . $term . '%')
+                        ->orWhere('mobile', 'LIKE', '%' . $term . '%');
+                })
+                ->orderBy('id', 'asc')
+                ->simplePaginate(10);
 
 
             $morePages = true;
@@ -1087,7 +1107,7 @@ class AjaxController extends Controller
                     ->first();
                 if ($data) {
                     $data->product->categories = $data->product->categories;
-                    $check_Warranty = WarrantyActivation::with('media','customer','seller_details')->where('status', '!=', '3')->where('product_serail_number', $serial_no)->first();
+                    $check_Warranty = WarrantyActivation::with('media', 'customer', 'seller_details')->where('status', '!=', '3')->where('product_serail_number', $serial_no)->first();
                     return response()->json(['status' => true, 'data_all' => $data, 'data' => $data->product, 'check_Warranty' => $check_Warranty]);
                 } else {
                     return response()->json(['status' => false, 'data' => null]);
@@ -1201,13 +1221,13 @@ class AjaxController extends Controller
         $complaint = Complaint::with('createdbyname')->where('complaint_number', $request->complaint_number)->first();
         $service_bill = ServiceBill::where('complaint_no', $request->complaint_number)->first();
 
-        $product = $complaint->product_details??'';
+        $product = $complaint->product_details ?? '';
 
         $data['complaint'] = $complaint;
         $data['product'] = $product;
         $data['service_bill'] = $service_bill;
 
-        return response()->json(['status'=> 'success', 'data' => $data]);
+        return response()->json(['status' => 'success', 'data' => $data]);
     }
 
     public function getServiceCategory(Request $request)
@@ -1217,7 +1237,6 @@ class AjaxController extends Controller
             $data = ServiceChargeCategories::where('division_id', $request->division_id)->get();
 
             return response()->json($data);
-
         }
     }
 
@@ -1272,26 +1291,44 @@ class AjaxController extends Controller
 
             if ($request->month == 'Jan' || $request->month == 'Feb' || $request->month == 'Mar') {
                 $currentYear = $f_year_array[1];
-                $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->startOfMonth();
-                $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->endOfMonth();
-                $startDateFormatted = $startDate->toDateString();
-                $endDateFormatted = $endDate->toDateString();
+                $monthNumbers = array_map(function ($month) {
+                    return Carbon::parse($month)->month;
+                }, $request->month);
+
+                // Get the first month number and the last month number
+                $firstMonthNumber = min($monthNumbers);
+                $lastMonthNumber = max($monthNumbers);
+
+                // Create Carbon instances for the first and last dates
+                $firstDate = Carbon::createFromDate($currentYear, $firstMonthNumber, 1)->startOfMonth();
+                $lastDate = Carbon::createFromDate($currentYear, $lastMonthNumber, 1)->endOfMonth();
+                $startDateFormatted = $firstDate->toDateString();
+                $endDateFormatted = $lastDate->toDateString();
             } else {
                 $currentYear = $f_year_array[0];
-                $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->startOfMonth();
-                $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$request->month")->endOfMonth();
-                $startDateFormatted = $startDate->toDateString();
-                $endDateFormatted = $endDate->toDateString();
+                $monthNumbers = array_map(function ($month) {
+                    return Carbon::parse($month)->month;
+                }, $request->month);
+
+                // Get the first month number and the last month number
+                $firstMonthNumber = min($monthNumbers);
+                $lastMonthNumber = max($monthNumbers);
+
+                // Create Carbon instances for the first and last dates
+                $firstDate = Carbon::createFromDate($currentYear, $firstMonthNumber, 1)->startOfMonth();
+                $lastDate = Carbon::createFromDate($currentYear, $lastMonthNumber, 1)->endOfMonth();
+                $startDateFormatted = $firstDate->toDateString();
+                $endDateFormatted = $lastDate->toDateString();
             }
 
-            $query->whereHas('orders', function ($q) use ($startDateFormatted, $endDateFormatted) {
-                $q->whereDate('order_date', '>=', $startDateFormatted)
-                    ->whereDate('order_date', '<=', $endDateFormatted);
+            $query->where(function ($q) use ($startDateFormatted, $endDateFormatted) {
+                $q->where('invoice_date', '>=', $startDateFormatted)
+                    ->where('invoice_date', '<=', $endDateFormatted);;
             });
         }
 
         $data['total_qty'] = $query->sum('quantity');
-        $data['total_sale'] = number_format(($query->sum('net_amount')/100000),2,'.','')." (Lac)";
+        $data['total_sale'] = number_format(($query->sum('net_amount') / 100000), 2, '.', '') . " (Lac)";
 
         return response()->json($data);
     }
@@ -1303,7 +1340,6 @@ class AjaxController extends Controller
             $data = ServiceChargeProducts::where('charge_type_id', $request->charge_type_id)->where('division_id', $request->charge_cat_id)->get();
 
             return response()->json($data);
-
         }
     }
 
@@ -1314,17 +1350,28 @@ class AjaxController extends Controller
             $data = ServiceChargeProducts::where('id', $request->id)->first();
 
             return response()->json($data);
-
         }
     }
 
     public function changeAppointmentStatus(Request $request)
     {
-        $update = DealerAppointment::where('id', $request->appo_id)->update(['approval_status'=>$request->status]);
-        if($update){
-            return response()->json(['status'=>'success', 'message'=>'Approved Successfully !!']);
-        }else{
-            return response()->json(['status'=>'error', 'message'=>'Somthing went wrong.']);
+        if ($request->status == '3') {
+            $update = DealerAppointment::where('id', $request->appo_id)->update(['approval_status' => $request->status,'ho_approve'=>auth()->user()->id]);
+            DealerAppointmentKyc::updateOrCreate(
+                ['appointment_id' => $request->appo_id],
+                ['dealer_code' => $request->dealer_code]
+            );
+        } else {
+            if ($request->status == '1') {
+            $update = DealerAppointment::where('id', $request->appo_id)->update(['approval_status' => $request->status,'sales_approve'=>auth()->user()->id]);
+            }else{
+                $update = DealerAppointment::where('id', $request->appo_id)->update(['approval_status' => $request->status]);
+            }
+        }
+        if ($update) {
+            return response()->json(['status' => 'success', 'message' => 'Approved Successfully !!']);
+        } else {
+            return response()->json(['status' => 'error', 'message' => 'Somthing went wrong.']);
         }
     }
 
@@ -1343,6 +1390,6 @@ class AjaxController extends Controller
 
         $totalHours = $diff->days * 24 + $hoursDifference + ($minutesDifference / 60);
 
-        return response()->json(['status'=>'success', 'hours'=>$totalHours]);
+        return response()->json(['status' => 'success', 'hours' => $totalHours]);
     }
 }

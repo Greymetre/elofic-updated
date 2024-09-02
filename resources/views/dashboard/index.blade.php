@@ -1095,6 +1095,7 @@
                               <th>{!! trans('panel.secondary_dashboard.distributor_dealer_city') !!}</th>
                               <th>{!! trans('panel.secondary_dashboard.final_branch') !!}</th>
                               <th>{!! trans('panel.secondary_dashboard.sales_person') !!}</th>
+                              <th>Emp Code</th>
                               <th>{!! trans('panel.secondary_dashboard.product_name') !!}</th>
                               <th>{!! trans('panel.secondary_dashboard.quantity') !!}</th>
                               <th>{!! trans('panel.secondary_dashboard.rate') !!}</th>
@@ -3361,6 +3362,11 @@
                {
                   data: 'sales_person',
                   name: 'sales_person',
+                  "defaultContent": ''
+               },
+               {
+                  data: 'emp_code',
+                  name: 'emp_code',
                   "defaultContent": ''
                },
                {

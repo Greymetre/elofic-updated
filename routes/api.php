@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\CouponController;
 use App\Http\Controllers\Api\CustomController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\DealerAppointmentController;
 use App\Http\Controllers\Api\ExpensesTypeController;
 use App\Http\Controllers\Api\GiftController;
 use App\Http\Controllers\Api\LeaveController;
@@ -27,6 +28,8 @@ use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\Api\ReportingActivityController;
 use App\Http\Controllers\Api\TourPlanController;
 use App\Http\Controllers\Api\TransactionHistoryController;
+use App\Http\Controllers\Api\ReportController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -67,6 +70,7 @@ Route::any('gstNumberExists', [CustomController::class, 'gstNumberExists']);
 Route::any('getRetailerList', [CustomController::class, 'getRetailerList']);
 Route::any('getslider', [CustomController::class, 'getslider']);
 Route::get('getsettings', [DashboardController::class, 'getsettings']);
+Route::get('get-field-connet-version', [DashboardController::class, 'getVersion']);
 
 Route::any('emailExists', [CustomController::class, 'emailExists']);
 /*================= Customer Routes ============================*/
@@ -130,6 +134,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::any('dashboard', [DashboardController::class, 'dashboard']);
     Route::any('pendingCounts', [DashboardController::class, 'pendingCounts']);
     Route::any('getUserDashboardData', [DashboardController::class, 'getUserDashboardData']);
+    Route::any('getSarthiPoints', [DashboardController::class, 'getSarthiPoints']);
 
     Route::any('getProfile', [LoginController::class, 'getProfile']);
     Route::post('updateProfile', [LoginController::class, 'updateProfile']);
@@ -148,11 +153,13 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::post('insertOrder', [OrderController::class, 'insertOrder']);
     Route::any('getOrderList', [OrderController::class, 'getOrderList']);
     Route::any('getClusterOrderList', [OrderController::class, 'getClusterOrderList']);
+    Route::any('getSpecialOrderList', [OrderController::class, 'getSpecialOrderList']);
     Route::post('updateClusterOrder', [OrderController::class, 'updateClusterOrder']);
     Route::any('getOrderDetails', [OrderController::class, 'getOrderDetails']);
     Route::post('addCartItems', [OrderController::class, 'addCartItems']);
     Route::get('getCartItems', [OrderController::class, 'getCartItems']);
     Route::any('getOrderPfd', [OrderController::class, 'getOrderPfd']);
+    Route::post('customer/deleteOrder', [OrderController::class, 'deleteOrder']);
 
     //Leave
     Route::any('addLeaves', [LeaveController::class, 'addLeaves']);
@@ -161,6 +168,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::any('getBeatList', [BeatController::class, 'getBeatList']);
     Route::any('getBeatDropdownList', [BeatController::class, 'getBeatDropdownList']);
     Route::any('getBeatCustomers', [BeatController::class, 'getBeatCustomers']);
+    Route::any('getTodaySchedul', [BeatController::class, 'getTodaySchedul']);
     Route::post('userPunchin', [AttendanceController::class, 'userPunchin']);
     Route::post('userPunchout', [AttendanceController::class, 'userPunchout']);
     Route::any('getPunchin', [AttendanceController::class, 'getPunchin']);
@@ -171,6 +179,8 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::post('submitCheckin', [CheckinController::class, 'submitCheckin']);
     Route::post('submitCheckout', [CheckinController::class, 'submitCheckout']);
     Route::any('getCheckin', [CheckinController::class, 'getCheckin']);
+    Route::any('addCheckinDraft', [CheckinController::class, 'addCheckinDraft']);
+    Route::any('getCheckinDraft', [CheckinController::class, 'getCheckinDraft']);
     Route::post('submitVisitReports', [VisitReportController::class, 'submitVisitReports']);
     Route::any('getVisitTypes', [VisitReportController::class, 'getVisitTypes']);
     Route::any('getVisitReports', [VisitReportController::class, 'getVisitReports']);
@@ -204,6 +214,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     //Reporting Activity
     Route::get('reporting/users', [ReportingActivityController::class, 'allReportingUsers']);
     Route::get('user/activity', [ReportingActivityController::class, 'userActivity']);
+    Route::get('customer/activity', [ReportingActivityController::class, 'customerActivity']);
     //Tour Plan
     Route::get('tour/userlist', [TourPlanController::class, 'user_list']);
     Route::get('tour/show', [TourPlanController::class, 'show']);
@@ -218,4 +229,15 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::post('updateExpense', [ExpensesTypeController::class, 'updateExpense']);
     Route::post('approveExpense', [ExpensesTypeController::class, 'approveExpense']);
     Route::post('rejectExpense', [ExpensesTypeController::class, 'rejectExpense']);
+    //Dealer Appointment
+    Route::get('getappointments', [DealerAppointmentController::class, 'getappointments']);
+    Route::get('getappointmentsDetails', [DealerAppointmentController::class, 'getappointmentsDetails']);
+    Route::get('getappointmentsPDF', [DealerAppointmentController::class, 'getappointmentsPDF']);
+    Route::post('approveAppointment', [DealerAppointmentController::class, 'approveAppointment']);
+    Route::post('addbmremark', [DealerAppointmentController::class, 'addbmremark']);
+
+    //Report 
+    Route::get('primary-sales', [ReportController::class, 'primarySales']);
+    Route::get('monthly-sales', [ReportController::class, 'monthlySales']);
+    Route::get('getDealerGrowth', [ReportController::class, 'getDealerGrowth']);
 });

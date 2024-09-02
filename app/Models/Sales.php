@@ -11,7 +11,7 @@ class Sales extends Model
 
     protected $table = 'sales';
 
-    protected $fillable = [ 'active', 'buyer_id', 'seller_id', 'order_id', 'total_qty', 'shipped_qty', 'orderno', 'fiscal_year', 'sales_no', 'invoice_no', 'invoice_date', 'transport_details', 'total_gst', 'sub_total', 'grand_total', 'paid_amount','payment_status','description', 'status_id', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at'];
+    protected $fillable = [ 'active', 'buyer_id', 'seller_id', 'order_id', 'total_qty', 'shipped_qty', 'orderno', 'fiscal_year', 'sales_no', 'invoice_no', 'invoice_date','transport_name','lr_no','dispatch_date', 'transport_details', 'total_gst', 'sub_total', 'grand_total', 'paid_amount','payment_status','description', 'status_id', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at'];
 
     public function message()
     {
@@ -24,6 +24,8 @@ class Sales extends Model
             'grand_total.required' => 'Enter Invoice Amount',
             'fiscal_year.required' => 'Enter Financial Year',
             'sales_no.required' => 'Enter Sales No',
+            'dispatch_date.required' => 'Enter Dispatched Date',
+            'lr_no.required'         => 'Enter LR Number',
         ];
     }
 
@@ -36,6 +38,9 @@ class Sales extends Model
             'invoice_no' => 'required',
             'invoice_date' => 'required',
             'grand_total' => 'required',
+            'dispatch_date' => 'required',
+            'lr_no'         => 'required',
+
             //'fiscal_year' => 'required',
             //'sales_no' => 'required|unique:secondary_sales,sales_no',
         ];
@@ -58,7 +63,6 @@ class Sales extends Model
     {
         try
         {
-            
             $created_at = getcurentDateTime();
 
             if( $sales_id = Sales::insertGetId([
@@ -74,6 +78,8 @@ class Sales extends Model
                 'total_gst' => isset($request['total_gst'])? $request['total_gst']:0.00,
                 'sub_total' => isset($request['sub_total'])? $request['sub_total']:0.00,
                 'grand_total' => isset($request['grand_total'])?  $request['grand_total']:0.00,
+                'lr_no' =>  isset($request['lr_no'])? $request['lr_no'] :null,
+                'dispatch_date' =>  isset($request['dispatch_date'])? $request['dispatch_date'] :null,
                 'description' =>  isset($request['description'])? $request['description'] :null,
                 'status_id' =>  isset($request['status_id'])? $request['status_id'] :null,
                 'created_by' =>  isset($request['created_by'])? $request['created_by'] :null,
@@ -101,7 +107,7 @@ class Sales extends Model
     }
     public function buyers()
     {
-        return $this->belongsTo('App\Models\Customers', 'buyer_id', 'id')->select('id','name', 'first_name', 'last_name','executive_id');
+        return $this->belongsTo('App\Models\Customers', 'buyer_id', 'id');
     }
 
     public function customeraddress()

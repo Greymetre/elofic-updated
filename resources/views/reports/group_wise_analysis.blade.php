@@ -15,8 +15,8 @@
                   <div class="d-flex flex-wrap flex-row">
                     <!-- division filter -->
                     <div class="p-2" style="width:200px;">
-                      <select class="select2" name="division" id="ps_division_id" data-style="select-with-transition" title="{!! trans('panel.secondary_dashboard.division') !!}">
-                        <option value="" disabled selected>{!! trans('panel.secondary_dashboard.division') !!}</option>
+                      <select class="selectpicker" name="division[]" multiple id="ps_division_id" data-style="select-with-transition" title="{!! trans('panel.secondary_dashboard.division') !!}">
+                        <option value="" disabled>{!! trans('panel.secondary_dashboard.division') !!}</option>
                         @if(@isset($ps_divisions ))
                         @foreach($ps_divisions as $division)
                         <option value="{!! $division->division !!}">{!! $division->division !!}</option>
@@ -131,7 +131,7 @@
             <table id="getprimarysales" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
               <thead class=" text-primary">
                 <th>Group Name</th>
-                <th>Fianl Branch Name</th>
+                <th>Final Branch Name</th>
                 @if(count($months) > 0)
                 @foreach($months as $month)
                 <th>{{$month}}  QTY</th>

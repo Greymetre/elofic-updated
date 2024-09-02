@@ -377,8 +377,8 @@ class TransactionHistoryController extends Controller
                 }
                 if (!$notexists) {
                     throw ValidationException::withMessages([
-                        'coupon_code' => "The coupon code '$nonNullCoupenCode' is Invalid.",
-                        // 'coupon_code' => "coupon code '$nonNullCoupenCode' is sent for approval, points will be credited once approved.",
+                        // 'coupon_code' => "The coupon code '$nonNullCoupenCode' is Invalid.",
+                        'coupon_code' => "coupon code '$nonNullCoupenCode' is sent for approval, points will be credited once approved.",
                     ]);
                 }
                 $scheme = Services::where('serial_no', $nonNullCoupenCode)->first();

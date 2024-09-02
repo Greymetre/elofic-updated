@@ -11,10 +11,20 @@ class DealerAppointment extends Model implements HasMedia
 {
     use HasFactory,InteractsWithMedia;
 
-    protected $fillable = ['branch','district','city','place','appointment_date','customertype','division','old_user','old_division','old_firm_name','old_gst','security_deposit','SDPUMPMOTORS','SDF&A','gst_type','gst_no','firm_type','firm_name','cin_no','related_firm_name','line_business','office_address','office_pincode','office_mobile','office_email','godown_address','godown_pincode','godown_mobile','godown_email','status','ppd_name_1','ppd_adhar_1','ppd_pan_1','ppd_name_2','ppd_adhar_2','ppd_pan_2','ppd_name_3','ppd_adhar_3','ppd_pan_3','ppd_name_4','ppd_adhar_4','ppd_pan_4','contact_person_name','mobile_email','bank_name','bank_address','account_type','account_number','ifsc_code','payment_term','credit_period','cheque_no_1','cheque_account_number_1','cheque_bank_1','cheque_no_2','cheque_account_number_2','cheque_bank_2','manufacture_company_1','manufacture_product_1','manufacture_business_1','manufacture_turn_over_1','manufacture_company_2','manufacture_product_2','manufacture_business_2','manufacture_turn_over_2','present_annual_turnover','motor_anticipated_business_1','motor_next_year_business_1','pump_anticipated_business_1','pump_next_year_business_1','F&A_anticipated_business_1','F&A_next_year_business_1','lighting_anticipated_business_1','lighting_next_year_business_1','agri_anticipated_business_1','agri_next_year_business_1','solar_anticipated_business_1','solar_next_year_business_1','anticipated_business_total','approval_status','created_by','created_at','updated_at'];
+    protected $fillable = ['branch','district','city','place','appointment_date','customertype','division','old_user','old_division','old_firm_name','old_gst','security_deposit','SDPUMPMOTORS','SDF&A','gst_type','gst_no','firm_type','firm_name','cin_no','related_firm_name','line_business','office_address','office_pincode','office_mobile','office_email','godown_address','godown_pincode','godown_mobile','godown_email','status','ppd_name_1','ppd_adhar_1','ppd_pan_1','ppd_name_2','ppd_adhar_2','ppd_pan_2','ppd_name_3','ppd_adhar_3','ppd_pan_3','ppd_name_4','ppd_adhar_4','ppd_pan_4','contact_person_name','mobile_email','bank_name','bank_address','account_type','account_number','ifsc_code','payment_term','credit_period','cheque_no_1','cheque_account_number_1','cheque_bank_1','cheque_no_2','cheque_account_number_2','cheque_bank_2','manufacture_company_1','manufacture_product_1','manufacture_business_1','manufacture_turn_over_1','manufacture_company_2','manufacture_product_2','manufacture_business_2','manufacture_turn_over_2','present_annual_turnover','motor_anticipated_business_1','motor_next_year_business_1','pump_anticipated_business_1','pump_next_year_business_1','F&A_anticipated_business_1','F&A_next_year_business_1','lighting_anticipated_business_1','lighting_next_year_business_1','agri_anticipated_business_1','agri_next_year_business_1','solar_anticipated_business_1','solar_next_year_business_1','anticipated_business_total','approval_status','sales_approve','ho_approve','created_by','created_at','updated_at'];
 
     public $timestamps = true;
 
+
+    public function sales_approve_user()
+    {
+     return $this->belongsTo(User::class, 'sales_approve', 'id');
+    }
+
+    public function ho_approve_user()
+    {
+     return $this->belongsTo(User::class, 'ho_approve', 'id');
+    }
 
     public function branch_details()
     {

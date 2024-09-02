@@ -16,13 +16,14 @@ use App\Models\CheckIn;
 use App\Models\Customers;
 use App\Models\VisitReport;
 use App\Models\BeatSchedule;
+use App\Models\CheckInDraft;
 
 class CheckinController extends Controller
 {
     public function __construct()
     {
         $this->checkin = new CheckIn();
-        
+
         $this->successStatus = 200;
         $this->created = 201;
         $this->accepted = 202;
@@ -36,22 +37,20 @@ class CheckinController extends Controller
 
     public function getCheckin(Request $request)
     {
-        try
-        { 
+        try {
             $user = $request->user();
             if ($user->active == 'N') {
-                return response()->json(['status' => 'error','message' =>  'User Inactive'], 401); 
+                return response()->json(['status' => 'error', 'message' =>  'User Inactive'], 401);
             }
             $user_id = $user->id;
             $pageSize = $request->input('pageSize');
-            $query = $this->checkin->where(function ($query) use($user_id) {
-                                        $query->where('user_id', '=', $user_id);
-                                    })
-                                    ->select('id','customer_id','checkin_date','checkin_time','checkin_latitude','checkin_longitude','checkin_address','checkout_date','checkout_time','checkout_latitude','checkout_longitude','checkout_address','beatscheduleid')->orderBy('checkin_date','desc')->orderBy('checkin_time','desc');
+            $query = $this->checkin->where(function ($query) use ($user_id) {
+                $query->where('user_id', '=', $user_id);
+            })
+                ->select('id', 'customer_id', 'checkin_date', 'checkin_time', 'checkin_latitude', 'checkin_longitude', 'checkin_address', 'checkout_date', 'checkout_time', 'checkout_latitude', 'checkout_longitude', 'checkout_address', 'beatscheduleid')->orderBy('checkin_date', 'desc')->orderBy('checkin_time', 'desc');
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
             $data = collect([]);
-            if($db_data->isNotEmpty())
-            {
+            if ($db_data->isNotEmpty()) {
                 foreach ($db_data as $key => $value) {
                     $data->push([
                         'checkin_id' => isset($value['id']) ? $value['id'] : 0,
@@ -72,33 +71,29 @@ class CheckinController extends Controller
                         'beat_schedule_id' => isset($value['beatscheduleid']) ? $value['beatscheduleid'] : 0,
                     ]);
                 }
-                return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','data' => $data ], $this->successStatus);
+                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], $this->successStatus);
             }
-            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data ],200);  
-            
+            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data], 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
-        catch(\Exception $e)
-        {
-            return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
-        }        
     }
 
     public function submitCheckin(Request $request)
     {
-        try
-        { 
+        try {
 
             $user = $request->user();
             if ($user->active == 'N') {
-                return response()->json(['status' => 'error','message' =>  'User Inactive'], 401); 
+                return response()->json(['status' => 'error', 'message' =>  'User Inactive'], 401);
             }
             $validator = Validator::make($request->all(), [
                 'customer_id' => 'nullable|exists:customers,id',
                 'checkin_latitude' => 'required',
                 'checkin_longitude' => 'required',
-            ]); 
+            ]);
             if ($validator->fails()) {
-                return response()->json(['status' => 'error','message' =>  $validator->errors()], $this->badrequest); 
+                return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
             $distance = '';
             // if(!empty($request['checkin_latitude']) && !empty($request['checkin_longitude']))
@@ -106,39 +101,36 @@ class CheckinController extends Controller
             //     $distance = distance($request['checkin_latitude'] , $request['checkin_longitude'],$request['customer_id']);
             // }
 
-             if(!empty($request['checkin_latitude']) && !empty($request['checkin_longitude']))
-            {
-                $distance = distance($request['checkin_latitude'] , $request['checkin_longitude'],$request['customer_id']);
+            if (!empty($request['checkin_latitude']) && !empty($request['checkin_longitude'])) {
+                $distance = distance($request['checkin_latitude'], $request['checkin_longitude'], $request['customer_id']);
             }
 
 
-            if(empty($request['beatScheduleId']))
-            {
-                $request['beatScheduleId'] = BeatSchedule::where('user_id', $user->id) 
-                        ->whereDate('beat_date', getcurentDate())
-                        ->whereHas('beatcustomers', function ($query) use($request) {
-                            $query->where('customer_id', '=', $request['customer_id']);
-                        })
-                        ->pluck('id')->first();
+            if (empty($request['beatScheduleId'])) {
+                $request['beatScheduleId'] = BeatSchedule::where('user_id', $user->id)
+                    ->whereDate('beat_date', getcurentDate())
+                    ->whereHas('beatcustomers', function ($query) use ($request) {
+                        $query->where('customer_id', '=', $request['customer_id']);
+                    })
+                    ->pluck('id')->first();
             }
 
-             // $request['checkin_address'] = getLatLongToAddress($request['checkin_latitude'], $request['checkin_longitude']);
+            // $request['checkin_address'] = getLatLongToAddress($request['checkin_latitude'], $request['checkin_longitude']);
 
             $request['checkin_address'] = getLatLongToAddress($request['checkin_latitude'], $request['checkin_longitude']);
 
-            if($checkin_id = $this->checkin->insertGetId([
+            if ($checkin_id = $this->checkin->insertGetId([
                 'active' => 'Y',
-                'customer_id' => isset($request['customer_id']) ? $request['customer_id'] :null,
+                'customer_id' => isset($request['customer_id']) ? $request['customer_id'] : null,
                 'user_id' => $user->id,
                 'checkin_date' => getcurentDate(),
                 'checkin_time' => getcurentTime(),
-                'checkin_latitude' => isset($request['checkin_latitude']) ? $request['checkin_latitude'] :'',
-                'checkin_longitude' => isset($request['checkin_longitude']) ? $request['checkin_longitude'] :'',
-                'checkin_address' => isset($request['checkin_address']) ? $request['checkin_address'] :'',
+                'checkin_latitude' => isset($request['checkin_latitude']) ? $request['checkin_latitude'] : '',
+                'checkin_longitude' => isset($request['checkin_longitude']) ? $request['checkin_longitude'] : '',
+                'checkin_address' => isset($request['checkin_address']) ? $request['checkin_address'] : '',
                 'distance' => $distance,
-                'beatscheduleid' => isset($request['beatScheduleId']) ? $request['beatScheduleId'] :null,
-            ]))
-            {
+                'beatscheduleid' => isset($request['beatScheduleId']) ? $request['beatScheduleId'] : null,
+            ])) {
                 // $customername = Customers::where('id','=',$request['customer_id'])->pluck('name')->first();
                 // $useractivity = array(
                 //         'userid' => $user->id, 
@@ -158,27 +150,24 @@ class CheckinController extends Controller
                 //     'body' =>  'You have successfully Checked In at '.$customername
                 // ]);
                 // sendNotification($user->id,$asmnotify);
-                $customername = Customers::with(['customertypes'])->where('id','=',$request['customer_id'])->first();
-                $cutomertype = $customername['customertypes']['customertype_name']??'';
+                $customername = Customers::with(['customertypes'])->where('id', '=', $request['customer_id'])->first();
+                $cutomertype = $customername['customertypes']['customertype_name'] ?? '';
 
-                return response()->json(['status' => 'success','message' => 'Check In successfully','checkin_id' => $checkin_id,'customer_type'=> $cutomertype], $this->successStatus);
+                return response()->json(['status' => 'success', 'message' => 'Check In successfully', 'checkin_id' => $checkin_id, 'customer_type' => $cutomertype], $this->successStatus);
             }
-            return response()->json(['status' => 'error','message' => 'Error in Check In' ], $this->badrequest);
+            return response()->json(['status' => 'error', 'message' => 'Error in Check In'], $this->badrequest);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
-        catch(\Exception $e)
-        {
-            return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
-        }        
     }
 
     public function submitCheckout(Request $request)
     {
-        try
-        { 
+        try {
 
             $user = $request->user();
             if ($user->active == 'N') {
-                return response()->json(['status' => 'error','message' =>  'User Inactive'], 401); 
+                return response()->json(['status' => 'error', 'message' =>  'User Inactive'], 401);
             }
             $validator = Validator::make($request->all(), [
                 'checkin_id' => 'required|exists:check_in,id',
@@ -187,30 +176,29 @@ class CheckinController extends Controller
                 'description' => 'required|string|max:1540',
                 'customer_id' => 'required|exists:customers,id',
                 'visit_type_id' => 'nullable|exists:visit_types,id',
-            ]); 
+            ]);
             if ($validator->fails()) {
-                return response()->json(['status' => 'error','message' =>  $validator->errors()], $this->badrequest); 
+                return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
 
-             $request['checkout_address'] = getLatLongToAddress($request['checkout_latitude'], $request['checkout_longitude']);
+            $request['checkout_address'] = getLatLongToAddress($request['checkout_latitude'], $request['checkout_longitude']);
 
-             if($this->checkin->where('id','=',$request['checkin_id'])->update([
+            if ($this->checkin->where('id', '=', $request['checkin_id'])->update([
                 'checkout_date' => getcurentDate(),
                 'checkout_time' => getcurentTime(),
-                'checkout_latitude' => !empty($request['checkout_latitude']) ? $request['checkout_latitude'] :'',
-                'checkout_longitude' => !empty($request['checkout_longitude']) ? $request['checkout_longitude'] :'',
-                'checkout_address' => !empty($request['checkout_address']) ? $request['checkout_address'] :'',
-            ]))
-            {
+                'checkout_latitude' => !empty($request['checkout_latitude']) ? $request['checkout_latitude'] : '',
+                'checkout_longitude' => !empty($request['checkout_longitude']) ? $request['checkout_longitude'] : '',
+                'checkout_address' => !empty($request['checkout_address']) ? $request['checkout_address'] : '',
+            ])) {
                 VisitReport::insertGetId([
-                    'checkin_id' => isset($request['checkin_id']) ? $request['checkin_id'] : null, 
-                    'user_id' => $user->id, 
-                    'customer_id' => isset($request['customer_id']) ? $request['customer_id'] : null, 
-                    'visit_type_id' => isset($request['visit_type_id']) ? $request['visit_type_id'] : null,  
+                    'checkin_id' => isset($request['checkin_id']) ? $request['checkin_id'] : null,
+                    'user_id' => $user->id,
+                    'customer_id' => isset($request['customer_id']) ? $request['customer_id'] : null,
+                    'visit_type_id' => isset($request['visit_type_id']) ? $request['visit_type_id'] : null,
                     'description' => isset($request['description']) ? $request['description'] : '',
                     'visit_image' => '',
                     'created_by' => $user->id,
-                    'next_visit' => isset($request['next_visit']) ? date( 'Y-m-d H:i:s', strtotime( $request['next_visit'] )) : null,
+                    'next_visit' => isset($request['next_visit']) ? date('Y-m-d H:i:s', strtotime($request['next_visit'])) : null,
                     'created_at' => getcurentDateTime()
                 ]);
                 // $customerid = $this->checkin->where('id','=',$request['checkin_id'])->pluck('customer_id')->first();
@@ -233,9 +221,13 @@ class CheckinController extends Controller
                 //     'body' =>  'You have successfully Checked out from '.$customername
                 // ]);
                 // sendNotification($user->id,$asmnotify);
-                return response()->json(['status' => 'success','message' => 'Check Out successfully'], $this->successStatus); 
+                $checkDraft = CheckInDraft::where('checkin_id', $request->checkin_id)->first();
+                if($checkDraft){
+                    $checkDraft->delete();
+                }
+                return response()->json(['status' => 'success', 'message' => 'Check Out successfully'], $this->successStatus);
             }
-            return response()->json(['status' => 'error','message' => 'Please submit report then checkout' ], 200);
+            return response()->json(['status' => 'error', 'message' => 'Please submit report then checkout'], 200);
             // if(VisitReport::where('checkin_id',$request->checkin_id)->exists())
             // {
             //     // $request['checkout_address'] = getLatLongToAddress($request['checkout_latitude'], $request['checkout_longitude']);
@@ -272,12 +264,57 @@ class CheckinController extends Controller
             //     return response()->json(['status' => 'error','message' => 'Error in Check Out' ], $this->badrequest);
             // }
             // return response()->json(['status' => 'error','message' => 'Please submit report then checkout' ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
-        catch(\Exception $e)
-        {
-            return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
-        }        
     }
 
-}
+    public function addCheckinDraft(Request $request)
+    {
+        try {
 
+            $user = $request->user();
+            if ($user->active == 'N') {
+                return response()->json(['status' => 'error', 'message' =>  'User Inactive'], 401);
+            }
+            $validator = Validator::make($request->all(), [
+                'checkin_id' => 'required|exists:check_in,id',
+                'draft_msg' => 'required'
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
+            }
+
+            $draft = CheckInDraft::updateOrCreate(['checkin_id' => $request->checkin_id], [
+                'draft_msg' => $request->draft_msg,
+            ]);
+
+            return response()->json(['status' => 'success','data' => $draft, 'message' => 'Data save successfully'], $this->successStatus);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
+    }
+
+    public function getCheckinDraft(Request $request)
+    {
+        try {
+
+            $user = $request->user();
+            if ($user->active == 'N') {
+                return response()->json(['status' => 'error', 'message' =>  'User Inactive'], 401);
+            }
+            $validator = Validator::make($request->all(), [
+                'checkin_id' => 'required|exists:check_in,id',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
+            }
+
+            $checkDraft = CheckInDraft::where('checkin_id', $request->checkin_id)->first();
+
+            return response()->json(['status' => 'success','data' => $checkDraft, 'message' => 'Draft retrieved successfully'], $this->successStatus);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
+    }
+}

@@ -1,4 +1,10 @@
 <x-app-layout>
+  <style>
+    table tbody tr{
+      font-size: 12px !important;
+      font-weight: 100 !important;
+    }
+  </style>
   <div class="row">
     <div class="col-md-12">
       <div class="card">
@@ -10,13 +16,14 @@
             <span class="">
               <div class="btn-group header-frm-btn">
                 @if(auth()->user()->can(['primary_sales_download']))
-                <form method="POST" action="{{url('primary_sales/download')}}">
+                <form method="POST" action="{{url('primary_sales/download')}}" id="prifilfrm">
                   @csrf
                   <div class="d-flex flex-wrap flex-row">
                     <!-- division filter -->
                     <div class="p-2" style="width:200px;">
-                      <select class="select2" name="division" id="ps_division_id" data-style="select-with-transition" title="{!! trans('panel.secondary_dashboard.division') !!}">
-                        <option value="" disabled selected>{!! trans('panel.secondary_dashboard.division') !!}</option>
+                      <label for="division">Division</label>
+                      <select class="select2" name="division[]" placeholder="Division" multiple id="ps_division_id" data-style="select-with-transition" title="{!! trans('panel.secondary_dashboard.division') !!}">
+                        <option value="" disabled>{!! trans('panel.secondary_dashboard.division') !!}</option>
                         @if(@isset($ps_divisions ))
                         @foreach($ps_divisions as $division)
                         <option value="{!! $division->division !!}">{!! $division->division !!}</option>
@@ -50,8 +57,9 @@
                     </div>
                     <!-- month filter-->
                     <div class="p-2" style="width:200px;">
-                      <select class="selectpicker" name="month" id="ps_month" disabled data-style="select-with-transition" title="Month">
-                        <option value="" selected>{!! trans('panel.secondary_dashboard.month') !!}</option>
+                      <label for="month">Month </label>
+                      <select class="selectpicker" name="month[]" multiple id="ps_month" disabled data-style="select-with-transition" title="Month">
+                        <option value="" disabled>{!! trans('panel.secondary_dashboard.month') !!}</option>
                         @for ($month = 1; $month <= 12; $month++) <option value="{!! date('M', mktime(0, 0, 0, $month, 1)) !!}">{!! date('M', mktime(0, 0, 0, $month, 1)) !!}</option>
                           @endfor
                       </select>
@@ -103,6 +111,12 @@
                     <div class="p-2" style="width:200px;">
                       <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Primary Sales">
                         <i class="material-icons">cloud_download</i>
+                        <div class="ripple-container"></div>
+                      </button>
+                    </div>
+                    <div class="p-2" style="width:200px;">
+                      <button class="btn btn-just-icon btn-theme" type="button" id="reset-filter" title="Reset">
+                        <i class="fa fa-refresh"></i>
                         <div class="ripple-container"></div>
                       </button>
                     </div>
@@ -175,7 +189,7 @@
             </div>
           </div>
           <div class="table-responsive">
-            <table id="getprimarysales" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
+            <table id="getprimarysales" class="table table-striped table-bordered table-hover table-checkable no-wrap">
               <thead class=" text-primary">
                 <th>S. No</th>
                 <th>{!! trans('panel.primary_dashboard.invoice_no') !!}</th>
@@ -187,6 +201,7 @@
                 <th>{!! trans('panel.primary_dashboard.state') !!}</th>
                 <th>Final Branch</th>
                 <th>Sales person</th>
+                <th>Emp Code</th>
                 <th>Model Name</th>
                 <th>Product Name</th>
                 <th>Qty.</th>
@@ -313,6 +328,11 @@
           {
             data: 'sales_person',
             name: 'sales_person',
+            "defaultContent": ''
+          },
+          {
+            data: 'emp_code',
+            name: 'emp_code',
             "defaultContent": ''
           },
           {
@@ -597,5 +617,10 @@
         });
       });
     });
+
+    $('#reset-filter').on('click', function(){
+      $('#prifilfrm').find('input:text, input:password, input:file, select, textarea').val('');
+      $('#prifilfrm').find('select').change();
+    })
   </script>
 </x-app-layout>

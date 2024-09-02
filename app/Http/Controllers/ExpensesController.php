@@ -514,12 +514,15 @@ class ExpensesController extends Controller
             // } else {
             //     $status = "Pending";
             // }
+            $status = "Pending";
             if ($item->checker_status == '1') {
                 $status = "Approved";
             } elseif ($item->checker_status == '2') {
                 $status = "Rejected";
             } elseif ($item->checker_status == '3') {
                 $status = "Checked";
+            } elseif ($item->checker_status == '4') {
+                $status = "Checked By Reporting";
             } elseif ($item->checker_status == '0') {
                 $status = "Pending";
             }

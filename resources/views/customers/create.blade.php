@@ -281,6 +281,43 @@
               </div>
             </div>
 
+            
+            <div class="col-md-6">
+                <div class="row">
+                  <label class="col-md-3 col-form-label">Working Status<span class="text-danger"> *</span></label>
+                  <div class="col-md-9">
+                    <div class="form-group has-default bmd-form-group">
+                      <select class="form-control select2" name="working_status" style="width: 100%;" required id="type">
+                        <option value="">Select Working Status</option>
+                        <option value="New" {{($customers && $customers['working_status'] == 'New')? 'selected':''}} >New</option>
+                        <option value="Existing" {{($customers && $customers['working_status'] == 'Existing')? 'selected':''}}>Existing</option>
+                      </select>
+                    </div>
+                    @if ($errors->has('working_status'))
+                    <div class="error col-lg-12">
+                      <p class="text-danger">{{ $errors->first('working_status') }}</p>
+                    </div>
+                    @endif
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="row">
+                  <label class="col-md-3 col-form-label">Creation Date</label>
+                  <div class="col-md-9">
+                    <div class="form-group has-default bmd-form-group">
+                      <input type="text" name="creation_date" id="creation_date" class="form-control datepicker" value="{!! old( 'contact_number', $customers['creation_date']) !!}" autocomplete="off">
+                    </div>
+                    @if ($errors->has('creation_date'))
+                    <div class="error col-lg-12">
+                      <p class="text-danger">{{ $errors->first('creation_date') }}</p>
+                    </div>
+                    @endif
+                  </div>
+                </div>
+              </div>
+
 <!--             <div class="col-md-6" id="parentcustomer" style="display:none;">
                 <div class="row">
                   <label class="col-md-3 col-form-label">{!! trans('panel.global.parentcustomer') !!}</label>

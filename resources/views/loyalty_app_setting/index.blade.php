@@ -74,7 +74,7 @@
             <div class="row image_preview p-4 m-4">
                @foreach($loyalty_app_setting->getMedia('slider_image') as $loyalty_app_setting_image)
                <div class="col-md-3 img-div">
-                  <img style="box-shadow: 0 0 15px #000;" class="mt-2 rounded" width="200" src="{{$loyalty_app_setting_image->getFullUrl()}}" alt=""><span class="delete-img" data-id="{{$loyalty_app_setting_image->id}}">X</span>
+                  <img style="box-shadow: 0 0 15px #000;" class="mt-2 rounded" width="200" src="{{$loyalty_app_setting_image->getFullUrl()}}" alt=""><span title="Delete Image" class="delete-img" data-id="{{$loyalty_app_setting_image->id}}">X</span>
                </div>
                @endforeach
             </div>
@@ -116,7 +116,7 @@
                <div class="row image_preview p-4 m-4">
                   @foreach($loyalty_app_setting->getMedia('gift_slider_image') as $loyalty_app_setting_image)
                   <div class="col-md-3 img-div">
-                     <img style="box-shadow: 0 0 15px #000;" class="mt-2 rounded" width="200" src="{{$loyalty_app_setting_image->getFullUrl()}}" alt=""><span class="delete-img" data-id="{{$loyalty_app_setting_image->id}}">X</span>
+                     <img style="box-shadow: 0 0 15px #000;" class="mt-2 rounded" width="200" src="{{$loyalty_app_setting_image->getFullUrl()}}" alt=""><span title="Delete Image" class="delete-img" data-id="{{$loyalty_app_setting_image->id}}">X</span>
                   </div>
                   @endforeach
                </div>

@@ -58,9 +58,9 @@ class ExpensesDataTable extends DataTable
             })
             ->editColumn('attech', function ($query) {
                 $is_avail = 'No';
-                if($query->getMedia('expense_file')->count() > 0){
-                    foreach($query->getMedia('expense_file') as $image){
-                        if(Storage::disk('s3')->exists($image->getPath())){
+                if ($query->getMedia('expense_file')->count() > 0) {
+                    foreach ($query->getMedia('expense_file') as $image) {
+                        if (Storage::disk('s3')->exists($image->getPath())) {
                             $is_avail = 'Yes';
                         }
                     }
@@ -96,8 +96,8 @@ class ExpensesDataTable extends DataTable
                 } else {
                     $btn = $btn . "<button type='button' onclick='showExpense($query->id)' class='btn btn-warning'>Pending</span></button>";
                 }
-                // if ($request->ip() == '111.118.252.250' || $request->ip() == 'http://192.168.0.210/') {
-                //     $btn = $btn . "<a href='".url('/map-all').'?id='.$query->user_id."'  class='btn btn-warning'>Pending</span></a>";
+                // if ($request->ip() == '106.222.215.69' || $request->ip() == 'http://192.168.0.210/') {
+                //     $btn = $btn . "<a href='".url('/map-all').'?id='.$query->user_id."'  class='btn btn-warning'>LOC</span></a>";
                 // }
                 return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
                                             ' . $btn . '
@@ -131,19 +131,34 @@ class ExpensesDataTable extends DataTable
      */
     public function query(Expenses $model, Request $request)
     {
-        $userids = getUsersReportingToAuth();
+        $login_userid = Auth::user()->id;
+        $all_users = User::all();
+        $userinfo = User::where('id', '=', $login_userid)->first();
+        if (!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin') && !$userinfo->hasRole('Sub_Admin') && !$userinfo->hasRole('HR_Admin') && !$userinfo->hasRole('HO_Account')  && !$userinfo->hasRole('Sub_Support') && !$userinfo->hasRole('Accounts Order') && !$userinfo->hasRole('Service Admin') && !$userinfo->hasRole('All Customers')) {
+            $userids = array($login_userid);
+            $test = getAllChild(array($login_userid), $all_users);
+            while (count($test) > 0) {
+                $userids = array_merge($userids, $test);
+                $test = getAllChild($test, $all_users);
+            }
+        } elseif ($userinfo->hasRole('Accounts Order')) {
+            $userids = User::whereIn('branch_id', explode(',', $userinfo->branch_show))->pluck('id')->toArray();
+            $test = getAllChild(array($login_userid), $all_users);
+            while (count($test) > 0) {
+                $userids = array_merge($userids, $test);
+                $test = getAllChild($test, $all_users);
+            }
+        } else {
+            $userids = User::pluck('id')->toArray();
+        }
         $data = $model->with('expense_type', 'users');
         if (!empty($request['payroll'])) {
 
             $payrollid = $request['payroll'];
-
-            $userid = User::where('active', '=', 'Y')->where(function ($query) use ($userids) {
-                if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
-                    $query->whereIn('id', $userids);
-                }
-            })->where('payroll', $payrollid)->pluck('id');
-
-            $data->whereIn('user_id', $userid);
+            $data->whereHas('users', function ($query) use ($payrollid) {
+                $query->where('payroll', $payrollid);
+            });
+            $data->whereIn('user_id', $userids);
         }
 
         if (!empty($request['executive_id'])) {

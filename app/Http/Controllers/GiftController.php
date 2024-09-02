@@ -29,6 +29,9 @@ use App\Models\GiftCategory;
 use App\Models\GiftModel;
 use App\Models\GiftSubcategory;
 
+use PDF;
+use Illuminate\Support\Facades\View;
+
 class GiftController extends Controller
 {
     public function __construct() 
@@ -226,4 +229,15 @@ class GiftController extends Controller
         }
         return response()->json(['status' => 'error','message' => 'Error in Status Update']);
     }
+
+    // generate pdf 
+    public function generatePdf(){
+        $gifts = $this->gifts->with(['categories','subcategories','brands' , 'models'])->orderBy('points', 'asc')->get();
+        // return view('gifts.gift-pdf' , compact('gifts'));
+        $pdf = PDF::loadView('gifts.gift-pdf', compact('gifts'));
+
+        return $pdf->download('document.pdf');
+  
+     
+    } 
 }

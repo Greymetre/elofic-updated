@@ -40,6 +40,8 @@ class DealerAppointmentDataTable extends DataTable
                     return '<span class="badge badge-info">Approved By Account</span>';
                 }elseif($data->approval_status == '3'){
                     return '<span class="badge badge-success">Approved By HO</span>';
+                }elseif($data->approval_status == '4'){
+                    return '<span class="badge badge-danger">Rejected</span>';
                 }
             })
             ->editColumn('createdbyname.name', function ($data) {
@@ -70,8 +72,11 @@ class DealerAppointmentDataTable extends DataTable
      */
     public function query(DealerAppointment $model, Request $request)
     {
-        
-        $data = $model->with('branch_details', 'district_details', 'city_details');
+        $user_ids = getUsersReportingToAuth();
+        $data = $model->with('branch_details', 'district_details', 'city_details', 'appointment_kyc_detail');
+        if(!auth()->user()->hasRole('superadmin')){
+            $data->whereIn('created_by' , $user_ids);
+        }
 
         if ($request->startdate && $request->startdate != '' && $request->startdate != NULL && $request->enddate && $request->enddate != '' && $request->enddate != NULL) {
             

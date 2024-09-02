@@ -84,6 +84,9 @@ class ProductAnalysisQtyExport implements FromCollection, WithHeadings, WithMapp
             $query->whereBetween('invoice_date', [$startDatethree, $endDatethree]);
         }
 
+        if ($this->division_id) {
+            $query->whereIn('division', $this->division_id);
+        }
         // Get total quantities to calculate percentages
         $this->t_data = $query->sum('quantity');
 
@@ -92,9 +95,6 @@ class ProductAnalysisQtyExport implements FromCollection, WithHeadings, WithMapp
             $query->where('final_branch', $this->branch_id);
         }
 
-        if ($this->division_id) {
-            $query->where('division', $this->division_id);
-        }
 
         if ($this->dealer_id) {
             $query->where('dealer', 'like', '%' . $this->dealer_id . '%');

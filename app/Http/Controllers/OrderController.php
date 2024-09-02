@@ -28,7 +28,9 @@ use App\Exports\OrderTemplate;
 use App\Http\Requests\OrderRequest;
 use App\Mail\OrderMailWithAttachment;
 use App\Models\Category;
+use App\Models\CustomerType;
 use App\Models\Division;
+// use App\Models\Customers;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Illuminate\Support\Facades\Mail;
@@ -44,8 +46,13 @@ class OrderController extends Controller
     public function index(OrderDataTable $dataTable)
     {
         abort_if(Gate::denies('order_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $sellers_ids = $this->orders->distinct()->pluck('seller_id');
+        $buyer_ids = $this->orders->distinct()->pluck('buyer_id');
         $divisions = Category::where('active', 'Y')->get();
-        return $dataTable->render('orders.index', compact('divisions'));
+        $retailers = Customers::whereIn("id" , $buyer_ids)->get();
+        $distributors = Customers::whereIn("id" , $sellers_ids)->get();
+        $customer_types = CustomerType::where('active', 'Y')->get();
+        return $dataTable->render('orders.index', compact('divisions','retailers','distributors','customer_types'));
     }
 
     /**
@@ -244,7 +251,11 @@ class OrderController extends Controller
                 foreach ($orderdetails as $key => $value) {
                     $totalLP += $value->price*$value->quantity;
                 }
-                $ttdis = number_format(((1-($orders->sub_total/$totalLP))*100),2);
+                if($totalLP > 0){
+                    $ttdis = number_format(((1-($orders->sub_total/$totalLP))*100),2);
+                }else{
+                    $ttdis = false;
+                }
             }else{
                 $ttdis = false;
                 $totalLP = false;
@@ -287,7 +298,8 @@ class OrderController extends Controller
 
         $sellers = Customers::where(function ($query) use ($userids) {
             if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
-                $query->whereIn('executive_id', $userids);
+                $query->whereIn('executive_id', $userids)
+                      ->orWhereIn('created_by', $userids);
             }
         })
             ->where('active', '=', 'Y')
@@ -312,7 +324,8 @@ class OrderController extends Controller
         $buyers = Customers::whereIn('customertype', ['1', '3', '4', '5', '6'])
             ->where(function ($query) use ($userids) {
                 if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
-                    $query->whereIn('executive_id', $userids);
+                    $query->whereIn('executive_id', $userids)
+                          ->orWhereIn('created_by', $userids);
                 }
             })
             ->where('active', '=', 'Y')
@@ -347,7 +360,6 @@ class OrderController extends Controller
     {
         abort_if(Gate::denies('order_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $id = decrypt($id);
-
 
         $request['cluster_amount'] = $request['extra_cluster_discount'];
         $request['deal_discount'] = $request['extra_discount'] ?? NULL;
@@ -418,8 +430,7 @@ class OrderController extends Controller
             //         ]);
             //     }
             foreach ($request['orderdetail'] as $key => $rows) {
-                // dd($rows['line_total']);
-                OrderDetails::updateOrCreate(['product_id' => $rows['product_id'], 'order_id' => $id], [
+                $check = OrderDetails::updateOrCreate(['product_id' => $rows['product_id'], 'order_id' => $id], [
                     'order_id' => $id,
                     'product_id' => isset($rows['product_id']) ? $rows['product_id'] : null,
                     'product_detail_id' => isset($rows['product_detail']) ? $rows['product_detail'] : null,
@@ -449,7 +460,6 @@ class OrderController extends Controller
                     'created_at' => getcurentDateTime(),
                 ]);
             }
-
             return Redirect::to('orders')->with('message_success', 'Order update Successfully');
         }
         return redirect()->back()->with('message_danger', 'Error in Purchases Store')->withInput();
@@ -611,10 +621,12 @@ class OrderController extends Controller
         try {
 
             $validator = Validator::make($request->all(), [
-                'invoice_no' => 'required',
-                'order_id' => 'required',
-                'invoice_date' => 'required',
-
+                'invoice_no'       => 'required',
+                'order_id'         => 'required',
+                'invoice_date'     => 'required',
+                // 'transport_name'   => 'required',
+                'lr_no'            => 'required',
+                'dispatch_date'    => 'required'
             ]);
             if ($validator->fails()) {
                 return redirect()->back()
@@ -628,6 +640,9 @@ class OrderController extends Controller
             $orders = $this->orders->with('orderdetails')->find($orderid);
             $orders['invoice_date'] = $request['invoice_date'];
             $orders['invoice_no'] = $request['invoice_no'];
+            // $orders['transport_name'] = $request['transport_name'];
+            $orders['lr_no'] = $request['lr_no'];
+            $orders['dispatch_date'] = $request['dispatch_date'];
             $orders['transport_details'] = $request['transport_details'];
             $orders['order_id'] = $orderid;
             $orders['saledetail'] = $orders['orderdetails'];
@@ -637,19 +652,24 @@ class OrderController extends Controller
 
                 $status_id = Status::where('status_name', '=', 'Dispatched')->pluck('id')->first();
                 $partiallystatus = Status::where('status_name', '=', 'Partially Dispatched')->pluck('id')->first();
-
+              
                 if ($request['orderdetail']) {
                     foreach ($request['orderdetail'] as $key => $rows) {
-
+                        // code chnanges
+                        // $orderdetail = OrderDetails::where('order_id', '=', $request['order_id'])
+                        //     ->where('product_detail_id', '=', $rows['product_detail'])->first();
                         $orderdetail = OrderDetails::where('order_id', '=', $request['order_id'])
-                            ->where('product_detail_id', '=', $rows['product_detail'])->first();
-                        if ($orderdetail['shipped_qty'] + $rows['quantity'] == $orderdetail['quantity']) {
-                            $orderdetail->status_id = $status_id;
-                        } else {
-                            $orderdetail->status_id = $partiallystatus;
+                            ->where('product_id', '=', ($rows['product_id'] ?? ''))->first();
+                        
+                        if(isset($orderdetail)){
+                            if ($orderdetail['shipped_qty'] + $rows['quantity'] == $orderdetail['quantity']) {
+                                $orderdetail->status_id = $status_id;
+                            } else {
+                                $orderdetail->status_id = $partiallystatus;
+                            }
+                            $orderdetail->increment('shipped_qty', $rows['quantity']);
+                            $orderdetail->save();
                         }
-                        $orderdetail->increment('shipped_qty', $rows['quantity']);
-                        $orderdetail->save();
                     }
                 }
 
@@ -706,41 +726,37 @@ class OrderController extends Controller
                 'invoice_no' => 'required',
                 'order_id' => 'required',
                 'grand_total' => 'required',
+                'lr_no'            => 'required',
+                'dispatch_date'    => 'required'
             ]);
             if ($validator->fails()) {
                 return redirect()->back()
                     ->withErrors($validator)
                     ->withInput();
             }
-            $request['saledetail'] = $request['orderdetails'];
+            $request['saledetail'] = $request['orderdetail'];
+            $request['status_id'] = 2;
             $data = collect([$request]);
             $response = insertSales($data);
             if ($response['status'] == 'success') {
-                $status_id = Status::where('status_name', '=', 'Dispatched')->pluck('id')->first();
-                $partiallystatus = Status::where('status_name', '=', 'Partially Dispatched')->pluck('id')->first();
-
-
-                if ($request['orderdetail']) {
+                $partiallystatus = 2;
+                if (isset($request['orderdetail'])) {
                     foreach ($request['orderdetail'] as $key => $rows) {
-
                         $orderdetail = OrderDetails::where('order_id', '=', $request['order_id'])
-                            ->where('product_detail_id', '=', $rows['product_detail'])->first();
-                        $orderdetail->cash_dis = $rows['cash_dis'];
-                        $orderdetail->cash_amounts = $rows['cash_amounts'];
-                        if ($orderdetail['shipped_qty'] + $rows['quantity'] == $orderdetail['quantity']) {
-                            $orderdetail->status_id = $status_id;
-                        } else {
+                        ->where('product_id', '=', ($rows['product_id'] ?? ''))->first();
+                        if(isset($orderdetail)){
+                            $orderdetail->cash_dis = $rows['cash_dis'];
+                            $orderdetail->cash_amounts = $rows['cash_amounts'];
                             $orderdetail->status_id = $partiallystatus;
+                            $orderdetail->increment('shipped_qty', $rows['quantity']);
+                            $orderdetail->save();
                         }
-                        $orderdetail->increment('shipped_qty', $rows['quantity']);
-                        $orderdetail->save();
                     }
                 }
-
                 if (OrderDetails::where('order_id', '=', $request['order_id'])->where('status_id', '=', $partiallystatus)->exists()) {
                     Order::where('id', '=', $request['order_id'])->update(['status_id' => $partiallystatus, 'cash_discount' => $request->cash_discount, 'cash_amount' => $request->cash_amount, 'order_remark' => $request->order_remark]);
                 } else {
-                    Order::where('id', '=', $request['order_id'])->update(['status_id' => $status_id, 'cash_discount' => $request->cash_discount, 'cash_amount' => $request->cash_amount, 'order_remark' => $request->order_remark]);
+                    Order::where('id', '=', $request['order_id'])->update(['status_id' => $partiallystatus, 'cash_discount' => $request->cash_discount, 'cash_amount' => $request->cash_amount, 'order_remark' => $request->order_remark]);
                 }
                 return Redirect::to('sales')->with('message_success', 'Sales Store Successfully');
             }
@@ -769,5 +785,12 @@ class OrderController extends Controller
             }
         }
         return Redirect::to('expected-delivery')->with('message_success', 'PlaceDispatch Update Successfully');
+    }
+
+    public function deleteOrderDtails(Request $request)
+    {
+        OrderDetails::where('id', $request->detailID)->delete();
+
+        return response()->json(['status'=>'success']);
     }
 }

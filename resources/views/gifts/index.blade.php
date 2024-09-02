@@ -40,6 +40,9 @@
                 @if(auth()->user()->can(['gift_create']))
                 <a href="{{ route('gifts.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.gift.title_singular') !!}"><i class="material-icons">add_circle</i></a>
                 @endif
+                @if(auth()->user()->can(['gift_create']))
+                <a href="{{ route('gifts.pdf') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.pdf_module.download') !!} {!! trans('panel.pdf_module.pdf') !!}"><i class="material-icons">picture_as_pdf</i></a>
+                @endif
               </div>
               </div>
             </span>

@@ -15,6 +15,7 @@ use App\Models\BeatCustomer;
 use App\Models\BeatSchedule;
 use App\Models\CheckIn;
 use App\Models\Customers;
+use Carbon\Carbon;
 
 class BeatController extends Controller
 {
@@ -277,6 +278,22 @@ class BeatController extends Controller
             }
             return response(['status' => 'error', 'message' => 'Error in No Record Found.'],200); 
         }
+        catch(\Exception $e)
+        {
+            return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
+        }
+    }
+
+    public function getTodaySchedul(Request $request)
+    {
+        try {
+            $userid = $request->user()->id;
+            $todayDate = Carbon::today()->toDateString();
+            $data = BeatSchedule::with('beats')->where('user_id', $userid)->where('beat_date',$todayDate)->get();
+         
+            return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','data' => $data], $this->successStatus);
+
+        } 
         catch(\Exception $e)
         {
             return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);

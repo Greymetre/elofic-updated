@@ -659,7 +659,7 @@
                                 <tr>
                                     <th colspan="3">Whether two (2) Cheque (s) have been collected – MCL CHEQUES (Nationalize) <span class="text-info">*(To Be filled at HO)</span></th>
                                     <td>
-                                        <select name="payment_term" disabled id="payment_term" class="form-control uppercase">
+                                        <select name="payment_term_bm" disabled id="payment_term_bm" class="form-control uppercase">
                                             <option value="" disabled selected>Please Select</option>
                                             <option value="Yes">Yes</option>
                                             <option value="No">No</option>
@@ -815,7 +815,7 @@
                         <div class="inp-div">
                             <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                             <p class="m-0">Attach a File</p>
-                            <input type="file" name="service_policy" id="service_policy" class="form-control uppercase" accept="application/pdf">
+                            <input type="file" name="service_policy" id="service_policy" class="form-control file-input" accept="application/pdf">
                         </div>
                     </div>
                     <div class="col-md-3 mb-3">
@@ -823,7 +823,7 @@
                         <div class="inp-div">
                             <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                             <p class="m-0">Attach a File</p>
-                            <input type="file" name="dealer_policy" id="dealer_policy" class="form-control uppercase" accept="application/pdf">
+                            <input type="file" name="dealer_policy" id="dealer_policy" class="form-control file-input" accept="application/pdf">
                         </div>
                     </div>
                     <div class="col-md-3 mb-3">
@@ -831,7 +831,7 @@
                         <div class="inp-div">
                             <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                             <p class="m-0">Attach a File</p>
-                            <input type="file" name="mou_sheet" id="mou_sheet" class="form-control uppercase" accept="application/pdf">
+                            <input type="file" name="mou_sheet" id="mou_sheet" class="form-control file-input" accept="application/pdf">
                         </div>
                     </div>
                     <div class="col-md-3 mb-3">
@@ -839,7 +839,7 @@
                         <div class="inp-div">
                             <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                             <p class="m-0">Attach a File</p>
-                            <input type="file" name="mcl_cheque_1" id="mcl_cheque_1" class="form-control uppercase" accept="application/pdf">
+                            <input type="file" name="mcl_cheque_1" id="mcl_cheque_1" class="form-control file-input" accept="application/pdf">
                         </div>
                     </div>
                     <div class="col-md-3 mb-3">
@@ -847,7 +847,7 @@
                         <div class="inp-div">
                             <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                             <p class="m-0">Attach a File</p>
-                            <input type="file" name="mcl_cheque_2" id="mcl_cheque_2" class="form-control uppercase" accept="application/pdf">
+                            <input type="file" name="mcl_cheque_2" id="mcl_cheque_2" class="form-control file-input" accept="application/pdf">
                         </div>
                     </div>
                     <div class="col-md-3 mb-3">
@@ -855,7 +855,7 @@
                         <div class="inp-div">
                             <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                             <p class="m-0">Attach a File</p>
-                            <input type="file" name="gst_certificate" id="gst_certificate" class="form-control uppercase" accept="application/pdf">
+                            <input type="file" name="gst_certificate" id="gst_certificate" class="form-control file-input" accept="application/pdf">
                         </div>
                     </div>
                     <div class="col-md-3 mb-3">
@@ -863,7 +863,7 @@
                         <div class="inp-div">
                             <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                             <p class="m-0">Attach a File</p>
-                            <input type="file" multiple name="adhar_card" id="adhar_card" class="form-control uppercase" accept="application/pdf">
+                            <input type="file" multiple name="adhar_card" id="adhar_card" class="form-control file-input" accept="application/pdf">
                         </div>
                     </div>
                     <div class="col-md-3 mb-3">
@@ -871,7 +871,7 @@
                         <div class="inp-div">
                             <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                             <p class="m-0">Attach a File</p>
-                            <input type="file" multiple name="pan_card" id="pan_card" class="form-control uppercase" accept="application/pdf">
+                            <input type="file" multiple name="pan_card" id="pan_card" class="form-control file-input" accept="application/pdf">
                         </div>
                     </div>
                     <div class="col-md-3 mb-3">
@@ -879,7 +879,7 @@
                         <div class="inp-div">
                             <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                             <p class="m-0">Attach a File</p>
-                            <input type="file" name="bank_statement" id="bank_statement" class="form-control uppercase" accept="application/pdf">
+                            <input type="file" name="bank_statement" id="bank_statement" class="form-control file-input" accept="application/pdf">
                         </div>
                     </div>
                     <div class="col-md-3 mb-3">
@@ -887,7 +887,7 @@
                         <div class="inp-div">
                             <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                             <p class="m-0">Attach a File</p>
-                            <input type="file" name="shop_image" id="shop_image" class="form-control uppercase" accept="image/*">
+                            <input type="file" name="shop_image" id="shop_image" class="form-control file-input" accept="image/*">
                         </div>
                     </div>
                 </div>
@@ -1062,7 +1062,7 @@
                 localStorage.removeItem('executive_id');
                 var branch_id = $(this).val();
                 $.ajax({
-                    url: "{{ url('getUserList') }}",
+                    url: "{{ url('getUserListAppoint') }}",
                     dataType: "json",
                     type: "POST",
                     data: {
@@ -1078,6 +1078,17 @@
                     }
                 });
             }).trigger("chnage");
+
+            $(document).ready(function() {
+                $('.file-input').on('change', function() {
+                    var inpDiv = $(this).closest('.inp-div');
+                    if (this.files && this.files.length > 0) {
+                        inpDiv.css('background-color', '#80ec759e'); // Change to your desired color
+                    } else {
+                        inpDiv.css('background-color', ''); // Reset the background color if no file is selected
+                    }
+                });
+            });
         </script>
 </body>
 

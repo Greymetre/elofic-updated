@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\SendNotifications;
 use App\Models\Address;
+use App\Models\BeatSchedule;
+use App\Models\BeatUser;
 use App\Models\CustomerDetails;
 use App\Models\Customers;
 use App\Models\CustomerType;
@@ -57,7 +59,7 @@ class LoginController extends Controller
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->noContent);
             }
             $username = $request->input('username');
-            if (!$user = $this->users->where('mobile', $username)->orWhere('email', $username)->first()) {
+            if (!$user = $this->users->with('roles')->where('mobile', $username)->orWhere('email', $username)->first()) {
                 return response()->json(['status' => 'error', 'message' => 'User not found'], $this->notFound);
             }
             if ($user->active != 'Y') {
@@ -70,6 +72,9 @@ class LoginController extends Controller
                     'notification_id' => !empty($request['device_token']) ? $request['device_token'] : '',
                     'device_type' => isset($request['device_type']) ? $request['device_type'] : ''
                 ]);
+                $todayDate = Carbon::today()->toDateString();
+                $todayBeatSchedule = BeatSchedule::where('user_id',$user['id'])->where('beat_date',$todayDate)->get();
+                $beatUser = BeatUser::where('user_id',$user['id'])->get();
                 $nestedData['id'] = isset($user['id']) ? $user['id'] : 0;
                 $nestedData['name'] = isset($user['name']) ? $user['name'] : '';
                 $nestedData['first_name'] = isset($user['first_name']) ? $user['first_name'] : '';
@@ -79,10 +84,35 @@ class LoginController extends Controller
                 $nestedData['profile_image'] = isset($user['profile_image']) ? $user['profile_image'] : '';
                 $nestedData['gender'] = isset($user['gender']) ? $user['gender'] : '';
                 $nestedData['payroll_id'] = isset($user['payroll']) ? $user['payroll'] : '';
+                $nestedData['todayBeatSchedule'] = count($todayBeatSchedule) > 0 ? true:false;
+                $nestedData['beatUser'] = count($beatUser) > 0 ? true:false;
                 $nestedData['access_token'] = $token;
+                $nestedData['roles'] = $user->roles->pluck('id')->toArray();
                 $user['provider'] = 'users';
                 $user['entry_from'] = 'app';
                 $this->usersLogin->save_data($user);
+
+                $checkLastLogin = MobileUserLoginDetails::where('user_id', $user['id'])->first();
+                if ($checkLastLogin) {
+                    MobileUserLoginDetails::updateOrCreate(['user_id' => $user['id']], [
+                        'user_id'   =>  $user['id'],
+                        'app_version'   =>  $request['app_version'],
+                        'device_name'   =>  $request['device_name'],
+                        'last_login_date'   =>  Carbon::now(),
+                        'login_status'   =>  '1',
+                        'app'   =>  '2',
+                    ]);
+                } else {
+                    MobileUserLoginDetails::updateOrCreate(['user_id' => $user['id']], [
+                        'user_id'   =>  $user['id'],
+                        'app_version'   =>  $request['app_version'],
+                        'device_name'   =>  $request['device_name'],
+                        'first_login_date'   =>  Carbon::now(),
+                        'last_login_date'   =>  Carbon::now(),
+                        'login_status'   =>  '1',
+                        'app'   =>  '2',
+                    ]);
+                }
 
                 return response()->json(['status' => 'success', 'userinfo' => $nestedData], $this->successStatus);
             } else {
@@ -142,6 +172,10 @@ class LoginController extends Controller
         try {
             $user = $request->user();
             if ($request->user()->token()->revoke()) {
+                MobileUserLoginDetails::updateOrCreate(['user_id' => $user->id], [
+                    'user_id'   =>  $user->id,
+                    'login_status'   =>  '0',
+                ]);
                 $this->users->where('id', $user->id)->update([
                     'notification_id' => ""
                 ]);
@@ -189,6 +223,7 @@ class LoginController extends Controller
                         'device_name'   =>  $request['device_name'],
                         'last_login_date'   =>  Carbon::now(),
                         'login_status'   =>  '1',
+                        'app'   =>  '1',
                     ]);
                 } else {
                     MobileUserLoginDetails::updateOrCreate(['customer_id' => $user->id], [
@@ -199,6 +234,7 @@ class LoginController extends Controller
                         'first_login_date'   =>  Carbon::now(),
                         'last_login_date'   =>  Carbon::now(),
                         'login_status'   =>  '1',
+                        'app'   =>  '1',
                     ]);
                 }
                 if ($username == '917788996655') {

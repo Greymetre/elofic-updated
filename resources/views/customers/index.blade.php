@@ -213,7 +213,7 @@
 
         </div>-->
         <div class="table-responsive">
-            <table id="getcustomers" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
+            <table id="getcustomers" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
             <thead class=" text-primary">
               <!-- <th>{!! trans('panel.global.no') !!}</th> -->
               <th><input type="checkbox" class="allCustomerschecked"/></th>
@@ -227,6 +227,7 @@
               <th>{!! trans('panel.customers.fields.customertype') !!}</th>
               <th>{!! trans('panel.global.created_by') !!}</th>
               <th>{!! trans('panel.global.created_at') !!}</th>
+              <th>Beat Name</th>
             </thead>
             <tbody>
             </tbody>
@@ -257,6 +258,8 @@
           url: "{{ route('customers.index') }}",
           data: function (d) {
                 d.executive_id = $('#executive_id').val(),
+                d.start_date = $('#start_date').val(),
+                d.end_date = $('#end_date').val(),
                 d.parent_id = $('#parent_id').val(),
                 d.branch_id = $('#branch_id').val(),
                 d.state_id = $('#state_id').val(),
@@ -280,11 +283,18 @@
             {data: 'customertypes.customertype_name', name: 'customertypes.customertype_name',"defaultContent": '', orderable: false},
             {data: 'createdbyname.name', name: 'createdbyname.name',"defaultContent": '', orderable: false},
             {data: 'created_at', name: 'created_at',"defaultContent": ''},
+            {data: 'beat_name', name: 'beat_name',"defaultContent": ''},
            
         ]
     });
 
     $('#executive_id').change(function(){
+        table.draw();
+    });
+    $('#end_date').change(function(){
+        table.draw();
+    });
+    $('#start_date').change(function(){
         table.draw();
     });
     $('#active').change(function(){

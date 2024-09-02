@@ -31,6 +31,7 @@ class PrimarySalesTemplate implements FromCollection,WithHeadings,ShouldAutoSize
             'State',
             'Final Branch',
             'Sales person',
+            'Emp Code',
             'Model Name',
             'Product Name',
             'Quantity',
@@ -45,7 +46,8 @@ class PrimarySalesTemplate implements FromCollection,WithHeadings,ShouldAutoSize
             'Group',
             'Branch',
             'New Group Name',
-            'Product ID',   
+            'Product ID',
+            'Customer Id',
         ];
     }
 

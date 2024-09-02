@@ -274,6 +274,14 @@
                   </a>
                 </li>
                 @endif
+                @if(auth()->user()->can('stock_access'))
+                <li class="nav-item {{ request()->is('stock*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('stock') }}">
+                    <i class="material-icons">donut_small</i>
+                    <p>Stock</p>
+                  </a>
+                </li>
+                @endif
                 @if(auth()->user()->can('stockdetails_access'))
                 <!-- <li class="nav-item {{ request()->is('production*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ url('production') }}">
@@ -463,6 +471,14 @@
                         <a class="nav-link" href="{{ url('users') }}">
                           <i class="material-icons">verified_user</i>
                           <p>{!! trans('panel.sidemenu.users') !!}</p>
+                        </a>
+                      </li>
+                      @endif
+                      @if(auth()->user()->can('user_app_details_access'))
+                      <li class="nav-item {{ request()->is('user_app_details*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ url('user_app_details') }}">
+                          <i class="material-icons">login</i>
+                          <p>User App details</p>
                         </a>
                       </li>
                       @endif
@@ -882,6 +898,14 @@
               </a>
             </li>
             @endif
+            @if(auth()->user()->can('loyalty_app_setting_access'))
+            <li class="nav-item {{request()->is('field-konnect-app-setting*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('field-konnect-app-setting') }}">
+                <i class="material-icons">settings</i>
+                <p>FieldKonnect App  {!! trans('panel.sidemenu.setting') !!}</p>
+              </a>
+            </li>
+            @endif
             @if(auth()->user()->can('status_access'))
             <li class="nav-item {{ request()->is('status*') ? 'active' : '' }}">
               <a class="nav-link" href="{{ url('status') }}">
@@ -1021,25 +1045,49 @@
                     </a>
                   </li>
                   @endif
+                  @if(auth()->user()->can('per_employee_costing_access'))
+                  <li class="nav-item {{ request()->is('reports/per_employee_costing*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('reports/per_employee_costing') }}">
+                      <i class="material-icons">store</i>
+                      <p>Per Employee Costing</p>
+                    </a>
+                  </li>
+                  @endif
+                  @if(auth()->user()->can('top_dealer_access'))
+                  <li class="nav-item {{ request()->is('reports/top_dealer*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('reports/top_dealer') }}">
+                      <i class="material-icons">store</i>
+                      <p>Top Dealer</p>
+                    </a>
+                  </li>
+                  @endif
+                  @if(auth()->user()->can('dealer_growth_access'))
+                  <li class="nav-item {{ request()->is('reports/dealer_growth*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('reports/dealer_growth') }}">
+                      <i class="material-icons">store</i>
+                      <p>Dealer Growth</p>
+                    </a>
+                  </li>
+                  @endif
+                  @if(auth()->user()->can('new_dealer_sale_access'))
+                  <li class="nav-item {{ request()->is('reports/new_dealer_sale*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('reports/new_dealer_sale') }}">
+                      <i class="material-icons">store</i>
+                      <p>New Dealer Sale</p>
+                    </a>
+                  </li>
+                  @endif
+                  @if(auth()->user()->can('user_incentive_access'))
+                  <li class="nav-item {{ request()->is('reports/user_incentive*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('reports/user_incentive') }}">
+                      <i class="material-icons">store</i>
+                      <p>User Incentive</p>
+                    </a>
+                  </li>
+                  @endif
                 </ul>
               </div>
             </li>
-            </li>
-            @endif
-            @if(auth()->user()->can('adherence_report'))
-            <li class="nav-item {{ request()->is('reports/beatadherence*') ? 'active' : '' }}" style="display:none;">
-              <a class="nav-link" href="{{ url('reports/beatadherence') }}">
-                <i class="material-icons">check_circle</i>
-                <p>Beat Adherence </p>
-              </a>
-            </li>
-            @endif
-            @if(auth()->user()->can('summary_report'))
-            <li class="nav-item {{ request()->is('reports/adherencesummary*') ? 'active' : '' }}" style="display:none;">
-              <a class="nav-link" href="{{ url('reports/adherencesummary') }}">
-                <i class="material-icons">check_circle</i>
-                <p>Adherence Summary</p>
-              </a>
             </li>
             @endif
             @if(auth()->user()->can('daily_visit_report'))
@@ -1155,6 +1203,14 @@
                     </a>
                   </li>
                   @endif
+                  @if(auth()->user()->can('customer_outstanting'))
+                  <li class="nav-item {{ request()->is('reports/customer_outstanting*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('reports/customer_outstanting') }}">
+                      <i class="material-icons">store</i>
+                      <p>Cutomer Outstanding</p>
+                    </a>
+                  </li>
+                  @endif
                 </ul>
               </div>
             </li>
@@ -1182,6 +1238,14 @@
               <a class="nav-link" href="{{ url('reports/loyalty_dealer_wise_summary_report') }}">
                 <i class="material-icons">airplay</i>
                 <p>Loyalty Dealer Wise Summary Report</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('loyalty_retailer_wise_summary_report'))
+            <li class="nav-item {{ request()->is('reports/loyalty_retailer_wise_summary_report') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('reports/loyalty_retailer_wise_summary_report') }}">
+                <i class="material-icons">airplay</i>
+                <p>Retailer Wise Loyalty Summary Report</p>
               </a>
             </li>
             @endif
@@ -1244,6 +1308,22 @@
               <a class="nav-link" href="{{ url('mastervisitreport') }}">
                 <i class="material-icons">store</i>
                 <p>Master VisitReport</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('adherence_report'))
+            <li class="nav-item {{ request()->is('reports/beatadherence*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('reports/beatadherence') }}">
+                <i class="material-icons">check_circle</i>
+                <p>Beat Adherence </p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('summary_report'))
+            <li class="nav-item {{ request()->is('reports/adherencesummary*') ? 'active' : '' }}" >
+              <a class="nav-link" href="{{ url('reports/adherencesummary') }}">
+                <i class="material-icons">check_circle</i>
+                <p>Adherence Summary</p>
               </a>
             </li>
             @endif

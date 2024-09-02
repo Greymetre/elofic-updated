@@ -20,7 +20,7 @@ class ProductAnalysisValueExport implements FromCollection, WithHeadings,WithMap
     {
         $this->user_id = $request->input('user_id');
         $this->branch_id = $request->input('branch_id');
-        $this->division_id = $request->input('division_id');
+        $this->division_id = $request->input('division');
         $this->dealer_id = $request->input('dealer_id');
         $this->product_model = $request->input('product_model');
         $this->new_group = $request->input('new_group');
@@ -81,15 +81,15 @@ class ProductAnalysisValueExport implements FromCollection, WithHeadings,WithMap
             $endDatethree = $currentDate->copy()->subMonthNoOverflow()->endOfMonth()->format('Y-m-d');
             $query->whereBetween('invoice_date', [$startDatethree, $endDatethree]);
         }
+        if ($this->division_id && $this->division_id != '' && $this->division_id != null) {
+            $query->whereIn('division', $this->division_id);
+        }
         $this->t_data = $query->get();
 
         if ($this->branch_id && $this->branch_id != '' && $this->branch_id != null) {
             $query->where('final_branch', $this->branch_id);
         }
 
-        if ($this->division_id && $this->division_id != '' && $this->division_id != null) {
-            $query->where('division', $this->division_id);
-        }
 
         if ($this->dealer_id && $this->dealer_id != '' && $this->dealer_id != null) {
             $query->where('dealer', 'like', '%' . $this->dealer_id . '%');

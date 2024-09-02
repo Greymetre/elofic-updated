@@ -120,7 +120,7 @@ class CustomersExport implements FromCollection,WithHeadings,ShouldAutoSize,With
     {
         // return ['Created Date','Customer ID','Customer Type','Created by','Firm Name', 'First Name', 'Last Name', 'Mobile', 'Email','Address', 'Gmap address','Pin Code','Zip Code','Market Place','City','District','State','Beat Name', 'Latitude', 'Longitude','GST No','Adhar No','Pan No','Other No','Shop Image', 'Employee Name', 'Grade', 'Visit Status','Contact number -2','Customer Code','Employee Code','Branch Name','Department','Designation','Parent Customer'];
 
-    return ['Created Date','customer_id','customer_code','status','Customer Type','Created by','firm_name','Parent Customer','first_name', 'last_name', 'Mobile','contact_number2', 'email','address', 'Gmap address','Pin Code','Zip Code','market_place','City','District','State','grade','visit_status','gstin_no','aadhar_no','pan_no','other_no','Shop Image','Employee Code','Employee Name','Designation','Branch Name','Division','Latitude', 'Longitude','employee_id','parent_id','pincode_id','city_id','district_id','state_id','customer_type_id'];
+    return ['Created Date','customer_id','customer_code','status','Customer Type','Created by','firm_name','Parent Customer','first_name', 'last_name', 'Mobile','contact_number2', 'email','address', 'Gmap address','Pin Code','Zip Code','market_place','City','District','State','grade','visit_status','gstin_no','aadhar_no','pan_no','other_no','Shop Image','Employee Code','Employee Name','Designation','Branch Name','Division','Latitude', 'Longitude','employee_id','parent_id','pincode_id','city_id','district_id','state_id','customer_type_id','Working Status','Creation Date'];
 
     }
 
@@ -230,6 +230,8 @@ class CustomersExport implements FromCollection,WithHeadings,ShouldAutoSize,With
              isset($data['customeraddress']['district_id']) ? $data['customeraddress']['district_id'] : '',
              isset($data['customeraddress']['state_id']) ? $data['customeraddress']['state_id'] : '',
              $data['customertype'],
+             $data['working_status'],
+             $data['creation_date'],
         ];
     }
 

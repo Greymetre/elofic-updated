@@ -78,6 +78,8 @@ class Customers extends Authenticatable
                 'last_name' => !empty($request['last_name'])? ucfirst($request['last_name']):'',
                 'mobile' => $request['mobile'],
                 'email' => !empty($request['email'])? $request['email']:null,
+                'working_status' => !empty($request['working_status'])? $request['working_status']:null,
+                'creation_date' => !empty($request['creation_date'])? $request['creation_date']:null,
                 'password' => !empty($request['password'])? Hash::make($request['password']) :'',
                 'contact_number' => !empty($request['contact_number'])? $request['contact_number']:'',
                 'notification_id' => !empty($request['notification_id'])? $request['notification_id']:'',
@@ -121,6 +123,8 @@ class Customers extends Authenticatable
             $customers = Customers::find($request['customer_id']);
             $customers->name = !empty($request['name'])? $request['name'] :'';
             $customers->first_name = !empty($request['first_name'])? ucfirst($request['first_name']):'';
+            $customers->working_status = !empty($request['working_status'])? $request['working_status']:null;
+            $customers->creation_date = !empty($request['creation_date'])? $request['creation_date']:null;
             $customers->last_name = !empty($request['last_name'])? ucfirst($request['last_name']):'';
             $customers->gender = !empty($request['gender'])? ucfirst($request['gender']):'';
             $customers->customer_code = !empty($request['customer_code'])? $request['customer_code']:'';
@@ -245,7 +249,7 @@ class Customers extends Authenticatable
     }
     public function visitsinfo()
     {
-        return $this->hasMany('App\Models\VisitReport','customer_id','id')->orderBy('created_at', 'desc')->select('id', 'customer_id', 'description','report_title','visit_image','user_id','created_at');
+        return $this->hasMany('App\Models\VisitReport','customer_id','id')->orderBy('created_at', 'desc');
     }
 
     public function customerdeals()

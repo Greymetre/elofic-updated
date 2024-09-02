@@ -18,7 +18,7 @@ use DB;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class MobileAppLoginUsersExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping
+class MobileAppLoginUsersExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithEvents
 {
 
     private $rowIndex = 3;
@@ -36,7 +36,7 @@ class MobileAppLoginUsersExport implements FromCollection, WithHeadings, ShouldA
     {
         $f_year_array = explode('-', $this->financial_year);
 
-        $data = MobileUserLoginDetails::with(['customer']);
+        $data = MobileUserLoginDetails::with(['customer'])->where('app', '1');
 
         if ($this->start_date && !empty($this->start_date) && $this->end_date && !empty($this->end_date)) {
             $startDate = date('Y-m-d', strtotime($this->start_date));
@@ -54,7 +54,7 @@ class MobileAppLoginUsersExport implements FromCollection, WithHeadings, ShouldA
     public function headings(): array
     {
 
-        $headings = ['S. No.', 'Customer ID', 'Firm Name', 'Contact Person', 'Mobile Number', 'Branch', 'State', 'District', 'City', 'App Version', 'Device Type', 'Device Name', 'First Login date', 'Last Login date', 'Login Status'];
+        $headings = ['S. No.', 'Customer ID', 'Firm Name', 'Contact Person', 'Mobile Number', 'Branch', 'State', 'District', 'City', 'App Version', 'Device Type', 'Device Name', 'First Login date', 'Last Login date', 'Login Status', 'User Name'];
 
 
 
@@ -70,6 +70,12 @@ class MobileAppLoginUsersExport implements FromCollection, WithHeadings, ShouldA
                 if (isset($datas->employee_detail->getbranch->branch_name) && !in_array($datas->employee_detail->getbranch->branch_name, $branch_arr)) {
                     $branch_arr[] = $datas->employee_detail->getbranch->branch_name;
                 }
+            }
+        }
+        $all_assign_emp = array();
+        if(count($data['customer']['getemployeedetail']) > 0){
+            foreach ($data['customer']['getemployeedetail'] as $key => $value) {
+                array_push($all_assign_emp, $value->employee_detail->name);
             }
         }
         return [
@@ -88,7 +94,50 @@ class MobileAppLoginUsersExport implements FromCollection, WithHeadings, ShouldA
             isset($data['first_login_date']) ? date('Y-m-d', strtotime($data['first_login_date'])) : '',
             isset($data['last_login_date']) ? date('Y-m-d', strtotime($data['last_login_date'])) : '',
             isset($data['login_status']) ? ($data['login_status'] == '0' ? 'Logout' : 'Login') : '',
+            count($all_assign_emp)>0?implode(',', $all_assign_emp):'-',
+        ];
+    }
 
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function (AfterSheet $event) {
+                $lastRow = $event->sheet->getHighestDataRow() + 2;
+                $lastColumn = $event->sheet->getHighestDataColumn();
+
+                $event->sheet->getStyle('A1:' . $lastColumn . '1')->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                        'color' => ['rgb' => 'FFFFFF'],
+                    ],
+                    'alignment' => [
+                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                        'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                    ],
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => '336677'],
+                    ],
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['argb' => '000000'],
+                        ],
+                    ],
+                ]);
+
+                $event->sheet->getStyle('A2:' . $lastColumn . '' . ($lastRow - 2))->applyFromArray([
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['argb' => '000000'],
+                        ],
+                    ],
+                    'alignment' => [
+                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
+                    ],
+                ]);
+            },
         ];
     }
 }

@@ -15,8 +15,8 @@
                   <div class="d-flex flex-wrap flex-row">
                     <!-- division filter -->
                     <div class="p-2" style="width:200px;">
-                      <select class="select2" name="division" id="ps_division_id" data-style="select-with-transition" title="{!! trans('panel.secondary_dashboard.division') !!}">
-                        <option value="" disabled selected>{!! trans('panel.secondary_dashboard.division') !!}</option>
+                      <select class="selectpicker" name="division[]" multiple id="ps_division_id" data-style="select-with-transition" title="{!! trans('panel.secondary_dashboard.division') !!}">
+                        <option value="">{!! trans('panel.secondary_dashboard.division') !!}</option>
                         @if(@isset($ps_divisions ))
                         @foreach($ps_divisions as $division)
                         <option value="{!! $division->division !!}">{!! $division->division !!}</option>
@@ -126,7 +126,7 @@
             </span>
           </div>
           @endif
-          
+
           <div class="table-responsive">
             <table id="getprimarysales" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
               <thead class=" text-primary">
@@ -171,19 +171,18 @@
           url: "{{ route('product_analysis_value.list') }}",
           data: function(d) {
             d.executive_id = $('#ps_executive_id').val(),
-              d.division_id = $('#ps_division_id').val(),
-              d.branch_id = $('#ps_branch_id').val(),
-              d.financial_year = $('#ps_financial_year').val(),
-              d.month = $('#ps_month').val(),
-              d.retailer_id = $('#ps_retailer_id').val(),
-              d.dealer_id = $('#ps_dealer_id').val(),
-              d.product_model = $('#ps_product_model').val(),
-              d.new_group = $('#ps_new_group').val(),
-              d.search = $('input[type="search"]').val()
+            d.division_id = $('#ps_division_id').val(),
+            d.branch_id = $('#ps_branch_id').val(),
+            d.financial_year = $('#ps_financial_year').val(),
+            d.month = $('#ps_month').val(),
+            d.retailer_id = $('#ps_retailer_id').val(),
+            d.dealer_id = $('#ps_dealer_id').val(),
+            d.product_model = $('#ps_product_model').val(),
+            d.new_group = $('#ps_new_group').val(),
+            d.search = $('input[type="search"]').val()
           }
         },
-        columns: [
-          {
+        columns: [{
             data: 'model_name',
             name: 'model_name',
             orderable: false,

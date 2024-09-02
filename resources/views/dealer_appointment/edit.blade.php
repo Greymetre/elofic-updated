@@ -446,7 +446,7 @@
                       <label> Office Address: </label>
                     </div>
                     <div class="col-md-12">
-                      <textarea class="form-control">{{$dealerAppointment->office_address}}</textarea>
+                      <textarea class="form-control" name="office_address">{{$dealerAppointment->office_address}}</textarea>
                     </div>
                   </div>
                   <div class="form-group row">
@@ -480,7 +480,7 @@
                       <label> Showroom Address / GODOWN: </label>
                     </div>
                     <div class="col-md-12">
-                      <textarea class="form-control">{{$dealerAppointment->godown_address}}</textarea>
+                      <textarea class="form-control" name="godown_address">{{$dealerAppointment->godown_address}}</textarea>
                     </div>
                   </div>
                   <div class="form-group row">
@@ -541,24 +541,24 @@
                       </tr>
                       <tr>
                         <th rowspan="4" style="width: 15%;">Name of the Proprietor/Partners/Direct ors (Self attested copy Of AADHAR Card and PAN No to be attached)</th>
-                        <td>{{$dealerAppointment->ppd_name_1}}</td>
-                        <td>{{$dealerAppointment->ppd_adhar_1}}</td>
-                        <td>{{$dealerAppointment->ppd_pan_1}}</td>
+                        <td><input value="{{$dealerAppointment->ppd_name_1}}" type="text" name="ppd_name_1" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->ppd_adhar_1}}" type="text" name="ppd_adhar_1" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->ppd_pan_1}}" type="text" name="ppd_pan_1" class="form-control"></td>
                       </tr>
                       <tr>
-                        <td>{{$dealerAppointment->ppd_name_2}}</td>
-                        <td>{{$dealerAppointment->ppd_adhar_2}}</td>
-                        <td>{{$dealerAppointment->ppd_pan_2}}</td>
+                        <td><input value="{{$dealerAppointment->ppd_name_2}}" type="text" name="ppd_name_2" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->ppd_adhar_2}}" type="text" name="ppd_adhar_2" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->ppd_pan_2}}" type="text" name="ppd_pan_2" class="form-control"></td>
                       </tr>
                       <tr>
-                        <td>{{$dealerAppointment->ppd_name_3}}</td>
-                        <td>{{$dealerAppointment->ppd_adhar_3}}</td>
-                        <td>{{$dealerAppointment->ppd_pan_3}}</td>
+                        <td><input value="{{$dealerAppointment->ppd_name_3}}" type="text" name="ppd_name_3" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->ppd_adhar_3}}" type="text" name="ppd_adhar_3" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->ppd_pan_3}}" type="text" name="ppd_pan_3" class="form-control"></td>
                       </tr>
                       <tr>
-                        <td>{{$dealerAppointment->ppd_name_4}}</td>
-                        <td>{{$dealerAppointment->ppd_adhar_4}}</td>
-                        <td>{{$dealerAppointment->ppd_pan_4}}</td>
+                        <td><input value="{{$dealerAppointment->ppd_name_4}}" type="text" name="ppd_name_4" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->ppd_adhar_4}}" type="text" name="ppd_adhar_4" class="form-control"></td>
+                        <td><input value="{{$dealerAppointment->ppd_pan_4}}" type="text" name="ppd_pan_4" class="form-control"></td>
                       </tr>
                       <tr>
                         <th>Contact Person / Name</th>
@@ -593,7 +593,13 @@
                       <tr>
                         <th>Payment terms</th>
                         <td colspan="3">
-                          <input type="text" value="{{$dealerAppointment->payment_term}}" class="form-control">
+                          <select name="payment_term" id="payment_term" class="form-control uppercase">
+                            <option value="" >Please Select Payment Term</option>
+                            <option value="Direct" {{$dealerAppointment->payment_term == 'Direct' ? 'selected' : ''}}>Direct</option>
+                            <option value="against" {{$dealerAppointment->payment_term == 'against' ? 'selected' : ''}}>against</option>
+                            <option value="Advance" {{$dealerAppointment->payment_term == 'Advance' ? 'selected' : ''}}>Advance</option>
+                            <option value="PDC" {{$dealerAppointment->payment_term == 'PDC' ? 'selected' : ''}}>PDC</option>
+                          </select>
                         </td>
                       </tr>
                       <tr>
@@ -603,7 +609,7 @@
                       <tr>
                         <th colspan="3">Whether two (2) Cheque (s) have been collected – MCL CHEQUES (Nationalize) <span class="text-info">*(To Be filled at HO)</span></th>
                         <td>
-                          <select name="payment_term" id="payment_term" class="form-control">
+                          <select name="payment_term_bm" id="payment_term_bm" class="form-control">
                             <option value="" selected>Please Select</option>
                             <option value="Yes">Yes</option>
                             <option value="No">No</option>
@@ -759,7 +765,7 @@
                   <div class="inp-div">
                     <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                     <p class="m-0">Attach a File</p>
-                    <input type="file" name="service_policy" id="service_policy" class="form-control" accept="image/*">
+                    <input type="file" name="service_policy" id="service_policy" class="form-control file-input" accept="application/pdf">
                   </div>
                 </div>
                 <div class="col-md-4 mb-3">
@@ -767,7 +773,7 @@
                   <div class="inp-div">
                     <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                     <p class="m-0">Attach a File</p>
-                    <input type="file" name="dealer_policy" id="dealer_policy" class="form-control" accept="image/*">
+                    <input type="file" name="dealer_policy" id="dealer_policy" class="form-control file-input" accept="application/pdf">
                   </div>
                 </div>
                 <div class="col-md-4 mb-3">
@@ -775,7 +781,7 @@
                   <div class="inp-div">
                     <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                     <p class="m-0">Attach a File</p>
-                    <input type="file" name="mou_sheet" id="mou_sheet" class="form-control" accept="image/*">
+                    <input type="file" name="mou_sheet" id="mou_sheet" class="form-control file-input" accept="application/pdf">
                   </div>
                 </div>
                 <div class="col-md-4 mb-3">
@@ -783,7 +789,7 @@
                   <div class="inp-div">
                     <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                     <p class="m-0">Attach a File</p>
-                    <input type="file" name="mcl_cheque_1" id="mcl_cheque_1" class="form-control" accept="image/*">
+                    <input type="file" name="mcl_cheque_1" id="mcl_cheque_1" class="form-control file-input" accept="application/pdf">
                   </div>
                 </div>
                 <div class="col-md-4 mb-3">
@@ -791,7 +797,7 @@
                   <div class="inp-div">
                     <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                     <p class="m-0">Attach a File</p>
-                    <input type="file" name="mcl_cheque_2" id="mcl_cheque_2" class="form-control" accept="image/*">
+                    <input type="file" name="mcl_cheque_2" id="mcl_cheque_2" class="form-control file-input" accept="application/pdf">
                   </div>
                 </div>
                 <div class="col-md-4 mb-3">
@@ -799,7 +805,7 @@
                   <div class="inp-div">
                     <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                     <p class="m-0">Attach a File</p>
-                    <input type="file" name="gst_certificate" id="gst_certificate" class="form-control" accept="image/*">
+                    <input type="file" name="gst_certificate" id="gst_certificate" class="form-control file-input" accept="application/pdf">
                   </div>
                 </div>
                 <div class="col-md-4 mb-3">
@@ -807,7 +813,7 @@
                   <div class="inp-div">
                     <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                     <p class="m-0">Attach a File</p>
-                    <input type="file" name="adhar_card" id="adhar_card" class="form-control" accept="image/*">
+                    <input type="file" name="adhar_card" id="adhar_card" class="form-control file-input" accept="application/pdf">
                   </div>
                 </div>
                 <div class="col-md-4 mb-3">
@@ -815,7 +821,7 @@
                   <div class="inp-div">
                     <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                     <p class="m-0">Attach a File</p>
-                    <input type="file" name="pan_card" id="pan_card" class="form-control" accept="image/*">
+                    <input type="file" name="pan_card" id="pan_card" class="form-control file-input" accept="application/pdf">
                   </div>
                 </div>
                 <div class="col-md-4 mb-3">
@@ -823,24 +829,48 @@
                   <div class="inp-div">
                     <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                     <p class="m-0">Attach a File</p>
-                    <input type="file" name="bank_statement" id="bank_statement" class="form-control" accept="image/*">
+                    <input type="file" name="bank_statement" id="bank_statement" class="form-control file-input" accept="application/pdf">
+                  </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="shop_image">Shop Image</label>
+                  <div class="inp-div">
+                    <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                    <p class="m-0">Attach a File</p>
+                    <input type="file" name="shop_image" id="shop_image" class="form-control file-input" accept="image/*">
                   </div>
                 </div>
               </div>
             </div>
             <div class="row mt-5">
-              @if($dealerAppointment->exists && $dealerAppointment->getMedia('*')->count() > 0)
-              @foreach($dealerAppointment->getMedia('*') as $k=>$media)
+            <div class="row all-attachments-div">
+              @if($dealerAppointment->exists)
+              @php
+              $allMediaExceptProfilePictures = $dealerAppointment->getMedia('*')
+              ->filter(function ($mediaItem) {
+              return $mediaItem->collection_name !== 'profile_picture';
+              });
+              @endphp
+              @if($allMediaExceptProfilePictures->count() > 0)
+              @foreach($allMediaExceptProfilePictures as $k=>$media)
               <div class="col-md-3 mb-3 ml-5 text-center border rounded">
-                <p class="attach-p">{{ucwords(str_replace('_',' ',$media->collection_name))}}</p>
-                <a href="{{$media->getFullUrl()}}" download target="_blank">
+                <p class="attach-p">{{ucfirst(str_replace('_',' ',$media->collection_name))}}</p>
+                <a href="{{$media->getFullUrl()}}" download="" target="_blank">
+                  @if($media->collection_name == 'shop_image')
                   <img class="m-2 rounded img-fluid" src="{!! $media->getFullUrl() !!}" style="width: 170px;height:170px;">
+                  @else
+                  {{ucfirst(str_replace('_','',$media->collection_name))}}.pdf
+                  @endif
                 </a>
               </div>
               @endforeach
               @else
               <h6>No Attachment</h6>
               @endif
+              @else
+              <h6>No Attachment</h6>
+              @endif
+            </div>
             </div>
 
             <h5 class="mt-5">Signatures of Dealer:</h5>
@@ -978,33 +1008,44 @@
             $('.select2').select2()
 
             document.getElementById('fileInput').addEventListener('change', function(event) {
-                const file = event.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        document.getElementById('profileImage').src = e.target.result;
-                    }
-                    reader.readAsDataURL(file);
+              const file = event.target.files[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                  document.getElementById('profileImage').src = e.target.result;
                 }
+                reader.readAsDataURL(file);
+              }
             });
 
             $("#branch").on("change", function() {
-                localStorage.removeItem('executive_id');
-                var branch_id = $(this).val();
-                $.ajax({
-                    url: "{{ url('getUserList') }}",
-                    dataType: "json",
-                    type: "POST",
-                    data: {
-                        _token: "{{csrf_token()}}",
-                        branch_id: branch_id
-                    },
-                    success: function(res) {
-                        var html = '<option value="">Select User</option>';
-                        $.each(res, function(k, v) {
-                            html += '<option value="' + v.id + '"> (' + v.employee_codes + ') ' + v.name + '</option>';
-                        });
-                        $("#created_by").html(html);
+              localStorage.removeItem('executive_id');
+              var branch_id = $(this).val();
+              $.ajax({
+                url: "{{ url('getUserList') }}",
+                dataType: "json",
+                type: "POST",
+                data: {
+                  _token: "{{csrf_token()}}",
+                  branch_id: branch_id
+                },
+                success: function(res) {
+                  var html = '<option value="">Select User</option>';
+                  $.each(res, function(k, v) {
+                    html += '<option value="' + v.id + '"> (' + v.employee_codes + ') ' + v.name + '</option>';
+                  });
+                  $("#created_by").html(html);
+                }
+              });
+            });
+
+            $(document).ready(function() {
+                $('.file-input').on('change', function() {
+                    var inpDiv = $(this).closest('.inp-div');
+                    if (this.files && this.files.length > 0) {
+                        inpDiv.css('background-color', '#80ec759e'); // Change to your desired color
+                    } else {
+                        inpDiv.css('background-color', ''); // Reset the background color if no file is selected
                     }
                 });
             });

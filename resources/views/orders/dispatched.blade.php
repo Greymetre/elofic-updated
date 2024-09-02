@@ -128,10 +128,28 @@
                   </div>
                   <div class="col-sm-6 invoice-col">
                      <div class="row">
-                        <label class="col-md-4">Transport Detials</label>
+                     <label class="col-md-4">Transport Name</label>
                         <div class="col-md-9">
                            <div class="form-group has-default bmd-form-group">
-                              <textarea class="form-control" name="transport_details" id="transport_details" cols="30" rows="5"></textarea>
+                              <textarea class="form-control" name="transport_details" id="transport_details" cols="30" rows="3"></textarea>
+                           </div>
+                        </div>
+                        <!-- <label class="col-md-4">Transport  Name</label>
+                        <div class="col-md-9">
+                           <div class="form-group has-default bmd-form-group">
+                              <input type="text" name="transport_name" class="form-control" value="{!! old( 'transport_name') !!}" autocomplete="off" required>
+                           </div>
+                        </div> -->
+                        <label class="col-md-4">LR No</label>
+                        <div class="col-md-9">
+                           <div class="form-group has-default bmd-form-group">
+                              <input type="text" name="lr_no" class="form-control" value="{!! old( 'lr_no') !!}" autocomplete="off" required>
+                           </div>
+                        </div>
+                        <label class="col-md-4">Dispatch Date</label>
+                        <div class="col-md-9">
+                           <div class="form-group has-default bmd-form-group">
+                              <input type="text" name="dispatch_date" class="form-control datepicker" value="{!! old( 'dispatch_date') !!}" autocomplete="off" required>
                            </div>
                         </div>
                      </div>

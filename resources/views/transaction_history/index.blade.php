@@ -52,10 +52,23 @@
                 </form>
                 @endif
                 <div class="next-btn">
+                      <div class="p-2" style="width:160px;">
+                        <select class="select2" name="customer_id" id="customer_id" data-style="select-with-transition" title="Select">
+                          <option value="">Firm Name</option>
+                          @if(@isset($customers))
+                          @foreach($customers as $customer)
+                          <!-- <option value="{!! $customer->id !!}">{!! $customer->_name !!}</option> -->
+                          <option value="{!! $customer['id'] !!}" {{ old( 'executive_id') == $customer->id ? 'selected' : '' }}>{!! $customer['name'] !!}</option>
+                          @endforeach
+                          @endif
+                        </select>
+                      </div>
                   @if(auth()->user()->can(['transaction_history_upload']))
                   <form action="{{ URL::to('transaction_history_upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                     {{ csrf_field() }}
+                   
                     <div class="d-flex">
+                      
                       <div class="fileinput-new text-center" data-provides="fileinput">
                         <span class="btn btn-just-icon btn-theme btn-file">
                           <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
@@ -195,7 +208,8 @@
               d.parent_customer = $('#parent_customer').val(),
               d.scheme_name = $('#scheme_name').val(),
               d.start_date = $('#start_date').val(),
-              d.end_date = $('#end_date').val()
+              d.end_date = $('#end_date').val(),
+              d.customer_id = $('#customer_id').val()
           }
         },
         columns: [{
@@ -270,6 +284,9 @@
         ]
       });
       $('#branch_id').change(function() {
+        table.draw();
+      });
+      $('#customer_id').change(function() {
         table.draw();
       });
       $('#parent_customer').change(function() {

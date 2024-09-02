@@ -20,7 +20,7 @@ use App\Models\OrderDetails;
 use App\Models\Division;
 use App\Models\Department;
 use App\Models\Branch;
-use App\Models\{Address, EmployeeDetail, TransactionHistory, MobileUserLoginDetails, Redemption, ParentDetail, PrimarySales, Product, State};
+use App\Models\{Address, BranchStock, CustomerOutstanting, DealerAppointment, EmployeeDetail, Media, TransactionHistory, MobileUserLoginDetails, Redemption, ParentDetail, PrimarySales, Product, SalesTargetUsers, State};
 use Excel;
 use App\Exports\CounterVisitReportExport;
 use App\Exports\AdherenceDetailReportExport;
@@ -46,18 +46,28 @@ use App\Exports\LoyaltySummaryReportExport;
 use App\Exports\LoyaltyDealerSummaryReportExport;
 use App\Models\DealIn;
 use App\DataTables\GamificationDataTable;
+use App\Exports\BranchCostingExport;
+use App\Exports\BranchOnlySalesCostingExport;
 use App\Exports\CustomerAnalysisExport;
+use App\Exports\CutomerOutstantingExport;
+use App\Exports\CutomerOutstantingTemplate;
+use App\Exports\DealerGrowthExport;
 use App\Exports\GroupWiseAnalysisExport;
+use App\Exports\LoyaltyRetialerSummaryReportExport;
+use App\Exports\NewDealerSaleExport;
+use App\Exports\NewDealerSaleLastYearExport;
+use App\Exports\PerEmployeeCostingExport;
 use App\Exports\ProductAnalysisBranchExport;
 use App\Exports\ProductAnalysisQtyExport;
 use App\Exports\ProductAnalysisValueExport;
+use App\Exports\TopDealerExport;
+use App\Exports\UserIncentiveExport;
+use App\Imports\CutomerOutstantingImport;
 use Carbon\Carbon;
 
 class ReportController extends Controller
 {
-    public function __construct()
-    {
-    }
+    public function __construct() {}
     public function beatadherence(Request $request)
     {
         $userids = getUsersReportingToAuth();
@@ -961,13 +971,18 @@ class ReportController extends Controller
                 ->addIndexColumn()
                 ->addColumn('total_registered_retailers', function ($data) use ($customerIdsByState) {
                     $customerIds = $customerIdsByState->get($data->id, collect());
-                    return $customerIds->count();
+                    $ttttsss = array();
+                    foreach ($customerIds as $key => $value) {
+                        if (!in_array($value, $ttttsss)) {
+                            array_push($ttttsss, $value);
+                        }
+                    }
+                    return count($ttttsss);
                 })
                 ->addColumn('total_registered_retailers_under_saarthi', function ($data) use ($customerIdsByState) {
                     $customerIds = $customerIdsByState->get($data->id, collect());
-                    return TransactionHistory::whereIn('customer_id', $customerIds)
-                        ->groupBy('customer_id')
-                        ->count();
+                    return count(TransactionHistory::whereIn('customer_id', $customerIds)
+                        ->groupBy('customer_id')->get());
                 })
                 ->addColumn('coupon_scan_nos', function ($data) use ($customerIdsByState) {
                     $customerIds = $customerIdsByState->get($data->id, collect());
@@ -2362,15 +2377,15 @@ class ReportController extends Controller
             $query->whereBetween('invoice_date', [$startDatethree, $endDatethree]);
         }
 
+        if ($request->division_id && $request->division_id != '' && $request->division_id != null && count($request->division_id) > 0) {
+            $query->whereIn('division', $request->division_id);
+        }
         $data = $query->get();
 
         if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
             $query->where('final_branch', $request->branch_id);
         }
 
-        if ($request->division_id && $request->division_id != '' && $request->division_id != null) {
-            $query->where('division', $request->division_id);
-        }
 
         if ($request->dealer_id && $request->dealer_id != '' && $request->dealer_id != null) {
             $query->where('dealer', 'like', '%' . $request->dealer_id . '%');
@@ -2522,9 +2537,9 @@ class ReportController extends Controller
         abort_if(Gate::denies('product_analysis_branch_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        if($request->financial_year && !empty($request->financial_year)){
-            $fileName = 'product_analysis_branch_wise_'.$request->financial_year.'.xlsx';
-        }else{
+        if ($request->financial_year && !empty($request->financial_year)) {
+            $fileName = 'product_analysis_branch_wise_' . $request->financial_year . '.xlsx';
+        } else {
             $fileName = 'product_analysis_branch_wise.xlsx';
         }
         return Excel::download(new ProductAnalysisBranchExport($request), $fileName);
@@ -2606,6 +2621,9 @@ class ReportController extends Controller
             $query->whereBetween('invoice_date', [$startDatethree, $endDatethree]);
         }
 
+        if ($request->division_id) {
+            $query->whereIn('division', $request->division_id);
+        }
         // Get total quantities to calculate percentages
         $totalQuantities = $query->sum('quantity');
 
@@ -2614,9 +2632,6 @@ class ReportController extends Controller
             $query->where('final_branch', $request->branch_id);
         }
 
-        if ($request->division_id) {
-            $query->where('division', $request->division_id);
-        }
 
         if ($request->dealer_id) {
             $query->where('dealer', 'like', '%' . $request->dealer_id . '%');
@@ -2699,9 +2714,9 @@ class ReportController extends Controller
         abort_if(Gate::denies('product_analysis_branch_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        if($request->financial_year && !empty($request->financial_year)){
-            $fileName = 'product_analysis_qty_'.$request->financial_year.'.xlsx';
-        }else{
+        if ($request->financial_year && !empty($request->financial_year)) {
+            $fileName = 'product_analysis_qty_' . $request->financial_year . '.xlsx';
+        } else {
             $fileName = 'product_analysis_qty.xlsx';
         }
         return Excel::download(new ProductAnalysisQtyExport($request), $fileName);
@@ -2784,6 +2799,9 @@ class ReportController extends Controller
             $query->whereBetween('invoice_date', [$startDatethree, $endDatethree]);
         }
 
+        if ($request->division_id && count($request->division_id) > 0) {
+            $query->whereIn('division', $request->division_id);
+        }
         // Get total net amounts to calculate percentages
         $totalNetAmounts = $query->sum('net_amount');
 
@@ -2792,9 +2810,6 @@ class ReportController extends Controller
             $query->where('final_branch', $request->branch_id);
         }
 
-        if ($request->division_id) {
-            $query->where('division', $request->division_id);
-        }
 
         if ($request->dealer_id) {
             $query->where('dealer', 'like', '%' . $request->dealer_id . '%');
@@ -2896,9 +2911,9 @@ class ReportController extends Controller
         abort_if(Gate::denies('product_analysis_value_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        if($request->financial_year && !empty($request->financial_year)){
-            $fileName = 'product_analysis_value_'.$request->financial_year.'.xlsx';
-        }else{
+        if ($request->financial_year && !empty($request->financial_year)) {
+            $fileName = 'product_analysis_value_' . $request->financial_year . '.xlsx';
+        } else {
             $fileName = 'product_analysis_value.xlsx';
         }
         return Excel::download(new ProductAnalysisValueExport($request), $fileName);
@@ -2980,15 +2995,16 @@ class ReportController extends Controller
             $query->whereBetween('invoice_date', [$startDatethree, $endDatethree]);
         }
 
+        if ($request->division_id && $request->division_id != '' && count($request->division_id) > 0) {
+            $query->whereIn('division', $request->division_id);
+        }
+
         $data = $query->get();
 
         if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
             $query->where('final_branch', $request->branch_id);
         }
 
-        if ($request->division_id && $request->division_id != '' && $request->division_id != null) {
-            $query->where('division', $request->division_id);
-        }
 
         if ($request->dealer_id && $request->dealer_id != '' && $request->dealer_id != null) {
             $query->where('dealer', 'like', '%' . $request->dealer_id . '%');
@@ -3137,17 +3153,1231 @@ class ReportController extends Controller
 
     public function group_wise_analysis_download(Request $request)
     {
-        if ($request->ip() != '111.118.252.250') {
-            return "<h2>Coming Soon ... </h1>";
-        }
         abort_if(Gate::denies('product_analysis_branch_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        if($request->financial_year && !empty($request->financial_year)){
-            $fileName = 'group_wise_analysis_'.$request->financial_year.'.xlsx';
-        }else{
+        if ($request->financial_year && !empty($request->financial_year)) {
+            $fileName = 'group_wise_analysis_' . $request->financial_year . '.xlsx';
+        } else {
             $fileName = 'group_wise_analysis.xlsx';
         }
         return Excel::download(new GroupWiseAnalysisExport($request), $fileName);
+    }
+
+    public function per_employee_costing(Request $request)
+    {
+        $ps_branches = Branch::where('active', 'Y')->select('id', 'branch_name')->get();
+        $ps_divisions = Division::where('active', 'Y')->select('id', 'division_name')->get();
+        $ps_months = PrimarySales::latest()->get()->unique('month');
+        $ps_dealers = PrimarySales::latest()->get()->unique('dealer');
+        $ps_product_models = PrimarySales::latest()->get()->unique('model_name');
+        $ps_new_group_names = PrimarySales::latest()->get()->unique('new_group');
+        $ps_sales_persons = User::where('active', 'Y')->select('id', 'name')->get();
+        $users = User::where('active', 'Y')->latest()->get();
+        $currentYear = Carbon::now()->year;
+        $years = range($currentYear - 1, $currentYear + 1);
+        $total_qty = PrimarySales::sum('quantity');
+        $total_sale = PrimarySales::sum('net_amount');
+        $currentDate = Carbon::now();
+        $months = [
+            $currentDate->copy()->subMonthsNoOverflow(3)->format('M'), // Three months ago
+            $currentDate->copy()->subMonthsNoOverflow(2)->format('M'), // Two months ago
+            $currentDate->copy()->subMonthsNoOverflow(1)->format('M'), // Last month
+        ];
+        return view('reports.per_employee_costing', compact('years', 'users', 'ps_branches', 'ps_divisions', 'ps_months', 'ps_dealers', 'ps_product_models', 'ps_new_group_names', 'ps_sales_persons', 'total_qty', 'total_sale', 'months'));
+    }
+
+    public function per_employee_costing_list(Request $request)
+    {
+        DB::statement("SET SESSION group_concat_max_len = 10000000");
+        $query = User::with('primarySales', 'getdesignation', 'getbranch', 'getdivision', 'userinfo', 'expenses')->where('active', 'Y')
+            ->whereHas('roles', function ($query) {
+                $query->whereIn('id', ['13', '6', '3', '2']);
+            });
+
+        // Filter by financial year or last three months
+        if ($request->month && is_array($request->month) && count($request->month) > 0 && $request->financial_year && !empty($request->financial_year)) {
+            $f_year_array = explode('-', $request->financial_year);
+
+            // Determine if months are in Jan-Mar and set the correct year
+            $isJanToMar = in_array('Jan', $request->month) || in_array('Feb', $request->month) || in_array('Mar', $request->month);
+            $currentYear = $isJanToMar ? $f_year_array[1] : $f_year_array[0];
+
+            // Get the first and last months from the array
+            $firstMonth = $request->month[0];
+            $lastMonth = $request->month[count($request->month) - 1];
+
+            // Format the month and create start and end dates
+            $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$firstMonth")->startOfMonth();
+            $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$lastMonth")->endOfMonth();
+
+            // Convert to date strings
+            $startDateFormatted = $startDate->toDateString();
+            $endDateFormatted = $endDate->toDateString();
+        } elseif ($request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
+            $f_year_array = explode('-', $request->financial_year);
+            $startDateFormatted = $f_year_array[0] . '-04-01';
+            $endDateFormatted = $f_year_array[1] . '-03-31';
+        } else {
+            $currentDate = Carbon::now();
+            $startDateFormatted = $currentDate->copy()->subMonthsNoOverflow(3)->firstOfMonth()->format('Y-m-d');
+            $endDateFormatted = $currentDate->copy()->subMonthNoOverflow()->endOfMonth()->format('Y-m-d');
+        }
+        $all_months = [];
+        $startDate = Carbon::createFromFormat('Y-m-d', $startDateFormatted);
+        $endDate = Carbon::createFromFormat('Y-m-d', $endDateFormatted);
+        $today = Carbon::now('Asia/Kolkata');
+        if ($endDate->greaterThan($today)) {
+            $endDate = $today->subMonth()->endOfMonth();
+            $endDateFormatted = $endDate->toDateString();
+        }
+        $currentDate = $startDate->copy();
+
+        while ($currentDate <= $endDate) {
+            $monthName = $currentDate->format('F');
+            if (!in_array($monthName, $all_months)) {
+                $all_months[] = $monthName;
+            }
+            $currentDate->addMonth()->startOfMonth();
+        }
+
+        if ($request->division_id && $request->division_id != '' && $request->division_id != NULL) {
+            $query->where('division_id', $request->division_id);
+        }
+
+        $data = $query->orderBy('id', 'desc')->get();
+
+        if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
+            $query->where('branch_id', $request->branch_id);
+        }
+
+
+        if ($request->dealer_id && $request->dealer_id != '' && $request->dealer_id != null) {
+            $query->where('dealer', 'like', '%' . $request->dealer_id . '%');
+        }
+
+        if ($request->product_model && $request->product_model != '' && $request->product_model != null) {
+            $query->where('model_name', $request->product_model);
+        }
+
+        if ($request->new_group && $request->new_group != '' && $request->new_group != null) {
+            $query->where('new_group', $request->new_group);
+        }
+
+        if ($request->executive_id && $request->executive_id != '' && $request->executive_id != null) {
+            $query->where('id', $request->executive_id);
+        }
+
+        $query = $query->get();
+
+        foreach ($query as $key => $value) {
+            $query[$key]->userinfo->gross_salary_monthly = $value->userinfo->gross_salary_monthly * count($all_months);
+            if (count($value->expenses) > 0) {
+                $query[$key]->total_expe = $value->expenses->where('date', '>=', $startDateFormatted)->where('date', '<=', $endDateFormatted)->sum('claim_amount') > 0 ? number_format(($value->expenses->where('date', '>=', $startDateFormatted)->where('date', '<=', $endDateFormatted)->sum('claim_amount') + $value->userinfo->gross_salary_monthly), 2, '.', '') : 0;
+            } else {
+                $query[$key]->total_expe = $value->userinfo->gross_salary_monthly;
+            }
+            if ($value->sales_type == 'Primary') {
+                if (count($value->primarySales) > 0) {
+                    $query[$key]->sales = $value->primarySales->where('invoice_date', '>=', $startDateFormatted)->where('invoice_date', '<=', $endDateFormatted)->sum('net_amount') > 0 ? number_format(($value->primarySales->where('invoice_date', '>=', $startDateFormatted)->where('invoice_date', '<=', $endDateFormatted)->sum('net_amount') / 100000), 2, '.', '') : 0;
+                } else {
+                    $query[$key]->sales = 0;
+                }
+            } else {
+                $query[$key]->sales = Order::where('created_by', $value->id)->where('order_date', '>=', $startDateFormatted)->where('order_date', '<=', $endDateFormatted)->sum('sub_total') > 0 ? number_format((Order::where('created_by', $value->id)->where('order_date', '>=', $startDateFormatted)->where('order_date', '<=', $endDateFormatted)->sum('sub_total') / 100000), 2, '.', '') : 0;
+            }
+        }
+
+        return Datatables::of($query)
+            ->addIndexColumn()
+            ->addColumn('emp_code', function ($query) {
+                return count(explode(',', $query->emp_codes)) > 0 ? explode(',', $query->emp_codes)[0] : '-';
+            })
+            ->addColumn('doj', function ($query) {
+                if ($query->userinfo) {
+                    return date('d M Y', strtotime($query->userinfo->date_of_joining));
+                } else {
+                    return '-';
+                }
+            })
+            ->addColumn('sales', function ($query) use ($startDateFormatted, $endDateFormatted) {
+                return $query->sales;
+            })
+            ->addColumn('ta_da', function ($query) use ($startDateFormatted, $endDateFormatted) {
+                if (count($query->expenses) > 0) {
+                    return $query->expenses->where('date', '>=', $startDateFormatted)->where('date', '<=', $endDateFormatted)->sum('claim_amount') > 0 ? number_format($query->expenses->where('date', '>=', $startDateFormatted)->where('date', '<=', $endDateFormatted)->sum('claim_amount'), 2, '.', '') : 0;
+                } else {
+                    return 0;
+                }
+            })
+            ->addColumn('total_exp', function ($query) {
+                return $query->total_expe;
+            })
+            ->addColumn('sal_exp', function ($query) {
+                if ($query->sales > 0) {
+                    return number_format(((($query->total_expe / 100000) / $query->sales) * 100), 2, '.', '') . "%";
+                } else {
+                    return "0%";
+                }
+            })
+
+            ->rawColumns(['doj', 'sales', 'ta_da', 'total_exp', 'sal_exp'])
+            ->make(true);
+    }
+
+    public function per_employee_costing_download(Request $request)
+    {
+        abort_if(Gate::denies('per_employee_costing_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        if ($request->branch_wise) {
+            if ($request->financial_year && !empty($request->financial_year)) {
+                $fileName = 'branch_costing_' . $request->financial_year . '.xlsx';
+            } else {
+                $fileName = 'branch_costing.xlsx';
+            }
+            return Excel::download(new BranchCostingExport($request), $fileName);
+        } elseif ($request->branch_wise_only_sales) {
+            if ($request->financial_year && !empty($request->financial_year)) {
+                $fileName = 'branch_costing_only_sales_' . $request->financial_year . '.xlsx';
+            } else {
+                $fileName = 'branch_costing_only_sales.xlsx';
+            }
+            return Excel::download(new BranchOnlySalesCostingExport($request), $fileName);
+        } else {
+            if ($request->financial_year && !empty($request->financial_year)) {
+                $fileName = 'per_employee_costing_' . $request->financial_year . '.xlsx';
+            } else {
+                $fileName = 'per_employee_costing.xlsx';
+            }
+            return Excel::download(new PerEmployeeCostingExport($request), $fileName);
+        }
+    }
+
+    public function top_dealer(Request $request)
+    {
+        $ps_branches = PrimarySales::latest()->get()->unique('final_branch');
+        $ps_divisions = PrimarySales::latest()->get()->unique('division');
+        $ps_months = PrimarySales::latest()->get()->unique('month');
+        $ps_dealers = PrimarySales::latest()->get()->unique('dealer');
+        $ps_product_models = PrimarySales::latest()->get()->unique('model_name');
+        $ps_new_group_names = PrimarySales::latest()->get()->unique('new_group');
+        $ps_sales_persons = PrimarySales::latest()->get()->unique('sales_person');
+        $users = User::where('active', 'Y')->latest()->get();
+        $currentYear = Carbon::now()->year;
+        $years = range($currentYear - 1, $currentYear + 1);
+        $total_qty = PrimarySales::sum('quantity');
+        $total_sale = PrimarySales::sum('net_amount');
+        $currentDate = Carbon::now();
+        $months = [
+            $currentDate->copy()->subMonthsNoOverflow(3)->format('M'), // Three months ago
+            $currentDate->copy()->subMonthsNoOverflow(2)->format('M'), // Two months ago
+            $currentDate->copy()->subMonthsNoOverflow(1)->format('M'), // Last month
+        ];
+        return view('reports.top_dealer', compact('years', 'users', 'ps_branches', 'ps_divisions', 'ps_months', 'ps_dealers', 'ps_product_models', 'ps_new_group_names', 'ps_sales_persons', 'total_qty', 'total_sale', 'months'));
+    }
+
+    public function top_dealer_list(Request $request)
+    {
+        DB::statement("SET SESSION group_concat_max_len = 10000000");
+        $query = PrimarySales::select(
+            'dealer',
+            'final_branch',
+            'city',
+            DB::raw('SUM(net_amount) as total_net_amounts'),
+        );
+
+        // Filter by financial year or last three months
+        if ($request->month && is_array($request->month) && count($request->month) > 0 && $request->financial_year && !empty($request->financial_year)) {
+            $f_year_array = explode('-', $request->financial_year);
+
+            // Determine if months are in Jan-Mar and set the correct year
+            $isJanToMar = in_array('Jan', $request->month) || in_array('Feb', $request->month) || in_array('Mar', $request->month);
+            $currentYear = $isJanToMar ? $f_year_array[1] : $f_year_array[0];
+
+            // Get the first and last months from the array
+            $firstMonth = $request->month[0];
+            $lastMonth = $request->month[count($request->month) - 1];
+
+            // Format the month and create start and end dates
+            $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$firstMonth")->startOfMonth();
+            $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$lastMonth")->endOfMonth();
+
+            // Convert to date strings
+            $startDateFormatted = $startDate->toDateString();
+            $endDateFormatted = $endDate->toDateString();
+
+            // Apply the date range to the query
+            $query->where(function ($q) use ($startDateFormatted, $endDateFormatted) {
+                $q->where('invoice_date', '>=', $startDateFormatted)
+                    ->where('invoice_date', '<=', $endDateFormatted);
+            });
+        } elseif ($request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
+            $f_year_array = explode('-', $request->financial_year);
+
+            $financial_year_start = $f_year_array[0] . '-04-01';
+            $financial_year_end = $f_year_array[1] . '-03-31';
+
+            $query->whereBetween('invoice_date', [$financial_year_start, $financial_year_end]);
+        } else {
+            $currentMonth = Carbon::now()->month;
+            $last_monts = [1, 2, 3];
+            $currentYear = Carbon::now()->year;
+            if (in_array($currentMonth, $last_monts)) {
+                $request->financial_year = ($currentYear - 1) . '-' . $currentYear;
+            } else {
+                $request->financial_year = $currentYear . '-' . $currentYear + 1;
+            }
+            $f_year_array = explode('-', $request->financial_year);
+            $financial_year_start = $f_year_array[0] . '-04-01';
+            $financial_year_end = $f_year_array[1] . '-03-31';
+
+            $query->whereBetween('invoice_date', [$financial_year_start, $financial_year_end]);
+        }
+
+        if ($request->division_id && $request->division_id != '' && count($request->division_id) > 0) {
+            $query->whereIn('division', $request->division_id);
+        }
+
+        if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
+            $query->where('final_branch', $request->branch_id);
+        }
+
+
+        if ($request->dealer_id && $request->dealer_id != '' && $request->dealer_id != null) {
+            $query->where('dealer', 'like', '%' . $request->dealer_id . '%');
+        }
+
+        if ($request->product_model && $request->product_model != '' && $request->product_model != null) {
+            $query->where('model_name', $request->product_model);
+        }
+
+        if ($request->new_group && $request->new_group != '' && $request->new_group != null) {
+            $query->where('new_group', $request->new_group);
+        }
+
+        if ($request->executive_id && $request->executive_id != '' && $request->executive_id != null) {
+            $query->where('sales_person', $request->executive_id);
+        }
+
+        $query = $query->groupBy('dealer', 'final_branch', 'city')->orderBy('total_net_amounts', 'desc');
+
+        return Datatables::of($query)
+            ->addIndexColumn()
+            ->addColumn('total_net_amounts', function ($query) {
+                return number_format(($query->total_net_amounts / 100000), 2, '.', '');
+            })
+            ->rawColumns(['total_net_amounts'])
+            ->make(true);
+    }
+
+    public function top_dealer_download(Request $request)
+    {
+        abort_if(Gate::denies('product_analysis_branch_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        if ($request->financial_year && !empty($request->financial_year)) {
+            $fileName = 'top_dealer_' . $request->financial_year . '.xlsx';
+        } else {
+            $fileName = 'top_dealer.xlsx';
+        }
+        return Excel::download(new TopDealerExport($request), $fileName);
+    }
+    public function dealer_growth(Request $request)
+    {
+        $ps_branches = PrimarySales::latest()->get()->unique('final_branch');
+        $ps_divisions = PrimarySales::latest()->get()->unique('division');
+        $ps_months = PrimarySales::latest()->get()->unique('month');
+        $ps_dealers = PrimarySales::latest()->get()->unique('dealer');
+        $ps_product_models = PrimarySales::latest()->get()->unique('model_name');
+        $ps_new_group_names = PrimarySales::latest()->get()->unique('new_group');
+        $ps_sales_persons = PrimarySales::latest()->get()->unique('sales_person');
+        $users = User::where('active', 'Y')->latest()->get();
+        $currentYear = Carbon::now()->year;
+        $years = range($currentYear - 1, $currentYear + 1);
+        $total_qty = PrimarySales::sum('quantity');
+        $total_sale = PrimarySales::sum('net_amount');
+        $currentDate = Carbon::now();
+        $months = [
+            $currentDate->copy()->subMonthsNoOverflow(3)->format('M'), // Three months ago
+            $currentDate->copy()->subMonthsNoOverflow(2)->format('M'), // Two months ago
+            $currentDate->copy()->subMonthsNoOverflow(1)->format('M'), // Last month
+        ];
+        return view('reports.dealer_growth', compact('years', 'users', 'ps_branches', 'ps_divisions', 'ps_months', 'ps_dealers', 'ps_product_models', 'ps_new_group_names', 'ps_sales_persons', 'total_qty', 'total_sale', 'months'));
+    }
+
+    public function dealer_growth_list(Request $request)
+    {
+        DB::statement("SET SESSION group_concat_max_len = 10000000");
+
+        $query = PrimarySales::select(
+            'dealer',
+            'final_branch',
+            'city',
+            DB::raw('SUM(net_amount) as total_net_amounts'),
+            DB::raw('0 as last_year_net_amounts')
+        );
+
+        // Determine the financial year date range
+        if ($request->month && is_array($request->month) && count($request->month) > 0 && $request->financial_year && !empty($request->financial_year)) {
+            $f_year_array = explode('-', $request->financial_year);
+
+            // Determine if months are in Jan-Mar and set the correct year
+            $isJanToMar = in_array('Jan', $request->month) || in_array('Feb', $request->month) || in_array('Mar', $request->month);
+            $currentYear = $isJanToMar ? $f_year_array[1] : $f_year_array[0];
+
+            // Get the first and last months from the array
+            $firstMonth = $request->month[0];
+            $lastMonth = $request->month[count($request->month) - 1];
+
+            // Format the month and create start and end dates
+            $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$firstMonth")->startOfMonth();
+            $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$lastMonth")->endOfMonth();
+
+            // Convert to date strings
+            $financial_year_start = $startDate->toDateString();
+            $financial_year_end = $endDate->toDateString();
+        } elseif ($request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
+            $f_year_array = explode('-', $request->financial_year);
+
+            $financial_year_start = $f_year_array[0] . '-04-01';
+            $financial_year_end = $f_year_array[1] . '-03-31';
+        } else {
+            $currentDate = Carbon::now();
+
+            $currentYear = $currentDate->year;
+            $financialYearStart = Carbon::create($currentYear, 4, 1);
+            $financialYearEnd = Carbon::create($currentYear + 1, 3, 31);
+
+            if ($currentDate->lt($financialYearStart)) {
+                $financialYearStart = Carbon::create($currentYear - 1, 4, 1);
+                $financialYearEnd = Carbon::create($currentYear, 3, 31);
+            }
+
+            $financial_year_start = $financialYearStart->format('Y-m-d');
+            $financial_year_end = $financialYearEnd->format('Y-m-d');
+        }
+
+        // Adjust financial_year_end if it is greater than today
+        $today = Carbon::today();
+        if (Carbon::parse($financial_year_end)->greaterThan($today)) {
+            $financial_year_end = $today->format('Y-m-d');
+        }
+
+        // Calculate last year start and end dates after potentially adjusting financial_year_end
+        $last_year_start = Carbon::parse($financial_year_start)->subYear()->format('Y-m-d');
+        $last_year_end = Carbon::parse($financial_year_end)->subYear()->format('Y-m-d');
+
+        // Filter by financial year
+        $query->whereBetween('invoice_date', [$financial_year_start, $financial_year_end]);
+
+        // Additional filters
+        if ($request->division_id && $request->division_id != '' && count($request->division_id) > 0) {
+            $query->whereIn('division', $request->division_id);
+        }
+
+        if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
+            $query->where('final_branch', $request->branch_id);
+        }
+
+        if ($request->dealer_id && $request->dealer_id != '' && $request->dealer_id != null) {
+            $query->where('dealer', 'like', '%' . $request->dealer_id . '%');
+        }
+
+        if ($request->product_model && $request->product_model != '' && $request->product_model != null) {
+            $query->where('model_name', $request->product_model);
+        }
+
+        if ($request->new_group && $request->new_group != '' && $request->new_group != null) {
+            $query->where('new_group', $request->new_group);
+        }
+
+        if ($request->executive_id && $request->executive_id != '' && $request->executive_id != null) {
+            $query->where('sales_person', $request->executive_id);
+        }
+
+        // Grouping and ordering
+        $query->whereIn('division', ['PUMP', 'MOTOR'])->groupBy('dealer', 'final_branch', 'city');
+
+        // Execute the primary query
+        $results = $query->get();
+
+        // Calculate the last year's net amounts
+        $lastYearAmounts = PrimarySales::select(
+            'dealer',
+            'final_branch',
+            'city',
+            DB::raw('SUM(net_amount) as last_year_net_amounts')
+        )
+            ->whereBetween('invoice_date', [$last_year_start, $last_year_end])
+            ->groupBy('dealer', 'final_branch', 'city')
+            ->get();
+
+        // Merge the results
+        $results = $results->map(function ($item) use ($lastYearAmounts) {
+            $lastYearAmount = $lastYearAmounts->firstWhere(function ($value) use ($item) {
+                return $value->dealer == $item->dealer &&
+                    $value->final_branch == $item->final_branch &&
+                    $value->city == $item->city;
+            });
+
+            $item->last_year_net_amounts = $lastYearAmount ? $lastYearAmount->last_year_net_amounts : 0;
+
+            $currentYearAchievements = $item->total_net_amounts;
+            $lastYearAchievements = $item->last_year_net_amounts;
+
+            $growthPercent = 0;
+            if ($lastYearAchievements != null) {
+                $growthPercent = (($currentYearAchievements - $lastYearAchievements) / abs($lastYearAchievements)) * 100;
+                $growthPercent = ROUND($growthPercent, 2);
+            } else {
+                if ($lastYearAchievements == null || $lastYearAchievements == 0) {
+                    if (($currentYearAchievements == null || $currentYearAchievements == 0) && ($lastYearAchievements == null || $lastYearAchievements == 0)) {
+                        $growthPercent = 0;
+                    } elseif (($lastYearAchievements == null || $lastYearAchievements == 0) && isset($currentYearAchievements) && ($currentYearAchievements != null && $currentYearAchievements > 0)) {
+                        $growthPercent = 0;
+                    }
+                }
+            }
+
+            $item->growthPercent = $growthPercent;
+            return $item;
+        });
+
+        if ($request->remark && $request->remark != '' && $request->remark != null) {
+            if ($request->remark == '1') {
+                // INACTIVE DEALER
+                $results = $results->filter(function ($item) {
+                    return $item->total_net_amounts == 0;
+                });
+            } elseif ($request->remark == '2') {
+                // LY -NO SALE
+                $results = $results->filter(function ($item) {
+                    return $item->last_year_net_amounts == 0;
+                });
+            } elseif ($request->remark == '3') {
+                // DE-GROWTH
+                $results = $results->filter(function ($item) {
+                    return $item->growthPercent < 0;
+                });
+            } elseif ($request->remark == '4') {
+                // GROWTH DEALER
+                $results = $results->filter(function ($item) {
+                    return $item->growthPercent > 0;
+                });
+            }
+        }
+
+        $results = $results->sortByDesc('growthPercent');
+
+        return Datatables::of($results)
+            ->addIndexColumn()
+            ->addColumn('cy_total_net_amounts', function ($results) {
+                return number_format(($results->total_net_amounts / 100000), 2, '.', '');
+            })
+            ->addColumn('ly_total_net_amounts', function ($results) {
+                if ($results->last_year_net_amounts > 0) {
+                    return number_format(($results->last_year_net_amounts / 100000), 2, '.', '');
+                } else {
+                    return "0";
+                }
+            })
+            ->addColumn('growth', function ($results) {
+                return $results->growthPercent;
+            })
+            ->rawColumns(['cy_total_net_amounts', 'ly_total_net_amounts', 'growth'])
+            ->make(true);
+    }
+
+    public function dealer_growth_download(Request $request)
+    {
+        abort_if(Gate::denies('dealer_growth_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        if ($request->financial_year && !empty($request->financial_year)) {
+            $fileName = 'dealer_growth_' . $request->financial_year . '.xlsx';
+        } else {
+            $fileName = 'dealer_growth.xlsx';
+        }
+        return Excel::download(new DealerGrowthExport($request), $fileName);
+    }
+
+    public function new_dealer_sale(Request $request)
+    {
+        $ps_branches = PrimarySales::latest()->get()->unique('final_branch');
+        $ps_divisions = PrimarySales::latest()->get()->unique('division');
+        $ps_months = PrimarySales::latest()->get()->unique('month');
+        $ps_dealers = PrimarySales::latest()->get()->unique('dealer');
+        $ps_product_models = PrimarySales::latest()->get()->unique('model_name');
+        $ps_new_group_names = PrimarySales::latest()->get()->unique('new_group');
+        $ps_sales_persons = PrimarySales::latest()->get()->unique('sales_person');
+        $users = User::where('active', 'Y')->latest()->get();
+        $currentYear = Carbon::now()->year;
+        $years = range($currentYear - 1, $currentYear + 1);
+        $total_qty = PrimarySales::sum('quantity');
+        $total_sale = PrimarySales::sum('net_amount');
+        $currentDate = Carbon::now();
+        $months = [
+            $currentDate->copy()->subMonthsNoOverflow(3)->format('M'), // Three months ago
+            $currentDate->copy()->subMonthsNoOverflow(2)->format('M'), // Two months ago
+            $currentDate->copy()->subMonthsNoOverflow(1)->format('M'), // Last month
+        ];
+        return view('reports.new_dealer_sale', compact('years', 'users', 'ps_branches', 'ps_divisions', 'ps_months', 'ps_dealers', 'ps_product_models', 'ps_new_group_names', 'ps_sales_persons', 'total_qty', 'total_sale', 'months'));
+    }
+
+    public function new_dealer_sale_list(Request $request)
+    {
+        $firstDateOfApril = Carbon::createFromDate(null, 4, 1)->startOfDay()->toDateString();
+        $new_dealers = Customers::where('creation_date', '>=', $firstDateOfApril)->pluck('id');
+        DB::statement("SET SESSION group_concat_max_len = 10000000");
+        $query = PrimarySales::with('customer')->select(
+            'dealer',
+            'final_branch',
+            'city',
+            'customer_id',
+            'division',
+            DB::raw('SUM(net_amount) as total_net_amounts'),
+        )->whereIn('customer_id', $new_dealers);
+
+        // Filter by financial year or last three months
+        if ($request->month && is_array($request->month) && count($request->month) > 0 && $request->financial_year && !empty($request->financial_year)) {
+            $f_year_array = explode('-', $request->financial_year);
+
+            // Determine if months are in Jan-Mar and set the correct year
+            $isJanToMar = in_array('Jan', $request->month) || in_array('Feb', $request->month) || in_array('Mar', $request->month);
+            $currentYear = $isJanToMar ? $f_year_array[1] : $f_year_array[0];
+
+            // Get the first and last months from the array
+            $firstMonth = $request->month[0];
+            $lastMonth = $request->month[count($request->month) - 1];
+
+            // Format the month and create start and end dates
+            $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$firstMonth")->startOfMonth();
+            $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$lastMonth")->endOfMonth();
+
+            // Convert to date strings
+            $startDateFormatted = $startDate->toDateString();
+            $endDateFormatted = $endDate->toDateString();
+
+            // Apply the date range to the query
+            $query->where(function ($q) use ($startDateFormatted, $endDateFormatted) {
+                $q->where('invoice_date', '>=', $startDateFormatted)
+                    ->where('invoice_date', '<=', $endDateFormatted);
+            });
+        } elseif ($request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
+            $f_year_array = explode('-', $request->financial_year);
+
+            $financial_year_start = $f_year_array[0] . '-04-01';
+            $financial_year_end = $f_year_array[1] . '-03-31';
+
+            $query->whereBetween('invoice_date', [$financial_year_start, $financial_year_end]);
+        } else {
+            $currentMonth = Carbon::now()->month;
+            $last_monts = [1, 2, 3];
+            $currentYear = Carbon::now()->year;
+            if (in_array($currentMonth, $last_monts)) {
+                $request->financial_year = ($currentYear - 1) . '-' . $currentYear;
+            } else {
+                $request->financial_year = $currentYear . '-' . $currentYear + 1;
+            }
+            $f_year_array = explode('-', $request->financial_year);
+            $financial_year_start = $f_year_array[0] . '-04-01';
+            $financial_year_end = $f_year_array[1] . '-03-31';
+
+            $query->whereBetween('invoice_date', [$financial_year_start, $financial_year_end]);
+        }
+
+        if ($request->division_id && $request->division_id != '' && count($request->division_id) > 0) {
+            $query->whereIn('division', $request->division_id);
+        }
+
+        if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
+            $query->where('final_branch', $request->branch_id);
+        }
+
+
+        if ($request->dealer_id && $request->dealer_id != '' && $request->dealer_id != null) {
+            $query->where('dealer', 'like', '%' . $request->dealer_id . '%');
+        }
+
+        if ($request->product_model && $request->product_model != '' && $request->product_model != null) {
+            $query->where('model_name', $request->product_model);
+        }
+
+        if ($request->new_group && $request->new_group != '' && $request->new_group != null) {
+            $query->where('new_group', $request->new_group);
+        }
+
+        if ($request->executive_id && $request->executive_id != '' && $request->executive_id != null) {
+            $query->where('sales_person', $request->executive_id);
+        }
+
+        $query = $query->groupBy('dealer', 'final_branch', 'division', 'city', 'customer_id')->orderBy('total_net_amounts', 'desc');
+
+        return Datatables::of($query)
+            ->addIndexColumn()
+            ->addColumn('total_net_amounts', function ($query) {
+                return number_format(($query->total_net_amounts / 100000), 2, '.', '');
+            })
+            ->addColumn('customer.creation_date', function ($query) {
+                return date('d M Y', strtotime($query->customer->creation_date));
+            })
+            ->addColumn('customer.customertypes.customertype_name', function ($query) {
+                return $query->customer->customertypes->customertype_name;
+            })
+            ->addColumn('slab', function ($query) {
+                $sales = number_format(($query->total_net_amounts / 100000), 2, '.', '');
+                if ($sales > 0 && $sales < 2) {
+                    return '0L-2L';
+                } elseif ($sales >= 2 && $sales < 5) {
+                    return '2L-5L';
+                } elseif ($sales >= 5 && $sales < 10) {
+                    return '5L-10L';
+                } elseif ($sales >= 10 && $sales < 15) {
+                    return '10L-15L';
+                } elseif ($sales >= 15 && $sales < 25) {
+                    return '15L-25L';
+                } elseif ($sales >= 25 && $sales < 75) {
+                    return '25L-75L';
+                } elseif ($sales >= 75 && $sales < 100) {
+                    return '75L-1Cr';
+                } elseif ($sales >= 100) {
+                    return '1Cr Plus';
+                }
+            })
+            ->rawColumns(['total_net_amounts', 'customer.creation_date', 'customer.customertypes.customertype_name', 'slab'])
+            ->make(true);
+    }
+
+    public function new_dealer_sale_download(Request $request)
+    {
+        abort_if(Gate::denies('product_analysis_branch_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        if ($request->last_year) {
+            if ($request->financial_year && !empty($request->financial_year)) {
+                $fileName = 'new_dealer_sale_last_year_' . $request->financial_year . '.xlsx';
+            } else {
+                $fileName = 'new_dealer_sale_last_year.xlsx';
+            }
+            return Excel::download(new NewDealerSaleLastYearExport($request), $fileName);
+        } else {
+            if ($request->financial_year && !empty($request->financial_year)) {
+                $fileName = 'new_dealer_sale_' . $request->financial_year . '.xlsx';
+            } else {
+                $fileName = 'new_dealer_sale.xlsx';
+            }
+            return Excel::download(new NewDealerSaleExport($request), $fileName);
+        }
+    }
+
+    public function loyaltyRetailerWiseSummaryReport(Request $request)
+    {
+        $userids = getUsersReportingToAuth();
+        $branches = Branch::latest()->get();
+        $dealers = Customers::where('customertype', ['1', '3'])->get();
+
+        if ($request->ajax()) {
+            DB::statement("SET SESSION group_concat_max_len = 100000000");
+            $retailers_sarthi = TransactionHistory::groupBy('customer_id')->pluck('customer_id');
+            $data = Customers::with('customertypes', 'firmtypes', 'createdbyname', 'customeraddress.cityname', 'customeraddress.statename', 'customer_transacation')->whereIn('id', $retailers_sarthi)
+                ->where(function ($query) use ($request, $userids) {
+                    if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
+                        $userIdsss = User::where('branch_id', $request->branch_id)->whereIn('id', $userids)->pluck('id');
+                        $query->whereIn('executive_id', $userIdsss)
+                            ->orWhereIn('created_by', $userIdsss);
+                    } else {
+                        if (!auth()->user()->hasRole('superadmin') && !auth()->user()->hasRole('Admin') && !auth()->user()->hasRole('Sub_Admin')) {
+                            $query->whereIn('executive_id', $userids)
+                                ->orWhereIn('created_by', $userids);
+                        }
+                    }
+
+                    if ($request->dealer_id && $request->dealer_id != '' && $request->dealer_id != null) {
+                        $query->where('id', $request->dealer_id);
+                    }
+                })->orderBy('id', 'asc');
+            return Datatables::of($data)
+                ->addIndexColumn()
+                ->editColumn('created_at', function ($data) {
+                    return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
+                })
+                ->editColumn('branch', function ($data) {
+                    return $data->createdbyname ? $data->createdbyname->getbranch->branch_name : '';
+                })
+                ->addColumn('coupon_scan_nos', function ($data) {
+
+                    $coupon_scan_nos = TransactionHistory::where('customer_id', $data->id)->count();
+
+                    return isset($coupon_scan_nos) ? $coupon_scan_nos : '';
+                })
+                ->addColumn('mobile_app_downloads', function ($data) {
+
+                    $mobile_app_downloads = MobileUserLoginDetails::where('customer_id', $data->id)->count();
+
+                    return isset($mobile_app_downloads) ? $mobile_app_downloads : '';
+                })
+                ->addColumn('provision_point', function ($data) {
+
+                    $thistorys = TransactionHistory::where('customer_id', $data->id)->get();
+                    $active_points = 0;
+                    $provision_points = 0;
+                    foreach ($thistorys as $thistory) {
+                        if ($thistory->status == '1') {
+                            $active_points += $thistory->point;
+                        } else {
+                            $active_points += $thistory->active_point;
+                            $provision_points += $thistory->provision_point;
+                        }
+                    }
+                    return $provision_points;
+                })
+                ->addColumn('active_point', function ($data) {
+                    $thistorys = TransactionHistory::where('customer_id', $data->id)->get();
+                    $total_points = TransactionHistory::where('customer_id', $data->id)->sum('point') ?? 0;
+                    $active_points = 0;
+                    $provision_points = 0;
+                    foreach ($thistorys as $thistory) {
+                        if ($thistory->status == '1') {
+                            $active_points += $thistory->point;
+                        } else {
+                            $active_points += $thistory->active_point;
+                            $provision_points += $thistory->provision_point;
+                        }
+                    }
+                    $total_redemption = Redemption::where('customer_id', $data->id)->whereNot('status', '2')->sum('redeem_amount') ?? 0;
+                    $total_rejected = Redemption::where('customer_id', $data->id)->where('status', '2')->sum('redeem_amount') ?? 0;
+                    $total_balance = (int)$active_points - (int)$total_redemption;
+                    return  $active_points;
+                })
+                ->addColumn('total_point', function ($data) {
+                    $total_points = TransactionHistory::where('customer_id', $data->id)->sum('point') ?? 0;
+                    return $total_points;
+                })
+                ->addColumn('redeem_gift', function ($data) {
+                    $redeem_gift = Redemption::where('status', '!=', '2')->where('customer_id', $data->id)->where('redeem_mode', '1')->sum('redeem_amount');
+
+                    return isset($redeem_gift) ? $redeem_gift : '';
+                })
+                ->addColumn('redeem_neft', function ($data) {
+                    $redeem_neft = Redemption::where('status', '!=', '2')->where('customer_id', $data->id)->where('redeem_mode', '2')->sum('redeem_amount');
+
+                    return isset($redeem_neft) ? $redeem_neft : '';
+                })
+                ->addColumn('total_redeem', function ($data) {
+                    $total_redemption = Redemption::where('customer_id', $data->id)->whereNot('status', '2')->sum('redeem_amount') ?? 0;
+                    return $total_redemption;
+                })
+                ->addColumn('balance_active_point', function ($data) {
+                    $thistorys = TransactionHistory::where('customer_id', $data->id)->get();
+                    $total_points = TransactionHistory::where('customer_id', $data->id)->sum('point') ?? 0;
+                    $active_points = 0;
+                    $provision_points = 0;
+                    foreach ($thistorys as $thistory) {
+                        if ($thistory->status == '1') {
+                            $active_points += $thistory->point;
+                        } else {
+                            $active_points += $thistory->active_point;
+                            $provision_points += $thistory->provision_point;
+                        }
+                    }
+                    $total_redemption = Redemption::where('customer_id', $data->id)->whereNot('status', '2')->sum('redeem_amount') ?? 0;
+                    $total_rejected = Redemption::where('customer_id', $data->id)->where('status', '2')->sum('redeem_amount') ?? 0;
+                    $total_balance = (int)$active_points - (int)$total_redemption;
+
+                    return $total_balance;
+                })
+
+                ->rawColumns(['total_registered_retailers', 'total_registered_retailers_under_saarthi', 'coupon_scan_nos', 'mobile_app_downloads', 'provision_point', 'active_point', 'total_point', 'redeem_gift', 'redeem_neft', 'balance_active_point', 'created_at'])
+                ->make(true);
+        }
+        $users = User::where('active', '=', 'Y')->where(function ($query) use ($userids) {
+            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                $query->whereIn('id', $userids);
+            }
+        })->select('id', 'name')->get();
+        return view('reports.loyaltyretailerwisesummaryreport', compact('branches', 'dealers'));
+    }
+
+    public function loyaltyRetailerSummaryReportDownload(Request $request)
+    {
+        abort_if(Gate::denies('loyalty_summary_report_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new LoyaltyRetialerSummaryReportExport($request), 'loyalty_retailer_summary.xlsx');
+    }
+
+    public function customer_outstanting(Request $request)
+    {
+        $userids = getUsersReportingToAuth();
+        $branches = Branch::where('active', 'Y')->latest()->get();
+        $dealers = Customers::where('customertype', ['1', '3'])->get();
+
+        if ($request->ajax()) {
+            $data = CustomerOutstanting::with('branch', 'customer')->select(
+                'customer_id',
+                'branch_id',
+                DB::raw('SUM(amount) as total_amounts'),
+                DB::raw('GROUP_CONCAT(amount) as amounts'),
+                DB::raw('GROUP_CONCAT(days) as days'),
+                DB::raw('JSON_OBJECTAGG(days, amount) as day_amount_pairs'),
+            )->groupBy('customer_id', 'branch_id');
+
+            return Datatables::of($data)
+                ->addIndexColumn()
+                ->addColumn('first_slot', function ($data) {
+                    $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
+                    return $day_wise_amount_array['0-30'] ?? '0';
+                })
+                ->addColumn('second_slot', function ($data) {
+                    $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
+                    return $day_wise_amount_array['31-60'] ?? '0';
+                })
+                ->addColumn('thired_slot', function ($data) {
+                    $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
+                    return $day_wise_amount_array['61-90'] ?? '0';
+                })
+                ->addColumn('fourth_slot', function ($data) {
+                    $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
+                    return $day_wise_amount_array['91-150'] ?? '0';
+                })
+                ->addColumn('fifth_slot', function ($data) {
+                    $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
+                    return $day_wise_amount_array['150'] ?? '0';
+                })
+
+                ->rawColumns(['first_slot', 'second_slot', 'thired_slot', 'fourth_slot', 'fifth_slot'])
+                ->make(true);
+        }
+
+        return view('reports.customer_outstanting', compact('branches', 'dealers'));
+    }
+
+    public function customer_outstanting_upload(Request $request)
+    {
+        abort_if(Gate::denies('customer_outstanting_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        Excel::import(new CutomerOutstantingImport, request()->file('import_file'));
+
+        return back()->with('success', 'Customer Outstanding Import successfully !!');
+    }
+
+    public function customer_outstanting_template(Request $request)
+    {
+        abort_if(Gate::denies('customer_outstanting_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new CutomerOutstantingTemplate, 'customer_outstanding_template.xlsx');
+    }
+
+    public function customer_outstanting_download(Request $request)
+    {
+        abort_if(Gate::denies('customer_outstanting_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new CutomerOutstantingExport($request), 'customer_outstanding.xlsx');
+    }
+
+    public function user_incentive(Request $request)
+    {
+        $branches =  Branch::where('active', 'Y')->get();
+        $users = User::where('active', 'Y')->latest()->get();
+        $currentYear = Carbon::now()->year;
+        $years = range($currentYear - 1, $currentYear + 1);
+        $currentDate = Carbon::now();
+        return view('reports.user_incentive', compact('years', 'users', 'branches'));
+    }
+
+    public function user_incentive_list(Request $request)
+    {
+        $userIds = getUsersReportingToAuth();
+        $data = SalesTargetUsers::with(['user', 'user.getdesignation', 'user.getdivision', 'branch'])->whereIn('user_id', $userIds)->select([
+            DB::raw('GROUP_CONCAT(target) as targets'),
+            DB::raw('SUM(target) as total_target'),
+            DB::raw('SUM(achievement) as total_achievement'),
+            DB::raw('GROUP_CONCAT(achievement) as achievements'),
+            DB::raw('GROUP_CONCAT(month) as months'),
+            DB::raw('GROUP_CONCAT(year) as years'),
+            DB::raw('GROUP_CONCAT(achievement_percent) as achievement_percents'),
+            DB::raw('user_id'),
+            DB::raw('branch_id'),
+            DB::raw('type'),
+        ]);
+
+        if ($request->financial_year && !empty($request->financial_year)) {
+            $f_year_array = explode('-', $request->financial_year);
+        } else {
+            $currentYear = now()->year;
+            $currentMonth = now()->month;
+            if (!$request->quarter || empty($request->quarter)) {
+                if ($currentMonth == 7 || $currentMonth == 8 || $currentMonth == 9) {
+                    $request->quarter = '1';
+                } elseif ($currentMonth == 10 || $currentMonth == 11 || $currentMonth == 12) {
+                    $request->quarter = '2';
+                } elseif ($currentMonth == 1 || $currentMonth == 2 || $currentMonth == 3) {
+                    $request->quarter = '3';
+                } elseif ($currentMonth == 4 || $currentMonth == 5 || $currentMonth == 6) {
+                    $request->quarter = '4';
+                }
+            }
+
+            if ($currentMonth <= 3) {
+                $f_year_array = [$currentYear - 1, $currentYear];
+            } else {
+                $f_year_array = [$currentYear, $currentYear + 1];
+            }
+        }
+        if ($request->quarter && !empty($request->quarter)) {
+            if ($request->quarter == '1') {
+                $data->where(function ($query) use ($f_year_array) {
+                    $query->where('year', '=', $f_year_array[0])
+                        ->whereIn('month', ['Apr', 'May', 'Jun']);
+                });
+                $months = ['Apr', 'May', 'Jun'];
+            } elseif ($request->quarter == '2') {
+                $data->where(function ($query) use ($f_year_array) {
+                    $query->where('year', '=', $f_year_array[0])
+                        ->whereIn('month', ['Jul', 'Aug', 'Sep']);
+                });
+                $months = ['Jul', 'Aug', 'Sep'];
+            } elseif ($request->quarter == '3') {
+                $data->where(function ($query) use ($f_year_array) {
+                    $query->where('year', '=', $f_year_array[0])
+                        ->whereIn('month', ['Oct', 'Nov', 'Dec']);
+                });
+                $months = ['Oct', 'Nov', 'Dec'];
+            } elseif ($request->quarter == '4') {
+                $data->where(function ($query) use ($f_year_array) {
+                    $query->where('year', '=', $f_year_array[1])
+                        ->whereIn('month', ['Jan', 'Feb', 'Mar']);
+                });
+                $months = ['Oct', 'Nov', 'Dec'];
+            }
+        }
+
+        $data = $data->groupBy('user_id', 'branch_id')->orderBy('month');
+
+        return Datatables::of($data)
+            ->addIndexColumn()
+            ->addColumn('achiv', function ($data) use ($request, $months, $f_year_array) {
+                $fmonth = $months[0];
+                $lmonth = $months[2];
+                if ($request->quarter == '4') {
+                    $monthNumber = Carbon::parse("1 $fmonth")->month;
+                    $monthNumber2 = Carbon::parse("1 $lmonth")->month;
+                    $firstDate = Carbon::createFromDate($f_year_array[1], $monthNumber, 1)->startOfMonth()->toDateString();
+                    $lastDate = Carbon::createFromDate($f_year_array[1], $monthNumber2, 1)->endOfMonth()->toDateString();
+                } else {
+                    $monthNumber = Carbon::parse("1 $fmonth")->month;
+                    $monthNumber2 = Carbon::parse("1 $lmonth")->month;
+                    $firstDate = Carbon::createFromDate($f_year_array[0], $monthNumber, 1)->startOfMonth()->toDateString();
+                    $lastDate = Carbon::createFromDate($f_year_array[0], $monthNumber2, 1)->endOfMonth()->toDateString();
+                }
+                $total_achiv =  number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
+                return $data->total_achievement ?? $total_achiv;
+            })
+            ->addColumn('taper', function ($data) use ($request, $months, $f_year_array) {
+                $fmonth = $months[0];
+                $lmonth = $months[2];
+                if ($request->quarter == '4') {
+                    $monthNumber = Carbon::parse("1 $fmonth")->month;
+                    $monthNumber2 = Carbon::parse("1 $lmonth")->month;
+                    $firstDate = Carbon::createFromDate($f_year_array[1], $monthNumber, 1)->startOfMonth()->toDateString();
+                    $lastDate = Carbon::createFromDate($f_year_array[1], $monthNumber2, 1)->endOfMonth()->toDateString();
+                } else {
+                    $monthNumber = Carbon::parse("1 $fmonth")->month;
+                    $monthNumber2 = Carbon::parse("1 $lmonth")->month;
+                    $firstDate = Carbon::createFromDate($f_year_array[0], $monthNumber, 1)->startOfMonth()->toDateString();
+                    $lastDate = Carbon::createFromDate($f_year_array[0], $monthNumber2, 1)->endOfMonth()->toDateString();
+                }
+                $total_achiv =  number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
+                $total_achievement = $data->total_achievement ?? $total_achiv;
+                $total_target = $data->total_target ?? 0;
+                return number_format((($total_achievement / $total_target) * 100), 2, '.', '');
+            })
+            ->addColumn('ovper', function ($data) use ($request, $months, $f_year_array) {
+                $total_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->sum('amount');
+                $sixty_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->whereNotIn('days', ['0-30', '31-60'])->sum('amount');
+                return $total_outstanding > 0 ? number_format((($sixty_outstanding / $total_outstanding) * 100), 2, '.', '') : '0';
+            })
+            ->addColumn('svper', function ($data) use ($request, $months, $f_year_array) {
+                $total_stock = BranchStock::where('branch_id', $data->branch_id)->sum('amount');
+                $ninty_stock = BranchStock::where('branch_id', $data->branch_id)->whereNotIn('days', ['0-30', '31-60', '61-90'])->sum('amount');
+                return $total_stock > 0 ? number_format((($ninty_stock / $total_stock) * 100), 2, '.', '') : '0';
+            })
+            ->addColumn('total_inc', function ($data) use ($request, $months, $f_year_array) {
+                $fmonth = $months[0];
+                $lmonth = $months[2];
+                if ($request->quarter == '4') {
+                    $monthNumber = Carbon::parse("1 $fmonth")->month;
+                    $monthNumber2 = Carbon::parse("1 $lmonth")->month;
+                    $firstDate = Carbon::createFromDate($f_year_array[1], $monthNumber, 1)->startOfMonth()->toDateString();
+                    $lastDate = Carbon::createFromDate($f_year_array[1], $monthNumber2, 1)->endOfMonth()->toDateString();
+                } else {
+                    $monthNumber = Carbon::parse("1 $fmonth")->month;
+                    $monthNumber2 = Carbon::parse("1 $lmonth")->month;
+                    $firstDate = Carbon::createFromDate($f_year_array[0], $monthNumber, 1)->startOfMonth()->toDateString();
+                    $lastDate = Carbon::createFromDate($f_year_array[0], $monthNumber2, 1)->endOfMonth()->toDateString();
+                }
+                $total_achiv =  number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
+                $total_achievement = $data->total_achievement ?? $total_achiv;
+                $total_target = $data->total_target ?? 0;
+                $total_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->sum('amount');
+                $sixty_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->whereNotIn('days', ['0-30', '31-60'])->sum('amount');
+                $total_stock = BranchStock::where('branch_id', $data->branch_id)->sum('amount');
+                $ninty_stock = BranchStock::where('branch_id', $data->branch_id)->whereNotIn('days', ['0-30', '31-60', '61-90'])->sum('amount');
+                $sixty_outstanding_per = $total_outstanding > 0 ? ($sixty_outstanding / $total_outstanding) * 100 : 0;
+                $ninty_stock_per = $total_stock > 0 ? ($ninty_stock / $total_stock) * 100 : 0;
+                if (($total_achievement / $total_target) * 100 >= 70 && ($total_achievement / $total_target) * 100 <= 79.99) {
+                    $incentive = $data['user']['userinfo'] ? ($data['user']['userinfo']['gross_salary_monthly'] * 50) / 100 : 0;
+                    $fincentive = $incentive;
+                    $wincentive = $incentive;
+                    if ($sixty_outstanding_per > 10) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                    if ($ninty_stock_per > 20) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                } elseif (($total_achievement / $total_target) * 100 >= 80 && ($total_achievement / $total_target) * 100 <= 89.99) {
+                    $incentive = $data['user']['userinfo'] ? ($data['user']['userinfo']['gross_salary_monthly'] * 100) / 100 : '0';
+                    $fincentive = $incentive;
+                    $wincentive = $incentive;
+                    if ($sixty_outstanding_per > 10) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                    if ($ninty_stock_per > 20) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                } elseif (($total_achievement / $total_target) * 100 >= 90 && ($total_achievement / $total_target) * 100 <= 99.99) {
+                    $incentive = $data['user']['userinfo'] ? ($data['user']['userinfo']['gross_salary_monthly'] * 150) / 100 : '0';
+                    $fincentive = $incentive;
+                    $wincentive = $incentive;
+                    if ($sixty_outstanding_per > 10) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                    if ($ninty_stock_per > 20) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                } elseif (($total_achievement / $total_target) * 100 >= 100) {
+                    $incentive = $data['user']['userinfo'] ? ($data['user']['userinfo']['gross_salary_monthly'] * 200) / 100 : '0';
+                    $fincentive = $incentive;
+                    $wincentive = $incentive;
+                    if ($sixty_outstanding_per > 10) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                    if ($ninty_stock_per > 20) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                } else {
+                    $fincentive = '0';
+                    $wincentive =  '0';
+                }
+                return number_format($fincentive,2,'.','');;
+            })
+            ->addColumn('total_inc_w', function ($data) use ($request, $months, $f_year_array) {
+                $fmonth = $months[0];
+                $lmonth = $months[2];
+                if ($request->quarter == '4') {
+                    $monthNumber = Carbon::parse("1 $fmonth")->month;
+                    $monthNumber2 = Carbon::parse("1 $lmonth")->month;
+                    $firstDate = Carbon::createFromDate($f_year_array[1], $monthNumber, 1)->startOfMonth()->toDateString();
+                    $lastDate = Carbon::createFromDate($f_year_array[1], $monthNumber2, 1)->endOfMonth()->toDateString();
+                } else {
+                    $monthNumber = Carbon::parse("1 $fmonth")->month;
+                    $monthNumber2 = Carbon::parse("1 $lmonth")->month;
+                    $firstDate = Carbon::createFromDate($f_year_array[0], $monthNumber, 1)->startOfMonth()->toDateString();
+                    $lastDate = Carbon::createFromDate($f_year_array[0], $monthNumber2, 1)->endOfMonth()->toDateString();
+                }
+                $total_achiv =  number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
+                $total_achievement = $data->total_achievement ?? $total_achiv;
+                $total_target = $data->total_target ?? 0;
+                $total_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->sum('amount');
+                $sixty_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->whereNotIn('days', ['0-30', '31-60'])->sum('amount');
+                $total_stock = BranchStock::where('branch_id', $data->branch_id)->sum('amount');
+                $ninty_stock = BranchStock::where('branch_id', $data->branch_id)->whereNotIn('days', ['0-30', '31-60', '61-90'])->sum('amount');
+                $sixty_outstanding_per = $total_outstanding > 0 ? ($sixty_outstanding / $total_outstanding) * 100 : 0;
+                $ninty_stock_per = $total_stock > 0 ? ($ninty_stock / $total_stock) * 100 : 0;
+                if (($total_achievement / $total_target) * 100 >= 70 && ($total_achievement / $total_target) * 100 <= 79.99) {
+                    $incentive = $data['user']['userinfo'] ? ($data['user']['userinfo']['gross_salary_monthly'] * 50) / 100 : 0;
+                    $fincentive = $incentive;
+                    $wincentive = $incentive;
+                    if ($sixty_outstanding_per > 10) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                    if ($ninty_stock_per > 20) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                } elseif (($total_achievement / $total_target) * 100 >= 80 && ($total_achievement / $total_target) * 100 <= 89.99) {
+                    $incentive = $data['user']['userinfo'] ? ($data['user']['userinfo']['gross_salary_monthly'] * 100) / 100 : '0';
+                    $fincentive = $incentive;
+                    $wincentive = $incentive;
+                    if ($sixty_outstanding_per > 10) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                    if ($ninty_stock_per > 20) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                } elseif (($total_achievement / $total_target) * 100 >= 90 && ($total_achievement / $total_target) * 100 <= 99.99) {
+                    $incentive = $data['user']['userinfo'] ? ($data['user']['userinfo']['gross_salary_monthly'] * 150) / 100 : '0';
+                    $fincentive = $incentive;
+                    $wincentive = $incentive;
+                    if ($sixty_outstanding_per > 10) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                    if ($ninty_stock_per > 20) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                } elseif (($total_achievement / $total_target) * 100 >= 100) {
+                    $incentive = $data['user']['userinfo'] ? ($data['user']['userinfo']['gross_salary_monthly'] * 200) / 100 : '0';
+                    $fincentive = $incentive;
+                    $wincentive = $incentive;
+                    if ($sixty_outstanding_per > 10) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                    if ($ninty_stock_per > 20) {
+                        $fincentive = '0';
+                        $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
+                    }
+                } else {
+                    $fincentive = '0';
+                    $wincentive =  '0';
+                }
+                return number_format($wincentive,2,'.','');
+            })
+
+            ->rawColumns(['achiv', 'taper', 'ovper', 'svper', 'total_inc', 'total_inc_w'])
+            ->make(true);
+    }
+
+    public function user_incentive_download(Request $request)
+    {
+        if ($request->ip() != '106.222.218.95') {
+            return 'Working on it...';
+        }
+        abort_if(Gate::denies('user_incentive_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        if ($request->financial_year && !empty($request->financial_year)) {
+            $fileName = 'user_incentive_' . $request->financial_year . '_' . $request->quarter . '.xlsx';
+        } else {
+            $fileName = 'user_incentive.xlsx';
+        }
+        return Excel::download(new UserIncentiveExport($request), $fileName);
     }
 }

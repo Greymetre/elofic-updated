@@ -76,6 +76,12 @@ class CustomersImport implements ToCollection,WithValidation,WithHeadingRow, Wit
                 $row['mobile'] = '91'.preg_replace('/\s+/', '', $row['mobile']);
             }
 
+            if (is_numeric($row['creation_date'])) {
+              $excelDate = $row['creation_date'] - 25569; // Adjust for Excel's epoch
+              $unixTimestamp = strtotime('+' . $excelDate . ' days', strtotime('1970-01-01'));
+              $row['creation_date'] = !empty($row['creation_date']) ? Carbon::createFromTimestamp($unixTimestamp)->toDateString() : '';
+          }
+
 
             if(!empty($row['customer_id'])){
 
@@ -125,6 +131,8 @@ class CustomersImport implements ToCollection,WithValidation,WithHeadingRow, Wit
                 //'parent_id' => !empty($row['parent_id'])? $row['parent_id'] :null,
                 'customer_code' => !empty($row['customer_code'])? $row['customer_code'] :null,
                 'email' => !empty($row['email'])? $row['email'] :null,
+                'working_status' => !empty($row['working_status'])? $row['working_status'] :null,
+                'creation_date' => !empty($row['creation_date'])? $row['creation_date'] :null,
                 'customertype' => !empty($row['customer_type_id'])? $row['customer_type_id'] :null,
 
 
@@ -239,6 +247,8 @@ class CustomersImport implements ToCollection,WithValidation,WithHeadingRow, Wit
                 'last_name' => !empty($row['last_name'])? ucfirst($row['last_name']):'',
                 'mobile' => (string)$row['mobile'], 
                 'email' => !empty($row['email'])? $row['email']:null,
+                'working_status' => !empty($row['working_status'])? $row['working_status']:null,
+                'creation_date' => !empty($row['creation_date'])? $row['creation_date']:null,
                 'password' => !empty($row['password'])? Hash::make($row['password']) :'',
                 'notification_id' => !empty($row['notification_id'])? $row['notification_id']:'',
                 'latitude' => !empty($row['latitude'])? $row['latitude']:'',

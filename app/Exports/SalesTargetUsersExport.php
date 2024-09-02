@@ -14,6 +14,7 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Illuminate\Support\Facades\Auth;
 use App\Models\SalesTargetUsers;
 use App\Models\User;
+use Carbon\Carbon;
 use DB;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
@@ -38,13 +39,14 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
 
         // $data = SalesTargetUsers::with(['user'])->whereBetween('year', $f_year_array)->toSql();
         $userIds = getUsersReportingToAuth();
-        $data = SalesTargetUsers::with(['user','user.getdesignation','user.getdivision','user.getbranch'])->whereIn('user_id', $userIds)->select([
+        $data = SalesTargetUsers::with(['user','user.getdesignation','user.getdivision','branch'])->whereIn('user_id', $userIds)->select([
          DB::raw('GROUP_CONCAT(target) as targets'),
          DB::raw('GROUP_CONCAT(achievement) as achievements'),
          DB::raw('GROUP_CONCAT(month) as months'),  
          DB::raw('GROUP_CONCAT(year) as years'),
          DB::raw('GROUP_CONCAT(achievement_percent) as achievement_percents'),
          DB::raw('user_id'),
+         DB::raw('branch_id'),
          DB::raw('type'),
         ]); 
 
@@ -66,7 +68,7 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
             });
         }
         
-        $data = $data->groupBy('user_id')->orderBy('month')->get();
+        $data = $data->groupBy('user_id','branch_id')->orderBy('month')->get();
 
         return $data;
     }
@@ -80,7 +82,7 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
 
      $endYear = $f_year_array[1];
 
-     $headings = ['Emp Code', 'User Name', 'Designation', 'Branch Name', 'Division','Sales Type'];
+     $headings = ['Emp Code', 'User Name', 'Designation', 'Branch Id', 'Branch Name', 'Division','Sales Type'];
 
      $quarterNames = ['Q1', 'Q2', 'Q3', 'Q4'];
 
@@ -92,8 +94,7 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
 
 
          for ($month = $startMonth; $month <= $endMonth; $month++) {
-
-               $formattedMonth = str_pad($month, 2, '0', STR_PAD_LEFT);
+             $formattedMonth = Carbon::createFromDate(null, $month, 1)->format('F');
                $headings[] = "$formattedMonth/$year";
                $headings[] = "";
                $headings[] = "";
@@ -110,7 +111,7 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
 
        $headings[] = 'Total';
 
-       $sub_headings = ['','','','','','','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%'];
+       $sub_headings = ['','','','','','','','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%','Tgt','Ach','Ach%'];
 
        $final_heading = [$headings, $sub_headings];
 
@@ -123,10 +124,11 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
     $response = array();
     $response[0] = $data['user']['employee_codes']??'';
     $response[1] = $data['user']['name']??'';
-    $response[2] = $data['user']['getdesignation']['designation_name']??'';
-    $response[3] = $data['user']['getbranch']['branch_name'] ?? '';
-    $response[4] = $data['user']['getdivision']['division_name']??'';
-    $response[5] = $data['type']??'';
+    $response[2] = $data['user']['getdesignation']?$data['user']['getdesignation']['designation_name']:'';
+    $response[3] = $data['branch_id'];
+    $response[4] = $data['branch']['branch_name'] ?? '';
+    $response[5] = $data['user']['getdivision']['division_name']??'';
+    $response[6] = $data['type']??'';
     $f_year_array = explode('-', $this->financial_year);
     $data['months'] = explode(',', $data['months']);
     $data['targets'] = explode(',', $data['targets']);
@@ -138,24 +140,32 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         $year = explode(',',$data['years']); 
 
         if($month == 'Apr' && $f_year_array[0] == $year[$key]) {
-            $response[6] = $data['targets'][$key];
-            $response[7] = $data['achievements'][$key]??'';
-            if(isset($response[6]) && isset($response[7]) && !empty($response[7]) && !empty($response[6])) {
-                $achievementPercent = ($response[6] == 0) ? 0 : ($response[7] * 100 / $response[6]);
+            $response[7] = $data['targets'][$key];
+            if ($data->user->sales_type == 'Primary') {
+                $monthNumber = Carbon::parse("1 $month")->month;
+                $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
+                $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
+
+                $response[8] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount'))/100000, 2, '.', '');
+            }else{
+                $response[8] = $data['achievements'][$key]??'';
+            }
+            if(isset($response[7]) && isset($response[8]) && !empty($response[8]) && !empty($response[7])) {
+                $achievementPercent = number_format(($response[7] == 0) ? 0 : ($response[8] * 100 / $response[7]),2,'.','');
             }else{
                 $achievementPercent = '';
             }   
-            $response[8] = $achievementPercent;
+            $response[9] = $achievementPercent;
         }
         else{
-            if(!isset($response[6])) {
-                $response[6] = '';
-            }
             if(!isset($response[7])) {
                 $response[7] = '';
             }
             if(!isset($response[8])) {
                 $response[8] = '';
+            }
+            if(!isset($response[9])) {
+                $response[9] = '';
             }
         }
     }
@@ -163,24 +173,32 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
         if($month == 'May' && $f_year_array[0] == $year[$key]) {
-            $response[9] = $data['targets'][$key];
-            $response[10] = $data['achievements'][$key]??'';
-            if(isset($response[9]) && isset($response[10]) && !empty($response[10]) && !empty($response[9])) {
-                $achievementPercent = ($response[9] == 0) ? 0 : ($response[10] * 100 / $response[9]);
+            $response[10] = $data['targets'][$key];
+            if ($data->user->sales_type == 'Primary') {
+                $monthNumber = Carbon::parse("1 $month")->month;
+                $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
+                $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
+
+                $response[11] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount'))/100000, 2, '.', '');
+            }else{
+                $response[11] = $data['achievements'][$key]??'';
+            }
+            if(isset($response[10]) && isset($response[11]) && !empty($response[11]) && !empty($response[10])) {
+                $achievementPercent = number_format(($response[10] == 0) ? 0 : ($response[11] * 100 / $response[10]),2,'.','');
             }else{
                 $achievementPercent = '';
             }
-            $response[11] = $achievementPercent;
+            $response[12] = $achievementPercent;
         }
         else{
-            if(!isset($response[9])) {
-                $response[9] = '';
-            }
             if(!isset($response[10])) {
                 $response[10] = '';
             }
             if(!isset($response[11])) {
                 $response[11] = '';
+            }
+            if(!isset($response[12])) {
+                $response[12] = '';
             }
         }
     }
@@ -188,38 +206,54 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
         if($month == 'Jun' && $f_year_array[0] == $year[$key]) {
-            $response[12] = $data['targets'][$key];
-            $response[13] = $data['achievements'][$key]??'';
-            if(isset($response[12]) && isset($response[13]) && !empty($response[13]) && !empty($response[12])) {
-                $achievementPercent = ($response[12] == 0) ? 0 : ($response[13] * 100 / $response[12]);
+            $response[13] = $data['targets'][$key];
+            if ($data->user->sales_type == 'Primary') {
+                $monthNumber = Carbon::parse("1 $month")->month;
+                $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
+                $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
+
+                $response[14] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount'))/100000, 2, '.', '');
+            }else{
+                $response[14] = $data['achievements'][$key]??'';
+            }
+            if(isset($response[13]) && isset($response[14]) && !empty($response[14]) && !empty($response[13])) {
+                $achievementPercent = number_format(($response[13] == 0) ? 0 : ($response[14] * 100 / $response[13]),2,'.','');
             }else{
                 $achievementPercent = '';
             }
-            $response[14] = $achievementPercent;
+            $response[15] = $achievementPercent;
         }else{
-            if(!isset($response[12])) {
-                $response[12] = '';
-            }
             if(!isset($response[13])) {
                 $response[13] = '';
             }
             if(!isset($response[14])) {
                 $response[14] = '';
             }
+            if(!isset($response[15])) {
+                $response[15] = '';
+            }
         }
     }
 
-    $response[16] = '=G'.$this->rowIndex.' + J'.$this->rowIndex.' + M'.$this->rowIndex;
-    $response[17] = '=H'.$this->rowIndex.' + K'.$this->rowIndex.' + N'.$this->rowIndex;
-    $response[18] = '=(I'.$this->rowIndex.' + L'.$this->rowIndex.' + O'.$this->rowIndex.') / 3';
+    $response[16] = '=H'.$this->rowIndex.' + K'.$this->rowIndex.' + N'.$this->rowIndex;
+    $response[17] = '=I'.$this->rowIndex.' + L'.$this->rowIndex.' + O'.$this->rowIndex;
+    $response[18] = '=ROUND((J'.$this->rowIndex.' + M'.$this->rowIndex.' + P'.$this->rowIndex.') / 3, 2)';
 
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
         if($month == 'Jul' && $f_year_array[0] == $year[$key]) {
             $response[19] = $data['targets'][$key];
-            $response[20] = $data['achievements'][$key]??'';
+            if ($data->user->sales_type == 'Primary') {
+                $monthNumber = Carbon::parse("1 $month")->month;
+                $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
+                $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
+
+                $response[20] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount'))/100000, 2, '.', '');
+            }else{
+                $response[20] = $data['achievements'][$key]??'';
+            }
             if(isset($response[19]) && isset($response[20]) && !empty($response[20]) && !empty($response[19])) {
-                $achievementPercent = ($response[19] == 0) ? 0 : ($response[20] * 100 / $response[19]);
+                $achievementPercent = number_format(($response[19] == 0) ? 0 : ($response[20] * 100 / $response[19]),2,'.','');
             }else{
                 $achievementPercent = '';
             }
@@ -232,7 +266,7 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
                 $response[20] = '';
             }
             if(!isset($response[21])) {
-                $response[2] = '';
+                $response[21] = '';
             }
         }
     }
@@ -241,9 +275,17 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         $year = explode(',',$data['years']);
         if($month == 'Aug' && $f_year_array[0] == $year[$key]) {
             $response[22] = $data['targets'][$key];
-            $response[23] = $data['achievements'][$key]??'';
+            if ($data->user->sales_type == 'Primary') {
+                $monthNumber = Carbon::parse("1 $month")->month;
+                $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
+                $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
+
+                $response[23] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount'))/100000, 2, '.', '');
+            }else{
+                $response[23] = $data['achievements'][$key]??'';
+            }
             if(isset($response[22]) && isset($response[23]) && !empty($response[23]) && !empty($response[22])) {
-                $achievementPercent = ($response[22] == 0) ? 0 : ($response[23] * 100 / $response[22]);
+                $achievementPercent = number_format(($response[22] == 0) ? 0 : ($response[23] * 100 / $response[22]),2,'.','');
             }else{
                 $achievementPercent = '';
             }
@@ -265,9 +307,17 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         $year = explode(',',$data['years']);
         if($month == 'Sep' && $f_year_array[0] == $year[$key]) {
             $response[25] = $data['targets'][$key];
-            $response[26] = $data['achievements'][$key]??'';
+            if ($data->user->sales_type == 'Primary') {
+                $monthNumber = Carbon::parse("1 $month")->month;
+                $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
+                $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
+
+                $response[26] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount'))/100000, 2, '.', '');
+            }else{
+                $response[26] = $data['achievements'][$key]??'';
+            }
             if(isset($response[25]) && isset($response[26]) && !empty($response[26]) && !empty($response[25])) {
-                $achievementPercent = ($response[25] == 0) ? 0 : ($response[26] * 100 / $response[25]);
+                $achievementPercent = number_format(($response[25] == 0) ? 0 : ($response[26] * 100 / $response[25]),2,'.','');
             }else{
                 $achievementPercent = '';
             }
@@ -285,18 +335,26 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         }
     }
 
-    $response[28] = '=S'.$this->rowIndex.' + V'.$this->rowIndex.' + Y'.$this->rowIndex;
-    $response[29] = '=T'.$this->rowIndex.' + W'.$this->rowIndex.' + Z'.$this->rowIndex;
-    $response[30] = '=(U'.$this->rowIndex.' + X'.$this->rowIndex.' + AA'.$this->rowIndex.') / 3';
+    $response[28] = '=T'.$this->rowIndex.' + W'.$this->rowIndex.' + Z'.$this->rowIndex;
+    $response[29] = '=u'.$this->rowIndex.' + X'.$this->rowIndex.' + AA'.$this->rowIndex;
+    $response[30] = '=ROUND((V'.$this->rowIndex.' + Y'.$this->rowIndex.' + AB'.$this->rowIndex.') / 3,2)';
 
 
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
         if($month == 'Oct' && $f_year_array[0] == $year[$key]) {
             $response[31] = $data['targets'][$key];
-            $response[32] = $data['achievements'][$key]??'';
+            if ($data->user->sales_type == 'Primary') {
+                $monthNumber = Carbon::parse("1 $month")->month;
+                $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
+                $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
+
+                $response[32] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount'))/100000, 2, '.', '');
+            }else{
+                $response[32] = $data['achievements'][$key]??'';
+            }
             if(isset($response[31]) && isset($response[32]) && !empty($response[32]) && !empty($response[31])) {
-                $achievementPercent = ($response[31] == 0) ? 0 : ($response[32] * 100 / $response[31]);
+                $achievementPercent = number_format(($response[31] == 0) ? 0 : ($response[32] * 100 / $response[31]),2,'.','');
             }else{
                 $achievementPercent = '';
             }
@@ -318,9 +376,17 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         $year = explode(',',$data['years']);
         if($month == 'Nov' && $f_year_array[0] == $year[$key]) {
             $response[34] = $data['targets'][$key];
-            $response[35] = $data['achievements'][$key]??'';
+            if ($data->user->sales_type == 'Primary') {
+                $monthNumber = Carbon::parse("1 $month")->month;
+                $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
+                $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
+
+                $response[35] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount'))/100000, 2, '.', '');
+            }else{
+                $response[35] = $data['achievements'][$key]??'';
+            }
             if(isset($response[34]) && isset($response[35]) && !empty($response[35]) && !empty($response[34])) {
-                $achievementPercent = ($response[34] == 0) ? 0 : ($response[35] * 100 / $response[34]);
+                $achievementPercent = number_format(($response[34] == 0) ? 0 : ($response[35] * 100 / $response[34]),2,'.','');
             }else{
                 $achievementPercent = '';
             }
@@ -342,9 +408,17 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         $year = explode(',',$data['years']);
         if($month == 'Dec' && $f_year_array[0] == $year[$key]) {
             $response[37] = $data['targets'][$key];
-            $response[38] = $data['achievements'][$key]??'';
+            if ($data->user->sales_type == 'Primary') {
+                $monthNumber = Carbon::parse("1 $month")->month;
+                $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
+                $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
+
+                $response[38] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount'))/100000, 2, '.', '');
+            }else{
+                $response[38] = $data['achievements'][$key]??'';
+            }
             if(isset($response[37]) && isset($response[38]) && !empty($response[38]) && !empty($response[37])) {
-                $achievementPercent = ($response[37] == 0) ? 0 : ($response[38] * 100 / $response[37]);
+                $achievementPercent = number_format(($response[37] == 0) ? 0 : ($response[38] * 100 / $response[37]),2,'.','');
             }else{
                 $achievementPercent = '';
             }
@@ -362,17 +436,25 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         }
     }
 
-    $response[40] = '=AE'.$this->rowIndex.' + AH'.$this->rowIndex.' + AK'.$this->rowIndex;
-    $response[41] = '=AF'.$this->rowIndex.' + AI'.$this->rowIndex.' + AL'.$this->rowIndex;
-    $response[42] = '=(AG'.$this->rowIndex.' + AJ'.$this->rowIndex.' + AM'.$this->rowIndex.') / 3';
+    $response[40] = '=AF'.$this->rowIndex.' + AI'.$this->rowIndex.' + AL'.$this->rowIndex;
+    $response[41] = '=AG'.$this->rowIndex.' + AJ'.$this->rowIndex.' + AM'.$this->rowIndex;
+    $response[42] = '=ROUND((AH'.$this->rowIndex.' + AK'.$this->rowIndex.' + AN'.$this->rowIndex.') / 3,2)';
 
     foreach($data['months'] as $key=>$month) {
         $year = explode(',',$data['years']);
         if($month == 'Jan' && $f_year_array[1] == $year[$key]) {
             $response[43] = $data['targets'][$key];
-            $response[44] = $data['achievements'][$key]??'';
+            if ($data->user->sales_type == 'Primary') {
+                $monthNumber = Carbon::parse("1 $month")->month;
+                $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
+                $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
+
+                $response[44] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount'))/100000, 2, '.', '');
+            }else{
+                $response[44] = $data['achievements'][$key]??'';
+            }
             if(isset($response[43]) && isset($response[44]) && !empty($response[44]) && !empty($response[43])) {
-                $achievementPercent = ($response[43] == 0) ? 0 : ($response[44] * 100 / $response[43]);
+                $achievementPercent = number_format(($response[43] == 0) ? 0 : ($response[44] * 100 / $response[43]),2,'.','');
             }else{
                 $achievementPercent = '';
             }
@@ -394,9 +476,17 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         $year = explode(',',$data['years']);
         if($month == 'Feb' && $f_year_array[1] == $year[$key]) {
             $response[46] = $data['targets'][$key];
-            $response[47] = $data['achievements'][$key]??'';
+            if ($data->user->sales_type == 'Primary') {
+                $monthNumber = Carbon::parse("1 $month")->month;
+                $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
+                $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
+
+                $response[47] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount'))/100000, 2, '.', '');
+            }else{
+                $response[47] = $data['achievements'][$key]??'';
+            }
             if(isset($response[46]) && isset($response[47]) && !empty($response[47]) && !empty($response[46])) {
-                $achievementPercent = ($response[46] == 0) ? 0 : ($response[47] * 100 / $response[46]);
+                $achievementPercent = number_format(($response[46] == 0) ? 0 : ($response[47] * 100 / $response[46]),2,'.','');
             }else{
                 $achievementPercent = '';
             }
@@ -418,9 +508,17 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         $year = explode(',',$data['years']);
         if($month == 'Mar' && $f_year_array[1] == $year[$key]) {
             $response[49] = $data['targets'][$key];
-            $response[50] = $data['achievements'][$key]??'';
+            if ($data->user->sales_type == 'Primary') {
+                $monthNumber = Carbon::parse("1 $month")->month;
+                $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
+                $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
+
+                $response[48] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount'))/100000, 2, '.', '');
+            }else{
+                $response[48] = $data['achievements'][$key]??'';
+            }
             if(isset($response[49]) && isset($response[50]) && !empty($response[50]) && !empty($response[49])) {
-                $achievementPercent = ($response[49] == 0) ? 0 : ($response[50] * 100 / $response[49]);
+                $achievementPercent = number_format(($response[49] == 0) ? 0 : ($response[50] * 100 / $response[49]),2,'.','');
             }else{
                 $achievementPercent = '';
             }
@@ -438,16 +536,15 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         }
     }
 
-    $response[52] = '=AQ'.$this->rowIndex.' + AT'.$this->rowIndex.' + AW'.$this->rowIndex;
-    $response[53] = '=AR'.$this->rowIndex.' + AU'.$this->rowIndex.' + AX'.$this->rowIndex;
-    $response[54] = '=(AS'.$this->rowIndex.' + AV'.$this->rowIndex.' + AY'.$this->rowIndex.') / 3';
+    $response[52] = '=AR'.$this->rowIndex.' + AU'.$this->rowIndex.' + AX'.$this->rowIndex;
+    $response[53] = '=AS'.$this->rowIndex.' + AV'.$this->rowIndex.' + AY'.$this->rowIndex;
+    $response[54] = '=ROUND((AT'.$this->rowIndex.' + AW'.$this->rowIndex.' + AZ'.$this->rowIndex.') / 3,2)';
 
-    $response[55] = '=P'.$this->rowIndex.' + AB'.$this->rowIndex.' + AN'.$this->rowIndex.' + AZ'.$this->rowIndex;
-    $response[56] = '=Q'.$this->rowIndex.' + AC'.$this->rowIndex.' + AO'.$this->rowIndex.' + BA'.$this->rowIndex;
-    $response[57] = '=(R'.$this->rowIndex.' + AD'.$this->rowIndex.' + AP'.$this->rowIndex.' + BB'.$this->rowIndex.') / 4';
+    $response[55] = '=Q'.$this->rowIndex.' + AC'.$this->rowIndex.' + AO'.$this->rowIndex.' + BA'.$this->rowIndex;
+    $response[56] = '=R'.$this->rowIndex.' + AD'.$this->rowIndex.' + AP'.$this->rowIndex.' + BB'.$this->rowIndex;
+    $response[57] = '=ROUND((S'.$this->rowIndex.' + AE'.$this->rowIndex.' + AQ'.$this->rowIndex.' + BC'.$this->rowIndex.') / 4,2)';
 
     $this->rowIndex++;
-
     return $response;
 }
 
@@ -459,23 +556,24 @@ class SalesTargetUsersExport implements FromCollection,WithHeadings,ShouldAutoSi
         $sheet->mergeCells('D1:D2');
         $sheet->mergeCells('E1:E2');
         $sheet->mergeCells('F1:F2');
-        $sheet->mergeCells('G1:I1');
-        $sheet->mergeCells('J1:L1');
-        $sheet->mergeCells('M1:O1');
-        $sheet->mergeCells('P1:R1');
-        $sheet->mergeCells('S1:U1');
-        $sheet->mergeCells('V1:X1');
-        $sheet->mergeCells('Y1:AA1');
-        $sheet->mergeCells('AB1:AD1');
-        $sheet->mergeCells('AE1:AG1');
-        $sheet->mergeCells('AH1:AJ1');
-        $sheet->mergeCells('AK1:AM1');
-        $sheet->mergeCells('AN1:AP1');
-        $sheet->mergeCells('AQ1:AS1');
-        $sheet->mergeCells('AT1:AV1');
-        $sheet->mergeCells('AW1:AY1');
-        $sheet->mergeCells('AZ1:BB1');
-        $sheet->mergeCells('BC1:BE1');
+        $sheet->mergeCells('G1:G2');
+        $sheet->mergeCells('H1:J1');
+        $sheet->mergeCells('K1:M1');
+        $sheet->mergeCells('N1:P1');
+        $sheet->mergeCells('Q1:S1');
+        $sheet->mergeCells('T1:V1');
+        $sheet->mergeCells('W1:Y1');
+        $sheet->mergeCells('Z1:AB1');
+        $sheet->mergeCells('AC1:AE1');
+        $sheet->mergeCells('AF1:AH1');
+        $sheet->mergeCells('AI1:AK1');
+        $sheet->mergeCells('AL1:AN1');
+        $sheet->mergeCells('AO1:AQ1');
+        $sheet->mergeCells('AR1:AT1');
+        $sheet->mergeCells('AU1:AW1');
+        $sheet->mergeCells('AX1:AZ1');
+        $sheet->mergeCells('BA1:BC1');
+        $sheet->mergeCells('BD1:BF1');
 
         $sheet->getStyle('A1:ZZ1')->applyFromArray([
             'font' => [

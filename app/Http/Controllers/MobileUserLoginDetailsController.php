@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 use App\Exports\MobileAppLoginUsersExport;
+use App\Exports\MobileAppLoginUsersFieldKonnectExport;
 use App\Models\SchemeDetails;
 use App\Models\SchemeHeader;
 use Carbon\Carbon;
@@ -44,21 +45,19 @@ class MobileUserLoginDetailsController extends Controller
 
     public function mobile_user_login(Request $request)
     {
-
-        $mobile_users = MobileUserLoginDetails::latest()->get();
         $branches = Branch::latest()->get();
         $divisions = Division::latest()->get();
         $currentYear = Carbon::now()->year;
         $years = range($currentYear - 2, $currentYear + 2);
 
         abort_if(Gate::denies('loyalty_mobile_app_users_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return view('loyalty_app_mobile_users.index', compact('mobile_users', 'branches', 'years', 'divisions'));
+        return view('loyalty_app_mobile_users.index', compact('branches', 'years', 'divisions'));
     }
 
 
     public function mobile_user_login_list(Request $request)
     {
-        $query = MobileUserLoginDetails::with(['customer', 'customer.customeraddress', 'customer.customeraddress.statename', 'customer.customeraddress.districtname', 'customer.customeraddress.cityname'])->where(function ($query) use ($request) {
+        $query = MobileUserLoginDetails::with(['customer', 'customer.customeraddress', 'customer.customeraddress.statename', 'customer.customeraddress.districtname', 'customer.customeraddress.cityname'])->where('app', '1')->where(function ($query) use ($request) {
 
             if ($request->user_id && $request->user_id != '' && $request->user_id != null) {
                 $userIds = Customers::where('id', $request->user_id)->pluck('id');
@@ -123,5 +122,67 @@ class MobileUserLoginDetailsController extends Controller
         ob_start();
 
         return Excel::download(new MobileAppLoginUsersExport($request), 'mobile_app_login_.xlsx');
+    }
+
+    public function user_app_details(Request $request)
+    {
+        $branches = Branch::latest()->get();
+        $divisions = Division::latest()->get();
+        $currentYear = Carbon::now()->year;
+        $years = range($currentYear - 2, $currentYear + 2);
+
+        abort_if(Gate::denies('loyalty_mobile_app_users_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        return view('loyalty_app_mobile_users.index_fieldKonnect', compact('branches', 'years', 'divisions'));
+    }
+
+
+    public function user_app_details_list(Request $request)
+    {
+        $query = MobileUserLoginDetails::with(['user', 'user.getbranch'])->where('app', '2')->where(function ($query) use ($request) {
+
+            if ($request->user_id && $request->user_id != '' && $request->user_id != null) {
+                $userIds = Customers::where('id', $request->user_id)->pluck('id');
+                $query->whereIn('customer_id', $userIds);
+            }
+
+            if ($request->start_date && $request->start_date != null && $request->start_date != '' && $request->end_date && $request->end_date != null && $request->end_date != '') {
+                $startDate = date('Y-m-d', strtotime($request->start_date));
+                $endDate = date('Y-m-d', strtotime($request->end_date));
+                $query->whereDate('first_login_date', '>=', $startDate)
+                    ->whereDate('first_login_date', '<=', $endDate);
+            }
+        })->orderBy('last_login_date', 'desc');
+
+        // $data = SalesTargetUsers::with(['user','user.getbranch'])->get();
+
+        return Datatables::of($query)
+            ->addIndexColumn()
+            
+            ->addColumn('login_status1', function ($data) {
+                if ($data['login_status'] == '0') {
+                    return '<span class="badge badge-danger">Logout</span>';
+                } elseif ($data['login_status'] == '1') {
+                    return '<span class="badge badge-info">Login</span>';
+                }
+            })
+            ->addColumn('first_login_date', function ($data) {
+                return $data->first_login_date ? date('d M y h:i A', strtotime($data->first_login_date)) : '';
+            })
+            ->addColumn('last_login_date', function ($data) {
+                return $data->last_login_date ? date('d M y h:i A', strtotime($data->last_login_date)) : '';
+            })
+           
+            ->rawColumns(['action', 'contact_person', 'login_status1', 'last_login_date', 'first_login_date','branches'])
+            ->make(true);
+    }
+
+
+    public function user_app_details_download(Request $request)
+    {
+        abort_if(Gate::denies('mobile_app_login_details_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+
+        return Excel::download(new MobileAppLoginUsersFieldKonnectExport($request), 'mobile_app_login_userd.xlsx');
     }
 }
