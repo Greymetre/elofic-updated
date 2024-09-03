@@ -420,6 +420,8 @@ class ProductController extends Controller
             $data = BranchStock::with('branch','division')->select(
                 'division_id',
                 'branch_id',
+                'year',
+                'quarter',
                 DB::raw('SUM(amount) as total_amounts'),
                 DB::raw('GROUP_CONCAT(amount) as amounts'),
                 DB::raw('GROUP_CONCAT(days) as days'),
@@ -428,7 +430,7 @@ class ProductController extends Controller
             if($request->branch_id && !empty($request->branch_id)){
                 $data->where('branch_id', $request->branch_id);
             }
-            $data = $data->groupBy('division_id','branch_id');
+            $data = $data->groupBy('division_id','branch_id', 'year', 'quarter');
             
             return Datatables::of($data)
                 ->addIndexColumn()
@@ -480,9 +482,6 @@ class ProductController extends Controller
 
     public function stock_download(Request $request)
     {
-        if ($request->ip() != '106.222.216.59') {
-            return 'Working on it....';
-        }
         abort_if(Gate::denies('stock_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();

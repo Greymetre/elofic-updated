@@ -90,6 +90,8 @@
               <thead class=" text-primary">
                 <th>Branch</th>
                 <th>Division</th>
+                <th>Year</th>
+                <th>Quarter</th>
                 <th>0-30</th>
                 <th>31-60</th>
                 <th>61-90</th>
@@ -145,6 +147,18 @@
             name: 'division.division_name',
             orderable: false,
             searchable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'year',
+            name: 'year',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'quarter',
+            name: 'quarter',
+            orderable: false,
             "defaultContent": ''
           },
           {

@@ -21,12 +21,13 @@
                     <div class="p-2" style="width:160px;">
                       <div class="form-group">
                         <!-- <label class="bmd-label-floating">Status</label> -->
-                        <select class="form-control select2" name="status_id" id="status_id" style="width: 100%;" onchange="getCityList()">
+                        <select class="form-control select2" name="status_id" id="status_id" style="width: 100%;">
                           <option value="">Select Status</option>
                           <option value="0">Pending</option>
                           <option value="1">Approved By Sales Team</option>
                           <option value="2">Approved By Account</option>
                           <option value="3">Approved By HO</option>
+                          <option value="4">Rejected</option>
                         </select>
                         @if ($errors->has('status_id'))
                         <div class="error col-lg-12">

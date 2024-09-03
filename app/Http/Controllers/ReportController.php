@@ -4017,11 +4017,13 @@ class ReportController extends Controller
             $data = CustomerOutstanting::with('branch', 'customer')->select(
                 'customer_id',
                 'branch_id',
+                'year',
+                'quarter',
                 DB::raw('SUM(amount) as total_amounts'),
                 DB::raw('GROUP_CONCAT(amount) as amounts'),
                 DB::raw('GROUP_CONCAT(days) as days'),
                 DB::raw('JSON_OBJECTAGG(days, amount) as day_amount_pairs'),
-            )->groupBy('customer_id', 'branch_id');
+            )->groupBy('customer_id', 'branch_id', 'year', 'quarter');
 
             return Datatables::of($data)
                 ->addIndexColumn()
@@ -4092,7 +4094,7 @@ class ReportController extends Controller
     public function user_incentive_list(Request $request)
     {
         $userIds = getUsersReportingToAuth();
-        $data = SalesTargetUsers::with(['user', 'user.getdesignation', 'user.getdivision', 'branch'])->whereIn('user_id', $userIds)->select([
+        $data = SalesTargetUsers::with(['user', 'user.userinfo', 'branch'])->whereIn('user_id', $userIds)->select([
             DB::raw('GROUP_CONCAT(target) as targets'),
             DB::raw('SUM(target) as total_target'),
             DB::raw('SUM(achievement) as total_achievement'),
@@ -4130,24 +4132,28 @@ class ReportController extends Controller
         }
         if ($request->quarter && !empty($request->quarter)) {
             if ($request->quarter == '1') {
+                $quarter_name = 'Q1';
                 $data->where(function ($query) use ($f_year_array) {
                     $query->where('year', '=', $f_year_array[0])
                         ->whereIn('month', ['Apr', 'May', 'Jun']);
                 });
                 $months = ['Apr', 'May', 'Jun'];
             } elseif ($request->quarter == '2') {
+                $quarter_name = 'Q2';
                 $data->where(function ($query) use ($f_year_array) {
                     $query->where('year', '=', $f_year_array[0])
                         ->whereIn('month', ['Jul', 'Aug', 'Sep']);
                 });
                 $months = ['Jul', 'Aug', 'Sep'];
             } elseif ($request->quarter == '3') {
+                $quarter_name = 'Q3';
                 $data->where(function ($query) use ($f_year_array) {
                     $query->where('year', '=', $f_year_array[0])
                         ->whereIn('month', ['Oct', 'Nov', 'Dec']);
                 });
                 $months = ['Oct', 'Nov', 'Dec'];
             } elseif ($request->quarter == '4') {
+                $quarter_name = 'Q4';
                 $data->where(function ($query) use ($f_year_array) {
                     $query->where('year', '=', $f_year_array[1])
                         ->whereIn('month', ['Jan', 'Feb', 'Mar']);
@@ -4196,14 +4202,24 @@ class ReportController extends Controller
                 $total_target = $data->total_target ?? 0;
                 return number_format((($total_achievement / $total_target) * 100), 2, '.', '');
             })
-            ->addColumn('ovper', function ($data) use ($request, $months, $f_year_array) {
-                $total_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->sum('amount');
-                $sixty_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->whereNotIn('days', ['0-30', '31-60'])->sum('amount');
+            ->addColumn('ovper', function ($data) use ($request, $months, $f_year_array, $quarter_name) {
+                if ($request->quarter == '4') {
+                    $total_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->where('year', $f_year_array[1])->where('quarter', 'Like' , '%'.$quarter_name.'%')->sum('amount');
+                    $sixty_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->whereNotIn('days', ['0-30', '31-60'])->where('year', $f_year_array[1])->where('quarter', 'Like' , '%'.$quarter_name.'%')->sum('amount');
+                }else{
+                    $total_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->where('year', $f_year_array[0])->where('quarter', 'Like' , '%'.$quarter_name.'%')->sum('amount');
+                    $sixty_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->whereNotIn('days', ['0-30', '31-60'])->where('year', $f_year_array[0])->where('quarter', 'Like' , '%'.$quarter_name.'%')->sum('amount');
+                }
                 return $total_outstanding > 0 ? number_format((($sixty_outstanding / $total_outstanding) * 100), 2, '.', '') : '0';
             })
-            ->addColumn('svper', function ($data) use ($request, $months, $f_year_array) {
-                $total_stock = BranchStock::where('branch_id', $data->branch_id)->sum('amount');
-                $ninty_stock = BranchStock::where('branch_id', $data->branch_id)->whereNotIn('days', ['0-30', '31-60', '61-90'])->sum('amount');
+            ->addColumn('svper', function ($data) use ($request, $months, $f_year_array, $quarter_name) {
+                if ($request->quarter == '4') {
+                $total_stock = BranchStock::where('branch_id', $data->branch_id)->where('year', $f_year_array[1])->where('quarter', 'Like' , '%'.$quarter_name.'%')->sum('amount');
+                $ninty_stock = BranchStock::where('branch_id', $data->branch_id)->whereNotIn('days', ['0-30', '31-60', '61-90'])->where('year', $f_year_array[1])->where('quarter', 'Like' , '%'.$quarter_name.'%')->sum('amount');
+                }else{
+                    $total_stock = BranchStock::where('branch_id', $data->branch_id)->where('year', $f_year_array[0])->where('quarter', 'Like' , '%'.$quarter_name.'%')->sum('amount');
+                $ninty_stock = BranchStock::where('branch_id', $data->branch_id)->whereNotIn('days', ['0-30', '31-60', '61-90'])->where('year', $f_year_array[0])->where('quarter', 'Like' , '%'.$quarter_name.'%')->sum('amount');
+                }
                 return $total_stock > 0 ? number_format((($ninty_stock / $total_stock) * 100), 2, '.', '') : '0';
             })
             ->addColumn('total_inc', function ($data) use ($request, $months, $f_year_array) {
@@ -4367,9 +4383,6 @@ class ReportController extends Controller
 
     public function user_incentive_download(Request $request)
     {
-        if ($request->ip() != '106.222.218.95') {
-            return 'Working on it...';
-        }
         abort_if(Gate::denies('user_incentive_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();

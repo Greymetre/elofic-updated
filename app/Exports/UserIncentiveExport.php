@@ -32,6 +32,7 @@ class UserIncentiveExport implements FromCollection, WithHeadings, ShouldAutoSiz
         $this->branch_id = $request->input('branch_id');
         $this->financial_year = $request->input('financial_year');
         $this->quarter = $request->input('quarter');
+        $this->quarter_name = '';
     }
 
     public function collection()
@@ -53,24 +54,28 @@ class UserIncentiveExport implements FromCollection, WithHeadings, ShouldAutoSiz
 
         if ($this->quarter && !empty($this->quarter)) {
             if ($this->quarter == '1') {
+                $this->quarter_name = 'Q1';
                 $data->where(function ($query) use ($f_year_array) {
                     $query->where('year', '=', $f_year_array[0])
                         ->whereIn('month', ['Apr', 'May', 'Jun']);
                 });
                 $this->months = ['Apr', 'May', 'Jun'];
             } elseif ($this->quarter == '2') {
+                $this->quarter_name = 'Q2';
                 $data->where(function ($query) use ($f_year_array) {
                     $query->where('year', '=', $f_year_array[0])
                         ->whereIn('month', ['Jul', 'Aug', 'Sep']);
                 });
                 $this->months = ['Jul', 'Aug', 'Sep'];
             } elseif ($this->quarter == '3') {
+                $this->quarter_name = 'Q3';
                 $data->where(function ($query) use ($f_year_array) {
                     $query->where('year', '=', $f_year_array[0])
                         ->whereIn('month', ['Oct', 'Nov', 'Dec']);
                 });
                 $this->months = ['Oct', 'Nov', 'Dec'];
             } elseif ($this->quarter == '4') {
+                $this->quarter_name = 'Q4';
                 $data->where(function ($query) use ($f_year_array) {
                     $query->where('year', '=', $f_year_array[1])
                         ->whereIn('month', ['Jan', 'Feb', 'Mar']);
@@ -180,10 +185,18 @@ class UserIncentiveExport implements FromCollection, WithHeadings, ShouldAutoSiz
     public function map($data): array
     {
         // return [];
-        $total_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->sum('amount');
-        $sixty_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->whereNotIn('days', ['0-30', '31-60'])->sum('amount');
-        $total_stock = BranchStock::where('branch_id', $data->branch_id)->sum('amount');
-        $ninty_stock = BranchStock::where('branch_id', $data->branch_id)->whereNotIn('days', ['0-30', '31-60', '61-90'])->sum('amount');
+        $f_year_array = explode('-', $this->financial_year);
+        if ($this->quarter == '4') {
+            $total_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->where('year', $f_year_array[1])->where('quarter', 'Like', '%' . $this->quarter_name . '%')->sum('amount');
+            $sixty_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->whereNotIn('days', ['0-30', '31-60'])->where('year', $f_year_array[1])->where('quarter', 'Like', '%' . $this->quarter_name . '%')->sum('amount');
+            $total_stock = BranchStock::where('branch_id', $data->branch_id)->where('year', $f_year_array[1])->where('quarter', 'Like', '%' . $this->quarter_name . '%')->sum('amount');
+            $ninty_stock = BranchStock::where('branch_id', $data->branch_id)->whereNotIn('days', ['0-30', '31-60', '61-90'])->where('year', $f_year_array[1])->where('quarter', 'Like', '%' . $this->quarter_name . '%')->sum('amount');
+        } else {
+            $total_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->where('year', $f_year_array[0])->where('quarter', 'Like', '%' . $this->quarter_name . '%')->sum('amount');
+            $sixty_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->whereNotIn('days', ['0-30', '31-60'])->where('year', $f_year_array[0])->where('quarter', 'Like', '%' . $this->quarter_name . '%')->sum('amount');
+            $total_stock = BranchStock::where('branch_id', $data->branch_id)->where('year', $f_year_array[0])->where('quarter', 'Like', '%' . $this->quarter_name . '%')->sum('amount');
+            $ninty_stock = BranchStock::where('branch_id', $data->branch_id)->whereNotIn('days', ['0-30', '31-60', '61-90'])->where('year', $f_year_array[0])->where('quarter', 'Like', '%' . $this->quarter_name . '%')->sum('amount');
+        }
 
 
         $response = array();
@@ -198,7 +211,6 @@ class UserIncentiveExport implements FromCollection, WithHeadings, ShouldAutoSiz
         $data['achievement_percents'] = explode(',', $data['achievement_percents']);
         $year = explode(',', $data['years']);
 
-        $f_year_array = explode('-', $this->financial_year);
         $fmonth = $this->months[0];
         $lmonth = $this->months[2];
         if ($this->quarter == '4') {
@@ -273,11 +285,11 @@ class UserIncentiveExport implements FromCollection, WithHeadings, ShouldAutoSiz
             $wincentive = $incentive;
             if ($sixty_outstanding_per > 10) {
                 $fincentive = '0';
-                $wincentive = $wincentive > 0 ? $wincentive-(($incentive*20)/100) : '0';
+                $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
             }
             if ($ninty_stock_per > 20) {
                 $fincentive = '0';
-                $wincentive = $wincentive > 0 ? $wincentive-(($incentive*20)/100) : '0';
+                $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
             }
             $response[19 + $index] = $fincentive;
             $response[20 + $index] = $wincentive;
@@ -287,11 +299,11 @@ class UserIncentiveExport implements FromCollection, WithHeadings, ShouldAutoSiz
             $wincentive = $incentive;
             if ($sixty_outstanding_per > 10) {
                 $fincentive = '0';
-                $wincentive = $wincentive > 0 ? $wincentive-(($incentive*20)/100) : '0';
+                $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
             }
             if ($ninty_stock_per > 20) {
                 $fincentive = '0';
-                $wincentive = $wincentive > 0 ? $wincentive-(($incentive*20)/100) : '0';
+                $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
             }
             $response[19 + $index] = $fincentive;
             $response[20 + $index] = $wincentive;
@@ -301,11 +313,11 @@ class UserIncentiveExport implements FromCollection, WithHeadings, ShouldAutoSiz
             $wincentive = $incentive;
             if ($sixty_outstanding_per > 10) {
                 $fincentive = '0';
-                $wincentive = $wincentive > 0 ? $wincentive-(($incentive*20)/100) : '0';
+                $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
             }
             if ($ninty_stock_per > 20) {
                 $fincentive = '0';
-                $wincentive = $wincentive > 0 ? $wincentive-(($incentive*20)/100) : '0';
+                $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
             }
             $response[19 + $index] = $fincentive;
             $response[20 + $index] = $wincentive;
@@ -315,11 +327,11 @@ class UserIncentiveExport implements FromCollection, WithHeadings, ShouldAutoSiz
             $wincentive = $incentive;
             if ($sixty_outstanding_per > 10) {
                 $fincentive = '0';
-                $wincentive = $wincentive > 0 ? $wincentive-(($incentive*20)/100) : '0';
+                $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
             }
             if ($ninty_stock_per > 20) {
                 $fincentive = '0';
-                $wincentive = $wincentive > 0 ? $wincentive-(($incentive*20)/100) : '0';
+                $wincentive = $wincentive > 0 ? $wincentive - (($incentive * 20) / 100) : '0';
             }
             $response[19 + $index] = $fincentive;
             $response[20 + $index] = $wincentive;

@@ -48,7 +48,9 @@ class CutomerOutstantingImport implements ToCollection, WithValidation, WithHead
                     $salesTargetUsers = CustomerOutstanting::updateOrCreate(
                         [
                             'customer_id' => $row['customer_id'],
-                            'days' => (string)$k
+                            'days' => (string)$k,
+                            'year' => $row['year'],
+                            'quarter' => $row['quarter']
                         ],
                         [
                             'branch_id' => $row['branch_id'],

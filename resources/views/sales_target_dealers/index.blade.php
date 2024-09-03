@@ -199,7 +199,7 @@
               <thead class=" text-primary">
                 <th>{!! trans('panel.global.no') !!}</th>
                 <th>{!! trans('panel.global.action') !!}</th>
-                <th>{!! trans('panel.sales_dealer_distributor.dealer_distributor_name') !!}</th>
+                <th>Employee Name</th>
                 <th>{!! trans('panel.sales_dealer_distributor.dealer_distributor_firm_name') !!}</th>
                 <th>{!! trans('panel.sales_dealer_distributor.city') !!}</th>
                 <th>{!! trans('panel.sales_dealer_distributor.branch_name') !!}</th>
@@ -404,8 +404,8 @@
             "defaultContent": ''
           },
           {
-            data: 'customer_name',
-            name: 'customer_name',
+            data: 'customer.createdbyname.name',
+            name: 'customer.createdbyname.name',
             orderable: false,
             searchable: false,
             "defaultContent": ''
