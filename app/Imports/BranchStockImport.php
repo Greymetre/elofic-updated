@@ -49,7 +49,9 @@ class BranchStockImport implements ToCollection, WithValidation, WithHeadingRow,
                     $salesTargetUsers = BranchStock::updateOrCreate(
                         [
                             'branch_id' => $row['branch_id'],
-                            'days' => $k
+                            'days' => $k,
+                            'year' => $row['year'],
+                            'quarter' => $row['quarter']
                         ],
                         [
                             'branch_name' => $row['branch_name'],

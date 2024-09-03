@@ -21,7 +21,7 @@ use DB;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithStyles
+class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithStyles, WithEvents
 {
 
     private $rowIndex = 3;
@@ -41,7 +41,7 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
         $month = $this->month;
 
 
-        $data = SalesTargetCustomers::with(['customer', 'customer.userdetails'])->select([
+        $data = SalesTargetCustomers::with(['customer', 'customer.userdetails', 'customer.createdbyname'])->select([
             DB::raw('GROUP_CONCAT(target) as targets'),
             DB::raw('GROUP_CONCAT(achievement) as achievements'),
             DB::raw('GROUP_CONCAT(month) as months'),
@@ -110,7 +110,7 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
 
         $endYear = $f_year_array[1];
 
-        $headings = ['Dealer id', 'Dealer Distributor Name', 'Firm Name', 'City', 'Branch', 'Division', 'Sales Type'];
+        $headings = ['Dealer id', 'Employee Name', 'Firm Name', 'City', 'Branch', 'Division', 'Sales Type'];
 
         $quarterNames = ['Q1', 'Q2', 'Q3', 'Q4'];
 
@@ -158,10 +158,8 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
     public function map($data): array
     {
         $response = array();
-        $first_name = !empty($data['customer']['first_name']) ? $data['customer']['first_name'] : '';
-        $last_name = !empty($data['customer']['last_name']) ? $data['customer']['last_name'] : '';
 
-        $dealer_name =  $first_name . ' ' . $last_name;
+        $dealer_name =  $data['customer']['createdbyname'] ? $data['customer']['createdbyname']['name'] : '';
         $response[0] = $data['customer']['id'] ?? '';
         $response[1] = $dealer_name;
         $response[2] = $data['customer']['name'];
@@ -186,7 +184,7 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
                 $response[8] = number_format((PrimarySales::where('customer_id', $data['customer_id'])->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
                 // $response[8] = $data['achievements'][$key]??'';
                 if (isset($response[7]) && isset($response[8]) && !empty($response[8]) && !empty($response[7])) {
-                    $achievementPercent = ($response[7] == 0) ? 0 : ($response[8] * 100 / $response[7]);
+                    $achievementPercent = ($response[7] == 0) ? 0 : number_format(($response[8] * 100 / $response[7]), 2, '.', '');
                 } else {
                     $achievementPercent = '';
                 }
@@ -213,20 +211,20 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
                 $response[11] = number_format((PrimarySales::where('customer_id', $data['customer_id'])->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
                 // $response[11] = $data['achievements'][$key]??'';
                 if (isset($response[10]) && isset($response[11]) && !empty($response[11]) && !empty($response[10])) {
-                    $achievementPercent = ($response[10] == 0) ? 0 : ($response[11] * 100 / $response[10]);
+                    $achievementPercent = ($response[10] == 0) ? 0 : number_format(($response[11] * 100 / $response[10]), 2, '.', '');
                 } else {
-                    $achievementPercent = '';
+                    $achievementPercent = '0';
                 }
                 $response[12] = $achievementPercent;
             } else {
                 if (!isset($response[10])) {
-                    $response[10] = '';
+                    $response[10] = '0';
                 }
                 if (!isset($response[11])) {
-                    $response[11] = '';
+                    $response[11] = '0';
                 }
                 if (!isset($response[12])) {
-                    $response[12] = '';
+                    $response[12] = '0';
                 }
             }
         }
@@ -240,27 +238,27 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
                 $response[14] = number_format((PrimarySales::where('customer_id', $data['customer_id'])->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
                 // $response[14] = $data['achievements'][$key]??'';
                 if (isset($response[13]) && isset($response[14]) && !empty($response[14]) && !empty($response[13])) {
-                    $achievementPercent = ($response[13] == 0) ? 0 : ($response[14] * 100 / $response[13]);
+                    $achievementPercent = ($response[13] == 0) ? 0 : number_format(($response[14] * 100 / $response[13]), 2, '.', '');
                 } else {
-                    $achievementPercent = '';
+                    $achievementPercent = '0';
                 }
                 $response[15] = $achievementPercent;
             } else {
                 if (!isset($response[13])) {
-                    $response[13] = '';
+                    $response[13] = '0';
                 }
                 if (!isset($response[14])) {
-                    $response[14] = '';
+                    $response[14] = '0';
                 }
                 if (!isset($response[15])) {
-                    $response[15] = '';
+                    $response[15] = '0';
                 }
             }
         }
 
         $response[17] = '=H' . $this->rowIndex . ' + K' . $this->rowIndex . ' + N' . $this->rowIndex;
         $response[18] = '=I' . $this->rowIndex . ' + L' . $this->rowIndex . ' + O' . $this->rowIndex;
-        $response[19] = '=(J' . $this->rowIndex . ' + M' . $this->rowIndex . ' + P' . $this->rowIndex . ') / 3';
+        $response[19] = '=ROUND((J' . $this->rowIndex . ' + M' . $this->rowIndex . ' + P' . $this->rowIndex . ') / 3,2)';
 
         foreach ($data['months'] as $key => $month) {
             $year = explode(',', $data['years']);
@@ -271,7 +269,7 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
                 $response[21] = number_format((PrimarySales::where('customer_id', $data['customer_id'])->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
                 // $response[21] = $data['achievements'][$key]??'';
                 if (isset($response[20]) && isset($response[21]) && !empty($response[21]) && !empty($response[20])) {
-                    $achievementPercent = ($response[20] == 0) ? 0 : ($response[21] * 100 / $response[20]);
+                    $achievementPercent = ($response[20] == 0) ? 0 : number_format(($response[21] * 100 / $response[20]), 2, '.', '');
                 } else {
                     $achievementPercent = '';
                 }
@@ -298,7 +296,7 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
                 $response[24] = number_format((PrimarySales::where('customer_id', $data['customer_id'])->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
                 // $response[24] = $data['achievements'][$key]??'';
                 if (isset($response[23]) && isset($response[24]) && !empty($response[24]) && !empty($response[23])) {
-                    $achievementPercent = ($response[23] == 0) ? 0 : ($response[24] * 100 / $response[23]);
+                    $achievementPercent = ($response[23] == 0) ? 0 : number_format(($response[24] * 100 / $response[23]), 2, '.', '');
                 } else {
                     $achievementPercent = '';
                 }
@@ -325,7 +323,7 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
                 $response[27] = number_format((PrimarySales::where('customer_id', $data['customer_id'])->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
                 // $response[27] = $data['achievements'][$key]??'';
                 if (isset($response[26]) && isset($response[27]) && !empty($response[27]) && !empty($response[26])) {
-                    $achievementPercent = ($response[26] == 0) ? 0 : ($response[27] * 100 / $response[26]);
+                    $achievementPercent = ($response[26] == 0) ? 0 : number_format(($response[27] * 100 / $response[26]), 2, '.', '');
                 } else {
                     $achievementPercent = '';
                 }
@@ -345,7 +343,7 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
 
         $response[29] = '=T' . $this->rowIndex . ' + W' . $this->rowIndex . ' + Z' . $this->rowIndex;
         $response[30] = '=U' . $this->rowIndex . ' + X' . $this->rowIndex . ' + AA' . $this->rowIndex;
-        $response[31] = '=(V' . $this->rowIndex . ' + Y' . $this->rowIndex . ' + AB' . $this->rowIndex . ') / 3';
+        $response[31] = '=ROUND((V' . $this->rowIndex . ' + Y' . $this->rowIndex . ' + AB' . $this->rowIndex . ') / 3,2)';
 
 
         foreach ($data['months'] as $key => $month) {
@@ -357,7 +355,7 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
                 $response[33] = number_format((PrimarySales::where('customer_id', $data['customer_id'])->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
                 // $response[33] = $data['achievements'][$key]??'';
                 if (isset($response[32]) && isset($response[33]) && !empty($response[33]) && !empty($response[32])) {
-                    $achievementPercent = ($response[32] == 0) ? 0 : ($response[33] * 100 / $response[32]);
+                    $achievementPercent = ($response[32] == 0) ? 0 : number_format(($response[33] * 100 / $response[32]), 2, '.', '');
                 } else {
                     $achievementPercent = '';
                 }
@@ -384,7 +382,7 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
                 $response[36] = number_format((PrimarySales::where('customer_id', $data['customer_id'])->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
                 // $response[36] = $data['achievements'][$key]??'';
                 if (isset($response[35]) && isset($response[36]) && !empty($response[36]) && !empty($response[35])) {
-                    $achievementPercent = ($response[35] == 0) ? 0 : ($response[36] * 100 / $response[35]);
+                    $achievementPercent = ($response[35] == 0) ? 0 : number_format(($response[36] * 100 / $response[35]), 2, '.', '');
                 } else {
                     $achievementPercent = '';
                 }
@@ -411,7 +409,7 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
                 $response[39] = number_format((PrimarySales::where('customer_id', $data['customer_id'])->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
                 // $response[39] = $data['achievements'][$key]??'';
                 if (isset($response[38]) && isset($response[39]) && !empty($response[39]) && !empty($response[38])) {
-                    $achievementPercent = ($response[38] == 0) ? 0 : ($response[39] * 100 / $response[38]);
+                    $achievementPercent = ($response[38] == 0) ? 0 : number_format(($response[39] * 100 / $response[38]), 2, '.', '');
                 } else {
                     $achievementPercent = '';
                 }
@@ -431,7 +429,7 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
 
         $response[41] = '=AF' . $this->rowIndex . ' + AI' . $this->rowIndex . ' + AL' . $this->rowIndex;
         $response[42] = '=AG' . $this->rowIndex . ' + AJ' . $this->rowIndex . ' + AM' . $this->rowIndex;
-        $response[43] = '=(AH' . $this->rowIndex . ' + AK' . $this->rowIndex . ' + AN' . $this->rowIndex . ') / 3';
+        $response[43] = '=ROUND((AH' . $this->rowIndex . ' + AK' . $this->rowIndex . ' + AN' . $this->rowIndex . ') / 3,2)';
 
         foreach ($data['months'] as $key => $month) {
             $year = explode(',', $data['years']);
@@ -442,7 +440,7 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
                 $response[45] = number_format((PrimarySales::where('customer_id', $data['customer_id'])->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
                 // $response[45] = $data['achievements'][$key]??'';
                 if (isset($response[44]) && isset($response[45]) && !empty($response[45]) && !empty($response[44])) {
-                    $achievementPercent = ($response[44] == 0) ? 0 : ($response[45] * 100 / $response[44]);
+                    $achievementPercent = ($response[44] == 0) ? 0 : number_format(($response[45] * 100 / $response[44]), 2, '.', '');
                 } else {
                     $achievementPercent = '';
                 }
@@ -469,7 +467,7 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
                 $response[48] = number_format((PrimarySales::where('customer_id', $data['customer_id'])->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
                 // $response[48] = $data['achievements'][$key]??'';
                 if (isset($response[47]) && isset($response[48]) && !empty($response[48]) && !empty($response[47])) {
-                    $achievementPercent = ($response[47] == 0) ? 0 : ($response[48] * 100 / $response[47]);
+                    $achievementPercent = ($response[47] == 0) ? 0 : number_format(($response[48] * 100 / $response[47]), 2, '.', '');
                 } else {
                     $achievementPercent = '';
                 }
@@ -496,7 +494,7 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
                 $response[51] = number_format((PrimarySales::where('customer_id', $data['customer_id'])->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
                 // $response[51] = $data['achievements'][$key]??'';
                 if (isset($response[50]) && isset($response[51]) && !empty($response[51]) && !empty($response[50])) {
-                    $achievementPercent = ($response[50] == 0) ? 0 : ($response[51] * 100 / $response[50]);
+                    $achievementPercent = ($response[50] == 0) ? 0 : number_format(($response[51] * 100 / $response[50]), 2, '.', '');
                 } else {
                     $achievementPercent = '';
                 }
@@ -516,65 +514,85 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
 
         $response[53] = '=AR' . $this->rowIndex . ' + AU' . $this->rowIndex . ' + AX' . $this->rowIndex;
         $response[54] = '=AS' . $this->rowIndex . ' + AV' . $this->rowIndex . ' + AY' . $this->rowIndex;
-        $response[55] = '=(AT' . $this->rowIndex . ' + AW' . $this->rowIndex . ' + AZ' . $this->rowIndex . ') / 3';
+        $response[55] = '=ROUND((AT' . $this->rowIndex . ' + AW' . $this->rowIndex . ' + AZ' . $this->rowIndex . ') / 3,2)';
 
         $response[56] = '=Q' . $this->rowIndex . ' + AC' . $this->rowIndex . ' + AO' . $this->rowIndex . ' + BA' . $this->rowIndex;
         $response[57] = '=R' . $this->rowIndex . ' + AD' . $this->rowIndex . ' + AP' . $this->rowIndex . ' + BB' . $this->rowIndex;
-        $response[58] = '=(S' . $this->rowIndex . ' + AE' . $this->rowIndex . ' + AQ' . $this->rowIndex . ' + BC' . $this->rowIndex . ') / 4';
+        $response[58] = '=ROUND((S' . $this->rowIndex . ' + AE' . $this->rowIndex . ' + AQ' . $this->rowIndex . ' + BC' . $this->rowIndex . ') / 4,2)';
 
         $this->rowIndex++;
 
         return $response;
     }
 
-    public function styles(Worksheet $sheet)
+    public function styles(Worksheet $sheet) {}
+
+    public function registerEvents(): array
     {
-        $sheet->mergeCells('A1:A2');
-        $sheet->mergeCells('B1:B2');
-        $sheet->mergeCells('C1:C2');
-        $sheet->mergeCells('D1:D2');
-        $sheet->mergeCells('E1:E2');
-        $sheet->mergeCells('F1:F2');
-        $sheet->mergeCells('G1:G2');
-        $sheet->mergeCells('H1:J1');
-        $sheet->mergeCells('K1:M1');
-        $sheet->mergeCells('N1:P1');
-        $sheet->mergeCells('Q1:S1');
-        $sheet->mergeCells('T1:V1');
-        $sheet->mergeCells('W1:Y1');
-        $sheet->mergeCells('Z1:AB1');
-        $sheet->mergeCells('AC1:AE1');
-        $sheet->mergeCells('AF1:AH1');
-        $sheet->mergeCells('AI1:AK1');
-        $sheet->mergeCells('AL1:AN1');
-        $sheet->mergeCells('AO1:AQ1');
-        $sheet->mergeCells('AR1:AT1');
-        $sheet->mergeCells('AU1:AW1');
-        $sheet->mergeCells('AX1:AZ1');
-        $sheet->mergeCells('BA1:BC1');
-        $sheet->mergeCells('BD1:BF1');
+        return [
+            AfterSheet::class => function (AfterSheet $event) {
+                $lastRow = $event->sheet->getHighestDataRow() + 2;
+                $lastColumn = $event->sheet->getHighestDataColumn();
 
-        $sheet->getStyle('A1:ZZ1')->applyFromArray([
-            'font' => [
-                'bold' => true
-            ],
-            'background' => [
-                'color' => '#000000'
-            ],
-            'alignment' => [
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-            ],
-        ]);
+                $event->sheet->mergeCells('A1:A2');
+                $event->sheet->mergeCells('B1:B2');
+                $event->sheet->mergeCells('C1:C2');
+                $event->sheet->mergeCells('D1:D2');
+                $event->sheet->mergeCells('E1:E2');
+                $event->sheet->mergeCells('F1:F2');
+                $event->sheet->mergeCells('G1:G2');
+                $event->sheet->mergeCells('H1:J1');
+                $event->sheet->mergeCells('K1:M1');
+                $event->sheet->mergeCells('N1:P1');
+                $event->sheet->mergeCells('Q1:S1');
+                $event->sheet->mergeCells('T1:V1');
+                $event->sheet->mergeCells('W1:Y1');
+                $event->sheet->mergeCells('Z1:AB1');
+                $event->sheet->mergeCells('AC1:AE1');
+                $event->sheet->mergeCells('AF1:AH1');
+                $event->sheet->mergeCells('AI1:AK1');
+                $event->sheet->mergeCells('AL1:AN1');
+                $event->sheet->mergeCells('AO1:AQ1');
+                $event->sheet->mergeCells('AR1:AT1');
+                $event->sheet->mergeCells('AU1:AW1');
+                $event->sheet->mergeCells('AX1:AZ1');
+                $event->sheet->mergeCells('BA1:BC1');
+                $event->sheet->mergeCells('BD1:BF1');
 
-        $sheet->getStyle('A2:ZZ2')->applyFromArray([
-            'font' => [
-                'bold' => true,
-            ],
-            'alignment' => [
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-            ],
-        ]);
+                
+                $event->sheet->getStyle('A1:' . $lastColumn . '2')->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                        'color' => ['rgb' => 'FFFFFF'],
+                    ],
+                    'alignment' => [
+                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                        'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                    ],
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => '336677'],
+                    ],
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['argb' => '000000'],
+                        ],
+                    ],
+                ]);
+
+                $event->sheet->getStyle('A3:' . $lastColumn . '' . ($lastRow - 2))->applyFromArray([
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['argb' => '000000'],
+                        ],
+                    ],
+                    'alignment' => [
+                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
+                    ],
+                ]);
+            },
+        ];
     }
 }

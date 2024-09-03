@@ -28,6 +28,8 @@ class CutomerOutstantingTemplate implements FromCollection,WithHeadings,ShouldAu
             'Customer ID',
             'User ID',
             'Customer Name', 
+            'Year',
+            'Quarter',
             '0-30',
             '31-60',
             '61-90',

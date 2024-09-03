@@ -105,9 +105,6 @@ class CheckinExport implements FromCollection, WithHeadings, ShouldAutoSize, Wit
             // isset($data['orders']) ? $data['orders']->sum('grand_total') : 0,
             $sum_qty,
             (!empty($data['orders_sum'])) ? $data['orders_sum']->sum('grand_total') : 0,
-
-
-
         ];
     }
 }

@@ -142,8 +142,21 @@
             @endif
             @if(auth()->user()->can(['dealer_appointment_edit']))
             <a href="{{route('dealer-appointment.edit', $dealerAppointment->id)}}" class="btn btn-info btn-sm ml-2" title="Edit Appointment Form">Edit</a>
-            <a href="{{ url('/dealer-appointments') }}" class="btn btn-primary btn-sm ml-2">Back</a>
             @endif
+            @if(auth()->user()->can(['dealer_appointment_reject']))
+            @if($dealerAppointment->approval_status != '4')
+            <button type="button" class="btn btn-sm btn-danger ml-2" onclick="changeStatus('4','{{$dealerAppointment->id}}')">Reject</button>
+            @else
+            <button type="button" class="btn btn-sm btn-warning ml-2" onclick="changeStatus('0','{{$dealerAppointment->id}}')">Pending</button>
+            <button type="button" class="btn btn-sm btn-danger ml-2">Rejected</button>
+            @endif
+            @endif
+            @if($dealerAppointment->division == 'PUMP&MOTORS')
+            <button type="button" class="btn btn-info ml-2" data-toggle="modal" data-target="#exampleModal">
+              BM Remark
+            </button>
+            @endif
+            <a href="{{ url('/dealer-appointments') }}" class="btn btn-primary btn-sm ml-2">Back</a>
           </div>
         </div>
 
@@ -362,31 +375,40 @@
             <div class="row mt-4">
               <div class="col-md-4">
                 <div class="form-group row">
-                  <div class="col-md-6">
-                    <label> PUMP & MOTORS </label>
-                  </div>
-                  <div class="col-md-6">
+                  <div class="col-md-2 p-0 pr-1">
                     <input class="form-check-input ml-3" type="radio" name="security_deposit" value="10000" disabled {{($dealerAppointment->security_deposit == '10000')?'checked':''}}>
                   </div>
+                  <div class="col-md-6 p-0">
+                    <label> PUMP & MOTORS </label>
+                  </div>
+                  <div class="col-md-3 p-0">
+                    <h4>10000</h4>
+                  </div>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="form-group row">
-                  <div class="col-md-2">
-                    <label> F&A </label>
-                  </div>
-                  <div class="col-md-6">
+                  <div class="col-md-2 p-0 pr-1">
                     <input class="form-check-input ml-3" type="radio" name="security_deposit&A" value="5000" disabled {{($dealerAppointment->security_deposit == '5000')?'checked':''}}>
                   </div>
+                  <div class="col-md-2 p-0">
+                    <label> F&A </label>
+                  </div>
+                  <div class="col-md-7 p-0">
+                    <h4>5000</h4>
+                  </div>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="form-group row">
-                  <div class="col-md-2">
+                  <div class="col-md-2 p-0 pr-1">
+                    <input class="form-check-input ml-3" type="radio" name="security_deposit" value="100000" disabled {{($dealerAppointment->security_deposit == '100000')?'checked':''}}>
+                  </div>
+                  <div class="col-md-3 p-0">
                     <label> AGRI </label>
                   </div>
-                  <div class="col-md-6">
-                    <input class="form-check-input ml-3" type="radio" name="security_deposit" value="100000" disabled {{($dealerAppointment->security_deposit == '100000')?'checked':''}}>
+                  <div class="col-md-7 p-0">
+                    <h4>100000</h4>
                   </div>
                 </div>
               </div>
@@ -1015,6 +1037,28 @@
       </div>
       <div class="col-1"></div>
 
+      <!-- BM Remark Modal -->
+      <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Branch Manager Remark</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              Remark :- <b>{{$dealerAppointment->bm_remark??'......'}}</b> <br>
+              BY :- <b>{{$dealerAppointment->bm_remark_user_details?$dealerAppointment->bm_remark_user_details->name:'......'}}</b>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+            </div>
+          </div>
+        </div>
+      </div>
+
 
       <link rel="stylesheet" href="{{ url('/').'/'.asset('lightboxx/css/lightbox.min.css') }}">
 
@@ -1027,7 +1071,7 @@
             var printWindow = window.open('', '_blank', 'width=800,height=600');
             printWindow.document.write('<html><head><title>Grey-Meter</title>');
             printWindow.document.write('<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">');
-            printWindow.document.write('<style>p.attach-p{font-weight: 900;font-family: cursive;position: relative;}p.attach-p:before {content: " ";position: absolute;width: 100px;height: 5px;top: 24px;background: radial-gradient(#00aadb, transparent);left: 105px;}	input[type="checkbox"].form-check-input {border: 2px solid !important;width: 20px !important;height: 20px !important;opacity: 1 !important;float: right !important;position: relative !important;z-index: 99999 !important;}.all-attachments-div{display:none;}.all-attachments{display:none;}.profile-pic-container {position: absolute;width: 200px;height: 200px;}.profile-pic {width: 100%;height: 100%;border-radius: 5%;overflow: hidden;border: 2px solid #ccc;display: flex;justify-content: center;align-items: center;text-align: center;}.profile-pic img {width: 100%;height: 100%;object-fit: cover;}</style>');
+            printWindow.document.write('<style>p.attach-p{font-weight: 900;font-family: cursive;position: relative;}p.attach-p:before {content: " ";position: absolute;width: 100px;height: 5px;top: 24px;background: radial-gradient(#00aadb, transparent);left: 105px;}	input.form-check-input {border: 2px solid !important;width: 20px !important;height: 20px !important;opacity: 1 !important;float: right !important;position: relative !important;z-index: 99999 !important;}.all-attachments-div{display:none;}.all-attachments{display:none;}.profile-pic-container {position: absolute;width: 200px;height: 200px;}.profile-pic {width: 100%;height: 100%;border-radius: 5%;overflow: hidden;border: 2px solid #ccc;display: flex;justify-content: center;align-items: center;text-align: center;}.profile-pic img {width: 100%;height: 100%;object-fit: cover;}</style>');
             printWindow.document.write('</head><body>');
             printWindow.document.write(printContents);
             printWindow.document.write('<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"><\/script>');

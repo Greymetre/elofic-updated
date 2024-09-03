@@ -35,6 +35,8 @@ class BranchStockExport implements FromCollection, WithHeadings, ShouldAutoSize,
         $data = BranchStock::with('branch','division')->select(
             'division_id',
             'branch_id',
+            'year',
+            'quarter',
             DB::raw('SUM(amount) as total_amounts'),
             DB::raw('GROUP_CONCAT(amount) as amounts'),
             DB::raw('GROUP_CONCAT(days) as days'),
@@ -43,7 +45,7 @@ class BranchStockExport implements FromCollection, WithHeadings, ShouldAutoSize,
         if($this->branch_id && !empty($this->branch_id)){
             $data->where('branch_id', $this->branch_id);
         }
-        $data = $data->groupBy('division_id','branch_id')->get();
+        $data = $data->groupBy('division_id','branch_id', 'year', 'quarter',)->get();
 
         return $data;
     }
@@ -55,6 +57,8 @@ class BranchStockExport implements FromCollection, WithHeadings, ShouldAutoSize,
             'Branch ID',
             'Branch Name',
             'Division ID',
+            'Year',
+            'Quarter',
             '0-30',
             '31-60',
             '61-90',
@@ -75,6 +79,8 @@ class BranchStockExport implements FromCollection, WithHeadings, ShouldAutoSize,
             $data->branch_id ? $data->branch_id : '-',
             $data->branch ? $data->branch->branch_name : '-',
             $data->division_id ? $data->division_id : '-',
+            $data->year ? $data->year : '-',
+            $data->quarter ? $data->quarter : '-',
             $day_wise_amount_array['0-30'] ?? '0',
             $day_wise_amount_array['31-60'] ?? '0',
             $day_wise_amount_array['61-90'] ?? '0',

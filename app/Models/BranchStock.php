@@ -9,7 +9,7 @@ class BranchStock extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['branch_id', 'branch_name', 'division_id', 'amount', 'days', 'created_at', 'updated_at'];
+    protected $fillable = ['branch_id', 'branch_name', 'division_id', 'amount', 'days', 'year', 'quarter', 'created_at', 'updated_at'];
 
     public $timestamps = true;
 

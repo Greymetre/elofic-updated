@@ -318,7 +318,7 @@ class SalesTargetUsersController extends Controller
     public function sales_dealers_target_achievement(Request $request)
     {
 
-        $query = SalesTargetCustomers::with(['customer'])->where(function ($query) use ($request) {
+        $query = SalesTargetCustomers::with(['customer', 'customer.createdbyname'])->where(function ($query) use ($request) {
 
             if ($request->month && $request->month != '' && $request->month != null) {
                 $query->where('month', $request->month);
