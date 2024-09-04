@@ -305,10 +305,10 @@ class ExpensesController extends Controller
             ->orderBy('checkin_time', 'asc')
             ->get();
         $total_dis = 0;
-        foreach ($checkins as $k=>$checkin) {
-            if($k <= (count($checkins) - 2)){
+        foreach ($checkins as $k => $checkin) {
+            if ($k <= (count($checkins) - 2)) {
                 if (!empty($checkin->checkin_latitude) && !empty($checkin->checkin_longitude) && !empty($checkin->checkout_latitude) && !empty($checkin->checkout_longitude)) {
-                    $total_dis += haversineGreatCircleDistance($checkin->checkin_latitude, $checkin->checkin_longitude, $checkins[$k+1]->checkin_latitude,$checkins[$k+1]->checkin_longitude,);
+                    $total_dis += haversineGreatCircleDistance($checkin->checkin_latitude, $checkin->checkin_longitude, $checkins[$k + 1]->checkin_latitude, $checkins[$k + 1]->checkin_longitude,);
                 }
             }
         }
@@ -687,9 +687,9 @@ class ExpensesController extends Controller
         $expenses->checker_status = $status;
         $expenses->approve_reject_by = Auth::user()->id;
         $expenses->save();
-        if($status == '3'){
+        if ($status == '3') {
             $status_type = 'Checked';
-        }elseif($status == '4'){
+        } elseif ($status == '4') {
             $status_type = 'Checked By Reporting';
         }
 
@@ -825,27 +825,51 @@ class ExpensesController extends Controller
 
     public function all_map(Request $request)
     {
-        $coordinates = [];
 
-        $attan = Attendance::where('user_id', $request->id)->where('punchin_date', '2024-03-02')->first();
-        $checks = CheckIn::with('customers')->where('user_id', $request->id)->where('checkin_date', '2024-03-02')->get();
+        $rules = [
+            'user_id'          => 'required',
+            'date'            => 'required',
+        ];
 
-        $coordinates[0]['latitude'] = $attan->punchin_latitude;
-        $coordinates[0]['longitude'] = $attan->punchin_longitude;
-        $coordinates[0]['name'] = 'Punch In';
-        $i = 1;
-        foreach($checks as $check){
-            $coordinates[$i]['latitude'] = $check->checkin_latitude;
-            $coordinates[$i]['longitude'] = $check->checkin_longitude;
-            $coordinates[$i]['name'] = ($check->customers?$check->customers->name:'-').' : Check In';
-            $i++;
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->passes()) {
+            $coordinates = [];
+
+            $attan = Attendance::where('user_id', $request->user_id)->where('punchin_date', $request->date)->first();
+            $checks = CheckIn::with('customers')->where('user_id', $request->user_id)->where('checkin_date', $request->date)->get();
+
+            if ($attan) {
+
+                $coordinates[0]['latitude'] = $attan->punchin_latitude;
+                $coordinates[0]['longitude'] = $attan->punchin_longitude;
+                $coordinates[0]['name'] = 'Punch In';
+                $coordinates[0]['time'] = $attan->punchin_time ? Carbon::createFromFormat('H:i:s', $attan->punchin_time)->format('g:i A') : '-';
+                $i = 1;
+                foreach ($checks as $check) {
+                    $coordinates[$i]['latitude'] = $check->checkin_latitude;
+                    $coordinates[$i]['longitude'] = $check->checkin_longitude;
+                    $coordinates[$i]['name'] = ($check->customers ? $check->customers->name : '-') . ' : Check In';
+                    $coordinates[$i]['time'] = $check->checkin_time ? Carbon::createFromFormat('H:i:s', $check->checkin_time)->format('g:i A') : '-';
+                    $i++;
+                    // $coordinates[$i]['latitude'] = $check->checkout_latitude;
+                    // $coordinates[$i]['longitude'] = $check->checkout_longitude;
+                    // $coordinates[$i]['name'] = ($check->customers ? $check->customers->name : '-') . ' : Check Out';
+                    // $coordinates[$i]['time'] = $check->checkout_time?Carbon::createFromFormat('H:i:s', $check->checkout_time)->format('g:i A'):'-';
+                    // $i++;
+                }
+                if ($attan->punchout_latitude && !empty($attan->punchout_latitude)) {
+                    $coordinates[$i]['latitude'] = $attan->punchout_latitude;
+                    $coordinates[$i]['longitude'] = $attan->punchout_longitude;
+                    $coordinates[$i]['name'] = 'Punch Out';
+                    $coordinates[$i]['time'] = $attan->punchout_time ? Carbon::createFromFormat('H:i:s', $attan->punchout_time)->format('g:i A') : '-';
+                }
+
+                return view('map.route', compact('coordinates'));
+            } else {
+                return redirect()->back()->withErrors('No Activity Found');
+            }
+        } else {
+            return redirect()->back()->withErrors($validator)->withInput();
         }
-
-        $coordinates[$i]['latitude'] = $attan->punchout_latitude;
-        $coordinates[$i]['longitude'] = $attan->punchout_longitude;
-        $coordinates[$i]['name'] = 'Punch Out';
-
-        return view('map.route', compact('coordinates'));
-
     }
 }
