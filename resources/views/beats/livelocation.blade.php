@@ -27,65 +27,71 @@
                     </div>
                     @endif
                     <h5 class="font-weight-normal mt-4">User Live Location</h5>
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="dropdown bootstrap-select show-tick">
-                                <select class="selectpicker" multiple id="branch_id" name="branch_id" data-style="select-with-transition" title="Choose Branch" data-size="10" tabindex="-98">
-                                    <option disabled=""> Select Branch</option>
-                                    @if(@isset($branches ))
-                                    @foreach($branches as $branch)
-                                    <option value="{!! $branch['id'] !!}">{!! $branch['name'] !!}</option>
-                                    @endforeach
-                                    @endif
-                                </select>
+                    <form target="_blank" method="post" action="{{url('map-all')}}">
+                        @csrf
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="dropdown bootstrap-select show-tick">
+                                    <select class="selectpicker" multiple id="branch_id" name="branch_id" data-style="select-with-transition" title="Choose Branch" data-size="10" tabindex="-98">
+                                        <option disabled=""> Select Branch</option>
+                                        @if(@isset($branches ))
+                                        @foreach($branches as $branch)
+                                        <option value="{!! $branch['id'] !!}">{!! $branch['name'] !!}</option>
+                                        @endforeach
+                                        @endif
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="dropdown bootstrap-select show-tick">
+                                    <select class="selectpicker" multiple id="division_id" name="division_id" data-style="select-with-transition" title="Choose Division" data-size="10" tabindex="-98">
+                                        <option disabled=""> Select Division</option>
+                                        @if(@isset($divisions ))
+                                        @foreach($divisions as $division)
+                                        <option value="{!! $division['id'] !!}">{!! $division['name'] !!}</option>
+                                        @endforeach
+                                        @endif
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="dropdown bootstrap-select show-tick">
+                                    <select class="selectpicker" multiple id="department_id" name="department_id" data-style="select-with-transition" title="Choose Department" data-size="10" tabindex="-98">
+                                        <option disabled=""> Select Department</option>
+                                        @if(@isset($departments ))
+                                        @foreach($departments as $department)
+                                        <option value="{!! $department['id'] !!}">{!! $department['name'] !!}</option>
+                                        @endforeach
+                                        @endif
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="dropdown bootstrap-select show-tick">
+                                    <select class="select2" id="user_id" name="user_id" data-style="select-with-transition" title="Choose User" data-size="10" tabindex="-98" required>
+                                        <option disabled="" selected> Select Users</option>
+                                        @if(@isset($users ))
+                                        @foreach($users as $user)
+                                        <option {{(!empty($user_id) && $user_id == $user['id'])?'selected':''}} value="{!! $user['id'] !!}">{!! $user['name'] !!}</option>
+                                        @endforeach
+                                        @endif
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group has-default bmd-form-group">
+                                    <input type="text" class="form-control datepicker" id="date" required name="date" value="{{$date??''}}" placeholder="Select Date" autocomplete="off" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-info" onclick="getActivityData()">Activity</button>
+                            </div>
+                            <div class="col-md-3 pl-0">
+                                <!-- <button type="button" class="btn btn-info btn-sm" onclick="getLocationData()">Location</button> -->
+                                <input type="submit" class="btn btn-primary" value="Complete Map">
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="dropdown bootstrap-select show-tick">
-                                <select class="selectpicker" multiple id="division_id" name="division_id" data-style="select-with-transition" title="Choose Division" data-size="10" tabindex="-98">
-                                    <option disabled=""> Select Division</option>
-                                    @if(@isset($divisions ))
-                                    @foreach($divisions as $division)
-                                    <option value="{!! $division['id'] !!}">{!! $division['name'] !!}</option>
-                                    @endforeach
-                                    @endif
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="dropdown bootstrap-select show-tick">
-                                <select class="selectpicker" multiple id="department_id" name="department_id" data-style="select-with-transition" title="Choose Department" data-size="10" tabindex="-98">
-                                    <option disabled=""> Select Department</option>
-                                    @if(@isset($departments ))
-                                    @foreach($departments as $department)
-                                    <option value="{!! $department['id'] !!}">{!! $department['name'] !!}</option>
-                                    @endforeach
-                                    @endif
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="dropdown bootstrap-select show-tick">
-                                <select class="select2" id="user_id" name="user_id" data-style="select-with-transition" title="Choose User" data-size="10" tabindex="-98">
-                                    <option disabled="" selected> Select Users</option>
-                                    @if(@isset($users ))
-                                    @foreach($users as $user)
-                                    <option {{(!empty($user_id) && $user_id == $user['id'])?'selected':''}} value="{!! $user['id'] !!}">{!! $user['name'] !!}</option>
-                                    @endforeach
-                                    @endif
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group has-default bmd-form-group">
-                                <input type="text" class="form-control datepicker" id="date" name="date" value="{{$date??''}}" placeholder="Select Date" autocomplete="off" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <!-- <button class="btn btn-info btn-sm" onclick="getLocationData()">Location</button> -->
-                            <button class="btn btn-info btn-sm" onclick="getActivityData()">Activity</button>
-                        </div>
-                    </div>
+                    </form>
                     <div class="row p-3">
                         <div class="col-md-7">
                             <div id="map" style="width: 500px; height: 400px;"></div>
@@ -111,7 +117,7 @@
         function getLocationData(lat, lang) {
             if (lat != '' && lang != '') {
                 var map = new google.maps.Map(document.getElementById('map'), {
-                    zoom: 18,
+                    zoom: 12,
                     center: new google.maps.LatLng(lat, lang),
                     mapTypeId: google.maps.MapTypeId.ROADMAP
                 });
@@ -184,7 +190,7 @@
                                 '<h5 style="font-weight: bold;">' + item.title + '</h5>' +
                                 '</div>' +
                                 '<h6><i class="ti-time"></i> ' + item.msg + '</h6>' +
-                                '<button class="btn btn-info btn-sm" onclick="getLocationData(' + item.latitude + ',' + item.longitude +')">Location</button>' +
+                                '<button class="btn btn-info btn-sm" onclick="getLocationData(' + item.latitude + ',' + item.longitude + ')">Location</button>' +
                                 '</div>' +
                                 '</li>');
                         });
@@ -219,46 +225,46 @@
         })
 
         $("#division_id").on('change', function() {
-         var search_divisions = $(this).val();
-         $.ajax({
-             url: "{{ url('livelocation') }}",
-             data: {
-                 "search_divisions": search_divisions
-             },
-             success: function(res) {
-                 if (res.status == true) {
-                     var select = $('#user_id');
-                     select.empty();
-                     select.append('<option>Select User</option>');
-                     $.each(res.users, function(k, v) {
-                         select.append('<option value="' + v.id + '" >' + v.name + '</option>');
-                     });
-                     select.selectpicker('refresh');
-                 }
-             }
-         });
+            var search_divisions = $(this).val();
+            $.ajax({
+                url: "{{ url('livelocation') }}",
+                data: {
+                    "search_divisions": search_divisions
+                },
+                success: function(res) {
+                    if (res.status == true) {
+                        var select = $('#user_id');
+                        select.empty();
+                        select.append('<option>Select User</option>');
+                        $.each(res.users, function(k, v) {
+                            select.append('<option value="' + v.id + '" >' + v.name + '</option>');
+                        });
+                        select.selectpicker('refresh');
+                    }
+                }
+            });
 
-     })
+        })
 
         $("#department_id").on('change', function() {
-         var search_departments = $(this).val();
-         $.ajax({
-             url: "{{ url('livelocation') }}",
-             data: {
-                 "search_departments": search_departments
-             },
-             success: function(res) {
-                 if (res.status == true) {
-                     var select = $('#user_id');
-                     select.empty();
-                     select.append('<option>Select User</option>');
-                     $.each(res.users, function(k, v) {
-                         select.append('<option value="' + v.id + '" >' + v.name + '</option>');
-                     });
-                     select.selectpicker('refresh');
-                 }
-             }
-         });
-     })
+            var search_departments = $(this).val();
+            $.ajax({
+                url: "{{ url('livelocation') }}",
+                data: {
+                    "search_departments": search_departments
+                },
+                success: function(res) {
+                    if (res.status == true) {
+                        var select = $('#user_id');
+                        select.empty();
+                        select.append('<option>Select User</option>');
+                        $.each(res.users, function(k, v) {
+                            select.append('<option value="' + v.id + '" >' + v.name + '</option>');
+                        });
+                        select.selectpicker('refresh');
+                    }
+                }
+            });
+        })
     </script>
 </x-app-layout>
