@@ -208,7 +208,33 @@ function getCityList()
       }
     });
   }
-} 
+}
+
+function getCityListMultiDis()
+{
+  var district_id = $('.district').val();
+  var base_url =$('.baseurl').data('baseurl'); 
+  if(district_id){
+    $.ajax({
+      url: base_url + '/getCity',
+      dataType: "json",
+      type: "GET",
+      data:{ _token: "{{csrf_token()}}", district_id:district_id},
+      success: function(res){
+        $(".city").empty();
+        $(".pincode").empty();
+        if(res)
+        {
+          $(".city").append('<option value="">Select City</option>');
+          $.each(res, function(key, item) 
+          {
+            $('.city').append('<option value="' + item.id + '">' + item.city_name + '</option>');
+          });
+        }
+      }
+    });
+  }
+}
 
 function getPincodeList()
 {

@@ -60,7 +60,7 @@
         </div>
         @endif
         <div class="table-responsive">
-          <table id="getbeat" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
+          <table id="getbeat" class="table">
             <thead class=" text-primary">
               <th>{!! trans('panel.global.no') !!}</th>
               <th>{!! trans('panel.global.action') !!}</th>
@@ -91,13 +91,13 @@ $(document).ready(function() {
         "columns": [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
             {data: 'action', name: 'action',"defaultContent": '', orderable: false, searchable: false},
-            {data: 'beat_name', name: 'beat_name',"defaultContent": ''},
-            {data: 'description', name: 'description',"defaultContent": ''},
-            {data: 'cityname.city_name', name: 'cityname.city_name',"defaultContent": ''},
-            {data: 'districtname.district_name', name: 'districtname.district_name',"defaultContent": ''},
-            {data: 'statename.state_name', name: 'statename.state_name',"defaultContent": ''},
-            {data: 'createdbyname.name', name: 'createdbyname.name',"defaultContent": ''},
-            {data: 'created_at', name: 'created_at',"defaultContent": ''},
+            {data: 'beat_name', name: 'beat_name',"defaultContent": '', orderable: false},
+            {data: 'description', name: 'description',"defaultContent": '', orderable: false},
+            {data: 'city_name', name: 'city_name',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'district_name', name: 'district_name',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'statename.state_name', name: 'statename.state_name',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'createdbyname.name', name: 'createdbyname.name',"defaultContent": '', orderable: false, searchable: false},
+            {data: 'created_at', name: 'created_at',"defaultContent": '', orderable: false, searchable: false},
         ]
     });
 });

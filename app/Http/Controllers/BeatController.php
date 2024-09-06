@@ -59,11 +59,17 @@ class BeatController extends Controller
      */
     public function store(BeatRequest $request)
     {
-      try
-      { 
+      // try
+      // { 
         ////abort_if(Gate::denies('beat_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $request['active'] = 'Y';
         $request['created_by'] = Auth::user()->id;
+        if(is_array($request->district_id)){
+          $request['district_id'] = implode(',', $request->district_id);
+        }
+        if(is_array($request->city_id)){
+          $request['city_id'] = implode(',', $request->city_id);
+        }
         $response = $this->beats->create([
           'active' => 'Y',
           'beat_name' => isset($request['beat_name'])? ucfirst($request['beat_name']):'',
@@ -151,11 +157,11 @@ class BeatController extends Controller
           return Redirect::to('beats')->with('message_success', 'beats Store Successfully');
         }
         return redirect()->back()->with('message_danger', 'Error in beats Store')->withInput();  
-      }         
-      catch(\Exception $e)
-      {
-        return redirect()->back()->withErrors($e->getMessage())->withInput();
-      }
+      // }         
+      // catch(\Exception $e)
+      // {
+      //   return redirect()->back()->withErrors($e->getMessage())->withInput();
+      // }
     }
 
     /**
@@ -169,6 +175,10 @@ class BeatController extends Controller
       ////abort_if(Gate::denies('beat_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
       $id = decrypt($id);
       $beats = Beat::with('beatusers')->find($id);
+      $city_names = City::whereIn('id', explode(',', $beats->city_id))->pluck('city_name')->toArray();
+      $beats['city_name'] = implode(',', $city_names);
+      $district_names = District::whereIn('id', explode(',', $beats->district_id))->pluck('district_name')->toArray();
+      $beats['district_name'] = implode(',', $district_names);
       $schedules = BeatSchedule::where('beat_id' , $id)->get();
       $customers = BeatCustomer::where('beat_id' , $id)->get();
       return view('beats.show',compact('schedules','customers'))->with('beats',$beats);

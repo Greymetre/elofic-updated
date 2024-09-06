@@ -83,7 +83,7 @@ class BeatController extends Controller
         try
         { 
             $user_id = $request->user()->id;
-            $beats = Beat::with('cityname')->whereHas('beatusers', function ($query) use($user_id){
+            $beats = Beat::whereHas('beatusers', function ($query) use($user_id){
                                 $query->where('user_id', '=', $user_id);
                             })
                             ->where(function ($query) use($request) {

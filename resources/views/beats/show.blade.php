@@ -23,9 +23,9 @@
 						<p class="text-sm"> {!! $beats['description'] !!} </p>
 						<hr class="horizontal gray-light my-4">
 						<ul class="list-group"> @if($beats['statename']['state_name'])
-							<li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">State:</strong> &nbsp; {!! $beats['statename']['state_name'] !!}</li> @endif @if($beats['districtname']['district_name'])
-							<li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">District:</strong> &nbsp; {!! $beats['districtname']['district_name'] !!}</li>@endif @if($beats['cityname']['city_name'])
-							<li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">City:</strong> &nbsp; {!! $beats['cityname']['city_name'] !!}</li> @endif @if($beats['createdbyname']['name'])
+							<li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">State:</strong> &nbsp; {!! $beats['statename']['state_name'] !!}</li> @endif @if($beats['district_name'])
+							<li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">District:</strong> &nbsp; {!! $beats['district_name'] !!}</li>@endif @if($beats['city_name'])
+							<li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">City:</strong> &nbsp; {!! $beats['city_name'] !!}</li> @endif @if($beats['createdbyname']['name'])
 							<li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Created By:</strong> &nbsp; {!! $beats['createdbyname']['name'] !!}</li> @endif </ul>
 						<hr class="horizontal gray-light my-4">
 						<h6 class="text-uppercase text-body text-xs font-weight-bolder">Users</h6>

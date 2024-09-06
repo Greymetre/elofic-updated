@@ -83,12 +83,13 @@
                      <div class="row">
                         <label class="col-md-3 col-form-label">Employee</label>
                         <div class="col-md-9">
+                           
                            <div class="form-group has-default bmd-form-group">
                               <select class="form-control select2" name="executive_id" style="width: 100%;">
                                  <option value="">Select Employee</option>
                                  @if(@isset($users ))
                                  @foreach($users as $user)
-                                 <option value="{!! $user['id'] !!}" {{ old( 'executive_id' , (!empty($orders->executive_id))?($orders->executive_id):('') ) == $user['id'] ? 'selected' : '' }}>{!! $user['name'] !!}</option>
+                                 <option value="{!! $user['id'] !!}" {{ old( 'executive_id' , (!empty($orders->executive_id)?$orders->executive_id:($orders->created_by??'') )) == $user['id'] ? 'selected' : '' }}>{!! $user['name'] !!}</option>
                                  @endforeach
                                  @endif
                               </select>
