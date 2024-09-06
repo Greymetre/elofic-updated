@@ -60,13 +60,24 @@ class AjaxController extends Controller
     {
         try {
             $district = $request->input('district_id');
-            $cities = City::where(function ($query) use ($district) {
-                if (isset($district)) {
-                    $query->where('district_id', '=', $district);
-                }
-                $query->where('active', '=', 'Y');
-            })
+            if( is_array($district)){
+                $cities = City::where(function ($query) use ($district) {
+                    if (isset($district) && count($district) > 0) {
+                        $query->whereIn('district_id', $district);
+                    }
+                    $query->where('active', '=', 'Y');
+                })
                 ->select('id', 'city_name')->orderBy('city_name', 'asc')->get();
+            }else{
+                $cities = City::where(function ($query) use ($district) {
+                    if (isset($district)) {
+                        $query->where('district_id', '=', $district);
+                    }
+                    $query->where('active', '=', 'Y');
+                })
+                ->select('id', 'city_name')->orderBy('city_name', 'asc')->get();
+
+            }
             return response()->json($cities);
         } catch (\Exception $e) {
             return $e;
@@ -302,11 +313,23 @@ class AjaxController extends Controller
                     if (isset($state)) {
                         $query->where('state_id', '=', $state);
                     }
-                    if (isset($district)) {
-                        $query->where('district_id', '=', $district);
+                    if(is_array($district)){
+                        if (count($district) > 0) {
+                            $query->whereIn('district_id', $district);
+                        }
+                    }else{
+                        if (isset($district)) {
+                            $query->where('district_id', '=', $district);
+                        }
                     }
-                    if (isset($city)) {
-                        $query->where('city_id', '=', $city);
+                    if(is_array($city)){
+                        if (count($city) > 0) {
+                            $query->whereIn('city_id', $city);
+                        }
+                    }else{
+                        if (isset($city)) {
+                            $query->where('city_id', '=', $city);
+                        }
                     }
                 })
                 ->select('id', 'name', 'mobile', 'first_name', 'last_name')

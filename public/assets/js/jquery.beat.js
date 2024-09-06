@@ -31,8 +31,9 @@ function getRetailerlist()
     var base_url =$('.baseurl').data('baseurl'); 
     var token = $("meta[name='csrf-token']").attr("content");
     var state_id = $("select[name=state_id]").val();
-    var district_id = $("select[name=district_id]").val();
-    var city_id = $("select[name=city_id]").val();
+    var district_id = $(".district").val();
+    var city_id = $(".city").val();
+    console.log(district_id,city_id);
     var users = [];    
     $(".user :selected").each(function(){
       users.push($(this).val()); 
@@ -43,15 +44,14 @@ function getRetailerlist()
         type: "POST",
         data:{ "_token": token, state_id : state_id, district_id : district_id, city_id : city_id, user_id : users },
         success: function(res){
-          console.log(res);
             var table = document.getElementById(tab_beat_customer),rIndex;
             if(res){
               $('#tab_beat_customer tr:last').find(".customer").empty();
                 $('#tab_beat_customer tr:last').find(".customer").append('<option value="">Select Customer</option>');
               $.each(res,function(key,value){ 
                 $('#tab_beat_customer tr:last').find('.customer').append('<option value="'+value.id+'">'+value.name+' '+value.mobile+'</option>');
-
               });
+              $('.select2').select2()
             }
             else{
                row.find(".customerlists").empty();
@@ -89,8 +89,9 @@ $(document).ready(function(){
                   '<td><select name="customers[' + counter + ']" class="form-control customer rowchange select2"/> </select></td>' +
                   '<td class="td-actions text-right"><a class="remove-customer-rows btn btn-danger" title="Remove row"><i class="material-icons">close</i></a></td> </tr>';
           $tablecustomer.append(newRow);
+          $('.select2').select2()
       });
-   
+      
       $tablecustomer.on('click', '.remove-customer-rows', function() {
           $(this).closest('tr').remove();
       });

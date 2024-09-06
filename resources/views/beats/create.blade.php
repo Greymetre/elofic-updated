@@ -48,11 +48,11 @@
                <div class="col-md-12">
                   <div class="form-group">
                      <label class="bmd-label-floating">{!! trans('panel.global.district') !!} </label>
-                     <select class="form-control select2 district" name="district_id" style="width: 100%;" onchange="getCityList()">
+                     <select class="form-control select2 district" name="district_id[]" multiple style="width: 100%;" onchange="getCityListMultiDis()">
                         <option value="">Select {!! trans('panel.global.district') !!}</option>
                         @if(@isset($districts))
                         @foreach($districts as $district)
-                        <option value="{!! $district['id'] !!}" @if($beats['district_id'] ==  $district['id']) selected @endif>{!! $district['district_name'] !!}</option>
+                        <option value="{!! $district['id'] !!}" @if(in_array($district['id'],explode(',',$beats['district_id']))) selected @endif>{!! $district['district_name'] !!}</option>
                         @endforeach
                         @endif
                      </select>
@@ -68,11 +68,11 @@
                <div class="col-md-12">
                   <div class="form-group">
                      <label class="bmd-label-floating">{!! trans('panel.global.city') !!} </label>
-                     <select class="form-control select2 city" id="city_id" name="city_id" style="width: 100%;">
+                     <select class="form-control select2 city" id="city_id" name="city_id[]" multiple style="width: 100%;">
                         <option value="">Select {!! trans('panel.global.city') !!}</option>
                         @if(@isset($cities))
                         @foreach($cities as $city)
-                        <option value="{!! $city['id'] !!}" @if($beats['city_id'] ==  $city['id']) selected @endif>{!! $city['city_name'] !!}</option>
+                        <option value="{!! $city['id'] !!}" @if(in_array($city['id'],explode(',',$beats['city_id']))) selected @endif>{!! $city['city_name'] !!}</option>
                         @endforeach
                         @endif
                      </select>
@@ -466,6 +466,7 @@
       </div>
     </div>
 </div> -->
+<script src="https://silver.fieldkonnect.io//public/assets/js/core/jquery.validate.js"></script>
 <script src="{{ url('/').'/'.asset('assets/js/jquery.custom.js') }}"></script>
 <script src="{{ url('/').'/'.asset('assets/js/jquery.beat.js') }}"></script>
 </x-app-layout>

@@ -198,6 +198,7 @@ class CustomersImport implements ToCollection,WithValidation,WithHeadingRow, Wit
                      //$row['parent_id'] = str_replace(']','',$row['parent_id']);
 
                      $parent_data = explode(",", $row['parent_id']);
+                    //  dd($parent_data);
 
                     foreach($parent_data as $key => $row_parent) {
                 $parentDetail = ParentDetail::updateOrCreate(
