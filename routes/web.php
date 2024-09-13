@@ -168,9 +168,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('group_wise_analysis/list', [ReportController::class, 'group_wise_analysis_list'])->name('group_wise_analysis.list');
     
     // Per Employee Costing
-    Route::any('reports/per_employee_costing', [ReportController::class, 'per_employee_costing']);
+    Route::any('reports/per_employee_costing', [ReportController::class, 'per_employee_costing'])->name('per_employee_costing');
     Route::any('per_employee_costing/download', [ReportController::class, 'per_employee_costing_download'])->name('per_employee_costing.download');
-    Route::any('per_employee_costing/list', [ReportController::class, 'per_employee_costing_list'])->name('per_employee_costing.list');
 
     // Top Dealer
     Route::any('reports/top_dealer', [ReportController::class, 'top_dealer']);

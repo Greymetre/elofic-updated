@@ -94,7 +94,8 @@ class SalesDataTable extends DataTable
         });
 
         if ($request->dividion_id && !empty($request->dividion_id) ) {
-            $order_ids = Order::where('product_cat_id', $this->dividion_id)->pluck('id');
+            $order_ids = Order::where('product_cat_id', $request->dividion_id)->pluck('id');
+            // dd($order_ids);
             $query->whereIn('order_id', $order_ids);
             // $query->where('orders.product_cat_id',$this->dividion_id);
         }
@@ -109,10 +110,10 @@ class SalesDataTable extends DataTable
         }
 
         if ($request->start_date) {
-            $query->whereDate('invoice_date', '>=', $request->start_date);
+            $query->whereDate('created_at', '>=', $request->start_date);
         }
         if ($request->end_date) {
-            $query->whereDate('invoice_date', '<=', $request->end_date);
+            $query->whereDate('created_at', '<=', $request->end_date);
         }
 
         $query = $query->latest()->newQuery();

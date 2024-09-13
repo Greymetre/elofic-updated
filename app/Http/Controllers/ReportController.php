@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\DataTables\EmployeeCostingDataTable;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Redirect;
@@ -3164,7 +3165,7 @@ class ReportController extends Controller
         return Excel::download(new GroupWiseAnalysisExport($request), $fileName);
     }
 
-    public function per_employee_costing(Request $request)
+    public function per_employee_costing(EmployeeCostingDataTable $dataTable)
     {
         $ps_branches = Branch::where('active', 'Y')->select('id', 'branch_name')->get();
         $ps_divisions = Division::where('active', 'Y')->select('id', 'division_name')->get();
@@ -3184,145 +3185,7 @@ class ReportController extends Controller
             $currentDate->copy()->subMonthsNoOverflow(2)->format('M'), // Two months ago
             $currentDate->copy()->subMonthsNoOverflow(1)->format('M'), // Last month
         ];
-        return view('reports.per_employee_costing', compact('years', 'users', 'ps_branches', 'ps_divisions', 'ps_months', 'ps_dealers', 'ps_product_models', 'ps_new_group_names', 'ps_sales_persons', 'total_qty', 'total_sale', 'months'));
-    }
-
-    public function per_employee_costing_list(Request $request)
-    {
-        DB::statement("SET SESSION group_concat_max_len = 10000000");
-        $query = User::with('primarySales', 'getdesignation', 'getbranch', 'getdivision', 'userinfo', 'expenses')->where('active', 'Y')
-            ->whereHas('roles', function ($query) {
-                $query->whereIn('id', ['13', '6', '3', '2']);
-            });
-
-        // Filter by financial year or last three months
-        if ($request->month && is_array($request->month) && count($request->month) > 0 && $request->financial_year && !empty($request->financial_year)) {
-            $f_year_array = explode('-', $request->financial_year);
-
-            // Determine if months are in Jan-Mar and set the correct year
-            $isJanToMar = in_array('Jan', $request->month) || in_array('Feb', $request->month) || in_array('Mar', $request->month);
-            $currentYear = $isJanToMar ? $f_year_array[1] : $f_year_array[0];
-
-            // Get the first and last months from the array
-            $firstMonth = $request->month[0];
-            $lastMonth = $request->month[count($request->month) - 1];
-
-            // Format the month and create start and end dates
-            $startDate = Carbon::createFromFormat('Y-M', "$currentYear-$firstMonth")->startOfMonth();
-            $endDate = Carbon::createFromFormat('Y-M', "$currentYear-$lastMonth")->endOfMonth();
-
-            // Convert to date strings
-            $startDateFormatted = $startDate->toDateString();
-            $endDateFormatted = $endDate->toDateString();
-        } elseif ($request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
-            $f_year_array = explode('-', $request->financial_year);
-            $startDateFormatted = $f_year_array[0] . '-04-01';
-            $endDateFormatted = $f_year_array[1] . '-03-31';
-        } else {
-            $currentDate = Carbon::now();
-            $startDateFormatted = $currentDate->copy()->subMonthsNoOverflow(3)->firstOfMonth()->format('Y-m-d');
-            $endDateFormatted = $currentDate->copy()->subMonthNoOverflow()->endOfMonth()->format('Y-m-d');
-        }
-        $all_months = [];
-        $startDate = Carbon::createFromFormat('Y-m-d', $startDateFormatted);
-        $endDate = Carbon::createFromFormat('Y-m-d', $endDateFormatted);
-        $today = Carbon::now('Asia/Kolkata');
-        if ($endDate->greaterThan($today)) {
-            $endDate = $today->subMonth()->endOfMonth();
-            $endDateFormatted = $endDate->toDateString();
-        }
-        $currentDate = $startDate->copy();
-
-        while ($currentDate <= $endDate) {
-            $monthName = $currentDate->format('F');
-            if (!in_array($monthName, $all_months)) {
-                $all_months[] = $monthName;
-            }
-            $currentDate->addMonth()->startOfMonth();
-        }
-
-        if ($request->division_id && $request->division_id != '' && $request->division_id != NULL) {
-            $query->where('division_id', $request->division_id);
-        }
-
-        $data = $query->orderBy('id', 'desc')->get();
-
-        if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
-            $query->where('branch_id', $request->branch_id);
-        }
-
-
-        if ($request->dealer_id && $request->dealer_id != '' && $request->dealer_id != null) {
-            $query->where('dealer', 'like', '%' . $request->dealer_id . '%');
-        }
-
-        if ($request->product_model && $request->product_model != '' && $request->product_model != null) {
-            $query->where('model_name', $request->product_model);
-        }
-
-        if ($request->new_group && $request->new_group != '' && $request->new_group != null) {
-            $query->where('new_group', $request->new_group);
-        }
-
-        if ($request->executive_id && $request->executive_id != '' && $request->executive_id != null) {
-            $query->where('id', $request->executive_id);
-        }
-
-        $query = $query->get();
-
-        foreach ($query as $key => $value) {
-            $query[$key]->userinfo->gross_salary_monthly = $value->userinfo->gross_salary_monthly * count($all_months);
-            if (count($value->expenses) > 0) {
-                $query[$key]->total_expe = $value->expenses->where('date', '>=', $startDateFormatted)->where('date', '<=', $endDateFormatted)->sum('claim_amount') > 0 ? number_format(($value->expenses->where('date', '>=', $startDateFormatted)->where('date', '<=', $endDateFormatted)->sum('claim_amount') + $value->userinfo->gross_salary_monthly), 2, '.', '') : 0;
-            } else {
-                $query[$key]->total_expe = $value->userinfo->gross_salary_monthly;
-            }
-            if ($value->sales_type == 'Primary') {
-                if (count($value->primarySales) > 0) {
-                    $query[$key]->sales = $value->primarySales->where('invoice_date', '>=', $startDateFormatted)->where('invoice_date', '<=', $endDateFormatted)->sum('net_amount') > 0 ? number_format(($value->primarySales->where('invoice_date', '>=', $startDateFormatted)->where('invoice_date', '<=', $endDateFormatted)->sum('net_amount') / 100000), 2, '.', '') : 0;
-                } else {
-                    $query[$key]->sales = 0;
-                }
-            } else {
-                $query[$key]->sales = Order::where('created_by', $value->id)->where('order_date', '>=', $startDateFormatted)->where('order_date', '<=', $endDateFormatted)->sum('sub_total') > 0 ? number_format((Order::where('created_by', $value->id)->where('order_date', '>=', $startDateFormatted)->where('order_date', '<=', $endDateFormatted)->sum('sub_total') / 100000), 2, '.', '') : 0;
-            }
-        }
-
-        return Datatables::of($query)
-            ->addIndexColumn()
-            ->addColumn('emp_code', function ($query) {
-                return count(explode(',', $query->emp_codes)) > 0 ? explode(',', $query->emp_codes)[0] : '-';
-            })
-            ->addColumn('doj', function ($query) {
-                if ($query->userinfo) {
-                    return date('d M Y', strtotime($query->userinfo->date_of_joining));
-                } else {
-                    return '-';
-                }
-            })
-            ->addColumn('sales', function ($query) use ($startDateFormatted, $endDateFormatted) {
-                return $query->sales;
-            })
-            ->addColumn('ta_da', function ($query) use ($startDateFormatted, $endDateFormatted) {
-                if (count($query->expenses) > 0) {
-                    return $query->expenses->where('date', '>=', $startDateFormatted)->where('date', '<=', $endDateFormatted)->sum('claim_amount') > 0 ? number_format($query->expenses->where('date', '>=', $startDateFormatted)->where('date', '<=', $endDateFormatted)->sum('claim_amount'), 2, '.', '') : 0;
-                } else {
-                    return 0;
-                }
-            })
-            ->addColumn('total_exp', function ($query) {
-                return $query->total_expe;
-            })
-            ->addColumn('sal_exp', function ($query) {
-                if ($query->sales > 0) {
-                    return number_format(((($query->total_expe / 100000) / $query->sales) * 100), 2, '.', '') . "%";
-                } else {
-                    return "0%";
-                }
-            })
-
-            ->rawColumns(['doj', 'sales', 'ta_da', 'total_exp', 'sal_exp'])
-            ->make(true);
+        return $dataTable->render('reports.per_employee_costing', compact('years', 'users', 'ps_branches', 'ps_divisions', 'ps_months', 'ps_dealers', 'ps_product_models', 'ps_new_group_names', 'ps_sales_persons', 'total_qty', 'total_sale', 'months'));
     }
 
     public function per_employee_costing_download(Request $request)
@@ -4204,21 +4067,21 @@ class ReportController extends Controller
             })
             ->addColumn('ovper', function ($data) use ($request, $months, $f_year_array, $quarter_name) {
                 if ($request->quarter == '4') {
-                    $total_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->where('year', $f_year_array[1])->where('quarter', 'Like' , '%'.$quarter_name.'%')->sum('amount');
-                    $sixty_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->whereNotIn('days', ['0-30', '31-60'])->where('year', $f_year_array[1])->where('quarter', 'Like' , '%'.$quarter_name.'%')->sum('amount');
-                }else{
-                    $total_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->where('year', $f_year_array[0])->where('quarter', 'Like' , '%'.$quarter_name.'%')->sum('amount');
-                    $sixty_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->whereNotIn('days', ['0-30', '31-60'])->where('year', $f_year_array[0])->where('quarter', 'Like' , '%'.$quarter_name.'%')->sum('amount');
+                    $total_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->where('year', $f_year_array[1])->where('quarter', 'Like', '%' . $quarter_name . '%')->sum('amount');
+                    $sixty_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->whereNotIn('days', ['0-30', '31-60'])->where('year', $f_year_array[1])->where('quarter', 'Like', '%' . $quarter_name . '%')->sum('amount');
+                } else {
+                    $total_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->where('year', $f_year_array[0])->where('quarter', 'Like', '%' . $quarter_name . '%')->sum('amount');
+                    $sixty_outstanding = CustomerOutstanting::where('user_id', $data->user_id)->whereNotIn('days', ['0-30', '31-60'])->where('year', $f_year_array[0])->where('quarter', 'Like', '%' . $quarter_name . '%')->sum('amount');
                 }
                 return $total_outstanding > 0 ? number_format((($sixty_outstanding / $total_outstanding) * 100), 2, '.', '') : '0';
             })
             ->addColumn('svper', function ($data) use ($request, $months, $f_year_array, $quarter_name) {
                 if ($request->quarter == '4') {
-                $total_stock = BranchStock::where('branch_id', $data->branch_id)->where('year', $f_year_array[1])->where('quarter', 'Like' , '%'.$quarter_name.'%')->sum('amount');
-                $ninty_stock = BranchStock::where('branch_id', $data->branch_id)->whereNotIn('days', ['0-30', '31-60', '61-90'])->where('year', $f_year_array[1])->where('quarter', 'Like' , '%'.$quarter_name.'%')->sum('amount');
-                }else{
-                    $total_stock = BranchStock::where('branch_id', $data->branch_id)->where('year', $f_year_array[0])->where('quarter', 'Like' , '%'.$quarter_name.'%')->sum('amount');
-                $ninty_stock = BranchStock::where('branch_id', $data->branch_id)->whereNotIn('days', ['0-30', '31-60', '61-90'])->where('year', $f_year_array[0])->where('quarter', 'Like' , '%'.$quarter_name.'%')->sum('amount');
+                    $total_stock = BranchStock::where('branch_id', $data->branch_id)->where('year', $f_year_array[1])->where('quarter', 'Like', '%' . $quarter_name . '%')->sum('amount');
+                    $ninty_stock = BranchStock::where('branch_id', $data->branch_id)->whereNotIn('days', ['0-30', '31-60', '61-90'])->where('year', $f_year_array[1])->where('quarter', 'Like', '%' . $quarter_name . '%')->sum('amount');
+                } else {
+                    $total_stock = BranchStock::where('branch_id', $data->branch_id)->where('year', $f_year_array[0])->where('quarter', 'Like', '%' . $quarter_name . '%')->sum('amount');
+                    $ninty_stock = BranchStock::where('branch_id', $data->branch_id)->whereNotIn('days', ['0-30', '31-60', '61-90'])->where('year', $f_year_array[0])->where('quarter', 'Like', '%' . $quarter_name . '%')->sum('amount');
                 }
                 return $total_stock > 0 ? number_format((($ninty_stock / $total_stock) * 100), 2, '.', '') : '0';
             })
@@ -4297,7 +4160,7 @@ class ReportController extends Controller
                     $fincentive = '0';
                     $wincentive =  '0';
                 }
-                return number_format($fincentive,2,'.','');;
+                return number_format($fincentive, 2, '.', '');;
             })
             ->addColumn('total_inc_w', function ($data) use ($request, $months, $f_year_array) {
                 $fmonth = $months[0];
@@ -4374,7 +4237,7 @@ class ReportController extends Controller
                     $fincentive = '0';
                     $wincentive =  '0';
                 }
-                return number_format($wincentive,2,'.','');
+                return number_format($wincentive, 2, '.', '');
             })
 
             ->rawColumns(['achiv', 'taper', 'ovper', 'svper', 'total_inc', 'total_inc_w'])

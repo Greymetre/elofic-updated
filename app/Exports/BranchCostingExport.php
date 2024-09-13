@@ -161,7 +161,7 @@ class BranchCostingExport implements FromCollection, WithHeadings, WithMapping, 
         if ($data->id == '15') {
             $cluster_head = User::where('id', '135')->get();
         } else {
-            $cluster_head = User::where('branch_id', $data->id)
+            $cluster_head = User::whereRaw("FIND_IN_SET(?, branch_id)", [$data->id])
                 ->where('active', 'Y')
                 ->where('division_id', $this->division_id)
                 ->whereHas('roles', function ($query) {
@@ -171,14 +171,14 @@ class BranchCostingExport implements FromCollection, WithHeadings, WithMapping, 
         if ($data->id == '8') {
             $reginal_manager = User::where('id', '50')->get();
         } else {
-            $reginal_manager = User::where('branch_id', $data->id)
+            $reginal_manager = User::whereRaw("FIND_IN_SET(?, branch_id)", [$data->id])
                 ->where('active', 'Y')
                 ->where('division_id', $this->division_id)
                 ->whereHas('roles', function ($query) {
                     $query->where('id', '13');
                 })->get();
         }
-        $branch_managver = User::where('branch_id', $data->id)
+        $branch_managver = User::whereRaw("FIND_IN_SET(?, branch_id)", [$data->id])
             ->where('active', 'Y')
             ->where('division_id', $this->division_id)
             ->whereHas('roles', function ($query) {

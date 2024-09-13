@@ -185,7 +185,7 @@
         ],
         "retrieve": true,
         ajax: {
-          url: "{{ route('per_employee_costing.list') }}",
+          url: "{{ route('per_employee_costing') }}",
           data: function(d) {
             d.executive_id = $('#ps_executive_id').val(),
               d.division_id = $('#ps_division_id').val(),

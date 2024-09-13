@@ -924,6 +924,11 @@
 <script src="{{ url('/').'/'.asset('assets/js/jquery.custom.js') }}"></script>
 <script src="{{ url('/').'/'.asset('assets/js/validation_customers.js') }}"></script>
 <script type="text/javascript">
+  $(document).ready(function(){
+    getStateList();
+    getDistrictList();
+    getCityList();
+  });
    $(function () {
       //Initialize Select2 Elements
       $('.select2').select2()
