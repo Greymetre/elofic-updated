@@ -198,9 +198,9 @@
 
                                     </select>
                                  </div>
-                                 @if ($errors->has('branch_id'))
+                                 @if ($errors->has('branch_show'))
                                  <div class="error col-lg-12">
-                                    <p class="text-danger">{{ $errors->first('branch_id') }}</p>
+                                    <p class="text-danger">{{ $errors->first('branch_show') }}</p>
                                  </div>
                                  @endif
                               </div>
@@ -1156,8 +1156,8 @@
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
                                  <div class="form-group has-default bmd-form-group">
-                                    <select class="form-control" name="branch_id" required>
-                                       <option value="" disabled selected>Select Branch</option>
+                                    <select class="form-control select2" name="branch_id[]" multiple required>
+                                       <option value="" disabled>Select Branch</option>
 
                                        <?php
                                        $branch_id = $user->branch_id;
@@ -1167,7 +1167,7 @@
                                        ?>
 
                                           @foreach($branches as $branche)
-                                          <option {{ (($branche->id == old('branch_id', $user->id?$user->getbranch->id:''))) ? 'selected' : '' }} value="{{$branche->id}}">{{$branche->branch_name}}</option>
+                                          <option {{ (in_array($branche->id, explode(',', $branch_id))) ? 'selected' : '' }} value="{{$branche->id}}">{{$branche->branch_name}}</option>
                                           @endforeach
 
                                        <?php } else { ?>

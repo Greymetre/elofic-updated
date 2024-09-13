@@ -107,7 +107,7 @@ function readURL7(input) {
 }
 
 $(".getimage7").change(function(){
-  readURL0(this);
+  readURL7(this);
 });
 
 
@@ -124,7 +124,7 @@ function readURL8(input) {
 }
 
 $(".getimage8").change(function(){
-  readURL0(this);
+  readURL8(this);
 });
 
 

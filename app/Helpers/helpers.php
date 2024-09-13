@@ -825,3 +825,16 @@ function haversineGreatCircleDistance($latitudeFrom, $longitudeFrom, $latitudeTo
         cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
     return $angle * $earthRadius;
 }
+
+function getMonthsBetween($startDate, $endDate)
+{
+    $months = [];
+    $currentDate = $startDate->copy();
+
+    while ($currentDate <= $endDate) {
+        $months[] = $currentDate->format('F');
+        $currentDate->addMonth();
+    }
+
+    return array_unique($months);
+}

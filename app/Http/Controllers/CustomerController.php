@@ -50,7 +50,7 @@ class CustomerController extends Controller
             if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                 $query->whereIn('id', $userids);
             }
-        })->select('id', 'name')->get();
+        })->select('id', 'name')->orderBy('name')->get();
         $states = State::where('active', '=', 'Y')
             ->whereHas('statecities', function ($query) use ($userids) {
                 if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
@@ -59,12 +59,12 @@ class CustomerController extends Controller
                     });
                 }
             })
-            ->select('id', 'state_name')->get();
+            ->select('id', 'state_name')->orderBy('state_name')->get();
         $cities = City::where('active', '=', 'Y')->whereHas('assignusers', function ($query) use ($userids) {
             if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                 $query->whereIn('userid', $userids);
             }
-        })->select('id', 'city_name')->get();
+        })->select('id', 'city_name')->orderBy('city_name')->get();
         $customertype = CustomerType::select('id', 'customertype_name')->orderBy('id', 'desc')->get();
 
         $all_user_branches = User::with('getbranch')->whereIn('id', $userids)->orderBy('branch_id')->get();

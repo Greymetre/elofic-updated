@@ -39,6 +39,7 @@ class SalesExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
             }
             if ($this->dividion_id) {
                 $order_ids = Order::where('product_cat_id', $this->dividion_id)->pluck('id');
+                // dd($order_ids, $this->dividion_id);
                 $query->whereIn('order_id', $order_ids);
                 // $query->where('orders.product_cat_id',$this->dividion_id);
             }

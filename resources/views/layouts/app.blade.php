@@ -955,6 +955,83 @@
         </div>
       </li>
       @endif
+      @if(auth()->user()->can('visitreport_access') || auth()->user()->can('beat_access'))
+      <li class="nav-item ">
+        <a class="nav-link collapsed" data-toggle="collapse" href="#beatMenu" aria-expanded="false">
+          <i class="material-icons">schedule</i>
+          <p> Beats
+          </p>
+        </a>
+        <div class="collapse" id="beatMenu" style="">
+          <ul class="nav">
+            @if(auth()->user()->can('beat_access'))
+            <li class="nav-item {{ request()->is('beats*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('beats') }}">
+                <i class="material-icons">rowing</i>
+                <p>{!! trans('panel.sidemenu.beats') !!}</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('beatdetail_access'))
+            <li class="nav-item {{ request()->is('beatdetail*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('beatdetail') }}">
+                <i class="material-icons">opacity</i>
+                <p>{!! trans('panel.sidemenu.beatdetail') !!}</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('checkin_access'))
+            <li class="nav-item {{ request()->is('checkin*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('checkin') }}">
+                <i class="material-icons">assignment_turned_in</i>
+                <p>{!! trans('panel.sidemenu.checkin') !!}</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('visitreport_access'))
+            <li class="nav-item {{ request()->is('visitreports*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('visitreports') }}">
+                <i class="material-icons">analytics</i>
+                <p>{!! trans('panel.sidemenu.visitreport') !!}</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('visittype_access'))
+            <li class="nav-item {{ request()->is('visittypes*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('visittypes') }}">
+                <i class="material-icons">input</i>
+                <p>{!! trans('panel.sidemenu.visittype') !!}</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('visitreport_access'))
+            <li class="nav-item ">
+              <a class="nav-link" href="{{ url('mastervisitreport') }}">
+                <i class="material-icons">store</i>
+                <p>Master VisitReport</p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('adherence_report'))
+            <li class="nav-item {{ request()->is('reports/beatadherence*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('reports/beatadherence') }}">
+                <i class="material-icons">check_circle</i>
+                <p>Beat Adherence </p>
+              </a>
+            </li>
+            @endif
+            @if(auth()->user()->can('summary_report'))
+            <li class="nav-item {{ request()->is('reports/adherencesummary*') ? 'active' : '' }}" >
+              <a class="nav-link" href="{{ url('reports/adherencesummary') }}">
+                <i class="material-icons">check_circle</i>
+                <p>Adherence Summary</p>
+              </a>
+            </li>
+            @endif
+          </ul>
+        </div>
+      </li>
+      @endif
       @if(auth()->user()->can('reports'))
       <li class="nav-item {{ request()->is('reports*') ? 'active' : '' }}">
         <a class="nav-link collapsed" data-toggle="collapse" href="#tasksMenu" aria-expanded="false">
@@ -1252,83 +1329,6 @@
           </ul>
         </div>
       </li>
-      </li>
-      @endif
-      @if(auth()->user()->can('visitreport_access') || auth()->user()->can('beat_access'))
-      <li class="nav-item ">
-        <a class="nav-link collapsed" data-toggle="collapse" href="#beatMenu" aria-expanded="false">
-          <i class="material-icons">schedule</i>
-          <p> Beats
-          </p>
-        </a>
-        <div class="collapse" id="beatMenu" style="">
-          <ul class="nav">
-            @if(auth()->user()->can('beat_access'))
-            <li class="nav-item {{ request()->is('beats*') ? 'active' : '' }}">
-              <a class="nav-link" href="{{ url('beats') }}">
-                <i class="material-icons">rowing</i>
-                <p>{!! trans('panel.sidemenu.beats') !!}</p>
-              </a>
-            </li>
-            @endif
-            @if(auth()->user()->can('beatdetail_access'))
-            <li class="nav-item {{ request()->is('beatdetail*') ? 'active' : '' }}">
-              <a class="nav-link" href="{{ url('beatdetail') }}">
-                <i class="material-icons">opacity</i>
-                <p>{!! trans('panel.sidemenu.beatdetail') !!}</p>
-              </a>
-            </li>
-            @endif
-            @if(auth()->user()->can('checkin_access'))
-            <li class="nav-item {{ request()->is('checkin*') ? 'active' : '' }}">
-              <a class="nav-link" href="{{ url('checkin') }}">
-                <i class="material-icons">assignment_turned_in</i>
-                <p>{!! trans('panel.sidemenu.checkin') !!}</p>
-              </a>
-            </li>
-            @endif
-            @if(auth()->user()->can('visitreport_access'))
-            <li class="nav-item {{ request()->is('visitreports*') ? 'active' : '' }}">
-              <a class="nav-link" href="{{ url('visitreports') }}">
-                <i class="material-icons">analytics</i>
-                <p>{!! trans('panel.sidemenu.visitreport') !!}</p>
-              </a>
-            </li>
-            @endif
-            @if(auth()->user()->can('visittype_access'))
-            <li class="nav-item {{ request()->is('visittypes*') ? 'active' : '' }}">
-              <a class="nav-link" href="{{ url('visittypes') }}">
-                <i class="material-icons">input</i>
-                <p>{!! trans('panel.sidemenu.visittype') !!}</p>
-              </a>
-            </li>
-            @endif
-            @if(auth()->user()->can('visitreport_access'))
-            <li class="nav-item ">
-              <a class="nav-link" href="{{ url('mastervisitreport') }}">
-                <i class="material-icons">store</i>
-                <p>Master VisitReport</p>
-              </a>
-            </li>
-            @endif
-            @if(auth()->user()->can('adherence_report'))
-            <li class="nav-item {{ request()->is('reports/beatadherence*') ? 'active' : '' }}">
-              <a class="nav-link" href="{{ url('reports/beatadherence') }}">
-                <i class="material-icons">check_circle</i>
-                <p>Beat Adherence </p>
-              </a>
-            </li>
-            @endif
-            @if(auth()->user()->can('summary_report'))
-            <li class="nav-item {{ request()->is('reports/adherencesummary*') ? 'active' : '' }}" >
-              <a class="nav-link" href="{{ url('reports/adherencesummary') }}">
-                <i class="material-icons">check_circle</i>
-                <p>Adherence Summary</p>
-              </a>
-            </li>
-            @endif
-          </ul>
-        </div>
       </li>
       @endif
       </ul>
