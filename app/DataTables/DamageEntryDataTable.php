@@ -96,10 +96,10 @@ class DamageEntryDataTable extends DataTable
             $data->where('status', $request->status);
         }
 
-        // if ($request->start_date && !empty($request->start_date) && $request->end_date && !empty($request->end_date)) {
-        //     $data->whereDate('created_at', '>=', $request->start_date)
-        //         ->whereDate('created_at', '<=', $request->end_date);
-        // }
+        if ($request->start_date && !empty($request->start_date) && $request->end_date && !empty($request->end_date)) {
+            $data->whereDate('created_at', '>=', $request->start_date)
+                ->whereDate('created_at', '<=', $request->end_date);
+        }
 
         $data = $data->latest()->newQuery();
         return $data;

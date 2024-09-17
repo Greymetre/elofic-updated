@@ -39,7 +39,12 @@ class Beat extends Model
     public function save_data($request)
     {
         try {
-
+            if (is_array($request->district_id)) {
+                $request['district_id'] = implode(',', $request->district_id);
+            }
+            if (is_array($request->city_id)) {
+                $request['city_id'] = implode(',', $request->city_id);
+            }
             $created_at = getcurentDateTime();
             if ($beat_id = Beat::insertGetId([
                 'active' => 'Y',
@@ -65,6 +70,12 @@ class Beat extends Model
     public function update_data($request)
     {
         try {
+            if (is_array($request->district_id)) {
+                $request['district_id'] = implode(',', $request->district_id);
+            }
+            if (is_array($request->city_id)) {
+                $request['city_id'] = implode(',', $request->city_id);
+            }
 
             $created_at = getcurentDateTime();
             $beats = Beat::find($request['beat_id']);

@@ -647,6 +647,7 @@ class OrderController extends Controller
             $orders['order_id'] = $orderid;
             $orders['saledetail'] = $orders['orderdetails'];
             $data = collect([$orders]);
+            // dd($data);
             $response = insertSales($data);
             if ($response['status'] == 'success') {
 

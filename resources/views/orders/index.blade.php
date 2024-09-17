@@ -185,58 +185,75 @@
           {
             data: 'buyers.name',
             name: 'buyers.name',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: false,
           },
           {
             data: 'sellers.name',
             name: 'sellers.name',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: false,
           },
           {
             data: 'orderno',
             name: 'orderno',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: false,
           },
           {
             data: 'order_date',
             name: 'order_date',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: false,
+            searchable: false
           },
           {
             data: 'completed_date',
             name: 'completed_date',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: false,
+            searchable: false
           },
           {
             data: 'total_gst',
             name: 'total_gst',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: false,
+            searchable: false
           },
           // {data: 'suc_del', name: 'suc_del',"defaultContent": ''},
           {
             data: 'sub_total',
             name: 'sub_total',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: false,
+            searchable: false
           },
           {
             data: 'grand_total',
             name: 'grand_total',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: false,
+            searchable: false
           },
           {
             data: 'statusname.status_name',
             name: 'statusname.status_name',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: false,
           },
           {
             data: 'createdbyname.name',
             name: 'createdbyname.name',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: false,
           },
           {
             data: 'created_at',
             name: 'created_at',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: false,
+            searchable: false
           },
         ]
       });

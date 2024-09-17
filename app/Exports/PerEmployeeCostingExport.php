@@ -61,10 +61,10 @@ class PerEmployeeCostingExport implements FromCollection, WithHeadings, WithMapp
         if ($endDate->greaterThan($today)) {
             $endDate = $today->subMonth()->endOfMonth();
         }
-
+        
         $startDateFormatted = $startDate->toDateString();
         $endDateFormatted = $endDate->toDateString();
-
+        
         $this->startDateFormatted = $startDateFormatted;
         $this->endDateFormatted = $endDateFormatted;
 
@@ -74,10 +74,12 @@ class PerEmployeeCostingExport implements FromCollection, WithHeadings, WithMapp
             ->whereHas('roles', function ($query) {
                 $query->whereIn('id', ['13', '6', '3', '2']);
             });
-
+            
+            if ($this->division_id && count($this->division_id) > 0) {
+                $query->whereIn('division_id', $this->division_id);
+            }
         // Apply Filters
         $filters = [
-            'division_id' => $this->division_id,
             'branch_id' => $this->branch_id,
             'dealer' => $this->dealer_id ? ['like', "%{$this->dealer_id}%"] : null,
             'model_name' => $this->product_model,
@@ -112,16 +114,13 @@ class PerEmployeeCostingExport implements FromCollection, WithHeadings, WithMapp
             }
 
             $user->sales = $salesSum > 0 ? number_format($salesSum / 100000, 2) : 0;
-
             // Calculate Salary/Expense ratio
             $user->sal_exp = $user->sales > 0
                 ? number_format(($user->total_expe / 100000) / $user->sales * 100, 2)
                 : 0;
         }
 
-        // Sort and Return
-        return $users->sortBy('sal_exp');
-        return $users;
+        return $users->sortByDesc('sal_exp');
     }
 
     public function headings(): array
@@ -216,7 +215,7 @@ class PerEmployeeCostingExport implements FromCollection, WithHeadings, WithMapp
 
     public function map($data): array
     {
-        $data->userinfo->gross_salary_monthly = $data->userinfo->gross_salary_monthly * count($this->months);
+        
         if (count($data->expenses) > 0) {
             $data->total_expe = $data->expenses->where('date', '>=', $this->startDateFormatted)->where('date', '<=', $this->endDateFormatted)->sum('claim_amount') > 0 ? number_format(($data->expenses->where('date', '>=', $this->startDateFormatted)->where('date', '<=', $this->endDateFormatted)->sum('claim_amount') + $data->userinfo->gross_salary_monthly), 2, '.', '') : "0";
         } else {
@@ -307,7 +306,7 @@ class PerEmployeeCostingExport implements FromCollection, WithHeadings, WithMapp
                 $rowCount = $event->sheet->getHighestDataRow();
                 for ($row = 1; $row <= $rowCount; $row++) {
                     $cellValue = $event->sheet->getCell('N'.$row)->getValue();
-                    if($cellValue <= 5){
+                    if($cellValue > 5){
                         $event->sheet->getStyle('N'.$row)->applyFromArray([
                             'fill' => [
                                 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,

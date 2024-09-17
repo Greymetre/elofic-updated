@@ -605,24 +605,33 @@ class ExpensesController extends Controller
 
     public function rejectExpense(Request $request)
     {
-        $dates = Carbon::now();
-        $current_date_time = $dates->setTimezone('Asia/Kolkata');
-        $expense_id = $request->expense_id;
-        $reason = $request->reason ?? NULL;
-        Expenses::where('id', $expense_id)->update(['reason' => $reason, 'checker_status' => '2', 'approve_reject_by' => Auth::user()->id, 'approve_amount' => NULL]);
-        //return redirect(route('expenses.index')); 
+        $rules = [
+            'reason'          => 'required',
+        ];
 
-        if ($expense_id) {
-            $logdata = array(
-                'log_date' => date('Y-m-d'),
-                'expense_id' => $expense_id,
-                'created_by' => Auth::user()->id,
-                'status_type' => 'rejected'
-            );
-            ExpenseLog::create($logdata);
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->passes()) {
+            $dates = Carbon::now();
+            $current_date_time = $dates->setTimezone('Asia/Kolkata');
+            $expense_id = $request->expense_id;
+            $reason = $request->reason ?? NULL;
+            Expenses::where('id', $expense_id)->update(['reason' => $reason, 'checker_status' => '2', 'approve_reject_by' => Auth::user()->id, 'approve_amount' => NULL]);
+            //return redirect(route('expenses.index')); 
+
+            if ($expense_id) {
+                $logdata = array(
+                    'log_date' => date('Y-m-d'),
+                    'expense_id' => $expense_id,
+                    'created_by' => Auth::user()->id,
+                    'status_type' => 'rejected'
+                );
+                ExpenseLog::create($logdata);
+            }
+            return response()->json(['status' => 'success', 'message' => 'Expense reject successfully']);
+            // return redirect(route('expenses.show', ["expense" => $expense_id]))->with('danger', 'Expense rejected');
+        } else {
+            return response()->json(['status' => 'error', 'message' => 'Please add reason if you want reject the expens.']);
         }
-        return response()->json(['status' => 'success', 'message' => 'Expense reject successfully']);
-        // return redirect(route('expenses.show', ["expense" => $expense_id]))->with('danger', 'Expense rejected');
     }
 
     public function approveExpense(Request $request)

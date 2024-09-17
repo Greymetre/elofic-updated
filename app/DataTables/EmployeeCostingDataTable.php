@@ -55,7 +55,7 @@ class EmployeeCostingDataTable extends DataTable
             })
             ->addColumn('sal_exp', function ($query) {
                 if ($query->sal_exp > 0) {
-                    if ($query->sal_exp > 5) {
+                    if ($query->sal_exp <= 5) {
                         return $query->sal_exp . '%';
                     } else {
                         return '<span class="badge badge-danger">' . $query->sal_exp . '%</span>';
@@ -110,10 +110,12 @@ class EmployeeCostingDataTable extends DataTable
             ->whereHas('roles', function ($query) {
                 $query->whereIn('id', ['13', '6', '3', '2']);
             });
+            if ($request->division_id && count($request->division_id) > 0) {
+                $query->whereIn('division_id', $request->division_id);
+            }
 
         // Apply Filters
         $filters = [
-            'division_id' => $request->division_id,
             'branch_id' => $request->branch_id,
             'dealer' => $request->dealer_id ? ['like', "%{$request->dealer_id}%"] : null,
             'model_name' => $request->product_model,
@@ -156,7 +158,7 @@ class EmployeeCostingDataTable extends DataTable
         }
 
         // Sort and Return
-        return $users->sortBy('sal_exp');
+        return $users->sortByDesc('sal_exp');
     }
 
 

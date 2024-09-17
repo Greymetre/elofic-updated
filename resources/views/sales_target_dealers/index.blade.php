@@ -404,8 +404,8 @@
             "defaultContent": ''
           },
           {
-            data: 'customer.createdbyname.name',
-            name: 'customer.createdbyname.name',
+            data: 'employee_name',
+            name: 'employee_name',
             orderable: false,
             searchable: false,
             "defaultContent": ''
