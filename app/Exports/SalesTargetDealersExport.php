@@ -159,9 +159,10 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
     {
         $response = array();
 
-        $dealer_name =  $data['customer']['createdbyname'] ? $data['customer']['createdbyname']['name'] : '';
+        $employee_name = PrimarySales::where('customer_id', $data['customer_id'])->orderBy('id', 'desc')->first();
+
         $response[0] = $data['customer']['id'] ?? '';
-        $response[1] = $dealer_name;
+        $response[1] = $employee_name?$employee_name->sales_person:'-';
         $response[2] = $data['customer']['name'];
         $response[3] = $data['customer']['customeraddress']['cityname']['city_name'] ?? '';
         $response[4] = $data['customer']['userdetails']['getbranch']['branch_name'] ?? '';

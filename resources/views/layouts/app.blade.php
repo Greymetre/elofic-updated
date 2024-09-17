@@ -956,7 +956,7 @@
       </li>
       @endif
       @if(auth()->user()->can('visitreport_access') || auth()->user()->can('beat_access'))
-      <li class="nav-item ">
+      <li class="nav-item {{ request()->is('beats*') || request()->is('beatdetail*') ? 'active' : '' }}">
         <a class="nav-link collapsed" data-toggle="collapse" href="#beatMenu" aria-expanded="false">
           <i class="material-icons">schedule</i>
           <p> Beats

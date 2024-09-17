@@ -127,8 +127,9 @@ class AttendanceController extends Controller
                 //         'description' => 'User Login',
                 //     );
                 // submitUserActivity($useractivity);
-                if(!empty($request['beats']))
+                if(!empty($request['beats']) && $request['beats'] != '')
                 {
+                    $this->attendances->where('id',$punchin->id)->update(['beat_id' => $request['beats']]);
                     $collection = array();
                     $beats = explode(',', $request['beats']);
                     if(!empty($beats))

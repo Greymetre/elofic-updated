@@ -295,6 +295,12 @@
                 </div>
               </div>
               <div class="col-md-4">
+                    <div class="form-check">
+                        <label class="form-check-label" for="SERVECE"> SERVECE </label>
+                        <input required class="form-check-input" type="radio" name="division" id="SERVECE" value="SERVECE" {{($dealerAppointment->division == 'SERVECE')?'checked':''}}>
+                    </div>
+                </div>
+              <div class="col-md-4">
                 <div class="form-check">
                   <label class="form-check-label" for="Others"> Others </label>
                   <input class="form-check-input" type="radio" name="division" id="Others" value="Others" {{($dealerAppointment->division == 'Others')?'checked':''}}>

@@ -24,8 +24,6 @@
           <strong class="message"></strong>
         </div>
 
-
-
         <div class="card">
           <div class="card-body">
             <div class="row">
@@ -411,13 +409,13 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="input-group input-group-outline my-3">
-                      <label class="form-label">Reason</label>
+                      <label class="form-label">Reason </label>
                       <input type="text" name="reason" id="reason" class="form-control" value="{!! old( 'reason') !!}" required> <br><br>
                       <input type="text" name="expense_id" id="reject_expense_id" class="form-control" hidden>
                     </div>
                   </div>
                 </div>
-                <button class="btn btn-info save-rjc" onclick="disableButtonreject()">Reject</button>
+                <button type="submit" class="btn btn-info save-rjc">Reject</button>
               </form>
             </div>
           </div>

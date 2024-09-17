@@ -423,14 +423,14 @@ if (! function_exists('insertSales')) {
     {
         $sallers = $data->pluck('seller_id');
         $buyers = $data->pluck('buyer_id');
+        $order_ids = $data->pluck('order_id');
         $customers = Customers::whereIn('id',$sallers)->orWhereIn('id',$buyers)->select('id','customertype')->get();
-        $existsales = Sales::whereIn('seller_id',$sallers)->orwhereIn('buyer_id',$buyers)->select('buyer_id','seller_id','sales_no','invoice_no','grand_total','invoice_date')->get();
+        $existsales = Sales::whereIn('seller_id',$sallers)->whereIn('buyer_id',$buyers)->whereIn('order_id', $order_ids)->select('buyer_id','seller_id','sales_no','invoice_no','grand_total','invoice_date')->get();
         $sales = collect([]);
         $saledetails = collect([]);
 
         $data->filter(function ($item, $key) use($existsales ,$sales ,$saledetails) {
-                    $item['sales_no'] = uniqueSalesNo($item['invoice_no'],$item['seller_id'], fiscalYear($item['invoice_date']));
-
+            $item['sales_no'] = uniqueSalesNo($item['invoice_no'],$item['seller_id'], fiscalYear($item['invoice_date']));
                     if(!$existsales->contains('sales_no', $item['sales_no']) )
                     {
                         $sales->push([

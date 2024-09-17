@@ -752,7 +752,6 @@
                   data: 'action',
                   name: 'action',
                   "defaultContent": '',
-                  className: 'td-actions text-center',
                   orderable: false,
                   searchable: false
                },

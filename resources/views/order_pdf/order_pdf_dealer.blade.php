@@ -171,6 +171,13 @@
                 <th>{{$order->deal_discount}}</th>
                 <th>{{$order->deal_amount}}</th>
             </tr>
+            @if($order->cash_discount && $order->cash_discount != '' && $order->cash_discount != NULL)
+            <tr>
+                <th colspan="4">Cash Discount %</th>
+                <th>{{$order->cash_discount}}</th>
+                <th>{{$order->cash_amount ?? ''}}</th>
+            </tr>
+            @endif
             @endif
             <tr>
                 <th colspan="5">Sub Total</th>

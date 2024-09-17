@@ -45,10 +45,10 @@ class DamageEntriesExport implements FromCollection, WithHeadings, ShouldAutoSiz
         if ($this->branch_id && $this->branch_id != '' && $this->branch_id != NULL) {
             $query->where('branch_id', $this->branch_id);
         }
-        // if ($this->start_date && !empty($this->start_date) && $this->end_date && !empty($this->end_date)) {
-        //     $query->whereDate('created_at', '>=', $this->start_date)
-        //         ->whereDate('created_at', '<=', $this->end_date);
-        // }
+        if ($this->start_date && !empty($this->start_date) && $this->end_date && !empty($this->end_date)) {
+            $query->whereDate('created_at', '>=', $this->start_date)
+                ->whereDate('created_at', '<=', $this->end_date);
+        }
         $query = $query->latest()->get();
 
         return $query;

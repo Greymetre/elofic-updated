@@ -381,6 +381,16 @@ class SalesTargetUsersController extends Controller
 
         return Datatables::of($query)
             ->addIndexColumn()
+            ->addColumn('employee_name', function ($data) {
+
+                $monthNumber = Carbon::parse("1 $data->month")->month;
+                $firstDate = Carbon::createFromDate($data->year, $monthNumber, 1)->startOfMonth()->toDateString();
+                $lastDate = Carbon::createFromDate($data->year, $monthNumber, 1)->endOfMonth()->toDateString();
+
+                $employee_name = PrimarySales::where('customer_id', $data->customer_id)->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->orderBy('id', 'desc')->first();
+
+                return $employee_name?$employee_name->sales_person:'-';
+            })
             ->addColumn('achievement', function ($data) {
 
                 $monthNumber = Carbon::parse("1 $data->month")->month;
@@ -438,7 +448,7 @@ class SalesTargetUsersController extends Controller
      ' . $btn . '
      </div>';
             })
-            ->rawColumns(['action', 'achievement_percent', 'customer_name', 'city_name', 'branch_name'])
+            ->rawColumns(['action', 'achievement_percent', 'customer_name', 'city_name', 'branch_name', 'employee_name'])
             ->make(true);
     }
 
