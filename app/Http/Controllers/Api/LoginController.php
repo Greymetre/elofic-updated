@@ -88,7 +88,11 @@ class LoginController extends Controller
                 $nestedData['beatUser'] = count($beatUser) > 0 ? true:false;
                 $nestedData['access_token'] = $token;
                 $nestedData['roles'] = $user->roles->pluck('id')->toArray();
-                $user['provider'] = 'users';
+                if($user->hasRole('Customer Dealer')){
+                    $user['provider'] = 'retailers';
+                }else{
+                    $user['provider'] = 'users';
+                }
                 $user['entry_from'] = 'app';
                 $this->usersLogin->save_data($user);
 
@@ -179,7 +183,11 @@ class LoginController extends Controller
                 $this->users->where('id', $user->id)->update([
                     'notification_id' => ""
                 ]);
-                $user['provider'] = 'users';
+                if($user->hasRole('Customer Dealer')){
+                    $user['provider'] = 'retailers';
+                }else{
+                    $user['provider'] = 'users';
+                }
                 $this->usersLogin->logout($user);
                 return response()->json(['status' => 'success', 'message' => 'Logout Successfully'], $this->successStatus);
             }

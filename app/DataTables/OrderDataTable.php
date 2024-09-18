@@ -3,6 +3,7 @@
 namespace App\DataTables;
 
 use App\Models\Order;
+use App\Models\ParentDetail;
 use Yajra\DataTables\Html\Button;
 use Yajra\DataTables\Html\Column;
 use Yajra\DataTables\Html\Editor\Editor;
@@ -86,7 +87,7 @@ class OrderDataTable extends DataTable
 
         $query = $model->with('sellers', 'buyers', 'statusname', 'createdbyname');
 
-        if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('Sub_Admin') && !Auth::user()->hasRole('Sub billing')) {
+        if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('Sub_Admin') && !Auth::user()->hasRole('Sub billing')  && !Auth::user()->hasRole('Customer Dealer')) {
             $query->where(function ($subQuery) use ($userids) {
                 $subQuery->whereIn('executive_id', $userids)
                     ->orWhereIn('created_by', $userids);
@@ -105,6 +106,14 @@ class OrderDataTable extends DataTable
             } else {
                 $query->where('status_id', request()->get('pending_status'));
             }
+        }
+        if (auth()->user()->hasRole('Customer Dealer')) {
+            $parent_id = auth()->user()->customerid;
+            $query->where('seller_id', $parent_id);
+            // $customer_idss = ParentDetail::where('parent_id', $parent_id)->pluck('customer_id');
+            // if (!empty($customer_idss)) {
+            //     $query->whereIn('buyer_id', $customer_idss);
+            // }
         }
 
         $query->newQuery();

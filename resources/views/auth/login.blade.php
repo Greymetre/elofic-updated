@@ -239,7 +239,7 @@
                 <!-- <p class="card-description text-center">Or Be Classical</p> -->
                 <span class="bmd-form-group">
                   <div class="form-group">
-                    <input id="email" type="email" class=" @error('email') is-invalid @enderror" name="email" placeholder="{{ __('E-Mail Address') }}" value="{{ old('email') }}" required autocomplete="email" autofocus>
+                    <input id="email" type="text" class=" @error('email') is-invalid @enderror" name="email" placeholder="{{ __('E-Mail Address And Mobile Number') }}" value="{{ old('email') }}" required autocomplete="email" autofocus>
                     @error('email')
                     <span class="invalid-feedback" role="alert">
                       <strong>{{ $message }}</strong>

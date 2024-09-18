@@ -4,7 +4,12 @@
          {{ __('Dashboard') }}
       </h2>
    </x-slot>
-
+   @if(auth()->user()->hasRole('Customer Dealer'))
+   <div class="container mt-5">
+      <h4>Dealer Portal Dashbord</h4>
+      <h6>Working Soon......</h6>
+   </div>
+   @else
    <div class="nav-wrapper position-relative end-0">
       <ul class="nav nav-pills nav-pills-warning nav-pills-icons justify-content-center" id="tabs" role="tablist">
          <li class="nav-item">
@@ -1634,6 +1639,7 @@
          </div>
       </div>
    </div>
+   @endif
    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 

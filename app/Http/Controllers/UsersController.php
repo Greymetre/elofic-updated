@@ -97,7 +97,7 @@ class UsersController extends Controller
             'latitude'   =>  isset($request['latitude']) ? $request['latitude'] : '',
             'longitude' => isset($request['longitude']) ? $request['longitude'] : '',
             'location' => !empty($request['location']) ? $request['location'] : '',
-            'branch_id' => (isset($request['branch_id']) && count($request['branch_id']) > 0) ? implode(',',$request['branch_id']) : '',
+            'branch_id' => (isset($request['branch_id']) && count($request['branch_id']) > 0) ? implode(',', $request['branch_id']) : '',
             'branch_show' => isset($request['branch_show']) ? implode(',', $request['branch_show']) : NULL,
             'department_id' => isset($request['department_id']) ? $request['department_id'] : '',
             'employee_codes' => isset($request['employee_codes']) ? $request['employee_codes'] : '',
@@ -106,6 +106,7 @@ class UsersController extends Controller
             'reportingid' => isset($request['reportingid']) ? $request['reportingid'] : '',
             'show_attandance_report' => isset($request['show_attandance_report']) ? $request['show_attandance_report'] : 1,
             'payroll' => isset($request['payroll']) ? $request['payroll'] : '',
+            'customerid' => isset($request['customerid']) ? $request['customerid'] : NULL,
         ]);
         $user->roles()->sync($request->input('roles', []));
         $permissions = $user->getPermissionsViaRoles()->pluck('name');
@@ -183,18 +184,19 @@ class UsersController extends Controller
             'total_exp'   =>  isset($request['total_exp']) ? $request['total_exp'] : null,
 
         ]);
-
-        foreach ($request->education_detail as $education_detail) {
-            if ($education_detail['degree_name'] != null && $education_detail['degree_name'] != '') {
-                $new_education_detail = new UserEducation();
-                $new_education_detail->user_id = $user['id'];
-                $new_education_detail->degree_name = $education_detail['degree_name'];
-                $new_education_detail->board_name = $education_detail['board_name'];
-                $new_education_detail->percentage = $education_detail['percentage'];
-                $new_education_detail->grade = $education_detail['grade'];
-                $new_education_detail->save();
-                if ($education_detail['image'] && $education_detail['image'] != null && $education_detail['image'] != '') {
-                    $new_education_detail->addMedia($education_detail['image'])->toMediaCollection('education_image');
+        if ($request->education_detail && count($request->education_detail) > 0) {
+            foreach ($request->education_detail as $education_detail) {
+                if ($education_detail['degree_name'] != null && $education_detail['degree_name'] != '') {
+                    $new_education_detail = new UserEducation();
+                    $new_education_detail->user_id = $user['id'];
+                    $new_education_detail->degree_name = $education_detail['degree_name'];
+                    $new_education_detail->board_name = $education_detail['board_name'];
+                    $new_education_detail->percentage = $education_detail['percentage'];
+                    $new_education_detail->grade = $education_detail['grade'];
+                    $new_education_detail->save();
+                    if ($education_detail['image'] && $education_detail['image'] != null && $education_detail['image'] != '') {
+                        $new_education_detail->addMedia($education_detail['image'])->toMediaCollection('education_image');
+                    }
                 }
             }
         }
@@ -295,7 +297,8 @@ class UsersController extends Controller
             if ($education_detail['degree_name'] != null && $education_detail['degree_name'] != '') {
                 $new_education_detail = UserEducation::updateOrCreate(
                     [
-                        'user_id' => $id, 'education_type_id' => $education_detail['education_type_id']
+                        'user_id' => $id,
+                        'education_type_id' => $education_detail['education_type_id']
                     ],
                     [
                         'user_id' => $id,
@@ -338,7 +341,7 @@ class UsersController extends Controller
         $user->reportingid = isset($request['reportingid']) ? $request['reportingid'] : null;
         $user->region_id = isset($request['region_id']) ? $request['region_id'] : null;
 
-        $user->branch_id = (isset($request['branch_id']) && count($request['branch_id']) > 0) ? implode(',',$request['branch_id']) : NULL;
+        $user->branch_id = (isset($request['branch_id']) && count($request['branch_id']) > 0) ? implode(',', $request['branch_id']) : NULL;
         $user->department_id = isset($request['department_id']) ? $request['department_id'] : null;
         $user->employee_codes = isset($request['employee_codes']) ? $request['employee_codes'] : null;
         $user->designation_id = isset($request['designation_id']) ? $request['designation_id'] : null;
@@ -404,12 +407,12 @@ class UsersController extends Controller
         Excel::import(new UserImport, request()->file('import_file'));
         return back();
     }
-    public function download()
+    public function download(Request $request)
     {
         abort_if(Gate::denies('user_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        return Excel::download(new UserExport, 'users.xlsx');
+        return Excel::download(new UserExport($request), 'users.xlsx');
     }
     public function template()
     {
@@ -717,5 +720,12 @@ class UsersController extends Controller
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         return Excel::download(new FOSRatingReportExport($request), 'FOS_Rating_Report.xlsx');
+    }
+
+    public function CustomerUserView()
+    {
+        $roles = Role::where('name', '!=', 'super-admin')->pluck('name', 'id');
+        // $customers = Customers::where('active', 'Y')->get();
+        return view('users.customer_user_create', compact('roles'))->with('user', $this->user);
     }
 }

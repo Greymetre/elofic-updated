@@ -1342,8 +1342,8 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top ">
       <div class="container-fluid bg-theme p-2" style="background: #fff !important">
-        <img src="{!! url('/').'/'.asset('assets/img/bediya.jpg') !!}" width="100">
-        <img src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" width="100">
+        <img src="{!! url('/').'/'.asset('assets/img/bediya.jpg') !!}" width="180">
+        <img src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" width="190">
         <!-- <img src="{!! url('/').'/'.asset('assets/img/logo.png') !!}" width="50"> -->
         <div class="navbar-wrapper">
           <div class="navbar-minimize">
@@ -1362,7 +1362,7 @@
         @auth
         <div class="collapse navbar-collapse justify-content-end">
           <ul class="navbar-nav">
-            <li class="nav-item dropdown">
+            <!-- <li class="nav-item dropdown">
               <a class="nav-link" href="http://example.com" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="material-icons">notifications</i>
                 <span class="notification">5</span>
@@ -1380,7 +1380,7 @@
                 <a class="dropdown-item" href="#">Another Notification</a>
                 <a class="dropdown-item" href="#">Another One</a>
               </div>
-            </li>
+            </li> -->
             <li class="nav-item dropdown">
               <a class="nav-link" href="javascript:;" id="navbarDropdownProfile" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="material-icons">person</i>
