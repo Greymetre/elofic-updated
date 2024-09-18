@@ -99,20 +99,6 @@ a.nav-link[aria-expanded="true"] {
 }
 
 
-a.nav-link[aria-expanded="false"]:after {
-    position: absolute;
-    content: "";
-    width: 10px;
-    height: 10px;
-    background-color: transparent;
-    border: 1px solid #fff;
-    right: 15px;
-    top: 20px;
-    border-top: 0px;
-    border-left: 0px;
-    transform: rotate(45deg);
-}
-
 a.nav-link[aria-expanded="false"] {
     position: relative;
 }
@@ -120,21 +106,6 @@ a.nav-link[aria-expanded="false"] {
 
 a.nav-link[aria-expanded="true"] {
     position: relative;
-}
-
-
-a.nav-link[aria-expanded="true"]:after {
-    position: absolute;
-    content: "";
-    width: 10px;
-    height: 10px;
-    background-color: transparent;
-    border: 1px solid #fff;
-    right: 15px;
-    top: 20px;
-    border-top: 0px;
-    border-left: 0px;
-    transform: rotate(223deg);
 }
 
 /* width */

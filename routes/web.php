@@ -274,6 +274,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('usercity', [UsersController::class, 'userCity'])->name('users.usercity');
     Route::post('usercity-upload', [UsersController::class, 'userCityUpload'])->name('usercity.upload');
     Route::any('usercity-download', [UsersController::class, 'userCitydownload'])->name('usercity.download');
+    Route::any('customer-user', [UsersController::class, 'CustomerUserView'])->name('customers.user.create');
     //Targets
     Route::resource('reportings', UserReportingController::class);
     //Sales Weightege

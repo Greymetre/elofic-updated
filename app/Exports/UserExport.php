@@ -18,25 +18,36 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Illuminate\Support\Facades\Auth;
 
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use PHPUnit\Framework\Constraint\Count;
 
 class UserExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapping
 {
-    public function __construct()
+    public function __construct(Request $request)
     {
-        
+        $this->user_type = $request->user_type;
         $this->userids = getUsersReportingToAuth();
     }
 
     public function collection()
     {
-        return User::with(['reportinginfo','userinfo'])->where(function ($query)  {
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
+        $data = User::with('createdbyname', 'getbranch', 'getdesignation', 'reportinginfo', 'userinfo', 'getdivision')
+            ->where(function ($query) {
+                if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                    $query->whereIn('id', $this->userids);
+                }
+            })
+            // ->whereHas('roles', function ($query) {
+            //     if($this->user_type == 'customer'){
+            //         $query->where('name', ['Customer Dealer']);
+            //     }else{
+            //         $query->whereNot('name', ['Customer Dealer']);
+            //     }
+            // })
+            ->latest()
+            ->get();
 
-                                {
-                                    $query->whereIn('id', $this->userids);
-                                }
-                            })->latest()->get();   
+        return $data;
     }
 
     public function headings(): array

@@ -64,6 +64,6 @@ class UserLogin extends Model
 
     public function customers()
     {
-        return $this->belongsTo('App\Models\Customers', 'user_id', 'id')->select('id','name', 'first_name', 'last_name');
+        return $this->belongsTo('App\Models\User', 'user_id', 'id')->select('id','name', 'first_name', 'last_name');
     }
 }

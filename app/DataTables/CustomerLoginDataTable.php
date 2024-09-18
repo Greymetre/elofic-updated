@@ -23,6 +23,10 @@ class CustomerLoginDataTable extends DataTable
             {
                 return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
             })
+            ->editColumn('contact_person', function($data)
+            {
+                return isset($data->customers) ? $data->customers->first_name.' '.$data->customers->last_name : '';
+            })
             ->editColumn('login_at', function($data)
             {
                 return isset($data->login_at) ? showdatetimeformat($data->login_at) : '';
@@ -42,7 +46,7 @@ class CustomerLoginDataTable extends DataTable
      */
     public function query(UserLogin $model)
     {
-        return $model->whereIn('provider',['retailers','distributors'])->latest()->newQuery();
+        return $model->with('customers')->whereIn('provider',['retailers','distributors'])->latest()->newQuery();
     }
 
     /**

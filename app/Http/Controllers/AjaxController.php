@@ -155,7 +155,6 @@ class AjaxController extends Controller
             $customer_id = $request->input('customer_id');
             $data = Customers::with('customeraddress', 'addresslists')
                 ->where('id', '=', $customer_id)
-                ->select('id', 'name', 'first_name', 'last_name', 'mobile', 'email', 'customertype')
                 ->first();
             $addresslists = collect([]);
             if ($data['addresslists']) {
@@ -176,6 +175,8 @@ class AjaxController extends Controller
                 'mobile' => isset($data['mobile']) ? $data['mobile'] : '',
                 'customertype' => isset($data['customertype']) ? $data['customertype'] : '',
                 'email' => isset($data['email']) ? $data['email'] : '',
+                'created_by' => isset($data['created_by']) ? $data['created_by'] : '',
+                'executive_id' => isset($data['executive_id']) ? $data['executive_id'] : '',
                 'address1' => isset($data['customeraddress']['address1']) ? $data['customeraddress']['address1'] . ' ' . $data['customeraddress']['address2'] . ' ' . $data['customeraddress']['landmark'] . ' ' . $data['customeraddress']['locality'] : '',
                 'address2' => isset($data['customeraddress']['cityname']['city_name']) ? $data['customeraddress']['cityname']['city_name'] . ', ' . $data['customeraddress']['pincodename']['pincode'] : '',
                 'addresslists' => $addresslists

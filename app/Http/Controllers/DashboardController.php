@@ -22,7 +22,6 @@ class DashboardController extends Controller
 {
     public function __construct()
     {
-
         $this->DAILY_VISIT_TARGET = 15;
     }
     public function index(Request $request)
