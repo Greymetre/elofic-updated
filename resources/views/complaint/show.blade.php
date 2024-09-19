@@ -155,7 +155,7 @@
                 <div class="col-md-6">
                   <h4><em>Complaint From</em></h4>
                   <h6 style="color: #5252b7;">{{$complaint->customer->customer_name}}</h6>
-                  <p>At - {{$complaint->customer->customer_address}} {{$complaint->customer->customer_place}} Po - {{$complaint->customer->customer_city}} District - {{$complaint->customer->customer_district}} State - {{$complaint->customer->customer_state}} Pin - {{$complaint->customer->pincodeDetails->pincode}}</p>
+                  <p>At - {{$complaint->customer->customer_address}} {{$complaint->customer->customer_place}} Po - {{$complaint->customer->customer_city}} District - {{$complaint->customer->customer_district}} State - {{$complaint->customer->customer_state}} Pin - {{$complaint->customer->pincodeDetails?$complaint->customer->pincodeDetails->pincode:'-'}}</p>
                   <p>{{$complaint->customer->customer_district}}, {{$complaint->customer->customer_state}}, {{$complaint->customer->customer_country}}</p>
                   <p>{{$complaint->customer->customer_number}}</p>
                 </div>

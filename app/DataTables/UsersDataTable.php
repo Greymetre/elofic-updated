@@ -97,13 +97,13 @@ class UsersDataTable extends DataTable
                     $query->whereIn('id', $userids);
                 }
             })
-            // ->whereHas('roles', function ($query) use ($request) {
-            //     if($request->user_type == 'customer'){
-            //         $query->where('name', ['Customer Dealer']);
-            //     }else{
-            //         $query->whereNot('name', ['Customer Dealer']);
-            //     }
-            // })
+            ->whereHas('roles', function ($query) use ($request) {
+                if($request->user_type == 'customer'){
+                    $query->where('name', ['Customer Dealer']);
+                }else{
+                    $query->whereNot('name', ['Customer Dealer']);
+                }
+            })
             ->latest()
             ->newQuery();
 
