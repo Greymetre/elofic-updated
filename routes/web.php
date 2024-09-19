@@ -48,6 +48,7 @@ use App\Http\Controllers\ComplaintTypeController;
 use App\Http\Controllers\CustomerKycController;
 use App\Http\Controllers\DamageEntryController;
 use App\Http\Controllers\DealerAppointmentController;
+use App\Http\Controllers\DealerPortalSettingsController;
 use App\Http\Controllers\DivisionController;
 use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\ExpensesController;
@@ -831,6 +832,7 @@ Route::group(['middleware' => ['auth']], function () {
 
     // FieldKonnectAppSetting App Setting Route
     Route::resource('field-konnect-app-setting', FieldKonnectAppSettings::class);
+    Route::resource('delar-portal-setting', DealerPortalSettingsController::class);
     
     // Damage Entry Route
     Route::resource('damage_entries', DamageEntryController::class);

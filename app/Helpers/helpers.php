@@ -189,14 +189,14 @@ if (! function_exists('showdateformat')) {
 if (! function_exists('showdtimeformat')) { 
     function showdtimeformat($time)
     {
-        return Carbon::parse(strtotime($time))->format('H:i');
+        return Carbon::parse(strtotime($time))->format('H:i A');
     }
 }
 
 if (! function_exists('showdatetimeformat')) { 
     function showdatetimeformat($date)
     {
-        return Carbon::parse($date)->format('M,d Y h:i');
+        return Carbon::parse($date)->format('d-M-y h:i A');
     }
 }
 if (! function_exists('getcurentDateTime')) { 

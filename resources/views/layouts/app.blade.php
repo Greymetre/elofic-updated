@@ -906,6 +906,14 @@
               </a>
             </li>
             @endif
+            @if(auth()->user()->can('dealer_portal_setting_access'))
+            <li class="nav-item {{request()->is('delar-portal-setting*') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ url('delar-portal-setting') }}">
+                <i class="material-icons">settings</i>
+                <p>Dealer portal  {!! trans('panel.sidemenu.setting') !!}</p>
+              </a>
+            </li>
+            @endif
             @if(auth()->user()->can('status_access'))
             <li class="nav-item {{ request()->is('status*') ? 'active' : '' }}">
               <a class="nav-link" href="{{ url('status') }}">

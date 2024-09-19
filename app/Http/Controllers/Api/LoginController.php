@@ -93,7 +93,7 @@ class LoginController extends Controller
                 }else{
                     $user['provider'] = 'users';
                 }
-                $user['entry_from'] = 'app';
+                $user['entry_from'] = 'App';
                 $this->usersLogin->save_data($user);
 
                 $checkLastLogin = MobileUserLoginDetails::where('user_id', $user['id'])->first();
