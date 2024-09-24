@@ -3,6 +3,9 @@
       .row.image_preview.p-4.m-4 {
          border: 1px solid lightgrey;
          border-radius: 10px;
+         width: 100%;
+         height: 350px;
+         justify-content: center;
       }
 
       .img-div {
@@ -28,7 +31,7 @@
       i.fa.fa-window-close {
          position: absolute;
          top: 26px;
-         right: 42px;
+         right: 0;
          font-size: 22px;
          color: red;
          cursor: pointer;
@@ -122,6 +125,18 @@
                         </div>
                      </div>
                   </div>
+                  <!-- <div class="col-md-6">
+                     <div class="form-group">
+                        <div class="row">
+                           <div class="col-md-3">
+                              <label class="form-control">Slider Heading</label>
+                           </div>
+                           <div class="col-md-9">
+                              <input type="text" class="form-control" name="slider_heading" value="{{old('slider_heading', $dealer_portal_setting->slider_heading)}}">
+                           </div>
+                        </div>
+                     </div>
+                  </div> -->
                </div>
                <hr>
                <div class="row mt-4">
@@ -145,9 +160,10 @@
                      <div class="row">
                         @foreach($dealer_portal_setting->getMedia('dealer_portal_slider_image') as $k=>$media)
                         <div class="col-md-6">
+                           <h4 class="text-center">{{$media->name}}</h4>
                            <div class="row image_preview p-4 m-4">
-                              <iframe src="{{ $media->getFullUrl() }}" width="100%" height="400px" frameborder="0"></iframe>
-                              <i class="fa fa-window-close close-btn" data-id="{{$media->id}}" aria-hidden="true"></i>
+                              <img src="{{ $media->getFullUrl() }}" alt="{{$media->name}}" width="100%" height="100%">
+                              <i class="fa fa-window-close close-btn" data-id="{{$media->id}}" title="Delete" aria-hidden="true"></i>
                            </div>
                         </div>
                         @endforeach

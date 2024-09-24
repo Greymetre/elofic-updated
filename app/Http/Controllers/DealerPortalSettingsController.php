@@ -21,9 +21,11 @@ class DealerPortalSettingsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return view('work_in_progress');
+        // if($request->ip() != '111.118.252.250'){
+        //     return view('work_in_progress');
+        // }
         $this->dealer_portal_setting =  DealerPortalSettings::first();
         return view('dealer_portal_setting.index')->with('dealer_portal_setting', $this->dealer_portal_setting);
     }

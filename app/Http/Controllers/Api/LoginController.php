@@ -355,6 +355,27 @@ class LoginController extends Controller
                     'created_at' => getcurentDateTime(),
                     'updated_at' => getcurentDateTime()
                 ])) {
+                    if ($request['customertype'] == '1' || $request['customertype'] == '3') {
+                        $passis = generatePassword();
+                        if (strlen($request['mobile']) > 10 && substr($request['mobile'], 0, 2) === '91') {
+                            $request['mobile'] = substr($request['mobile'], 2);
+                        }
+                        $user = User::create([
+                            'active'   =>  isset($request['active']) ? $request['active'] : 'Y',
+                            'name'   =>  isset($request['name']) ? $request['name'] : $request['first_name'] . ' ' . $request['last_name'],
+                            'first_name'   =>  isset($request['first_name']) ? $request['first_name'] : '',
+                            'last_name'   =>  isset($request['last_name']) ? $request['last_name'] : '',
+                            'mobile'   =>  isset($request['mobile']) ? $request['mobile'] : null,
+                            'email'   =>  isset($request['email']) ? $request['email'] : '',
+                            'password'   =>  Hash::make($passis),
+                            'reportingid' => !empty($request['created_by']) ? $request['created_by'] : null,
+                            'password_string'   =>  $passis,
+                            'customerid' => $customer->id,
+                        ]);
+                        $user->roles()->sync(['29']);
+                        $permissions = $user->getPermissionsViaRoles()->pluck('name');
+                        $user->givePermissionTo($permissions);
+                    }
                     $request['customer_id'] = $customer->id;
                     $pincodes = Pincode::with('cityname', 'cityname.districtname')->where('pincode', '=', $request['zipcode'])->first();
                     $request['state_id'] = !empty($pincodes['cityname']['districtname']['state_id']) ? $pincodes['cityname']['districtname']['state_id'] : $request['state_id'];

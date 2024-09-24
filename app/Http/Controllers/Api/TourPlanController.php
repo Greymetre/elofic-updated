@@ -91,7 +91,9 @@ class   TourPlanController extends Controller
             $all_reporting_user_ids = User::whereIn('id', $all_reporting_user_ids)->whereIn('branch_id', $search_branches)->pluck('id')->toArray();
         }
 
-        $all_user_details = User::with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
+        $all_user_details = User::with('getbranch')->whereDoesntHave('roles', function ($query) {
+            $query->where('id', 29);
+        })->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
         $all_users= array();
         foreach ($all_user_details as $k => $val) {
             $all_users[$k]['id'] = $val->id;
@@ -102,6 +104,9 @@ class   TourPlanController extends Controller
             $all_reporting_user_ids[] = $search_name;
         }
         $date_checkIn = User::select('name', 'id')
+        ->whereDoesntHave('roles', function ($query) {
+            $query->where('id', 29);
+        })
         ->whereIn('id', $all_reporting_user_ids);
         $date_checkIn->orderBy('id', 'desc');
     

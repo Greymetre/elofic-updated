@@ -9,6 +9,11 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://silver.fieldkonnect.io//public/assets/plugins/select2/css/select2.css">
     <style>
+        .error {
+            font-size: 0.8rem;
+            color: #f44336;
+        }
+
         input.form-check-input {
             border: 2px solid !important;
             width: 20px !important;
@@ -111,6 +116,215 @@
             top: 0;
             left: 0;
         }
+
+
+
+
+
+        @media (max-width: 966px) {
+            .profile-pic-container {
+                width: 152px;
+                height: 152px;
+            }
+
+
+            label {
+                font-size: 12px;
+            }
+
+            .form-select {
+                font-size: 12px;
+                padding: 3px 4px;
+            }
+
+
+            .form-control {
+                font-size: 12px;
+            }
+
+
+            input.form-check-input {
+                width: 15px !important;
+                height: 15px !important;
+
+            }
+
+            .mt-5 {
+                margin-top: 1rem !important;
+                font-size: 14px;
+            }
+
+            .select2-container--default .select2-selection--single .select2-selection__rendered {
+                height: 27px;
+                font-size: 12px;
+            }
+
+            .form-check {
+                padding-left: 0;
+
+            }
+
+            .mt-4 {
+                margin-top: 0.5rem !important;
+            }
+
+            table.table tr th {
+                font-size: 12px;
+            }
+
+            p {
+                font-size: 10px;
+            }
+
+            table.table td {
+                font-size: 12px;
+            }
+
+            span.text-info {
+                font-size: 10px;
+            }
+
+            h5 {
+                font-size: 14px;
+            }
+
+            h6 {
+                font-size: 14px;
+            }
+
+            ol li {
+                font-size: 12px;
+            }
+        }
+
+
+
+
+
+
+        @media (max-width: 767px) {
+            .profile-pic-container {
+                width: 168px;
+                height: 168px;
+                margin: 0 auto;
+                margin-top: 13px;
+                position: relative;
+            }
+
+
+            label {
+                font-size: 11px;
+            }
+
+            .form-select {
+                font-size: 11px;
+                padding: 3px 4px;
+            }
+
+
+            .form-control {
+                font-size: 10px;
+            }
+
+
+            input.form-check-input {
+                width: 15px !important;
+                height: 15px !important;
+
+            }
+
+            .mt-5 {
+                margin-top: 1rem !important;
+                font-size: 13px;
+            }
+
+            table.table.border tr th {
+                font-size: 10px;
+            }
+
+            table.table th {
+                font-size: 10px;
+            }
+
+            p {
+                font-size: 8px;
+                margin-bottom: 0;
+            }
+
+            table.table td {
+                font-size: 10px;
+            }
+
+
+
+            span.text-info {
+                font-size: 8px;
+            }
+
+            h5 {
+                font-size: 12px;
+            }
+
+            h6 {
+                font-size: 12px;
+            }
+
+            ol li {
+                font-size: 10px;
+            }
+
+            .content img {
+                width: 100%;
+            }
+
+            form {
+                width: 100%;
+            }
+
+            .form-check {
+                padding-left: 1.5rem;
+            }
+
+
+            input.form-control:read-only {
+                margin-bottom: 10px;
+            }
+
+            .row.box-inputs.mt-2 {
+                margin-top: 0 !important;
+            }
+
+            p {
+                font-size: 10px !IMPORTANT;
+            }
+
+            button.btn {
+                width: 100%;
+                margin-bottom: 12px;
+                margin-top: 12px;
+            }
+
+            input#fileInput[type="file"] {
+                position: absolute;
+                width: 168px;
+                height: 168px;
+                opacity: 0;
+                cursor: pointer;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            .footer-div {
+                display: flex;
+                gap: 15px;
+                flex-flow: row;
+            }
+
+            .row.mt-5 {
+                margin-top: 0 !important;
+            }
+        }
     </style>
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
 </head>
@@ -131,7 +345,7 @@
         <h1 class="text-center">Dealer/Distributor Data Sheet</h1>
         <p>(All information furnished by you will be treated as strictly confidential)</p>
 
-        <form action="{{route('dealer-appointment-form.store')}}" method="post" enctype="multipart/form-data">
+        <form id="new_dealer_appoint_form" action="{{route('dealer-appointment-form.store')}}" method="post" enctype="multipart/form-data">
             @csrf
             <div class="row mt-3">
                 <div class="col-md-3 content-frm bg-light">
@@ -148,6 +362,11 @@
                                 @endforeach
                                 @endif
                             </select>
+                            @if ($errors->has('branch'))
+                            <div class="error col-lg-12">
+                                <p class="text-danger">{{ $errors->first('branch') }}</p>
+                            </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -974,17 +1193,19 @@
                 <br>
                 <br>
                 <br>
-                <div class="row">
-                    <div class="col-md-3 text-center"><b>(TM-ASM) </b></div>
-                    <div class="col-md-3 text-center"><b>Branch Manager </b></div>
-                    <div class="col-md-3 text-center"><b>Cluster/State Head </b></div>
-                    <div class="col-md-3 text-center"><b>National Head (HO) </b></div>
-                </div>
-                <div class="row mt-5">
-                    <div class="col-md-3 text-center"><b>(SIGN) </b></div>
-                    <div class="col-md-3 text-center"><b>(SIGN) </b></div>
-                    <div class="col-md-3 text-center"><b>(SIGN) </b></div>
-                    <div class="col-md-3 text-center"><b>(SIGN) </b></div>
+                <div class="footer-div">
+                    <div class="row">
+                        <div class="col-md-3 text-center"><b>(TM-ASM) </b></div>
+                        <div class="col-md-3 text-center"><b>Branch Manager </b></div>
+                        <div class="col-md-3 text-center"><b>Cluster/State Head </b></div>
+                        <div class="col-md-3 text-center"><b>National Head (HO) </b></div>
+                    </div>
+                    <div class="row mt-5">
+                        <div class="col-md-3 text-center"><b>(SIGN) </b></div>
+                        <div class="col-md-3 text-center"><b>(SIGN) </b></div>
+                        <div class="col-md-3 text-center"><b>(SIGN) </b></div>
+                        <div class="col-md-3 text-center"><b>(SIGN) </b></div>
+                    </div>
                 </div>
             </div>
 
@@ -1007,6 +1228,9 @@
     <div class="baseurl" data-baseurl="{{ url('/')}}">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script src="https://silver.fieldkonnect.io//public/assets/plugins/select2/js/select2.full.min.js"></script>
+        <script src="{{ url('/').'/'.asset('assets/js/core/jquery.validate.js') }}"></script>
+        <script src="{{ url('/').'/'.asset('assets/js/plugins/jquery.validate.min.js') }}"></script>
+        <script src="{{ url('/').'/'.asset('assets/js/validation_dealer_appointment.js?') }}"></script>
         <script>
             $(document).ready(function() {
                 $('#printButton').click(function() {

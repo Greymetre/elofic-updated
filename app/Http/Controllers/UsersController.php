@@ -54,10 +54,10 @@ class UsersController extends Controller
         $this->pan_card_path = 'pan_card';
     }
 
-    public function index(UsersDataTable $dataTable)
+    public function index(UsersDataTable $dataTable, Request $request)
     {
         //abort_if(Gate::denies('user_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-
+        
         return $dataTable->render('users.index');
     }
 
@@ -292,25 +292,26 @@ class UsersController extends Controller
             'current_company_tenture'   =>  isset($request['current_company_tenture']) ? (int)$request['current_company_tenture'] : 0,
             'total_exp'   =>  isset($request['total_exp']) ? (int)$request['total_exp'] : 0,
         ]);
-
-        foreach ($request->education_detail as $education_detail) {
-            if ($education_detail['degree_name'] != null && $education_detail['degree_name'] != '') {
-                $new_education_detail = UserEducation::updateOrCreate(
-                    [
-                        'user_id' => $id,
-                        'education_type_id' => $education_detail['education_type_id']
-                    ],
-                    [
-                        'user_id' => $id,
-                        'education_type_id' => $education_detail['education_type_id'],
-                        'degree_name' => $education_detail['degree_name'],
-                        'board_name' => $education_detail['board_name'],
-                        'percentage' => $education_detail['percentage'],
-                        'grade' => $education_detail['grade'],
-                    ]
-                );
-                if (isset($education_detail['image']) && $education_detail['image'] != null && $education_detail['image'] != '') {
-                    $new_education_detail->addMedia($education_detail['image'])->toMediaCollection('education_image');
+        if ($request->education_detail && count($request->education_detail) > 0) {
+            foreach ($request->education_detail as $education_detail) {
+                if ($education_detail['degree_name'] != null && $education_detail['degree_name'] != '') {
+                    $new_education_detail = UserEducation::updateOrCreate(
+                        [
+                            'user_id' => $id,
+                            'education_type_id' => $education_detail['education_type_id']
+                        ],
+                        [
+                            'user_id' => $id,
+                            'education_type_id' => $education_detail['education_type_id'],
+                            'degree_name' => $education_detail['degree_name'],
+                            'board_name' => $education_detail['board_name'],
+                            'percentage' => $education_detail['percentage'],
+                            'grade' => $education_detail['grade'],
+                        ]
+                    );
+                    if (isset($education_detail['image']) && $education_detail['image'] != null && $education_detail['image'] != '') {
+                        $new_education_detail->addMedia($education_detail['image'])->toMediaCollection('education_image');
+                    }
                 }
             }
         }
@@ -332,6 +333,7 @@ class UsersController extends Controller
         $user->show_attandance_report = isset($request['show_attandance_report']) ? $request['show_attandance_report'] : '';
         if ($request['password'] && !empty($request['password'])) {
             $user->password = isset($request['password']) ? Hash::make($request['password']) : '';
+            $user->password_string = $request['password'];
         }
         if ($request['profile_image']) {
             $user->profile_image = isset($request['profile_image']) ? $request['profile_image'] : '';
@@ -360,10 +362,10 @@ class UsersController extends Controller
                         ['userid' => $id, 'city_id' => $city,  'reportingid' => $request['reportingid']]
                     );
                 }
+                UserCityAssign::whereNotIn('city_id', $request['cities'])->where('userid', $id)->delete();
             }
-            UserCityAssign::whereNotIn('city_id', $request['cities'])->where('userid', $id)->delete();
         }
-        if ($request['password'] && !empty($request['password'])) {
+        if ($request['password'] && !empty($request['password']) && !$user->roles()->where('id', '29')->exists()) {
             Auth::logout();
             return redirect()->route('login')->with('status', 'Password updated successfully. Please log in with your new password.');
         } else {
@@ -462,7 +464,9 @@ class UsersController extends Controller
 
 
         if ($request->ajax()) {
-            $data = User::with('reportinginfo', 'getbranch', 'getdivision', 'getdesignation', 'all_attendance_details', 'visits', 'customers');
+            $data = User::whereDoesntHave('roles', function ($query) {
+                $query->where('id', 29);
+            })->with('reportinginfo', 'getbranch', 'getdivision', 'getdesignation', 'all_attendance_details', 'visits', 'customers');
             if ($request->user_id && $request->user_id != '' && $request->user_id != NULL) {
                 $data->where('id', $request->user_id);
             } else {
@@ -722,8 +726,12 @@ class UsersController extends Controller
         return Excel::download(new FOSRatingReportExport($request), 'FOS_Rating_Report.xlsx');
     }
 
-    public function CustomerUserView()
+    public function CustomerUserView(Request $request)
     {
+        if (isset($request->id) && !empty($request->id)) {
+            $id = decrypt($request->id);
+            $this->user = User::with('userinfo')->where('id', $id)->first();
+        }
         $roles = Role::where('name', '!=', 'super-admin')->pluck('name', 'id');
         // $customers = Customers::where('active', 'Y')->get();
         return view('users.customer_user_create', compact('roles'))->with('user', $this->user);

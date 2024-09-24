@@ -107,6 +107,12 @@ class OrderDataTable extends DataTable
                 $query->where('status_id', request()->get('pending_status'));
             }
         }
+        if (request()->get('startdate')) {
+            $query->where('order_date', '>=', request()->get('startdate'));
+        }
+        if (request()->get('enddate')) {
+            $query->where('order_date', '<=', request()->get('enddate'));
+        }
         if (auth()->user()->hasRole('Customer Dealer')) {
             $parent_id = auth()->user()->customerid;
             $query->where('seller_id', $parent_id);

@@ -11,7 +11,7 @@ class DealerPortalSettings extends Model implements HasMedia
 {
     use HasFactory,InteractsWithMedia;
 
-    protected $fillable = ['slider','created_at','updated_at'];
+    protected $fillable = ['slider', 'slider_heading','created_at','updated_at'];
 
     public $timestamps = true;
 

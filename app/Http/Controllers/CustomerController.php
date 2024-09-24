@@ -46,7 +46,9 @@ class CustomerController extends Controller
                 $query->whereIn('user_id', $userids);
             }
         })->select('id', 'beat_name')->get();
-        $users = User::where('active', '=', 'Y')->where(function ($query) use ($userids) {
+        $users = User::whereDoesntHave('roles', function ($query) {
+            $query->where('id', 29);
+        })->where('active', '=', 'Y')->where(function ($query) use ($userids) {
             if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                 $query->whereIn('id', $userids);
             }
@@ -67,7 +69,9 @@ class CustomerController extends Controller
         })->select('id', 'city_name')->orderBy('city_name')->get();
         $customertype = CustomerType::select('id', 'customertype_name')->orderBy('id', 'desc')->get();
 
-        $all_user_branches = User::with('getbranch')->whereIn('id', $userids)->orderBy('branch_id')->get();
+        $all_user_branches = User::whereDoesntHave('roles', function ($query) {
+            $query->where('id', 29);
+        })->with('getbranch')->whereIn('id', $userids)->orderBy('branch_id')->get();
         $branches = array();
         $all_branch = array();
         $bkey = 0;
@@ -118,7 +122,9 @@ class CustomerController extends Controller
                     // }
 
                     if (!empty($request['branch_id'])) {
-                        $branch_user_id = User::whereIn('branch_id', $request['branch_id'])->pluck('id');
+                        $branch_user_id = User::whereDoesntHave('roles', function ($query) {
+                            $query->where('id', 29);
+                        })->whereIn('branch_id', $request['branch_id'])->pluck('id');
                         if (!empty($branch_user_id)) {
                             $query->whereIn('executive_id', $branch_user_id);
                         }
@@ -273,7 +279,11 @@ class CustomerController extends Controller
         $customertype = CustomerType::select('id', 'customertype_name')->orderBy('id', 'desc')->get();
         $firmtype = FirmType::select('id', 'firmtype_name')->orderBy('id', 'desc')->get();
         $fields = Field::with('fieldsData')->whereIn('module', $customertype->pluck('id'))->where('active', '=', 'Y')->get();
-        $users = User::where(function ($query) use ($userids) {
+        $users = User::whereDoesntHave('roles', function ($query) {
+            $query->where('id', 29);
+        })->whereDoesntHave('roles', function ($query) {
+            $query->where('id', 29);
+        })->where(function ($query) use ($userids) {
             if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                 $query->whereIn('id', $userids);
             }
@@ -528,7 +538,9 @@ class CustomerController extends Controller
         $customers['aadhar_image'] = $customers['customerdocuments']->where('document_name', 'aadhar')->pluck('file_path')->first();
         $customers['other_image'] = $customers['customerdocuments']->where('document_name', 'other')->pluck('file_path')->first();
         $fields = Field::with('fieldsData')->whereIn('module', [$customers->customertype])->where('active', '=', 'Y')->get();
-        $users = User::where(function ($query) use ($userids) {
+        $users = User::whereDoesntHave('roles', function ($query) {
+            $query->where('id', 29);
+        })->where(function ($query) use ($userids) {
             if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                 $query->whereIn('id', $userids);
             }

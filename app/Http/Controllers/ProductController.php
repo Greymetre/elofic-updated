@@ -256,16 +256,16 @@ class ProductController extends Controller
                     // dd($request);
                     // ProductDetails::whereNotIn('id',$detailsids)->delete();
                     foreach ($request['detail'] as $key => $rows) {
-                        $price = 0;
-                        if(!empty($rows['mrp'])){
-                            $price = $rows['mrp'];
-                            if(!empty($request['gst']) && $request['gst'] > 0){
-                                $price = ($rows['mrp']+(($rows['mrp']*$request['gst'])/100));
-                            }
-                            if(!empty($request['discount']) && $request['discount'] > 0){
-                                $price = ($price-(($rows['mrp']*$request['discount'])/100));
-                            }
-                        }
+                        $price = $rows['mrp'];
+                        // if(!empty($rows['mrp'])){
+                        //     $price = $rows['mrp'];
+                        //     if(!empty($request['gst']) && $request['gst'] > 0){
+                        //         $price = ($rows['mrp']+(($rows['mrp']*$request['gst'])/100));
+                        //     }
+                        //     if(!empty($request['discount']) && $request['discount'] > 0){
+                        //         $price = ($price-(($rows['mrp']*$request['discount'])/100));
+                        //     }
+                        // }
                         if(empty($rows['detail_id']))
                         {
                             $details->push([
