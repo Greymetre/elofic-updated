@@ -53,7 +53,7 @@
                   From
                   <address>
                     <strong>{!! isset($orders['sellers']['name']) ? $orders['sellers']['name'] :'' !!} </strong><br>
-                    {!! $orders['sellers']['customeraddress']['address1'] !!} ,{!! $orders['sellers']['customeraddress']['address2'] !!}<br>
+                    {!! $orders['sellers']['customeraddress']['address1']??'' !!} ,{!! $orders['sellers']['customeraddress']['address2']??'' !!}<br>
                     {!! $orders['sellers']['customeraddress']['locality']??'-' !!}, {!! $orders['sellers']['customeraddress']['cityname']['city_name']??'-' !!} {!! $orders['sellers']['customeraddress']['pincodename']['pincode']??'-' !!}<br>
                     Phone: {!! $orders['sellers']['mobile'] !!}<br>
                     Email: {!! $orders['sellers']['email'] !!}

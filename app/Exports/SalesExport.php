@@ -68,7 +68,7 @@ class SalesExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
             isset($data['sales']['buyers']['customertypes']) ? $data['sales']['buyers']['customertypes']['customertype_name'] : '',
             isset($data['sales']['seller_id']) ? $data['sales']['seller_id'] : '',
             isset($data['sales']['sellers']['name']) ? $data['sales']['sellers']['name'] : '',
-            isset($data['sales']['buyers']['customeraddress']) ? $data['sales']['buyers']['customeraddress']['cityname']['city_name'] : '',
+            isset($data['sales']['buyers']['customeraddress']) ? ($data['sales']['buyers']['customeraddress']['cityname']?$data['sales']['buyers']['customeraddress']['cityname']['city_name']:'') : '',
             isset($data['sales']['orders']['createdbyname']['name']) ? $data['sales']['orders']['createdbyname']['name'] : '',
             isset($data['sales']['orders']['getuserdetails']['getbranch']['branch_name']) ? $data['sales']['orders']['getuserdetails']['getbranch']['branch_name'] : '',
             isset($data['sales']['orders']['orderno']) ? $data['sales']['orders']['orderno'] : '',

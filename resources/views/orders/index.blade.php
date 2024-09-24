@@ -166,6 +166,8 @@
             d.distributor_id = $('#distributor_id').val();
             d.customer_type_id = $('#customer_type_id').val();
             d.pending_status = $('#pending_status').val();
+            d.startdate = $('#start_date').val();
+            d.enddate = $('#end_date').val();
           }
         },
         columns: [{
@@ -259,6 +261,14 @@
       });
 
       $('#retailers_id').change(function() {
+        table.draw();
+      });
+      $('#end_date').change(function() {
+        table.draw();
+      });
+      $('#start_date').change(function() {
+        var selectedStartDate = $('#start_date').datepicker('getDate');
+      $('#end_date').datepicker("option", "minDate", selectedStartDate);
         table.draw();
       });
 

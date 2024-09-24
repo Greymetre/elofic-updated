@@ -120,7 +120,7 @@
           <strong class="message"></strong>
         </div>
 
-        <div class="container">
+        <div class="container mt-3">
           <div class="row">
             @if($dealerAppointment->approval_status == '0')
             @if(auth()->user()->can(['dealer_appointment_approve_sale_team']))

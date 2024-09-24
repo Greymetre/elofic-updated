@@ -82,7 +82,7 @@
           <span class="message"></span>
         </div>
         <div class="table-responsive">
-          <table id="getuser" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
+          <table id="getuser" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
             <thead class=" text-primary">
               <th>{!! trans('panel.global.no') !!}</th>
               <th>{!! trans('panel.global.action') !!}</th>
@@ -98,6 +98,7 @@
               <th>Joining Date</th>
               <th>Roles</th>
               <th>Division</th>
+              <th>Password</th>
             </thead>
             <tbody>
             </tbody>
@@ -217,6 +218,13 @@
           {
             data: 'getdivision.division_name',
             name: 'getdivision.division_name',
+            "defaultContent": '',
+            orderable: false,
+            searchable: false
+          },
+          {
+            data: 'password_string',
+            name: 'password_string',
             "defaultContent": '',
             orderable: false,
             searchable: false

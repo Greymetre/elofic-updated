@@ -85,10 +85,14 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                     $order_ids = Order::where(function($query) {
                         $query->where('product_cat_id', $this->dividion_id)
                               ->orWhereNull('product_cat_id');
-                    })
-                    ->where('order_date', '>=', $this->startdate)
-                    ->where('order_date', '<=', $this->enddate)
-                    ->pluck('id');
+                    });
+                    if ($this->startdate) {
+                        $order_ids->where('order_date', '>=', $this->startdate);
+                    }
+                    if ($this->enddate) {
+                        $order_ids->where('order_date', '<=', $this->enddate);
+                    }
+                    $order_ids = $order_ids->pluck('id');
                     $query->whereIn('id', $order_ids);
                     // $query->where('orders.product_cat_id',$this->dividion_id);
                 }else{

@@ -1,4 +1,16 @@
 <x-app-layout>
+   <style>
+      #pass-div {
+         position: relative;
+      }
+
+      #pass-seen {
+         position: absolute;
+         top: 7px;
+         right: 10px;
+         cursor: pointer;
+      }
+   </style>
    <div class="row">
       <div class="col-md-12">
          <div class="card card-profile">
@@ -25,7 +37,7 @@
                   </span>
                </div>
                @endif
-               <form method="POST" action="{{($user->id)?route('users.update', [$user->id]): route('users.store') }}" enctype="multipart/form-data" id="{{($user->id)?'updateUserData':'storeUserData'}}">
+               <form method="POST" action="{{($user->id)?route('users.update', [$user->id]): route('users.store') }}" enctype="multipart/form-data" id="{{($user->id)?'updateCustomerUserData':'storeCustomerUserData'}}">
                   @csrf
                   @if($user->id)
                   @method('PUT')
@@ -61,6 +73,9 @@
                                  <div class="form-group has-default bmd-form-group">
                                     <select class="form-control select2" name="customerid" id="customerid" required>
                                        <option value="" disabled>Select Customer</option>
+                                       @if($user->id)
+                                       <option value="{{$user->customerid}}" selected>{{ $user->user_customer->name}}</option>
+                                       @endif
                                     </select>
                                     @if($errors->has('customerid'))
                                     <div class="invalid-feedback">
@@ -108,7 +123,7 @@
                               <label class="col-md-2 col-form-label">{!! trans('panel.global.email') !!}<span class="text-danger"> *</span></label>
                               <div class="col-md-10">
                                  <div class="form-group has-default bmd-form-group">
-                                    <input type="email" name="email" id="email" class="form-control" value="{!! $user->email,old( 'email') !!}" maxlength="200" required>
+                                    <input type="email" name="email" id="email" class="form-control" value="{!! old( 'email', $user->email) !!}" maxlength="200">
                                     @if ($errors->has('email'))
                                     <div class="error col-lg-12">
                                        <p class="text-danger">{{ $errors->first('email') }}</p>
@@ -135,8 +150,9 @@
                            <div class="row">
                               <label class="col-md-4 col-form-label">{{ trans('panel.user.fields.password') }}<span class="text-danger"> *</span></label>
                               <div class="col-md-8">
-                                 <div class="form-group has-default bmd-form-group">
-                                    <input class="form-control {{ $errors->has('password') ? 'is-invalid' : '' }}" type="password" name="password" id="password" value="{{ old('password') }}" minlength="6" maxlength="200" required>
+                                 <div class="form-group has-default bmd-form-group" id="pass-div">
+                                    <input class="form-control {{ $errors->has('password') ? 'is-invalid' : '' }}" type="text" name="password" id="password" value="{{ old('password', $user->password_string) }}" minlength="6" maxlength="200" required>
+                                    <span class="material-icons" title="Show" id="pass-seen">visibility</span>
                                     @if ($errors->has('password'))
                                     <label class="error">{{ $errors->first('password') }}</label>
                                     @endif
@@ -234,11 +250,11 @@
                if (mobile.length === 12 && mobile.startsWith('91')) {
                   mobile = mobile.substring(2);
                }
-               if(res.created_by != '' && res.created_by != null){
+               if (res.created_by != '' && res.created_by != null) {
                   $("#reportingid").val(res.created_by);
-               }else if(res.executive_id != '' && res.executive_id != null){
+               } else if (res.executive_id != '' && res.executive_id != null) {
                   $("#reportingid").val(res.executive_id);
-               }else{
+               } else {
                   $("#reportingid").val('1');
                }
                $("#first_name").val(res.first_name);
@@ -250,5 +266,19 @@
             }
          });
       })
+      $("#pass-seen").on('click', function() {
+         let currentText = $(this).text();
+         let passwordField = $("#password");
+
+         if (currentText === 'visibility') {
+            $(this).text('visibility_off');
+            $(this).attr('title', 'Show');
+            passwordField.attr("type", "password");
+         } else {
+            $(this).text('visibility');
+            $(this).attr('title', 'Hide');
+            passwordField.attr("type", "text");
+         }
+      });
    </script>
 </x-app-layout>

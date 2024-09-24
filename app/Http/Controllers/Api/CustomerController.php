@@ -35,7 +35,7 @@ use App\Models\DealIn;
 use App\Models\OrderDetails;
 use App\Models\ParentDetail;
 use App\Models\EmployeeDetail;
-
+use Illuminate\Support\Facades\Hash;
 
 class CustomerController extends Controller
 {
@@ -129,6 +129,27 @@ class CustomerController extends Controller
                         'updated_at' => getcurentDateTime()
                     ])) {
 
+                        if ($request['customertype'] == '1' || $request['customertype'] == '3') {
+                            $passis = generatePassword();
+                            if (strlen($request['mobile']) > 10 && substr($request['mobile'], 0, 2) === '91') {
+                                $request['mobile'] = substr($request['mobile'], 2);
+                            }
+                            $user = User::create([
+                                'active'   =>  isset($request['active']) ? $request['active'] : 'Y',
+                                'name'   =>  isset($request['name']) ? $request['name'] : $request['first_name'] . ' ' . $request['last_name'],
+                                'first_name'   =>  isset($request['first_name']) ? $request['first_name'] : '',
+                                'last_name'   =>  isset($request['last_name']) ? $request['last_name'] : '',
+                                'mobile'   =>  isset($request['mobile']) ? $request['mobile'] : null,
+                                'email'   =>  isset($request['email']) ? $request['email'] : '',
+                                'password'   =>  Hash::make($passis),
+                                'reportingid' => !empty($request['created_by']) ? $request['created_by'] : null,
+                                'password_string'   =>  $passis,
+                                'customerid' => $customer->id,
+                            ]);
+                            $user->roles()->sync(['29']);
+                            $permissions = $user->getPermissionsViaRoles()->pluck('name');
+                            $user->givePermissionTo($permissions);
+                        }
 
                         //parent start
 
@@ -426,72 +447,92 @@ class CustomerController extends Controller
         $cityid = $request->city_id;
         $customertype = $request->customertype;
         $customer_id = array();
+
         if (!empty($cityid) && $cityid[0] != null) {
-            $customer_id = Address::whereIn('city_id', $cityid)->pluck('customer_id');
+            $customer_id = Address::whereIn('city_id', $cityid)->pluck('customer_id')->toArray();
         }
+
         $customerTypes = CustomerType::select('id', 'customertype_name')->get();
         $branch_id = $request->branch_id;
         $branch_user_id = array();
+
         if (!empty($branch_id) && $branch_id[0] != null) {
-            $branch_user_id = User::whereIn('branch_id', $branch_id)->pluck('id');
+            $branch_user_id = User::whereIn('branch_id', $branch_id)->pluck('id')->toArray();
         }
-
-
 
         try {
             $user = $request->user();
-            $userids = getUsersReportingToAuth($user->id);
-            //$userids = $user->id;
+            $userids = getUsersReportingToAuth($user->id); // Get users reporting to the authenticated user
             $customer_ids_assign = EmployeeDetail::whereIn('user_id', $userids)->pluck('customer_id')->toArray();
 
-            $pageSize = $request->input('pageSize');
-            $search = $request['search'];
-            $query = $this->customers->with('customeraddress', 'customerdetails', 'customertypes')->where('active', 'Y')
-                ->where(function ($query) use ($search, $userids, $customer_id, $branch_user_id, $customertype) {
-                    if (!empty($search)) {
-                        // $query->where('name', 'like', "%{$search}%")->whereIn('executive_id', $userids)
-                        $query->where('name', 'like', "%{$search}%")
-                            ->Orwhere('first_name', 'like', "%{$search}%")
-                            ->Orwhere('last_name', 'like', "%{$search}%")
-                            ->Orwhere('email', 'like', "%{$search}%")
-                            ->Orwhere('mobile', 'like', "%{$search}%");
-                    }
+            $pageSize = $request->input('pageSize', 10000); // Default to 10000 if pageSize is not provided
+            $search = $request->input('search');
 
-                    if (!empty($customer_id)) {
-                        $query->whereIn('id', $customer_id);
-                    }
+            // Split large arrays into chunks
+            $chunkSize = 1000; // Adjust as needed based on database limitations
+            $customerIdChunks = array_chunk($customer_ids_assign, $chunkSize);
 
-                    if (!empty($customertype)) {
-                        $query->where('customertype', $customertype);
-                    }
+            $results = collect(); // To store all paginated results
 
-                    // if(!empty($branch_user_id)){
-                    //   $query->whereIn('executive_id', $branch_user_id);
-                    // }
+            foreach ($customerIdChunks as $chunk) {
+                $query = $this->customers->with('customeraddress', 'customerdetails', 'customertypes')
+                    ->where('active', 'Y')
+                    ->where(function ($query) use ($search, $customer_id, $branch_user_id, $customertype) {
+                        // Search conditions
+                        if (!empty($search)) {
+                            $query->where(function ($query) use ($search) {
+                                $query->where('name', 'like', "%{$search}%")
+                                    ->orWhere('first_name', 'like', "%{$search}%")
+                                    ->orWhere('last_name', 'like', "%{$search}%")
+                                    ->orWhere('email', 'like', "%{$search}%")
+                                    ->orWhere('mobile', 'like', "%{$search}%");
+                            });
+                        }
 
-                    if (!empty($branch_user_id)) {
-                        $query->whereHas('getemployeedetail', function ($query) use ($branch_user_id) {
-                            $query->whereIn('user_id', $branch_user_id);
-                        });
-                    }
+                        // Filter by customer_id (from city)
+                        if (!empty($customer_id)) {
+                            $query->whereIn('id', $customer_id);
+                        }
 
-                    //$query->whereIn('executive_id', $userids);
+                        // Filter by customertype
+                        if (!empty($customertype)) {
+                            $query->where('customertype', $customertype);
+                        }
 
-                })->whereHas('getemployeedetail', function ($querys) use ($userids) {
-                    $querys->whereIn('user_id', $userids);
-                })
+                        // Filter by branch_user_id
+                        if (!empty($branch_user_id)) {
+                            $query->whereHas('getemployeedetail', function ($query) use ($branch_user_id) {
+                                $query->whereIn('user_id', $branch_user_id);
+                            });
+                        }
+                    })
+                    ->whereHas('getemployeedetail', function ($querys) use ($userids, $user) {
+                        // Role-based filtering
+                        if (!$user->hasRole('superadmin') && !$user->hasRole('Admin') && !$user->hasRole('Sub_Admin') && !$user->hasRole('HR_Admin') && !$user->hasRole('HO_Account')) {
+                            $querys->whereIn('user_id', $userids);
+                        }
+                    })
+                    ->whereIn('id', $chunk) // Apply the chunked customer IDs
+                    ->select('id', 'name', 'first_name', 'last_name', 'mobile', 'email', 'profile_image', 'customer_code', 'latitude', 'longitude', 'customertype')
+                    ->orderBy('name', 'asc')
+                    ->paginate($pageSize); // Apply pagination
 
-                ->whereIn('id', $customer_ids_assign)
+                // Collect results from each chunk into the final result
+                $results = $results->merge($query->items());
+            }
 
-                // ->whereHas('customertypes', function($query) use($user){
-                //     $query->where('type_name', '=', 'retailer');
-                // })
-                ->select('id', 'name', 'first_name', 'last_name', 'mobile', 'email', 'profile_image', 'customer_code', 'latitude', 'longitude', 'customertype')
-                ->orderBy('name', 'asc');
-            //->latest();
+            // Optionally convert results to a Laravel paginator if needed
+            $db_data = new \Illuminate\Pagination\LengthAwarePaginator(
+                $results,
+                count($results),
+                $pageSize,
+                $request->input('page', 1),
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
 
 
-            $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->paginate(10000);
+
+
             // dd($db_data);
             $data = collect([]);
             if ($db_data->isNotEmpty()) {

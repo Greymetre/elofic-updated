@@ -20,7 +20,8 @@ use App\Models\SalesDetails;
 use App\Models\Settings;
 use App\Models\SchemeHeader;
 use App\Models\Coupons;
-use App\Models\Payment;  
+use App\Models\Payment;
+use Illuminate\Support\Str;  
 
 if (! function_exists('sendmessage')) {
     function sendmessage($data, $mobile)
@@ -379,9 +380,13 @@ if (! function_exists('getUsersReportingToAuth')) {
     function getUsersReportingToAuth($userid = '')
     {
         $userid = !empty($userid) ? $userid : Auth::user()->id;
-        $userinfo = User::where('id','=',$userid)->first();
+        $userinfo = User::whereDoesntHave('roles', function ($query) {
+            $query->where('id', 29);
+        })->where('id','=',$userid)->first();
 
-        $all_users = User::where('active' , 'Y')->get();
+        $all_users = User::whereDoesntHave('roles', function ($query) {
+            $query->where('id', 29);
+        })->where('active' , 'Y')->get();
      
         // if(!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin'))
         // {
@@ -837,4 +842,12 @@ function getMonthsBetween($startDate, $endDate)
     }
 
     return array_unique($months);
+}
+
+function generatePassword($length = 10) {
+    $letters = Str::random($length - 3); // Random letters
+    $digits = substr(str_shuffle('0123456789'), 0, 3); // Random 3 digits
+    $password = str_shuffle($letters . $digits); // Mix them together
+
+    return $password;
 }

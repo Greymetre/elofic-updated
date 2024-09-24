@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\DataTables\VisitorDataTable;
 use App\Exports\PrimarySalesExport;
 use Illuminate\Http\Request;
-use App\Models\{User, Customers, Order, Branch, Division, CheckIn, BeatSchedule, Sales, SalesTarget, OrderDetails, TourProgramme, Wallet, Product, UserActivity, UserCityAssign, Address, TourDetail, TransactionHistory, EmployeeDetail, SalesTargetUsers, Attendance, VisitReport, PrimarySales, Redemption};
+use App\Models\{User, Customers, Order, Branch, Division, CheckIn, BeatSchedule, Sales, SalesTarget, OrderDetails, TourProgramme, Wallet, Product, UserActivity, UserCityAssign, Address, TourDetail, TransactionHistory, EmployeeDetail, SalesTargetUsers, Attendance, DealerPortalSettings, VisitReport, PrimarySales, Redemption};
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Auth;
@@ -107,7 +107,9 @@ class DashboardController extends Controller
         $total_qty = PrimarySales::sum('quantity');
         $total_sale = PrimarySales::sum('net_amount');
 
-        return view('dashboard.index', compact('users', 'branches', 'divisions', 'years', 'sales_persons', 'retailers', 'dealers_and_distibutors', 'products', 'uniqueProductsNewGroup', 'ps_branches', 'ps_divisions', 'ps_months', 'ps_dealers', 'ps_product_models', 'ps_new_group_names', 'ps_sales_persons', 'labels', 'data', 'labels2', 'data2', 'labels3', 'data3', 'total_qty', 'total_sale'));
+        $dealer_poster_setting = DealerPortalSettings::first();
+
+        return view('dashboard.index', compact('users', 'branches', 'divisions', 'years', 'sales_persons', 'retailers', 'dealers_and_distibutors', 'products', 'uniqueProductsNewGroup', 'ps_branches', 'ps_divisions', 'ps_months', 'ps_dealers', 'ps_product_models', 'ps_new_group_names', 'ps_sales_persons', 'labels', 'data', 'labels2', 'data2', 'labels3', 'data3', 'total_qty', 'total_sale', 'dealer_poster_setting'));
     }
 
     public function dashboardData(Request $request)

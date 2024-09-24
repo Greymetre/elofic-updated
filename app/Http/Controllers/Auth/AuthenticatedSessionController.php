@@ -36,12 +36,12 @@ class AuthenticatedSessionController extends Controller
             if ($user->active != 'Y') {
                 return redirect()->back()->with('error', 'Your account is deactivated don\'t hesitate to get in touch with admin.');
             }
-        }
-        if($user->roles->contains('id', '29')){
-            $user['entry_from'] = 'Web';
-            $user['provider'] = 'retailers';
-            $usersLogin = new UserLogin;
-            $usersLogin->save_data($user);
+            if($user->roles->contains('id', '29')){
+                $user['entry_from'] = 'Web';
+                $user['provider'] = 'retailers';
+                $usersLogin = new UserLogin;
+                $usersLogin->save_data($user);
+            }
         }
         $request->authenticate();
 

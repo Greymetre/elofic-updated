@@ -37,13 +37,13 @@ class UserExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
                     $query->whereIn('id', $this->userids);
                 }
             })
-            // ->whereHas('roles', function ($query) {
-            //     if($this->user_type == 'customer'){
-            //         $query->where('name', ['Customer Dealer']);
-            //     }else{
-            //         $query->whereNot('name', ['Customer Dealer']);
-            //     }
-            // })
+            ->whereHas('roles', function ($query) {
+                if($this->user_type == 'customer'){
+                    $query->where('id', ['29']);
+                }else{
+                    $query->whereNot('id', ['29']);
+                }
+            })
             ->latest()
             ->get();
 
@@ -78,10 +78,12 @@ class UserExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
                 }
 
             }
-
-            $mail_types = explode(',', $data['userinfo']['order_mails_type']);
-
-            $mail_types_name = CustomerType::whereIn('id', $mail_types)->pluck('customertype_name')->toArray();
+            if($data['userinfo'] && !empty($data['userinfo']['order_mails_type'])){
+                $mail_types = explode(',', $data['userinfo']['order_mails_type']);
+                $mail_types_name = CustomerType::whereIn('id', $mail_types)->pluck('customertype_name')->toArray();
+            }else{
+                $mail_types_name = array();
+            }
 
         return [
             $data['id'],
@@ -163,9 +165,9 @@ class UserExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMappi
             $roles,
             $data['payroll']??NULL,
             (string)$data['show_attandance_report']??'0',
-            $data['userinfo']['order_mails'],
+            $data['userinfo']?$data['userinfo']['order_mails']:'',
             implode(',',$mail_types_name),
-            $data['userinfo']['order_mails_type'],
+            $data['userinfo']?$data['userinfo']['order_mails_type']:'',
         ];
     }
 }
