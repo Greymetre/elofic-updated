@@ -36,19 +36,11 @@ class UsersDataTable extends DataTable
                 $btn = '';
                 $activebtn = '';
                 if (auth()->user()->can(['user_edit'])) {
-<<<<<<< HEAD
                     if ($query->roles()->where('id', '29')->exists()) {
                         $btn = $btn . '<a href="' . url("customer-user?id=" . encrypt($query->id)) . '" class="btn btn-info btn-just-icon btn-sm edit" id="' . encrypt($query->id) . '" title="' . trans('panel.global.edit') . ' ' . trans('panel.user.title_singular') . '">
                               <i class="material-icons">edit</i>
                             </a>';
                     } else {
-=======
-                    if($query->roles()->where('id', '29')->exists()){
-                        $btn = $btn . '<a href="' . url("customer-user?id=" . encrypt($query->id) ) . '" class="btn btn-info btn-just-icon btn-sm edit" id="' . encrypt($query->id) . '" title="' . trans('panel.global.edit') . ' ' . trans('panel.user.title_singular') . '">
-                              <i class="material-icons">edit</i>
-                            </a>';
-                    }else{
->>>>>>> 3a8a503 (resolved conflict)
                         $btn = $btn . '<a href="' . url("users/" . encrypt($query->id) . '/edit') . '" class="btn btn-info btn-just-icon btn-sm edit" id="' . encrypt($query->id) . '" title="' . trans('panel.global.edit') . ' ' . trans('panel.user.title_singular') . '">
                               <i class="material-icons">edit</i>
                             </a>';
@@ -120,15 +112,9 @@ class UsersDataTable extends DataTable
                 }
             })
             ->whereHas('roles', function ($query) use ($request) {
-<<<<<<< HEAD
                 if ($request->user_type == 'customer') {
                     $query->where('id', ['29']);
                 } else {
-=======
-                if($request->user_type == 'customer'){
-                    $query->where('id', ['29']);
-                }else{
->>>>>>> 3a8a503 (resolved conflict)
                     $query->whereNot('id', ['29']);
                 }
             })
