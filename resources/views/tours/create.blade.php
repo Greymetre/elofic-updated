@@ -13,7 +13,7 @@
           <div class="col-md-12">
             <!-- jquery validation -->
             <div class="card card-primary">
-              <div class="card-header">
+              <div class="card-header card-header-icon card-header-theme">
                 <h3 class="card-title">Tour Create</h3>
               </div>
               <!-- /.card-header -->
@@ -40,7 +40,7 @@
                         <div class="table-responsive w-100">
                           <table class="table kvcodes-dynamic-rows-example" id="tab_logic">
                              <thead>
-                                <tr class="card-header-warning text-white">
+                                <tr class="text-white">
                                   <th class="text-center">Date </th>
                                   <th>User</th>
                                   <th class="text-center">Town</th>
@@ -50,8 +50,11 @@
                              </thead>
                              <tbody>
                               <tr id='addr0' value="1">
-                                 <td><input type="text" name="detail[1][date]" class="form-control datepicker" autocomplete="off"/></td>
                                  <td>
+                                  <div class="input_section"><input type="text" name="detail[1][date]" class="form-control datepicker" autocomplete="off"/>
+                                  </div></td>
+                                 <td>
+                                <div class="input_section">
                                     <select class="form-control rowchange select2" name="detail[1][userid]">
                                        @if(@isset($users))
                                        <option value="">Select User</option>
@@ -60,12 +63,17 @@
                                        @endforeach
                                        @endif
                                     </select>
+                                  </div>
                                  </td>
                                  <td>
+                                    <div class="input_section">
                                     <input type="text" name="detail[1][town]" class="form-control rowchange"/>
+                                  </div>
                                  </td>
                                  <td>
+                                    <div class="input_section">
                                     <input type="text" name="detail[1][objectives]" class="form-control rowchange"/>
+                                  </div>
                                  </td>
                                  <td class="td-actions text-center"><a class="remove btn btn-danger btn-xs"><i class="fa fa-minus"></i></a></td>
                               </tr>
@@ -100,10 +108,10 @@
           counter++;
           var newRow = 
               '<tr value="'+counter+'">'+
-                  '<td><input type="text" name="detail[' + counter + '][date]" class="form-control datepicker" autocomplete="off"/></td>' +
-                  '<td><select class="form-control user select2" name="detail[' + counter + '][userid]"></select></td>'+
-                  '<td><input type="text" name="detail[' + counter + '][town]" class="form-control rowchange"/></td>' +
-                  '<td><input type="text" name="detail[' + counter + '][objectives]" class="form-control rowchange"/></td>' +
+                  '<td><div class="input_section"><input type="text" name="detail[' + counter + '][date]" class="form-control datepicker" autocomplete="off"/></div></td>' +
+                  '<td><div class="input_section"><select class="form-control user select2" name="detail[' + counter + '][userid]"></select></div></td>'+
+                  '<td><div class="inpu_section"><input type="text" name="detail[' + counter + '][town]" class="form-control rowchange"/></div></td>' +
+                  '<td><div class="inpu_section"><input type="text" name="detail[' + counter + '][objectives]" class="form-control rowchange"/></div></td>' +
                   '<td class="td-actions text-center"><a href="javascript:void(0)" class="remove-rows btn btn-danger btn-xs"> <i class="fa fa-minus"></i></a></td> </tr>';
           $table.append(newRow);
           $('.datepicker').datepicker({ dateFormat: 'yy-mm-dd' });

@@ -14,7 +14,7 @@
                     <!-- jquery validation -->
                     <div class="card card-primary">
                         <div class="card-header">
-                            <h3 class="card-title">Holiday</h3>
+                            <h4 class="card-title">Holiday</h3>
                         </div>
                         <!-- /.card-header -->
                         <!-- form start -->

@@ -41,25 +41,24 @@
             <input type="hidden" name="service_id" value="{{$serialNumberHistory->id}}">
           <div class="row">
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">Serial Number<span class="text-danger"> *</span></label>
-                <div class="col-md-9">
+              <div class="input_section">
+                <label class="col-form-label">Serial Number<span class="text-danger"> *</span></label>
+              
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="serial_no" class="form-control" value="{!! old( 'serial_no', $serialNumberHistory['serial_no']) !!}" maxlength="200" required>
                     @if ($errors->has('serial_no'))
-                    <div class="error col-lg-12">
+                    <div class="error">
                       <p class="text-danger">{{ $errors->first('serial_no') }}</p>
                     </div>
                     @endif
-                  </div>
+                
                 </div>
               </div>
             </div>
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">Product<span class="text-danger"> *</span></label>
-                <div class="col-md-9">
-                  <div class="form-group has-default bmd-form-group">
+              <div class="input_section">
+                <label class="col-form-label">Product<span class="text-danger"> *</span></label>
+                                <div class="form-group has-default bmd-form-group">
                     <select class="form-control select2" name="product_code" id="product_code" style="width: 100%;" required>
                       <option value="">Select Product</option>
                       @if(@isset($products ))
@@ -70,83 +69,80 @@
                     </select>
                   </div>
                   @if ($errors->has('product_code'))
-                  <div class="error col-lg-12">
+                  <div class="error">
                     <p class="text-danger">{{ $errors->first('product_code') }}</p>
                   </div>
                   @endif
                 </div>
-              </div>
+             
             </div>
           </div>
           <div class="row">
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">Party Name<span class="text-danger"> *</span></label>
-                <div class="col-md-9">
+              <div class="input_section">
+                <label class="col-form-label">Party Name<span class="text-danger"> *</span></label>
+                
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="party_name" class="form-control" value="{!! old( 'party_name', $serialNumberHistory['party_name']) !!}" maxlength="200" required>
                     @if ($errors->has('party_name'))
-                    <div class="error col-lg-12">
+                    <div class="error">
                       <p class="text-danger">{{ $errors->first('party_name') }}</p>
                     </div>
                     @endif
                   </div>
-                </div>
+            
               </div>
             </div>
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">Branch Code<span class="text-danger"> *</span></label>
-                <div class="col-md-9">
+              <div class="input_section">
+                <label class="col-form-label">Branch Code<span class="text-danger"> *</span></label>
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="branch_code" class="form-control" value="{!! old( 'branch_code', $serialNumberHistory['branch_code']) !!}" maxlength="200" required>
                     @if ($errors->has('branch_code'))
-                    <div class="error col-lg-12">
+                    <div class="error">
                       <p class="text-danger">{{ $errors->first('branch_code') }}</p>
                     </div>
                     @endif
-                  </div>
                 </div>
               </div>
             </div>
           </div>
           <div class="row">
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">Invoice Date<span class="text-danger"> *</span></label>
-                <div class="col-md-9">
+              <div class="input_section">
+                <label class="col-form-label">Invoice Date<span class="text-danger"> *</span></label>
+               
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="invoice_date" class="form-control datepicker" value="{!! old( 'invoice_date', $serialNumberHistory['invoice_date']) !!}" maxlength="200" required>
                     @if ($errors->has('invoice_date'))
-                    <div class="error col-lg-12">
+                    <div class="error">
                       <p class="text-danger">{{ $errors->first('invoice_date') }}</p>
                     </div>
                     @endif
                   </div>
-                </div>
+                
               </div>
             </div>
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">Invoice Number<span class="text-danger"> *</span></label>
-                <div class="col-md-9">
+              <div class="input_section">
+                <label class="col-form-label">Invoice Number<span class="text-danger"> *</span></label>
+        
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="invoice_no" class="form-control" value="{!! old( 'invoice_no', $serialNumberHistory['invoice_no']) !!}" maxlength="200" required>
                     @if ($errors->has('invoice_no'))
-                    <div class="error col-lg-12">
+                    <div class="error">
                       <p class="text-danger">{{ $errors->first('invoice_no') }}</p>
                     </div>
                     @endif
-                  </div>
                 </div>
               </div>
             </div>
           </div>
           <div class="row">
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">Narration</label>
-                <div class="col-md-9">
+              <div class="input_section">
+                <label class="col-form-label">Narration</label>
+                
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="narration" class="form-control" value="{!! old( 'narration', $serialNumberHistory['narration']) !!}" maxlength="200">
                     @if ($errors->has('narration'))
@@ -154,7 +150,7 @@
                       <p class="text-danger">{{ $errors->first('narration') }}</p>
                     </div>
                     @endif
-                  </div>
+                  
                 </div>
               </div>
             </div>

@@ -36,16 +36,17 @@
                'files'=>true
                ]) !!}
                <div class="row">
-                  <div class="col-md-1">
+                  <div class="col-md-12">
+                     <div class="input_section">
                      <img src="{!! url('/').'/'.asset('assets/img/bediya.jpg') !!}" width="70">
                      <img src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" width="70">
                      <!-- <img src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" class="brand-image" width="70px" alt="Logo"> <span> {!! config('app.name') !!}</span> -->
-
+</div>
                   </div>
-                  <div class="col-md-3">
-                     <div class="row">
-                        <label class="col-md-3 col-form-label">{!! trans('panel.order.order_date') !!}</label>
-                        <div class="col-md-9">
+                  <div class="col-md-4">
+                     <div class="input_section">
+                        <label class="col-form-label">{!! trans('panel.order.order_date') !!}</label>
+                        
                            <div class="form-group has-default bmd-form-group">
                               <input type="text" name="order_date" class="form-control datepicker" id="order_date" value="{{ old( 'order_date' , (!empty($orders->order_date)) ? ($orders->order_date) : date('Y-m-d') ) }}" autocomplete="off" readonly>
                               @if($errors->has('order_date'))
@@ -53,15 +54,14 @@
                                  {{ $errors->first('order_date') }}
                               </div>
                               @endif
-                           </div>
+                         
                         </div>
                      </div>
                   </div>
 
-                  <div class="col-md-3">
-                     <div class="row">
-                        <label class="col-md-4 col-form-label">Order Taking</label>
-                        <div class="col-md-8">
+                  <div class="col-md-4">
+                     <div class="input_section">
+                        <label class="col-form-label">Order Taking</label>
                            <div class="form-group has-default bmd-form-group">
                               <select class="form-control select2" name="order_taking" style="width: 100%;" required>
                                  <!-- <option value="">Select Order Taking</option> -->
@@ -71,18 +71,17 @@
                               </select>
                            </div>
                            @if ($errors->has('seller_id'))
-                           <div class="error col-lg-12">
+                           <div class="error">
                               <p class="text-danger">{{ $errors->first('seller_id') }}</p>
                            </div>
                            @endif
-                        </div>
+                     
                      </div>
                   </div>
 
                   <div class="col-md-4">
-                     <div class="row">
-                        <label class="col-md-4 col-form-label">Employee</label>
-                        <div class="col-md-8">
+                     <div class="input_section">
+                        <label class="col-form-label">Employee</label>
                            <div class="form-group has-default bmd-form-group">
                               <select class="form-control select2" name="executive_id" style="width: 100%;" required>
                                  <option value="">Select Employee</option>
@@ -94,13 +93,109 @@
                               </select>
                            </div>
                            @if ($errors->has('executive_id'))
-                           <div class="error col-lg-12">
+                           <div class="error">
                               <p class="text-danger">{{ $errors->first('executive_id') }}</p>
+                           </div>
+                           @endif
+                     
+                     </div>
+                  </div>
+
+                      <div class="col-md-4">
+                     <div class="input_section">
+                        <label class="col-form-label">{!! trans('panel.global.bill_to') !!}<span class="text-danger"> *</span></label>
+                       
+                           <div class="form-group has-default bmd-form-group">
+                              <select class="form-control select2 seller" name="seller_id" style="width: 100%;" required onchange="sellerinfo()" id="seller_id">
+                                 <!-- <option value="">Select {!! trans('panel.global.seller') !!}</option> -->
+                                 <option value="">Select Customer</option>
+                                 @if(@isset($sellers ))
+                                 @foreach($sellers as $seller)
+                                 <option value="{!! $seller['id'] !!}" data-allowtype="{{$seller->customertype}}" {{ old( 'seller_id' , (!empty($orders->seller_id)) ? ($orders->seller_id) :('') ) == $seller['id'] ? 'selected' : '' }}>{!! $seller['name'] !!}</option>
+                                 @endforeach
+                                 @endif
+                              </select>
+                           </div>
+                           @if ($errors->has('seller_id'))
+                           <div class="error ">
+                              <p class="text-danger">{{ $errors->first('seller_id') }}</p>
+                           </div>
+                           @endif
+                       
+                     </div>
+
+
+                  </div>
+                  <!-- <div class="col-md-4">
+                        <div class="input_section">
+                        <label class="col-form-label">Address : </label>
+                        <span class="seller_address"></span>
+                     </div>
+                  </div> -->
+                  <div class="col-md-4" id="de_dis" style="display:none;">
+                     <div class="input_section">
+                        <!-- <label class="col-md-3 col-form-label">{!! trans('panel.global.buyer') !!}<span class="text-danger"> *</span></label> -->
+                        <label class="col-form-label">Dealer/Distributer<span class="text-danger"> *</span></label>
+                       
+                           <div class="form-group has-default bmd-form-group">
+                              <select class="form-control select2 buyer" name="buyer_id" style="width: 100%;" onchange="buyerinfo()">
+                                 <!-- <option value="">Select {!! trans('panel.global.buyer') !!}</option> -->
+                                 <option value="">Select Dealer/Distributer</option>
+                                 @if(@isset($buyers ))
+                                 @foreach($buyers as $buyer)
+                                 <option value="{!! $buyer['id'] !!}" {{ old( 'buyer_id' , (!empty($orders->buyer_id)) ? ($orders->buyer_id) :('') ) == $buyer['id'] ? 'selected' : '' }}>{!! $buyer['name'] !!}</option>
+                                 @endforeach
+                                 @endif
+                              </select>
+                           </div>
+                           @if($errors->has('seller_id'))
+                           <div class="error">
+                              <p class="text-danger">{{ $errors->first('seller_id') }}</p>
                            </div>
                            @endif
                         </div>
                      </div>
+
+                            @if($orders->exists && @isset($orders['orderno']))
+                  <div class="col-md-4">
+                     <div class="input_section">
+                        <label class="col-form-label">{!! trans('panel.order.orderno') !!}</label>
+                       
+                           <div class="form-group has-default bmd-form-group">
+                              <input type="text" class="form-control" name="orderno" value="{!! old( 'orderno', $orders['orderno']) !!}">
+                              @if ($errors->has('orderno'))
+                              <div class="error col-lg-12">
+                                 <p class="text-danger">{{ $errors->first('orderno') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                       
+                     </div>
                   </div>
+                  @endif
+
+                      <div class="col-md-4">
+                  <div class="input_section">
+                  <label class="col-form-label">Division : </label>
+                
+                     <select name="product_cat_id" id="product_cat_id" class="form-control select2" onchange="getProductlist()" required>
+                        <option value="">Select Division</option>
+                        @if(count($category) > 0)
+                        @foreach($category as $cat)
+                        <option value="{{$cat->id}}">{{$cat->category_name}}</option>
+                        @endforeach
+                        @endif
+                     </select>
+                  </div>
+                  
+               </div>
+
+                  <!--      <div class="col-md-4">
+                        <div class="input_section">
+                        <label class="col-form-label">Address : </label>
+                        <span class="buyer_address"></span>
+                     </div>
+                  </div> -->
 
 
 
@@ -137,95 +232,9 @@
                        </div>
                   </div> -->
                </div>
-               <div class="row">
-                  <div class="col-md-6">
-                     <div class="row">
-                        <label class="col-md-3 col-form-label">{!! trans('panel.global.bill_to') !!}<span class="text-danger"> *</span></label>
-                        <div class="col-md-9">
-                           <div class="form-group has-default bmd-form-group">
-                              <select class="form-control select2 seller" name="seller_id" style="width: 100%;" required onchange="sellerinfo()" id="seller_id">
-                                 <!-- <option value="">Select {!! trans('panel.global.seller') !!}</option> -->
-                                 <option value="">Select Customer</option>
-                                 @if(@isset($sellers ))
-                                 @foreach($sellers as $seller)
-                                 <option value="{!! $seller['id'] !!}" data-allowtype="{{$seller->customertype}}" {{ old( 'seller_id' , (!empty($orders->seller_id)) ? ($orders->seller_id) :('') ) == $seller['id'] ? 'selected' : '' }}>{!! $seller['name'] !!}</option>
-                                 @endforeach
-                                 @endif
-                              </select>
-                           </div>
-                           @if ($errors->has('seller_id'))
-                           <div class="error col-lg-12">
-                              <p class="text-danger">{{ $errors->first('seller_id') }}</p>
-                           </div>
-                           @endif
-                        </div>
-                     </div>
 
-                     <div class="row">
-                        <label class="col-md-3 col-form-label">Address : </label>
-                        <span class="seller_address"></span>
-                     </div>
-                  </div>
-                  <div class="col-md-6" id="de_dis" style="display:none;">
-                     <div class="row">
-                        <!-- <label class="col-md-3 col-form-label">{!! trans('panel.global.buyer') !!}<span class="text-danger"> *</span></label> -->
-                        <label class="col-md-3 col-form-label">Dealer/Distributer<span class="text-danger"> *</span></label>
-                        <div class="col-md-9">
-                           <div class="form-group has-default bmd-form-group">
-                              <select class="form-control select2 buyer" name="buyer_id" style="width: 100%;" onchange="buyerinfo()">
-                                 <!-- <option value="">Select {!! trans('panel.global.buyer') !!}</option> -->
-                                 <option value="">Select Dealer/Distributer</option>
-                                 @if(@isset($buyers ))
-                                 @foreach($buyers as $buyer)
-                                 <option value="{!! $buyer['id'] !!}" {{ old( 'buyer_id' , (!empty($orders->buyer_id)) ? ($orders->buyer_id) :('') ) == $buyer['id'] ? 'selected' : '' }}>{!! $buyer['name'] !!}</option>
-                                 @endforeach
-                                 @endif
-                              </select>
-                           </div>
-                           @if($errors->has('seller_id'))
-                           <div class="error col-lg-12">
-                              <p class="text-danger">{{ $errors->first('seller_id') }}</p>
-                           </div>
-                           @endif
-                        </div>
-                     </div>
-                     <div class="row">
-                        <label class="col-md-3 col-form-label">Address : </label>
-                        <span class="buyer_address"></span>
-                     </div>
-                  </div>
-                  @if($orders->exists && @isset($orders['orderno']))
-                  <div class="col-md-6">
-                     <div class="row">
-                        <label class="col-md-3 col-form-label">{!! trans('panel.order.orderno') !!}</label>
-                        <div class="col-md-9">
-                           <div class="form-group has-default bmd-form-group">
-                              <input type="text" class="form-control" name="orderno" value="{!! old( 'orderno', $orders['orderno']) !!}">
-                              @if ($errors->has('orderno'))
-                              <div class="error col-lg-12">
-                                 <p class="text-danger">{{ $errors->first('orderno') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                     </div>
-                  </div>
-                  @endif
+           
                </div>
-               <div class="row">
-                  <label class="col-md-2 col-form-label">Division : </label>
-                  <div class="col-md-4">
-                     <select name="product_cat_id" id="product_cat_id" class="form-control select2" onchange="getProductlist()" required>
-                        <option value="">Select Division</option>
-                        @if(count($category) > 0)
-                        @foreach($category as $cat)
-                        <option value="{{$cat->id}}">{{$cat->category_name}}</option>
-                        @endforeach
-                        @endif
-                     </select>
-                  </div>
-               </div>
-               <br>
                <!-- <div class="row">
 
                    <div class="col-md-6">
@@ -295,11 +304,11 @@
 
                <!-- Table row -->
                <div class="row">
-                  <div class="container-fluid mt-5 d-flex justify-content-center w-100">
-                     <div class="table-responsive w-100">
+                  <div class="container-fluid mt-5 d-flex justify-content-center">
+                     <div class="table-responsive w-100 p-2">
                         <table class="table kvcodes-dynamic-rows-example" id="tab_logic">
                            <thead>
-                              <tr class="card-header-warning text-white">
+                              <tr class="">
                                  <th class="text-center"> # </th>
                                  <th class="text-center"> {!! trans('panel.global.products') !!}</th>
                                  <!-- <th class="text-center"> {!! trans('panel.global.product_detail') !!} </th> -->
@@ -321,14 +330,17 @@
                               <tr id='addr{{ $key }}' value="{{ $key +1 }}">
                                  <td>{{ $key + 1 }}</td>
                                  <td>
+                                    <div class="input_section">
                                     <select class="form-control product rowchange select2" name="orderdetail[{{ $key }}][product_id]">
                                        @if ($rows['product_id'] !== null)
                                        <option value="{!! $rows['product_id'] !!}">{!! $rows['products']['display_name'] !!}</option>
                                        @endif
                                     </select>
+                                 </div>
                                     <div class="error-product"></div>
                                  </td>
                                  <td style="display: none;">
+                                       <div class="input_section">
                                     <select class="form-control productdetails rowchange select2" name="orderdetail[{{ $key }}][product_detail]" onchange="getproductdetailinfo(this)">
                                        @if ($rows['product_detail_id'] !== null)
                                        <option value="{!! $rows['product_detail_id'] !!}">{!! $rows['productdetails']['detail_title'] !!}</option>
@@ -339,31 +351,42 @@
                                     <span class="linediscount" style="display:none;"></span>
                                     <input type="hidden" name="orderdetail[{{ $key }}][tax_amount]" class="form-control tax_amount" value="{!! $rows['tax_amount'] !!}" readonly />
                                     <input type="hidden" name="orderdetail[{{ $key }}][discount_amount]" class="form-control discountamount" value="{!! $rows['discount_amount'] !!}" readonly />
+                                 </div>
                                  </td>
 
                                  <td>
+                                       <div class="input_section">
                                     <input type="number" name='orderdetail[{{ $key }}][quantity]' class="form-control quantity rowchange" step="0" min="0" value="{!! $rows['quantity'] !!}" />
                                     <div class='error-quantity'></div>
+                                 </div>
                                  </td>
 
                                  <td>
+                                       <div class="input_section">
                                     <input type="number" name="orderdetail[{{ $key }}][mrp]" class="form-control price rowchange" step="0.00" min="0" value="{!! $rows['mrp'] !!}" readonly />
                                     <div class='error-price'></div>
+                                 </div>
                                  </td>
 
                                  <td>
+                                       <div class="input_section">
                                     <input type="text" name="orderdetail[{{ $key }}][gst]" class="form-control gst_new rowchange" step="0.00" min="0" value="{!! $rows['gst'] !!}" readonly />
                                     <div class='error-gst'></div>
+                                 </div>
                                  </td>
 
                                  <td>
+                                       <div class="input_section">
                                     <input type="number" name="orderdetail[{{ $key }}][discount]" class="form-control discount rowchange" step="0.00" min="0" value="{!! $rows['discount'] !!}" readonly />
                                     <div class='error-discount'></div>
+                                 </div>
                                  </td>
 
 
                                  <td>
+                                       <div class="input_section">
                                     <input type="number" name='orderdetail[{{ $key }}][line_total]' class="form-control total" value="{!! $rows['line_total'] !!}" readonly />
+                                 </div>
                                  </td>
 
                                  <td></td>
@@ -375,6 +398,7 @@
                               <tr id='addr0' value="1">
                                  <td>1</td>
                                  <td style="width:21% !important;">
+                                       <div class="input_section">
                                     <select class="form-control product rowchange select2" name="orderdetail[1][product_id]" onchange="getproductinfo(this)" data-url="{{URL::To('sales/product_detail')}}">
                                        @if(@isset($products))
                                        <option value="">Select Product</option>
@@ -384,9 +408,11 @@
                                        @endif
                                     </select>
                                     <div class="error-product"></div>
+                                 </div>
                                  </td>
 
                                  <td style="width:21% !important; display: none;">
+                                       <div class="input_section">
                                     <select class="form-control productdetails rowchange select2" name="orderdetail[1][product_detail]" onchange="getproductdetailinfo(this)">
 
                                     </select>
@@ -395,25 +421,37 @@
                                     <span class="linediscount" style="display:none;"></span>
                                     <input type="hidden" name="orderdetail[1][tax_amount]" class="form-control tax_amount readonly" />
                                     <input type="hidden" name="orderdetail[1][discount_amount]" class="form-control discountamount readonly" />
-                                 </td>
-                                 <td>
-                                    <input type="number" name='orderdetail[1][quantity]' class="form-control quantity rowchange" step="0" min="0" />
-                                    <div class='error-quantity'></div>
+                                 </div>
                                  </td>
 
                                  <td>
+                                       <div class="input_section">
+                                    <input type="number" name='orderdetail[1][quantity]' class="form-control quantity rowchange" step="0" min="0" />
+                                    <div class='error-quantity'></div>
+                                 </div>
+                                 </td>
+
+                                 <td>
+                                       <div class="input_section">
                                     <input type="number" name="orderdetail[1][mrp]" class="form-control price rowchange" step="0.00" min="0" readonly />
                                     <div class='error-price'></div>
+                                 </div>
                                  </td>
                                  <td>
+                                       <div class="input_section">
                                     <input type="text" name="orderdetail[1][gst]" class="form-control gst_new rowchange" readonly />
                                     <div class='error-gst'></div>
+                                 </div>
                                  </td>
                                  <td>
+                                       <div class="input_section">
                                     <input type="number" name="orderdetail[1][discount]" class="form-control discount rowchange" step="0.00" min="0" readonly />
                                     <div class='error-discount'></div>
+                                 </div>
                                  </td>
-                                 <td> <input type="text" name="orderdetail[1][scheme_dis]" class="scheme_dis form-control" readonly>
+                                 <td> 
+   <div class="input_section">
+                                    <input type="text" name="orderdetail[1][scheme_dis]" class="scheme_dis form-control" readonly>
 
                                     <!-- nnn -->
                                     <input type="text" name="orderdetail[1][scheme_type]" class="scheme_type" hidden>
@@ -428,43 +466,69 @@
 
                                     <input type="text" name="orderdetail[1][scheme_amount]" class="ebd_amount" hidden>
                                     <input type="text" name="orderdetail[1][scheme_name]" class="scheme_name" hidden>
-
+</div>
                                  </td>
                                  <td>
+                                       <div class="input_section">
                                     <input type="number" name='orderdetail[1][line_total]' class="form-control total" readonly />
+                                 </div>
                                  </td>
-                                 <td hidden> <input type="text" name="orderdetail[1][clustered_dis]" class="clustered_dis">
+                                 <td hidden>
+   <div class="input_section">
+                                  <input type="text" name="orderdetail[1][clustered_dis]" class="clustered_dis">
                                     <input type="text" name="orderdetail[1][clus_amounts]" class="clus_amounts">
+                                 </div>
                                  </td>
-                                 <td hidden> <input type="text" name="orderdetail[1][dod_dis]" class="dod_dis">
+                                 <td hidden>    <div class="input_section"><input type="text" name="orderdetail[1][dod_dis]" class="dod_dis">
                                     <input type="text" name="orderdetail[1][dodp_amounts]" class="dodp_amounts">
+                                 </div>
                                  </td>
-                                 <td hidden> <input type="text" name="orderdetail[1][sd_dis]" class="sd_dis">
+                                 <td hidden>
+
+                                    <div class="input_section"> <input type="text" name="orderdetail[1][sd_dis]" class="sd_dis">
                                     <input type="text" name="orderdetail[1][sd_amounts]" class="sd_amounts">
+                                 </div>
                                  </td>
-                                 <td hidden> <input type="text" name="orderdetail[1][dm_dis]" class="dm_dis">
+                                 <td hidden>    <div class="input_section"><input type="text" name="orderdetail[1][dm_dis]" class="dm_dis">
                                     <input type="text" name="orderdetail[1][dm_amounts]" class="dm_amounts">
+                                 </div>
                                  </td>
-                                 <td hidden> <input type="text" name="orderdetail[1][ch_dis]" class="ch_dis">
+                                 <td hidden> 
+   <div class="input_section">
+                                    <input type="text" name="orderdetail[1][ch_dis]" class="ch_dis">
                                     <input type="text" name="orderdetail[1][ch_amounts]" class="ch_amounts">
+                              </div>
                                  </td>
-                                 <td hidden> <input type="text" name="orderdetail[1][ebd_dis]" class="ebd_dis">
+                                 <td hidden>
+   <div class="input_section">
+                                  <input type="text" name="orderdetail[1][ebd_dis]" class="ebd_dis">
                                     <input type="text" name="orderdetail[1][ebd_amounts]" class="ebd_amounts">
+                              </div>
                                  </td>
 
-                                 <td hidden><input type="text" name="orderdetail[1][deal_dis]" class="deal_dis">
+                                 <td hidden>
+   <div class="input_section">
+                                    <input type="text" name="orderdetail[1][deal_dis]" class="deal_dis">
                                     <input type="text" name="orderdetail[1][deal_amounts]" class="deal_amounts" hidden>
+                              
+</div>
                                  </td>
-                                 <td hidden><input type="text" name="orderdetail[1][fan_extra_dis]" class="fan_extra_dis">
+                                 <td hidden>
+                                       <div class="input_section">
+                                          <input type="text" name="orderdetail[1][fan_extra_dis]" class="fan_extra_dis">
                                     <input type="text" name="orderdetail[1][fan_extra_amount]" class="fan_extra_amount" hidden>
+                                 </div>
                                  </td>
-                                 <td hidden><input type="text" name="orderdetail[1][special_dis]" class="special_dis">
+                                 <td hidden>
+
+                                       <div class="input_section"><input type="text" name="orderdetail[1][special_dis]" class="special_dis">
                                     <input type="text" name="orderdetail[1][special_amounts]" class="special_amounts" hidden>
+                                 </div>
                                  </td>
 
 
                                  <td hidden>
-                                    <input type="text" name="orderdetail[1][distributot_dis]" class="distributot_dis">
+                                       <div class="input_section"><input type="text" name="orderdetail[1][distributot_dis]" class="distributot_dis">
 
                                     <input type="text" name="orderdetail[1][distributot_amounts]" class="distributot_amounts" hidden>
 
@@ -477,6 +541,7 @@
                                     <input type="text" name="orderdetail[1][twelve_gst]" class="twelve_gst" hidden>
                                     <input type="text" name="orderdetail[1][eighteen_gst]" class="eighteen_gst" hidden>
                                     <input type="text" name="orderdetail[1][twenti_eight_gst]" class="twenti_eight_gst" hidden>
+                                 </div>
                                  </td>
 
                                  <td class="td-actions text-center"><a class="remove btn btn-danger btn-xs"><i class="fa fa-minus"></i></a></td>
@@ -487,7 +552,7 @@
                      </div>
                   </div>
                </div>
-               <div class="row clearfix">
+               <div class="row clearfix p-2">
                   <div class="col-md-12">
                      <table>
                         <tbody>
@@ -522,14 +587,14 @@
                         </p> -->
                   </div>
                   <!-- /.col -->
-                  <div class="col-6">
+                  <div class="col-12">
                      <div id="all-discount-div-pump">
 
                         <div class="form-group row">
-                           <div class="col-sm-4">
-                              <label class="bmd-label">Scheme Discount</label>
-                           </div>
-                           <div class="col-sm-8">
+                           <div class="col-md-6">
+                              <div class="input_section">
+                              <label class="col-form-label">Scheme Discount</label>
+                       
                               <input type="number" name='scheme_discount' id="scheme_discount" class="form-control scheme_discount" value="{!! old( 'scheme_discount', $orders['scheme_discount']) !!}" readonly />
                               @if($errors->has('scheme_discount'))
                               <div class="invalid-feedback">
@@ -537,13 +602,11 @@
                               </div>
                               @endif
                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                           <div class="col-sm-4">
-                              <label class="bmd-label">EBD Discount%</label>
-                           </div>
-                           <div class="col-sm-4">
+                            </div>
+                                <div class="col-md-6">
+                           <div class="input_section">
+                              <label class="col-form-label">EBD Discount%</label>
+                          
                               <select name='ebd_discount' class="form-control ebd_discount">
                                  <option value="">Select EBD Discount</option>
                                  <option value="1">1%</option>
@@ -551,22 +614,26 @@
                                  <option value="3">3%</option>
                               </select>
                            </div>
-                           <div class="col-sm-4">
+                          
+                        </div>
+ <div class="col-md-6">
+   <div class="input_section">
+      <label class="col-form-label">extra discount</label>
                               <input type="text" name="extra_ebd_discount" class="extra_ebd_discount form-control" readonly>
                            </div>
                         </div>
-
-                        <div class="form-group row">
-                           <div class="col-sm-4">
-                              <label class="bmd-label">MOU Discount%</label>
-                           </div>
-                           <div class="col-sm-8">
-                              <div class="input-group">
+    
+                        <div class="col-md-6">
+                           <div class="input_section">
+                              <label class="col-form-label">MOU Discount%</label>
+                           
+              
                                  <div class="input-group-prepend">
                                  </div>
                                  <input type="number" name='distributor_discount' class="form-control distributor_discount" value="{!! old( 'distributor_discount', $orders['distributor_discount']) !!}" />
+                                 <br>
                                  <input type="text" name="distributor_discount_amount" class="form-control distributor_discount_amount" readonly>
-                              </div>
+                     
                               @if($errors->has('distributor_discount'))
                               <div class="invalid-feedback">
                                  {{ $errors->first('distributor_discount') }}
@@ -575,18 +642,17 @@
                            </div>
                         </div>
 
-                        <div class="form-group row">
-                           <div class="col-sm-4">
-                              <label class="bmd-label">Special Discount%</label>
-                           </div>
-                           <div class="col-sm-8">
-                              <div class="input-group">
+                        <div class="col-md-6">
+                           <div class="input_section">
+                              <label class="col-form-label">Special Discount%</label>
+                        
+                           
                                  <div class="input-group-prepend">
                                  </div>
                                  <input type="number" name='special_discount' class="form-control special_discount" value="{!! old( 'special_discount', $orders['special_discount']) !!}" />
-
+<br>
                                  <input type="text" name="special_discount_amount" class="form-control special_discount_amount" readonly>
-                              </div>
+                        
                               @if($errors->has('special_discount'))
                               <div class="invalid-feedback">
                                  {{ $errors->first('special_discount') }}
@@ -595,24 +661,24 @@
                            </div>
                         </div>
 
-                        <div class="form-group row">
-                           <div class="col-sm-4">
-                              <label class="bmd-label">Frieght Discount%</label>
-                           </div>
-                           <div class="col-sm-8">
-                              <div class="input-group">
+                        <div class="col-md-6">
+                           <div class="input_section">
+                              <label class="col-form-label">Frieght Discount%</label>
+                       
                                  <div class="input-group-prepend">
                                  </div>
-                                 <div class="col-sm-4">
+                            
+                               
                                     <select name='frieght_discount' class="form-control frieght_discount">
                                        <option value="">Select Frieght Discount</option>
                                        <option value="1">1%</option>
                                     </select>
-                                 </div>
-                                 <div class="col-sm-4">
+                                
+                                 <br>
+                               
                                     <input type="text" name="frieght_discount_amount" class="form-control frieght_discount_amount" readonly>
-                                 </div>
-                              </div>
+                          
+                        
                               @if($errors->has('frieght_discount'))
                               <div class="invalid-feedback">
                                  {{ $errors->first('frieght_discount') }}
@@ -621,36 +687,37 @@
                            </div>
                         </div>
 
-                        <div class="form-group row">
-                           <div class="col-sm-4">
-                              <label class="bmd-label">Cluster Discount%</label>
-                           </div>
-                           <div class="col-sm-4">
+                     
+
+                
+
+                        <div class="col-md-6">
+                           <div class="input_section">
+                              <label class="col-form-label">Cluster Discount%</label>
+                        
                               <select name='cluster_discount' class="form-control cluster_discount">
                                  <option value="">Select Cluster Discount</option>
                                  <option value="1">1%</option>
                                  <option value="2">2%</option>
                                  <option value="3">3%</option>
                               </select>
-                           </div>
-                           <div class="col-sm-4">
+                         
+                           <br>
                               <input type="text" name="extra_cluster_discount" class="extra_cluster_discount form-control" readonly>
-                           </div>
+                        </div>  </div>
 
-                        </div>
-
-                        <div class="form-group row">
-                           <div class="col-sm-4">
-                              <!-- <label class="bmd-label">{!! trans('panel.order.extra_discount') !!}</label> -->
-                              <label class="bmd-label">Deal Discount%</label>
-                           </div>
-                           <div class="col-sm-8">
-                              <div class="input-group">
+                        <div class="col-md-6">
+                           <div class="input_section">
+                              <!-- <label class="col-form-label">{!! trans('panel.order.extra_discount') !!}</label> -->
+                              <label class="col-form-label">Deal Discount%</label>
+                      
+                          
                                  <div class="input-group-prepend">
                                  </div>
                                  <input type="number" name='extra_discount' class="form-control deal_discnt" value="{!! old( 'extra_discount', $orders['extra_discount']) !!}" />
+                                 <br>
                                  <input type="text" name="extra_discount_amount" class="form-control extra_discount_amount" readonly>
-                              </div>
+                          
                               @if($errors->has('extra_discount'))
                               <div class="invalid-feedback">
                                  {{ $errors->first('extra_discount') }}
@@ -661,12 +728,11 @@
                      </div>
                      <div id="all-discount-div-fan">
 
-                        <div class="form-group row">
-                           <div class="col-sm-4">
-                              <label class="bmd-label">DOD Discount%</label>
-                           </div>
-                           <div class="col-sm-4">
-                              <div class="input-group">
+                        <div class="col-md-12">
+                           <div class="input_section">
+                              <label class="col-form-label">DOD Discount%</label>
+                              <div class="row">
+                              <div class="col-md-6">
                                  <div class="input-group-prepend">
                                  </div>
                                  <select name='dod_discount' class="select2 dod_discount">
@@ -679,17 +745,20 @@
                                  {{ $errors->first('dod_discount') }}
                               </div>
                               @endif
-                           </div>
-                           <div class="col-sm-4">
+
+                                <div class="col-md-6">
                               <input type="text" name="dod_discount_amount" class="dod_discount_amount form-control" readonly>
                            </div>
+                           </div>
+                        </div>
+                         
                         </div>
 
-                        <div class="form-group row">
-                           <div class="col-sm-4">
-                              <label class="bmd-label">Special Distribution Discount%</label>
-                           </div>
-                           <div class="col-sm-4">
+                        <div class="col-md-12">
+                           <div class="input_section">
+                              <label class="col-form-label">Special Distribution Discount%</label>
+                          <div class="row">
+                           <div class="col-md-6">
                               <div class="input-group">
                                  <div class="input-group-prepend">
                                  </div>
@@ -704,17 +773,19 @@
                               </div>
                               @endif
                            </div>
-                           <div class="col-sm-4">
+                           <div class="col-md-6">
                               <input type="text" name="special_distribution_discount_amount" class="special_distribution_discount_amount form-control" readonly>
                            </div>
                         </div>
+                          </div>
+                         </div>
 
-                        <div class="form-group row">
-                           <div class="col-sm-4">
+                        <div class="col-md-12">
+                           <div class="input_section">
                               <!-- <label class="bmd-label">{!! trans('panel.order.extra_discount') !!}</label> -->
-                              <label class="bmd-label">Distribution Margin Discount%</label>
-                           </div>
-                           <div class="col-sm-4">
+                              <label class="col-form-label">Distribution Margin Discount%</label>
+                        <div class="row">
+                           <div class="col-md-6">
                               <div class="input-group">
                                  <div class="input-group-prepend">
                                  </div>
@@ -729,16 +800,19 @@
                               </div>
                               @endif
                            </div>
-                           <div class="col-sm-4">
+                           <div class="col-md-6">
                               <input type="text" name="distribution_margin_discount_amount" class="distribution_margin_discount_amount form-control" readonly>
                            </div>
                         </div>
-
-                        <div class="form-group row">
-                           <div class="col-sm-4">
-                              <label class="bmd-label">Extra Discount%</label>
+                     </div>
                            </div>
-                           <div class="col-sm-4">
+
+                        <div class="col-md-12">
+                           <div class="input_section">
+                              <label class="col-form-label">Extra Discount%</label>
+                        
+                        <div class="row">
+                           <div class="col-md-6">
                               <div class="input-group">
                                  <div class="input-group-prepend">
                                  </div>
@@ -752,16 +826,18 @@
                               </div>
                               @endif
                            </div>
-                           <div class="col-sm-4">
+                           <div class="col-md-6">
                               <input type="text" name="fan_extra_discount_amount" class="fan_extra_discount_amount form-control" readonly>
                            </div>
-                        </div>
+                        </div>  
+                         </div>
 
-                        <div class="form-group row">
-                           <div class="col-sm-4">
-                              <label class="bmd-label">Cash Discount%</label>
-                           </div>
-                           <div class="col-sm-4">
+ </div>                       <div class="col-md-12">
+                           <div class="input_section">
+                              <label class="col-form-label">Cash Discount%</label>
+                     
+                     <div class="row">
+                           <div class="col-md-6">
                               <div class="input-group">
                                  <div class="input-group-prepend">
                                  </div>
@@ -776,17 +852,20 @@
                               </div>
                               @endif
                            </div>
-                           <div class="col-sm-4">
+                           <div class="col-md-6">
                               <input type="text" name="cash_amount" class="cash_amount form-control" readonly>
                            </div>
                         </div>
+                     </div>
+                              </div>
 
-                        <div class="form-group row">
-                           <div class="col-sm-4">
+                        <div class="col-md-12">
+                           <div class="input_section">
                               <!-- <label class="bmd-label">{!! trans('panel.order.extra_discount') !!}</label> -->
-                              <label class="bmd-label">Total Discount%</label>
-                           </div>
-                           <div class="col-sm-4">
+                              <label class="col-form-label">Total Discount%</label>
+                      
+                      <div class="row">
+                           <div class="col-md-6">
                               <div class="input-group">
                                  <div class="input-group-prepend">
                                  </div>
@@ -799,65 +878,64 @@
                               </div>
                               @endif
                            </div>
-                           <div class="col-sm-4">
+                           <div class="col-md-6">
                               <input type="text" name="total_fan_discount_amount" class="total_fan_discount_amount form-control" readonly>
                            </div>
                         </div>
+                        </div>
+                             </div>
                      </div>
 
-                     <div class="form-group row">
-                        <div class="col-sm-4">
-                           <label class="bmd-label">{!! trans('panel.order.sub_total') !!}</label>
-                        </div>
-                        <div class="col-sm-8">
+                     <div class="col-md-12">
+                        <div class="input_section">
+                           <label class="col-form-label">{!! trans('panel.order.sub_total') !!}</label>
+                   
+                     
                            <input type="number" name='sub_total' class="form-control" id="subtotal" readonly value="{!! old( 'sub_total', $orders['sub_total']) !!}" />
                            @if($errors->has('sub_total'))
                            <div class="invalid-feedback">
                               {{ $errors->first('sub_total') }}
                            </div>
                            @endif
-                        </div>
+                      
                      </div>
+                          </div>
 
                      <!-- for tax start -->
-                     <div class="form-group row">
-                        <div class="col-sm-4">
-                           <label class="bmd-label">5%Tax</label>
-                        </div>
-                        <div class="col-sm-8">
+                     <div class="col-md-12">
+                        <div class="input_section">
+                           <label class="col-form-label">5%Tax</label>
+                      
                            <div class="input-group">
                               <input type="number" name='5_gst' class="form-control 5_gst" readonly />
                            </div>
                         </div>
                      </div>
 
-                     <div class="form-group row">
-                        <div class="col-sm-4">
-                           <label class="bmd-label">12%Tax</label>
-                        </div>
-                        <div class="col-sm-8">
+                     <div class="col-md-12">
+                        <div class="input_section">
+                           <label class="col-form-label">12%Tax</label>
+                    
                            <div class="input-group">
                               <input type="number" name='12_gst' class="form-control 12_gst" readonly />
                            </div>
                         </div>
                      </div>
 
-                     <div class="form-group row">
-                        <div class="col-sm-4">
-                           <label class="bmd-label">18%Tax</label>
-                        </div>
-                        <div class="col-sm-8">
+                     <div class="col-md-12">
+                        <div class="input_section">
+                           <label class="col-form-label">18%Tax</label>
+                        
                            <div class="input-group">
                               <input type="number" name='18_gst' class="form-control 18_gst" readonly />
                            </div>
                         </div>
                      </div>
 
-                     <div class="form-group row">
-                        <div class="col-sm-4">
-                           <label class="bmd-label">28%Tax</label>
-                        </div>
-                        <div class="col-sm-8">
+                     <div class="col-md-12">
+                        <div class="input_section">
+                           <label class="col-form-label">28%Tax</label>
+                        
                            <div class="input-group">
                               <input type="number" name='28_gst' class="form-control 28_gst" readonly />
                            </div>
@@ -871,7 +949,7 @@
 
                      <!-- <div class="form-group row"> 
                        <div class="col-sm-4">
-                        <label class="bmd-label">{!! trans('panel.order.total_gst') !!}</label>
+                        <label class="col-form-label">{!! trans('panel.order.total_gst') !!}</label>
                       </div>
                         <div class="col-sm-8">
                            <input type="number" name='total_gst' id="totalgst" class="form-control" value="{!! old( 'total_gst', $orders['total_gst']) !!}" readonly/>
@@ -884,11 +962,10 @@
                      </div> -->
 
 
-                     <div class="form-group row" hidden>
-                        <div class="col-sm-4">
-                           <label class="bmd-label">{!! trans('panel.order.total_discount') !!}</label>
-                        </div>
-                        <div class="col-sm-8">
+                     <div class="col-md-12" hidden>
+                        <div class="input_section">
+                           <label class="col-form-label">{!! trans('panel.order.total_discount') !!}</label>
+                   
                            <input type="number" name='total_discount' id="totaldiscount" class="form-control" value="{!! old( 'total_discount', $orders['total_discount']) !!}" readonly />
                            @if($errors->has('total_discount'))
                            <div class="invalid-feedback">
@@ -899,7 +976,7 @@
                      </div>
                      <!-- <div class="form-group row">
                        <div class="col-sm-4">
-                        <label class="bmd-label">Transportation</label>
+                        <label class="col-form-label">Transportation</label>
                       </div>
                         <div class="col-sm-8">
                            <input type="number" name='transportation_amount' id="transportation_amount" class="form-control" value="{!! old( 'transportation_amount', $orders['transportation_amount']) !!}"/>
@@ -910,11 +987,10 @@
                            @endif
                         </div>
                      </div> -->
-                     <div class="form-group row">
-                        <div class="col-sm-4">
-                           <label class="bmd-label">{!! trans('panel.order.grand_total') !!}</label>
-                        </div>
-                        <div class="col-sm-8">
+                     <div class="col-md-12">
+                        <div class="input_section">
+                           <label class="col-form-label">{!! trans('panel.order.grand_total') !!}</label>
+                     
                            <input type="number" class="form-control" id="grandtotal" name="grand_total" value="{!! old( 'grand_total', $orders['grand_total']) !!}" readonly>
                            @if($errors->has('grand_total'))
                            <div class="invalid-feedback">
@@ -925,11 +1001,10 @@
                      </div>
 
 
-                     <div class="form-group row">
-                        <div class="col-sm-4">
-                           <label class="bmd-label">Remark</label>
-                        </div>
-                        <div class="col-sm-8">
+                     <div class="col-md-12">
+                        <div class="input_section">
+                           <label class="col-form-label">Remark</label>
+                     
                            <input type="text" name='order_remark' id="order_remark" class="form-control" value="{!! old( 'order_remark') !!}" />
                            @if($errors->has('order_remark'))
                            <div class="invalid-feedback">
@@ -942,10 +1017,11 @@
 
 
                   </div>
-               </div>
-               <div class="card-footer pull-right">
+                       <div class="card-footer pull-right">
                   {{ Form::submit('Submit', array('class' => 'btn btn-theme')) }}
                </div>
+               </div>
+          
                {{ Form::close() }}
             </div>
          </div>
@@ -965,28 +1041,28 @@
             counter++;
             var newRow =
                '<tr value="' + counter + '"> <td>' + counter + '</td>' +
-               '<td><select name="orderdetail[' + counter + '][product_id]" class="form-control product rowchange select2" onchange="getproductinfo(this)"/> </select></td>' +
-               '<td style="display:none;"> <select class="form-control productdetails rowchange select2" name="orderdetail[' + counter + '][product_detail]" onchange="getproductdetailinfo(this)" ></select><span class="gst_percent" style="display:none;"></span> <br><span class="gstamount" style="display:none;"></span> <br><span class="linediscount" style="display:none;"></span> <br><input type="hidden" name="orderdetail[' + counter + '][tax_amount]" class="form-control tax_amount readonly"/><input type="hidden" name="orderdetail[' + counter + '][discount_amount]" class="form-control discountamount readonly"/></td>' +
+               '<td><div class="input_section"><select name="orderdetail[' + counter + '][product_id]" class="form-control product rowchange select2" onchange="getproductinfo(this)"/> </select></div></td>' +
+               '<td style="display:none;"> <div class="input_section"><select class="form-control productdetails rowchange select2" name="orderdetail[' + counter + '][product_detail]" onchange="getproductdetailinfo(this)" ></select><span class="gst_percent" style="display:none;"></span> <br><span class="gstamount" style="display:none;"></span> <br><span class="linediscount" style="display:none;"></span> <br><input type="hidden" name="orderdetail[' + counter + '][tax_amount]" class="form-control tax_amount readonly"/><input type="hidden" name="orderdetail[' + counter + '][discount_amount]" class="form-control discountamount readonly"/></div></td>' +
 
-               '<td><input type="text" name="orderdetail[' + counter + '][quantity]" class="form-control quantity rowchange" /></td>' +
+               '<td><div class="input_section"><input type="text" name="orderdetail[' + counter + '][quantity]" class="form-control quantity rowchange" /></div></td>' +
 
-               '<td><input type="number" name="orderdetail[' + counter + '][mrp]" class="form-control price " readonly/></td>' +
+               '<td><div class="input_section"><input type="number" name="orderdetail[' + counter + '][mrp]" class="form-control price " readonly/></div></td>' +
 
-               '<td><input type="text" name="orderdetail[' + counter + '][gst]" class="form-control gst_new "readonly/></td>' +
-               '<td><input type="number" name="orderdetail[' + counter + '][discount]" class="form-control discount" readonly/></td>' +
-               '<td><input type="text" name="orderdetail[' + counter + '][scheme_dis]"  class="scheme_dis form-control" readonly> <input type="text" name="orderdetail[' + counter + '][scheme_amount]" class="ebd_amount" hidden> <input type="text" name="orderdetail[' + counter + '][scheme_name]" class="scheme_name" hidden> <input type="text" name="orderdetail[' + counter + '][scheme_type]" class="scheme_type" hidden> <input type="text" name="orderdetail[' + counter + '][scheme_value_type]" class="scheme_value_type" hidden><input type="text" name="orderdetail[' + counter + '][minimum]" class="minimum" hidden><input type="text" name="orderdetail[' + counter + '][maximum]" class="maximum" hidden>  <input type="text" name="orderdetail[' + counter + '][start_date]" class="start_date" hidden><input type="text" name="orderdetail[' + counter + '][end_date]" class="end_date" hidden> </td>' +
+               '<td><div class="input_section"><input type="text" name="orderdetail[' + counter + '][gst]" class="form-control gst_new "readonly/></div></td>' +
+               '<td><div class="input_section"><input type="number" name="orderdetail[' + counter + '][discount]" class="form-control discount" readonly/></div></td>' +
+               '<td><div class="input_section"><input type="text" name="orderdetail[' + counter + '][scheme_dis]"  class="scheme_dis form-control" readonly> <input type="text" name="orderdetail[' + counter + '][scheme_amount]" class="ebd_amount" hidden> <input type="text" name="orderdetail[' + counter + '][scheme_name]" class="scheme_name" hidden> <input type="text" name="orderdetail[' + counter + '][scheme_type]" class="scheme_type" hidden> <input type="text" name="orderdetail[' + counter + '][scheme_value_type]" class="scheme_value_type" hidden><input type="text" name="orderdetail[' + counter + '][minimum]" class="minimum" hidden><input type="text" name="orderdetail[' + counter + '][maximum]" class="maximum" hidden>  <input type="text" name="orderdetail[' + counter + '][start_date]" class="start_date" hidden><input type="text" name="orderdetail[' + counter + '][end_date]" class="end_date" hidden></div> </td>' +
 
-               '<td><input type="text" name="orderdetail[' + counter + '][line_total]" class="form-control total rowchange" readonly /></td>' +
-               '<td hidden> <input type="text" name="orderdetail[' + counter + '][clustered_dis]" class="clustered_dis"> <input type="text" name="orderdetail[' + counter + '][clus_amounts]" class="clus_amounts" hidden> </td>' +
-               '<td hidden> <input type="text" name="orderdetail[' + counter + '][dod_dis]" class="dod_dis"> <input type="text" name="orderdetail[' + counter + '][dodp_amounts]" class="dodp_amounts" hidden> </td>' +
-               '<td hidden> <input type="text" name="orderdetail[' + counter + '][sd_dis]" class="sd_dis"> <input type="text" name="orderdetail[' + counter + '][sd_amounts]" class="sd_amounts" hidden> </td>' +
-               '<td hidden> <input type="text" name="orderdetail[' + counter + '][dm_dis]" class="dm_dis"> <input type="text" name="orderdetail[' + counter + '][dm_amounts]" class="dm_amounts" hidden> </td>' +
-               '<td hidden> <input type="text" name="orderdetail[' + counter + '][ch_dis]" class="ch_dis"> <input type="text" name="orderdetail[' + counter + '][ch_amounts]" class="ch_amounts" hidden> </td>' +
-               '<td hidden> <input type="text" name="orderdetail[' + counter + '][ebd_dis]" class="ebd_dis"> <input type="text" name="orderdetail[' + counter + '][ebd_amounts]" class="ebd_amounts" hidden> </td>' +
-               '<td hidden><input type="text" name="orderdetail[' + counter + '][deal_dis]" class="deal_dis"><input type="text" name="orderdetail[' + counter + '][deal_amounts]" class="deal_amounts" hidden></td>' +
-               '<td hidden><input type="text" name="orderdetail[' + counter + '][fan_extra_dis]" class="fan_extra_dis"><input type="text" name="orderdetail[' + counter + '][fan_extra_amount]" class="fan_extra_amount" hidden></td>' +
-               '<td hidden><input type="text" name="orderdetail[' + counter + '][special_dis]" class="special_dis"><input type="text" name="orderdetail[' + counter + '][special_amounts]" class="special_amounts" hidden></td>' +
-               '<td hidden><input type="text" name="orderdetail[' + counter + '][distributot_dis]" class="distributot_dis"><input type="text" name="orderdetail[' + counter + '][distributot_amounts]" class="distributot_amounts" hidden> <input type="text" name="orderdetail[' + counter + '][frieght_dis]" class="frieght_dis"><input type="text" name="orderdetail[' + counter + '][frieght_amounts]" class="frieght_amounts"><input type="text" name="orderdetail[' + counter + '][five_gst]" class="five_gst" hidden> <input type="text" name="orderdetail[' + counter + '][twelve_gst]" class="twelve_gst" hidden> <input type="text" name="orderdetail[' + counter + '][eighteen_gst]" class="eighteen_gst" hidden> <input type="text" name="orderdetail[' + counter + '][twenti_eight_gst]" class="twenti_eight_gst" hidden></td>' +
+               '<td><div class="input_section"><input type="text" name="orderdetail[' + counter + '][line_total]" class="form-control total rowchange" readonly /></div></td>' +
+               '<td hidden> <div class="input_section"><input type="text" name="orderdetail[' + counter + '][clustered_dis]" class="clustered_dis"> <input type="text" name="orderdetail[' + counter + '][clus_amounts]" class="clus_amounts" hidden></div> </td>' +
+               '<td hidden><div class="input_section"> <input type="text" name="orderdetail[' + counter + '][dod_dis]" class="dod_dis"> <input type="text" name="orderdetail[' + counter + '][dodp_amounts]" class="dodp_amounts" hidden></div> </td>' +
+               '<td hidden> <div class="input_section"><input type="text" name="orderdetail[' + counter + '][sd_dis]" class="sd_dis"> <input type="text" name="orderdetail[' + counter + '][sd_amounts]" class="sd_amounts" hidden> </div></td>' +
+               '<td hidden><div class="input_section"> <input type="text" name="orderdetail[' + counter + '][dm_dis]" class="dm_dis"> <input type="text" name="orderdetail[' + counter + '][dm_amounts]" class="dm_amounts" hidden> </div></td>' +
+               '<td hidden><div class="input_section"> <input type="text" name="orderdetail[' + counter + '][ch_dis]" class="ch_dis"> <input type="text" name="orderdetail[' + counter + '][ch_amounts]" class="ch_amounts" hidden> </div></td>' +
+               '<td hidden> <div class="input_section"><input type="text" name="orderdetail[' + counter + '][ebd_dis]" class="ebd_dis"> <input type="text" name="orderdetail[' + counter + '][ebd_amounts]" class="ebd_amounts" hidden> </div></td>' +
+               '<td hidden><div class="input_section"><input type="text" name="orderdetail[' + counter + '][deal_dis]" class="deal_dis"><input type="text" name="orderdetail[' + counter + '][deal_amounts]" class="deal_amounts" hidden></div></td>' +
+               '<td hidden><div class="input_section"><input type="text" name="orderdetail[' + counter + '][fan_extra_dis]" class="fan_extra_dis"><input type="text" name="orderdetail[' + counter + '][fan_extra_amount]" class="fan_extra_amount" hidden></div></td>' +
+               '<td hidden><div class="input_section"><input type="text" name="orderdetail[' + counter + '][special_dis]" class="special_dis"><input type="text" name="orderdetail[' + counter + '][special_amounts]" class="special_amounts" hidden></div></td>' +
+               '<td hidden><div class="input_section"><input type="text" name="orderdetail[' + counter + '][distributot_dis]" class="distributot_dis"><input type="text" name="orderdetail[' + counter + '][distributot_amounts]" class="distributot_amounts" hidden> <input type="text" name="orderdetail[' + counter + '][frieght_dis]" class="frieght_dis"><input type="text" name="orderdetail[' + counter + '][frieght_amounts]" class="frieght_amounts"><input type="text" name="orderdetail[' + counter + '][five_gst]" class="five_gst" hidden> <input type="text" name="orderdetail[' + counter + '][twelve_gst]" class="twelve_gst" hidden> <input type="text" name="orderdetail[' + counter + '][eighteen_gst]" class="eighteen_gst" hidden> <input type="text" name="orderdetail[' + counter + '][twenti_eight_gst]" class="twenti_eight_gst" hidden></div></td>' +
                '<td class="td-actions text-center"><a href="#" class="remove-rows btn btn-danger btn-xs"><i class="fa fa-minus"></i></a></td> </tr>';
             $table.append(newRow);
             $('.select2').select2({

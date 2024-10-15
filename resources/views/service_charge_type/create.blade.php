@@ -38,19 +38,20 @@
           ]) !!}
           <div class="row">
             <div class="col-md-8">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.brand.fields.brand_name') !!} <span class="text-danger"> *</span></label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.brand.fields.brand_name') !!} <span class="text-danger"> *</span></label>
+                
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="brand_name" class="form-control" value="{!! old( 'brand_name', $brands['brand_name']) !!}" maxlength="200" required>
                       @if ($errors->has('brand_name'))
                         <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('brand_name') }}</p></div>
                       @endif
                     </div>
-                  </div>
+                
                 </div>
               </div>
             <div class="col-md-3 col-sm-3">
+              <div class="input_section">
               <div class="fileinput fileinput-new text-center" data-provides="fileinput">
                    <div class="selectThumbnail">
                      <span class="btn btn-just-icon btn-round btn-file">
@@ -67,6 +68,8 @@
                    <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
                    <label class="bmd-label-floating">{!! trans('panel.brand.fields.brand_image') !!}</label>
                  </div>
+
+               </div>
             </div>
           </div>
         <div class="card-footer pull-right">

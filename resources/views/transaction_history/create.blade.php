@@ -17,12 +17,12 @@
    </style>
    <div class="row">
       <div class="col-md-12">
-         <div class="card">
-            <div class="card-header card-header-tabs card-header-warning">
+         <div class="card p-0 mt-0">
+            <div class="card-header m-0 card-header-tabs card-header-warning">
                <div class="nav-tabs-navigation">
-                  <div class="nav-tabs-wrapper">
-                     <h4 class="card-title ">
-                        Transaction Coupon History Creation
+                  <div class="nav-tabs-wrapper new_id">
+                     <h4 class="card-title">  
+                        Transaction Coupon History Creation</h4>
                         @if(auth()->user()->can(['district_access']))
                         <ul class="nav nav-tabs pull-right" data-tabs="tabs">
                            <li class="nav-item">
@@ -33,7 +33,7 @@
                            </li>
                         </ul>
                         @endif
-                     </h4>
+                   
                   </div>
                </div>
             </div>
@@ -58,41 +58,39 @@
                ]) !!}
                <div class="form-group">
                   <div class="row">
-                     <div class="col-md-2">
-                        <label for="customer_id" class="form-control">Customer</label>
-                     </div>
-                     <div class="col-md-10">
-                        <select name="customer_id" id="customer_id" placeholder="Select Customers" class="select2 form-control" required>
+                     <div class="col-md-6">
+                        <div class="input_section">
+                        <label for="customer_id" class="col-form-label">Customer</label>
+                     
+                        <select name="customer_id" id="customer_id" placeholder="Select Customers" class="select2 form-control mt-2" required>
                            
                         </select>
                         @if ($errors->has('customer_id'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('customer_id') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
-                  <div id="copen_code_div">
-                     <div class="row">
-                        <div class="col-md-2">
-                           <label for="coupon_code" class="form-control">Coupen Code</label>
-                        </div>
-                        <div class="col-md-9">
+                  <div class="col-md-6" id="copen_code_div">
+                    
+                        <div class="input_section">
+                           <label for="coupon_code" class="col-form-label">Coupen Code</label>
+                     
                            <input type="text" name="coupon_code[]" id="coupon_code" class="form-control" required>
                            @if ($errors->has('coupon_code'))
-                           <div class="error col-lg-12">
+                           <div class="error">
                               <p class="text-danger">{{ $errors->first('coupon_code') }}</p>
                            </div>
                            @endif
                         </div>
-                        <div class="col-md-1">
+                       
                            <a href="#" title="" class="btn btn-success btn-just-icon btn-sm add-rows"> <i class="fa fa-plus"></i> </a>
-                        </div>
-                     </div>
-                  </div>
+                                            </div>
+                 
                </div>
 
-               <div class="card-footer pull-right">
+               <div class="pull-right">
                   {{ Form::submit('Submit', array('class' => 'btn btn-theme')) }}
                </div>
                {{ Form::close() }}
@@ -107,12 +105,11 @@
          event.preventDefault();
          var newRow =
             '<div class="row">' +
-            '<div class="col-md-2">' +
-            '<label for="coupon_code" class="form-control">Coupen Code</label>' +
-            '</div>' +
-            '<div class="col-md-9">' +
-            '<input type="text" name="coupon_code[]" id="coupon_code" class="form-control copen_codes" required>' +
-            '</div>' +
+            '<div class="col-md-6"> <div class="input_Section">' +
+            '<label for="coupon_code" class="col-form-label">Coupen Code</label>' +
+            
+           '<input type="text" name="coupon_code[]" id="coupon_code" class="form-control copen_codes" required>' +
+            '</div> </div>' +
             '<div class="col-md-1">' +
             '<a class="remove-rows btn btn-danger btn-just-icon btn-sm"><i class="fa fa-minus"></i></a>' +
             '</div>' +

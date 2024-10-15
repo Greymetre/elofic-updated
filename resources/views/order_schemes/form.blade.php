@@ -15,15 +15,13 @@
          border-bottom: 1px solid lightgray;
       }
    </style>
-   <div class="row">
-      <div class="col-md-12">
-         <div class="card">
-            <div class="card-header card-header-tabs card-header-warning">
+          <div class="card pt-0 mb-0 mt-0">
+            <div class="card-header card-header-tabs card-header-warning m-0">
                <div class="nav-tabs-navigation">
-                  <div class="nav-tabs-wrapper">
+                  <div class="nav-tabs-wrapper new_id">
                      <h4 class="card-title ">
                         Order Scheme Creation
-                        <!-- @if(auth()->user()->can(['district_access'])) -->
+                        <!-- @if(auth()->user()->can(['district_access'])) --> </h4>
                         <ul class="nav nav-tabs pull-right" data-tabs="tabs">
                            <li class="nav-item">
                               <a class="nav-link" href="{{ url('orderschemes') }}">
@@ -33,10 +31,13 @@
                            </li>
                         </ul>
                         <!-- @endif -->
-                     </h4>
+                    
                   </div>
                </div>
             </div>
+   <div class="row">
+      <div class="col-md-12">
+  
             <div class="card-body">
                @if(count($errors) > 0)
                <div class="alert alert-danger">
@@ -58,8 +59,9 @@
                ]) !!}
                <div class="row">
                   <div class="col-md-6">
-                     <div class="form-group">
-                        <label class="bmd-label-floating">{!! trans('panel.orderschemes.fields.scheme_name') !!} </label>
+                     <div class="input_section">
+
+                        <label class="col-form-label">{!! trans('panel.orderschemes.fields.scheme_name') !!} </label>
                         <input type="text" name="scheme_name" class="form-control" value="{!! old( 'scheme_name', $schemes['scheme_name']) !!}">
                         @if ($errors->has('scheme_name'))
                         <div class="error col-lg-12">
@@ -69,7 +71,8 @@
                      </div>
                   </div>
                   <div class="col-md-6">
-                     <div class="form-group">
+                     <div class="input_section">
+                          <label class="col-form-label">Select Customer Type</label>
                         <select class="select2 form-control" multiple name="customer_type[]" id="customer_type">
                            <!-- <option value="" selected disabled>Select Customer Type</option> -->
                            <option value="" disabled>Select Customer Type</option>
@@ -80,17 +83,15 @@
                            @endif
                         </select>
                         @if ($errors->has('customer_type'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('customer_type') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
-               </div>
-
-               <div class="row">
-                  <div class="col-md-6">
-                     <div class="form-group">
+     <div class="col-md-6">
+                     <div class="input_section">
+    <label class="col-form-label">Select Repetition </label>
                         <select name="repetition" class="select2 form-control" id="repetition">
                            <option value="">Select Repetition </option>
                            <option value="1" {{(old('repetition') == '1')?'selected':''}}>Day</option>
@@ -99,47 +100,42 @@
                            <option value="4" {{(old('repetition') == '4')?'selected':''}}>Year</option>
                         </select>
                         @if ($errors->has('repetition'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('repetition') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
                   <div class="col-md-6">
-                     <div class="form-group">
+                     <div class="input_section">
+                            <label class="col-form-label">scheme type </label>
                         <select name="scheme_type" class="select2 form-control" id="schemetype">
                            <option value="">{!! trans('panel.orderschemes.fields.scheme_type') !!}</option>
                            <option value="lp" {{(old('repetition') == 'lp')?'selected':''}}>LP Price</option>
                            <option value="Qty" {{(old('repetition') == 'Qty')?'selected':''}}>Quantity</option>
                         </select>
                         @if ($errors->has('scheme_type'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('scheme_type') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
-               </div>
-
-
-               <div class="weekDays row d-none">
-                  <div class="col-md-6">
-                     <div class="form-group {{$errors->has('day_repeat') ? config('constants.ERROR_FORM_GROUP_CLASS') : ''}}">
-                        <label class="col-md-6 control-label" for="day_repeat">Repeat on days<span style="color:red">*</span></label>
-                        <div class="col-md-10">
+     <div class="col-md-6 weekDays  d-none">
+                     <div class="input_section{{$errors->has('day_repeat') ? config('constants.ERROR_FORM_GROUP_CLASS') : ''}}">
+                        <label class="col-form-label" for="day_repeat">Repeat on days<span style="color:red">*</span></label>
+                        
                            @foreach(config('constants.WEEK_LIST') as $key => $week)
                            <input type="checkbox" value="{{$key}}" class="weeks_data" name=week[] checked> {{$week}}
                            @endforeach
                            @if($errors->has('day_repeat'))
                            <strong for="day_repeat" class="help-block">{{ $errors->first('day_repeat') }}</strong>
                            @endif
-                        </div>
+                        
                      </div>
                   </div>
-               </div>
-               <div class="weeks row d-none">
-               <div class="col-md-6">
-                     <div class="form-group">
+            <div class="col-md-6 weeks  d-none">
+                     <div class="input_section">
                         <select name="week_repeat" class="select2 form-control" id="week_repeat">
                            <option value="">Select Week </option>
                            <option value="1">First Week</option>
@@ -154,25 +150,35 @@
                         @endif
                      </div>
                   </div>
+
+
+
+
+
                </div>
-               <div class="dateRang row d-none">
-                  <div class="col-md-6">
-                     <div class="form-group">
-                        <label class="bmd-label-floating">{!! trans('panel.orderschemes.fields.start_date') !!} </label>
+
+
+             
+             
+                  <div class="dateRang row  d-none">
+             
+                  <div class="col-md-6 dateRang  d-none">
+                     <div class="input_section">
+                        <label class="col-form-label">{!! trans('panel.orderschemes.fields.start_date') !!} </label>
                         <input type="text" name="start_date" class="form-control datepicker1" value="{!! old( 'start_date', $schemes['start_date']) !!}" autocomplete="off" readonly id="start_date">
                         @if ($errors->has('start_date'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('start_date') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
                   <div class="col-md-6">
-                     <div class="form-group">
-                        <label class="bmd-label-floating">{!! trans('panel.orderschemes.fields.end_date') !!} </label>
+                     <div class="input_section">
+                        <label class="col-form-label">{!! trans('panel.orderschemes.fields.end_date') !!} </label>
                         <input type="text" name="end_date" class="form-control datepicker1" value="{!! old( 'end_date', $schemes['end_date']) !!}" autocomplete="off" readonly id="end_date">
                         @if ($errors->has('end_date'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('end_date') }}</p>
                         </div>
                         @endif
@@ -180,8 +186,9 @@
                   </div>
                </div>
                <div class="row">
-                  <div class="col-md-4">
-                     <div class="form-group">
+                  <div class="col-md-6">
+                     <div class="input_section">
+                             <label class="col-form-label">Scheme Based On</label>
                         <select name="scheme_basedon" class="select2 form-control" id="schemebasedon">
                            <option value="">Scheme Based On</option>
                            <option value="value" {{(old('repetition') == 'value')?'selected':''}}>Value</option>
@@ -195,12 +202,12 @@
                         @endif
                      </div>
                   </div>
-                  <div class="col-md-8">
-                     <div class="form-group">
-                        <label class="bmd-label-floating">{!! trans('panel.orderschemes.fields.scheme_description') !!} </label>
+                  <div class="col-md-6">
+                     <div class="input_section">
+                        <label class="col-form-label">{!! trans('panel.orderschemes.fields.scheme_description') !!} </label>
                         <textarea class="form-control" rows="4" name="scheme_description">{!! old( 'scheme_description') !!}</textarea>
                         @if ($errors->has('scheme_description'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('scheme_description') }}</p>
                         </div>
                         @endif
@@ -210,23 +217,23 @@
                </div>
 
                <div class="row" id="min_max" style="display:none;">
-                  <div class="col-md-4">
-                     <div class="form-group">
-                        <label class="bmd-label-floating">{!! trans('panel.orderschemes.fields.minimum') !!} </label>
+                  <div class="col-md-6">
+                     <div class="input_section">
+                        <label class="col-form-label">{!! trans('panel.orderschemes.fields.minimum') !!} </label>
                         <input type="number" name="minimum" class="form-control" value="{!! old( 'minimum', $schemes['minimum']) !!}">
                         @if ($errors->has('minimum'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('minimum') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
-                  <div class="col-md-4">
-                     <div class="form-group">
-                        <label class="bmd-label-floating">{!! trans('panel.orderschemes.fields.maximum') !!} </label>
+                  <div class="col-md-6">
+                     <div class="input_section">
+                        <label class="col-form-label">{!! trans('panel.orderschemes.fields.maximum') !!} </label>
                         <input type="number" name="maximum" class="form-control" value="{!! old( 'maximum', $schemes['maximum']) !!}">
                         @if ($errors->has('maximum'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('maximum') }}</p>
                         </div>
                         @endif
@@ -237,7 +244,7 @@
 
                <div class="row">
                   <div class="col-md-6">
-                     <div class="form-group">
+                     <div class="input_section">
                         <select name="assign_to" placeholder="Select Branch" class="select2 form-control" id="assign_to">
                            <option value="" disabled selected>Assign To</option>
                            <option {!! ($schemes->assign_to == 'all' ) ? "selected" : ''!!} value="all">All</option>
@@ -253,7 +260,7 @@
                      </div>
                   </div>
                   <div class="col-md-6" id="branch">
-                     <div class="form-group">
+                     <div class="input_section">
                         <select name="branch[]" multiple placeholder="Select Branch" class="select2 form-control" required style="width:100%;">
 
                            @if($branchs && count($branchs) > 0)
@@ -263,14 +270,14 @@
                            @endif
                         </select>
                         @if ($errors->has('branch'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('branch') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
                   <div class="col-md-6" id="state">
-                     <div class="form-group">
+                     <div class="input_section">
                         <select name="state[]" multiple placeholder="Select States" class="select2 form-control" required style="width:100%;">
 
                            @if($states && count($states) > 0)
@@ -280,18 +287,18 @@
                            @endif
                         </select>
                         @if ($errors->has('state'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('state') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
                   <div class="col-md-6" id="customer">
-                     <div class="form-group">
+                     <div class="input_section">
                         <!-- <select name="customer[]" id='customer_select' value="{!! old( 'customer', $schemes['customer']) !!}" ></select> -->
                         {!! Form::select('customer[]',[], old( 'customer', $schemes['customer']), ['id'=>'customer_select', 'class' => 'form-control']) !!}
                         @if ($errors->has('state'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('state') }}</p>
                         </div>
                         @endif
@@ -411,7 +418,7 @@
                               <td>
                                  <input type="text" name="points[]" class="form-control points rowchange" value="{{ $row['points'] }}" />
                               </td>
-                              <td class="td-actions text-center">
+                              <td class="text-center">
                                  <a class="remove-rows btn btn-danger btn-just-icon btn-sm"><i class="fa fa-minus"></i></a>
                               </td>
                            </tr>
@@ -420,22 +427,22 @@
                         </tbody>
                      </table>
                   </div>
-                  <div class="row clearfix">
+                  <!-- <div class="row clearfix"> -->
                      <div class="col-md-12">
                         <table class="table">
                            <tbody>
                               <tr>
-                                 <td class="td-actions">
+                                 <td class="p-0">
                                     <a href="#" title="" class="btn btn-success btn-just-icon btn-sm add-rows" onclick="getcategorylist()"> <i class="fa fa-plus"></i> </a>
                                  </td>
                               </tr>
                            </tbody>
                         </table>
-                     </div>
+                     <!-- </div> -->
                   </div>
                </div>
 
-               <div class="card-footer pull-right">
+               <div class="pull-right">
                   {{ Form::submit('Submit', array('class' => 'btn btn-theme')) }}
                </div>
                {{ Form::close() }}

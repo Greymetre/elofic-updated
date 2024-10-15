@@ -381,9 +381,7 @@ if (! function_exists('getUsersReportingToAuth')) {
     function getUsersReportingToAuth($userid = '')
     {
         $userid = !empty($userid) ? $userid : Auth::user()->id;
-        $userinfo = User::whereDoesntHave('roles', function ($query) {
-            $query->where('id', 29);
-        })->where('id','=',$userid)->first();
+        $userinfo = User::where('id','=',$userid)->first();
 
         $all_users = User::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);

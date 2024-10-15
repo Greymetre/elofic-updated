@@ -8,13 +8,13 @@
       ]) !!}
 <div class="row mt-4">
 	<div class="col-lg-6">
-		<div class="card mt-4" data-animation="true">
+		<div class="card p-0" data-animation="true">
 			<div class="card-body">
-				<h5 class="font-weight-normal mt-4"> Beat Info</h5>
+				<h5 class="newdata"> Beat Info</h5>
             <div class="row">
                <div class="col-md-12">
-                  <div class="form-group">
-                     <label class="bmd-label-floating">{!! trans('panel.beat.beat_name') !!} <span class="text-danger"> *</span></label>
+                  <div class="input_section">
+                     <label class="col-form-label">{!! trans('panel.beat.beat_name') !!} <span class="text-danger"> *</span></label>
                      <input type="text" name="beat_name" id="beat_name" class="form-control" value="{!! old( 'beat_name', $beats['beat_name']) !!}"  maxlength="200" required>
                      @if ($errors->has('beat_name'))
                         <div class="error col-lg-12">
@@ -23,11 +23,9 @@
                      @endif
                   </div>
                </div>
-            </div>
-            <div class="row">
-               <div class="col-md-12">
-                  <div class="form-group">
-                     <label class="bmd-label-floating">{!! trans('panel.global.state') !!} </label>
+     <div class="col-md-12">
+                  <div class="input_section">
+                     <label class="col-form-label">{!! trans('panel.global.state') !!} </label>
                      <select class="form-control select2 state" name="state_id" style="width: 100%;" onchange="getDistrictList()">
                         <option value="">Select {!! trans('panel.global.state') !!}</option>
                         @if(@isset($states))
@@ -43,11 +41,9 @@
                      @endif
                   </div>
                </div>
-            </div>
-            <div class="row">
-               <div class="col-md-12">
-                  <div class="form-group">
-                     <label class="bmd-label-floating">{!! trans('panel.global.district') !!} </label>
+  <div class="col-md-12">
+                  <div class="input_section">
+                     <label class="col-form-label">{!! trans('panel.global.district') !!} </label>
                      <select class="form-control select2 district" name="district_id[]" multiple style="width: 100%;" onchange="getCityListMultiDis()">
                         <option value="">Select {!! trans('panel.global.district') !!}</option>
                         @if(@isset($districts))
@@ -57,17 +53,15 @@
                         @endif
                      </select>
                      @if ($errors->has('district_id'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('district_id') }}</p>
                         </div>
                      @endif
                   </div>
-               </div>
-            </div>
-            <div class="row">
-               <div class="col-md-12">
-                  <div class="form-group">
-                     <label class="bmd-label-floating">{!! trans('panel.global.city') !!} </label>
+                   </div>
+ <div class="col-md-12">
+                  <div class="input_section">
+                     <label class="col-form-label">{!! trans('panel.global.city') !!} </label>
                      <select class="form-control select2 city" id="city_id" name="city_id[]" multiple style="width: 100%;">
                         <option value="">Select {!! trans('panel.global.city') !!}</option>
                         @if(@isset($cities))
@@ -77,26 +71,32 @@
                         @endif
                      </select>
                      @if ($errors->has('city_id'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('city_id') }}</p>
                         </div>
                      @endif
                   </div>
                </div>
-            </div>
-            <div class="row">
-               <div class="col-md-12">
-                  <div class="form-group">
-                     <label class="bmd-label-floating">{!! trans('panel.beat.description') !!} <span class="text-danger"> *</span></label>
+
+                 <div class="col-md-12">
+                  <div class="input_section">
+                     <label class="col-form-label">{!! trans('panel.beat.description') !!} <span class="text-danger"> *</span></label>
                      <textarea name="description" class="form-control" rows="5">{!! old( 'description', $beats['description']) !!}</textarea>
                      @if ($errors->has('description'))
-                     <div class="error col-lg-12">
+                     <div class="error">
                         <p class="text-danger">{{ $errors->first('description') }}</p>
                      </div>
                      @endif
                   </div>
                </div>
+
+
+
+
+
             </div>
+          
+         
             @if($beats->exists)
                {{ Form::submit('Submit', array('class' => 'btn btn-theme pull-right')) }} 
             @endif
@@ -107,15 +107,16 @@
       {{ Form::close() }}
    @endif
    <div class="col-lg-6">
-		<div class="card mt-4" data-animation="true">
+		<div class="card p-0" data-animation="true">
 			<div class="card-body">
-				<h5 class="font-weight-normal mt-4"> Beat User</h5>
-            <div class="row p-3">
+				<h5 class="newdata"> Beat User</h5>
+            <div class="row p-2">
                <div class="table-responsive">
                <a href="javascript:;" title="Add a row" class="btn btn-just-icon btn-success pull-right add-users-rows" onclick="getUserlist()">+</a>
                @if($beats->exists)
                   <form action="{{ URL::to('add-beatusers') }}" class="form-horizontal" method="post">
                   {{ csrf_field() }}
+
                   <input type="hidden" name="beat_id" id="beat_id" value="{!! old( 'beat_id', $beats->id) !!}">
                @endif
                      <table class="table beat-users-rows" id="tab_beat_users">
@@ -142,7 +143,10 @@
                               @foreach($beats['beatusers'] as $key => $index )
                                  <tr>
                                     <td>{!! $key+1 !!}</td>
-                                    <td> <select  class="form-control user" disabled><option value="{!! $index['user_id'] !!}" selected>{!! $index['users']['name'] !!}</option></select></td>
+                                    <td>
+<div class="input_section">
+                                     <select  class="form-control user" disabled><option value="{!! $index['user_id'] !!}" selected>{!! $index['users']['name'] !!}</option></select>
+                                  </div></td>
                                     <td class="td-actions text-right">
                                      <a class="btn btn-danger" title="Remove row" onclick="deleteUserFromBeat({!! $index['id'] !!})"><i class="material-icons">close</i>
                                      </a>
@@ -160,13 +164,13 @@
 	</div>
 
    <div class="col-lg-6">
-		<div class="card mt-4" data-animation="true">
+		<div class="card p-0" data-animation="true">
 			<div class="card-body">
-				<h5 class="font-weight-normal mt-4"> Beat Customer</h5>
+				<h5 class="newdata"> Beat Customer</h5>
 
             <div class="row p-3">
                <div class="table-responsive">
-               <a href="javascript:;" title="Add a row" class="btn btn-just-icon btn-info add-customer-rows" onclick="getRetailerlist()">+</a>
+               <a href="javascript:;" title="Add a row" class="btn pull-right btn-just-icon btn-info add-customer-rows" onclick="getRetailerlist()">+</a>
                @if($beats->exists)
                <form action="{{ URL::to('add-beatcustomers') }}" class="form-horizontal" method="post">
                   {{ csrf_field() }}
@@ -210,9 +214,9 @@
 	</div>
 
       <div class="col-lg-6">
-		<div class="card mt-4" data-animation="true">
+		<div class="card mt-4 p-0" data-animation="true">
 			<div class="card-body">
-				<h5 class="font-weight-normal mt-4"> Schedule Beat</h5>
+				<h5 class="newdata"> Schedule Beat</h5>
             <div class="row p-3">
             <div class="table-responsive">
             <a href="javascript:;" title="Add a row" class="btn btn-just-icon btn-success pull-right add-schedule-rows" onclick="getScheduleUserlist()">+</a>

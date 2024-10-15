@@ -16,7 +16,7 @@
                     <input type="text" name="page_length" id="page_length" value="10" hidden>
 
                     <div class="p-2"></div>
-                    <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('User City') !!}"><i class="material-icons">cloud_download</i></button></div>
+                    <div class=""><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('User City') !!}"><i class="material-icons">cloud_download</i></button></div>
                   </div>
                 </form>
                 <form action="{{ URL::to('/usercity-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">

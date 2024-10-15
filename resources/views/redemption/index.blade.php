@@ -57,7 +57,9 @@
                     </div>
                     <div class="p-2" style="width:160px;"><label for="start_date">Start Date</label><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
                     <div class="p-2" style="width:160px;"><label for="end_date">End Date</label><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
-                    <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Redemption"><i class="material-icons">cloud_download</i></button></div>
+                    <div class="p-2">
+<label for="redeem_mode">Download</label>
+                      <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Redemption"><i class="material-icons">cloud_download</i></button></div>
                   </div>
                 </form>
                 @endif

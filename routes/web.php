@@ -398,6 +398,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('productionupdate', [ProductController::class, 'productionUpdate'])->name('products.productionupdate');
     Route::any('products-list', [ProductController::class, 'productList']);
     Route::any('checkProductCode', [ProductController::class, 'checkProductCode'])->name('checkProductCode');
+    Route::any('dealer_product', [ProductController::class, 'dealer_product'])->name('dealer_product');
+    Route::any('dealer_product_list/{id}', [ProductController::class, 'dealer_product_list'])->name('category.products');
 
     // Customer Outstanting
     Route::any('stock', [ProductController::class, 'stock'])->name('stock');

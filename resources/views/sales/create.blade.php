@@ -2,11 +2,12 @@
 
   <div class="row">
     <div class="col-md-12">
-      <div class="card">
-        <div class="card-header card-header-tabs card-header-warning">
+      <div class="card pt-0 mt-0">
+        <div class="card-header card-header-tabs card-header-warning m-0">
           <div class="nav-tabs-navigation">
-            <div class="nav-tabs-wrapper">
+            <div class="nav-tabs-wrapper new_id">
               <h4 class="card-title ">{!! trans('panel.sale.title_singular') !!}
+                    </h4>
                 @if(auth()->user()->can(['sale_access']))
                 <ul class="nav nav-tabs pull-right" data-tabs="tabs">
                   <li class="nav-item">
@@ -17,7 +18,7 @@
                   </li>
                 </ul>
                 @endif
-              </h4>
+          
             </div>
           </div>
         </div>
@@ -41,9 +42,9 @@
           'files'=>true
           ]) !!}
           <div class="row">
-            <div class="col-12">
-              <h4>
-                <small class="float-right">
+            <div class="col-md-2">
+              <div class="input_section">
+              
                   <input type="hidden" name="sales_id" class="form-control datepicker" value="{!! old( 'id', $sales['id']) !!}" autocomplete="off" >
                   <input type="text" name="invoice_date" class="form-control datepicker" value="{!! old( 'invoice_date', $sales['invoice_date']) !!}" autocomplete="off" >
                   @if($errors->has('invoice_date'))
@@ -51,14 +52,15 @@
                     {{ $errors->first('invoice_date') }}
                   </div>
                   @endif
-                </small>
-              </h4>
+               
+              </div>
             </div>
             <!-- /.col -->
           </div>
           <div class="row invoice-info">
-            <div class="col-sm-4 invoice-col">
-              {!! trans('panel.global.bill_from') !!}
+            <div class="col-md-4">
+              <div class="input_section">
+                <label class="col-form-label">{!! trans('panel.global.bill_from') !!}</label>
               <address>
                 <strong>
                   <select class="form-control select2 buyer" name="seller_id" style="width: 100%;" required onchange="sellerinfo()">
@@ -74,9 +76,10 @@
                   Address:<span class="seller_address"></span>
                 </address>
             </div>
-            <!-- /.col -->
-            <div class="col-sm-4 invoice-col">
-              {!! trans('panel.global.bill_to') !!}
+            </div>
+                <div class="col-md-4">
+              <div class="input_section"> <label class="col-form-label">{!! trans('panel.global.bill_to') !!}</label>
+              
               <strong>
                 <select class="form-control select2 buyer" name="buyer_id" style="width: 100%;" required onchange="buyerinfo()">
                   <option value="" selected disabled>Select {!! trans('panel.global.buyer') !!} <span class="text-danger"> *</span></option>
@@ -91,17 +94,16 @@
                   {{ $errors->first('buyer_id') }}
                 </div>
                 @endif
-              </strong><br>
+              </strong>
               <address>
                 Address:<span class="buyer_address"></span>
               </address>
             </div>
-            <!-- /.col -->
-            <div class="col-sm-4 invoice-col">
-              <br>
-              <div class="form-group row">
-                <label class="bmd-label-floating">Invoice</label>
-                <div class="col-sm-9">
+             </div>
+                 <div class="col-md-4">
+              <div class="input_section">
+                <label class="col-form-label">Invoice</label>
+                
                   <input type="text" readonly class="form-control" name="invoice_no" value="{!! old( 'invoice_no', $sales['invoice_no']) !!}" required>
                   @if($errors->has('invoice_no'))
                   <div class="invalid-feedback">
@@ -110,47 +112,62 @@
                   @endif
                 </div>
               </div>
-              <br>
-              <div class="form-group row">
-                <label class="bmd-label-floating">Order No</label>
-                <div class="col-sm-9">
+          <div class="col-md-4">
+              <div class="input_section">
+                <label class="col-form-label">Order No</label>
                   <input type="text" readonly class="form-control" name="orderno" value="{!! old( 'orderno', $sales['orderno']) !!}" required>
                   @if($errors->has('orderno'))
                   <div class="invalid-feedback">
                     {{ $errors->first('orderno') }}
                   </div>
                   @endif
-                </div>
               </div>
             </div>
-            <!-- /.col -->
-          </div>
-          <div class="col-sm-12 invoice-col">
-            <div class="row">
-              <label class="col-md-1">Transport Name</label>
-              <div class="col-md-3">
+
+             <div class="col-md-4">
+              <div class="input_section">
+              <label class="col-form-label">Transport Name</label>
                 <div class="form-group has-default bmd-form-group">
                   <textarea class="form-control" name="transport_details" id="transport_details" cols="30" rows="3">{!! old( 'transport_details', $sales['transport_details']) !!}</textarea>
                 </div>
               </div>
-              <label class="col-md-1">LR No</label>
-              <div class="col-md-3">
+            </div>
+
+            <div class="col-md-4">
+            <div class="input_section">
+              <label class="col-form-label">LR No</label>
                 <div class="form-group has-default bmd-form-group">
                   <input type="text" name="lr_no" class="form-control" value="{!! old( 'lr_no', $sales['lr_no']) !!}" autocomplete="off" required>
                 </div>
               </div>
-              <label class="col-md-1">Dispatch Date</label>
-              <div class="col-md-3">
+               </div>
+               <div class="col-md-4">
+<div class="input_section">
+              <label class="col-form-label">Dispatch Date</label>
+          
                 <div class="form-group has-default bmd-form-group">
                   <input type="text" name="dispatch_date" class="form-control datepicker"  value="{!! old( 'dispatch_date', $sales['dispatch_date']) !!}" autocomplete="off" required>
                 </div>
-              </div>
-            </div>
           </div>
+            </div>
+
+
+
+  </div>
+
+            <!-- /.col -->
+
+            <!-- /.col -->
+
+            </div>
+            <!-- /.col -->
+          </div>
+
+
           <div class="row">
             <div class="container-fluid mt-5 d-flex justify-content-centerbg-dark w-100">
               <div class="table-responsive w-100">
-                <table class="table kvcodes-dynamic-rows-example" id="tab_logic">
+                <table class="table kvcodes-dynamic-rows-example mb-0" id="tab_logic">
                   <thead>
                     <tr class="card-header-warning text-white">
                       <th class="text-center"> # </th>
@@ -169,12 +186,15 @@
                     <tr id='addr0'>
                       <td>{!! $index +1 !!}</td>
                       <td>
+                        <div class="input_section">
                         <select class="form-control product rowchange select2" name="saledetail[{!! $index !!}][product_id]">
                           <option value="{!! $rows['product_id'] !!}">{!! $rows['products']['display_name'] !!}</option>
                         </select>
                         <div class="error-product"></div>
+                      </div>
                       </td>
                       <td>
+                        <div class="input_section">
                         GST Percent :
                         <span class="gst_percent">
                           {!! isset($rows['products']['productdetails']['gst']) ? $rows['products']['productdetails']['gst'] : '' !!}
@@ -190,22 +210,31 @@
                           {!! $rows['discount_amount'] !!} </span>
                         <input type="hidden" name="saledetail[{!! $index !!}[tax_amount]" class="form-control tax_amount" value="{!! $rows['tax_amount'] !!}" readonly />
                         <input type="hidden" name="saledetail[{!! $index !!}[discount_amount]" class="form-control discountamount" value="{!! $rows['discount_amount'] !!}" readonly />
+                      </div>
                       </td>
                       <td width="20%">
+                        <div class="input_section">
                         <input type="number" readonly name="saledetail[{!! $index !!}][price]" class="form-control price rowchange" step="0.00" min="0" value="{!! $rows['price'] !!}" />
                         <div class='error-price'></div>
+                      </div>
                       </td>
                       <td>
+                        <div class="input_section">
                         <input type="number" readonly name="saledetail[{!! $index !!}[discount]" class="form-control discount rowchange" step="0.00" min="0" value="{!! $rows['discount'] !!}" />
                         <div class='error-discount'></div>
+                      </div>
                       </td>
                       <td width="15%">
+                        <div class="input_section">
                         <input type="number" readonly name='saledetail[{!! $index !!}][quantity]' class="form-control quantity rowchange" step="0" min="0" value="{!! $rows['quantity'] !!}" />
                         <div class='error-quantity'></div>
+                      </div>
                       </td>
 
                       <td width="15%">
+                        <div class="input_section">
                         <input type="number" name='saledetail[{!! $index !!}][line_total]' class="form-control total" value="{!! $rows['line_total'] !!}" readonly />
+                      </div>
                       </td>
                       <td class="td-actions text-center"><a class="remove-rows btn btn-danger btn-just-icon btn-sm"><i class="fa fa-minus"></i></a></td>
                     </tr>
@@ -215,6 +244,7 @@
                     <tr id='addr0' value="1">
                       <td>1</td>
                       <td>
+                        <div class="input_section">
                         <select class="form-control product rowchange select2" name="saledetail[1][product_id]" onchange="getproductinfo(this)" data-url="{{URL::To('sales/product_detail')}}">
                           @if(@isset($products))
                           <option value="">Select Product</option>
@@ -224,8 +254,10 @@
                           @endif
                         </select>
                         <div class="error-product"></div>
+                      </div>
                       </td>
                       <td>
+                        <div class="input_section">
                         <select class="form-control productdetails rowchange select2" name="saledetail[1][product_detail]" onchange="getproductdetailinfo(this)">
 
                         </select>
@@ -234,21 +266,30 @@
                         <span class="linediscount" style="display:none;"></span>
                         <input type="hidden" name="saledetail[1][tax_amount]" class="form-control tax_amount readonly" />
                         <input type="hidden" name="saledetail[1][discount_amount]" class="form-control discountamount readonly" />
+                      </div>
                       </td>
                       <td>
+                        <div class="input_section">
                         <input type="number" name="saledetail[1][price]" class="form-control price rowchange" step="0.00" min="0" />
                         <div class='error-price'></div>
+                      </div>
                       </td>
                       <td>
+                        <div class="input_section">
                         <input type="number" name="saledetail[1][discount]" class="form-control discount rowchange" step="0.00" min="0" />
                         <div class='error-discount'></div>
+                      </div>
                       </td>
                       <td>
+                        <div class="input_section">
                         <input type="number" name='saledetail[1][quantity]' class="form-control quantity rowchange" step="0" min="0" />
                         <div class='error-quantity'></div>
+                      </div>
                       </td>
                       <td>
+                        <div class="input_section">
                         <input type="number" name='saledetail[1][line_total]' class="form-control total" readonly />
+                      </div>
                       </td>
                       <td class="td-actions text-center"><a class="remove btn btn-danger btn-xs"><i class="fa fa-minus"></i></a></td>
                     </tr>
@@ -271,10 +312,10 @@
               </table>
             </div>
           </div>
-          <div class="baseurl" data-baseurl="{{ url('/')}}">
+          <div class="baseurl" style="background-color: #fff" data-baseurl="{{ url('/')}}">
             <div class="row">
               <!-- accepted payments column -->
-              <div class="col-6">
+              <!-- <div class="col-6"> -->
                 <!-- <p class="lead">{!! trans('panel.sale.fields.description') !!}</p>
                 <p class="text-muted well well-sm shadow-none" style="margin-top: 10px;">
                 <div class="form-group row">
@@ -287,27 +328,26 @@
                   @endif
                 </div>
                 </p> -->
-              </div>
+              <!-- </div> -->
               <!-- /.col -->
-              <div class="col-6">
-                <div class="form-group row">
-                  <div class="col-sm-4">
-                    <label class="bmd-label">{!! trans('panel.sale.fields.sub_total') !!}</label>
-                  </div>
-                  <div class="col-sm-8">
+              <div class="col-md-6">
+                <div class="input_section">
+                    <label class="col-form-label">{!! trans('panel.sale.fields.sub_total') !!}</label>
                     <input type="number" name='sub_total' class="form-control" id="subtotal" readonly value="{!! old( 'sub_total', $sales['sub_total']) !!}" />
                     @if($errors->has('sub_total'))
                     <div class="invalid-feedback">
                       {{ $errors->first('sub_total') }}
                     </div>
                     @endif
-                  </div>
+                 
                 </div>
-                <div class="form-group row">
-                  <div class="col-sm-4">
-                    <label class="bmd-label">{!! trans('panel.sale.fields.total_gst') !!}</label>
-                  </div>
-                  <div class="col-sm-8">
+                </div>
+
+
+                <div class="col-md-6">
+                  <div class="input_section">
+                    <label class="col-form-label">{!! trans('panel.sale.fields.total_gst') !!}</label>
+               
                     <input type="number" name='total_gst' id="totalgst" class="form-control" value="{!! old( 'total_gst', $sales['total_gst']) !!}" readonly />
                     @if($errors->has('total_gst'))
                     <div class="invalid-feedback">
@@ -334,11 +374,10 @@
                     @endif
                   </div>
                 </div> -->
-                <div class="form-group row">
-                  <div class="col-sm-4">
-                    <label class="bmd-label">{!! trans('panel.sale.fields.total_discount') !!}</label>
-                  </div>
-                  <div class="col-sm-8">
+                <div class="col-md-6">
+                  <div class="input_section">
+                    <label class="col-form-label">{!! trans('panel.sale.fields.total_discount') !!}</label>
+                 
                     <input type="number" name='total_discount' id="totaldiscount" class="form-control" value="{!! old( 'total_discount', $sales['total_discount']) !!}" readonly />
                     @if($errors->has('total_discount'))
                     <div class="invalid-feedback">
@@ -347,12 +386,9 @@
                     @endif
                   </div>
                 </div>
-                <div class="form-group row">
-                  <div class="col-sm-4">
-                    <label class="bmd-label">{!! trans('panel.sale.fields.grand_total') !!}</label>
-                  </div>
-
-                  <div class="col-sm-8">
+                <div class="col-md-6">
+                  <div class="input_section">
+                    <label class="col-form-label">{!! trans('panel.sale.fields.grand_total') !!}</label>
                     <input type="number" class="form-control" id="grandtotal" name="grand_total" value="{!! old( 'grand_total', $sales['grand_total']) !!}" readonly>
                     @if($errors->has('grand_total'))
                     <div class="invalid-feedback">
@@ -361,13 +397,15 @@
                     @endif
                   </div>
                 </div>
-              </div>
-            </div>
-
-
-            <div class="card-footer pull-right">
+                       <div class="col-md-12 pull-right">
               {{ Form::submit('Submit', array('class' => 'btn btn-theme')) }}
             </div>
+              </div>
+
+            </div>
+
+
+         
             {{ Form::close() }}
           </div>
         </div>
@@ -388,12 +426,12 @@
           counter++;
           var newRow =
             '<tr value="' + counter + '"> <td>' + counter + '</td>' +
-            '<td><select name="saledetail[' + counter + '][product_id]" class="form-control product rowchange select2" onchange="getproductinfo(this)"/> </select></td>' +
-            '<td> <select class="form-control productdetails rowchange select2" name="saledetail[' + counter + '][product_detail]" onchange="getproductdetailinfo(this)" ></select><span class="gst_percent" style="display:none;"></span> <br><span class="gstamount" style="display:none;"></span> <br><span class="linediscount" style="display:none;"></span> <br><input type="hidden" name="saledetail[' + counter + '][tax_amount]" class="form-control tax_amount readonly"/><input type="hidden" name="saledetail[' + counter + '][discount_amount]" class="form-control discountamount readonly"/></td>' +
-            '<td><input type="number" name="saledetail[' + counter + '][price]" class="form-control price readonly"/></td>' +
-            '<td><input type="number" name="saledetail[' + counter + '][discount]" class="form-control discount readonly"/></td>' +
-            '<td><input type="text" name="saledetail[' + counter + '][quantity]" class="form-control quantity rowchange" /></td>' +
-            '<td><input type="text" name="saledetail[' + counter + '][line_total]" class="form-control total rowchange" readonly /></td>' +
+            '<td><div class="input_section"><select name="saledetail[' + counter + '][product_id]" class="form-control product rowchange select2" onchange="getproductinfo(this)"/> </select></div></td>' +
+            '<td><div class="input_section"> <select class="form-control productdetails rowchange select2" name="saledetail[' + counter + '][product_detail]" onchange="getproductdetailinfo(this)" ></select><span class="gst_percent" style="display:none;"></span> <span class="gstamount" style="display:none;"></span> <span class="linediscount" style="display:none;"></span> <input type="hidden" name="saledetail[' + counter + '][tax_amount]" class="form-control tax_amount readonly"/><input type="hidden" name="saledetail[' + counter + '][discount_amount]" class="form-control discountamount readonly"/></div></td>' +
+            '<td><div class="input_section"><input type="number" name="saledetail[' + counter + '][price]" class="form-control price readonly"/></div></td>' +
+            '<td><div class="input_section"><input type="number" name="saledetail[' + counter + '][discount]" class="form-control discount readonly"/></td>' +
+            '<td><input type="text" name="saledetail[' + counter + '][quantity]" class="form-control quantity rowchange" /></div></td>' +
+            '<td><div class="input_section"><input type="text" name="saledetail[' + counter + '][line_total]" class="form-control total rowchange" readonly /></div></td>' +
             '<td class="td-actions text-center"><a href="#" class="remove-rows btn btn-danger btn-xs"> <i class="fa fa-minus"></i></a></td> </tr>';
           $table.append(newRow);
         });

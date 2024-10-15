@@ -36,13 +36,14 @@
    </style>
    <div class="row">
       <div class="col-md-12">
-         <div class="card">
-            <div class="card-header card-header-tabs card-header-warning">
+         <div class="card mt-0 p-0">
+            <div class="card-header m-0 card-header-tabs card-header-warning">
                <div class="nav-tabs-navigation">
-                  <div class="nav-tabs-wrapper">
+                  <div class="nav-tabs-wrapper new_id">
                      <h4 class="card-title ">
-                        Complaint Creation
+                        Complaint Creation  </h4>
                         @if(auth()->user()->can(['district_access']))
+
                         <ul class="nav nav-tabs pull-right" data-tabs="tabs">
                            <li class="nav-item">
                               <a class="nav-link" href="{{ url('complaints') }}">
@@ -52,7 +53,7 @@
                            </li>
                         </ul>
                         @endif
-                     </h4>
+                   
                   </div>
                </div>
             </div>
@@ -98,8 +99,8 @@
                <div class="row">
                   @if(!$complaints->exists)
                   <div class="col-md-4">
-                     <div class="form-group">
-                        <label class="bmd-label-floating">Search By Searial Number </label>
+                     <div class="input_section">
+                        <label class="col-form-label">Search By Searial Number </label>
                         <input type="text" name="serail_number" id="serail_number" class="form-control" value="{!! old( 'serail_number', $complaints['serail_number']) !!}">
                         <p class="text-danger d-none" id="search_error"></p>
                         @if ($errors->has('serail_number'))
@@ -114,8 +115,8 @@
                   </div>
                   @endif
                   <div class="col-md-3">
-                     <div class="">
-                        <label>Assign User </label>
+                     <div class="input_section">
+                        <label class="col-form-label">Assign User </label>
                         <select name="assign_user" id="assign_user" class="select2 form-control">
                            <option value="">Select User</option>
                            @if($assign_users)
@@ -125,15 +126,15 @@
                            @endif
                         </select>
                         @if ($errors->has('assign_user'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('assign_user') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
                   <div class="col-md-3">
-                     <div class="">
-                        <label>Service Center </label>
+                     <div class="input_section">
+                        <label class="col-form-label">Service Center </label>
                         <select name="service_center" id="service_center" class="select2 form-control">
                            <option value="">Select Service Center</option>
                            @if($service_centers)
@@ -143,7 +144,7 @@
                            @endif
                         </select>
                         @if ($errors->has('service_center'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('service_center') }}</p>
                         </div>
                         @endif
@@ -173,8 +174,8 @@
                </div>
                <div class="row mt-3">
                   <div class="col-md-3">
-                     <div class="form-group">
-                        <label class="bmd-label-floating">Complaint Number </label>
+                     <div class="input_section">
+                        <label class="col-form-label">Complaint Number </label>
                         <input type="text" readonly name="complaint_number" class="form-control" value="{!! old( 'complaint_number', $complaints['complaint_number']) ?? $newComplaintNumber !!}">
                         @if ($errors->has('complaint_number'))
                         <div class="error col-lg-12">
@@ -184,37 +185,37 @@
                      </div>
                   </div>
                   <div class="col-md-3">
-                     <div class="form-group">
-                        <label class="bmd-label-floating">Complaint Date </label>
+                     <div class="input_section">
+                        <label class="col-form-label">Complaint Date </label>
                         <input type="text" readonly name="complaint_date" id="complaint_date" class="form-control datepicker" value="{!! old( 'complaint_date', $complaints['complaint_date'])?? Carbon\Carbon::now()->toDateString() !!}">
                         @if ($errors->has('complaint_date'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('complaint_date') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
                   <div class="col-md-3">
-                     <div class="form-group">
-                        <label class="bmd-label-floating">Seller (Company billed Party )</label>
+                     <div class="input_section">
+                        <label class="col-form-label">Seller (Company billed Party )</label>
                         <input type="text" name="seller" id="seller" class="form-control" value="{{old('seller', $complaints['seller'])}}">
                         @if ($errors->has('seller'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('seller') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
                   <div class="col-md-3">
-                     <div class="form-group">
-                        <label class="bmd-label-floating">Purchased Party Name </label>
+                     <div class="input_section">
+                        <label class="col-form-label">Purchased Party Name </label>
                         <select name="party_name" id="party_name" class="select2 form-control">
                            @if(old('party_name', $complaints['party_name']))
                            <option selected value="{{$complaints['party_name']}}">{{$complaints['party']['name']}}</option>
                            @endif
                         </select>
                         @if ($errors->has('party_name'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('party_name') }}</p>
                         </div>
                         @endif
@@ -223,8 +224,8 @@
                </div>
                <div class="row">
                   <div class="col-md-3">
-                     <div class="form-group">
-                        <label class="bmd-label-floating">Product Laying at </label>
+                     <div class="input_section">
+                        <label class="col-form-label">Product Laying at </label>
                         <select name="product_laying" id="product_laying" class="select2 form-control">
                            <option value="">Product Laying at</option>
                            <option value="Customer" {!! old('product_laying', $complaints['product_laying'])=='Customer' ? 'selected' :'' !!}>Customer</option>
@@ -274,33 +275,33 @@
                </div>
                <div class="basic_details mt-1">
                   <h3><b>Complaint Registration :</b></h3>
-                  <div class="border border-dark rounded p-4">
+                  <div class="border rounded p-4">
                      <div class="row mt-3">
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">Product Searial Number </label>
+                           <div class="input_section">
+                              <label class="col-form-label">Product Searial Number </label>
                               <input {{($complaints->exists && empty($complaints['product_serail_number']))?'':'readonly'}} type="text" name="product_serail_number" id="product_serail_number" class="form-control" value="{!! old( 'product_serail_number', $complaints['product_serail_number']) !!}">
                               @if ($errors->has('product_serail_number'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('product_serail_number') }}</p>
                               </div>
                               @endif
                            </div>
                         </div>
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">Product/Model(Code) </label>
+                           <div class="input_section">
+                              <label class="col-form-label">Product/Model(Code) </label>
                               <input readonly type="text" name="product_code" id="product_code" class="form-control" value="{!! old( 'product_code', $complaints['product_code']) !!}">
                               @if ($errors->has('product_code'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('product_code') }}</p>
                               </div>
                               @endif
                            </div>
                         </div>
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">Product Name </label>
+                           <div class="input_section">
+                              <label class="col-form-label">Product Name </label>
                               <select name="product_id" id="product_id" class="select2">
                                  <option value="">Select Product</option>
                                  @if(count($products) > 0)
@@ -311,15 +312,15 @@
                               </select>
                               <input readonly type="hidden" name="product_name" id="product_name" class="form-control" value="{!! old( 'product_name', $complaints['product_name']) !!}">
                               @if ($errors->has('product_name'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('product_name') }}</p>
                               </div>
                               @endif
                            </div>
                         </div>
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">Division </label>
+                           <div class="input_section">
+                              <label class="col-form-label">Division </label>
                               <input readonly type="text" name="category" id="category" class="form-control" value="{!! old( 'category', $complaints['category']) !!}">
                               @if ($errors->has('category'))
                               <div class="error col-lg-12">
@@ -331,8 +332,8 @@
                      </div>
                      <div class="row mt-3">
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">HP </label>
+                           <div class="input_section">
+                              <label class="col-form-label">HP </label>
                               <input readonly type="text" name="specification" id="specification" class="form-control" value="{!! old( 'specification', $complaints['specification']) !!}">
                               @if ($errors->has('specification'))
                               <div class="error col-lg-12">
@@ -342,8 +343,8 @@
                            </div>
                         </div>
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">Stage </label>
+                           <div class="input_section">
+                              <label class="col-form-label">Stage </label>
                               <input readonly type="text" name="product_no" id="product_no" class="form-control" value="{!! old( 'product_no', $complaints['product_no']) !!}">
                               @if ($errors->has('product_no'))
                               <div class="error col-lg-12">
@@ -353,11 +354,11 @@
                            </div>
                         </div>
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">Phase </label>
+                           <div class="input_section">
+                              <label class="col-form-label">Phase </label>
                               <input readonly type="text" name="phase" id="phase" class="form-control" value="{!! old( 'phase', $complaints['phase']) !!}">
                               @if ($errors->has('phase'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('phase') }}</p>
                               </div>
                               @endif
@@ -384,8 +385,8 @@
                      </div>
                      <div class="row mt-3">
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">Service Branch </label>
+                           <div class="input_section">
+                              <label class="col-form-label">Service Branch </label>
                               <select name="purchased_branch" id="purchased_branch" class="select2 form-control">
                                  <option value="">Service Branch</option>
                                  @if($branchs)
@@ -395,40 +396,40 @@
                                  @endif
                               </select>
                               @if ($errors->has('purchased_branch'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('purchased_branch') }}</p>
                               </div>
                               @endif
                            </div>
                         </div>
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">Product Group </label>
+                           <div class="input_section">
+                              <label class="col-form-label">Product Group </label>
                               <input readonly type="text" name="product_group" class="form-control" value="{!! old( 'product_group', $complaints['product_group']) !!}">
                               @if ($errors->has('product_group'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('product_group') }}</p>
                               </div>
                               @endif
                            </div>
                         </div>
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">Company Sale Bill NO </label>
+                           <div class="input_section">
+                              <label class="col-form-label">Company Sale Bill NO </label>
                               <input type="text" name="company_sale_bill_no" id="company_sale_bill_no" class="form-control" value="{!! old( 'company_sale_bill_no', $complaints['company_sale_bill_no']) !!}">
                               @if ($errors->has('company_sale_bill_no'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('company_sale_bill_no') }}</p>
                               </div>
                               @endif
                            </div>
                         </div>
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">Company Sale Bill Date </label>
+                           <div class="input_section">
+                              <label class="col-form-label">Company Sale Bill Date </label>
                               <input type="text" name="company_sale_bill_date" id="company_sale_bill_date" class="form-control datepicker" value="{!! old( 'company_sale_bill_date', $complaints['company_sale_bill_date']) !!}">
                               @if ($errors->has('company_sale_bill_date'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('company_sale_bill_date') }}</p>
                               </div>
                               @endif
@@ -437,48 +438,48 @@
                      </div>
                      <div class="row mt-3">
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">Warranty / Customer Bill Date </label>
+                           <div class="input_section">
+                              <label class="col-form-label">Warranty / Customer Bill Date </label>
                               <input type="text" name="customer_bill_date" id="customer_bill_date" class="form-control datepicker" value="{!! old( 'customer_bill_date', $complaints['customer_bill_date']) !!}">
                               @if ($errors->has('customer_bill_date'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('customer_bill_date') }}</p>
                               </div>
                               @endif
                            </div>
                         </div>
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">Customer Bill No.</label>
+                           <div class="input_section">
+                              <label class="col-form-label">Customer Bill No.</label>
                               <input type="text" name="customer_bill_no" id="customer_bill_no" class="form-control" value="{!! old( 'customer_bill_no', $complaints['customer_bill_no']) !!}">
                               @if ($errors->has('customer_bill_no'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('customer_bill_no') }}</p>
                               </div>
                               @endif
                            </div>
                         </div>
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">Company Bill Date Month </label>
+                           <div class="input_section">
+                              <label class="col-form-label">Company Bill Date Month </label>
                               <input readonly type="text" name="company_bill_date_month" id="company_bill_date_month" class="form-control" value="{!! old( 'company_bill_date_month', $complaints['company_bill_date_month']) !!}">
                               @if ($errors->has('company_bill_date_month'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('company_bill_date_month') }}</p>
                               </div>
                               @endif
                            </div>
                         </div>
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">Under Warranty </label>
+                           <div class="input_section">
+                              <label class="col-form-label">Under Warranty </label>
                               <select name="under_warranty" id="under_warranty" class="select2 form-control">
                                  <option value="">Under Warranty</option>
                                  <option value="Yes" {!! old('under_warranty', $complaints['under_warranty'])=='Yes' ? 'selected' :'' !!}>Yes</option>
                                  <option value="No" {!! old('under_warranty', $complaints['under_warranty'])=='No' ? 'selected' :'' !!}>No</option>
                               </select>
                               @if ($errors->has('under_warranty'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('under_warranty') }}</p>
                               </div>
                               @endif
@@ -487,8 +488,8 @@
                      </div>
                      <div class="row mt-3">
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">Service Paid/Free </label>
+                           <div class="input_section">
+                              <label class="col-form-label">Service Paid/Free </label>
                               <select name="service_type" id="service_type" class="select2 form-control">
                                  <option value="">Service Paid/Free</option>
                                  <option value="Paid" {!! old('service_type', $complaints['service_type'])=='Paid' ? 'selected' :'' !!}>Paid</option>
@@ -496,33 +497,33 @@
                                  <option value="later_update" {!! old('service_type', $complaints['service_type'])=='later_update' ? 'selected' :'' !!}>F&A Later Update</option>
                               </select>
                               @if ($errors->has('service_type'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('service_type') }}</p>
                               </div>
                               @endif
                            </div>
                         </div>
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">Customer Bill Date Month </label>
+                           <div class="input_section">
+                              <label class="col-form-label">Customer Bill Date Month </label>
                               <input readonly type="text" name="customer_bill_date_month" id="customer_bill_date_month" class="form-control" value="{!! old( 'customer_bill_date_month', $complaints['customer_bill_date_month']) !!}">
                               @if ($errors->has('customer_bill_date_month'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('customer_bill_date_month') }}</p>
                               </div>
                               @endif
                            </div>
                         </div>
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">Warranty/Bill </label>
+                           <div class="input_section">
+                              <label class="col-form-label">Warranty/Bill </label>
                               <select name="warranty_bill" id="warranty_bill" class="select2 form-control">
                                  <option value="">Warranty/Bill</option>
                                  <option value="Yes" {!! old('warranty_bill', $complaints['warranty_bill'])=='Yes' ? 'selected' :'' !!}>Yes</option>
                                  <option value="No" {!! old('warranty_bill', $complaints['warranty_bill'])=='No' ? 'selected' :'' !!}>No</option>
                               </select>
                               @if ($errors->has('warranty_bill'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('warranty_bill') }}</p>
                               </div>
                               @endif
@@ -572,15 +573,15 @@
                </div>
                <div class="contact_details mt-1">
                   <h3><b>Contact Details :</b></h3>
-                  <div class="border border-dark rounded p-4">
+                  <div class="border rounded p-4">
                      <div class="row mt-3">
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">Customer Number Search</label>
+                           <div class="input_section">
+                              <label class="col-form-label">Customer Number Search</label>
                               <input type="number" name="customer_number" id="customer_number" class="form-control" value="{!! old( 'customer_number', $complaints['customer']?$complaints['customer']['customer_number']:'') !!}" required>
                               <input type="hidden" name="end_user_id" id="end_user_id">
                               @if ($errors->has('customer_number'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('customer_number') }}</p>
                               </div>
                               @endif
@@ -588,11 +589,11 @@
                         </div>
 
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating"> Customer Name </label>
+                           <div class="input_section">
+                              <label class="col-form-label"> Customer Name </label>
                               <input type="text" readonly name="customer_name" id="customer_name" class="form-control" value="{!! old( 'customer_name', $complaints['customer_name']) !!}">
                               @if ($errors->has('customer_name'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('customer_name') }}</p>
                               </div>
                               @endif
@@ -600,22 +601,22 @@
                         </div>
 
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">Email </label>
+                           <div class="input_section">
+                              <label class="col-form-label">Email </label>
                               <input type="text" readonly name="customer_email" id="customer_email" class="form-control" value="{!! old( 'customer_email', $complaints['customer_email']) !!}">
                               @if ($errors->has('customer_email'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('customer_email') }}</p>
                               </div>
                               @endif
                            </div>
                         </div>
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">Address </label>
+                           <div class="input_section">
+                              <label class="col-form-label">Address </label>
                               <input type="text" name="customer_address" id="customer_address" class="form-control" value="{!! old( 'customer_address', $complaints['customer_address']) !!}">
                               @if ($errors->has('customer_address'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('customer_address') }}</p>
                               </div>
                               @endif
@@ -624,19 +625,19 @@
                      </div>
                      <div class="row mt-3">
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">Place </label>
+                           <div class="input_section">
+                              <label class="col-form-label">Place </label>
                               <input type="text" name="customer_place" id="customer_place" class="form-control" value="{!! old( 'customer_place', $complaints['customer_place']) !!}">
                               @if ($errors->has('customer_place'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('customer_place') }}</p>
                               </div>
                               @endif
                            </div>
                         </div>
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">Pincode </label>
+                           <div class="input_section">
+                              <label class="col-form-label">Pincode </label>
                               <select name="customer_pindcode" id="customer_pindcode" placeholder="Select Pincode" class="select2 form-control" required>
                                  <option value="" disabled selected>Select Pincode</option>
                                  @if($pincodes && count($pincodes) > 0)
@@ -646,29 +647,29 @@
                                  @endif
                               </select>
                               @if ($errors->has('customer_pindcode'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('customer_pindcode') }}</p>
                               </div>
                               @endif
                            </div>
                         </div>
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">Country </label>
+                           <div class="input_section">
+                              <label class="col-form-label">Country </label>
                               <input type="text" readonly name="customer_country" id="customer_country" class="form-control" value="{!! old( 'customer_country', $complaints['customer_country']) !!}">
                               @if ($errors->has('customer_country'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('customer_country') }}</p>
                               </div>
                               @endif
                            </div>
                         </div>
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">State </label>
+                           <div class="input_section">
+                              <label class="col-form-label">State </label>
                               <input type="text" readonly name="customer_state" id="customer_state" class="form-control" value="{!! old( 'customer_state', $complaints['customer_state']) !!}">
                               @if ($errors->has('customer_state'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('customer_state') }}</p>
                               </div>
                               @endif
@@ -677,22 +678,22 @@
                      </div>
                      <div class="row mt-3">
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">District </label>
+                           <div class="input_section">
+                              <label class="col-form-label">District </label>
                               <input type="text" readonly name="customer_district" id="customer_district" class="form-control" value="{!! old( 'customer_district', $complaints['customer_district']) !!}">
                               @if ($errors->has('customer_district'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('customer_district') }}</p>
                               </div>
                               @endif
                            </div>
                         </div>
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">City </label>
+                           <div class="input_section">
+                              <label class="col-form-label">City </label>
                               <input type="text" readonly name="customer_city" id="customer_city" class="form-control" value="{!! old( 'customer_city', $complaints['customer_city']) !!}">
                               @if ($errors->has('customer_city'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('customer_city') }}</p>
                               </div>
                               @endif
@@ -717,8 +718,8 @@
                         </div>
                      </div> -->
                         <div class="col-md-3">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">Complaint Register By </label>
+                           <div class="input_section">
+                              <label class="col-form-label">Complaint Register By </label>
                               <select name="register_by" id="register_by" class="select2 form-control">
                                  <option value="">Complaint Register By</option>
                                  <option value="Dealer" {!! old( 'register_by' , $complaints['register_by'])=='Dealer' ?'selected':'' !!}>Dealer</option>
@@ -729,7 +730,7 @@
                                  <option value="Service Enginer" {!! old( 'register_by' , $complaints['register_by'])=='Service Enginer' ?'selected':'' !!}>Service Enginer</option>
                               </select>
                               @if ($errors->has('register_by'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('register_by') }}</p>
                               </div>
                               @endif
@@ -738,19 +739,19 @@
                      </div>
                      <div class="row mt-3">
                         <div class="col-md-6">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">Description / CRM Remark </label>
+                           <div class="input_section">
+                              <label class="col-form-label">Description / CRM Remark </label>
                               <textarea type="text" name="description" cols="30" rows="7" class="form-control"> {!! old( 'description', $complaints['description']) !!} </textarea>
                               @if ($errors->has('description'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('description') }}</p>
                               </div>
                               @endif
                            </div>
                         </div>
                         <div class="col-md-6">
-                           <div class="form-group">
-                              <label class="bmd-label-floating">Customer Complaint Type </label>
+                           <div class="input_section">
+                              <label class="col-form-label">Customer Complaint Type </label>
                               <select name="complaint_type" id="complaint_type" placeholder="Select Pincode" class="select2 form-control" required>
                                  <option value="" disabled selected>Complaint Type</option>
                                  @if($complaint_types && count($complaint_types) > 0)
@@ -760,7 +761,7 @@
                                  @endif
                               </select>
                               @if ($errors->has('complaint_type'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('complaint_type') }}</p>
                               </div>
                               @endif
@@ -769,14 +770,14 @@
                      </div>
                      <div class="row mt-3">
                         <div class="col-md-3 d-none" id="invoice-div">
-                           <div class="">
-                              <h6 class="bmd-label-floating">Invoice </h6>
+                           <div class="input_section">
+                              <h6 class="col-form-label">Invoice </h6>
                               <a href="" download target="_blank"><img class="ml-2 rounded" id="invoice-img" style="width: 200px;height:220px;border: 3px solid #5a5252;" src=""></a>
                            </div>
                         </div>
                         <div class="col-md-9">
-                           <div class="">
-                              <label class="bmd-label-floating">Attachments </label>
+                           <div class="input_section">
+                              <label class="col-form-label">Attachments </label>
                               <input type="file" multiple name="images[]" class="form-controll">
                               <div class="row mt-3">
                                  @if($complaints->exists && $complaints->getMedia('complaint_attach')->count() > 0 && Storage::disk('s3')->exists($complaints->getMedia('complaint_attach')[0]->getPath()))
@@ -795,7 +796,7 @@
                                  @endif
                               </div>
                               @if ($errors->has('description'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('description') }}</p>
                               </div>
                               @endif

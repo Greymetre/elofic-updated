@@ -2,8 +2,8 @@
 
   <div class="row">
     <div class="col-md-12">
-      <div class="card">
-        <div class="card-header card-header-icon card-header-theme">
+      <div class="card mt-0 pt-0">
+        <div class="card-header m-0 card-header-icon card-header-theme">
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>

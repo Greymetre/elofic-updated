@@ -66,7 +66,7 @@
                   <h5 class="mb-1">
                      {!! isset($customers['name']) ? $customers['name'] : '' !!}
                   </h5>
-                  <p class="mb-0 font-weight-normal text-sm">
+                  <p class="font-weight-normal text-sm">
                      {!! isset($customers['customertypes']['customertype_name']) ? $customers['customertypes']['customertype_name'] : '' !!}
                   </p>
                </div>
@@ -127,7 +127,7 @@
 
                            <div class="card-body p-3">
                               <div class="ctmr-box">
-                                 <h6 class="mb-0">Personal Information</h6>
+                                 <h6 class="">Personal Information</h6>
                                  <ul class="list-group">
                                     <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Full Name:</strong> &nbsp; {!! isset($customers['first_name']) ? $customers['first_name'] : '' !!} {!! isset($customers['last_name']) ? $customers['last_name'] : '' !!}</li>
                                     <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Mobile:</strong> &nbsp; {!! isset($customers['mobile']) ? $customers['mobile'] : '' !!}</li>
@@ -140,7 +140,7 @@
                                  </ul>
                               </div>
                               <div class="ctmr-box">
-                                 <h6 class="mb-0">Address Info</h6>
+                                 <h6 class="">Address Info</h6>
                                  <ul class="list-group">
                                     @if(isset($customers['customeraddress']['address1']) && $customers['customeraddress']['address1'] != '')
                                     <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Address:</strong> &nbsp; {!! isset($customers['customeraddress']['address1']) ? $customers['customeraddress']['address1'] : '' !!}
@@ -172,7 +172,7 @@
 
                            <div class="card-body p-3">
                               <div class="ctmr-box">
-                                 <h6 class="mb-0">Customer Information</h6>
+                                 <h6 class="">Customer Information</h6>
 
                                  <ul class="list-group">
 
@@ -228,13 +228,13 @@
                                  </ul>
                               </div>
                               <div class="ctmr-box">
-                                 <h6 class="mb-0">Survey Information</h6>
+                                 <h6 class="">Survey Information</h6>
                                  <div id="accordion" role="tablist">
                                     @if(!empty($customers['surveys']))
                                     @foreach( $customers['surveys'] as $index => $survey )
                                     <div class="card-collapse">
                                        <div class="card-header" role="tab" id="heading{{$index}}">
-                                          <h5 class="mb-0">
+                                          <h5 class="">
                                              <a data-toggle="collapse" href="#collapse{{$index}}" aria-expanded="false" aria-controls="collapse{{$index}}" class="collapsed">
                                                 {!! isset($survey['fields']['label_name']) ? $survey['fields']['label_name'] : '' !!}
                                                 <i class="material-icons">keyboard_arrow_down</i>
@@ -258,7 +258,7 @@
                      <div class="col-md-4 mt-md-0 mt-4">
                         <div class="card card-plain h-100 activity-conv">
                            <div class="card-header pb-0 p-3">
-                              <h6 class="mb-0">Activities</h6>
+                              <h6 class="">Activities</h6>
                            </div>
                            <div class="card-body p-3">
                               <ul class="timeline timeline-simple">
@@ -296,9 +296,11 @@
                            </div>
                         </div>
                      </div>
+                     <div class="col-md-12">
                      <div class="showCustomerLocationonMaps" style="display:none;">
-                        <div id="map" style="width: 900px; height: 700px;"></div>
+                        <div id="map" style="height: 700px;"></div>
                      </div>
+                  </div>
                      <div class="col-md-12">
                         <span class="pull-right">
                            <a href="javascript:void(0)" class="btn btn-just-icon btn-theme" onclick="showGoogleMaps()"><i class="material-icons">room</i></a>
@@ -309,7 +311,7 @@
                <div class="tab-pane " id="profile-tabs-orders">
                   <div class="row">
                      <div class="col-md-12">
-                        <h4 class="mb-0">Orders List</h4>
+                        <h4 class="">Orders List</h4>
                         <div class="table-responsive">
                            <table id="getorder" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap" style="width: 100%">
                               <thead class="text-primary">
@@ -328,7 +330,7 @@
                   </div>
                </div>
                <div class="tab-pane " id="profile-tabs-sales">
-                  <h4 class="mb-0">Sales List</h4>
+                  <h4 class="">Sales List</h4>
                   <div class="table-responsive">
                      <table id="getsales" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap" style="width: 100%">
                         <thead class=" text-primary">
@@ -344,7 +346,7 @@
                   </div>
                </div>
                <div class="tab-pane " id="profile-tabs-payments">
-                  <h4 class="mb-0">Payments List</h4>
+                  <h4 class="">Payments List</h4>
                   <div class="table-responsive">
                      <table id="getPaymentList" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap" style="width: 100%">
                         <thead class=" text-primary">
@@ -381,9 +383,9 @@
                                     <input type="hidden" name="id" id="note_id">
                                     <div class="row">
                                        <div class="col-md-6">
-                                          <div class="row">
-                                             <label class="col-md-3 col-form-label">Purpose<span class="text-danger"> *</span></label>
-                                             <div class="col-md-9">
+                                          <div class="input_section">
+                                             <label class="col-form-label">Purpose<span class="text-danger"> *</span></label>
+                                            
                                                 <div class="form-group has-default bmd-form-group">
                                                    <select class="form-control select2" name="purpose" id="purpose" style="width: 100%;" required>
                                                       <option value="" disabled>Select Purpose</option>
@@ -392,17 +394,17 @@
                                                    </select>
                                                 </div>
                                                 @if ($errors->has('purpose'))
-                                                <div class="error col-lg-12">
+                                                <div class="error">
                                                    <p class="text-danger">{{ $errors->first('purpose') }}</p>
                                                 </div>
                                                 @endif
-                                             </div>
+                                           
                                           </div>
                                        </div>
                                        <div class="col-md-6">
-                                          <div class="row">
-                                             <label class="col-md-3 col-form-label">Call Status <span class="text-danger"> *</span></label>
-                                             <div class="col-md-9">
+                                          <div class="input_section">
+                                             <label class="col-form-label">Call Status <span class="text-danger"> *</span></label>
+                                            
                                                 <div class="form-group has-default bmd-form-group">
                                                    <select class="form-control select2" name="callstatus" id="callstatus" data-style="select-with-transition" title="Select Call Status" required style="width: 100%;">
                                                       <option value="" disabled>Select Call Status</option>
@@ -417,18 +419,18 @@
                                                       <option value="Call Disconnected">Call Disconnected</option>
 
                                                    </select>
-                                                </div>
+                                            
                                              </div>
                                           </div>
                                        </div>
                                        <div class="col-md-12">
-                                          <div class="row">
-                                             <label class="col-sm-1 col-form-label">Notes<span class="text-danger"> *</span></label>
-                                             <div class="col-sm-11">
+                                          <div class="input_section">
+                                             <label class="col-form-label">Notes<span class="text-danger"> *</span></label>
+                                          
                                                 <div class="form-group bmd-form-group">
                                                    <textarea class="form-control" rows="4" name="note" id="note" required>{!! old( 'note') !!}</textarea>
                                                 </div>
-                                             </div>
+                                    
                                           </div>
                                        </div>
                                        <div class="col-md-12 pull-right">
@@ -459,7 +461,7 @@
                               </div>
                               <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div><br>
                               @if ($errors->has('imggstin'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('imggstin') }}</p>
                               </div>
                               @endif
@@ -469,19 +471,19 @@
                      <div class="col-md-6 col-sm-12" style="position: relative;">
                         <div class="img-cvr">
                            <label class="bmd-label-floating">{!! trans('panel.customers.fields.gstin_image') !!}</label>
-                           <div class="input-field">
-                              <div class="row">
-                                 <label class="col-md-6 col-form-label">{!! trans('panel.customers.fields.gstin_no') !!} :</label>
-                                 <div class="col-md-6">
+                           <div class="input-field1">
+                              <div class="input_section">
+                                 <label class="col-form-label">{!! trans('panel.customers.fields.gstin_no') !!} :</label>
+                               
                                     <div class="form-group has-default bmd-form-group">
                                        <input type="text" readonly name="gstin_no" id="gstin_no" class="form-control" value="{!! old( 'gstin_no', isset($customers['customerdetails']['gstin_no']) ? $customers['customerdetails']['gstin_no'] :'' ) !!}" maxlength="200">
                                        @if ($errors->has('gstin_no'))
-                                       <div class="error col-lg-12">
+                                       <div class="error">
                                           <p class="text-danger">{{ $errors->first('gstin_no') }}</p>
                                        </div>
                                        @endif
                                     </div>
-                                 </div>
+                           
                               </div>
                            </div>
                            <div class="fileinput fileinput-new text-center" data-provides="fileinput">
@@ -514,19 +516,19 @@
                      <div class="col-md-6 col-sm-12" style="position: relative;">
                         <div class="img-cvr">
                            <label class="bmd-label-floating">{!! trans('panel.customers.fields.pan_image') !!}</label>
-                           <div class="input-field">
-                              <div class="row">
-                                 <label class="col-md-6 col-form-label">{!! trans('panel.customers.fields.pan_no') !!} :</label>
-                                 <div class="col-md-6">
+                           <div class="input-field1">
+                              <div class="input_section">
+                                 <label class="col-form-label">{!! trans('panel.customers.fields.pan_no') !!} :</label>
+                                
                                     <div class="form-group has-default bmd-form-group">
                                        <input type="text" readonly name="pan_no" id="pan_no" class="form-control" value="{!! old( 'pan_no', isset($customers['customerdetails']['pan_no']) ? $customers['customerdetails']['pan_no'] :'' ) !!}" maxlength="200">
                                        @if ($errors->has('pan_no'))
-                                       <div class="error col-lg-12">
+                                       <div class="error">
                                           <p class="text-danger">{{ $errors->first('pan_no') }}</p>
                                        </div>
                                        @endif
                                     </div>
-                                 </div>
+                           
                               </div>
                            </div>
                            <div class="fileinput fileinput-new text-center" data-provides="fileinput">
@@ -552,10 +554,10 @@
                      <div class="col-md-6 col-sm-12" style="position: relative;">
                         <div class="img-cvr">
                            <label class="bmd-label-floating">{!! trans('panel.customers.fields.aadhar_image') !!}</label>
-                           <div class="input-field">
-                              <div class="row">
-                                 <label class="col-md-6 col-form-label">{!! trans('panel.customers.fields.aadhar_no') !!} :</label>
-                                 <div class="col-md-6">
+                           <div class="input-field1">
+                              <div class="input_section">
+                                 <label class="col-form-label">{!! trans('panel.customers.fields.aadhar_no') !!} :</label>
+                                
                                     <div class="form-group has-default bmd-form-group">
                                        <input type="text" readonly name="aadhar_no" id="aadhar_no" class="form-control" value="{!! old( 'aadhar_no', isset($customers['customerdetails']['aadhar_no']) ? $customers['customerdetails']['aadhar_no'] :'' ) !!}" maxlength="200">
                                        @if ($errors->has('aadhar_no'))
@@ -563,7 +565,7 @@
                                           <p class="text-danger">{{ $errors->first('aadhar_no') }}</p>
                                        </div>
                                        @endif
-                                    </div>
+                                
                                  </div>
                               </div>
                            </div>
@@ -599,38 +601,38 @@
                         <div class="img-cvr">
                            <label class="bmd-label-floating">{!! trans('panel.customers.fields.bank_passbook_image') !!}</label>
 
-                           <div class="input-field">
-                              <div class="row">
-                                 <label class="col-md-6 col-form-label">{!! trans('panel.customers.fields.account_holder') !!} :</label>
-                                 <div class="col-md-6">
+                           <div class="input-field1">
+                              <div class="input_section">
+                                 <label class="col-form-label">{!! trans('panel.customers.fields.account_holder') !!} :</label>
+                                
                                     <div class="form-group has-default bmd-form-group">
                                        <input type="text" readonly name="account_holder" id="account_holder" class="form-control" value="{!! old( 'account_holder', isset($customers['customerdetails']['account_holder']) ? $customers['customerdetails']['account_holder'] :'' ) !!}" maxlength="200">
-                                    </div>
+                                  
                                  </div>
                               </div>
-                              <div class="row">
-                                 <label class="col-md-6 col-form-label">{!! trans('panel.customers.fields.account_number') !!} :</label>
-                                 <div class="col-md-6">
+                              <div class="input_section">
+                                 <label class="col-form-label">{!! trans('panel.customers.fields.account_number') !!} :</label>
+                                
                                     <div class="form-group has-default bmd-form-group">
                                        <input type="text" readonly name="account_number" id="account_number" class="form-control" value="{!! old( 'account_number', isset($customers['customerdetails']['account_number']) ? $customers['customerdetails']['account_number'] :'' ) !!}" maxlength="200">
                                     </div>
-                                 </div>
+                               
                               </div>
-                              <div class="row">
-                                 <label class="col-md-6 col-form-label">{!! trans('panel.customers.fields.bank_name') !!} :</label>
-                                 <div class="col-md-6">
+                              <div class="input_section">
+                                 <label class="col-form-label">{!! trans('panel.customers.fields.bank_name') !!} :</label>
+                                
                                     <div class="form-group has-default bmd-form-group">
                                        <input type="text" readonly name="bank_name" id="bank_name" class="form-control" value="{!! old( 'bank_name', isset($customers['customerdetails']['bank_name']) ? $customers['customerdetails']['bank_name'] :'' ) !!}" maxlength="200">
                                     </div>
-                                 </div>
+                                
                               </div>
-                              <div class="row">
-                                 <label class="col-md-6 col-form-label">{!! trans('panel.customers.fields.ifsc_code') !!} :</label>
-                                 <div class="col-md-6">
+                              <div class="input_section">
+                                 <label class="col-form-label">{!! trans('panel.customers.fields.ifsc_code') !!} :</label>
+                                 
                                     <div class="form-group has-default bmd-form-group">
                                        <input type="text" readonly name="ifsc_code" id="ifsc_code" class="form-control" value="{!! old( 'ifsc_code', isset($customers['customerdetails']['ifsc_code']) ? $customers['customerdetails']['ifsc_code'] :'' ) !!}" maxlength="200">
                                     </div>
-                                 </div>
+                               
                               </div>
                            </div>
                            <div class="fileinput fileinput-new text-center" data-provides="fileinput">
@@ -657,10 +659,10 @@
                         <div class="img-cvr">
                            <label class="bmd-label-floating">{!! trans('panel.customers.fields.otherid_image') !!}</label>
 
-                           <div class="input-field">
-                              <div class="row">
-                                 <label class="col-md-6 col-form-label">{!! trans('panel.customers.fields.otherid_no') !!} :</label>
-                                 <div class="col-md-6">
+                           <div class="input-field1">
+                              <div class="input_section">
+                                 <label class="col-form-label">{!! trans('panel.customers.fields.otherid_no') !!} :</label>
+                                 
                                     <div class="form-group has-default bmd-form-group">
                                        <input type="text" readonly name="otherid_no" id="otherid_no" class="form-control" value="{!! old( 'otherid_no', isset($customers['customerdetails']['otherid_no']) ? $customers['customerdetails']['otherid_no'] :'' ) !!}" maxlength="200">
                                        @if ($errors->has('otherid_no'))
@@ -669,7 +671,7 @@
                                        </div>
                                        @endif
                                     </div>
-                                 </div>
+                               
 
                               </div>
                            </div>

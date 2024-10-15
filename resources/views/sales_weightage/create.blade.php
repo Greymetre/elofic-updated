@@ -12,9 +12,9 @@
                 <!-- left column -->
                 <div class="col-md-12">
                     <!-- jquery validation -->
-                    <div class="card card-primary">
-                        <div class="card-header">
-                            <h3 class="card-title">Sale Weightage Create</h3>
+                    <div class="card">
+                        <div class="card-header card-header-icon card-header-theme">
+                            <h4 class="card-title">Sale Weightage Create</h3>
                         </div>
                         <!-- /.card-header -->
                         <!-- form start -->
@@ -28,7 +28,7 @@
                         </div>
                         @endif
                         <div class="card-body ">
-                            <div class="tab-content tab-space">
+                            <div class="tab-content">
                                 {!! Form::model($sales_weightage,[
                                 'route' => $sales_weightage->exists ? ['sales_weightage.update', $sales_weightage->id] : 'sales_weightage.store',
                                 'method' => $sales_weightage->exists ? 'PUT' : 'POST',
@@ -36,18 +36,18 @@
                                 'files'=>true
                                 ]) !!}
 
-                                <div class="p-2 form-group">
-                                    <label for="display_name">Display Name</label>
+                                <div class="input_section">
+                                    <label class="col-form-label" for="display_name">Display Name</label>
                                     <input type="text" name="display_name" id="display_name" value="{{$sales_weightage?$sales_weightage->display_name:''}}" class="form-control">
                                 </div>
 
-                                 <div class="p-2 form-group">
-                                    <label for="financial_year">Financial Year</label>
+                                 <div class="input_section">
+                                    <label class="col-form-label" for="financial_year">Financial Year</label>
                                     <input type="text" name="financial_year" id="financial_year" value="" class="form-control">
                                 </div>
 
-                                <div class="p-2 form-group">
-                                    <label for="category">Division</label>
+                                <div class="input_section">
+                                    <label class="col-form-label" for="category">Division</label>
                                     <select class="form-control select2 {{ $errors->has('division') ? 'is-invalid' : '' }}" name="division" id="division" required>
                                         <option value="">Select Division</option>
                                         @foreach($devisions as $devision)
@@ -55,13 +55,13 @@
                                         @endforeach
                                     </select>
                                     @if ($errors->has('division'))
-                                    <div class="error col-lg-12">
+                                    <div class="error">
                                         <p class="text-danger">{{ $errors->first('division') }}</p>
                                     </div>
                                     @endif
                                 </div>
-                                <div class="p-2 form-group">
-                                    <label for="category">Department</label>
+                                <div class="input_section">
+                                    <label  class="col-form-label" for="category">Department</label>
                                     <select class="form-control select2 {{ $errors->has('department') ? 'is-invalid' : '' }}" name="department" id="department" required>
                                     <option value="">Select Department</option>
                                         @foreach($departments as $department)
@@ -69,13 +69,13 @@
                                         @endforeach
                                     </select>
                                     @if ($errors->has('department'))
-                                    <div class="error col-lg-12">
+                                    <div class="error">
                                         <p class="text-danger">{{ $errors->first('department') }}</p>
                                     </div>
                                     @endif
                                 </div>
-                                <div class="p-2 form-group">
-                                    <label for="category">Designation</label>
+                                <div class="input_section">
+                                    <label class="col-form-label" for="category">Designation</label>
 
                                     <?php
                                     $selected_desig = array();
@@ -91,7 +91,7 @@
                                         @endforeach
                                  </select>
                                     @if ($errors->has('designation'))
-                                    <div class="error col-lg-12">
+                                    <div class="error">
                                         <p class="text-danger">{{ $errors->first('designation') }}</p>
                                     </div>
                                     @endif
@@ -105,26 +105,26 @@
                             <div id="add_sales_detail">
 
                            
-                                <div class="p-2 form-group">
-                                    <label for="category">KRA Category</label>
+                                <div class="input_section">
+                                    <label  class="col-form-label" for="category">KRA Category</label>
                                     <input value="{{$sales_weightage?$sales_weightage->category_name:''}}" type="text" name="category[]" id="category" class="form-control">
                                 </div>
-                                <div class="p-2 form-group">
-                                    <label for="name">KRA Name</label>
+                                <div class="input_section">
+                                    <label class="col-form-label" for="name">KRA Name</label>
                                     <input value="{{$sales_weightage?$sales_weightage->name:''}}" type="text" name="name[]" id="name" class="form-control">
                                 </div>
 
-                                <div class="p-2 form-group">
-                                    <label for="weightage">Weightage</label>
+                                <div class="input_section">
+                                    <label class="col-form-label" for="weightage">Weightage</label>
                                     <input type="text" name="weightage[]" id="weightage" value="{{$sales_weightage?$sales_weightage->weightage:''}}" class="form-control">
                                 </div>
 
-                                <div class="p-2 form-group">
-                                    <label for="indicator">Indicator</label>
+                                <div class="input_section">
+                                    <label class="col-form-label" for="indicator">Indicator</label>
                                     <input type="text" name="indicator[]" id="indicator" value="{{$sales_weightage?$sales_weightage->indicator:''}}" class="form-control">
                                 </div>
-                                <div class="p-2 form-group">
-                                    <label for="annum_target">Target Per Annum</label>
+                                <div class="input_section">
+                                    <label class="col-form-label" for="annum_target">Target Per Annum</label>
                                     <input type="text" name="annum_target[]" id="annum_target" value="{{$sales_weightage?$sales_weightage->annum_target:''}}" class="form-control">
                                 </div>
                             

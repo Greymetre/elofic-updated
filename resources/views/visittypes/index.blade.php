@@ -70,21 +70,21 @@
         @csrf
         <div class="row">
           <div class="col-md-12">
-            <div class="row">
-              <label class="col-md-12 col-form-label">{!! trans('panel.visittype.type_name') !!} <span class="text-danger"> *</span></label>
-              <div class="col-md-12">
+            <div class="input_Section">
+              <label class="col-form-label">{!! trans('panel.visittype.type_name') !!} <span class="text-danger"> *</span></label>
+             
                 <div class="form-group has-default bmd-form-group">
                   <input type="text" name="type_name" id="type_name" class="form-control" value="{!! old( 'type_name') !!}" maxlength="200" >
                   @if ($errors->has('type_name'))
                     <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('type_name') }}</p></div>
                   @endif
                 </div>
-              </div>
+              
             </div>
           </div>
         </div>
         <div class="clearfix"></div>
-        <div class="modal-footer pull-right">
+        <div class=" pull-right">
           <input type="hidden" name="id" id="visittype_id" />
           <button class="btn btn-info save"> Submit</button>
         </form>

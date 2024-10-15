@@ -147,8 +147,8 @@
           <form method="POST" action="{{ route('leaves.store') }}" enctype="multipart/form-data" id="createleadstagesForm"> @csrf
             <div class="row">
               <div class="col-md-12">
-                <div class="input-group input-group-outline my-3">
-                  <label class="form-label">User</label>
+                <div class="input_section">
+                  <label class="col-form-label">User</label>
                   <select class=" select2" name="user_id" id="user_id" style="width: 100%;" required>
                     <option value="">Select User</option>
                     @if(@isset($users))
@@ -160,20 +160,25 @@
                 </div>
               </div>
               <div class="col-md-6">
-                <div class="input-group input-group-outline my-3">
-                  <label class="form-label">From Date</label>
-                  <input type="text" name="from_date" id="from_date" class="ml-2 datepicker" value="{!! old( 'from_date') !!}" required>
+                <div class="input_section">
+                  <label class="col-form-label">From Date</label>
+                  <div>
+                  <input type="text" name="from_date" id="from_date" class="datepicker" value="{!! old( 'from_date') !!}" required>
                 </div>
               </div>
-              <div class="col-md-6">
-                <div class="input-group input-group-outline my-3">
-                  <label class="form-label">To Date</label>
-                  <input type="text" name="to_date" id="to_date" class="ml-2 datepicker" value="{!! old( 'to_date') !!}" required>
-                </div>
               </div>
               <div class="col-md-6">
-                <div class="input-group input-group-outline my-3">
-                  <label class="form-label">Type</label>
+                <div class="input_section">
+                  <label class="col-form-label">To Date</label>
+                  <div>
+                  <input type="text" name="to_date" id="to_date" class="datepicker" value="{!! old( 'to_date') !!}" required>
+                </div>
+              </div>
+              </div>
+              <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">Type</label>
+                  <div>
                   <select class=" select2" name="type" id="type" style="width: 100%;" required>
                     <option value="">Select Type</option>
                     <option value="Leave" data-is-city="false">Leave</option>
@@ -183,15 +188,18 @@
                     <option value="Full Day Leave" data-is-city="false">Full Day Leave</option>
                   </select>
                 </div>
+                </div>
               </div>
               <div class="col-md-6">
-                <div class="input-group input-group-outline my-3">
-                  <label class="form-label">Reason</label>
+                <div class="input_section">
+                  <label class="col-form-label">Reason</label>
+                  <div>
                   <textarea name="reason" id="reason" cols="50" rows="5">{!! old( 'reason') !!}</textarea>
                 </div>
               </div>
+              </div>
             </div>
-            <button id="add_leave" class="btn btn-info save"> Submit</button>
+            <button id="add_leave" class="btn btn-info save pull-right"> Submit</button>
           </form>
         </div>
       </div>
@@ -221,11 +229,12 @@
           <form method="POST" action="{{ route('rejectLeave') }}" enctype="multipart/form-data" id="createleadstagesForm_new"> @csrf
             <div class="row">
               <div class="col-md-6">
-                <div class="input-group input-group-outline my-3">
-                  <label class="form-label">Remark</label>
+                <div class="input_section">
+                  <label class="col-form-label">Remark</label>
+                  <div>
                   <input type="text" name="remark_status" id="remark_status" class="form-control" value="{!! old( 'remark_status') !!}" required> <br><br>
                   <input type="text" name="leave_id" id="leave_id" class="form-control" hidden>
-
+</div>
                 </div>
               </div>
             </div>

@@ -39,8 +39,11 @@
             <div class="first-box">
             <div class="row">
               <div class="col-md-3 ml-auto mr-auto">
-                 <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                   <div class="selectThumbnail">
+                 <div class="fileinput fileinput-new" data-provides="fileinput">
+                 
+                   <div class="fileinput-new thumbnail">
+                    <img src="{!! !empty($customers['profile_image']) ? asset('uploads/'.$customers['profile_image']) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview7">
+                      <div class="selectThumbnail">
                      <span class="btn btn-just-icon btn-round btn-file">
                        <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
                        <span class="fileinput-exists">Change</span>
@@ -49,8 +52,6 @@
                      <br>
                      <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
                    </div>
-                   <div class="fileinput-new thumbnail">
-                    <img src="{!! !empty($customers['profile_image']) ? asset('uploads/'.$customers['profile_image']) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview7">
                    </div>
                    <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
                    <label class="bmd-label-floating">{!! trans('panel.customers.fields.shop_image') !!}</label>
@@ -60,8 +61,11 @@
                  </div>
                </div>
                <div class="col-md-3 ml-auto mr-auto">
-                <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                  <div class="selectThumbnail">
+                <div class="fileinput fileinput-new" data-provides="fileinput">
+                
+                  <div class="fileinput-new thumbnail">
+                    <img src="{!! !empty($customers['shop_image']) ? asset('uploads/'.$customers['shop_image']) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview8">
+                      <div class="selectThumbnail">
                     <span class="btn btn-just-icon btn-round btn-file">
                       <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
                       <span class="fileinput-exists">Change</span>
@@ -70,8 +74,6 @@
                     <br>
                     <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
                   </div>
-                  <div class="fileinput-new thumbnail">
-                    <img src="{!! !empty($customers['shop_image']) ? asset('uploads/'.$customers['shop_image']) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview8">
                   </div>
                   <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
                   <label class="bmd-label-floating">{!! trans('panel.customers.fields.profile_image') !!}</label>
@@ -85,89 +87,61 @@
              </div>
             <div class="row">
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.name') !!}<span class="text-danger"> *</span></label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.customers.fields.name') !!}<span class="text-danger"> *</span></label>
+                  
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="name" class="form-control" value="{!! old( 'name', $customers['name']) !!}" maxlength="200" required>
                       @if ($errors->has('name'))
-                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('name') }}</p></div>
+                        <div class="error"><p class="text-danger">{{ $errors->first('name') }}</p></div>
                       @endif
                     </div>
-                  </div>
                 </div>
               </div>
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.customer_code') !!} </label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.customers.fields.customer_code') !!} </label>
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="customer_code" id="customer_code" class="form-control" value="{!! old( 'customer_code', $customers['customer_code']) !!}" maxlength="200">
                       @if ($errors->has('customer_code'))
-                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('customer_code') }}</p></div>
+                        <div class="error"><p class="text-danger">{{ $errors->first('customer_code') }}</p></div>
                       @endif
                     </div>
-                  </div>
+                
                 </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.first_name') !!} <span class="text-danger"> *</span></label>
-                  <div class="col-md-9">
+
+               <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.customers.fields.first_name') !!} <span class="text-danger"> *</span></label>
+                 
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="first_name" class="form-control" value="{!! old( 'first_name', $customers['first_name']) !!}" maxlength="200" required>
                       @if ($errors->has('first_name'))
-                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('first_name') }}</p></div>
+                        <div class="error"><p class="text-danger">{{ $errors->first('first_name') }}</p></div>
                       @endif
                     </div>
-                  </div>
+               
                 </div>
               </div>
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.last_name') !!}</label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.customers.fields.last_name') !!}</label>
+            
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="last_name" class="form-control" value="{!! old( 'last_name', $customers['last_name']) !!}" maxlength="200">
                       @if ($errors->has('last_name'))
                         <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('last_name') }}</p></div>
                       @endif
                     </div>
-                  </div>
+                  
                 </div>
               </div>
-              <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">{!! trans('panel.global.email') !!}</label>
-                <div class="col-md-9">
-                  <div class="form-group has-default bmd-form-group">
-                    <input type="email" name="email" id="email" class="form-control" value="{!! old( 'email', $customers['email']) !!}" maxlength="200">
-                    @if ($errors->has('email'))
-                      <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('email') }}</p></div>
-                    @endif
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">{!! trans('panel.global.mobile') !!}<span class="text-danger"> *</span></label>
-                <div class="col-md-9">
-                  <div class="form-group has-default bmd-form-group">
-                    <input type="text" name="mobile"  pattern="[0-9]{10}" id="mobile" class="form-control" value="{!! old( 'mobile', $customers['mobile']) !!}" required>
-                  </div>
-                  @if ($errors->has('mobile'))
-                    <label class="error">{{ $errors->first('mobile') }}</label>
-                  @endif
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.customertype') !!}<span class="text-danger"> *</span></label>
-                <div class="col-md-9">
+
+                  <div class="col-md-6">
+              <div class="input_section">
+                <label class="col-form-label">{!! trans('panel.customers.fields.customertype') !!}<span class="text-danger"> *</span></label>
+                
                   <div class="form-group has-default bmd-form-group">
                     <select class="form-control select2" name="customertype" style="width: 100%;" required id="type">
                         <option value="">Select {!! trans('panel.customers.fields.customertype') !!}</option>
@@ -179,13 +153,163 @@
                      </select>
                   </div>
                   @if ($errors->has('customertype'))
-                   <div class="error col-lg-12">
+                   <div class="error">
                       <p class="text-danger">{{ $errors->first('customertype') }}</p>
                    </div>
                   @endif
-                </div>
+             
               </div>
             </div>
+               <div class="col-md-6">
+              <div class="input_section">
+                <label class="col-form-label">{!! trans('panel.global.mobile') !!}<span class="text-danger"> *</span></label>
+             
+                  <div class="form-group has-default bmd-form-group">
+                    <input type="text" name="mobile"  pattern="[0-9]{10}" id="mobile" class="form-control" value="{!! old( 'mobile', $customers['mobile']) !!}" required>
+                  </div>
+                  @if ($errors->has('mobile'))
+                    <label class="error">{{ $errors->first('mobile') }}</label>
+                  @endif     
+              </div>
+            </div>
+           <div class="col-md-6">
+              <div class="input_section">
+                <label class="col-form-label">{!! trans('panel.global.email') !!}</label>
+            
+                  <div class="form-group has-default bmd-form-group">
+                    <input type="email" name="email" id="email" class="form-control" value="{!! old( 'email', $customers['email']) !!}" maxlength="200">
+                    @if ($errors->has('email'))
+                      <div class="error"><p class="text-danger">{{ $errors->first('email') }}</p></div>
+                    @endif
+                  </div>
+           
+              </div>
+            </div>
+
+
+<div class="col-md-6">
+              <div class="input_section">
+                <label class="col-form-label">Employee 
+
+                         <?php
+                         $userarray = array();
+                         ?>
+                        @foreach($customers->getemployeedetail as $key_new => $datas)
+                          <?php $userarray[] = $datas->user_id; ?>
+                        @endforeach
+
+              </label>
+             
+                  <div class="form-group has-default bmd-form-group">
+                    <select class="form-control select2" name="executive_id[]" style="width: 100%;" multiple>
+                        <!-- <option value="">Select Employee</option> -->
+                        @if(@isset($users ))
+
+                        @foreach($users as  $user)
+                         <option value="{!! $user['id'] !!}" <?php if(in_array($user->id,$userarray)){echo "selected";} ?>>{!! $user['name'] !!}</option>
+                        @endforeach
+                        @endif
+                     </select>
+                  </div>
+                  @if ($errors->has('executive_id'))
+                   <div class="error">
+                      <p class="text-danger">{{ $errors->first('executive_id') }}</p>
+                   </div>
+                  @endif
+              
+              </div>
+            </div>
+
+       <div class="col-md-6">
+              <div class="input_section">
+                <label class="col-form-label">{!! trans('panel.global.contact_number_two') !!}<span class="text-danger"> *</span></label>
+               
+                  <div class="form-group has-default bmd-form-group">
+                    <input type="text" name="contact_number" id="contact_number" class="form-control" value="{!! old( 'contact_number', $customers['contact_number']) !!}" maxlength="13" minlength="10">
+                  </div>
+                  @if ($errors->has('contact_number'))
+                    <label class="error">{{ $errors->first('contact_number') }}</label>
+                  @endif
+               
+              </div>
+            </div>
+
+            
+            <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">Working Status<span class="text-danger"> *</span></label>
+                  
+                    <div class="form-group has-default bmd-form-group">
+                      <select class="form-control select2" name="working_status" style="width: 100%;" required id="type">
+                        <option value="">Select Working Status</option>
+                        <option value="New" {{($customers && $customers['working_status'] == 'New')? 'selected':''}} >New</option>
+                        <option value="Existing" {{($customers && $customers['working_status'] == 'Existing')? 'selected':''}}>Existing</option>
+                      </select>
+                    </div>
+                    @if ($errors->has('working_status'))
+                    <div class="error col-lg-12">
+                      <p class="text-danger">{{ $errors->first('working_status') }}</p>
+                    </div>
+                    @endif
+              
+                </div>
+              </div>
+       <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">Creation Date</label>
+                
+                    <div class="form-group has-default bmd-form-group">
+                      <input type="text" name="creation_date" id="creation_date" class="form-control datepicker" value="{!! old( 'contact_number', $customers['creation_date']) !!}" autocomplete="off">
+                    </div>
+                    @if ($errors->has('creation_date'))
+                    <div class="error">
+                      <p class="text-danger">{{ $errors->first('creation_date') }}</p>
+                    </div>
+                    @endif
+                  </div>
+            
+              </div>
+
+
+   <div class="col-md-6" id="parentcustomer" style="display:none;">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.global.parentcustomer') !!}</label>
+
+                       <?php
+                         $parentarray = array();
+                         ?>
+                        @foreach($customers->getparentdetail as $key => $parentdetail)
+                          <?php $parentarray[] = $parentdetail->parent_id; 
+                          ?>
+                        @endforeach
+
+
+              
+                    <div class="form-group has-default bmd-form-group">
+                      <select class="form-control select2 customer_parent" name="parent_id[]"  style="width: 100%;" multiple>
+                         <!-- <option value="">Select {!! trans('panel.global.parentcustomer') !!}</option> -->
+                          @if(@isset($parentcustomers ))
+                            @foreach($parentcustomers as $parentcustomer)
+                            <option value="{!! $parentcustomer['id'] !!}"  <?php if(in_array($parentcustomer->id,$parentarray)){echo "selected";} ?>>{!! $parentcustomer['name'] !!}</option>
+                            @endforeach
+                          @endif
+
+                      </select>
+                    </div>
+                    @if ($errors->has('parent_id'))
+                     <div class="error col-lg-12">
+                        <p class="text-danger">{{ $errors->first('parent_id') }}</p>
+                     </div>
+                    @endif
+               
+                </div>
+              </div>
+<!-- row -->
+            </div>
+          
+                
+         
+
             <!-- <div class="col-md-6">
               <div class="row">
                 <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.firmtype') !!}</label>
@@ -231,92 +355,14 @@
               </div>
             </div> -->
 
-            <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">Employee 
-
-                         <?php
-                         $userarray = array();
-                         ?>
-                        @foreach($customers->getemployeedetail as $key_new => $datas)
-                          <?php $userarray[] = $datas->user_id; ?>
-                        @endforeach
-
-              </label>
-                <div class="col-md-9">
-                  <div class="form-group has-default bmd-form-group">
-                    <select class="form-control select2" name="executive_id[]" style="width: 100%;" multiple>
-                        <!-- <option value="">Select Employee</option> -->
-                        @if(@isset($users ))
-
-                        @foreach($users as  $user)
-                         <option value="{!! $user['id'] !!}" <?php if(in_array($user->id,$userarray)){echo "selected";} ?>>{!! $user['name'] !!}</option>
-                        @endforeach
-                        @endif
-                     </select>
-                  </div>
-                  @if ($errors->has('executive_id'))
-                   <div class="error col-lg-12">
-                      <p class="text-danger">{{ $errors->first('executive_id') }}</p>
-                   </div>
-                  @endif
-                </div>
-              </div>
-            </div>
+            
 
 
             <!-- new field -->
 
-            <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">{!! trans('panel.global.contact_number_two') !!}<span class="text-danger"> *</span></label>
-                <div class="col-md-9">
-                  <div class="form-group has-default bmd-form-group">
-                    <input type="text" name="contact_number" id="contact_number" class="form-control" value="{!! old( 'contact_number', $customers['contact_number']) !!}" maxlength="13" minlength="10">
-                  </div>
-                  @if ($errors->has('contact_number'))
-                    <label class="error">{{ $errors->first('contact_number') }}</label>
-                  @endif
-                </div>
-              </div>
-            </div>
+     
 
-            
-            <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">Working Status<span class="text-danger"> *</span></label>
-                  <div class="col-md-9">
-                    <div class="form-group has-default bmd-form-group">
-                      <select class="form-control select2" name="working_status" style="width: 100%;" required id="type">
-                        <option value="">Select Working Status</option>
-                        <option value="New" {{($customers && $customers['working_status'] == 'New')? 'selected':''}} >New</option>
-                        <option value="Existing" {{($customers && $customers['working_status'] == 'Existing')? 'selected':''}}>Existing</option>
-                      </select>
-                    </div>
-                    @if ($errors->has('working_status'))
-                    <div class="error col-lg-12">
-                      <p class="text-danger">{{ $errors->first('working_status') }}</p>
-                    </div>
-                    @endif
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">Creation Date</label>
-                  <div class="col-md-9">
-                    <div class="form-group has-default bmd-form-group">
-                      <input type="text" name="creation_date" id="creation_date" class="form-control datepicker" value="{!! old( 'contact_number', $customers['creation_date']) !!}" autocomplete="off">
-                    </div>
-                    @if ($errors->has('creation_date'))
-                    <div class="error col-lg-12">
-                      <p class="text-danger">{{ $errors->first('creation_date') }}</p>
-                    </div>
-                    @endif
-                  </div>
-                </div>
-              </div>
+       
 
 <!--             <div class="col-md-6" id="parentcustomer" style="display:none;">
                 <div class="row">
@@ -343,40 +389,8 @@
                 </div>
               </div> -->
 
-              <div class="col-md-6" id="parentcustomer" style="display:none;">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.global.parentcustomer') !!}</label>
-
-                       <?php
-                         $parentarray = array();
-                         ?>
-                        @foreach($customers->getparentdetail as $key => $parentdetail)
-                          <?php $parentarray[] = $parentdetail->parent_id; 
-                          ?>
-                        @endforeach
-
-
-                  <div class="col-md-9">
-                    <div class="form-group has-default bmd-form-group">
-                      <select class="form-control select2 customer_parent" name="parent_id[]"  style="width: 100%;" multiple>
-                         <!-- <option value="">Select {!! trans('panel.global.parentcustomer') !!}</option> -->
-                          @if(@isset($parentcustomers ))
-                            @foreach($parentcustomers as $parentcustomer)
-                            <option value="{!! $parentcustomer['id'] !!}"  <?php if(in_array($parentcustomer->id,$parentarray)){echo "selected";} ?>>{!! $parentcustomer['name'] !!}</option>
-                            @endforeach
-                          @endif
-
-                      </select>
-                    </div>
-                    @if ($errors->has('parent_id'))
-                     <div class="error col-lg-12">
-                        <p class="text-danger">{{ $errors->first('parent_id') }}</p>
-                     </div>
-                    @endif
-                  </div>
-                </div>
-              </div>
-              </div>
+           
+       
              <!-- end new feld -->
 
           </div>
@@ -385,62 +399,62 @@
             <div class="second-box">
             <div class="row">
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.address.address1') !!} <span class="text-danger"> *</span></label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.address.address1') !!} <span class="text-danger"> *</span></label>
+               
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="address1" class="form-control" value="{!! old( 'address1', isset($customers['customeraddress']['address1']) ? $customers['customeraddress']['address1'] :'' ) !!}" maxlength="200" required>
                       @if ($errors->has('address1'))
                         <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('address1') }}</p></div>
                       @endif
                     </div>
-                  </div>
+                 
                 </div>
               </div>
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.address.address2') !!} </label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.address.address2') !!} </label>
+                 
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="address2" class="form-control" value="{!! old( 'address2', isset($customers['customeraddress']['address2']) ? $customers['customeraddress']['address2'] :'' ) !!}" maxlength="200">
                       @if ($errors->has('address2'))
-                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('address2') }}</p></div>
+                        <div class="error"><p class="text-danger">{{ $errors->first('address2') }}</p></div>
                       @endif
-                    </div>
+                 
                   </div>
                 </div>
               </div>
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.address.landmark') !!} </label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.address.landmark') !!} </label>
+                  
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="landmark" class="form-control" value="{!! old( 'address1', isset($customers['customeraddress']['landmark']) ? $customers['customeraddress']['landmark'] :'' ) !!}" maxlength="200">
                       @if ($errors->has('landmark'))
-                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('landmark') }}</p></div>
+                        <div class="error"><p class="text-danger">{{ $errors->first('landmark') }}</p></div>
                       @endif
-                    </div>
+            
                   </div>
                 </div>
               </div>
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.address.locality') !!} </label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.address.locality') !!} </label>
+                  
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="locality" class="form-control" value="{!! old( 'locality', isset($customers['customeraddress']['locality']) ? $customers['customeraddress']['locality'] :'' ) !!}" maxlength="200">
                       @if ($errors->has('aadhar_no'))
-                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('aadhar_no') }}</p></div>
+                        <div class="error"><p class="text-danger">{{ $errors->first('aadhar_no') }}</p></div>
                       @endif
                     </div>
-                  </div>
+       
                 </div>
               </div>
               
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.global.country') !!}</label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class=" col-form-label">{!! trans('panel.global.country') !!}</label>
+             
                     <div class="form-group has-default bmd-form-group">
                       <select class="form-control select2 country" name="country_id" onchange="getStateList()" style="width: 100%;">
                           <option value="">Select {!! trans('panel.global.country') !!}</option>
@@ -456,13 +470,13 @@
                         <p class="text-danger">{{ $errors->first('country_id') }}</p>
                      </div>
                     @endif
-                  </div>
+             
                 </div>
               </div>
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.global.state') !!}</label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.global.state') !!}</label>
+               
                     <div class="form-group has-default bmd-form-group">
                       <select class="form-control select2 state" name="state_id" onchange="getDistrictList()" style="width: 100%;">
                           @if($customers->exists && isset($customers['customeraddress']['state_id']))
@@ -473,17 +487,17 @@
                        </select>
                     </div>
                     @if ($errors->has('state_id'))
-                     <div class="error col-lg-12">
+                     <div class="error">
                         <p class="text-danger">{{ $errors->first('state_id') }}</p>
                      </div>
                     @endif
                   </div>
                 </div>
-              </div>
+           
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.global.district') !!}</label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.global.district') !!}</label>
+              
                     <div class="form-group has-default bmd-form-group">
                       <select class="form-control select2 district" name="district_id" onchange="getCityList()" style="width: 100%;">
                           @if($customers->exists && isset($customers['customeraddress']['district_id']))
@@ -494,17 +508,17 @@
                        </select>
                     </div>
                     @if ($errors->has('country_id'))
-                     <div class="error col-lg-12">
+                     <div class="error">
                         <p class="text-danger">{{ $errors->first('country_id') }}</p>
                      </div>
                     @endif
-                  </div>
+            
                 </div>
               </div>
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.global.city') !!}</label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.global.city') !!}</label>
+                  
                     <div class="form-group has-default bmd-form-group">
                       <select class="form-control select2 city" name="city_id" onchange="getPincodeList()" style="width: 100%;">
                           @if($customers->exists && isset($customers['customeraddress']['city_id']))
@@ -519,13 +533,13 @@
                         <p class="text-danger">{{ $errors->first('city_id') }}</p>
                      </div>
                     @endif
-                  </div>
+               
                 </div>
               </div>
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.global.pincode') !!}</label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.global.pincode') !!}</label>
+                 
                     <div class="form-group has-default bmd-form-group">
                       <select class="form-control pincode select2" name="pincode_id" onchange="getAddressData()" style="width: 100%;">
                           <option value="">Select {!! trans('panel.global.pincode') !!}</option>
@@ -537,133 +551,122 @@
                        </select>
                     </div>
                     @if ($errors->has('pincode_id'))
-                     <div class="error col-lg-12">
+                     <div class="error">
                         <p class="text-danger">{{ $errors->first('pincode_id') }}</p>
                      </div>
                     @endif
-                  </div>
+                
                 </div>
               </div>
             </div>
             </div>
+              
           <hr class="my-3">
           <h4 class="section-heading mb-3  h4 mt-0 text-center text-theme2">{!! trans('panel.customers.title_kyc') !!}</h4> 
           <div class="last-box">
           <div class="row">
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.gstin_no') !!} </label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.customers.fields.gstin_no') !!} </label>
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="gstin_no" id="gstin_no" class="form-control" value="{!! old( 'gstin_no', isset($customers['customerdetails']['gstin_no']) ? $customers['customerdetails']['gstin_no'] :'' ) !!}" maxlength="200">
                       @if ($errors->has('gstin_no'))
-                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('gstin_no') }}</p></div>
+                        <div class="error"><p class="text-danger">{{ $errors->first('gstin_no') }}</p></div>
                       @endif
-                    </div>
-                  </div>
-                  
+                    </div>                
                 </div>
               </div>
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.pan_no') !!}</label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.customers.fields.pan_no') !!}</label>
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="pan_no" id="pan_no" class="form-control" value="{!! old( 'pan_no', isset($customers['customerdetails']['pan_no']) ? $customers['customerdetails']['pan_no'] :'' ) !!}" maxlength="200">
                       @if ($errors->has('pan_no'))
-                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('pan_no') }}</p></div>
+                        <div class="error"><p class="text-danger">{{ $errors->first('pan_no') }}</p></div>
                       @endif
                     </div>
-                  </div>
-                  
                 </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.aadhar_no') !!} </label>
-                  <div class="col-md-9">
+
+                  <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.customers.fields.aadhar_no') !!} </label>
+               
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="aadhar_no" id="aadhar_no" class="form-control" value="{!! old( 'aadhar_no', isset($customers['customerdetails']['aadhar_no']) ? $customers['customerdetails']['aadhar_no'] :'' ) !!}" maxlength="200">
                       @if ($errors->has('aadhar_no'))
-                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('aadhar_no') }}</p></div>
+                        <div class="error"><p class="text-danger">{{ $errors->first('aadhar_no') }}</p></div>
                       @endif
                     </div>
-                  </div>
                 </div>
               </div>
-              <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.account_holder') !!} </label>
-                  <div class="col-md-9">
+   <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.customers.fields.account_holder') !!} </label>
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="account_holder" id="account_holder" class="form-control" value="{!! old( 'account_holder', isset($customers['customerdetails']['account_holder']) ? $customers['customerdetails']['account_holder'] :'' ) !!}" maxlength="200">
                       @if ($errors->has('account_holder'))
-                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('account_holder') }}</p></div>
+                        <div class="error"><p class="text-danger">{{ $errors->first('account_holder') }}</p></div>
                       @endif
-                    </div>
                   </div>
                 </div>
               </div>
-              <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.account_number') !!} </label>
-                  <div class="col-md-9">
+ <div class="col-md-6">
+                <div class="input_section">
+                  <label class="ccol-form-label">{!! trans('panel.customers.fields.account_number') !!} </label>
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="account_number" id="account_number" class="form-control" value="{!! old( 'account_number', isset($customers['customerdetails']['account_number']) ? $customers['customerdetails']['account_number'] :'' ) !!}" maxlength="200">
                       @if ($errors->has('account_number'))
-                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('account_number') }}</p></div>
+                        <div class="error"><p class="text-danger">{{ $errors->first('account_number') }}</p></div>
                       @endif
-                    </div>
                   </div>
                 </div>
               </div>
-              <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.bank_name') !!} </label>
-                  <div class="col-md-9">
+   <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.customers.fields.bank_name') !!} </label>
+               
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="bank_name" id="bank_name" class="form-control" value="{!! old( 'bank_name', isset($customers['customerdetails']['bank_name']) ? $customers['customerdetails']['bank_name'] :'' ) !!}" maxlength="200">
                       @if ($errors->has('bank_name'))
-                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('bank_name') }}</p></div>
+                        <div class="error"><p class="text-danger">{{ $errors->first('bank_name') }}</p></div>
                       @endif
-                    </div>
+               
                   </div>
                 </div>
               </div>
-              <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.ifsc_code') !!} </label>
-                  <div class="col-md-9">
+       <div class="col-md-6">
+                <div class="input_section">
+                  <label class=" col-form-label">{!! trans('panel.customers.fields.ifsc_code') !!} </label>
+                
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="ifsc_code" id="ifsc_code" class="form-control" value="{!! old( 'ifsc_code', isset($customers['customerdetails']['ifsc_code']) ? $customers['customerdetails']['ifsc_code'] :'' ) !!}" maxlength="200">
                       @if ($errors->has('ifsc_code'))
                         <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('ifsc_code') }}</p></div>
                       @endif
-                    </div>
+               
                   </div>
                 </div>
               </div>
+
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.customers.fields.otherid_no') !!}</label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class=" col-form-label">{!! trans('panel.customers.fields.otherid_no') !!}</label>
+                
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="otherid_no" id="otherid_no" class="form-control" value="{!! old( 'otherid_no', isset($customers['customerdetails']['otherid_no']) ? $customers['customerdetails']['otherid_no'] :'' ) !!}" maxlength="200">
                       @if ($errors->has('otherid_no'))
-                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('otherid_no') }}</p></div>
+                        <div class="error"><p class="text-danger">{{ $errors->first('otherid_no') }}</p></div>
                       @endif
                     </div>
-                  </div>
+                 
                   
                 </div>
               </div>
-        <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">Visit Status</label>
-                  <div class="col-md-9">
-                    <div class="form-group has-default bmd-form-group">
+ <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">Visit Status</label>
+                                    <div class="form-group has-default bmd-form-group">
                       <select class="form-control" name="visit_status" id="visit_status" style="width: 100%;" required>
                         <option value="" selected disabled>Select Visit Status</option>
                         <option value="Hot" @if(!empty($customers->customerdetails) && $customers->customerdetails->visit_status == "Hot") selected @endif>Hot</option>
@@ -675,14 +678,14 @@
                         <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('visit_status') }}</p></div>
                       @endif
                     </div>
-                  </div>
+            
                   
                 </div>
               </div>
-              <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">Grade</label>
-                  <div class="col-md-9">
+     <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">Grade</label>
+               
                     <div class="form-group has-default bmd-form-group">
                       <select class="form-control" name="grade" id="grade" style="width: 100%;" required>
                         <option value="" selected disabled>Select Grade</option>
@@ -691,18 +694,23 @@
                         <option value="Grade C" @if(!empty($customers->customerdetails) && $customers->customerdetails->grade  == "Grade C") selected @endif>C</option>
                      </select>
                       @if ($errors->has('otherid_no'))
-                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('otherid_no') }}</p></div>
+                        <div class="error"><p class="text-danger">{{ $errors->first('otherid_no') }}</p></div>
                       @endif
                     </div>
-                  </div>
+        
                   
                 </div>
               </div>
+
+ </div>
             </div>
-            <div class="row">
+          
+            <div class="row mt-5">
               <div class="col-md-2 col-sm-2">
-                 <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                   <div class="selectThumbnail">
+                 <div class="fileinput fileinput-new" data-provides="fileinput">
+                   <div class="fileinput-new thumbnail">
+                    <img src="{!! !empty($customers['customerdocuments']->where('document_name','gstin')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','gstin')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview1">
+                       <div class="selectThumbnail">
                      <span class="btn btn-just-icon btn-round btn-file">
                        <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
                        <span class="fileinput-exists">Change</span>
@@ -711,8 +719,6 @@
                      <br>
                      <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
                    </div>
-                   <div class="fileinput-new thumbnail">
-                    <img src="{!! !empty($customers['customerdocuments']->where('document_name','gstin')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','gstin')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview1">
                    </div>
                    <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
                    <label class="bmd-label-floating">{!! trans('panel.customers.fields.gstin_image') !!}</label>
@@ -722,8 +728,11 @@
                  </div>
                </div>
               <div class="col-md-2 col-sm-2">
-                <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                  <div class="selectThumbnail">
+                <div class="fileinput fileinput-new" data-provides="fileinput">
+              
+                 <div class="fileinput-new thumbnail">
+                   <img src="{!! !empty($customers['customerdocuments']->where('document_name','pan')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','pan')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview2">
+                       <div class="selectThumbnail">
                    <span class="btn btn-just-icon btn-round btn-file">
                      <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
                      <span class="fileinput-exists">Change</span>
@@ -732,16 +741,17 @@
                    <br>
                    <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
                  </div>
-                 <div class="fileinput-new thumbnail">
-                   <img src="{!! !empty($customers['customerdocuments']->where('document_name','pan')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','pan')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview2">
                  </div>
                  <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
                  <label class="bmd-label-floating">{!! trans('panel.customers.fields.pan_image') !!}</label>
                </div>
              </div>
               <div class="col-md-2 col-sm-2">
-                <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                  <div class="selectThumbnail">
+                <div class="fileinput fileinput-new" data-provides="fileinput">
+               
+                 <div class="fileinput-new thumbnail">
+                   <img src="{!! !empty($customers['customerdocuments']->where('document_name','aadhar')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','aadhar')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview3">
+                      <div class="selectThumbnail">
                    <span class="btn btn-just-icon btn-round btn-file">
                      <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
                      <span class="fileinput-exists">Change</span>
@@ -750,16 +760,17 @@
                    <br>
                    <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
                  </div>
-                 <div class="fileinput-new thumbnail">
-                   <img src="{!! !empty($customers['customerdocuments']->where('document_name','aadhar')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','aadhar')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview3">
                  </div>
                  <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
                  <label class="bmd-label-floating">{!! trans('panel.customers.fields.aadhar_front_image') !!}</label>
                </div>
              </div>
              <div class="col-md-2 col-sm-2">
-                <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                  <div class="selectThumbnail">
+                <div class="fileinput fileinput-new" data-provides="fileinput">
+                
+                 <div class="fileinput-new thumbnail">
+                   <img src="{!! !empty($customers['customerdocuments']->where('document_name','aadharback')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','aadharback')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview4">
+                     <div class="selectThumbnail">
                    <span class="btn btn-just-icon btn-round btn-file">
                      <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
                      <span class="fileinput-exists">Change</span>
@@ -768,16 +779,17 @@
                    <br>
                    <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
                  </div>
-                 <div class="fileinput-new thumbnail">
-                   <img src="{!! !empty($customers['customerdocuments']->where('document_name','aadharback')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','aadharback')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview4">
                  </div>
                  <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
                  <label class="bmd-label-floating">{!! trans('panel.customers.fields.aadhar_back_image') !!}</label>
                </div>
              </div>
              <div class="col-md-2 col-sm-2">
-                <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                  <div class="selectThumbnail">
+                <div class="fileinput fileinput-new" data-provides="fileinput">
+               
+                 <div class="fileinput-new thumbnail">
+                   <img src="{!! !empty($customers['customerdocuments']->where('document_name','bankpass')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','bankpass')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview5">
+                      <div class="selectThumbnail">
                    <span class="btn btn-just-icon btn-round btn-file">
                      <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
                      <span class="fileinput-exists">Change</span>
@@ -786,16 +798,17 @@
                    <br>
                    <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
                  </div>
-                 <div class="fileinput-new thumbnail">
-                   <img src="{!! !empty($customers['customerdocuments']->where('document_name','bankpass')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','bankpass')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview5">
                  </div>
                  <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
                  <label class="bmd-label-floating">{!! trans('panel.customers.fields.bank_passbook_image') !!}</label>
                </div>
              </div>
               <div class="col-md-2 col-sm-2">
-                <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                 <div class="selectThumbnail">
+                <div class="fileinput fileinput-new" data-provides="fileinput">
+               
+                 <div class="fileinput-new thumbnail">
+                   <img src="{!! !empty($customers['customerdocuments']->where('document_name','other')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','other')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview6">
+                     <div class="selectThumbnail">
                    <span class="btn btn-just-icon btn-round btn-file">
                      <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
                      <span class="fileinput-exists">Change</span>
@@ -804,8 +817,6 @@
                    <br>
                    <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
                  </div>
-                 <div class="fileinput-new thumbnail">
-                   <img src="{!! !empty($customers['customerdocuments']->where('document_name','other')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','other')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview6">
                  </div>
                  <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
                  <label class="bmd-label-floating">{!! trans('panel.customers.fields.otherid_image') !!}</label>
@@ -832,9 +843,9 @@
 
                               @if($field['field_type'] == 'Radio')
                               <div class="row">
-                                <label class="col-sm-1 col-form-label label-checkbox"></label>
-                                <div class="col-sm-11 checkbox-radios">
-                                    {!! $field['label_name'] !!}
+                                <!-- <label class="col-sm-1 col-form-label label-checkbox"></label> -->
+                                <div class="col-sm-12 checkbox-radios">
+                                   <h4 class="section-heading mb-3  h4 mt-0 text-center text-theme2"> {!! $field['label_name'] !!}</h4>
                                   <div class="row">
                                     @if(@isset($field['fieldsData'] ))
                                       @foreach($field['fieldsData'] as $rows)
@@ -855,9 +866,10 @@
                               </div>
                               @elseif($field['field_type'] == 'Checkbox')
                                 <div class="row">
-                                  <label class="col-sm-1 col-form-label label-checkbox"></label>
-                                  <div class="col-sm-11 checkbox-radios">
-                                    {!! $field['label_name'] !!}
+                                  <!-- <label class="col-sm-1 col-form-label label-checkbox"></label> -->
+                                  <div class="col-sm-12 checkbox-radios">
+                                   <h4 class="section-heading mb-3  h4 mt-0 text-center text-theme2"> {!! $field['label_name'] !!}</h4>
+
                                     <div class="row">
                                       @if(@isset($field['fieldsData'] ))
                                         @foreach($field['fieldsData'] as $i => $rows)
@@ -894,9 +906,9 @@
                                 </div>
                               @else
                                 <div class="row">
-                                    <label class="col-sm-1 col-form-label label-checkbox"></label>
-                                    <div class="col-sm-11 checkbox-radios">
-                                    {!! $field['label_name'] !!}
+                                    <!-- <label class="col-sm-1 col-form-label label-checkbox"></label> -->
+                                    <div class="col-sm-12 checkbox-radios">
+                              <h4 class="section-heading mb-3  h4 mt-0 text-center text-theme2"> {!! $field['label_name'] !!}</h4>
                                     <div class="form-group has-default bmd-form-group">
                                       <input type="text" name="survey[{!! $index !!}][value]" class="form-control" value="{!! $customers['surveys']->where('field_id', $field['id'])->pluck('value')->first() !!}" maxlength="200">
                                     </div>

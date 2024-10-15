@@ -155,22 +155,21 @@
         @csrf
         <div class="row">
             <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">Date<span class="text-danger"> *</span></label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class="col-form-label">Date<span class="text-danger"> *</span></label>
+                
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="date" id="date" class="form-control datepicker" autocomplete="off" required/>
                       @if ($errors->has('date'))
-                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('date') }}</p></div>
+                        <div class="error"><p class="text-danger">{{ $errors->first('date') }}</p></div>
                       @endif
                     </div>
-                  </div>
+               
                 </div>
               </div>
                <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">User<span class="text-danger"> *</span></label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class="col-form-label">User<span class="text-danger"> *</span></label>
                     <div class="form-group has-default bmd-form-group">
                       <select class="form-control rowchange select2" name="userid" id="userid" required style="width: 100%;">
                          @if(@isset($users))
@@ -181,36 +180,35 @@
                          @endif
                       </select>
                       @if ($errors->has('userid'))
-                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('userid') }}</p></div>
+                        <div class="error"><p class="text-danger">{{ $errors->first('userid') }}</p></div>
                       @endif
-                    </div>
                   </div>
                 </div>
               </div>
               <div class="col-md-12">
-                <div class="row">
-                  <label class="col-md-2 col-form-label">Town<span class="text-danger"> *</span></label>
-                  <div class="col-md-10">
+                <div class="input_section">
+                  <label class="col-form-label">Town<span class="text-danger"> *</span></label>
+                 
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="town" id="town" class="form-control" required/>
                       @if ($errors->has('town'))
-                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('town') }}</p></div>
+                        <div class="error"><p class="text-danger">{{ $errors->first('town') }}</p></div>
                       @endif
                     </div>
                   </div>
-                </div>
+             
               </div>
               <div class="col-md-12">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">Objectives</label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class="col-form-label">Objectives</label>
+            
                     <div class="form-group has-default bmd-form-group">
                       <textarea class="form-control" name="objectives" id="objectives" rows="5"></textarea>
                       @if ($errors->has('objectives'))
-                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('objectives') }}</p></div>
+                        <div class="error"><p class="text-danger">{{ $errors->first('objectives') }}</p></div>
                       @endif
                     </div>
-                  </div>
+                 
                 </div>
               </div>
           </div>

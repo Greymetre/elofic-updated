@@ -14,6 +14,10 @@
             color: #f44336;
         }
 
+        .form-control {
+    margin-bottom: 10px;
+}
+
         input.form-check-input {
             border: 2px solid !important;
             width: 20px !important;
@@ -348,7 +352,7 @@
         <form id="new_dealer_appoint_form" action="{{route('dealer-appointment-form.store')}}" method="post" enctype="multipart/form-data">
             @csrf
             <div class="row mt-3">
-                <div class="col-md-3 content-frm bg-light">
+                <div class="col-md-3 ">
                     <div class="form-group row">
                         <div class="col-md-3">
                             <label for="branch">Branch </label>
@@ -370,7 +374,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6 content-frm bg-light">
+                <div class="col-md-6 ">
                     <div class="form-group row">
                         <div class="col-md-4">
                             <label for="branch">User(Created By) </label>
@@ -392,7 +396,7 @@
                 </div>
             </div>
             <div class="row mt-3">
-                <div class="col-md-3 content-frm bg-light">
+                <div class="col-md-3 ">
                     <div class="form-group row">
                         <div class="col-md-3">
                             <label for="district">District </label>
@@ -409,7 +413,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3 content-frm bg-light">
+                <div class="col-md-3 ">
                     <div class="form-group row">
                         <div class="col-md-4">
                             <label for="city">Town / City </label>
@@ -421,7 +425,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3 content-frm bg-light">
+                <div class="col-md-3 ">
                     <div class="form-group row">
                         <div class="col-md-4">
                             <label for="place">Place </label>

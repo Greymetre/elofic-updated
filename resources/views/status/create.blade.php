@@ -41,37 +41,36 @@
           ]) !!}
           <div class="row">
             <div class="col-md-6">
-                <div class="form-group">
-                    <label class="bmd-label-floating">{!! trans('panel.status.fields.status_name') !!} </label>
+                <div class="input_section">
+                    <label class="col-form-label">{!! trans('panel.status.fields.status_name') !!} </label>
                     <input type="text" name="status_name" class="form-control" value="{!! old( 'status_name', $status['status_name']) !!}" >
                   @if ($errors->has('status_name'))
-                    <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('status_name') }}</p></div>
+                    <div class="error"><p class="text-danger">{{ $errors->first('status_name') }}</p></div>
                   @endif
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="form-group">
-                    <label class="bmd-label-floating">{!! trans('panel.status.fields.status_message') !!}</label>
+                <div class="input_section">
+                    <label class="col-form-label">{!! trans('panel.status.fields.status_message') !!}</label>
                     <input type="text" name="status_message" class="form-control" value="{!! old( 'status_message', $status['status_message']) !!}" >
                     @if ($errors->has('status_message'))
-                    <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('status_message') }}</p></div>
+                    <div class="error"><p class="text-danger">{{ $errors->first('status_message') }}</p></div>
                   @endif
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label class="bmd-label-floating">{!! trans('panel.status.fields.display_name') !!} </label>
+
+               <div class="col-md-6">
+                <div class="input_section">
+                    <label class="col-form-label">{!! trans('panel.status.fields.display_name') !!} </label>
                     <input type="text" name="display_name" class="form-control" value="{!! old( 'display_name', $status['display_name']) !!}" >
                   @if ($errors->has('display_name'))
-                    <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('display_name') }}</p></div>
+                    <div class="error"><p class="text-danger">{{ $errors->first('display_name') }}</p></div>
                   @endif
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="form-group">
-                    <label class="bmd-label-floating">{!! trans('panel.status.fields.module') !!}</label>
+                <div class="input_section">
+                    <label class="col-form-label">{!! trans('panel.status.fields.module') !!}</label>
                     <select class="form-control select2 module" name="module" style="width: 100%;" required >
                        <option value="">Select {!! trans('panel.status.fields.module') !!}</option>
                        <option value="Customer" {{ old( 'module' , (!empty($status->module))?($status->module):('') ) == 'Customer' ? 'selected' : '' }}>Customer</option>
@@ -87,7 +86,8 @@
                 </div>
             </div>
         </div>
-        <div class="card-footer pull-right">
+       
+        <div class="pull-right">
             {{ Form::submit('Submit', array('class' => 'btn btn-theme')) }}
         </div>
         {{ Form::close() }} 

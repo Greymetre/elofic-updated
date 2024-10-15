@@ -68,10 +68,11 @@
                    <label class="bmd-label-floating">{!! trans('panel.brand.fields.brand_image') !!}</label>
                  </div>
             </div>
-          </div>
-        <div class="card-footer pull-right">
+                <div class="pull-right">
             {{ Form::submit('Submit', array('class' => 'btn btn-theme')) }}
         </div>
+          </div>
+    
         {{ Form::close() }} 
       </div>
     </div>

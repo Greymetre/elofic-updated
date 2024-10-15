@@ -38,39 +38,34 @@
 
           <div class="row">
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">Product Stage<span class="text-danger"> *</span></label>
-                <div class="col-md-9">
+              <div class="input_section">
+                <label class="col-form-label">Product Stage<span class="text-danger"> *</span></label>
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="product_no" class="form-control" value="{!! old( 'product_no', $products['product_no']) !!}" maxlength="200" required>
                     @if ($errors->has('product_no'))
-                    <div class="error col-lg-12">
+                    <div class="error">
                       <p class="text-danger">{{ $errors->first('product_no') }}</p>
                     </div>
                     @endif
                   </div>
-                </div>
               </div>
             </div>
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">kW<span class="text-danger"> *</span></label>
-                <div class="col-md-9">
+              <div class="input_section">
+                <label class="col-form-label">kW<span class="text-danger"> *</span></label>
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="part_no" class="form-control" value="{!! old( 'part_no', $products['part_no']) !!}" maxlength="200" required>
                     @if ($errors->has('part_no'))
-                    <div class="error col-lg-12">
+                    <div class="error">
                       <p class="text-danger">{{ $errors->first('part_no') }}</p>
                     </div>
                     @endif
                   </div>
-                </div>
               </div>
             </div>
             <div class="col-md-12">
-              <div class="row">
-                <label class="col-md-2 col-form-label">{!! trans('panel.product.fields.description') !!} <span class="text-danger"> *</span></label>
-                <div class="col-md-10">
+              <div class="input_section">
+                <label class="col-form-label">{!! trans('panel.product.fields.description') !!} <span class="text-danger"> *</span></label>
                   <div class="form-group has-default bmd-form-group">
                     <textarea name="description" class="form-control" rows="5" maxlength="200" required>{!! old( 'description', $products['description']) !!}</textarea>
                     @if ($errors->has('description'))
@@ -78,14 +73,12 @@
                       <p class="text-danger">{{ $errors->first('description') }}</p>
                     </div>
                     @endif
-                  </div>
                 </div>
               </div>
             </div>
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">HP<span class="text-danger"> *</span></label>
-                <div class="col-md-9">
+              <div class="input_section">
+                <label class="col-form-label">HP<span class="text-danger"> *</span></label>
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="specification" class="form-control" rows="4" maxlength="200" required value="{!! old( 'specification', $products['specification']) !!}">
                     @if ($errors->has('specification'))
@@ -94,58 +87,51 @@
                     </div>
                     @endif
                   </div>
-                </div>
               </div>
             </div>
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">Phase<span class="text-danger"> *</span></label>
-                <div class="col-md-9">
+              <div class="input_section">
+                <label class="col-form-label">Phase<span class="text-danger"> *</span></label>
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="phase" class="form-control" rows="4" maxlength="200" required value="{!! old( 'phase', $products['phase']) !!}">
                     @if ($errors->has('phase'))
-                    <div class="error col-lg-12">
+                    <div class="error">
                       <p class="text-danger">{{ $errors->first('phase') }}</p>
                     </div>
                     @endif
                   </div>
-                </div>
               </div>
             </div>
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">Model</label>
-                <div class="col-md-9">
+              <div class="input_section">
+                <label class="col-form-label">Model</label>
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="model_no" class="form-control" value="{!! old( 'model_no', $products['model_no']) !!}" maxlength="200">
                     @if ($errors->has('model_no'))
-                    <div class="error col-lg-12">
+                    <div class="error">
                       <p class="text-danger">{{ $errors->first('model_no') }}</p>
                     </div>
                     @endif
                   </div>
                 </div>
               </div>
-            </div>
+          
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">Product Code</label>
-                <div class="col-md-9">
+              <div class="input_section">
+                <label class="col-form-label">Product Code</label>
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="product_code" id="product_code" class="form-control" value="{!! old( 'product_code', $products['product_code']) !!}" maxlength="200">
                     @if ($errors->has('product_code'))
-                    <div class="error col-lg-12">
+                    <div class="error">
                       <p class="text-danger">{{ $errors->first('product_code') }}</p>
                     </div>
                     @endif
                   </div>
-                </div>
               </div>
             </div>
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">{!! trans('panel.product.fields.brand_name') !!}<span class="text-danger"> *</span></label>
-                <div class="col-md-9">
+              <div class="input_section">
+                <label class="col-form-label">{!! trans('panel.product.fields.brand_name') !!}<span class="text-danger"> *</span></label>
                   <div class="form-group has-default bmd-form-group">
                     <select class="form-control select2" name="brand_id" style="width: 100%;" required>
                       <option value="">Select {!! trans('panel.product.fields.brand_name') !!}</option>
@@ -162,12 +148,10 @@
                   </div>
                   @endif
                 </div>
-              </div>
             </div>
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">New Group</label>
-                <div class="col-md-9">
+              <div class="input_section">
+                <label class="col-form-label">New Group</label>
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="new_group" class="form-control" value="{!! old( 'new_group', $products['new_group']) !!}" maxlength="200">
                     @if ($errors->has('new_group'))
@@ -177,12 +161,10 @@
                     @endif
                   </div>
                 </div>
-              </div>
             </div>
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">Sub Group</label>
-                <div class="col-md-9">
+              <div class="input_section">
+                <label class="col-form-label">Sub Group</label>
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="sub_group" class="form-control" value="{!! old( 'sub_group', $products['sub_group']) !!}" maxlength="200">
                     @if ($errors->has('sub_group'))
@@ -191,13 +173,11 @@
                     </div>
                     @endif
                   </div>
-                </div>
               </div>
             </div>
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">{!! trans('panel.product.fields.category_name') !!}<span class="text-danger"> *</span></label>
-                <div class="col-md-9">
+              <div class="input_section">
+                <label class="col-form-label">{!! trans('panel.product.fields.category_name') !!}<span class="text-danger"> *</span></label>
                   <div class="form-group has-default bmd-form-group">
                     <select class="form-control select2" name="category_id" style="width: 100%;" required>
                       <option value="">Select {!! trans('panel.product.fields.category_name') !!}</option>
@@ -209,17 +189,15 @@
                     </select>
                   </div>
                   @if ($errors->has('category_id'))
-                  <div class="error col-lg-12">
+                  <div class="error">
                     <p class="text-danger">{{ $errors->first('category_id') }}</p>
                   </div>
                   @endif
                 </div>
-              </div>
             </div>
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">{!! trans('panel.product.fields.subcategory_name') !!}<span class="text-danger"> *</span></label>
-                <div class="col-md-9">
+              <div class="input_section">
+                <label class="col-form-label">{!! trans('panel.product.fields.subcategory_name') !!}<span class="text-danger"> *</span></label>
                   <div class="form-group has-default bmd-form-group">
                     <select class="form-control select2" name="subcategory_id" style="width: 100%;" required>
                       <option value="">Select {!! trans('panel.product.fields.subcategory_name') !!}</option>
@@ -231,17 +209,15 @@
                     </select>
                   </div>
                   @if ($errors->has('subcategory_id'))
-                  <div class="error col-lg-12">
+                  <div class="error">
                     <p class="text-danger">{{ $errors->first('subcategory_id') }}</p>
                   </div>
                   @endif
                 </div>
-              </div>
             </div>
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">{!! trans('panel.product.fields.brand_name') !!}<span class="text-danger"> *</span></label>
-                <div class="col-md-9">
+              <div class="input_section">
+                <label class="col-form-label">{!! trans('panel.product.fields.brand_name') !!}<span class="text-danger"> *</span></label>
                   <div class="form-group has-default bmd-form-group">
                     <select class="form-control select2" name="brand_id" style="width: 100%;" required>
                       <option value="">Select {!! trans('panel.product.fields.brand_name') !!}</option>
@@ -253,17 +229,15 @@
                     </select>
                   </div>
                   @if ($errors->has('brand_id'))
-                  <div class="error col-lg-12">
+                  <div class="error">
                     <p class="text-danger">{{ $errors->first('brand_id') }}</p>
                   </div>
                   @endif
                 </div>
-              </div>
             </div>
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">{!! trans('panel.product.fields.unit_name') !!}<span class="text-danger"> *</span></label>
-                <div class="col-md-9">
+              <div class="input_section">
+                <label class="col-form-label">{!! trans('panel.product.fields.unit_name') !!}<span class="text-danger"> *</span></label>
                   <div class="form-group has-default bmd-form-group">
                     <select class="form-control select2" name="unit_id" style="width: 100%;" required>
                       <option value="">Select {!! trans('panel.product.fields.unit_name') !!}</option>
@@ -275,17 +249,15 @@
                     </select>
                   </div>
                   @if ($errors->has('unit_id'))
-                  <div class="error col-lg-12">
+                  <div class="error">
                     <p class="text-danger">{{ $errors->first('unit_id') }}</p>
                   </div>
                   @endif
-                </div>
               </div>
             </div>
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">{!! trans('panel.product.fields.suc-del') !!} <span class="text-danger"> *</span></label>
-                <div class="col-md-9">
+              <div class="input_section">
+                <label class="col-form-label">{!! trans('panel.product.fields.suc-del') !!} <span class="text-danger"> *</span></label>
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="suc_del" class="form-control" value="{!! old( 'suc_del', $products['suc_del']) !!}" maxlength="200" required>
                     @if ($errors->has('suc_del'))
@@ -294,13 +266,11 @@
                     </div>
                     @endif
                   </div>
-                </div>
               </div>
             </div>
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">{!! trans('panel.product.fields.product_name') !!} <span class="text-danger"> *</span></label>
-                <div class="col-md-9">
+              <div class="input_section">
+                <label class="col-form-label">{!! trans('panel.product.fields.product_name') !!} <span class="text-danger"> *</span></label>
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="product_name" class="form-control" value="{!! old( 'product_name', $products['product_name']) !!}" maxlength="200" required>
                     @if ($errors->has('product_name'))
@@ -308,14 +278,12 @@
                       <p class="text-danger">{{ $errors->first('product_name') }}</p>
                     </div>
                     @endif
-                  </div>
-                </div>
+                  </div>               
               </div>
             </div>
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">{!! trans('panel.product.fields.expiry_interval') !!} <span class="text-danger"> *</span></label>
-                <div class="col-md-9">
+              <div class="input_section">
+                <label class="col-form-label">{!! trans('panel.product.fields.expiry_interval') !!} <span class="text-danger"> *</span></label>
                   <div class="form-group has-default bmd-form-group">
                     <select name="expiry_interval" class="form-control" required>
                       <option value="" disabled selected>Please select expiry interval</option>
@@ -324,27 +292,24 @@
                       <option {{($products && $products['expiry_interval'] == 'Year')?'selected':''}} value="Year">Year</option>
                     </select>
                     @if ($errors->has('expiry_interval'))
-                    <div class="error col-lg-12">
+                    <div class="error">
                       <p class="text-danger">{{ $errors->first('expiry_interval') }}</p>
                     </div>
                     @endif
                   </div>
-                </div>
               </div>
             </div>
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">{!! trans('panel.product.fields.expiry_interval_preiod') !!} <span class="text-danger"> *</span></label>
-                <div class="col-md-9">
+              <div class="input_section">
+                <label class="col-form-label">{!! trans('panel.product.fields.expiry_interval_preiod') !!} <span class="text-danger"> *</span></label>
                   <div class="form-group has-default bmd-form-group">
                     <input type="number" name="expiry_interval_preiod" class="form-control" value="{!! old( 'expiry_interval_preiod', $products['expiry_interval_preiod']) !!}" min="0" required>
                     @if ($errors->has('expiry_interval_preiod'))
-                    <div class="error col-lg-12">
+                    <div class="error">
                       <p class="text-danger">{{ $errors->first('expiry_interval_preiod') }}</p>
                     </div>
                     @endif
                   </div>
-                </div>
               </div>
             </div>
             <!--             <div class="col-md-6">
@@ -361,27 +326,22 @@
               </div>
             </div> -->
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">{!! trans('panel.product.fields.gst') !!}</label>
-                <div class="col-md-9">
+              <div class="input_section">
+                <label class="col-form-label">{!! trans('panel.product.fields.gst') !!}</label>
                   <div class="form-group has-default bmd-form-group">
                     <input type="number" name="gst" class="form-control" value="{!! old( 'gst', !empty($products['productdetails']->pluck('gst')->first() ) ? $products['productdetails']->pluck('gst')->first() :'' ) !!}" min="0" step="0.01">
                     @if ($errors->has('gst'))
-                    <div class="error col-lg-12">
+                    <div class="error">
                       <p class="text-danger">{{ $errors->first('gst') }}</p>
                     </div>
                     @endif
                   </div>
-                </div>
               </div>
             </div>
-          </div>
-          <div class="row">
 
-            <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">{!! trans('panel.product.fields.discount') !!}</label>
-                <div class="col-md-9">
+   <div class="col-md-6">
+              <div class="input_section">
+                <label class="col-form-label">{!! trans('panel.product.fields.discount') !!}</label>
                   <div class="form-group has-default bmd-form-group">
                     <input type="number" name="discount" id="discount" class="form-control" value="{!! old( 'discount', !empty($products['productdetails']->pluck('discount')->first() ) ? $products['productdetails']->pluck('discount')->first() :'' ) !!}" min="0" step="0.01">
                     @if ($errors->has('discount'))
@@ -390,12 +350,13 @@
                     </div>
                     @endif
                   </div>
-                </div>
               </div>
             </div>
-            <div class="col-md-3 col-sm-3 col-md-3 ml-auto mr-auto">
-              <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                <div class="selectThumbnail">
+    <div class="col-md-3 col-sm-3">
+              <div class="fileinput fileinput-new" data-provides="fileinput">
+                <div class="fileinput-new thumbnail">
+                  <img src="{!! ($products['product_image']) ? asset('/uploads/'.$products['product_image']) : asset('public/assets/img/placeholder.jpg') !!}" class="imagepreview1">
+                    <div class="selectThumbnail">
                   <span class="btn btn-just-icon btn-round btn-file">
                     <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
                     <span class="fileinput-exists">Change</span>
@@ -404,23 +365,22 @@
                   <br>
                   <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
                 </div>
-                <div class="fileinput-new thumbnail">
-                  <img src="{!! ($products['product_image']) ? asset('/uploads/'.$products['product_image']) : asset('public/assets/img/placeholder.jpg') !!}" class="imagepreview1">
                 </div>
                 <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
                 <label class="bmd-label-floating">{!! trans('panel.product.fields.product_image') !!}</label>
               </div>
               @if ($errors->has('image'))
-              <div class="error col-lg-12">
+              <div class="error">
                 <p class="text-danger">{{ $errors->first('image') }}</p>
               </div>
               @endif
             </div>
+              </div>
           </div>
-          <div class="row">
+          <div class="Menu_table">
             <table class="table kvcodes-dynamic-rows-example" id="tab_logic">
               <thead>
-                <tr class="card-header-warning text-white">
+                <tr>
                   <th width="3%"> # </th>
                   <!--                      <th class="text-center">Detail Title</th>
                      <th class="text-center">Description</th> -->
@@ -530,7 +490,7 @@
               </table>
              </div> -->
         </div>
-        <div class="card-footer">
+        <div class="">
           {{ Form::submit('Submit', array('class' => 'btn btn-theme pull-right')) }}
         </div>
         {{ Form::close() }}
@@ -549,11 +509,11 @@
         counter++;
         var newRow =
           '<tr value="' + counter + '"><td>' + counter + '</td>' +
-          '<td><input type="text" name="detail[' + counter + '][detail_title]" class="form-control"/></td>' +
-          '<td><input type="text" name="detail[' + counter + '][detail_description]" class="form-control"/></td>' +
-          '<td><input type="number" name="detail[' + counter + '][mrp]" class="form-control" step="0.00" min="0"/></td>' +
-          '<td><input type="number" name="detail[' + counter + '][price]" class="form-control" step="0.00" min="0"/></td>' +
-          '<td><input type="number" name="detail[' + counter + '][selling_price]" class="form-control discount rowchange" step="0.00" min="0" /></td>' +
+          '<td><div class="input_section"><input type="text" name="detail[' + counter + '][detail_title]" class="form-control"/></div></td>' +
+          '<td><div class="input_section"><input type="text" name="detail[' + counter + '][detail_description]" class="form-control"/></div></td>' +
+          '<td><div class="input_section"><input type="number" name="detail[' + counter + '][mrp]" class="form-control" step="0.00" min="0"/></div></td>' +
+          '<td><div class="input_section"><input type="number" name="detail[' + counter + '][price]" class="form-control" step="0.00" min="0"/></div></td>' +
+          '<td><div class="input_section"><input type="number" name="detail[' + counter + '][selling_price]" class="form-control discount rowchange" step="0.00" min="0" /></div></td>' +
           '<td class="td-actions text-center"><div class="btn-group btn-group-sm" role="group" aria-label="Small button group"><a href="#" class="btn btn-danger btn-just-icon btn-sm remove-rows"><i class="material-icons">clear</i></a></div></td>' +
           '</tr>';
         $table.append(newRow);

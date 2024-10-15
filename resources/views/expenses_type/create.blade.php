@@ -34,10 +34,10 @@
             <div class="row">
 
 
-            <div class="col-md-12">
-                <div class="row">
-                  <label class="col-md-2 col-form-label">{{ trans('panel.expenses_type.fields.pay_roll') }}<span class="text-danger"> *</span></label>
-                  <div class="col-md-10">
+            <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">{{ trans('panel.expenses_type.fields.pay_roll') }}<span class="text-danger"> *</span></label>
+                 
                     <div class="form-group has-default bmd-form-group">
                       <select name="payroll_id" id="payroll_id" class="form-control {{ $errors->has('payroll_id') ? 'is-invalid' : '' }}">
                         <option value="" disabled selected>Please select pay roll</option>
@@ -51,7 +51,7 @@
                       </div>
                       @endif
                     </div>
-                  </div>
+                
                 </div>
               </div>
 
@@ -60,10 +60,10 @@
 
 
 
-              <div class="col-md-12">
-                <div class="row">
-                  <label class="col-md-2 col-form-label">{{ trans('panel.expenses_type.fields.allowance_type') }}<span class="text-danger"> *</span></label>
-                  <div class="col-md-10">
+              <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">{{ trans('panel.expenses_type.fields.allowance_type') }}<span class="text-danger"> *</span></label>
+                
                     <div class="form-group has-default bmd-form-group">
                       <select name="allowance_type_id" id="allowance_type_id" class="form-control {{ $errors->has('allowance_type_id') ? 'is-invalid' : '' }}">
                         <option value="" disabled selected>Please select allowance type</option>
@@ -77,14 +77,14 @@
                       </div>
                       @endif
                     </div>
-                  </div>
+             
                 </div>
               </div>
 
-              <div class="col-md-12">
-                <div class="row">
-                  <label class="col-md-2 col-form-label">{{ trans('panel.expenses_type.fields.name') }}<span class="text-danger"> *</span></label>
-                  <div class="col-md-10">
+              <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">{{ trans('panel.expenses_type.fields.name') }}<span class="text-danger"> *</span></label>
+                
                     <div class="form-group has-default bmd-form-group">
                       <input placeholder="Expenses type name" class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}" type="text" name="name" id="name" value="{{ old('name', '') }}" maxlength="200" required>
                       @if($errors->has('name'))
@@ -92,14 +92,14 @@
                         {{ $errors->first('name') }}
                       </div>
                       @endif
-                    </div>
+                   
                   </div>
                 </div>
               </div>
-              <div class="col-md-12">
-                <div class="row">
-                  <label class="col-md-2 col-form-label">{{ trans('panel.expenses_type.fields.rate') }}</label>
-                  <div class="col-md-10">
+              <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">{{ trans('panel.expenses_type.fields.rate') }}</label>
+                 
                     <div class="form-group has-default bmd-form-group">
                       <input class="form-control {{ $errors->has('rate') ? 'is-invalid' : '' }}" type="" name="rate" id="rate" value="{{ old('rate', '') }}" pattern="^\d*(\.\d{0,2})?$" placeholder="0.00">
                       @if($errors->has('display_name'))
@@ -108,11 +108,11 @@
                       </div>
                       @endif
                     </div>
-                  </div>
+          
                 </div>
               </div>
             </div>
-            <div class="card-footer pull-right">
+            <div class="pull-right">
               {{ Form::submit('Submit', array('class' => 'btn btn-theme')) }}
             </div>
             {{ Form::close() }}

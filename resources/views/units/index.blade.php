@@ -103,34 +103,32 @@
         @csrf
         <div class="row">
             <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.unit.fields.unit_name') !!} <span class="text-danger"> *</span></label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.unit.fields.unit_name') !!} <span class="text-danger"> *</span></label>
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="unit_name" id="unit_name" class="form-control" value="{!! old( 'unit_name') !!}" maxlength="200" required>
                       @if ($errors->has('unit_name'))
-                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('unit_name') }}</p></div>
+                        <div class="error"><p class="text-danger">{{ $errors->first('unit_name') }}</p></div>
                       @endif
                     </div>
-                  </div>
                 </div>
               </div>
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.unit.fields.unit_code') !!} <span class="text-danger"> *</span></label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.unit.fields.unit_code') !!} <span class="text-danger"> *</span></label>
+                
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="unit_code" id="unit_code" class="form-control" value="{!! old( 'unit_code') !!}" maxlength="200" required>
                       @if ($errors->has('unit_code'))
-                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('unit_code') }}</p></div>
+                        <div class="error"><p class="text-danger">{{ $errors->first('unit_code') }}</p></div>
                       @endif
                     </div>
-                  </div>
+                 
                 </div>
               </div>
           </div>
         <div class="clearfix"></div>
-        <div class="modal-footer">
+        <div class="pull-right">
           <input type="hidden" name="id" id="unit_id" />
           <button class="btn btn-info save"> Submit</button>
         </form>

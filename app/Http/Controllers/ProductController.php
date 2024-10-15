@@ -489,4 +489,18 @@ class ProductController extends Controller
         ob_start();
         return Excel::download(new BranchStockExport($request), 'stock.xlsx');
     }
+
+    public function dealer_product(Request $request)
+    {
+        $categories = Category::where('active', 'Y')->get();
+        
+        return view('products.dealer_product', compact('categories'));
+    }
+
+    public function dealer_product_list($id)
+    {
+        $products = Product::with('productpriceinfo')->where('category_id', $id)->get();
+
+        return view('products.dealer_product_list', compact('products'));
+    }
 }

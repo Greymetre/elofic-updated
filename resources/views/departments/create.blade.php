@@ -36,21 +36,19 @@
             ]) !!}
             <input type="hidden" name="id" id="subdivision_id" value="{!! $departments['id'] !!}">
             <div class="row">
-              <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.departments.title_singular') !!}<span class="text-danger"> *</span></label>
-                  <div class="col-md-9">
+              <div class="col-md-12">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.departments.title_singular') !!}<span class="text-danger"> *</span></label>
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="name" class="form-control" value="{!! old( 'name', $departments['name']) !!}" maxlength="200" required>
                       @if ($errors->has('name'))
-                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('name') }}</p></div>
+                        <div class="error"><p class="text-danger">{{ $errors->first('name') }}</p></div>
                       @endif
-                    </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="card-footer pull-right">
+            <div class="pull-right">
                {{ Form::submit('Submit', array('class' => 'btn btn-theme')) }}
             </div>
             {{ Form::close() }} 

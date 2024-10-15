@@ -99,22 +99,22 @@
         @csrf
         <div class="row">
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-4 col-form-label">{!! trans('panel.pincode.pincode') !!} <span class="text-danger"> *</span></label>
-                <div class="col-md-8">
+              <div class="input_section">
+                <label class="col-form-label">{!! trans('panel.pincode.pincode') !!} <span class="text-danger"> *</span></label>
+               
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="pincode" id="pincode" class="form-control" value="{!! old( 'pincode') !!}" maxlength="200" required>
                     @if ($errors->has('pincode'))
-                      <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('pincode') }}</p></div>
+                      <div class="error"><p class="text-danger">{{ $errors->first('pincode') }}</p></div>
                     @endif
                   </div>
-                </div>
+                
               </div>
             </div>
           <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">{!! trans('panel.pincode.city') !!}<span class="text-danger"> *</span></label>
-                <div class="col-md-9">
+              <div class="input_section">
+                <label class="col-form-label">{!! trans('panel.pincode.city') !!}<span class="text-danger"> *</span></label>
+               
                   <div class="form-group has-default bmd-form-group">
                   <input list="browsers" name="city_id" id="browser" class="form-control">
                   <datalist id="browsers">
@@ -134,21 +134,22 @@
                      </select> -->
                   </div>
                   @if ($errors->has('country_id'))
-                   <div class="error col-lg-12">
+                   <div class="error">
                       <p class="text-danger">{{ $errors->first('country_id') }}</p>
                    </div>
                   @endif
-                </div>
+               
               </div>
             </div>
+             </div>
         <div class="clearfix"></div>
-        <div class="modal-footer">
+        <div class="pull-right">
           <input type="hidden" name="id" id="pincode_id" />
           <button class="btn btn-info save"> Submit</button>
         </form>
         </div>
       </div>
-    </div>
+   
   </div>
 <script src="{{ url('/').'/'.asset('assets/js/jquery.custom.js') }}"></script>
 <script src="{{ url('/').'/'.asset('assets/js/validation_address.js') }}"></script>
