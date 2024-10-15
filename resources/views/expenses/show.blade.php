@@ -415,7 +415,7 @@
                     </div>
                   </div>
                 </div>
-                <button type="submit" class="btn btn-info save-rjc">Reject</button>
+                <button type="buuton" class="btn btn-info save-rjc" onclick="disableButtonreject()" >Reject</button>
               </form>
             </div>
           </div>
@@ -460,7 +460,7 @@
 
                   </div>
                 </div>
-                <input type="submit" class="btn btn-info save-apr" onclick="disableButton()" value="Approve">
+                <input type="button" class="btn btn-info save-apr" onclick="disableButton()" value="Approve">
               </form>
             </div>
           </div>

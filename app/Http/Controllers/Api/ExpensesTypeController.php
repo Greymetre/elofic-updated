@@ -428,7 +428,9 @@ class ExpensesTypeController extends Controller
 
             $all_status = [['id' => '0', 'name' => 'Pending'], ['id' => '1', 'name' => 'Approved'], ['id' => '2', 'name' => 'Rejected'], ['id' => '3', 'name' => 'Checked'] ,['id' => '4', 'name' => 'Checked By Reporting']];
             $datas = array();
-            $all_user_branches = User::with('getbranch')->whereIn('id', getUsersReportingToAuth($user_id))->orderBy('branch_id')->get();
+            $all_user_branches = User::with('getbranch')->whereDoesntHave('roles', function ($query) {
+                $query->where('id', 29);
+            })->whereIn('id', getUsersReportingToAuth($user_id))->orderBy('branch_id')->get();
             $branches = array();
             $all_branch = array();
             $bkey = 0;
@@ -443,7 +445,9 @@ class ExpensesTypeController extends Controller
                 }
             }
 
-            $all_user_details = User::with('getbranch')->whereIn('id', $userids)->orderBy('branch_id')->get();
+            $all_user_details = User::with('getbranch')->whereDoesntHave('roles', function ($query) {
+                $query->where('id', 29);
+            })->whereIn('id', $userids)->orderBy('name', 'asc')->get();
             $all_users = array();
             foreach ($all_user_details as $k => $val) {
                 $all_users[$k]['id'] = $val->id;

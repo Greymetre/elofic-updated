@@ -91,7 +91,9 @@ class OrderController extends Controller
             // dd($request->all());
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
             $data = collect([]);
-            $users = User::where('active', 'Y')->whereIn('id',$user_ids)->select('id', 'name')->get();
+            $users = User::whereDoesntHave('roles', function ($query) {
+                $query->where('id', 29);
+            })->where('active', 'Y')->whereIn('id',$user_ids)->select('id', 'name')->orderBy('name', 'asc')->get();
             $all_status = [['id' => '0', 'name' => 'Pending'], ['id' => '1', 'name' => 'Dispatched'], ['id' => '2', 'name' => 'Partially Dispatched'], ['id' => '3', 'name' => 'Full Dispatch'] ,['id' => '4', 'name' => 'Cancel'] ];
             if ($db_data->isNotEmpty()) {
                 foreach ($db_data as $key => $value) {
@@ -494,7 +496,9 @@ class OrderController extends Controller
                 $query->where('discount_status', $selectedstatus_id);
             }
             $all_status = [['id' => '0', 'name' => 'Pending'], ['id' => '1', 'name' => 'Approved'], ['id' => '2', 'name' => 'Reject']];
-            $users = User::where('active', 'Y')->whereIn('id',$user_ids)->select('id', 'name')->get();
+            $users = User::whereDoesntHave('roles', function ($query) {
+                $query->where('id', 29);
+            })->where('active', 'Y')->whereIn('id',$user_ids)->select('id', 'name')->orderBy('name', 'asc')->get();
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
             $data = collect([]);
             if ($db_data->isNotEmpty()) {
@@ -563,7 +567,9 @@ class OrderController extends Controller
                 $query->where('discount_status', $selectedstatus_id);
             }
             $all_status = [['id' => '0', 'name' => 'Pending'], ['id' => '1', 'name' => 'Approved'], ['id' => '2', 'name' => 'Reject']];
-            $users = User::where('active', 'Y')->whereIn('id',$user_ids)->select('id', 'name')->get();
+            $users = User::whereDoesntHave('roles', function ($query) {
+                $query->where('id', 29);
+            })->where('active', 'Y')->whereIn('id',$user_ids)->select('id', 'name')->orderBy('name', 'asc')->get();
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
             $data = collect([]);
             if ($db_data->isNotEmpty()) {

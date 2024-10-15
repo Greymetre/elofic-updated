@@ -423,7 +423,6 @@ function disableButton() {
 
 $('body').on('click', '.reject_status', function () {
     var id = $('#expenseid').val();
-    console.log(id);
     var token = $("meta[name='csrf-token']").attr("content");
     $('#reject_expense_id').val(id);
     $("#reject_expense").modal();
@@ -452,7 +451,6 @@ function disableButtonreject() {
                 $('#reject_expense').modal('hide');
                 $('#expenseModal').modal('hide');
                 oTable.draw();
-
             } else {
                 $('.alert').addClass("alert-danger");
                 // setTimeout(function() {

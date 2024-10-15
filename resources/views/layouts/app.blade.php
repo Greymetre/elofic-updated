@@ -326,6 +326,14 @@
                   </a>
                 </li>
                 @endif
+                @if(auth()->user()->can('primary_scheme'))
+                <li class="nav-item {{ request()->is('primary_scheme') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ url('primary_scheme') }}">
+                    <i class="material-icons">holiday_village</i>
+                    <p> Primary Scheme</p>
+                  </a>
+                </li>
+                @endif
               </ul>
             </div>
           </li>

@@ -121,7 +121,7 @@
             <span class="message"></span>
           </div>
           <div class="table-responsive">
-            <table id="getorder" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
+            <table id="getorder" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
               <thead class=" text-primary">
                 <th>{!! trans('panel.global.no') !!}</th>
                 <th>{!! trans('panel.global.action') !!}</th>

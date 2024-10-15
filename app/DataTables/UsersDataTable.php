@@ -24,15 +24,23 @@ class UsersDataTable extends DataTable
             ->editColumn('created_at', function ($data) {
                 return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
             })
+            ->editColumn('getBranchNames', function ($data) {
+                $branchIds = array_filter(explode(',', $data->branch_id)); // Remove empty values
+                if (!empty($branchIds)) {
+                    return \App\Models\Branch::whereIn('id', $branchIds)->pluck('branch_name')->implode(', ');
+                } else {
+                    return "-";
+                }
+            })
             ->addColumn('action', function ($query) {
                 $btn = '';
                 $activebtn = '';
                 if (auth()->user()->can(['user_edit'])) {
-                    if($query->roles()->where('id', '29')->exists()){
-                        $btn = $btn . '<a href="' . url("customer-user?id=" . encrypt($query->id) ) . '" class="btn btn-info btn-just-icon btn-sm edit" id="' . encrypt($query->id) . '" title="' . trans('panel.global.edit') . ' ' . trans('panel.user.title_singular') . '">
+                    if ($query->roles()->where('id', '29')->exists()) {
+                        $btn = $btn . '<a href="' . url("customer-user?id=" . encrypt($query->id)) . '" class="btn btn-info btn-just-icon btn-sm edit" id="' . encrypt($query->id) . '" title="' . trans('panel.global.edit') . ' ' . trans('panel.user.title_singular') . '">
                               <i class="material-icons">edit</i>
                             </a>';
-                    }else{
+                    } else {
                         $btn = $btn . '<a href="' . url("users/" . encrypt($query->id) . '/edit') . '" class="btn btn-info btn-just-icon btn-sm edit" id="' . encrypt($query->id) . '" title="' . trans('panel.global.edit') . ' ' . trans('panel.user.title_singular') . '">
                               <i class="material-icons">edit</i>
                             </a>';
@@ -85,7 +93,7 @@ class UsersDataTable extends DataTable
                 }
                 return $roles;
             })
-            ->rawColumns(['action', 'image', 'active', 'roles']);
+            ->rawColumns(['action', 'image', 'active', 'roles', 'getBranchNames']);
     }
 
     /**
@@ -104,9 +112,9 @@ class UsersDataTable extends DataTable
                 }
             })
             ->whereHas('roles', function ($query) use ($request) {
-                if($request->user_type == 'customer'){
+                if ($request->user_type == 'customer') {
                     $query->where('id', ['29']);
-                }else{
+                } else {
                     $query->whereNot('id', ['29']);
                 }
             })

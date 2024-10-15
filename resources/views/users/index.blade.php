@@ -156,8 +156,8 @@
             searchable: false
           },
           {
-            data: 'getbranch.branch_name',
-            name: 'getbranch.branch_name',
+            data: 'getBranchNames',
+            name: 'getBranchNames',
             "defaultContent": '',
             orderable: false,
             searchable: false

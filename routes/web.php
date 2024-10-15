@@ -74,6 +74,7 @@ use App\Http\Controllers\NewJoiningController;
 use App\Http\Controllers\ServiceBillController;
 use App\Http\Controllers\ServiceChargeProductsController;
 use App\Http\Controllers\FieldKonnectAppSettings;
+use App\Http\Controllers\PrimarySchemeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -417,6 +418,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('order-dispatched/{id}', [OrderController::class, 'orderDispatched'])->name('orders.dispatched');
     Route::any('order-partially-dispatched/{id}', [OrderController::class, 'orderPartiallyDispatched'])->name('orders.partiallydispatched');
     Route::any('order-cancle/{id}', [OrderController::class, 'orderCancle'])->name('orders.orderCancle');
+    Route::any('order-pendding/{id}', [OrderController::class, 'orderPendding'])->name('orders.orderPendding');
     Route::post('submit-dispatched', [OrderController::class, 'submitDispatched'])->name('orders.submitdispatched');
     Route::any('order-detail-delete', [OrderController::class, 'deleteOrderDtails'])->name('orders.deletedetails');
 
@@ -716,6 +718,12 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('orderschemes-active', [OrderSchemeController::class, 'active'])->name('orderschemes.active');
     Route::any('orderschemes-template', [OrderSchemeController::class, 'template'])->name('orderschemes.template');
     Route::any('orderschemes-download', [OrderSchemeController::class, 'download'])->name('orderschemes.download');
+
+    //primary scheme
+    Route::resource('primary_scheme', PrimarySchemeController::class);
+    Route::post('primary_scheme-active', [PrimarySchemeController::class, 'active'])->name('primary_scheme.active');
+    Route::any('primary_scheme-template', [PrimarySchemeController::class, 'template'])->name('primary_scheme.template');
+    Route::any('primary_scheme-download', [PrimarySchemeController::class, 'download'])->name('primary_scheme.download');
 
 
 

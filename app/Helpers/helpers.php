@@ -20,6 +20,7 @@ use App\Models\SalesDetails;
 use App\Models\Settings;
 use App\Models\SchemeHeader;
 use App\Models\Coupons;
+use App\Models\Holiday;
 use App\Models\Payment;
 use Illuminate\Support\Str;  
 
@@ -380,9 +381,7 @@ if (! function_exists('getUsersReportingToAuth')) {
     function getUsersReportingToAuth($userid = '')
     {
         $userid = !empty($userid) ? $userid : Auth::user()->id;
-        $userinfo = User::whereDoesntHave('roles', function ($query) {
-            $query->where('id', 29);
-        })->where('id','=',$userid)->first();
+        $userinfo = User::where('id','=',$userid)->first();
 
         $all_users = User::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
@@ -850,4 +849,19 @@ function generatePassword($length = 10) {
     $password = str_shuffle($letters . $digits); // Mix them together
 
     return $password;
+}
+
+function getHolidayData($branchIds)
+{
+    return Holiday::whereIn('branch', $branchIds)->get()->groupBy('branch');
+}
+
+// Check if the date is a holiday for a specific branch
+function isHoliday($checkDate, $branchId, $holidayData)
+{
+    if (isset($holidayData[$branchId])) {
+        $holidays = explode(',', $holidayData[$branchId]->pluck('holiday_date')->first());
+        return in_array($checkDate, $holidays);
+    }
+    return false;
 }

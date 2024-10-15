@@ -30,6 +30,8 @@ use App\Mail\OrderMailWithAttachment;
 use App\Models\Category;
 use App\Models\CustomerType;
 use App\Models\Division;
+use App\Models\Sales;
+use App\Models\SalesDetails;
 // use App\Models\Customers;
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -697,7 +699,7 @@ class OrderController extends Controller
     public function orderPartiallyDispatched($orderid)
     {
         $orderid = decrypt($orderid);
-        $orders = $this->orders->with('orderdetails')->find($orderid);
+        $orders = $this->orders->find($orderid);
         $category = Category::where('active', 'Y')->get();
         return view('orders.dispatched', compact('category'))->with('orders', $orders);
     }
@@ -711,6 +713,24 @@ class OrderController extends Controller
             $orders->order_remark = $request->remark;
             $orders->save();
             return response()->json(['status' => 'success', 'message' => 'Order cancle successfully !!']);
+        } else {
+            return response()->json(['status' => 'error', 'message' => 'Order not found !!']);
+        }
+    }
+
+    public function orderPendding($orderid, Request $request)
+    {
+        $orderid = decrypt($orderid);
+        $orders = $this->orders->find($orderid);
+        if ($orders) {
+            $orders->status_id = NULL;
+            // $orders->order_remark = $request->remark;
+            $orders->save();
+            OrderDetails::where('order_id', $orderid)->update(['shipped_qty'=>'0']);
+            $sales = Sales::where('order_id', $orderid)->first();
+            SalesDetails::where('sales_id', $sales->id)->delete();
+            $sales->delete();
+            return response()->json(['status' => 'success', 'message' => 'Order pendding successfully !!']);
         } else {
             return response()->json(['status' => 'error', 'message' => 'Order not found !!']);
         }

@@ -79,8 +79,29 @@ class SalesTargetUsersController extends Controller
 
     public function sales_target_users_list(Request $request)
     {
-        $userIds = getUsersReportingToAuth();
-        $query = SalesTargetUsers::with(['user', 'branch', 'user.getdesignation'])->whereIn('user_id', $userIds)->where(function ($query) use ($request) {
+        $userid = auth()->user()->id;
+        $all_users = User::whereDoesntHave('roles', function ($query) {
+            $query->where('id', 29);
+        })->get();
+        if(!auth()->user()->hasRole('superadmin') && !auth()->user()->hasRole('Admin') && !auth()->user()->hasRole('Sub_Admin') && !auth()->user()->hasRole('HR_Admin') && !auth()->user()->hasRole('HO_Account')  && !auth()->user()->hasRole('Sub_Support') && !auth()->user()->hasRole('Accounts Order') && !auth()->user()->hasRole('Service Admin') && !auth()->user()->hasRole('All Customers') && !auth()->user()->hasRole('Sub billing') && !auth()->user()->hasRole('Sales Admin'))
+        {
+            $all_ids_array = array($userid);
+            $test = getAllChild(array($userid), $all_users);
+            while(count($test) > 0){
+                $all_ids_array = array_merge($all_ids_array, $test);
+                $test = getAllChild($test, $all_users);
+            }
+        }elseif(auth()->user()->hasRole('Accounts Order')){
+            $all_ids_array = User::where('active' , 'Y')->whereIn('branch_id', explode(',', auth()->user()->branch_show))->pluck('id')->toArray();
+            $test = getAllChild(array($userid), $all_users);
+            while(count($test) > 0){
+                $all_ids_array = array_merge($all_ids_array, $test);
+                $test = getAllChild($test, $all_users);
+            }
+        }else{
+            $all_ids_array = User::pluck('id')->toArray();
+        }
+        $query = SalesTargetUsers::with(['user', 'branch', 'user.getdesignation'])->whereIn('user_id', $all_ids_array)->where(function ($query) use ($request) {
 
             if ($request->month && $request->month != '' && $request->month != null) {
                 $query->where('month', $request->month);

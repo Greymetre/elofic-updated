@@ -98,13 +98,17 @@ class ExpensesController extends Controller
 
         if (Auth::user()->hasRole('superadmin') || Auth::user()->hasRole('Admin') || Auth::user()->hasRole('Sub_Admin') || Auth::user()->hasRole('HR_Admin') || Auth::user()->hasRole('HO_Account')) {
 
-            $users = User::where('active', '=', 'Y')->where(function ($query) use ($userids) {
+            $users = User::whereDoesntHave('roles', function ($query) {
+                $query->where('id', 29);
+            })->where('active', '=', 'Y')->where(function ($query) use ($userids) {
                 if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('Sub_Admin') && !Auth::user()->hasRole('HR_Admin') && !Auth::user()->hasRole('HO_Account')) {
                     $query->whereIn('id', $userids);
                 }
             })->select('id', 'name')->get();
         } else {
-            $users = User::where('active', '=', 'Y')->where('id', Auth::user()->id)->select('id', 'name')->get();
+            $users = User::whereDoesntHave('roles', function ($query) {
+                $query->where('id', 29);
+            })->where('active', '=', 'Y')->where('id', Auth::user()->id)->select('id', 'name')->get();
         }
 
         $expensestypes = ExpensesType::get();
@@ -627,7 +631,7 @@ class ExpensesController extends Controller
                 );
                 ExpenseLog::create($logdata);
             }
-            return response()->json(['status' => 'success', 'message' => 'Expense reject successfully']);
+            return response()->json(['status' => 'success', 'message' => 'Expense reject successfully.']);
             // return redirect(route('expenses.show', ["expense" => $expense_id]))->with('danger', 'Expense rejected');
         } else {
             return response()->json(['status' => 'error', 'message' => 'Please add reason if you want reject the expens.']);

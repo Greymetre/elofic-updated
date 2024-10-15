@@ -5,7 +5,6 @@
       </h2>
    </x-slot>
    @if(auth()->user()->hasRole('Customer Dealer'))
-   @if($dealer_poster_setting->slider == 'Y')
    <div class="nav-wrapper position-relative end-0">
       <ul class="nav nav-pills nav-pills-warning nav-pills-icons justify-content-center" id="tabs" role="tablist">
          <li class="nav-item">
@@ -22,6 +21,7 @@
    </div>
    <div class="tab-content tab-space tab-subcategories">
       <div class="tab-pane active show" id="sliderTab">
+         @if($dealer_poster_setting->slider == 'Y')
          <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
             <ol class="carousel-indicators">
                @if($dealer_poster_setting->exists && $dealer_poster_setting->getMedia('dealer_portal_slider_image')->count() > 0 && Storage::disk('s3')->exists($dealer_poster_setting->getMedia('dealer_portal_slider_image')[0]->getPath()))
@@ -1682,7 +1682,6 @@
          </div>
       </div>
    </div>
-   @endif
    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 
@@ -3834,4 +3833,5 @@
 
       ////////////////// sarthi graph scripts end ///////////////////
    </script>
+   @endif
 </x-app-layout>

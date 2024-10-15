@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Models\ParentDetail;
 use App\Models\PrimarySales;
 use App\Models\User;
 use Carbon\Carbon;
@@ -13,6 +14,7 @@ use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Illuminate\Support\Facades\Auth;
 use DB;
+use Spatie\Permission\Models\Role;
 
 class PrimarySalesExport implements FromCollection, WithHeadings,WithMapping, ShouldAutoSize, WithEvents
 {
@@ -44,6 +46,14 @@ class PrimarySalesExport implements FromCollection, WithHeadings,WithMapping, Sh
 
         if ($this->branch_id && $this->branch_id != '' && $this->branch_id != null) {
             $query->where('final_branch', $this->branch_id);
+        }
+
+        $role = Role::find(29);
+        if ($role && auth()->user()->hasRole($role->name)) {
+            $child_customer = ParentDetail::where('parent_id', auth()->user()->customerid)
+                ->pluck('customer_id')
+                ->push(auth()->user()->customerid);
+            $query->whereIn('customer_id', $child_customer);
         }
 
         if ($this->division_id && $this->division_id != '' && count($this->division_id) > 0) {

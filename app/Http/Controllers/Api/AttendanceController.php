@@ -350,7 +350,9 @@ class AttendanceController extends Controller
 
             $all_punch_in_out = (!empty($pageSize)) ? $all_punch_in_out->paginate($pageSize) : $all_punch_in_out->paginate(100);
 
-            $all_user_details = User::with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
+            $all_user_details = User::with('getbranch')->whereDoesntHave('roles', function ($query) {
+                $query->where('id', 29);
+            })->whereIn('id', $all_reporting_user_ids)->orderBy('name', 'asc')->get();
             $all_users= array();
             foreach ($all_user_details as $k => $val) {
                 $all_users[$k]['id'] = $val->id;

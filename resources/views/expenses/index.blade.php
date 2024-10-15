@@ -236,6 +236,11 @@
      function resetFilter() {
        localStorage.setItem("is_reset", '1');
        localStorage.setItem("executive_id", '');
+       localStorage.setItem("start_date", '');
+       localStorage.setItem("end_date", '');
+       localStorage.setItem("status", '');
+       localStorage.setItem("expense_id", '');
+       localStorage.setItem("division_id", '');
        fetch(removeSessionUrl, {
          method: 'POST',
          headers: {

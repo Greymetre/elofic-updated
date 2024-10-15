@@ -37,7 +37,9 @@ class ReportingActivityController extends Controller
             $all_reporting_user_ids = getUsersReportingToAuth($user_id);
         }
 
-        $all_user_branches = User::with('getbranch')->whereIn('id', getUsersReportingToAuth($user_id))->orderBy('branch_id')->get();
+        $all_user_branches = User::with('getbranch')->whereDoesntHave('roles', function ($query) {
+            $query->where('id', 29);
+        })->whereIn('id', getUsersReportingToAuth($user_id))->orderBy('branch_id')->get();
         $branches= array();
         $all_branch= array();
         $bkey = 0;
@@ -51,6 +53,10 @@ class ReportingActivityController extends Controller
                 }
             }
         }
+
+        usort($branches, function ($a, $b) {
+            return strcmp($a['name'], $b['name']);
+        });
 
         if($search_branches && count($search_branches) > 0 && $search_branches[0] != null){
             $all_reporting_user_ids = User::whereIn('id', $all_reporting_user_ids)->whereIn('branch_id', $search_branches)->pluck('id')->toArray();
@@ -70,7 +76,9 @@ class ReportingActivityController extends Controller
         
         $date_checkIn = (!empty($pageSize)) ? $date_checkIn->paginate($pageSize) : $date_checkIn->paginate(100);
         
-        $all_user_details = User::with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
+        $all_user_details = User::with('getbranch')->whereDoesntHave('roles', function ($query) {
+            $query->where('id', 29);
+        })->whereIn('id', $all_reporting_user_ids)->orderBy('name', 'asc')->get();
         $all_users= array();
         foreach ($all_user_details as $k => $val) {
             $all_users[$k]['id'] = $val->id;
