@@ -1007,6 +1007,7 @@
                      <a class="hoveradd" href="{{ url('dealer_product') }}">
                         <i class="material-icons icon">flaky</i>
                         <span>{!! trans('panel.sidemenu.product_master') !!}</span>
+                        <div class="d-none mobile_hide">{!! trans('panel.sidemenu.product_master') !!}</div>
                      </a>
                   </li>
                   @endif
@@ -1047,10 +1048,11 @@
                            </li>
                            @endif
                            @if(auth()->user()->can('primary_scheme'))
-                           <li class="nav-item {{ request()->is('primary_scheme') ? 'active' : '' }}">
-                              <a class="nav-link" href="{{ url('primary_scheme') }}">
-                                 <i class="material-icons">holiday_village</i>
-                                 <p> Primary Scheme</p>
+                           <li class="nav-item-btn {{ request()->is('primary_scheme') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('primary_scheme') }}">
+                                 <i class="material-icons icon">holiday_village</i>
+                                 <span> Primary Scheme</span>
+                                 <div class="d-none mobile_hide"> Primary Scheme</div>
                               </a>
                            </li>
                            @endif

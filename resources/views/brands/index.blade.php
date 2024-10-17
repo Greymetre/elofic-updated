@@ -102,7 +102,7 @@
       <div class="modal-body">
         {!! Form::open(['route' => 'brands.store','id' => 'createBrandForm','files'=>true ]) !!}
         <div class="row">
-          <div class="col-md-8">
+          <div class="col-md-9">
             <div class="input_section">
               <label class="col-form-label">{!! trans('panel.brand.fields.brand_name') !!} <span class="text-danger"> *</span></label>
                 <div class="form-group has-default bmd-form-group">

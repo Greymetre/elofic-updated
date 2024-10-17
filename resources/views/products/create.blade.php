@@ -433,9 +433,12 @@
                        <input type="text" name="detail[1][detail_description]" class="form-control"/>
                      </td> -->
                   <td>
+                    <div class="input_section">
                     <input type="number" name="detail[1][mrp]" class="form-control" step="0.00" min="0" />
+                  </div>
                   </td>
-                  <td><input type="number" readonly name="detail[1][price]" class="form-control" step="0.00" min="0" /></td>
+                  <td>
+                    <div class="input_section"><input type="number" readonly name="detail[1][price]" class="form-control" step="0.00" min="0" /></div></td>
                   <!--                      <td>
                         <input type="number" name="detail[1][selling_price]" class="form-control discount rowchange" step="0.00" min="0" />
                      </td>
@@ -489,10 +492,11 @@
                 </tr>
               </table>
              </div> -->
-        </div>
-        <div class="">
+              <div class="pull-right col-md-12">
           {{ Form::submit('Submit', array('class' => 'btn btn-theme pull-right')) }}
         </div>
+        </div>
+       
         {{ Form::close() }}
       </div>
     </div>

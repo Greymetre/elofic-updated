@@ -307,11 +307,11 @@
               
                <div class="row clearfix earnscheme">
                   <div class="col-md-12">
-                     <span class="pull-right">
+                     <span class="mt-2" style="float: right;">
                         <span style="background: linear-gradient(45deg, #3860a4 0%, #3694cc 100%);color: #fff;padding: 5px;border-radius: 5px;font-weight: 500;">*Import product in this scheme please check first template</span>
                         <div class="d-flex flex-row-reverse">
                            <div class="">
-                              <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                              <div class="fileinput fileinput-new text-center d-flex flex-row-reverse" data-provides="fileinput">
                                  <span class="btn btn-just-icon btn-theme btn-file">
                                     <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
                                     <span class="fileinput-exists">Change</span>

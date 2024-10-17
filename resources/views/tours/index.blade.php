@@ -213,7 +213,7 @@
               </div>
           </div>
         <div class="clearfix"></div>
-        <div class="modal-footer">
+        <div class="pull-right">
           <input type="hidden" name="id" id="tour_id" />
           <button class="btn btn-info save"> Submit</button>
         </form>

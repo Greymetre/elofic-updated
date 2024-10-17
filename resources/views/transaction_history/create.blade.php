@@ -111,7 +111,7 @@
            '<input type="text" name="coupon_code[]" id="coupon_code" class="form-control copen_codes" required>' +
             '</div> </div>' +
             '<div class="col-md-1">' +
-            '<a class="remove-rows btn btn-danger btn-just-icon btn-sm"><i class="fa fa-minus"></i></a>' +
+            '<div class="input_Section">' + '<label for="coupon_code" class="col-form-label"></label>' + '<a class="remove-rows btn btn-danger btn-just-icon btn-sm"><i class="fa fa-minus"></i></a>' + '<div>' +
             '</div>' +
             '</div>';
 

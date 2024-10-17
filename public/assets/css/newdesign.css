@@ -486,7 +486,7 @@ div#kyc {
     border-radius: 10px;
     padding: 20px 20px;
     box-shadow: 0px 0px 10px 10px lightgray;
-    min-height: 510px !important;
+    min-height: 609px !important;
     background-color: #fff !important;
 }
 
@@ -1321,4 +1321,16 @@ table#tab_logic tbody tr td.td-actions.text-center {
     display: revert-layer;
     vertical-align: middle;
     /* align-items: center; */
+}
+
+
+form#new_dealer_appoint_form {
+    border: 1px solid gray;
+    padding: 11px 20px;
+    border-radius: 10px;
+}
+
+span.week_data {
+    color: gray;
+    padding: 0 4px;
 }

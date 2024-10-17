@@ -497,10 +497,11 @@ class ProductController extends Controller
         return view('products.dealer_product', compact('categories'));
     }
 
-    public function dealer_product_list($id)
+    public function dealer_product_list($category_id)
     {
-        $products = Product::with('productpriceinfo')->where('category_id', $id)->get();
+        $products = Product::with('productpriceinfo')->where('category_id', $category_id)->get();
+        $categories = Category::where('active', 'Y')->get();
 
-        return view('products.dealer_product_list', compact('products'));
+        return view('products.dealer_product_list', compact('products', 'category_id', 'categories'));
     }
 }
