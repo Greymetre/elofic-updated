@@ -30,6 +30,7 @@ class PrimarySalesTemplate implements FromCollection,WithHeadings,ShouldAutoSize
             'City',
             'State',
             'Final Branch',
+            'Branch ID',
             'Sales person',
             'Emp Code',
             'Model Name',
