@@ -158,6 +158,9 @@ class SalesTargetUsersExport implements FromCollection, WithHeadings, ShouldAuto
         }
 
         $headings[] = 'Total';
+        $headings[] = '';
+        $headings[] = '';
+        $headings[] = 'User Active';
 
         $sub_headings = ['', '', '', '', '', '', '', '', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%'];
 
@@ -195,7 +198,7 @@ class SalesTargetUsersExport implements FromCollection, WithHeadings, ShouldAuto
                     $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
                     $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
 
-                    $response[9] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
+                    $response[9] = number_format(($data->user->primarySales->where('branch_id', $data['branch_id'])->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
                 } else {
                     $response[9] = $data['achievements'][$key] ?? '';
                 }
@@ -227,7 +230,7 @@ class SalesTargetUsersExport implements FromCollection, WithHeadings, ShouldAuto
                     $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
                     $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
 
-                    $response[12] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
+                    $response[12] = number_format(($data->user->primarySales->where('branch_id', $data['branch_id'])->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
                 } else {
                     $response[12] = $data['achievements'][$key] ?? '';
                 }
@@ -259,7 +262,7 @@ class SalesTargetUsersExport implements FromCollection, WithHeadings, ShouldAuto
                     $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
                     $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
 
-                    $response[15] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
+                    $response[15] = number_format(($data->user->primarySales->where('branch_id', $data['branch_id'])->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
                 } else {
                     $response[15] = $data['achievements'][$key] ?? '';
                 }
@@ -295,7 +298,7 @@ class SalesTargetUsersExport implements FromCollection, WithHeadings, ShouldAuto
                     $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
                     $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
 
-                    $response[21] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
+                    $response[21] = number_format(($data->user->primarySales->where('branch_id', $data['branch_id'])->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
                 } else {
                     $response[21] = $data['achievements'][$key] ?? '';
                 }
@@ -304,7 +307,7 @@ class SalesTargetUsersExport implements FromCollection, WithHeadings, ShouldAuto
                 } else {
                     $achievementPercent = '';
                 }
-                $response[21] = $achievementPercent;
+                $response[22] = $achievementPercent;
             } else {
                 if (!isset($response[20])) {
                     $response[20] = '';
@@ -327,7 +330,7 @@ class SalesTargetUsersExport implements FromCollection, WithHeadings, ShouldAuto
                     $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
                     $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
 
-                    $response[24] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
+                    $response[24] = number_format(($data->user->primarySales->where('branch_id', $data['branch_id'])->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
                 } else {
                     $response[24] = $data['achievements'][$key] ?? '';
                 }
@@ -359,7 +362,7 @@ class SalesTargetUsersExport implements FromCollection, WithHeadings, ShouldAuto
                     $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
                     $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
 
-                    $response[27] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
+                    $response[27] = number_format(($data->user->primarySales->where('branch_id', $data['branch_id'])->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
                 } else {
                     $response[27] = $data['achievements'][$key] ?? '';
                 }
@@ -396,7 +399,7 @@ class SalesTargetUsersExport implements FromCollection, WithHeadings, ShouldAuto
                     $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
                     $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
 
-                    $response[33] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
+                    $response[33] = number_format(($data->user->primarySales->where('branch_id', $data['branch_id'])->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
                 } else {
                     $response[33] = $data['achievements'][$key] ?? '';
                 }
@@ -428,7 +431,7 @@ class SalesTargetUsersExport implements FromCollection, WithHeadings, ShouldAuto
                     $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
                     $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
 
-                    $response[36] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
+                    $response[36] = number_format(($data->user->primarySales->where('branch_id', $data['branch_id'])->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
                 } else {
                     $response[36] = $data['achievements'][$key] ?? '';
                 }
@@ -460,7 +463,7 @@ class SalesTargetUsersExport implements FromCollection, WithHeadings, ShouldAuto
                     $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
                     $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
 
-                    $response[39] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
+                    $response[39] = number_format(($data->user->primarySales->where('branch_id', $data['branch_id'])->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
                 } else {
                     $response[39] = $data['achievements'][$key] ?? '';
                 }
@@ -496,7 +499,7 @@ class SalesTargetUsersExport implements FromCollection, WithHeadings, ShouldAuto
                     $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
                     $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
 
-                    $response[45] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
+                    $response[45] = number_format(($data->user->primarySales->where('branch_id', $data['branch_id'])->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
                 } else {
                     $response[45] = $data['achievements'][$key] ?? '';
                 }
@@ -528,7 +531,7 @@ class SalesTargetUsersExport implements FromCollection, WithHeadings, ShouldAuto
                     $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
                     $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
 
-                    $response[48] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
+                    $response[48] = number_format(($data->user->primarySales->where('branch_id', $data['branch_id'])->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
                 } else {
                     $response[48] = $data['achievements'][$key] ?? '';
                 }
@@ -560,7 +563,7 @@ class SalesTargetUsersExport implements FromCollection, WithHeadings, ShouldAuto
                     $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
                     $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
 
-                    $response[51] = number_format(($data->user->primarySales->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
+                    $response[51] = number_format(($data->user->primarySales->where('branch_id', $data['branch_id'])->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
                 } else {
                     $response[51] = $data['achievements'][$key] ?? '';
                 }
@@ -590,6 +593,7 @@ class SalesTargetUsersExport implements FromCollection, WithHeadings, ShouldAuto
         $response[57] = '=R' . $this->rowIndex . ' + AD' . $this->rowIndex . ' + AP' . $this->rowIndex . ' + BB' . $this->rowIndex;
         $response[56] = '=S' . $this->rowIndex . ' + AE' . $this->rowIndex . ' + AQ' . $this->rowIndex . ' + BC' . $this->rowIndex;
         $response[58] = '=ROUND((T' . $this->rowIndex . ' + AF' . $this->rowIndex . ' + AR' . $this->rowIndex . ' + BD' . $this->rowIndex . ') / 4,2)';
+        $response[59] = $data['user']['active'] ?? '';
 
         $this->rowIndex++;
         return $response;
