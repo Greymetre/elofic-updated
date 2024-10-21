@@ -210,8 +210,8 @@ class ProductController extends Controller
      */
     public function update(ProductRequest $request, $id)
     {
-        try
-        { 
+        // try
+        // { 
             abort_if(Gate::denies('product_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
             $validator = Validator::make($request->all(), [
                 'product_code' => 'unique:products,product_code,'.decrypt($id),
@@ -258,16 +258,16 @@ class ProductController extends Controller
                     // dd($request);
                     // ProductDetails::whereNotIn('id',$detailsids)->delete();
                     foreach ($request['detail'] as $key => $rows) {
-                        $price = $rows['mrp'];
-                        // if(!empty($rows['mrp'])){
-                        //     $price = $rows['mrp'];
-                        //     if(!empty($request['gst']) && $request['gst'] > 0){
-                        //         $price = ($rows['mrp']+(($rows['mrp']*$request['gst'])/100));
-                        //     }
-                        //     if(!empty($request['discount']) && $request['discount'] > 0){
-                        //         $price = ($price-(($rows['mrp']*$request['discount'])/100));
-                        //     }
-                        // }
+                        // $price = $rows['mrp'];
+                        if(!empty($rows['mrp'])){
+                            $price = $rows['mrp'];
+                            if(!empty($request['gst']) && $request['gst'] > 0){
+                                $price = ($rows['mrp']+(($rows['mrp']*$request['gst'])/100));
+                            }
+                            if(!empty($request['discount']) && $request['discount'] > 0){
+                                $price = ($price-(($rows['mrp']*$request['discount'])/100));
+                            }
+                        }
                         if(empty($rows['detail_id']))
                         {
                             $details->push([
@@ -297,7 +297,7 @@ class ProductController extends Controller
                                 'detail_image'  => isset($rows['detail_image']) ? $rows['detail_image'] :'',
                                 'mrp'       => isset($rows['mrp']) ? $rows['mrp'] :0.00,
                                 // 'price'     => isset($rows['price']) ? $rows['price'] :0.00,
-                                'price'     => $price,
+                                'price'     => isset($rows['mrp']) ? $rows['mrp'] :0.00,
                                 'selling_price' => isset($rows['selling_price']) ? $rows['selling_price'] :0.00,
                                 'discount' => isset($request['discount']) ? $request['discount'] :0.00,
                                 'max_discount' => isset($request['max_discount']) ? $request['max_discount'] :0.00,
@@ -318,11 +318,11 @@ class ProductController extends Controller
               return Redirect::to('products')->with('message_success', 'Product Update Successfully');
             }
             return redirect()->back()->with('message_danger', 'Error in Category Update')->withInput();
-        }         
-        catch(\Exception $e)
-        {
-          return redirect()->back()->withErrors($e->getMessage())->withInput();
-        }
+        // }         
+        // catch(\Exception $e)
+        // {
+        //   return redirect()->back()->withErrors($e->getMessage())->withInput();
+        // }
 
     }
 

@@ -96,6 +96,7 @@
                            <option value="2" {{(old('repetition') == '2')?'selected':''}}>Week</option>
                            <option value="3" {{(old('repetition') == '3')?'selected':''}}>Month</option>
                            <option value="4" {{(old('repetition') == '4')?'selected':''}}>Year</option>
+                           <option value="5" {{(old('repetition') == '5')?'selected':''}}>Quarter</option>
                         </select>
                         @if ($errors->has('repetition'))
                         <div class="error">
@@ -109,9 +110,9 @@
                         <label class="col-form-label">Select order schemes</label>
                         <select name="scheme_type" id="scheme_type" class="select2 form-control" id="schemetype">
                            <option value="">{!! trans('panel.orderschemes.fields.scheme_type') !!}</option>
-                           <option value="lp" {{(old('repetition') == 'lp')?'selected':''}}>LP Price</option>
-                           <option value="Qty" {{(old('repetition') == 'Qty')?'selected':''}}>Quantity</option>
-                           <option value="grp_Qty" {{(old('repetition') == 'grp_Qty')?'selected':''}}>Group Quantity</option>
+                           <option value="lp" {{(old('scheme_type') == 'lp')?'selected':''}}>LP Price</option>
+                           <option value="Qty" {{(old('scheme_type') == 'Qty')?'selected':''}}>Quantity</option>
+                           <option value="grp_Qty" {{(old('scheme_type') == 'grp_Qty')?'selected':''}}>Group Quantity</option>
                         </select>
                         @if ($errors->has('scheme_type'))
                         <div class="error col-lg-12">
@@ -129,6 +130,25 @@
 
 
 
+               <div class="quarter-selection row d-none">
+                  <div class="col-md-6">
+                     <div class="input_section">
+                        <label class="col-form-label">Select Quarter</label>
+                        <select name="quarter" class="select2 form-control" id="week_repeat">
+                           <option value="">Select Quarter </option>
+                           <option value="1">Q1</option>
+                           <option value="2">Q2</option>
+                           <option value="3">Q3</option>
+                           <option value="4">Q4</option>
+                        </select>
+                        @if ($errors->has('week_repeat'))
+                        <div class="error">
+                           <p class="text-danger">{{ $errors->first('week_repeat') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+               </div>
                <div class="weekDays row d-none">
                   <div class="col-md-6">
                      <div class="input_section {{$errors->has('day_repeat') ? config('constants.ERROR_FORM_GROUP_CLASS') : ''}}">
@@ -187,14 +207,15 @@
                      </div>
                   </div>
                </div>
+
                <div class="row">
                   <div class="col-md-6">
                      <div class="input_section">
                         <label class="col-form-label">Scheme Based On</label>
                         <select name="scheme_basedon" class="select2 form-control" id="schemebasedon">
                            <option value="">Scheme Based On</option>
-                           <option value="value" {{(old('repetition') == 'value')?'selected':''}}>Value</option>
-                           <option value="percentage" {{(old('repetition') == 'percentage')?'selected':''}}>Percentage</option>
+                           <option value="value" {{(old('scheme_basedon') == 'value')?'selected':''}}>Value</option>
+                           <option value="percentage" {{(old('scheme_basedon') == 'percentage')?'selected':''}}>Percentage</option>
 
                         </select>
                         @if ($errors->has('scheme_basedon'))
@@ -389,7 +410,7 @@
                            <tr>
                               <th class="text-center"> # </th>
                               <th class="text-center category"> {!! trans('panel.orderschemes.fields.category_id') !!} </th>
-                              <th class="text-center"> {!! trans('panel.orderschemes.fields.subcategory_id') !!}</th>
+                              <th class="text-center sub-category"> {!! trans('panel.orderschemes.fields.subcategory_id') !!}</th>
                               <th class="text-center product"> {!! trans('panel.orderschemes.fields.product_id') !!} </th>
                               <!-- <th class="text-center"> {!! trans('panel.orderschemes.fields.maximum') !!}</th> -->
                               <th class="text-center"> {!! trans('panel.orderschemes.fields.points') !!} </th>
@@ -484,13 +505,16 @@
          var $table = $('table.kvcodes-dynamic-rows-example');
          $('a.add-rows').click(function(event) {
             event.preventDefault();
-            var schemetype = $("#schemetype option:selected").val();
+            var schemetype = $("#scheme_type").val();
             counter++;
-            if (schemetype === 'invoiceValue') {
+            if (schemetype == 'grp_Qty') {
                var newRow =
                   '<tr> <td>' + counter + '</td>' +
-                  '<td><div class="input_section"><input type="text" name="points[]' + counter + '"class="form-control points rowchange" /></div></td>' +
-                  '<td><a href="#" class="remove-rows btn btn-danger btn-xs"> <i class="fa fa-minus"></i></a></td> </tr>';
+                  '<td class="group" style="width:30%"><div class="input_section"><select required name="group' + counter + '" class="form-control  set_cat_' + counter + ' group_drop rowchange"></select></td>' +
+                  '<td style="width:30%" class="subCat"><div class="input_section"><input type="number" name="min' + counter + '" class="form-control  set_min_' + counter + '"></div></td>' +
+                  '<td style="width:30%"><div class="input_section"><input type="number" name="max' + counter + '" class="form-control  set_max_' + counter + '"></div></td>' +
+                  '<td><div class="input_section"><input required type="number" name="points[]' + counter + '"class="form-control points rowchange" /></div></td>' +
+                  '<td class="td-actions text-center"><a class="remove-rows btn btn-danger btn-just-icon btn-sm"><i class="fa fa-minus"></i></a></td> </tr>';
             } else {
                var newRow =
                   '<tr> <td>' + counter + '</td>' +
@@ -560,17 +584,32 @@
 
 
       function getcategorylist() {
-         $.ajax({
-            //url: "/getCategoryData",
-            url: "{{url('/getCategoryData')}}",
-            success: function(data) {
-               var html = '<option value="">Select Category</option>';
-               $.each(data, function(k, v) {
-                  html += '<option value="' + v.id + '">' + v.category_name + '</option>';
-               });
-               $('.set_cat_' + counter).html(html);
-            }
-         });
+         if($("#scheme_type").val() == 'grp_Qty'){
+            $.ajax({
+               //url: "/getCategoryData",
+               url: "{{url('/getPrimaryGroup')}}",
+               success: function(data) {
+                  console.log(data);
+                  var html = '<option value="">Select Group</option>';
+                  $.each(data, function(k, v) {
+                     html += '<option value="' + v + '">' + v + '</option>';
+                  });
+                  $('.set_cat_' + counter).html(html);
+               }
+            });
+         }else{
+            $.ajax({
+               //url: "/getCategoryData",
+               url: "{{url('/getCategoryData')}}",
+               success: function(data) {
+                  var html = '<option value="">Select Category</option>';
+                  $.each(data, function(k, v) {
+                     html += '<option value="' + v.id + '">' + v.category_name + '</option>';
+                  });
+                  $('.set_cat_' + counter).html(html);
+               }
+            });
+         }
       }
 
 
@@ -702,14 +741,22 @@
                $('.weekDays').removeClass('d-none');
                $('.dateRang').addClass('d-none');
                $('.weeks').addClass('d-none');
+               $('.quarter-selection').addClass('d-none');
             } else if (repetition == 2) {
                $('.weeks').removeClass('d-none');
+               $('.weekDays').addClass('d-none');
+               $('.dateRang').addClass('d-none');
+               $('.quarter-selection').addClass('d-none');
+            } else if (repetition == 5) {
+               $('.quarter-selection').removeClass('d-none');
+               $('.weeks').addClass('d-none');
                $('.weekDays').addClass('d-none');
                $('.dateRang').addClass('d-none');
             } else {
                $('.weeks').addClass('d-none');
                $('.weekDays').addClass('d-none');
                $('.dateRang').removeClass('d-none');
+               $('.quarter-selection').addClass('d-none');
             }
 
 
@@ -718,9 +765,16 @@
       });
 
       $('#scheme_type').on('change', function() {
+         $('table.kvcodes-dynamic-rows-example tbody').html('');
          var schemeType = $(this).val();
          if (schemeType == 'grp_Qty') {
-            console.log(schemeType);
+            $('#tab_logic .category').html('Group');
+            $('#tab_logic .sub-category').html('Min');
+            $('#tab_logic .product').html('Max');
+         }else{
+            $('#tab_logic .category').html('Category');
+            $('#tab_logic .sub-category').html('Sub category');
+            $('#tab_logic .product').html('Product');
          }
       })
    </script>

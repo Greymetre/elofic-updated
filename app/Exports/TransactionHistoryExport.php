@@ -32,6 +32,7 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
         $this->parent_customer = $request->input('parent_customer');
         $this->scheme_name = $request->input('scheme_name');
         $this->customer_id = $request->input('customer_id');
+        $this->designation = $request->input('designation');
     }
 
     public function collection()
@@ -107,9 +108,12 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
 
         if (!empty($data['customer']['getemployeedetail'])) {
             foreach ($data['customer']['getemployeedetail'] as $key_new => $datas) {
-
-                $employee[] = isset($datas->employee_detail->name) ? $datas->employee_detail->name : '';
-                $employee_id[] = isset($datas->user_id) ? $datas->user_id : '';
+                if($this->designation && !empty($this->designation)){
+                    if($datas->employee_detail->designation_id == $this->designation){
+                        $employee[] = isset($datas->employee_detail->name) ? $datas->employee_detail->name : '';
+                        $employee_id[] = isset($datas->user_id) ? $datas->user_id : '';
+                    }
+                }
             }
         }
 

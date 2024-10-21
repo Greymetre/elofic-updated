@@ -203,6 +203,16 @@ class AjaxController extends Controller
         }
     }
 
+    public function getPrimaryGroup(Request $request)
+    {
+        try {
+            $data = PrimarySales::groupBy('new_group')->pluck('new_group');;
+            return response()->json($data);
+        } catch (\Exception $e) {
+            return $e;
+        }
+    }
+
     public function getSubCategoryData(Request $request)
     {
         try {

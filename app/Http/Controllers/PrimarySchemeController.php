@@ -149,6 +149,7 @@ class PrimarySchemeController extends Controller
                 'repetition' => isset($request['repetition']) ? $request['repetition'] : '',
                 'day_repeat' => isset($request['week']) ? implode(',',$request['week']) : NULL,
                 'week_repeat' => isset($request['week_repeat']) ? $request['week_repeat'] : NULL,
+                'quarter' => isset($request['quarter']) ? $request['quarter'] : NULL,
                 'scheme_type' => isset($request['scheme_type']) ? $request['scheme_type'] : '',
                 'scheme_basedon' => isset($request['scheme_basedon']) ? $request['scheme_basedon'] : '',
                 'assign_to' => isset($request['assign_to']) ? $request['assign_to'] : '',
