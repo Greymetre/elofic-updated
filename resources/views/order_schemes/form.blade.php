@@ -11,9 +11,9 @@
          min-width: 250px !important;
       }
 
-      .select2-container {
+    /*  .select2-container {
          border-bottom: 1px solid lightgray;
-      }
+      }*/
    </style>
           <div class="card pt-0 mb-0 mt-0">
             <div class="card-header card-header-tabs card-header-warning m-0">
@@ -136,6 +136,7 @@
                   </div>
             <div class="col-md-6 weeks  d-none">
                      <div class="input_section">
+                            <label class="col-form-label">Select Week  </label>
                         <select name="week_repeat" class="select2 form-control" id="week_repeat">
                            <option value="">Select Week </option>
                            <option value="1">First Week</option>
@@ -245,6 +246,7 @@
                <div class="row">
                   <div class="col-md-6">
                      <div class="input_section">
+                            <label class="col-form-label">Select Branch </label>
                         <select name="assign_to" placeholder="Select Branch" class="select2 form-control" id="assign_to">
                            <option value="" disabled selected>Assign To</option>
                            <option {!! ($schemes->assign_to == 'all' ) ? "selected" : ''!!} value="all">All</option>
@@ -261,6 +263,7 @@
                   </div>
                   <div class="col-md-6" id="branch">
                      <div class="input_section">
+                          <label class="col-form-label">Select Branch </label>
                         <select name="branch[]" multiple placeholder="Select Branch" class="select2 form-control" required style="width:100%;">
 
                            @if($branchs && count($branchs) > 0)
@@ -278,6 +281,7 @@
                   </div>
                   <div class="col-md-6" id="state">
                      <div class="input_section">
+                          <label class="col-form-label">Select States </label>
                         <select name="state[]" multiple placeholder="Select States" class="select2 form-control" required style="width:100%;">
 
                            @if($states && count($states) > 0)
@@ -295,6 +299,7 @@
                   </div>
                   <div class="col-md-6" id="customer">
                      <div class="input_section">
+                           <label class="col-form-label">Select customer </label>
                         <!-- <select name="customer[]" id='customer_select' value="{!! old( 'customer', $schemes['customer']) !!}" ></select> -->
                         {!! Form::select('customer[]',[], old( 'customer', $schemes['customer']), ['id'=>'customer_select', 'class' => 'form-control']) !!}
                         @if ($errors->has('state'))
@@ -391,32 +396,43 @@
                            @foreach($schemes['orderscheme_details'] as $k=>$row)
                            <tr>
                               <td>
+                                 <div class="input_section">
                                  <input type="hidden" name="detail_id[]" id="detail_id" value="{{$row['id']}}">
                                  {{$k+1}}
+                              </div>
                               </td>
                               @if( isset($row['categories']['category_name']))
                               <td>
+                                 <div class="input_section">
                                  <select name="category_id[]" class="form-control category rowchange" />
                                  <option value="{{ $row['category_id'] }}">{{ $row['categories']['category_name'] }}</option>
                                  </select>
+                              </div>
                               </td>
                               @endif
                               @if( isset($row['subcategories']['subcategory_name']))
                               <td>
+                                 <div class="input_section">
                                  <select name="subcategory_id[]" class="form-control category rowchange" />
                                  <option value="{{ $row['subcategory_id'] }}">{{ $row['subcategories']['subcategory_name'] }}</option>
                                  </select>
+                              </dvi>
+                              </div>
                               </td>
                               @endif
                               @if( isset($row['products']['product_name']))
                               <td>
+                                 <div class="input_section">
                                  <select name="product_id[]" class="form-control product rowchange" />
                                  <option value="{{ $row['product_id'] }}">{{ $row['products']['product_name'] }}</option>
                                  </select>
+                              </div>
                               </td>
                               @endif
                               <td>
+                                 <div class="input_section">
                                  <input type="text" name="points[]" class="form-control points rowchange" value="{{ $row['points'] }}" />
+                              </div>
                               </td>
                               <td class="text-center">
                                  <a class="remove-rows btn btn-danger btn-just-icon btn-sm"><i class="fa fa-minus"></i></a>
@@ -473,10 +489,10 @@
             } else {
                var newRow =
                   '<tr> <td>' + counter + '</td>' +
-                  '<td class="category" style="width:30%"><select required name="category_id[]' + counter + '" class="form-control select2bs4 set_cat_' + counter + ' category_drop rowchange"> </select></td>' +
-                  '<td style="width:30%" class="subCat"><select required style="max-width: 300px;" name="subcategory_id[]' + counter + '" class="form-control sub_category rowchange" onchange="getproductinfo(this.value)"/> </select></td>' +
-                  '<td class="product" style="width:30%"><select required name="product_id[]' + counter + '" class="form-control select2bs4 product_drop rowchange"/></select></td>' +
-                  '<td><input required type="number" name="points[]' + counter + '"class="form-control points rowchange" /></td>' +
+                  '<td class="category" style="width:30%"><div class="input_section"><select required name="category_id[]' + counter + '" class="form-control select2 set_cat_' + counter + ' category_drop rowchange"> </select> </div></td>' +
+                  '<td style="width:30%" class="subCat"><div class="input_section"><select required style="max-width: 300px;" name="subcategory_id[]' + counter + '" class="form-control sub_category rowchange" onchange="getproductinfo(this.value)"/> </select></div></td>' +
+                  '<td class="product" style="width:30%"><div class="input_section"><select required name="product_id[]' + counter + '" class="form-control  product_drop rowchange"/></select></div></td>' +
+                  '<td><div class="input_section"><input required type="number" name="points[]' + counter + '"class="form-control points rowchange" /></td>' +
                   '<td class="td-actions text-center"><a class="remove-rows btn btn-danger btn-just-icon btn-sm"><i class="fa fa-minus"></i></a></td> </tr>';
             }
 

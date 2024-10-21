@@ -14,9 +14,9 @@
       }
     }
 
-    input.form-control:read-only {
+   /* input.form-control:read-only {
       border-bottom: 1px solid #000 !important;
-    }
+    }*/
 
     p.attach-p:before {
       content: " ";
@@ -25,7 +25,7 @@
       height: 5px;
       top: 24px;
       background: radial-gradient(#00aadb, transparent);
-      left: 50px;
+      left: 74px;
     }
 
     p.attach-p {
@@ -150,6 +150,7 @@
                     <label for="branch">Branch </label>
                   </div>
                   <div class="col-md-9">
+                    <div class="input_section">
                     <select class="form-select select2" name="branch" id="blood_group" required>
                       <option value="" disabled selected>Your answer</option>
                       @if($branchs && count($branchs) > 0)
@@ -159,6 +160,7 @@
                       @endif
                     </select>
                   </div>
+                  </div>
                 </div>
               </div>
               <div class="col-md-6 content-frm bg-light">
@@ -167,6 +169,7 @@
                     <label for="branch">User(Created By) </label>
                   </div>
                   <div class="col-md-8">
+                    <div class="input_section">
                     <select class="select2" name="created_by" id="created_by" data-style="select-with-transition" title="Select User">
                       <option value="">Select User</option>
                       @if(count($users) > 0)
@@ -175,6 +178,7 @@
                       @endforeach
                       @endif
                     </select>
+                  </div>
                   </div>
                 </div>
               </div>
@@ -198,6 +202,7 @@
                     <label for="district">District </label>
                   </div>
                   <div class="col-md-9">
+                    <div class="input_section">
                     <select class="form-select select2" name="district" id="district" required>
                       <option value="" disabled selected>Your answer</option>
                       @if($districts && count($districts) > 0)
@@ -207,6 +212,7 @@
                       @endif
                     </select>
                   </div>
+                  </div>
                 </div>
               </div>
               <div class="col-md-3 content-frm bg-light">
@@ -215,9 +221,11 @@
                     <label for="city">Town / City </label>
                   </div>
                   <div class="col-md-8">
+                    <div class="input_section">
                     <select class="form-select select2" name="city" id="city" required>
                       <option value="" disabled selected>Select City</option>
                     </select>
+                  </div>
                   </div>
                 </div>
               </div>
@@ -227,7 +235,9 @@
                     <label for="place">Place </label>
                   </div>
                   <div class="col-md-8">
+                    <div class="input_section">
                     <input type="text" name="place" id="place" class="form-control uppercase" value="{{$dealerAppointment->place}}">
+                  </div>
                   </div>
                 </div>
               </div>
@@ -922,7 +932,7 @@
               </div>
             </div>
 
-            <div class="row mt-5">
+            <div class=" mt-5">
               <h5 style="text-decoration: underline;line-height: 5px;">Signatures and Approvals</h5>
               <h6 style="text-decoration: underline;">Important Note.</h6>
               <ol>
@@ -934,7 +944,7 @@
               </ol>
             </div>
 
-            <div class="row mt-5">
+            <div class="mt-5">
               <h6 class="text-center" style="text-decoration: underline;">Declaration: Payment Instructions - Company Bank Account Only</h6>
               <p style="font-size: 12px;">I hope this letter finds you well. I am writing to formally communicate our company's payment policy regarding transactions. We kindly request that all payments to Silver Consumer Electricals Pvt Ltd be made exclusively through our designated company bank account. <br><br> In line with our commitment to ensuring transparency, security, and accountability in financial transactions, this policy to safeguard both our organization and our clients. Utilizing only our official company bank account for payments will help us better track and manage transactions, minimize errors, and prevent potential risks associated with cash transactions. <br><br> Kindly ensure that all future payments, including invoices and any other financial transactions, are processed using the provided bank account information. We kindly request your full cooperation in adhering to this payment policy to ensure a smooth and efficient business relationship.</p>
               <br>
@@ -942,10 +952,10 @@
               <br>
               <p style="font-size: 15px;">Thank you for your understanding and cooperation in this matter. We look forward to continuing our positive business association.</p>
             </div>
-            <div class="row mb-5">
+            <div class="mb-5">
               <h6><b>Channel Partners</b></h6>
             </div>
-            <div class=" row mb-5 mt-5">
+            <div class="mb-5 mt-5">
               <h5><b>(Sign With Stamp)</b></h5>
             </div>
             <div class="row">

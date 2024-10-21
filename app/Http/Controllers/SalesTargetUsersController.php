@@ -191,7 +191,9 @@ class SalesTargetUsersController extends Controller
     public function sales_target_users(Request $request)
     {
         $sales_target_users = SalesTargetUsers::latest()->get();
-        $users = User::latest()->get();
+        $users = User::whereDoesntHave('roles', function ($query) {
+            $query->where('id', 29);
+        })->get();
         $branches = Branch::latest()->get();
         $divisions = Division::latest()->get();
         $currentYear = Carbon::now()->year;

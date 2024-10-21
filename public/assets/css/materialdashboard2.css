@@ -2794,9 +2794,9 @@ a.btn.disabled,fieldset:disabled a.btn {
     box-shadow: none,0 0 0 .2rem rgba(248,249,250,.5)
 }
 
-.btn-dark {
+body .btn-dark {
     color: #fff;
-    background-color: #343a40;
+    background: #343a40 !important;
     border-color: #343a40;
     box-shadow: none
 }
@@ -8780,7 +8780,7 @@ a.text-dark:hover,a.text-dark:focus {
 
 .btn.btn-success {
     color: #fff;
-    background-color: #4caf50;
+    background: #4caf50 !important;
     border-color: #4caf50;
     box-shadow: 0 2px 2px 0 rgba(76,175,80,.14),0 3px 1px -2px rgba(76,175,80,.2),0 1px 5px 0 rgba(76,175,80,.12)
 }
@@ -8844,9 +8844,9 @@ a.text-dark:hover,a.text-dark:focus {
     color: #4caf50
 }
 
-.btn.btn-warning {
+body .btn.btn-warning {
     color: #fff;
-    background-color: #ff9800;
+    background: #ff9800 !important;
     border-color: #ff9800;
     box-shadow: 0 2px 2px 0 rgba(255,152,0,.14),0 3px 1px -2px rgba(255,152,0,.2),0 1px 5px 0 rgba(255,152,0,.12)
 }
@@ -8912,7 +8912,7 @@ a.text-dark:hover,a.text-dark:focus {
 
 .btn.btn-danger {
     color: #fff!important;
-    background-color: #f44336;
+    background: #f44336 !important;
     border-color: #f44336;
     box-shadow: 0 2px 2px 0 rgba(244,67,54,.14),0 3px 1px -2px rgba(244,67,54,.2),0 1px 5px 0 rgba(244,67,54,.12)
 }
@@ -12788,7 +12788,7 @@ a {
 }
 
 a:hover,a:focus {
-    color: #4a4a4a ;
+    color: #0a6ebd ;
     text-decoration: none
 }
 
@@ -12804,7 +12804,7 @@ a .material-icons {
     font-size: 14px;
     line-height: 1.42857;
     color: #aaa;
-    font-weight: 400
+    font-weight: 600;
 }
 
 .animation-transition-general,.sidebar .sidebar-wrapper>.nav [data-toggle=collapse]~div>ul>li>a span,.sidebar .sidebar-wrapper .user .user-info [data-toggle=collapse]~div>ul>li>a span,.sidebar .nav p,.sidebar .logo a.logo-mini,.sidebar .logo a.logo-normal,.sidebar .user .photo,.sidebar .user .user-info>a>span,.login-page .card-login,.lock-page .card-profile {
@@ -21034,15 +21034,15 @@ table.dataTable thead .sorting:before,table.dataTable thead .sorting:after,table
 }
 
 table.dataTable thead .sorting:before,table.dataTable thead .sorting_asc:before,table.dataTable thead .sorting_desc:before,table.dataTable thead .sorting_asc_disabled:before,table.dataTable thead .sorting_desc_disabled:before {
-/*    top: 11px;
-    right: 1em;
-    content: "\2191"*/
+   top: 11px;
+    right: 0em;
+    content: "\2191"
 }
 
 table.dataTable thead .sorting:after,table.dataTable thead .sorting_asc:after,table.dataTable thead .sorting_desc:after,table.dataTable thead .sorting_asc_disabled:after,table.dataTable thead .sorting_desc_disabled:after {
-  /*  top: 11px;
-    right: .5em;
-    content: "\2193"*/
+   top: 11px;
+    right: -0.5em;
+    content: "\2193"
 }
 
 table.dataTable thead .sorting_asc:before,table.dataTable thead .sorting_desc:after {
@@ -21064,7 +21064,7 @@ div.dataTables_scrollBody table {
 }
 
 div.dataTables_scrollBody table thead .sorting:before,div.dataTables_scrollBody table thead .sorting_asc:before,div.dataTables_scrollBody table thead .sorting_desc:before,div.dataTables_scrollBody table thead .sorting:after,div.dataTables_scrollBody table thead .sorting_asc:after,div.dataTables_scrollBody table thead .sorting_desc:after {
-    display: none
+    display: block;
 }
 
 div.dataTables_scrollBody table tbody tr:first-child th,div.dataTables_scrollBody table tbody tr:first-child td {
@@ -26595,10 +26595,10 @@ span.yes_no {
 }
 
 
-body table th:first-child{
+/*body table th:first-child{
     max-width: 81px !important;
     min-width: 62px !important;
-}
+}*/
 
 h5.font-weight-normal.mt-4 {
     color: #3c4858 !important;
@@ -26814,4 +26814,82 @@ body .dataTables_length select.custom-select {
 body table.dataTable.dtr-inline.collapsed > tbody > tr[role="row"] > td:first-child:before, table.dataTable.dtr-inline.collapsed > tbody > tr[role="row"] > th:first-child:before{
     line-height: 17px;
 }
+}
+
+
+
+
+div#expenseDetails h3.card-title.pb-3 ,div#expenseDetails h4 {
+    color: #000;
+    font-weight: 500;
+}
+
+div#expenseModal .modal-footer button.close {
+    background: linear-gradient(45deg, #3860a4 0%, #3694cc 100%) !important;
+    border-color: #3860a4;
+    box-shadow: 0 2px 2px 0 rgba(153, 153, 153, .14), 0 3px 1px -2px rgba(153, 153, 153, .2), 0 1px 5px 0 rgba(153, 153, 153, .12);
+    padding: 12px 30px;
+    margin: .3125rem 1px;
+    font-size: .75rem;
+    font-weight: 400;
+    line-height: 1.428571;
+    text-decoration: none;
+    color: #ffff;
+    opacity: 1;
+}
+
+div#expenseModal .modal-dialog{
+        margin-top:0px;
+}
+
+
+/*div#expenseModal  .modal-fullscreen .modal-content {
+    height: auto;
+}
+
+div#expenseDetails {
+    overflow: visible;
+
+}*/
+div#expenseModal {
+    overflow: hidden;
+}
+
+section.content.new_item .table>tbody>tr>td     ,table#tab_logic>tbody>tr>td {
+    white-space: nowrap;
+}
+
+
+.row.Warranty.Activation h6, .row.Warranty.Activation p, .row.Warranty.Activation h3 {
+    color: #000;
+    font-weight: 500;
+}
+
+
+
+.tab-content.tab-subcategories div#accordion {
+    padding: 10px 15px;
+}
+
+body span.seller_address  ,body span.buyer_address ,h3.card-title.pb-3{
+    color: #3c4858;
+    font-weight: 500;
+}
+
+
+/*body .input_section .form-control[disabled], {
+    background-color: #e9eded;
+    cursor: not-allowed;
+    border-bottom: 1px dotted #d2d2d2;
+    background-repeat: no-repeat;
+    border-color: transparent !important;
+    border-radius: 4px !important;
+}*/
+
+div#expenseDetails .invoice-col ,div#expenseDetails .invoice-col h6 {
+    font-weight: 300;
+}
+
+li.list-group-item.border-0.ps-0.text-sm {
+    color: gray;
 }

@@ -6,7 +6,7 @@
         <div class="card-icon">
           <i class="material-icons">perm_identity</i>
         </div>
-        <h4 class="card-title ">{!! trans('panel.pincode.title_singular') !!}{!! trans('panel.global.list') !!}
+        <h4 class="card-title ">{!! trans('panel.pincode.title_singular') !!} {!! trans('panel.global.list') !!}
               <span class="">
                 <div class="btn-group header-frm-btn">
                     <div class="next-btn">
@@ -116,14 +116,16 @@
                 <label class="col-form-label">{!! trans('panel.pincode.city') !!}<span class="text-danger"> *</span></label>
                
                   <div class="form-group has-default bmd-form-group">
-                  <input list="browsers" name="city_id" id="browser" class="form-control">
-                  <datalist id="browsers">
+                  <!-- <input list="browsers" name="city_id" id="browser" class="form-control"> -->
+                  <select class="form-control select2" name="city_id" id="browser">
+                  
                     @if(@isset($cities ))
                       @foreach($cities as $city)
                       <option value="{!! $city['id'] !!}">{!! $city['city_name'] !!}</option>
                       @endforeach
                     @endif
-                  </datalist>
+                  
+                    </select>
                     <!-- <select class="form-control select2" name="city_id" id="city_id" style="width: 100%;" required>
                         <option value="">Select {!! trans('panel.pincode.city') !!}</option>
                         @if(@isset($cities ))

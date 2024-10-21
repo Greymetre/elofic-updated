@@ -571,7 +571,7 @@
          top: 0;
          float: unset;
          left: 250px;
-         height: 100vh !important;
+         height: unset !important;
          width: calc(100% - 250px);
          max-height: unset !important;
       }

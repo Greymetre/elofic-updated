@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Imports\PrimarySchemeImport;
 use App\Models\Branch;
+use App\Models\Customers;
 use App\Models\CustomerType;
+use App\Models\PrimarySales;
 use App\Models\PrimaryScheme;
 use App\Models\PrimarySchemeDetail;
 use App\Models\State;
@@ -98,10 +100,12 @@ class PrimarySchemeController extends Controller
      */
     public function create()
     {
+        $primary_customers = PrimarySales::groupBy('customer_id')->pluck('customer_id');
+        $primary_branchs = PrimarySales::groupBy('branch_id')->pluck('branch_id');
         $customer_types = CustomerType::where('active', 'Y')->select('id', 'customertype_name')->get();
-        $branchs = Branch::where('active', 'Y')->select('id', 'branch_name')->get();
+        $branchs = Branch::whereIn('id', $primary_branchs)->where('active', 'Y')->select('id', 'branch_name')->get();
         $states = State::where('active', 'Y')->select('id', 'state_name')->get();
-        $customers = [];
+        $customers = Customers::whereIn('id', $primary_customers)->where('active', 'Y')->select('id', 'name')->get();
 
         return view('primary_schemes.form', compact('customer_types', 'branchs', 'states', 'customers'))->with('schemes', $this->schemes);
     }

@@ -6,7 +6,7 @@
       </div><!-- /.container-fluid -->
     </div>
     <!-- Main content -->
-    <section class="content">
+    <section class="content new_item">
       <div class="container-fluid">
         <div class="row">
           <!-- left column -->
@@ -84,7 +84,7 @@
                         <tbody>
                            <tr>
                               <td class="td-actions text-left">
-                                 <a href="javascript:void(0)" class="btn btn-success btn-xs add-rows" onclick="getUserlist()"> <i class="fa fa-plus"></i> </a>
+                                 <a href="javascript:void(0)" class="btn  btn-xs add-rows" onclick="getUserlist()"> <i class="fa fa-plus"></i> </a>
                               </td>
                            </tr>
                         </tbody>

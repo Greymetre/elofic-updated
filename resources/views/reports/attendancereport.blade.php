@@ -14,6 +14,9 @@
       height: 42px;
       margin-top: 7px;
     }
+   /* div#submitAttendance{
+      z-index: 9;
+    }*/
   </style>
   <div class="row">
     <div class="col-md-12">
@@ -153,7 +156,7 @@
               <div class="col-md-6">
                 <div class="input_section">
                   <label class="col-form-label">User</label>
-                  <select class="form-control select2" name="user_id" id="user_id" style="width: 100%;" required>
+                  <select class="form-control" name="user_id" id="user_id" style="width: 100%;" required>
                     <option value="">Select User</option>
                     @if(@isset($users))
                     @foreach($users as $user)
@@ -179,7 +182,7 @@
               <div class="col-md-6">
                 <div class="input_section">
                   <label class="col-form-label">Working Type</label>
-                  <select class="form-control select2" name="working_type" id="working_type" style="width: 100%;" required>
+                  <select class="form-control " name="working_type" id="working_type" style="width: 100%;" required>
                     <option value="">Select Working Type</option>
                     <option value="Tour" data-is-city="true">Tour</option>
                     <option value="Office Work" data-is-city="true">Office Work</option>
@@ -192,7 +195,7 @@
               </div>
               <div class="col-md-6" id="city_div" style="display: none;">
                 <label class="col-form-label">Select City</label>
-                <select class="select2" name="city" id="city">
+                <select class="form-control" name="city" id="city">
 
                 </select>
               </div>

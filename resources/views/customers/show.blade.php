@@ -453,7 +453,7 @@
                   <div class="row align-items-center">
                      <div class="col-md-6 col-sm-12" style="position: relative;">
                         <div class="img-cvr">
-                           <label class="bmd-label-floating">Shop Image</label>
+                           <label class="bmd-label-floating">Shop Image dd</label>
                            <div class="empty-div"></div>
                            <div class="fileinput fileinput-new text-center" data-provides="fileinput">
                               <div class="fileinput-new thumbnail">
@@ -488,7 +488,7 @@
                            </div>
                            <div class="fileinput fileinput-new text-center" data-provides="fileinput">
                               <div class="fileinput-new thumbnail">
-                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','gstin')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','gstin')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview1">
+                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','gstin')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','gstin')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="border-radius-lg shadow-sm imageDisplayModel">
                               </div>
                               <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div><br>
                               @if ($errors->has('imggstin'))
@@ -533,7 +533,7 @@
                            </div>
                            <div class="fileinput fileinput-new text-center" data-provides="fileinput">
                               <div class="fileinput-new thumbnail">
-                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','pan')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','pan')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview2">
+                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','pan')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','pan')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="border-radius-lg shadow-sm imageDisplayModel">
                               </div>
                               <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div><br>
                            </div>
@@ -571,11 +571,11 @@
                            </div>
                            <div class="fileinput fileinput-new text-center two-adhar-img" data-provides="fileinput">
                               <div class="fileinput-new thumbnail">
-                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','aadhar')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','aadhar')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview3">
+                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','aadhar')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','aadhar')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="border-radius-lg shadow-sm imageDisplayModel">
                               </div>
                               <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
                               <div class="fileinput-new thumbnail ml-2">
-                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','aadharback')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','aadharback')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview3">
+                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','aadharback')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','aadharback')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="border-radius-lg shadow-sm imageDisplayModel">
                               </div>
                               <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div><br>
                            </div>
@@ -637,7 +637,7 @@
                            </div>
                            <div class="fileinput fileinput-new text-center" data-provides="fileinput">
                               <div class="fileinput-new thumbnail">
-                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','bankpass')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','bankpass')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview2">
+                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','bankpass')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','bankpass')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="border-radius-lg shadow-sm imageDisplayModel">
                               </div>
                               <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div><br>
                            </div>
@@ -677,7 +677,7 @@
                            </div>
                            <div class="fileinput fileinput-new text-center" data-provides="fileinput">
                               <div class="fileinput-new thumbnail">
-                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','other')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','other')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview4">
+                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','other')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','other')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="border-radius-lg shadow-sm imageDisplayModel">
                               </div>
                               <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div><br>
                            </div>

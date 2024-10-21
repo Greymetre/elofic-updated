@@ -1,3 +1,9 @@
+<!-- <style>
+  .table>tbody>tr>td{
+    white-space: unset;
+  }
+</style> -->
+
 <x-app-layout>
 <div class="row">
    <div class="col-md-12">
@@ -159,8 +165,7 @@
                     </div>
                 
                 </div>
-            </div>
-            <div class="col-md-6 multipleshow">
+                    <div class="col-md-6 multipleshow">
                 <div class="input_section">
                   <label class="col-form-label">Is Multiple</label>
                  
@@ -173,13 +178,15 @@
                   
                   </div>
               </div>
+            </div>
+        
             <!-- Table row -->
                <div class="row fielddata" @if($fields->exists && $fields['fieldsData']->count() >= 1 ) '' @else style="display: none;" @endif>
                   <div class="container-fluid mt-5 d-flex justify-content-center w-100">
                      <div class="table-responsive w-100">
                         <table class="table kvcodes-dynamic-rows-example" id="tab_logic">
                            <thead>
-                              <tr class="card-header-warning text-white">
+                              <tr class="text-white">
                                  <th class="text-center"> # </th>
                                  <th class="text-center"> Field Data </th>
                                  <th class="text-center"> </th>
@@ -191,8 +198,10 @@
                               <tr id='addr0'>
                                 <td class="detail_index">{!! $index +1 !!}</td>
                                  <td>
+                                  <div class="input_section">
                                     <input type="text" name="details[{!! $index !!}][value]" class="form-control value rowchange" value="{!! $rows['value'] !!}" />
                                     <div class='error-value'></div>
+                                  </div>
                                  </td>
                                  <td class="td-actions text-right">
                                   <a href="javascript:void(0)" class="btn btn-danger remove-rows" value="{!! $rows['id'] !!}" data-original-title="" title="">

@@ -149,7 +149,7 @@
               <div class="col-md-12">
                 <div class="input_section">
                   <label class="col-form-label">User</label>
-                  <select class=" select2" name="user_id" id="user_id" style="width: 100%;" required>
+                  <select class="form-control" name="user_id" id="user_id" style="width: 100%;" required>
                     <option value="">Select User</option>
                     @if(@isset($users))
                     @foreach($users as $user)
@@ -179,7 +179,7 @@
                 <div class="input_section">
                   <label class="col-form-label">Type</label>
                   <div>
-                  <select class=" select2" name="type" id="type" style="width: 100%;" required>
+                  <select class=" form-control" name="type" id="type" style="width: 100%;" required>
                     <option value="">Select Type</option>
                     <option value="Leave" data-is-city="false">Leave</option>
                     <option value="Holiday" data-is-city="false">Holiday</option>

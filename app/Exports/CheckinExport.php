@@ -39,7 +39,7 @@ class CheckinExport implements FromCollection, WithHeadings, ShouldAutoSize, Wit
             }
         })
             ->select('id', 'customer_id', 'user_id', 'checkin_date', 'checkin_time', 'checkout_date', 'checkout_time', 'checkin_address', 'checkout_address', 'distance', 'beatscheduleid', 'created_at')
-            ->latest()->limit(5000)->get();
+            ->latest()->limit(2000)->get();
     }
 
     public function headings(): array
@@ -98,7 +98,7 @@ class CheckinExport implements FromCollection, WithHeadings, ShouldAutoSize, Wit
 
 
             isset($data['customers']['customeraddress']['address1']) ? $data['customers']['customeraddress']['address1'] . ' ' . $data['customers']['customeraddress']['address2'] : '',
-            (date("Y-m-d", strtotime($data['customers']['created_at'])) == date("Y-m-d", strtotime($data['checkin_date']))) ? 'New' : 'Existing',
+            $data['customers']?((date("Y-m-d", strtotime($data['customers']['created_at'])) == date("Y-m-d", strtotime($data['checkin_date']))) ? 'New' : 'Existing'):'-',
             isset($data['visitreports']['visittypename']['type_name']) ? $data['visitreports']['visittypename']['type_name'] : '',
             isset($data['visitreports']['description']) ? $data['visitreports']['description'] : '',
             // isset($data['orders']) ?$data['orders']->sum('total_qty') : 0,

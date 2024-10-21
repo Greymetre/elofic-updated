@@ -41,9 +41,6 @@ $(document).ready(function () {
     oTable = $('#getallexpenses').DataTable({
         "processing": true,
         "serverSide": true,
-        "order": [
-            [0, 'desc']
-        ],
         "stateSave": true,
         "bStateSave": true,
         "lengthMenu": [
@@ -72,7 +69,6 @@ $(document).ready(function () {
             {
                 data: 'id',
                 name: 'id',
-                orderable: false,
                 searchable: false
             },
             {

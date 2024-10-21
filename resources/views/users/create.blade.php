@@ -196,13 +196,13 @@
                 <div class="col-md-6">
                   <div class="input_section">
                     <label class="col-form-label">{{ trans('panel.user.fields.gender') }}</label>
-                    <div class="form-group has-default bmd-form-group">
-                      <select class="selectpicker" data-style="select-with-transition" name="gender">
+                    <!-- <div class="form-group has-default bmd-form-group"> -->
+                      <select class="form-control" data-style="select-with-transition" name="gender">
                         <option value="" disabled selected>Gender</option>
                         <option value="Male" {{ (old('gender')??$user->gender == 'Male') ? 'selected' : '' }}>Male</option>
                         <option value="Female" {{ (old('gender')??$user->gender == 'Female') ? 'selected' : '' }}>Female</option>
                       </select>
-                    </div>
+                    <!-- </div> -->
                     @if ($errors->has('gender'))
                     <div class="error">
                       <p class="text-danger">{{ $errors->first('gender') }}</p>

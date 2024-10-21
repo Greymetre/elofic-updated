@@ -11,9 +11,9 @@
          min-width: 250px !important;
       }
 
-      .select2-container {
+     /* .select2-container {
          border-bottom: 1px solid lightgray;
-      }
+      }*/
    </style>
    <div class="row">
       <div class="col-md-12">

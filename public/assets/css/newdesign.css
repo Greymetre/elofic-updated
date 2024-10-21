@@ -25,6 +25,7 @@ body{
     text-align: left !important;
     padding: 12px 20px !important;
     line-height: 19px;
+    white-space: unset;
 }
 .table thead {
     background-color: #6c6e6e1c;
@@ -62,7 +63,7 @@ body{
     color: #4a4a4a !important;
     font-size: 14px;
     font-weight: 400 !important;
-    white-space: pre;
+    white-space: normal;
 }
 .table-bordered th,
 .table-bordered td {
@@ -570,12 +571,12 @@ div#kyc {
 }
 
 .table tbody tr td.td-actions.text-center {
-    display: flex;
+/*    display: flex;*/
    /* flex-direction: row;
     justify-content: center;
     align-items: center;*/
     vertical-align: middle;
-    align-items: center;
+/*    align-items: center;*/
 }
 
 .table thead tr th.td-actions.text-center.sorting_disabled {
@@ -1333,4 +1334,64 @@ form#new_dealer_appoint_form {
 span.week_data {
     color: gray;
     padding: 0 4px;
+}
+
+form#prifilfrm .d-flex.flex-wrap.flex-row {
+    align-items: end;
+}
+.card-body .card.text-center.m-1 ,body .color_bg{
+    background:linear-gradient(45deg, #3860a4 0%, #3694cc 100%);
+}
+
+body table.ui-datepicker-calendar th:first-child {
+    max-width: unset !important;
+    min-width: unset !important;
+}
+
+
+.avatar.avatar-xl.position-relative img.w-100.border-radius-lg.shadow-sm.imageDisplayModel {
+    max-width: 250px;
+    min-width: 136px;
+    height: 104px;
+    object-fit: contain;
+}
+
+
+select.form-control {
+    border-radius: 4px;
+}
+
+
+span.select2-selection__clear {
+    display: none;
+}
+
+body .productlistpage .select2-container--default .select2-selection--single   ,body .productlistpage .form-control:disabled, body .productlistpage .form-control[readonly] {
+    background-color: #fff;
+    border-radius: 5px !important;
+    height: 100%;
+    padding-bottom: 0px;
+    border: 1px solid lightgrey !important;
+    height: 36px;
+}
+
+body .productlistpage  form .form-group select.form-control {
+    position: unset;
+    top: 0;
+}
+
+.card.new_text p {
+    font-weight: 300;
+
+}
+
+
+small {
+    color: #3c4858;
+    font-weight: 500;
+}
+
+
+.float-right p, h4.float-left p {
+    color: gray !important;
 }

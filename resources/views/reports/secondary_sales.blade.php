@@ -135,7 +135,7 @@
           <div class="col-md-12">
             <div class="row">
               <div class="col-sm">
-                <div class="card text-center">
+                <div class="card  color_bg text-center">
                   <div class="card-body">
                     <h4 class="card-title" id="total_order_value">0</h4>
                     <p class="card-text">Total Order Value</p>
@@ -143,7 +143,7 @@
                 </div>
               </div>
               <div class="col-sm">
-                <div class="card text-center">
+                <div class="card  color_bg text-center">
                   <div class="card-body">
                     <h4 class="card-title" id="total_order_qty">0</h4>
                     <p class="card-text text-center">Total Order Quantity</p>
@@ -151,7 +151,7 @@
                 </div>
               </div>
               <div class="col-sm">
-                <div class="card text-center">
+                <div class="card color_bg text-center">
                   <div class="card-body">
                     <h4 class="card-title" id="total_order">0</h4>
                     <p class="card-text text-center">Total Order</p>

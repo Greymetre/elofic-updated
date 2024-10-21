@@ -202,8 +202,10 @@ Route::group(['middleware' => ['auth']], function () {
     //Customers
     Route::resource('customertype', CustomerTypeController::class);
     Route::post('customertype-active', [CustomerTypeController::class, 'active'])->name('customertype.active');
+    Route::any('customertype-download', [CustomerTypeController::class, 'download'])->name('customertype.download');
     Route::resource('firmtype', FirmTypeController::class);
     Route::post('firmtype-active', [FirmTypeController::class, 'active'])->name('firmtype.active');
+    Route::any('firmtype-download', [FirmTypeController::class, 'download'])->name('firmtype.download');
     Route::resource('customers', CustomerController::class);
     Route::any('customers-download', [CustomerController::class, 'download'])->name('customers.download');
     Route::any('customers-template', [CustomerController::class, 'template'])->name('customers.template');

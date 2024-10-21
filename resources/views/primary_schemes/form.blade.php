@@ -11,9 +11,9 @@
          min-width: 250px !important;
       }
 
-      .select2-container {
+      /* .select2-container {
          border-bottom: 1px solid lightgray;
-      }
+      }*/
    </style>
    <div class="row">
       <div class="col-md-12">
@@ -22,18 +22,18 @@
                <div class="nav-tabs-navigation">
                   <div class="nav-tabs-wrapper new_id">
                      <h4 class="card-title ">
-                     Primary Scheme Creation </h4>
-                        <!-- @if(auth()->user()->can(['district_access'])) -->
-                        <ul class="nav nav-tabs pull-right" data-tabs="tabs">
-                           <li class="nav-item">
-                              <a class="nav-link" href="{{ url('primary_scheme') }}">
-                                 <i class="material-icons">next_plan</i> Primary Scheme
-                                 <div class="ripple-container"></div>
-                              </a>
-                           </li>
-                        </ul>
-                        <!-- @endif -->
-                    
+                        Primary Scheme Creation </h4>
+                     <!-- @if(auth()->user()->can(['district_access'])) -->
+                     <ul class="nav nav-tabs pull-right" data-tabs="tabs">
+                        <li class="nav-item">
+                           <a class="nav-link" href="{{ url('primary_scheme') }}">
+                              <i class="material-icons">next_plan</i> Primary Scheme
+                              <div class="ripple-container"></div>
+                           </a>
+                        </li>
+                     </ul>
+                     <!-- @endif -->
+
                   </div>
                </div>
             </div>
@@ -70,7 +70,7 @@
                   </div>
                   <div class="col-md-6">
                      <div class="input_section">
-                        <label  class="col-form-label">Select Customer Type</label>
+                        <label class="col-form-label">Select Customer Type</label>
                         <select class="select2 form-control" multiple name="customer_type[]" id="customer_type">
                            <!-- <option value="" selected disabled>Select Customer Type</option> -->
                            <option value="" disabled>Select Customer Type</option>
@@ -87,7 +87,7 @@
                         @endif
                      </div>
                   </div>
-   <div class="col-md-6">
+                  <div class="col-md-6">
                      <div class="input_section">
                         <label class="col-form-label">Select Repetition </label>
                         <select name="repetition" class="select2 form-control" id="repetition">
@@ -107,10 +107,11 @@
                   <div class="col-md-6">
                      <div class="input_section">
                         <label class="col-form-label">Select order schemes</label>
-                        <select name="scheme_type" class="select2 form-control" id="schemetype">
+                        <select name="scheme_type" id="scheme_type" class="select2 form-control" id="schemetype">
                            <option value="">{!! trans('panel.orderschemes.fields.scheme_type') !!}</option>
                            <option value="lp" {{(old('repetition') == 'lp')?'selected':''}}>LP Price</option>
                            <option value="Qty" {{(old('repetition') == 'Qty')?'selected':''}}>Quantity</option>
+                           <option value="grp_Qty" {{(old('repetition') == 'grp_Qty')?'selected':''}}>Group Quantity</option>
                         </select>
                         @if ($errors->has('scheme_type'))
                         <div class="error col-lg-12">
@@ -125,26 +126,26 @@
 
                </div>
 
-              
+
 
 
                <div class="weekDays row d-none">
                   <div class="col-md-6">
                      <div class="input_section {{$errors->has('day_repeat') ? config('constants.ERROR_FORM_GROUP_CLASS') : ''}}">
                         <label class="col-form-label" for="day_repeat">Repeat on days<span style="color:red">*</span></label>
-                       
-                           @foreach(config('constants.WEEK_LIST') as $key => $week)
-                           <input type="checkbox" value="{{$key}}" class="weeks_data" name=week[] checked><span class="week_data"> {{$week}}</span>
-                           @endforeach
-                           @if($errors->has('day_repeat'))
-                           <strong for="day_repeat" class="help-block">{{ $errors->first('day_repeat') }}</strong>
-                           @endif
-                    
+
+                        @foreach(config('constants.WEEK_LIST') as $key => $week)
+                        <input type="checkbox" value="{{$key}}" class="weeks_data" name=week[] checked><span class="week_data"> {{$week}}</span>
+                        @endforeach
+                        @if($errors->has('day_repeat'))
+                        <strong for="day_repeat" class="help-block">{{ $errors->first('day_repeat') }}</strong>
+                        @endif
+
                      </div>
                   </div>
                </div>
                <div class="weeks row d-none">
-               <div class="col-md-6">
+                  <div class="col-md-6">
                      <div class="input_section">
                         <label class="col-form-label">Select Week</label>
                         <select name="week_repeat" class="select2 form-control" id="week_repeat">
@@ -281,7 +282,7 @@
                   </div>
                   <div class="col-md-6" id="state">
                      <div class="input_section">
-                              <label class="col-form-label">Select States</label>
+                        <label class="col-form-label">Select States</label>
                         <select name="state[]" multiple placeholder="Select States" class="select2 form-control" required style="width:100%;">
 
                            @if($states && count($states) > 0)
@@ -299,11 +300,17 @@
                   </div>
                   <div class="col-md-6" id="customer">
                      <div class="input_section">
-                        <!-- <select name="customer[]" id='customer_select' value="{!! old( 'customer', $schemes['customer']) !!}" ></select> -->
-                        {!! Form::select('customer[]',[], old( 'customer', $schemes['customer']), ['id'=>'customer_select', 'class' => 'form-control']) !!}
-                        @if ($errors->has('state'))
+                        <label class="col-form-label">Select customer </label>
+                        <select name="customer[]" multiple id='customer_select' class="select2" value="{!! old( 'customer', $schemes['customer']) !!}">
+                           @if($customers && count($customers) > 0)
+                           @foreach($customers as $customer)
+                           <option value="{{$customer->id}}" {!! in_array($customer->id, old( 'customer[]', explode(',', $schemes['customer']))) ?'selected':'' !!}>{{$customer->name}}</option>
+                           @endforeach
+                           @endif
+                        </select>
+                        @if ($errors->has('customer'))
                         <div class="error">
-                           <p class="text-danger">{{ $errors->first('state') }}</p>
+                           <p class="text-danger">{{ $errors->first('customer') }}</p>
                         </div>
                         @endif
                      </div>
@@ -396,41 +403,42 @@
                            <tr>
                               <td>
                                  <div class="input_section">
-                                 <input type="hidden" name="detail_id[]" id="detail_id" value="{{$row['id']}}">
-                                 {{$k+1}}
-                              </div>
+                                    <input type="hidden" name="detail_id[]" id="detail_id" value="{{$row['id']}}">
+                                    {{$k+1}}
+                                 </div>
                               </td>
                               @if( isset($row['categories']['category_name']))
                               <td>
                                  <div class="input_section">
-                                 <select name="category_id[]" class="form-control category rowchange" />
-                                 <option value="{{ $row['category_id'] }}">{{ $row['categories']['category_name'] }}</option>
-                                 </select>
-                              </div>
+                                    <select name="category_id[]" class="form-control category rowchange">
+                                       <option value="{{ $row['category_id'] }}">{{ $row['categories']['category_name'] }}</option>
+                                    </select>
+                                 </div>
                               </td>
                               @endif
                               @if( isset($row['subcategories']['subcategory_name']))
                               <td>
                                  <div class="input_section">
-                                 <select name="subcategory_id[]" class="form-control category rowchange" />
-                                 <option value="{{ $row['subcategory_id'] }}">{{ $row['subcategories']['subcategory_name'] }}</option>
-                                 </select>
-                              </div>
+                                    <select name="subcategory_id[]" class="form-control category rowchange">
+                                       <option value="{{ $row['subcategory_id'] }}">{{ $row['subcategories']['subcategory_name'] }}</option>
+                                    </select>
+                                 </div>
                               </td>
                               @endif
                               @if( isset($row['products']['product_name']))
                               <td>
                                  <div class="input_section">
-                                 <select name="product_id[]" class="form-control product rowchange" />
-                                 <option value="{{ $row['product_id'] }}">{{ $row['products']['product_name'] }}</option>
-                                 </select>
-                              </div>
+                                    <select name="product_id[]" class="form-control product rowchange">
+                                       <option value="{{ $row['product_id'] }}">{{ $row['products']['product_name'] }}</option>
+                                    </select>
+                                 </div>
                               </td>
                               @endif
                               <td>
                                  <div class="input_section">
-                                 <input type="text" name="points[]" class="form-control points rowchange" value="{{ $row['points'] }}" />
-                              </div>                              </td>
+                                    <input type="text" name="points[]" class="form-control points rowchange" value="{{ $row['points'] }}" />
+                                 </div>
+                              </td>
                               <td class="td-actions text-center">
                                  <a class="remove-rows btn btn-danger btn-just-icon btn-sm"><i class="fa fa-minus"></i></a>
                               </td>
@@ -486,9 +494,9 @@
             } else {
                var newRow =
                   '<tr> <td>' + counter + '</td>' +
-                  '<td class="category" style="width:30%"><div class="input_section"><select required name="category_id[]' + counter + '" class="form-control select2bs4 set_cat_' + counter + ' category_drop rowchange"> </select></td>' +
-                  '<td style="width:30%" class="subCat"><div class="input_section"><select required style="max-width: 300px;" name="subcategory_id[]' + counter + '" class="form-control sub_category rowchange" onchange="getproductinfo(this.value)"/> </select></div></td>' +
-                  '<td class="product" style="width:30%"><div class="input_section"><select required name="product_id[]' + counter + '" class="form-control select2bs4 product_drop rowchange" placeholder="selected" /></select></div></td>' +
+                  '<td class="category" style="width:30%"><div class="input_section"><select required name="category_id[]' + counter + '" class="form-control  set_cat_' + counter + ' category_drop rowchange"> </select></td>' +
+                  '<td style="width:30%" class="subCat"><div class="input_section"><select required style="max-width: 300px;" name="subcategory_id[]' + counter + '" class="form-control select2 sub_category rowchange" onchange="getproductinfo(this.value)"/> </select></div></td>' +
+                  '<td class="product" style="width:30%"><div class="input_section"><select required name="product_id[]' + counter + '" class="form-control select2 product_drop rowchange" placeholder="selected" /></select></div></td>' +
                   '<td><div class="input_section"><input required type="number" name="points[]' + counter + '"class="form-control points rowchange" /></div></td>' +
                   '<td class="td-actions text-center"><a class="remove-rows btn btn-danger btn-just-icon btn-sm"><i class="fa fa-minus"></i></a></td> </tr>';
             }
@@ -620,27 +628,27 @@
             $('#customer').show();
             $('#state').hide();
             $('#branch').hide();
-            var selectedCustomersString = "{!! $schemes['customer'] !!}";
-            var selectedCustomersArray = selectedCustomersString.split(',').map(Number);
-            setTimeout(() => {
-               var $customerSelect = $('#customer_select').select2({
-                  placeholder: 'Customer Select...',
-                  multiple: true,
-                  allowClear: true,
-                  ajax: {
-                     url: "{{ route('getCustomerDataSelect') }}",
-                     dataType: 'json',
-                     delay: 250,
-                     data: function(params) {
-                        return {
-                           term: params.term || '',
-                           page: params.page || 1
-                        }
-                     },
-                     cache: true
-                  }
-               });
-            }, 1000);
+            // var selectedCustomersString = "{!! $schemes['customer'] !!}";
+            // var selectedCustomersArray = selectedCustomersString.split(',').map(Number);
+            // setTimeout(() => {
+            //    var $customerSelect = $('#customer_select').select2({
+            //       placeholder: 'Customer Select...',
+            //       multiple: true,
+            //       allowClear: true,
+            //       ajax: {
+            //          url: "{{ route('getCustomerDataSelect') }}",
+            //          dataType: 'json',
+            //          delay: 250,
+            //          data: function(params) {
+            //             return {
+            //                term: params.term || '',
+            //                page: params.page || 1
+            //             }
+            //          },
+            //          cache: true
+            //       }
+            //    });
+            // }, 1000);
          } else {
             $('#state').hide();
             $('#customer').hide();
@@ -698,7 +706,7 @@
                $('.weeks').removeClass('d-none');
                $('.weekDays').addClass('d-none');
                $('.dateRang').addClass('d-none');
-            }else{
+            } else {
                $('.weeks').addClass('d-none');
                $('.weekDays').addClass('d-none');
                $('.dateRang').removeClass('d-none');
@@ -708,6 +716,13 @@
          });
 
       });
+
+      $('#scheme_type').on('change', function() {
+         var schemeType = $(this).val();
+         if (schemeType == 'grp_Qty') {
+            console.log(schemeType);
+         }
+      })
    </script>
 
 

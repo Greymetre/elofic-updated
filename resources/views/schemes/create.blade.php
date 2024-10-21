@@ -337,7 +337,7 @@
                                  <th class="text-center"> Active Points</th>
                                  <th class="text-center"> Provision Points</th>
                                  <th class="text-center"> Total {!! trans('panel.scheme.fields.points') !!} </th>
-                                 <th class="text-center"> </th>
+                                 <!-- <th class="text-center"> </th> -->
                               </tr>
                            </thead>
                         </table>
@@ -402,18 +402,18 @@
             if (schemetype === 'invoiceValue') {
                var newRow =
                   '<tr> <td>' + counter + '</td>' +
-                  '<td><input type="text" name="points[]' + counter + '"class="form-control points rowchange" /></td>' +
+                  '<td><div class="input_section"><input type="text" name="points[]' + counter + '"class="form-control points rowchange" /></div></td>' +
                   '<td><a href="#" class="remove-rows btn btn-danger btn-xs"> <i class="fa fa-minus"></i></a></td> </tr>';
             } else {
                var newRow =
                   '<tr> <td>' + counter + '</td>' +
-                  '<td class="category"><select required name="category_id[]' + counter + '" class="form-control set_cat_' + counter + ' category_drop rowchange"> </select></td>' +
-                  '<td style="max-width: 300px;" class="subCat"><select required style="max-width: 300px;" name="subcategory_id[]' + counter + '" class="form-control select2bs4 sub_category rowchange" /> </select></td>' +
-                  '<td class="product"><select required name="product_id[]' + counter + '" class="form-control select2bs4 product_drop rowchange"/></select></td>' +
-                  '<td><input required type="number" name="active_point[]' + counter + '"class="form-control active_point rowchange" /></td>' +
-                  '<td><input required type="number" name="provision_point[]' + counter + '"class="form-control provision_point rowchange" /></td>' +
-                  '<td><input required type="number" name="points[]' + counter + '"class="form-control points rowchange" /></td>' +
-                  '<td class="td-actions text-center"><a class="remove-rows btn btn-danger btn-just-icon btn-sm"><i class="fa fa-minus"></i></a></td> </tr>';
+                  '<td class="category"><div class="input_section"><select required name="category_id[]' + counter + '" class="form-control set_cat_' + counter + ' category_drop rowchange"> </select></div></td>' +
+                  '<td class="subCat"><div class="input_section"><select required  name="subcategory_id[]' + counter + '" class="form-control select2 sub_category rowchange" /></div> </select></td>' +
+                  '<td class="product"><div class="input_section"><select required name="product_id[]' + counter + '" class="form-control select2 product_drop rowchange"/></select></div></td>' +
+                  '<td><div class="input_section"><input required type="number" name="active_point[]' + counter + '"class="form-control active_point rowchange" /></div></td>' +
+                  '<td><div class="input_section"><input required type="number" name="provision_point[]' + counter + '"class="form-control provision_point rowchange" /></div></td>' +
+                  '<td><div class="input_section"><input required type="number" name="points[]' + counter + '"class="form-control points rowchange" /><a class="remove-rows btn btn-danger btn-just-icon btn-sm"><i class="fa fa-minus"></i></a></div></td>' +
+                  ' </tr>';
             }
 
             $table.append(newRow);
