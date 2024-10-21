@@ -679,7 +679,7 @@
 
       @media (max-width: 996px) {
          body nav.sidebar {
-            display: none !important;
+            display: block !important;
          }
 
          body .main-panel {
