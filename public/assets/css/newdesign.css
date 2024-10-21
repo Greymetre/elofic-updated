@@ -1395,3 +1395,10 @@ small {
 .float-right p, h4.float-left p {
     color: gray !important;
 }
+
+
+
+th.lenth_text {
+    width: 100%;
+    min-width: 200px;
+}

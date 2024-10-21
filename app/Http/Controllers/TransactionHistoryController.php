@@ -20,6 +20,7 @@ use App\Exports\TransactionMainTemplate;
 use App\Exports\TransactionTemplate;
 use App\Imports\MainTransactionImport;
 use App\Imports\ManualTransactionImport;
+use App\Models\Designation;
 use App\Models\SchemeDetails;
 use App\Models\SchemeHeader;
 use Carbon\Carbon;
@@ -46,9 +47,10 @@ class TransactionHistoryController extends Controller
         // $parent_customers = Customers::where('active', 'Y')->whereIn('customertype', ['1', '3'])->select('id', 'name')->get();
         $customer_ids = $this->transaction_history->distinct()->pluck('customer_id');
         $parent_customers = [];
+        $designations = Designation::where('active', 'Y')->get();
         $customers = Customers::whereIn('id' , $customer_ids)->get();
         $scheme_names = SchemeHeader::where('active', 'Y')->select('id', 'scheme_name')->get();
-        return $dataTable->render('transaction_history.index', compact('branches', 'parent_customers', 'scheme_names' , 'customers'));
+        return $dataTable->render('transaction_history.index', compact('branches', 'parent_customers', 'scheme_names' , 'customers','designations'));
     }
 
     /**

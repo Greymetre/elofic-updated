@@ -929,6 +929,7 @@ Route::any('getProductDataSelect', [AjaxController::class, 'getProductDataSelect
 Route::any('getServiceCategory', [AjaxController::class, 'getServiceCategory'])->name('getServiceCategory');
 Route::any('getStateDataSelect', [AjaxController::class, 'getStateDataSelect'])->name('getStateDataSelect');
 Route::any('getCategoryData', [AjaxController::class, 'getCategoryData']);
+Route::any('getPrimaryGroup', [AjaxController::class, 'getPrimaryGroup']);
 Route::any('getExpensesData', [AjaxController::class, 'getExpensesData'])->name('getExpensesData');
 Route::any('getSubCategoryData', [AjaxController::class, 'getSubCategoryData']);
 Route::any('getGiftSubCategoryData', [AjaxController::class, 'getGiftSubCategoryData']);

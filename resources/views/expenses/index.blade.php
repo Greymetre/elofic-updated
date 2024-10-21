@@ -148,7 +148,7 @@
                  <th>{!! trans('panel.expenses.fields.claim_amount') !!}</th>
                  <th>{!! trans('panel.expenses.fields.approve_amount') !!}</th>
                  <th>{!! trans('panel.expenses.fields.expense_status') !!}</th>
-                 <th>{!! trans('panel.expenses.fields.note') !!}</th>
+                 <th class="lenth_text">{!! trans('panel.expenses.fields.note') !!}</th>
                  <th>{!! trans('panel.expenses.fields.created_at') !!}</th>
                  <th>{!! trans('panel.expenses.fields.branch') !!}</th>
                  <th>{!! trans('panel.expenses.fields.total_km') !!}</th>
