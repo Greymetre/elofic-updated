@@ -32,10 +32,10 @@
          <form method="POST" action="{{ route("roles.store") }}" enctype="multipart/form-data" id="storeRoleData">
             @csrf
           <div class="row">
-            <div class="col-md-12">
-              <div class="row">
-                <label class="col-md-2 col-form-label">{{ trans('panel.role.fields.name') }}<span class="text-danger"> *</span></label>
-                <div class="col-md-10">
+            <div class="col-md-6">
+              <div class="inpu_section">
+                <label class="col-form-label">{{ trans('panel.role.fields.name') }}<span class="text-danger"> *</span></label>
+               
                   <div class="form-group has-default bmd-form-group">
                       <input class="form-control {{ $errors->has('title') ? 'is-invalid' : '' }}" type="text" name="name" id="title" value="{{ old('name', '') }}" maxlength="200" required>
                       @if($errors->has('name'))
@@ -43,14 +43,14 @@
                               {{ $errors->first('name') }}
                           </div>
                       @endif
-                  </div>
+                  
                 </div>
               </div>
             </div>
-            <div class="col-md-12">
-              <div class="row">
-                <label class="col-md-2 col-form-label">{{ trans('panel.role.fields.display_name') }}<span class="text-danger"> *</span></label>
-                <div class="col-md-10">
+            <div class="col-md-6">
+              <div class="inpu_section">
+                <label class="col-form-label">{{ trans('panel.role.fields.display_name') }}<span class="text-danger"> *</span></label>
+          
                   <div class="form-group has-default bmd-form-group">
                       <input class="form-control {{ $errors->has('display_name') ? 'is-invalid' : '' }}" type="text" name="display_name" id="display_name" value="{{ old('display_name', '') }}" maxlength="200" required>
                       @if($errors->has('display_name'))
@@ -60,12 +60,12 @@
                       @endif
                   </div>
                 </div>
-              </div>
+             
             </div>
-            <div class="col-md-12">
-              <div class="row">
-                <label class="col-md-2 col-form-label">{{ trans('panel.role.fields.permissions') }}<span class="text-danger"> *</span></label>
-                <div class="col-md-10">
+            <div class="col-md-6">
+              <div class="inpu_section">
+                <label class="col-form-label">{{ trans('panel.role.fields.permissions') }}<span class="text-danger"> *</span></label>
+            
                   <div style="padding-bottom: 4px">
                         <span class="btn btn-info btn-xs select-all" style="border-radius: 0">{{ trans('panel.select_all') }}</span>
                         <span class="btn btn-info btn-xs deselect-all" style="border-radius: 0">{{ trans('panel.deselect_all') }}</span>
@@ -82,11 +82,11 @@
                         </div>
                     @endif
                   </div>
-                </div>
+               
               </div>
             </div>
         </div>
-        <div class="card-footer pull-right">
+        <div class="pull-right">
             {{ Form::submit('Submit', array('class' => 'btn btn-theme')) }}
         </div>
         {{ Form::close() }} 

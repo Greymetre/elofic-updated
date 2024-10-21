@@ -13,11 +13,11 @@
     .card-body.main-card:before {
       content: ' ';
       width: 105%;
-      height: 108px;
-      background: #00aadb;
-      top: -15px;
+      height: 134px;
+      background: linear-gradient(45deg, #3860a4 0%, #3694cc 100%);
+      top: -24px;
       position: absolute;
-      left: -20px;
+      left: -24px;
       border-radius: 10px;
       box-shadow: 0px 8px 12px 0px grey;
     }
@@ -26,8 +26,8 @@
       content: ' ';
       width: 20px;
       height: 20px;
-      background: #00aadb;
-      top: 80px;
+     background: linear-gradient(45deg, #3860a4 0%, #3694cc 100%);
+      top: 98px;
       position: absolute;
       left: 0px;
       transform: rotate(-45deg);
@@ -40,6 +40,10 @@
       height: 2px;
       border-radius: 10px;
     }
+
+    .card.new_text p {
+    color: #000;
+}
   </style>
   <div class="content-header">
     <div class="container-fluid">
@@ -77,7 +81,7 @@
 
 
 
-        <div class="card">
+        <div class="card new_text">
           <div class="card-body main-card">
             <div class="row head mb-4">
               <div class="col-md-4 col-sm-6">

@@ -13,9 +13,20 @@ use Illuminate\Support\Facades\Auth;
 
 class ProductExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapping
 {
+    public function __construct($request)
+    {
+        $this->category_id = $request->input('category_id');
+    }
+
     public function collection()
     {
-        return Product::with('productpriceinfo')->select('id','product_name','product_code','new_group','sub_group','expiry_interval','expiry_interval_preiod', 'display_name', 'description', 'subcategory_id', 'category_id', 'brand_id', 'product_image', 'unit_id', 'specification', 'part_no','suc_del', 'product_no', 'model_no')->latest()->get();   
+        $data = Product::with('productpriceinfo')->select('id','product_name','product_code','new_group','sub_group','expiry_interval','expiry_interval_preiod', 'display_name', 'description', 'subcategory_id', 'category_id', 'brand_id', 'product_image', 'unit_id', 'specification', 'part_no','suc_del', 'product_no', 'model_no');
+        if($this->category_id && !empty($this->category_id)){
+            $data->where('category_id', $this->category_id);
+        }
+        $data = $data->latest()->get();
+
+        return $data;
     }
 
     public function headings(): array

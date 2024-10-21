@@ -103,22 +103,22 @@
         @csrf
         <div class="row">
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-4 col-form-label">{!! trans('panel.city.city_name') !!} <span class="text-danger"> *</span></label>
-                <div class="col-md-8">
+              <div class="input_section">
+                <label class="col-form-label">{!! trans('panel.city.city_name') !!} <span class="text-danger"> *</span></label>
+                
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="city_name" id="city_name" class="form-control" value="{!! old( 'city_name') !!}" maxlength="200" required>
                     @if ($errors->has('city_name'))
-                      <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('city_name') }}</p></div>
+                      <div class="error"><p class="text-danger">{{ $errors->first('city_name') }}</p></div>
                     @endif
                   </div>
-                </div>
+               
               </div>
             </div>
           <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-3 col-form-label">{!! trans('panel.city.district') !!}<span class="text-danger"> *</span></label>
-                <div class="col-md-9">
+              <div class="input_section">
+                <label class="col-form-label">{!! trans('panel.city.district') !!}<span class="text-danger"> *</span></label>
+               
                   <div class="form-group has-default bmd-form-group">
                     <select class="form-control select2" name="district_id" id="district_id" style="width: 100%;" required>
                         <option value="">Select {!! trans('panel.city.district') !!}</option>
@@ -130,20 +130,21 @@
                      </select>
                   </div>
                   @if ($errors->has('country_id'))
-                   <div class="error col-lg-12">
+                   <div class="error">
                       <p class="text-danger">{{ $errors->first('country_id') }}</p>
                    </div>
                   @endif
                 </div>
-              </div>
+           
             </div>
+             </div>
         <div class="clearfix"></div>
-        <div class="modal-footer">
+        <div class="pull-right">
           <input type="hidden" name="id" id="city_id" />
           <button class="btn btn-info save"> Submit</button>
         </form>
         </div>
-      </div>
+     
     </div>
   </div>
 <script src="{{ url('/').'/'.asset('assets/js/jquery.custom.js') }}"></script>

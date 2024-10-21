@@ -100,10 +100,10 @@
         <form method="POST" action="{{ route('firmtype.store') }}" enctype="multipart/form-data" id="storeFirmTypeData">
         @csrf
         <div class="row">
-            <div class="col-md-9">
-              <div class="row">
-                <label class="col-md-4 col-form-label">{!! trans('panel.firmtype.fields.firmtype_name') !!} <span class="text-danger"> *</span></label>
-                <div class="col-md-8">
+            <div class="col-md-12">
+              <div class="input_section">
+                <label class="col-form-label">{!! trans('panel.firmtype.fields.firmtype_name') !!} <span class="text-danger"> *</span></label>
+              
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="firmtype_name" id="firmtype_name" class="form-control" value="{!! old( 'firmtype_name') !!}" maxlength="200" required>
                     @if ($errors->has('firmtype_name'))
@@ -111,11 +111,11 @@
                     @endif
                   </div>
                 </div>
-              </div>
+         
             </div>
           </div>
         <div class="clearfix"></div>
-        <div class="modal-footer">
+        <div class="pull-right">
           <input type="hidden" name="id" id="firmtype_id" />
           <button class="btn btn-info save"> Submit</button>
         </form>

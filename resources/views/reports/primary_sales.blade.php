@@ -317,93 +317,128 @@
           {
             data: 'state',
             name: 'state',
-            searchable: false,
+            orderable: true,
+            searchable: true,
             "defaultContent": ''
           },
           {
             data: 'final_branch',
             name: 'final_branch',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: true,
+            searchable: true,
           },
           {
             data: 'sales_person',
             name: 'sales_person',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: true,
+            searchable: true,
           },
           {
             data: 'emp_code',
             name: 'emp_code',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: true,
+            searchable: true,
           },
           {
             data: 'model_name',
             name: 'model_name',
-            "defaultContent": 'final branch'
+            "defaultContent": 'final branch',
+            orderable: true,
+            searchable: true,
           },
           {
             data: 'product_name',
             name: 'product_name',
-            "defaultContent": 'final branch'
+            "defaultContent": 'final branch',
+            orderable: true,
+            searchable: true,
           },
           {
             data: 'quantity',
             name: 'quantity',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: true,
+            searchable: true,
           },
           {
             data: 'rate',
             name: 'rate',
-            "defaultContent": 'product name'
+            "defaultContent": 'product name',
+            orderable: true,
+            searchable: true,
           },
           {
             data: 'net_amount',
             name: 'net_amount',
-            "defaultContent": 'total_qty'
+            "defaultContent": 'total_qty',
+            orderable: true,
+            searchable: true,
           },
           {
             data: 'cgst_amount',
             name: 'cgst_amount',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: true,
+            searchable: true,
           },
           {
             data: 'sgst_amount',
             name: 'sgst_amount',
-            "defaultContent": 'tax amount'
+            "defaultContent": 'tax amount',
+            orderable: true,
+            searchable: true,
           },
           {
             data: 'igst_amount',
             name: 'igst_amount',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: true,
+            searchable: true,
           },
           {
             data: 'total_amount',
             name: 'total_amount',
-            "defaultContent": 'total'
+            "defaultContent": 'total',
+            orderable: true,
+            searchable: true,
           },
           {
             data: 'store_name',
             name: 'store_name',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: true,
+            searchable: true,
           },
           {
             data: 'new_group',
             name: 'new_group',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: true,
+            searchable: true,
           },
           {
             data: 'branch',
             name: 'branch',
-            "defaultContent": 'branch'
+            "defaultContent": 'branch',
+            orderable: true,
+            searchable: true,
           },
           {
             data: 'new_group_name',
             name: 'new_group_name',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: true,
+            searchable: true,
           },
           {
             data: 'product_id',
             name: 'product_id',
-            "defaultContent": ''
+            "defaultContent": '',
+            orderable: true,
+            searchable: true,
           },
         ]
       });

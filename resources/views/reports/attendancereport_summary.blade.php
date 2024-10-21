@@ -160,7 +160,7 @@
         <form method="POST" action="{{ route('submitAttendances') }}" enctype="multipart/form-data" id="createleadstagesForm"> @csrf 
           <div class="row">
             <div class="col-md-6">
-              <div class="input-group input-group-outline my-3">
+              <div class="input-section">
                 <label class="form-label">User</label>
                 <select class="form-control select2" name="user_id" id="user_id" style="width: 100%;" required>
                   <option value="">Select User</option>
@@ -173,7 +173,7 @@
               </div>
             </div>
             <div class="col-md-6">
-              <div class="input-group input-group-outline my-3">
+              <div class="input-section">
                 <label class="form-label">Working Type</label>
                 <select class="form-control select2" name="working_type" id="working_type" style="width: 100%;" required>
                   <option value="">Select Working Type</option>
@@ -187,13 +187,13 @@
               </div>
             </div>
             <div class="col-md-6">
-              <div class="input-group input-group-outline my-3">
+              <div class="input-section">
                 <label class="form-label">Punchin</label>
                 <input type="text" name="punchin_date" id="punchin_date" class="form-control datetimepicker" value="{!! old( 'punchin_date') !!}" required>
               </div>
             </div>
             <div class="col-md-6">
-              <div class="input-group input-group-outline my-3">
+              <div class="input-section">
                 <label class="form-label">Punch Out</label>
                 <input type="text" name="punchout_date" id="punchout_date" class="form-control datetimepicker" value="{!! old( 'punchout_date') !!}">
               </div>
@@ -229,7 +229,7 @@
         <form method="POST" action="{{ route('rejectAttendance') }}" enctype="multipart/form-data" id="createleadstagesForm_new"> @csrf 
           <div class="row">
             <div class="col-md-6">
-              <div class="input-group input-group-outline my-3">
+              <div class="input-section">
                 <label class="form-label">Remark</label>
                 <input type="text" name="remark_status" id="remark_status" class="form-control" value="{!! old( 'remark_status') !!}" required> <br><br>
                 <input type="text" name="attendance_id" id="attendance_id" class="form-control" hidden>

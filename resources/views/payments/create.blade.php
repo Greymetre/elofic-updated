@@ -12,16 +12,16 @@
           <!-- left column -->
           <div class="col-md-12">
             <!-- jquery validation -->
-            <div class="card card-primary">
-              <div class="card-header">
-                <h3 class="card-title">Payment Recieved</h3>
+            <div class="card">
+              <div class="card-header card-header-icon card-header-theme">
+                <h4 class="card-title">Payment Recieved</h4>
               </div>
               <!-- /.card-header -->
               <!-- form start -->
                 <div class="card-body ">
-                  <ul class="nav nav-pills nav-pills-theme" role="tablist">
+                  <ul class="nav nav-pills nav-pills-theme pl-0 nev_item_list" role="tablist">
                     <li class="nav-item">
-                      <a class="nav-link active" data-toggle="tab" href="#link1" role="tablist">
+                      <a class="nav-link active" data-toggle="tab" href="#link1" role="tablist" >
                         Invoice payment
                       </a>
                     </li>
@@ -42,7 +42,7 @@
                         <input type="hidden" name="customer_id" id="customer_id" value="{!! old( 'customer_id', $payment['customer_id']) !!}">
                         <input type="hidden" name="payment_type" id="paymentType" value="Invoice payment">
                         <div class="col-md-6">
-                          <div class="form-group">
+                          <div class="input_section">
                             <label>Select Customer</label>
                             <div class="form-group bmd-form-group">
                               <input class="form-control" id="customer_name" name="customer_name" list="customerList" value="{!! old( 'customer_name', $payment['customer_name']) !!}" autocomplete="off"  required/>
@@ -62,7 +62,7 @@
                           </div>
                         </div>
                         <div class="col-md-6">
-                          <div class="form-group">
+                          <div class="input_section">
                             <label>Payment Date</label>
                             <div class="form-group bmd-form-group">
                               <input type="text" name="payment_date" class="form-control datepicker" value="{!! date('Y-m-d') !!}" autocomplete="off" readonly required>
@@ -75,7 +75,7 @@
                           </div>
                         </div>
                         <div class="col-md-6">
-                          <div class="form-group">
+                          <div class="input_section">
                             <label>Payment Mode</label>
                             <div class="form-group bmd-form-group">
                               <select class="form-control" name="payment_mode" style="width: 100%;" required >
@@ -90,7 +90,7 @@
                           </div>
                         </div>
                         <div class="col-md-6">
-                          <div class="form-group">
+                          <div class="input_section">
                             <label>Amount Received </label>
                             <div class="form-group bmd-form-group">
                               <input type="number" class="form-control" name="amount" value="{!! old( 'amount', $payment['amount']) !!}">
@@ -103,7 +103,7 @@
                           </div>
                         </div>
                         <div class="col-md-6">
-                          <div class="form-group">
+                          <div class="input_section">
                             <label>Reference no </label>
                             <div class="form-group bmd-form-group">
                               <input type="text" class="form-control" name="reference_no" value="{!! old( 'reference_no', $payment['reference_no']) !!}">
@@ -116,7 +116,7 @@
                           </div>
                         </div>
                         <div class="col-md-6">
-                          <div class="form-group">
+                          <div class="input_section">
                             <label>Bank Name</label>
                             <div class="form-group bmd-form-group">
                               <input type="text" class="form-control" name="bank_name" value="{!! old( 'bank_name', $payment['bank_name']) !!}">
@@ -131,7 +131,7 @@
                       </div>
                       <div class="row">
                         <div class="col-md-12">
-                          <div class="form-group">
+                          <div class="input_section">
                             <label>Description </label>
                             <div class="form-group bmd-form-group">
                               <textarea class="form-control" rows="5" name="description">{!! old( 'description', $payment['description']) !!}</textarea>
@@ -146,11 +146,11 @@
                       </div>
                     <div class="tab-pane active" id="link1">
                       <div class="row">
-                        <h4 class="section-heading mb-3  h4 mt-0 text-center text-info">Unpaid Invoices</h4> 
+                        <h4 class="section-heading mb-3  h4 mt-0 text-center">Unpaid Invoices</h4> 
                         <div class="table-responsive w-100">
                           <table class="table kvcodes-dynamic-rows-example" id="tab_logic">
                              <thead>
-                                <tr class="card-header-warning text-white">
+                                <tr class="card-header-warning text-white bg_color_change">
                                   <th class="text-center"> # </th>
                                   <th class="text-center"> Invoice Date </th>
                                   <th class="text-center"> Invoice No</th>

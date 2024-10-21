@@ -5,7 +5,6 @@
       </h2>
    </x-slot>
    @if(auth()->user()->hasRole('Customer Dealer'))
-   @if($dealer_poster_setting->slider == 'Y')
    <div class="nav-wrapper position-relative end-0">
       <ul class="nav nav-pills nav-pills-warning nav-pills-icons justify-content-center" id="tabs" role="tablist">
          <li class="nav-item">
@@ -22,6 +21,7 @@
    </div>
    <div class="tab-content tab-space tab-subcategories">
       <div class="tab-pane active show" id="sliderTab">
+         @if($dealer_poster_setting->slider == 'Y')
          <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
             <ol class="carousel-indicators">
                @if($dealer_poster_setting->exists && $dealer_poster_setting->getMedia('dealer_portal_slider_image')->count() > 0 && Storage::disk('s3')->exists($dealer_poster_setting->getMedia('dealer_portal_slider_image')[0]->getPath()))
@@ -208,7 +208,7 @@
             <div class="col-md-12">
                <div class="row">
                   <div class="col-sm">
-                     <div class="card text-center">
+                     <div class="card bg-color text-center">
                         <div class="card-body">
                            <h4 class="card-title visittargetcount">0</h4>
                            <p class="card-text">Visit Target</p>
@@ -216,7 +216,7 @@
                      </div>
                   </div>
                   <div class="col-sm">
-                     <div class="card text-center">
+                     <div class="card bg-color  text-center">
                         <div class="card-body">
                            <h4 class="card-title visitedcount">0</h4>
                            <p class="card-text text-center">Visited</p>
@@ -224,7 +224,7 @@
                      </div>
                   </div>
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title text-center beatadherancecount">0</h4>
                            <p class="card-text text-center">Adherance %</p>
@@ -232,7 +232,7 @@
                      </div>
                   </div>
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title text-center beatproductivitycount">0</h4>
                            <p class="card-text text-center">Productivity %</p>
@@ -242,7 +242,7 @@
                </div>
                <div class="row">
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title text-center totaldealerscount">0</h4>
                            <p class="card-text text-center">Total Dealers</p>
@@ -250,7 +250,7 @@
                      </div>
                   </div>
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title text-center totalStockistcount">0</h4>
                            <p class="card-text text-center">Total Stockist</p>
@@ -258,7 +258,7 @@
                      </div>
                   </div>
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title text-center totalFleetOwnercount">0</h4>
                            <p class="card-text text-center">Total Fleet Owner</p>
@@ -266,7 +266,7 @@
                      </div>
                   </div>
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color">
                         <div class="card-body">
                            <h4 class="card-title text-center totalMechanicscount">0</h4>
                            <p class="card-text text-center">Total Mechanic</p>
@@ -276,7 +276,7 @@
                </div>
                <div class="row">
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title text-center activedealerscount">0</h4>
                            <p class="card-text text-center">Active Dealers</p>
@@ -284,7 +284,7 @@
                      </div>
                   </div>
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title text-center activeStockistcount">0</h4>
                            <p class="card-text text-center">Active Stockist</p>
@@ -292,7 +292,7 @@
                      </div>
                   </div>
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title text-center activeFleetOwnercount">0</h4>
                            <p class="card-text text-center">Active Fleet Owner</p>
@@ -300,7 +300,7 @@
                      </div>
                   </div>
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title text-center activeMechanicscount">0</h4>
                            <p class="card-text text-center">Active Mechanic</p>
@@ -312,7 +312,7 @@
             <div class="col-md-12">
                <div class="row">
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title">{!! date('F') !!} Beat Adherence</h4>
                            <div id="BeatAdherenceBar" class="ct-chart"></div>
@@ -331,7 +331,7 @@
                </div>
                <div class="row">
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color">
                         <div class="card-body">
                            <h4 class="card-title">{!! date('F') !!} Beat Productivity</h4>
                            <div id="BeatProductivityBar" class="ct-chart"></div>
@@ -350,7 +350,7 @@
                </div>
                <div class="row">
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title">{!! date('Y') !!} Adherence</h4>
                            <div id="YearBeatAdherenceBar" class="ct-chart"></div>
@@ -369,7 +369,7 @@
                </div>
                <div class="row">
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title">{!! date('Y') !!} Productivity</h4>
                            <div id="YearBeatProductivityBar" class="ct-chart"></div>
@@ -519,7 +519,7 @@
                <div class="col-md-12">
                   <div class="row">
                      <div class="col-sm">
-                        <div class="card text-center">
+                        <div class="card bg-color  text-center">
                            <div class="card-body">
                               <h4 class="card-title" id="total_primary_sale_value">{{$total_sale}}</h4>
                               <p class="card-text">Total Sale Value</p>
@@ -527,7 +527,7 @@
                         </div>
                      </div>
                      <div class="col-sm">
-                        <div class="card text-center">
+                        <div class="card bg-color  text-center">
                            <div class="card-body">
                               <h4 class="card-title" id="total_primary_qty">{{$total_qty}}</h4>
                               <p class="card-text text-center">Total Quantity</p>
@@ -582,7 +582,7 @@
          <div class="col-md-12">
             <div class="row">
                <div class="col-sm">
-                  <div class="card text-center">
+                  <div class="card bg-color text-center">
                      <div class="card-body">
                         <h4 class="card-title daystouredcount">0</h4>
                         <p class="card-text">Days Toured</p>
@@ -590,7 +590,7 @@
                   </div>
                </div>
                <div class="col-sm">
-                  <div class="card text-center">
+                  <div class="card bg-color  text-center">
                      <div class="card-body">
                         <h4 class="card-title daystouredcount">0</h4>
                         <p class="card-text">Days Toured</p>
@@ -598,7 +598,7 @@
                   </div>
                </div>
                <div class="col-sm">
-                  <div class="card text-center">
+                  <div class="card bg-color  text-center">
                      <div class="card-body">
                         <h4 class="card-title daystouredcount">0</h4>
                         <p class="card-text">Days Toured</p>
@@ -606,7 +606,7 @@
                   </div>
                </div>
                <div class="col-sm">
-                  <div class="card text-center">
+                  <div class="card bg-color  text-center">
                      <div class="card-body">
                         <h4 class="card-title daystouredcount">0</h4>
                         <p class="card-text">Days Toured</p>
@@ -614,51 +614,7 @@
                   </div>
                </div>
                <div class="col-sm">
-                  <div class="card text-center">
-                     <div class="card-body">
-                        <h4 class="card-title daystouredcount">0</h4>
-                        <p class="card-text">Days Toured</p>
-                     </div>
-                  </div>
-               </div>
-            </div>
-         </div>
-         <div class="col-md-12">
-            <div class="row">
-               <div class="col-sm">
-                  <div class="card text-center">
-                     <div class="card-body">
-                        <h4 class="card-title daystouredcount">0</h4>
-                        <p class="card-text">Days Toured</p>
-                     </div>
-                  </div>
-               </div>
-               <div class="col-sm">
-                  <div class="card text-center">
-                     <div class="card-body">
-                        <h4 class="card-title daystouredcount">0</h4>
-                        <p class="card-text">Days Toured</p>
-                     </div>
-                  </div>
-               </div>
-               <div class="col-sm">
-                  <div class="card text-center">
-                     <div class="card-body">
-                        <h4 class="card-title daystouredcount">0</h4>
-                        <p class="card-text">Days Toured</p>
-                     </div>
-                  </div>
-               </div>
-               <div class="col-sm">
-                  <div class="card text-center">
-                     <div class="card-body">
-                        <h4 class="card-title daystouredcount">0</h4>
-                        <p class="card-text">Days Toured</p>
-                     </div>
-                  </div>
-               </div>
-               <div class="col-sm">
-                  <div class="card text-center">
+                  <div class="card bg-color  text-center">
                      <div class="card-body">
                         <h4 class="card-title daystouredcount">0</h4>
                         <p class="card-text">Days Toured</p>
@@ -670,7 +626,7 @@
          <div class="col-md-12">
             <div class="row">
                <div class="col-sm">
-                  <div class="card text-center">
+                  <div class="card bg-color  text-center">
                      <div class="card-body">
                         <h4 class="card-title daystouredcount">0</h4>
                         <p class="card-text">Days Toured</p>
@@ -678,7 +634,7 @@
                   </div>
                </div>
                <div class="col-sm">
-                  <div class="card text-center">
+                  <div class="card bg-color  text-center">
                      <div class="card-body">
                         <h4 class="card-title daystouredcount">0</h4>
                         <p class="card-text">Days Toured</p>
@@ -686,7 +642,7 @@
                   </div>
                </div>
                <div class="col-sm">
-                  <div class="card text-center">
+                  <div class="card bg-color  text-center">
                      <div class="card-body">
                         <h4 class="card-title daystouredcount">0</h4>
                         <p class="card-text">Days Toured</p>
@@ -694,7 +650,7 @@
                   </div>
                </div>
                <div class="col-sm">
-                  <div class="card text-center">
+                  <div class="card bg-color  text-center">
                      <div class="card-body">
                         <h4 class="card-title daystouredcount">0</h4>
                         <p class="card-text">Days Toured</p>
@@ -702,7 +658,51 @@
                   </div>
                </div>
                <div class="col-sm">
-                  <div class="card text-center">
+                  <div class="card bg-color  text-center">
+                     <div class="card-body">
+                        <h4 class="card-title daystouredcount">0</h4>
+                        <p class="card-text">Days Toured</p>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="col-md-12">
+            <div class="row">
+               <div class="col-sm">
+                  <div class="card bg-color  text-center">
+                     <div class="card-body">
+                        <h4 class="card-title daystouredcount">0</h4>
+                        <p class="card-text">Days Toured</p>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-sm">
+                  <div class="card bg-color  text-center">
+                     <div class="card-body">
+                        <h4 class="card-title daystouredcount">0</h4>
+                        <p class="card-text">Days Toured</p>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-sm">
+                  <div class="card bg-color   text-center">
+                     <div class="card-body">
+                        <h4 class="card-title daystouredcount">0</h4>
+                        <p class="card-text">Days Toured</p>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-sm">
+                  <div class="card bg-color  text-center">
+                     <div class="card-body">
+                        <h4 class="card-title daystouredcount">0</h4>
+                        <p class="card-text">Days Toured</p>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-sm">
+                  <div class="card bg-color  text-center">
                      <div class="card-body">
                         <h4 class="card-title daystouredcount">0</h4>
                         <p class="card-text">Days Toured</p>
@@ -721,7 +721,7 @@
             <div class="col-md-12">
                <div class="row">
                   <div class="col-sm">
-                     <div class="card text-center">
+                     <div class="card bg-color  text-center">
                         <div class="card-body">
                            <h4 class="card-title daystouredcount">0</h4>
                            <p class="card-text">Days Toured</p>
@@ -729,7 +729,7 @@
                      </div>
                   </div>
                   <div class="col-sm">
-                     <div class="card text-center">
+                     <div class="card bg-color  text-center">
                         <div class="card-body">
                            <h4 class="card-title citiescoveredcount">0</h4>
                            <p class="card-text text-center">Cities Covered</p>
@@ -737,7 +737,7 @@
                      </div>
                   </div>
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title text-center daysCentralMarketcount">0</h4>
                            <p class="card-text text-center">Days Central Market</p>
@@ -745,7 +745,7 @@
                      </div>
                   </div>
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title text-center daysSuburbancount">0</h4>
                            <p class="card-text text-center">Days Suburban</p>
@@ -753,7 +753,7 @@
                      </div>
                   </div>
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title text-center daysOfficeWorkCount">0</h4>
                            <p class="card-text text-center">Days Office Work</p>
@@ -765,7 +765,7 @@
             <div class="col-md-9">
                <div class="row">
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title">Travel Summary in {!! date('F') !!}</h4>
                            <div id="MonthlyCitiesTours" class="ct-chart"></div>
@@ -787,7 +787,7 @@
             <div class="col-md-12">
                <div class="row">
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title">Travel Summary in {!! date('Y') !!}</h4>
                            <div id="YearCitiesTours" class="ct-chart ct-perfect-fourth"></div>
@@ -813,10 +813,10 @@
             <div class="col-md-12 text-center">
                <h4 class="section-heading mb-3 h4 mt-0">Secondary KPIS</h4>
             </div>
-            <div class="row" id="main_dashboard_filters">
-               <div class="col col1">
+          
+               <div class="col-md-2">
                   <label class="bmd-label-floating">User</label>
-                  <div class="form-group has-default bmd-form-group">
+                  <div class="form-group has-default">
                      <select class="form-control select2" name="user_id" id="user_id" data-style="select-with-transition" title="Select User">
                         <option value="">Select User</option>
                         @if(@isset($users ))
@@ -827,19 +827,19 @@
                      </select>
                   </div>
                </div>
-               <div class="col col2">
+               <div class="col-md-2">
                   <label class="bmd-label-floating">From Date</label>
                   <div class="form-group has-default bmd-form-group">
-                     <input type="text" class="form-control datepicker" id="fromdate" name="fromdate" autocomplete="off" readonly>
+                     <input type="text" placeholder="From Date"  class="form-control datepicker" id="fromdate" name="fromdate" autocomplete="off" readonly>
                   </div>
                </div>
-               <div class="col col3">
+               <div class="col-md-2">
                   <label class="bmd-label-floating">To Date</label>
                   <div class="form-group has-default bmd-form-group">
-                     <input type="text" class="form-control datepicker" id="todate" name="todate" autocomplete="off" readonly>
+                     <input type="text" placeholder="To Date" class="form-control datepicker" id="todate" name="todate" autocomplete="off" readonly>
                   </div>
                </div>
-               <div class="col col4">
+               <div class="col-md-2">
                   <label class="bmd-label-floating">Division</label>
                   <select class="form-control select2 division_test" name="division_id" id="division_id" data-style="select-with-transition" title="Select User">
                      <option value="">Division</option>
@@ -850,7 +850,7 @@
                      @endif
                   </select>
                </div>
-               <div class="col col5">
+               <div class="col-md-2">
                   <label class="bmd-label-floating">Branch</label>
                   <select class="form-control select2" name="branch_id" id="branch_id" data-style="select-with-transition" title="Select User">
                      <option value="">Branch</option>
@@ -861,7 +861,7 @@
                      @endif
                   </select>
                </div>
-               <div class="col col6">
+               <div class="col-md-2">
                   <label class="bmd-label-floating">Financial Year</label>
                   <select class="form-control select2" name="financial_year" id="financial_year" required data-style="select-with-transition" title="Year">
                      <option value="" disabled selected>Financial Year</option>
@@ -874,7 +874,7 @@
                      @endforeach
                   </select>
                </div>
-               <div class="col col7">
+               <div class="col-md-2">
                   <label class="bmd-label-floating">Branch</label>
                   <select class="form-control select2" name="month" id="month" data-style="select-with-transition" title="Month">
                      <option value="" disabled selected>Month</option>
@@ -882,7 +882,7 @@
                         @endfor
                   </select>
                </div>
-               <div class="col col5">
+               <div class="col-md-2">
                   <label class="bmd-label-floating">Sales Person</label>
                   <select class="form-control select2" name="sales_id" id="sales_id" data-style="select-with-transition" title="Select User">
                      <option value="">Sales Person</option>
@@ -893,91 +893,91 @@
                      @endif
                   </select>
                </div>
-            </div>
+
             <div class="col-md-12">
                <div class="row">
-                  <div class="col-sm">
-                     <div class="card text-center">
+                  <div class="col-md-3">
+                     <div class="card bg-color text-center">
                         <div class="card-body">
                            <h4 class="card-title registredretailercount">0</h4>
                            <p class="card-text">Registred Retailer</p>
                         </div>
                      </div>
                   </div>
-                  <div class="col-sm">
-                     <div class="card text-center">
+                  <div class="col-md-3">
+                     <div class="card bg-color  text-center">
                         <div class="card-body">
                            <h4 class="card-title activeretailercount">0</h4>
                            <p class="card-text text-center">Active Retailer</p>
                         </div>
                      </div>
                   </div>
-                  <div class="col-sm">
-                     <div class="card">
+                  <div class="col-md-3">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title text-center activeRetailerPercent">0</h4>
                            <p class="card-text text-center">Active Retailer %</p>
                         </div>
                      </div>
                   </div>
-                  <div class="col-sm">
-                     <div class="card">
+                  <div class="col-md-3">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title text-center newretaileradcount">0</h4>
                            <p class="card-text text-center">New Retailer Ad</p>
                         </div>
                      </div>
                   </div>
-                  <div class="col-sm">
-                     <div class="card">
+                  <div class="col-md-3">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title text-center nosOfRetailerRegistredSaarthi">0</h4>
                            <p class="card-text text-center">Nos Of Retailer Registred under saarthi</p>
                         </div>
                      </div>
                   </div>
-                  <div class="col-sm">
-                     <div class="card">
+                  <div class="col-md-3">
+                     <div class="card bg-color">
                         <div class="card-body">
                            <h4 class="card-title text-center nosOfRetailerRegistredSaarthiPercent">0</h4>
                            <p class="card-text text-center">Nos Of Retailer Registred under saarthi %</p>
                         </div>
                      </div>
                   </div>
-                  <div class="col-sm">
-                     <div class="card">
+                  <div class="col-md-3">
+                     <div class="card bg-color">
                         <div class="card-body">
                            <h4 class="card-title text-center orderTarget">0</h4>
                            <p class="card-text text-center">Order Target</p>
                         </div>
                      </div>
                   </div>
-                  <div class="col-sm">
-                     <div class="card">
+                  <div class="col-md-3">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title text-center orderAchievement">0</h4>
                            <p class="card-text text-center">Order Achievement</p>
                         </div>
                      </div>
                   </div>
-                  <div class="col-sm">
-                     <div class="card">
+                  <div class="col-md-3">
+                     <div class="card bg-color">
                         <div class="card-body">
                            <h4 class="card-title text-center achievementPercent">0</h4>
                            <p class="card-text text-center">Achievement %</p>
                         </div>
                      </div>
                   </div>
-                  <div class="col-sm">
-                     <div class="card">
+                  <div class="col-md-3">
+                     <div class="card bg-color">
                         <div class="card-body">
                            <h4 class="card-title text-center perDayAverageSales">0</h4>
                            <p class="card-text text-center">Per Day Avg Sales</p>
                         </div>
                      </div>
                   </div>
-                  <div class="col-sm">
-                     <div class="card">
+                  <div class="col-md-3">
+                     <div class="card bg-color  ">
                         <div class="card-body">
                            <h4 class="card-title text-center perDayAverageVisit">0</h4>
                            <p class="card-text text-center">Per Day average Visit</p>
@@ -993,6 +993,7 @@
             <div class="col-md-12 text-center">
                <h4 class="section-heading mb-3 h4 mt-0">Secondary Sales Summary</h4>
             </div>
+            <div class="col-md-12">
             <form method="GET" action="{{ URL::to('customers-download') }}">
                <div class="d-flex flex-wrap flex-row">
                   <!-- division filter -->
@@ -1097,10 +1098,11 @@
                   </div>
                </div>
             </form>
+         </div>
             <div class="col-md-12">
                <div class="row">
                   <div class="col-sm">
-                     <div class="card text-center">
+                     <div class="card bg-color text-center">
                         <div class="card-body">
                            <h4 class="card-title" id="total_order_value">0</h4>
                            <p class="card-text">Total Order Value</p>
@@ -1108,7 +1110,7 @@
                      </div>
                   </div>
                   <div class="col-sm">
-                     <div class="card text-center">
+                     <div class="card bg-color text-center">
                         <div class="card-body">
                            <h4 class="card-title" id="total_order_qty">0</h4>
                            <p class="card-text text-center">Total Order Quantity</p>
@@ -1116,7 +1118,7 @@
                      </div>
                   </div>
                   <div class="col-sm">
-                     <div class="card text-center">
+                     <div class="card bg-color  text-center">
                         <div class="card-body">
                            <h4 class="card-title" id="total_order">0</h4>
                            <p class="card-text text-center">Total Order</p>
@@ -1198,7 +1200,7 @@
          </div>
          <div class="row">
             <div class="col-sm">
-               <div class="card text-center">
+               <div class="card bg-color  text-center">
                   <div class="card-body">
                      <h4 class="card-title newSTUsregisteredcount">0</h4>
                      <p class="card-text">New STUs Registered</p>
@@ -1206,7 +1208,7 @@
                </div>
             </div>
             <div class="col-sm">
-               <div class="card">
+               <div class="card bg-color ">
                   <div class="card-body">
                      <h4 class="card-title text-center newFleetOwnercount">0</h4>
                      <p class="card-text text-center">New Fleet Owner Registered</p>
@@ -1214,7 +1216,7 @@
                </div>
             </div>
             <div class="col-sm">
-               <div class="card">
+               <div class="card bg-color ">
                   <div class="card-body">
                      <h4 class="card-title text-center newMechanicregisteredcount">0</h4>
                      <p class="card-text text-center">New Mechanincs Registered</p>
@@ -1222,7 +1224,7 @@
                </div>
             </div>
             <div class="col-sm">
-               <div class="card">
+               <div class="card bg-color ">
                   <div class="card-body">
                      <h4 class="card-title text-center newDealerRegisteredcount">0</h4>
                      <p class="card-text text-center">New Dealers Registered</p>
@@ -1232,7 +1234,7 @@
          </div>
          <div class="row">
             <div class="col-sm">
-               <div class="card text-center">
+               <div class="card bg-color  text-center">
                   <div class="card-body">
                      <h4 class="card-title visitedstuscount">0</h4>
                      <p class="card-text text-center">STUs Visited</p>
@@ -1240,7 +1242,7 @@
                </div>
             </div>
             <div class="col-sm">
-               <div class="card">
+               <div class="card bg-color ">
                   <div class="card-body">
                      <h4 class="card-title text-center visitedFleetOwnercount">0</h4>
                      <p class="card-text text-center">Fleet Owner Visited</p>
@@ -1249,7 +1251,7 @@
             </div>
 
             <div class="col-sm">
-               <div class="card">
+               <div class="card bg-color ">
                   <div class="card-body">
                      <h4 class="card-title text-center visitedMechanicCount">0</h4>
                      <p class="card-text text-center">Mechanincs Visited</p>
@@ -1257,7 +1259,7 @@
                </div>
             </div>
             <div class="col-sm">
-               <div class="card">
+               <div class="card bg-color ">
                   <div class="card-body">
                      <h4 class="card-title text-center visitedDealerCount">0</h4>
                      <p class="card-text text-center">Dealers Visited</p>
@@ -1267,7 +1269,7 @@
          </div>
          <div class="row">
             <div class="col-sm">
-               <div class="card">
+               <div class="card bg-color ">
                   <div class="card-body">
                      <h4 class="card-title">Customer Registered in {!! date('F') !!}</h4>
                      <div id="MonthNewCustomerRegisteredBar" class="ct-chart"></div>
@@ -1287,7 +1289,7 @@
          </div>
          <div class="row">
             <div class="col-sm">
-               <div class="card">
+               <div class="card bg-color">
                   <div class="card-body">
                      <h4 class="card-title">Customer Visited in {!! date('F') !!}</h4>
                      <div id="MonthCustomerVisitedBar" class="ct-chart"></div>
@@ -1307,7 +1309,7 @@
          </div>
          <div class="row">
             <div class="col-sm">
-               <div class="card">
+               <div class="card bg-color ">
                   <div class="card-body">
                      <h4 class="card-title">Customer Registered in {!! date('Y') !!}</h4>
                      <div id="YearNewCustomerRegisteredBar" class="ct-chart"></div>
@@ -1327,7 +1329,7 @@
          </div>
          <div class="row">
             <div class="col-sm">
-               <div class="card">
+               <div class="card bg-color ">
                   <div class="card-body">
                      <h4 class="card-title">Customer Visited in {!! date('Y') !!}</h4>
                      <div id="YearCustomerVisitedBar" class="ct-chart"></div>
@@ -1354,7 +1356,7 @@
          </div>
          <div class="row">
             <div class="col-sm">
-               <div class="card text-center">
+               <div class="card bg-color  text-center">
                   <div class="card-body">
                      <h4 class="card-title couponsCollectedValue">0</h4>
                      <p class="card-text">Coupons collected under value scheme</p>
@@ -1362,7 +1364,7 @@
                </div>
             </div>
             <div class="col-sm">
-               <div class="card text-center">
+               <div class="card bg-color text-center">
                   <div class="card-body">
                      <h4 class="card-title mrpCollectedValue">0</h4>
                      <p class="card-text text-center">Total Value under value scheme</p>
@@ -1370,7 +1372,7 @@
                </div>
             </div>
             <div class="col-sm">
-               <div class="card">
+               <div class="card bg-color ">
                   <div class="card-body">
                      <h4 class="card-title text-center couponsCollectedPoints">0</h4>
                      <p class="card-text text-center">Coupon collected under MRP scheme</p>
@@ -1378,7 +1380,7 @@
                </div>
             </div>
             <div class="col-sm">
-               <div class="card">
+               <div class="card bg-color ">
                   <div class="card-body">
                      <h4 class="card-title text-center mrpCollectedPoints">0</h4>
                      <p class="card-text text-center">Total Value under MRP Scheme</p>
@@ -1388,7 +1390,7 @@
          </div>
          <div class="row">
             <div class="col-sm">
-               <div class="card">
+               <div class="card bg-color ">
                   <div class="card-body">
                      <h4 class="card-title">Coupon Vs Mrp Scheme in {!! date('F') !!}</h4>
                      <div id="ValueVsMrpSchemePai" class="ct-chart"></div>
@@ -1404,7 +1406,7 @@
                </div>
             </div>
             <div class="col-sm">
-               <div class="card">
+               <div class="card bg-color ">
                   <div class="card-body">
                      <h4 class="card-title">Monthly Coupon Value vs MRP Scheme in {!! date('F') !!}</h4>
                      <div id="ValueVsMrpSchemeQtyPai" class="ct-chart"></div>
@@ -1422,7 +1424,7 @@
          </div>
          <div class="row">
             <div class="col-sm">
-               <div class="card">
+               <div class="card bg-color ">
                   <div class="card-body">
                      <h4 class="card-title">Coupon Vs Mrp Scheme in {!! date('Y') !!}</h4>
                      <div id="YearValueVsMrpSchemePai" class="ct-chart"></div>
@@ -1438,7 +1440,7 @@
                </div>
             </div>
             <div class="col-sm">
-               <div class="card">
+               <div class="card bg-color ">
                   <div class="card-body">
                      <h4 class="card-title">Monthly Coupon Value vs MRP Scheme in {!! date('Y') !!}</h4>
                      <div id="YearValueVsMrpSchemeQtyPai" class="ct-chart"></div>
@@ -1463,7 +1465,7 @@
             <div class="col-md-12">
                <div class="row">
                   <div class="col-sm">
-                     <div class="card text-center">
+                     <div class="card bg-color  text-center">
                         <div class="card-body">
                            <h4 class="card-title orderCollectedCount">0</h4>
                            <p class="card-text">Order Collected</p>
@@ -1471,7 +1473,7 @@
                      </div>
                   </div>
                   <div class="col-sm">
-                     <div class="card text-center">
+                     <div class="card bg-color  text-center">
                         <div class="card-body">
                            <h4 class="card-title orderCollectedSum">0</h4>
                            <p class="card-text text-center">Total Orders</p>
@@ -1479,7 +1481,7 @@
                      </div>
                   </div>
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title text-center GGPLorderCollectedCount">0</h4>
                            <p class="card-text text-center">Total orders GGPL</p>
@@ -1487,7 +1489,7 @@
                      </div>
                   </div>
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title text-center GGPLorderCollectedSum">0</h4>
                            <p class="card-text text-center">Total order value GGPL</p>
@@ -1497,7 +1499,7 @@
                </div>
                <div class="row">
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color">
                         <div class="card-body">
                            <h4 class="card-title text-center GPDorderCollectedCount">0</h4>
                            <p class="card-text text-center">Total orders GPD</p>
@@ -1505,7 +1507,7 @@
                      </div>
                   </div>
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title text-center GPDorderCollectedSum">0</h4>
                            <p class="card-text text-center">Total order value GPD</p>
@@ -1513,7 +1515,7 @@
                      </div>
                   </div>
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title text-center GDGLorderCollectedCount">0</h4>
                            <p class="card-text text-center">Total orders GDGL</p>
@@ -1521,7 +1523,7 @@
                      </div>
                   </div>
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title text-center GDGLorderCollectedSum">0</h4>
                            <p class="card-text text-center">Total order value GDGL</p>
@@ -1533,7 +1535,7 @@
             <div class="col-md-12">
                <div class="row">
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title">Top 10 Product</h4>
                            <div id="Top10ProductBar" class="ct-chart"></div>
@@ -1543,7 +1545,7 @@
                </div>
                <div class="row">
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title">Target Vs Achievement</h4>
                            <div id="TargetVsAchievementBar" class="ct-chart"></div>
@@ -1553,7 +1555,7 @@
                </div>
                <div class="row">
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title">State Wise Target Vs Achievement</h4>
                            <div id="StateWiseTargetVsAchievementBar" class="ct-chart"></div>
@@ -1563,7 +1565,7 @@
                </div>
                <div class="row">
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title">Top 10 Sales Representatives</h4>
                            <div id="Top10OrderRepresentativesBar" class="ct-chart"></div>
@@ -1573,7 +1575,7 @@
                </div>
                <div class="row">
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title">Orders by Zone </h4>
                            <div id="OrdersbyZoneBar" class="ct-chart"></div>
@@ -1592,7 +1594,7 @@
             <div class="col-md-12">
                <div class="row">
                   <div class="col-sm">
-                     <div class="card text-center">
+                     <div class="card bg-color  text-center">
                         <div class="card-body">
                            <h4 class="card-title salestargetamount">0</h4>
                            <p class="card-text">Sales Target</p>
@@ -1600,7 +1602,7 @@
                      </div>
                   </div>
                   <div class="col-sm">
-                     <div class="card text-center">
+                     <div class="card bg-color  text-center">
                         <div class="card-body">
                            <h4 class="card-title salesachivmentamount">0</h4>
                            <p class="card-text text-center">Achivement </p>
@@ -1608,7 +1610,7 @@
                      </div>
                   </div>
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title text-center salesachivmentpercent">0</h4>
                            <p class="card-text text-center">Achivement %</p>
@@ -1616,7 +1618,7 @@
                      </div>
                   </div>
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title text-center salesvalues">0</h4>
                            <p class="card-text text-center">Sales in Value</p>
@@ -1628,7 +1630,7 @@
             <div class="col-md-12">
                <div class="row">
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title">Sales Target Vs Achievement</h4>
                            <div id="SalesTargetAchievementBar" class="ct-chart"></div>
@@ -1638,7 +1640,7 @@
                </div>
                <div class="row">
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color">
                         <div class="card-body">
                            <h4 class="card-title">State Wise Target Vs Achievement</h4>
                            <div id="StateWiseSalesTargetVsAchievementBar" class="ct-chart"></div>
@@ -1648,7 +1650,7 @@
                </div>
                <div class="row">
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title">Top 10 Sales Representatives</h4>
                            <div id="Top10SalesRepresentativesBar" class="ct-chart"></div>
@@ -1658,7 +1660,7 @@
                </div>
                <div class="row">
                   <div class="col-sm">
-                     <div class="card">
+                     <div class="card bg-color ">
                         <div class="card-body">
                            <h4 class="card-title">Sales (Amount in RS ) by Zone </h4>
                            <div id="SalesbyZoneBar" class="ct-chart"></div>
@@ -1682,7 +1684,6 @@
          </div>
       </div>
    </div>
-   @endif
    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 
@@ -3834,4 +3835,5 @@
 
       ////////////////// sarthi graph scripts end ///////////////////
    </script>
+   @endif
 </x-app-layout>

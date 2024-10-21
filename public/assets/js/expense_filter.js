@@ -41,9 +41,6 @@ $(document).ready(function () {
     oTable = $('#getallexpenses').DataTable({
         "processing": true,
         "serverSide": true,
-        "order": [
-            [0, 'desc']
-        ],
         "stateSave": true,
         "bStateSave": true,
         "lengthMenu": [
@@ -72,7 +69,6 @@ $(document).ready(function () {
             {
                 data: 'id',
                 name: 'id',
-                orderable: false,
                 searchable: false
             },
             {
@@ -423,7 +419,6 @@ function disableButton() {
 
 $('body').on('click', '.reject_status', function () {
     var id = $('#expenseid').val();
-    console.log(id);
     var token = $("meta[name='csrf-token']").attr("content");
     $('#reject_expense_id').val(id);
     $("#reject_expense").modal();
@@ -452,7 +447,6 @@ function disableButtonreject() {
                 $('#reject_expense').modal('hide');
                 $('#expenseModal').modal('hide');
                 oTable.draw();
-
             } else {
                 $('.alert').addClass("alert-danger");
                 // setTimeout(function() {

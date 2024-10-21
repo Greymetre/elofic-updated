@@ -101,22 +101,22 @@
         <form method="POST" action="{{ route('country.store') }}" enctype="multipart/form-data" id="createcountryForm">
         @csrf
         <div class="row">
-            <div class="col-md-9">
-              <div class="row">
-                <label class="col-md-4 col-form-label">{!! trans('panel.country.country_name') !!} <span class="text-danger"> *</span></label>
-                <div class="col-md-8">
+            <div class="col-md-12">
+              <div class="input_section">
+                <label class="col-form-label">{!! trans('panel.country.country_name') !!} <span class="text-danger"> *</span></label>
+              
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="country_name" id="country_name" class="form-control" value="{!! old( 'country_name') !!}" maxlength="200" required>
                     @if ($errors->has('country_name'))
-                      <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('country_name') }}</p></div>
+                      <div class="error"><p class="text-danger">{{ $errors->first('country_name') }}</p></div>
                     @endif
                   </div>
-                </div>
+                
               </div>
             </div>
           </div>
         <div class="clearfix"></div>
-        <div class="modal-footer">
+        <div class="pull-right">
           <input type="hidden" name="id" id="country_id" />
           <button class="btn btn-info save"> Submit</button>
         </form>

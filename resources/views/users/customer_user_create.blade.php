@@ -66,10 +66,10 @@
                      <div class="row">
                         <input type="hidden" name="id" id="user_id" value="{!! $user?$user->id:'' !!}">
 
-                        <div class="col-md-10">
-                           <div class="row">
-                              <label class="col-md-3 col-form-label">Customer To</label>
-                              <div class="col-md-9">
+                        <div class="col-md-12">
+                           <div class="input_section">
+                              <label class="col-form-label">Customer To</label>
+                           
                                  <div class="form-group has-default bmd-form-group">
                                     <select class="form-control select2" name="customerid" id="customerid" required>
                                        <option value="" disabled>Select Customer</option>
@@ -84,12 +84,12 @@
                                     @endif
                                  </div>
                               </div>
-                           </div>
+                       
                         </div>
                         <div class="col-md-6">
-                           <div class="row">
-                              <label class="col-md-4 col-form-label">{{ trans('panel.user.fields.first_name') }} <span class="text-danger"> *</span></label>
-                              <div class="col-md-8">
+                           <div class="input_section">
+                              <label class=" col-form-label">{{ trans('panel.user.fields.first_name') }} <span class="text-danger"> *</span></label>
+                            
                                  <div class="form-group has-default bmd-form-group">
                                     <input type="text" name="first_name" id="first_name" class="form-control {{ $errors->has('first_name') ? 'is-invalid' : '' }}" value="{!! old( 'first_name'), $user->first_name !!}" maxlength="200" required>
                                     @if ($errors->has('first_name'))
@@ -98,13 +98,13 @@
                                     </div>
                                     @endif
                                  </div>
-                              </div>
+                          
                            </div>
                         </div>
                         <div class="col-md-6">
-                           <div class="row">
-                              <label class="col-md-4 col-form-label">{{ trans('panel.user.fields.last_name') }}<span class="text-danger"> *</span></label>
-                              <div class="col-md-8">
+                           <div class="input_section">
+                              <label class="col-form-label">{{ trans('panel.user.fields.last_name') }}<span class="text-danger"> *</span></label>
+                             
                                  <div class="form-group has-default bmd-form-group">
                                     <input type="text" name="last_name" id="last_name" class="form-control {{ $errors->has('last_name') ? 'is-invalid' : '' }}" value="{!! old( 'last_name'), $user->last_name !!}" maxlength="200" required>
                                     @if ($errors->has('last_name'))
@@ -113,15 +113,15 @@
                                     </div>
                                     @endif
                                  </div>
-                              </div>
+                           
                            </div>
                         </div>
                      </div>
                      <div class="row">
                         <div class="col-md-12">
-                           <div class="row">
-                              <label class="col-md-2 col-form-label">{!! trans('panel.global.email') !!}<span class="text-danger"> *</span></label>
-                              <div class="col-md-10">
+                           <div class="input_section">
+                              <label class="ccol-form-label">{!! trans('panel.global.email') !!}<span class="text-danger"> *</span></label>
+                            
                                  <div class="form-group has-default bmd-form-group">
                                     <input type="email" name="email" id="email" class="form-control" value="{!! old( 'email', $user->email) !!}" maxlength="200">
                                     @if ($errors->has('email'))
@@ -130,13 +130,13 @@
                                     </div>
                                     @endif
                                  </div>
-                              </div>
+                         
                            </div>
                         </div>
                         <div class="col-md-6">
-                           <div class="row">
-                              <label class="col-md-4 col-form-label">{!! trans('panel.global.mobile') !!}<span class="text-danger"> *</span></label>
-                              <div class="col-md-8">
+                           <div class="input_section">
+                              <label class="col-form-label">{!! trans('panel.global.mobile') !!}<span class="text-danger"> *</span></label>
+                              
                                  <div class="form-group has-default bmd-form-group">
                                     <input type="number" name="mobile" id="mobile" class="form-control {{ $errors->has('mobile') ? 'is-invalid' : '' }}" value="{!!  $user->mobile, old( 'mobile') !!}" maxlength="10" minlength="10" required>
                                  </div>
@@ -144,12 +144,12 @@
                                  <label class="error">{{ $errors->first('mobile') }}</label>
                                  @endif
                               </div>
-                           </div>
+                        
                         </div>
                         <div class="col-md-6">
-                           <div class="row">
-                              <label class="col-md-4 col-form-label">{{ trans('panel.user.fields.password') }}<span class="text-danger"> *</span></label>
-                              <div class="col-md-8">
+                           <div class="input_section">
+                              <label class="col-form-label">{{ trans('panel.user.fields.password') }}<span class="text-danger"> *</span></label>
+                          
                                  <div class="form-group has-default bmd-form-group" id="pass-div">
                                     <input class="form-control {{ $errors->has('password') ? 'is-invalid' : '' }}" type="text" name="password" id="password" value="{{ old('password', $user->password_string) }}" minlength="6" maxlength="200" required>
                                     <span class="material-icons" title="Show" id="pass-seen">visibility</span>
@@ -157,13 +157,13 @@
                                     <label class="error">{{ $errors->first('password') }}</label>
                                     @endif
                                  </div>
-                              </div>
+                            
                            </div>
                         </div>
                         <div class="col-md-6">
-                           <div class="row">
-                              <label class="col-md-2 col-form-label">{{ trans('panel.user.fields.roles') }}</label>
-                              <div class="col-md-10">
+                           <div class="input_section">
+                              <label class="col-form-label">{{ trans('panel.user.fields.roles') }}</label>
+                           
                                  <div class="form-group has-default bmd-form-group">
                                     <select class="form-control select2" name="roles[]" id="roles" multiple required>
                                        @foreach($roles as $id => $roles)
@@ -174,13 +174,13 @@
                                     <label class="error">{{ $errors->first('roles') }}</label>
                                     @endif
                                  </div>
-                              </div>
+                          
                            </div>
                         </div>
                         {{-- <div class="col-md-6 d-none" id="branch-data">
-                           <div class="row">
-                              <label class="col-md-3 col-form-label">Branch data</label>
-                              <div class="col-md-9">
+                           <div class="input_section">
+                              <label class="col-form-label">Branch data</label>
+                           
                                  <div class="form-group has-default bmd-form-group">
                                     <div class="form-group has-default bmd-form-group">
                                        <select class="form-control select2" name="branch_show[]" multiple required>
@@ -198,7 +198,7 @@
                      </div>
                      @endif
                   </div>
-            </div>
+        
          </div>
       </div> --}}
    </div>

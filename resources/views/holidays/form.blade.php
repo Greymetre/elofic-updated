@@ -13,8 +13,8 @@
                 <div class="col-md-12">
                     <!-- jquery validation -->
                     <div class="card card-primary">
-                        <div class="card-header">
-                            <h3 class="card-title">Holiday</h3>
+                        <div class="card-header card-header-icon card-header-theme">
+                            <h4 class="card-title">Holiday</h3>
                         </div>
                         <!-- /.card-header -->
                         <!-- form start -->
@@ -31,7 +31,10 @@
                             <div class="tab-content tab-space">
                                  {!! Form::open(['method' => 'POST','files'=>true,'route' => ['holidays.store'],'class' => 'form-horizontal','id' => 'holiday']) !!}
 
-                                <div class="p-2 form-group">
+
+<div class="row">
+    <div class="col-md-12">
+                                <div class="input_section">
                                     <label for="branch">Branch</label>
                                     <select class="form-control select2 {{ $errors->has('branch') ? 'is-invalid' : '' }}" name="branch" id="branch" required>
                                         <option value="">Select Branch</option>
@@ -40,37 +43,43 @@
                                         @endforeach
                                     </select>
                                     @if ($errors->has('branch'))
-                                    <div class="error col-lg-12">
+                                    <div class="error">
                                         <p class="text-danger">{{ $errors->first('branch') }}</p>
                                     </div>
                                     @endif
                                 </div>
-
-                                 
-                             <div class="col-md-1">
+                                   </div>
+                                      <div class="col-md-1">
                             <button type="submit" class=" btn btn-theme btn-sm add_more" id="add_more" style="margin-top:20%">{{ __('+') }}</button>     
                             </div>
+                                      </div>
 
-                            <div id="add_sales_detail">
+                                 
+                          
 
-                                 <div class="p-2 form-group">
+                            <div id="add_sales_detail" class="row">
+
+<div class="col-md-6">
+                                 <div class="input_section">
                                     <label for="holiday_date">Holiday Date</label>
                                     <input type="text" name="holiday_date[]" id="holiday_date1" value="" class="form-control datepicker">
                                      @if ($errors->has('holiday_date'))
-                                 <div class="error col-lg-12">
+                                 <div class="error">
                                     <p class="text-danger">{{ $errors->first('holiday_date') }}</p>
                                  </div>
                                  @endif
                                 </div>
-
-                                 <div class="p-2 form-group">
+ </div>
+ <div class="col-md-6">
+                                 <div class="input_section">
                                     <label for="name">Holiday Name</label>
                                     <input type="text" name="name[]" id="name" value="" class="form-control">
                                     @if ($errors->has('name'))
-                                 <div class="error col-lg-12">
+                                 <div class="error">
                                     <p class="text-danger">{{ $errors->first('name') }}</p>
                                  </div>
                                  @endif
+                                 </div>
                                  </div>
 
                             </div>
@@ -99,13 +108,13 @@
           '<button class="btn btn-danger btn-sm  deleteRowhstry"  type="button">'+
           '<i class="bi bi-trash"></i>-</button>'+
           '</div>'+
-             '<div class="p-2 form-group">'+
+             '<div class="p-3 form-group">'+
                 '<label for="holiday_date">Holiday Date</label>'+
-                '<input value="" type="text" name="holiday_date[]"  class="form-control datepicker">'+
+                '<input value="" type="text" placeholder="holiday date" name="holiday_date[]"  class="form-control datepicker">'+
              '</div>'+
-            '<div class="p-2 form-group">'+
+            '<div class="p-3 form-group">'+
                 '<label for="name">Holiday Name</label>'+
-                '<input value="" type="text" name="name[]" id="name" class="form-control">'+
+                '<input value="" type="text" name="name[]" placeholder="Holiday Name" id="name" class="form-control">'+
             '</div>'+
             '</div>';
 

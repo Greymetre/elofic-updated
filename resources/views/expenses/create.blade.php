@@ -33,9 +33,9 @@
             @csrf
             <div class="row">
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-2 col-form-label">{{ trans('panel.expenses.fields.user') }}<span class="text-danger"> *</span></label>
-                  <div class="col-md-10">
+                <div class="input_section">
+                  <label class="col-form-label">{{ trans('panel.expenses.fields.user') }}<span class="text-danger"> *</span></label>
+                  
                     <div class="form-group has-default bmd-form-group">
                       <select name="user_id" id="user_id" class="form-control {{ $errors->has('user_id') ? 'is-invalid' : '' }} select2">
                         <option value="" disabled selected>Please Select User</option>
@@ -49,14 +49,14 @@
                       </div>
                       @endif
                     </div>
-                  </div>
+                
                 </div>
               </div>
 
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-2 col-form-label">{{ trans('panel.expenses.fields.date') }}<span class="text-danger"> *</span></label>
-                  <div class="col-md-10">
+                <div class="input_section">
+                  <label class="col-form-label">{{ trans('panel.expenses.fields.date') }}<span class="text-danger"> *</span></label>
+                  
                     <div class="form-group has-default bmd-form-group">
                       <input placeholder="Expenses date" class="form-control {{ $errors->has('date') ? 'is-invalid' : '' }} datepicker" type="text" name="date" id="date" value="{{ old('date', '') }}" maxlength="200" required autocomplete="off">
                       @if($errors->has('date'))
@@ -65,15 +65,15 @@
                       </div>
                       @endif
                     </div>
-                  </div>
+                 
                 </div>
               </div>
 
 
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-2 col-form-label">{{ trans('panel.expenses.fields.expense_type') }}<span class="text-danger"> *</span></label>
-                  <div class="col-md-10">
+                <div class="input_section">
+                  <label class="col-form-label">{{ trans('panel.expenses.fields.expense_type') }}<span class="text-danger"> *</span></label>
+               
                     <div class="form-group has-default bmd-form-group">
                       <select name="expenses_type" id="expenses_type" class="form-control {{ $errors->has('expenses_type') ? 'is-invalid' : '' }} select2">
                         <option value="" disabled selected>Please Select Expenses Type</option>
@@ -89,14 +89,14 @@
                       </div>
                       @endif
                     </div>
-                  </div>
+                
                 </div>
               </div>
 
               <div class="col-md-6 km" style="display:none;">
-                <div class="row">
-                  <label class="col-md-2 col-form-label">{{ trans('panel.expenses.fields.rate') }}<span class="text-danger"> *</span></label>
-                  <div class="col-md-10">
+                <div class="input_section">
+                  <label class="col-form-label">{{ trans('panel.expenses.fields.rate') }}<span class="text-danger"> *</span></label>
+                 
                     <div class="form-group has-default bmd-form-group">
                       <input placeholder="Rate" class="form-control {{ $errors->has('rate') ? 'is-invalid' : '' }}  rate" type="text" name="rate" id="rate" value="{{ old('rate', '') }}"  autocomplete="off">
                       @if($errors->has('rate'))
@@ -105,7 +105,7 @@
                       </div>
                       @endif
                     </div>
-                  </div>
+                 
                 </div>
               </div>
 
@@ -114,9 +114,9 @@
 
 
               <div class="col-md-6 km" style="display:none;">
-                <div class="row">
-                  <label class="col-md-2 col-form-label">{{ trans('panel.expenses.fields.start_km') }}<span class="text-danger"> *</span></label>
-                  <div class="col-md-10">
+                <div class="input_section">
+                  <label class="col-form-label">{{ trans('panel.expenses.fields.start_km') }}<span class="text-danger"> *</span></label>
+                 
                     <div class="form-group has-default bmd-form-group">
                       <input placeholder="Start Km" class="form-control {{ $errors->has('start_km') ? 'is-invalid' : '' }} calcu" type="text" name="start_km" id="start_km" value="{{ old('start_km', '') }}" maxlength="200" autocomplete="off">
                       @if($errors->has('start_km'))
@@ -124,15 +124,15 @@
                         {{ $errors->first('start_km') }}
                       </div>
                       @endif
-                    </div>
+                  
                   </div>
                 </div>
               </div>
 
               <div class="col-md-6 km" style="display:none;">
-                <div class="row">
-                  <label class="col-md-2 col-form-label">{{ trans('panel.expenses.fields.stop_km') }}<span class="text-danger"> *</span></label>
-                  <div class="col-md-10">
+                <div class="input_section">
+                  <label class="col-form-label">{{ trans('panel.expenses.fields.stop_km') }}<span class="text-danger"> *</span></label>
+                  
                     <div class="form-group has-default bmd-form-group">
                       <input placeholder="Stop Km" class="form-control {{ $errors->has('stop_km') ? 'is-invalid' : '' }} calcu" type="text" name="stop_km" id="stop_km" value="{{ old('stop_km', '') }}" maxlength="200" autocomplete="off">
                       @if($errors->has('stop_km'))
@@ -141,13 +141,13 @@
                       </div>
                       @endif
                     </div>
-                  </div>
+             
                 </div>
               </div>
               <div class="col-md-6 km" style="display:none;">
-                <div class="row">
-                  <label class="col-md-2 col-form-label">{{ trans('panel.expenses.fields.total_km') }}<span class="text-danger"> *</span></label>
-                  <div class="col-md-10">
+                <div class="input_section">
+                  <label class="col-form-label">{{ trans('panel.expenses.fields.total_km') }}<span class="text-danger"> *</span></label>
+                 
                     <div class="form-group has-default bmd-form-group">
                       <input placeholder="Total Km" class="form-control {{ $errors->has('total_km') ? 'is-invalid' : '' }} total_km claim" type="text" name="total_km" id="total_km" value="{{ old('total_km', '') }}" maxlength="200" autocomplete="off">
                       @if($errors->has('total_km'))
@@ -156,15 +156,15 @@
                       </div>
                       @endif
                     </div>
-                  </div>
+                
                 </div>
               </div>
 
 
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-2 col-form-label">{{ trans('panel.expenses.fields.claim_amount') }}</label>
-                  <div class="col-md-10">
+                <div class="input_section">
+                  <label class="col-form-label">{{ trans('panel.expenses.fields.claim_amount') }}</label>
+                 
                     <div class="form-group has-default bmd-form-group">
                       <input class="form-control {{ $errors->has('claim_amount') ? 'is-invalid' : '' }} claim final_claim" type="" name="claim_amount" id="claim_amount" value="{{ old('claim_amount', '') }}" pattern="^\d*(\.\d{0,2})?$" placeholder="Claim Amount">
                       @if($errors->has('claim_amount'))
@@ -173,14 +173,14 @@
                       </div>
                       @endif
                     </div>
-                  </div>
+             
                 </div>
               </div>
 
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-2 col-form-label">{{ trans('panel.expenses.fields.note') }}<span class="text-danger"> *</span></label>
-                  <div class="col-md-10">
+                <div class="input_section">
+                  <label class="col-form-label">{{ trans('panel.expenses.fields.note') }}<span class="text-danger"> *</span></label>
+                
                     <div class="form-group has-default bmd-form-group">
                       <input placeholder="Note" class="form-control {{ $errors->has('note') ? 'is-invalid' : '' }} " type="text" name="note" id="note" value="{{ old('note', '') }}"  required autocomplete="off">
                       @if($errors->has('note'))
@@ -188,28 +188,28 @@
                         {{ $errors->first('note') }}
                       </div>
                       @endif
-                    </div>
+                    
                   </div>
                 </div>
               </div>
 
          
               <div class="col-md-6">
-                <div class="row">
-                   <label class="col-md-2 col-form-label">{!! trans('panel.expenses.fields.expense_file') !!}</label>
-                   <br><br>
-                   <div class="col-md-10">
+                <div class="input_section">
+                   <label class="col-form-label">{!! trans('panel.expenses.fields.expense_file') !!}</label>
+                  
+                 
                       <div class=" has-default bmd-form-group">
                          <input type="file" name="expense_file[]" multiple class="form-control">
                       </div>
-                   </div>
+                  
                 </div>
              </div>
           
             </div>
 
 
-            <div class="card-footer pull-right">
+            <div class="pull-right">
               {{ Form::submit('Submit', array('class' => 'btn btn-theme')) }}
             </div>
             {{ Form::close() }}

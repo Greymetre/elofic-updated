@@ -73,38 +73,37 @@
         @csrf
         <div class="row">
             <div class="col-md-6">
-              <div class="row">
-                <label for="name" class="col-md-4 col-form-label">{!! trans('panel.complaint_type.city_name') !!} <span class="text-danger"> *</span></label>
-                <div class="col-md-8">
+              <div class="inpu_section">
+                <label for="name" class="col-form-label">{!! trans('panel.complaint_type.city_name') !!} <span class="text-danger"> *</span></label>
+                
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="name" id="name" class="form-control" value="{!! old( 'name') !!}" maxlength="200" required>
                     @if ($errors->has('name'))
                       <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('name') }}</p></div>
                     @endif
                   </div>
-                </div>
               </div>
             </div>
           <div class="col-md-6">
-              <div class="row">
-                <label for="active" class="col-md-3 col-form-label">{!! trans('panel.complaint_type.status') !!}<span class="text-danger"> *</span></label>
-                <div class="col-md-9">
+              <div class="inpu_section">
+                <label for="active" class="col-form-label">{!! trans('panel.complaint_type.status') !!}<span class="text-danger"> *</span></label>
+     
                   <div class="form-group has-default bmd-form-group">
-                    <input type="radio" class="form-check-input" name="active" id="activeY" checked value="Y">Active
+                    <input type="radio" class="" name="active" id="activeY" checked value="Y"><span class="yes_no">Active</span>
                   </div>
                   <div class="form-group has-default bmd-form-group">
-                    <input type="radio" class="form-check-input" name="active" id="activeN" value="N">Inactive
+                    <input type="radio" class="" name="active" id="activeN" value="N"><span class="yes_no">Inactive</span>
                   </div>
                   @if ($errors->has('active'))
-                   <div class="error col-lg-12">
+                   <div class="error">
                       <p class="text-danger">{{ $errors->first('active') }}</p>
                    </div>
                   @endif
-                </div>
+               
               </div>
             </div>
         <div class="clearfix"></div>
-        <div class="modal-footer">
+        <div class="col-md-12 pull-right">
           <input type="hidden" name="id" id="complaint_type_id" />
           <button class="btn btn-info save"> Submit</button>
         </form>

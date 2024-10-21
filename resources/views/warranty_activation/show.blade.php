@@ -8,14 +8,14 @@
          border-left: 1px solid;
       }
    </style>
-   <div class="row">
+   <div class="row Warranty Activation ">
       <div class="col-md-12">
-         <div class="card">
-            <div class="card-header card-header-tabs card-header-warning">
+         <div class="card card m-0 p-0">
+            <div class="card-header m-0 card-header-tabs card-header-warning">
                <div class="nav-tabs-navigation">
-                  <div class="nav-tabs-wrapper">
+                  <div class="nav-tabs-wrapper new_id">
                      <h4 class="card-title ">
-                        Warranty Activation > {{$warrantyactivation->customer->customer_name}}
+                        Warranty Activation > {{$warrantyactivation->customer->customer_name}}      </h4>
                         @if(auth()->user()->can(['district_access']))
                         <ul class="nav nav-tabs pull-right" data-tabs="tabs">
                            @if($warrantyactivation->status == '0')
@@ -109,7 +109,7 @@
                            </li>
                         </ul>
                         @endif
-                     </h4>
+                
                   </div>
                </div>
             </div>
@@ -236,7 +236,7 @@
                   </div>
                   <div class="col-md-3 rounded">
                      <h5 class="theadl">Timeline</h5>
-                     <div class="bg-secondar" style="border-top: 1px dashed #a7a3a3;background-color: #f1e7e7;padding: 10px;">
+                     <div class="bg-secondar" style="border: 1px dashed #a7a3a3;;padding: 10px; box-shadow: 0px 0px 10px 10px lightgray; border-radius: 5px;">
                         <h5 class="theadl">PLANNED</h5>
                         <p class="text-center text-wrap">
                            You don't have any Schedule activity.

@@ -11,12 +11,13 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CustomerDetails, DealerAppointment, DealerAppointmentKyc, EndUser, Expenses, GiftModel, GiftSubcategory, Notes, OrderSchemeDetail, PrimarySales, Redemption, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation};
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CustomerDetails, DealerAppointment, DealerAppointmentKyc, EndUser, Expenses, GiftModel, GiftSubcategory, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, Redemption, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation};
 use App\Models\UserLiveLocation;
 use App\Models\UserActivity;
 use App\Http\Controllers\SendNotifications;
 use Carbon\Carbon;
 use LDAP\Result;
+use Spatie\Permission\Models\Role;
 
 class AjaxController extends Controller
 {
@@ -253,7 +254,9 @@ class AjaxController extends Controller
             $login_userid = Auth::user()->id;
             $all_users = User::all();
             $userinfo = User::where('id', '=', $login_userid)->first();
-            $data = User::where(function ($query) use ($beat_id, $userids, $payroll,$userinfo) {
+            $data = User::whereDoesntHave('roles', function ($query) {
+                $query->where('id', 29);
+            })->where(function ($query) use ($beat_id, $userids, $payroll,$userinfo) {
                 if (isset($beat_id)) {
                     $query->whereHas('userbeats', function ($query) use ($beat_id) {
                         $query->where('beat_id', '=', $beat_id);
@@ -1273,12 +1276,20 @@ class AjaxController extends Controller
             $usersIds = User::with('attendance_details')->where('sales_type', 'Secondary')->pluck('id');
         }
 
+        $role = Role::find(29);
+        if ($role && auth()->user()->hasRole($role->name)) {
+            $child_customer = ParentDetail::where('parent_id', auth()->user()->customerid)
+                ->pluck('id')
+                ->push(auth()->user()->customerid);
+            $query->whereIn('customer_id', $child_customer);
+        }
+
         if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
             $query->where('final_branch', $request->branch_id);
         }
 
         if ($request->division_id && $request->division_id != '' && $request->division_id != null) {
-            $query->where('division', $request->division_id);
+            $query->whereIn('division', $request->division_id);
         }
 
         if ($request->dealer_id && $request->dealer_id != '' && $request->dealer_id != null) {

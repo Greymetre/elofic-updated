@@ -4,8 +4,8 @@
     <div class="card">
       <div class="card-header card-header-tabs card-header-warning">
         <div class="nav-tabs-navigation">
-          <div class="nav-tabs-wrapper">
-            <h4 class="card-title ">{!! trans('panel.visittype.title_singular') !!}
+          <div class="nav-tabs-wrapper new_id">
+            <h4 class="card-title ">{!! trans('panel.visittype.title_singular') !!}     </h4>
             @if(auth()->user()->can(['visitreport_access']))
             <ul class="nav nav-tabs pull-right" data-tabs="tabs">
               <li class="nav-item">
@@ -16,7 +16,7 @@
               </li>
             </ul>
             @endif
-          </h4>
+     
           </div>
         </div>
       </div>
@@ -41,8 +41,8 @@
         ]) !!}
          <div class="row">
             <div class="col-md-12">
-              <div class="form-group">
-                  <label class="bmd-label-floating">{!! trans('panel.visittype.type_name') !!} </label>
+              <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.visittype.type_name') !!} </label>
                   <input type="text" name="type_name" class="form-control" value="{!! old( 'type_name', $visittypes['type_name']) !!}" >
                 @if ($errors->has('type_name'))
                   <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('type_name') }}</p></div>

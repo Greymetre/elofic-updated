@@ -17,8 +17,8 @@
    </style>
    <div class="row">
       <div class="col-md-12">
-         <div class="card">
-            <div class="card-header card-header-tabs card-header-warning">
+         <div class="card p-0 m-0 ">
+            <div class="card-header m-0 card-header-tabs card-header-warning">
                <div class="nav-tabs-navigation">
                   <div class="nav-tabs-wrapper">
                      <h4 class="card-title ">
@@ -62,26 +62,26 @@
                'id' => 'storeRedemptionData',
                'files'=>true
                ]) !!}
-               <div class="form-group">
-                  <div class="row">
-                     <div class="col-md-2">
-                        <label for="customer_id" class="form-control">Customer</label>
-                     </div>
-                     <div class="col-md-4">
+               <div class="row">
+                  <div class="col-md-4">
+                     <div class="input_section">
+                        <label for="customer_id" class="col-form-label">Customer</label>
+                    
                         <select name="customer_id" id="customer_id" placeholder="Select Customers" class="form-control" required>
                            <option value="" disabled selected>Select Customer</option>
 
                         </select>
                         @if ($errors->has('customer_id'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('customer_id') }}</p>
                         </div>
                         @endif
                      </div>
-                     <div class="col-md-2">
-                        <label for="redeem_mode" class="form-control">Redeem Mode</label>
-                     </div>
+                  </div>
                      <div class="col-md-4">
+                        <div class="input_section">
+                        <label for="redeem_mode" class="col-form-label">Redeem Mode</label>
+                     
                         <select name="redeem_mode" id="redeem_mode" placeholder="Select Redeem Mode" class="select2 form-control" required>
                            <option value="" disabled selected>Select Redeem Mode</option>
                            @if($redeem_modes && count($redeem_modes) > 0)
@@ -91,46 +91,47 @@
                            @endif
                         </select>
                         @if ($errors->has('redeem_mode'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('redeem_mode') }}</p>
                         </div>
                         @endif
                      </div>
-                     <div class="col-md-2">
-                        <label for="total_point" class="form-control">Total Point</label>
-                     </div>
-                     <div class="col-md-10">
-                        <div class="d-flex">
-                           <input style="width: 40% !important;" readonly type="number" value="{!! old( 'total_point' ) !!}" name="total_point" id="total_point" class="form-control">
-                           <h4 class="ml-2">- Redeem Point </h4>
-                           <h4 class="ml-2" id="redeem_amount_cal">0</h4>
-                           <h4 class="ml-2">= Balance Point</h4>
-                           <h4 class="ml-2" id="remain_amount_cal"> 0 </h4>
+                  </div>
+                     <div class="col-md-4">
+                        <div class="input_section">
+                        <label for="total_point" class="col-form-label">Total Point</label>
+                   
+                        <div class="">
+                           <input style="" readonly type="number" value="{!! old( 'total_point' ) !!}" name="total_point" id="total_point" class="form-control">
+                     
                         </div>
+
+                              <h4 class="color_gray">Redeem Point - <span class="color_gray" id="redeem_amount_cal">0</span> </h4>
+                          
+                           <h4 class="color_gray">Balance Point -  <span class="color_gray" id="remain_amount_cal"> 0 </span></h4>
+                         
                         @if ($errors->has('total_point'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('total_point') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
                   <div id="bank_details">
-                     <div class="row">
-                        <div class="col-md-2">
-                           <label for="account_holder" class="form-control">Account Holder Name</label>
-                        </div>
-                        <div class="col-md-4">
+                     <div class="col-md-4">
+                        <div class="input_section">
+                           <label for="account_holder" class="col-form-label">Account Holder Name</label>
                            <input readonly type="text" name="account_holder" value="{!! old( 'account_holder' , $redemption['account_holder']) !!}" id="account_holder" class="form-control">
                            @if ($errors->has('account_holder'))
-                           <div class="error col-lg-12">
+                           <div class="error">
                               <p class="text-danger">{{ $errors->first('account_holder') }}</p>
                            </div>
                            @endif
                         </div>
-                        <div class="col-md-2">
-                           <label for="account_number" class="form-control">Account Number</label>
-                        </div>
+                          </div>
                         <div class="col-md-4">
+                           <div class="input_section">
+                           <label for="account_number" class="col-form-label">Account Number</label>
                            <input readonly type="number" value="{!! old( 'account_number' , $redemption['account_number']) !!}" name="account_number" id="account_number" class="form-control">
                            @if ($errors->has('account_number'))
                            <div class="error col-lg-12">
@@ -139,11 +140,11 @@
                            @endif
                         </div>
                      </div>
-                     <div class="row">
-                        <div class="col-md-2">
-                           <label for="bank_name" class="form-control">Bank Name</label>
-                        </div>
+                 
                         <div class="col-md-4">
+                           <div class="input_section">
+                           <label for="bank_name" class="col-form-label">Bank Name</label>
+                      
                            <input readonly type="text" name="bank_name" id="bank_name" class="form-control" value="{!! old( 'bank_name' , $redemption['bank_name']) !!}">
                            @if ($errors->has('bank_name'))
                            <div class="error col-lg-12">
@@ -151,10 +152,11 @@
                            </div>
                            @endif
                         </div>
-                        <div class="col-md-2">
-                           <label for="ifsc_code" class="form-control">IFSC Code</label>
-                        </div>
+                     </div>
                         <div class="col-md-4">
+                           <div class="input_section">
+                           <label for="ifsc_code" class="col-form-label">IFSC Code</label>
+                      
                            <input readonly type="text" name="ifsc_code" id="ifsc_code" value="{!! old( 'ifsc_code' , $redemption['ifsc_code']) !!}" class="form-control">
                            @if ($errors->has('ifsc_code'))
                            <div class="error col-lg-12">
@@ -163,9 +165,10 @@
                            @endif
                         </div>
                      </div>
+               
                      <div class="row">
                         <div class="col-md-2">
-                           <label for="redeem_amount" class="form-control">Redeem Amount</label>
+                           <label for="redeem_amount" class="col-form-label">Redeem Amount</label>
                         </div>
                         <div class="col-md-6">
                            <input type="number" value="{!! old( 'redeem_amount' , $redemption['redeem_amount']) !!}" name="redeem_amount" id="redeem_amount" class="form-control">
@@ -180,7 +183,7 @@
                   <div id="gift_catalogue">
                      <div class="table-responsive">
                         <table id="getproduct" class="table table-striped- table-bordered table-hover table-checkable">
-                           <thead class=" text-primary">
+                           <thead class="text-primary">
                               <th>Gift {!! trans('panel.global.code') !!}</th>
                               <th>{!! trans('panel.gift.fields.product_image') !!}</th>
                               <th>{!! trans('panel.gift.fields.category_name') !!}</th>
@@ -195,7 +198,7 @@
                   </div>
                </div>
 
-               <div class="card-footer pull-right">
+               <div class="pull-right">
                   {{ Form::submit('Submit', array('class' => 'btn btn-theme', 'id' => 'submit-button')) }}
                </div>
                {{ Form::close() }}

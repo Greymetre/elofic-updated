@@ -7,6 +7,7 @@
             <i class="material-icons">perm_identity</i>
           </div>
           <h4 class="card-title ">{!! trans('panel.orderschemes.title_singular') !!} {!! trans('panel.global.list') !!}
+               </h4>
             <span class="">
               <div class="btn-group header-frm-btn">
               <div class="next-btn">                
@@ -15,7 +16,7 @@
                 @endif
               </div>
             </span>
-          </h4>
+       
         </div>
 
         <div class="card-body">

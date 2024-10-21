@@ -1,3 +1,9 @@
+<!-- <style>
+  .table>tbody>tr>td{
+    white-space: unset;
+  }
+</style> -->
+
 <x-app-layout>
 <div class="row">
    <div class="col-md-12">
@@ -38,48 +44,47 @@
             <input type="hidden" name="id" value="{!! $fields['id'] !!}">
             <div class="row">
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">Field Name <span class="text-danger"> *</span></label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class="col-form-label">Field Name <span class="text-danger"> *</span></label>
+                 
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="field_name" id="field_name" class="form-control" value="{!! old( 'field_name', $fields['field_name']) !!}" maxlength="200" required>
                       @if ($errors->has('field_name'))
-                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('field_name') }}</p></div>
+                        <div class="error"><p class="text-danger">{{ $errors->first('field_name') }}</p></div>
                       @endif
                     </div>
-                  </div>
+              
                 </div>
               </div>
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">Lable Name <span class="text-danger"> *</span></label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class="col-form-label">Lable Name <span class="text-danger"> *</span></label>
+                 
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="label_name" id="label_name" class="form-control" value="{!! old( 'label_name', $fields['label_name']) !!}" maxlength="200" required>
                       @if ($errors->has('label_name'))
                         <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('label_name') }}</p></div>
                       @endif
                     </div>
-                  </div>
-                </div>
+                               </div>
               </div>
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">Place Holder </label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class="col-form-label">Place Holder </label>
+               
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="placeholder" id="placeholder" class="form-control" value="{!! old( 'placeholder', $fields['placeholder']) !!} " maxlength="200">
                       @if ($errors->has('placeholder'))
                         <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('placeholder') }}</p></div>
                       @endif
                     </div>
-                  </div>
+          
                 </div>
               </div>
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">Field Type <span class="text-danger"> *</span></label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class="col-form-label">Field Type <span class="text-danger"> *</span></label>
+            
                     <div class="form-group has-default bmd-form-group">
                       <select class="form-control select2" name="field_type" id="field_type" style="width: 100%;" required>
                         <option value="" selected disabled>Select Field Type</option>
@@ -95,12 +100,12 @@
                       @endif
                     </div>
                   </div>
-                </div>
+             
               </div>
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">Module Type <span class="text-danger"> *</span></label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class="col-form-label">Module Type <span class="text-danger"> *</span></label>
+                
                     <div class="form-group has-default bmd-form-group">
                       <select class="form-control select2" name="module" id="module" style="width: 100%;" required>
                         <option value="" selected disabled>Select Module Type</option>
@@ -114,16 +119,16 @@
                         <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('module') }}</p></div>
                       @endif
                     </div>
-                  </div>
+               
                 </div>
               </div>
 
             <!-- nn -->
 
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">Division <span class="text-danger"> *</span></label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class=" col-form-label">Division <span class="text-danger"> *</span></label>
+               
                     <div class="form-group has-default bmd-form-group">
                       <select class="form-control select2" name="division_id" id="division_id" style="width: 100%;" required>
                         <option value="" selected disabled>Select Division</option>
@@ -138,7 +143,7 @@
                       @endif
                     </div>
                   </div>
-                </div>
+             
               </div>
 
               <!-- nn -->
@@ -148,9 +153,9 @@
 
 
               <div class="col-md-6">
-                <div class="row">
-                  <label class="col-sm-3 col-form-label">Mandatory</label>
-                  <div class="col-sm-9">
+                <div class="input_section">
+                  <label class="col-form-label">Mandatory</label>
+                
                     <label class="col-form-label">
                       <div class="checkbox">
                         <input type="checkbox" name="is_required" {{ old( 'is_required' , (!empty($fields->is_required)) ? ($fields->is_required) :('') ) == true ? 'checked' : '' }}><span class="checkbox-material"><span class="check"></span></span>
@@ -158,29 +163,30 @@
                         </div>
                       </label>
                     </div>
-                  </div>
+                
                 </div>
-            </div>
-            <div class="col-md-6 multipleshow">
-                <div class="row">
-                  <label class="col-sm-3 col-form-label">Is Multiple</label>
-                  <div class="col-sm-9">
+                    <div class="col-md-6 multipleshow">
+                <div class="input_section">
+                  <label class="col-form-label">Is Multiple</label>
+                 
                   <label class="col-form-label">
                     <div class="checkbox">
                       <input type="checkbox" name="is_multiple" {{ old( 'is_multiple' , (!empty($fields->is_multiple)) ? ($fields->is_multiple) :('') ) == true ? 'checked' : '' }}><span class="checkbox-material"><span class="check"></span></span>
                       Yes
                       </div>
                       </label>
-                    </div>
+                  
                   </div>
               </div>
+            </div>
+        
             <!-- Table row -->
                <div class="row fielddata" @if($fields->exists && $fields['fieldsData']->count() >= 1 ) '' @else style="display: none;" @endif>
                   <div class="container-fluid mt-5 d-flex justify-content-center w-100">
                      <div class="table-responsive w-100">
                         <table class="table kvcodes-dynamic-rows-example" id="tab_logic">
                            <thead>
-                              <tr class="card-header-warning text-white">
+                              <tr class="text-white">
                                  <th class="text-center"> # </th>
                                  <th class="text-center"> Field Data </th>
                                  <th class="text-center"> </th>
@@ -192,8 +198,10 @@
                               <tr id='addr0'>
                                 <td class="detail_index">{!! $index +1 !!}</td>
                                  <td>
+                                  <div class="input_section">
                                     <input type="text" name="details[{!! $index !!}][value]" class="form-control value rowchange" value="{!! $rows['value'] !!}" />
                                     <div class='error-value'></div>
+                                  </div>
                                  </td>
                                  <td class="td-actions text-right">
                                   <a href="javascript:void(0)" class="btn btn-danger remove-rows" value="{!! $rows['id'] !!}" data-original-title="" title="">

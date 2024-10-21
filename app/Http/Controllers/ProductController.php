@@ -42,10 +42,12 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         abort_if(Gate::denies('product_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return view('products.index');
+        $categories = Category::where('active', 'Y')->get();
+        $subCategories = Subcategory::where('active', 'Y')->get();
+        return view('products.index', compact('categories', 'subCategories'));
     }
 
-    public function productList(ProductDataTable $dataTable)
+    public function productList(ProductDataTable $dataTable, Request $request)
     {
         return $dataTable->render('products.index');
     }
@@ -353,12 +355,12 @@ class ProductController extends Controller
         Excel::import(new ProductImport,request()->file('import_file'));
         return back();
     }
-    public function download()
+    public function download(Request $request)
     {
         abort_if(Gate::denies('product_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        return Excel::download(new ProductExport, 'products.xlsx');
+        return Excel::download(new ProductExport($request), 'products.xlsx');
     }
     public function template()
     {
@@ -486,5 +488,20 @@ class ProductController extends Controller
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         return Excel::download(new BranchStockExport($request), 'stock.xlsx');
+    }
+
+    public function dealer_product(Request $request)
+    {
+        $categories = Category::where('active', 'Y')->get();
+        
+        return view('products.dealer_product', compact('categories'));
+    }
+
+    public function dealer_product_list($category_id)
+    {
+        $products = Product::with('productpriceinfo')->where('category_id', $category_id)->get();
+        $categories = Category::where('active', 'Y')->get();
+
+        return view('products.dealer_product_list', compact('products', 'category_id', 'categories'));
     }
 }

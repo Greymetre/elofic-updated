@@ -23,6 +23,7 @@ class PrimarySales extends Model
         'city',
         'state',
         'final_branch',
+        'branch_id',
         'sales_person',
         'emp_code',
         'model_name',

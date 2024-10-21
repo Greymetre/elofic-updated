@@ -10,10 +10,10 @@
       <div class="row">
         <div class="col-12">
           <div class="card">
-            <div class="card-body">
+            <div class="card-body card-header card-header-icon card-header-theme">
                 <div class="row">
                     <div class="col-12">
-                      <h3 class="card-title pb-3">{!! trans('panel.sale.title_singular') !!}</h3>
+                      <h4 class="card-title pb-3">{!! trans('panel.sale.title_singular') !!}</h3>
                     </div>
                     <!-- /.col -->
                   </div>

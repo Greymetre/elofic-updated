@@ -3,6 +3,7 @@
 namespace App\DataTables;
 
 use App\Models\Product;
+use Illuminate\Http\Request;
 use Yajra\DataTables\Html\Button;
 use Yajra\DataTables\Html\Column;
 use Yajra\DataTables\Html\Editor\Editor;
@@ -74,9 +75,15 @@ class ProductDataTable extends DataTable
      * @param \App\Product $model
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function query(Product $model)
+    public function query(Product $model, Request $request)
     {
-        return $model->with('createdbyname','categories','subcategories','brands','unitmeasures','productdetails','productpriceinfo')->latest()->newQuery();
+        $data = $model->with('createdbyname','categories','subcategories','brands','unitmeasures','productdetails','productpriceinfo');
+        if($request->category_id && !empty($request->category_id)){
+            $data->where('category_id', $request->category_id);
+        }
+        $data = $data->latest()->newQuery();
+
+        return $data;
     }
 
     /**

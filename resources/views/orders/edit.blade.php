@@ -1,7 +1,7 @@
 <x-app-layout>
    <div class="row">
       <div class="col-md-12">
-         <div class="card">
+         <div class="card productlistpage">
             <div class="card-header card-header-icon card-header-theme">
                <div class="card-icon">
                   <i class="material-icons">perm_identity</i>
@@ -36,16 +36,17 @@
                'files'=>true
                ]) !!}
                <div class="row">
-                  <div class="col-md-1">
+                  <div class="col-md-12">
+                     <div class="input_section">
                      <img src="{!! url('/').'/'.asset('assets/img/bediya.jpg') !!}" width="70">
                      <img src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" width="70">
                      <!-- <img src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" class="brand-image" width="70px" alt="Logo"> <span> {!! config('app.name') !!}</span> -->
-
+</div>
                   </div>
-                  <div class="col-md-3">
-                     <div class="row">
-                        <label class="col-md-3 col-form-label">{!! trans('panel.order.order_date') !!}</label>
-                        <div class="col-md-9">
+                  <div class="col-md-4">
+                     <div class="input_section">
+                        <label class="col-form-label">{!! trans('panel.order.order_date') !!}</label>
+                       
                            <div class="form-group has-default bmd-form-group">
                               <input type="text" name="order_date" class="form-control datepicker" id="order_date" value="{{ old( 'order_date' , (!empty($orders->order_date)) ? ($orders->order_date) : date('Y-m-d') ) }}" autocomplete="off" readonly>
                               @if($errors->has('order_date'))
@@ -55,13 +56,13 @@
                               @endif
                            </div>
                         </div>
-                     </div>
+                   
                   </div>
 
                   <div class="col-md-4">
-                     <div class="row">
-                        <label class="col-md-3 col-form-label">Order Taking</label>
-                        <div class="col-md-9">
+                     <div class="input_section">
+                        <label class="col-form-label">Order Taking</label>
+                     
                            <div class="form-group has-default bmd-form-group">
                               <select class="form-control" name="order_taking" style="width: 100%;">
                                  <option value="">Select Order Taking</option>
@@ -76,13 +77,13 @@
                            </div>
                            @endif
                         </div>
-                     </div>
+                    
                   </div>
 
                   <div class="col-md-3">
-                     <div class="row">
-                        <label class="col-md-3 col-form-label">Employee</label>
-                        <div class="col-md-9">
+                     <div class="input_section">
+                        <label class="col-form-label">Employee</label>
+                        
                            
                            <div class="form-group has-default bmd-form-group">
                               <select class="form-control select2" name="executive_id" style="width: 100%;">
@@ -100,16 +101,16 @@
                            </div>
                            @endif
                         </div>
-                     </div>
+                   
                   </div>
 
 
                </div>
                <div class="row">
-                  <div class="col-md-6">
-                     <div class="row">
-                        <label class="col-md-3 col-form-label">{!! trans('panel.global.bill_to') !!}<span class="text-danger"> *</span></label>
-                        <div class="col-md-9">
+                  <div class="col-md-4">
+                     <div class="input_section">
+                        <label class="col-form-label">{!! trans('panel.global.bill_to') !!}<span class="text-danger"> *</span></label>
+                       
                            <div class="form-group has-default bmd-form-group">
                               <select class="form-control select2 seller" name="seller_id" style="width: 100%;" required onchange="sellerinfo()" id="seller_id">
                                  <!-- <option value="">Select {!! trans('panel.global.seller') !!}</option> -->
@@ -126,23 +127,27 @@
                               </select>
                            </div>
                            @if ($errors->has('seller_id'))
-                           <div class="error col-lg-12">
+                           <div class="error">
                               <p class="text-danger">{{ $errors->first('seller_id') }}</p>
                            </div>
                            @endif
-                        </div>
+                       
                      </div>
 
-                     <div class="row">
-                        <label class="col-md-3 col-form-label">Address : </label>
+                       <div class="col-md-4">
+                        <div class="input_section">
+                        <label class="col-form-label">Address : </label>
                         <span class="seller_address"></span>
                      </div>
+                     </div>
+
+                   
                   </div>
-                  <div class="col-md-6" id="de_dis" style="display:none;">
-                     <div class="row">
+                  <div class="col-md-4" id="de_dis" style="display:none;">
+                     <div class="input_section">
                         <!-- <label class="col-md-3 col-form-label">{!! trans('panel.global.buyer') !!}<span class="text-danger"> *</span></label> -->
-                        <label class="col-md-3 col-form-label">Dealer/Distributer<span class="text-danger"> *</span></label>
-                        <div class="col-md-9">
+                        <label class="col-form-label">Dealer/Distributer<span class="text-danger"> *</span></label>
+                       
                            <div class="form-group has-default bmd-form-group">
                               <select class="form-control select2 buyer" name="buyer_id" style="width: 100%;" onchange="buyerinfo()">
                                  <!-- <option value="">Select {!! trans('panel.global.buyer') !!}</option> -->
@@ -156,39 +161,42 @@
                               </select>
                            </div>
                            @if($errors->has('seller_id'))
-                           <div class="error col-lg-12">
+                           <div class="error">
                               <p class="text-danger">{{ $errors->first('seller_id') }}</p>
                            </div>
                            @endif
-                        </div>
+                        
                      </div>
                      <div class="row">
-                        <label class="col-md-3 col-form-label">Address : </label>
+                        <div class="input_section">
+                        <label class="col-form-label">Address : </label>
                         <span class="buyer_address"></span>
                      </div>
                   </div>
+                  </div>
                   @if($orders->exists && @isset($orders['orderno']))
-                  <div class="col-md-6">
-                     <div class="row">
-                        <label class="col-md-3 col-form-label">{!! trans('panel.order.orderno') !!}</label>
-                        <div class="col-md-9">
+                  <div class="col-md-4">
+                     <div class="input_section">
+                        <label class="col-form-label">{!! trans('panel.order.orderno') !!}</label>
+                       
                            <div class="form-group has-default bmd-form-group">
                               <input type="text" class="form-control" name="orderno" value="{!! old( 'orderno', $orders['orderno']) !!}">
                               @if ($errors->has('orderno'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('orderno') }}</p>
                               </div>
                               @endif
                            </div>
-                        </div>
+                       
                      </div>
                   </div>
                   @endif
                </div>
 
                <div class="row">
-                  <label class="col-md-2 col-form-label">Division : </label>
-                  <div class="col-md-4">
+                  <div class="col-md-12">
+                  <label class="col-form-label">Division : </label>
+                 
                      <select name="product_cat_id" readonly id="product_cat_id" class="form-control select2" onchange="getProductlist()">
                         @if(count($category) > 0)
                         <option value="" disabled>Select Division</option>
@@ -199,6 +207,7 @@
                      </select>
                   </div>
                </div>
+              
                <br>
 
 
@@ -210,7 +219,7 @@
                      <div class="table-responsive w-100">
                         <table class="table kvcodes-dynamic-rows-example" id="tab_logic">
                            <thead>
-                              <tr class="card-header-warning text-white">
+                              <tr class="text-white">
                                  <th class="text-center"> # </th>
                                  <th class="text-center"> {!! trans('panel.global.products') !!}</th>
                                  <!-- <th class="text-center"> {!! trans('panel.global.product_detail') !!} </th> -->

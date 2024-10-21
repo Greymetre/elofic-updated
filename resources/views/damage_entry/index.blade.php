@@ -1,8 +1,41 @@
 <x-app-layout>
   <style>
-    span.select2-dropdown.select2-dropdown--below {
+   /* span.select2-dropdown.select2-dropdown--below {
       z-index: 99999 !important;
-    }
+    }*/
+
+  body  .swal2-popup .swal2-select {
+    min-width: 50%;
+    max-width: 100%;
+    padding: .375em .625em !important;
+    color: #545454;
+    font-size: 1.125em;
+    display: block;
+    width: 100%;
+    padding: .4375rem 0;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: transparent;
+    background-clip: padding-box;
+    border: 1px solid #d2d2d2;
+    border-radius: 0;
+    box-shadow: none;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    margin-top: 8px;
+}
+body .input_section .select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #3c4858 !important;
+    line-height: 36px !important;
+}
+body .swal2-container{
+  z-index: 9;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__clear {
+  
+    display: none;
+}
   </style>
   <div class="row">
     <div class="col-md-12">
@@ -31,12 +64,14 @@
                     </div> -->
                 <div class="p-2 mr-5" style="width:250px;">
                   <!-- <label for="status">Status</label> -->
+                  <div class="input_Section">
                   <select class="selectpicker" name="status" id="status" data-style="select-with-transition" title="Select Status">
                     <option value="">Select Status</option>
                     <option value="0">Pending</option>
                     <option value="1">Approved</option>
                     <option value="2">Rejected</option>
                   </select>
+                </div>
                 </div>
                 <!-- <div class="p-2" style="width:160px;">
                       <label for="scheme_type">Scheme</label>
@@ -308,7 +343,7 @@
               }
             });
           },
-          html: '<input type="text" name="coupon_code" id="coupon_code" class="swal2-input" value="' + ccode + '" placeholder="Coupon Code"/ required><select class="form-control select2" name="product_id" id="product_id" data-style="select-with-transition" title="Select Product"></select><input id="remark" name="remark" class="swal2-input" placeholder="Remark"><p class="alert alert-danger d-none" id="poperror"></p>',
+          html: '<div class="input_section mb-2"><input type="text" name="coupon_code" id="coupon_code" class="form-control" value="' + ccode + '" placeholder="Coupon Code"/ required></div><div class="input_section mb-2"><select class="form-control " name="product_id" id="product_id" data-style="select-with-transition" title="Select Product"></select></div><div class="input_section"><input id="remark" name="remark" class="form-control" placeholder="Remark"></div><p class="alert alert-danger d-none" id="poperror"></p>',
           preConfirm: function() {
             var status = $('.swal2-select').val();
             var remark = $('#remark').val();

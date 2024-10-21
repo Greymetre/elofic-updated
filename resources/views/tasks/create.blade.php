@@ -37,9 +37,8 @@
             <input type="hidden" name="action" value="create">
             <div class="row">
                <div class="col-md-12">
-                  <div class="row">
-                     <label class="col-md-2 col-form-label">{!! trans('panel.task.task_title') !!} <span class="text-danger"> *</span></label>
-                     <div class="col-md-10">
+                  <div class="input_section">
+                     <label class="col-form-label">{!! trans('panel.task.task_title') !!} <span class="text-danger"> *</span></label>
                         <div class="form-group has-default bmd-form-group">
                            <input type="text" name="title" id="title" class="form-control" value="{!! old( 'title', $tasks['title']) !!}" maxlength="200" required>
                            @if ($errors->has('title'))
@@ -47,14 +46,12 @@
                               <p class="text-danger">{{ $errors->first('title') }}</p>
                            </div>
                            @endif
-                        </div>
                      </div>
                   </div>
                </div>
                <div class="col-md-6">
-                  <div class="row">
-                     <label class="col-sm-4 col-form-label">{!! trans('panel.task.user_id') !!}<span class="text-danger"> *</span></label>
-                     <div class="col-sm-8">
+                  <div class="input_section">
+                     <label class="col-form-label">{!! trans('panel.task.user_id') !!}<span class="text-danger"> *</span></label>
                         <div class="form-group bmd-form-group">
                            <select class="form-control select2" name="user_id" id="user_id" style="width: 100%;" required>
                               <option value="">Select {!! trans('panel.task.user_id') !!}</option>
@@ -66,17 +63,15 @@
                            </select>
                         </div>
                         @if ($errors->has('users'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('users') }}</p>
                         </div>
                         @endif
-                     </div>
                   </div>
                </div>
                <div class="col-md-6">
-                  <div class="row">
-                     <label class="col-sm-4 col-form-label">Customer</label>
-                     <div class="col-sm-8">
+                  <div class="input_section">
+                     <label class="col-form-label">Customer</label>
                         <div class="form-group bmd-form-group">
                            <select class="form-control select2" name="customer_id" id="customer_id" style="width: 100%;" required>
                               <option value="">Select Customer</option>
@@ -92,13 +87,11 @@
                            <p class="text-danger">{{ $errors->first('customer_id') }}</p>
                         </div>
                         @endif
-                     </div>
                   </div>
                </div>
                <div class="col-md-6">
-                  <div class="row">
-                     <label class="col-sm-4 col-form-label">Date Time<span class="text-danger"> *</span></label>
-                     <div class="col-sm-8">
+                  <div class="input_section">
+                     <label class="col-form-label">Date Time<span class="text-danger"> *</span></label>
                         <div class="form-group bmd-form-group">
                            <input type="text" name="datetime" id="datetime" class="form-control datetimepicker" value="{!! old( 'datetime', $tasks['datetime']) !!}">
                         </div>
@@ -107,41 +100,40 @@
                            <p class="text-danger">{{ $errors->first('datetime') }}</p>
                         </div>
                         @endif
-                     </div>
                   </div>
                </div>
                <div class="col-md-6">
-                  <div class="row">
-                     <label class="col-sm-4 col-form-label">Reminder</label>
-                     <div class="col-sm-8">
+                  <div class="input_section">
+                     <label class="col-form-label">Reminder</label>
                         <div class="form-group bmd-form-group">
                            <input type="text" name="reminder" id="reminder" class="form-control datetimepicker" value="{!! old( 'reminder', $tasks['reminder']) !!}">
                         </div>
                         @if ($errors->has('reminder'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('reminder') }}</p>
                         </div>
                         @endif
                      </div>
-                  </div>
                </div>
             </div>
             <hr class="my-3">
-            <h4 class="section-heading mb-3  h4 mt-0 text-center text-rose">{!! trans('panel.task.descriptions') !!}</h4>
+            <h4 class="section-heading mb-3  h4 mt-0 text-center">{!! trans('panel.task.descriptions') !!}</h4>
             <div class="row">
                <div class="col-md-12">
                   <div class="form-group has-default bmd-form-group">
                      <textarea class="ckeditor form-control" name="descriptions" id="descriptions">{!! old( 'descriptions', $tasks['descriptions']) !!}</textarea>
                      @if ($errors->has('descriptions'))
-                     <div class="error col-lg-12">
+                     <div class="error">
                         <p class="text-danger">{{ $errors->first('descriptions') }}</p>
                      </div>
                      @endif
                   </div>
                </div>
+               <div class="col-md-12">
                <div class="pull-right">
                   {{ Form::submit('Submit', array('class' => 'btn btn-theme')) }}
                </div>
+            </div>
             </div>
          </div>
      

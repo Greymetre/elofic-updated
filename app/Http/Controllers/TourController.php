@@ -96,6 +96,8 @@ class TourController extends Controller
                                 {
                                     $query->whereIn('id',$userids);
                                 }
+                            })->whereDoesntHave('roles', function ($query) {
+                                $query->where('id', 29);
                             })->select('id','name')->orderBy('id','desc')->get();
 
     
@@ -239,6 +241,8 @@ class TourController extends Controller
                                 {
                                     $query->whereIn('id',$userids);
                                 }
+                            })->whereDoesntHave('roles', function ($query) {
+                                $query->where('id', 29);
                             })->select('id','name')->orderBy('id','desc')->get();
         return view('tours.create',compact('users'))->with('tours',$this->tours);
     }

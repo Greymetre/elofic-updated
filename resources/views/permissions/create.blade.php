@@ -31,9 +31,12 @@
         @endif
         <form method="POST" action="{{ route("permissions.store") }}" enctype="multipart/form-data" id="storePermissionData">
             @csrf
-            <div class="row">
-              <label class="col-md-2 col-form-label">{{ trans('panel.permission.fields.title') }}<span class="text-danger"> *</span></label>
-              <div class="col-md-10">
+
+<div class="row">
+             <div class="col-md-12">
+            <div class="input_Section">
+              <label class="col-form-label">{{ trans('panel.permission.fields.title') }}<span class="text-danger"> *</span></label>
+             
                 <div class="form-group has-default bmd-form-group">
                   <input class="form-control {{ $errors->has('title') ? 'is-invalid' : '' }}" type="text" name="name" id="title" value="{{ old('name', '') }}" maxlength="200" required>
                   @if($errors->has('title'))
@@ -44,7 +47,7 @@
                 </div>
               </div>
             </div>
-        <div class="card-footer pull-right">
+        <div class="col-md-12 pull-right">
             {{ Form::submit('Submit', array('class' => 'btn btn-theme')) }}
         </div>
         {{ Form::close() }} 

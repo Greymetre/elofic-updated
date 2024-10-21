@@ -1,7 +1,7 @@
 <x-app-layout>
    <div class="row">
       <div class="col-md-12">
-         <div class="card">
+         <div class="card productlistpage">
             <div class="card-header card-header-icon card-header-theme">
                <div class="card-icon">
                   <i class="material-icons">perm_identity</i>
@@ -36,16 +36,16 @@
                'files'=>true
                ]) !!}
                <div class="row">
-                  <div class="col-md-1">
+                  <div class="col-md-12">
                      <img src="{!! url('/').'/'.asset('assets/img/bediya.jpg') !!}" width="70">
                      <img src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" width="70">
                      <!-- <img src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" class="brand-image" width="70px" alt="Logo"> <span> {!! config('app.name') !!}</span> -->
 
                   </div>
-                  <div class="col-md-3">
-                     <div class="row">
-                        <label class="col-md-3 col-form-label">{!! trans('panel.order.order_date') !!}</label>
-                        <div class="col-md-9">
+                  <div class="col-md-4">
+                     <div class="input_section">
+                        <label class="col-form-label">{!! trans('panel.order.order_date') !!}</label>
+                        
                            <div class="form-group has-default bmd-form-group">
                               <input type="text" name="order_date" class="form-control datepicker" id="order_date" value="{{ old( 'order_date' , (!empty($orders->order_date)) ? ($orders->order_date) : date('Y-m-d') ) }}" autocomplete="off" readonly>
                               @if($errors->has('order_date'))
@@ -54,14 +54,14 @@
                               </div>
                               @endif
                            </div>
-                        </div>
+                        
                      </div>
                   </div>
 
                   <div class="col-md-3">
-                     <div class="row">
-                        <label class="col-md-4 col-form-label">Order Taking</label>
-                        <div class="col-md-8">
+                     <div class="input_section">
+                        <label class="col-form-label">Order Taking</label>
+                      
                            <div class="form-group has-default bmd-form-group">
                               <select class="form-control select2" name="order_taking" style="width: 100%;" required>
                                  <!-- <option value="">Select Order Taking</option> -->
@@ -71,18 +71,18 @@
                               </select>
                            </div>
                            @if ($errors->has('seller_id'))
-                           <div class="error col-lg-12">
+                           <div class="error">
                               <p class="text-danger">{{ $errors->first('seller_id') }}</p>
                            </div>
                            @endif
-                        </div>
+                     
                      </div>
                   </div>
 
                   <div class="col-md-4">
-                     <div class="row">
-                        <label class="col-md-4 col-form-label">Employee</label>
-                        <div class="col-md-8">
+                     <div class="input_section">
+                        <label class="col-form-label">Employee</label>
+                      
                            <div class="form-group has-default bmd-form-group">
                               <select class="form-control select2" name="executive_id" style="width: 100%;" required>
                                  <option value="">Select Employee</option>
@@ -94,12 +94,12 @@
                               </select>
                            </div>
                            @if ($errors->has('executive_id'))
-                           <div class="error col-lg-12">
+                           <div class="error">
                               <p class="text-danger">{{ $errors->first('executive_id') }}</p>
                            </div>
                            @endif
                         </div>
-                     </div>
+                    
                   </div>
 
 
@@ -136,12 +136,11 @@
                          </div>
                        </div>
                   </div> -->
-               </div>
-               <div class="row">
-                  <div class="col-md-6">
-                     <div class="row">
-                        <label class="col-md-3 col-form-label">{!! trans('panel.global.bill_to') !!}<span class="text-danger"> *</span></label>
-                        <div class="col-md-9">
+
+                       <div class="col-md-4">
+                     <div class="input_section">
+                        <label class="col-form-label">{!! trans('panel.global.bill_to') !!}<span class="text-danger"> *</span></label>
+                       
                            <div class="form-group has-default bmd-form-group">
                               <select class="form-control select2 seller" name="seller_id" style="width: 100%;" required onchange="sellerinfo()" id="seller_id">
                                  <!-- <option value="">Select {!! trans('panel.global.seller') !!}</option> -->
@@ -154,23 +153,26 @@
                               </select>
                            </div>
                            @if ($errors->has('seller_id'))
-                           <div class="error col-lg-12">
+                           <div class="error">
                               <p class="text-danger">{{ $errors->first('seller_id') }}</p>
                            </div>
                            @endif
                         </div>
-                     </div>
-
-                     <div class="row">
-                        <label class="col-md-3 col-form-label">Address : </label>
+                      </div>
+<div class="col-md-4">
+                     <div class="input_section">
+                        <label class="col-form-label">Address : </label>
                         <span class="seller_address"></span>
                      </div>
-                  </div>
-                  <div class="col-md-6" id="de_dis" style="display:none;">
-                     <div class="row">
+               </div>
+               </div>
+               <div class="row">
+             
+                  <div class="col-md-4" id="de_dis" style="display:none;">
+                     <div class="input_section">
                         <!-- <label class="col-md-3 col-form-label">{!! trans('panel.global.buyer') !!}<span class="text-danger"> *</span></label> -->
-                        <label class="col-md-3 col-form-label">Dealer/Distributer<span class="text-danger"> *</span></label>
-                        <div class="col-md-9">
+                        <label class="col-form-label">Dealer/Distributer<span class="text-danger"> *</span></label>
+                      
                            <div class="form-group has-default bmd-form-group">
                               <select class="form-control select2 buyer" name="buyer_id" style="width: 100%;" onchange="buyerinfo()">
                                  <!-- <option value="">Select {!! trans('panel.global.buyer') !!}</option> -->
@@ -183,38 +185,42 @@
                               </select>
                            </div>
                            @if($errors->has('seller_id'))
-                           <div class="error col-lg-12">
+                           <div class="error">
                               <p class="text-danger">{{ $errors->first('seller_id') }}</p>
                            </div>
                            @endif
                         </div>
-                     </div>
-                     <div class="row">
-                        <label class="col-md-3 col-form-label">Address : </label>
+                   </div>
+                   <div class="col-md-4">
+                     <div class="input_section">
+                        <label class="col-form-label">Address : </label>
                         <span class="buyer_address"></span>
                      </div>
                   </div>
+                
                   @if($orders->exists && @isset($orders['orderno']))
-                  <div class="col-md-6">
-                     <div class="row">
-                        <label class="col-md-3 col-form-label">{!! trans('panel.order.orderno') !!}</label>
-                        <div class="col-md-9">
+                  <div class="col-md-4">
+                     <div class="input_section">
+                        <label class="col-form-label">{!! trans('panel.order.orderno') !!}</label>
+                      
                            <div class="form-group has-default bmd-form-group">
                               <input type="text" class="form-control" name="orderno" value="{!! old( 'orderno', $orders['orderno']) !!}">
                               @if ($errors->has('orderno'))
-                              <div class="error col-lg-12">
+                              <div class="error">
                                  <p class="text-danger">{{ $errors->first('orderno') }}</p>
                               </div>
                               @endif
                            </div>
-                        </div>
+                        
                      </div>
                   </div>
                   @endif
                </div>
                <div class="row">
-                  <label class="col-md-2 col-form-label">Division : </label>
                   <div class="col-md-4">
+                     <div class="input_section">
+                  <label class="col-form-label">Division : </label>
+                 
                      <select name="product_cat_id" id="product_cat_id" class="form-control select2" onchange="getProductlist()" required>
                         <option value="">Select Division</option>
                         @if(count($category) > 0)
@@ -223,6 +229,7 @@
                         @endforeach
                         @endif
                      </select>
+                  </div>
                   </div>
                </div>
                <br>
@@ -299,7 +306,7 @@
                      <div class="table-responsive w-100">
                         <table class="table kvcodes-dynamic-rows-example" id="tab_logic">
                            <thead>
-                              <tr class="card-header-warning text-white">
+                              <tr class="text-white">
                                  <th class="text-center"> # </th>
                                  <th class="text-center"> {!! trans('panel.global.products') !!}</th>
                                  <!-- <th class="text-center"> {!! trans('panel.global.product_detail') !!} </th> -->
@@ -321,12 +328,14 @@
                               <tr id='addr{{ $key }}' value="{{ $key +1 }}">
                                  <td>{{ $key + 1 }}</td>
                                  <td>
+                                    <div class="input_section">
                                     <select class="form-control product rowchange select2" name="orderdetail[{{ $key }}][product_id]">
                                        @if ($rows['product_id'] !== null)
                                        <option value="{!! $rows['product_id'] !!}">{!! $rows['products']['display_name'] !!}</option>
                                        @endif
                                     </select>
                                     <div class="error-product"></div>
+                                 </div>
                                  </td>
                                  <td style="display: none;">
                                     <select class="form-control productdetails rowchange select2" name="orderdetail[{{ $key }}][product_detail]" onchange="getproductdetailinfo(this)">
@@ -560,31 +569,35 @@
                            <div class="col-sm-4">
                               <label class="bmd-label">MOU Discount%</label>
                            </div>
-                           <div class="col-sm-8">
-                              <div class="input-group">
+                           <div class="col-sm-4">
+                           <!--    <div class="input-group">
                                  <div class="input-group-prepend">
-                                 </div>
+                                 </div> -->
                                  <input type="number" name='distributor_discount' class="form-control distributor_discount" value="{!! old( 'distributor_discount', $orders['distributor_discount']) !!}" />
-                                 <input type="text" name="distributor_discount_amount" class="form-control distributor_discount_amount" readonly>
+                           
                               </div>
+                              <div class="col-sm-4">
+                                       <input type="text" name="distributor_discount_amount" class="form-control distributor_discount_amount" readonly>
+                                    </div>
                               @if($errors->has('distributor_discount'))
                               <div class="invalid-feedback">
                                  {{ $errors->first('distributor_discount') }}
                               </div>
                               @endif
                            </div>
-                        </div>
+                     
 
                         <div class="form-group row">
                            <div class="col-sm-4">
                               <label class="bmd-label">Special Discount%</label>
                            </div>
-                           <div class="col-sm-8">
-                              <div class="input-group">
+                           <div class="col-sm-4">
+                             <!--  <div class="input-group">
                                  <div class="input-group-prepend">
-                                 </div>
+                                 </div> -->
                                  <input type="number" name='special_discount' class="form-control special_discount" value="{!! old( 'special_discount', $orders['special_discount']) !!}" />
-
+</div>
+<div class="col-sm-4">
                                  <input type="text" name="special_discount_amount" class="form-control special_discount_amount" readonly>
                               </div>
                               @if($errors->has('special_discount'))
@@ -593,16 +606,16 @@
                               </div>
                               @endif
                            </div>
-                        </div>
+               
 
                         <div class="form-group row">
                            <div class="col-sm-4">
                               <label class="bmd-label">Frieght Discount%</label>
                            </div>
-                           <div class="col-sm-8">
+                          <!--  <div class="col-sm-8">
                               <div class="input-group">
                                  <div class="input-group-prepend">
-                                 </div>
+                                 </div> -->
                                  <div class="col-sm-4">
                                     <select name='frieght_discount' class="form-control frieght_discount">
                                        <option value="">Select Frieght Discount</option>
@@ -618,8 +631,8 @@
                                  {{ $errors->first('frieght_discount') }}
                               </div>
                               @endif
-                           </div>
-                        </div>
+                        <!--    </div>
+                        </div> -->
 
                         <div class="form-group row">
                            <div class="col-sm-4">
@@ -644,11 +657,13 @@
                               <!-- <label class="bmd-label">{!! trans('panel.order.extra_discount') !!}</label> -->
                               <label class="bmd-label">Deal Discount%</label>
                            </div>
-                           <div class="col-sm-8">
-                              <div class="input-group">
+                           <div class="col-sm-4">
+                            <!--   <div class="input-group">
                                  <div class="input-group-prepend">
-                                 </div>
+                                 </div> -->
                                  <input type="number" name='extra_discount' class="form-control deal_discnt" value="{!! old( 'extra_discount', $orders['extra_discount']) !!}" />
+                              </div>
+                              <div class="col-sm-4">
                                  <input type="text" name="extra_discount_amount" class="form-control extra_discount_amount" readonly>
                               </div>
                               @if($errors->has('extra_discount'))
@@ -657,7 +672,7 @@
                               </div>
                               @endif
                            </div>
-                        </div>
+                      
                      </div>
                      <div id="all-discount-div-fan">
 

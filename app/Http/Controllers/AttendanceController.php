@@ -98,30 +98,6 @@ class AttendanceController extends Controller
   public function attendanceSummaryDownload(Request $request)
   {
 
-  //   $label = [
-  //     'File Name',
-  //     'Model',
-  //     'data'
-  // ];
-  // $data = [];
-  // $medi = Media::where('created_at', '>=', '2024-06-15')->where('created_at', '<=', '2024-06-30')->get();
-  // foreach ($medi as $key => $value) {
-  //   $model_is = $value->model_type;
-
-  //   $main_data = $model_is::where('id', $value->model_id)->first();
-  //   if($model_is == 'App\Models\Expenses'){
-  //     $data[$key][0] =  date('d/M/Y',strtotime($value->created_at));
-  //     $data[$key][1] =  $value->file_name;
-  //     $data[$key][2] =  $model_is;
-  //     $data[$key][3] = $main_data->users->name;
-  //     $data[$key][4] = $main_data->checker_status;
-  //   }
-  // }
-
-  // // dd($data);
-  
-  // $export = new ExcelExport($label, $data);
-  // return Excel::download($export, 'testtt.xlsx');
 
     $filename = 'attendance-summary-report.xlsx';
     $start_date = $request->start_date;
@@ -137,10 +113,9 @@ class AttendanceController extends Controller
 
 
 
-    /// get all user
-
-
-    $attendancesummary = User::with(['attendance_details', 'createdbyname', 'getbranch'])->where('active', 'Y')->where('show_attandance_report', '1');
+    $attendancesummary = User::with(['attendance_details', 'createdbyname', 'getbranch'])->where('active', 'Y')->whereDoesntHave('roles', function ($query) {
+      $query->where('id', 29);
+    })->where('show_attandance_report', '1');
     if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
       $attendancesummary = $attendancesummary->whereIn('id', getUsersReportingToAuth());
     }
@@ -149,37 +124,8 @@ class AttendanceController extends Controller
       $attendancesummary = $attendancesummary->where('id', $executive_id);
     }
 
-    $attendancesummary = $attendancesummary->get();
-
-
-    ///
-
-
-
-
-    // $attendancesummary = Attendance::with(['users']);
-    // if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-    //     {
-    //       $attendancesummary = $attendancesummary->whereIn('user_id', getUsersReportingToAuth());
-    //     }
-    // if($start_date)
-    //     {
-    //         $attendancesummary = $attendancesummary->whereDate('punchin_date','>=',$start_date);
-    //     }
-    // if($end_date)
-    // {
-    //    $attendancesummary = $attendancesummary->whereDate('punchin_date','<=',$end_date);
-    // }
-
-    // if($executive_id)
-    // {
-    //     $attendancesummary = $attendancesummary->where('user_id', $executive_id);
-    // } 
-
-    // $attendancesummary = $attendancesummary->get()->unique('user_id');  
-
-
-
+    $attendancesummary = $attendancesummary->limit(4500)->get();
+    
     $date1 = $start_date;
     $date2 = $end_date;
 
@@ -194,12 +140,6 @@ class AttendanceController extends Controller
       $like_date =  $value->format('j-M-Y');
     }
 
-    //new
-
-
-    // $label2[] ="TGT";
-
-    // $label2[] = "";
 
     $data = $attendancesummary->map(function ($item, $key) use ($label2, $date1, $date2, $period) {
 
@@ -268,11 +208,10 @@ class AttendanceController extends Controller
               } elseif ($attendance_details->working_type == 'Office Meeting') {
                 $label_data[] =  'P';
                 $total_p++;
-              }elseif ($attendance_details->working_type == 'Scouting for market') {
+              } elseif ($attendance_details->working_type == 'Scouting for market') {
                 $label_data[] =  'P';
                 $total_p++;
-              }
-               elseif ($attendance_details->working_type == 'Plumber Meet') {
+              } elseif ($attendance_details->working_type == 'Plumber Meet') {
                 $label_data[] =  'P';
                 $total_p++;
               } elseif ($attendance_details->working_type == 'Retailer Meet') {
@@ -292,13 +231,13 @@ class AttendanceController extends Controller
               if ($attendance_details->working_type == 'Full Day Leave') {
                 $label_data[] =  'LOPN';
                 $total_a++;
-              }elseif ($attendance_details->working_type == 'Second Half Leave' || $attendance_details->working_type == 'First Half Leave') {
+              } elseif ($attendance_details->working_type == 'Second Half Leave' || $attendance_details->working_type == 'First Half Leave') {
                 $label_data[] =  '1/2P+1/2LOPN';
                 $total_hd++;
-              }elseif($attendance_details->working_type == 'Leave'){
+              } elseif ($attendance_details->working_type == 'Leave') {
                 $label_data[] =  'LOPN';
                 $total_lop++;
-              }else{
+              } else {
                 $label_data[] = 'A';
                 $total_a++;
               }
@@ -313,10 +252,6 @@ class AttendanceController extends Controller
               $total_mis++;
             }
           }
-
-
-          ///last end new   
-
         }
       }
 

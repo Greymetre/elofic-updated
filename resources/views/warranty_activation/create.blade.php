@@ -17,12 +17,12 @@
    </style>
    <div class="row">
       <div class="col-md-12">
-         <div class="card">
-            <div class="card-header card-header-tabs card-header-warning">
+         <div class="card mt-0 p-0">
+            <div class="card-header  m-0 card-header-tabs card-header-warning">
                <div class="nav-tabs-navigation">
-                  <div class="nav-tabs-wrapper">
+                  <div class="nav-tabs-wrapper new_id">
                      <h4 class="card-title ">
-                        Warranty Activation Creation
+                        Warranty Activation Creation    </h4>
                         @if(auth()->user()->can(['district_access']))
                         <ul class="nav nav-tabs pull-right" data-tabs="tabs">
                            <li class="nav-item">
@@ -33,7 +33,7 @@
                            </li>
                         </ul>
                         @endif
-                     </h4>
+                 
                   </div>
                </div>
             </div>
@@ -58,11 +58,15 @@
                ]) !!}
                <div class="form-group">
                   <div class="row">
-                     <div class="col-md-3">
-                        <label for="status" class="form-control"><b>Warranty Activation Status</b></label>
-                        <input type="hidden" name="previous_url" value="{{ strtok(url()->previous(), '?') }}">
+                     <div class="col-md-6">
+                        <div class="input_section">
+                        <label for="status" class="col-form-label">Warranty Activation Status</label>
+                        <input type="hidden" name="previous_url" placeholder="Warranty Activation Status" value="{{ strtok(url()->previous(), '?') }}">
                      </div>
-                     <div class="col-md-3">
+                  </div>
+                     <div class="col-md-6">
+                        <div class="input_section">
+                        <label  class="col-form-label">Select Status</label>
                         <select name="status" id="status" class="select2" required>
                            <option value="">Select Status</option>
                            <option value="0" {{($warranty_activation->exists && $warranty_activation->status == '0')?'selected':''}}>In Verification</option>
@@ -71,34 +75,35 @@
                            <option value="3" {{($warranty_activation->exists && $warranty_activation->status == '3')?'selected':''}}>Rejected</option>
                         </select>
                      </div>
-                     <div class="col-md-2 reject-remark d-none">
-                        <label for="remark" class="form-control"><b>Reject Remark <span class="text-danger">*</span></b></label>
-                     </div>
-                     <div class="col-md-4 reject-remark d-none">
+                  </div>
+                     <div class="col-md-6 reject-remark d-none">
+                        <div class="input_section">
+                        <label for="remark" class="col-form-label">Reject Remark <span class="text-danger">*</span></label>
+                   
                         <textarea name="remark" id="remark" class="form-control">{{$warranty_activation->remark??""}}</textarea>
                      </div>
-                  </div>
-                  <div class="row">
+                     </div>
                   </div>
                   <div class="mt-5">
-                     <h5>Warranty Details</h5>
+                     <h5 class="newdata">Warranty Details</h5>
                      <input type="hidden" name="warranty_id" value="{{$warranty_activation->id}}">
                      <div class="row">
-                        <div class="col-md-2">
-                           <label for="product_serail_number" class="form-control">Product Serial Number</label>
-                        </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
+                           <div class="input_section">
+                           <label for="product_serail_number" class="col-form-label">Product Serial Number</label>
+                    
                            <input type="text" name="product_serail_number" id="product_serail_number" class="form-control" value="{!! old( 'product_serail_number' , $warranty_activation['product_serail_number'])??(isset($request)?$request->serial_no:'') !!}">
                            @if ($errors->has('product_serail_number'))
-                           <div class="error col-lg-12">
+                           <div class="error">
                               <p class="text-danger">{{ $errors->first('product_serail_number') }}</p>
                            </div>
                            @endif
                         </div>
-                        <div class="col-md-2">
-                           <label for="product_id" class="form-control">Product</label>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
+                           <div class="input_section">
+                           <label for="product_id" class="col-form-label">Product</label>
+                      
                            <select name="select_product_id" id="select_product_id" placeholder="Select Product" class="select2 form-control">
                               @if($warranty_activation->exists && $warranty_activation->product_details)
                               <option value="{{$warranty_activation->product_details->id}}" selected>{{$warranty_activation->product_details->product_name}}</option>
@@ -106,17 +111,22 @@
                            </select>
                            <input type="hidden" name="product_id" id="product_id">
                            @if ($errors->has('product_id'))
-                           <div class="error col-lg-12">
+                           <div class="error">
                               <p class="text-danger">{{ $errors->first('product_id') }}</p>
                            </div>
                            @endif
                         </div>
                      </div>
-                     <div class="row">
-                        <div class="col-md-2">
-                           <label for="branch_id" class="form-control">Branch</label>
-                        </div>
-                        <div class="col-md-4">
+
+
+
+
+
+
+   <div class="col-md-6">
+                           <div class="input_section">
+                           <label for="branch_id" class="col-form-label">Branch</label>
+                      
                            <select name="branch_id" placeholder="Select Branch" class="select2 form-control" required>
                               <option value="" disabled selected>Select Branch</option>
                               @if($branches && count($branches) > 0)
@@ -126,80 +136,90 @@
                               @endif
                            </select>
                            @if ($errors->has('branch_id'))
-                           <div class="error col-lg-12">
+                           <div class="error">
                               <p class="text-danger">{{ $errors->first('branch_id') }}</p>
                            </div>
                            @endif
                         </div>
                      </div>
+
+
+
+                  </div>
+
                   </div>
                   <div class="pt-4">
                      <h5>Contact Details</h5>
                      <div class="row">
-                        <div class="col-md-2">
-                           <label for="customer_number" class="form-control">Customer Number Search</label>
-                        </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
+                           <div class="input_section">
+                           <label for="customer_number" class="col-form-label">Customer Number Search</label>
+                      
                            <input type="number" name="customer_number" id="customer_number" class="form-control" value="{!! old( 'customer_number' , $warranty_activation['customer']?$warranty_activation['customer']['customer_number']:'') !!}" required>
                            <input type="hidden" name="end_user_id" id="end_user_id" value="{!! old( 'end_user_id' , $warranty_activation['end_user_id']) !!}">
                            @if ($errors->has('customer_number'))
-                           <div class="error col-lg-12">
+                           <div class="error">
                               <p class="text-danger">{{ $errors->first('customer_number') }}</p>
                            </div>
                            @endif
                         </div>
-                        <div class="col-md-2">
-                           <label for="customer_name" class="form-control">Customer Name</label>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
+                           <div class="input_section">
+                           <label for="customer_name" class="col-form-label">Customer Name</label>
+                       
                            <input type="text" name="customer_name" id="customer_name" class="form-control" value="{!! old( 'customer_name' , $warranty_activation['customer']?$warranty_activation['customer']['customer_name']:'') !!}" required>
                            @if ($errors->has('customer_name'))
-                           <div class="error col-lg-12">
+                           <div class="error">
                               <p class="text-danger">{{ $errors->first('customer_name') }}</p>
                            </div>
                            @endif
                         </div>
                      </div>
-                     <div class="row">
-                        <div class="col-md-2">
-                           <label for="customer_email" class="form-control">Email</label>
-                        </div>
-                        <div class="col-md-4">
+                  
+                        <div class="col-md-6">
+                           <div class="input_section">
+                           <label for="customer_email" class="col-form-label">Email</label>
+                      
                            <input type="text" name="customer_email" id="customer_email" class="form-control" value="{!! old( 'customer_email' , $warranty_activation['customer']?$warranty_activation['customer']['customer_email']:'') !!}">
                            @if ($errors->has('customer_email'))
-                           <div class="error col-lg-12">
+                           <div class="error">
                               <p class="text-danger">{{ $errors->first('customer_email') }}</p>
                            </div>
                            @endif
                         </div>
-                        <div class="col-md-2">
-                           <label for="customer_place" class="form-control">Place</label>
-                        </div>
-                        <div class="col-md-4">
+                     </div>
+                        <div class="col-md-6">
+                           <div class="input_section">
+                           <label for="customer_place" class="col-form-label">Place</label>
+                      
                            <input type="text" name="customer_place" id="customer_place" class="form-control" value="{!! old( 'customer_place' , $warranty_activation['customer']?$warranty_activation['customer']['customer_place']:'') !!}">
                            @if ($errors->has('customer_place'))
-                           <div class="error col-lg-12">
+                           <div class="error">
                               <p class="text-danger">{{ $errors->first('customer_place') }}</p>
                            </div>
                            @endif
                         </div>
                      </div>
-                     <div class="row">
-                        <div class="col-md-2">
-                           <label for="customer_address" class="form-control">Address</label>
-                        </div>
-                        <div class="col-md-4">
+
+
+                           <div class="col-md-6">
+                           <div class="input_section">
+                           <label for="customer_address" class="col-form-label">Address</label>
+                        
                            <input type="text" name="customer_address" id="customer_address" class="form-control" value="{!! old( 'customer_address' , $warranty_activation['customer']?$warranty_activation['customer']['customer_address']:'') !!}" required>
                            @if ($errors->has('customer_address'))
-                           <div class="error col-lg-12">
+                           <div class="error">
                               <p class="text-danger">{{ $errors->first('customer_address') }}</p>
                            </div>
                            @endif
                         </div>
-                        <div class="col-md-2">
-                           <label for="customer_pindcode" class="form-control">Pincode</label>
-                        </div>
-                        <div class="col-md-4">
+                     </div>
+
+                        <div class="col-md-6">
+                           <div class="input_section">
+                           <label for="customer_pindcode" class="col-form-label">Pincode</label>
+                       
                            <select name="customer_pindcode" id="customer_pindcode" placeholder="Select Pincode" class="select2 form-control">
                               <option value="" disabled selected>Select Pincode</option>
                               @if($pincodes && count($pincodes) > 0)
@@ -209,28 +229,30 @@
                               @endif
                            </select>
                            @if ($errors->has('customer_pindcode'))
-                           <div class="error col-lg-12">
+                           <div class="error">
                               <p class="text-danger">{{ $errors->first('customer_pindcode') }}</p>
                            </div>
                            @endif
                         </div>
                      </div>
-                     <div class="row">
-                        <div class="col-md-1">
-                           <label for="customer_country" class="form-control">Country</label>
-                        </div>
-                        <div class="col-md-2">
+
+
+                       <div class="col-md-6">
+                           <div class="input_section">
+                           <label for="customer_country" class="col-form-label">Country</label>
+                       
                            <input type="text" readonly name="customer_country" id="customer_country" class="form-control">
                            @if ($errors->has('customer_country'))
-                           <div class="error col-lg-12">
+                           <div class="error c">
                               <p class="text-danger">{{ $errors->first('customer_country') }}</p>
                            </div>
                            @endif
                         </div>
-                        <div class="col-md-1">
-                           <label for="customer_state" class="form-control">State</label>
-                        </div>
-                        <div class="col-md-2">
+                     </div>
+                        <div class="col-md-6">
+                           <div class="input_section">
+                           <label for="customer_state" class="col-form-label">State</label>
+                       
                            <select name="customer_state" id="customer_state" placeholder="Select State" class="select2 form-control" required>
                               <option value="" disabled selected>Select State</option>
                               @if($states && count($states) > 0)
@@ -240,51 +262,55 @@
                               @endif
                            </select>
                            @if ($errors->has('customer_state'))
-                           <div class="error col-lg-12">
+                           <div class="error">
                               <p class="text-danger">{{ $errors->first('customer_state') }}</p>
                            </div>
                            @endif
                         </div>
-                        <div class="col-md-1">
-                           <label for="customer_district" class="form-control">District</label>
-                        </div>
-                        <div class="col-md-2">
+                     </div>
+
+                         <div class="col-md-6">
+                           <div class="input_section">
+                           <label for="customer_district" class="col-form-label">District</label>
+                        
                            <input type="text" readonly name="customer_district" id="customer_district" class="form-control">
                            @if ($errors->has('customer_district'))
-                           <div class="error col-lg-12">
+                           <div class="error ">
                               <p class="text-danger">{{ $errors->first('customer_district') }}</p>
                            </div>
                            @endif
                         </div>
-                        <div class="col-md-1">
-                           <label for="customer_city" class="form-control">City</label>
-                        </div>
-                        <div class="col-md-2">
+                     </div>
+                        <div class="col-md-6">
+                           <div class="input_section">
+                           <label for="customer_city" class="col-form-label">City</label>
+                       
                            <input type="text" readonly name="customer_city" id="customer_city" class="form-control">
                            @if ($errors->has('customer_city'))
-                           <div class="error col-lg-12">
+                           <div class="error ">
                               <p class="text-danger">{{ $errors->first('customer_city') }}</p>
                            </div>
                            @endif
                         </div>
+                    
                      </div>
-                     <div class="row">
-                        <div class="col-md-2">
-                           <label for="customer_status" class="form-control">Customer Statsu</label>
-                        </div>
-                        <div class="col-md-4">
-                           <input type="radio" name="customer_status" id="inactive" value="0"> Inactive
-                           <input type="radio" checked name="customer_status" id="active" value="1"> active
+                            <div class="col-md-6 mt-3">
+                           <div class="input_section">
+                           <label for="customer_status" class="col-form-label">Customer status</label>
+                       
+                           <input type="radio" name="customer_status" id="inactive" value="0"><span class="yes_no"> Inactive</span>
+                           <input type="radio" checked name="customer_status" id="active" value="1"> <span class="yes_no">active</span>
                         </div>
                      </div>
+         
                   </div>
                   <div class="pt-4">
                      <h5>Other Details</h5>
                      <div class="row">
-                        <div class="col-md-2">
-                           <label for="customer_id" class="form-control">Seller</label>
-                        </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
+                           <div class="input_section">
+                           <label for="customer_id"class="col-form-label">Seller</label>
+                      
                            <select name="customer_id" placeholder="Select Customers" class="select2 form-control" required>
                               <option value="" disabled selected>Select Customer</option>
                               @if($customers && count($customers) > 0)
@@ -294,28 +320,28 @@
                               @endif
                            </select>
                            @if ($errors->has('customer_id'))
-                           <div class="error col-lg-12">
+                           <div class="error">
                               <p class="text-danger">{{ $errors->first('customer_id') }}</p>
                            </div>
                            @endif
                         </div>
-                        <div class="col-md-2">
-                           <label for="sale_bill_date" class="form-control">Sale Bill Date</label>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
+                           <div class="input_section">
+                           <label for="sale_bill_date"class="col-form-label">Sale Bill Date</label>
                            <input type="text" name="sale_bill_date" id="sale_bill_date" class="datepicker form-control" placeholder="Sale Bill Date" autocomplete="off" value="{!! old( 'sale_bill_date' , $warranty_activation['sale_bill_date']) !!}" required>
                            @if ($errors->has('sale_bill_date'))
-                           <div class="error col-lg-12">
+                           <div class="error">
                               <p class="text-danger">{{ $errors->first('sale_bill_date') }}</p>
                            </div>
                            @endif
                         </div>
-                     </div>
-                     <div class="row">
-                        <div class="col-md-2">
-                           <label for="warranty_date" class="form-control">Warranty Date</label>
                         </div>
-                        <div class="col-md-4">
+
+                            <div class="col-md-6">
+                           <div class="input_section">
+                           <label for="warranty_date"class="col-form-label">Warranty Date</label>
+                        
                            <input type="text" name="warranty_date" id="warranty_date" class="datepicker form-control" placeholder="Warranty Date" autocomplete="off" value="{!! old( 'warranty_date' , $warranty_activation['warranty_date']) !!}" required>
                            @if ($errors->has('warranty_date'))
                            <div class="error col-lg-12">
@@ -323,10 +349,10 @@
                            </div>
                            @endif
                         </div>
-                        <div class="col-md-2">
-                           <label for="sale_bill_no" class="form-control">Co Sale Bill No.</label>
-                        </div>
-                        <div class="col-md-4">
+                     </div>
+                        <div class="col-md-6">
+                           <div class="input_section">
+                           <label for="sale_bill_no" class="col-form-label">Co Sale Bill No.</label>
                            <input type="text" name="sale_bill_no" id="sale_bill_no" class="form-control" value="{!! old( 'sale_bill_no' , $warranty_activation['sale_bill_no']) !!}" required>
                            @if ($errors->has('sale_bill_no'))
                            <div class="error col-lg-12">
@@ -334,24 +360,18 @@
                            </div>
                            @endif
                         </div>
+                         </div>
                      </div>
+                   
                   </div>
                </div>
-               <div class="row">
-                  <div class="col-md-2">
-                     <label for="warranty_activation_attach" class="form-control">Attachment</label>
-                  </div>
-                  <div class="col-md-3 col-sm-3 mt-4">
+               <div class="row mt-2">
+                  <div class="col-md-6">
+                     <div class="input_section">
+                     <label for="warranty_activation_attach" class="col-form-label">Attachment</label>
+                
                      <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                        <div class="selectThumbnail">
-                           <span class="btn btn-just-icon btn-round btn-file">
-                              <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
-                              <span class="fileinput-exists">Change</span>
-                              <input type="file" name="warranty_activation_attach" class="getimage1" accept="image/*,application/pdf">
-                           </span>
-                           <br>
-                           <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
-                        </div>
+                      
                         <div class="fileinput-new thumbnail">
                            @if($warranty_activation->exists && $warranty_activation->getMedia('warranty_activation_attach')->count() > 0)
                            @php
@@ -371,22 +391,33 @@
                            @else
                            <img src="{!! url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview1">
                            @endif
+                             <div class="selectThumbnail">
+                           <span class="btn btn-just-icon btn-round btn-file">
+                              <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
+                              <span class="fileinput-exists">Change</span>
+                              <input type="file" name="warranty_activation_attach" class="getimage1" accept="image/*,application/pdf">
+                           </span>
+                           <br>
+                           <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
+                        </div>
                         </div>
 
                         <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
                         <!-- <label class="bmd-label-floating">Attachment 1st</label> -->
                         @if ($errors->has('warranty_activation_attach'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('warranty_activation_attach') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
-               </div>
-
-               <div class="card-footer pull-right">
+                    <div class="card-footer pull-right">
                   {{ Form::submit('Submit', array('class' => 'btn btn-theme')) }}
                </div>
+                    </div>
+          
+
+             
                {{ Form::close() }}
             </div>
          </div>
