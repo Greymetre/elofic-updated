@@ -1,6 +1,6 @@
 <x-app-layout>
    <style>
-      .row.image_preview.p-4.m-4 {
+      .row.image_preview {
          border: 1px solid lightgrey;
          border-radius: 10px;
       }
@@ -10,28 +10,32 @@
       }
 
       span.delete-img {
-         position: absolute;
-         top: 0px;
-         right: 12px;
-         background: #f73232;
-         color: #fff;
-         border-radius: 50%;
-         width: 16px;
-         height: 16px;
-         text-align: center;
-         font-size: 14px;
-         line-height: 17px;
-         font-weight: 900;
-         cursor: pointer;
+             position: absolute;
+    top: -8px;
+    right: -14px;
+    background: red;
+    color: #fff;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    font-size: 14px;
+    line-height: 18px;
+    font-weight: 900;
+    cursor: pointer;
+    display: flex;
+   align-items: center;
+   justify-content: center;
       }
 
       i.fa.fa-window-close {
-         position: absolute;
-         top: 26px;
-         right: 42px;
-         font-size: 22px;
-         color: red;
-         cursor: pointer;
+          position: absolute;
+    top: 11px;
+    right: 26px;
+    font-size: 22px;
+    color: red;
+    cursor: pointer;
+    background: #fff;
       }
 
       iframe {
@@ -40,8 +44,8 @@
    </style>
    <div class="row">
       <div class="col-md-12">
-         <div class="card">
-            <div class="card-header card-header-tabs card-header-warning">
+         <div class="card p-0 m-0">
+            <div class="card-header card-header-tabs m-0 card-header-warning">
                <div class="nav-tabs-navigation">
                   <div class="nav-tabs-wrapper">
                      <h4 class="card-title ">
@@ -107,13 +111,21 @@
 
                <div class="row">
 
-                  <div class="col-md-6">
-                     <div class="form-group">
-                        <div class="row">
-                           <div class="col-md-3">
-                              <label class="form-control">App Version </label>
-                           </div>
-                           <div class="col-md-9">
+              
+                     </div>
+              
+               </div>
+               <hr>
+
+               <div class="card-body">
+               <div class="row">
+
+                      <div class="col-md-6">
+                     <div class="input_section">
+                      
+                              <label class="col-form-label">App Version </label>
+                    
+                          
                               <input type="number" name="app_version" placeholder="1.01" step="0.01" class="form-control" id="app_version" value="{{old('app_version', $field_konnect_app_setting['app_version'])}}" required>
                               @if ($errors->has('app_version'))
                               <div class="error col-lg-12">
@@ -122,47 +134,49 @@
                               @endif
                            </div>
                         </div>
-                     </div>
-                  </div>
-               </div>
-               <hr>
-               <div class="row mt-4">
-                  <div class="col-md-12 mt-4">
-                     <div class="row">
-                        <div class="col-md-4">
+                  <div class="col-md-6">
+                     <div class="input_section">
+                       
                            <label class="bmd-label-floating">Upload Product Catalogue </label>
-                        </div>
-                        <div class="col-md-8">
+                     
                            <input type="file" name="product_catalogue" accept="application/pdf" id="product_catalogue" class="form-control">
                            <input type="hidden" multiple name="id" id="id" class="form-control" value="{!! old( 'id', $field_konnect_app_setting?$field_konnect_app_setting['id']:'') !!}">
                            @if ($errors->has('product_catalogue'))
-                           <div class="error col-lg-12">
+                           <div class="error">
                               <p class="text-danger">{{ $errors->first('product_catalogue') }}</p>
                            </div>
                            @endif
                         </div>
                      </div>
                      @if(isset($field_konnect_app_setting) && $field_konnect_app_setting->getMedia('product_catalogue')->count() > 0 && Storage::disk('s3')->exists($field_konnect_app_setting->getMedia('product_catalogue')[0]->getPath()))
-                     <h3>Product Catalogue</h3>
-                     <div class="row">
+                    
+   <div class="col-md-12">
+                     <div class="row mt-3">
+                         <div class="col-md-12">
+                              <label class="bmd-label-floating">Product Catalogue</label>
+                         </div>
                         @foreach($field_konnect_app_setting->getMedia('product_catalogue') as $k=>$media)
                         <div class="col-md-6">
-                           <div class="row image_preview p-4 m-4">
+
+                           <div class="row image_preview p-4 m-2">
                               <iframe src="{{ $media->getFullUrl() }}" width="100%" height="400px" frameborder="0"></iframe>
                               <i class="fa fa-window-close close-btn" data-id="{{$media->id}}" aria-hidden="true"></i>
                            </div>
                         </div>
                         @endforeach
                      </div>
+                      </div>
                      @endif
                   </div>
-               </div>
-
-               <div class="card-footer pull-right">
+                   <div class="pull-right">
                   {{ Form::submit('Submit', array('class' => 'btn btn-theme')) }}
                </div>
+               </div>
+
+              
                {{ Form::close() }}
             </div>
+              </div>
          </div>
       </div>
    </div>

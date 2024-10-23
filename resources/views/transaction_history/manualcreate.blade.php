@@ -17,12 +17,12 @@
    </style>
    <div class="row">
       <div class="col-md-12">
-         <div class="card">
-            <div class="card-header card-header-tabs card-header-warning">
+         <div class="card p-0 mt-0">
+            <div class="card-header m-0 card-header-tabs card-header-warning">
                <div class="nav-tabs-navigation">
-                  <div class="nav-tabs-wrapper">
+                  <div class="nav-tabs-wrapper new_id">
                      <h4 class="card-title ">
-                        Transaction Coupon History Creation
+                        Transaction Coupon History Creation</h4>
                         @if(auth()->user()->can(['district_access']))
                         <ul class="nav nav-tabs pull-right" data-tabs="tabs">
                            <li class="nav-item">
@@ -33,7 +33,7 @@
                            </li>
                         </ul>
                         @endif
-                     </h4>
+                     
                   </div>
                </div>
             </div>
@@ -58,67 +58,71 @@
                ]) !!}
                <div class="form-group">
                   <div class="row">
-                     <div class="col-md-2">
-                        <label for="customer_id" class="form-control">Customer :</label>
-                     </div>
-                     <div class="col-md-10">
+                     <div class="col-md-6">
+                        <div class="input_section">
+                        <label for="customer_id" class="col-form-label">Customer :</label>
+                  
                         <select name="customer_id" id="customer_id" placeholder="Select Customers" class="select2 form-control" required>
                            
                         </select>
                         @if ($errors->has('customer_id'))
-                        <div class="error col-lg-12">
+                        <div class="error ">
                            <p class="text-danger">{{ $errors->first('customer_id') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
-                  <div id="copen_code_div">
-                     <div class="row">
-                        <div class="col-md-2">
-                           <label for="point_type" class="form-control">Point Type :</label>
-                        </div>
-                        <div class="col-md-4">
+
+                    <div class="col-md-6">
+                        <div class="input_section">
+                           <label for="point_type" class="col-form-label">Point Type :</label>
+                     
                            <select name="point_type" id="point_type" class="select2 form-control" required>
                               <option value="">Select Type</option>
                               <option value="0">Provision</option>
                               <option value="1">Active</option>
                            </select>
                            @if ($errors->has('point_type'))
-                           <div class="error col-lg-12">
+                           <div class="error">
                               <p class="text-danger">{{ $errors->first('point_type') }}</p>
                            </div>
                            @endif
                         </div>
-                        <div class="col-md-2">
-                           <label for="points" class="form-control">Points :</label>
-                        </div>
-                        <div class="col-md-4">
+                         </div>
+                        <div class="col-md-6">
+                           <div class="input_section">
+                           <label for="points" class="col-form-label">Points :</label>
+                     
                            <input type="number" name="points" id="points" class="form-control" required>
                            @if ($errors->has('points'))
-                           <div class="error col-lg-12">
+                           <div class="error">
                               <p class="text-danger">{{ $errors->first('points') }}</p>
                            </div>
                            @endif
                         </div>
-                     </div>
-                  </div>
-               </div>
-               <div class="row">
-                  <div class="col-md-2">
-                     <label for="remark" class="form-control">Remark :</label>
-                  </div>
-                  <div class="col-md-6">
+ </div>
+                             <div class="col-md-6">
+                  <div class="input_section">
+                     <label for="remark" class="col-form-label">Remark :</label>
+                
                      <textarea name="remark" id="remark" class="form-control" cols="50" rows="3" required></textarea>
                      @if ($errors->has('remark'))
-                     <div class="error col-lg-12">
+                     <div class="error">
                         <p class="text-danger">{{ $errors->first('remark') }}</p>
                      </div>
                      @endif
                   </div>
                </div>
-               <div class="card-footer pull-right">
+                <div class="pull-right col-md-12">
                   {{ Form::submit('Submit', array('class' => 'btn btn-theme')) }}
                </div>
+                     </div>
+           
+                   
+                  </div>
+               </div>
+          
+              
                {{ Form::close() }}
             </div>
          </div>

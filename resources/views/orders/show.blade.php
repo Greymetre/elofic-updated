@@ -328,6 +328,11 @@
                   @if($orders['status_id'] != 1 && $orders['status_id'] != 4)
                   <button type="button" data-orderid="{!! encrypt($orders->id) !!}" id="cancleButton" class="btn btn-danger float-right">Cancel</button>
                   @endif
+                  @if($orders['status_id'] != NULL)
+                  @if(auth()->user()->can('pendding_orders'))
+                  <button type="button" data-orderid="{!! encrypt($orders->id) !!}" id="penddingButton" class="btn btn-warning float-right">Pending</button>
+                  @endif
+                  @endif
                   @if($orders['status_id'] == 4)
                   <button type="button" disabled class="btn btn-danger float-right">Canceled</button>
                   @endif
@@ -373,6 +378,40 @@
             data: {
               _token: token,
               remark: result.value
+            },
+            success: function(res) {
+              Swal.fire({
+                title: res.status,
+                text: res.message,
+              });
+              if(res.status == 'success'){
+                window.location.href = base_url + '/orders';
+              }
+            }
+          });
+        }
+      });
+
+    })
+    $("#penddingButton").on("click", function() {
+      Swal.fire({
+        title: "Are you sure?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No',
+      }).then((result) => {
+        if (result.value) {
+          var token = $("meta[name='csrf-token']").attr("content");
+          var base_url = $('.baseurl').data('baseurl');
+          var orderId = $(this).data("orderid");
+          $.ajax({
+            url: base_url + '/order-pendding/' + orderId,
+            dataType: "json",
+            type: "POST",
+            data: {
+              _token: token,
+              // remark: result.value
             },
             success: function(res) {
               Swal.fire({

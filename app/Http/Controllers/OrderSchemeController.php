@@ -358,7 +358,7 @@ class OrderSchemeController extends Controller
         //abort_if(Gate::denies('order_scheme_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        return Excel::download(new OrderSchemeTemplate, 'order_scheme_template.xlsx');
+        return Excel::download(new OrderSchemeTemplate, 'Scheme Template.xlsx');
     }
 
 

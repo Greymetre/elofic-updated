@@ -96,7 +96,7 @@
           </span>
         </h4>
       </div>
-      <div class="modal-body">
+      <div class="modal-body all_text">
           <h4 class="title"></h4>
           <p class="datetime"></p>
           <div class="descriptions"></div>

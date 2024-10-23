@@ -103,51 +103,51 @@
         <form method="POST" action="{{ route('status.store') }}" enctype="multipart/form-data" id="createstatusForm">
         @csrf
         <div class="row">
-          <div class="col-md-12">
-            <div class="row">
-              <label class="col-md-3 col-form-label">{!! trans('panel.status.status_name') !!} <span class="text-danger"> *</span></label>
-              <div class="col-md-9">
+          <div class="col-md-6">
+            <div class="input_section">
+              <label class="col-form-label">{!! trans('panel.status.status_name') !!} <span class="text-danger"> *</span></label>
+           
                 <div class="form-group has-default bmd-form-group">
                   <input type="text" name="status_name" id="status_name" class="form-control" value="{!! old( 'status_name') !!}" maxlength="200" required>
                   @if ($errors->has('status_name'))
-                    <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('status_name') }}</p></div>
+                    <div class="error"><p class="text-danger">{{ $errors->first('status_name') }}</p></div>
                   @endif
-                </div>
+          
               </div>
             </div>
           </div>
-          <div class="col-md-12">
-            <div class="row">
-              <label class="col-md-3 col-form-label">{!! trans('panel.status.display_name') !!} <span class="text-danger"> *</span></label>
-              <div class="col-md-9">
+          <div class="col-md-6">
+            <div class="input_section">
+              <label class="col-form-label">{!! trans('panel.status.display_name') !!} <span class="text-danger"> *</span></label>
+              
                 <div class="form-group has-default bmd-form-group">
                   <input type="text" name="display_name" id="display_name" class="form-control" value="{!! old( 'display_name') !!}" maxlength="200" required>
                   @if ($errors->has('display_name'))
-                    <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('display_name') }}</p></div>
+                    <div class="error"><p class="text-danger">{{ $errors->first('display_name') }}</p></div>
                   @endif
-                </div>
+              
               </div>
             </div>
           </div>
-          <div class="col-md-12">
-            <div class="row">
-              <label class="col-md-3 col-form-label">{!! trans('panel.status.status_message') !!} <span class="text-danger"> *</span></label>
-              <div class="col-md-9">
+          <div class="col-md-6">
+            <div class="input_section">
+              <label class="col-form-label">{!! trans('panel.status.status_message') !!} <span class="text-danger"> *</span></label>
+           
                 <div class="form-group has-default bmd-form-group">
                   <input type="text" name="status_message" id="status_message" class="form-control" value="{!! old( 'status_message') !!}" maxlength="200" required>
                   @if ($errors->has('status_message'))
-                    <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('status_message') }}</p></div>
+                    <div class="error"><p class="text-danger">{{ $errors->first('status_message') }}</p></div>
                   @endif
                 </div>
-              </div>
+             
             </div>
           </div>
-          <div class="col-md-12">
-              <div class="row">
-                <label class="col-md-3 col-form-label">{!! trans('panel.status.module') !!}<span class="text-danger"> *</span></label>
-                <div class="col-md-9">
+          <div class="col-md-6">
+              <div class="input_section">
+                <label class="col-form-label">{!! trans('panel.status.module') !!}<span class="text-danger"> *</span></label>
+            
                   <div class="form-group has-default bmd-form-group">
-                    <select class="form-control select2" name="module" id="module" style="width: 100%;" required >
+                    <select class="form-control" name="module" id="module" style="width: 100%;" required >
                        <option value="">Select {!! trans('panel.status.module') !!}</option>
                        <option value="Customer" {{ old( 'module' , (!empty($status->module))?($status->module):('') ) == 'Customer' ? 'selected' : '' }}>Customer</option>
                        <option value="Order" {{ old( 'module' , (!empty($status->module))?($status->module):('') ) == 'Order' ? 'selected' : '' }}>Order</option>
@@ -158,16 +158,16 @@
                     </select>
                   </div>
                   @if ($errors->has('module'))
-                   <div class="error col-lg-12">
+                   <div class="error">
                       <p class="text-danger">{{ $errors->first('module') }}</p>
                    </div>
                   @endif
                 </div>
-              </div>
+             
             </div>
           </div>
         <div class="clearfix"></div>
-        <div class="modal-footer pull-right">
+        <div class="pull-right">
           <input type="hidden" name="id" id="status_id" />
           <button class="btn btn-info save"> Submit</button>
         </form>

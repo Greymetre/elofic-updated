@@ -1,12 +1,13 @@
  <x-app-layout>
   <div class="row">
     <div class="col-md-12">
-      <div class="card">
-        <div class="card-header card-header-tabs card-header-warning">
+      <div class="card p-0 mt-0">
+        <div class="card-header m-0 card-header-tabs card-header-warning">
           <div class="nav-tabs-navigation">
-            <div class="nav-tabs-wrapper">
+            <div class="nav-tabs-wrapper new_id">
               <h4 class="card-title ">{{ trans('panel.global.edit') }} {{ trans('panel.expenses_type.title_singular') }}
                 @if(auth()->user()->can(['expenses_type']))
+              </h4>
                 <ul class="nav nav-tabs pull-right" data-tabs="tabs">
                   <li class="nav-item">
                     <a class="nav-link" href="{{ url('expenses_type') }}">
@@ -16,7 +17,7 @@
                   </li>
                 </ul>
                 @endif
-              </h4>
+             
             </div>
           </div>
         </div>
@@ -39,10 +40,10 @@
             <input type="hidden" name="id" id="id" value="{!! $expensesType->id !!}">
             <div class="row">
 
-            <div class="col-md-12">
-                <div class="row">
-                  <label class="col-md-2 col-form-label">{{ trans('panel.expenses_type.fields.pay_roll') }}<span class="text-danger"> *</span></label>
-                  <div class="col-md-10">
+            <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">{{ trans('panel.expenses_type.fields.pay_roll') }}<span class="text-danger"> *</span></label>
+                 
                     <div class="form-group has-default bmd-form-group">
                       <select name="payroll_id" id="payroll_id" class="form-control {{ $errors->has('payroll_id') ? 'is-invalid' : '' }}">
                         <option value="" disabled selected>Please select pay roll</option>
@@ -56,15 +57,15 @@
                       </div>
                       @endif
                     </div>
-                  </div>
+                
                 </div>
               </div>
 
 
-              <div class="col-md-12">
-                <div class="row">
-                  <label class="col-md-2 col-form-label">{{ trans('panel.expenses_type.fields.allowance_type') }}<span class="text-danger"> *</span></label>
-                  <div class="col-md-10">
+              <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">{{ trans('panel.expenses_type.fields.allowance_type') }}<span class="text-danger"> *</span></label>
+                  
                     <div class="form-group has-default bmd-form-group">
                       <select name="allowance_type_id" id="allowance_type_id" class="form-control {{ $errors->has('allowance_type_id') ? 'is-invalid' : '' }}">
                         <option value="">Please select allowance type</option>
@@ -77,14 +78,14 @@
                         {{ $errors->first('allowance_type_id') }}
                       </div>
                       @endif
-                    </div>
+                 
                   </div>
                 </div>
               </div>
-              <div class="col-md-12">
-                <div class="row">
-                  <label class="col-md-2 col-form-label">{{ trans('panel.expenses_type.fields.name') }}<span class="text-danger"> *</span></label>
-                  <div class="col-md-10">
+              <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">{{ trans('panel.expenses_type.fields.name') }}<span class="text-danger"> *</span></label>
+               
                     <div class="form-group has-default bmd-form-group">
                       <input placeholder="Expenses type name" class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}" type="text" name="name" id="name" value="{{$expensesType->name}}" maxlength="200" required>
                       @if($errors->has('name'))
@@ -93,13 +94,13 @@
                       </div>
                       @endif
                     </div>
-                  </div>
+                
                 </div>
               </div>
-              <div class="col-md-12">
-                <div class="row">
-                  <label class="col-md-2 col-form-label">{{ trans('panel.expenses_type.fields.rate') }}</label>
-                  <div class="col-md-10">
+              <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">{{ trans('panel.expenses_type.fields.rate') }}</label>
+                 
                     <div class="form-group has-default bmd-form-group">
                       <input class="form-control {{ $errors->has('rate') ? 'is-invalid' : '' }}" type="" name="rate" id="rate" value="{{$expensesType->rate}}" pattern="^\d*(\.\d{0,2})?$" placeholder="0.00">
                       @if($errors->has('display_name'))
@@ -108,11 +109,11 @@
                       </div>
                       @endif
                     </div>
-                  </div>
+                
                 </div>
               </div>
             </div>
-            <div class="card-footer">
+            <div class="pull-right">
               {{ Form::submit('Update', array('class' => 'btn btn-theme')) }}
             </div>
             {{ Form::close() }}

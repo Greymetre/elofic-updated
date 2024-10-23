@@ -138,7 +138,7 @@
            </div>
 
            <div class="table-responsive">
-             <table id="getallexpenses" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
+             <table id="getallexpenses" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
                <thead class=" text-primary">
                  <th>{!! trans('panel.expenses.fields.expense_id') !!}</th>
                  <th>Expense Date</th>
@@ -148,7 +148,7 @@
                  <th>{!! trans('panel.expenses.fields.claim_amount') !!}</th>
                  <th>{!! trans('panel.expenses.fields.approve_amount') !!}</th>
                  <th>{!! trans('panel.expenses.fields.expense_status') !!}</th>
-                 <th>{!! trans('panel.expenses.fields.note') !!}</th>
+                 <th class="lenth_text">{!! trans('panel.expenses.fields.note') !!}</th>
                  <th>{!! trans('panel.expenses.fields.created_at') !!}</th>
                  <th>{!! trans('panel.expenses.fields.branch') !!}</th>
                  <th>{!! trans('panel.expenses.fields.total_km') !!}</th>
@@ -236,6 +236,11 @@
      function resetFilter() {
        localStorage.setItem("is_reset", '1');
        localStorage.setItem("executive_id", '');
+       localStorage.setItem("start_date", '');
+       localStorage.setItem("end_date", '');
+       localStorage.setItem("status", '');
+       localStorage.setItem("expense_id", '');
+       localStorage.setItem("division_id", '');
        fetch(removeSessionUrl, {
          method: 'POST',
          headers: {

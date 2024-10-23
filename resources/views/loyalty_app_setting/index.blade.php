@@ -1,6 +1,6 @@
 <x-app-layout>
    <style>
-      .row.image_preview.p-4.m-4 {
+      .row.image_preview {
          border: 1px solid lightgrey;
          border-radius: 10px;
       }
@@ -10,25 +10,36 @@
       }
 
       span.delete-img {
-         position: absolute;
-         top: 0px;
-         right: 12px;
-         background: #f73232;
-         color: #fff;
-         border-radius: 50%;
-         width: 16px;
-         height: 16px;
-         text-align: center;
-         font-size: 14px;
-         line-height: 17px;
-         font-weight: 900;
-         cursor: pointer;
+          position: absolute;
+    top: -8px;
+    right: -14px;
+    background: red;
+    color: #fff;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    font-size: 14px;
+    line-height: 18px;
+    font-weight: 900;
+    cursor: pointer;
+    display: flex;
+   align-items: center;
+   justify-content: center;
       }
+
+      .select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: #0080b8;
+ 
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: red;}
    </style>
    <div class="row">
       <div class="col-md-12">
-         <div class="card">
-            <div class="card-header card-header-tabs card-header-warning">
+         <div class="card p-0 mt-0">
+            <div class="card-header m-0 card-header-tabs card-header-warning">
                <div class="nav-tabs-navigation">
                   <div class="nav-tabs-wrapper">
                      <h4 class="card-title ">
@@ -70,16 +81,24 @@
             </div>
             @endif
             @if(isset($loyalty_app_setting) && $loyalty_app_setting->getMedia('slider_image')->count() > 0 && Storage::disk('s3')->exists($loyalty_app_setting->getMedia('slider_image')[0]->getPath()))
-            <h3>Main Slider Images</h3>
-            <div class="row image_preview p-4 m-4">
+           <div class="image_preview p-4">
+            <div class="row">
+               
+                <div class="col-md-12">
+                <label class="bmd-label-floating mt-2">Main Slider Images</label>
+             </div>
                @foreach($loyalty_app_setting->getMedia('slider_image') as $loyalty_app_setting_image)
-               <div class="col-md-3 img-div">
-                  <img style="box-shadow: 0 0 15px #000;" class="mt-2 rounded" width="200" src="{{$loyalty_app_setting_image->getFullUrl()}}" alt=""><span title="Delete Image" class="delete-img" data-id="{{$loyalty_app_setting_image->id}}">X</span>
+               <div class="col-md-3">
+                  <div class="img-div">
+                  <img style="box-shadow: 0 0 15px #000;" class="rounded" width="100%" src="{{$loyalty_app_setting_image->getFullUrl()}}" alt=""><span title="Delete Image" class="delete-img" data-id="{{$loyalty_app_setting_image->id}}">X</span>
                </div>
+            </div>
+
                @endforeach
             </div>
+            
             @endif
-            <div class="card-body">
+            <div class="card-body p-0 mt-5">
                @if(count($errors) > 0)
                <div class="alert alert-danger">
                   <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -100,35 +119,82 @@
                ]) !!}
                <div class="row">
                   <div class="col-md-3">
-                     <label class="bmd-label-floating">Upload Main Silder Images </label>
-                  </div>
-                  <div class="col-md-8">
-                     <input type="file" name="images[]" multiple id="images" class="form-control" accept="image/png, image/gif, image/jpeg">
+<div class="input_section">
+
+<div class="fileinput fileinput-new text-center" data-provides="fileinput">
+<div class="fileinput-new thumbnail">
+   <img src="https://expertfromindia.in/bediya/public/assets/img/placeholder.jpg" class="imagepreview1">
+<div class="selectThumbnail">
+<span class="btn btn-just-icon btn-round btn-file">
+<span class="fileinput-new"><i class="fa fa-pencil"></i></span>
+<span class="fileinput-exists">Change</span>
+ <input type="file" name="images[]" multiple id="images" class="form-control" accept="image/png, image/gif, image/jpeg">
+</span>
+<br>
+<a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
+</div>
+</div>
+<div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
+
+</div>
+<label for="warranty_activation_attach" class="bmd-label-floating">Upload Main Silder Images</label>
+</div>
+
+            
+                 
                      @if ($errors->has('images'))
-                     <div class="error col-lg-12">
+                     <div class="error">
                         <p class="text-danger">{{ $errors->first('images') }}</p>
                      </div>
                      @endif
                   </div>
                </div>
                @if(isset($loyalty_app_setting) && $loyalty_app_setting->getMedia('gift_slider_image')->count() > 0 && Storage::disk('s3')->exists($loyalty_app_setting->getMedia('gift_slider_image')[0]->getPath()))
-               <h3>Gift Slider Images</h3>
-               <div class="row image_preview p-4 m-4">
+            
+               <div class="row mt-4">
+                   <div class="col-md-12">
+                <label class="bmd-label-floating mt-2">Gift Slider Images</label>
+             </div>
+
                   @foreach($loyalty_app_setting->getMedia('gift_slider_image') as $loyalty_app_setting_image)
-                  <div class="col-md-3 img-div">
-                     <img style="box-shadow: 0 0 15px #000;" class="mt-2 rounded" width="200" src="{{$loyalty_app_setting_image->getFullUrl()}}" alt=""><span title="Delete Image" class="delete-img" data-id="{{$loyalty_app_setting_image->id}}">X</span>
+                  <div class="col-md-3">
+                     <div class="img-div">
+                     <img style="box-shadow: 0 0 15px #000;" class="rounded" width="100%" src="{{$loyalty_app_setting_image->getFullUrl()}}" alt=""><span title="Delete Image" class="delete-img" data-id="{{$loyalty_app_setting_image->id}}">X</span>
                   </div>
+               </div>
                   @endforeach
                </div>
                @endif
-               <div class="row">
+               <div class="row mt-3">
                   <div class="col-md-3">
-                     <label class="bmd-label-floating">Upload Gift Silder Images </label>
-                  </div>
-                  <div class="col-md-8">
-                     <input type="file" name="gift_images[]" multiple id="gift_images" class="form-control" accept="image/png, image/gif, image/jpeg">
+<div class="input_section">
+
+<div class="fileinput fileinput-new text-center" data-provides="fileinput">
+<div class="fileinput-new thumbnail">
+   <img src="https://expertfromindia.in/bediya/public/assets/img/placeholder.jpg" class="imagepreview1">
+<div class="selectThumbnail">
+<span class="btn btn-just-icon btn-round btn-file">
+<span class="fileinput-new"><i class="fa fa-pencil"></i></span>
+<span class="fileinput-exists">Change</span>
+ <input type="file" name="gift_images[]" multiple id="gift_images" class="form-control" accept="image/png, image/gif, image/jpeg">
+</span>
+<br>
+<a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
+</div>
+</div>
+<div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
+
+</div>
+<label for="warranty_activation_attach" class="bmd-label-floating">Upload Gift Silder Images</label>
+</div>
+
+
+
+
+                 
+                    
                      @if ($errors->has('gift_images'))
-                     <div class="error col-lg-12">
+                     <div class="error">
                         <p class="text-danger">{{ $errors->first('gift_images') }}</p>
                      </div>
                      @endif
@@ -136,8 +202,8 @@
                </div>
                <div class="row">
                   <div class="col-md-6">
-                     <div class="form-group">
-                        <label class="bmd-label-floating">Select Customer Type </label>
+                     <div class="input_section">
+                        <label class="col-form-label">Select Customer Type </label>
                         <select name="customer_types[]" multiple id="customer_types" class="select2 form-control" required>
                            <option value="">Select Customer Type</option>
                            @if($customer_types)
@@ -147,32 +213,30 @@
                            @endif
                         </select>
                         @if ($errors->has('customer_types'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('customer_types') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
                   <div class="col-md-6">
-                     <div class="form-group">
-                        <div class="row">
-                           <div class="col-md-3">
-                              <label class="form-control">App Version </label>
-                           </div>
-                           <div class="col-md-9">
+                     <div class="input_section">
+                        
+                              <label class="col-form-label">App Version </label>
+                          
                               <input type="number" name="app_version" placeholder="1.01" step="0.01" class="form-control" id="app_version" value="{{old('app_version', $loyalty_app_setting['app_version'])}}" required>
                               @if ($errors->has('app_version'))
-                              <div class="error col-lg-12">
+                              <div class="error ">
                                  <p class="text-danger">{{ $errors->first('app_version') }}</p>
                               </div>
                               @endif
-                           </div>
-                        </div>
+                          
                      </div>
                   </div>
+
                </div>
-               <div class="row mt-4">
-                  <div class="col-md-6 mt-4">
+               <div class="row mt-5">
+                  <div class="col-md-6">
                      <div class="row">
                         <div class="col-md-4">
                            <label class="bmd-label-floating">Upload Product Catalogue </label>
@@ -181,20 +245,21 @@
                            <input type="file" name="product_catalogue" accept="application/pdf" id="product_catalogue" class="form-control">
                            <input type="hidden" name="id" id="id" class="form-control" value="{!! old( 'id', $loyalty_app_setting?$loyalty_app_setting['id']:'') !!}">
                            @if ($errors->has('product_catalogue'))
-                           <div class="error col-lg-12">
+                           <div class="error ">
                               <p class="text-danger">{{ $errors->first('product_catalogue') }}</p>
                            </div>
                            @endif
                         </div>
                      </div>
                      @if(isset($loyalty_app_setting) && $loyalty_app_setting->getMedia('product_catalogue')->count() > 0 && Storage::disk('s3')->exists($loyalty_app_setting->getMedia('product_catalogue')[0]->getPath()))
-                     <h3>Product Catalogue</h3>
-                     <div class="row image_preview p-4 m-4">
+                   
+                     <div class="row image_preview p-4 mt-2 m-2">
+                          <label class="bmd-label-floating">Product Catalogue</label>
                         <iframe src="{{ $loyalty_app_setting->getMedia('product_catalogue')[0]->getFullUrl() }}" width="100%" height="400px" frameborder="0"></iframe>
                      </div>
                      @endif
                   </div>
-                  <div class="col-md-6 mt-4">
+                  <div class="col-md-6">
                      <div class="row">
                         <div class="col-md-4">
                            <label class="bmd-label-floating">Upload Scheme Catalogue </label>
@@ -209,8 +274,9 @@
                         </div>
                      </div>
                      @if(isset($loyalty_app_setting) && $loyalty_app_setting->getMedia('scheme_catalogue')->count() > 0 && Storage::disk('s3')->exists($loyalty_app_setting->getMedia('scheme_catalogue')[0]->getPath()))
-                     <h3>Scheme Catalogue</h3>
-                     <div class="row image_preview p-4 m-4">
+           
+                     <div class="row image_preview p-4 mt-2 m-2">
+                                  <label class="bmd-label-floating">Scheme Catalogue</label>
                         <iframe src="{{ $loyalty_app_setting->getMedia('scheme_catalogue')[0]->getFullUrl() }}" width="100%" height="400px" frameborder="0"></iframe>
                      </div>
                      @endif

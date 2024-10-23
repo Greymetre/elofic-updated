@@ -38,28 +38,24 @@
           ]) !!}
           <div class="row">
             <div class="col-md-8">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.branch.fields.branch_name') !!} <span class="text-danger"> *</span></label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.branch.fields.branch_name') !!} <span class="text-danger"> *</span></label>
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="branch_name" class="form-control" value="{!! old( 'branch_name', $branches['branch_name']) !!}" maxlength="200" required>
                       @if ($errors->has('branch_name'))
-                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('branch_name') }}</p></div>
+                        <div class="error"><p class="text-danger">{{ $errors->first('branch_name') }}</p></div>
                       @endif
-                    </div>
                   </div>
                 </div>
               </div>
               <div class="col-md-8">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.branch.fields.branch_code') !!} <span class="text-danger"> *</span></label>
-                  <div class="col-md-9">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.branch.fields.branch_code') !!} <span class="text-danger"> *</span></label>       
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="branch_code" class="form-control" value="{!! old( 'branch_code', $branches['branch_code']) !!}" maxlength="200" required>
                       @if ($errors->has('branch_code'))
-                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('branch_code') }}</p></div>
+                        <div class="error"><p class="text-danger">{{ $errors->first('branch_code') }}</p></div>
                       @endif
-                    </div>
                   </div>
                 </div>
               </div>

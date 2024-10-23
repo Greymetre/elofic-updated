@@ -22,7 +22,38 @@ class User extends Authenticatable implements HasMedia
      * @var array<int, string>
      */
     protected $fillable = [
-        'active', 'name', 'first_name', 'last_name', 'mobile', 'email', 'email_verified_at', 'password', 'password_string', 'notification_id', 'device_type', 'gender', 'profile_image', 'latitude', 'longitude', 'region_id', 'remember_token', 'deleted_at', 'created_at', 'updated_at', 'location', 'reportingid', 'branch_id', 'branch_show', 'designation_id', 'employee_codes', 'department_id', 'division_id', 'payroll', 'sales_type', 'customerid', 'show_attandance_report'
+        'active',
+        'name',
+        'first_name',
+        'last_name',
+        'mobile',
+        'email',
+        'email_verified_at',
+        'password',
+        'password_string',
+        'notification_id',
+        'device_type',
+        'gender',
+        'profile_image',
+        'latitude',
+        'longitude',
+        'region_id',
+        'remember_token',
+        'deleted_at',
+        'created_at',
+        'updated_at',
+        'location',
+        'reportingid',
+        'branch_id',
+        'branch_show',
+        'designation_id',
+        'employee_codes',
+        'department_id',
+        'division_id',
+        'payroll',
+        'sales_type',
+        'customerid',
+        'show_attandance_report'
     ];
 
     public function registerMediaCollections(): void
@@ -184,6 +215,4 @@ class User extends Authenticatable implements HasMedia
     {
         return $this->hasMany(Expenses::class, 'user_id', 'id');
     }
-
-
 }

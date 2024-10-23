@@ -236,10 +236,9 @@
           <form method="POST" action="{{ route('sales-target-dealer.store') }}" enctype="multipart/form-data" id="updateSalesTargetForm">
             @csrf
             <div class="row">
-              <div class="col-md-9">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.sales_target_dealer.fields.dealer') !!} <span class="text-danger"> *</span></label>
-                  <div class="col-md-9">
+              <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.sales_target_dealer.fields.dealer') !!} <span class="text-danger"> *</span></label>
                     <div class="form-group has-default bmd-form-group">
                       <select class="form-control select2" name="customer_id" id="customer_id" title="{!! trans('panel.sales_users.user_name') !!}">
                         <option value="form-control" disabled selected>{!! trans('panel.sales_users.target_users') !!}</option>
@@ -256,48 +255,37 @@
                       @endif
                     </div>
                   </div>
-                </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="col-md-9">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.sales_target_dealer.fields.dealer_firm_name') !!} <span class="text-danger"> *</span></label>
-                  <div class="col-md-9">
+ <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.sales_target_dealer.fields.dealer_firm_name') !!} <span class="text-danger"> *</span></label>
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="firm_name" id="firm_name" class="form-control" value="{!! old( 'firm_name') !!}" readonly>
                       @if ($errors->has('firm_name'))
-                      <div class="error col-lg-12">
+                      <div class="error">
                         <p class="text-danger">{{ $errors->first('firm_name') }}</p>
                       </div>
                       @endif
-                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="col-md-9">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.sales_target_dealer.fields.sales_type') !!} <span class="text-danger"> *</span></label>
-                  <div class="col-md-9">
+  <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.sales_target_dealer.fields.sales_type') !!} <span class="text-danger"> *</span></label>             
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="type" id="type" class="form-control" value="{!! old('type') !!}" readonly>
                       @if ($errors->has('type'))
-                      <div class="error col-lg-12">
+                      <div class="error">
                         <p class="text-danger">{{ $errors->first('type') }}</p>
                       </div>
                       @endif
-                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="col-md-9">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.sales_target_user.fields.month') !!} <span class="text-danger"> *</span></label>
-                  <div class="col-md-9">
+ <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.sales_target_user.fields.month') !!} <span class="text-danger"> *</span></label>
+                
                     <div class="form-group has-default bmd-form-group">
                       <select class="form-control" name="month" id="month" title="{!! trans('panel.sales_target_user.fields.month') !!}">
                         <option value="" disabled selected>{!! trans('panel.sales_users.month') !!}</option>
@@ -305,20 +293,17 @@
                           @endfor
                       </select>
                       @if ($errors->has('month'))
-                      <div class="error col-lg-12">
+                      <div class="error">
                         <p class="text-danger">{{ $errors->first('month') }}</p>
                       </div>
                       @endif
                     </div>
-                  </div>
+              
                 </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="col-md-9">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.sales_target_user.fields.year') !!} <span class="text-danger"> *</span></label>
-                  <div class="col-md-9">
+      <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.sales_target_user.fields.year') !!} <span class="text-danger"> *</span></label>
                     <div class="form-group has-default bmd-form-group">
                       <select class="form-control" name="year" id="year" title="{!! trans('panel.sales_target_user.fields.year') !!}">
                         <option value="" disabled selected>{!! trans('panel.sales_users.year') !!}</option>
@@ -327,32 +312,29 @@
                         @endforeach
                       </select>
                       @if ($errors->has('year'))
-                      <div class="error col-lg-12">
+                      <div class="error">
                         <p class="text-danger">{{ $errors->first('year') }}</p>
                       </div>
                       @endif
                     </div>
-                  </div>
                 </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="col-md-9">
-                <div class="row">
-                  <label class="col-md-3 col-form-label">{!! trans('panel.sales_target_user.fields.target') !!} <span class="text-danger"> *</span></label>
-                  <div class="col-md-9">
+  <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">{!! trans('panel.sales_target_user.fields.target') !!} <span class="text-danger"> *</span></label>              
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="target" id="target" class="form-control" value="{!! old( 'target') !!}" maxlength="200">
                       @if ($errors->has('target'))
-                      <div class="error col-lg-12">
+                      <div class="error">
                         <p class="text-danger">{{ $errors->first('target') }}</p>
                       </div>
                       @endif
-                    </div>
                   </div>
                 </div>
               </div>
+
             </div>
+           
             <div class="clearfix"></div>
             <div class="modal-footer">
               <input type="hidden" name="id" id="sales_target_id" />

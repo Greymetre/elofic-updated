@@ -129,28 +129,6 @@ class CustomerController extends Controller
                         'updated_at' => getcurentDateTime()
                     ])) {
 
-                        if ($request['customertype'] == '1' || $request['customertype'] == '3') {
-                            $passis = generatePassword();
-                            if (strlen($request['mobile']) > 10 && substr($request['mobile'], 0, 2) === '91') {
-                                $request['mobile'] = substr($request['mobile'], 2);
-                            }
-                            $user = User::create([
-                                'active'   =>  isset($request['active']) ? $request['active'] : 'Y',
-                                'name'   =>  isset($request['name']) ? $request['name'] : $request['first_name'] . ' ' . $request['last_name'],
-                                'first_name'   =>  isset($request['first_name']) ? $request['first_name'] : '',
-                                'last_name'   =>  isset($request['last_name']) ? $request['last_name'] : '',
-                                'mobile'   =>  isset($request['mobile']) ? $request['mobile'] : null,
-                                'email'   =>  isset($request['email']) ? $request['email'] : '',
-                                'password'   =>  Hash::make($passis),
-                                'reportingid' => !empty($request['created_by']) ? $request['created_by'] : null,
-                                'password_string'   =>  $passis,
-                                'customerid' => $customer->id,
-                            ]);
-                            $user->roles()->sync(['29']);
-                            $permissions = $user->getPermissionsViaRoles()->pluck('name');
-                            $user->givePermissionTo($permissions);
-                        }
-
                         //parent start
 
                         // if(!empty($request['parent_id']))
@@ -408,6 +386,27 @@ class CustomerController extends Controller
                                 ]);
                             }
                         }
+                        if ($request['customertype'] == '1' || $request['customertype'] == '3') {
+                            $passis = generatePassword();
+                            if (strlen($request['mobile']) > 10 && substr($request['mobile'], 0, 2) === '91') {
+                                $request['mobile'] = substr($request['mobile'], 2);
+                            }
+                            $user = User::create([
+                                'active'   =>  isset($request['active']) ? $request['active'] : 'Y',
+                                'name'   =>  isset($request['name']) ? $request['name'] : $request['first_name'] . ' ' . $request['last_name'],
+                                'first_name'   =>  isset($request['first_name']) ? $request['first_name'] : '',
+                                'last_name'   =>  isset($request['last_name']) ? $request['last_name'] : '',
+                                'mobile'   =>  isset($request['mobile']) ? $request['mobile'] : null,
+                                'email'   =>  isset($request['email']) ? $request['email'] : 'customer'.$customer->id.'@gmail.com',
+                                'password'   =>  Hash::make($passis),
+                                'reportingid' => !empty($request['created_by']) ? $request['created_by'] : null,
+                                'password_string'   =>  $passis,
+                                'customerid' => $customer->id,
+                            ]);
+                            $user->roles()->sync(['29']);
+                            $permissions = $user->getPermissionsViaRoles()->pluck('name');
+                            $user->givePermissionTo($permissions);
+                        }
                         $asmnotify = collect([
                             'title' => 'Successfully added',
                             'body' =>  'You have successfully added ' . $request['name']
@@ -563,7 +562,7 @@ class CustomerController extends Controller
                 }
                 return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'customerTypes' => $customerTypes, 'data' => $data], $this->successStatus);
             }
-            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data], 200);
+            return response(['status' => 'success', 'message' => 'Data retrieved successfully.', 'customerTypes' => $customerTypes, 'data' => $data], $this->successStatus);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
@@ -584,9 +583,11 @@ class CustomerController extends Controller
                 ->whereHas('customertypes', function ($query) {
                     $query->where('type_name', '=', 'distributor')->orWhere('type_name', '=', 'Dealer');
                 })
-                ->whereIn('customertype', ['1', '3'])
-                ->whereIn('id', $customer_ids_assign)
-                ->select('id', 'name', 'first_name', 'last_name', 'mobile', 'email', 'profile_image', 'customer_code')->orderBy('name', 'asc');
+                ->whereIn('customertype', ['1', '3']);
+                if(!$user->hasRole('superadmin') && !$user->hasRole('Admin') && !$user->hasRole('Sub_Admin')){
+                    $query = $query->whereIn('id', $customer_ids_assign);
+                }
+                $query = $query->select('id', 'name', 'first_name', 'last_name', 'mobile', 'email', 'profile_image', 'customer_code')->orderBy('name', 'asc');
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
             $data = collect([]);
             if ($db_data->isNotEmpty()) {

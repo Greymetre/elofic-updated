@@ -57,7 +57,9 @@
                     </div>
                     <div class="p-2" style="width:160px;"><label for="start_date">Start Date</label><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
                     <div class="p-2" style="width:160px;"><label for="end_date">End Date</label><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
-                    <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Redemption"><i class="material-icons">cloud_download</i></button></div>
+                    <div class="p-2">
+<label for="redeem_mode">Download</label>
+                      <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Redemption"><i class="material-icons">cloud_download</i></button></div>
                   </div>
                 </form>
                 @endif
@@ -566,7 +568,7 @@
               }
             });
           },
-          html: '<input id="dispatch_number" name="dispatch_number" class="swal2-input" placeholder="Dispatch Number">',
+          html: '<div class="input_section"><input id="dispatch_number" name="dispatch_number" class="swal2-input" placeholder="Dispatch Number"></div>',
         }).then(function(result) {
           if (!result.dismiss) {
             var dispatch_number = $('#dispatch_number').val();
@@ -627,10 +629,10 @@
         var status = active == 0 ? '0' : (active == 1 ? '1' : '2');
         Swal.fire({
           title: 'Transfer details and Status',
-          html: '<select id="statusSelect" class="swal2-select">' +
+          html: '<div class="input_section"><select id="statusSelect" class="swal2-select">' +
             '<option value="4">Delivered</option>' +
-            '</select>' +
-            '<input id="remark" name="remark" class="swal2-input" placeholder="Remark">',
+            '</select></div>' +
+            '<div class="input_section"><input id="remark" name="remark" class="swal2-input" placeholder="Remark"></div>',
           inputAttributes: {
             autocapitalize: 'off'
           },

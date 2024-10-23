@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\DataTables\VisitorDataTable;
 use App\Exports\PrimarySalesExport;
 use Illuminate\Http\Request;
-use App\Models\{User, Customers, Order, Branch, Division, CheckIn, BeatSchedule, Sales, SalesTarget, OrderDetails, TourProgramme, Wallet, Product, UserActivity, UserCityAssign, Address, TourDetail, TransactionHistory, EmployeeDetail, SalesTargetUsers, Attendance, DealerPortalSettings, VisitReport, PrimarySales, Redemption};
+use App\Models\{User, Customers, Order, Branch, Division, CheckIn, BeatSchedule, Sales, SalesTarget, OrderDetails, TourProgramme, Wallet, Product, UserActivity, UserCityAssign, Address, TourDetail, TransactionHistory, EmployeeDetail, SalesTargetUsers, Attendance, DealerPortalSettings, ParentDetail, VisitReport, PrimarySales, Redemption};
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Auth;
@@ -17,6 +17,7 @@ use Gate;
 use Carbon\Carbon;
 use App\Exports\PrimarySalesTemplate;
 use Excel;
+use Spatie\Permission\Models\Role;
 
 class DashboardController extends Controller
 {
@@ -39,16 +40,16 @@ class DashboardController extends Controller
         $dealers_and_distibutors = Customers::where('customertype', [3, 4])->get();
         $users = User::latest()->get();
         $products = Product::latest()->get()->unique('model_no');
-
-        $ps_branches = PrimarySales::latest()->get()->unique('final_branch');
-        $ps_divisions = PrimarySales::latest()->get()->unique('division');
-        $ps_months = PrimarySales::latest()->get()->unique('month');
-        $ps_dealers = PrimarySales::latest()->get()->unique('dealer');
-        $ps_product_models = PrimarySales::latest()->get()->unique('product_name');
-        $ps_new_group_names = PrimarySales::latest()->get()->unique('new_group');
-        $ps_product_models = PrimarySales::latest()->get()->unique('product_name');
-        $ps_sales_persons = PrimarySales::latest()->get()->unique('sales_person');
-
+        
+        $ps_branches = PrimarySales::select('final_branch')->distinct()->get();
+        $ps_divisions = PrimarySales::select('division')->distinct()->get();
+        $ps_months = PrimarySales::select('month')->distinct()->get();
+        $ps_dealers = PrimarySales::select('dealer')->distinct()->get();
+        $ps_new_group_names = PrimarySales::select('new_group')->distinct()->get();
+        $ps_product_models = PrimarySales::select('product_name')->distinct()->get();
+        $ps_sales_persons = PrimarySales::select('sales_person')->distinct()->get();
+        // dd('sssssssssssss');
+        
         $userData = TransactionHistory::select(
             DB::raw('YEAR(max_date) as year'),
             DB::raw('MONTH(max_date) as month'),
@@ -1158,7 +1159,13 @@ class DashboardController extends Controller
         if ($request->division_id && $request->division_id != '' && count($request->division_id) > 0) {
             $query->whereIn('division', $request->division_id);
         }
-
+        $role = Role::find(29);
+        if ($role && auth()->user()->hasRole($role->name)) {
+            $child_customer = ParentDetail::where('parent_id', auth()->user()->customerid)
+                ->pluck('customer_id')
+                ->push(auth()->user()->customerid);
+            $query->whereIn('customer_id', $child_customer);
+        }
         if ($request->dealer_id && $request->dealer_id != '' && $request->dealer_id != null) {
             $query->where('dealer', 'like', '%' . $request->dealer_id . '%');
         }

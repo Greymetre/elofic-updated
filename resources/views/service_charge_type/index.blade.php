@@ -88,10 +88,10 @@
         <div class="modal-body">
           {!! Form::open(['route' => 'servicecharge.chargetype.add','id' => 'createDivisionForm','files'=>true ]) !!}
           <div class="row">
-            <div class="col-md-8">
-              <div class="row">
-                <label class="col-md-3 col-form-label">Charge Type <span class="text-danger"> *</span></label>
-                <div class="col-md-9">
+            <div class="col-md-12">
+              <div class="input_section">
+                <label class="col-form-label">Charge Type <span class="text-danger"> *</span></label>
+               
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="charge_type" class="form-control" id="division_name" value="{!! old( 'division_name') !!}" maxlength="200" required>
                     @if ($errors->has('division_name'))
@@ -100,7 +100,7 @@
                     </div>
                     @endif
                   </div>
-                </div>
+              
               </div>
             </div>
 

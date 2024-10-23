@@ -126,7 +126,7 @@ class CustomerController extends Controller
                             $query->where('id', 29);
                         })->whereIn('branch_id', $request['branch_id'])->pluck('id');
                         if (!empty($branch_user_id)) {
-                            $query->whereIn('executive_id', $branch_user_id);
+                            $query->whereIn('created_by', $branch_user_id);
                         }
                     }
 

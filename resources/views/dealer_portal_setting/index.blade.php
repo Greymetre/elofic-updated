@@ -1,11 +1,12 @@
 <x-app-layout>
    <style>
-      .row.image_preview.p-4.m-4 {
+      .image_preview {
          border: 1px solid lightgrey;
          border-radius: 10px;
          width: 100%;
          height: 350px;
          justify-content: center;
+         position: relative;
       }
 
       .img-div {
@@ -30,8 +31,8 @@
 
       i.fa.fa-window-close {
          position: absolute;
-         top: 26px;
-         right: 0;
+         top: -1px;
+         right: 2px;
          font-size: 22px;
          color: red;
          cursor: pointer;
@@ -40,11 +41,15 @@
       iframe {
          position: relative;
       }
+
+      img.img_view {
+    object-fit: contain;
+}
    </style>
    <div class="row">
       <div class="col-md-12">
-         <div class="card">
-            <div class="card-header card-header-tabs card-header-warning">
+         <div class="card p-0 m-0">
+            <div class="card-header  m-0 card-header-tabs card-header-warning">
                <div class="nav-tabs-navigation">
                   <div class="nav-tabs-wrapper">
                      <h4 class="card-title ">
@@ -107,24 +112,11 @@
                ]) !!}
 
 
+<!-- <div class="card-body">
+               <div class="row"> -->
 
-               <div class="row">
-
-                  <div class="col-md-6">
-                     <div class="form-group">
-                        <div class="row">
-                           <div class="col-md-3">
-                              <label class="form-control">Show Slider </label>
-                           </div>
-                           <div class="col-md-9">
-                              <select name="slider" id="slider" class="select2">
-                                 <option value="Y" {{$dealer_portal_setting->slider == 'Y'?'selected':''}}>Yes</option>
-                                 <option value="N" {{$dealer_portal_setting->slider == 'N'?'selected':''}}>No</option>
-                              </select>
-                           </div>
-                        </div>
-                     </div>
-                  </div>
+             
+                
                   <!-- <div class="col-md-6">
                      <div class="form-group">
                         <div class="row">
@@ -137,15 +129,25 @@
                         </div>
                      </div>
                   </div> -->
-               </div>
-               <hr>
+               <!-- </div> -->
+               <!-- <hr> -->
                <div class="row mt-4">
-                  <div class="col-md-12 mt-4">
-                     <div class="row">
-                        <div class="col-md-4">
-                           <label class="bmd-label-floating">Upload Slider Images </label>
+     <div class="col-md-6">
+                     <div class="input_section">
+                              <label class="bmd-label-floating">Show Slider </label>
+                              <select name="slider" id="slider" class="select2">
+                                 <option value="Y" {{$dealer_portal_setting->slider == 'Y'?'selected':''}}>Yes</option>
+                                 <option value="N" {{$dealer_portal_setting->slider == 'N'?'selected':''}}>No</option>
+                              </select>
+                           </div>
                         </div>
-                        <div class="col-md-8">
+              
+
+                  <div class="col-md-6">
+                     <div class="input_section">
+               
+                           <label class="bmd-label-floating">Upload Slider Images </label>
+                    
                            <input type="file" multiple name="dealer_portal_slider_image[]" accept="images/*" id="dealer_portal_slider_image" class="form-control">
                            <input type="hidden" name="id" id="id" class="form-control" value="{!! old( 'id', $dealer_portal_setting?$dealer_portal_setting['id']:'') !!}">
                            @if ($errors->has('dealer_portal_slider_image'))
@@ -156,27 +158,37 @@
                         </div>
                      </div>
                      @if(isset($dealer_portal_setting) && $dealer_portal_setting->getMedia('dealer_portal_slider_image')->count() > 0 && Storage::disk('s3')->exists($dealer_portal_setting->getMedia('dealer_portal_slider_image')[0]->getPath()))
-                     <h3>Product Catalogue</h3>
-                     <div class="row">
+
+               
+                                          <div class="col-md-12">
+
+                          <h4 class="bmd-label-floating mt-2">Product Catalogue </h4>
+                                          </div>
                         @foreach($dealer_portal_setting->getMedia('dealer_portal_slider_image') as $k=>$media)
                         <div class="col-md-6">
-                           <h4 class="text-center">{{$media->name}}</h4>
-                           <div class="row image_preview p-4 m-4">
-                              <img src="{{ $media->getFullUrl() }}" alt="{{$media->name}}" width="100%" height="100%">
+                           
+                           <div class="image_preview p-4">
+                              <label class="bmd-label-floating">{{$media->name}}</label>
+                              <img class="img_view" src="{{ $media->getFullUrl() }}" alt="{{$media->name}}" width="100%" height="100%">
                               <i class="fa fa-window-close close-btn" data-id="{{$media->id}}" title="Delete" aria-hidden="true"></i>
                            </div>
                         </div>
                         @endforeach
-                     </div>
-                     @endif
-                  </div>
-               </div>
-
-               <div class="card-footer pull-right">
+                     
+    <div class="col-md-12 pull-right">
                   {{ Form::submit('Submit', array('class' => 'btn btn-theme')) }}
                </div>
+                     </div>
+                     @endif
+
+
+                  </div>   
+              
+
+            
                {{ Form::close() }}
             </div>
+               </div>
          </div>
       </div>
    </div>

@@ -366,7 +366,7 @@ class LoginController extends Controller
                             'first_name'   =>  isset($request['first_name']) ? $request['first_name'] : '',
                             'last_name'   =>  isset($request['last_name']) ? $request['last_name'] : '',
                             'mobile'   =>  isset($request['mobile']) ? $request['mobile'] : null,
-                            'email'   =>  isset($request['email']) ? $request['email'] : '',
+                            'email'   =>  isset($request['email']) ? $request['email'] : 'customer'.$customer->id.'@gmail.com',
                             'password'   =>  Hash::make($passis),
                             'reportingid' => !empty($request['created_by']) ? $request['created_by'] : null,
                             'password_string'   =>  $passis,

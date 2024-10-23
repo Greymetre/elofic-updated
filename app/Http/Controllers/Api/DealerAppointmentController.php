@@ -26,7 +26,9 @@ class DealerAppointmentController extends Controller
         $user = $request->user();
         $braches = Branch::where('active', 'Y')->select('id', 'branch_name')->get();
         $user_ids = getUsersReportingToAuth($user->id);
-        $users = User::where('active', 'Y')->whereIn('id', $user_ids)->select('id', 'name')->get();
+        $users = User::whereDoesntHave('roles', function ($query) {
+            $query->where('id', 29);
+        })->where('active', 'Y')->whereIn('id', $user_ids)->select('id', 'name')->orderBy('name', 'asc')->get();
         $pageSize = $request->input('pageSize');
         $all_status = [['id' => '0', 'name' => 'Pending'], ['id' => '1', 'name' => 'Approved By Sales Team'], ['id' => '2', 'name' => 'Approved By Account'], ['id' => '3', 'name' => 'Approved By HO'], ['id' => '4', 'name' => 'Rejected']];
         $db_data = DealerAppointment::with('branch_details', 'district_details', 'city_details', 'appointment_kyc_detail', 'createdbyname')->whereIn('created_by', $user_ids);

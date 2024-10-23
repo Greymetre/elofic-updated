@@ -190,7 +190,7 @@ class BeatController extends Controller
       $beats = Beat::with('beatcustomers.customers', 'beatusers.users')->find($id);
       $users = User::whereDoesntHave('roles', function ($query) {
         $query->where('id', 29);
-    })->select('id', 'name', 'mobile')->get();
+      })->select('id', 'name', 'mobile')->get();
       $customers = Customers::where('active', '=', 'Y')->select('id', 'name', 'mobile')->get();
       $states = State::where('active', '=', 'Y')->select('id', 'state_name')->get();
       $districts = District::where('active', '=', 'Y')->where('state_id', $beats['state_id'])->select('district_name', 'id')->get();
@@ -505,10 +505,16 @@ class BeatController extends Controller
     $search_departments = $request->input('search_departments');
     $user_id = auth()->user()->id;
     $all_reporting_user_ids = getUsersReportingToAuth($user_id);
-    $all_user_divisions = User::with('getdivision')->orderBy('division_id')->get();
-    $all_user_departments = User::with('getdepartment')->orderBy('department_id')->get();
+    $all_user_divisions = User::whereDoesntHave('roles', function ($query) {
+      $query->where('id', 29);
+    })->with('getdivision')->orderBy('division_id')->get();
+    $all_user_departments = User::whereDoesntHave('roles', function ($query) {
+      $query->where('id', 29);
+    })->with('getdepartment')->orderBy('department_id')->get();
 
-    $all_user_branches = User::with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
+    $all_user_branches = User::whereDoesntHave('roles', function ($query) {
+      $query->where('id', 29);
+    })->with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
     $branches = array();
     $all_branch = array();
     $bkey = 0;
@@ -556,18 +562,26 @@ class BeatController extends Controller
     }
 
     if ($search_branches && count($search_branches) > 0 && $search_branches[0] != null) {
-      $all_reporting_user_ids = User::whereIn('id', $all_reporting_user_ids)->whereIn('branch_id', $search_branches)->pluck('id')->toArray();
+      $all_reporting_user_ids = User::whereDoesntHave('roles', function ($query) {
+        $query->where('id', 29);
+      })->whereIn('id', $all_reporting_user_ids)->whereIn('branch_id', $search_branches)->pluck('id')->toArray();
     }
 
     if (!empty($search_divisions) && count($search_divisions) > 0 && $search_divisions[0] != null) {
-      $all_reporting_user_ids = User::whereIn('id', $all_reporting_user_ids)->whereIn('division_id', $search_divisions)->pluck('id')->toArray();
+      $all_reporting_user_ids = User::whereDoesntHave('roles', function ($query) {
+        $query->where('id', 29);
+      })->whereIn('id', $all_reporting_user_ids)->whereIn('division_id', $search_divisions)->pluck('id')->toArray();
     }
 
     if (!empty($search_departments) && count($search_departments) > 0 && $search_departments[0] != null) {
-      $all_reporting_user_ids = User::whereIn('id', $all_reporting_user_ids)->whereIn('department_id', $search_departments)->pluck('id')->toArray();
+      $all_reporting_user_ids = User::whereDoesntHave('roles', function ($query) {
+        $query->where('id', 29);
+      })->whereIn('id', $all_reporting_user_ids)->whereIn('department_id', $search_departments)->pluck('id')->toArray();
     }
 
-    $all_user_details = User::with('getbranch', 'getdivision', 'getdepartment')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
+    $all_user_details = User::whereDoesntHave('roles', function ($query) {
+      $query->where('id', 29);
+    })->with('getbranch', 'getdivision', 'getdepartment')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
     $all_users = array();
     foreach ($all_user_details as $k => $val) {
       $users[$k]['id'] = $val->id;

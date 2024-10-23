@@ -227,6 +227,8 @@
         ]
       });
       $('#start_date').change(function() {
+        var selectedStartDate = $('#start_date').datepicker('getDate');
+        $('#end_date').datepicker("option", "minDate", selectedStartDate);
         table.draw();
       });
       $('#end_date').change(function() {

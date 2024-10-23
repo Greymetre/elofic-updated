@@ -65,6 +65,7 @@ use App\Exports\TopDealerExport;
 use App\Exports\UserIncentiveExport;
 use App\Imports\CutomerOutstantingImport;
 use Carbon\Carbon;
+use Spatie\Permission\Models\Role;
 
 class ReportController extends Controller
 {
@@ -144,8 +145,8 @@ class ReportController extends Controller
         $end_date = $request->input('end_date');
         if ($request->ajax()) {
             $data = user::whereDoesntHave('roles', function ($query) {
-            $query->where('id', 29);
-        })->where(function ($query) use ($userids) {
+                $query->where('id', 29);
+            })->where(function ($query) use ($userids) {
                 if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                     $query->whereIn('id', $userids);
                 }
@@ -361,7 +362,7 @@ class ReportController extends Controller
         }
         $users = user::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
-        })->whereIn('id', $userids)->select('id', 'name')->get();
+        })->whereIn('id', $userids)->select('id', 'name')->orderBy('name', 'asc')->get();
         return view('reports.customervisit', compact('users'));
     }
 
@@ -371,7 +372,7 @@ class ReportController extends Controller
         $all_reporting_user_ids = getUsersReportingToAuth();
         $all_user_branches = user::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
-        })->with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
+        })->with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('name', 'asc')->get();
         $branches = array();
         $all_branch = array();
         $bkey = 0;
@@ -387,12 +388,12 @@ class ReportController extends Controller
         }
         if ($search_branches && count($search_branches) > 0 && $search_branches[0] != null) {
             $all_reporting_user_ids = user::whereDoesntHave('roles', function ($query) {
-            $query->where('id', 29);
-        })->whereIn('id', $all_reporting_user_ids)->whereIn('branch_id', $search_branches)->pluck('id')->toArray();
+                $query->where('id', 29);
+            })->whereIn('id', $all_reporting_user_ids)->whereIn('branch_id', $search_branches)->orderBy('name', 'asc')->pluck('id')->toArray();
         }
         $all_user_details = user::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
-        })->with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
+        })->with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('name', 'asc')->get();
         $all_users = array();
         foreach ($all_user_details as $k => $val) {
             $users[$k]['id'] = $val->id;
@@ -574,11 +575,11 @@ class ReportController extends Controller
         $all_reporting_user_ids = getUsersReportingToAuth();
         $all_user_branches = user::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
-        })->with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
+        })->with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('name', 'asc')->get();
         $divisions = Division::latest()->get();
         $all_user_divisions = user::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
-        })->with('getdivision')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
+        })->with('getdivision')->whereIn('id', $all_reporting_user_ids)->orderBy('name', 'asc')->get();
         $all_user_departments = Department::latest()->get();
         $branches = array();
         $all_branch = array();
@@ -612,12 +613,12 @@ class ReportController extends Controller
 
         if ($search_branches && count($search_branches) > 0 && $search_branches[0] != null) {
             $all_reporting_user_ids = user::whereDoesntHave('roles', function ($query) {
-            $query->where('id', 29);
-        })->whereIn('id', $all_reporting_user_ids)->whereIn('branch_id', $search_branches)->pluck('id')->toArray();
+                $query->where('id', 29);
+            })->whereIn('id', $all_reporting_user_ids)->whereIn('branch_id', $search_branches)->orderBy('name', 'asc')->pluck('id')->toArray();
         }
         $all_user_details = user::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
-        })->with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
+        })->with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('name', 'asc')->get();
         $all_users = array();
         foreach ($all_user_details as $k => $val) {
             $users[$k]['id'] = $val->id;
@@ -839,16 +840,25 @@ class ReportController extends Controller
         $dealers = Customers::where('customertype', ['1', '3'])->get();
 
         if ($request->ajax()) {
+            $role = Role::find(29);
             $data = Customers::with('customertypes', 'firmtypes', 'createdbyname', 'getretailers', 'customeraddress.cityname', 'customeraddress.statename', 'getretailers.redemption', 'getretailers.transactions')->where('customertype', ['1', '3'])
-                ->where(function ($query) use ($request, $userids) {
-                    if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
-                        $userIdsss = user::whereDoesntHave('roles', function ($query) {
-            $query->where('id', 29);
-        })->where('branch_id', $request->branch_id)->whereIn('id', $userids)->pluck('id');
-                        $query->whereIn('executive_id', $userIdsss);
-                    } else {
-                        $query->whereIn('executive_id', $userids);
+                ->where(function ($query) use ($request, $userids,$role) {
+                    if ($role && auth()->user()->hasRole($role->name)) {
+                        $child_customer = ParentDetail::where('parent_id', auth()->user()->customerid)
+                            ->pluck('customer_id')
+                            ->push(auth()->user()->customerid);
+                        $query->whereIn('id', $child_customer);
+                    }else{
+                        if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
+                            $userIdsss = user::whereDoesntHave('roles', function ($query) {
+                                $query->where('id', 29);
+                            })->where('branch_id', $request->branch_id)->whereIn('id', $userids)->pluck('id');
+                            $query->whereIn('executive_id', $userIdsss);
+                        } else {
+                            $query->whereIn('executive_id', $userids);
+                        }
                     }
+
 
                     if ($request->dealer_id && $request->dealer_id != '' && $request->dealer_id != null) {
                         $query->where('id', $request->dealer_id);
@@ -966,7 +976,7 @@ class ReportController extends Controller
             if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                 $query->whereIn('id', $userids);
             }
-        })->select('id', 'name')->get();
+        })->select('id', 'name')->orderBy('name', 'asc')->get();
         return view('reports.loyaltydealerwisesummaryreport', compact('branches', 'dealers'));
     }
 
@@ -977,8 +987,8 @@ class ReportController extends Controller
         if ($request->ajax()) {
             $userid = !empty($userid) ? $userid : Auth::user()->id;
             $userinfo = user::whereDoesntHave('roles', function ($query) {
-            $query->where('id', 29);
-        })->where('id', '=', $userid)->first();
+                $query->where('id', 29);
+            })->where('id', '=', $userid)->first();
             if ($request->state_id && !empty($request->state_id)) {
                 $data = State::where('id', $request->state_id);
             } else if (!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin') && !$userinfo->hasRole('Sub_Admin') && !$userinfo->hasRole('HR_Admin') && !$userinfo->hasRole('HO_Account')  && !$userinfo->hasRole('Sub_Support') && !$userinfo->hasRole('Accounts Order') && !$userinfo->hasRole('Service Admin') && !$userinfo->hasRole('All Customers')) {
@@ -1151,14 +1161,14 @@ class ReportController extends Controller
         $end_date = !empty($request->input('end_date')) ? $request->input('end_date') : date("Y-m-t");
         if ($request->ajax()) {
             $data = user::whereDoesntHave('roles', function ($query) {
-            $query->where('id', 29);
-        })->where(function ($query) use ($userids) {
+                $query->where('id', 29);
+            })->where(function ($query) use ($userids) {
                 if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                     $query->whereIn('id', $userids);
                 }
             })->whereHas('roles', function ($query) {
                 $query->whereNotIn('name', ['superadmin', 'Admin']);
-            })->select('id', 'name', 'mobile', 'location')->latest();
+            })->select('id', 'name', 'mobile', 'location')->orderBy('name', 'asc')->latest();
             $users = $data->pluck('id')->toArray();
             $workings = Attendance::whereIn('user_id', $users)->select('id', 'punchin_date', 'worked_time', 'working_type', 'user_id')->get();
             $attendances = $workings->map(function ($item) use ($start_date, $end_date) {
@@ -1245,7 +1255,7 @@ class ReportController extends Controller
             }
         })->whereHas('roles', function ($query) {
             $query->whereNotIn('name', ['superadmin', 'Admin']);
-        })->select('id', 'name', 'mobile')->get();
+        })->select('id', 'name', 'mobile')->orderBy('name', 'asc')->get();
         return view('reports.tourprogramme', compact('users'));
     }
 
@@ -1260,7 +1270,7 @@ class ReportController extends Controller
             }
         })->whereHas('roles', function ($query) {
             $query->whereNotIn('name', ['superadmin', 'Admin']);
-        })->select('id', 'name', 'mobile')->get();
+        })->select('id', 'name', 'mobile')->orderBy('name', 'asc')->get();
         return view('reports.monthlymovement', compact('users'));
     }
 
@@ -1275,7 +1285,7 @@ class ReportController extends Controller
             }
         })->whereHas('roles', function ($query) {
             $query->whereNotIn('name', ['superadmin', 'Admin']);
-        })->select('id', 'name', 'mobile')->get();
+        })->select('id', 'name', 'mobile')->orderBy('name', 'asc')->get();
         return view('reports.pointcollections', compact('users'));
     }
     public function territoryCoverage(Request $request)
@@ -1289,7 +1299,7 @@ class ReportController extends Controller
             }
         })->whereHas('roles', function ($query) {
             $query->whereNotIn('name', ['superadmin', 'Admin']);
-        })->select('id', 'name', 'mobile')->get();
+        })->select('id', 'name', 'mobile')->orderBy('name', 'asc')->get();
         return view('reports.territorycoverage', compact('users'));
     }
     public function performanceParameter(Request $request)
@@ -1303,7 +1313,7 @@ class ReportController extends Controller
             }
         })->whereHas('roles', function ($query) {
             $query->whereNotIn('name', ['superadmin', 'Admin']);
-        })->select('id', 'name', 'mobile')->get();
+        })->select('id', 'name', 'mobile')->orderBy('name', 'asc')->get();
         return view('reports.performanceparameter', compact('users'));
     }
     public function asmWiseMechanicsPoints(Request $request)
@@ -1317,7 +1327,7 @@ class ReportController extends Controller
             }
         })->whereHas('roles', function ($query) {
             $query->whereNotIn('name', ['superadmin', 'Admin']);
-        })->select('id', 'name', 'mobile')->get();
+        })->select('id', 'name', 'mobile')->orderBy('name', 'asc')->get();
         return view('reports.asmwisemechanicspoints', compact('users'));
     }
     public function targetVsSales(Request $request)
@@ -1334,15 +1344,15 @@ class ReportController extends Controller
             $fromdate = date("Y-m-01");
             $todate = date("Y-m-t");
             $users = user::whereDoesntHave('roles', function ($query) {
-            $query->where('id', 29);
-        })->with('cities', 'roles')->where(function ($query) use ($userids) {
+                $query->where('id', 29);
+            })->with('cities', 'roles')->where(function ($query) use ($userids) {
                 if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                     $query->whereIn('id', $userids);
                 }
             })
                 ->whereHas('roles', function ($query) {
                     $query->whereNotIn('name', ['superadmin', 'Admin']);
-                })->where('active', '=', 'Y')->select('id', 'name', 'location')->get();
+                })->where('active', '=', 'Y')->select('id', 'name', 'location')->orderBy('name', 'asc')->get();
             $data = $users->map(function ($item, $key) use ($fromdate, $todate, $threemonth, $sixmonth) {
                 $visited = collect([
                     'new_dealer_visited' => 0,
@@ -1474,8 +1484,8 @@ class ReportController extends Controller
             });
             $collections['tours'] = $finaldata;
             $collections['users'] = user::whereDoesntHave('roles', function ($query) {
-            $query->where('id', 29);
-        })->where('id', $userid)->select('name', 'location')->first();
+                $query->where('id', 29);
+            })->where('id', $userid)->select('name', 'location')->first();
             return response()->json($collections);
         } catch (\Exception $e) {
             return $e;
@@ -1564,8 +1574,8 @@ class ReportController extends Controller
                 return $item;
             });
             $data['users'] = user::whereDoesntHave('roles', function ($query) {
-            $query->where('id', 29);
-        })->where('id', $userid)->select('name', 'location')->first();
+                $query->where('id', 29);
+            })->where('id', $userid)->select('name', 'location')->first();
             $data['tours'] = $finaldata;
             $data['total'] = collect([
                 'dealer_visited' => $finaldata->sum('dealer_visited'),
@@ -1601,8 +1611,8 @@ class ReportController extends Controller
                 return $item;
             });
             $data['users'] = user::whereDoesntHave('roles', function ($query) {
-            $query->where('id', 29);
-        })->where('id', $userid)->select('name', 'location')->first();
+                $query->where('id', 29);
+            })->where('id', $userid)->select('name', 'location')->first();
             $data['points'] = $finaldata;
             $data['total'] = collect([
                 'total_quantity' => $points->sum('total_quantity'),
@@ -1711,8 +1721,8 @@ class ReportController extends Controller
             });
 
             $data['users'] = user::whereDoesntHave('roles', function ($query) {
-            $query->where('id', 29);
-        })->where('id', $userid)->select('name', 'location')->first();
+                $query->where('id', 29);
+            })->where('id', $userid)->select('name', 'location')->first();
             $data['cities'] = $finaldata;
             $data['total'] = collect([
                 'total_dealer' => $finaldata->sum('total_dealer'),
@@ -2065,8 +2075,8 @@ class ReportController extends Controller
                 return $item;
             });
             $data['users'] = user::whereDoesntHave('roles', function ($query) {
-            $query->where('id', 29);
-        })->where('id', $userid)->select('name', 'location')->first();
+                $query->where('id', 29);
+            })->where('id', $userid)->select('name', 'location')->first();
             $data['perams'] = $finaldata;
             $data['total'] = collect([
                 'jan' => $finaldata->sum('jan'),
@@ -2092,8 +2102,8 @@ class ReportController extends Controller
         try {
             $userid = !empty($request->input('user_id')) ? $request->input('user_id') : Auth::user()->id;
             $data['users'] = user::whereDoesntHave('roles', function ($query) {
-            $query->where('id', 29);
-        })->with('reportinginfo')->where('id', $userid)->select('name', 'location', 'reportingid')->first();
+                $query->where('id', 29);
+            })->with('reportinginfo')->where('id', $userid)->select('name', 'location', 'reportingid')->first();
             $perameters = collect([
                 collect(["month" => date("Y-01"), "user_name" => isset($data['users']['name']) ? $data['users']['name'] : '', "location" => isset($data['users']['location']) ? $data['users']['location'] : '', "state" => isset($data['users']['location']) ? $data['users']['location'] : '', "reporting" => isset($data['users']['reportinginfo']['name']) ? $data['users']['reportinginfo']['name'] : '']),
                 collect(["month" => date("Y-02"), "user_name" => isset($data['users']['name']) ? $data['users']['name'] : '', "location" => isset($data['users']['location']) ? $data['users']['location'] : '', "state" => isset($data['users']['location']) ? $data['users']['location'] : '', "reporting" => isset($data['users']['reportinginfo']['name']) ? $data['users']['reportinginfo']['name'] : '']),
@@ -2177,8 +2187,8 @@ class ReportController extends Controller
             $userid = !empty($request->input('user_id')) ? $request->input('user_id') : Auth::user()->id;
             $userids = getUsersReportingToAuth();
             $users = user::whereDoesntHave('roles', function ($query) {
-            $query->where('id', 29);
-        })->with('reportinginfo')->whereIn('id', $userids)->select('name', 'location', 'reportingid')->get();
+                $query->where('id', 29);
+            })->with('reportinginfo')->whereIn('id', $userids)->select('name', 'location', 'reportingid')->orderBy('name', 'asc')->get();
             $sales = SalesDetails::with('products', 'sales')
                 ->whereHas('sales', function ($query) use ($userid) {
                     $query->where('created_by', '=', $userid);
@@ -2277,7 +2287,7 @@ class ReportController extends Controller
             }
         })->whereHas('roles', function ($query) {
             $query->whereNotIn('name', ['superadmin', 'Admin']);
-        })->select('id', 'name', 'mobile')->get();
+        })->select('id', 'name', 'mobile')->orderBy('name', 'asc')->get();
 
         return view('reports.surveyanalysis', compact('users'));
     }
@@ -2339,11 +2349,22 @@ class ReportController extends Controller
         $ps_sales_persons = PrimarySales::latest()->get()->unique('sales_person');
         $users = user::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
-        })->where('active', 'Y')->latest()->get();
+        })->where('active', 'Y')->orderBy('name', 'asc')->get();
         $currentYear = Carbon::now()->year;
         $years = range($currentYear - 2, $currentYear + 2);
-        $total_qty = PrimarySales::sum('quantity');
-        $total_sale = PrimarySales::sum('net_amount');
+
+        $total_query = PrimarySales::query();
+
+        $role = Role::find(29);
+        if ($role && auth()->user()->hasRole($role->name)) {
+            $child_customer = ParentDetail::where('parent_id', auth()->user()->customerid)
+                ->pluck('customer_id')
+                ->push(auth()->user()->customerid);
+            $total_query->whereIn('customer_id', $child_customer);
+        }
+
+        $total_qty = $total_query->sum('quantity');
+        $total_sale = $total_query->sum('net_amount');
         return view('reports.primary_sales', compact('years', 'users', 'ps_branches', 'ps_divisions', 'ps_months', 'ps_dealers', 'ps_product_models', 'ps_new_group_names', 'ps_sales_persons', 'total_qty', 'total_sale'));
     }
 
@@ -2353,11 +2374,11 @@ class ReportController extends Controller
         $dealers_and_distibutors = Customers::where('customertype', [3, 4])->get();
         $sales_persons = user::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
-        })->latest()->get();
+        })->orderBy('name', 'asc')->get();
         $products = Product::latest()->get();;
         $users = user::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
-        })->latest()->get();
+        })->orderBy('name', 'asc')->get();
         $branches = Branch::latest()->get();
         $divisions = Division::latest()->get();
         $currentYear = Carbon::now()->year;
@@ -2380,7 +2401,7 @@ class ReportController extends Controller
         $ps_sales_persons = PrimarySales::latest()->get()->unique('sales_person');
         $users = user::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
-        })->where('active', 'Y')->latest()->get();
+        })->where('active', 'Y')->orderBy('name', 'asc')->get();
         $currentYear = Carbon::now()->year;
         $years = range($currentYear - 1, $currentYear + 1);
         $total_qty = PrimarySales::sum('quantity');
@@ -2624,7 +2645,7 @@ class ReportController extends Controller
         $ps_sales_persons = PrimarySales::latest()->get()->unique('sales_person');
         $users = user::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
-        })->where('active', 'Y')->latest()->get();
+        })->where('active', 'Y')->orderBy('name', 'asc')->get();
         $currentYear = Carbon::now()->year;
         $years = range($currentYear - 1, $currentYear + 1);
         $total_qty = PrimarySales::sum('quantity');
@@ -2804,7 +2825,7 @@ class ReportController extends Controller
         $ps_sales_persons = PrimarySales::latest()->get()->unique('sales_person');
         $users = user::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
-        })->where('active', 'Y')->latest()->get();
+        })->where('active', 'Y')->orderBy('name', 'asc')->get();
         $currentYear = Carbon::now()->year;
         $years = range($currentYear - 1, $currentYear + 1);
         $total_qty = PrimarySales::sum('quantity');
@@ -3003,7 +3024,7 @@ class ReportController extends Controller
         $ps_sales_persons = PrimarySales::latest()->get()->unique('sales_person');
         $users = user::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
-        })->where('active', 'Y')->latest()->get();
+        })->where('active', 'Y')->orderBy('name', 'asc')->get();
         $currentYear = Carbon::now()->year;
         $years = range($currentYear - 1, $currentYear + 1);
         $total_qty = PrimarySales::sum('quantity');
@@ -3249,10 +3270,10 @@ class ReportController extends Controller
         $ps_new_group_names = PrimarySales::latest()->get()->unique('new_group');
         $ps_sales_persons = user::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
-        })->where('active', 'Y')->select('id', 'name')->get();
+        })->where('active', 'Y')->select('id', 'name')->orderBy('name', 'asc')->get();
         $users = user::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
-        })->where('active', 'Y')->latest()->get();
+        })->where('active', 'Y')->latest()->orderBy('name', 'asc')->get();
         $currentYear = Carbon::now()->year;
         $years = range($currentYear - 1, $currentYear + 1);
         $total_qty = PrimarySales::sum('quantity');
@@ -3306,7 +3327,7 @@ class ReportController extends Controller
         $ps_sales_persons = PrimarySales::latest()->get()->unique('sales_person');
         $users = user::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
-        })->where('active', 'Y')->latest()->get();
+        })->where('active', 'Y')->orderBy('name', 'asc')->get();
         $currentYear = Carbon::now()->year;
         $years = range($currentYear - 1, $currentYear + 1);
         $total_qty = PrimarySales::sum('quantity');
@@ -3437,7 +3458,7 @@ class ReportController extends Controller
         $ps_sales_persons = PrimarySales::latest()->get()->unique('sales_person');
         $users = user::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
-        })->where('active', 'Y')->latest()->get();
+        })->where('active', 'Y')->orderBy('name', 'asc')->get();
         $currentYear = Carbon::now()->year;
         $years = range($currentYear - 1, $currentYear + 1);
         $total_qty = PrimarySales::sum('quantity');
@@ -3519,6 +3540,14 @@ class ReportController extends Controller
         // Additional filters
         if ($request->division_id && $request->division_id != '' && count($request->division_id) > 0) {
             $query->whereIn('division', $request->division_id);
+        }
+
+        $role = Role::find(29);
+        if ($role && auth()->user()->hasRole($role->name)) {
+            $child_customer = ParentDetail::where('parent_id', auth()->user()->customerid)
+                ->pluck('customer_id')
+                ->push(auth()->user()->customerid);
+            $query->whereIn('customer_id', $child_customer);
         }
 
         if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
@@ -3658,7 +3687,7 @@ class ReportController extends Controller
         $ps_sales_persons = PrimarySales::latest()->get()->unique('sales_person');
         $users = user::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
-        })->where('active', 'Y')->latest()->get();
+        })->where('active', 'Y')->orderBy('name', 'asc')->get();
         $currentYear = Carbon::now()->year;
         $years = range($currentYear - 1, $currentYear + 1);
         $total_qty = PrimarySales::sum('quantity');
@@ -3827,16 +3856,23 @@ class ReportController extends Controller
         if ($request->ajax()) {
             DB::statement("SET SESSION group_concat_max_len = 100000000");
             $retailers_sarthi = TransactionHistory::groupBy('customer_id')->pluck('customer_id');
+            $role = Role::find(29);
+            if ($role && auth()->user()->hasRole($role->name)) {
+                $child_customer = ParentDetail::where('parent_id', auth()->user()->customerid)
+                    ->pluck('customer_id')
+                    ->push(auth()->user()->customerid);
+                    $retailers_sarthi = $child_customer->intersect($retailers_sarthi);
+            }
             $data = Customers::with('customertypes', 'firmtypes', 'createdbyname', 'customeraddress.cityname', 'customeraddress.statename', 'customer_transacation')->whereIn('id', $retailers_sarthi)
-                ->where(function ($query) use ($request, $userids) {
+                ->where(function ($query) use ($request, $userids,$role) {
                     if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
                         $userIdsss = user::whereDoesntHave('roles', function ($query) {
-            $query->where('id', 29);
-        })->where('branch_id', $request->branch_id)->whereIn('id', $userids)->pluck('id');
+                            $query->where('id', 29);
+                        })->where('branch_id', $request->branch_id)->whereIn('id', $userids)->pluck('id');
                         $query->whereIn('executive_id', $userIdsss)
                             ->orWhereIn('created_by', $userIdsss);
                     } else {
-                        if (!auth()->user()->hasRole('superadmin') && !auth()->user()->hasRole('Admin') && !auth()->user()->hasRole('Sub_Admin')) {
+                        if (!auth()->user()->hasRole('superadmin') && !auth()->user()->hasRole('Admin') && !auth()->user()->hasRole('Sub_Admin') && !auth()->user()->hasRole($role->name)) {
                             $query->whereIn('executive_id', $userids)
                                 ->orWhereIn('created_by', $userids);
                         }
@@ -3946,7 +3982,7 @@ class ReportController extends Controller
             if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                 $query->whereIn('id', $userids);
             }
-        })->select('id', 'name')->get();
+        })->select('id', 'name')->orderBy('name', 'asc')->get();
         return view('reports.loyaltyretailerwisesummaryreport', compact('branches', 'dealers'));
     }
 
@@ -4037,7 +4073,7 @@ class ReportController extends Controller
         $branches =  Branch::where('active', 'Y')->get();
         $users = user::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
-        })->where('active', 'Y')->latest()->get();
+        })->where('active', 'Y')->orderBy('name', 'asc')->get();
         $currentYear = Carbon::now()->year;
         $years = range($currentYear - 1, $currentYear + 1);
         $currentDate = Carbon::now();

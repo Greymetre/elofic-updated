@@ -1,11 +1,11 @@
 <x-app-layout>
 <div class="row">
   <div class="col-md-12">
-    <div class="card">
-      <div class="card-header card-header-tabs card-header-warning">
+    <div class="card pt-0 mt-0">
+      <div class="card-header m-0 card-header-tabs card-header-warning">
         <div class="nav-tabs-navigation">
-          <div class="nav-tabs-wrapper">
-            <h4 class="card-title ">{!! trans('panel.visittype.title_singular') !!}
+          <div class="nav-tabs-wrapper new_id">
+            <h4 class="card-title ">{!! trans('panel.visittype.title_singular') !!}    </h4>
             @if(auth()->user()->can(['visitreport_access']))
             <ul class="nav nav-tabs pull-right" data-tabs="tabs">
               <li class="nav-item">
@@ -16,7 +16,7 @@
               </li>
             </ul>
             @endif
-          </h4>
+      
           </div>
         </div>
       </div>
@@ -43,7 +43,7 @@
         <div class="row">
 
         </div>
-        <div class="card-footer pull-right">
+        <div class="pull-right">
             {{ Form::submit('Submit', array('class' => 'btn btn-theme')) }}
         </div>
         {{ Form::close() }} 

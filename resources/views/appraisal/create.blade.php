@@ -13,8 +13,8 @@
                 <div class="col-md-12">
                     <!-- jquery validation -->
                     <div class="card card-primary">
-                        <div class="card-header">
-                            <h3 class="card-title">Appraisal Create</h3>
+                        <div class="card-header card-header-icon card-header-theme">
+                            <h4 class="card-title">Appraisal Create</h4>
                         </div>
                         <!-- /.card-header -->
                         <!-- form start -->
@@ -28,7 +28,7 @@
                         </div>
                         @endif
                         <div class="card-body ">
-                            <div class="tab-content tab-space">
+                            <div class="tab-content tab-space mt-0 pt-0">
                                 {!! Form::model($appraisal,[
                                 'route' => $appraisal->exists ? ['appraisal.update', $appraisal->id] : 'appraisal.store',
                                 'method' => $appraisal->exists ? 'PUT' : 'POST',
@@ -115,10 +115,10 @@
                                     </div>
                                     <input type="hidden" name="user_id" value="{{$user_id}}">
 
-                                    <div class="table-responsive w-100">
+                                    <div class="table-responsive w-100 p-2">
                                         <table class="table kvcodes-dynamic-rows-example" id="table_appraisal">
                                             <thead>
-                                                <tr class="card-header-warning text-white" id="headings">
+                                                <tr class="" id="headings">
                                                     <th class="text-center">Category </th>
                                                     <th class="text-center">KRA </th>
                                                     <th class="text-center">Measure/Indicator</th>
@@ -191,12 +191,13 @@
                                               
                                             </tbody>
                                         </table>
-                                        <div class="form-group">
+                                        <div class="form-group p-2">
                                             <label for="remark">Remark</label>
                                             <input type="text" class="form-control" name="remark" id="remark" placeholder="Remark">
                                         </div>
+                                          {{ Form::submit('Submit', array('class' => 'btn btn-theme pull-right')) }}
                                     </div>
-                                    {{ Form::submit('Submit', array('class' => 'btn btn-theme pull-right')) }}
+                                  
                                     {{ Form::close() }}
                                 </div>
                             </div>

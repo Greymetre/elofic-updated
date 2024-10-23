@@ -14,6 +14,10 @@
             color: #f44336;
         }
 
+        .form-control {
+            margin-bottom: 10px;
+        }
+
         input.form-check-input {
             border: 2px solid !important;
             width: 20px !important;
@@ -28,9 +32,9 @@
             }
         }
 
-        input.form-control:read-only {
+        /* input.form-control:read-only {
             border-bottom: 1px solid #000 !important;
-        }
+        }*/
 
         p.attach-p:before {
             content: " ";
@@ -348,37 +352,41 @@
         <form id="new_dealer_appoint_form" action="{{route('dealer-appointment-form.store')}}" method="post" enctype="multipart/form-data">
             @csrf
             <div class="row mt-3">
-                <div class="col-md-3 content-frm bg-light">
+                <div class="col-md-3 ">
                     <div class="form-group row">
                         <div class="col-md-3">
                             <label for="branch">Branch </label>
                         </div>
                         <div class="col-md-9">
-                            <select class="form-select" name="branch" id="branch" required>
-                                <option value="" disabled selected>Your answer</option>
-                                @if($branchs && count($branchs) > 0)
-                                @foreach($branchs as $branch)
-                                <option value="{{$branch->id}}">{{$branch->branch_name}}</option>
-                                @endforeach
+                            <div class="input_section">
+                                <select class="form-select" name="branch" id="branch" required>
+                                    <option value="" disabled selected>Your answer</option>
+                                    @if($branchs && count($branchs) > 0)
+                                    @foreach($branchs as $branch)
+                                    <option value="{{$branch->id}}">{{$branch->branch_name}}</option>
+                                    @endforeach
+                                    @endif
+                                </select>
+                                @if ($errors->has('branch'))
+                                <div class="error col-lg-12">
+                                    <p class="text-danger">{{ $errors->first('branch') }}</p>
+                                </div>
                                 @endif
-                            </select>
-                            @if ($errors->has('branch'))
-                            <div class="error col-lg-12">
-                                <p class="text-danger">{{ $errors->first('branch') }}</p>
                             </div>
-                            @endif
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6 content-frm bg-light">
+                <div class="col-md-6 ">
                     <div class="form-group row">
                         <div class="col-md-4">
                             <label for="branch">User(Created By) </label>
                         </div>
                         <div class="col-md-8">
-                            <select class="select2" name="created_by" id="created_by" data-style="select-with-transition" title="Select User">
-                                <option value="">Select User</option>
-                            </select>
+                            <div class="input_section">
+                                <select class="select2" name="created_by" id="created_by" data-style="select-with-transition" title="Select User">
+                                    <option value="">Select User</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -392,42 +400,48 @@
                 </div>
             </div>
             <div class="row mt-3">
-                <div class="col-md-3 content-frm bg-light">
+                <div class="col-md-3 ">
                     <div class="form-group row">
                         <div class="col-md-3">
                             <label for="district">District </label>
                         </div>
                         <div class="col-md-9">
-                            <select class="form-select select2" name="district" id="district" required>
-                                <option value="" disabled selected>Your answer</option>
-                                @if($districts && count($districts) > 0)
-                                @foreach($districts as $district)
-                                <option value="{{$district->id}}">{{$district->district_name}}</option>
-                                @endforeach
-                                @endif
-                            </select>
+                            <div class="input_section">
+                                <select class="form-select select2" name="district" id="district" required>
+                                    <option value="" disabled selected>Your answer</option>
+                                    @if($districts && count($districts) > 0)
+                                    @foreach($districts as $district)
+                                    <option value="{{$district->id}}">{{$district->district_name}}</option>
+                                    @endforeach
+                                    @endif
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3 content-frm bg-light">
+                <div class="col-md-3 ">
                     <div class="form-group row">
                         <div class="col-md-4">
                             <label for="city">Town / City </label>
                         </div>
                         <div class="col-md-8">
-                            <select class="form-select select2" name="city" id="city" required>
-                                <option value="" disabled selected>Select City</option>
-                            </select>
+                            <div class="input_section">
+                                <select class="form-select select2" name="city" id="city" required>
+                                    <option value="" disabled selected>Select City</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3 content-frm bg-light">
+                <div class="col-md-3 ">
                     <div class="form-group row">
                         <div class="col-md-4">
                             <label for="place">Place </label>
                         </div>
                         <div class="col-md-8">
-                            <input type="text" name="place" id="place" class="form-control uppercase">
+                            <div class="input_section">
+                                <input type="text" name="place" id="place" class="form-control uppercase">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -438,7 +452,9 @@
                     <label for="appointment_date">Date of Appointment </label>
                 </div>
                 <div class="col-md-4">
-                    <input type="date" name="appointment_date" id="appointment_date" class="form-control uppercase" required>
+                    <div class="input_section">
+                        <input type="date" name="appointment_date" id="appointment_date" class="form-control uppercase" required>
+                    </div>
                 </div>
             </div>
 
@@ -533,8 +549,8 @@
                 </div>
                 <div class="col-md-4">
                     <div class="form-check">
-                        <label class="form-check-label" for="AGRI"> AGRI </label>
-                        <input required class="form-check-input" type="radio" name="division" value="AGRI" id="AGRI">
+                        <label class="form-check-label" for="AGRID"> AGRI </label>
+                        <input required class="form-check-input" type="radio" name="division" value="AGRI" id="AGRID">
                     </div>
                 </div>
                 <div class="col-md-4">
@@ -601,7 +617,7 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <input class="form-control mr-3" type="text" oninput="this.value = this.value.toUpperCase()" name="SDPUMPMOTORS" value="100000" readonly>
+                            <input class="form-control mr-3" id="asda" type="text" name="SDPUMPMOTORS" value="100000" readonly>
                         </div>
                     </div>
                 </div>
@@ -1313,9 +1329,17 @@
                 $('.file-input').on('change', function() {
                     var inpDiv = $(this).closest('.inp-div');
                     if (this.files && this.files.length > 0) {
-                        inpDiv.css('background-color', '#80ec759e'); // Change to your desired color
+                        inpDiv.css('background-color', '#80ec759e'); 
                     } else {
-                        inpDiv.css('background-color', ''); // Reset the background color if no file is selected
+                        inpDiv.css('background-color', ''); 
+                    }
+                });
+                $('input[name="customertype"]').change(function() {
+                    var selectedType = $(this).val(); 
+                    if(selectedType == 'dealer'){
+                        document.getElementById("asda").value = '25000';
+                    }else{
+                        document.getElementById("asda").value = '100000';
                     }
                 });
             });

@@ -72,28 +72,27 @@
       <div class="modal-body">
         {!! Form::open(['route' => 'designation.store','id' => 'createDesignationForm','files'=>true ]) !!}
         <div class="row">
-          <div class="col-md-8">
-            <div class="row">
-              <label class="col-md-3 col-form-label">{!! trans('panel.designation.fields.designation_name') !!} <span class="text-danger"> *</span></label>
-              <div class="col-md-9">
+          <div class="col-md-12">
+            <div class="input_section">
+              <label class="col-form-label">{!! trans('panel.designation.fields.designation_name') !!} <span class="text-danger"> *</span></label>
                 <div class="form-group has-default bmd-form-group">
                   <input type="text" name="designation_name" class="form-control" id="designation_name" value="{!! old( 'brand_name') !!}" maxlength="200" required>
                   @if ($errors->has('designation_name'))
                     <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('designation_name') }}</p></div>
                   @endif
                 </div>
-              </div>
             </div>
             </div>
-           
-            </div>
-        </div>
-        <div class="clearfix"></div>
-        <div class="modal-footer">
+               <div class="clearfix"></div>
+        <div class="pull-right col-md-12">
           <input type="hidden" name="id" id="brand_id" />
           {{ Form::submit('Submit', array('class' => 'btn btn-info save')) }}
           {{ Form::close() }}
         </div>
+           
+            </div>
+        </div>
+     
       </div>
     </div>
   </div>

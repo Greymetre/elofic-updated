@@ -1,11 +1,11 @@
 <x-app-layout>
   <div class="row">
     <div class="col-md-12">
-      <div class="card">
-        <div class="card-header card-header-tabs card-header-warning">
+      <div class="card mt-0 pt-0">
+        <div class="card-header m-0 card-header-tabs card-header-warning">
           <div class="nav-tabs-navigation">
-            <div class="nav-tabs-wrapper">
-              <h4 class="card-title ">{{ trans('panel.global.edit') }} {{ trans('panel.role.title_singular') }}
+            <div class="nav-tabs-wrapper new_id">
+              <h4 class="card-title ">{{ trans('panel.global.edit') }} {{ trans('panel.role.title_singular') }}   </h4>
                 @if(auth()->user()->can(['role_access']))
                 <ul class="nav nav-tabs pull-right" data-tabs="tabs">
                   <li class="nav-item">
@@ -16,7 +16,7 @@
                   </li>
                 </ul>
                 @endif
-              </h4>
+            
             </div>
           </div>
         </div>
@@ -38,9 +38,9 @@
             @csrf
             <input type="hidden" name="id" id="role_id" value="{!! $role->id !!}">
             <div class="row">
-              <div class="col-md-12">
-                <div class="form-group">
-                  <label class="bmd-label-floating required" for="name">{{ trans('panel.role.fields.name') }}</label>
+              <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label required" for="name">{{ trans('panel.role.fields.name') }}</label>
                   <input class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}" type="text" name="name" id="name" value="{{ old('name', $role->name) }}" required>
                   @if($errors->has('name'))
                   <div class="invalid-feedback">
@@ -51,9 +51,9 @@
 
                 </div>
               </div>
-              <div class="col-md-12">
-                <div class="form-group">
-                  <label class="bmd-label-floating required" for="display_name">{{ trans('panel.role.fields.display_name') }}</label>
+              <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label required" for="display_name">{{ trans('panel.role.fields.display_name') }}</label>
                   <input class="form-control {{ $errors->has('display_name') ? 'is-invalid' : '' }}" type="text" name="display_name" id="display_name" value="{{ old('name', $role->name) }}" required>
                   @if($errors->has('display_name'))
                   <div class="invalid-feedback">
@@ -65,8 +65,8 @@
                 </div>
               </div>
               <div class="col-md-12">
-                <div class="form-group">
-                  <label class="required" for="permissions">{{ trans('panel.role.fields.permissions') }}</label>
+                <div class="input_section">
+                  <label class="col-form-label required" for="permissions">{{ trans('panel.role.fields.permissions') }}</label>
                   <div style="padding-bottom: 4px">
                     <span class="btn btn-info btn-xs select-all" style="border-radius: 0">{{ trans('panel.global.select_all') }}</span>
                     <span class="btn btn-info btn-xs deselect-all" style="border-radius: 0">{{ trans('panel.global.deselect_all') }}</span>
@@ -85,7 +85,7 @@
                 </div>
               </div>
             </div>
-            <div class="card-footer">
+            <div class="pull-right">
               {{ Form::submit('Submit', array('class' => 'btn btn-theme')) }}
             </div>
             {{ Form::close() }}

@@ -78,11 +78,13 @@ class AddressController extends Controller
                     ]);
                 }
                 $dis_data = Customers::where('active', '=', 'Y')
-                    ->whereIn('customertype', ['1', '3'])
-                    ->whereHas('customeraddress', function ($query) use ($state_id) {
-                        $query->where('state_id', $state_id);
-                    })
-                    ->select('id', 'name')->get();
+                    ->whereIn('customertype', ['1', '3']);
+                    if($state_id && !empty($state_id)){
+                        $dis_data->whereHas('customeraddress', function ($query) use ($state_id) {
+                            $query->where('state_id', $state_id);
+                        });
+                    }
+                    $dis_data = $dis_data->select('id', 'name')->get();
                 return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data, 'dis_data' => $dis_data], $this->successStatus);
             }
             return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data], 200);

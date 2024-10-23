@@ -11,9 +11,9 @@
          min-width: 250px !important;
       }
 
-      .select2-container {
+   /*   .select2-container {
          border-bottom: 1px solid lightgray;
-      }
+      }*/
 
       #help-image {
          position: absolute;
@@ -27,12 +27,12 @@
    </style>
    <div class="row">
       <div class="col-md-12">
-         <div class="card">
-            <div class="card-header card-header-tabs card-header-warning">
+         <div class="card mt-0 pt-0">
+            <div class="card-header m-0 card-header-tabs card-header-warning">
                <div class="nav-tabs-navigation">
-                  <div class="nav-tabs-wrapper">
+                  <div class="nav-tabs-wrapper new_id">
                      <h4 class="card-title ">
-                        Add Damage Entry
+                        Add Damage Entry   </h4>
                         @if(auth()->user()->can(['district_access']))
                         <ul class="nav nav-tabs pull-right" data-tabs="tabs">
                            <li class="nav-item">
@@ -43,7 +43,7 @@
                            </li>
                         </ul>
                         @endif
-                     </h4>
+                  
                   </div>
                </div>
             </div>
@@ -66,53 +66,55 @@
                'id' => 'storeDamageEntryData',
                'files'=>true
                ]) !!}
-               <div class="form-group">
-                  <div class="row">
-                     <div class="col-md-2">
-                        <label for="customer_id" class="form-control">Customer</label>
-                     </div>
-                     <div class="col-md-4">
+               <div class="row">
+                  
+                     <div class="col-md-6">
+                        <div class="input_section">
+                        <label for="customer_id" class="col-form-label">Customer</label>
+                   
                         <select name="customer_id" id="customer_id" placeholder="Select Customers" class="select2 form-control">
                            <option value="" disabled selected>Select Customer</option>
                            
                         </select>
                         @if ($errors->has('customer_id'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('customer_id') }}</p>
                         </div>
                         @endif
                      </div>
-                     <div class="col-md-2">
-                        <label for="coupen_code" class="form-control">Coupen Code</label>
-                     </div>
-                     <div class="col-md-4">
+                      </div>
+                     <div class="col-md-6">
+                        <div class="input_section">
+                        <label for="coupen_code" class="col-form-label">Coupen Code</label>
+                   
                         <input type="text" name="coupen_code" id="coupen_code" class="form-control">
                         @if ($errors->has('coupen_code'))
-                        <div class="error col-lg-12">
+                        <div class="error ">
                            <p class="text-danger">{{ $errors->first('coupen_code') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
-               </div>
+              
                <div class="row mt-2">
-                  <div class="col-md-3 col-sm-3">
-                     <img id="help-image" src="{{asset('damageimg.jpg')}}" style="display: none;" />
-                     <h4>Attachment <i id="help-icon" class="material-icons">help_outline</i></h4>
+                  <div class="col-md-12 col-sm-12">
+                     <img id="help-image"  src="{{asset('damageimg.jpg')}}" style="display: none;" />
+                     <h4 class="card-title ">Attachment <i id="help-icon" class="material-icons">help_outline</i></h4>
                   </div>
                   <div class="col-md-3 col-sm-3">
                      <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                        <div class="selectThumbnail">
+                     
+                        <div class="fileinput-new thumbnail">
+                           <img src="{!! url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview1">
+                              <div class="selectThumbnail">
                            <span class="btn btn-just-icon btn-round btn-file">
                               <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
                               <span class="fileinput-exists">Change</span>
                               <input type="file" name="damageattach1" class="getimage1" accept="image/*">
                            </span>
-                           <br>
+                          
                            <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
                         </div>
-                        <div class="fileinput-new thumbnail">
-                           <img src="{!! url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview1">
                         </div>
                         <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
                         <label class="bmd-label-floating">Attachment 1st</label>
@@ -125,7 +127,10 @@
                   </div>
                   <div class="col-md-3 col-sm-3">
                      <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                        <div class="selectThumbnail">
+                     
+                        <div class="fileinput-new thumbnail">
+                           <img src="{!! url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview2">
+                              <div class="selectThumbnail">
                            <span class="btn btn-just-icon btn-round btn-file">
                               <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
                               <span class="fileinput-exists">Change</span>
@@ -134,8 +139,6 @@
                            <br>
                            <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
                         </div>
-                        <div class="fileinput-new thumbnail">
-                           <img src="{!! url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview2">
                         </div>
                         <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
                         <label class="bmd-label-floating">Attachment 2nd</label>
@@ -143,7 +146,10 @@
                   </div>
                   <div class="col-md-3 col-sm-3">
                      <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                        <div class="selectThumbnail">
+                      
+                        <div class="fileinput-new thumbnail">
+                           <img src="{!! url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview3">
+                             <div class="selectThumbnail">
                            <span class="btn btn-just-icon btn-round btn-file">
                               <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
                               <span class="fileinput-exists">Change</span>
@@ -152,20 +158,18 @@
                            <br>
                            <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
                         </div>
-                        <div class="fileinput-new thumbnail">
-                           <img src="{!! url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview3">
                         </div>
                         <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
                         <label class="bmd-label-floating">Attachment 3rd</label>
                      </div>
                   </div>
                </div>
-
-               <div class="card-footer pull-right">
+</div>
+               <div class="pull-right">
                   {{ Form::submit('Submit', array('class' => 'btn btn-theme')) }}
                </div>
                {{ Form::close() }}
-            </div>
+            
          </div>
       </div>
    </div>

@@ -69,6 +69,8 @@ class DealerAppointmentExport implements FromCollection, WithHeadings, ShouldAut
             $aproval_status = 'Approved By Account';
         }elseif($row->approval_status == '3'){
             $aproval_status = 'Approved By HO';
+        }elseif($row->approval_status == '4'){
+            $aproval_status = 'Rejected';
         }
         return [
             date('d M Y', strtotime($row->created_at)),

@@ -102,22 +102,22 @@
         @csrf
         <div class="row">
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-4 col-form-label">{!! trans('panel.customertype.fields.customertype_name') !!} <span class="text-danger"> *</span></label>
-                <div class="col-md-8">
+              <div class="input_section">
+                <label class="col-form-label">{!! trans('panel.customertype.fields.customertype_name') !!} <span class="text-danger"> *</span></label>
+               
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="customertype_name" id="customertype_name" class="form-control" value="{!! old( 'customertype_name') !!}" maxlength="200" required>
                     @if ($errors->has('customertype_name'))
                       <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('customertype_name') }}</p></div>
                     @endif
                   </div>
-                </div>
+              
               </div>
             </div>
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-4 col-form-label">{!! trans('panel.customertype.fields.type_name') !!} <span class="text-danger"> *</span></label>
-                <div class="col-md-8">
+              <div class="input_section">
+                <label class="col-form-label">{!! trans('panel.customertype.fields.type_name') !!} <span class="text-danger"> *</span></label>
+                
                   <div class="form-group has-default bmd-form-group">
                     <select class="form-control" name="type_name" id="type_name" style="width: 100%;" required>
                         <option value="" selected disabled>Select {!! trans('panel.customertype.fields.type_name') !!}</option>
@@ -130,12 +130,12 @@
                       <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('type_name') }}</p></div>
                     @endif
                   </div>
-                </div>
+          
               </div>
             </div>
           </div>
         <div class="clearfix"></div>
-        <div class="modal-footer">
+        <div class="pull-right">
           <input type="hidden" name="id" id="customertype_id" />
           <button class="btn btn-info save"> Submit</button>
         </form>

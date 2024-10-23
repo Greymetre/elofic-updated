@@ -74,7 +74,8 @@
          @csrf
          <div class="row">
             <div class="col-md-6">
-               <div class="form-group">
+                      <label class="col-form-label">Select User</label>
+               <div class="input_section">
                   <select class="form-control" name="userid" id="userid" style="width: 100%;" required >
                      <option value="" selected disabled>Select User</option>
                      @if(@isset($users ))
@@ -84,16 +85,16 @@
                      @endif
                   </select>
                   @if ($errors->has('userid'))
-                  <div class="error col-lg-12">
+                  <div class="error">
                      <p class="text-danger">{{ $errors->first('userid') }}</p>
                   </div>
                   @endif
                </div>
             </div>
             <div class="col-md-6">
-               <div class="row">
-                  <label class="col-md-3 col-form-label">From Date</label>
-                  <div class="col-md-9">
+               <div class="input_section">
+                  <label class="col-form-label">From Date</label>
+                 
                      <div class="form-group has-default bmd-form-group">
                         <input type="text" name="startdate" id="startdate" class="form-control datepicker" autocomplete="off" readonly>
                         @if($errors->has('startdate'))
@@ -103,12 +104,12 @@
                         @endif
                      </div>
                   </div>
-               </div>
+           
             </div>
             <div class="col-md-6">
-               <div class="row">
-                  <label class="col-md-3 col-form-label">To Date</label>
-                  <div class="col-md-9">
+               <div class="input_section">
+                  <label class="col-form-label">To Date</label>
+                
                      <div class="form-group has-default bmd-form-group">
                         <input type="text" name="enddate" id="enddate" class="form-control datepicker" autocomplete="off" readonly>
                         @if($errors->has('enddate'))
@@ -117,13 +118,12 @@
                         </div>
                         @endif
                      </div>
-                  </div>
-               </div>
+                                 </div>
             </div>
             <div class="col-md-6">
-               <div class="row">
-                  <label class="col-md-3 col-form-label">Amount</label>
-                  <div class="col-md-9">
+               <div class="input_section">
+                  <label class="col-form-label">Amount</label>
+                 
                      <div class="form-group has-default bmd-form-group">
                         <input type="number" name="amount" id="amount" class="form-control">
                         @if($errors->has('amount'))
@@ -133,10 +133,10 @@
                         @endif
                      </div>
                   </div>
-               </div>
+         
             </div>
             <div class="clearfix"></div>
-            <div class="modal-footer pull-right">
+            <div class="col-md-12 pull-right">
                <input type="hidden" name="id" id="targets_id" />
                <button class="btn btn-info save"> Submit</button>
       </form>

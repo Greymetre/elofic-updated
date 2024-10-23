@@ -20,7 +20,8 @@
                         </select>
                       </div>
                     </div>
-                    <div class="p-2"><button class="btn btn-just-icon btn-theme" title="Download Customers"><i class="material-icons">cloud_download</i></button></div>
+                    <div class="p-2">
+                      <button class="btn btn-just-icon btn-theme" title="Download Customers"><i class="material-icons">cloud_download</i></button></div>
                   </div>
                 </form>
               @endif
@@ -156,8 +157,8 @@
             searchable: false
           },
           {
-            data: 'getbranch.branch_name',
-            name: 'getbranch.branch_name',
+            data: 'getBranchNames',
+            name: 'getBranchNames',
             "defaultContent": '',
             orderable: false,
             searchable: false

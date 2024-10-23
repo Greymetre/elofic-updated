@@ -1,7 +1,7 @@
 <x-app-layout>
   <div class="row">
     <div class="col-md-12">
-      <div class="card">
+      <div class="card p-0 mt-0">
         <div class="card-header card-header-icon card-header-theme">
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
@@ -35,6 +35,17 @@
                       </select>
                     </div>
                     <div class="p-2" style="width:160px;">
+                      <label for="designation">Designation</label>
+                      <select class="select2" name="designation" id="designation" data-style="select-with-transition" title="Select Parent Customer">
+                        <option value="">Select Designation</option>
+                        @if(@isset($designations ))
+                        @foreach($designations as $designation)
+                        <option value="{!! $designation->id !!}">{!! $designation->designation_name !!}</option>
+                        @endforeach
+                        @endif
+                      </select>
+                    </div>
+                    <div class="p-2" style="width:160px;">
                       <label for="scheme_type">Scheme</label>
                       <select class="select2" name="scheme_name" id="scheme_name" data-style="select-with-transition" title="Select Scheme Type">
                         <option value="">Scheme Name</option>
@@ -47,14 +58,15 @@
                     </div>
                     <div class="p-2" style="width:160px;"><label for="start_date">Start Date</label><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
                     <div class="p-2" style="width:160px;"><label for="end_date">End Date</label><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
-                    <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Transaction"><i class="material-icons">cloud_download</i></button></div>
+                    <div class="p-2">
+                      <label for="">Download</label><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Transaction"><i class="material-icons">cloud_download</i></button></div>
                   </div>
                 </form>
                 @endif
                 <div class="next-btn">
                       <div class="p-2" style="width:160px;">
                         <select class="select2" name="customer_id" id="customer_id" data-style="select-with-transition" title="Select">
-                          <option value="">Firm Name</option>
+                          <option value="">First Name</option>
                           @if(@isset($customers))
                           @foreach($customers as $customer)
                           <!-- <option value="{!! $customer->id !!}">{!! $customer->_name !!}</option> -->
@@ -210,6 +222,7 @@
               d.start_date = $('#start_date').val(),
               d.end_date = $('#end_date').val(),
               d.customer_id = $('#customer_id').val()
+              d.designation = $('#designation').val()
           }
         },
         columns: [{
@@ -287,6 +300,9 @@
         table.draw();
       });
       $('#customer_id').change(function() {
+        table.draw();
+      });
+      $('#designation').change(function() {
         table.draw();
       });
       $('#parent_customer').change(function() {

@@ -39,9 +39,9 @@
           <input type="hidden" name="id" value="{{$product->exists ? $product->id : ''}}">
           <div class="row">
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-5 col-form-label">Charge Type <span class="text-danger"> *</span></label>
-                <div class="col-md-7">
+              <div class="input_section">
+                <label class="col-form-label">Charge Type <span class="text-danger"> *</span></label>
+                
                   <div class="form-group has-default bmd-form-group">
                     <select name="charge_type_id" id="charge_type_id" class="select2">
                       <option value="">Select Charge Type</option>
@@ -56,14 +56,14 @@
                       <p class="text-danger">{{ $errors->first('charge_type_id') }}</p>
                     </div>
                     @endif
-                  </div>
+              
                 </div>
               </div>
             </div>
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-5 col-form-label">Product Name(Description) <span class="text-danger"> *</span></label>
-                <div class="col-md-7">
+              <div class="input_section">
+                <label class="col-form-label">Product Name(Description) <span class="text-danger"> *</span></label>
+             
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="product_name" class="form-control" value="{!! old( 'product_name', $product['product_name']) !!}" maxlength="200" required>
                     @if ($errors->has('product_name'))
@@ -72,13 +72,13 @@
                     </div>
                     @endif
                   </div>
-                </div>
+           
               </div>
             </div>
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-5 col-form-label">Division <span class="text-danger"> *</span></label>
-                <div class="col-md-7">
+              <div class="input_section">
+                <label class="col-form-label">Division <span class="text-danger"> *</span></label>
+               
                   <div class="form-group has-default bmd-form-group">
                     <select name="division_id" id="division_id" class="select2">
                       <option value="">Select Division</option>
@@ -93,14 +93,14 @@
                       <p class="text-danger">{{ $errors->first('division_id') }}</p>
                     </div>
                     @endif
-                  </div>
+               
                 </div>
               </div>
             </div>
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-5 col-form-label">Category <span class="text-danger"> *</span></label>
-                <div class="col-md-7">
+              <div class="input_section">
+                <label class="col-form-label">Category <span class="text-danger"> *</span></label>
+            
                   <div class="form-group has-default bmd-form-group">
                     <select name="category_id" id="category_id" class="select2">
                       <option value="">Select Division First</option>
@@ -110,14 +110,14 @@
                       <p class="text-danger">{{ $errors->first('category_id') }}</p>
                     </div>
                     @endif
-                  </div>
+               
                 </div>
               </div>
             </div>
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-5 col-form-label">Price(Charge) <span class="text-danger"> *</span></label>
-                <div class="col-md-7">
+              <div class="input_section">
+                <label class="col-form-label">Price(Charge) <span class="text-danger"> *</span></label>
+             
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="price" id="price" class="form-control" value="{!! old( 'price', $product['price']) !!}">
                     @if ($errors->has('price'))
@@ -125,14 +125,14 @@
                       <p class="text-danger">{{ $errors->first('price') }}</p>
                     </div>
                     @endif
-                  </div>
+                 
                 </div>
               </div>
             </div>
             <div class="col-md-6">
-              <div class="row">
-                <label class="col-md-5 col-form-label">Other Charges <span class="text-danger"> *</span></label>
-                <div class="col-md-7">
+              <div class="input_section">
+                <label class="col-form-label">Other Charges <span class="text-danger"> *</span></label>
+              
                   <div class="form-group has-default bmd-form-group">
                     <input type="text" name="other_charge" id="other_charge" class="form-control" value="{!! old( 'other_charge', $product['other_charge']) !!}">
                     @if ($errors->has('other_charge'))
@@ -141,11 +141,11 @@
                     </div>
                     @endif
                   </div>
-                </div>
+                
               </div>
             </div>
           </div>
-          <div class="card-footer pull-right">
+          <div class="pull-right">
             {{ Form::submit($product->exists?'Update':'Submit', array('class' => 'btn btn-theme')) }}
           </div>
           {{ Form::close() }}

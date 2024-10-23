@@ -38,7 +38,7 @@
       height: 5px;
       top: 24px;
       background: radial-gradient(#00aadb, transparent);
-      left: 40px;
+      left: 90px;
     }
 
     p.attach-p {
@@ -95,8 +95,8 @@
 
   <section class="content">
     <div class="row">
-      <div class="col-1"></div>
-      <div class="col-10">
+      <!-- <div class="col-1"></div> -->
+      <div class="col-md-12">
 
         @if(Session::has('success'))
         <div class="alert alert-success" id="hide_div">

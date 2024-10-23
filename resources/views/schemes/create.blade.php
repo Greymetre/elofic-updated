@@ -10,19 +10,19 @@
       .select2-dropdown--above {
          min-width: 250px !important;
       }
-
+/*
       .select2-container {
          border-bottom: 1px solid lightgray;
-      }
+      }*/
    </style>
    <div class="row">
       <div class="col-md-12">
-         <div class="card">
-            <div class="card-header card-header-tabs card-header-warning">
+         <div class="card pt-0 mt-0">
+            <div class="card-header card-header-tabs card-header-warning m-0">
                <div class="nav-tabs-navigation">
-                  <div class="nav-tabs-wrapper">
+                  <div class="nav-tabs-wrapper new_id">
                      <h4 class="card-title ">
-                        Loyalty Scheme Creation
+                        Loyalty Scheme Creation  </h4>
                         @if(auth()->user()->can(['district_access']))
                         <ul class="nav nav-tabs pull-right" data-tabs="tabs">
                            <li class="nav-item">
@@ -33,7 +33,7 @@
                            </li>
                         </ul>
                         @endif
-                     </h4>
+                   
                   </div>
                </div>
             </div>
@@ -57,19 +57,20 @@
                'files'=>true
                ]) !!}
                <div class="row">
-                  <div class="col-md-6">
-                     <div class="form-group">
-                        <label class="bmd-label-floating">{!! trans('panel.scheme.fields.scheme_name') !!} </label>
+                  <div class="col-md-4">
+                     <div class="input_section">
+                        <label class="col-form-label">{!! trans('panel.scheme.fields.scheme_name') !!} </label>
                         <input type="text" name="scheme_name" class="form-control" value="{!! old( 'scheme_name', $schemes['scheme_name']) !!}">
                         @if ($errors->has('scheme_name'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('scheme_name') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
-                  <div class="col-md-6">
-                     <div class="form-group">
+                  <div class="col-md-4">
+                     <div class="input_section">
+                           <label class="col-form-label">Select Customer Type </label>
                         <select class="select2 form-control" name="customer_type" id="customer_type">
                            <option value="" selected disabled>Select Customer Type</option>
                            @if($customer_types && count($customer_types) > 0)
@@ -79,38 +80,37 @@
                            @endif
                         </select>
                         @if ($errors->has('point_value'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('point_value') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
-               </div>
-               <div class="row">
-                  <div class="col-md-4">
-                     <div class="form-group">
-                        <label class="bmd-label-floating">{!! trans('panel.scheme.fields.start_date') !!} </label>
+    <div class="col-md-4">
+                     <div class="input_section">
+                        <label class="col-form-label">{!! trans('panel.scheme.fields.start_date') !!} </label>
                         <input type="text" name="start_date" class="form-control datepicker" value="{!! old( 'start_date', $schemes['start_date']) !!}" autocomplete="off" readonly>
                         @if ($errors->has('start_date'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('start_date') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
                   <div class="col-md-4">
-                     <div class="form-group">
-                        <label class="bmd-label-floating">{!! trans('panel.scheme.fields.end_date') !!} </label>
+                     <div class="input_section">
+                        <label class="col-form-label">{!! trans('panel.scheme.fields.end_date') !!} </label>
                         <input type="text" name="end_date" class="form-control datepicker" value="{!! old( 'end_date', $schemes['end_date']) !!}" autocomplete="off" readonly>
                         @if ($errors->has('end_date'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('end_date') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
-                  <div class="col-md-4">
-                     <div class="form-group">
+      <div class="col-md-4">
+                     <div class="input_section">
+                        <label class="col-form-label">select </label>
                         <select name="scheme_type" class="select2 form-control" id="schemetype">
                            <option value="">{!! trans('panel.scheme.fields.scheme_type') !!}</option>
                            <option value="invoice" {!! ($schemes->scheme_type == 'invoice' ) ? "selected" : ''!!}>Invoice</option>
@@ -119,16 +119,15 @@
                            <option value="coupon" {!! ($schemes->scheme_type == 'coupon' ) ? "selected" : ''!!}>Coupons</option>
                         </select>
                         @if ($errors->has('scheme_type'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('scheme_type') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
-               </div>
-               <div class="row">
-                  <div class="col-md-4">
-                     <div class="form-group">
+                     <div class="col-md-4">
+                     <div class="input_section">
+                        <label class="col-form-label">Scheme Based On </label>
                         <select name="scheme_basedon" class="select2 form-control" id="schemebasedon">
                            <option value="">Scheme Based On</option>
                            <option value="value" {!! ($schemes->scheme_basedon == 'value' ) ? "selected" : ''!!}>Value</option>
@@ -137,41 +136,60 @@
                            <option value="coupon" {!! ($schemes->scheme_basedon == 'coupon' ) ? "selected" : ''!!}>Coupons</option>
                         </select>
                         @if ($errors->has('scheme_basedon'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('scheme_basedon') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
-                  <div class="col-md-4">
-                     <div class="form-group">
-                        <label class="bmd-label-floating">{!! trans('panel.scheme.fields.scheme_description') !!} </label>
+ <div class="col-md-4">
+                     <div class="input_section">
+                        <label class="col-form-label">{!! trans('panel.scheme.fields.scheme_description') !!} </label>
                         <textarea class="form-control" rows="4" name="scheme_description">{!! old( 'scheme_description', $schemes['scheme_description']) !!}</textarea>
                         @if ($errors->has('scheme_description'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('scheme_description') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
-                  <div class="col-md-4">
-                     <label class="bmd-label-floating">{!! trans('panel.scheme.fields.scheme_image') !!}</label>
-                     <div class="input-group">
-                        <div class="custom-file">
-                           <input type="file" class="custom-file-input" name="image" accept="image/*">
-                           <label class="custom-file-label">Choose file</label>
-                        </div>
+   <div class="col-md-4">
+                     <div class="input_section">
+                     <label class="col-form-label">{!! trans('panel.scheme.fields.scheme_image') !!}</label>
+                
+                         <!-- <div class="custom-file"> -->
+                          
+                        
+                         
+
+
+                        <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+<div class="fileinput-new thumbnail">
+<img src="https://expertfromindia.in/bediya/public/assets/img/placeholder.jpg" class="imagepreview1">
+<div class="selectThumbnail">
+<span class="btn btn-just-icon btn-round btn-file">
+<span class="fileinput-new"><i class="fa fa-pencil"></i></span>
+<span class="fileinput-exists">Change</span>
+<input type="file" name="image" class="getimage1" accept="image/*" >
+</span>
+<br>
+<a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
+</div>
+</div>
+
+
+
                         @if ($errors->has('scheme_image'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('scheme_image') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
-               </div>
-               <div class="row">
-                  <div class="col-md-6">
-                     <div class="form-group">
+                  </div>
+   <div class="col-md-4">
+                     <div class="input_section">
+                        <label class="col-form-label">Assign To</label>
                         <select name="assign_to" placeholder="Select Branch" class="select2 form-control" id="assign_to">
                            <option value="" disabled selected>Assign To</option>
                            <option {!! ($schemes->assign_to == 'all' ) ? "selected" : ''!!} value="all">All</option>
@@ -180,14 +198,15 @@
                            <option {!! ($schemes->assign_to == 'customer' ) ? "selected" : ''!!} value="customer">Customer</option>
                         </select>
                         @if ($errors->has('scheme_type'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('scheme_type') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
-                  <div class="col-md-6" id="branch">
-                     <div class="form-group">
+   <div class="col-md-4" id="branch">
+                     <div class="input_section">
+                        <label class="col-form-label">Select Branch</label>
                         <select name="branch[]" multiple placeholder="Select Branch" class="select2 form-control" required>
                            <!-- <option value="">select branches</option> -->
                            @if($branchs && count($branchs) > 0)
@@ -197,14 +216,15 @@
                            @endif
                         </select>
                         @if ($errors->has('branch'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('branch') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
-                  <div class="col-md-6" id="state">
-                     <div class="form-group">
+     <div class="col-md-4" id="state">
+                     <div class="input_section">
+                         <label class="col-form-label">Select States</label>
                         <select name="state[]" multiple placeholder="Select States" class="select2 form-control" required>
                            <!-- <option value="">select branches</option> -->
                            @if($states && count($states) > 0)
@@ -214,75 +234,84 @@
                            @endif
                         </select>
                         @if ($errors->has('state'))
-                        <div class="error col-lg-12">
+                        <div class="error">
                            <p class="text-danger">{{ $errors->first('state') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
-                  <div class="col-md-6" id="customer">
-                     <div class="form-group">
+  <div class="col-md-4" id="customer">
+                     <div class="input_section">
                         <!-- <select name="customer[]" id='customer_select' value="{!! old( 'customer', $schemes['customer']) !!}" ></select> -->
                         {!! Form::select('customer[]',[], old( 'customer', $schemes['customer']), ['id'=>'customer_select', 'class' => 'form-control']) !!}
                         @if ($errors->has('state'))
-                        <div class="error col-lg-12">
+                        <div class="error ">
                            <p class="text-danger">{{ $errors->first('state') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
+
+
+
+
+
                </div>
+              
+   
+              
                <div class="row redemption">
-                  <div class="col-md-6">
-                     <div class="row">
-                        <label class="col-sm-3 col-form-label">{!! trans('panel.scheme.fields.points_start_date') !!}</label>
-                        <div class="col-sm-9">
+                  <div class="col-md-4">
+                     <div class="input_section">
+                        <label class="col-form-label">{!! trans('panel.scheme.fields.points_start_date') !!}</label>
+                       
                            <div class="form-group bmd-form-group is-filled">
                               <input type="text" name="points_start_date" class="form-control datepicker" value="{!! old( 'points_start_date', $schemes['points_start_date']) !!}" autocomplete="off" readonly>
                            </div>
-                        </div>
+                      
                      </div>
                   </div>
-                  <div class="col-md-6">
-                     <div class="row">
-                        <label class="col-sm-3 col-form-label">{!! trans('panel.scheme.fields.points_end_date') !!}</label>
-                        <div class="col-sm-9">
+                  <div class="col-md-4">
+                     <div class="input_section">
+                        <label class="col-form-label">{!! trans('panel.scheme.fields.points_end_date') !!}</label>
+                    
                            <div class="form-group bmd-form-group is-filled">
                               <input type="text" name="points_end_date" class="form-control datepicker" value="{!! old( 'points_end_date', $schemes['points_end_date']) !!}" autocomplete="off" readonly>
                            </div>
-                        </div>
+                     
                      </div>
                   </div>
-               </div>
-               <div class="row redemption">
-                  <div class="col-md-6">
-                     <div class="row">
-                        <label class="col-sm-3 col-form-label">{!! trans('panel.scheme.fields.block_points') !!}</label>
-                        <div class="col-sm-9">
+
+   <div class="col-md-4">
+                     <div class="input_section">
+                        <label class="col-form-label">{!! trans('panel.scheme.fields.block_points') !!}</label>
+                       
                            <div class="form-group bmd-form-group is-filled">
                               <input class="form-control" name="block_points" type="text">
                            </div>
-                        </div>
+                        
                      </div>
                   </div>
-                  <div class="col-md-6">
-                     <div class="row">
-                        <label class="col-sm-3 col-form-label">{!! trans('panel.scheme.fields.block_percents') !!}</label>
-                        <div class="col-sm-9">
+                  <div class="col-md-4">
+                     <div class="input_section">
+                        <label class="col-form-label">{!! trans('panel.scheme.fields.block_percents') !!}</label>
+                        
                            <div class="form-group bmd-form-group is-filled">
                               <input class="form-control" name="block_percents" type="text">
-                           </div>
+                         
                         </div>
                      </div>
                   </div>
+
                </div>
+              
                <div class="row clearfix earnscheme">
                   <div class="col-md-12">
-                     <span class="pull-right">
-                        <span style="background: #00aadb;color: #fff;padding: 5px;border-radius: 5px;font-weight: 500;">*Import product in this scheme please check first template</span>
+                     <span class="mt-2" style="float: right;">
+                        <span style="background: linear-gradient(45deg, #3860a4 0%, #3694cc 100%);color: #fff;padding: 5px;border-radius: 5px;font-weight: 500;">*Import product in this scheme please check first template</span>
                         <div class="d-flex flex-row-reverse">
                            <div class="">
-                              <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                              <div class="fileinput fileinput-new text-center d-flex flex-row-reverse" data-provides="fileinput">
                                  <span class="btn btn-just-icon btn-theme btn-file">
                                     <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
                                     <span class="fileinput-exists">Change</span>
@@ -308,13 +337,13 @@
                                  <th class="text-center"> Active Points</th>
                                  <th class="text-center"> Provision Points</th>
                                  <th class="text-center"> Total {!! trans('panel.scheme.fields.points') !!} </th>
-                                 <th class="text-center"> </th>
+                                 <!-- <th class="text-center"> </th> -->
                               </tr>
                            </thead>
                         </table>
                      </div>
                   </div>
-                  <div class="row clearfix">
+               
                      <div class="col-md-12">
                         <table class="table">
                            <tbody>
@@ -327,9 +356,9 @@
                         </table>
                      </div>
                   </div>
-               </div>
+           
 
-               <div class="card-footer pull-right">
+               <div class="pull-right">
                   {{ Form::submit('Submit', array('class' => 'btn btn-theme')) }}
                </div>
                {{ Form::close() }}
@@ -373,18 +402,18 @@
             if (schemetype === 'invoiceValue') {
                var newRow =
                   '<tr> <td>' + counter + '</td>' +
-                  '<td><input type="text" name="points[]' + counter + '"class="form-control points rowchange" /></td>' +
+                  '<td><div class="input_section"><input type="text" name="points[]' + counter + '"class="form-control points rowchange" /></div></td>' +
                   '<td><a href="#" class="remove-rows btn btn-danger btn-xs"> <i class="fa fa-minus"></i></a></td> </tr>';
             } else {
                var newRow =
                   '<tr> <td>' + counter + '</td>' +
-                  '<td class="category"><select required name="category_id[]' + counter + '" class="form-control set_cat_' + counter + ' category_drop rowchange"> </select></td>' +
-                  '<td style="max-width: 300px;" class="subCat"><select required style="max-width: 300px;" name="subcategory_id[]' + counter + '" class="form-control select2bs4 sub_category rowchange" /> </select></td>' +
-                  '<td class="product"><select required name="product_id[]' + counter + '" class="form-control select2bs4 product_drop rowchange"/></select></td>' +
-                  '<td><input required type="number" name="active_point[]' + counter + '"class="form-control active_point rowchange" /></td>' +
-                  '<td><input required type="number" name="provision_point[]' + counter + '"class="form-control provision_point rowchange" /></td>' +
-                  '<td><input required type="number" name="points[]' + counter + '"class="form-control points rowchange" /></td>' +
-                  '<td class="td-actions text-center"><a class="remove-rows btn btn-danger btn-just-icon btn-sm"><i class="fa fa-minus"></i></a></td> </tr>';
+                  '<td class="category"><div class="input_section"><select required name="category_id[]' + counter + '" class="form-control set_cat_' + counter + ' category_drop rowchange"> </select></div></td>' +
+                  '<td class="subCat"><div class="input_section"><select required  name="subcategory_id[]' + counter + '" class="form-control select2 sub_category rowchange" /></div> </select></td>' +
+                  '<td class="product"><div class="input_section"><select required name="product_id[]' + counter + '" class="form-control select2 product_drop rowchange"/></select></div></td>' +
+                  '<td><div class="input_section"><input required type="number" name="active_point[]' + counter + '"class="form-control active_point rowchange" /></div></td>' +
+                  '<td><div class="input_section"><input required type="number" name="provision_point[]' + counter + '"class="form-control provision_point rowchange" /></div></td>' +
+                  '<td><div class="input_section"><input required type="number" name="points[]' + counter + '"class="form-control points rowchange" /><a class="remove-rows btn btn-danger btn-just-icon btn-sm"><i class="fa fa-minus"></i></a></div></td>' +
+                  ' </tr>';
             }
 
             $table.append(newRow);

@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Models\ParentDetail;
 use App\Models\PrimarySales;
 use App\Models\User;
 use Carbon\Carbon;
@@ -13,6 +14,7 @@ use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Illuminate\Support\Facades\Auth;
 use DB;
+use Spatie\Permission\Models\Role;
 
 class PrimarySalesExport implements FromCollection, WithHeadings,WithMapping, ShouldAutoSize, WithEvents
 {
@@ -44,6 +46,14 @@ class PrimarySalesExport implements FromCollection, WithHeadings,WithMapping, Sh
 
         if ($this->branch_id && $this->branch_id != '' && $this->branch_id != null) {
             $query->where('final_branch', $this->branch_id);
+        }
+
+        $role = Role::find(29);
+        if ($role && auth()->user()->hasRole($role->name)) {
+            $child_customer = ParentDetail::where('parent_id', auth()->user()->customerid)
+                ->pluck('customer_id')
+                ->push(auth()->user()->customerid);
+            $query->whereIn('customer_id', $child_customer);
         }
 
         if ($this->division_id && $this->division_id != '' && count($this->division_id) > 0) {
@@ -138,6 +148,7 @@ class PrimarySalesExport implements FromCollection, WithHeadings,WithMapping, Sh
             'City',
             'State',
             'Final Branch',
+            'Branch ID',
             'Sales person',
             'Emp Code',
             'Model Name',
@@ -151,7 +162,8 @@ class PrimarySalesExport implements FromCollection, WithHeadings,WithMapping, Sh
             'IGST Amt',
             'Total',
             'Store Name',
-            'Group',
+            'Group Name',
+            'New Group',
             'Branch',
             'New Group Name',
             'Product ID',
@@ -172,6 +184,7 @@ class PrimarySalesExport implements FromCollection, WithHeadings,WithMapping, Sh
             $data['city'],
             $data['state'],
             $data['final_branch'],
+            $data['branch_id'],
             $data['sales_person'],
             $data['emp_code'],
             $data['model_name'],
@@ -185,6 +198,7 @@ class PrimarySalesExport implements FromCollection, WithHeadings,WithMapping, Sh
             $data['igst_amount'],
             (string)$data['total_amount'],
             $data['store_name'],
+            $data['group_name'],
             $data['new_group'],
             $data['branch'],
             $data['new_group_name'],
