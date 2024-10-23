@@ -30,6 +30,7 @@ class MobileAppLoginUsersExport implements FromCollection, WithHeadings, ShouldA
         $this->start_date = $request->input('start_date');
         $this->end_date = $request->input('end_date');
         $this->financial_year = $request->input('financial_year');
+        $this->designation = $request->input('designation');
     }
 
     public function collection()
@@ -75,7 +76,9 @@ class MobileAppLoginUsersExport implements FromCollection, WithHeadings, ShouldA
         $all_assign_emp = array();
         if(count($data['customer']['getemployeedetail']) > 0){
             foreach ($data['customer']['getemployeedetail'] as $key => $value) {
-                array_push($all_assign_emp, $value->employee_detail->name);
+                if($value->employee_detail->designation_id == $this->designation){
+                    array_push($all_assign_emp, $value->employee_detail->name);
+                }
             }
         }
         return [

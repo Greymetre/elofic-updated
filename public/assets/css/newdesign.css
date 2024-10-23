@@ -1402,3 +1402,9 @@ th.lenth_text {
     width: 100%;
     min-width: 200px;
 }
+
+
+td.sorting {
+    color: #363954;
+    font-weight: 400;
+}

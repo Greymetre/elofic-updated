@@ -54,8 +54,8 @@
                 <th>{!! trans('panel.global.action') !!}</th>
                 <th>{!! trans('panel.global.scheme_name') !!}</th>
                 <th>{!! trans('panel.scheme.fields.scheme_description') !!}</th>
-                <th>{!! trans('panel.scheme.fields.start_date') !!}</th>
-                <th>{!! trans('panel.scheme.fields.end_date') !!}</th>
+                <th>Assign</th>
+                <th>Based On</th>
                 <th>{!! trans('panel.scheme.fields.scheme_type') !!}</th>
                 <th>{!! trans('panel.global.created_at') !!}</th>
               </thead>
@@ -107,13 +107,13 @@
             "defaultContent": ''
           },
           {
-            data: 'start_date',
-            name: 'start_date',
+            data: 'assign_to',
+            name: 'assign_to',
             "defaultContent": ''
           },
           {
-            data: 'end_date',
-            name: 'end_date',
+            data: 'scheme_basedon',
+            name: 'scheme_basedon',
             "defaultContent": ''
           },
           {
@@ -167,6 +167,7 @@
 
 
       $('body').on('click', '.delete', function() {
+        event.preventDefault();
         var id = $(this).attr("value");
         var token = $("meta[name='csrf-token']").attr("content");
         if (!confirm("Are You sure want to delete ?")) {
@@ -174,7 +175,7 @@
         }
 
         $.ajax({
-          url: "{{ url('orderschemes') }}" + '/' + id,
+          url: "{{ url('primary_scheme') }}" + '/' + id,
           type: 'DELETE',
           data: {
             _token: token,

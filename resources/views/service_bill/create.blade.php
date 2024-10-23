@@ -4,10 +4,11 @@
          overflow: auto;
          max-height: 200px !important;
       }
-
-      .select2-container {
+body table td {
+    color: #363954;}
+    /*  .select2-container {
          border-bottom: 1px solid lightgray;
-      }
+      }*/
 
       button.delete-img-btn {
          position: absolute;
@@ -63,12 +64,12 @@
    </style>
    <div class="row">
       <div class="col-md-12">
-         <div class="card">
-            <div class="card-header card-header-tabs card-header-warning">
+         <div class="card m-0 p-0">
+            <div class="card-header m-0 card-header-tabs card-header-warning">
                <div class="nav-tabs-navigation">
-                  <div class="nav-tabs-wrapper">
-                     <h3 class="card-title ">
-                        {{$service_bill->exists?'Edit':'Create'}} Service Bill
+                  <div class="nav-tabs-wrapper new_id">
+                     <h4 class="card-title ">
+                        {{$service_bill->exists?'Edit':'Create'}} Service Bill   </h4>
                         @if(auth()->user()->can(['district_access']))
                         <ul class="nav nav-tabs pull-right" data-tabs="tabs">
                            <li class="nav-item">
@@ -79,7 +80,7 @@
                            </li>
                         </ul>
                         @endif
-                     </h3>
+                  
                   </div>
                </div>
             </div>
@@ -104,8 +105,8 @@
                ]) !!}
                <div class="row mt-2 mb-2">
                   <div class="col-md-3">
-                     <div class="form-group">
-                        <label for="service_bill_no">Service Bill No.</label>
+                     <div class="input_section">
+                        <label class="col-form-label" for="service_bill_no">Service Bill No.</label>
                         <input class="form-control" type="text" readonly name="service_bill_no" id="service_bill_no" value="{{$serviceBillNo}}">
                         @if($service_bill->exists)
                         <input type="hidden" name="complaint_number" id="complaint_number" value="{{$complaint->complaint_number}}">
@@ -113,8 +114,8 @@
                      </div>
                   </div>
                   <div class="col-md-3">
-                     <div class="form-group">
-                        <label for="complaint_number">Complaint Number</label>
+                     <div class="input_section">
+                        <label class="col-form-label" for="complaint_number">Complaint Number</label>
                         <select disabled {{$service_bill->exists?'disabled':''}} name="complaint_number" id="complaint_number" class="select2" required>
                            <option value="">Select Complaint Number</option>
                            @if(count($all_complaint_number) > 0)
@@ -130,8 +131,8 @@
                      </div>
                   </div>
                   <div class="col-md-3">
-                     <div class="form-group">
-                        <label for="division">Division</label>
+                     <div class="input_section">
+                        <label for="division" class="col-form-label">Division</label>
                         <select disabled name="division" id="division" class="select2">
                            <option value="">Select Division</option>
                            @if($divisions && count($divisions) > 0)
@@ -250,8 +251,8 @@
                <div class="border border-dark rounded p-4">
                   <div class="row mt-2 mb-2">
                      <div class="col-md-3">
-                        <div class="form-group">
-                           <label for="category">Category Of Complaint</label>
+                        <div class="input_section">
+                           <label class="col-form-label" for="category">Category Of Complaint</label>
                            <select name="category" id="category" class="select2">
                               <option value="">Select Category</option>
                               <option value="Electrical Fault" {{($service_bill && $service_bill->category == 'Electrical Fault')?'selected':''}}>Electrical Fault</option>
@@ -261,8 +262,8 @@
                         </div>
                      </div>
                      <div class="col-md-3">
-                        <div class="form-group">
-                           <label for="complaint_type">Complaint Type</label>
+                        <div class="input_section">
+                           <label class="col-form-label" for="complaint_type">Complaint Type</label>
                            <select name="complaint_type" id="complaint_type" class="select2">
                               <option value="">Select Complaint Type</option>
                               <option value="Auto ON-OFF" {{($service_bill && $service_bill->complaint_type == 'Auto ON-OFF')?'selected':''}}>Auto ON-OFF</option>
@@ -278,7 +279,7 @@
                         </div>
                      </div>
                      <div class="col-md-3">
-                        <div class="form-group">
+                        <div class="input_section">
                            <label for="complaint_reason">Complaint Reason</label>
                            <select name="complaint_reason" id="complaint_reason" class="select2">
                               <option value="">Select Complaint Reason</option>
@@ -291,8 +292,8 @@
                         </div>
                      </div>
                      <div class="col-md-3">
-                        <div class="form-group">
-                           <label for="condition_of_service">Condition Of Service</label>
+                        <div class="input_section" >
+                           <label for="condition_of_service" class="col-form-label">Condition Of Service</label>
                            <select name="condition_of_service" id="condition_of_service" class="select2">
                               <option value="">Select Condition Of Service</option>
                               <option value="Full Finish" {{($service_bill && $service_bill->condition_of_service == 'Full Finish')?'selected':''}}>Full Finish</option>
@@ -302,8 +303,8 @@
                         </div>
                      </div>
                      <div class="col-md-3">
-                        <div class="form-group">
-                           <label for="received_product">Received Product</label>
+                        <div class="input_section">
+                           <label class="col-form-label" for="received_product">Received Product</label>
                            <select name="received_product" id="received_product" class="select2">
                               <option value="">Select Received Product</option>
                               <option value="Pump" {{($service_bill && $service_bill->received_product == 'Pump')?'selected':''}}>Pump</option>
@@ -316,8 +317,8 @@
                         </div>
                      </div>
                      <div class="col-md-3">
-                        <div class="form-group">
-                           <label for="nature_of_fault">Nature Of Fault</label>
+                        <div class="input_section">
+                           <label class="input_section" for="nature_of_fault">Nature Of Fault</label>
                            <select name="nature_of_fault" id="nature_of_fault" class="select2">
                               <option value="">Select Nature Of Fault</option>
                               <option value="Transit Damage" {{($service_bill && $service_bill->nature_of_fault == 'Transit Damage')?'selected':''}}>Transit Damage</option>
@@ -327,8 +328,8 @@
                         </div>
                      </div>
                      <div class="col-md-3">
-                        <div class="form-group">
-                           <label for="service_location">Service Location</label>
+                        <div class="input_section">
+                           <label class="col-form-label" for="service_location">Service Location</label>
                            <select name="service_location" id="service_location" class="select2">
                               <option value="">Select Service Location</option>
                               <option value="Site Visit" {{($service_bill && $service_bill->service_location == 'Site Visit')?'selected':''}}>Site Visit</option>
@@ -343,8 +344,8 @@
                <div class="border border-dark rounded p-4">
                   <div class="row mt-2 mb-2">
                      <div class="col-md-3">
-                        <div class="form-group">
-                           <label for="repaired_replacement">Repaired / Replacement</label>
+                        <div class="input_section">
+                           <label class="col-form-label" for="repaired_replacement">Repaired / Replacement</label>
                            <select name="repaired_replacement" id="repaired_replacement" class="select2" required>
                               <option value="">Please Select</option>
                               <option value="Repaired" {{($service_bill && $service_bill->repaired_replacement == 'Repaired')?'selected':''}}>Repaired</option>
@@ -353,8 +354,8 @@
                         </div>
                      </div>
                      <div class="col-md-3">
-                        <div class="form-group">
-                           <label for="replacement_tag">Replacement Tag</label>
+                        <div class="input_section">
+                           <label class="col-form-label" for="replacement_tag">Replacement Tag</label>
                            <select disabled name="replacement_tag" id="replacement_tag" class="select2">
                               <option value="">Select Replacement Tag</option>
                               <option value="Yes">Yes</option>
@@ -363,7 +364,7 @@
                         </div>
                      </div>
                      <div class="col-md-3 d-none" id="tag-number">
-                        <div class="form-group">
+                        <div class="input_section">
                            <input type="text" name="replacement_tag_number" id="replacement_tag_number" placeholder="Replacement Tag Number" value="{{($service_bill?($service_bill->replacement_tag_number?$service_bill->replacement_tag_number:''):'')}}" class="form-control">
                         </div>
                      </div>
@@ -460,7 +461,7 @@
                <hr>
                <div class="row mt-2 mb-2">
                   <table class="table table-striped" id="table-service">
-                     <thead>
+                     <thead class="">
                         <tr>
                            <td style="width: 220px !important;">Service Type</td>
                            <td style="width: 320px !important;">Job Type / Description /HP</td>
@@ -476,8 +477,10 @@
                      <tbody>
                         @foreach($service_bill->service_bill_products as $k=>$product)
                         <tr>
-                           <input type="hidden" name="service[{{$k}}][service_bill_product_id]" id="service_bill_product_id" value="{{$product->id}}">
+                           <div class="input_section">
+                           <input type="hidden" name="service[{{$k}}][service_bill_product_id]" id="service_bill_product_id" value="{{$product->id}}"></div>
                            <td>
+                              <div class="input_section">
                               <select required name="service[{{$k}}][service_type]" class="form-control select2 chargety">
                                  @if(count($charge_type) > 0)
                                  @if($complaint->product_details->category_id == '2')
@@ -488,17 +491,24 @@
                                  @endforeach
                                  @endif
                               </select>
+                           </div>
                            </td>
                            <td>
+                              <div class="input_section">
                               <select required name="service[{{$k}}][product_id]" class="form-control select2 chargeprod">
                                  <option value="{{$product->product_id}}">{{$product->product?$product->product->product_name:$product->product_id}}</option>
                               </select>
+                           </div>
                            </td>
-                           <td><input type="number" readonly name="service[{{$k}}][quantity]" value="{{$product->quantity}}" class="form-control quantity" /></td>
-                           <td><input type="number" readonly name="service[{{$k}}][distance]" value="{{$product->distance}}" class="form-control distance" /></td>
-                           <td><input type="number" readonly name="service[{{$k}}][appreciation]" value="{{$product->appreciation}}" class="form-control appreciation" /></td>
-                           <td><input name="service[{{$k}}][price]" readonly class="form-control sprice" value="{{$product->price}}" /></td>
-                           <td><input name="service[{{$k}}][subtotal]" readonly class="form-control ssubtotal" value="{{$product->subtotal}}" /></td>
+                           <td>
+                              <div class="input_section"><input type="number" readonly name="service[{{$k}}][quantity]" value="{{$product->quantity}}" class="form-control quantity" />
+                              </div></td>
+                           <td>
+                              <div class="input_section"><input type="number" readonly name="service[{{$k}}][distance]" value="{{$product->distance}}" class="form-control distance" /></div></td>
+                           <td><div class="input_section"><input type="number" readonly name="service[{{$k}}][appreciation]" value="{{$product->appreciation}}" class="form-control appreciation" /></div></td>
+                           <td><div class="input_section"><input name="service[{{$k}}][price]" readonly class="form-control sprice" value="{{$product->price}}" />
+                           </div></td>
+                           <td><div class="input_section"><input name="service[{{$k}}][subtotal]" readonly class="form-control ssubtotal" value="{{$product->subtotal}}" /></div></td>
                            <td><button type="button" class="btn btn-danger btn-sm remove-tr m-0">X</button></td>
                         </tr>
                         @endforeach
@@ -668,7 +678,7 @@
          $.each(chargeType, function(k, v) {
             options += '<option value="' + v.id + '">' + v.charge_type + '</option>';
          });
-         var newTR = '<tr><td><select required name="service[' + counter + '][service_type]" class="form-control select2 chargety">' + options + '</select></td><td class="product_td"><select required name="service[' + counter + '][product_id]" class="form-control select2 chargeprod"></select></td><td><input type="number" readonly name="service[' + counter + '][quantity]" value="1" class="form-control quantity" /></td><td><input type="number" readonly name="service[' + counter + '][distance]"  class="form-control distance" /></td><td><input type="number" readonly name="service[' + counter + '][appreciation]" class="form-control appreciation" /></td><td><input name="service[' + counter + '][price]" readonly class="form-control sprice" /></td><td><input name="service[' + counter + '][subtotal]" readonly class="form-control ssubtotal" /></td><td><button type="button" class="btn btn-danger btn-sm remove-tr m-0">X</button></td></tr>';
+         var newTR = '<tr><td><div class="input_section"><select required name="service[' + counter + '][service_type]" class="form-control select2 chargety">' + options + '</select></div></td><td class="product_td"><div class="input_section"><select required name="service[' + counter + '][product_id]" class="form-control select2 chargeprod"></select></div></td><td><div class="input_section"><input type="number" readonly name="service[' + counter + '][quantity]" value="1" class="form-control quantity" /></div></td><td><div class="input_section"><input type="number" readonly name="service[' + counter + '][distance]"  class="form-control distance" /></div></td><td><div class="input_section"><input type="number" readonly name="service[' + counter + '][appreciation]" class="form-control appreciation" /></div></td><td><div class="input_section"><input name="service[' + counter + '][price]" readonly class="form-control sprice" /></div></td><td><div class="input_section"><input name="service[' + counter + '][subtotal]" readonly class="form-control ssubtotal" /></div></td><td><button type="button" class="btn btn-danger btn-sm remove-tr m-0">X</button></td></tr>';
          counter++;
          $("#table-service").append(newTR);
          $('.select2').select2();

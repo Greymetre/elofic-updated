@@ -568,7 +568,7 @@
               }
             });
           },
-          html: '<input id="dispatch_number" name="dispatch_number" class="swal2-input" placeholder="Dispatch Number">',
+          html: '<div class="input_section"><input id="dispatch_number" name="dispatch_number" class="swal2-input" placeholder="Dispatch Number"></div>',
         }).then(function(result) {
           if (!result.dismiss) {
             var dispatch_number = $('#dispatch_number').val();
@@ -629,10 +629,10 @@
         var status = active == 0 ? '0' : (active == 1 ? '1' : '2');
         Swal.fire({
           title: 'Transfer details and Status',
-          html: '<select id="statusSelect" class="swal2-select">' +
+          html: '<div class="input_section"><select id="statusSelect" class="swal2-select">' +
             '<option value="4">Delivered</option>' +
-            '</select>' +
-            '<input id="remark" name="remark" class="swal2-input" placeholder="Remark">',
+            '</select></div>' +
+            '<div class="input_section"><input id="remark" name="remark" class="swal2-input" placeholder="Remark"></div>',
           inputAttributes: {
             autocapitalize: 'off'
           },
@@ -690,6 +690,23 @@
 
     setTimeout(() => {
       $('#parent_customer').select2({
+        placeholder: 'Please Select...',
+        multiple: true,
+        allowClear: true,
+        ajax: {
+          url: "{{ route('getCustomerDataSelect') }}",
+          dataType: 'json',
+          delay: 250,
+          data: function(params) {
+            return {
+              term: params.term || '',
+              page: params.page || 1
+            }
+          },
+          cache: true
+        }
+      }).trigger('change');
+       $('#branch_id').select2({
         placeholder: 'Please Select...',
         multiple: true,
         allowClear: true,

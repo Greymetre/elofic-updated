@@ -137,7 +137,7 @@
                        </div>
                   </div> -->
 
-                       <div class="col-md-4">
+                       <div class="col-md-6">
                      <div class="input_section">
                         <label class="col-form-label">{!! trans('panel.global.bill_to') !!}<span class="text-danger"> *</span></label>
                        
@@ -159,7 +159,7 @@
                            @endif
                         </div>
                       </div>
-<div class="col-md-4">
+<div class="col-md-6">
                      <div class="input_section">
                         <label class="col-form-label">Address : </label>
                         <span class="seller_address"></span>
@@ -168,7 +168,7 @@
                </div>
                <div class="row">
              
-                  <div class="col-md-4" id="de_dis" style="display:none;">
+                  <div class="col-md-6" id="de_dis" style="display:none;">
                      <div class="input_section">
                         <!-- <label class="col-md-3 col-form-label">{!! trans('panel.global.buyer') !!}<span class="text-danger"> *</span></label> -->
                         <label class="col-form-label">Dealer/Distributer<span class="text-danger"> *</span></label>
@@ -191,7 +191,7 @@
                            @endif
                         </div>
                    </div>
-                   <div class="col-md-4">
+                   <div class="col-md-6">
                      <div class="input_section">
                         <label class="col-form-label">Address : </label>
                         <span class="buyer_address"></span>
@@ -199,7 +199,7 @@
                   </div>
                 
                   @if($orders->exists && @isset($orders['orderno']))
-                  <div class="col-md-4">
+                  <div class="col-md-6">
                      <div class="input_section">
                         <label class="col-form-label">{!! trans('panel.order.orderno') !!}</label>
                       
@@ -217,7 +217,7 @@
                   @endif
                </div>
                <div class="row">
-                  <div class="col-md-4">
+                  <div class="col-md-6">
                      <div class="input_section">
                   <label class="col-form-label">Division : </label>
                  

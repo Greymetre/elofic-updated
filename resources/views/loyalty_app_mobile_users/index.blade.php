@@ -22,6 +22,17 @@
                         @endif
                       </select>
                     </div>
+                    <div class="p-2" style="width:160px;">
+                      <!-- <label for="designation">Designation</label> -->
+                      <select class="select2" name="designation" id="designation" data-style="select-with-transition" title="Select Parent Customer">
+                        <option value="">Select Designation</option>
+                        @if(@isset($designations ))
+                        @foreach($designations as $designation)
+                        <option value="{!! $designation->id !!}">{!! $designation->designation_name !!}</option>
+                        @endforeach
+                        @endif
+                      </select>
+                    </div>
                     <div class="p-2">
                       <input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly>
                     </div>
@@ -128,6 +139,7 @@
             d.user_id = $('#user').val(),
             d.start_date = $('#start_date').val(),
             d.end_date = $('#end_date').val()
+            d.designation = $('#designation').val()
           }
         },
         columns: [{

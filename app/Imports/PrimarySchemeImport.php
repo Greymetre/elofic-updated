@@ -44,28 +44,24 @@ class PrimarySchemeImport implements ToCollection,WithValidation,WithHeadingRow,
     }
     public function collection(Collection $rows)
     {
-        
         foreach($rows as $row) {
             $scheme = PrimarySchemeDetail::updateOrCreate([
                 'primary_scheme_id' => decrypt($this->scheme_id),
-                'product_id' => isset($row['product_id'])? $row['product_id']:null,
+                'groups' => isset($row['group_name'])? $row['group_name']:null,
+                'min' => isset($row['min'])? $row['min']:null,
+                'max' => isset($row['max'])? $row['max']:null,
             ],[
-                
                 'active' => 'Y',
-                'primary_scheme_id' => decrypt($this->scheme_id),
-                'product_id' => isset($row['product_id'])? $row['product_id']:null,
-                'category_id' => isset($row['category_id'])? $row['category_id']:null,
-                'subcategory_id' => isset($row['sub_category_id'])? $row['sub_category_id']:null,
-                'points' => isset($row['discount'])? $row['discount']:null
+                'points' => isset($row['points'])? $row['points']:null
             ]);
         }
     }
     public function rules(): array
     {
         return [
-            'product_id' => [
+            'group_name' => [
                 'required',
-                Rule::exists('products', 'id')
+                Rule::exists('primary_sales', 'new_group_name')
             ],
         ];
     }

@@ -13,8 +13,8 @@
               <form method="GET" action="{{ URL::to('customers-download') }}">
                   <div class="d-flex flex-row">
                     <div class="p-2">
-                        <select class="form-control" name="executive_id" id="executive_id" data-style="select-with-transition" title="Select User">
-                         <option value="">Select User</option>
+                        <select class="select2" name="executive_id" id="executive_id" data-style="select-with-transition" title="Select User">
+                         <option value="" >Select User</option>
                         @if(@isset($users ))
                         @foreach($users as $user)
                          <option value="{!! $user['id'] !!}" {{ old( 'executive_id') == $user->id ? 'selected' : '' }}>{!! $user['name'] !!}</option>

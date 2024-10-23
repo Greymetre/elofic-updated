@@ -37,7 +37,7 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
 
     public function collection()
     {
-        $data = TransactionHistory::with(['customer', 'scheme']);
+        $data = TransactionHistory::with(['customer', 'scheme', 'scheme_details']);
 
         $userids = getUsersReportingToAuth();
 
@@ -76,8 +76,8 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
         }
 
         if ($this->scheme_name) {
-            $data->whereHas('scheme', function ($query) {
-                $query->where('name', 'LIKE', '%' . $this->scheme_name . '%');
+            $data->whereHas('scheme_details', function ($query) {
+                $query->where('id', 'LIKE', '%' . $this->scheme_name . '%');
             });
         }
 

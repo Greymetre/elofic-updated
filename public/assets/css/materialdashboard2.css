@@ -2067,6 +2067,16 @@ pre code {
     .table-responsive-lg>.table-bordered {
         border: 0
     }
+
+    body .main-panel>.content {
+    margin-top: 0px !important;
+        padding-top: 113px !important;
+}
+body nav.sidebar {
+        display: none !important;
+    }
+
+
 }
 
 @media(max-width: 1199.98px) {
@@ -10627,7 +10637,7 @@ fieldset[disabled][disabled] .form-control,.form-control.disabled,.form-control:
 }
 
 .is-focused [class^=bmd-label],.is-focused [class*=' bmd-label'] {
-    color: #9c27b0
+    color: #495057
 }
 
 .is-focused .bmd-label-placeholder {
@@ -15265,7 +15275,7 @@ form .checkbox-radios {
 @media all and (max-width: 991px) {
     .card .card-body .col-form-label,.card .card-body .label-on-right {
         text-align:left;
-        padding-left: 15px;
+        padding-left: 0px;
         padding-top: 8px
     }
 }
@@ -25335,7 +25345,7 @@ select.bs-select-hidden,.bootstrap-select>select.bs-select-hidden,select.selectp
     }
 
     .navbar.navbar-transparent .navbar-toggler .navbar-toggler-icon {
-        background-color: #fff
+        background-color: #fff !important;
     }
 
     #bodyClick {
@@ -25590,7 +25600,8 @@ select.bs-select-hidden,.bootstrap-select>select.bs-select-hidden,select.selectp
         height: 100%;
         width: 260px;
         padding: 10px 14px;
-        background: var(--sidebar-color);
+/*        background: var(--sidebar-color);*/
+display: block !important;
         transition: var(--tran-05);
         z-index: 100
     }
@@ -26892,4 +26903,39 @@ div#expenseDetails .invoice-col ,div#expenseDetails .invoice-col h6 {
 
 li.list-group-item.border-0.ps-0.text-sm {
     color: gray;
+}
+
+th.lenth_text {
+    width: 100%;
+    min-width: 200px;
+}
+.dropdown.bootstrap-select.show .dropdown-menu.show {
+    z-index: 9999999 !important;
+}
+
+
+form#storeLoyaltyAppSetting .img-div {
+    margin-bottom: 15px;
+}
+
+
+
+@media(max-width: 996px) {
+
+body .select2-container--open .select2-dropdown--below{
+    width: 100% !important;
+}
+
+body table.dataTable.dtr-inline.collapsed > tbody > tr[role="row"] > td:first-child:before,body  table.dataTable.dtr-inline.collapsed > tbody > tr[role="row"] > th:first-child:before {
+    top: 60%;
+    left: 95%;
+}
+
+body .d-flex.flex-row {
+    flex-flow: wrap !important;
+}
+
+body .table thead tr th {
+    white-space: pre;
+}
 }

@@ -94,7 +94,7 @@
             <span class="message"></span>
           </div>
           <div class="table-responsive">
-            <table id="getproduct" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
+            <table id="getproduct" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
               <thead class=" text-primary">
                 <th>{!! trans('panel.global.no') !!}</th>
                 <th>{!! trans('panel.global.action') !!}</th>
@@ -171,81 +171,97 @@
           {
             data: 'product_name',
             name: 'product_name',
+            orderable: false,
             "defaultContent": ''
           },
           {
             data: 'product_no',
             name: 'product_no',
+            orderable: false,
             "defaultContent": ''
           },
           {
             data: 'part_no',
             name: 'part_no',
+            orderable: false,
             "defaultContent": ''
           },
           {
             data: 'description',
             name: 'description',
+            orderable: false,
             "defaultContent": ''
           },
           {
             data: 'specification',
             name: 'specification',
+            orderable: false,
             "defaultContent": ''
           },
           {
             data: 'brands.brand_name',
             name: 'brands.brand_name',
+            orderable: false,
             "defaultContent": ''
           },
           {
             data: 'productpriceinfo.mrp',
             name: 'productpriceinfo.mrp',
+            orderable: false,
             "defaultContent": ''
           },
           {
             data: 'categories.category_name',
             name: 'categories.category_name',
+            orderable: false,
             "defaultContent": ''
           },
           {
             data: 'subcategories.subcategory_name',
             name: 'subcategories.subcategory_name',
+            orderable: false,
             "defaultContent": ''
           },
           {
             data: 'unitmeasures.unit_code',
             name: 'unitmeasures.unit_code',
+            orderable: false,
             "defaultContent": ''
           },
           {
             data: 'productpriceinfo.price',
             name: 'productpriceinfo.price',
+            orderable: false,
             "defaultContent": ''
           },
           {
             data: 'suc_del',
             name: 'suc_del',
+            orderable: false,
             "defaultContent": ''
           },
           {
             data: 'productpriceinfo.selling_price',
             name: 'productpriceinfo.selling_price',
+            orderable: false,
             "defaultContent": ''
           },
           {
             data: 'productpriceinfo.gst',
             name: 'productpriceinfo.gst',
+            orderable: false,
             "defaultContent": ''
           },
           {
             data: 'createdbyname.name',
             name: 'createdbyname.name',
+            orderable: false,
             "defaultContent": ''
           },
           {
             data: 'created_at',
             name: 'created_at',
+            orderable: false,
             "defaultContent": ''
           },
         ]

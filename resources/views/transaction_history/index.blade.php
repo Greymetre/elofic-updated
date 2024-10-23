@@ -1,7 +1,7 @@
 <x-app-layout>
   <div class="row">
     <div class="col-md-12">
-      <div class="card p-0 mt-0">
+      <div class="card">
         <div class="card-header card-header-icon card-header-theme">
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
@@ -11,7 +11,7 @@
               <div class="btn-group header-frm-btn">
                 @if(auth()->user()->can(['transaction_history_download']))
                 <form method="GET" action="{{ route('transaction_history.download') }}" class="form-horizontal">
-                  <div class="d-flex flex-row align-items-center">
+                  <div class="d-flex flex-row align-items-end">
                     <div class="p-2" style="width:160px;">
                       <label for="branch_id">Branch</label>
                       <select class="select2" placeholder="Select Branch" multiple name="branch_id[]" id="branch_id" data-style="select-with-transition" title="Select Branch">
@@ -35,7 +35,7 @@
                       </select>
                     </div>
                     <div class="p-2" style="width:160px;">
-                      <label for="designation">Designation</label>
+                      <!-- <label for="designation">Designation</label> -->
                       <select class="select2" name="designation" id="designation" data-style="select-with-transition" title="Select Parent Customer">
                         <option value="">Select Designation</option>
                         @if(@isset($designations ))
@@ -387,6 +387,24 @@
         multiple: true,
         allowClear: true,
         ajax: {
+          url: "{{ route('getCustomerDataSelect') }}",
+          dataType: 'json',
+          delay: 250,
+          data: function(params) {
+            return {
+              term: params.term || '',
+              page: params.page || 1
+            }
+          },
+          cache: true
+        }
+      }).trigger('change');
+
+        $('#branch_id').select2({
+        placeholder: 'Select...',
+        multiple: true,
+         allowClear: true,
+       ajax: {
           url: "{{ route('getCustomerDataSelect') }}",
           dataType: 'json',
           delay: 250,
