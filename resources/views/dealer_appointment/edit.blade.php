@@ -151,7 +151,7 @@
                   </div>
                   <div class="col-md-9">
                     <div class="input_section">
-                    <select class="form-select select2" name="branch" id="blood_group" required>
+                    <select class="form-select select2" name="branch" id="branch" required>
                       <option value="" disabled selected>Your answer</option>
                       @if($branchs && count($branchs) > 0)
                       @foreach($branchs as $branch)

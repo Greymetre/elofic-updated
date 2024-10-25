@@ -305,42 +305,42 @@ if (! function_exists('submitUserActivity')) {
 if (! function_exists('getLatLongToAddress')) { 
     function getLatLongToAddress($latitude, $longitude)
     {
-        $curl = curl_init();
-        curl_setopt_array($curl, [
-            CURLOPT_URL => "https://nominatim.openstreetmap.org/search?q=".$latitude.",".$longitude."&format=json&polygon=1",
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => "", // Allow all encodings
-            CURLOPT_MAXREDIRS => 10, // Maximum number of redirects
-            CURLOPT_TIMEOUT => 30, // Timeout after 30 seconds
-            CURLOPT_FOLLOWLOCATION => true, // Follow redirects
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => "GET", // Use GET request
-            CURLOPT_HTTPHEADER => [
-                "accept: application/json",
-                "accept-language: en-GB,en-US;q=0.9,en;q=0.8",
-                "app-lang: en",
-                "authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im1vdG9yZnJlbnp5NUB3ZWIuZGUiLCJhY2NvdW50TmFtZSI6IkFydHVyX0FydHVyIiwiaWQiOiI3MjI1NTMwODIwIiwiZmlyZWJhc2VJZCI6IkNlSnBpNHFUeTRYUW5yTGh4cjlwZ1BpZUx3ajIiLCJsb2dpbldpdGhPdGhlciI6MTAsInVzZXJUeXBlIjoyODUsImxhbmd1YWdlIjoiZGUiLCJwb2xpY2llcyI6eyJpc1Rlcm1zVmVyc2lvbiI6dHJ1ZSwiaXNDb29raWVWZXJzaW9uIjp0cnVlLCJpc1ByaXZhY3lWZXJzaW9uIjp0cnVlfSwiaWF0IjoxNzI4NTY1NzE0fQ.oNENMRoOEy3R48GmKPkYYUOFJNVapD7S8N4xDSrIXho",
-                "origin: http://localhost:4200",
-                "priority: u=1, i",
-                "referer: http://localhost:4200/",
-                'sec-ch-ua: "Google Chrome";v="129", "Not=A?Brand";v="8", "Chromium";v="129"',
-                'sec-ch-ua-mobile: ?0',
-                'sec-ch-ua-platform: "Linux"',
-                'sec-fetch-dest: empty',
-                'sec-fetch-mode: cors',
-                'sec-fetch-site: cross-site',
-                'user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'
-            ],
-        ]);
+        // $curl = curl_init();
+        // curl_setopt_array($curl, [
+        //     CURLOPT_URL => "https://nominatim.openstreetmap.org/search?q=".$latitude.",".$longitude."&format=json&polygon=1",
+        //     CURLOPT_RETURNTRANSFER => true,
+        //     CURLOPT_ENCODING => "", // Allow all encodings
+        //     CURLOPT_MAXREDIRS => 10, // Maximum number of redirects
+        //     CURLOPT_TIMEOUT => 30, // Timeout after 30 seconds
+        //     CURLOPT_FOLLOWLOCATION => true, // Follow redirects
+        //     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        //     CURLOPT_CUSTOMREQUEST => "GET", // Use GET request
+        //     CURLOPT_HTTPHEADER => [
+        //         "accept: application/json",
+        //         "accept-language: en-GB,en-US;q=0.9,en;q=0.8",
+        //         "app-lang: en",
+        //         "authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im1vdG9yZnJlbnp5NUB3ZWIuZGUiLCJhY2NvdW50TmFtZSI6IkFydHVyX0FydHVyIiwiaWQiOiI3MjI1NTMwODIwIiwiZmlyZWJhc2VJZCI6IkNlSnBpNHFUeTRYUW5yTGh4cjlwZ1BpZUx3ajIiLCJsb2dpbldpdGhPdGhlciI6MTAsInVzZXJUeXBlIjoyODUsImxhbmd1YWdlIjoiZGUiLCJwb2xpY2llcyI6eyJpc1Rlcm1zVmVyc2lvbiI6dHJ1ZSwiaXNDb29raWVWZXJzaW9uIjp0cnVlLCJpc1ByaXZhY3lWZXJzaW9uIjp0cnVlfSwiaWF0IjoxNzI4NTY1NzE0fQ.oNENMRoOEy3R48GmKPkYYUOFJNVapD7S8N4xDSrIXho",
+        //         "origin: http://localhost:4200",
+        //         "priority: u=1, i",
+        //         "referer: http://localhost:4200/",
+        //         'sec-ch-ua: "Google Chrome";v="129", "Not=A?Brand";v="8", "Chromium";v="129"',
+        //         'sec-ch-ua-mobile: ?0',
+        //         'sec-ch-ua-platform: "Linux"',
+        //         'sec-fetch-dest: empty',
+        //         'sec-fetch-mode: cors',
+        //         'sec-fetch-site: cross-site',
+        //         'user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'
+        //     ],
+        // ]);
         
-        // Execute the request and get the response
-        $json = curl_exec($curl);
+        // // Execute the request and get the response
+        // $json = curl_exec($curl);
         
-        $results = json_decode($json, true);
-        if (!empty($results)) {
-            $addressline = $results[0]['display_name'];
-        }
-        return $addressline;
+        // $results = json_decode($json, true);
+        // if (!empty($results)) {
+        //     $addressline = $results[0]['display_name'];
+        // }
+        // return $addressline;
         // $addressline = UserLiveLocation::where('latitude','=',$latitude)->where('longitude','=',$longitude)->whereNotNull('address')->pluck('address')->first();
         
         // if(empty($addressline))
@@ -364,27 +364,27 @@ if (! function_exists('getLatLongToAddress')) {
                 
         //     }
         // } 
-        // $addressline = '';
-        // $queryString = http_build_query([
-        // //   'access_key' => 'd342b3255ee297b500728db66a690965',
-        // 'access_key' => 'cb11435aa9960016039084830621463b',  
+        $addressline = '';
+        $queryString = http_build_query([
+        //   'access_key' => 'd342b3255ee297b500728db66a690965',
+        'access_key' => 'cb11435aa9960016039084830621463b',  
 
-        //   'query' => "$latitude,$longitude",
-        //   'output' => 'json',
-        //   'limit' => 1,
-        // ]);
+          'query' => "$latitude,$longitude",
+          'output' => 'json',
+          'limit' => 1,
+        ]);
 
-        // $ch = curl_init(sprintf('%s?%s', 'http://api.positionstack.com/v1/reverse', $queryString));
-        // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        // $json = curl_exec($ch);
-        // curl_close($ch);
-        // $results = json_decode($json, true);
-        // if(!empty($results['data']))
-        // {
-        //     $addressline = $results['data'][0]['name'].', '.$results['data'][0]['county'].', '.$results['data'][0]['region'].', '.$results['data'][0]['postal_code'];
+        $ch = curl_init(sprintf('%s?%s', 'http://api.positionstack.com/v1/reverse', $queryString));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $json = curl_exec($ch);
+        curl_close($ch);
+        $results = json_decode($json, true);
+        if(!empty($results['data']))
+        {
+            $addressline = $results['data'][0]['name'].', '.$results['data'][0]['county'].', '.$results['data'][0]['region'].', '.$results['data'][0]['postal_code'];
             
-        // }
-        // return $addressline;
+        }
+        return $addressline;
     }
 }
 if (! function_exists('getLatLongToCity')) { 

@@ -31,6 +31,8 @@ use App\Models\TourDetail;
 use DateTime;
 use DatePeriod;
 use DateInterval;
+use Stevebauman\Location\Drivers\IpInfo;
+use Stevebauman\Location\Facades\Location;
 
 class AttendanceController extends Controller
 {
@@ -320,12 +322,17 @@ class AttendanceController extends Controller
   public function submitAttendances(Request $request)
   {
     try {
+      $ipAddress = $request->ip();
+      $accessToken = '4060dae74e438c';
+      $location = Location::get($ipAddress);
+      $addressP = getLatLongToAddress($location->latitude,$location->longitude);
       if (Attendance::updateOrCreate(['user_id' => $request['user_id'], 'punchin_date' => date('Y-m-d', strtotime($request['punchin_date']))], [
         'user_id' => $request['user_id'],
         'active' => 'Y',
         'punchin_date' => date('Y-m-d', strtotime($request['punchin_date'])),
         'punchin_time' => date('G:i', strtotime($request['punchin_date'])),
         'punchin_summary' => !empty($request['punchin_summary']) ? $request['punchin_summary'] : '',
+        'punchin_address' => !empty($addressP) ? $addressP : '',
         'working_type' => !empty($request['working_type']) ? $request['working_type'] : '',
         'created_at' => getcurentDateTime(),
         'updated_at' => getcurentDateTime(),

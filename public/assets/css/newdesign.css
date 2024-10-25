@@ -1408,3 +1408,8 @@ td.sorting {
     color: #363954;
     font-weight: 400;
 }
+
+.weekDays .input_section {
+    color: #0000008c;
+    font-size: 12px;
+}

@@ -620,7 +620,6 @@
                //url: "/getCategoryData",
                url: "{{url('/getPrimaryGroup')}}",
                success: function(data) {
-                  console.log(data);
                   var html = '<option value="">Select Group</option>';
                   $.each(data, function(k, v) {
                      html += '<option value="' + v + '">' + v + '</option>';

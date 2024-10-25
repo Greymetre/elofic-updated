@@ -1,4 +1,5 @@
 <x-app-layout>
+
   <div class="row">
     <div class="col-md-12">
       <div class="card">
@@ -12,7 +13,7 @@
                 @if(auth()->user()->can(['primary_scheme_report_download']))
                 <form method="POST" action="{{url('primary_scheme_report/download')}}">
                   @csrf
-                  <div class="d-flex flex-wrap flex-row">
+                  <div class="d-flex flex-wrap flex-row align-items-end">
                     <!-- Division filter -->
                     <div class="p-2" style="width:180px;">
                       <label for="division">Division</label>
@@ -60,7 +61,7 @@
                       </select>
                     </div>
                     <!-- Scheme filter -->
-                    <div class="p-2" style="width:180px;">
+                    <div class="p-2 new_see" style="width:180px;">
                       <label for="scheme_id">Primary Scheme</label>
                       <select class="select2" name="scheme_id[]" multiple id="scheme_id" data-style="select-with-transition" required title="panel.sales_users.branch">
                         <option value="" disabled>Primary Scheme</option>

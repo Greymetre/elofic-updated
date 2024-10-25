@@ -24,7 +24,9 @@ class LeaveController extends Controller
     {
         abort_if(Gate::denies('leave_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $all_reporting_user_ids = getUsersReportingToAuth();
-        $all_user_details = User::with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
+        $all_user_details = User::with('getbranch')->whereDoesntHave('roles', function ($query) {
+            $query->where('id', 29);
+        })->whereIn('id', $all_reporting_user_ids)->orderBy('branch_id')->get();
         $all_users = array();
         foreach ($all_user_details as $k => $val) {
             $users[$k]['id'] = $val->id;

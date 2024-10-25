@@ -59,28 +59,29 @@
                     <div class="p-2" style="width:160px;"><label for="start_date">Start Date</label><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
                     <div class="p-2" style="width:160px;"><label for="end_date">End Date</label><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
                     <div class="p-2">
-                      <label for="">Download</label><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Transaction"><i class="material-icons">cloud_download</i></button></div>
+                      <label for="">Download</label><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Transaction"><i class="material-icons">cloud_download</i></button>
+                    </div>
                   </div>
                 </form>
                 @endif
                 <div class="next-btn">
-                      <div class="p-2" style="width:160px;">
-                        <select class="select2" name="customer_id" id="customer_id" data-style="select-with-transition" title="Select">
-                          <option value="">First Name</option>
-                          @if(@isset($customers))
-                          @foreach($customers as $customer)
-                          <!-- <option value="{!! $customer->id !!}">{!! $customer->_name !!}</option> -->
-                          <option value="{!! $customer['id'] !!}" {{ old( 'executive_id') == $customer->id ? 'selected' : '' }}>{!! $customer['name'] !!}</option>
-                          @endforeach
-                          @endif
-                        </select>
-                      </div>
+                  <div class="p-2" style="width:160px;">
+                    <select class="select2" name="customer_id" id="customer_id" data-style="select-with-transition" title="Select">
+                      <option value="">First Name</option>
+                      @if(@isset($customers))
+                      @foreach($customers as $customer)
+                      <!-- <option value="{!! $customer->id !!}">{!! $customer->_name !!}</option> -->
+                      <option value="{!! $customer['id'] !!}" {{ old( 'executive_id') == $customer->id ? 'selected' : '' }}>{!! $customer['name'] !!}</option>
+                      @endforeach
+                      @endif
+                    </select>
+                  </div>
                   @if(auth()->user()->can(['transaction_history_upload']))
                   <form action="{{ URL::to('transaction_history_upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                     {{ csrf_field() }}
-                   
+
                     <div class="d-flex">
-                      
+
                       <div class="fileinput-new text-center" data-provides="fileinput">
                         <span class="btn btn-just-icon btn-theme btn-file">
                           <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
@@ -222,7 +223,7 @@
               d.start_date = $('#start_date').val(),
               d.end_date = $('#end_date').val(),
               d.customer_id = $('#customer_id').val()
-              d.designation = $('#designation').val()
+            d.designation = $('#designation').val()
           }
         },
         columns: [{
@@ -387,24 +388,6 @@
         multiple: true,
         allowClear: true,
         ajax: {
-          url: "{{ route('getCustomerDataSelect') }}",
-          dataType: 'json',
-          delay: 250,
-          data: function(params) {
-            return {
-              term: params.term || '',
-              page: params.page || 1
-            }
-          },
-          cache: true
-        }
-      }).trigger('change');
-
-        $('#branch_id').select2({
-        placeholder: 'Select...',
-        multiple: true,
-         allowClear: true,
-       ajax: {
           url: "{{ route('getCustomerDataSelect') }}",
           dataType: 'json',
           delay: 250,
