@@ -108,7 +108,7 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
 
         if (!empty($data['customer']['getemployeedetail'])) {
             foreach ($data['customer']['getemployeedetail'] as $key_new => $datas) {
-                if($this->designation && !empty($this->designation)){
+                if($this->designation && !empty($this->designation) && $datas->employee_detail && !empty($datas->employee_detail)){
                     if($datas->employee_detail->designation_id == $this->designation){
                         $employee[] = isset($datas->employee_detail->name) ? $datas->employee_detail->name : '';
                         $employee_id[] = isset($datas->user_id) ? $datas->user_id : '';

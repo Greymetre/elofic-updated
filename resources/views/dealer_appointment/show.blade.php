@@ -279,7 +279,7 @@
                     <label for="old_user">Are you already working on another division of <b>Silver/Bediya</b>? </label>
                   </div>
                   <div class="col-md-6">
-                    <select class="form-select select2" disabled name="old_user" id="old_user" required>
+                    <select class="form-control" disabled name="old_user" id="old_user" required>
                       <option value="" disabled selected>Your Answer</option>
                       <option value="Yes" {{($dealerAppointment->old_user == 'Yes')?'selected':''}}>Yes</option>
                       <option value="No" {{($dealerAppointment->old_user == 'No')?'selected':''}}>No</option>
@@ -296,9 +296,9 @@
                     <label for="old_division">Select devision </label>
                   </div>
                   <div class="col-md-7">
-                    <select class="form-select" disabled name="old_division" id="old_division" required>
+                    <select class="form-control" disabled name="old_division" id="old_division" required>
                       <option value="" disabled selected>Your Answer</option>
-                      <option value="PUMP&MOTORS" {{($dealerAppointment->old_division == 'PUMPMOTORS')?'selected':''}}>PUMP & MOTORS</option>
+                      <option value="PUMP&MOTORS" {{($dealerAppointment->old_division == 'PUMP&MOTORS')?'selected':''}}>PUMP & MOTORS</option>
                       <option value="FAN&APP" {{($dealerAppointment->old_division == 'FAN&APP')?'selected':''}}>FAN & APP</option>
                       <option value="AGRI" {{($dealerAppointment->old_division == 'AGRI')?'selected':''}}>AGRI</option>
                       <option value="SOLAR" {{($dealerAppointment->old_division == 'SOLAR')?'selected':''}}>SOLAR</option>
@@ -367,6 +367,13 @@
                   <label class="form-check-label" for="Others"> Others </label>
                   <input disabled class="form-check-input" type="radio" name="division" id="Others" value="Others" {{($dealerAppointment->division == 'Others')?'checked':''}}>
                 </div>
+              </div>
+            </div>
+
+            <div class="row mt-4 d-none" id="parent-div">
+              <div class="col-md-4">
+              <label class="form-check-label" for="Others"> Parent Customer </label>
+                <input type="text" value="{{$dealerAppointment->parent?$dealerAppointment->parent->name:''}}" class="form-control" name="parent_id" disabled>
               </div>
             </div>
 
@@ -1162,6 +1169,18 @@
             });
           }
         }
+
+        $('input[name="division"]').change(function() {
+          var selectedType = $('input[name="customertype"]:checked').val();
+          var selectedDivision = $('input[name="division"]:checked').val();
+          console.log(selectedType, selectedDivision);
+
+          if (selectedDivision == 'AGRI' && selectedType == 'dealer') {
+            $("#parent-div").removeClass('d-none');
+          } else {
+            $("#parent-div").addClass('d-none');
+          }
+        }).trigger('change');
       </script>
 
 </x-app-layout>

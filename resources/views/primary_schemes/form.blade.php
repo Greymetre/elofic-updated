@@ -541,7 +541,7 @@
             if (schemetype == 'grp_Qty') {
                var newRow =
                   '<tr> <td>' + counter + '</td>' +
-                  '<td class="group" style="width:30%"><div class="input_section"><select required name="groups[]' + counter + '" class="form-control  set_cat_' + counter + ' group_drop rowchange"></select></td>' +
+                  '<td class="group" style="width:30%"><div class="input_section"><select required name="groups[]' + counter + '" class="form-control select2  set_cat_' + counter + ' group_drop rowchange"></select></td>' +
                   '<td style="width:30%" class="subCat"><div class="input_section"><input type="number" name="min[]' + counter + '" class="form-control  set_min_' + counter + '"></div></td>' +
                   '<td style="width:30%"><div class="input_section"><input type="number" name="max[]' + counter + '" class="form-control  set_max_' + counter + '"></div></td>' +
                   '<td><div class="input_section"><input required type="number" name="points[]' + counter + '"class="form-control points rowchange" /></div></td>' +
@@ -625,6 +625,7 @@
                      html += '<option value="' + v + '">' + v + '</option>';
                   });
                   $('.set_cat_' + counter).html(html);
+                  $('.select2').select2();
                }
             });
          } else {

@@ -74,10 +74,12 @@ class MobileAppLoginUsersExport implements FromCollection, WithHeadings, ShouldA
             }
         }
         $all_assign_emp = array();
-        if(count($data['customer']['getemployeedetail']) > 0){
+        if (count($data['customer']['getemployeedetail']) > 0) {
             foreach ($data['customer']['getemployeedetail'] as $key => $value) {
-                if($value->employee_detail->designation_id == $this->designation){
-                    array_push($all_assign_emp, $value->employee_detail->name);
+                if ($this->designation && !empty($this->designation) && $value->employee_detail && !empty($value->employee_detail)) {
+                    if ($value->employee_detail->designation_id == $this->designation) {
+                        array_push($all_assign_emp, $value->employee_detail->name);
+                    }
                 }
             }
         }
@@ -88,16 +90,16 @@ class MobileAppLoginUsersExport implements FromCollection, WithHeadings, ShouldA
             isset($data['customer']['first_name']) ? $data['customer']['first_name'] : '',
             isset($data['customer']['mobile']) ? $data['customer']['mobile'] : '',
             implode(',', $branch_arr),
-            isset($data['customer']['customeraddress']) ? ($data['customer']['customeraddress']['statename']?$data['customer']['customeraddress']['statename']['state_name']:'') : '',
-            isset($data['customer']['customeraddress']) ? ($data['customer']['customeraddress']['districtname']?$data['customer']['customeraddress']['districtname']['district_name']:'') : '',
-            isset($data['customer']['customeraddress']) ? ($data['customer']['customeraddress']['cityname']?$data['customer']['customeraddress']['cityname']['city_name']:'') : '',
+            isset($data['customer']['customeraddress']) ? ($data['customer']['customeraddress']['statename'] ? $data['customer']['customeraddress']['statename']['state_name'] : '') : '',
+            isset($data['customer']['customeraddress']) ? ($data['customer']['customeraddress']['districtname'] ? $data['customer']['customeraddress']['districtname']['district_name'] : '') : '',
+            isset($data['customer']['customeraddress']) ? ($data['customer']['customeraddress']['cityname'] ? $data['customer']['customeraddress']['cityname']['city_name'] : '') : '',
             isset($data['app_version']) ? $data['app_version'] : '',
             isset($data['device_type']) ? $data['device_type'] : '',
             isset($data['device_name']) ? $data['device_name'] : '',
             isset($data['first_login_date']) ? date('Y-m-d', strtotime($data['first_login_date'])) : '',
             isset($data['last_login_date']) ? date('Y-m-d', strtotime($data['last_login_date'])) : '',
             isset($data['login_status']) ? ($data['login_status'] == '0' ? 'Logout' : 'Login') : '',
-            count($all_assign_emp)>0?implode(',', $all_assign_emp):'-',
+            count($all_assign_emp) > 0 ? implode(',', $all_assign_emp) : '-',
         ];
     }
 

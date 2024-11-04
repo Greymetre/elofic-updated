@@ -138,8 +138,8 @@
                },
                cache: true
             }
-         }).trigger('change');
-      }, 1000);
+         });
+      }, 2000);
 
    </script>
 </x-app-layout>
