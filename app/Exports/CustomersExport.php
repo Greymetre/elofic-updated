@@ -70,7 +70,8 @@ class CustomersExport implements FromCollection,WithHeadings,ShouldAutoSize,With
                                  
                                 if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
                                 {
-                                    $query->whereIn('executive_id',$userids);
+                                    $query->whereIn('executive_id',$this->userids)
+                                    ->orWhereIn('created_by',$this->userids);
                                 }
 
                                 if($this->active)

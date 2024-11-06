@@ -35,7 +35,13 @@ class NewDealerSaleExport implements FromCollection, WithHeadings, WithMapping, 
     {
         $currentDate = Carbon::now();
         $firstDateOfApril = Carbon::createFromDate(null, 4, 1)->startOfDay()->toDateString();
-        $new_dealers = Customers::where('creation_date', '>=', $firstDateOfApril)->pluck('id');
+        if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+            $userids = getUsersReportingToAuth();
+            $customer_ids = Customers::whereIn('executive_id', $userids)->orWhereIn('created_by', $userids)->pluck('id');
+            $new_dealers = Customers::where('creation_date', '>=', $firstDateOfApril)->whereIn('id', $customer_ids)->pluck('id');
+        } else {
+            $new_dealers = Customers::where('creation_date', '>=', $firstDateOfApril)->pluck('id');
+        }
         DB::statement("SET SESSION group_concat_max_len = 10000000");
         $query = PrimarySales::with('customer')->select(
             'dealer',
@@ -251,23 +257,23 @@ class NewDealerSaleExport implements FromCollection, WithHeadings, WithMapping, 
         $response[5 + $indx] = $data->total_net_amounts > 0 ? number_format(($data->total_net_amounts / 100000), 2, '.', '') : "0";
 
         $sales = number_format(($data->total_net_amounts / 100000), 2, '.', '');
-                if($sales > 0 && $sales < 2){
-                    $response[6 + $indx] =  '0L-2L';
-                }elseif($sales >= 2 && $sales < 5){
-                    $response[6 + $indx] =  '2L-5L';
-                }elseif($sales >= 5 && $sales < 10){
-                    $response[6 + $indx] =  '5L-10L';
-                }elseif($sales >= 10 && $sales < 15){
-                    $response[6 + $indx] =  '10L-15L';
-                }elseif($sales >= 15 && $sales < 25){
-                    $response[6 + $indx] =  '15L-25L';
-                }elseif($sales >= 25 && $sales < 75){
-                    $response[6 + $indx] =  '25L-75L';
-                }elseif($sales >= 75 && $sales < 100){
-                    $response[6 + $indx] =  '75L-1Cr';
-                }elseif($sales >= 100){
-                    $response[6 + $indx] =  '1Cr Plus';
-                }
+        if ($sales > 0 && $sales < 2) {
+            $response[6 + $indx] =  '0L-2L';
+        } elseif ($sales >= 2 && $sales < 5) {
+            $response[6 + $indx] =  '2L-5L';
+        } elseif ($sales >= 5 && $sales < 10) {
+            $response[6 + $indx] =  '5L-10L';
+        } elseif ($sales >= 10 && $sales < 15) {
+            $response[6 + $indx] =  '10L-15L';
+        } elseif ($sales >= 15 && $sales < 25) {
+            $response[6 + $indx] =  '15L-25L';
+        } elseif ($sales >= 25 && $sales < 75) {
+            $response[6 + $indx] =  '25L-75L';
+        } elseif ($sales >= 75 && $sales < 100) {
+            $response[6 + $indx] =  '75L-1Cr';
+        } elseif ($sales >= 100) {
+            $response[6 + $indx] =  '1Cr Plus';
+        }
 
         return $response;
     }

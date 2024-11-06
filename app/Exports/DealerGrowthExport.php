@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Models\Customers;
 use App\Models\PrimarySales;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -37,6 +38,7 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
         DB::statement("SET SESSION group_concat_max_len = 100000000");
         $query = PrimarySales::with('user')->select(
             'dealer',
+            'customer_id',
             'final_branch',
             'city',
             'emp_code',
@@ -51,6 +53,12 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
             DB::raw('0 as last_year_division_array'),
             DB::raw('0 as last_year_invoice_date_array'),
         );
+
+        if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+            $userids = getUsersReportingToAuth();
+            $customer_ids = Customers::whereIn('executive_id', $userids)->orWhereIn('created_by', $userids)->pluck('id');
+            $query->whereIn('customer_id', $customer_ids);
+        }
 
         // Determine the financial year date range
         if ($this->month && is_array($this->month) && count($this->month) > 0 && $this->financial_year && !empty($this->financial_year)) {
@@ -131,7 +139,7 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
         }
 
         // Grouping and ordering
-        $query->whereIn('division', ['PUMP', 'MOTOR'])->groupBy('dealer', 'final_branch', 'city', 'emp_code');
+        $query->whereIn('division', ['PUMP', 'MOTOR'])->groupBy('dealer', 'customer_id', 'final_branch', 'city', 'emp_code');
 
         // Execute the primary query
         $results = $query->get();

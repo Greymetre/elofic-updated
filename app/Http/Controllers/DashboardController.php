@@ -40,7 +40,7 @@ class DashboardController extends Controller
         $dealers_and_distibutors = Customers::where('customertype', [3, 4])->get();
         $users = User::latest()->get();
         $products = Product::latest()->get()->unique('model_no');
-        
+
         $ps_branches = PrimarySales::select('final_branch')->distinct()->get();
         $ps_divisions = PrimarySales::select('division')->distinct()->get();
         $ps_months = PrimarySales::select('month')->distinct()->get();
@@ -49,7 +49,7 @@ class DashboardController extends Controller
         $ps_product_models = PrimarySales::select('product_name')->distinct()->get();
         $ps_sales_persons = PrimarySales::select('sales_person')->distinct()->get();
         // dd('sssssssssssss');
-        
+
         $userData = TransactionHistory::select(
             DB::raw('YEAR(max_date) as year'),
             DB::raw('MONTH(max_date) as month'),
@@ -853,6 +853,14 @@ class DashboardController extends Controller
     {
 
         $query = OrderDetails::with(['orders', 'orders.sellers', 'orders.buyers', 'orders.createdbyname', 'orders.getuserdetails.getdivision', 'orders.buyers.customeraddress.cityname', 'orders.buyers.customeraddress.statename', 'products', 'products.productpriceinfo', 'orders.getuserdetails.getbranch', 'orders.sellers.customeraddress.cityname', 'orders.createdbyname.getbranch', 'orders.createdbyname.getbranch'])->where(function ($query) use ($request) {
+            $query->whereHas('orders', function ($q) {
+                if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                    $userids = getUsersReportingToAuth();
+                    $customer_ids = Customers::whereIn('executive_id', $userids)->orWhereIn('created_by', $userids)->pluck('id');
+                    $q->whereIn('buyer_id', $customer_ids)
+                        ->orWhereIn('seller_id', $customer_ids);
+                }
+            });
 
             if ($request->month && $request->month != '' && $request->month != null && $request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
 
@@ -1200,14 +1208,14 @@ class DashboardController extends Controller
 
             if (in_array('Jan', $request->month) || in_array('Feb', $request->month) || in_array('Mar', $request->month)) {
                 $currentYear = $f_year_array[1];
-                $monthNumbers = array_map(function($month) {
+                $monthNumbers = array_map(function ($month) {
                     return Carbon::parse($month)->month;
                 }, $request->month);
-            
+
                 // Get the first month number and the last month number
                 $firstMonthNumber = min($monthNumbers);
                 $lastMonthNumber = max($monthNumbers);
-            
+
                 // Create Carbon instances for the first and last dates
                 $firstDate = Carbon::createFromDate($currentYear, $firstMonthNumber, 1)->startOfMonth();
                 $lastDate = Carbon::createFromDate($currentYear, $lastMonthNumber, 1)->endOfMonth();
@@ -1215,14 +1223,14 @@ class DashboardController extends Controller
                 $endDateFormatted = $lastDate->toDateString();
             } else {
                 $currentYear = $f_year_array[0];
-                $monthNumbers = array_map(function($month) {
+                $monthNumbers = array_map(function ($month) {
                     return Carbon::parse($month)->month;
                 }, $request->month);
-            
+
                 // Get the first month number and the last month number
                 $firstMonthNumber = min($monthNumbers);
                 $lastMonthNumber = max($monthNumbers);
-            
+
                 // Create Carbon instances for the first and last dates
                 $firstDate = Carbon::createFromDate($currentYear, $firstMonthNumber, 1)->startOfMonth();
                 $lastDate = Carbon::createFromDate($currentYear, $lastMonthNumber, 1)->endOfMonth();
@@ -1238,8 +1246,8 @@ class DashboardController extends Controller
 
         return Datatables::of($query)
             ->addIndexColumn()
-            ->addColumn('invoice_date', function($query){
-                return date('d/M/Y',strtotime($query->invoice_date));
+            ->addColumn('invoice_date', function ($query) {
+                return date('d/M/Y', strtotime($query->invoice_date));
             })
             ->rawColumns(['invoice_date'])
             ->make(true);
