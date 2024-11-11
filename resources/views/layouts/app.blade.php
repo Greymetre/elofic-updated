@@ -1056,6 +1056,15 @@
                               </a>
                            </li>
                            @endif
+                           @if(auth()->user()->can('primary_scheme_report'))
+                           <li class="nav-item-btn {{ request()->is('primary_scheme_report') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('primary_scheme_report') }}">
+                                 <i class="material-icons icon">holiday_village</i>
+                                 <span> Primary Scheme Report</span>
+                                 <div class="d-none mobile_hide"> Primary Scheme Report</div>
+                              </a>
+                           </li>
+                           @endif
                         </ul>
                      </div>
                   </li>
@@ -2175,8 +2184,10 @@
       <!-- Navbar -->
       <nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top ">
          <div class="container-fluid  p-2" style="background: transparent; !important">
+            <div class="new_demo">
             <img class="rounded ml-2 iconimg" src="{!! url('/').'/'.asset('assets/img/bediya.jpg') !!}" width="100">
             <img class="rounded ml-2  iconimg" src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" width="100">
+         </div>
             <!-- <img src="{!! url('/').'/'.asset('assets/img/logo.png') !!}" width="50"> -->
             <div class="navbar-wrapper">
                <div class="navbar-minimize">

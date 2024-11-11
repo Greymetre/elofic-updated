@@ -706,6 +706,23 @@
           cache: true
         }
       }).trigger('change');
+       $('#branch_id').select2({
+        placeholder: 'Please Select...',
+        multiple: true,
+        allowClear: true,
+        ajax: {
+          url: "{{ route('getCustomerDataSelect') }}",
+          dataType: 'json',
+          delay: 250,
+          data: function(params) {
+            return {
+              term: params.term || '',
+              page: params.page || 1
+            }
+          },
+          cache: true
+        }
+      }).trigger('change');
     }, 1000);
   </script>
 </x-app-layout>

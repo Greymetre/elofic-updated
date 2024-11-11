@@ -47,11 +47,11 @@ class Order extends Model
             $created_at = getcurentDateTime();
             $request['orderno'] = !empty($request['orderno']) ? $request['orderno'] : date('Y').'_'.$request['seller_id'].'_'.autoIncrementId('Order','id');
 
-                 // if(!empty($request['buyer_id'])){
-                 //   $buyer = $request['buyer_id'];
-                 //   }else{
-                 //    $buyer = $request['seller_id'];
-                 //   }
+                //  if(!empty($request['buyer_id'])){
+                //    $buyer = $request['buyer_id'];
+                //    }else{
+                //     $buyer = $request['seller_id'];
+                //    }
 
             if( $order_id = Order::insertGetId([
                 'active' => 'Y',

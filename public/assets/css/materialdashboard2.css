@@ -13572,9 +13572,40 @@ a[data-toggle=collapse][aria-expanded=true] .caret,a[aria-expanded=true] .caret,
 .dropdown-menu.bootstrap-datetimepicker-widget.open {
     opacity: 1;
     transform: scale(1);
-    top: 0
+    top: 30px  !important;
 }
 
+.bootstrap-datetimepicker-widget  td span.glyphicon{
+    display: inline-block;
+    font: normal normal normal 14px / 1 FontAwesome;
+    font-size: inherit;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transform: translate(0, 0);
+}
+
+
+.bootstrap-datetimepicker-widget .picker-switch td span.glyphicon-time:before {
+        content: "\f017";
+        color: #14649d;
+    font-weight: 800;
+    font-size: 20px;
+}
+.bootstrap-datetimepicker-widget .timepicker-picker span.glyphicon.glyphicon-chevron-down:before{
+  content: "\f063";
+        color: #fff;
+    font-weight: 800;
+    font-size: 20px;
+}
+
+.bootstrap-datetimepicker-widget .timepicker-picker td  span.glyphicon-chevron-up:before{
+  content: "\f062";
+        color: #fff;
+    font-weight: 800;
+    font-size: 20px;
+
+}
 .progress {
     height: 4px;
     border-radius: 0;
@@ -15275,7 +15306,7 @@ form .checkbox-radios {
 @media all and (max-width: 991px) {
     .card .card-body .col-form-label,.card .card-body .label-on-right {
         text-align:left;
-        padding-left: 15px;
+        padding-left: 0px;
         padding-top: 8px
     }
 }
@@ -22416,10 +22447,10 @@ svg {
     cursor: not-allowed
 }
 
-.bootstrap-datetimepicker-widget table td span {
+body .bootstrap-datetimepicker-widget table td span {
     display: inline-block;
-    width: 40px;
-    height: 40px;
+    width: 22px;
+    height: 2px;
     line-height: 40px;
     margin: 3px;
     cursor: pointer;
@@ -22427,8 +22458,15 @@ svg {
     text-align: center
 }
 
+
+/*.bootstrap-datetimepicker-widget a:focus, .bootstrap-datetimepicker-widget a:active,.bootstrap-datetimepicker-widget a:hover{
+  background: transparent !important;
+  
+}*/
+
+}
 .bootstrap-datetimepicker-widget table td span:hover {
-    background: #eee
+    background: transparent !important;
 }
 
 .bootstrap-datetimepicker-widget table td span.active {
@@ -26667,6 +26705,13 @@ li.nav-link.hide_icon a:after {
     border-radius: 0;
     font-size: 14px;
     text-align: left;
+/*        overflow-y: overlay;*/
+    /* display: flex !important; */
+    flex-wrap: wrap-reverse;
+    flex-wrap: inherit;
+    overflow-x: auto !important;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 
@@ -26910,10 +26955,46 @@ th.lenth_text {
     min-width: 200px;
 }
 .dropdown.bootstrap-select.show .dropdown-menu.show {
+<<<<<<< HEAD
     z-index: 99999;
+=======
+    z-index: 9999999 !important;
+>>>>>>> b68dd0aad605bc4dc638f53450281ed2f5f342c8
 }
 
 
 form#storeLoyaltyAppSetting .img-div {
     margin-bottom: 15px;
+<<<<<<< HEAD
+=======
+}
+
+
+
+@media(max-width: 996px) {
+
+body .select2-container--open .select2-dropdown--below{
+    width: 100% !important;
+}
+
+body table.dataTable.dtr-inline.collapsed > tbody > tr[role="row"] > td:first-child:before,body  table.dataTable.dtr-inline.collapsed > tbody > tr[role="row"] > th:first-child:before {
+    top: 60%;
+    left: 95%;
+}
+
+body .d-flex.flex-row {
+    flex-flow: wrap !important;
+}
+
+body .table thead tr th {
+    white-space: pre;
+}
+}
+
+
+.p-2.new_see .select2-container--default .select2-selection--multiple .select2-selection__choice{
+    width: 100%;
+    /* text-align: center; */
+    max-width: 102px;
+>>>>>>> b68dd0aad605bc4dc638f53450281ed2f5f342c8
 }

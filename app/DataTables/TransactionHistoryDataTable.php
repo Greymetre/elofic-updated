@@ -81,7 +81,7 @@ class TransactionHistoryDataTable extends DataTable
     public function query(TransactionHistory $model, Request $request)
     {
 
-        $data = $model->with('customer', 'scheme');
+        $data = $model->with('customer', 'scheme', 'scheme_details');
         $userids = getUsersReportingToAuth();
         if ($request->branch_id && $request->branch_id != null && count($request->branch_id) > 0) {
             $branch_user_id = User::whereIn('branch_id', $request['branch_id'])->whereIn('id', $userids)->pluck('id');
@@ -107,13 +107,9 @@ class TransactionHistoryDataTable extends DataTable
             }
         }
         if ($request->scheme_name && $request->scheme_name != null  && $request->scheme_name != '') {
-            $scheme_details = SchemeDetails::with('products')->where('scheme_id', $request->scheme_name)->get();
-            $all_product_code = $scheme_details->pluck('products.product_code')->flatten()->unique();
-            $all_serial_number = Services::whereIn('product_code', $all_product_code)->pluck('serial_no');
-
-            if (!empty($all_serial_number)) {
-                $data->whereIn('coupen_code', $all_serial_number);
-            }
+            $data->whereHas('scheme_details', function ($query) {
+                $query->where('id', 'LIKE', '%' . $this->scheme_name . '%');
+            });
         }
         if ($request->start_date && $request->start_date != null && $request->start_date != '' && $request->end_date && $request->end_date != null && $request->end_date != '') {
             $startDate = date('Y-m-d', strtotime($request->start_date));

@@ -567,7 +567,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="form-check">
-                        <label class="form-check-label" for="SERVECE"> SERVECE </label>
+                        <label class="form-check-label" for="SERVECE"> SERVICE </label>
                         <input required class="form-check-input" type="radio" name="division" id="SERVECE" value="SERVECE">
                     </div>
                 </div>
@@ -576,6 +576,12 @@
                         <label class="form-check-label" for="Others"> Others </label>
                         <input required class="form-check-input" type="radio" name="division" id="Others" value="Others">
                     </div>
+                </div>
+            </div>
+
+            <div class="row mt-4 d-none" id="parent-div">
+                <div class="col-md-4">
+                    <select name="parent_id" id="parent_id" class="select2 form-control"></select>
                 </div>
             </div>
 
@@ -1329,20 +1335,49 @@
                 $('.file-input').on('change', function() {
                     var inpDiv = $(this).closest('.inp-div');
                     if (this.files && this.files.length > 0) {
-                        inpDiv.css('background-color', '#80ec759e'); 
+                        inpDiv.css('background-color', '#80ec759e');
                     } else {
-                        inpDiv.css('background-color', ''); 
+                        inpDiv.css('background-color', '');
                     }
                 });
                 $('input[name="customertype"]').change(function() {
-                    var selectedType = $(this).val(); 
-                    if(selectedType == 'dealer'){
+                    var selectedType = $(this).val();
+                    if (selectedType == 'dealer') {
                         document.getElementById("asda").value = '25000';
-                    }else{
+                    } else {
                         document.getElementById("asda").value = '100000';
                     }
                 });
+                    $('input[name="division"]').change(function() {
+                        var selectedType = $('input[name="customertype"]:checked').val();
+                        var selectedDivision = $(this).val();
+                        
+                        if (selectedDivision == 'AGRI' && selectedType == 'dealer') {
+                            $("#parent-div").removeClass('d-none');
+                        } else {
+                            $("#parent-div").addClass('d-none');
+                        }
+                    });
             });
+
+            setTimeout(() => {
+                var $customerSelect = $('#parent_id').select2({
+                    placeholder: 'Select Parent',
+                    allowClear: true,
+                    ajax: {
+                        url: "{{ route('getDealerDisDataSelect') }}",
+                        dataType: 'json',
+                        delay: 250,
+                        data: function(params) {
+                            return {
+                                term: params.term || '',
+                                page: params.page || 1
+                            }
+                        },
+                        cache: true
+                    }
+                });
+            }, 1500);
         </script>
 </body>
 

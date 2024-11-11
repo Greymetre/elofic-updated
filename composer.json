@@ -11,6 +11,7 @@
         "edujugon/push-notification": "^5.4",
         "guzzlehttp/guzzle": "^7.2",
         "intervention/image": "^2.7",
+        "ipinfo/ipinfo": "^3.1",
         "jenssegers/agent": "^2.6",
         "kreait/laravel-firebase": "^5.8",
         "laravel/framework": "^9.19",

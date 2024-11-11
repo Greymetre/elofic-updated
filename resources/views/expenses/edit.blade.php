@@ -2,8 +2,8 @@
 
   <div class="row">
     <div class="col-md-12">
-      <div class="card mt-0 pt-0">
-        <div class="card-header m-0 card-header-icon card-header-theme">
+      <div class="card">
+        <div class="card-header card-header-icon card-header-theme">
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
@@ -55,7 +55,11 @@
                         {{ $errors->first('user_id') }}
                       </div>
                       @endif
+<<<<<<< HEAD
               
+=======
+                
+>>>>>>> b68dd0aad605bc4dc638f53450281ed2f5f342c8
                   </div>
                 </div>
               </div>
@@ -63,7 +67,11 @@
               <div class="col-md-6">
                 <div class="input_section">
                   <label class="col-form-label">{{ trans('panel.expenses.fields.date') }}<span class="text-danger"> *</span></label>
+<<<<<<< HEAD
               
+=======
+                 
+>>>>>>> b68dd0aad605bc4dc638f53450281ed2f5f342c8
                     <div class="form-group has-default bmd-form-group">
                       <input placeholder="Expenses date" class="form-control {{ $errors->has('date') ? 'is-invalid' : '' }} datepicker" type="text" name="date" id="date" value="{{ old('date', $expense->date??'') }}" maxlength="200" required autocomplete="off">
                       @if($errors->has('date'))
@@ -80,7 +88,11 @@
               <div class="col-md-6">
                 <div class="input_section">
                   <label class="col-form-label">{{ trans('panel.expenses.fields.expense_type') }}<span class="text-danger"> *</span></label>
+<<<<<<< HEAD
                
+=======
+                  
+>>>>>>> b68dd0aad605bc4dc638f53450281ed2f5f342c8
                     <div class="form-group has-default bmd-form-group">
                       <select name="expenses_type" id="expenses_type" class="form-control {{ $errors->has('expenses_type') ? 'is-invalid' : '' }} select2">
                         <!-- <option value="" disabled selected>Please Select Expenses Type</option> -->
@@ -94,7 +106,11 @@
                       </div>
                       @endif
                     </div>
+<<<<<<< HEAD
                  
+=======
+                
+>>>>>>> b68dd0aad605bc4dc638f53450281ed2f5f342c8
                 </div>
 
               <input type="text" name="expenses_types" value="{{$expense->expenses_type??''}}" id="expenses_type_id" hidden>
@@ -108,7 +124,11 @@
               <div class="col-md-6 km" style="display:none;">
                 <div class="input_section">
                   <label class="col-form-label">{{ trans('panel.expenses.fields.rate') }}<span class="text-danger"> *</span></label>
+<<<<<<< HEAD
                   
+=======
+            
+>>>>>>> b68dd0aad605bc4dc638f53450281ed2f5f342c8
                     <div class="form-group has-default bmd-form-group">
                       <input placeholder="Rate" class="form-control {{ $errors->has('rate') ? 'is-invalid' : '' }}  rate" type="text" name="rate" id="rate" value="{{ old('rate', '') }}"  autocomplete="off">
                       @if($errors->has('rate'))
@@ -117,15 +137,24 @@
                       </div>
                       @endif
                     </div>
+<<<<<<< HEAD
                   </div>
                
+=======
+                 
+                </div>
+>>>>>>> b68dd0aad605bc4dc638f53450281ed2f5f342c8
               </div>
 
 
               <div class="col-md-6 km" style="display:none;">
                 <div class="input_section">
                   <label class="col-form-label">{{ trans('panel.expenses.fields.start_km') }}<span class="text-danger"> *</span></label>
+<<<<<<< HEAD
                   
+=======
+                 
+>>>>>>> b68dd0aad605bc4dc638f53450281ed2f5f342c8
                     <div class="form-group has-default bmd-form-group">
                       <input placeholder="Start Km" class="form-control {{ $errors->has('start_km') ? 'is-invalid' : '' }} calcu" type="text" name="start_km" id="start_km" value="{{ old('start_km',  $expense->start_km??'') }}" maxlength="200" autocomplete="off">
                       @if($errors->has('start_km'))
@@ -141,7 +170,11 @@
               <div class="col-md-6 km" style="display:none;">
                 <div class="input_section">
                   <label class="col-form-label">{{ trans('panel.expenses.fields.stop_km') }}<span class="text-danger"> *</span></label>
+<<<<<<< HEAD
                  
+=======
+                
+>>>>>>> b68dd0aad605bc4dc638f53450281ed2f5f342c8
                     <div class="form-group has-default bmd-form-group">
                       <input placeholder="Stop Km" class="form-control {{ $errors->has('stop_km') ? 'is-invalid' : '' }} calcu" type="text" name="stop_km" id="stop_km" value="{{ old('stop_km', $expense->stop_km??'') }}" maxlength="200" autocomplete="off">
                       @if($errors->has('stop_km'))
@@ -149,8 +182,13 @@
                         {{ $errors->first('stop_km') }}
                       </div>
                       @endif
+<<<<<<< HEAD
                     </div>
                   
+=======
+               
+                  </div>
+>>>>>>> b68dd0aad605bc4dc638f53450281ed2f5f342c8
                 </div>
               </div>
               <div class="col-md-6 km" style="display:none;">
@@ -164,8 +202,13 @@
                         {{ $errors->first('total_km') }}
                       </div>
                       @endif
+<<<<<<< HEAD
                    
                   </div>
+=======
+                    </div>
+                
+>>>>>>> b68dd0aad605bc4dc638f53450281ed2f5f342c8
                 </div>
               </div>
 
@@ -182,14 +225,22 @@
                       </div>
                       @endif
                     </div>
+<<<<<<< HEAD
                   
+=======
+                 
+>>>>>>> b68dd0aad605bc4dc638f53450281ed2f5f342c8
                 </div>
               </div>
 
               <div class="col-md-6">
                 <div class="input_section">
                   <label class="col-form-label">{{ trans('panel.expenses.fields.note') }}<span class="text-danger"> *</span></label>
+<<<<<<< HEAD
                  
+=======
+               
+>>>>>>> b68dd0aad605bc4dc638f53450281ed2f5f342c8
                     <div class="form-group has-default bmd-form-group">
                       <input placeholder="Note" class="form-control {{ $errors->has('note') ? 'is-invalid' : '' }} " type="text" name="note" id="note" value="{{ old('note', $expense->note??'') }}"  required autocomplete="off">
                       @if($errors->has('note'))
@@ -197,15 +248,24 @@
                         {{ $errors->first('note') }}
                       </div>
                       @endif
+<<<<<<< HEAD
                     </div>
                  
+=======
+                 
+                  </div>
+>>>>>>> b68dd0aad605bc4dc638f53450281ed2f5f342c8
                 </div>
               </div>
 
               <div class="col-md-6">
                 <div class="input_section">
                   <label class="col-form-label">Status Change Reason<span class="text-danger"> *</span></label>
+<<<<<<< HEAD
                   
+=======
+            
+>>>>>>> b68dd0aad605bc4dc638f53450281ed2f5f342c8
                     <div class="form-group has-default bmd-form-group">
                       <input placeholder="reason" class="form-control {{ $errors->has('reason') ? 'is-invalid' : '' }} " type="text" name="reason" id="reason" value="{{ old('reason', $expense->reason??'') }}"  autocomplete="off">
                       @if($errors->has('reason'))
@@ -221,7 +281,11 @@
               <div class="col-md-6">
                 <div class="input_section">
                   <label class="col-form-label">Approved Amount<span class="text-danger"> *</span></label>
+<<<<<<< HEAD
                  
+=======
+                
+>>>>>>> b68dd0aad605bc4dc638f53450281ed2f5f342c8
                     <div class="form-group has-default bmd-form-group">
                       <input placeholder="Approve Amount" class="form-control {{ $errors->has('approve_amount') ? 'is-invalid' : '' }} " type="text" name="approve_amount" id="approve_amount" value="{{ old('approve_amount', $expense->approve_amount??'') }}"  autocomplete="off">
                       @if($errors->has('approve_amount'))
@@ -229,8 +293,13 @@
                         {{ $errors->first('approve_amount') }}
                       </div>
                       @endif
+<<<<<<< HEAD
                   
                   </div>
+=======
+                    </div>
+               
+>>>>>>> b68dd0aad605bc4dc638f53450281ed2f5f342c8
                 </div>
               </div>
 
@@ -273,8 +342,13 @@
     <div class="input_section">
                    <label class="col-form-label">{!! trans('panel.expenses.fields.expense_file') !!}</label>
                     
+<<<<<<< HEAD
                   
                       <div class=" has-default bmd-form-group">
+=======
+                   <div class="col-md-10">
+                      <div class="has-default bmd-form-group">
+>>>>>>> b68dd0aad605bc4dc638f53450281ed2f5f342c8
                          <input type="file" name="expense_file[]" multiple class="form-control">
                      
                    </div>

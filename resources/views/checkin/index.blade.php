@@ -48,7 +48,7 @@
               <th>{!! trans('panel.checkin.checkin_time') !!}</th>
               <th>{!! trans('panel.checkin.checkin_longitude') !!}</th>
               <th>{!! trans('panel.checkin.checkin_latitude') !!}</th>
-              <th>{!! trans('panel.checkin.checkin_address') !!}</th>
+              <th class="lenth_text">{!! trans('panel.checkin.checkin_address') !!}</th>
               <th>{!! trans('panel.checkin.checkout_date') !!}</th>
               <th>{!! trans('panel.checkin.checkout_time') !!}</th>
               <th>{!! trans('panel.checkin.checkout_latitude') !!}</th>

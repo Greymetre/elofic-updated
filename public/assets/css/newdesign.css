@@ -1402,3 +1402,14 @@ th.lenth_text {
     width: 100%;
     min-width: 200px;
 }
+
+
+td.sorting {
+    color: #363954;
+    font-weight: 400;
+}
+
+.weekDays .input_section {
+    color: #0000008c;
+    font-size: 12px;
+}

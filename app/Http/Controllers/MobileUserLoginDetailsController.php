@@ -16,6 +16,7 @@ use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 use App\Exports\MobileAppLoginUsersExport;
 use App\Exports\MobileAppLoginUsersFieldKonnectExport;
+use App\Models\Designation;
 use App\Models\SchemeDetails;
 use App\Models\SchemeHeader;
 use Carbon\Carbon;
@@ -45,13 +46,14 @@ class MobileUserLoginDetailsController extends Controller
 
     public function mobile_user_login(Request $request)
     {
+        abort_if(Gate::denies('loyalty_mobile_app_users_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $branches = Branch::latest()->get();
         $divisions = Division::latest()->get();
         $currentYear = Carbon::now()->year;
         $years = range($currentYear - 2, $currentYear + 2);
+        $designations = Designation::where('active', 'Y')->get();
 
-        abort_if(Gate::denies('loyalty_mobile_app_users_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return view('loyalty_app_mobile_users.index', compact('branches', 'years', 'divisions'));
+        return view('loyalty_app_mobile_users.index', compact('branches', 'years', 'divisions','designations'));
     }
 
 

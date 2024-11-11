@@ -567,8 +567,8 @@ class CustomerController extends Controller
             ]);
             if ($validator->fails()) {
                 return redirect()->back()
-                    ->withErrors($validator)
-                    ->withInput();
+                ->withErrors($validator)
+                ->withInput();
             }
             ////abort_if(Gate::denies('customer_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
             $request['updated_by'] = Auth::user()->id;
@@ -766,6 +766,7 @@ class CustomerController extends Controller
             }
             return redirect()->back()->with('message_danger', $response['message'])->withInput();
         } catch (\Exception $e) {
+            dd($e->getMessage());
             return redirect()->back()->withErrors($e->getMessage())->withInput();
         }
     }

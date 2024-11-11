@@ -16,7 +16,7 @@
                     <!-- division filter -->
                     <div class="p-2" style="width:200px;">
                       <label for="division">Division</label>
-                      <select class="select2" name="division[]" multiple id="ps_division_id" data-style="select-with-transition" title="{!! trans('panel.secondary_dashboard.division') !!}">
+                      <select class="selectpicker" name="division[]" multiple id="ps_division_id" data-style="select-with-transition" title="{!! trans('panel.secondary_dashboard.division') !!}">
                         <option value="" disabled>{!! trans('panel.secondary_dashboard.division') !!}</option>
                         @if(@isset($ps_divisions ))
                         @foreach($ps_divisions as $division)
@@ -311,5 +311,30 @@
       $('#prifilfrm').find('input:text, input:password, input:file, select, textarea').val('');
       $('#prifilfrm').find('select').change();
     })
+
+
+
+
+ setTimeout(() => {
+   
+       $('#ps_division_id').select2({
+        placeholder: 'Please Select...',
+        multiple: true,
+        allowClear: true,
+        ajax: {
+       
+          dataType: 'json',
+          delay: 250,
+          data: function(params) {
+            return {
+              term: params.term || '',
+              page: params.page || 1
+            }
+          },
+          cache: true
+        }
+      }).trigger('change');
+    }, 1000);
+
   </script>
 </x-app-layout>

@@ -728,6 +728,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('primary_scheme-active', [PrimarySchemeController::class, 'active'])->name('primary_scheme.active');
     Route::any('primary_scheme-template', [PrimarySchemeController::class, 'template'])->name('primary_scheme.template');
     Route::any('primary_scheme-download', [PrimarySchemeController::class, 'download'])->name('primary_scheme.download');
+    Route::any('primary_scheme_report', [PrimarySchemeController::class, 'primary_scheme_report'])->name('primary_scheme.report');
+    Route::any('primary_scheme_report/download', [PrimarySchemeController::class, 'primary_scheme_report_download'])->name('primary_scheme.report.download');
+    Route::any('primary_scheme_report/template', [PrimarySchemeController::class, 'primary_scheme_report_template'])->name('primary_scheme.report.template');
 
 
 
@@ -965,6 +968,7 @@ Route::any('getServiceProduct', [AjaxController::class, 'getServiceProduct'])->n
 Route::any('getServiceProductDetails', [AjaxController::class, 'getServiceProductDetails'])->name('getServiceProductDetails');
 Route::any('changeAppointmentStatus', [AjaxController::class, 'changeAppointmentStatus']);
 Route::any('getWorkDoneTime', [AjaxController::class, 'getWorkDoneTime']);
+Route::any('getPrimarySachme', [AjaxController::class, 'getPrimarySachme']);
 
 
 

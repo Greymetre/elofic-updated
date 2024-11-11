@@ -51,7 +51,7 @@
                </div>
                @endif
                {!! Form::model($schemes,[
-               'route' => $schemes->exists ? ['primary_scheme.update', encrypt($schemes->id) ] : 'primary_scheme.store',
+               'route' => $schemes->exists ? ['primary_scheme.update', $schemes->id ] : 'primary_scheme.store',
                'method' => $schemes->exists ? 'PUT' : 'POST',
                'id' => 'storeSchemeData',
                'files'=>true
@@ -76,7 +76,10 @@
                            <option value="" disabled>Select Customer Type</option>
                            @if($customer_types && count($customer_types) > 0)
                            @foreach($customer_types as $customer_type)
-                           <option value="{{$customer_type->id}}" {!! in_array($customer_type->id, old( 'customer_type[]')??[]) ?'selected':'' !!} >{{$customer_type->customertype_name}}</option>
+                           <option value="{{ $customer_type->id }}"
+                              {!! in_array($customer_type->id, old('customer_type', explode(',', $schemes->customer_type)) ?? []) ? 'selected' : '' !!}>
+                              {{ $customer_type->customertype_name }}
+                           </option>
                            @endforeach
                            @endif
                         </select>
@@ -92,11 +95,11 @@
                         <label class="col-form-label">Select Repetition </label>
                         <select name="repetition" class="select2 form-control" id="repetition">
                            <option value="">Select Repetition </option>
-                           <option value="1" {{(old('repetition') == '1')?'selected':''}}>Day</option>
-                           <option value="2" {{(old('repetition') == '2')?'selected':''}}>Week</option>
-                           <option value="3" {{(old('repetition') == '3')?'selected':''}}>Month</option>
-                           <option value="4" {{(old('repetition') == '4')?'selected':''}}>Year</option>
-                           <option value="5" {{(old('repetition') == '5')?'selected':''}}>Quarter</option>
+                           <option value="1" {{(old('repetition', $schemes->repetition) == '1')?'selected':''}}>Day</option>
+                           <option value="2" {{(old('repetition', $schemes->repetition) == '2')?'selected':''}}>Week</option>
+                           <option value="3" {{(old('repetition', $schemes->repetition) == '3')?'selected':''}}>Month</option>
+                           <option value="4" {{(old('repetition', $schemes->repetition) == '4')?'selected':''}}>Year</option>
+                           <option value="5" {{(old('repetition', $schemes->repetition) == '5')?'selected':''}}>Quarter</option>
                         </select>
                         @if ($errors->has('repetition'))
                         <div class="error">
@@ -110,9 +113,9 @@
                         <label class="col-form-label">Select order schemes</label>
                         <select name="scheme_type" id="scheme_type" class="select2 form-control" id="schemetype">
                            <option value="">{!! trans('panel.orderschemes.fields.scheme_type') !!}</option>
-                           <option value="lp" {{(old('scheme_type') == 'lp')?'selected':''}}>LP Price</option>
-                           <option value="Qty" {{(old('scheme_type') == 'Qty')?'selected':''}}>Quantity</option>
-                           <option value="grp_Qty" {{(old('scheme_type') == 'grp_Qty')?'selected':''}}>Group Quantity</option>
+                           <option value="lp" {{(old('scheme_type', $schemes->scheme_type) == 'lp')?'selected':''}}>LP Price</option>
+                           <option value="Qty" {{(old('scheme_type', $schemes->scheme_type) == 'Qty')?'selected':''}}>Quantity</option>
+                           <option value="grp_Qty" {{(old('scheme_type', $schemes->scheme_type) == 'grp_Qty')?'selected':''}}>Group Quantity</option>
                         </select>
                         @if ($errors->has('scheme_type'))
                         <div class="error col-lg-12">
@@ -136,10 +139,10 @@
                         <label class="col-form-label">Select Quarter</label>
                         <select name="quarter" class="select2 form-control" id="week_repeat">
                            <option value="">Select Quarter </option>
-                           <option value="1">Q1</option>
-                           <option value="2">Q2</option>
-                           <option value="3">Q3</option>
-                           <option value="4">Q4</option>
+                           <option value="1" {{(old('quarter', $schemes->quarter) == '1')?'selected':''}}>Q1</option>
+                           <option value="2" {{(old('quarter', $schemes->quarter) == '2')?'selected':''}}>Q2</option>
+                           <option value="3" {{(old('quarter', $schemes->quarter) == '3')?'selected':''}}>Q3</option>
+                           <option value="4" {{(old('quarter', $schemes->quarter) == '4')?'selected':''}}>Q4</option>
                         </select>
                         @if ($errors->has('week_repeat'))
                         <div class="error">
@@ -170,10 +173,10 @@
                         <label class="col-form-label">Select Week</label>
                         <select name="week_repeat" class="select2 form-control" id="week_repeat">
                            <option value="">Select Week </option>
-                           <option value="1">First Week</option>
-                           <option value="2">Second Week</option>
-                           <option value="3">Third Week</option>
-                           <option value="4">Last Week</option>
+                           <option value="1" {{(old('week_repeat', $schemes->week_repeat) == '1')?'selected':''}}>First Week</option>
+                           <option value="2" {{(old('week_repeat', $schemes->week_repeat) == '2')?'selected':''}}>Second Week</option>
+                           <option value="3" {{(old('week_repeat', $schemes->week_repeat) == '3')?'selected':''}}>Third Week</option>
+                           <option value="4" {{(old('week_repeat', $schemes->week_repeat) == '4')?'selected':''}}>Last Week</option>
                         </select>
                         @if ($errors->has('week_repeat'))
                         <div class="error">
@@ -214,8 +217,8 @@
                         <label class="col-form-label">Scheme Based On</label>
                         <select name="scheme_basedon" class="select2 form-control" id="schemebasedon">
                            <option value="">Scheme Based On</option>
-                           <option value="value" {{(old('scheme_basedon') == 'value')?'selected':''}}>Value</option>
-                           <option value="percentage" {{(old('scheme_basedon') == 'percentage')?'selected':''}}>Percentage</option>
+                           <option value="value" {{(old('scheme_basedon', $schemes->scheme_basedon) == 'value')?'selected':''}}>Value</option>
+                           <option value="percentage" {{(old('scheme_basedon', $schemes->scheme_basedon) == 'percentage')?'selected':''}}>Percentage</option>
 
                         </select>
                         @if ($errors->has('scheme_basedon'))
@@ -228,7 +231,7 @@
                   <div class="col-md-6">
                      <div class="input_section">
                         <label class="col-form-label">{!! trans('panel.orderschemes.fields.scheme_description') !!} </label>
-                        <textarea class="form-control" rows="4" name="scheme_description">{!! old( 'scheme_description') !!}</textarea>
+                        <textarea class="form-control" rows="4" name="scheme_description">{!! old( 'scheme_description', $schemes->scheme_description) !!}</textarea>
                         @if ($errors->has('scheme_description'))
                         <div class="error">
                            <p class="text-danger">{{ $errors->first('scheme_description') }}</p>
@@ -398,6 +401,7 @@
                                     <input type="file" name="import_file" accept=".xls,.xlsx" />
                                  </span>
                                  <a href="{{ URL::to('orderschemes-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.scheme.title_singular') !!}"><i class="material-icons">text_snippet</i></a>
+                                 <a href="{{ URL::to('primary_scheme_report/template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} Group {!! trans('panel.scheme.title_singular') !!}"><i class="material-icons">description</i></a>
                                  @if( $schemes->exists && isset($schemes['primaryscheme_details']) )
                                  <a href="{{ URL::to('orderschemes-download') }}?id={{$schemes->id}}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.scheme.title') !!}"><i class="material-icons">cloud_download</i></a>
                                  @endif
@@ -431,8 +435,35 @@
                               @if( isset($row['categories']['category_name']))
                               <td>
                                  <div class="input_section">
-                                    <select name="category_id[]" class="form-control category rowchange">
+                                    <select name="category_id[]" class="form-control rowchange">
                                        <option value="{{ $row['category_id'] }}">{{ $row['categories']['category_name'] }}</option>
+                                    </select>
+                                 </div>
+                              </td>
+                              @endif
+                              @if( isset($row['groups']))
+                              <td>
+                                 <div class="input_section">
+                                    <select name="groups[]" class="form-control rowchange">
+                                       <option value="{{ $row['groups'] }}">{{ $row['groups'] }}</option>
+                                    </select>
+                                 </div>
+                              </td>
+                              @endif
+                              @if( isset($row['min']))
+                              <td>
+                                 <div class="input_section">
+                                    <select name="min[]" class="form-control rowchange">
+                                       <option value="{{ $row['min'] }}">{{ $row['min'] }}</option>
+                                    </select>
+                                 </div>
+                              </td>
+                              @endif
+                              @if( isset($row['max']))
+                              <td>
+                                 <div class="input_section">
+                                    <select name="max[]" class="form-control rowchange">
+                                       <option value="{{ $row['max'] }}">{{ $row['max'] }}</option>
                                     </select>
                                  </div>
                               </td>
@@ -440,7 +471,7 @@
                               @if( isset($row['subcategories']['subcategory_name']))
                               <td>
                                  <div class="input_section">
-                                    <select name="subcategory_id[]" class="form-control category rowchange">
+                                    <select name="subcategory_id[]" class="form-control rowchange">
                                        <option value="{{ $row['subcategory_id'] }}">{{ $row['subcategories']['subcategory_name'] }}</option>
                                     </select>
                                  </div>
@@ -449,7 +480,7 @@
                               @if( isset($row['products']['product_name']))
                               <td>
                                  <div class="input_section">
-                                    <select name="product_id[]" class="form-control product rowchange">
+                                    <select name="product_id[]" class="form-control rowchange">
                                        <option value="{{ $row['product_id'] }}">{{ $row['products']['product_name'] }}</option>
                                     </select>
                                  </div>
@@ -501,7 +532,7 @@
       }
       $(document).ready(function() {
 
-         columnDisplay();
+         // columnDisplay();
          var $table = $('table.kvcodes-dynamic-rows-example');
          $('a.add-rows').click(function(event) {
             event.preventDefault();
@@ -510,9 +541,9 @@
             if (schemetype == 'grp_Qty') {
                var newRow =
                   '<tr> <td>' + counter + '</td>' +
-                  '<td class="group" style="width:30%"><div class="input_section"><select required name="group' + counter + '" class="form-control  set_cat_' + counter + ' group_drop rowchange"></select></td>' +
-                  '<td style="width:30%" class="subCat"><div class="input_section"><input type="number" name="min' + counter + '" class="form-control  set_min_' + counter + '"></div></td>' +
-                  '<td style="width:30%"><div class="input_section"><input type="number" name="max' + counter + '" class="form-control  set_max_' + counter + '"></div></td>' +
+                  '<td class="group" style="width:30%"><div class="input_section"><select required name="groups[]' + counter + '" class="form-control select2  set_cat_' + counter + ' group_drop rowchange"></select></td>' +
+                  '<td style="width:30%" class="subCat"><div class="input_section"><input type="number" name="min[]' + counter + '" class="form-control  set_min_' + counter + '"></div></td>' +
+                  '<td style="width:30%"><div class="input_section"><input type="number" name="max[]' + counter + '" class="form-control  set_max_' + counter + '"></div></td>' +
                   '<td><div class="input_section"><input required type="number" name="points[]' + counter + '"class="form-control points rowchange" /></div></td>' +
                   '<td class="td-actions text-center"><a class="remove-rows btn btn-danger btn-just-icon btn-sm"><i class="fa fa-minus"></i></a></td> </tr>';
             } else {
@@ -580,24 +611,24 @@
             columnDisplay();
          })
 
-      });
+      }).trigger('change');
 
 
       function getcategorylist() {
-         if($("#scheme_type").val() == 'grp_Qty'){
+         if ($("#scheme_type").val() == 'grp_Qty') {
             $.ajax({
                //url: "/getCategoryData",
                url: "{{url('/getPrimaryGroup')}}",
                success: function(data) {
-                  console.log(data);
                   var html = '<option value="">Select Group</option>';
                   $.each(data, function(k, v) {
                      html += '<option value="' + v + '">' + v + '</option>';
                   });
                   $('.set_cat_' + counter).html(html);
+                  $('.select2').select2();
                }
             });
-         }else{
+         } else {
             $.ajax({
                //url: "/getCategoryData",
                url: "{{url('/getCategoryData')}}",
@@ -734,7 +765,7 @@
    <script>
       $(document).ready(function() {
 
-         $(document).on('change', '#repetition', function() {
+         $('#repetition').on('change', function() {
 
             var repetition = $(this).val();
             if (repetition == 1) {
@@ -760,23 +791,30 @@
             }
 
 
-         });
+         }).trigger('change');
 
       });
 
       $('#scheme_type').on('change', function() {
-         $('table.kvcodes-dynamic-rows-example tbody').html('');
+         // $('table.kvcodes-dynamic-rows-example tbody').html('');
          var schemeType = $(this).val();
          if (schemeType == 'grp_Qty') {
             $('#tab_logic .category').html('Group');
             $('#tab_logic .sub-category').html('Min');
             $('#tab_logic .product').html('Max');
+            $('#min_max').hide();
+         } else if (schemeType == 'Qty') {
+            $('#min_max').show();
+            $('#tab_logic .category').html('Category');
+            $('#tab_logic .sub-category').html('Sub category');
+            $('#tab_logic .product').html('Product');
          }else{
+            $('#min_max').hide();
             $('#tab_logic .category').html('Category');
             $('#tab_logic .sub-category').html('Sub category');
             $('#tab_logic .product').html('Product');
          }
-      })
+      }).trigger('change');
    </script>
 
 

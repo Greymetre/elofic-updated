@@ -300,6 +300,9 @@ class OrderController extends Controller
 
         $sellers = Customers::where(function ($query) use ($userids) {
             if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                if(Auth::user()->hasRole('Accounts Order')){
+                    $userids = User::whereIn('branch_id', explode(',',Auth::user()->branch_show))->pluck('id');
+                }
                 $query->whereIn('executive_id', $userids)
                       ->orWhereIn('created_by', $userids);
             }
@@ -374,6 +377,11 @@ class OrderController extends Controller
         $request['gst12_amt'] = $request['12_gst'];
         $request['gst28_amt'] = $request['18_gst'];
         $request['gst18_amt'] = $request['28_gst'];
+        $ss_customer_type = Customers::where('id', $request['seller_id'])->pluck('customertype')->first();
+
+            if($ss_customer_type == '1' || $ss_customer_type == '3'){
+                $request['buyer_id'] = $request['seller_id'];
+            }
 
         $orders = Order::with('orderdetails')->find($id);
         $orders->buyer_id = isset($request['seller_id']) ? $request['seller_id'] : null;
