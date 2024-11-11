@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Models\Customers;
 use App\Models\PrimarySales;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -36,6 +37,7 @@ class TopDealerExport implements FromCollection, WithHeadings, WithMapping, Shou
         DB::statement("SET SESSION group_concat_max_len = 10000000");
         $query = PrimarySales::select(
             'dealer',
+            'customer_id',
             'final_branch',
             'city',
             DB::raw('SUM(net_amount) as total_net_amounts'),
@@ -43,6 +45,12 @@ class TopDealerExport implements FromCollection, WithHeadings, WithMapping, Shou
             DB::raw('GROUP_CONCAT(month) as months'),
             DB::raw('GROUP_CONCAT(invoice_date) as invoice_dates'),
         );
+
+        if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+            $userids = getUsersReportingToAuth();
+            $customer_ids = Customers::whereIn('executive_id', $userids)->orWhereIn('created_by', $userids)->pluck('id');
+            $query->whereIn('customer_id', $customer_ids);
+        }
 
         if ($this->month && is_array($this->month) && count($this->month) > 0 && $this->financial_year && !empty($this->financial_year)) {
             $f_year_array = explode('-', $this->financial_year);
@@ -106,7 +114,7 @@ class TopDealerExport implements FromCollection, WithHeadings, WithMapping, Shou
             $query->where('sales_person', $this->executive_id);
         }
 
-        $query = $query->groupBy('dealer', 'final_branch', 'city')->orderBy('total_net_amounts', 'desc');
+        $query = $query->groupBy('dealer', 'customer_id', 'final_branch', 'city')->orderBy('total_net_amounts', 'desc');
         return $query->get();
     }
 

@@ -40,7 +40,13 @@ class NewDealerSaleLastYearExport implements FromCollection, WithHeadings, WithM
             ->subYear()
             ->startOfDay()
             ->toDateString();
-        $new_dealers = Customers::where('creation_date', '>=', $firstDateOfAprilLastYear)->pluck('id');
+        if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+            $userids = getUsersReportingToAuth();
+            $customer_ids = Customers::whereIn('executive_id', $userids)->orWhereIn('created_by', $userids)->pluck('id');
+            $new_dealers = Customers::where('creation_date', '>=', $firstDateOfAprilLastYear)->whereIn('id', $customer_ids)->pluck('id');
+        } else {
+            $new_dealers = Customers::where('creation_date', '>=', $firstDateOfAprilLastYear)->pluck('id');
+        }
         DB::statement("SET SESSION group_concat_max_len = 10000000");
         $query = PrimarySales::with('customer')->select(
             'dealer',
@@ -284,9 +290,9 @@ class NewDealerSaleLastYearExport implements FromCollection, WithHeadings, WithM
             $response[6 + $indx] =  '1Cr Plus';
         }
 
-        if($data->total_net_amounts > 0){
-            $response[7 + $indx] = number_format(((($data->total_net_amounts/100000)/($branch_total_sale/100000))*100),2,'.','').'%';
-        }else{
+        if ($data->total_net_amounts > 0) {
+            $response[7 + $indx] = number_format(((($data->total_net_amounts / 100000) / ($branch_total_sale / 100000)) * 100), 2, '.', '') . '%';
+        } else {
             $response[7 + $indx] = "0%";
         }
 

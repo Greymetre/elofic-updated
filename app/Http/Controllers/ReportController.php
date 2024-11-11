@@ -3346,10 +3346,17 @@ class ReportController extends Controller
         DB::statement("SET SESSION group_concat_max_len = 10000000");
         $query = PrimarySales::select(
             'dealer',
+            'customer_id',
             'final_branch',
             'city',
             DB::raw('SUM(net_amount) as total_net_amounts'),
         );
+
+        if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+            $userids = getUsersReportingToAuth();
+            $customer_ids = Customers::whereIn('executive_id', $userids)->orWhereIn('created_by', $userids)->pluck('id');
+            $query->whereIn('customer_id', $customer_ids);
+        }
 
         // Filter by financial year or last three months
         if ($request->month && is_array($request->month) && count($request->month) > 0 && $request->financial_year && !empty($request->financial_year)) {
@@ -3424,7 +3431,7 @@ class ReportController extends Controller
             $query->where('sales_person', $request->executive_id);
         }
 
-        $query = $query->groupBy('dealer', 'final_branch', 'city')->orderBy('total_net_amounts', 'desc');
+        $query = $query->groupBy('dealer','customer_id', 'final_branch', 'city')->orderBy('total_net_amounts', 'desc');
 
         return Datatables::of($query)
             ->addIndexColumn()
@@ -3437,7 +3444,7 @@ class ReportController extends Controller
 
     public function top_dealer_download(Request $request)
     {
-        abort_if(Gate::denies('product_analysis_branch_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('top_dealer_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         if ($request->financial_year && !empty($request->financial_year)) {
@@ -3478,6 +3485,7 @@ class ReportController extends Controller
 
         $query = PrimarySales::select(
             'dealer',
+            'customer_id',
             'final_branch',
             'city',
             DB::raw('SUM(net_amount) as total_net_amounts'),
@@ -3548,6 +3556,12 @@ class ReportController extends Controller
                 ->pluck('customer_id')
                 ->push(auth()->user()->customerid);
             $query->whereIn('customer_id', $child_customer);
+        }else{
+            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                $userids = getUsersReportingToAuth();
+                $customer_ids = Customers::whereIn('executive_id', $userids)->orWhereIn('created_by', $userids)->pluck('id');
+                $query->whereIn('customer_id', $customer_ids);
+            }
         }
 
         if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
@@ -3571,7 +3585,7 @@ class ReportController extends Controller
         }
 
         // Grouping and ordering
-        $query->whereIn('division', ['PUMP', 'MOTOR'])->groupBy('dealer', 'final_branch', 'city');
+        $query->whereIn('division', ['PUMP', 'MOTOR'])->groupBy('dealer','customer_id', 'final_branch', 'city');
 
         // Execute the primary query
         $results = $query->get();
@@ -3704,7 +3718,13 @@ class ReportController extends Controller
     public function new_dealer_sale_list(Request $request)
     {
         $firstDateOfApril = Carbon::createFromDate(null, 4, 1)->startOfDay()->toDateString();
-        $new_dealers = Customers::where('creation_date', '>=', $firstDateOfApril)->pluck('id');
+        if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+            $userids = getUsersReportingToAuth();
+            $customer_ids = Customers::whereIn('executive_id', $userids)->orWhereIn('created_by', $userids)->pluck('id');
+            $new_dealers = Customers::where('creation_date', '>=', $firstDateOfApril)->whereIn('id', $customer_ids)->pluck('id');
+        }else{
+            $new_dealers = Customers::where('creation_date', '>=', $firstDateOfApril)->pluck('id');
+        }
         DB::statement("SET SESSION group_concat_max_len = 10000000");
         $query = PrimarySales::with('customer')->select(
             'dealer',
@@ -3827,7 +3847,7 @@ class ReportController extends Controller
 
     public function new_dealer_sale_download(Request $request)
     {
-        abort_if(Gate::denies('product_analysis_branch_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('new_dealer_sale_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         if ($request->last_year) {

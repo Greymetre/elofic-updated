@@ -44,6 +44,8 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
     {
         $f_year_array = explode('-', $this->financial_year);
         $pSchemesGroup = PrimarySchemeDetail::whereIn('primary_scheme_id', $this->scheme_id)->groupBy('groups')->pluck('groups');
+        $pSchemesBranch = PrimaryScheme::whereIn('id', $this->scheme_id)->groupBy('branch')->pluck('branch');
+        // dd($pSchemesGroup, $pSchemesBranch);
         $data = PrimarySales::with(['user', 'user.getdesignation', 'user.getdivision', 'branch', 'customer'])->select([
             DB::raw('SUM(quantity) as total_quantity'),
             DB::raw('SUM(net_amount) as total_net_amount'),
@@ -52,7 +54,7 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
             DB::raw('customer_id'),
             DB::raw('division'),
             DB::raw('new_group_name'),
-        ])->whereIn('new_group_name', $pSchemesGroup);
+        ])->whereIn('new_group_name', $pSchemesGroup)->whereIn('branch_id', $pSchemesBranch);
 
         if ($this->quarter && !empty($this->quarter)) {
             if ($this->quarter == '1') {
@@ -100,91 +102,8 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
 
     public function headings(): array
     {
-        // $f_year_array = explode('-', $this->financial_year);
-
-        // $startYear = $f_year_array[0];
-
-        // $endYear = $f_year_array[1];
-
+     
         $headings = ['FY','Quarter','Div','Dealer','City','State','Final Branch','Sales person', 'Emp Code', 'New Group Name', 'Sale Return Qty', 'Sale Return Value','Sales Quantity','Sales Net Amount','After  Sales Return Quantity','After Sales Return Net Amount','Discount (CN)','Scheme Name'];
-
-
-        // if ($this->quarter && !empty($this->quarter)) {
-        //     if ($this->quarter == '1') {
-        //         $headings[] = 'Apr-' . $startYear;
-        //         $headings[] = '';
-        //         $headings[] = '';
-        //         $headings[] = 'May-' . $startYear;
-        //         $headings[] = '';
-        //         $headings[] = '';
-        //         $headings[] = 'Jun-' . $startYear;
-        //         $headings[] = '';
-        //         $headings[] = '';
-        //         $headings[] = 'Q1';
-        //         $headings[] = '';
-        //         $headings[] = '';
-        //         $headings[] = '';
-        //         $headings[] = '';
-        //     } elseif ($this->quarter == '2') {
-        //         $headings[] = 'Jul-' . $startYear;
-        //         $headings[] = '';
-        //         $headings[] = '';
-        //         $headings[] = 'Aug-' . $startYear;
-        //         $headings[] = '';
-        //         $headings[] = '';
-        //         $headings[] = 'Sep-' . $startYear;
-        //         $headings[] = '';
-        //         $headings[] = '';
-        //         $headings[] = 'Q2';
-        //         $headings[] = '';
-        //         $headings[] = '';
-        //         $headings[] = '';
-        //         $headings[] = '';
-        //     } elseif ($this->quarter == '3') {
-        //         $headings[] = 'Oct-' . $startYear;
-        //         $headings[] = '';
-        //         $headings[] = '';
-        //         $headings[] = 'Nov-' . $startYear;
-        //         $headings[] = '';
-        //         $headings[] = '';
-        //         $headings[] = 'Dec-' . $startYear;
-        //         $headings[] = '';
-        //         $headings[] = '';
-        //         $headings[] = 'Q3';
-        //         $headings[] = '';
-        //         $headings[] = '';
-        //         $headings[] = '';
-        //         $headings[] = '';
-        //     } elseif ($this->quarter == '4') {
-        //         $headings[] = 'Jan-' . $endYear;
-        //         $headings[] = '';
-        //         $headings[] = '';
-        //         $headings[] = 'Feb-' . $endYear;
-        //         $headings[] = '';
-        //         $headings[] = '';
-        //         $headings[] = 'Mar-' . $endYear;
-        //         $headings[] = '';
-        //         $headings[] = '';
-        //         $headings[] = 'Q4';
-        //         $headings[] = '';
-        //         $headings[] = '';
-        //         $headings[] = '';
-        //         $headings[] = '';
-        //     }
-        // }
-
-        // $headings[] = 'Total Outstanding Value';
-        // $headings[] = 'Outstanding Value (>60 Days)';
-        // $headings[] = 'Outstanding Value (>60 Days) %';
-        // $headings[] = 'Total Stock Value';
-        // $headings[] = 'Stock Value (>90 Days)';
-        // $headings[] = 'Stock Value (>90 Days) %';
-        // $headings[] = 'Total Incentive';
-        // $headings[] = 'Total Incentive as per weightage';
-
-        // $sub_headings = ['', '', '', '', '', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Fresh Sales Return', 'Net Sales', 'Target Achievement (%)'];
-
-        // $final_heading = [$headings, $sub_headings];
 
         return $headings;
     }
@@ -192,15 +111,15 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
 
     public function map($data): array
     {
-        $CM = PrimarySchemeDetail::where('groups',$data['new_group_name'])->where('min', '<=', $data['total_quantity'])->where('max', '>=', $data['total_quantity'])->first();
-        // dd($CM);
+        $CM = PrimarySchemeDetail::where('groups',$data['new_group_name'])->where('min', '<=', $data['total_quantity'])->where('max', '>=', $data['total_quantity'])->whereIn('primary_scheme_id', $this->scheme_id)->first();
+        // dd($data);
         $response = array();
         $response[0] = $this->financial_year;
         $response[1] = 'Q'.$this->quarter;
         $response[2] = $data['division'] ?? '';
         $response[3] = $data['customer'] ? $data['customer']['name'] : '-';
-        $response[4] = $data['customer']['customeraddress'] ? ($data['customer']['customeraddress']['cityname']?$data['customer']['customeraddress']['cityname']['city_name']:'-') : '-';
-        $response[5] = $data['customer']['customeraddress'] ? ($data['customer']['customeraddress']['statename']?$data['customer']['customeraddress']['statename']['state_name']:'-') : '-';
+        $response[4] = data_get($data, 'customer.customeraddress.cityname.city_name', '-');
+        $response[5] = data_get($data, 'customer.customeraddress.statename.state_name', '-');
         $response[6] = $data['branch'] ? $data['branch']['branch_name'] : '-';
         $response[7] = $data['user'] ? $data['user']['name'] : '-';
         $response[8] = $data['emp_code'] ?? '-';
