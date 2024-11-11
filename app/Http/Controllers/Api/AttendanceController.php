@@ -18,6 +18,7 @@ use App\Models\BeatSchedule;
 use App\Models\Beat;
 use App\Models\TourDetail;
 use App\Models\User;
+use Carbon\Carbon;
 
 class AttendanceController extends Controller
 {
@@ -46,7 +47,7 @@ class AttendanceController extends Controller
             $query = $this->attendances->where(function ($query) use($user_id) {
                                         $query->where('user_id', '=', $user_id);
                                     })
-                                    ->select('id','punchin_date', 'punchin_time', 'punchin_longitude', 'punchin_latitude', 'punchin_address', 'punchin_image', 'punchout_date', 'punchout_time', 'punchout_latitude', 'punchout_longitude', 'punchout_address', 'punchout_image')->orderBy('punchin_date', 'desc');
+                                    ->select('id','punchin_date', 'punchin_time', 'punchin_longitude', 'punchin_latitude', 'punchin_address', 'punchin_image', 'punchout_date', 'punchout_time', 'punchout_latitude', 'punchout_longitude', 'punchout_address', 'punchout_image')->orderBy('punchin_date', 'desc')->where('punchin_date', '<=', Carbon::today()->toDateString());
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
             $data = collect([]);
             if($db_data->isNotEmpty())
@@ -347,6 +348,10 @@ class AttendanceController extends Controller
             }
             $all_punch_in_out->orderBy('punchin_date', 'desc');
 
+            if($request->status != NULL){
+                $all_punch_in_out->where('attendance_status', $request->status);
+            }
+
 
             $all_punch_in_out = (!empty($pageSize)) ? $all_punch_in_out->paginate($pageSize) : $all_punch_in_out->paginate(100);
 
@@ -374,7 +379,8 @@ class AttendanceController extends Controller
                         $data[$key]['self'] = false;
                     }
                 }
-                return response()->json(['status' => 'success','message' => 'Data retrieved successfully.', 'users'=>$all_users, 'branches'=>$branches, 'page_count'=>$all_punch_in_out->lastPage(), 'data' => $data ], $this->successStatus);
+                $all_status = [['id' => '0', 'name' => 'Pending'], ['id' => '1', 'name' => 'Approved'], ['id' => '2', 'name' => 'Rejected']];
+                return response()->json(['status' => 'success','message' => 'Data retrieved successfully.', 'users'=>$all_users, 'branches'=>$branches, 'page_count'=>$all_punch_in_out->lastPage(),'all_status' => $all_status, 'data' => $data ], $this->successStatus);
             }else{
                 return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data ], $this->badrequest);
             }
