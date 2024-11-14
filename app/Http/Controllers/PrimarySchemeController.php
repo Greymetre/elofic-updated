@@ -112,8 +112,9 @@ class PrimarySchemeController extends Controller
         $branchs = Branch::whereIn('id', $primary_branchs)->where('active', 'Y')->select('id', 'branch_name')->get();
         $states = State::where('active', 'Y')->select('id', 'state_name')->get();
         $customers = Customers::whereIn('id', $primary_customers)->where('active', 'Y')->select('id', 'name')->get();
+        $primary_divs = PrimarySales::select('division')->groupBy('division')->get();
 
-        return view('primary_schemes.form', compact('customer_types', 'branchs', 'states', 'customers'))->with('schemes', $this->schemes);
+        return view('primary_schemes.form', compact('customer_types', 'branchs', 'states', 'customers', 'primary_divs'))->with('schemes', $this->schemes);
     }
 
     /**
@@ -151,6 +152,7 @@ class PrimarySchemeController extends Controller
             if ($id = PrimaryScheme::insertGetId([
                 'active' => 'Y',
                 'scheme_name' => isset($request['scheme_name']) ? $request['scheme_name'] : '',
+                'division' => isset($request['division']) ? $request['division'] : '',
                 'scheme_description' => isset($request['scheme_description']) ? $request['scheme_description'] : '',
                 'start_date' => isset($request['start_date']) ? $request['start_date'] : '',
                 'end_date' => isset($request['end_date']) ? $request['end_date'] : '',
@@ -160,6 +162,7 @@ class PrimarySchemeController extends Controller
                 'quarter' => isset($request['quarter']) ? $request['quarter'] : NULL,
                 'scheme_type' => isset($request['scheme_type']) ? $request['scheme_type'] : '',
                 'scheme_basedon' => isset($request['scheme_basedon']) ? $request['scheme_basedon'] : '',
+                'per_pcs' => isset($request['per_pcs']) ? $request['per_pcs'] : 0,
                 'assign_to' => isset($request['assign_to']) ? $request['assign_to'] : '',
                 'branch' => (isset($request['branch']) && count($request['branch']) > 0) ? implode(',', $request['branch']) : '',
                 'state' => (isset($request['state']) && count($request['state']) > 0) ? implode(',', $request['state']) : '',
@@ -187,6 +190,30 @@ class PrimarySchemeController extends Controller
                                 'groups' => !empty($request['groups']) ? $request['groups'][$key] : null,
                                 'min' => isset($request['min']) ? $request['min'][$key] : null,
                                 'max' => isset($request['max']) ? $request['max'][$key] : null,
+                                'slab_min' => isset($request['slab_min']) ? $request['slab_min'][$key] : null,
+                                'slab_max' => isset($request['slab_max']) ? $request['slab_max'][$key] : null,
+                                'gift' => isset($request['gift']) ? $request['gift'][$key] : null,
+                                'points' => isset($request['points']) ? $request['points'][$key] : 0,
+                            ]);
+                        }
+                        if ($primarychemedetils->isNotEmpty()) {
+                            PrimarySchemeDetail::insert($primarychemedetils->toArray());
+                        }
+                    }
+                    if ($request['gift']) {
+                        foreach ($request['gift'] as $key => $value) {
+                            $primarychemedetils->push([
+                                'active' => 'Y',
+                                'primary_scheme_id' => $id,
+                                'product_id' => !empty($request['product_id']) ? $request['product_id'][$key] : null,
+                                'category_id' => !empty($request['category_id']) ? $request['category_id'][$key] : null,
+                                'subcategory_id' => !empty($request['subcategory_id']) ? $request['subcategory_id'][$key] : null,
+                                'groups' => !empty($request['groups']) ? $request['groups'][$key] : null,
+                                'min' => isset($request['min']) ? $request['min'][$key] : null,
+                                'max' => isset($request['max']) ? $request['max'][$key] : null,
+                                'slab_min' => isset($request['slab_min']) ? $request['slab_min'][$key] : null,
+                                'slab_max' => isset($request['slab_max']) ? $request['slab_max'][$key] : null,
+                                'gift' => isset($request['gift']) ? $request['gift'][$key] : null,
                                 'points' => isset($request['points']) ? $request['points'][$key] : 0,
                             ]);
                         }
@@ -229,8 +256,9 @@ class PrimarySchemeController extends Controller
         $branchs = Branch::whereIn('id', $primary_branchs)->where('active', 'Y')->select('id', 'branch_name')->get();
         $states = State::where('active', 'Y')->select('id', 'state_name')->get();
         $customers = Customers::whereIn('id', $primary_customers)->where('active', 'Y')->select('id', 'name')->get();
+        $primary_divs = PrimarySales::select('division')->groupBy('division')->get();
 
-        return view('primary_schemes.form', compact('customer_types', 'branchs', 'states', 'customers'))->with('schemes', $primaryScheme);
+        return view('primary_schemes.form', compact('customer_types', 'branchs', 'states', 'customers', 'primary_divs'))->with('schemes', $primaryScheme);
     }
 
     /**
@@ -267,6 +295,7 @@ class PrimarySchemeController extends Controller
             }
 
             $primaryScheme->scheme_name = isset($request['scheme_name']) ? $request['scheme_name'] : '';
+            $primaryScheme->division = isset($request['division']) ? $request['division'] : '';
             $primaryScheme->scheme_description = isset($request['scheme_description']) ? $request['scheme_description'] : '';
             $primaryScheme->start_date = isset($request['start_date']) ? $request['start_date'] : '';
             $primaryScheme->end_date = isset($request['end_date']) ? $request['end_date'] : '';
@@ -276,6 +305,7 @@ class PrimarySchemeController extends Controller
             $primaryScheme->quarter = isset($request['quarter']) ? $request['quarter'] : NULL;
             $primaryScheme->scheme_type = isset($request['scheme_type']) ? $request['scheme_type'] : '';
             $primaryScheme->scheme_basedon = isset($request['scheme_basedon']) ? $request['scheme_basedon'] : '';
+            $primaryScheme->per_pcs = isset($request['per_pcs']) ? $request['per_pcs'] : 0;
             $primaryScheme->assign_to = isset($request['assign_to']) ? $request['assign_to'] : '';
             $primaryScheme->branch = (isset($request['branch']) && count($request['branch']) > 0) ? implode(',', $request['branch']) : '';
             $primaryScheme->state = (isset($request['state']) && count($request['state']) > 0) ? implode(',', $request['state']) : '';
@@ -303,6 +333,30 @@ class PrimarySchemeController extends Controller
                             'groups' => !empty($request['groups']) ? $request['groups'][$key] : null,
                             'min' => isset($request['min']) ? $request['min'][$key] : null,
                             'max' => isset($request['max']) ? $request['max'][$key] : null,
+                            'slab_min' => isset($request['slab_min']) ? $request['slab_min'][$key] : null,
+                            'slab_max' => isset($request['slab_max']) ? $request['slab_max'][$key] : null,
+                            'gift' => isset($request['gift']) ? $request['gift'][$key] : null,
+                            'points' => isset($request['points']) ? $request['points'][$key] : 0,
+                        ]);
+                    }
+                    if ($primarychemedetils->isNotEmpty()) {
+                        PrimarySchemeDetail::insert($primarychemedetils->toArray());
+                    }
+                }
+                if ($request['gift']) {
+                    foreach ($request['gift'] as $key => $value) {
+                        $primarychemedetils->push([
+                            'active' => 'Y',
+                            'primary_scheme_id' => $primaryScheme->id,
+                            'product_id' => !empty($request['product_id']) ? $request['product_id'][$key] : null,
+                            'category_id' => !empty($request['category_id']) ? $request['category_id'][$key] : null,
+                            'subcategory_id' => !empty($request['subcategory_id']) ? $request['subcategory_id'][$key] : null,
+                            'groups' => !empty($request['groups']) ? $request['groups'][$key] : null,
+                            'min' => isset($request['min']) ? $request['min'][$key] : null,
+                            'max' => isset($request['max']) ? $request['max'][$key] : null,
+                            'slab_min' => isset($request['slab_min']) ? $request['slab_min'][$key] : null,
+                            'slab_max' => isset($request['slab_max']) ? $request['slab_max'][$key] : null,
+                            'gift' => isset($request['gift']) ? $request['gift'][$key] : null,
                             'points' => isset($request['points']) ? $request['points'][$key] : 0,
                         ]);
                     }
@@ -328,11 +382,10 @@ class PrimarySchemeController extends Controller
         PrimarySchemeDetail::where('primary_scheme_id', $primaryScheme->id)->delete();
         $delete = $primaryScheme->delete();
 
-        if($delete){
-            return response()->json(['status' => 'success','message' => 'Scheme deleted successfully!']);
+        if ($delete) {
+            return response()->json(['status' => 'success', 'message' => 'Scheme deleted successfully!']);
         }
-        return response()->json(['status' => 'error','message' => 'Error in Scheme Delete!']);
-        
+        return response()->json(['status' => 'error', 'message' => 'Error in Scheme Delete!']);
     }
 
     public function primary_scheme_report(Request $request)

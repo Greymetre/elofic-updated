@@ -63,7 +63,7 @@
                     <!-- Scheme filter -->
                     <div class="p-2 new_see" style="width:180px;">
                       <label for="scheme_id">Primary Scheme</label>
-                      <select class="select2" name="scheme_id[]" multiple id="scheme_id" data-style="select-with-transition" required title="panel.sales_users.branch">
+                      <select class="select2" name="scheme_id" id="scheme_id" data-style="select-with-transition" required title="panel.sales_users.branch">
                         <option value="" disabled>Primary Scheme</option>
                         @if(@isset($primary_schemes ))
                         @foreach($primary_schemes as $primary_scheme)
@@ -257,8 +257,15 @@
         table.draw();
       });
       $('#ps_financial_year').change(function() {
-        $('#quarter').prop('disabled', false);
-        $('#quarter').selectpicker('refresh');
+        var div = $("#division").val();
+        if(div != 'FAN'){
+          $('#quarter').prop('disabled', false);
+          $('#quarter').selectpicker('refresh');
+        }else{
+          $('#quarter').val('');
+          $('#quarter').prop('disabled', true);
+          $('#quarter').selectpicker('refresh');
+        }
         // table.draw();
       });
       $('#quarter').change(function() {
@@ -266,10 +273,10 @@
             //url: "/getProductData",
             url: "{{url('/getPrimarySachme')}}",
             data: {
-               'quater': $(this).val()
+               'quater': $(this).val(),
+               'division': $("#division").val()
             },
             success: function(data) {
-              console.log(data);
                var html = '';
                $.each(data.data, function(k, v) {
                   html += '<option value="' + v.id + '">' + v.scheme_name + '</option>';
@@ -280,5 +287,30 @@
         table.draw();
       });
     });
+
+    $("#division").on("change", function(){
+      var div = $(this).val();
+      if(div == 'FAN'){
+        $('#quarter').val('');
+        $('#quarter').prop('disabled', true);
+        $('#quarter').selectpicker('refresh');
+        $.ajax({
+            //url: "/getProductData",
+            url: "{{url('/getPrimarySachme')}}",
+            data: {
+               'division': $(this).val()
+            },
+            success: function(data) {
+               var html = '';
+               $.each(data.data, function(k, v) {
+                  html += '<option value="' + v.id + '">' + v.scheme_name + '</option>';
+               });
+               $("#scheme_id").html(html);
+            }
+         });
+      }else{
+        $("#scheme_id").html('');
+      }
+    })
   </script>
 </x-app-layout>

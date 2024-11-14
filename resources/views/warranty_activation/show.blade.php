@@ -203,7 +203,7 @@
                            <h6>Dealer</h6>
                            @if(count($warrantyactivation->seller_details->getparentdetail) > 0)
                            @foreach($warrantyactivation->seller_details->getparentdetail as $pdetails)
-                           <p>{{$pdetails->parent_detail->name}}</p>
+                           <p>{{$pdetails->parent_detail?$pdetails->parent_detail->name:''}}</p>
                            @endforeach
                            @else
                            <p>-</p>
