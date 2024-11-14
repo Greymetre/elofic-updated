@@ -181,7 +181,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 isset($data['orders']['cluster_discount']) ? $data['orders']['cluster_discount'] : '',
                 isset($data['orders']['deal_discount']) ? $data['orders']['deal_discount'] : '',
                 isset($data['orders']['cash_discount']) ? $data['orders']['cash_discount'] : '',
-                $data['products'] ? ($data['products']['productpriceinfo']['mrp'] > 0 && $data['quantity'] > 0 ? number_format(((1 - ($data['line_total'] / ($data['products']['productpriceinfo']['mrp'] * $data['quantity']))) * 100), 2): '0') : '0',
+                $data['products'] && isset($data['products']['productpriceinfo'], $data['products']['productpriceinfo']['mrp'], $data['quantity']) && $data['products']['productpriceinfo']['mrp'] > 0 && $data['quantity'] > 0 ? number_format(((1 - ($data['line_total'] / ($data['products']['productpriceinfo']['mrp'] * $data['quantity']))) * 100), 2): '0',
                 isset($data['products']['productpriceinfo']['gst']) ? $data['products']['productpriceinfo']['gst'] : '',
                 isset($data['line_total']) ? $data['line_total'] : '',
                 isset($data['orders']['grand_total'])  ? $data['orders']['grand_total'] : '',

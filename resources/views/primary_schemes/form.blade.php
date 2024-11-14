@@ -92,6 +92,24 @@
                   </div>
                   <div class="col-md-6">
                      <div class="input_section">
+                        <label class="col-form-label">Select Division</label>
+                        <select class="select2 form-control" name="division" id="division" required>
+                           <option value="" selected disabled>Select Division</option>
+                           @if($primary_divs && count($primary_divs) > 0)
+                           @foreach($primary_divs as $primary_div)
+                           <option value="{{$primary_div->division}}" {!! $primary_div->division == old('division', $schemes['division']) ?'selected':'' !!} >{{$primary_div->division}}</option>
+                           @endforeach
+                           @endif
+                        </select>
+                        @if ($errors->has('division'))
+                        <div class="error">
+                           <p class="text-danger">{{ $errors->first('division') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+                  <div class="col-md-6">
+                     <div class="input_section">
                         <label class="col-form-label">Select Repetition </label>
                         <select name="repetition" class="select2 form-control" id="repetition">
                            <option value="">Select Repetition </option>
@@ -116,6 +134,7 @@
                            <option value="lp" {{(old('scheme_type', $schemes->scheme_type) == 'lp')?'selected':''}}>LP Price</option>
                            <option value="Qty" {{(old('scheme_type', $schemes->scheme_type) == 'Qty')?'selected':''}}>Quantity</option>
                            <option value="grp_Qty" {{(old('scheme_type', $schemes->scheme_type) == 'grp_Qty')?'selected':''}}>Group Quantity</option>
+                           <option value="gift" {{(old('scheme_type', $schemes->scheme_type) == 'gift')?'selected':''}}>Gift</option>
                         </select>
                         @if ($errors->has('scheme_type'))
                         <div class="error col-lg-12">
@@ -125,13 +144,7 @@
                      </div>
                   </div>
 
-
-
-
                </div>
-
-
-
 
                <div class="quarter-selection row d-none">
                   <div class="col-md-6">
@@ -235,6 +248,17 @@
                         @if ($errors->has('scheme_description'))
                         <div class="error">
                            <p class="text-danger">{{ $errors->first('scheme_description') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+                  <div class="col-md-6 d-none" id="per_pcs_div">
+                     <div class="input_section">
+                        <label class="col-form-label">Per Pcs?</label>
+                        <input type="checkbox" name="per_pcs" id="per_pcs" value="1" {!! old( 'per_pcs', $schemes->per_pcs) == 1 ?'checked':'' !!}>
+                        @if ($errors->has('per_pcs'))
+                        <div class="error">
+                           <p class="text-danger">{{ $errors->first('per_pcs') }}</p>
                         </div>
                         @endif
                      </div>
@@ -417,7 +441,7 @@
                               <th class="text-center sub-category"> {!! trans('panel.orderschemes.fields.subcategory_id') !!}</th>
                               <th class="text-center product"> {!! trans('panel.orderschemes.fields.product_id') !!} </th>
                               <!-- <th class="text-center"> {!! trans('panel.orderschemes.fields.maximum') !!}</th> -->
-                              <th class="text-center"> {!! trans('panel.orderschemes.fields.points') !!} </th>
+                              <th class="text-center point"> {!! trans('panel.orderschemes.fields.points') !!} </th>
                               <th class="text-center"> </th>
                            </tr>
                         </thead>
@@ -468,6 +492,33 @@
                                  </div>
                               </td>
                               @endif
+                              @if( isset($row['slab_min']))
+                              <td>
+                                 <div class="input_section">
+                                    <select name="slab_min[]" class="form-control rowchange">
+                                       <option value="{{ $row['slab_min'] }}">{{ $row['slab_min'] }}</option>
+                                    </select>
+                                 </div>
+                              </td>
+                              @endif
+                              @if( isset($row['slab_max']))
+                              <td>
+                                 <div class="input_section">
+                                    <select name="slab_max[]" class="form-control rowchange">
+                                       <option value="{{ $row['slab_max'] }}">{{ $row['slab_max'] }}</option>
+                                    </select>
+                                 </div>
+                              </td>
+                              @endif
+                              @if( isset($row['gift']))
+                              <td>
+                                 <div class="input_section">
+                                    <select name="gift[]" class="form-control rowchange">
+                                       <option value="{{ $row['gift'] }}">{{ $row['gift'] }}</option>
+                                    </select>
+                                 </div>
+                              </td>
+                              @endif
                               @if( isset($row['subcategories']['subcategory_name']))
                               <td>
                                  <div class="input_section">
@@ -486,11 +537,13 @@
                                  </div>
                               </td>
                               @endif
+                              @if( isset($row['points']) && $row['points'] > 0)
                               <td>
                                  <div class="input_section">
                                     <input type="text" name="points[]" class="form-control points rowchange" value="{{ $row['points'] }}" />
                                  </div>
                               </td>
+                              @endif
                               <td class="td-actions text-center">
                                  <a class="remove-rows btn btn-danger btn-just-icon btn-sm"><i class="fa fa-minus"></i></a>
                               </td>
@@ -545,6 +598,21 @@
                   '<td style="width:30%" class="subCat"><div class="input_section"><input type="number" name="min[]' + counter + '" class="form-control  set_min_' + counter + '"></div></td>' +
                   '<td style="width:30%"><div class="input_section"><input type="number" name="max[]' + counter + '" class="form-control  set_max_' + counter + '"></div></td>' +
                   '<td><div class="input_section"><input required type="number" name="points[]' + counter + '"class="form-control points rowchange" /></div></td>' +
+                  '<td class="td-actions text-center"><a class="remove-rows btn btn-danger btn-just-icon btn-sm"><i class="fa fa-minus"></i></a></td> </tr>';
+            } else if (schemetype == 'gift') {
+               var newRow =
+                  '<tr> <td>' + counter + '</td>' +
+                  '<td class="group" style="width:20%"><div class="input_section"><select required name="groups[]' + counter + '" class="form-control select2  set_cat_' + counter + ' group_drop rowchange"></select></td>' +
+                  '<td style="width:10%" class="subCat"><div class="input_section"><input type="number" name="min[]' + counter + '" class="form-control  set_min_' + counter + '"></div></td>' +
+                  '<td style="width:10%"><div class="input_section"><input type="number" name="max[]' + counter + '" class="form-control  set_max_' + counter + '"></div></td>' +
+
+                  
+                  '<td style="width:10%" class="subCat"><div class="input_section"><input type="number" name="slab_min[]' + counter + '" class="form-control  set_slab_min_' + counter + '"></div></td>' +
+                  '<td style="width:10%"><div class="input_section"><input type="number" name="slab_max[]' + counter + '" class="form-control  set_slab_max_' + counter + '"></div></td>' +
+
+
+
+                  '<td style="width:30%"><div class="input_section"><input required type="text" name="gift[]' + counter + '"class="form-control gift rowchange" /></div></td>' +
                   '<td class="td-actions text-center"><a class="remove-rows btn btn-danger btn-just-icon btn-sm"><i class="fa fa-minus"></i></a></td> </tr>';
             } else {
                var newRow =
@@ -615,7 +683,7 @@
 
 
       function getcategorylist() {
-         if ($("#scheme_type").val() == 'grp_Qty') {
+         if ($("#scheme_type").val() == 'grp_Qty' || $("#scheme_type").val() == 'gift') {
             $.ajax({
                //url: "/getCategoryData",
                url: "{{url('/getPrimaryGroup')}}",
@@ -802,19 +870,48 @@
             $('#tab_logic .category').html('Group');
             $('#tab_logic .sub-category').html('Min');
             $('#tab_logic .product').html('Max');
+            $('#tab_logic .point').html('Discount');
+            $('#tab_logic thead tr th.slab_max').remove();
+            $('#tab_logic thead tr th.giftth').remove();
+
+            $('#min_max').hide();
+         } else if (schemeType == 'gift') {
+            $('#tab_logic .category').html('Group');
+            $('#tab_logic .sub-category').html('Min');
+            $('#tab_logic .product').html('Max');
+            $('#tab_logic .point').html('Slab Min');
+            $('#tab_logic thead tr th.point').after('<th class="text-center giftth">Gift</th>');
+            $('#tab_logic thead tr th.point').after('<th class="text-center slab_max">Slab Max</th>');
             $('#min_max').hide();
          } else if (schemeType == 'Qty') {
             $('#min_max').show();
             $('#tab_logic .category').html('Category');
             $('#tab_logic .sub-category').html('Sub category');
             $('#tab_logic .product').html('Product');
+            $('#tab_logic .point').html('Discount');
+            $('#tab_logic thead tr th.slab_max').remove();
+            $('#tab_logic thead tr th.giftth').remove();
+
          }else{
             $('#min_max').hide();
             $('#tab_logic .category').html('Category');
             $('#tab_logic .sub-category').html('Sub category');
             $('#tab_logic .product').html('Product');
+            $('#tab_logic .point').html('Discount');
+            $('#tab_logic thead tr th.slab_max').remove();
+            $('#tab_logic thead tr th.giftth').remove();
+
          }
       }).trigger('change');
+
+      $("#schemebasedon").on("change", function(){
+         var basedOn = $(this).val();
+         if(basedOn == 'value'){
+            $("#per_pcs_div").removeClass('d-none');
+         }else{
+            $("#per_pcs_div").addClass('d-none');
+         }
+      }).trigger("change");
    </script>
 
 

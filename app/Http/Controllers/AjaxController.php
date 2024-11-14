@@ -1440,7 +1440,7 @@ class AjaxController extends Controller
 
     public function getPrimarySachme(Request $request)
     {
-        $pSchemes = PrimaryScheme::where('quarter', $request->quater)->select('id', 'scheme_name')->get();
+        $pSchemes = PrimaryScheme::where('quarter', $request->quater)->whereIn('division', $request->division)->select('id', 'scheme_name')->get();
         return response()->json(['status' => 'success', 'data' => $pSchemes]);
     }
 }

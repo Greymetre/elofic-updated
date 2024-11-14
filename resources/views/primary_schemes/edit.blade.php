@@ -86,6 +86,23 @@
                         @endif
                      </div>
                   </div>
+                  <div class="col-md-6">
+                     <div class="form-group">
+                        <select class="select2 form-control" name="division" id="division">
+                           <option value="" selected disabled>Select Divisionss</option>
+                           @if($primary_divs && count($primary_divs) > 0)
+                           @foreach($primary_divs as $primary_div)
+                           <option value="{{$primary_div->division}}" {!! $primary_div->division == old('division', $schemes['division']) ?'selected':'' !!} >{{$primary_div->division}}</option>
+                           @endforeach
+                           @endif
+                        </select>
+                        @if ($errors->has('division'))
+                        <div class="error col-lg-12">
+                           <p class="text-danger">{{ $errors->first('division') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
                </div>
                <div class="row">
                   <div class="col-md-6">
