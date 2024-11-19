@@ -90,6 +90,10 @@ class DealerAppointmentDataTable extends DataTable
             $data->where('approval_status', $request->status_id);
         }
 
+        if($request->division_id != '' && $request->division_id != NULL){
+            $data->where('division', $request->division_id);
+        }
+
         $data = $data->latest()->newQuery();
         return $data;
     }

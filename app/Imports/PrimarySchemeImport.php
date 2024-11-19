@@ -47,6 +47,7 @@ class PrimarySchemeImport implements ToCollection,WithValidation,WithHeadingRow,
         foreach($rows as $row) {
             $scheme = PrimarySchemeDetail::updateOrCreate([
                 'primary_scheme_id' => decrypt($this->scheme_id),
+                'group_type' => !empty($row['group_type']) ? $row['group_type'] : null,
                 'groups' => isset($row['group_name'])? $row['group_name']:null,
                 'min' => isset($row['min'])? $row['min']:null,
                 'max' => isset($row['max'])? $row['max']:null,
@@ -59,6 +60,9 @@ class PrimarySchemeImport implements ToCollection,WithValidation,WithHeadingRow,
     public function rules(): array
     {
         return [
+            'group_type' => [
+                'required',
+            ],
             'group_name' => [
                 'required',
                 Rule::exists('primary_sales', 'new_group_name')

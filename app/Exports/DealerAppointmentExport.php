@@ -39,7 +39,7 @@ class DealerAppointmentExport implements FromCollection, WithHeadings, ShouldAut
             $query->where('designation_id', $this->designation_id);
         }
         if ($this->division_id) {
-            $query->where('division_id', $this->division_id);
+            $query->where('division', $this->division_id);
         }
         if ($this->status_id != '' && $this->status_id != NULL) {
             $query->where('approval_status', $this->status_id);

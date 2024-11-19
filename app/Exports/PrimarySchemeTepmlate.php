@@ -21,7 +21,7 @@ class PrimarySchemeTepmlate implements FromCollection,WithHeadings,ShouldAutoSiz
 
     public function headings(): array
     {
-        return ['Group Name', 'Min', 'Max', 'Points'];
+        return ['Group Type', 'Group Name', 'Min', 'Max', 'Points'];
     }
 
 }

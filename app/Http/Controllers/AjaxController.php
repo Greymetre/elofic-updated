@@ -206,7 +206,7 @@ class AjaxController extends Controller
     public function getPrimaryGroup(Request $request)
     {
         try {
-            $data = PrimarySales::groupBy('new_group_name')->pluck('new_group_name');;
+            $data = PrimarySales::whereNotNull($request->group_type)->groupBy($request->gruop_type)->pluck($request->gruop_type);
             return response()->json($data);
         } catch (\Exception $e) {
             return $e;

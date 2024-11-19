@@ -167,6 +167,10 @@ class PrimarySalesExport implements FromCollection, WithHeadings,WithMapping, Sh
             'New Group Name',
             'Product ID',
             'Customer Id',
+            'group_1',
+            'group_2',
+            'group_3',
+            'group_4',
             'Delete This',   
         ];
     }
@@ -202,6 +206,10 @@ class PrimarySalesExport implements FromCollection, WithHeadings,WithMapping, Sh
             $data['new_group_name'],
             $data['product_id'],
             $data['customer_id'],
+            $data['group_1'],
+            $data['group_2'],
+            $data['group_3'],
+            $data['group_4'],
         ];
     }
 

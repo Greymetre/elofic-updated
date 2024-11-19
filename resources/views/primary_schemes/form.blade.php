@@ -437,6 +437,7 @@
                         <thead>
                            <tr>
                               <th class="text-center"> # </th>
+                              <th class="text-center group_type_th">Group Type</th>
                               <th class="text-center category"> {!! trans('panel.orderschemes.fields.category_id') !!} </th>
                               <th class="text-center sub-category"> {!! trans('panel.orderschemes.fields.subcategory_id') !!}</th>
                               <th class="text-center product"> {!! trans('panel.orderschemes.fields.product_id') !!} </th>
@@ -466,6 +467,17 @@
                               </td>
                               @endif
                               @if( isset($row['groups']))
+                              <td>
+                                 <div class="input_section">
+                                    <select name="group_type[]" class="form-control rowchange">
+                                       <option value="" disabled selected>Select Group Type</option>
+                                       <option value="group_1" {{$row['group_type'] == 'group_1' ? 'selected' : ''}}>group_1</option>
+                                       <option value="group_2" {{$row['group_type'] == 'group_2' ? 'selected' : ''}}>group_2</option>
+                                       <option value="group_3" {{$row['group_type'] == 'group_3' ? 'selected' : ''}}>group_3</option>
+                                       <option value="group_4"{{$row['group_type'] == 'group_4' ? 'selected' : ''}}>group_4</option>
+                                    </select>
+                                 </div>
+                              </td>
                               <td>
                                  <div class="input_section">
                                     <select name="groups[]" class="form-control rowchange">
@@ -576,6 +588,7 @@
          </div>
       </div>
    </div>
+
    <script src="{{ url('/').'/'.asset('assets/js/validation_loyalty.js') }}"></script>
    <script>
       if ("{{count($schemes['primaryscheme_details'])}}" > 0) {
@@ -594,6 +607,7 @@
             if (schemetype == 'grp_Qty') {
                var newRow =
                   '<tr> <td>' + counter + '</td>' +
+                  '<td class="group" style="width:30%"><div class="input_section"><select required name="group_type[]' + counter + '" class="form-control select2  set_group_type_' + counter + ' group_type_drop rowchange"><option value="group_1">group_1</option><option value="group_2">group_2</option><option value="group_3">group_3</option><option value="group_4">group_4</option></select></td>' +
                   '<td class="group" style="width:30%"><div class="input_section"><select required name="groups[]' + counter + '" class="form-control select2  set_cat_' + counter + ' group_drop rowchange"></select></td>' +
                   '<td style="width:30%" class="subCat"><div class="input_section"><input type="number" name="min[]' + counter + '" class="form-control  set_min_' + counter + '"></div></td>' +
                   '<td style="width:30%"><div class="input_section"><input type="number" name="max[]' + counter + '" class="form-control  set_max_' + counter + '"></div></td>' +
@@ -602,6 +616,7 @@
             } else if (schemetype == 'gift') {
                var newRow =
                   '<tr> <td>' + counter + '</td>' +
+                  '<td class="group" style="width:30%"><div class="input_section"><select required name="group_type[]' + counter + '" class="form-control select2  set_group_type_' + counter + ' group_type_drop rowchange"><option value="group_1">group_1</option><option value="group_2">group_2</option><option value="group_3">group_3</option><option value="group_4">group_4</option></select></td>' +
                   '<td class="group" style="width:20%"><div class="input_section"><select required name="groups[]' + counter + '" class="form-control select2  set_cat_' + counter + ' group_drop rowchange"></select></td>' +
                   '<td style="width:10%" class="subCat"><div class="input_section"><input type="number" name="min[]' + counter + '" class="form-control  set_min_' + counter + '"></div></td>' +
                   '<td style="width:10%"><div class="input_section"><input type="number" name="max[]' + counter + '" class="form-control  set_max_' + counter + '"></div></td>' +
@@ -686,11 +701,13 @@
          if ($("#scheme_type").val() == 'grp_Qty' || $("#scheme_type").val() == 'gift') {
             $.ajax({
                //url: "/getCategoryData",
-               url: "{{url('/getPrimaryGroup')}}",
+               url: "{{url('/getPrimaryGroup?gruop_type=group_1')}}",
                success: function(data) {
                   var html = '<option value="">Select Group</option>';
                   $.each(data, function(k, v) {
-                     html += '<option value="' + v + '">' + v + '</option>';
+                     if(v != null){
+                        html += '<option value="' + v + '">' + v + '</option>';
+                     }
                   });
                   $('.set_cat_' + counter).html(html);
                   $('.select2').select2();
@@ -912,6 +929,27 @@
             $("#per_pcs_div").addClass('d-none');
          }
       }).trigger("change");
+
+      $(document).on('change', '.group_type_drop', function() {
+         var gruop_type = $(this).val();
+         let currentRow = $(this).closest('tr');
+         let groupDrop = currentRow.find('.group_drop');
+         $.ajax({
+               //url: "/getCategoryData",
+               url: "{{url('/getPrimaryGroup?gruop_type=')}}"+gruop_type,
+               success: function(data) {
+                  var html = '<option value="">Select Group</option>';
+                  $.each(data, function(k, v) {
+                     if(v != null){
+                        html += '<option value="' + v + '">' + v + '</option>';
+                     }
+                  });
+                  $(groupDrop).html(html);
+                  $('.select2').select2();
+               }
+            });
+      })
+
    </script>
 
 

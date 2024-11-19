@@ -25,7 +25,9 @@ class DealerAppointmentController extends Controller
     {
         abort_if(Gate::denies('dealer_appointment'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        return $dataTable->render('dealer_appointment.index');
+        $divisions = DealerAppointment::groupBy('division')->pluck('division');
+
+        return $dataTable->render('dealer_appointment.index', compact('divisions'));
     }
 
     /**
@@ -56,8 +58,10 @@ class DealerAppointmentController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
-        $dealer_appointment = DealerAppointment::create($request->all());
+        $data = $request->all();
+        $data['asc_divi'] = implode(',', $request->asc_divi);
+
+        $dealer_appointment = DealerAppointment::create($data);
 
         if ($request->hasFile('profile_picture')) {
             $file = $request->file('profile_picture');
@@ -128,6 +132,13 @@ class DealerAppointmentController extends Controller
             $dealer_appointment->addMedia($file)
                 ->usingFileName($customname)
                 ->toMediaCollection('bank_statement', 's3');
+        }
+        if ($request->hasFile('application_form')) {
+            $file = $request->file('application_form');
+            $customname = time() . '.' . $file->getClientOriginalExtension();
+            $dealer_appointment->addMedia($file)
+                ->usingFileName($customname)
+                ->toMediaCollection('application_form', 's3');
         }
         if ($request->hasFile('shop_image')) {
             $file = $request->file('shop_image');
@@ -180,7 +191,7 @@ class DealerAppointmentController extends Controller
      */
     public function update(Request $request, DealerAppointment $dealerAppointment)
     {
-        DealerAppointment::where('id', $dealerAppointment->id)->update($request->except(['_token','profile_picture','service_policy','dealer_policy','mou_sheet','mcl_cheque_1','mcl_cheque_2','gst_certificate','adhar_card','pan_card','bank_statement','shop_image']));
+        DealerAppointment::where('id', $dealerAppointment->id)->update($request->except(['_token', 'profile_picture', 'service_policy', 'dealer_policy', 'mou_sheet', 'mcl_cheque_1', 'mcl_cheque_2', 'gst_certificate', 'adhar_card', 'pan_card', 'bank_statement', 'shop_image']));
 
         if ($request->hasFile('profile_picture')) {
             $file = $request->file('profile_picture');
@@ -259,6 +270,13 @@ class DealerAppointmentController extends Controller
                 ->usingFileName($customname)
                 ->toMediaCollection('bank_statement', 's3');
         }
+        if ($request->hasFile('application_form')) {
+            $file = $request->file('application_form');
+            $customname = time() . '.' . $file->getClientOriginalExtension();
+            $dealerAppointment->addMedia($file)
+                ->usingFileName($customname)
+                ->toMediaCollection('application_form', 's3');
+        }
         return redirect(route('dealer-appointment'));
     }
 
@@ -272,9 +290,9 @@ class DealerAppointmentController extends Controller
     {
         DealerAppointmentKyc::where('appointment_id', $dealerAppointment->id)->delete();
         $check = DealerAppointment::where('id', $dealerAppointment->id)->delete();
-        if($check){
+        if ($check) {
             return redirect()->back()->with('message_success', 'Appointment deleted successfully')->withInput();
-        }else{
+        } else {
             return redirect()->back()->with('message_info', 'Appointment not deleted, Please try again leater.')->withInput();
         }
     }
@@ -297,7 +315,7 @@ class DealerAppointmentController extends Controller
 
     public function kyc_store(Request $request)
     {
-        DealerAppointmentKyc::updateOrCreate(['appointment_id' => $request->appointment_id,],[
+        DealerAppointmentKyc::updateOrCreate(['appointment_id' => $request->appointment_id,], [
             'appointment_id' => $request->appointment_id,
             'channel_partner' => $request->channel_partner,
             'place' => $request->place,

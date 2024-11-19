@@ -1020,7 +1020,7 @@
                      </a>
                      <div class="collapse" id="salesUserMenu" style="">
                         <ul class="navd">
-                           @if(auth()->user()->can('target_users_access'))
+                           @if(auth()->user()->can('target_users_access_sales'))
                            <li class="nav-link-btn {{ request()->is('sales_users*') ? 'active' : '' }}">
                               <a class="hoveradd2" href="{{ url('sales_users/target_users') }}">
                                  <i class="material-icons icon">emoji_events</i>

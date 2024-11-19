@@ -44,28 +44,57 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
     public function collection()
     {
         $f_year_array = explode('-', $this->financial_year);
-        $pSchemesGroup = PrimarySchemeDetail::where('primary_scheme_id', $this->scheme_id)->groupBy('groups')->pluck('groups');
+        $pSchemesGroups = PrimarySchemeDetail::where('primary_scheme_id', $this->scheme_id)
+            ->select([DB::raw('GROUP_CONCAT(`groups`) as `groups`'), 'group_type'])
+            ->groupBy('group_type')
+            ->get();
         $pSchemesBranchCol = PrimaryScheme::where('id', $this->scheme_id)->groupBy('branch')->pluck('branch');
         $this->pSchemes = PrimaryScheme::where('id', $this->scheme_id)->first();
         $pSchemesBranch = $pSchemesBranchCol->flatMap(function ($item) {
             return explode(',', $item);
         })->toArray();
-        $data = PrimarySales::with(['user', 'user.getdesignation', 'user.getdivision', 'branch', 'customer'])->select([
-            DB::raw('SUM(quantity) as total_quantity'),
-            DB::raw('SUM(net_amount) as total_net_amount'),
-            DB::raw('final_branch'),
-            DB::raw('emp_code'),
-            DB::raw('branch_id'),
-            DB::raw('customer_id'),
-            DB::raw('division'),
-            DB::raw('new_group_name'),
-        ])->whereIn('new_group_name', $pSchemesGroup);
+        if ($pSchemesGroups[0]->group_type == 'group_2') {
+            $data = PrimarySales::with(['user', 'user.getdesignation', 'user.getdivision', 'branch', 'customer'])->select([
+                DB::raw('SUM(quantity) as total_quantity'),
+                DB::raw('SUM(net_amount) as total_net_amount'),
+                DB::raw('final_branch'),
+                DB::raw('emp_code'),
+                DB::raw('branch_id'),
+                DB::raw('customer_id'),
+                DB::raw('division'),
+                DB::raw('group_2'),
+                DB::raw('GROUP_CONCAT(DISTINCT new_group_name) as new_group_name'),
+            ]);
+        } else {
+            $data = PrimarySales::with(['user', 'user.getdesignation', 'user.getdivision', 'branch', 'customer'])->select([
+                DB::raw('SUM(quantity) as total_quantity'),
+                DB::raw('SUM(net_amount) as total_net_amount'),
+                DB::raw('final_branch'),
+                DB::raw('emp_code'),
+                DB::raw('branch_id'),
+                DB::raw('customer_id'),
+                DB::raw('division'),
+                DB::raw('new_group_name'),
+            ]);
+        }
+        $data->where(function ($query) use ($pSchemesGroups) {
+            foreach ($pSchemesGroups as $key => $value) {
+                // dd($value->groups);
+                $groupsArray = explode(',', $value->groups);
+                // Apply OR WHERE IN for each group type
+                $query->orWhereIn($value->group_type, $groupsArray);
+            }
+        });
 
         if (!in_array('FAN', $this->division)) {
             $data->whereIn('branch_id', $pSchemesBranch);
         }
         if ($this->pSchemes->repetition == '3') {
             $data->where('invoice_date', '>=', $this->pSchemes->start_date)->where('invoice_date', '<=', $this->pSchemes->end_date);
+        }
+
+        if (auth()->user()->hasRole('Customer Dealer')) {
+            $data->where('customer_id', auth()->user()->customerid);
         }
 
         if ($this->pSchemes->repetition == '5') {
@@ -106,8 +135,14 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
             $data->whereIn('division', $this->division);
         }
 
-        $data = $data->groupBy('customer_id', 'emp_code', 'final_branch', 'branch_id', 'division', 'new_group_name')->orderBy('month')->get();
 
+        // dd($data->groupBy('customer_id', 'emp_code', 'final_branch', 'branch_id', 'division', 'new_group_name')->toSql(), $this->pSchemes->start_date, $this->pSchemes->end_date, $pSchemesGroups);
+        if ($pSchemesGroups[0]->group_type == 'group_2') {
+            $data = $data->groupBy('customer_id', 'emp_code', 'final_branch', 'branch_id', 'division', 'group_2')->orderBy('month')->get();
+        } else {
+            $data = $data->groupBy('customer_id', 'emp_code', 'final_branch', 'branch_id', 'division', 'new_group_name')->orderBy('month')->get();
+        }
+        // dd($data);
         return $data;
     }
 
@@ -123,7 +158,15 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
 
     public function map($data): array
     {
-        $CM = PrimarySchemeDetail::where('groups', $data['new_group_name'])->where('min', '<=', $data['total_quantity'])->where('max', '>=', $data['total_quantity'])->where('primary_scheme_id', $this->scheme_id)->first();
+        $pSchemesGroups = PrimarySchemeDetail::where('primary_scheme_id', $this->scheme_id)
+            ->select([DB::raw('GROUP_CONCAT(`groups`) as `groups`'), 'group_type'])
+            ->groupBy('group_type')
+            ->get();
+        if ($pSchemesGroups[0]->group_type == 'group_2') {
+            $CM = PrimarySchemeDetail::whereIn('groups', explode(',',$data['group_2']))->where('min', '<=', $data['total_quantity'])->where('max', '>=', $data['total_quantity'])->where('primary_scheme_id', $this->scheme_id)->first();
+        } else {
+            $CM = PrimarySchemeDetail::where('groups', $data['new_group_name'])->where('min', '<=', $data['total_quantity'])->where('max', '>=', $data['total_quantity'])->where('primary_scheme_id', $this->scheme_id)->first();
+        }
 
         $response = array();
         $response[0] = $this->financial_year;
@@ -141,22 +184,21 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
         $response[12] = $data['total_quantity'] ?? '-';
         $response[13] = $data['total_net_amount'] ?? '-';
         $response[14] = $data['total_quantity'] ?? '-';
-        $response[15] = $data['total_net_amount']/100000 ?? '-';
+        $response[15] = $data['total_net_amount'] > 0 ? number_format($data['total_net_amount'] / 100000, 2, '.', '') : '-';
         if (!in_array('FAN', $this->division)) {
-
             $response[16] = $CM ? $CM->points . '%' : '0%';
             $response[17] = $CM ? $CM->primaryscheme->scheme_name : '-';
         } else {
             if ($this->pSchemes->scheme_type == 'gift') {
-                if($CM){
-                    if($CM->slab_min <= $data['total_net_amount']/100000){
-                        $response[16] = $CM->gift;        
-                    }else{
+                if ($CM) {
+                    if ($CM->slab_min <= $data['total_net_amount'] / 100000) {
+                        $response[16] = $CM->gift;
+                    } else {
                         $checkOthers = PrimarySchemeDetail::where('primary_scheme_id', $this->scheme_id)->where('slab_min', '<=', $response[15])->first();
-                        $response[16] = $checkOthers?$checkOthers->gift:'-';
+                        $response[16] = $checkOthers ? $checkOthers->gift : '-';
                     }
-                }else{
-                    $response[16] = '-'    ;
+                } else {
+                    $response[16] = '-';
                 }
                 $response[17] = $CM ? $CM->primaryscheme->scheme_name : '-';
             } else {

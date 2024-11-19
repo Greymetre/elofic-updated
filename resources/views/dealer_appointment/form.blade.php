@@ -461,23 +461,48 @@
             <div class="row mt-4">
                 <div class="col-md-4">
                     <div class="form-check">
-                        <label class="form-check-label" for="distributor"> Distributor </label>
-                        <input required class="form-check-input mr-3" type="radio" name="customertype" value="distributor" id="distributor">
+                        <label class="form-check-label" for="PUMPMOTORS"> PUMP & MOTORS </label>
+                        <input required class="form-check-input" type="radio" value="PUMP&MOTORS" name="division" id="PUMPMOTORS">
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-check">
-                        <label class="form-check-label" for="dealer"> Dealer </label>
-                        <input required class="form-check-input mr-3" type="radio" name="customertype" value="dealer" id="dealer">
+                        <label class="form-check-label" for="FAN&APP"> FAN & APP </label>
+                        <input required class="form-check-input" type="radio" name="division" value="FAN&APP" id="FAN&APP">
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-check">
-                        <label class="form-check-label" for="shopee"> Shopee </label>
-                        <input required class="form-check-input mr-3" type="radio" name="customertype" value="shopee" id="shopee">
+                        <label class="form-check-label" for="AGRID"> AGRI </label>
+                        <input required class="form-check-input" type="radio" name="division" value="AGRI" id="AGRID">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-check">
+                        <label class="form-check-label" for="SOLAR"> SOLAR </label>
+                        <input required class="form-check-input" type="radio" name="division" value="SOLAR" id="SOLAR">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-check">
+                        <label class="form-check-label" for="LIGHTING"> LIGHTING </label>
+                        <input required class="form-check-input" type="radio" name="division" id="LIGHTING" value="LIGHTING">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-check">
+                        <label class="form-check-label" for="SERVECE"> ASC </label>
+                        <input required class="form-check-input" type="radio" name="division" id="SERVECE" value="SERVECE">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-check">
+                        <label class="form-check-label" for="Others"> Others </label>
+                        <input required class="form-check-input" type="radio" name="division" id="Others" value="Others">
                     </div>
                 </div>
             </div>
+
             <div class="row mt-4">
                 <div class="col-md-10">
                     <div class="form-group row">
@@ -489,6 +514,25 @@
                                 <option value="" disabled selected>Your Answer</option>
                                 <option value="Yes">Yes</option>
                                 <option value="No">No</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4 d-none" id="asc-div">
+                <div class="col-md-10">
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <label for="asc_divi">Please select divisions </label>
+                        </div>
+                        <div class="col-md-6">
+                            <select class="form-select select2" name="asc_divi[]" multiple id="asc_divi" required>
+                                <option value="PUMP&MOTORS">PUMP & MOTORS</option>
+                                <option value="FAN&APP">FAN & APP</option>
+                                <option value="AGRI">AGRI</option>
+                                <option value="SOLAR">SOLAR</option>
+                                <option value="LIGHTING">LIGHTING</option>
                             </select>
                         </div>
                     </div>
@@ -534,51 +578,33 @@
                     </div>
                 </div>
             </div>
+
             <div class="row mt-4">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="form-check">
-                        <label class="form-check-label" for="PUMPMOTORS"> PUMP & MOTORS </label>
-                        <input required class="form-check-input" type="radio" value="PUMP&MOTORS" name="division" id="PUMPMOTORS">
+                        <label class="form-check-label" for="distributor"> Distributor </label>
+                        <input required class="form-check-input mr-3" type="radio" name="customertype" value="distributor" id="distributor">
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="form-check">
-                        <label class="form-check-label" for="FAN&APP"> FAN & APP </label>
-                        <input required class="form-check-input" type="radio" name="division" value="FAN&APP" id="FAN&APP">
+                        <label class="form-check-label" for="dealer"> Dealer </label>
+                        <input required class="form-check-input mr-3" type="radio" name="customertype" value="dealer" id="dealer">
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="form-check">
-                        <label class="form-check-label" for="AGRID"> AGRI </label>
-                        <input required class="form-check-input" type="radio" name="division" value="AGRI" id="AGRID">
+                        <label class="form-check-label" for="shopee"> Shopee </label>
+                        <input required class="form-check-input mr-3" type="radio" name="customertype" value="shopee" id="shopee">
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="form-check">
-                        <label class="form-check-label" for="SOLAR"> SOLAR </label>
-                        <input required class="form-check-input" type="radio" name="division" value="SOLAR" id="SOLAR">
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="form-check">
-                        <label class="form-check-label" for="LIGHTING"> LIGHTING </label>
-                        <input required class="form-check-input" type="radio" name="division" id="LIGHTING" value="LIGHTING">
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="form-check">
-                        <label class="form-check-label" for="SERVECE"> SERVICE </label>
-                        <input required class="form-check-input" type="radio" name="division" id="SERVECE" value="SERVECE">
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="form-check">
-                        <label class="form-check-label" for="Others"> Others </label>
-                        <input required class="form-check-input" type="radio" name="division" id="Others" value="Others">
+                        <label class="form-check-label" for="service center"> Service Center </label>
+                        <input required class="form-check-input mr-3" type="radio" name="customertype" value="Service Center" id="servicecenter">
                     </div>
                 </div>
             </div>
-
             <div class="row mt-4 d-none" id="parent-div">
                 <div class="col-md-4">
                     <select name="parent_id" id="parent_id" class="select2 form-control"></select>
@@ -624,6 +650,19 @@
                         </div>
                         <div class="col-md-6">
                             <input class="form-control mr-3" id="asda" type="text" name="SDPUMPMOTORS" value="100000" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group row">
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <label class="form-check-label" for="service_centerd"> Service Center </label>
+                                <input required class="form-check-input" type="radio" name="security_deposit" id="service_centerd" value="0">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <input class="form-control mr-3" id="asda" type="text" name="SDservicecenterd" value="0">
                         </div>
                     </div>
                 </div>
@@ -876,6 +915,7 @@
                                             <option value="Current Account">Current Account</option>
                                             <option value="CC Account">CC Account</option>
                                             <option value="OD Account">OD Account</option>
+                                            <option value="Saving Accounts">Saving Accounts</option>
                                         </select>
                                     </td>
                                 </tr>
@@ -1130,6 +1170,22 @@
                         </div>
                     </div>
                     <div class="col-md-3 mb-3">
+                        <label for="application_form">Application Form(PDF Only)</label>
+                        <div class="inp-div">
+                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                            <p class="m-0">Attach a File</p>
+                            <input type="file" name="application_form" id="application_form" class="form-control file-input" accept="application/pdf">
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="cancel_cheque">Cancel Cheque / Passbook (PDF Only)</label>
+                        <div class="inp-div">
+                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                            <p class="m-0">Attach a File</p>
+                            <input type="file" name="cancel_cheque" id="cancel_cheque" class="form-control file-input" accept="application/pdf">
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
                         <label for="shop_image">Shop Image</label>
                         <div class="inp-div">
                             <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
@@ -1342,22 +1398,35 @@
                 });
                 $('input[name="customertype"]').change(function() {
                     var selectedType = $(this).val();
+                    var selectedDivision = $('input[name="division"]:checked').val();
                     if (selectedType == 'dealer') {
                         document.getElementById("asda").value = '25000';
                     } else {
                         document.getElementById("asda").value = '100000';
                     }
+
+                    if (selectedDivision == 'AGRI' && selectedType == 'dealer') {
+                        $("#parent-div").removeClass('d-none');
+                    } else {
+                        $("#parent-div").addClass('d-none');
+                    }
                 });
-                    $('input[name="division"]').change(function() {
-                        var selectedType = $('input[name="customertype"]:checked').val();
-                        var selectedDivision = $(this).val();
-                        
-                        if (selectedDivision == 'AGRI' && selectedType == 'dealer') {
-                            $("#parent-div").removeClass('d-none');
-                        } else {
-                            $("#parent-div").addClass('d-none');
-                        }
-                    });
+                $('input[name="division"]').change(function() {
+                    var selectedType = $('input[name="customertype"]:checked').val();
+                    var selectedDivision = $(this).val();
+
+                    if (selectedDivision == 'SERVECE') {
+                        $('#asc-div').removeClass('d-none');
+                    } else {
+                        $('#asc-div').addClass('d-none');
+                    }
+
+                    if (selectedDivision == 'AGRI' && selectedType == 'dealer') {
+                        $("#parent-div").removeClass('d-none');
+                    } else {
+                        $("#parent-div").addClass('d-none');
+                    }
+                });
             });
 
             setTimeout(() => {
