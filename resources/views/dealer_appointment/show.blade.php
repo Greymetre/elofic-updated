@@ -252,22 +252,46 @@
             </div>
 
             <div class="row mt-4">
-              <div class="col-md-3">
+              <div class="col-md-4">
                 <div class="form-check">
-                  <label class="form-check-label" for="distributor"> Distributor </label>
-                  <input disabled class="form-check-input mr-3" type="radio" name="customertype" value="distributor" id="distributor" {{($dealerAppointment->customertype == 'distributor')?'checked':''}}>
+                  <label class="form-check-label" for="PUMPMOTORS"> PUMP & MOTORS </label>
+                  <input disabled class="form-check-input" type="radio" value="PUMP&MOTORS" name="division" id="PUMPMOTORS" {{($dealerAppointment->division == 'PUMP&MOTORS')?'checked':''}}>
                 </div>
               </div>
-              <div class="col-md-3">
+              <div class="col-md-4">
                 <div class="form-check">
-                  <label class="form-check-label" for="dealer"> Dealer </label>
-                  <input disabled class="form-check-input mr-3" type="radio" name="customertype" value="dealer" id="dealer" {{($dealerAppointment->customertype == 'dealer')?'checked':''}}>
+                  <label class="form-check-label" for="FAN&APP"> FAN & APP </label>
+                  <input disabled class="form-check-input" type="radio" name="division" value="FAN&APP" id="FAN&APP" {{($dealerAppointment->division == 'FAN&APP')?'checked':''}}>
                 </div>
               </div>
-              <div class="col-md-3">
+              <div class="col-md-4">
                 <div class="form-check">
-                  <label class="form-check-label" for="shopee"> Shopee </label>
-                  <input disabled class="form-check-input mr-3" type="radio" name="customertype" value="shopee" id="shopee" {{($dealerAppointment->customertype == 'shopee')?'checked':''}}>
+                  <label class="form-check-label" for="AGRI"> AGRI </label>
+                  <input disabled class="form-check-input" type="radio" name="division" value="AGRI" id="AGRI" {{($dealerAppointment->division == 'AGRI')?'checked':''}}>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-check">
+                  <label class="form-check-label" for="SOLAR"> SOLAR </label>
+                  <input disabled class="form-check-input" type="radio" name="division" value="SOLAR" id="SOLAR" {{($dealerAppointment->division == 'SOLAR')?'checked':''}}>
+                </div>
+              </div>
+              <div class="col-md-4">
+                    <div class="form-check">
+                        <label class="form-check-label" for="SERVECE"> ASC </label>
+                        <input required class="form-check-input" type="radio" name="division" id="SERVECE" value="SERVECE" {{($dealerAppointment->division == 'SERVECE')?'checked':''}}>
+                    </div>
+                </div>
+              <div class="col-md-4">
+                <div class="form-check">
+                  <label class="form-check-label" for="LIGHTING"> LIGHTING </label>
+                  <input disabled class="form-check-input" type="radio" name="division" id="LIGHTING" value="LIGHTING" {{($dealerAppointment->division == 'LIGHTING')?'checked':''}}>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-check">
+                  <label class="form-check-label" for="Others"> Others </label>
+                  <input disabled class="form-check-input" type="radio" name="division" id="Others" value="Others" {{($dealerAppointment->division == 'Others')?'checked':''}}>
                 </div>
               </div>
             </div>
@@ -284,6 +308,18 @@
                       <option value="Yes" {{($dealerAppointment->old_user == 'Yes')?'selected':''}}>Yes</option>
                       <option value="No" {{($dealerAppointment->old_user == 'No')?'selected':''}}>No</option>
                     </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row mt-4 d-none" id="asc-div">
+              <div class="col-md-12">
+                <div class="form-group row">
+                  <div class="col-md-2">
+                    <label for="asc_divi">Please select divisions :</label>
+                  </div>
+                  <div class="col-md-8">
+                    <h4>{{$dealerAppointment->asc_divi}}</h4>
                   </div>
                 </div>
               </div>
@@ -332,47 +368,36 @@
             @endif
 
             <div class="row mt-4">
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <div class="form-check">
-                  <label class="form-check-label" for="PUMPMOTORS"> PUMP & MOTORS </label>
-                  <input disabled class="form-check-input" type="radio" value="PUMP&MOTORS" name="division" id="PUMPMOTORS" {{($dealerAppointment->division == 'PUMP&MOTORS')?'checked':''}}>
+                  <label class="form-check-label" for="distributor"> Distributor </label>
+                  <input disabled class="form-check-input mr-3" type="radio" name="customertype" value="distributor" id="distributor" {{($dealerAppointment->customertype == 'distributor')?'checked':''}}>
                 </div>
               </div>
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <div class="form-check">
-                  <label class="form-check-label" for="FAN&APP"> FAN & APP </label>
-                  <input disabled class="form-check-input" type="radio" name="division" value="FAN&APP" id="FAN&APP" {{($dealerAppointment->division == 'FAN&APP')?'checked':''}}>
+                  <label class="form-check-label" for="dealer"> Dealer </label>
+                  <input disabled class="form-check-input mr-3" type="radio" name="customertype" value="dealer" id="dealer" {{($dealerAppointment->customertype == 'dealer')?'checked':''}}>
                 </div>
               </div>
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <div class="form-check">
-                  <label class="form-check-label" for="AGRI"> AGRI </label>
-                  <input disabled class="form-check-input" type="radio" name="division" value="AGRI" id="AGRI" {{($dealerAppointment->division == 'AGRI')?'checked':''}}>
+                  <label class="form-check-label" for="shopee"> Shopee </label>
+                  <input disabled class="form-check-input mr-3" type="radio" name="customertype" value="shopee" id="shopee" {{($dealerAppointment->customertype == 'shopee')?'checked':''}}>
                 </div>
               </div>
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <div class="form-check">
-                  <label class="form-check-label" for="SOLAR"> SOLAR </label>
-                  <input disabled class="form-check-input" type="radio" name="division" value="SOLAR" id="SOLAR" {{($dealerAppointment->division == 'SOLAR')?'checked':''}}>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="form-check">
-                  <label class="form-check-label" for="LIGHTING"> LIGHTING </label>
-                  <input disabled class="form-check-input" type="radio" name="division" id="LIGHTING" value="LIGHTING" {{($dealerAppointment->division == 'LIGHTING')?'checked':''}}>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="form-check">
-                  <label class="form-check-label" for="Others"> Others </label>
-                  <input disabled class="form-check-input" type="radio" name="division" id="Others" value="Others" {{($dealerAppointment->division == 'Others')?'checked':''}}>
+                  <label class="form-check-label" for="server center"> Service Center </label>
+                  <input disabled class="form-check-input mr-3" type="radio" name="customertype" value="server center" id="servercenter" {{($dealerAppointment->customertype == 'server center')?'checked':''}}>
                 </div>
               </div>
             </div>
 
+
             <div class="row mt-4 d-none" id="parent-div">
               <div class="col-md-4">
-              <label class="form-check-label" for="Others"> Parent Customer </label>
+                <label class="form-check-label" for="Others"> Parent Customer </label>
                 <input type="text" value="{{$dealerAppointment->parent?$dealerAppointment->parent->name:''}}" class="form-control" name="parent_id" disabled>
               </div>
             </div>
@@ -416,6 +441,19 @@
                   </div>
                   <div class="col-md-7 p-0">
                     <h4>100000</h4>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group row">
+                  <div class="col-md-2 p-0 pr-1">
+                    <input class="form-check-input ml-3" type="radio" name="security_deposit" value="{{$dealerAppointment->security_deposit }}" disabled {{($dealerAppointment->security_deposit == '0')?'checked':''}}>
+                  </div>
+                  <div class="col-md-6 p-0">
+                    <label> Service Center </label>
+                  </div>
+                  <div class="col-md-3 p-0">
+                    <h4>{{$dealerAppointment->SDservicecenterd }}</h4>
                   </div>
                 </div>
               </div>
@@ -1174,6 +1212,12 @@
           var selectedType = $('input[name="customertype"]:checked').val();
           var selectedDivision = $('input[name="division"]:checked').val();
           console.log(selectedType, selectedDivision);
+
+          if (selectedDivision == 'SERVECE') {
+            $('#asc-div').removeClass('d-none');
+          } else {
+            $('#asc-div').addClass('d-none');
+          }
 
           if (selectedDivision == 'AGRI' && selectedType == 'dealer') {
             $("#parent-div").removeClass('d-none');

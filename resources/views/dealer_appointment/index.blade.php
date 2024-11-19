@@ -36,6 +36,23 @@
                         @endif
                       </div>
                     </div>
+                    <div class="p-2" style="width:160px;">
+                      <div class="form-group">
+                        <!-- <label class="bmd-label-floating">Status</label> -->
+                        <select class="form-control select2" name="division_id" id="division_id" style="width: 100%;">
+                          <option value="">Select Division</option>
+                          @foreach($divisions as $division)
+                          <option value="{{$division}}">{{$division}}</option>
+                          @endforeach
+                          
+                        </select>
+                        @if ($errors->has('division_id'))
+                        <div class="error col-lg-12">
+                          <p class="text-danger">{{ $errors->first('division_id') }}</p>
+                        </div>
+                        @endif
+                      </div>
+                    </div>
                     <!-- <div class="p-2" style="width:160px;">
                       <div class="form-group">
                         <label class="bmd-label-floating">{!! trans('panel.global.city') !!} </label>
@@ -148,7 +165,7 @@
           'data': function(d) {
             d.status = $('#status').val(),
               d.status_id = $('#status_id').val(),
-              d.district_id = $('#district_id').val(),
+              d.division_id = $('#division_id').val(),
               d.startdate = $('#start_date').val(),
               d.enddate = $('#end_date').val()
           }
@@ -237,7 +254,7 @@
       $('#status_id').change(function() {
         table.draw();
       });
-      $('#district_id').change(function() {
+      $('#division_id').change(function() {
         table.draw();
       });
     });

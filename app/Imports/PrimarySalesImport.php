@@ -77,6 +77,10 @@ class PrimarySalesImport implements ToCollection, WithValidation, WithHeadingRow
                         'new_group_name' => $row['new_group_name'],
                         'product_id' => $row['product_id'] ?? NULL,
                         'customer_id' => $row['customer_id'] ?? NULL,
+                        'group_1' => $row['group_1'] ?? NULL,
+                        'group_2' => $row['group_2'] ?? NULL,
+                        'group_3' => $row['group_3'] ?? NULL,
+                        'group_4' => $row['group_4'] ?? NULL,
                     ]);
                 }
             } else {
@@ -108,6 +112,10 @@ class PrimarySalesImport implements ToCollection, WithValidation, WithHeadingRow
                     'new_group_name' => $row['new_group_name'],
                     'product_id' => $row['product_id'] ?? NULL,
                     'customer_id' => $row['customer_id'] ?? NULL,
+                    'group_1' => $row['group_1'] ?? NULL,
+                    'group_2' => $row['group_2'] ?? NULL,
+                    'group_3' => $row['group_3'] ?? NULL,
+                    'group_4' => $row['group_4'] ?? NULL,
                 ]);
             }
         }

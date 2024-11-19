@@ -15,7 +15,7 @@
       }
     }
 
-   /* input.form-control:read-only {
+    /* input.form-control:read-only {
       border-bottom: 1px solid #000 !important;
     }*/
 
@@ -152,15 +152,15 @@
                   </div>
                   <div class="col-md-9">
                     <div class="input_section">
-                    <select class="form-select select2" name="branch" id="branch" required>
-                      <option value="" disabled selected>Your answer</option>
-                      @if($branchs && count($branchs) > 0)
-                      @foreach($branchs as $branch)
-                      <option value="{{$branch->id}}" {{($dealerAppointment->branch == $branch->id)?'selected':''}}>{{$branch->branch_name}}</option>
-                      @endforeach
-                      @endif
-                    </select>
-                  </div>
+                      <select class="form-select select2" name="branch" id="branch" required>
+                        <option value="" disabled selected>Your answer</option>
+                        @if($branchs && count($branchs) > 0)
+                        @foreach($branchs as $branch)
+                        <option value="{{$branch->id}}" {{($dealerAppointment->branch == $branch->id)?'selected':''}}>{{$branch->branch_name}}</option>
+                        @endforeach
+                        @endif
+                      </select>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -171,15 +171,15 @@
                   </div>
                   <div class="col-md-8">
                     <div class="input_section">
-                    <select class="select2" name="created_by" id="created_by" data-style="select-with-transition" title="Select User">
-                      <option value="">Select User</option>
-                      @if(count($users) > 0)
-                      @foreach($users as $user)
-                      <option value="{{$user->id}}" {{($dealerAppointment->created_by == $user->id)?'selected':''}}>{{$user->name}}</option>
-                      @endforeach
-                      @endif
-                    </select>
-                  </div>
+                      <select class="select2" name="created_by" id="created_by" data-style="select-with-transition" title="Select User">
+                        <option value="">Select User</option>
+                        @if(count($users) > 0)
+                        @foreach($users as $user)
+                        <option value="{{$user->id}}" {{($dealerAppointment->created_by == $user->id)?'selected':''}}>{{$user->name}}</option>
+                        @endforeach
+                        @endif
+                      </select>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -204,15 +204,15 @@
                   </div>
                   <div class="col-md-9">
                     <div class="input_section">
-                    <select class="form-select select2" name="district" id="district" required>
-                      <option value="" disabled selected>Your answer</option>
-                      @if($districts && count($districts) > 0)
-                      @foreach($districts as $district)
-                      <option value="{{$district->id}}" {{($dealerAppointment->district == $district->id)?'selected':''}}>{{$district->district_name}}</option>
-                      @endforeach
-                      @endif
-                    </select>
-                  </div>
+                      <select class="form-select select2" name="district" id="district" required>
+                        <option value="" disabled selected>Your answer</option>
+                        @if($districts && count($districts) > 0)
+                        @foreach($districts as $district)
+                        <option value="{{$district->id}}" {{($dealerAppointment->district == $district->id)?'selected':''}}>{{$district->district_name}}</option>
+                        @endforeach
+                        @endif
+                      </select>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -223,10 +223,10 @@
                   </div>
                   <div class="col-md-8">
                     <div class="input_section">
-                    <select class="form-select select2" name="city" id="city" required>
-                      <option value="" disabled selected>Select City</option>
-                    </select>
-                  </div>
+                      <select class="form-select select2" name="city" id="city" required>
+                        <option value="" disabled selected>Select City</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -237,8 +237,8 @@
                   </div>
                   <div class="col-md-8">
                     <div class="input_section">
-                    <input type="text" name="place" id="place" class="form-control uppercase" value="{{$dealerAppointment->place}}">
-                  </div>
+                      <input type="text" name="place" id="place" class="form-control uppercase" value="{{$dealerAppointment->place}}">
+                    </div>
                   </div>
                 </div>
               </div>
@@ -251,85 +251,6 @@
               <div class="col-md-4">
                 <input type="date" value="{{$dealerAppointment->appointment_date}}" name="appointment_date" id="appointment_date" class="form-control">
               </div>
-            </div>
-
-            <div class="row mt-4">
-              <div class="col-md-4">
-                <div class="form-check">
-                  <label class="form-check-label" for="distributor"> Distributor </label>
-                  <input class="form-check-input mr-3" type="radio" name="customertype" value="distributor" id="distributor" {{($dealerAppointment->customertype == 'distributor')?'checked':''}}>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="form-check">
-                  <label class="form-check-label" for="dealer"> Dealer </label>
-                  <input class="form-check-input mr-3" type="radio" name="customertype" value="dealer" id="dealer" {{($dealerAppointment->customertype == 'dealer')?'checked':''}}>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="form-check">
-                  <label class="form-check-label" for="shopee"> Shopee </label>
-                  <input class="form-check-input mr-3" type="radio" name="customertype" value="shopee" id="shopee" {{($dealerAppointment->customertype == 'shopee')?'checked':''}}>
-                </div>
-              </div>
-            </div>
-
-            <div class="row mt-4">
-                <div class="col-md-10">
-                    <div class="form-group row">
-                        <div class="col-md-6">
-                            <label for="old_user">Are you already working on another division of <b>Silver/Bediya</b>? </label>
-                        </div>
-                        <div class="col-md-6">
-                            <select class="form-select select2" name="old_user" id="old_user" required>
-                                <option value="" disabled selected>Your Answer</option>
-                                <option value="Yes" {{$dealerAppointment->old_user == 'Yes' ? 'selected' : ''}}>Yes</option>
-                                <option value="No" {{$dealerAppointment->old_user == 'No' ? 'selected' : ''}}>No</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row mt-4 if_old d-none">
-                <div class="col-md-3">
-                    <div class="form-group row">
-                        <div class="col-md-5">
-                            <label for="old_division">Select devision </label>
-                        </div>
-                        <div class="col-md-7">
-                            <select class="form-select select2" name="old_division" id="old_division">
-                                <option value="" disabled selected>Your Answer</option>
-                                <option value="PUMP&MOTORS" {{$dealerAppointment->old_division == 'PUMP&MOTORS' ? 'selected' : ''}}>PUMP & MOTORS</option>
-                                <option value="FAN&APP" {{$dealerAppointment->old_division == 'FAN&APP' ? 'selected' : ''}}>FAN & APP</option>
-                                <option value="AGRI" {{$dealerAppointment->old_division == 'AGRI' ? 'selected' : ''}}>AGRI</option>
-                                <option value="SOLAR" {{$dealerAppointment->old_division == 'SOLAR' ? 'selected' : ''}}>SOLAR</option>
-                                <option value="LIGHTING" {{$dealerAppointment->old_division == 'LIGHTING' ? 'selected' : ''}}>LIGHTING</option>
-                                <option value="Others" {{$dealerAppointment->old_division == 'Others' ? 'selected' : ''}}>Others</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-5">
-                    <div class="form-group row">
-                        <div class="col-md-4">
-                            <label for="old_firm_name">Firm Name / Sister Concern </label>
-                        </div>
-                        <div class="col-md-8">
-                            <input type="text" name="old_firm_name" id="old_firm_name" value="{{old('old_firm_name', $dealerAppointment->old_firm_name)}}" class="form-control uppercase">
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="form-group row">
-                        <div class="col-md-3">
-                            <label for="old_gst">GST Number </label>
-                        </div>
-                        <div class="col-md-9">
-                            <input type="text" name="old_gst" id="old_gst" value="{{old('old_gst', $dealerAppointment->old_gst)}}" class="form-control uppercase">
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <div class="row mt-4">
@@ -364,11 +285,11 @@
                 </div>
               </div>
               <div class="col-md-4">
-                    <div class="form-check">
-                        <label class="form-check-label" for="SERVECE"> SERVECE </label>
-                        <input required class="form-check-input" type="radio" name="division" id="SERVECE" value="SERVECE" {{($dealerAppointment->division == 'SERVECE')?'checked':''}}>
-                    </div>
+                <div class="form-check">
+                  <label class="form-check-label" for="SERVECE"> ASC </label>
+                  <input required class="form-check-input" type="radio" name="division" id="SERVECE" value="SERVECE" {{($dealerAppointment->division == 'SERVECE')?'checked':''}}>
                 </div>
+              </div>
               <div class="col-md-4">
                 <div class="form-check">
                   <label class="form-check-label" for="Others"> Others </label>
@@ -377,10 +298,114 @@
               </div>
             </div>
 
-            <div class="row mt-4 d-none" id="parent-div">
-                <div class="col-md-4">
-                    <select name="parent_id" id="parent_id" class="select2 form-control"></select>
+            <div class="row mt-4">
+              <div class="col-md-10">
+                <div class="form-group row">
+                  <div class="col-md-6">
+                    <label for="old_user">Are you already working on another division of <b>Silver/Bediya</b>? </label>
+                  </div>
+                  <div class="col-md-6">
+                    <select class="form-select select2" name="old_user" id="old_user" required>
+                      <option value="" disabled selected>Your Answer</option>
+                      <option value="Yes" {{$dealerAppointment->old_user == 'Yes' ? 'selected' : ''}}>Yes</option>
+                      <option value="No" {{$dealerAppointment->old_user == 'No' ? 'selected' : ''}}>No</option>
+                    </select>
+                  </div>
                 </div>
+              </div>
+            </div>
+
+            <div class="row mt-4 d-none" id="asc-div">
+              <div class="col-md-10">
+                <div class="form-group row">
+                  <div class="col-md-6">
+                    <label for="asc_divi">Please select divisions </label>
+                  </div>
+                  <div class="col-md-6">
+                    <select class="form-select select2" name="asc_divi[]" multiple id="asc_divi">
+                      <option value="PUMP&MOTORS" {{in_array('PUMP&MOTORS', explode(',',$dealerAppointment->asc_divi)) ? 'selected' : ''}}>PUMP & MOTORS</option>
+                      <option value="FAN&APP" {{in_array('FAN&APP', explode(',',$dealerAppointment->asc_divi)) ? 'selected' : ''}}>FAN & APP</option>
+                      <option value="AGRI" {{in_array('AGRI', explode(',',$dealerAppointment->asc_divi)) ? 'selected' : ''}}>AGRI</option>
+                      <option value="SOLAR" {{in_array('SOLAR', explode(',',$dealerAppointment->asc_divi)) ? 'selected' : ''}}>SOLAR</option>
+                      <option value="LIGHTING" {{in_array('LIGHTING', explode(',',$dealerAppointment->asc_divi)) ? 'selected' : ''}}>LIGHTING</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row mt-4 if_old d-none">
+              <div class="col-md-3">
+                <div class="form-group row">
+                  <div class="col-md-5">
+                    <label for="old_division">Select devision </label>
+                  </div>
+                  <div class="col-md-7">
+                    <select class="form-select select2" name="old_division" id="old_division">
+                      <option value="" disabled selected>Your Answer</option>
+                      <option value="PUMP&MOTORS" {{$dealerAppointment->old_division == 'PUMP&MOTORS' ? 'selected' : ''}}>PUMP & MOTORS</option>
+                      <option value="FAN&APP" {{$dealerAppointment->old_division == 'FAN&APP' ? 'selected' : ''}}>FAN & APP</option>
+                      <option value="AGRI" {{$dealerAppointment->old_division == 'AGRI' ? 'selected' : ''}}>AGRI</option>
+                      <option value="SOLAR" {{$dealerAppointment->old_division == 'SOLAR' ? 'selected' : ''}}>SOLAR</option>
+                      <option value="LIGHTING" {{$dealerAppointment->old_division == 'LIGHTING' ? 'selected' : ''}}>LIGHTING</option>
+                      <option value="Others" {{$dealerAppointment->old_division == 'Others' ? 'selected' : ''}}>Others</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-5">
+                <div class="form-group row">
+                  <div class="col-md-4">
+                    <label for="old_firm_name">Firm Name / Sister Concern </label>
+                  </div>
+                  <div class="col-md-8">
+                    <input type="text" name="old_firm_name" id="old_firm_name" value="{{old('old_firm_name', $dealerAppointment->old_firm_name)}}" class="form-control uppercase">
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group row">
+                  <div class="col-md-3">
+                    <label for="old_gst">GST Number </label>
+                  </div>
+                  <div class="col-md-9">
+                    <input type="text" name="old_gst" id="old_gst" value="{{old('old_gst', $dealerAppointment->old_gst)}}" class="form-control uppercase">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row mt-4">
+              <div class="col-md-3">
+                <div class="form-check">
+                  <label class="form-check-label" for="distributor"> Distributor </label>
+                  <input class="form-check-input mr-3" type="radio" name="customertype" value="distributor" id="distributor" {{($dealerAppointment->customertype == 'distributor')?'checked':''}}>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="form-check">
+                  <label class="form-check-label" for="dealer"> Dealer </label>
+                  <input class="form-check-input mr-3" type="radio" name="customertype" value="dealer" id="dealer" {{($dealerAppointment->customertype == 'dealer')?'checked':''}}>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="form-check">
+                  <label class="form-check-label" for="shopee"> Shopee </label>
+                  <input class="form-check-input mr-3" type="radio" name="customertype" value="shopee" id="shopee" {{($dealerAppointment->customertype == 'shopee')?'checked':''}}>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="form-check">
+                  <label class="form-check-label" for="server center"> Service Center </label>
+                  <input class="form-check-input mr-3" type="radio" name="customertype" value="server center" id="servercenter" {{($dealerAppointment->customertype == 'server center')?'checked':''}}>
+                </div>
+              </div>
+            </div>
+
+            <div class="row mt-4 d-none" id="parent-div">
+              <div class="col-md-4">
+                <select name="parent_id" id="parent_id" class="select2 form-control"></select>
+              </div>
             </div>
 
             <h5 class="mt-5">SECURITY DEPOSIT:</h5>
@@ -660,7 +685,13 @@
                       <tr>
                         <th>Account Type</th>
                         <td colspan="3">
-                          <input value="{{$dealerAppointment->account_type}}" type="text" class="form-control">
+                          <select name="account_type" id="account_type" class="form-control uppercase">
+                            <option value="" disabled selected>Please Select Account Type</option>
+                            <option value="Current Account" {{$dealerAppointment->account_type == 'Current Account'?'selected':''}}>Current Account</option>
+                            <option value="CC Account" {{$dealerAppointment->account_type == 'CC Account'?'selected':''}}>CC Account</option>
+                            <option value="OD Account" {{$dealerAppointment->account_type == 'OD Account'?'selected':''}}>OD Account</option>
+                            <option value="Saving Accounts" {{$dealerAppointment->account_type == 'Saving Accounts'?'selected':''}}>Saving Accounts</option>
+                          </select>
                         </td>
                       </tr>
                       <tr>
@@ -675,7 +706,7 @@
                         <th>Payment terms</th>
                         <td colspan="3">
                           <select name="payment_term" id="payment_term" class="form-control uppercase">
-                            <option value="" >Please Select Payment Term</option>
+                            <option value="">Please Select Payment Term</option>
                             <option value="Direct" {{$dealerAppointment->payment_term == 'Direct' ? 'selected' : ''}}>Direct</option>
                             <option value="against" {{$dealerAppointment->payment_term == 'against' ? 'selected' : ''}}>against</option>
                             <option value="Advance" {{$dealerAppointment->payment_term == 'Advance' ? 'selected' : ''}}>Advance</option>
@@ -914,6 +945,22 @@
                   </div>
                 </div>
                 <div class="col-md-4 mb-3">
+                  <label for="application_form">Application Form(PDF Only)</label>
+                  <div class="inp-div">
+                    <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                    <p class="m-0">Attach a File</p>
+                    <input type="file" name="application_form" id="application_form" class="form-control file-input" accept="application/pdf">
+                  </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="cancel_cheque">Cancel Cheque / Passbook (PDF Only)</label>
+                  <div class="inp-div">
+                    <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                    <p class="m-0">Attach a File</p>
+                    <input type="file" name="cancel_cheque" id="cancel_cheque" class="form-control file-input" accept="application/pdf">
+                  </div>
+                </div>
+                <div class="col-md-4 mb-3">
                   <label for="shop_image">Shop Image</label>
                   <div class="inp-div">
                     <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
@@ -924,34 +971,34 @@
               </div>
             </div>
             <div class="row mt-5">
-            <div class="row all-attachments-div">
-              @if($dealerAppointment->exists)
-              @php
-              $allMediaExceptProfilePictures = $dealerAppointment->getMedia('*')
-              ->filter(function ($mediaItem) {
-              return $mediaItem->collection_name !== 'profile_picture';
-              });
-              @endphp
-              @if($allMediaExceptProfilePictures->count() > 0)
-              @foreach($allMediaExceptProfilePictures as $k=>$media)
-              <div class="col-md-3 mb-3 ml-5 text-center border rounded">
-                <p class="attach-p">{{ucfirst(str_replace('_',' ',$media->collection_name))}}</p>
-                <a href="{{$media->getFullUrl()}}" download="" target="_blank">
-                  @if($media->collection_name == 'shop_image')
-                  <img class="m-2 rounded img-fluid" src="{!! $media->getFullUrl() !!}" style="width: 170px;height:170px;">
-                  @else
-                  {{ucfirst(str_replace('_','',$media->collection_name))}}.pdf
-                  @endif
-                </a>
+              <div class="row all-attachments-div">
+                @if($dealerAppointment->exists)
+                @php
+                $allMediaExceptProfilePictures = $dealerAppointment->getMedia('*')
+                ->filter(function ($mediaItem) {
+                return $mediaItem->collection_name !== 'profile_picture';
+                });
+                @endphp
+                @if($allMediaExceptProfilePictures->count() > 0)
+                @foreach($allMediaExceptProfilePictures as $k=>$media)
+                <div class="col-md-3 mb-3 ml-5 text-center border rounded">
+                  <p class="attach-p">{{ucfirst(str_replace('_',' ',$media->collection_name))}}</p>
+                  <a href="{{$media->getFullUrl()}}" download="" target="_blank">
+                    @if($media->collection_name == 'shop_image')
+                    <img class="m-2 rounded img-fluid" src="{!! $media->getFullUrl() !!}" style="width: 170px;height:170px;">
+                    @else
+                    {{ucfirst(str_replace('_','',$media->collection_name))}}.pdf
+                    @endif
+                  </a>
+                </div>
+                @endforeach
+                @else
+                <h6>No Attachment</h6>
+                @endif
+                @else
+                <h6>No Attachment</h6>
+                @endif
               </div>
-              @endforeach
-              @else
-              <h6>No Attachment</h6>
-              @endif
-              @else
-              <h6>No Attachment</h6>
-              @endif
-            </div>
             </div>
 
             <h5 class="mt-5">Signatures of Dealer:</h5>
@@ -1121,61 +1168,67 @@
             });
 
             $(document).ready(function() {
-                $('.file-input').on('change', function() {
-                    var inpDiv = $(this).closest('.inp-div');
-                    if (this.files && this.files.length > 0) {
-                        inpDiv.css('background-color', '#80ec759e'); // Change to your desired color
-                    } else {
-                        inpDiv.css('background-color', ''); // Reset the background color if no file is selected
-                    }
-                });
+              $('.file-input').on('change', function() {
+                var inpDiv = $(this).closest('.inp-div');
+                if (this.files && this.files.length > 0) {
+                  inpDiv.css('background-color', '#80ec759e'); // Change to your desired color
+                } else {
+                  inpDiv.css('background-color', ''); // Reset the background color if no file is selected
+                }
+              });
 
-                $('input[name="division"]').change(function() {
-                    var selectedType = $('input[name="customertype"]:checked').val();
-                    var selectedDivision = $('input[name="division"]:checked').val();
-                    console.log(selectedType, selectedDivision);
-                    
-                    if (selectedDivision == 'AGRI' && selectedType == 'dealer') {
-                        $("#parent-div").removeClass('d-none');
-                    } else {
-                        $("#parent-div").addClass('d-none');
-                    }
-                }).trigger('change');
+              $('input[name="division"]').change(function() {
+                var selectedType = $('input[name="customertype"]:checked').val();
+                var selectedDivision = $('input[name="division"]:checked').val();
+                console.log(selectedType, selectedDivision);
+
+                if (selectedDivision == 'SERVECE') {
+                  $('#asc-div').removeClass('d-none');
+                } else {
+                  $('#asc-div').addClass('d-none');
+                }
+
+                if (selectedDivision == 'AGRI' && selectedType == 'dealer') {
+                  $("#parent-div").removeClass('d-none');
+                } else {
+                  $("#parent-div").addClass('d-none');
+                }
+              }).trigger('change');
             });
 
             setTimeout(() => {
-                var $customerSelect = $('#parent_id').select2({
-                    placeholder: 'Select Parent',
-                    allowClear: true,
-                    ajax: {
-                        url: "{{ route('getDealerDisDataSelect') }}",
-                        dataType: 'json',
-                        delay: 250,
-                        data: function(params) {
-                            return {
-                                term: params.term || '',
-                                page: params.page || 1
-                            }
-                        },
-                        cache: true
+              var $customerSelect = $('#parent_id').select2({
+                placeholder: 'Select Parent',
+                allowClear: true,
+                ajax: {
+                  url: "{{ route('getDealerDisDataSelect') }}",
+                  dataType: 'json',
+                  delay: 250,
+                  data: function(params) {
+                    return {
+                      term: params.term || '',
+                      page: params.page || 1
                     }
-                });
+                  },
+                  cache: true
+                }
+              });
             }, 1500);
 
             $("#old_user").on("change", function() {
-                var if_user = $(this).val();
-                console.log(if_user);
-                if (if_user == 'Yes') {
-                    $(".if_old").removeClass('d-none');
-                    $("#old_division").attr('required', true);
-                    $("#old_firm_name").attr('required', true);
-                    $("#old_gst").attr('required', true);
-                } else {
-                    $(".if_old").addClass('d-none');
-                    $("#old_division").attr('required', false);
-                    $("#old_firm_name").attr('required', false);
-                    $("#old_gst").attr('required', false);
-                }
+              var if_user = $(this).val();
+              console.log(if_user);
+              if (if_user == 'Yes') {
+                $(".if_old").removeClass('d-none');
+                $("#old_division").attr('required', true);
+                $("#old_firm_name").attr('required', true);
+                $("#old_gst").attr('required', true);
+              } else {
+                $(".if_old").addClass('d-none');
+                $("#old_division").attr('required', false);
+                $("#old_firm_name").attr('required', false);
+                $("#old_gst").attr('required', false);
+              }
             }).trigger("change");
           </script>
 </x-app-layout>
