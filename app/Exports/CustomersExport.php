@@ -19,224 +19,354 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
-class CustomersExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapping
+
+class CustomersExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping
 {
+    protected $filters = [];
+    protected $division_users = [];
+
     public function __construct($request)
-    {    
-        $this->startdate = $request->input('start_date');
-        $this->enddate = $request->input('end_date');
-        $this->customertype = $request->input('customertype');
-        $this->branch_id = $request->input('branch_id');   
-        $this->state_id = $request->input('state_id');
-        $this->city_id = $request->input('city_id'); 
-        $this->active = $request->input('active'); 
+    {
+        $this->filters = [
+            'start_date' => $request->input('start_date'),
+            'end_date' => $request->input('end_date'),
+            'customertype' => $request->input('customertype'),
+            'branch_id' => $request->input('branch_id'),
+            'division_id' => $request->input('division_id'),
+            'state_id' => $request->input('state_id'),
+            'city_id' => $request->input('city_id'),
+            'active' => $request->input('active'),
+            'executive_id' => $request->input('executive_id'),
+        ];
 
-        //$this->userid = !empty($request->input('executive_id')) ? $request->input('executive_id') : Auth::user()->id;
-        //$this->userids = getUsersReportingToAuth($this->userid); 
+        $this->pumpD = ['PUMPFOS', 'PUMPTM', 'PUMPASM', 'PUMPRM', 'PUMPBM', 'PUMPCH'];
+        $this->fanD = ['FAN&A/TM/ASM/MM', 'FAN&A/BM/MM', 'FAN/RM', 'FAN/CH/GM/SH'];
+        $this->agriD = ['AGRIGM/CH/ZM/RM/SH', 'AGRIMANAGER'];
+        $this->solarD = ['SOLAR/MANAGER', 'SOLAR/BM/GM/ZM'];
+        $this->serviceD = ['Service Eng'];
+        $this->tenderD = ['TENDER/MANAGER'];
 
-        // $this->userid = Auth::user()->id;
-        // $this->userids = getUsersReportingToAuth($this->userid); 
-        $this->userids = getUsersReportingToAuth(); 
-        $this->user_new_id = $request->input('executive_id');
+        $this->userids = getUsersReportingToAuth();
 
-      
+        if (!empty($this->filters['division_id'])) {
+            $this->division_users = User::where('division_id', $this->filters['division_id'])->pluck('id')->toArray();
+        }
     }
 
     public function collection()
     {
-        // return Customers::where(function ($query)  {
-        //                         if($this->userids)
+        $query = Customers::with([
+            'customertypes',
+            'firmtypes',
+            'createdbyname',
+            'getemployeedetail.employee_detail.getdesignation',
+            'getemployeedetail.employee_detail.getbranch',
+            'getemployeedetail.employee_detail.getdivision',
+            'getparentdetail.parent_detail',
+            'customeraddress.pincodename',
+            'customeraddress.cityname',
+            'customeraddress.districtname',
+            'customeraddress.statename',
+        ])->where(function ($query) {
+            if (!empty($this->filters['executive_id'])) {
+                $query->where('executive_id', $this->filters['executive_id']);
+            }
 
-        //                         {
-        //                             $query->whereIn('executive_id', $this->userids);
-        //                         }
-        //                         if($this->startdate)
-        //                         {
-        //                             $query->whereDate('created_at','>=',$this->startdate);
-        //                         }
-        //                         if($this->enddate)
-        //                         {
-        //                             $query->whereDate('created_at','<=',$this->enddate);
-        //                         }
-        //                     })
-        //                 ->select('id','name', 'first_name', 'last_name', 'mobile', 'email', 'latitude', 'longitude', 'customertype', 'created_at','created_by','executive_id','customer_code','contact_number','parent_id')
-        //                 ->limit(5000)->latest()->get();   
+            if (!Auth::user()->hasRole(['superadmin', 'Admin'])) {
+                $query->where(function ($query) {
+                    $query->whereIn('executive_id', $this->userids)
+                        ->orWhereIn('created_by', $this->userids);
+                });
+            }
 
+            if (!empty($this->division_users)) {
+                $query->where(function ($query) {
+                    $common = array_intersect($this->division_users, $this->userids);
+                    $query->whereIn('executive_id', $common)
+                        ->orWhereIn('created_by', $common);
+                });
+            }
 
-            return Customers::with(['customertypes','firmtypes','createdbyname','getemployeedetail','getparentdetail'])->where(function ($query)  {
-                                if(!empty($this->user_new_id)){
-                                    $query->where('executive_id', $this->user_new_id);
-                                 }
-                                 
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                                {
-                                    $query->whereIn('executive_id',$this->userids)
-                                    ->orWhereIn('created_by',$this->userids);
-                                }
+            if (!empty($this->filters['active'])) {
+                $query->where('active', $this->filters['active']);
+            }
+            if (!empty($this->filters['start_date'])) {
+                $query->whereDate('created_at', '>=', $this->filters['start_date']);
+            }
 
-                                if($this->active)
-                                {
-                                    $query->where('active',$this->active);
-                                }
-                                if($this->startdate)
-                                {
-                                    $query->whereDate('created_at','>=',$this->startdate);
-                                }
-                                if($this->enddate)
-                                {
-                                    $query->whereDate('created_at','<=',$this->enddate);
-                                }
-                                if(!empty($this->customertype))
-                                {
-                                    $query->where('customertype', $this->customertype);
-                                }
-                                if(!empty($this->branch_id))
-                                {
-                                   $branch_user_id = User::whereIn('branch_id',$this->branch_id)->pluck('id');
-                                if(!empty($branch_user_id)){
-                                    $query->whereIn('executive_id', $branch_user_id);  
-                                   }
-                                }
-                                if(!empty($this->state_id))
-                                {  $state = $this->state_id;
-                                 $query->whereHas('customeraddress',function($q) use($state){
-                                    $q->where('state_id', $state);
-                                 });
-                                }
-                                if(!empty($this->city_id))
-                                {  $city = $this->city_id;
-                                 $query->whereHas('customeraddress',function($q) use($city){
-                                    $q->where('city_id', $city);
-                                 });
-                                }
+            if (!empty($this->filters['end_date'])) {
+                $query->whereDate('created_at', '<=', $this->filters['end_date']);
+            }
 
-                            })
-                        ->limit(5000)->latest()->get();   
+            if (!empty($this->filters['customertype'])) {
+                $query->where('customertype', $this->filters['customertype']);
+            }
 
+            if (!empty($this->filters['branch_id'])) {
+                $branch_users = User::whereIn('branch_id', $this->filters['branch_id'])->pluck('id');
+                $query->whereIn('executive_id', $branch_users);
+            }
 
+            if (!empty($this->filters['state_id'])) {
+                $query->whereHas('customeraddress', function ($q) {
+                    $q->where('state_id', $this->filters['state_id']);
+                });
+            }
 
+            if (!empty($this->filters['city_id'])) {
+                $query->whereHas('customeraddress', function ($q) {
+                    $q->where('city_id', $this->filters['city_id']);
+                });
+            }
+        });
+
+        // Limit for performance
+        return $query->limit(5000)->latest()->get();
     }
 
     public function headings(): array
     {
-        // return ['Created Date','Customer ID','Customer Type','Created by','Firm Name', 'First Name', 'Last Name', 'Mobile', 'Email','Address', 'Gmap address','Pin Code','Zip Code','Market Place','City','District','State','Beat Name', 'Latitude', 'Longitude','GST No','Adhar No','Pan No','Other No','Shop Image', 'Employee Name', 'Grade', 'Visit Status','Contact number -2','Customer Code','Employee Code','Branch Name','Department','Designation','Parent Customer'];
+        $headings = [
+            'Created Date',
+            'Customer ID',
+            'Customer Code',
+            'Status',
+            'Customer Type',
+            'Created By',
+            'Firm Name',
+            'Parent Customer',
+            'First Name',
+            'Last Name',
+            'Mobile',
+            'Contact Number 2',
+            'Email',
+            'Address',
+            'Gmap Address',
+            'Pin Code',
+            'Zip Code',
+            'Market Place',
+            'City',
+            'District',
+            'State',
+            'Grade',
+            'Visit Status',
+            'GSTIN No',
+            'Aadhar No',
+            'PAN No',
+            'Other No',
+            'Shop Image',
+            'Employee Code',
+            'Employee Name',
+            'Designation',
+            'Branch Name',
+            'Division',
+            'Latitude',
+            'Longitude',
+            'Employee ID',
+            'Parent ID',
+            'Pincode ID',
+            'City ID',
+            'District ID',
+            'State ID',
+            'Customer Type ID',
+            'Working Status',
+        ];
 
-    return ['Created Date','customer_id','customer_code','status','Customer Type','Created by','firm_name','Parent Customer','first_name', 'last_name', 'Mobile','contact_number2', 'email','address', 'Gmap address','Pin Code','Zip Code','market_place','City','District','State','grade','visit_status','gstin_no','aadhar_no','pan_no','other_no','Shop Image','Employee Code','Employee Name','Designation','Branch Name','Division','Latitude', 'Longitude','employee_id','parent_id','pincode_id','city_id','district_id','state_id','customer_type_id','Working Status','Creation Date'];
+        if (!empty($this->division_users)) {
+            if ($this->filters['division_id'] == '10') {
+                $headings = array_merge($headings, $this->pumpD);
+            } else if ($this->filters['division_id'] == '3') {
+                $headings = array_merge($headings, $this->fanD);
+            } else if ($this->filters['division_id'] == '4') {
+                $headings = array_merge($headings, $this->agriD);
+            } else if ($this->filters['division_id'] == '5') {
+                $headings = array_merge($headings, $this->solarD);
+            }else if ($this->filters['division_id'] == '9') {
+                $headings = array_merge($headings, $this->serviceD);
+            }else if ($this->filters['division_id'] == '7') {
+                $headings = array_merge($headings, $this->tenderD);
+            }
+        }
 
+
+        return $headings;
     }
 
     public function map($data): array
     {
-        // $data['gmap_address'] = UserActivity::where('customerid','=',$data['id'])->where('type','=','Counter Created')->pluck('address')->first();
-        $data['gmap_address'] = UserActivity::where('customerid','=',$data['id'])->pluck('address')->first();
+        // Process related data
+        $employeeDetails = $data->getemployeedetail->filter(function ($item) {
+            return empty($this->division_users) || in_array($item->user_id, $this->division_users);
+        });
 
+        $parentDetails = $data->getparentdetail;
 
-        //new fields start
+        // Map employee details
+        $employeeNames = $employeeDetails->pluck('employee_detail.name')->implode(',');
+        $employeeIds = $employeeDetails->pluck('user_id')->implode(',');
+        $designations = $employeeDetails->pluck('employee_detail.getdesignation.designation_name')->implode(',');
+        $branches = $employeeDetails->pluck('employee_detail.getbranch.branch_name')->implode(',');
+        $divisions = $employeeDetails->pluck('employee_detail.getdivision.division_name')->implode(',');
+        $employeeCodes = $employeeDetails->pluck('employee_detail.employee_codes')->implode(',');
 
-         $employee = array();
-         $employee_id = array();
-        
-        if(!empty($data['getemployeedetail']))  
-        {
-            foreach($data['getemployeedetail'] as $key_new => $datas) {  
+        // Map parent details
+        $parentNames = $parentDetails->pluck('parent_detail.name')->implode(',');
+        $parentIds = $parentDetails->pluck('parent_id')->implode(',');
 
-              $employee[] = isset($datas->employee_detail->name) ? $datas->employee_detail->name: '';
-              $employee_id[] = isset($datas->user_id) ? $datas->user_id: '';
-               
-            }
-            
-        }
-
-        $parent = array();
-        $parent_id = array();
-         if(!empty($data['getparentdetail']))
-        {
-            foreach($data['getparentdetail'] as $key => $parent_data) {
-                $parent[] = isset($parent_data->parent_detail->name) ? $parent_data->parent_detail->name: '';
-                $parent_id[] = isset($parent_data->parent_id) ? $parent_data->parent_id: '';
-            }
-            
-        }
-
-
-        $getdesignation_arr = array();
-        $branch_arr = array();
-        $division_arr = array();
-        $empcode_arr = array();
-        if(!empty($data['getemployeedetail']))  
-        {
-            foreach($data['getemployeedetail'] as $key_new => $datas) {  
-              $getdesignation_arr[] = isset($datas->employee_detail->getdesignation->designation_name) ? $datas->employee_detail->getdesignation->designation_name: '';
-              $branch_arr[] = isset($datas->employee_detail->getbranch->branch_name) ? $datas->employee_detail->getbranch->branch_name: '';
-              $division_arr[] = isset($datas->employee_detail->getdivision->division_name) ? $datas->employee_detail->getdivision->division_name: '';
-              $empcode_arr[] = isset($datas->employee_detail->employee_codes) ? $datas->employee_detail->employee_codes: '';
-            }
-            
-        }
-    
-        //new fields end
-
-
-        return [
-            $data['created_at'] = isset($data['created_at']) ? date("d-m-Y", strtotime($data['created_at'])) :'',
-            $data['id'],
-            $data['customer_code'], 
-            $data['active'], 
-            isset($data['customertypes']['customertype_name']) ? $data['customertypes']['customertype_name'] :'',
-            $data['createdbyname'] = isset($data['createdbyname']['name']) ? $data['createdbyname']['name'] : 'Self',
-            $data['name'],
-            //$data->parentdetail->first_name??'',
-            implode(',',$parent),
-            $data['first_name'],
-            $data['last_name'],
-            $data['mobile'],
-            $data['contact_number'],  
-            $data['email'],
-            isset($data['customeraddress']['address1']) ? $data['customeraddress']['address1'] : '',
-            $data['gmap_address'] = isset($data['gmap_address']) ? $data['gmap_address'] :'',
-            $data['pincode_id'] = isset($data['customeraddress']['pincodename']['pincode']) ? $data['customeraddress']['pincodename']['pincode'] : '',
-            isset($data['customeraddress']['zipcode']) ? $data['customeraddress']['zipcode'] : '',
-            $data['landmark'] = isset($data['customeraddress']['landmark']) ? $data['customeraddress']['landmark'] : '',
-            $data['city_name'] = isset($data['customeraddress']['cityname']['city_name']) ? $data['customeraddress']['cityname']['city_name'] : '',
-            $data['district_name'] = isset($data['customeraddress']['districtname']['district_name']) ? $data['customeraddress']['districtname']['district_name'] :'',
-            $data['state_name'] = isset($data['customeraddress']['statename']['state_name']) ? $data['customeraddress']['statename']['state_name'] :'',
-            // $data['beat_name'] = isset($data['beatdetails']['beats']['beat_name']) ? $data['beatdetails']['beats']['beat_name'] :'',
-            isset($data['customerdetails']['grade']) ? $data['customerdetails']['grade'] :'',
-            isset($data['customerdetails']['visit_status']) ? $data['customerdetails']['visit_status'] : '',
-            isset($data['customerdetails']['gstin_no']) ? $data['customerdetails']['gstin_no'] :'',
-            isset($data['customerdetails']['aadhar_no']) ? $data['customerdetails']['aadhar_no'] : '',
-            isset($data['customerdetails']['pan_no']) ? $data['customerdetails']['pan_no'] :'',
-            isset($data['customerdetails']['otherid_no']) ? $data['customerdetails']['otherid_no'] :'' ,
-            $data['shop_image'] = isset($data['profile_image']) ? $data['profile_image'] :'',
-            // $data['status_name'] = isset($data['statusname']['status_name']) ? $data['statusname']['status_name'] : '',
-          
-            //isset($data['userdetails']['employee_codes']) ? $data['userdetails']['employee_codes'] : '',
-            implode(',', $empcode_arr),
-            // $data['employee_name'] = isset($data['employeename']['name']) ? $data['employeename']['name'] : '',
-            implode(',',$employee),
-            implode(',',$getdesignation_arr),
-            implode(',',$branch_arr),
-            implode(',',$division_arr),
-            // isset($data['userdetails']['getdesignation']['designation_name']) ? $data['userdetails']['getdesignation']['designation_name'] : '',
-            // isset($data['userdetails']['getbranch']['branch_name']) ? $data['userdetails']['getbranch']['branch_name'] : '',
-            // isset($data['userdetails']['getdepartment']['division_name']) ? $data['userdetails']['getdepartment']['division_name'] : '',
-             $data['latitude'],
-             $data['longitude'],
-             // $data['executive_id']??NULL,
-             // $data['parent_id']??NULL,
-             implode(',',$employee_id),
-             implode(',',$parent_id),
-             isset($data['customeraddress']['pincode_id']) ? $data['customeraddress']['pincode_id'] : '',
-             isset($data['customeraddress']['city_id']) ? $data['customeraddress']['city_id'] : '',
-             isset($data['customeraddress']['district_id']) ? $data['customeraddress']['district_id'] : '',
-             isset($data['customeraddress']['state_id']) ? $data['customeraddress']['state_id'] : '',
-             $data['customertype'],
-             $data['working_status'],
-             $data['creation_date'],
+        // Return mapped data
+        $response = [
+            optional($data->created_at)->format('d-m-Y'),
+            $data->id,
+            $data->customer_code,
+            $data->active,
+            optional($data->customertypes)->customertype_name,
+            optional($data->createdbyname)->name ?? 'Self',
+            $data->name,
+            $parentNames,
+            $data->first_name,
+            $data->last_name,
+            $data->mobile,
+            $data->contact_number,
+            $data->email,
+            optional($data->customeraddress)->address1,
+            optional(UserActivity::where('customerid', $data->id)->first())->address,
+            optional($data->customeraddress->pincodename)->pincode,
+            optional($data->customeraddress)->zipcode,
+            optional($data->customeraddress)->landmark,
+            optional($data->customeraddress->cityname)->city_name,
+            optional($data->customeraddress->districtname)->district_name,
+            optional($data->customeraddress->statename)->state_name,
+            optional($data->customerdetails)->grade,
+            optional($data->customerdetails)->visit_status,
+            optional($data->customerdetails)->gstin_no,
+            optional($data->customerdetails)->aadhar_no,
+            optional($data->customerdetails)->pan_no,
+            optional($data->customerdetails)->otherid_no,
+            $data->profile_image,
+            $employeeCodes,
+            $employeeNames,
+            $designations,
+            $branches,
+            $divisions,
+            $data->latitude,
+            $data->longitude,
+            $employeeIds,
+            $parentIds,
+            optional($data->customeraddress)->pincode_id,
+            optional($data->customeraddress)->city_id,
+            optional($data->customeraddress)->district_id,
+            optional($data->customeraddress)->state_id,
+            $data->customertype,
+            $data->working_status
         ];
+
+        if (!empty($this->division_users)) {
+            if ($this->filters['division_id'] == '10') {
+                foreach ($this->pumpD as $key => $value) {
+                    $foundUser = false;
+                    foreach ($data->getemployeedetail as $item) {
+                        $roleNames = $item->employee_detail->roles->pluck('name')->unique()->toArray();
+                        if (in_array($value, $roleNames)) {
+
+                            $response[] = $item->employee_detail->name;
+                            $foundUser = true;
+                            break;
+                        }
+                    }
+                    if (!$foundUser) {
+
+                        $response[] = '-';
+                    }
+                }
+            } else if ($this->filters['division_id'] == '3') {
+                foreach ($this->fanD as $key => $value) {
+                    $foundUser = false;
+                    foreach ($data->getemployeedetail as $item) {
+                        $roleNames = $item->employee_detail->roles->pluck('name')->unique()->toArray();
+                        if (in_array($value, $roleNames)) {
+
+                            $response[] = $item->employee_detail->name;
+                            $foundUser = true;
+                            break;
+                        }
+                    }
+                    if (!$foundUser) {
+
+                        $response[] = '-';
+                    }
+                }
+            } else if ($this->filters['division_id'] == '4') {
+                foreach ($this->agriD as $key => $value) {
+                    $foundUser = false;
+                    foreach ($data->getemployeedetail as $item) {
+                        $roleNames = $item->employee_detail->roles->pluck('name')->unique()->toArray();
+                        if (in_array($value, $roleNames)) {
+
+                            $response[] = $item->employee_detail->name;
+                            $foundUser = true;
+                            break;
+                        }
+                    }
+                    if (!$foundUser) {
+
+                        $response[] = '-';
+                    }
+                }
+            } else if ($this->filters['division_id'] == '5') {
+                foreach ($this->solarD as $key => $value) {
+                    $foundUser = false;
+                    foreach ($data->getemployeedetail as $item) {
+                        $roleNames = $item->employee_detail->roles->pluck('name')->unique()->toArray();
+                        if (in_array($value, $roleNames)) {
+
+                            $response[] = $item->employee_detail->name;
+                            $foundUser = true;
+                            break;
+                        }
+                    }
+                    if (!$foundUser) {
+
+                        $response[] = '-';
+                    }
+                }
+            }else if ($this->filters['division_id'] == '9') {
+                foreach ($this->serviceD as $key => $value) {
+                    $foundUser = false;
+                    foreach ($data->getemployeedetail as $item) {
+                        $roleNames = $item->employee_detail->roles->pluck('name')->unique()->toArray();
+                        if (in_array($value, $roleNames)) {
+
+                            $response[] = $item->employee_detail->name;
+                            $foundUser = true;
+                            break;
+                        }
+                    }
+                    if (!$foundUser) {
+
+                        $response[] = '-';
+                    }
+                }
+            }else if ($this->filters['division_id'] == '7') {
+                foreach ($this->tenderD as $key => $value) {
+                    $foundUser = false;
+                    foreach ($data->getemployeedetail as $item) {
+                        $roleNames = $item->employee_detail->roles->pluck('name')->unique()->toArray();
+                        if (in_array($value, $roleNames)) {
+
+                            $response[] = $item->employee_detail->name;
+                            $foundUser = true;
+                            break;
+                        }
+                    }
+                    if (!$foundUser) {
+
+                        $response[] = '-';
+                    }
+                }
+            }
+        }
+
+
+        return $response;
     }
-
-
-
-
 }
