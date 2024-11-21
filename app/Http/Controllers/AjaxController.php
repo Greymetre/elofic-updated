@@ -140,8 +140,8 @@ class AjaxController extends Controller
     {
         try {
             $user_id = $request->input('user_id');
-            $data = User::where('id', '=', $user_id)
-                ->select('id', 'name', 'mobile')
+            $data = User::with('reportinginfo','getdesignation','userinfo')->where('id', '=', $user_id)
+                ->select('id', 'name', 'mobile','designation_id','reportingid','employee_codes')
                 ->first();
 
             return response()->json($data);
@@ -260,13 +260,14 @@ class AjaxController extends Controller
             $beat_id = $request->input('beat_id');
             $payroll = $request->input('payroll');
             $branch_id = $request->input('branch_id');
+            $division_id = $request->input('division_id');
             $userids = getUsersReportingToAuth();
             $login_userid = Auth::user()->id;
             $all_users = User::all();
             $userinfo = User::where('id', '=', $login_userid)->first();
             $data = User::whereDoesntHave('roles', function ($query) {
                 $query->where('id', 29);
-            })->where(function ($query) use ($beat_id, $userids, $payroll,$userinfo) {
+            })->where(function ($query) use ($beat_id, $userids, $payroll,$userinfo,$branch_id,$division_id) {
                 if (isset($beat_id)) {
                     $query->whereHas('userbeats', function ($query) use ($beat_id) {
                         $query->where('beat_id', '=', $beat_id);
@@ -277,6 +278,9 @@ class AjaxController extends Controller
                 }
                 if (isset($branch_id)) {
                     $query->where('branch_id', '=', $branch_id);
+                }
+                if (isset($division_id)) {
+                    $query->where('division_id', '=', $division_id);
                 }
                 if (!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin') && !$userinfo->hasRole('Sub_Admin') && !$userinfo->hasRole('HR_Admin') && !$userinfo->hasRole('HO_Account')  && !$userinfo->hasRole('Sub_Support') && !$userinfo->hasRole('Accounts Order') && !$userinfo->hasRole('Service Admin') && !$userinfo->hasRole('All Customers')) {
                     $query->whereIn('id', $userids);

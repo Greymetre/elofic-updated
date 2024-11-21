@@ -75,6 +75,7 @@ use App\Http\Controllers\ServiceBillController;
 use App\Http\Controllers\ServiceChargeProductsController;
 use App\Http\Controllers\FieldKonnectAppSettings;
 use App\Http\Controllers\PrimarySchemeController;
+use App\Http\Controllers\ResignationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -841,6 +842,10 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('leaves', LeaveController::class);
     Route::any('approveLeave', [LeaveController::class, 'approveLeave'])->name('approveLeave');
     Route::any('rejectLeave', [LeaveController::class, 'rejectLeave'])->name('rejectLeave');
+
+    // Resignations Route
+    Route::resource('resignations', ResignationController::class);
+    Route::any('resignation/download', [ResignationController::class, 'download'])->name('resignation.download');
 
     // Loyalty App Setting Route
     Route::resource('loyalty-app-setting', LoyaltyAppSettingController::class);

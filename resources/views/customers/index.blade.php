@@ -14,6 +14,16 @@
                   <div class="d-flex flex-wrap flex-row">
 
                   <div class="p-2" style="width:200px;">
+                    <select class="selectpicker" name="division_id" id="division_id" data-style="select-with-transition" title="Select Division">
+                       <option value="">Select Division</option>
+                      @if(@isset($divisions ))
+                      @foreach($divisions as $division)
+                       <option value="{!! $division['id'] !!}" {{ old( 'division_id') == $division->id ? 'selected' : '' }}>{!! $division['division_name'] !!}</option>
+                      @endforeach
+                      @endif
+                    </select>
+                  </div>
+                  <div class="p-2" style="width:200px;">
                     <select class="selectpicker" name="executive_id" id="executive_id" data-style="select-with-transition" title="Select User">
                        <option value="">Select User</option>
                       @if(@isset($users ))

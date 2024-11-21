@@ -343,6 +343,10 @@ class SalesTargetUsersController extends Controller
 
         $query = SalesTargetCustomers::with(['customer', 'customer.createdbyname'])->where(function ($query) use ($request) {
 
+            if (auth()->user()->hasRole('Customer Dealer')) {
+                $query->where('customer_id', auth()->user()->customerid);
+            }
+
             if ($request->month && $request->month != '' && $request->month != null) {
                 $query->where('month', $request->month);
             }

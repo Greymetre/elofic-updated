@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{Customers, UserLogin, CustomerType, FirmType, Regions, Pincode, Country, CustomerDetails, Address, Attachment, SurveyData, Field, State, City, Beat, BeatCustomer, DealIn, Redemption, SchemeDetails};
+use App\Models\{Customers, UserLogin, CustomerType, FirmType, Regions, Pincode, Country, CustomerDetails, Address, Attachment, SurveyData, Field, State, City, Beat, BeatCustomer, DealIn, Division, Redemption, SchemeDetails};
 use App\Models\User;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -239,7 +239,8 @@ class CustomerController extends Controller
                 ->rawColumns(['action', 'beat_name', 'image', 'checkbox', 'createdbyname.name', 'profileimage'])
                 ->make(true);
         }
-        return view('customers.index', compact('beats', 'users', 'states', 'cities', 'customertype', 'branches'));
+        $divisions = Division::where('active', 'Y')->get();
+        return view('customers.index', compact('beats', 'users', 'states', 'cities', 'customertype', 'branches', 'divisions'));
     }
 
     public function distributors(DistributorDataTable $dataTable)

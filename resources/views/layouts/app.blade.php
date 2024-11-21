@@ -1033,8 +1033,8 @@
                            <li class="nav-link-btn {{ request()->is('sales_dealer*') ? 'active' : '' }}">
                               <a class="hoveradd2" href="{{ url('sales_dealer/target_dealers') }}">
                                  <i class="material-icons icon">school</i>
-                                 <span> {!! trans('panel.dealer_distributor_user.title') !!}</span>
-                                 <div class="d-none mobile_hide">{!! trans('panel.dealer_distributor_user.title') !!}</div>
+                                 <span> Dealer distributor target vs achievement</span>
+                                 <div class="d-none mobile_hide">Dealer distributor target vs achievement</div>
                               </a>
                            </li>
                            @endif
@@ -1112,6 +1112,15 @@
                                  <i class="material-icons icon">energy_savings_leaf</i>
                                  <span>Leaves</span>
                                  <div class="d-none mobile_hide"> Leaves</div>
+                              </a>
+                           </li>
+                           @endif
+                           @if(auth()->user()->can('resignation_access'))
+                           <li class="nav-link-btn {{ request()->is('resignations*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('resignations') }}">
+                                 <i class="material-icons icon">outgoing_mail</i>
+                                 <span>Resignation</span>
+                                 <div class="d-none mobile_hide"> Resignation</div>
                               </a>
                            </li>
                            @endif
