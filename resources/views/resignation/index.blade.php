@@ -144,7 +144,7 @@
                 <th>Reason</th>
                 <th>Personal Email ID</th>
                 <th>Personal Mobile Number</th>
-                <th>Action</th>
+                <!-- <th>Action</th> -->
               </thead>
               <tbody>
               </tbody>
@@ -280,13 +280,13 @@
             "defaultContent": '',
             orderable: false
           },
-          {
-            data: 'action',
-            name: 'action',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          },
+          // {
+          //   data: 'action',
+          //   name: 'action',
+          //   "defaultContent": '',
+          //   orderable: false,
+          //   searchable: false
+          // },
         ]
       });
       $('#division_id').change(function() {

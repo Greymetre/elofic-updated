@@ -191,7 +191,7 @@
                                 <div class="row mt-2">
                                     <div class="col-md-4">
                                         <div class="input_section">
-                                            <label for="persoanla_mobile">Persoanla Mobile Number</label>
+                                            <label for="persoanla_mobile">Personal Mobile Number</label>
                                             <input class="form-control {{ $errors->has('persoanla_mobile') ? 'is-invalid' : '' }}" type="text" name="persoanla_mobile" id="persoanla_mobile" required>
                                             @if ($errors->has('persoanla_mobile'))
                                             <div class="error">
@@ -214,7 +214,7 @@
                                     <div class="col-md-4">
                                         <div class="input_section">
                                             <label for="submit_date">Submit Date</label>
-                                            <input class="form-control datepicker {{ $errors->has('submit_date') ? 'is-invalid' : '' }}" type="text" name="submit_date" id="submit_date" value="{{ now()->format('Y-m-d') }}" readonly required>
+                                            <input class="form-control datepicker {{ $errors->has('submit_date') ? 'is-invalid' : '' }}" type="text" name="submit_date" id="submit_date" value="{{ now()->format('Y-m-d') }}" readonly disabled required>
                                             @if ($errors->has('submit_date'))
                                             <div class="error">
                                                 <p class="text-danger">{{ $errors->first('submit_date') }}</p>
