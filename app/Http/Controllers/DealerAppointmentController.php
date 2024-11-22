@@ -59,7 +59,9 @@ class DealerAppointmentController extends Controller
     public function store(Request $request)
     {
         $data = $request->all();
-        $data['asc_divi'] = implode(',', $request->asc_divi);
+        if(isset($data['asc_divi']) && !empty($data['asc_divi']) && count($data['asc_divi']) > 0){
+            $data['asc_divi'] = implode(',', $request->asc_divi);
+        }
 
         $dealer_appointment = DealerAppointment::create($data);
 

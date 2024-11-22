@@ -170,6 +170,7 @@ class CustomersExport implements FromCollection, WithHeadings, ShouldAutoSize, W
             'State ID',
             'Customer Type ID',
             'Working Status',
+            'Creation Date'
         ];
 
         if (!empty($this->division_users)) {
@@ -181,9 +182,9 @@ class CustomersExport implements FromCollection, WithHeadings, ShouldAutoSize, W
                 $headings = array_merge($headings, $this->agriD);
             } else if ($this->filters['division_id'] == '5') {
                 $headings = array_merge($headings, $this->solarD);
-            }else if ($this->filters['division_id'] == '9') {
+            } else if ($this->filters['division_id'] == '9') {
                 $headings = array_merge($headings, $this->serviceD);
-            }else if ($this->filters['division_id'] == '7') {
+            } else if ($this->filters['division_id'] == '7') {
                 $headings = array_merge($headings, $this->tenderD);
             }
         }
@@ -230,12 +231,12 @@ class CustomersExport implements FromCollection, WithHeadings, ShouldAutoSize, W
             $data->email,
             optional($data->customeraddress)->address1,
             optional(UserActivity::where('customerid', $data->id)->first())->address,
-            optional($data->customeraddress->pincodename)->pincode,
+            optional(optional($data->customeraddress)->pincodename)->pincode, // Proper nesting
             optional($data->customeraddress)->zipcode,
             optional($data->customeraddress)->landmark,
-            optional($data->customeraddress->cityname)->city_name,
-            optional($data->customeraddress->districtname)->district_name,
-            optional($data->customeraddress->statename)->state_name,
+            optional(optional($data->customeraddress)->cityname)->city_name, // Proper nesting
+            optional(optional($data->customeraddress)->districtname)->district_name, // Proper nesting
+            optional(optional($data->customeraddress)->statename)->state_name, // Proper nesting
             optional($data->customerdetails)->grade,
             optional($data->customerdetails)->visit_status,
             optional($data->customerdetails)->gstin_no,
@@ -257,109 +258,99 @@ class CustomersExport implements FromCollection, WithHeadings, ShouldAutoSize, W
             optional($data->customeraddress)->district_id,
             optional($data->customeraddress)->state_id,
             $data->customertype,
-            $data->working_status
+            $data->working_status,
+            $data['creation_date'],
         ];
+
 
         if (!empty($this->division_users)) {
             if ($this->filters['division_id'] == '10') {
                 foreach ($this->pumpD as $key => $value) {
-                    $foundUser = false;
+                    $names = [];
                     foreach ($data->getemployeedetail as $item) {
-                        $roleNames = $item->employee_detail->roles->pluck('name')->unique()->toArray();
+                        $roleNames = $item->employee_detail?->roles?->pluck('name')->unique()->toArray() ?? [];
                         if (in_array($value, $roleNames)) {
-
-                            $response[] = $item->employee_detail->name;
-                            $foundUser = true;
-                            break;
+                            $names[] = $item->employee_detail->name;
                         }
                     }
-                    if (!$foundUser) {
-
+                    if (!empty($names)) {
+                        $response[] = implode(', ', $names);
+                    } else {
                         $response[] = '-';
                     }
                 }
             } else if ($this->filters['division_id'] == '3') {
                 foreach ($this->fanD as $key => $value) {
-                    $foundUser = false;
+                    $names = [];
                     foreach ($data->getemployeedetail as $item) {
-                        $roleNames = $item->employee_detail->roles->pluck('name')->unique()->toArray();
+                        $roleNames = $item->employee_detail?->roles?->pluck('name')->unique()->toArray() ?? [];
                         if (in_array($value, $roleNames)) {
-
-                            $response[] = $item->employee_detail->name;
-                            $foundUser = true;
-                            break;
+                            $names[] = $item->employee_detail->name;
                         }
                     }
-                    if (!$foundUser) {
-
+                    if (!empty($names)) {
+                        $response[] = implode(', ', $names);
+                    } else {
                         $response[] = '-';
                     }
                 }
             } else if ($this->filters['division_id'] == '4') {
                 foreach ($this->agriD as $key => $value) {
-                    $foundUser = false;
+                    $names = [];
                     foreach ($data->getemployeedetail as $item) {
-                        $roleNames = $item->employee_detail->roles->pluck('name')->unique()->toArray();
+                        $roleNames = $item->employee_detail?->roles?->pluck('name')->unique()->toArray() ?? [];
                         if (in_array($value, $roleNames)) {
-
-                            $response[] = $item->employee_detail->name;
-                            $foundUser = true;
-                            break;
+                            $names[] = $item->employee_detail->name;
                         }
                     }
-                    if (!$foundUser) {
-
+                    if (!empty($names)) {
+                        $response[] = implode(', ', $names);
+                    } else {
                         $response[] = '-';
                     }
                 }
             } else if ($this->filters['division_id'] == '5') {
                 foreach ($this->solarD as $key => $value) {
-                    $foundUser = false;
+                    $names = [];
                     foreach ($data->getemployeedetail as $item) {
-                        $roleNames = $item->employee_detail->roles->pluck('name')->unique()->toArray();
+                        $roleNames = $item->employee_detail?->roles?->pluck('name')->unique()->toArray() ?? [];
                         if (in_array($value, $roleNames)) {
-
-                            $response[] = $item->employee_detail->name;
-                            $foundUser = true;
-                            break;
+                            $names[] = $item->employee_detail->name;
                         }
                     }
-                    if (!$foundUser) {
-
+                    if (!empty($names)) {
+                        $response[] = implode(', ', $names);
+                    } else {
                         $response[] = '-';
                     }
                 }
-            }else if ($this->filters['division_id'] == '9') {
+            } else if ($this->filters['division_id'] == '9') {
                 foreach ($this->serviceD as $key => $value) {
-                    $foundUser = false;
+                    $names = [];
                     foreach ($data->getemployeedetail as $item) {
-                        $roleNames = $item->employee_detail->roles->pluck('name')->unique()->toArray();
+                        $roleNames = $item->employee_detail?->roles?->pluck('name')->unique()->toArray() ?? [];
                         if (in_array($value, $roleNames)) {
-
-                            $response[] = $item->employee_detail->name;
-                            $foundUser = true;
-                            break;
+                            $names[] = $item->employee_detail->name;
                         }
                     }
-                    if (!$foundUser) {
-
+                    if (!empty($names)) {
+                        $response[] = implode(', ', $names);
+                    } else {
                         $response[] = '-';
                     }
                 }
-            }else if ($this->filters['division_id'] == '7') {
+            } else if ($this->filters['division_id'] == '7') {
                 foreach ($this->tenderD as $key => $value) {
-                    $foundUser = false;
+                    $names = [];
                     foreach ($data->getemployeedetail as $item) {
-                        $roleNames = $item->employee_detail->roles->pluck('name')->unique()->toArray();
+                        $roleNames = $item->employee_detail?->roles?->pluck('name')->unique()->toArray() ?? [];
                         if (in_array($value, $roleNames)) {
-
-                            $response[] = $item->employee_detail->name;
-                            $foundUser = true;
-                            break;
+                            $names[] = $item->employee_detail->name;
                         }
                     }
-                    if (!$foundUser) {
-
+                    if (!empty($names)) {
+                        $response[] = implode(', ', $names);
+                    } else {
                         $response[] = '-';
                     }
                 }

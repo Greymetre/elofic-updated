@@ -41,6 +41,10 @@ class ResignationDataTable extends DataTable
                     $status = '<a href="'.route('resignations.show', $data->id).'" class="badge badge-danger">Reject</a>';
                 }else if($data->status == '3'){
                     $status = '<a href="'.route('resignations.show', $data->id).'" class="badge badge-success">Revoke</a>';
+                }else if($data->status == '4'){
+                    $status = '<a href="'.route('resignations.show', $data->id).'" class="badge badge-success">Approve</a>';
+                }else if($data->status == '5'){
+                    $status = '<a href="'.route('resignations.show', $data->id).'" class="badge badge-info">Hold</a>';
                 }
 
                 return $status;

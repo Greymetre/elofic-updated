@@ -846,6 +846,8 @@ Route::group(['middleware' => ['auth']], function () {
     // Resignations Route
     Route::resource('resignations', ResignationController::class);
     Route::any('resignation/download', [ResignationController::class, 'download'])->name('resignation.download');
+    Route::any('update_checklist', [ResignationController::class, 'update_checklist'])->name('resignation.update_checklist');
+    Route::any('resignation_status_change', [ResignationController::class, 'resignation_status_change'])->name('resignation.resignation_status_change');
 
     // Loyalty App Setting Route
     Route::resource('loyalty-app-setting', LoyaltyAppSettingController::class);
