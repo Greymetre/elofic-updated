@@ -141,7 +141,7 @@ class AjaxController extends Controller
         try {
             $user_id = $request->input('user_id');
             $data = User::with('reportinginfo','getdesignation','userinfo')->where('id', '=', $user_id)
-                ->select('id', 'name', 'mobile','designation_id','reportingid','employee_codes')
+                ->select('id', 'name', 'mobile','designation_id','reportingid','employee_codes','branch_id')
                 ->first();
 
             return response()->json($data);

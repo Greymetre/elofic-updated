@@ -110,7 +110,6 @@ Route::get('aboutus/abridgeit', function () {
 Route::get('contactus', function () {
     return view('contactus');
 });
-Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::get('/privcay-policy', [NewJoiningController::class, 'privacyPolicy'])->name('privacyPolicy');
 
 //New Joining without auth Route
@@ -848,6 +847,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('resignation/download', [ResignationController::class, 'download'])->name('resignation.download');
     Route::any('update_checklist', [ResignationController::class, 'update_checklist'])->name('resignation.update_checklist');
     Route::any('resignation_status_change', [ResignationController::class, 'resignation_status_change'])->name('resignation.resignation_status_change');
+    Route::any('resignation_last_working_date_change', [ResignationController::class, 'resignation_last_working_date_change'])->name('resignation.resignation_last_working_date_change');
 
     // Loyalty App Setting Route
     Route::resource('loyalty-app-setting', LoyaltyAppSettingController::class);

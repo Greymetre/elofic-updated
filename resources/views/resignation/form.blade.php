@@ -213,8 +213,8 @@
                                     </div>
                                     <div class="col-md-4">
                                         <div class="input_section">
-                                            <label for="submit_date">Submit Date</label>
-                                            <input class="form-control datepicker {{ $errors->has('submit_date') ? 'is-invalid' : '' }}" type="text" name="submit_date" id="submit_date" value="{{ now()->format('Y-m-d') }}" readonly disabled required>
+                                            <label for="submit_date">Resignation Date</label>
+                                            <input class="form-control datepicker {{ $errors->has('submit_date') ? 'is-invalid' : '' }}" type="text" name="submit_date" id="submit_date" value="{{ now()->format('Y-m-d') }}" onchange="calculateRD()" required>
                                             @if ($errors->has('submit_date'))
                                             <div class="error">
                                                 <p class="text-danger">{{ $errors->first('submit_date') }}</p>
@@ -283,10 +283,12 @@
                     user_id: user_id
                 },
                 success: function(res) {
+                    console.log(res);
                     $("#employee_code").val(res.employee_codes);
                     $("#designation").val(res.getdesignation?.designation_name || '');
                     $("#reporting_manager").val(res.reportinginfo?.name || '');
                     $("#mobile").val(res.mobile);
+                    $("#branch_id").val(res.branch_id);
                     $("#date_of_joining").val(res.userinfo.date_of_joining);
                     console.log(res);
                 }
@@ -296,13 +298,16 @@
         function calculateRD() {
             var noticeP = parseInt($('#notice').val(), 10);
 
-            let today = new Date();
-            let nextMonth = new Date(today);
-            nextMonth.setMonth(today.getMonth() + noticeP);
+            if(noticeP != '' && noticeP != null){
+                let today = new Date($('#submit_date').val());
+                let nextMonth = new Date(today);
+                nextMonth.setMonth(today.getMonth() + noticeP);
+    
+                let formattedDate = nextMonth.toISOString().split('T')[0];
+    
+                $("#last_working_date").val(formattedDate);
+            }
 
-            let formattedDate = nextMonth.toISOString().split('T')[0];
-
-            $("#last_working_date").val(formattedDate);
         }
     </script>
 

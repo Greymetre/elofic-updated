@@ -37,6 +37,7 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
         $this->quarter = $request->input('quarter');
         $this->scheme_id = $request->input('scheme_id');
         $this->division = $request->input('division');
+        $this->types = $request->input('types');
         $this->quarter_name = '';
         $this->pSchemes = '';
     }
@@ -163,9 +164,21 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
             ->groupBy('group_type')
             ->get();
         if ($pSchemesGroups[0]->group_type == 'group_2') {
-            $CM = PrimarySchemeDetail::whereIn('groups', explode(',',$data['group_2']))->where('min', '<=', $data['total_quantity'])->where('max', '>=', $data['total_quantity'])->where('primary_scheme_id', $this->scheme_id)->first();
+            $CM = PrimarySchemeDetail::whereIn('groups', explode(',', $data['group_2']))->where('min', '<=', $data['total_quantity'])->where('max', '>=', $data['total_quantity'])->where('primary_scheme_id', $this->scheme_id)->first();
         } else {
             $CM = PrimarySchemeDetail::where('groups', $data['new_group_name'])->where('min', '<=', $data['total_quantity'])->where('max', '>=', $data['total_quantity'])->where('primary_scheme_id', $this->scheme_id)->first();
+        }
+
+        if ($this->types && !empty($this->types)) {
+            if ($this->types == 'qualified') {
+                if (!$CM) {
+                    return array();
+                }
+            } else if ($this->types == 'unqualified') {
+                if ($CM) {
+                    return array();
+                }
+            }
         }
 
         $response = array();
