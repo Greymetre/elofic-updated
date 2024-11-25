@@ -81,6 +81,9 @@ class ProductDataTable extends DataTable
         if($request->category_id && !empty($request->category_id)){
             $data->where('category_id', $request->category_id);
         }
+        if($request->active && !empty($request->active)){
+            $data->where('active', $request->active);
+        }
         $data = $data->latest()->newQuery();
 
         return $data;

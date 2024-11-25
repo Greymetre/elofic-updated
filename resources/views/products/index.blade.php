@@ -13,6 +13,15 @@
                 <form method="GET" action="{{ URL::to('products-download') }}">
                   <div class="d-flex flex-wrap flex-row">
 
+                  <div class="p-2" style="width:200px;">
+                      <select class="selectpicker" name="active" id="active" data-style="select-with-transition" title="Select Status">
+                        <option value="">Select Status</option>
+                        <option value="Y">Active</option>
+                        <option value="N">Inactive</option>
+                        
+                      </select>
+                    </div>
+
                     <div class="p-2" style="width:200px;">
                       <select class="selectpicker" name="category_id" id="category_id" data-style="select-with-transition" title="Select Division">
                         <option value="">Select Division</option>
@@ -145,6 +154,7 @@
           data: function (d) {
                 d._token = token,
                 d.category_id = $('#category_id').val()
+                d.active = $('#active').val()
             }
         },
         columns: [{
@@ -269,6 +279,10 @@
 
       $('#category_id').change(function() {
         console.log($('#category_id').val());
+        table.draw();
+      });
+      $('#active').change(function() {
+        console.log($('#active').val());
         table.draw();
       });
 

@@ -19,6 +19,7 @@ class AttendanceExport implements FromCollection,WithHeadings,ShouldAutoSize,Wit
         $this->start_date = $request->start_date;
         $this->end_date = $request->end_date;
         $this->executive_id = $request->executive_id;
+        $this->active = $request->active;
     }
 
     public function collection()
@@ -49,9 +50,15 @@ class AttendanceExport implements FromCollection,WithHeadings,ShouldAutoSize,Wit
                         {
                             $query->whereDate('punchin_date','<=',$this->end_date);
                         }
-                         if($this->executive_id)
+                        if($this->executive_id)
                         {
                             $query->where('user_id', $this->executive_id);
+                        }
+                        if (!empty($this->active) && $this->active != null && $this->active != "") {
+                            $active = $this->active;
+                            $query->whereHas('users', function ($query) use ($active) {
+                                $query->where('active', $active);
+                            });
                         }
 
                     })

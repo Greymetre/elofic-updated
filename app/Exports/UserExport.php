@@ -26,6 +26,7 @@ class UserExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMa
     public function __construct(Request $request)
     {
         $this->user_type = $request->user_type;
+        $this->active = $request->active;
         $this->userids = getUsersReportingToAuth();
     }
 
@@ -35,6 +36,9 @@ class UserExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMa
             ->where(function ($query) {
                 if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                     $query->whereIn('id', $this->userids);
+                }
+                if($this->active && !empty($this->active)){
+                    $query->where('active', $this->active);
                 }
             })
             ->whereHas('roles', function ($query) {

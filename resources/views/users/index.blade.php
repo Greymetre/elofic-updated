@@ -20,6 +20,13 @@
                         </select>
                       </div>
                     </div>
+                    <div class="p-2" style="width: 250px;">
+                      <select class="selectpicker" name="active" id="active" data-style="select-with-transition" title="Select User Status">
+                        <option value="">Select User Status</option>
+                        <option value="Y">Active</option>
+                        <option value="N">Inactive</option>
+                      </select>
+                    </div>
                     <div class="p-2">
                       <button class="btn btn-just-icon btn-theme" title="Download Customers"><i class="material-icons">cloud_download</i></button></div>
                   </div>
@@ -127,6 +134,7 @@
           url: "{{ route('users.index') }}",
           data: function (d) {
                 d.user_type = $('#user_type').val()
+                d.active = $('#active').val()
             }
         },
         columns: [{
@@ -233,6 +241,9 @@
         ]
       });
       $('#user_type').change(function(){
+        table.draw();
+      });
+      $('#active').change(function(){
         table.draw();
       });
 

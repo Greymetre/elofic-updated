@@ -113,10 +113,14 @@
                   @endif
                   <p class="text-dark">{{$resignation->remark}}</p>
                   <h4>
-                    <small class="float-left">Submit Date <p style="font-size: 22px; color:#5252b7">{!! date('d M Y',strtotime($resignation['submit_date'])) !!}</p></small>
+                    <small class="float-left">Resignation Date <p style="font-size: 22px; color:#5252b7">{!! date('d M Y',strtotime($resignation['submit_date'])) !!}</p></small>
                   </h4>
                   <h4>
-                    <small class="float-left">Last Working Date <p style="font-size: 22px; color:#5252b7">{!! date('d M Y',strtotime($resignation['last_working_date'])) !!} <i class="material-icons" style="font-size: 16px !important;cursor:pointer;" id="edit-last-date">edit</i></p></small>
+                    <small class="float-left">Last Working Date <p style="font-size: 22px; color:#5252b7">{!! date('d M Y',strtotime($resignation['last_working_date'])) !!}
+                        @if(auth()->user()->can('resignation_last_working_date_change'))
+                        <i class="material-icons" style="font-size: 16px !important;cursor:pointer;" id="edit-last-date">edit</i>
+                        @endif
+                      </p></small>
                   </h4>
                 </div>
                 <div class="col-10">
@@ -441,7 +445,31 @@
           }).then((result) => {
             if (result.value) {
               const selectedDate = result.value;
-              console.log('Selected date:', selectedDate);
+              $.ajax({
+                url: "{{ url('resignation_last_working_date_change') }}",
+                type: 'POST',
+                data: {
+                  _token: token,
+                  id: id,
+                  date: selectedDate
+                },
+                success: function(data) {
+                  if (data.status == 'success') {
+                    $('.message').empty();
+                    $('.alert').show();
+                    $('.alert').addClass("alert-success");
+                    $('.message').append(data.message);
+                    setTimeout(function() {
+                      location.reload();
+                    }, 700);
+                  } else {
+                    $('.message').empty();
+                    $('.alert').show();
+                    $('.alert').addClass("alert-danger");
+                    $('.message').append(data.message);
+                  }
+                }
+              })
             }
           }).catch((error) => {
             Swal.fire('Error', error.message, 'error');

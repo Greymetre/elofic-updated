@@ -418,6 +418,12 @@ class ReportController extends Controller
                             $query->where('division_id', $division_id);
                         });
                     }
+                    if (!empty($request['active']) && $request['active'] != null && $request['active'] != "") {
+                        $active = $request['active'];
+                        $query->whereHas('users', function ($query) use ($active) {
+                            $query->where('active', $active);
+                        });
+                    }
 
                     if (!empty($request['department_id']) && $request['department_id'] != null && $request['department_id'] != "") {
                         $department_id = $request['department_id'];

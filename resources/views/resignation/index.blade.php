@@ -55,9 +55,11 @@
                       <select class="selectpicker"  name="status" id="status" data-style="select-with-transition" title="Select Status">
                         <option value="">Select Status</option>
                         <option value="0">Pendding</option>
-                        <option value="1">Accept</option>
-                        <option value="2">Reject</option>
+                        <option value="1">Accepted</option>
+                        <option value="2">Rejected</option>
                         <option value="3">Revoke</option>
+                        <option value="4">Approved</option>
+                        <option value="5">Hold</option>
                       </select>
                     </div>
 
@@ -129,7 +131,7 @@
           <div class="table-responsive">
             <table id="getDamageEntries" class="table table-striped table-hover no-wrap">
               <thead class=" text-primary">
-                <th>Submit Date</th>
+                <th>Resignation Date</th>
                 <th>Status</th>
                 <th>Division</th>
                 <th>Branch</th>
@@ -144,7 +146,7 @@
                 <th>Reason</th>
                 <th>Personal Email ID</th>
                 <th>Personal Mobile Number</th>
-                <!-- <th>Action</th> -->
+                <th>Action</th>
               </thead>
               <tbody>
               </tbody>
@@ -280,13 +282,13 @@
             "defaultContent": '',
             orderable: false
           },
-          // {
-          //   data: 'action',
-          //   name: 'action',
-          //   "defaultContent": '',
-          //   orderable: false,
-          //   searchable: false
-          // },
+          {
+            data: 'action',
+            name: 'action',
+            "defaultContent": '',
+            orderable: false,
+            searchable: false
+          },
         ]
       });
       $('#division_id').change(function() {

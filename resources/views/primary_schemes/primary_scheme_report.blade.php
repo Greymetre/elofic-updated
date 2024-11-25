@@ -65,11 +65,14 @@
                       <label for="scheme_id">Primary Scheme</label>
                       <select class="select2" name="scheme_id" id="scheme_id" data-style="select-with-transition" required title="panel.sales_users.branch">
                         <option value="" disabled>Primary Scheme</option>
-                        @if(@isset($primary_schemes ))
-                        @foreach($primary_schemes as $primary_scheme)
-                        <!-- <option value="{!! $primary_scheme->id !!}">{!! $primary_scheme->scheme_name !!}</option> -->
-                        @endforeach
-                        @endif
+                      </select>
+                    </div>
+                    <div class="p-2 new_see" style="width:180px;">
+                      <label for="types">Type</label>
+                      <select class="select2" name="types" id="types" data-style="select-with-transition" title="panel.sales_users.branch">
+                        <option value="" disabled selected>Type</option>
+                        <option value="qualified">Qualified</option>
+                        <option value="unqualified">Unqualified</option>
                       </select>
                     </div>
                     
