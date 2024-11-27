@@ -269,6 +269,21 @@
                   </div>
             
               </div>
+       <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">SAP Code</label>
+                
+                    <div class="form-group has-default bmd-form-group">
+                      <input type="text" name="sap_code" id="sap_code" class="form-control" value="{!! old( 'contact_number', $customers['sap_code']) !!}" autocomplete="off">
+                    </div>
+                    @if ($errors->has('sap_code'))
+                    <div class="error">
+                      <p class="text-danger">{{ $errors->first('sap_code') }}</p>
+                    </div>
+                    @endif
+                  </div>
+            
+              </div>
 
 
    <div class="col-md-6" id="parentcustomer" style="display:none;">

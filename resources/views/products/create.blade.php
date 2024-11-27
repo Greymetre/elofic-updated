@@ -352,6 +352,19 @@
                 </div>
               </div>
             </div>
+            <div class="col-md-6">
+              <div class="input_section">
+                <label class="col-form-label">SAP Code</label>
+                <div class="form-group has-default bmd-form-group">
+                  <input type="text" name="sap_code" id="sap_code" class="form-control" value="{!! old( 'sap_code', $products['sap_code']) !!}" min="0" step="0.01">
+                  @if ($errors->has('sap_code'))
+                  <div class="error col-lg-12">
+                    <p class="text-danger">{{ $errors->first('sap_code') }}</p>
+                  </div>
+                  @endif
+                </div>
+              </div>
+            </div>
             <div class="col-md-3 col-sm-3">
               <div class="fileinput fileinput-new" data-provides="fileinput">
                 <div class="fileinput-new thumbnail">

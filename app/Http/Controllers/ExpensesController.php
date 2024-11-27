@@ -89,12 +89,6 @@ class ExpensesController extends Controller
     public function create()
     {
         $userids = getUsersReportingToAuth();
-        // $users= User::where('active','=','Y')->where(function($query) use($userids){
-        //                     if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-        //                     {
-        //                         $query->whereIn('id',$userids);
-        //                     }
-        //                     })->select('id','name')->get();
 
         if (Auth::user()->hasRole('superadmin') || Auth::user()->hasRole('Admin') || Auth::user()->hasRole('Sub_Admin') || Auth::user()->hasRole('HR_Admin') || Auth::user()->hasRole('HO_Account')) {
 
@@ -124,60 +118,6 @@ class ExpensesController extends Controller
      */
     public function store(Request $request)
     {
-        // $rules = [
-        //        'expenses_type'    => 'required', 
-        //        'user_id'          => 'required', 
-        //        'claim_amount'    => 'required', 
-        //        'date'            => 'required', 
-        //    ];
-
-
-        //    $validator = Validator::make($request->all(), $rules);
-        //    if ($validator->passes()) {
-        //        $data = $request->all();
-
-        //         $data = array(
-        //            'expenses_type' =>$request->expenses_type??NULL,
-        //            'user_id' =>$request->user_id??NULL,
-        //            'date' =>$request->date??NULL,
-        //            'claim_amount' =>$request->claim_amount??NULL,
-        //            'start_km' =>$request->start_km??NULL,
-        //            'stop_km' =>$request->stop_km??NULL,
-        //            'total_km' =>$request->total_km ??NULL,
-        //            'note' =>$request->note??NULL,
-        //            'created_by' =>Auth::user()->id??NULL,
-        //           );
-
-        //        $expenses = Expenses::create($data);
-
-        //        if($expenses){
-
-        //         $logdata = array(
-        //            'log_date' => date('Y-m-d'),
-        //            'expense_id' => $expenses->id,
-        //            'created_by' => Auth::user()->id,
-        //            'status_type' => 'generated'
-        //         );
-        //         ExpenseLog::create($logdata);
-
-        //        }
-
-
-        //        if($request->hasFile('expense_file')){
-        //            $files = $request->file('expense_file');
-        //            foreach($files as $file){
-        //            $customname = time() . '.' . $file->getClientOriginalExtension();
-        //            $expenses->addMedia($file)
-        //                    ->usingFileName($customname)
-        //                    ->toMediaCollection('expense_file', 's3');
-        //             }       
-
-        //        }
-        //     return redirect(route('expenses.index'))->with('message', 'expense added successfully');
-        //    }else {
-        //        return redirect()->back()->withErrors($validator)->withInput();
-        //    }
-
         $dates = Carbon::now();
         $current_date_time = $dates->setTimezone('Asia/Kolkata');
 

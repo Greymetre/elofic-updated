@@ -65,6 +65,7 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
                 DB::raw('division'),
                 DB::raw('group_2'),
                 DB::raw('GROUP_CONCAT(DISTINCT new_group_name) as new_group_name'),
+                DB::raw('SUM(CASE WHEN FIND_IN_SET("CEILING FAN", new_group_name) THEN quantity ELSE 0 END) as ceiling_fan_quantity'),
             ]);
         } else {
             $data = PrimarySales::with(['user', 'user.getdesignation', 'user.getdivision', 'branch', 'customer'])->select([
@@ -76,6 +77,8 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
                 DB::raw('customer_id'),
                 DB::raw('division'),
                 DB::raw('new_group_name'),
+                DB::raw('GROUP_CONCAT(DISTINCT group_4) as group_4'),
+                DB::raw('SUM(CASE WHEN FIND_IN_SET("20 additional", group_4) THEN quantity ELSE 0 END) as group_4_quantity'),
             ]);
         }
         $data->where(function ($query) use ($pSchemesGroups) {
@@ -143,7 +146,6 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
         } else {
             $data = $data->groupBy('customer_id', 'emp_code', 'final_branch', 'branch_id', 'division', 'new_group_name')->orderBy('month')->get();
         }
-        // dd($data);
         return $data;
     }
 
@@ -164,7 +166,12 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
             ->groupBy('group_type')
             ->get();
         if ($pSchemesGroups[0]->group_type == 'group_2') {
-            $CM = PrimarySchemeDetail::whereIn('groups', explode(',', $data['group_2']))->where('min', '<=', $data['total_quantity'])->where('max', '>=', $data['total_quantity'])->where('primary_scheme_id', $this->scheme_id)->first();
+            if($this->pSchemes->id == 20){
+                $CM = PrimarySchemeDetail::whereIn('groups', explode(',', $data['group_2']))->where('min', '<=', $data['ceiling_fan_quantity'])->where('max', '>=', $data['ceiling_fan_quantity'])->where('primary_scheme_id', $this->scheme_id)->first();
+            }else{
+                $CM = PrimarySchemeDetail::whereIn('groups', explode(',', $data['group_2']))->where('min', '<=', $data['total_quantity'])->where('max', '>=', $daa['total_quantity'])->where('primary_scheme_id', $this->scheme_id)->first();
+
+            }
         } else {
             $CM = PrimarySchemeDetail::where('groups', $data['new_group_name'])->where('min', '<=', $data['total_quantity'])->where('max', '>=', $data['total_quantity'])->where('primary_scheme_id', $this->scheme_id)->first();
         }
@@ -181,6 +188,10 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
             }
         }
 
+        if($this->pSchemes->id == 38){
+            //Working panding
+        }
+
         $response = array();
         $response[0] = $this->financial_year;
         $response[1] = $this->quarter ? 'Q' . $this->quarter : '-';
@@ -194,7 +205,11 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
         $response[9] = $data['new_group_name'] ?? '-';
         $response[10] = '-';
         $response[11] = '-';
-        $response[12] = $data['total_quantity'] ?? '-';
+        if($this->pSchemes->id == 20){
+            $response[12] = $data['total_quantity'].' ('. $data['ceiling_fan_quantity'] .')' ?? '-';
+        }else{
+            $response[12] = $data['total_quantity'] ?? '-';
+        }
         $response[13] = $data['total_net_amount'] ?? '-';
         $response[14] = $data['total_quantity'] ?? '-';
         $response[15] = $data['total_net_amount'] > 0 ? number_format($data['total_net_amount'] / 100000, 2, '.', '') : '-';
