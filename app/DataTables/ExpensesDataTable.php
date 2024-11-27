@@ -174,6 +174,14 @@ class ExpensesDataTable extends DataTable
         if (!empty($request['expenses_type'])) {
             $data->where('expenses_type', $request['expenses_type']);
         }
+        
+        if (!empty($request['attechments'])) {
+            if ($request['attechments'] == 'yes') {
+                $data->whereHas('media');
+            } elseif ($request['attechments'] == 'no') {
+                $data->whereDoesntHave('media');
+            }
+        }
 
         if (!empty($request['branch_id'])) {
             $branch_user_id = User::where('branch_id', $request['branch_id'])->pluck('id');
@@ -202,6 +210,7 @@ class ExpensesDataTable extends DataTable
             $data->where('checker_status', $request['status']);
         }
 
+        // dd($data->toSql());
         $data = $data->newQuery();
         return $data;
     }

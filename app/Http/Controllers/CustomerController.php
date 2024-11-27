@@ -96,7 +96,10 @@ class CustomerController extends Controller
             $data = Customers::with('customertypes', 'firmtypes', 'createdbyname')
                 ->where(function ($query) use ($request, $userids) {
                     if (!empty($request['executive_id'])) {
-                        $query->where('executive_id', $request['executive_id']);
+                        $query->where(function ($q) use ($request) {
+                            $q->where('executive_id', $request['executive_id'])
+                              ->orWhere('created_by', $request['executive_id']);
+                        });
                     }
                     if (!empty($request['parent_id'])) {
                         $customer_idss = ParentDetail::where('parent_id', $request['parent_id'])->pluck('customer_id');
@@ -166,6 +169,7 @@ class CustomerController extends Controller
                     }
                     // $query->whereIn('customertype', ['2','3','4','5','6']);
                 })
+                // dd($data->toSql());
                 ->latest();
             return Datatables::of($data)
                 ->addIndexColumn()

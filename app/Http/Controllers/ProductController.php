@@ -115,6 +115,7 @@ class ProductController extends Controller
                 'created_at'    => getcurentDateTime(),
                 'specification' => !empty($request['specification']) ? $request['specification'] :'',
                 'phase' => !empty($request['phase']) ? $request['phase'] :'',
+                'sap_code' => !empty($request['sap_code']) ? $request['sap_code'] :'',
                 'part_no'       => !empty($request['part_no']) ? $request['part_no'] :'',
                 'product_no'    => !empty($request['product_no']) ? $request['product_no'] :'',
                 'model_no'      => !empty($request['model_no']) ? $request['model_no'] :'',
@@ -239,6 +240,7 @@ class ProductController extends Controller
             $product->unit_id = !empty($request['unit_id']) ? $request['unit_id'] :null;
             $product->specification = !empty($request['specification']) ? $request['specification'] :'';
             $product->phase = !empty($request['phase']) ? $request['phase'] :'';
+            $product->sap_code = !empty($request['sap_code']) ? $request['sap_code'] :'';
             $product->part_no = !empty($request['part_no']) ? $request['part_no'] :'';
             $product->product_no = !empty($request['product_no']) ? $request['product_no'] :'';
             $product->model_no = !empty($request['model_no']) ? $request['model_no'] :'';

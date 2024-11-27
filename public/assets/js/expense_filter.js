@@ -60,6 +60,7 @@ $(document).ready(function () {
                     d.status = $('#status').val(),
                     d.start_date = $('#start_date').val(),
                     d.end_date = $('#end_date').val()
+                    d.attechments = $('#attechments').val()
 
             }
         },
@@ -152,6 +153,9 @@ $(document).ready(function () {
         ]
     });
 
+    $('#attechments').change(function () {
+        oTable.draw();
+    });
     $('#payroll').change(function () {
         $('#executive_id').val('');
         $('#executive_id').change();

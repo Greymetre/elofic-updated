@@ -69,7 +69,10 @@ class CustomersExport implements FromCollection, WithHeadings, ShouldAutoSize, W
             'customeraddress.statename',
         ])->where(function ($query) {
             if (!empty($this->filters['executive_id'])) {
-                $query->where('executive_id', $this->filters['executive_id']);
+                $query->where(function ($q)  {
+                    $q->where('executive_id', $this->filters['executive_id'])
+                      ->orWhere('created_by', $this->filters['executive_id']);
+                });
             }
 
             if (!Auth::user()->hasRole(['superadmin', 'Admin'])) {
@@ -170,7 +173,8 @@ class CustomersExport implements FromCollection, WithHeadings, ShouldAutoSize, W
             'State ID',
             'Customer Type ID',
             'Working Status',
-            'Creation Date'
+            'Creation Date',
+            'Sap Code'
         ];
 
         if (!empty($this->division_users)) {
@@ -260,6 +264,7 @@ class CustomersExport implements FromCollection, WithHeadings, ShouldAutoSize, W
             $data->customertype,
             $data->working_status,
             $data['creation_date'],
+            $data['sap_code'],
         ];
 
 

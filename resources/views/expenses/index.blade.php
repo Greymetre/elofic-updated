@@ -13,17 +13,12 @@
 
                  @if(auth()->user()->can(['expense_download']))
                  <form method="GET" action="{{ URL::to('expenses-download') }}">
-
-
                    <div class="d-flex flex-row">
                      <div class="p-2" style="width:195px;">
                        <select class="selectpicker" name="payroll" id="payroll" data-style="select-with-transition">
-
                          @foreach($pay_rolls as $key=>$payroll)
                          <option value="{!! $key !!}">{!! $payroll !!}</option>
                          @endforeach
-
-
                        </select>
                      </div>
 
@@ -76,6 +71,14 @@
                          <option value="1">Approved</option>
                          <option value="2">Rejected</option>
                          <option value="0">Pending</option>
+                       </select>
+                     </div>
+
+                     <div class="p-2" style="width:160px;">
+                       <select class="selectpicker" name="attechments" id="attechments" data-style="select-with-transition" title="Select Attechments">
+                         <option value="">Select Attechments</option>
+                         <option value="yes">Yes</option>
+                         <option value="no">No</option>
                        </select>
                      </div>
 
@@ -287,5 +290,5 @@
        });
      }).trigger("chnage");
    </script>
-   <script src="{{asset('assets/js/expense_filter.js')}}"></script>
+   <script src="{{asset('assets/js/expense_filter.js?')}}"></script>
  </x-app-layout>
