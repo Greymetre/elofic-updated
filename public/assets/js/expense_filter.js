@@ -60,7 +60,7 @@ $(document).ready(function () {
                     d.status = $('#status').val(),
                     d.start_date = $('#start_date').val(),
                     d.end_date = $('#end_date').val()
-                    d.attechments = $('#attechments').val()
+                d.attechments = $('#attechments').val()
 
             }
         },
@@ -189,10 +189,38 @@ $(document).ready(function () {
         oTable.draw();
     });
     $('#start_date').change(function () {
+        $.ajax({
+            url: "/getExpenseCount",
+            data: {
+                start_date: $('#start_date').val(),
+                end_date: $('#end_date').val()
+            },
+            method: "GET",
+            success: function (data) {
+                $("#pending_count").html(data.data.pending_count);
+                $("#approve_count").html(data.data.approve_count);
+                $("#reject_count").html(data.data.reject_count);
+                $("#checked_count").html(data.data.checked_count);
+            }
+        });
         localStorage.setItem("start_date", $(this).val());
         oTable.draw();
     });
     $('#end_date').change(function () {
+        $.ajax({
+            url: "/getExpenseCount",
+            data: {
+                start_date: $('#start_date').val(),
+                end_date: $('#end_date').val()
+            },
+            method: "GET",
+            success: function (data) {
+                $("#pending_count").html(data.data.pending_count);
+                $("#approve_count").html(data.data.approve_count);
+                $("#reject_count").html(data.data.reject_count);
+                $("#checked_count").html(data.data.checked_count);
+            }
+        });
         localStorage.setItem("end_date", $(this).val());
         oTable.draw();
     });
@@ -521,7 +549,7 @@ $('body').on('click', '.checked_by_reporting_status', function () {
             data: {
                 _token: token,
                 id: id,
-                status:'4'
+                status: '4'
             },
             success: function (data) {
                 $('.message').empty();
@@ -564,7 +592,7 @@ $('body').on('click', '.checked_status', function () {
             data: {
                 _token: token,
                 id: id,
-                status:'3'
+                status: '3'
             },
             success: function (data) {
                 $('.message').empty();

@@ -74,11 +74,14 @@ class ExpensesController extends Controller
 
 
 
-        // $expense_ids = Expenses::orderBy('id', 'desc')->get();
+        $pending_count = Expenses::where('checker_status', '0')->count();
+        $approve_count = Expenses::where('checker_status', '1')->count();
+        $reject_count = Expenses::where('checker_status', '2')->count();
+        $checked_count = Expenses::where('checker_status', '3')->count();
 
         $pay_rolls = Config('constants.pay_roll');
 
-        return $dataTable->render('expenses.index', compact('branches', 'pay_rolls', 'divisions'));
+        return $dataTable->render('expenses.index', compact('branches', 'pay_rolls', 'divisions', 'pending_count', 'approve_count', 'reject_count','checked_count'));
     }
 
     /**

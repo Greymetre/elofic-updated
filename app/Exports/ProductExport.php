@@ -71,7 +71,7 @@ class ProductExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMa
             isset($data['model_no']) ? $data['model_no'] :'',
             $data['suc_del'],
             $data['phase'],
-            $data['active'] == 'Y' ? 'Active':'Inacticve',
+            $data['active'],
             $data['sap_code'],
         ];
     }

@@ -1447,4 +1447,21 @@ class AjaxController extends Controller
         $pSchemes = PrimaryScheme::where('quarter', $request->quater)->whereIn('division', $request->division)->select('id', 'scheme_name')->get();
         return response()->json(['status' => 'success', 'data' => $pSchemes]);
     }
+
+    public function getExpenseCount(Request $request)
+    {
+        if($request->end_date && !empty($request->end_date)){
+            $data['pending_count'] = Expenses::where('checker_status', '0')->where('date', '>=', $request->start_date)->where('date', '<=', $request->end_date)->count();
+            $data['approve_count'] = Expenses::where('checker_status', '1')->where('date', '>=', $request->start_date)->where('date', '<=', $request->end_date)->count();
+            $data['reject_count'] = Expenses::where('checker_status', '2')->where('date', '>=', $request->start_date)->where('date', '<=', $request->end_date)->count();
+            $data['checked_count'] = Expenses::where('checker_status', '3')->where('date', '>=', $request->start_date)->where('date', '<=', $request->end_date)->count();
+        }else{
+            $data['pending_count'] = Expenses::where('checker_status', '0')->where('date', '>=', $request->start_date)->count();
+            $data['approve_count'] = Expenses::where('checker_status', '1')->where('date', '>=', $request->start_date)->count();
+            $data['reject_count'] = Expenses::where('checker_status', '2')->where('date', '>=', $request->start_date)->count();
+            $data['checked_count'] = Expenses::where('checker_status', '3')->where('date', '>=', $request->start_date)->count();
+        }
+
+        return response()->json(['status' => 'success', 'data' => $data]);
+    }
 }

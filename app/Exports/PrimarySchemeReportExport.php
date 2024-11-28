@@ -188,10 +188,6 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
             }
         }
 
-        if($this->pSchemes->id == 38){
-            //Working panding
-        }
-
         $response = array();
         $response[0] = $this->financial_year;
         $response[1] = $this->quarter ? 'Q' . $this->quarter : '-';
@@ -230,7 +226,17 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
                 }
                 $response[17] = $CM ? $CM->primaryscheme->scheme_name : '-';
             } else {
-                $response[16] = $CM ? ($CM->primaryscheme->per_pcs == 1 ? $CM->points * $data['total_quantity'] : $CM->points) : '0';
+                if($this->pSchemes->id == 38){
+                    if($data->group_4_quantity > 0 && $data->total_quantity >= 300){
+                        $additional = $data->group_4_quantity*40;
+                        $remain = ($data->total_quantity-$data->group_4_quantity)*20;
+                        $response[16] = $additional+$remain;
+                    }else{
+                        $response[16] = $CM ? ($CM->primaryscheme->per_pcs == 1 ? $CM->points * $data['total_quantity'] : $CM->points) : '0';
+                    }
+                }else{
+                    $response[16] = $CM ? ($CM->primaryscheme->per_pcs == 1 ? $CM->points * $data['total_quantity'] : $CM->points) : '0';
+                }
                 $response[17] = $CM ? $CM->primaryscheme->scheme_name : '-';
             }
         }

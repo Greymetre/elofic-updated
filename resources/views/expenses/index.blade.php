@@ -111,6 +111,44 @@
            </h4>
          </div>
          <div class="card-body">
+           <div class="col-md-12">
+             <div class="row">
+               <div class="col-sm">
+                 <div class="card text-center m-1">
+                   <div class="card-body">
+                     <h4 class="card-text">Pending</h4>
+                     <h5 class="card-title" id="pending_count">{{$pending_count}}</h5>
+                   </div>
+                 </div>
+               </div>
+               <div class="col-sm">
+                 <div class="card text-center m-1">
+                   <div class="card-body">
+                     <h4 class="card-text text-center">Approved</h4>
+                     <h5 class="card-title" id="approve_count">{{$approve_count}}</h5>
+                   </div>
+                 </div>
+               </div>
+               <div class="col-sm">
+                 <div class="card text-center m-1">
+                   <div class="card-body">
+                     <h4 class="card-text text-center">Rejected</h4>
+                     <h5 class="card-title" id="reject_count">{{$reject_count}}</h5>
+                   </div>
+                 </div>
+               </div>
+               <div class="col-sm">
+                 <div class="card text-center m-1">
+                   <div class="card-body">
+                     <h4 class="card-text text-center">Checked</h4>
+                     <h5 class="card-title" id="checked_count">{{$checked_count}}</h5>
+                   </div>
+                 </div>
+               </div>
+             </div>
+           </div>
+         </div>
+         <div class="card-body">
            @if(count($errors) > 0)
            <div class="alert alert-danger">
              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -270,7 +308,7 @@
        });
      }
      $("#payroll").on("change", function() {
-      localStorage.removeItem('executive_id');
+       localStorage.removeItem('executive_id');
        var payroll = $(this).val();
        $.ajax({
          url: "{{ url('getUserList') }}",
@@ -281,11 +319,11 @@
            payroll: payroll
          },
          success: function(res) {
-          var html = '<option value="">Select User</option>';
-          $.each(res, function(k, v) {
-            html += '<option value="'+v.id+'"> ('+v.employee_codes+') '+v.name+'</option>';
-          });
-          $("#executive_id").html(html);
+           var html = '<option value="">Select User</option>';
+           $.each(res, function(k, v) {
+             html += '<option value="' + v.id + '"> (' + v.employee_codes + ') ' + v.name + '</option>';
+           });
+           $("#executive_id").html(html);
          }
        });
      }).trigger("chnage");
