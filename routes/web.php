@@ -976,6 +976,7 @@ Route::any('getServiceProductDetails', [AjaxController::class, 'getServiceProduc
 Route::any('changeAppointmentStatus', [AjaxController::class, 'changeAppointmentStatus']);
 Route::any('getWorkDoneTime', [AjaxController::class, 'getWorkDoneTime']);
 Route::any('getPrimarySachme', [AjaxController::class, 'getPrimarySachme']);
+Route::any('getExpenseCount', [AjaxController::class, 'getExpenseCount']);
 
 
 

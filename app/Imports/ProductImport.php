@@ -35,7 +35,7 @@ class ProductImport implements ToCollection,WithValidation,WithHeadingRow, WithB
         $productdetails = collect([]);
         foreach ($rows as $row) {
             if( $product = Product::updateOrCreate(['id' => $row['product_id'] ],[
-                'active' => 'Y',
+                'active' => isset($row['status'])? ucfirst($row['status']):'Y',
                 'product_name' => isset($row['product_name'])? ucfirst($row['product_name']):'',
                 'product_code' => isset($row['product_code'])? $row['product_code']:'',
                 'new_group' => isset($row['new_group'])? $row['new_group']:'',
@@ -68,7 +68,7 @@ class ProductImport implements ToCollection,WithValidation,WithHeadingRow, WithB
             ]) )
             {
                ProductDetails::updateOrCreate(['product_id' => $product['id'] ],[
-                    'active' => 'Y',
+                    'active' => isset($row['status'])? ucfirst($row['status']):'Y',
                     'product_id' => $product['id'],
                     'detail_title' => isset($row['detail_title'])? ucfirst($row['detail_title']):$row['product_name'],
                     'detail_description' => isset($row['detail_description'])? ucfirst($row['detail_description']):'',
