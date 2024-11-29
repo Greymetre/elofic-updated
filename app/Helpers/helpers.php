@@ -451,7 +451,9 @@ if (! function_exists('getUsersReportingToAuth')) {
                 $test = getAllChild($test, $all_users);
             }
         }else{
-            $all_ids_array = User::where('active' , 'Y')->pluck('id')->toArray();
+            $all_ids_array = User::whereDoesntHave('roles', function ($query) {
+                $query->where('id', 29);
+            })->where('active' , 'Y')->pluck('id')->toArray();
         }
 
         return $all_ids_array ;
