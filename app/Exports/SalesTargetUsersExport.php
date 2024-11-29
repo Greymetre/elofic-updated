@@ -285,9 +285,20 @@ class SalesTargetUsersExport implements FromCollection, WithHeadings, ShouldAuto
             }
         }
 
-        $response[17] = '=I' . $this->rowIndex . ' + L' . $this->rowIndex . ' + O' . $this->rowIndex;
-        $response[18] = '=J' . $this->rowIndex . ' + M' . $this->rowIndex . ' + P' . $this->rowIndex;
-        $response[19] = '=ROUND((K' . $this->rowIndex . ' + N' . $this->rowIndex . ' + Q' . $this->rowIndex . ') / 3, 2)';
+        $response[17] =
+            (float) ($response[8] ?? 0) +
+            (float) ($response[11] ?? 0) +
+            (float) ($response[14] ?? 0);
+
+        $response[18] =
+            (float) ($response[9] ?? 0) +
+            (float) ($response[12] ?? 0) +
+            (float) ($response[15] ?? 0);
+
+        $response[19] = $response[17] > 0
+            ? number_format(($response[18] / $response[17]) * 100, 2) . '%'
+            : '0.00%';
+
 
         foreach ($data['months'] as $key => $month) {
             $year = explode(',', $data['years']);
@@ -385,9 +396,19 @@ class SalesTargetUsersExport implements FromCollection, WithHeadings, ShouldAuto
             }
         }
 
-        $response[30] = '=U' . $this->rowIndex . ' + X' . $this->rowIndex . ' + AA' . $this->rowIndex;
-        $response[29] = '=V' . $this->rowIndex . ' + Y' . $this->rowIndex . ' + AB' . $this->rowIndex;
-        $response[31] = '=ROUND((W' . $this->rowIndex . ' + Z' . $this->rowIndex . ' + AC' . $this->rowIndex . ') / 3,2)';
+        $response[29] =
+            (float) ($response[20] ?? 0) +
+            (float) ($response[23] ?? 0) +
+            (float) ($response[26] ?? 0);
+
+        $response[30] =
+            (float) ($response[21] ?? 0) +
+            (float) ($response[24] ?? 0) +
+            (float) ($response[27] ?? 0);
+
+        $response[31] = $response[29] > 0
+            ? number_format(($response[30] / $response[29]) * 100, 2) . '%'
+            : '0.00%';
 
 
         foreach ($data['months'] as $key => $month) {
@@ -430,7 +451,6 @@ class SalesTargetUsersExport implements FromCollection, WithHeadings, ShouldAuto
                     $monthNumber = Carbon::parse("1 $month")->month;
                     $firstDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->startOfMonth()->toDateString();
                     $lastDate = Carbon::createFromDate($year[$key], $monthNumber, 1)->endOfMonth()->toDateString();
-
                     $response[36] = number_format(($data->user->primarySales->where('branch_id', $data['branch_id'])->where('invoice_date', '>=', $firstDate)->where('invoice_date', '<=', $lastDate)->sum('net_amount')) / 100000, 2, '.', '');
                 } else {
                     $response[36] = $data['achievements'][$key] ?? '';
@@ -486,9 +506,19 @@ class SalesTargetUsersExport implements FromCollection, WithHeadings, ShouldAuto
             }
         }
 
-        $response[42] = '=AG' . $this->rowIndex . ' + AJ' . $this->rowIndex . ' + AM' . $this->rowIndex;
-        $response[41] = '=AH' . $this->rowIndex . ' + AK' . $this->rowIndex . ' + AN' . $this->rowIndex;
-        $response[43] = '=ROUND((AI' . $this->rowIndex . ' + AL' . $this->rowIndex . ' + AO' . $this->rowIndex . ') / 3,2)';
+        $response[41] =
+            (float) ($response[32] ?? 0) +
+            (float) ($response[35] ?? 0) +
+            (float) ($response[38] ?? 0);
+
+        $response[42] =
+            (float) ($response[33] ?? 0) +
+            (float) ($response[36] ?? 0) +
+            (float) ($response[39] ?? 0);
+
+        $response[43] = $response[41] > 0
+            ? number_format(($response[42] / $response[41]) * 100, 2) . '%'
+            : '0.00%';
 
         foreach ($data['months'] as $key => $month) {
             $year = explode(',', $data['years']);
@@ -586,13 +616,35 @@ class SalesTargetUsersExport implements FromCollection, WithHeadings, ShouldAuto
             }
         }
 
-        $response[54] = '=AS' . $this->rowIndex . ' + AV' . $this->rowIndex . ' + AY' . $this->rowIndex;
-        $response[53] = '=AT' . $this->rowIndex . ' + AW' . $this->rowIndex . ' + AZ' . $this->rowIndex;
-        $response[55] = '=ROUND((AU' . $this->rowIndex . ' + AX' . $this->rowIndex . ' + BA' . $this->rowIndex . ') / 3,2)';
+        $response[53] =
+            (float) ($response[44] ?? 0) +
+            (float) ($response[47] ?? 0) +
+            (float) ($response[50] ?? 0);
 
-        $response[57] = '=R' . $this->rowIndex . ' + AD' . $this->rowIndex . ' + AP' . $this->rowIndex . ' + BB' . $this->rowIndex;
-        $response[56] = '=S' . $this->rowIndex . ' + AE' . $this->rowIndex . ' + AQ' . $this->rowIndex . ' + BC' . $this->rowIndex;
-        $response[58] = '=ROUND((T' . $this->rowIndex . ' + AF' . $this->rowIndex . ' + AR' . $this->rowIndex . ' + BD' . $this->rowIndex . ') / 4,2)';
+        $response[54] =
+            (float) ($response[45] ?? 0) +
+            (float) ($response[48] ?? 0) +
+            (float) ($response[51] ?? 0);
+
+        $response[55] = $response[53] > 0
+            ? number_format(($response[54] / $response[53]) * 100, 2) . '%'
+            : '0.00%';
+
+        $response[56] =
+            (float) ($response[17] ?? 0) +
+            (float) ($response[29] ?? 0) +
+            (float) ($response[41] ?? 0) +
+            (float) ($response[53] ?? 0);
+
+        $response[57] =
+            (float) ($response[18] ?? 0) +
+            (float) ($response[30] ?? 0) +
+            (float) ($response[42] ?? 0) +
+            (float) ($response[54] ?? 0);
+
+        $response[58] = $response[56] > 0
+            ? number_format(($response[57] / $response[56]) * 100, 2) . '%'
+            : '0.00%';
         $response[59] = $data['user']['active'] ?? '';
 
         $this->rowIndex++;
@@ -627,25 +679,31 @@ class SalesTargetUsersExport implements FromCollection, WithHeadings, ShouldAuto
         $sheet->mergeCells('BB1:BD1');
         $sheet->mergeCells('BE1:BG1');
 
-        $sheet->getStyle('A1:ZZ1')->applyFromArray([
+        $sheet->getStyle('A1:BH2')->applyFromArray([
             'font' => [
-                'bold' => true
+                'bold' => true,
+                'color' => ['rgb' => 'FFFFFF'], // White font color
             ],
-            'background' => [
-                'color' => '#000000'
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '87CEEB'], // Sky blue background color
             ],
             'alignment' => [
                 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
             ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // Thin border
+                    'color' => ['rgb' => '000000'], // Black border color
+                ],
+            ],
         ]);
 
-        $sheet->getStyle('A2:ZZ2')->applyFromArray([
-            'font' => [
-                'bold' => true,
-            ],
+
+        $sheet->getStyle('A3:BH300')->applyFromArray([
             'alignment' => [
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
                 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
             ],
         ]);

@@ -520,6 +520,7 @@ class DashboardController extends Controller
         if ($validator->fails()) {
             return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
         }
+        $slected_user = User::find($request->user_id);
         $login_user = $request->user();
         $todayDate = Carbon::today()->toDateString();
         $todayBeatSchedule = BeatSchedule::where('user_id', $login_user['id'])->where('beat_date', $todayDate)->get();
@@ -542,8 +543,10 @@ class DashboardController extends Controller
             $user_ids = User::where('division_id', $request->division_id)->pluck('id');
         }
 
-        $query = SalesTargetUsers::with('user')
-            ->whereIn('user_id', $user_ids);
+        $query = SalesTargetUsers::with('user');
+        if(!$slected_user->hasRole('superadmin') && !$slected_user->hasRole('Admin') && !$slected_user->hasRole('Sub_Admin')){
+            $query->whereIn('user_id', $user_ids);
+        }
 
         if ($request->branch_id && !empty($request->branch_id)) {
             $query->where(['branch_id' => $request->branch_id]);
@@ -557,16 +560,14 @@ class DashboardController extends Controller
         } else {
             $query->where(['month' => $month, 'year' => $year]);
         }
-
         $total_data = $query->get();
         $target = 0;
         $achievement = 0;
-
         foreach ($total_data as $key => $value) {
             if ($value->user_id == $request->user_id) {
                 $target += $value->target;
                 $achievement += $value->achievement;
-            } elseif ($value->type == 'primary') {
+            }else if ($value->type == 'primary') {
                 $target += $value->target;
                 $achievement += $value->achievement;
             }
@@ -592,8 +593,8 @@ class DashboardController extends Controller
 
                     $firstDateFormatted = $firstDate->toDateString();
                     $lastDateFormatted = $lastDate->toDateString();
-
-                    $achievement = PrimarySales::whereIn('emp_code', $all_emp_codes)->where('invoice_date', '>=', $firstDateFormatted)->where('invoice_date', '<=', $lastDateFormatted);
+                    
+                    $achievement = PrimarySales::whereIn('emp_code', $all_emp_codes)->whereIn('division', ['PUMP', 'MOTOR'])->where('invoice_date', '>=', $firstDateFormatted)->where('invoice_date', '<=', $lastDateFormatted);
 
                     if ($request->branch_id && !empty($request->branch_id)) {
                         $selected_branch = Branch::find($request->branch_id);
@@ -613,7 +614,7 @@ class DashboardController extends Controller
 
                     $firstDateFormatted = $firstDate->toDateString();
                     $lastDateFormatted = $lastDate->toDateString();
-                    $achievement = PrimarySales::whereIn('emp_code', $all_emp_codes)->where('invoice_date', '>=', $firstDateFormatted)->where('invoice_date', '<=', $lastDateFormatted);
+                    $achievement = PrimarySales::whereIn('emp_code', $all_emp_codes)->whereIn('division', ['PUMP', 'MOTOR'])->where('invoice_date', '>=', $firstDateFormatted)->where('invoice_date', '<=', $lastDateFormatted);
                     if ($request->branch_id && !empty($request->branch_id)) {
                         $selected_branch = Branch::find($request->branch_id);
                         $achievement->where(['final_branch' => $selected_branch->branch_name]);
@@ -626,7 +627,12 @@ class DashboardController extends Controller
                         $data['achievement'] = "0";
                     }
                 } else {
-                    $achievement = PrimarySales::whereIn('emp_code', $all_emp_codes)->where('invoice_date', '>=', date('Y-m') . '-01');
+                    $achievement = PrimarySales::whereIn('division', ['PUMP', 'MOTOR'])
+                    ->where('invoice_date', '>=', date('Y-m') . '-01')
+                    ->whereIn('emp_code', User::where('sales_type', 'Primary')->pluck('employee_codes'));
+                    // ->whereIn('emp_code', $all_emp_codes);
+                    
+                    // PrimarySales::whereIn('emp_code', $all_emp_codes)->whereIn('division', ['PUMP', 'MOTOR'])->where('invoice_date', '>=', date('Y-m') . '-01');
                     if ($request->branch_id && !empty($request->branch_id)) {
                         $selected_branch = Branch::find($request->branch_id);
                         $achievement->where(['final_branch' => $selected_branch->branch_name]);

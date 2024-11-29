@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\LeaveController;
 use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\PrimarySchemeReportController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\SalesController;
 use App\Http\Controllers\Api\SurveyController;
@@ -240,4 +241,9 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::get('primary-sales', [ReportController::class, 'primarySales']);
     Route::get('monthly-sales', [ReportController::class, 'monthlySales']);
     Route::get('getDealerGrowth', [ReportController::class, 'getDealerGrowth']);
+    
+    //Primary Scheme report
+    Route::get('getprimary-scheme-filter', [PrimarySchemeReportController::class, 'getPrimarySchemeFilter']);
+    Route::get('getPrimarySchemes', [PrimarySchemeReportController::class, 'getPrimarySchemes']);
+    
 });
