@@ -876,6 +876,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('/dealer-appointment/download', [DealerAppointmentController::class, 'download'])->name('dealer-appointment.download');
     Route::get('/dealer-appointment-edit/{dealerAppointment}', [DealerAppointmentController::class, 'edit'])->name('dealer-appointment.edit');
     Route::post('/dealer-appointment-update//{dealerAppointment}', [DealerAppointmentController::class, 'update'])->name('dealer-appointment-form.update');
+    Route::any('/dealer-certificate-generate', [DealerAppointmentController::class, 'dealerCertificateGenerate'])->name('dealer-certificate.generate');
 
     // Damage Entry Route
     Route::any('visitors', [DashboardController::class, 'visitors'])->name('visitor');

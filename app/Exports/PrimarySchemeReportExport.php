@@ -90,7 +90,7 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
             }
         });
 
-        if (!in_array('FAN', $this->division)) {
+        if ($this->pSchemes->assign_to == 'branch') {
             $data->whereIn('branch_id', $pSchemesBranch);
         }
         if ($this->pSchemes->repetition == '3') {
@@ -169,7 +169,7 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
             if($this->pSchemes->id == 20){
                 $CM = PrimarySchemeDetail::whereIn('groups', explode(',', $data['group_2']))->where('min', '<=', $data['ceiling_fan_quantity'])->where('max', '>=', $data['ceiling_fan_quantity'])->where('primary_scheme_id', $this->scheme_id)->first();
             }else{
-                $CM = PrimarySchemeDetail::whereIn('groups', explode(',', $data['group_2']))->where('min', '<=', $data['total_quantity'])->where('max', '>=', $daa['total_quantity'])->where('primary_scheme_id', $this->scheme_id)->first();
+                $CM = PrimarySchemeDetail::whereIn('groups', explode(',', $data['group_2']))->where('min', '<=', $data['total_quantity'])->where('max', '>=', $data['total_quantity'])->where('primary_scheme_id', $this->scheme_id)->first();
 
             }
         } else {

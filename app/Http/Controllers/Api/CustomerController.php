@@ -462,22 +462,17 @@ class CustomerController extends Controller
         try {
             $user = $request->user();
             $userids = getUsersReportingToAuth($user->id); // Get users reporting to the authenticated user
-            $customer_ids_assign = EmployeeDetail::whereIn('user_id', $userids)->pluck('customer_id')->toArray();
+            $customer_ids_assign = EmployeeDetail::whereIn('user_id', $userids)->distinct('customer_id')->pluck('customer_id')->toArray();
 
             $pageSize = $request->input('pageSize', 10000); // Default to 10000 if pageSize is not provided
             $search = $request->input('search');
+            // $chunkSize = 10000;
+            // $customerIdChunks = array_chunk($customer_ids_assign, $chunkSize);
 
-            // Split large arrays into chunks
-            $chunkSize = 1000; // Adjust as needed based on database limitations
-            $customerIdChunks = array_chunk($customer_ids_assign, $chunkSize);
-
-            $results = collect(); // To store all paginated results
-
-            foreach ($customerIdChunks as $chunk) {
+            // foreach ($customerIdChunks as $chunk) {
                 $query = $this->customers->with('customeraddress', 'customerdetails', 'customertypes')
                     ->where('active', 'Y')
                     ->where(function ($query) use ($search, $customer_id, $branch_user_id, $customertype) {
-                        // Search conditions
                         if (!empty($search)) {
                             $query->where(function ($query) use ($search) {
                                 $query->where('name', 'like', "%{$search}%")
@@ -487,13 +482,9 @@ class CustomerController extends Controller
                                     ->orWhere('mobile', 'like', "%{$search}%");
                             });
                         }
-
-                        // Filter by customer_id (from city)
                         if (!empty($customer_id)) {
                             $query->whereIn('id', $customer_id);
                         }
-
-                        // Filter by customertype
                         if (!empty($customertype)) {
                             $query->where('customertype', $customertype);
                         }
@@ -506,31 +497,19 @@ class CustomerController extends Controller
                         }
                     })
                     ->whereHas('getemployeedetail', function ($querys) use ($userids, $user) {
-                        // Role-based filtering
                         if (!$user->hasRole('superadmin') && !$user->hasRole('Admin') && !$user->hasRole('Sub_Admin') && !$user->hasRole('HR_Admin') && !$user->hasRole('HO_Account')) {
                             $querys->whereIn('user_id', $userids);
                         }
                     })
-                    ->whereIn('id', $chunk) // Apply the chunked customer IDs
+                    ->whereIn('id', $customer_ids_assign)
                     ->select('id', 'name', 'first_name', 'last_name', 'mobile', 'email', 'profile_image', 'customer_code', 'latitude', 'longitude', 'customertype')
+                    // dd($query->toSql());
                     ->orderBy('name', 'asc')
-                    ->paginate($pageSize); // Apply pagination
-
-                // Collect results from each chunk into the final result
-                $results = $results->merge($query->items());
-            }
-
-            // Optionally convert results to a Laravel paginator if needed
-            $db_data = new \Illuminate\Pagination\LengthAwarePaginator(
-                $results,
-                count($results),
-                $pageSize,
-                $request->input('page', 1),
-                ['path' => $request->url(), 'query' => $request->query()]
-            );
+                    ->paginate($pageSize);
+            // }
 
 
-
+            $db_data = $query;
 
             // dd($db_data);
             $data = collect([]);
@@ -575,6 +554,7 @@ class CustomerController extends Controller
             $userids = getUsersReportingToAuth($user->id);
             $customer_ids_assign = EmployeeDetail::whereIn('user_id', $userids)->pluck('customer_id')->toArray();
             $pageSize = $request->input('pageSize');
+            $search = $request->input('search');
             $query = $this->customers
                 // ->whereHas('customertypes', function($query) use($user){
                 //     $query->where('type_name', '=', 'distributor');
@@ -586,6 +566,15 @@ class CustomerController extends Controller
                 ->whereIn('customertype', ['1', '3']);
                 if(!$user->hasRole('superadmin') && !$user->hasRole('Admin') && !$user->hasRole('Sub_Admin')){
                     $query = $query->whereIn('id', $customer_ids_assign);
+                }
+                if (!empty($search)) {
+                    $query->where(function ($query) use ($search) {
+                        $query->where('name', 'like', "%{$search}%")
+                            ->orWhere('first_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('mobile', 'like', "%{$search}%");
+                    });
                 }
                 $query = $query->select('id', 'name', 'first_name', 'last_name', 'mobile', 'email', 'profile_image', 'customer_code')->orderBy('name', 'asc');
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();

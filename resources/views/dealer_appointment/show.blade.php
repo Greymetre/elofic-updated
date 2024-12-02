@@ -277,11 +277,11 @@
                 </div>
               </div>
               <div class="col-md-4">
-                    <div class="form-check">
-                        <label class="form-check-label" for="SERVECE"> ASC </label>
-                        <input required class="form-check-input" type="radio" name="division" id="SERVECE" value="SERVECE" {{($dealerAppointment->division == 'SERVECE')?'checked':''}}>
-                    </div>
+                <div class="form-check">
+                  <label class="form-check-label" for="SERVECE"> ASC </label>
+                  <input required class="form-check-input" type="radio" name="division" id="SERVECE" value="SERVECE" {{($dealerAppointment->division == 'SERVECE')?'checked':''}}>
                 </div>
+              </div>
               <div class="col-md-4">
                 <div class="form-check">
                   <label class="form-check-label" for="LIGHTING"> LIGHTING </label>
@@ -1104,6 +1104,43 @@
         </div>
       </div>
 
+      <div class="modal fade" id="generateCertificateModal" tabindex="-1" aria-labelledby="generateCertificateLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="generateCertificateLabel">Generate Certificate</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form id="certificateForm" action="{{route('dealer-certificate.generate')}}" method="get">
+                <div class="mb-3">
+                  <input type="hidden" value="{{$dealerAppointment->id}}" name="id">
+                  <label for="dealerName" class="form-label">Firm Name</label>
+                  <input type="text" class="form-control" id="dealerName" name="dealer_name" placeholder="Enter dealer/distributor name" required>
+                </div>
+                <div class="mb-3">
+                  <label for="customer_type" class="form-label">Customer Type</label>
+                  <select class="form-control" name="customer_type" id="customer_type" required>
+                    <option value="">Select Customer Type</option>
+                    <option value="Dealer">Dealer</option>
+                    <option value="Distributor">Distributor</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="region" class="form-label">Region</label>
+                  <input type="text" class="form-control" id="region" name="region" placeholder="Enter region" required>
+                </div>
+                <div class="mb-3">
+                  <label for="issue_date" class="form-label">Issue Date</label>
+                  <input type="date" class="form-control datepicker" id="issue_date" name="issue_date" placeholder="Enter issue_date" required>
+                </div>
+                <button type="submit" class="btn btn-success">Generate</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
 
       <link rel="stylesheet" href="{{ url('/').'/'.asset('lightboxx/css/lightbox.min.css') }}">
 
@@ -1157,10 +1194,14 @@
                     $('.message').empty();
                     $('.alert').show();
                     if (data.status == 'success') {
-                      $('.alert').addClass("alert-success");
-                      setTimeout(function() {
-                        location.reload();
-                      }, 500);
+                      // if (status === '3') {
+                      //   $("#generateCertificateModal").modal('show');
+                      // }else{
+                        $('.alert').addClass("alert-success");
+                        setTimeout(function() {
+                          location.reload();
+                        }, 500);
+                      // }
 
                     } else {
                       $('.alert').addClass("alert-danger");
