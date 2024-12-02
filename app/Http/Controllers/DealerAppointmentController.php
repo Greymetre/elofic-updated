@@ -9,6 +9,8 @@ use App\Models\DealerAppointment;
 use App\Models\DealerAppointmentKyc;
 use App\Models\District;
 use App\Models\User;
+use Carbon\Carbon;
+use Dompdf\Dompdf;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Gate;
@@ -59,7 +61,7 @@ class DealerAppointmentController extends Controller
     public function store(Request $request)
     {
         $data = $request->all();
-        if(isset($data['asc_divi']) && !empty($data['asc_divi']) && count($data['asc_divi']) > 0){
+        if (isset($data['asc_divi']) && !empty($data['asc_divi']) && count($data['asc_divi']) > 0) {
             $data['asc_divi'] = implode(',', $request->asc_divi);
         }
 
@@ -330,5 +332,74 @@ class DealerAppointmentController extends Controller
             'distribution_channel' => $request->distribution_channel,
         ]);
         return redirect(route('dealer-appointment-thanks'));
+    }
+
+    public function dealerCertificateGenerate(Request $request)
+    {
+        if ($request->ip() != '111.118.252.250') {
+            return redirect()->back();
+        }
+        $appointment = DealerAppointment::find($request->id);
+        $division = '';
+        
+        if($appointment->division == 'PUMP&MOTORS'){
+            $division = 'Pumps & Motors range';
+            $logoPath = public_path('assets/img/certificate_logo.png');
+            $brand = 'Silver';
+        }else if($appointment->division == 'FAN&APP'){
+            $division = 'Fans, Lighting and all range of Electrical';
+            $logoPath = public_path('assets/img/certificate_logo_fan.png');
+            $brand = 'Bediya';
+        }else if($appointment->division == 'FAN&APP'){
+            $division = 'Agriculture Equipments range';
+            $logoPath = public_path('assets/img/certificate_logo.png');
+            $brand = 'Silver';
+        }
+        $backImage = public_path('assets/img/certificate_side.png');
+        $footerLogoImage = public_path('assets/img/certificate_footer_logo.png');
+        $signImage = public_path('assets/img/certificate_sing.png');
+        $logoBase64 = "data:image/png;base64," . base64_encode(file_get_contents($logoPath));
+        $backImage64 = "data:image/png;base64," . base64_encode(file_get_contents($backImage));
+        $footerLogoImage64 = "data:image/png;base64," . base64_encode(file_get_contents($footerLogoImage));
+        $signImage64 = "data:image/png;base64," . base64_encode(file_get_contents($signImage));
+        $data = [
+            'dealerName' => $request->dealer_name,
+            'region' => $request->region,
+            'customer_type' => $request->customer_type,
+            'issue_date' => $request->issue_date,
+            'division' => $division,
+            'financialYear' => $this->getCurrentFinancialYear(),
+            'logoBase64' => $logoBase64,
+            'footerLogoImage64' => $footerLogoImage64,
+            'signImage64' => $signImage64,
+            'backImage64' => $backImage64,
+            'brand' => $brand
+        ];
+
+        // return view('dealer_appointment.certificate_pdf', $data);
+
+        $html = view('dealer_appointment.certificate_pdf', $data)->render();
+        $dompdf = new Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'landscape');
+
+        $dompdf->render();
+
+        return $dompdf->stream('certificate.pdf', ['Attachment' => false]);
+    }
+
+    function getCurrentFinancialYear(): string
+    {
+        $currentDate = Carbon::now();
+
+        if ($currentDate->month >= 4) {
+            $startYear = $currentDate->year;
+            $endYear = $currentDate->year + 1;
+        } else {
+            $startYear = $currentDate->year - 1;
+            $endYear = $currentDate->year;
+        }
+
+        return "April $startYear - March $endYear";
     }
 }

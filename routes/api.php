@@ -245,5 +245,6 @@ Route::group(['middleware' => ['auth:users']], function () {
     //Primary Scheme report
     Route::get('getprimary-scheme-filter', [PrimarySchemeReportController::class, 'getPrimarySchemeFilter']);
     Route::get('getPrimarySchemes', [PrimarySchemeReportController::class, 'getPrimarySchemes']);
+    Route::get('getPrimarySchemeData', [PrimarySchemeReportController::class, 'getPrimarySchemeData']);
     
 });

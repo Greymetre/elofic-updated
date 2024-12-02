@@ -544,7 +544,7 @@ class DashboardController extends Controller
         }
 
         $query = SalesTargetUsers::with('user');
-        if(!$slected_user->hasRole('superadmin') && !$slected_user->hasRole('Admin') && !$slected_user->hasRole('Sub_Admin')){
+        if(!$slected_user->hasRole('superadmin') && !$slected_user->hasRole('Admin')){
             $query->whereIn('user_id', $user_ids);
         }
 
@@ -629,8 +629,8 @@ class DashboardController extends Controller
                 } else {
                     $achievement = PrimarySales::whereIn('division', ['PUMP', 'MOTOR'])
                     ->where('invoice_date', '>=', date('Y-m') . '-01')
-                    ->whereIn('emp_code', User::where('sales_type', 'Primary')->pluck('employee_codes'));
-                    // ->whereIn('emp_code', $all_emp_codes);
+                    ->whereIn('emp_code', User::where('sales_type', 'Primary')->pluck('employee_codes'))
+                    ->whereIn('emp_code', $all_emp_codes);
                     
                     // PrimarySales::whereIn('emp_code', $all_emp_codes)->whereIn('division', ['PUMP', 'MOTOR'])->where('invoice_date', '>=', date('Y-m') . '-01');
                     if ($request->branch_id && !empty($request->branch_id)) {
