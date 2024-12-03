@@ -209,9 +209,18 @@ class RedemptionController extends Controller
 
     public function changeStatus(Request $request)
     {
-        $updateStatus = Redemption::where('id', $request->id)->update(['status' => $request->status, 'dispatch_number' => $request->dispatch_number]);
+        $redemption = Redemption::find($request->id);
+        if ($redemption->redeem_mode == '1') {
+            if ($request->status == '1') {
+                $column = 'approve_date';
+            } elseif ($request->status == '3') {
+                $column = 'dispatch_date';
+            } elseif ($request->status == '4') {
+                $column = 'gift_recived_date';
+            }
+        }
+        $updateStatus = Redemption::where('id', $request->id)->update(['status' => $request->status, 'dispatch_number' => $request->dispatch_number, $column => now()->toDateString()]);
         if ($updateStatus) {
-            $redemption = Redemption::find($request->id);
             if ($redemption) {
                 if ($redemption->redeem_mode == '2') {
                     if ($request->status == '1') {

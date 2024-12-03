@@ -16,6 +16,7 @@ use Yajra\DataTables\Html\Editor\Fields;
 use Yajra\DataTables\Services\DataTable;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class DealerAppointmentDataTable extends DataTable
 {
@@ -27,6 +28,13 @@ class DealerAppointmentDataTable extends DataTable
             ->addIndexColumn()
             ->editColumn('appointment_date', function ($data) {
                 return isset($data->appointment_date) ? date('d M Y', strtotime($data->appointment_date)) : '';
+            })
+            ->editColumn('certificate', function ($data) {
+                if($data->getMedia('certificate')->count() > 0 && Storage::disk('s3')->exists($data->getMedia('certificate')[0]->getPath())){
+                    return '<a target="_blank" href="'.$data->getMedia('certificate')[0]->getFullUrl().'" class="btn btn-success btn-just-icon btn-sm" title="Edit Appointment Form" ><i class="material-icons">card_membership</i></a>';
+                }else{
+                    return '-';
+                }
             })
             ->editColumn('name', function ($data) {
                 return $data->first_name.' '.$data->middle_name.' '.$data->last_name;
@@ -61,7 +69,7 @@ class DealerAppointmentDataTable extends DataTable
                 return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">'.$btn.'</div>';
             })
 
-            ->rawColumns(['appointment_date', 'action','createdbyname.name','approval_status']);
+            ->rawColumns(['appointment_date', 'action','createdbyname.name','approval_status','certificate']);
     }
 
     /**

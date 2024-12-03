@@ -21,7 +21,7 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Illuminate\Support\Facades\Auth;
 
 
-class RedemptionExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping
+class RedemptionExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithEvents
 {
     public function __construct($request)
     {
@@ -72,9 +72,9 @@ class RedemptionExport implements FromCollection, WithHeadings, ShouldAutoSize, 
     public function headings(): array
     {
         if($this->redeem_mode == '1'){
-            return ['Id', 'Date', 'Customer Id', 'Firm Name', 'Contact Person', 'Parent Code', 'Parent Name', 'Mobile Number', 'City', 'District', 'State', 'Branch', 'Div', 'Category Name', 'Prodcut Name', 'Point', 'Status', 'Dispatch Date', 'Dispatch Number', 'Gift Recived Date', 'Received Remark'];
+            return ['Id', 'Date', 'Customer Id', 'Firm Name', 'Contact Person', 'Parent Code', 'Parent Name', 'Mobile Number', 'City', 'District', 'State', 'Branch', 'Div', 'Category Name', 'Redeem Prodcut Name', 'Acual Dispatch Product', 'Point', 'Status', 'Approve Date', 'Dispatch Date', 'Dispatch Number', 'Gift Recived Date', 'Received Remark','Redemption No','Purchase Rate','Gst %','Total Purchase','Purchase Invoice No','Purchase Return no','Client Invoice No'];
         }elseif($this->redeem_mode == '2'){
-            return ['Id', 'Date', 'Customer Id', 'Firm Name', 'Contact Person', 'Parent Code', 'Parent Name', 'Mobile Number', 'City', 'District', 'State', 'Branch', 'Div', 'Redeem Mode', 'Redeem Point', 'Status', 'Bank Name', 'Account Holder Name', 'Account Number', 'IFSC Code', 'Adhar Number', 'PAN Number', 'TDS Dedcution %', 'TDS Amount', 'Final Pay', 'Payment Date', 'Trasaction Id'];
+            return ['Id', 'Date', 'Customer Id', 'Firm Name', 'Contact Person', 'Parent Code', 'Parent Name', 'Mobile Number', 'City', 'District', 'State', 'Branch', 'Div', 'Redeem Mode', 'Redeem Point', 'Status', 'Bank Name', 'Account Holder Name', 'Account Number', 'IFSC Code', 'Adhar Number', 'PAN Number', 'TDS Dedcution %', 'TDS Amount', 'Final Pay', 'Payment Date', 'Trasaction Id', 'Details', 'Invoice Number'];
         }
     }
 
@@ -121,10 +121,8 @@ class RedemptionExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                 $empcode_arr[] = isset($datas->employee_detail->employee_codes) ? $datas->employee_detail->employee_codes : '';
             }
         }
-
-        // $scheme_details = SchemeDetails::where('product_id', $data['scheme']['product']['id'])->first();        
-
-        //new fields end
+        $branch_arr = collect($branch_arr)->unique()->values()->toArray();
+        $division_arr = collect($division_arr)->unique()->values()->toArray();
 
         if($this->redeem_mode == '1'){
             return [
@@ -136,7 +134,7 @@ class RedemptionExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                 // implode(',', $employee),
                 implode(',', $parent_code),
                 implode(',', $parent),
-                "'".$data['customer']['mobile'],
+                $data['customer']['mobile'],
                 $data['city_name'] = isset($data['customer']['customeraddress']['cityname']['city_name']) ? $data['customer']['customeraddress']['cityname']['city_name'] : '',
                 $data['district_name'] = isset($data['customer']['customeraddress']['districtname']['district_name']) ? $data['customer']['customeraddress']['districtname']['district_name'] : '',
                 $data['state_name'] = isset($data['customer']['customeraddress']['statename']['state_name']) ? $data['customer']['customeraddress']['statename']['state_name'] : '',
@@ -144,11 +142,13 @@ class RedemptionExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                 implode(',', $division_arr),
                 $data['product']['categories']['category_name'],
                 $data['product']['product_name'],
+                $data['product_send'],
                 $data['redeem_amount'],
                 (($data['status'] == '0') ? 'Pendding' : (($data['status'] == '1') ? 'Approved' : (($data['status'] == '2') ? 'Rejected' : (($data['status'] == '3') ? 'Dispatch' : (($data['status'] == '4') ? 'Delivered' : ''))))),
-                date('d-M-Y', strtotime($data['created_at'])),
+                $data['approve_date'],
+                $data['dispatch_date']?date('d-M-Y', strtotime($data['dispatch_date'])):'',
                 $data['dispatch_number']??'',
-                date('d-M-Y', strtotime($data['updated_at'])),
+                $data['gift_recived_date']?date('d-M-Y', strtotime($data['gift_recived_date'])):'',
                 $data['remark'],
             ];
         }elseif($this->redeem_mode == '2'){
@@ -161,7 +161,7 @@ class RedemptionExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                 // implode(',', $employee),
                 implode(',', $parent_code),
                 implode(',', $parent),
-                "'".$data['customer']['mobile'],
+                $data['customer']['mobile'],
                 $data['city_name'] = isset($data['customer']['customeraddress']['cityname']['city_name']) ? $data['customer']['customeraddress']['cityname']['city_name'] : '',
                 $data['district_name'] = isset($data['customer']['customeraddress']['districtname']['district_name']) ? $data['customer']['customeraddress']['districtname']['district_name'] : '',
                 $data['state_name'] = isset($data['customer']['customeraddress']['statename']['state_name']) ? $data['customer']['customeraddress']['statename']['state_name'] : '',
@@ -172,16 +172,61 @@ class RedemptionExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                 (($data['status'] == '0') ? 'Pendding' : (($data['status'] == '1') ? 'Approved' : (($data['status'] == '2') ? 'Rejected' : (($data['status'] == '3') ? 'Success' : (($data['status'] == '4') ? 'Fail' : ''))))),
                 isset($data['customer']['customerdetails']['bank_name']) ? $data['customer']['customerdetails']['bank_name'] : '',
                 isset($data['customer']['customerdetails']['account_holder']) ? $data['customer']['customerdetails']['account_holder'] : '',
-                isset($data['customer']['customerdetails']['account_number']) ? "'".$data['customer']['customerdetails']['account_number'] : '',
+                isset($data['customer']['customerdetails']['account_number']) ? $data['customer']['customerdetails']['account_number'] : '',
                 isset($data['customer']['customerdetails']['ifsc_code']) ? $data['customer']['customerdetails']['ifsc_code'] : '',
-                isset($data['customer']['customerdetails']['aadhar_no']) ? "'".$data['customer']['customerdetails']['aadhar_no'] : '',
+                isset($data['customer']['customerdetails']['aadhar_no']) ? $data['customer']['customerdetails']['aadhar_no'] : '',
                 isset($data['customer']['customerdetails']['pan_no']) ? $data['customer']['customerdetails']['pan_no'] : '',
                 isset($data['neft_details'])?$data['neft_details']['tds'].'%':'10%',
                 (isset($data['neft_details']) && $data['status'] == '3') ? $data['redeem_amount'] * $data['neft_details']['tds'] / 100 : ($data['redeem_amount'] * 10) / 100,
                 (isset($data['neft_details']) && $data['status'] == '3') ? $data['redeem_amount'] - (($data['redeem_amount']*$data['neft_details']['tds']) / 100) :  $data['redeem_amount'] - (($data['redeem_amount'] * 10) / 100),
                 isset($data['neft_details']) ? date('d-M-Y', strtotime($data['updated_at'])) : '',
                 isset($data['neft_details']) ? $data['neft_details']['utr_number'] : '',
+                isset($data['deatils']) ? $data['deatils'] : '',
+                isset($data['invoice_number']) ? $data['invoice_number'] : '',
             ];
         }
+    }
+
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function (AfterSheet $event) {
+                $lastRow = $event->sheet->getHighestDataRow() + 2;
+                $lastColumn = $event->sheet->getHighestDataColumn();
+
+                $event->sheet->getStyle('A1:' . $lastColumn . '1')->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                        'color' => ['rgb' => 'FFFFFF'],
+                    ],
+                    'alignment' => [
+                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                        'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                    ],
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => '336677'],
+                    ],
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['argb' => '000000'],
+                        ],
+                    ],
+                ]);
+
+                $event->sheet->getStyle('A2:' . $lastColumn . '' . ($lastRow - 2))->applyFromArray([
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['argb' => '000000'],
+                        ],
+                    ],
+                    'alignment' => [
+                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
+                    ],
+                ]);
+            },
+        ];
     }
 }

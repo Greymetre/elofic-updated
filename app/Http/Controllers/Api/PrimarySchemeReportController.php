@@ -14,6 +14,7 @@ use Validator;
 use Gate;
 
 use App\Models\Division;
+use App\Models\EmployeeDetail;
 use App\Models\PrimarySales;
 use App\Models\PrimaryScheme;
 use App\Models\PrimarySchemeDetail;
@@ -125,8 +126,10 @@ class PrimarySchemeReportController extends Controller
             $data->where('invoice_date', '>=', $pSchemes->start_date)->where('invoice_date', '<=', $pSchemes->end_date);
         }
 
-        if (auth()->user()->hasRole('Customer Dealer')) {
-            $data->where('customer_id', auth()->user()->customerid);
+        if (!$request->user()->hasRole('superadmin') && !$request->user()->hasRole('Admin')) {
+            $user_ids = getUsersReportingToAuth($request->user()->id);
+            $customer_ids_assign = EmployeeDetail::whereIn('user_id', $user_ids)->distinct('customer_id')->pluck('customer_id')->toArray();
+            $data->whereIn('customer_id', $customer_ids_assign);
         }
 
         if ($pSchemes->repetition == '5') {

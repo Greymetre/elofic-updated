@@ -18,12 +18,14 @@ class Redemption extends Model
         'ifsc_code',
         'redeem_amount',
         'gift_id',
+        'product_send',
         'dispatch_number',
         'status',
-        'created_by'
+        'created_by',
+        'approve_date',
+        'deatils',
+        'invoice_number'
     ];
-
-    public $timestamps = true;
 
     public function customer(){
         return $this->belongsTo(Customers::class, 'customer_id', 'id');

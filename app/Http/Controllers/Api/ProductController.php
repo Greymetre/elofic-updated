@@ -250,7 +250,8 @@ class ProductController extends Controller
                         'product_no' => isset($value['product_no']) ? $value['product_no'] : '',
                         'model_no' => isset($value['model_no']) ? $value['model_no'] : '',
                         'hp' => isset($value['specification']) ? $value['specification'] : '',
-
+                        'discount' => $value['productpriceinfo']?$value['productpriceinfo']['discount'] : 0,
+                        'amount_diff' => $value['productpriceinfo']['mrp'] - $product_ebd_amount,
                         'ebd_amount' => (string)$ebd_amount,
                         'product_ebd_amount' => (string)$product_ebd_amount,
 
@@ -674,6 +675,7 @@ class ProductController extends Controller
                     'phase' => isset($query['phase']) ? $query['phase'] : '',
                     'ebd_amount' => (string)$ebd_amount,
                     'scheme_amount' => (string)$ebd_amount,
+                    'amount_diff' => $primary['mrp'] - $product_ebd_amount,
                     'product_ebd_amount' => (string)$product_ebd_amount,
                     'details' => $detail
                 ]);

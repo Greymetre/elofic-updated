@@ -23,7 +23,8 @@
             <td style="text-align: center;display:block;margin-top:20px;">
                 <div class="header">
                     <!-- Logo -->
-                    <img width="600" src="{{ $logoBase64 }}" alt="Logo">
+                    <img style="margin-top: 60px;" width="380" src="{{ $logoBase64 }}" alt="Logo">
+                    <img style="margin-left: 40px; margin-bottom: 23px;" width="60" src="{{ $sinceImage64 }}" alt="Logo">
                 </div>
                 <h1 style="font-size: 50px;color:#071f2b;font-weight:bold;margin-bottom:0;line-height:35px;">CERTIFICATE <br><span style="font-weight:700;font-size: 20px;">OF AUTHORISATION</span></h1>
                 <div class="content">
@@ -33,8 +34,8 @@
                     <table style="width: 100%;margin-top:20px;">
                         <tr style="text-align: center;">
                             <td style="font-size: 14px;color:#0f3e55;font-weight:200;margin-bottom:0;line-height:25px;">Issued Date : {{ date('d/m/Y',strtotime($issue_date)) }} <br> Place : Rajkot </td>
-                            <td><img width="120" src="{{ $footerLogoImage64 }}" alt="Logo"></td>
-                            <td><img width="200" src="{{ $signImage64 }}" alt="Logo"></td>
+                            <td><img width="80" src="{{ $footerLogoImage64 }}" alt="Logo"></td>
+                            <td><img width="90" src="{{ $signImage64 }}" alt="Logo"><hr style="height: 0px;"><p style="font-size: 12px;color:#0f3e55;font-weight:0;margin-bottom:0;line-height:2px;font-family:Ariall;">Sign</p></td>
                         </tr>
                     </table>
                 </div>

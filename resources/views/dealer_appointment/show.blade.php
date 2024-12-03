@@ -1194,14 +1194,14 @@
                     $('.message').empty();
                     $('.alert').show();
                     if (data.status == 'success') {
-                      // if (status === '3') {
-                      //   $("#generateCertificateModal").modal('show');
-                      // }else{
+                      if (status === '3') {
+                        $("#generateCertificateModal").modal('show');
+                      } else {
                         $('.alert').addClass("alert-success");
                         setTimeout(function() {
                           location.reload();
                         }, 500);
-                      // }
+                      }
 
                     } else {
                       $('.alert').addClass("alert-danger");
@@ -1266,6 +1266,33 @@
             $("#parent-div").addClass('d-none');
           }
         }).trigger('change');
+
+        $('#certificateForm').on('submit', function(e) {
+          e.preventDefault(); // Prevent default form submission
+
+          // Get form data
+          var formData = $(this).serialize(); // Serialize form data for GET request
+
+          // Send AJAX request
+          $.ajax({
+            url: $(this).attr('action'), // Use the form's action attribute as the URL
+            method: $(this).attr('method'), // Use the form's method
+            data: formData, // Serialized form data
+            success: function(response) {
+              if (response.pdf_url) {
+                // Open the PDF URL in a new window
+                window.open(response.pdf_url, '_blank', 'width=800,height=600');
+                location.reload();
+              } else {
+                alert('Certificate generation failed. Please try again.');
+              }
+            },
+            error: function(xhr, status, error) {
+              console.error('Error:', error);
+              alert('An error occurred while generating the certificate.');
+            }
+          });
+        });
       </script>
 
 </x-app-layout>
