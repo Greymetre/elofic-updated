@@ -127,7 +127,7 @@
             <span class="message"></span>
           </div>
           <div class="table-responsive" id="neft_table" style="display: none;">
-            <table id="getNeftTransactionHistory" class="table table-striped- table-bschemeed responsive table-hover table-checkable no-wrap">
+            <table id="getNeftTransactionHistory" class="table table-striped- table-bschemeed table-hover table-checkable no-wrap">
               <thead class=" text-primary">
                 <th>{!! trans('panel.global.action') !!}</th>
                 <th>{!! trans('panel.global.no') !!}</th>
@@ -145,7 +145,7 @@
             </table>
           </div>
           <div class="table-responsive" id="gift_table">
-            <table id="getGiftTransactionHistory" class="table table-striped- table-bschemeed responsive table-hover table-checkable no-wrap">
+            <table id="getGiftTransactionHistory" class="table table-striped- table-bschemeed table-hover table-checkable no-wrap">
               <thead class=" text-primary">
                 <th>{!! trans('panel.global.action') !!}</th>
                 <th>{!! trans('panel.global.no') !!}</th>

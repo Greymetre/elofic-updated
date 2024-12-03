@@ -125,6 +125,7 @@
               <thead class=" text-primary">
                 <th>{!! trans('panel.global.no') !!}</th>
                 <th>Action</th>
+                <th>Certificate</th>
                 <th>Created By</th>
                 <th>Appointment {!! trans('panel.expenses.fields.date') !!}</th>
                 <th>Branch</th>
@@ -179,6 +180,13 @@
           {
             data: 'action',
             name: 'action',
+            "defaultContent": '',
+            orderable: false,
+            searchable: false
+          },
+          {
+            data: 'certificate',
+            name: 'certificate',
             "defaultContent": '',
             orderable: false,
             searchable: false

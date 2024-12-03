@@ -336,32 +336,31 @@ class DealerAppointmentController extends Controller
 
     public function dealerCertificateGenerate(Request $request)
     {
-        if ($request->ip() != '111.118.252.250') {
-            return redirect()->back();
-        }
         $appointment = DealerAppointment::find($request->id);
         $division = '';
         
         if($appointment->division == 'PUMP&MOTORS'){
             $division = 'Pumps & Motors range';
-            $logoPath = public_path('assets/img/certificate_logo.png');
+            $logoPath = public_path('assets/img/certificate_logo2.png');
             $brand = 'Silver';
         }else if($appointment->division == 'FAN&APP'){
             $division = 'Fans, Lighting and all range of Electrical';
-            $logoPath = public_path('assets/img/certificate_logo_fan.png');
+            $logoPath = public_path('assets/img/certificate_logo_fan2.png');
             $brand = 'Bediya';
-        }else if($appointment->division == 'FAN&APP'){
+        }else if($appointment->division == 'AGRI'){
             $division = 'Agriculture Equipments range';
-            $logoPath = public_path('assets/img/certificate_logo.png');
+            $logoPath = public_path('assets/img/certificate_logo2.png');
             $brand = 'Silver';
         }
         $backImage = public_path('assets/img/certificate_side.png');
-        $footerLogoImage = public_path('assets/img/certificate_footer_logo.png');
-        $signImage = public_path('assets/img/certificate_sing.png');
+        $sinceImage = public_path('assets/img/1981.png');
+        $footerLogoImage = public_path('assets/img/certificate_footer_logo2.png');
+        $signImage = public_path('assets/img/certificate_sing2.png');
         $logoBase64 = "data:image/png;base64," . base64_encode(file_get_contents($logoPath));
         $backImage64 = "data:image/png;base64," . base64_encode(file_get_contents($backImage));
         $footerLogoImage64 = "data:image/png;base64," . base64_encode(file_get_contents($footerLogoImage));
         $signImage64 = "data:image/png;base64," . base64_encode(file_get_contents($signImage));
+        $sinceImage64 = "data:image/png;base64," . base64_encode(file_get_contents($sinceImage));
         $data = [
             'dealerName' => $request->dealer_name,
             'region' => $request->region,
@@ -373,6 +372,7 @@ class DealerAppointmentController extends Controller
             'footerLogoImage64' => $footerLogoImage64,
             'signImage64' => $signImage64,
             'backImage64' => $backImage64,
+            'sinceImage64' => $sinceImage64,
             'brand' => $brand
         ];
 
@@ -382,10 +382,23 @@ class DealerAppointmentController extends Controller
         $dompdf = new Dompdf();
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'landscape');
-
         $dompdf->render();
 
-        return $dompdf->stream('certificate.pdf', ['Attachment' => false]);
+        // return $dompdf->stream('certificate.pdf', ['Attachment' => false]);
+
+        $output = $dompdf->output();
+    
+        $tempFilePath = storage_path('app/temp/' . uniqid() . '_certificate.pdf');
+        file_put_contents($tempFilePath, $output);
+    
+        $media = $appointment->addMedia($tempFilePath)
+            ->toMediaCollection('certificate');
+    
+        // unlink($tempFilePath);
+    
+        $s3Url = $media->getUrl();
+    
+        return response()->json(['pdf_url' => $s3Url]);
     }
 
     function getCurrentFinancialYear(): string

@@ -33,6 +33,8 @@ class RedemptionImport implements ToCollection,WithValidation,WithHeadingRow, Wi
                         'redemption_id' => $row['redemption_id'],
                         'utr_number' => $row['transaction_id_utr_no'],
                         'tds' => $row['tds'],
+                        'deatils' => $row['deatils'],
+                        'invoice_number' => $row['invoice_number'],
                         'remark' => $row['details']
                 ]);
                 

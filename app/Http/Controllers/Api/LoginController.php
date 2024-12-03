@@ -77,6 +77,7 @@ class LoginController extends Controller
                 $beatUser = BeatUser::where('user_id',$user['id'])->get();
                 $nestedData['id'] = isset($user['id']) ? $user['id'] : 0;
                 $nestedData['name'] = isset($user['name']) ? $user['name'] : '';
+                $nestedData['dividion_id'] = isset($user['division_id']) ? $user['division_id'] : '';
                 $nestedData['first_name'] = isset($user['first_name']) ? $user['first_name'] : '';
                 $nestedData['last_name'] = isset($user['last_name']) ? $user['last_name'] : '';
                 $nestedData['email'] = isset($user['email']) ? $user['email'] : '';
