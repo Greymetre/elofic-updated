@@ -145,6 +145,9 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
             $scheme_details = SchemeDetails::where('product_id', $data['scheme']['product']['id'])->first();
         }
 
+        $branch_arr = collect($branch_arr)->unique()->values()->toArray();
+        $division_arr = collect($division_arr)->unique()->values()->toArray();
+
 
         //new fields end
         if ($data['status'] == '1') {

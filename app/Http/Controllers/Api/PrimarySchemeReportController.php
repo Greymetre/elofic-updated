@@ -18,6 +18,7 @@ use App\Models\EmployeeDetail;
 use App\Models\PrimarySales;
 use App\Models\PrimaryScheme;
 use App\Models\PrimarySchemeDetail;
+use App\Models\User;
 use Carbon\Carbon;
 
 class PrimarySchemeReportController extends Controller
@@ -38,10 +39,12 @@ class PrimarySchemeReportController extends Controller
             ->groupBy('division')
             ->pluck('division')
             ->map(function ($item) {
-                return [
-                    'key' => $item,
-                    'value' => $item,
-                ];
+                // if ($item != 'MOTOR') {
+                    return [
+                        'key' => $item,
+                        'value' => $item,
+                    ];
+                // }
             })
             ->values();
         $data['quarters'] = [['key' => '1', 'value' => 'Q1(Apr,May,Jun)'], ['key' => '2', 'value' => 'Q2(Jul,Aug,Sep)'], ['key' => '3', 'value' => 'Q3(Oct,Nov,Dec)'], ['key' => '4', 'value' => 'Q4(Jan,Feb,Mar)']];
@@ -58,7 +61,32 @@ class PrimarySchemeReportController extends Controller
         if ($validator->fails()) {
             return response()->json(['status' => 'error', 'message' =>  $validator->errors()], 400);
         }
-        $pSchemes = PrimaryScheme::where('quarter', $request->quarter)->where('division', $request->division)->select('id', 'scheme_name')->get();
+        if (!$request->user()->hasRole('superadmin') && !$request->user()->hasRole('Admin')) {
+            $user = $request->user();
+            if ($request->division == 'PUMP') {
+                $user_ids = getUsersReportingToAuth($user->id);
+                $branch_ids = User::whereIn('id', $user_ids)->distinct('branch_id')->pluck('branch_id')->toArray();
+                $pSchemes = PrimaryScheme::where('quarter', $request->quarter)
+                    ->where('division', $request->division)
+                    ->where(function ($query) use ($branch_ids) {
+                        $query->where('assign_to', '!=', 'branch') // Unconditionally include schemes not assigned to branches
+                            ->orWhere(function ($subQuery) use ($branch_ids) {
+                                $subQuery->where('assign_to', 'branch') // Include schemes assigned to branches
+                                    ->where(function ($nestedQuery) use ($branch_ids) {
+                                        foreach ($branch_ids as $branch_id) {
+                                            $nestedQuery->orWhereRaw("FIND_IN_SET(?, branch)", [$branch_id]);
+                                        }
+                                    });
+                            });
+                    })
+                    ->select('id', 'scheme_name')
+                    ->get();
+            } else {
+                $pSchemes = PrimaryScheme::where('quarter', $request->quarter)->where('division', $request->division)->select('id', 'scheme_name')->get();
+            }
+        } else {
+            $pSchemes = PrimaryScheme::where('quarter', $request->quarter)->where('division', $request->division)->select('id', 'scheme_name')->get();
+        }
         return response()->json(['status' => 'success', 'data' => $pSchemes]);
     }
 
@@ -127,7 +155,8 @@ class PrimarySchemeReportController extends Controller
         }
 
         if (!$request->user()->hasRole('superadmin') && !$request->user()->hasRole('Admin')) {
-            $user_ids = getUsersReportingToAuth($request->user()->id);
+            $user = $request->user();
+            $user_ids = getUsersReportingToAuth($user->id);
             $customer_ids_assign = EmployeeDetail::whereIn('user_id', $user_ids)->distinct('customer_id')->pluck('customer_id')->toArray();
             $data->whereIn('customer_id', $customer_ids_assign);
         }

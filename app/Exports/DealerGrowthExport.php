@@ -105,7 +105,6 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
         if (Carbon::parse($financial_year_end)->greaterThan($today)) {
             $financial_year_end = $today->format('Y-m-d');
         }
-
         // Calculate last year start and end dates after potentially adjusting financial_year_end
         $last_year_start = Carbon::parse($financial_year_start)->subYear()->format('Y-m-d');
         $last_year_end = Carbon::parse($financial_year_end)->subYear()->format('Y-m-d');
@@ -148,6 +147,7 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
         DB::statement("SET SESSION group_concat_max_len = 100000000");
         $lastYearAmounts = PrimarySales::select(
             'dealer',
+            'customer_id',
             'final_branch',
             'city',
             DB::raw('SUM(net_amount) as last_year_net_amounts'),
@@ -158,17 +158,17 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
         )
             ->whereBetween('invoice_date', [$last_year_start, $last_year_end])
             ->whereIn('division', ['PUMP', 'MOTOR'])
-            ->groupBy('dealer', 'final_branch', 'city')
+            ->groupBy('dealer', 'customer_id', 'final_branch', 'city')
             ->get();
-
-        // Merge the results
-        $results = $results->map(function ($item) use ($lastYearAmounts) {
-            $lastYearAmount = $lastYearAmounts->firstWhere(function ($value) use ($item) {
-                return $value->dealer == $item->dealer &&
-                    $value->final_branch == $item->final_branch &&
-                    $value->city == $item->city;
-            });
-
+            // Merge the results
+            $results = $results->map(function ($item) use ($lastYearAmounts) {
+                $lastYearAmount = $lastYearAmounts->firstWhere(function ($value) use ($item) {
+                    return $value->customer_id == $item->customer_id;
+                    // return $value->dealer == $item->dealer &&
+                    // $value->final_branch == $item->final_branch &&
+                    // $value->city == $item->city;
+                });
+                
             $item->last_year_net_amounts = $lastYearAmount ? $lastYearAmount->last_year_net_amounts : 0;
             $item->last_year_net_amounts_array = $lastYearAmount ? $lastYearAmount->last_year_net_amounts_array : 0;
             $item->last_year_division_array = $lastYearAmount ? $lastYearAmount->last_year_division_array : 0;
@@ -221,7 +221,7 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
             }
         }
         $results = $results->sortByDesc('growthPercent');
-        
+
         return $results;
     }
 
@@ -367,7 +367,7 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
         $last_year_divisions = explode(',', $data->last_year_division_array);
         $response[0] = $data->final_branch;
         $response[1] = $data->dealer;
-        $response[2] = $data->user?$data->user->name.'('.$data->emp_code.')':'-';
+        $response[2] = $data->user ? $data->user->name . '(' . $data->emp_code . ')' : '-';
         $response[3] = '';
         $indx = 0;
         $lytptsale = 0;

@@ -195,7 +195,7 @@ class DealerAppointmentController extends Controller
      */
     public function update(Request $request, DealerAppointment $dealerAppointment)
     {
-        DealerAppointment::where('id', $dealerAppointment->id)->update($request->except(['_token', 'profile_picture', 'service_policy', 'dealer_policy', 'mou_sheet', 'mcl_cheque_1', 'mcl_cheque_2', 'gst_certificate', 'adhar_card', 'pan_card', 'bank_statement', 'shop_image']));
+        DealerAppointment::where('id', $dealerAppointment->id)->update($request->except(['_token', 'profile_picture', 'service_policy', 'dealer_policy', 'mou_sheet', 'mcl_cheque_1', 'mcl_cheque_2', 'gst_certificate', 'adhar_card', 'pan_card', 'bank_statement', 'shop_image','cancel_cheque']));
 
         if ($request->hasFile('profile_picture')) {
             $file = $request->file('profile_picture');
@@ -203,6 +203,13 @@ class DealerAppointmentController extends Controller
             $dealerAppointment->addMedia($file)
                 ->usingFileName($customname)
                 ->toMediaCollection('profile_picture', 's3');
+        }
+        if ($request->hasFile('cancel_cheque')) {
+            $file = $request->file('cancel_cheque');
+            $customname = time() . '.' . $file->getClientOriginalExtension();
+            $dealerAppointment->addMedia($file)
+                ->usingFileName($customname)
+                ->toMediaCollection('cancel_cheque', 's3');
         }
         if ($request->hasFile('shop_image')) {
             $file = $request->file('shop_image');
@@ -338,19 +345,23 @@ class DealerAppointmentController extends Controller
     {
         $appointment = DealerAppointment::find($request->id);
         $division = '';
-        
-        if($appointment->division == 'PUMP&MOTORS'){
+
+        if ($appointment->division == 'PUMP&MOTORS') {
             $division = 'Pumps & Motors range';
             $logoPath = public_path('assets/img/certificate_logo2.png');
             $brand = 'Silver';
-        }else if($appointment->division == 'FAN&APP'){
+        } else if ($appointment->division == 'FAN&APP') {
             $division = 'Fans, Lighting and all range of Electrical';
             $logoPath = public_path('assets/img/certificate_logo_fan2.png');
             $brand = 'Bediya';
-        }else if($appointment->division == 'AGRI'){
+        } else if ($appointment->division == 'AGRI') {
             $division = 'Agriculture Equipments range';
             $logoPath = public_path('assets/img/certificate_logo2.png');
             $brand = 'Silver';
+        } else if ($appointment->division == 'SERVECE') {
+            $division = 'Pumps, Motors & Solar Products Range';
+            $logoPath = public_path('assets/img/certificate_logo2.png');
+            $brand = 'SILVER CONSUMER ELECTRICALS PRIVATE LIMITED';
         }
         $backImage = public_path('assets/img/certificate_side.png');
         $sinceImage = public_path('assets/img/1981.png');
@@ -367,7 +378,7 @@ class DealerAppointmentController extends Controller
             'customer_type' => $request->customer_type,
             'issue_date' => $request->issue_date,
             'division' => $division,
-            'financialYear' => $this->getCurrentFinancialYear(),
+            'financialYear' => $this->getCurrentFinancialYear($appointment->division),
             'logoBase64' => $logoBase64,
             'footerLogoImage64' => $footerLogoImage64,
             'signImage64' => $signImage64,
@@ -387,32 +398,37 @@ class DealerAppointmentController extends Controller
         // return $dompdf->stream('certificate.pdf', ['Attachment' => false]);
 
         $output = $dompdf->output();
-    
+
         $tempFilePath = storage_path('app/temp/' . uniqid() . '_certificate.pdf');
         file_put_contents($tempFilePath, $output);
-    
+
         $media = $appointment->addMedia($tempFilePath)
             ->toMediaCollection('certificate');
-    
+
         // unlink($tempFilePath);
-    
+
         $s3Url = $media->getUrl();
-    
+
         return response()->json(['pdf_url' => $s3Url]);
     }
 
-    function getCurrentFinancialYear(): string
+    function getCurrentFinancialYear($divi): string
     {
         $currentDate = Carbon::now();
 
-        if ($currentDate->month >= 4) {
-            $startYear = $currentDate->year;
-            $endYear = $currentDate->year + 1;
+        if ($divi == 'SERVECE') {
+            $targetYear = $currentDate->year + 2;
+            return "31 March $targetYear";
         } else {
-            $startYear = $currentDate->year - 1;
-            $endYear = $currentDate->year;
-        }
+            if ($currentDate->month >= 4) {
+                $startYear = $currentDate->year;
+                $endYear = $currentDate->year + 1;
+            } else {
+                $startYear = $currentDate->year - 1;
+                $endYear = $currentDate->year;
+            }
 
-        return "April $startYear - March $endYear";
+            return "April $startYear - March $endYear";
+        }
     }
 }

@@ -6,7 +6,7 @@
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
-          <h4 class="card-title ">Redeemption {!! trans('panel.global.list') !!}
+          <h4 class="card-title ">Redemption {!! trans('panel.global.list') !!}
             <span class="">
               <div class="btn-group header-frm-btn">
                 @if(auth()->user()->can(['redemption_download']))
@@ -65,7 +65,7 @@
                 @endif
                 <div class="next-btn">
                 @if(auth()->user()->can(['redemption_upload']))
-                <form id="neft_status_form" action="{{ URL::to('redemptions-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data" style="display: none;">
+                <form id="neft_status_form" action="{{ URL::to('redemptions-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                   {{ csrf_field() }}
                   <div class="d-flex flex-row align-items-center">
                     <div class="fileinput-new text-center" data-provides="fileinput">
@@ -77,7 +77,7 @@
                       </span>
                     </div>
                     <div class="input-group-append">
-                      <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.upload') !!} only NEFT Redemption status">
+                      <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.upload') !!} Redemption">
                         <i class="material-icons">cloud_upload</i>
                         <div class="ripple-container"></div>
                       </button>
@@ -86,7 +86,8 @@
                 </form>
                 @endif
                 @if(auth()->user()->can(['redemption_template']))
-                <a id="neft_status_tempalte" href="{{ URL::to('redemptions-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} NEFT Redemption status update" style="display: none;"><i class="material-icons">text_snippet</i></a>
+                <a id="neft_status_tempalte" href="{{ URL::to('redemptions-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} NEFT Redemption" style="display: none;"><i class="material-icons">text_snippet</i></a>
+                <a id="gift_status_tempalte" href="{{ URL::to('redemptions-template-gift') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} Gift Redemption"><i class="material-icons">text_snippet</i></a>
                 @endif
                 @if(auth()->user()->can(['redemption_create']))
                 <a href="{{ route('redemptions.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Redemption"><i class="material-icons">add_circle</i></a>
@@ -268,11 +269,13 @@
         if (mode == '1') {
           $("#gift_table").show();
           $("#neft_table").hide();
-          $("#neft_status_form").hide();
+          // $("#neft_status_form").hide();
           $("#neft_status_tempalte").hide();
+          $("#gift_status_tempalte").show();
         } else if (mode == '2') {
-          $("#neft_status_form").show();
+          // $("#neft_status_form").show();
           $("#neft_status_tempalte").show();
+          $("#gift_status_tempalte").hide();
           $("#gift_table").hide();
           $("#neft_table").show();
         }
@@ -528,13 +531,15 @@
         if (mode == '1') {
           $("#gift_table").show();
           $("#neft_table").hide();
-          $("#neft_status_form").hide();
+          // $("#neft_status_form").hide();
           $("#neft_status_tempalte").hide();
+          $("#gift_status_tempalte").show();
         } else if (mode == '2') {
           $("#gift_table").hide();
           $("#neft_table").show();
-          $("#neft_status_form").show();
+          // $("#neft_status_form").show();
           $("#neft_status_tempalte").show();
+          $("#gift_status_tempalte").hide();
         }
       });
       $('#start_date').change(function() {

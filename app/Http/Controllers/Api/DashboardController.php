@@ -629,9 +629,10 @@ class DashboardController extends Controller
                 } else {
                     $achievement = PrimarySales::whereIn('division', ['PUMP', 'MOTOR'])
                     ->where('invoice_date', '>=', date('Y-m') . '-01')
+                    ->where('invoice_date', '<=', date('Y-m') . '-31')
                     ->whereIn('emp_code', User::where('sales_type', 'Primary')->pluck('employee_codes'))
                     ->whereIn('emp_code', $all_emp_codes);
-                    
+
                     // PrimarySales::whereIn('emp_code', $all_emp_codes)->whereIn('division', ['PUMP', 'MOTOR'])->where('invoice_date', '>=', date('Y-m') . '-01');
                     if ($request->branch_id && !empty($request->branch_id)) {
                         $selected_branch = Branch::find($request->branch_id);
