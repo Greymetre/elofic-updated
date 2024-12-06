@@ -66,7 +66,9 @@ class UsersController extends Controller
         abort_if(Gate::denies('user_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $roles = Role::where('name', '!=', 'super-admin')->pluck('name', 'id');
         $cities = City::where('active', '=', 'Y')->pluck('city_name', 'id');
-        $reportings = User::where('active', '=', 'Y')->select('id', 'name')->get();
+        $reportings = User::whereDoesntHave('roles', function ($query) {
+            $query->where('id', 29);
+          })->where('active', '=', 'Y')->select('id', 'name')->get();
         $customertype = CustomerType::select('id', 'customertype_name')->orderBy('id', 'desc')->get();
 
         $branches = Branch::where('active', '=', 'Y')->get();
@@ -222,7 +224,9 @@ class UsersController extends Controller
         //$user['reportingid'] = UserCityAssign::where('userid','=',$id)->pluck('reportingid')->first();
         $customertype = CustomerType::select('id', 'customertype_name')->orderBy('id', 'desc')->get();
         $cities = City::where('active', '=', 'Y')->pluck('city_name', 'id');
-        $reportings = User::where('active', '=', 'Y')->select('id', 'name')->get();
+        $reportings = User::whereDoesntHave('roles', function ($query) {
+            $query->where('id', 29);
+          })->where('active', '=', 'Y')->select('id', 'name')->get();
 
         $branches = Branch::where('active', '=', 'Y')->get();
         $designations = Designation::where('active', '=', 'Y')->get();

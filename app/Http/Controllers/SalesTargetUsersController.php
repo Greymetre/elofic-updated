@@ -148,6 +148,7 @@ class SalesTargetUsersController extends Controller
         return Datatables::of($query)
             ->addIndexColumn()
             ->addColumn('achievement', function ($data) {
+                // dd($data);
                 if ($data->user->sales_type == 'Primary') {
                     $monthNumber = Carbon::parse("1 $data->month")->month;
                     $firstDate = Carbon::createFromDate($data->year, $monthNumber, 1)->startOfMonth()->toDateString();

@@ -159,7 +159,9 @@ class ExpensesDataTable extends DataTable
                 $query->where('payroll', $payrollid);
             });
         }
-        $data->whereIn('user_id', $userids);
+        if (!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin') && !$userinfo->hasRole('Sub_Admin')){
+            $data->whereIn('user_id', $userids);
+        }
 
         if (!empty($request['executive_id'])) {
             if ($request->executive_id) {

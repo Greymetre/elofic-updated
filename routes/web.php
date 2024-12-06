@@ -804,6 +804,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('redemptions_download', [RedemptionController::class, 'download'])->name('redemptions.download');
     Route::post('redemptions-upload', [RedemptionController::class, 'upload'])->name('redemptions.upload');
     Route::get('redemptions-template', [RedemptionController::class, 'template'])->name('redemptions.template');
+    Route::get('redemptions-template-gift', [RedemptionController::class, 'gift_template'])->name('redemptions.gift_template');
     Route::get('redemption-change-status', [RedemptionController::class, 'changeStatus'])->name('redemptions.changeStatus');
     Route::get('redemption-gift-delivered', [RedemptionController::class, 'giftDelivered'])->name('redemptions.giftDelivered');
     Route::any('redemption-gift-catalogue', [RedemptionController::class, 'gift_catalogue'])->name('redemptions.gift-catalogue');

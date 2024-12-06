@@ -43,5 +43,9 @@ class Redemption extends Model
     public function neft_details(){
         return $this->hasOne(NeftRedemptionDetails::class);
     }
+
+    public function gift_details(){
+        return $this->hasOne(GiftRedemptionDetail::class);
+    }
     
 }

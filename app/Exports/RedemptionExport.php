@@ -19,9 +19,10 @@ use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
-
-class RedemptionExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithEvents
+class RedemptionExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithEvents, WithColumnFormatting
 {
     public function __construct($request)
     {
@@ -72,9 +73,9 @@ class RedemptionExport implements FromCollection, WithHeadings, ShouldAutoSize, 
     public function headings(): array
     {
         if($this->redeem_mode == '1'){
-            return ['Id', 'Date', 'Customer Id', 'Firm Name', 'Contact Person', 'Parent Code', 'Parent Name', 'Mobile Number', 'City', 'District', 'State', 'Branch', 'Div', 'Category Name', 'Redeem Prodcut Name', 'Acual Dispatch Product', 'Point', 'Status', 'Approve Date', 'Dispatch Date', 'Dispatch Number', 'Gift Recived Date', 'Received Remark','Redemption No','Purchase Rate','Gst %','Total Purchase','Purchase Invoice No','Purchase Return no','Client Invoice No'];
+            return ['Id', 'Date','Redeem Mode', 'Customer Id', 'Firm Name', 'Contact Person', 'Parent Code', 'Parent Name', 'Mobile Number', 'City', 'District', 'State', 'Branch', 'Div', 'Category Name', 'Redeem Prodcut Name', 'Acual Dispatch Product', 'Point', 'Status', 'Approve Date', 'Dispatch Date', 'Dispatch Number', 'Gift Recived Date', 'Received Remark','Redemption No','Purchase Rate','Gst %','Total Purchase','Purchase Invoice No','Purchase Return no','Client Invoice No'];
         }elseif($this->redeem_mode == '2'){
-            return ['Id', 'Date', 'Customer Id', 'Firm Name', 'Contact Person', 'Parent Code', 'Parent Name', 'Mobile Number', 'City', 'District', 'State', 'Branch', 'Div', 'Redeem Mode', 'Redeem Point', 'Status', 'Bank Name', 'Account Holder Name', 'Account Number', 'IFSC Code', 'Adhar Number', 'PAN Number', 'TDS Dedcution %', 'TDS Amount', 'Final Pay', 'Payment Date', 'Trasaction Id', 'Details', 'Invoice Number'];
+            return ['Id', 'Date', 'Redeem Mode', 'Customer Id', 'Firm Name', 'Contact Person', 'Parent Code', 'Parent Name', 'Mobile Number', 'City', 'District', 'State', 'Branch', 'Div', 'Redeem Mode', 'Redeem Point', 'Status', 'Bank Name', 'Account Holder Name', 'Account Number', 'IFSC Code', 'Adhar Number', 'PAN Number', 'TDS Dedcution %', 'TDS Amount', 'Final Pay', 'Payment Date', 'Trasaction Id', 'Details', 'Invoice Number'];
         }
     }
 
@@ -128,6 +129,7 @@ class RedemptionExport implements FromCollection, WithHeadings, ShouldAutoSize, 
             return [
                 $data['id'],
                 $data['created_at'] = isset($data['created_at']) ? date("d-M-Y", strtotime($data['created_at'])) : '',
+                $data['redeem_mode'],
                 $data['customer']['id'],
                 $data['customer']['name'],
                 $data['customer']['first_name'].' '.$data['customer']['last_name'],
@@ -150,11 +152,19 @@ class RedemptionExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                 $data['dispatch_number']??'',
                 $data['gift_recived_date']?date('d-M-Y', strtotime($data['gift_recived_date'])):'',
                 $data['remark'],
+                $data['gift_details']?$data['gift_details']['redemption_no']:'',
+                $data['gift_details']?$data['gift_details']['purchase_rate']:'',
+                $data['gift_details']?$data['gift_details']['gst']:'',
+                $data['gift_details']?$data['gift_details']['total_purchase']:'',
+                $data['gift_details']?$data['gift_details']['purchase_invoice_no']:'',
+                $data['gift_details']?$data['gift_details']['purchase_return_no']:'',
+                $data['gift_details']?$data['gift_details']['client_invoice_no']:'',
             ];
         }elseif($this->redeem_mode == '2'){
             return [
                 $data['id'],
                 $data['created_at'] = isset($data['created_at']) ? date("d-M-Y", strtotime($data['created_at'])) : '',
+                $data['redeem_mode'],
                 $data['customer']['id'],
                 $data['customer']['name'],
                 $data['customer']['first_name'].' '.$data['customer']['last_name'],
@@ -227,6 +237,15 @@ class RedemptionExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                     ],
                 ]);
             },
+        ];
+    }
+
+    public function columnFormats(): array
+    {
+        return [
+            'I' => '0',
+            'T' => '0',
+            'V' => '0'
         ];
     }
 }

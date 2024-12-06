@@ -13,6 +13,7 @@ use App\DataTables\RedemptionGiftsDataTable;
 use Gate;
 use Excel;
 use App\Exports\RedemptionExport;
+use App\Exports\RedemptionGiftTemplate;
 use App\Exports\RedemptionTemplate;
 use App\Imports\RedemptionImport;
 use App\Models\Branch;
@@ -219,7 +220,11 @@ class RedemptionController extends Controller
                 $column = 'gift_recived_date';
             }
         }
-        $updateStatus = Redemption::where('id', $request->id)->update(['status' => $request->status, 'dispatch_number' => $request->dispatch_number, $column => now()->toDateString()]);
+        if ($redemption->redeem_mode == '2') {
+            $updateStatus = Redemption::where('id', $request->id)->update(['status' => $request->status, 'dispatch_number' => $request->dispatch_number]);
+        }else{
+            $updateStatus = Redemption::where('id', $request->id)->update(['status' => $request->status, 'dispatch_number' => $request->dispatch_number, $column => now()->toDateString()]);
+        }
         if ($updateStatus) {
             if ($redemption) {
                 if ($redemption->redeem_mode == '2') {
@@ -309,7 +314,15 @@ class RedemptionController extends Controller
         abort_if(Gate::denies('redemption_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        return Excel::download(new RedemptionTemplate, 'NEFT_Redemption_status.xlsx');
+        return Excel::download(new RedemptionTemplate, 'NEFT_Redemption_template.xlsx');
+    }
+
+    public function gift_template()
+    {
+        abort_if(Gate::denies('redemption_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new RedemptionGiftTemplate, 'Gift_Redemption_template.xlsx');
     }
 
     public function upload(Request $request)

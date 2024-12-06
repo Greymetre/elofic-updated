@@ -139,6 +139,9 @@
             @elseif($dealerAppointment->approval_status == '3')
             <span class="btn btn-sm btn-success">Approved</span>
             <button type="button" class="btn btn-sm btn-warning ml-2" onclick="changeStatus('0','{{$dealerAppointment->id}}')">Pending</button>
+            @if($dealerAppointment->getMedia('certificate')->count() < 1 )
+            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#generateCertificateModal">Generate Certificate</button>
+            @endif
             @endif
             @if(auth()->user()->can(['dealer_appointment_edit']))
             <a href="{{route('dealer-appointment.edit', $dealerAppointment->id)}}" class="btn btn-info btn-sm ml-2" title="Edit Appointment Form">Edit</a>
@@ -156,7 +159,7 @@
               BM Remark
             </button>
             @endif
-            <a href="{{ url('/dealer-appointments') }}" class="btn btn-primary btn-sm ml-2">Back</a>
+              <a href="{{ url('/dealer-appointments') }}" class="btn btn-primary btn-sm ml-2">Back</a>
           </div>
         </div>
 
@@ -1116,7 +1119,7 @@
                 <div class="mb-3">
                   <input type="hidden" value="{{$dealerAppointment->id}}" name="id">
                   <label for="dealerName" class="form-label">Firm Name</label>
-                  <input type="text" class="form-control" id="dealerName" name="dealer_name" placeholder="Enter dealer/distributor name" required>
+                  <input type="text" class="form-control" value="{{old('old_firm_name', $dealerAppointment->firm_name)}}" id="dealerName" name="dealer_name" placeholder="Enter dealer/distributor name" required>
                 </div>
                 <div class="mb-3">
                   <label for="customer_type" class="form-label">Customer Type</label>
@@ -1124,6 +1127,7 @@
                     <option value="">Select Customer Type</option>
                     <option value="Dealer">Dealer</option>
                     <option value="Distributor">Distributor</option>
+                    <option value="Service Center">Service Center</option>
                   </select>
                 </div>
                 <div class="mb-3">
@@ -1252,7 +1256,6 @@
         $('input[name="division"]').change(function() {
           var selectedType = $('input[name="customertype"]:checked').val();
           var selectedDivision = $('input[name="division"]:checked').val();
-          console.log(selectedType, selectedDivision);
 
           if (selectedDivision == 'SERVECE') {
             $('#asc-div').removeClass('d-none');

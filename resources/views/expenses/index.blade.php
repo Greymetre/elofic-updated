@@ -93,10 +93,26 @@
                      <div class="p-2"><button type="button" class="btn btn-just-icon btn-theme" title="Reset Fliter" onclick="resetFilter();"><i class="fa fa-refresh" aria-hidden="true"></i></button></div>
 
                      <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.customers.title') !!}"><i class="material-icons">cloud_download</i></button></div>
-
+                     <div class="count-divs">
+                       <h4 class="card-text">Pending</h4>
+                       <h5 class="card-title" id="pending_count">{{$pending_count}}</h5>
+                     </div>
+                     <div class="count-divs">
+                       <h4 class="card-text text-center">Approved</h4>
+                       <h5 class="card-title" id="approve_count">{{$approve_count}}</h5>
+                     </div>
+                     <div class="count-divs">
+                       <h4 class="card-text text-center">Rejected</h4>
+                       <h5 class="card-title" id="reject_count">{{$reject_count}}</h5>
+                     </div>
+                     <div class="count-divs">
+                       <h4 class="card-text text-center">Checked</h4>
+                       <h5 class="card-title" id="checked_count">{{$checked_count}}</h5>
+                     </div>
 
                    </div>
                  </form>
+
 
 
                  @endif
@@ -110,44 +126,7 @@
              </span>
            </h4>
          </div>
-         <div class="card-body">
-           <div class="col-md-12">
-             <div class="row">
-               <div class="col-sm">
-                 <div class="card text-center m-1">
-                   <div class="card-body">
-                     <h4 class="card-text">Pending</h4>
-                     <h5 class="card-title" id="pending_count">{{$pending_count}}</h5>
-                   </div>
-                 </div>
-               </div>
-               <div class="col-sm">
-                 <div class="card text-center m-1">
-                   <div class="card-body">
-                     <h4 class="card-text text-center">Approved</h4>
-                     <h5 class="card-title" id="approve_count">{{$approve_count}}</h5>
-                   </div>
-                 </div>
-               </div>
-               <div class="col-sm">
-                 <div class="card text-center m-1">
-                   <div class="card-body">
-                     <h4 class="card-text text-center">Rejected</h4>
-                     <h5 class="card-title" id="reject_count">{{$reject_count}}</h5>
-                   </div>
-                 </div>
-               </div>
-               <div class="col-sm">
-                 <div class="card text-center m-1">
-                   <div class="card-body">
-                     <h4 class="card-text text-center">Checked</h4>
-                     <h5 class="card-title" id="checked_count">{{$checked_count}}</h5>
-                   </div>
-                 </div>
-               </div>
-             </div>
-           </div>
-         </div>
+
          <div class="card-body">
            @if(count($errors) > 0)
            <div class="alert alert-danger">
@@ -227,6 +206,33 @@
    </div>
 
    <style type="text/css">
+     .count-divs h5 {
+       line-height: 0px;
+       border: 1px solid #377ab8;
+       height: 20px;
+       margin: -10px !important;
+       padding: 12px;
+       border-radius: 3px;
+       font-size: 14px;
+       font-weight: 400 !important;
+     }
+
+     .count-divs h4 {
+       font-size: 14px;
+       line-height: 5px;
+       background: linear-gradient(45deg, #3866a8, #3689c4);
+       color: #fff;
+       font-weight: 400 !important;
+       box-shadow: -2px 2px 5px 0px gray;
+     }
+
+     .count-divs {
+       padding: 10px;
+       margin: 10px;
+       line-height: 0px;
+       text-align: center;
+     }
+
      .flex-row .p-2 {
        width: 20% !important;
        /*   overflow: hidden;*/

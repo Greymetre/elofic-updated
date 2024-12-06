@@ -20,9 +20,11 @@ use App\Models\SchemeDetails;
 use App\Models\SchemeHeader;
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\DamageEntryController;
 use App\Http\Controllers\SendNotifications;
 use App\Models\DamageEntry;
 use App\Models\Gifts;
+use App\Models\Product;
 use App\Models\Redemption;
 
 class TransactionHistoryController extends Controller
@@ -475,6 +477,7 @@ class TransactionHistoryController extends Controller
     public function addDamageEntry(Request $request)
     {
         try {
+            
             $validator = Validator::make($request->all(), [
                 'customer_id' => 'required|exists:customers,id',
                 // 'damageattach1' => 'required',
@@ -525,6 +528,24 @@ class TransactionHistoryController extends Controller
                 $damageEntry->point = $point;
                 $damageEntry->created_by = auth()->user()->id;
                 $damageEntry->save();
+                // if ($damageEntry->save()) {
+                //     $coupon_code_array = explode('|', $damageEntry->coupon_code);
+                //     $pName = trim($coupon_code_array[0]);
+                //     $cCode = isset($coupon_code_array[1]) ? trim($coupon_code_array[1]) : '';
+                //     $produ = Product::where('product_name', $pName)->first();
+                //     if ($produ && !empty($produ)) {
+                //         $data = [
+                //             'id' => $damageEntry->id,
+                //             'status' => '1',
+                //             'coupon_code' => $cCode,
+                //             'remark' => 'Direct Approve'
+                //         ];
+                //         $request = new Request($data);
+
+                //         $damageEntryController = new DamageEntryController();
+                //         $response = $damageEntryController->changeStatus($request);
+                //     }
+                // }
             } else {
                 $damageEntry = new DamageEntry();
                 $damageEntry->customer_id = $request->customer_id;
