@@ -32,7 +32,7 @@ class SchemeExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMap
     {
         return [
             $data['product_id'],
-            $data['products']['product_name'],
+            $data['products']?$data['products']['product_name']:'-',
             $data['category_id'],
             $data['categories']?$data['categories']['category_name']:'',
             $data['subcategory_id'],

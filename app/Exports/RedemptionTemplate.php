@@ -18,7 +18,7 @@ class RedemptionTemplate implements FromCollection,WithHeadings,ShouldAutoSize
 
     public function headings(): array
     {
-        return [['Redemption Id','Status','Transaction Id(UTR No.)','Details','TDS', 'Payment Date', 'Invoice Number'],
+        return [['Redemption Id','Status','Transaction id UTR No','Details','TDS', 'Payment Date', 'Invoice Number'],
         ['Note : Status will be 0=Pendding,1=Approved,2=Reject,3=Success,4=Fail, Please enter number only in status column and remove this row before upload.']];
     }
 

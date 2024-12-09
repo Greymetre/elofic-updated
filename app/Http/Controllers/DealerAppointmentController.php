@@ -195,7 +195,7 @@ class DealerAppointmentController extends Controller
      */
     public function update(Request $request, DealerAppointment $dealerAppointment)
     {
-        DealerAppointment::where('id', $dealerAppointment->id)->update($request->except(['_token', 'profile_picture', 'service_policy', 'dealer_policy', 'mou_sheet', 'mcl_cheque_1', 'mcl_cheque_2', 'gst_certificate', 'adhar_card', 'pan_card', 'bank_statement', 'shop_image','cancel_cheque']));
+        DealerAppointment::where('id', $dealerAppointment->id)->update($request->except(['_token', 'profile_picture', 'service_policy', 'dealer_policy', 'mou_sheet', 'mcl_cheque_1', 'mcl_cheque_2', 'gst_certificate', 'adhar_card', 'pan_card', 'bank_statement', 'shop_image','cancel_cheque','application_form']));
 
         if ($request->hasFile('profile_picture')) {
             $file = $request->file('profile_picture');

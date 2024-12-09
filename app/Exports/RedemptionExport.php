@@ -191,7 +191,7 @@ class RedemptionExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                 (isset($data['neft_details']) && $data['status'] == '3') ? $data['redeem_amount'] - (($data['redeem_amount']*$data['neft_details']['tds']) / 100) :  $data['redeem_amount'] - (($data['redeem_amount'] * 10) / 100),
                 isset($data['neft_details']) ? date('d-M-Y', strtotime($data['updated_at'])) : '',
                 isset($data['neft_details']) ? $data['neft_details']['utr_number'] : '',
-                isset($data['deatils']) ? $data['deatils'] : '',
+                isset($data['remark']) ? $data['remark'] : '',
                 isset($data['invoice_number']) ? $data['invoice_number'] : '',
             ];
         }

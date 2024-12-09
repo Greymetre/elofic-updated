@@ -138,7 +138,7 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
         }
 
         // Grouping and ordering
-        $query->whereIn('division', ['PUMP', 'MOTOR'])->groupBy('dealer', 'customer_id', 'final_branch', 'city', 'emp_code');
+        $query->whereIn('division', ['PUMP', 'MOTOR'])->groupBy('dealer', 'customer_id', 'final_branch', 'city');
 
         // Execute the primary query
         $results = $query->get();
