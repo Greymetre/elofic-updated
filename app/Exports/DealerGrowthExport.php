@@ -160,15 +160,21 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
             ->whereIn('division', ['PUMP', 'MOTOR'])
             ->groupBy('dealer', 'customer_id', 'final_branch', 'city')
             ->get();
+
             // Merge the results
             $results = $results->map(function ($item) use ($lastYearAmounts) {
                 $lastYearAmount = $lastYearAmounts->firstWhere(function ($value) use ($item) {
-                    return $value->customer_id == $item->customer_id;
+                    // return $value->customer_id == $item->customer_id;
+                    return $value->customer_id == $item->customer_id && $value->dealer == $item->dealer;
+
+                    // return $value->dealer == $item->dealer &&
+                    // $value->final_branch == $item->final_branch;
+
                     // return $value->dealer == $item->dealer &&
                     // $value->final_branch == $item->final_branch &&
                     // $value->city == $item->city;
                 });
-                
+
             $item->last_year_net_amounts = $lastYearAmount ? $lastYearAmount->last_year_net_amounts : 0;
             $item->last_year_net_amounts_array = $lastYearAmount ? $lastYearAmount->last_year_net_amounts_array : 0;
             $item->last_year_division_array = $lastYearAmount ? $lastYearAmount->last_year_division_array : 0;
@@ -353,7 +359,6 @@ class DealerGrowthExport implements FromCollection, WithHeadings, WithMapping, S
 
         $headings = [$heading1, $heading2, $heading3];
 
-        // dd($headings);
         return $headings;
     }
 

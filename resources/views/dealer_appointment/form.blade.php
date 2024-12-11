@@ -492,7 +492,7 @@
                 <div class="col-md-4">
                     <div class="form-check">
                         <label class="form-check-label" for="SERVECE"> ASC </label>
-                        <input required class="form-check-input" type="radio" name="division" id="SERVECE" value="SERVECE">
+                        <input required class="form-check-input" type="radio" name="division" id="SERVECE" value="SERVICE">
                     </div>
                 </div>
                 <div class="col-md-4">
@@ -1415,7 +1415,7 @@
                     var selectedType = $('input[name="customertype"]:checked').val();
                     var selectedDivision = $(this).val();
 
-                    if (selectedDivision == 'SERVECE') {
+                    if (selectedDivision == 'SERVICE') {
                         $('#asc-div').removeClass('d-none');
                     } else {
                         $('#asc-div').addClass('d-none');

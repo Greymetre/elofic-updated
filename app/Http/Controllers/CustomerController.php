@@ -844,7 +844,7 @@ class CustomerController extends Controller
         ////abort_if(Gate::denies('customer_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        Excel::import(new CustomersImport, request()->file('import_file'));
+        $update = Excel::import(new CustomersImport, request()->file('import_file'));
         return back();
     }
     public function download(Request $request)
