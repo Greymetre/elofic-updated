@@ -282,7 +282,7 @@
               <div class="col-md-4">
                 <div class="form-check">
                   <label class="form-check-label" for="SERVECE"> ASC </label>
-                  <input required class="form-check-input" type="radio" name="division" id="SERVECE" value="SERVECE" {{($dealerAppointment->division == 'SERVECE')?'checked':''}}>
+                  <input required class="form-check-input" type="radio" name="division" id="SERVECE" value="SERVICE" {{($dealerAppointment->division == 'SERVICE')?'checked':''}}>
                 </div>
               </div>
               <div class="col-md-4">
@@ -1059,8 +1059,12 @@
                           <input class="form-check-input" type="radio" value="Dealer" {{($dealerAppointment->appointment_kyc_detail&&$dealerAppointment->appointment_kyc_detail->distribution_channel=='Dealer')?'checked':''}}>
                         </div>
                         <div class="form-check col-md-3">
-                          <label for="partnership_firm"> Distributor </label>
+                          <label for="Distributor"> Distributor </label>
                           <input class="form-check-input" type="radio" value="Distributor" {{($dealerAppointment->appointment_kyc_detail&&$dealerAppointment->appointment_kyc_detail->distribution_channel=='Distributor')?'checked':''}}>
+                        </div>
+                        <div class="form-check col-md-3">
+                          <label for="Service Center"> Service Center </label>
+                          <input class="form-check-input" type="radio" value="Service Center" {{($dealerAppointment->appointment_kyc_detail&&$dealerAppointment->appointment_kyc_detail->distribution_channel=='Service Center')?'checked':''}}>
                         </div>
                       </div>
                     </td>
@@ -1257,7 +1261,7 @@
           var selectedType = $('input[name="customertype"]:checked').val();
           var selectedDivision = $('input[name="division"]:checked').val();
 
-          if (selectedDivision == 'SERVECE') {
+          if (selectedDivision == 'SERVICE') {
             $('#asc-div').removeClass('d-none');
           } else {
             $('#asc-div').addClass('d-none');

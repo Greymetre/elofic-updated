@@ -3595,24 +3595,25 @@ class ReportController extends Controller
 
         // Execute the primary query
         $results = $query->get();
-
+    
         // Calculate the last year's net amounts
         $lastYearAmounts = PrimarySales::select(
             'dealer',
+            'customer_id',
             'final_branch',
             'city',
             DB::raw('SUM(net_amount) as last_year_net_amounts')
         )
             ->whereBetween('invoice_date', [$last_year_start, $last_year_end])
-            ->groupBy('dealer', 'final_branch', 'city')
+            ->groupBy('dealer', 'final_branch', 'customer_id', 'city')
             ->get();
-
         // Merge the results
         $results = $results->map(function ($item) use ($lastYearAmounts) {
             $lastYearAmount = $lastYearAmounts->firstWhere(function ($value) use ($item) {
-                return $value->dealer == $item->dealer &&
-                    $value->final_branch == $item->final_branch &&
-                    $value->city == $item->city;
+                return $value->customer_id == $item->customer_id && $value->dealer == $item->dealer;
+                // return $value->dealer == $item->dealer &&
+                //     $value->final_branch == $item->final_branch &&
+                //     $value->city == $item->city;
             });
 
             $item->last_year_net_amounts = $lastYearAmount ? $lastYearAmount->last_year_net_amounts : 0;

@@ -536,6 +536,7 @@ class TransactionHistoryController extends Controller
                     if ($produ && !empty($produ)) {
                         $data = [
                             'id' => $damageEntry->id,
+                            'product_id' => $produ->id,
                             'status' => '1',
                             'coupon_code' => $cCode,
                             'remark' => 'Direct Approve'

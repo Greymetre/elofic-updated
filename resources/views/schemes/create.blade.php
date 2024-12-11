@@ -10,10 +10,6 @@
       .select2-dropdown--above {
          min-width: 250px !important;
       }
-/*
-      .select2-container {
-         border-bottom: 1px solid lightgray;
-      }*/
    </style>
    <div class="row">
       <div class="col-md-12">
@@ -22,18 +18,18 @@
                <div class="nav-tabs-navigation">
                   <div class="nav-tabs-wrapper new_id">
                      <h4 class="card-title ">
-                        Loyalty Scheme Creation  </h4>
-                        @if(auth()->user()->can(['district_access']))
-                        <ul class="nav nav-tabs pull-right" data-tabs="tabs">
-                           <li class="nav-item">
-                              <a class="nav-link" href="{{ url('schemes') }}">
-                                 <i class="material-icons">next_plan</i> {!! trans('panel.scheme.title') !!}
-                                 <div class="ripple-container"></div>
-                              </a>
-                           </li>
-                        </ul>
-                        @endif
-                   
+                        Loyalty Scheme Creation </h4>
+                     @if(auth()->user()->can(['district_access']))
+                     <ul class="nav nav-tabs pull-right" data-tabs="tabs">
+                        <li class="nav-item">
+                           <a class="nav-link" href="{{ url('schemes') }}">
+                              <i class="material-icons">next_plan</i> {!! trans('panel.scheme.title') !!}
+                              <div class="ripple-container"></div>
+                           </a>
+                        </li>
+                     </ul>
+                     @endif
+
                   </div>
                </div>
             </div>
@@ -70,7 +66,7 @@
                   </div>
                   <div class="col-md-4">
                      <div class="input_section">
-                           <label class="col-form-label">Select Customer Type </label>
+                        <label class="col-form-label">Select Customer Type </label>
                         <select class="select2 form-control" name="customer_type" id="customer_type">
                            <option value="" selected disabled>Select Customer Type</option>
                            @if($customer_types && count($customer_types) > 0)
@@ -86,7 +82,7 @@
                         @endif
                      </div>
                   </div>
-    <div class="col-md-4">
+                  <div class="col-md-4">
                      <div class="input_section">
                         <label class="col-form-label">{!! trans('panel.scheme.fields.start_date') !!} </label>
                         <input type="text" name="start_date" class="form-control datepicker" value="{!! old( 'start_date', $schemes['start_date']) !!}" autocomplete="off" readonly>
@@ -108,7 +104,7 @@
                         @endif
                      </div>
                   </div>
-      <div class="col-md-4">
+                  <div class="col-md-4">
                      <div class="input_section">
                         <label class="col-form-label">select </label>
                         <select name="scheme_type" class="select2 form-control" id="schemetype">
@@ -125,7 +121,7 @@
                         @endif
                      </div>
                   </div>
-                     <div class="col-md-4">
+                  <div class="col-md-4">
                      <div class="input_section">
                         <label class="col-form-label">Scheme Based On </label>
                         <select name="scheme_basedon" class="select2 form-control" id="schemebasedon">
@@ -142,7 +138,7 @@
                         @endif
                      </div>
                   </div>
- <div class="col-md-4">
+                  <div class="col-md-4">
                      <div class="input_section">
                         <label class="col-form-label">{!! trans('panel.scheme.fields.scheme_description') !!} </label>
                         <textarea class="form-control" rows="4" name="scheme_description">{!! old( 'scheme_description', $schemes['scheme_description']) !!}</textarea>
@@ -153,41 +149,41 @@
                         @endif
                      </div>
                   </div>
-   <div class="col-md-4">
+                  <div class="col-md-4">
                      <div class="input_section">
-                     <label class="col-form-label">{!! trans('panel.scheme.fields.scheme_image') !!}</label>
-                
-                         <!-- <div class="custom-file"> -->
-                          
-                        
-                         
+                        <label class="col-form-label">{!! trans('panel.scheme.fields.scheme_image') !!}</label>
+
+                        <!-- <div class="custom-file"> -->
+
+
+
 
 
                         <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-<div class="fileinput-new thumbnail">
-<img src="https://expertfromindia.in/bediya/public/assets/img/placeholder.jpg" class="imagepreview1">
-<div class="selectThumbnail">
-<span class="btn btn-just-icon btn-round btn-file">
-<span class="fileinput-new"><i class="fa fa-pencil"></i></span>
-<span class="fileinput-exists">Change</span>
-<input type="file" name="image" class="getimage1" accept="image/*" >
-</span>
-<br>
-<a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
-</div>
-</div>
+                           <div class="fileinput-new thumbnail">
+                              <img src="https://expertfromindia.in/bediya/public/assets/img/placeholder.jpg" class="imagepreview1">
+                              <div class="selectThumbnail">
+                                 <span class="btn btn-just-icon btn-round btn-file">
+                                    <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
+                                    <span class="fileinput-exists">Change</span>
+                                    <input type="file" name="image" class="getimage1" accept="image/*">
+                                 </span>
+                                 <br>
+                                 <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
+                              </div>
+                           </div>
 
 
 
-                        @if ($errors->has('scheme_image'))
-                        <div class="error">
-                           <p class="text-danger">{{ $errors->first('scheme_image') }}</p>
+                           @if ($errors->has('scheme_image'))
+                           <div class="error">
+                              <p class="text-danger">{{ $errors->first('scheme_image') }}</p>
+                           </div>
+                           @endif
                         </div>
-                        @endif
                      </div>
                   </div>
-                  </div>
-   <div class="col-md-4">
+                  <div class="col-md-4">
                      <div class="input_section">
                         <label class="col-form-label">Assign To</label>
                         <select name="assign_to" placeholder="Select Branch" class="select2 form-control" id="assign_to">
@@ -204,7 +200,7 @@
                         @endif
                      </div>
                   </div>
-   <div class="col-md-4" id="branch">
+                  <div class="col-md-4" id="branch">
                      <div class="input_section">
                         <label class="col-form-label">Select Branch</label>
                         <select name="branch[]" multiple placeholder="Select Branch" class="select2 form-control" required>
@@ -222,9 +218,9 @@
                         @endif
                      </div>
                   </div>
-     <div class="col-md-4" id="state">
+                  <div class="col-md-4" id="state">
                      <div class="input_section">
-                         <label class="col-form-label">Select States</label>
+                        <label class="col-form-label">Select States</label>
                         <select name="state[]" multiple placeholder="Select States" class="select2 form-control" required>
                            <!-- <option value="">select branches</option> -->
                            @if($states && count($states) > 0)
@@ -240,7 +236,7 @@
                         @endif
                      </div>
                   </div>
-  <div class="col-md-4" id="customer">
+                  <div class="col-md-4" id="customer">
                      <div class="input_section">
                         <!-- <select name="customer[]" id='customer_select' value="{!! old( 'customer', $schemes['customer']) !!}" ></select> -->
                         {!! Form::select('customer[]',[], old( 'customer', $schemes['customer']), ['id'=>'customer_select', 'class' => 'form-control']) !!}
@@ -257,58 +253,58 @@
 
 
                </div>
-              
-   
-              
+
+
+
                <div class="row redemption">
                   <div class="col-md-4">
                      <div class="input_section">
                         <label class="col-form-label">{!! trans('panel.scheme.fields.points_start_date') !!}</label>
-                       
-                           <div class="form-group bmd-form-group is-filled">
-                              <input type="text" name="points_start_date" class="form-control datepicker" value="{!! old( 'points_start_date', $schemes['points_start_date']) !!}" autocomplete="off" readonly>
-                           </div>
-                      
+
+                        <div class="form-group bmd-form-group is-filled">
+                           <input type="text" name="points_start_date" class="form-control datepicker" value="{!! old( 'points_start_date', $schemes['points_start_date']) !!}" autocomplete="off" readonly>
+                        </div>
+
                      </div>
                   </div>
                   <div class="col-md-4">
                      <div class="input_section">
                         <label class="col-form-label">{!! trans('panel.scheme.fields.points_end_date') !!}</label>
-                    
-                           <div class="form-group bmd-form-group is-filled">
-                              <input type="text" name="points_end_date" class="form-control datepicker" value="{!! old( 'points_end_date', $schemes['points_end_date']) !!}" autocomplete="off" readonly>
-                           </div>
-                     
+
+                        <div class="form-group bmd-form-group is-filled">
+                           <input type="text" name="points_end_date" class="form-control datepicker" value="{!! old( 'points_end_date', $schemes['points_end_date']) !!}" autocomplete="off" readonly>
+                        </div>
+
                      </div>
                   </div>
 
-   <div class="col-md-4">
+                  <div class="col-md-4">
                      <div class="input_section">
                         <label class="col-form-label">{!! trans('panel.scheme.fields.block_points') !!}</label>
-                       
-                           <div class="form-group bmd-form-group is-filled">
-                              <input class="form-control" name="block_points" type="text">
-                           </div>
-                        
+
+                        <div class="form-group bmd-form-group is-filled">
+                           <input class="form-control" name="block_points" type="text">
+                        </div>
+
                      </div>
                   </div>
                   <div class="col-md-4">
                      <div class="input_section">
                         <label class="col-form-label">{!! trans('panel.scheme.fields.block_percents') !!}</label>
-                        
-                           <div class="form-group bmd-form-group is-filled">
-                              <input class="form-control" name="block_percents" type="text">
-                         
+
+                        <div class="form-group bmd-form-group is-filled">
+                           <input class="form-control" name="block_percents" type="text">
+
                         </div>
                      </div>
                   </div>
 
                </div>
-              
+
                <div class="row clearfix earnscheme">
                   <div class="col-md-12">
                      <span class="mt-2" style="float: right;">
-                        <span style="background: linear-gradient(45deg, #3860a4 0%, #3694cc 100%);color: #fff;padding: 5px;border-radius: 5px;font-weight: 500;">*Import product in this scheme please check first template</span>
+                        <!-- <span style="background: linear-gradient(45deg, #3860a4 0%, #3694cc 100%);color: #fff;padding: 5px;border-radius: 5px;font-weight: 500;">*Import product in this scheme please check first template</span> -->
                         <div class="d-flex flex-row-reverse">
                            <div class="">
                               <div class="fileinput fileinput-new text-center d-flex flex-row-reverse" data-provides="fileinput">
@@ -321,6 +317,8 @@
                                  <!-- <a href="{{ URL::to('schemes-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.scheme.title_singular') !!}"><i class="material-icons">text_snippet</i></a> -->
                                  @if( $schemes->exists && isset($schemes['schemedetails']) )
                                  <a href="{{ URL::to('schemes-download') }}?id={{$schemes->id}}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.scheme.title') !!}"><i class="material-icons">cloud_download</i></a>
+                                 <a href="{{ route('scheme.product-.pdf') }}?id={{$schemes->id}}&group=no" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.pdf_module.download') !!} {!! trans('panel.pdf_module.pdf') !!}"><i class="material-icons">picture_as_pdf</i></a>
+                                 <a href="{{ route('scheme.product-.pdf') }}?id={{$schemes->id}}&group=yes" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.pdf_module.download') !!} Point Wise {!! trans('panel.pdf_module.pdf') !!}"><i class="material-icons">picture_as_pdf</i></a>
                                  @endif
                               </div>
                            </div>
@@ -343,20 +341,20 @@
                         </table>
                      </div>
                   </div>
-               
-                     <div class="col-md-12">
-                        <table class="table">
-                           <tbody>
-                              <tr>
-                                 <td class="td-actions">
-                                    <a href="#" title="" class="btn btn-success btn-just-icon btn-sm add-rows" onclick="getcategorylist()"> <i class="fa fa-plus"></i> </a>
-                                 </td>
-                              </tr>
-                           </tbody>
-                        </table>
-                     </div>
+
+                  <div class="col-md-12">
+                     <table class="table">
+                        <tbody>
+                           <tr>
+                              <td class="td-actions">
+                                 <a href="#" title="" class="btn btn-success btn-just-icon btn-sm add-rows" onclick="getcategorylist()"> <i class="fa fa-plus"></i> </a>
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
                   </div>
-           
+               </div>
+
 
                <div class="pull-right">
                   {{ Form::submit('Submit', array('class' => 'btn btn-theme')) }}
@@ -577,61 +575,61 @@
       }).trigger('change');
    </script>
    <script type="text/javascript">
-        $(function() {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            var table = $('#tab_logic').DataTable({
-                "processing": true,
-                "serverSide": true,
-                "order": [
-                    [0, 'desc']
-                ],
-                //"dom": 'Bfrtip',
-                ajax: {
-                    url: "{{ route('scheme.product.ist') }}",
-                    data: function(d) {
-                        d.scheme_id = '{{$schemes->exists?$schemes->id:"0"}}'
-                    }
-                },
-                columns: [{
-                        data: 'DT_RowIndex',
-                        name: 'DT_RowIndex',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'categories.category_name',
-                        name: 'categories.category_name',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'subcategories.subcategory_name',
-                        name: 'subcategories.subcategory_name',
-                        orderable: false
-                    },
-                    {
-                        data: 'products.product_name',
-                        name: 'products.product_name',
-                        orderable: false
-                    },
-                    {
-                        data: 'active_point',
-                        name: 'active_point'
-                    },
-                    {
-                        data: 'provision_point',
-                        name: 'provision_point'
-                    },
-                    {
-                        data: 'points',
-                        name: 'points'
-                    },
-                ]
-            });
-        });
-    </script>
+      $(function() {
+         $.ajaxSetup({
+            headers: {
+               'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+         });
+         var table = $('#tab_logic').DataTable({
+            "processing": true,
+            "serverSide": true,
+            "order": [
+               [0, 'desc']
+            ],
+            //"dom": 'Bfrtip',
+            ajax: {
+               url: "{{ route('scheme.product.ist') }}",
+               data: function(d) {
+                  d.scheme_id = '{{$schemes->exists?$schemes->id:"0"}}'
+               }
+            },
+            columns: [{
+                  data: 'DT_RowIndex',
+                  name: 'DT_RowIndex',
+                  orderable: false,
+                  searchable: false
+               },
+               {
+                  data: 'categories.category_name',
+                  name: 'categories.category_name',
+                  orderable: false,
+                  searchable: false
+               },
+               {
+                  data: 'subcategories.subcategory_name',
+                  name: 'subcategories.subcategory_name',
+                  orderable: false
+               },
+               {
+                  data: 'products.product_name',
+                  name: 'products.product_name',
+                  orderable: false
+               },
+               {
+                  data: 'active_point',
+                  name: 'active_point'
+               },
+               {
+                  data: 'provision_point',
+                  name: 'provision_point'
+               },
+               {
+                  data: 'points',
+                  name: 'points'
+               },
+            ]
+         });
+      });
+   </script>
 </x-app-layout>

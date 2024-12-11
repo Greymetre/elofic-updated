@@ -147,6 +147,10 @@
                                                 <label for="Distributor"> Distributor </label>
                                                 <input class="form-check-input" type="radio" value="Distributor" id="Distributor" name="distribution_channel">
                                             </div>
+                                            <div class="form-check col-md-3">
+                                                <label for="Service Center"> Service Center </label>
+                                                <input class="form-check-input" type="radio" value="Service Center" id="service_center" name="distribution_channel">
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>

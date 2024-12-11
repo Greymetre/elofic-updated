@@ -51,7 +51,7 @@ class CustomersImport implements ToCollection, WithValidation, WithHeadingRow, W
     $addressdetails = collect([]);
     $attachments = collect([]);
 
-    foreach ($rows as $row) {
+    foreach ($rows as $ky=>$row) {
       if (strlen(preg_replace('/\s+/', '', $row['mobile'])) == 10) {
         $row['mobile'] = '91' . preg_replace('/\s+/', '', $row['mobile']);
       }
@@ -139,7 +139,6 @@ class CustomersImport implements ToCollection, WithValidation, WithHeadingRow, W
           //$row['parent_id'] = str_replace(']','',$row['parent_id']);
 
           $parent_data = explode(",", $row['parent_id']);
-          //  dd($parent_data);
 
           foreach ($parent_data as $key => $row_parent) {
             $parentDetail = ParentDetail::updateOrCreate(
@@ -151,7 +150,6 @@ class CustomersImport implements ToCollection, WithValidation, WithHeadingRow, W
             );
           }
         }
-
         // parent end  
 
       } else {
@@ -263,90 +261,17 @@ class CustomersImport implements ToCollection, WithValidation, WithHeadingRow, W
             'created_at' => getcurentDateTime(),
             'updated_at' => getcurentDateTime()
           ]);
-          if (!empty($row['beat_name'])) {
-            $beat = Beat::where('beat_name', '=', $row['beat_name'])->first();
-            if ($beat === null) {
-              $beat = Beat::create([
-                'active' => 'Y',
-                'beat_name' => $row['beat_name'],
-                'description'  => $row['beat_name'],
-              ]);
-            }
-            if (!empty($beat)) {
-              BeatCustomer::create([
-                'active' => 'Y',
-                'beat_id' => $beat['id'],
-                'customer_id' => $customer['id'],
-              ]);
-
-              BeatSchedule::create([
-                'active' => 'Y',
-                'beat_id' => $beat['id'],
-                'beat_date' => Carbon::now()->subDays($beat['id'])->format('Y-m-d'),
-                'user_id' => $user_id,
-              ]);
-            }
+          if ($customerdetails->isNotEmpty()) {
+            CustomerDetails::insert($customerdetails->toArray());
           }
-
-
-
-
-
-          // if($row['gstin_image'])
-          // {
-          //      $attachments->push([
-          //          'active' => 'Y',
-          //          'customer_id' => $customer['id'],
-          //          'file_path' => !empty($row['gstin_image'])? $row['gstin_image']:'',
-          //          'document_name' =>  'gstin',
-          //          'created_at' => getcurentDateTime(),
-          //          'updated_at' => getcurentDateTime()
-          //      ]);
-          //  }
-          //  if($row['pan_image'])
-          //  {
-          //      $attachments->push([
-          //          'active' => 'Y',
-          //          'customer_id' => $customer['id'],
-          //          'file_path' => !empty($row['pan_image'])? $row['pan_image']:'',
-          //          'document_name' =>  'pan',
-          //          'created_at' => getcurentDateTime() ,
-          //          'updated_at' => getcurentDateTime()
-          //      ]);
-          //  }
-          //  if($row['aadhar_image'])
-          //  {
-          //      $attachments->push([
-          //          'active' => 'Y',
-          //          'customer_id' => $customer['id'],
-          //          'file_path' => !empty($row['aadhar_image'])? $row['aadhar_image']:'',
-          //          'document_name' =>  'aadhar',
-          //          'created_at' => getcurentDateTime() ,
-          //          'updated_at' => getcurentDateTime()
-          //      ]);
-          //  }
-          //  if($row['other_image'])
-          //  {
-          //      $attachments->push([
-          //          'active' => 'Y',
-          //          'customer_id' => $customer['id'],
-          //          'file_path' => !empty($row['other_image'])? $row['other_image']:'',
-          //          'document_name' =>  'other',
-          //          'created_at' => getcurentDateTime() ,
-          //          'updated_at' => getcurentDateTime()
-          //      ]);
-          //  }
+          if ($addressdetails->isNotEmpty()) {
+            Address::insert($addressdetails->toArray());
+          }
+          // if ($attachments->isNotEmpty()) {
+          //   Attachment::insert($attachments->toArray());
+          // }
         }
       }
-    }
-    if ($customerdetails->isNotEmpty()) {
-      CustomerDetails::insert($customerdetails->toArray());
-    }
-    if ($addressdetails->isNotEmpty()) {
-      Address::insert($addressdetails->toArray());
-    }
-    if ($attachments->isNotEmpty()) {
-      Attachment::insert($attachments->toArray());
     }
   }
 
