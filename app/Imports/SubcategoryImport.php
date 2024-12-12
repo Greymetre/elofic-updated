@@ -32,7 +32,7 @@ class SubcategoryImport implements ToModel,WithValidation,WithHeadingRow, WithBa
             
             'active' => 'Y',
             'subcategory_name' => isset($row['subcategory_name'])? $row['subcategory_name']:'',
-            'subcategory_image' => isset($row['subcategory_image'])? $row['subcategory_image']:'',
+            'sap_code' => isset($row['sap_code'])? $row['sap_code']:'',
             'category_id' => isset($row['category_id'])? $row['category_id']:null,
             'created_by' => Auth::user()->id,
             'created_at' => getcurentDateTime(),

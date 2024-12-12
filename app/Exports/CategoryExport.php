@@ -14,12 +14,12 @@ class CategoryExport implements FromCollection,WithHeadings,ShouldAutoSize,WithM
 {
     public function collection()
     {
-        return Category::select('id','category_name', 'category_image')->latest()->get();   
+        return Category::select('id','category_name', 'sap_code')->latest()->get();   
     }
 
     public function headings(): array
     {
-        return ['id','category_name', 'category_image'];
+        return ['id','category_name', 'SAP Code'];
     }
 
     public function map($data): array
@@ -27,7 +27,7 @@ class CategoryExport implements FromCollection,WithHeadings,ShouldAutoSize,WithM
         return [
             $data['id'],
             $data['category_name'],
-            $data['category_image'],
+            $data['sap_code'],
         ];
     }
 

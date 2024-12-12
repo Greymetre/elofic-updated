@@ -123,7 +123,7 @@
 
 <div class="fileinput fileinput-new text-center" data-provides="fileinput">
 <div class="fileinput-new thumbnail">
-   <img src="https://expertfromindia.in/bediya/public/assets/img/placeholder.jpg" class="imagepreview1">
+   <img src="{!! asset('assets/img/placeholder.jpg') !!}" class="imagepreview1">
 <div class="selectThumbnail">
 <span class="btn btn-just-icon btn-round btn-file">
 <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
@@ -171,7 +171,7 @@
 
 <div class="fileinput fileinput-new text-center" data-provides="fileinput">
 <div class="fileinput-new thumbnail">
-   <img src="https://expertfromindia.in/bediya/public/assets/img/placeholder.jpg" class="imagepreview1">
+   <img src="{!! asset('assets/img/placeholder.jpg') !!}" class="imagepreview1">
 <div class="selectThumbnail">
 <span class="btn btn-just-icon btn-round btn-file">
 <span class="fileinput-new"><i class="fa fa-pencil"></i></span>

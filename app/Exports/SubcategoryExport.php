@@ -15,12 +15,12 @@ class SubcategoryExport implements FromCollection,WithHeadings,ShouldAutoSize,Wi
 {
     public function collection()
     {
-        return Subcategory::select('id','subcategory_name', 'subcategory_image','category_id')->latest()->get();   
+        return Subcategory::select('id','subcategory_name', 'sap_code','category_id')->latest()->get();   
     }
 
     public function headings(): array
     {
-        return ['id','subcategory_name', 'subcategory_image','category_id','category_name'];
+        return ['id','subcategory_name', 'Sap Code','category_id','category_name'];
     }
 
     public function map($data): array
@@ -28,7 +28,7 @@ class SubcategoryExport implements FromCollection,WithHeadings,ShouldAutoSize,Wi
         return [
             $data['id'],
             $data['subcategory_name'],
-            $data['subcategory_image'],
+            $data['sap_code'],
             $data['category_id'],
             $data['categories']['category_name'],
         ];
