@@ -105,13 +105,19 @@
             <div class="col-md-9">
                 <div class="input_section">
                   <label class="col-form-label">{!! trans('panel.category.fields.category_name') !!} <span class="text-danger"> *</span></label>
-            
+                  
+                  <div class="form-group has-default bmd-form-group">
+                    <input type="text" name="category_name" id="category_name" class="form-control" value="{!! old( 'category_name') !!}" maxlength="200" required>
+                    @if ($errors->has('category_name'))
+                    <div class="error"><p class="text-danger">{{ $errors->first('category_name') }}</p></div>
+                    @endif
+                  </div>
+                  <label class="col-form-label">SAP Code <span class="text-danger"> *</span></label>
                     <div class="form-group has-default bmd-form-group">
-                      <input type="text" name="category_name" id="category_name" class="form-control" value="{!! old( 'category_name') !!}" maxlength="200" required>
-                      @if ($errors->has('category_name'))
-                        <div class="error"><p class="text-danger">{{ $errors->first('category_name') }}</p></div>
+                      <input type="text" name="sap_code" id="sap_code" class="form-control" value="{!! old( 'sap_code') !!}" maxlength="200">
+                      @if ($errors->has('sap_code'))
+                        <div class="error"><p class="text-danger">{{ $errors->first('sap_code') }}</p></div>
                       @endif
-                   
                   </div>
                 </div>
               </div>
@@ -179,6 +185,7 @@
        success:function(data)
        {
         $('#category_name').val(data.category_name);
+        $('#sap_code').val(data.sap_code);
         if(data.category_image)
         {
           var image = data.category_image ;

@@ -726,6 +726,7 @@ Route::group(['middleware' => ['auth']], function () {
 
     //primary scheme
     Route::resource('primary_scheme', PrimarySchemeController::class);
+    Route::any('primary_scheme_template', [PrimarySchemeController::class, 'primary_scheme_template'])->name('primary_scheme.template');
     Route::post('primary_scheme-active', [PrimarySchemeController::class, 'active'])->name('primary_scheme.active');
     Route::any('primary_scheme-template', [PrimarySchemeController::class, 'template'])->name('primary_scheme.template');
     Route::any('primary_scheme-download', [PrimarySchemeController::class, 'download'])->name('primary_scheme.download');

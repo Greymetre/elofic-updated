@@ -424,7 +424,7 @@
                                     <input type="hidden">
                                     <input type="file" name="import_file" accept=".xls,.xlsx" />
                                  </span>
-                                 <a href="{{ URL::to('orderschemes-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.scheme.title_singular') !!}"><i class="material-icons">text_snippet</i></a>
+                                 <a href="{{ URL::to('primary_scheme_template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} {!! trans('panel.scheme.title_singular') !!}"><i class="material-icons">text_snippet</i></a>
                                  <a href="{{ URL::to('primary_scheme_report/template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} Group {!! trans('panel.scheme.title_singular') !!}"><i class="material-icons">description</i></a>
                                  @if( $schemes->exists && isset($schemes['primaryscheme_details']) )
                                  <a href="{{ URL::to('orderschemes-download') }}?id={{$schemes->id}}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.scheme.title') !!}"><i class="material-icons">cloud_download</i></a>
@@ -884,6 +884,7 @@
          // $('table.kvcodes-dynamic-rows-example tbody').html('');
          var schemeType = $(this).val();
          if (schemeType == 'grp_Qty') {
+            $('#tab_logic .group_type_th').removeClass('d-none');
             $('#tab_logic .category').html('Group');
             $('#tab_logic .sub-category').html('Min');
             $('#tab_logic .product').html('Max');
@@ -893,6 +894,7 @@
 
             $('#min_max').hide();
          } else if (schemeType == 'gift') {
+            $('#tab_logic .group_type_th').removeClass('d-none');
             $('#tab_logic .category').html('Group');
             $('#tab_logic .sub-category').html('Min');
             $('#tab_logic .product').html('Max');
@@ -902,6 +904,7 @@
             $('#min_max').hide();
          } else if (schemeType == 'Qty') {
             $('#min_max').show();
+            $('#tab_logic .group_type_th').addClass('d-none');
             $('#tab_logic .category').html('Category');
             $('#tab_logic .sub-category').html('Sub category');
             $('#tab_logic .product').html('Product');
@@ -911,6 +914,7 @@
 
          }else{
             $('#min_max').hide();
+            $('#tab_logic .group_type_th').addClass('d-none');
             $('#tab_logic .category').html('Category');
             $('#tab_logic .sub-category').html('Sub category');
             $('#tab_logic .product').html('Product');

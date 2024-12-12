@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\PrimarySchemeNormalTepmlate;
 use App\Exports\PrimarySchemeReportExport;
 use App\Exports\PrimarySchemeTepmlate;
 use App\Imports\PrimarySchemeImport;
@@ -425,5 +426,13 @@ class PrimarySchemeController extends Controller
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         return Excel::download(new PrimarySchemeTepmlate, 'schemesGroupTemplate.xlsx');
+    }
+
+    public function primary_scheme_template()
+    {
+        abort_if(Gate::denies('scheme_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new PrimarySchemeNormalTepmlate, 'schemesTemplate.xlsx');
     }
 }

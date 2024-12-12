@@ -112,9 +112,21 @@
                       <div class="error"><p class="text-danger">{{ $errors->first('subcategory_name') }}</p></div>
                     @endif
                   </div>
-                </div>
-           
+                </div>           
             </div>
+            <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">SAP Code<span class="text-danger"> *</span></label>
+                  <div class="form-group has-default bmd-form-group">
+                    <input type="text" name="sap_code" id="sap_code" class="form-control" value="{!! old( 'sap_code') !!}" maxlength="200" >
+                    @if ($errors->has('sap_code'))
+                    <div class="error">
+                      <p class="text-danger">{{ $errors->first('sap_code') }}</p>
+                    </div>
+                    @endif
+                  </div>
+                </div>
+              </div>
           <div class="col-md-6">
               <div class="input_section">
                 <label class="col-form-label">{!! trans('panel.subcategory.fields.category') !!}<span class="text-danger"> *</span></label>
@@ -201,6 +213,7 @@
        success:function(data)
        {
         $('#subcategory_name').val(data.subcategory_name);
+        $('#sap_code').val(data.sap_code);
         $("#category_id").append('<option value="'+data.category_id+'" selected="selected">'+data.category_name+'</option>');
         if(data.subcategory_image)
         {
