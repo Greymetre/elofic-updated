@@ -133,7 +133,7 @@
                 <th>Firm Name</th>
                 <th>Customer Type</th>
                 <th>Division</th>
-                <th>Dealer Code</th>
+                <th>BP code</th>
                 <th>Status</th>
               </thead>
               <tbody>

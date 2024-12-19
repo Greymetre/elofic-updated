@@ -74,6 +74,7 @@ use App\Http\Controllers\NewJoiningController;
 use App\Http\Controllers\ServiceBillController;
 use App\Http\Controllers\ServiceChargeProductsController;
 use App\Http\Controllers\FieldKonnectAppSettings;
+use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\PrimarySchemeController;
 use App\Http\Controllers\ResignationController;
 
@@ -198,6 +199,12 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('reports/customer_outstanting/upload', [ReportController::class, 'customer_outstanting_upload'])->name('reports.customer_outstanting.upload');
     Route::any('reports/customer_outstanting/download', [ReportController::class, 'customer_outstanting_download'])->name('reports.customer_outstanting.download');
     Route::any('reports/customer_outstanting', [ReportController::class, 'customer_outstanting'])->name('reports.customer_outstanting');
+
+    //Marketing
+    Route::get('marketings', [MarketingController::class, 'index'])->name('marketing.index');
+    Route::get('marketings/create', [MarketingController::class, 'create'])->name('marketing.create');
+    Route::get('marketings_template', [MarketingController::class, 'marketings_template'])->name('marketing.template');
+    Route::any('marketings_upload', [MarketingController::class, 'marketings_upload'])->name('marketing.upload');
 
     //Customers
     Route::resource('customertype', CustomerTypeController::class);

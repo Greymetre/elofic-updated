@@ -350,7 +350,7 @@ class DealerAppointmentController extends Controller
             $division = 'Pumps & Motors range';
             $logoPath = public_path('assets/img/certificate_logo2.png');
             $brand = 'Silver';
-        } else if ($appointment->division == 'FAN&APP') {
+        } else if ($appointment->division == 'FAN&APP' || $appointment->division == 'LIGHTING') {
             $division = 'Fans, Lighting and all range of Electrical';
             $logoPath = public_path('assets/img/certificate_logo_fan2.png');
             $brand = 'Bediya';
@@ -358,7 +358,7 @@ class DealerAppointmentController extends Controller
             $division = 'Agriculture Equipments range';
             $logoPath = public_path('assets/img/certificate_logo2.png');
             $brand = 'Silver';
-        } else if ($appointment->division == 'SERVECE') {
+        } else if ($appointment->division == 'SERVICE') {
             $division = 'Pumps, Motors & Solar Products Range';
             $logoPath = public_path('assets/img/certificate_logo2.png');
             $brand = 'SILVER CONSUMER ELECTRICALS PRIVATE LIMITED';
@@ -416,7 +416,7 @@ class DealerAppointmentController extends Controller
     {
         $currentDate = Carbon::now();
 
-        if ($divi == 'SERVECE') {
+        if ($divi == 'SERVICE') {
             $targetYear = $currentDate->year + 2;
             return "31 March $targetYear";
         } else {

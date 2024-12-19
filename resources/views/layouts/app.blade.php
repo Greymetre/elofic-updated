@@ -1512,6 +1512,37 @@
                </div>
             </li>
             @endif
+            @if(auth()->user()->can('marketing_access'))
+            <li class="nav-link {{ request()->is('marketings*') ? 'active' : '' }}">
+               <a class="collapsed hoveradd" data-toggle="collapse" href="#marketingMenu" aria-expanded="false">
+                  <i class="material-icons icon">local_convenience_store</i>
+                  <span>Marketing</span>
+                  <div class="d-none mobile_hide"> Marketing</div>
+               </a>
+               <div class="collapse" id="marketingMenu" style="">
+                  <ul class="navd">
+                     @if(auth()->user()->can('marketing_master_access'))
+                     <li class="nav-link-btn {{ request()->is('marketings*') ? 'active' : '' }}">
+                        <a class="hoveradd2" href="{{ url('marketings') }}">
+                           <i class="material-icons icon">add_business</i>
+                           <span>Marketing Master</span>
+                           <div class="d-none mobile_hide"> Marketing Master</div>
+                        </a>
+                     </li>
+                     @endif
+                     @if(auth()->user()->can('orderscheme'))
+                     <li class="nav-link-btn {{ request()->is('orderschemes*') ? 'active' : '' }}">
+                        <a class="hoveradd2" href="#">
+                           <i class="material-icons icon">flaky</i>
+                           <span>New Dealer/Distributor</span>
+                           <div class="d-none mobile_hide"> New Dealer/Distributor</div>
+                        </a>
+                     </li>
+                     @endif
+                  </ul>
+               </div>
+            </li>
+            @endif
             @if(auth()->user()->can('wallet_access'))
             <!-- <li class="nav-item ">
                         <a class="collapsed hoveradd" data-toggle="collapse" href="#walletMenu" aria-expanded="false">

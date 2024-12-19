@@ -1,0 +1,119 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\DataTables\MarketingDataTable;
+use App\Exports\MarketingMasterTemplate;
+use App\Imports\MarketingMasterImport;
+use App\Models\Marketing;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Gate;
+use Excel;
+
+class MarketingController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index(MarketingDataTable $dataTable, Request $request)
+    {
+        if ($request->ip() != '111.118.252.250') {
+            return view('work_in_progress');
+        }
+        $states = Marketing::latest()->get()->unique('state');
+        $event_districts = Marketing::latest()->get()->unique('event_district');
+        $event_under_names = Marketing::latest()->get()->unique('event_under_name');
+        $cities = Marketing::latest()->get()->unique('event_center');
+        $branchs = Marketing::latest()->get()->unique('branch');
+        $categories = Marketing::latest()->get()->unique('category_of_participant');
+        abort_if(Gate::denies('marketing_master_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        return $dataTable->render('marketing.index', compact('states','event_districts','event_under_names','cities','branchs','categories'));
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        return view('marketing.create');
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  \App\Models\Marketing  $marketing
+     * @return \Illuminate\Http\Response
+     */
+    public function show(Marketing $marketing)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  \App\Models\Marketing  $marketing
+     * @return \Illuminate\Http\Response
+     */
+    public function edit(Marketing $marketing)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Marketing  $marketing
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, Marketing $marketing)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Models\Marketing  $marketing
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Marketing $marketing)
+    {
+        //
+    }
+
+    public function marketings_template(Request $request)
+    {
+        abort_if(Gate::denies('marketing_master_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new MarketingMasterTemplate, 'Marketing Master.xlsx');
+    }
+
+    public function marketings_upload(Request $request) 
+    {
+      abort_if(Gate::denies('marketing_master_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        $googleDrivelink = $request->input('google_drivelink');
+        Excel::import(new MarketingMasterImport($googleDrivelink),request()->file('import_file'));
+        return redirect('marketings')->with('success', 'Data imported and updated successfully.');
+    }
+}

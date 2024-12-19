@@ -254,8 +254,31 @@ class LoginController extends Controller
 
                 $curl = curl_init();
 
+                // curl_setopt_array($curl, array(
+                //     CURLOPT_URL => 'http://sms.infisms.co.in/API/SendSMS.aspx?UserID=SILCLN&UserPassword=sil%24clnco&PhoneNumber=' . $username . '&Text=%22' . $otp . '%22is%20your%20OTP%20to%20login%20into%20the%20SILVER%20FAMILY%20App.%20Let%27s%20grow%20together%20and%20achieve%20more.%20From%20SILVER%20CONSUMER%20ELECTRICALS%20PRIVATE%20LIMITED&SenderId=SILCCD&AccountType=2&MessageType=0',
+                //     CURLOPT_RETURNTRANSFER => true,
+                //     CURLOPT_ENCODING => '',
+                //     CURLOPT_MAXREDIRS => 10,
+                //     CURLOPT_TIMEOUT => 0,
+                //     CURLOPT_FOLLOWLOCATION => true,
+                //     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                //     CURLOPT_CUSTOMREQUEST => 'GET',
+                //     CURLOPT_HTTPHEADER => array(
+                //         'Cookie: ASP.NET_SessionId=ti1fkgsldce1g3rn4l5ee4e1'
+                //     ),
+                // ));
+
                 curl_setopt_array($curl, array(
-                    CURLOPT_URL => 'http://sms.infisms.co.in/API/SendSMS.aspx?UserID=SILCLN&UserPassword=sil%24clnco&PhoneNumber=' . $username . '&Text=%22' . $otp . '%22is%20your%20OTP%20to%20login%20into%20the%20SILVER%20FAMILY%20App.%20Let%27s%20grow%20together%20and%20achieve%20more.%20From%20SILVER%20CONSUMER%20ELECTRICALS%20PRIVATE%20LIMITED&SenderId=SILCCD&AccountType=2&MessageType=0',
+                    CURLOPT_URL => 'http://sms.infisms.co.in/API/SendSMS.aspx?' . http_build_query([
+                        'UserID' => 'SILCLN',
+                        'UserPassword' => 'sil$clnco',
+                        'PhoneNumber' => $username,
+                        'Text' => $otp, // Placeholder value
+                        'SenderId' => 'SILCCD',
+                        'TemplateID' => '1707163998418408364', // Replace with your specific Template ID
+                        'AccountType' => 2,
+                        'MessageType' => 0
+                    ]),
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_ENCODING => '',
                     CURLOPT_MAXREDIRS => 10,

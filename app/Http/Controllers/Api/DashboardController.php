@@ -671,7 +671,7 @@ class DashboardController extends Controller
         $branches = Branch::where('active', 'Y')->select('id', 'branch_name')->get();
         $divisions = Division::where('active', 'Y')->select('id', 'division_name')->get();
 
-        return response()->json(['status' => 'success', 'data' => $data, 'Branches' => $branches, 'divisions' => $divisions], 200);
+        return response()->json(['status' => 'success', 'data' => $data, 'Branches' => $branches, 'divisions' => $divisions, 'user_status' => $login_user->active], 200);
     }
 
     //field connect version
@@ -719,5 +719,11 @@ class DashboardController extends Controller
         ];
 
         return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], 200);
+    }
+
+    public function getUserSataus(Request $request)
+    {
+        $login_user = $request->user();
+        return response()->json(['status' => 'success', 'user_status' => $login_user->active], 200);
     }
 }
