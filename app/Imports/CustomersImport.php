@@ -50,13 +50,13 @@ class CustomersImport implements ToCollection, WithValidation, WithHeadingRow, W
     $customerdetails = collect([]);
     $addressdetails = collect([]);
     $attachments = collect([]);
-
+     
     foreach ($rows as $ky=>$row) {
-      if (strlen(preg_replace('/\s+/', '', $row['mobile'])) == 10) {
+      if (isset($row['mobile']) && strlen(preg_replace('/\s+/', '', $row['mobile'])) == 10) {
         $row['mobile'] = '91' . preg_replace('/\s+/', '', $row['mobile']);
       }
 
-      if (is_numeric($row['creation_date'])) {
+      if (isset($row['creation_date']) && is_numeric($row['creation_date'])) {
         $excelDate = $row['creation_date'] - 25569; // Adjust for Excel's epoch
         $unixTimestamp = strtotime('+' . $excelDate . ' days', strtotime('1970-01-01'));
         $row['creation_date'] = !empty($row['creation_date']) ? Carbon::createFromTimestamp($unixTimestamp)->toDateString() : '';
@@ -160,7 +160,7 @@ class CustomersImport implements ToCollection, WithValidation, WithHeadingRow, W
           'name' => !empty($row['firm_name']) ? ucfirst($row['firm_name']) : '',
           'first_name' => !empty($row['first_name']) ? ucfirst($row['first_name']) : '',
           'last_name' => !empty($row['last_name']) ? ucfirst($row['last_name']) : '',
-          'mobile' => (string)$row['mobile'],
+          'mobile' =>  !empty($row['mobile']) ? (string)$row['mobile'] : '',
           'email' => !empty($row['email']) ? $row['email'] : null,
           'working_status' => !empty($row['working_status']) ? $row['working_status'] : null,
           'creation_date' => !empty($row['creation_date']) ? $row['creation_date'] : null,

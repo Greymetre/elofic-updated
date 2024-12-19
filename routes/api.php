@@ -133,6 +133,7 @@ Route::group(['middleware' => ['auth:customers']], function () {
 Route::group(['middleware' => ['auth:users']], function () {
     // Dashboard
     Route::any('dashboard', [DashboardController::class, 'dashboard']);
+    Route::any('getUserSataus', [DashboardController::class, 'getUserSataus']);
     Route::any('pendingCounts', [DashboardController::class, 'pendingCounts']);
     Route::any('getUserDashboardData', [DashboardController::class, 'getUserDashboardData']);
     Route::any('getSarthiPoints', [DashboardController::class, 'getSarthiPoints']);

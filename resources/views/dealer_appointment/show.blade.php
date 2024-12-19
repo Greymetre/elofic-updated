@@ -1004,7 +1004,7 @@
 
                 <div class="row">
                   <div class="col-md-6">
-                    Dealer Code -
+                    BP code -
                   </div>
                   <div class="col-md-6">
                     {{$dealerAppointment->appointment_kyc_detail->dealer_code??'-'}}
@@ -1176,14 +1176,14 @@
             Swal.fire({
               title: "Are You Sure, You Want To Approve This Appointment?",
               input: 'text',
-              inputPlaceholder: 'Enter Dealer code',
+              inputPlaceholder: 'Enter BP code',
               showDenyButton: true,
               showCancelButton: true,
               confirmButtonText: "YES",
               denyButtonText: `Don't`,
               inputValidator: (value) => {
                 if (!value) {
-                  return 'Dealer code1 field is required';
+                  return 'BP code1 field is required';
                 }
               }
             }).then((result) => {

@@ -220,7 +220,7 @@ class RedemptionController extends Controller
                 $column = 'gift_recived_date';
             }
         }
-        if ($redemption->redeem_mode == '2') {
+        if ($request->status == '0' || $request->status == '2' || $redemption->redeem_mode == '2') {
             $updateStatus = Redemption::where('id', $request->id)->update(['status' => $request->status, 'dispatch_number' => $request->dispatch_number]);
         }else{
             $updateStatus = Redemption::where('id', $request->id)->update(['status' => $request->status, 'dispatch_number' => $request->dispatch_number, $column => now()->toDateString()]);
@@ -246,6 +246,8 @@ class RedemptionController extends Controller
                         $status = 'Dispatch';
                     } elseif ($request->status == '4') {
                         $status = 'Success';
+                    } elseif ($request->status == '0') {
+                        $status = 'Pending';
                     }
                 }
             }
