@@ -78,7 +78,6 @@ class MarketingMasterImport implements ToCollection, WithValidation, WithHeading
             'mob_no_of_participant' => 'required|unique:marketings,mob_no_of_participant',
             'branch' => 'required|exists:branches,branch_name',
             'state' => 'required|exists:states,state_name',
-            'state' => 'required|exists:states,state_name',
             'category_of_participant' => 'required|in:Plumber,Mechanic,Village influencer,Retailer',
         ];
         return $rules;

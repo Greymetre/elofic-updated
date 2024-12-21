@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\DataTables\DealerAppointmentDataTable;
 use App\DataTables\MarketingDataTable;
+use App\DataTables\MarketingDealerAppointmentDataTable;
+use App\Exports\MarketingMasterExport;
 use App\Exports\MarketingMasterTemplate;
 use App\Imports\MarketingMasterImport;
+use App\Models\DealerAppointment;
 use App\Models\Marketing;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -20,17 +24,15 @@ class MarketingController extends Controller
      */
     public function index(MarketingDataTable $dataTable, Request $request)
     {
-        if ($request->ip() != '111.118.252.250') {
-            return view('work_in_progress');
-        }
         $states = Marketing::latest()->get()->unique('state');
         $event_districts = Marketing::latest()->get()->unique('event_district');
         $event_under_names = Marketing::latest()->get()->unique('event_under_name');
         $cities = Marketing::latest()->get()->unique('event_center');
         $branchs = Marketing::latest()->get()->unique('branch');
         $categories = Marketing::latest()->get()->unique('category_of_participant');
+        $branding_team_members = Marketing::latest()->get()->unique('branding_team_member');
         abort_if(Gate::denies('marketing_master_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return $dataTable->render('marketing.index', compact('states','event_districts','event_under_names','cities','branchs','categories'));
+        return $dataTable->render('marketing.index', compact('states','event_districts','event_under_names','cities','branchs','categories','branding_team_members'));
     }
 
     /**
@@ -99,14 +101,39 @@ class MarketingController extends Controller
         //
     }
 
+    /**
+     * Exports and downloads the Marketing Master template as an Excel file.
+     *
+     * This function checks if the user has permission to access the marketing
+     * master template. If denied, it aborts with a 403 Forbidden response.
+     * Otherwise, it clears any existing output buffers, starts a new output
+     * buffer, and returns the download of the 'Marketing Master.xlsx' file.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
+
     public function marketings_template(Request $request)
     {
         abort_if(Gate::denies('marketing_master_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        return Excel::download(new MarketingMasterTemplate, 'Marketing Master.xlsx');
+        return Excel::download(new MarketingMasterTemplate, 'Marketing Master Template.xlsx');
     }
 
+    /**
+     * Uploads and imports the Marketing Master data from a Google Drive link
+     * or an Excel file.
+     *
+     * This function checks if the user has permission to upload the marketing
+     * master data. If denied, it aborts with a 403 Forbidden response.
+     * Otherwise, it clears any existing output buffers, starts a new output
+     * buffer, and imports the data from the Google Drive link or the Excel
+     * file into the Marketing model.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function marketings_upload(Request $request) 
     {
       abort_if(Gate::denies('marketing_master_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
@@ -115,5 +142,38 @@ class MarketingController extends Controller
         $googleDrivelink = $request->input('google_drivelink');
         Excel::import(new MarketingMasterImport($googleDrivelink),request()->file('import_file'));
         return redirect('marketings')->with('success', 'Data imported and updated successfully.');
+    }
+
+    /**
+     * Downloads the Marketing Master data as an Excel file.
+     *
+     * This function checks if the user has permission to download the marketing
+     * master data. If denied, it aborts with a 403 Forbidden response.
+     * Otherwise, it clears any existing output buffers, starts a new output
+     * buffer, and returns the download of the 'Marketing Master.xlsx' file.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
+    public function download(Request $request)
+    {
+        abort_if(Gate::denies('marketing_master_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new MarketingMasterExport($request), 'Marketing Master.xlsx');
+    }
+
+    public function marketings_new_dealer(MarketingDealerAppointmentDataTable $dataTable, Request $request)
+    {
+        if($request->ip() != '111.118.252.250'){
+            return view('work_in_progress');
+        }
+        $divisions = DealerAppointment::groupBy('division')->pluck('division');
+        return $dataTable->render('marketing.new_dealer', compact('divisions'));
+    }
+
+    public function dealer_board_installation(Request $request)
+    {
+        dd($request->all());
     }
 }

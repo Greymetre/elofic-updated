@@ -594,7 +594,7 @@ class DashboardController extends Controller
                     $firstDateFormatted = $firstDate->toDateString();
                     $lastDateFormatted = $lastDate->toDateString();
                     
-                    $achievement = PrimarySales::whereIn('emp_code', $all_emp_codes)->whereIn('division', ['PUMP', 'MOTOR'])->where('invoice_date', '>=', $firstDateFormatted)->where('invoice_date', '<=', $lastDateFormatted);
+                    $achievement = PrimarySales::whereIn('emp_code', $all_emp_codes)->where('invoice_date', '>=', $firstDateFormatted)->where('invoice_date', '<=', $lastDateFormatted);
 
                     if ($request->branch_id && !empty($request->branch_id)) {
                         $selected_branch = Branch::find($request->branch_id);
@@ -614,7 +614,7 @@ class DashboardController extends Controller
 
                     $firstDateFormatted = $firstDate->toDateString();
                     $lastDateFormatted = $lastDate->toDateString();
-                    $achievement = PrimarySales::whereIn('emp_code', $all_emp_codes)->whereIn('division', ['PUMP', 'MOTOR'])->where('invoice_date', '>=', $firstDateFormatted)->where('invoice_date', '<=', $lastDateFormatted);
+                    $achievement = PrimarySales::whereIn('emp_code', $all_emp_codes)->where('invoice_date', '>=', $firstDateFormatted)->where('invoice_date', '<=', $lastDateFormatted);
                     if ($request->branch_id && !empty($request->branch_id)) {
                         $selected_branch = Branch::find($request->branch_id);
                         $achievement->where(['final_branch' => $selected_branch->branch_name]);
@@ -627,8 +627,7 @@ class DashboardController extends Controller
                         $data['achievement'] = "0";
                     }
                 } else {
-                    $achievement = PrimarySales::whereIn('division', ['PUMP', 'MOTOR'])
-                    ->where('invoice_date', '>=', date('Y-m') . '-01')
+                    $achievement = PrimarySales::where('invoice_date', '>=', date('Y-m') . '-01')
                     ->where('invoice_date', '<=', date('Y-m') . '-31')
                     ->whereIn('emp_code', User::where('sales_type', 'Primary')->pluck('employee_codes'))
                     ->whereIn('emp_code', $all_emp_codes);
