@@ -203,8 +203,11 @@ Route::group(['middleware' => ['auth']], function () {
     //Marketing
     Route::get('marketings', [MarketingController::class, 'index'])->name('marketing.index');
     Route::get('marketings/create', [MarketingController::class, 'create'])->name('marketing.create');
+    Route::any('marketings/download', [MarketingController::class, 'download'])->name('marketing.download');
     Route::get('marketings_template', [MarketingController::class, 'marketings_template'])->name('marketing.template');
     Route::any('marketings_upload', [MarketingController::class, 'marketings_upload'])->name('marketing.upload');
+    Route::any('marketings_new_dealer', [MarketingController::class, 'marketings_new_dealer'])->name('marketing.new_dealer');
+    Route::any('dealer-board-installation', [MarketingController::class, 'dealer_board_installation'])->name('marketing.dealer_board_installation');
 
     //Customers
     Route::resource('customertype', CustomerTypeController::class);
@@ -988,6 +991,7 @@ Route::any('changeAppointmentStatus', [AjaxController::class, 'changeAppointment
 Route::any('getWorkDoneTime', [AjaxController::class, 'getWorkDoneTime']);
 Route::any('getPrimarySachme', [AjaxController::class, 'getPrimarySachme']);
 Route::any('getExpenseCount', [AjaxController::class, 'getExpenseCount']);
+Route::any('marketing/getCounts', [AjaxController::class, 'marketingGetCounts'])->name('marketing.getCounts');
 
 
 

@@ -48,7 +48,7 @@ class RedemptionImport implements ToCollection, WithValidation, WithHeadingRow, 
                 }
                 $updateStatus = Redemption::where('id', $row['redemption_id'])->update(['status' => $row['status'], 'invoice_number' => $row['invoice_number'], 'remark' => $row['details'], 'updated_at' => $update_at]);
             } else if ($redemptio_is->redeem_mode == '1') {
-                dd($row);
+                // dd($row);
                 if ($row['approve_date'] && $row['approve_date'] != null && $row['approve_date'] != '') {
                     $unixTimestamp = ($row['approve_date'] - 25569) * 86400;
                     $carbonDate = Carbon::createFromTimestamp($unixTimestamp);

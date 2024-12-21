@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CustomerDetails, DealerAppointment, DealerAppointmentKyc, EndUser, Expenses, GiftModel, GiftSubcategory, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, PrimaryScheme, Redemption, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation};
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CustomerDetails, DealerAppointment, DealerAppointmentKyc, EndUser, Expenses, GiftModel, GiftSubcategory, Marketing, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, PrimaryScheme, Redemption, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation};
 use App\Models\UserLiveLocation;
 use App\Models\UserActivity;
 use App\Http\Controllers\SendNotifications;
@@ -61,23 +61,22 @@ class AjaxController extends Controller
     {
         try {
             $district = $request->input('district_id');
-            if( is_array($district)){
+            if (is_array($district)) {
                 $cities = City::where(function ($query) use ($district) {
                     if (isset($district) && count($district) > 0) {
                         $query->whereIn('district_id', $district);
                     }
                     $query->where('active', '=', 'Y');
                 })
-                ->select('id', 'city_name')->orderBy('city_name', 'asc')->get();
-            }else{
+                    ->select('id', 'city_name')->orderBy('city_name', 'asc')->get();
+            } else {
                 $cities = City::where(function ($query) use ($district) {
                     if (isset($district)) {
                         $query->where('district_id', '=', $district);
                     }
                     $query->where('active', '=', 'Y');
                 })
-                ->select('id', 'city_name')->orderBy('city_name', 'asc')->get();
-
+                    ->select('id', 'city_name')->orderBy('city_name', 'asc')->get();
             }
             return response()->json($cities);
         } catch (\Exception $e) {
@@ -140,8 +139,8 @@ class AjaxController extends Controller
     {
         try {
             $user_id = $request->input('user_id');
-            $data = User::with('reportinginfo','getdesignation','userinfo')->where('id', '=', $user_id)
-                ->select('id', 'name', 'mobile','designation_id','reportingid','employee_codes','branch_id')
+            $data = User::with('reportinginfo', 'getdesignation', 'userinfo')->where('id', '=', $user_id)
+                ->select('id', 'name', 'mobile', 'designation_id', 'reportingid', 'employee_codes', 'branch_id')
                 ->first();
 
             return response()->json($data);
@@ -267,7 +266,7 @@ class AjaxController extends Controller
             $userinfo = User::where('id', '=', $login_userid)->first();
             $data = User::whereDoesntHave('roles', function ($query) {
                 $query->where('id', 29);
-            })->where(function ($query) use ($beat_id, $userids, $payroll,$userinfo,$branch_id,$division_id) {
+            })->where(function ($query) use ($beat_id, $userids, $payroll, $userinfo, $branch_id, $division_id) {
                 if (isset($beat_id)) {
                     $query->whereHas('userbeats', function ($query) use ($beat_id) {
                         $query->where('beat_id', '=', $beat_id);
@@ -331,20 +330,20 @@ class AjaxController extends Controller
                     if (isset($state)) {
                         $query->where('state_id', '=', $state);
                     }
-                    if(is_array($district)){
+                    if (is_array($district)) {
                         if (count($district) > 0) {
                             $query->whereIn('district_id', $district);
                         }
-                    }else{
+                    } else {
                         if (isset($district)) {
                             $query->where('district_id', '=', $district);
                         }
                     }
-                    if(is_array($city)){
+                    if (is_array($city)) {
                         if (count($city) > 0) {
                             $query->whereIn('city_id', $city);
                         }
-                    }else{
+                    } else {
                         if (isset($city)) {
                             $query->where('city_id', '=', $city);
                         }
@@ -1405,15 +1404,15 @@ class AjaxController extends Controller
     public function changeAppointmentStatus(Request $request)
     {
         if ($request->status == '3') {
-            $update = DealerAppointment::where('id', $request->appo_id)->update(['approval_status' => $request->status,'ho_approve'=>auth()->user()->id]);
+            $update = DealerAppointment::where('id', $request->appo_id)->update(['approval_status' => $request->status, 'ho_approve' => auth()->user()->id, 'ho_approve_date' => date('Y-m-d')]);
             DealerAppointmentKyc::updateOrCreate(
                 ['appointment_id' => $request->appo_id],
                 ['dealer_code' => $request->dealer_code]
             );
         } else {
             if ($request->status == '1') {
-            $update = DealerAppointment::where('id', $request->appo_id)->update(['approval_status' => $request->status,'sales_approve'=>auth()->user()->id]);
-            }else{
+                $update = DealerAppointment::where('id', $request->appo_id)->update(['approval_status' => $request->status, 'sales_approve' => auth()->user()->id]);
+            } else {
                 $update = DealerAppointment::where('id', $request->appo_id)->update(['approval_status' => $request->status]);
             }
         }
@@ -1450,12 +1449,12 @@ class AjaxController extends Controller
 
     public function getExpenseCount(Request $request)
     {
-        if($request->end_date && !empty($request->end_date)){
+        if ($request->end_date && !empty($request->end_date)) {
             $data['pending_count'] = Expenses::where('checker_status', '0')->where('date', '>=', $request->start_date)->where('date', '<=', $request->end_date)->count();
             $data['approve_count'] = Expenses::where('checker_status', '1')->where('date', '>=', $request->start_date)->where('date', '<=', $request->end_date)->count();
             $data['reject_count'] = Expenses::where('checker_status', '2')->where('date', '>=', $request->start_date)->where('date', '<=', $request->end_date)->count();
             $data['checked_count'] = Expenses::where('checker_status', '3')->where('date', '>=', $request->start_date)->where('date', '<=', $request->end_date)->count();
-        }else{
+        } else {
             $data['pending_count'] = Expenses::where('checker_status', '0')->where('date', '>=', $request->start_date)->count();
             $data['approve_count'] = Expenses::where('checker_status', '1')->where('date', '>=', $request->start_date)->count();
             $data['reject_count'] = Expenses::where('checker_status', '2')->where('date', '>=', $request->start_date)->count();
@@ -1463,5 +1462,62 @@ class AjaxController extends Controller
         }
 
         return response()->json(['status' => 'success', 'data' => $data]);
+    }
+
+
+    public function marketingGetCounts(Request $request)
+    {
+        $data = Marketing::query();
+
+        if ($request->state) {
+            $data->where('state', $request->state);
+        }
+
+        if ($request->district) {
+            $data->where('event_district', $request->district);
+        }
+
+        if ($request->event_under) {
+            $data->where('event_under_name', $request->event_under);
+        }
+
+        if ($request->branch) {
+            $data->where('branch', $request->branch);
+        }
+
+        if ($request->event_center) {
+            $data->where('event_center', $request->event_center);
+        }
+
+        if ($request->category_of_participant) {
+            $data->where('category_of_participant', $request->category_of_participant);
+        }
+
+        if ($request->branding_team_member != null && $request->branding_team_member != '') {
+            $data->where('branding_team_member', $request->branding_team_member);
+        }
+
+        if ($request->start_date) {
+            $data->where('event_date', '>=', $request->start_date);
+        }
+
+        if ($request->end_date) {
+            $data->where('event_date', '<=', $request->end_date);
+        }
+
+        // Clone the query for independent counts
+        $total = $data->count();
+        $plumber_count = (clone $data)->where('category_of_participant', 'Plumber')->count();
+        $mechanic_count = (clone $data)->where('category_of_participant', 'Mechanic')->count();
+        $village_influencer_count = (clone $data)->where('category_of_participant', 'Village influencer')->count();
+        $retailer_count = (clone $data)->where('category_of_participant', 'Retailer')->count();
+
+        return response()->json([
+            'total' => $total,
+            'plumber_count' => $plumber_count,
+            'mechanic_count' => $mechanic_count,
+            'village_influencer_count' => $village_influencer_count,
+            'retailer_count' => $retailer_count,
+        ]);
     }
 }

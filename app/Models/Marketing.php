@@ -9,5 +9,11 @@ class Marketing extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['event_date','event_center','place_of_participant','event_district','state','event_under_type','event_under_name','branch','responsible_for_event','branding_team_member','name_of_participant','category_of_participant','mob_no_of_participant','google_drivelink', 'updated_at'];
+    protected $fillable = ['event_date','event_center','place_of_participant','event_district','state','event_under_type','event_under_name','branch','responsible_for_event','branding_team_member','name_of_participant','category_of_participant','mob_no_of_participant','google_drivelink','created_by', 'created_at', 'updated_at'];
+
+
+    public function createdByName()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 }

@@ -18,6 +18,7 @@ use Validator;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class DealerAppointmentController extends Controller
 {
@@ -31,7 +32,7 @@ class DealerAppointmentController extends Controller
         })->where('active', 'Y')->whereIn('id', $user_ids)->select('id', 'name')->orderBy('name', 'asc')->get();
         $pageSize = $request->input('pageSize');
         $all_status = [['id' => '0', 'name' => 'Pending'], ['id' => '1', 'name' => 'Approved By Sales Team'], ['id' => '2', 'name' => 'Approved By Account'], ['id' => '3', 'name' => 'Approved By HO'], ['id' => '4', 'name' => 'Rejected']];
-        $db_data = DealerAppointment::with('branch_details', 'district_details', 'city_details', 'appointment_kyc_detail', 'createdbyname')->whereIn('created_by', $user_ids);
+        $db_data = DealerAppointment::with('media','branch_details', 'district_details', 'city_details', 'appointment_kyc_detail', 'createdbyname')->whereIn('created_by', $user_ids);
 
         if ($request->startdate && $request->startdate != '' && $request->startdate != NULL && $request->enddate && $request->enddate != '' && $request->enddate != NULL) {
 
@@ -77,6 +78,7 @@ class DealerAppointmentController extends Controller
                     'firm_name' => isset($value['firm_name']) ? $value['firm_name'] : '',
                     'place' => isset($value['place']) ? $value['place'] : '',
                     'division' => isset($value['division']) ? $value['division'] : '',
+                    'certificate' => $value->getMedia('certificate')->count() > 0 && Storage::disk('s3')->exists($value->getMedia('certificate')[0]->getPath()) ? Storage::disk('s3')->url($value->getMedia('certificate')[0]->getPath()) : ''
                 ]);
             }
         }
@@ -139,11 +141,14 @@ class DealerAppointmentController extends Controller
                     'manufacture_turn_over_2' => isset($value['manufacture_turn_over_2']) ? $value['manufacture_turn_over_2'] : '',
                     'approval_status' => isset($value['approval_status']) ? $value['approval_status'] : '0',
                     'bm_remark' => isset($value['bm_remark']) ? $value['bm_remark'] : '',
+                    'certificate' => $value->getMedia('certificate')->count() > 0 && Storage::disk('s3')->exists($value->getMedia('certificate')[0]->getPath()) ? Storage::disk('s3')->url($value->getMedia('certificate')[0]->getPath()) : '',
                 ];
             }
+            return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], 200);
+        }else{
+            return response()->json(['status' => 'error', 'message' => 'Appointment not found.'], 404);
         }
 
-        return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], 200);
     }
 
     public function getappointmentsPDF(Request $request)

@@ -1530,9 +1530,9 @@
                         </a>
                      </li>
                      @endif
-                     @if(auth()->user()->can('orderscheme'))
-                     <li class="nav-link-btn {{ request()->is('orderschemes*') ? 'active' : '' }}">
-                        <a class="hoveradd2" href="#">
+                     @if(auth()->user()->can('marketing_new_dealer_access'))
+                     <li class="nav-link-btn {{ request()->is('marketings_new_dealer*') ? 'active' : '' }}">
+                        <a class="hoveradd2" href="{{ url('marketings_new_dealer') }}">
                            <i class="material-icons icon">flaky</i>
                            <span>New Dealer/Distributor</span>
                            <div class="d-none mobile_hide"> New Dealer/Distributor</div>

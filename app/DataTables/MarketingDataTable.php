@@ -3,6 +3,7 @@
 namespace App\DataTables;
 
 use App\Models\Marketing;
+use Illuminate\Http\Request;
 use Yajra\DataTables\Html\Button;
 use Yajra\DataTables\Html\Column;
 use Yajra\DataTables\Html\Editor\Editor;
@@ -21,7 +22,7 @@ class MarketingDataTable extends DataTable
             ->addIndexColumn()
             ->editColumn('action', function ($data) {
                 $btn = '';
-                
+
                 if (auth()->user()->can(['marketing_master_show'])) {
                     $btn .= '<a href="' . route('dealer-appointment.show', $data->id) . '" class="btn btn-info btn-just-icon btn-sm" title="Show Appointment Form" ><i class="material-icons">visibility</i></a>';
                 }
@@ -39,9 +40,47 @@ class MarketingDataTable extends DataTable
      * @param \App\Coupon $model
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function query(Marketing $model)
+    public function query(Marketing $model, Request $request)
     {
-        return $model->latest()->newQuery();
+        $data = $model->query();
+
+        if ($request->state != null && $request->state != '') {
+            $data->where('state', $request->state);
+        }
+
+        if ($request->district != null && $request->district != '') {
+            $data->where('event_district', $request->district);
+        }
+
+        if ($request->event_under != null && $request->event_under != '') {
+            $data->where('event_under_name', $request->event_under);
+        }
+
+        if ($request->branch != null && $request->branch != '') {
+            $data->where('branch', $request->branch);
+        }
+
+        if ($request->event_center != null && $request->event_center != '') {
+            $data->where('event_center', $request->event_center);
+        }
+
+        if ($request->category_of_participant != null && $request->category_of_participant != '') {
+            $data->where('category_of_participant', $request->category_of_participant);
+        }
+
+        if ($request->branding_team_member != null && $request->branding_team_member != '') {
+            $data->where('branding_team_member', $request->branding_team_member);
+        }
+
+        if ($request->start_date != null && $request->start_date != '') {
+            $data->where('event_date', '>=', $request->start_date);
+        }
+
+        if ($request->end_date != null && $request->end_date != '') {
+            $data->where('event_date', '<=', $request->end_date);
+        }
+
+        return $data->latest();
     }
 
     /**
