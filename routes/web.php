@@ -208,6 +208,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('marketings_upload', [MarketingController::class, 'marketings_upload'])->name('marketing.upload');
     Route::any('marketings_new_dealer', [MarketingController::class, 'marketings_new_dealer'])->name('marketing.new_dealer');
     Route::any('dealer-board-installation', [MarketingController::class, 'dealer_board_installation'])->name('marketing.dealer_board_installation');
+    Route::any('dealer-welcome-kit', [MarketingController::class, 'dealer_welcome_kit'])->name('marketing.dealer_welcome_kit');
+    Route::any('marketing-dealer-appointment/download', [MarketingController::class, 'new_dealer_download'])->name('marketing.new_dealer_download');
 
     //Customers
     Route::resource('customertype', CustomerTypeController::class);

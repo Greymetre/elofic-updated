@@ -22,6 +22,37 @@ class MarketingDealerAppointmentDataTable extends DataTable
             ->editColumn('appointment_date', function ($data) {
                 return isset($data->appointment_date) ? date('d M Y', strtotime($data->appointment_date)) : '';
             })
+            ->editColumn('ho_approve_date', function ($data) {
+                return isset($data->ho_approve_date) ? date('d M Y', strtotime($data->ho_approve_date)) : '';
+            })
+            ->editColumn('board_install_date', function ($data) {
+                return isset($data->board_install_date) ? date('d M Y', strtotime($data->board_install_date)) : '';
+            })
+            ->editColumn('welcome_kit_date', function ($data) {
+                return isset($data->welcome_kit_date) ? date('d M Y', strtotime($data->welcome_kit_date)) : '';
+            })
+            ->editColumn('color', function ($data) {
+                if($data->dealer_board == '0'){
+                    return '<span class="badge badge-danger" style="padding: 7px 20px">Red</span>';
+                }elseif($data->dealer_board == '1'){
+                    $approved_date = $data->ho_approve_date;
+                    $board_installation_date = $data->board_install_date;
+                    if($approved_date != null && $board_installation_date != null){
+                        //Check the day between approved date and board installation date
+                        $approved_date = date('Y-m-d', strtotime($approved_date));
+                        $board_installation_date = date('Y-m-d', strtotime($board_installation_date));
+                        $diff = abs(strtotime($approved_date) - strtotime($board_installation_date));
+                        $days = floor($diff / (60 * 60 * 24));
+                        if($days <= 7){
+                            return '<span class="badge badge-success">Green</span>';
+                        }else{
+                            return '<span class="badge badge-danger">Red</span>';
+                        }
+                    }else{
+                        return '<span class="badge badge-danger">Red</span>';
+                    }
+                }
+            })
             ->editColumn('certificate', function ($data) {
                 if($data->getMedia('certificate')->count() > 0 && Storage::disk('s3')->exists($data->getMedia('certificate')[0]->getPath())){
                     return '<a target="_blank" href="'.$data->getMedia('certificate')[0]->getFullUrl().'" class="btn btn-success btn-just-icon btn-sm" title="Edit Appointment Form" ><i class="material-icons">card_membership</i></a>';
@@ -47,7 +78,7 @@ class MarketingDealerAppointmentDataTable extends DataTable
             })
             ->editColumn('welcome_kit', function ($data) {
                 if($data->welcome_kit == '0'){
-                    return '<span class="badge badge-warning">Pending</span>';
+                    return '<button type="button" class="btn btn-warning btn-sm welcome-kit-btn" data-id="'.$data->id.'" data-bs-toggle="modal" data-bs-target="#welcomeKitModal">Pending</button>';
                 }elseif($data->welcome_kit == '1'){
                     return '<span class="badge badge-dark">Done</span>';
                 }
@@ -76,7 +107,7 @@ class MarketingDealerAppointmentDataTable extends DataTable
                 return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">'.$btn.'</div>';
             })
 
-            ->rawColumns(['appointment_date', 'action','createdbyname.name','approval_status','certificate','welcome_kit','dealer_board']);
+            ->rawColumns(['appointment_date', 'action','createdbyname.name','approval_status','certificate','welcome_kit','dealer_board','color','ho_approve_date','board_install_date','welcome_kit_date']);
     }
 
     /**
