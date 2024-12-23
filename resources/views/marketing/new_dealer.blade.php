@@ -14,8 +14,8 @@
           <h4 class="card-title ">New Dealer/Distributor {!! trans('panel.global.list') !!}
             <span class="">
               <div class="btn-group header-frm-btn">
-                @if(auth()->user()->can(['dealer_appointment_download']))
-                <form method="POST" action="{{ URL::to('/dealer-appointment/download') }}" class="form-horizontal">
+                @if(auth()->user()->can(['marketing_dealer_appointment_download']))
+                <form method="POST" action="{{ URL::to('/marketing-dealer-appointment/download') }}" class="form-horizontal">
                   @csrf
                   <div class="d-flex flex-wrap flex-row">
                     {{-- <div class="p-2" style="width:160px;">
@@ -68,13 +68,13 @@
                     </div> -->
         <div class="p-2" style="width:160px;"><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
         <div class="p-2" style="width:160px;"><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
-        <!-- <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Dealer Appointment"><i class="material-icons">cloud_download</i></button></div> -->
+        <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Dealer Appointment"><i class="material-icons">cloud_download</i></button></div>
       </div>
       </form>
       @endif
 
       <div class="next-btn">
-        <a class="btn btn-just-icon btn-theme" href="{{url('/dealer-appointment-form')}}" title="{!!  trans('panel.global.add') !!} Dealer Appointment"><i class="material-icons">add</i></a>
+        <!-- <a class="btn btn-just-icon btn-theme" href="{{url('/dealer-appointment-form')}}" title="{!!  trans('panel.global.add') !!} Dealer Appointment"><i class="material-icons">add</i></a> -->
       </div>
     </div>
     </span>
@@ -137,6 +137,10 @@
           <th>Division</th>
           <th>BP code</th>
           <th>Status</th>
+          <th>Approve Date</th>
+          <th>Board Installation Dtae</th>
+          <th>Welcome Kit Dtae</th>
+          <th>Color</th>
         </thead>
         <tbody>
         </tbody>
@@ -147,6 +151,32 @@
   </div>
   </div>
 
+  <div class="modal fade" id="welcomeKitModal" tabindex="-1" aria-labelledby="welcomeKitModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="welcomeKitModalLabel">Welcome kit</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form action="{{url('/dealer-welcome-kit')}}" method="POST" enctype="multipart/form-data">
+          @csrf
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="welcomeKit" class="form-label">Welcome kit Invoice</label>
+              <input type="file" class="form-control" id="welcomeKit" name="welcome_kit" accept="image/*" required>
+              <input type="hidden" name="dealer_id" id="welcome_kit_dealer_id">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger mr-3" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Done</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
   <div class="modal fade" id="boardInstallationModal" tabindex="-1" aria-labelledby="boardInstallationModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -166,7 +196,7 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-danger mr-3" data-dismiss="modal">Close</button>
             <button type="submit" class="btn btn-primary">Done</button>
           </div>
         </form>
@@ -183,6 +213,11 @@
       $('#boardInstallationModal').modal('show');
       var id = $(this).attr('data-id');
       $('#dealer_id').val(id);
+    });
+    $(document).on('click', '.welcome-kit-btn', function() {
+      $('#welcomeKitModal').modal('show');
+      var id = $(this).attr('data-id');
+      $('#welcome_kit_dealer_id').val(id);
     });
     $(function() {
       $.ajaxSetup({
@@ -295,6 +330,30 @@
           {
             data: 'approval_status',
             name: 'approval_status',
+            "defaultContent": '',
+            orderable: false
+          },
+          {
+            data: 'ho_approve_date',
+            name: 'ho_approve_date',
+            "defaultContent": '',
+            orderable: false
+          },
+          {
+            data: 'board_install_date',
+            name: 'board_install_date',
+            "defaultContent": '',
+            orderable: false
+          },
+          {
+            data: 'welcome_kit_date',
+            name: 'welcome_kit_date',
+            "defaultContent": '',
+            orderable: false
+          },
+          {
+            data: 'color',
+            name: 'color',
             "defaultContent": '',
             orderable: false
           },

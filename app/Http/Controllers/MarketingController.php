@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\DataTables\DealerAppointmentDataTable;
 use App\DataTables\MarketingDataTable;
 use App\DataTables\MarketingDealerAppointmentDataTable;
+use App\Exports\MarketingDealerAppointmentExport;
 use App\Exports\MarketingMasterExport;
 use App\Exports\MarketingMasterTemplate;
 use App\Imports\MarketingMasterImport;
@@ -174,6 +175,44 @@ class MarketingController extends Controller
 
     public function dealer_board_installation(Request $request)
     {
-        dd($request->all());
+        $dealerAppointment = DealerAppointment::find($request->dealer_id);
+        $dealerAppointment->board_install_date = date('Y-m-d');
+        $dealerAppointment->dealer_board = 1;
+        $dealerAppointment->save();
+        if ($request->hasFile('dealer_board')) {
+            $file = $request->file('dealer_board');
+            $customname = time() . '.' . $file->getClientOriginalExtension();
+            $dealerAppointment->addMedia($file)
+                ->usingFileName($customname)
+                ->toMediaCollection('dealer_board', 's3');
+        }
+        return redirect()->route('marketing.new_dealer')->with('message_success', 'Board installation date and image updated successfully')->withInput();
     }
+
+    public function dealer_welcome_kit(Request $request)
+    {
+        $dealerAppointment = DealerAppointment::find($request->dealer_id);
+        $dealerAppointment->welcome_kit_date = date('Y-m-d');
+        $dealerAppointment->welcome_kit = 1;
+        $dealerAppointment->save();
+        if ($request->hasFile('welcome_kit')) {
+            $file = $request->file('welcome_kit');
+            $customname = time() . '.' . $file->getClientOriginalExtension();
+            $dealerAppointment->addMedia($file)
+                ->usingFileName($customname)
+                ->toMediaCollection('welcome_kit', 's3');
+        }
+        return redirect()->route('marketing.new_dealer')->with('message_success', 'Welcome kit date and invoice updated successfully')->withInput();
+    }
+
+    public function new_dealer_download(Request $request)
+    {
+        abort_if(Gate::denies('marketing_dealer_appointment_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        // return $request;
+        return Excel::download(new MarketingDealerAppointmentExport($request), 'new_dealer_appointment.xlsx');
+    }
+        
+
 }

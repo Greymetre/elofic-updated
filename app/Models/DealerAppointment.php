@@ -116,5 +116,13 @@ class DealerAppointment extends Model implements HasMedia
              ->useFallbackUrl(asset(config('constants.NO_IMAGE_URL')))
              ->useFallbackPath(public_path(config('constants.NO_IMAGE_URL')))
              ->singleFile();
+        $this->addMediaCollection('dealer_board')
+             ->useFallbackUrl(asset(config('constants.NO_IMAGE_URL')))
+             ->useFallbackPath(public_path(config('constants.NO_IMAGE_URL')))
+             ->singleFile();
+        $this->addMediaCollection('welcome_kit')
+             ->useFallbackUrl(asset(config('constants.NO_IMAGE_URL')))
+             ->useFallbackPath(public_path(config('constants.NO_IMAGE_URL')))
+             ->singleFile();
     }
 }
