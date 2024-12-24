@@ -33,7 +33,7 @@ class MarketingDealerAppointmentExport implements FromCollection, WithHeadings, 
 
     public function collection()
     {
-        $query = DealerAppointment::with('branch_details', 'district_details', 'city_details', 'createdbyname', 'appointment_kyc_detail','sales_approve_user','ho_approve_user')->where('approval_status', '3');
+        $query = DealerAppointment::with('branch_details', 'district_details', 'city_details', 'createdbyname', 'appointment_kyc_detail', 'sales_approve_user', 'ho_approve_user')->where('approval_status', '3');
 
         if ($this->designation_id) {
             $query->where('designation_id', $this->designation_id);
@@ -56,25 +56,38 @@ class MarketingDealerAppointmentExport implements FromCollection, WithHeadings, 
 
     public function headings(): array
     {
-        return ['Submission Date', 'Appointment Date', 'Approval Status','Approve By Sales Name','Approve By HO Name', 'Created By Name', 'Created By Emp Code', 'Division', 'Branch', 'Customertype', 'Firm Type', 'ORGANISATION Status', 'Name of the Company/Firm', 'Gst Type', 'Gst No', 'Cin No', 'Related Firm Name', 'Line Business', 'State', 'District', 'City', 'Place', 'Office Address', 'Office Pincode', 'Office Mobile', 'Office Email', 'Godown Address', 'Godown Pincode', 'Godown Mobile', 'Godown Email', 'Are you already working on another division of Silver/Bediya?', 'Old Division', 'Old Firm Name', 'Old Gst', 'Contact Person Name', 'Mobile Email', 'Bank Name', 'Bank Address', 'Account Type', 'Account Number', 'Ifsc Code', 'Ppd Name 1', 'Ppd Adhar 1', 'Ppd Pan 1', 'Ppd Name 2', 'Ppd Adhar 2', 'Ppd Pan 2', 'Ppd Name 3', 'Ppd Adhar 3', 'Ppd Pan 3', 'Ppd Name 4', 'Ppd Adhar 4', 'Ppd Pan 4', 'Security Deposit', 'SDPUMPMOTORS', 'SDF&A', 'SDAGRI', 'Payment Term', 'Credit Period', 'Cheque No 1', 'Cheque Account Number 1', 'Cheque Bank 1', 'Cheque No 2', 'Cheque Account Number 2', 'Cheque Bank 2', 'Manufacture Company 1', 'Manufacture Product 1', 'Manufacture Business 1', 'Manufacture Turn Over 1', 'Manufacture Company 2', 'Manufacture Product 2', 'Manufacture Business 2', 'Manufacture Turn Over 2', 'Present Annual Turnover', 'Motor Anticipated Business 1', 'Motor Next Year Business 1', 'Pump Anticipated Business 1', 'Pump Next Year Business 1', 'F&A Anticipated Business 1', 'F&A Next Year Business 1', 'Lighting Anticipated Business 1', 'Lighting Next Year Business 1', 'Agri Anticipated Business 1', 'Agri Next Year Business 1', 'Solar Anticipated Business 1', 'Solar Next Year Business 1', 'Anticipated Business Total','Dealer Code'];
+        return ['Submission Date', 'Appointment Date', 'HO Approve Date', 'Approval Status', 'Approve By Sales Name', 'Approve By HO Name', 'Created By Name', 'Created By Emp Code', 'Division', 'Branch', 'Customertype', 'Firm Type', 'ORGANISATION Status', 'Name of the Company/Firm', 'Gst Type', 'Gst No', 'Cin No', 'Related Firm Name', 'Line Business', 'State', 'District', 'City', 'Place', 'Office Address', 'Office Pincode', 'Office Mobile', 'Office Email', 'Godown Address', 'Godown Pincode', 'Godown Mobile', 'Godown Email', 'Are you already working on another division of Silver/Bediya?', 'Old Division', 'Old Firm Name', 'Old Gst', 'Contact Person Name', 'Mobile Email', 'Bank Name', 'Bank Address', 'Account Type', 'Account Number', 'Ifsc Code', 'Ppd Name 1', 'Ppd Adhar 1', 'Ppd Pan 1', 'Ppd Name 2', 'Ppd Adhar 2', 'Ppd Pan 2', 'Ppd Name 3', 'Ppd Adhar 3', 'Ppd Pan 3', 'Ppd Name 4', 'Ppd Adhar 4', 'Ppd Pan 4', 'Security Deposit', 'SDPUMPMOTORS', 'SDF&A', 'SDAGRI', 'Payment Term', 'Credit Period', 'Cheque No 1', 'Cheque Account Number 1', 'Cheque Bank 1', 'Cheque No 2', 'Cheque Account Number 2', 'Cheque Bank 2', 'Manufacture Company 1', 'Manufacture Product 1', 'Manufacture Business 1', 'Manufacture Turn Over 1', 'Manufacture Company 2', 'Manufacture Product 2', 'Manufacture Business 2', 'Manufacture Turn Over 2', 'Present Annual Turnover', 'Motor Anticipated Business 1', 'Motor Next Year Business 1', 'Pump Anticipated Business 1', 'Pump Next Year Business 1', 'F&A Anticipated Business 1', 'F&A Next Year Business 1', 'Lighting Anticipated Business 1', 'Lighting Next Year Business 1', 'Agri Anticipated Business 1', 'Agri Next Year Business 1', 'Solar Anticipated Business 1', 'Solar Next Year Business 1', 'Anticipated Business Total', 'BP Code', 'Dealer Board', 'Welcome Kit', 'Board Install Date', 'Welcome Kit Date', 'Color'];
     }
 
     public function map($row): array
     {
-        if($row->approval_status == '0'){
+        if ($row->approval_status == '0') {
             $aproval_status = 'Pending';
-        }elseif($row->approval_status == '1'){
+        } elseif ($row->approval_status == '1') {
             $aproval_status = 'Approved By Sales Team';
-        }elseif($row->approval_status == '2'){
+        } elseif ($row->approval_status == '2') {
             $aproval_status = 'Approved By Account';
-        }elseif($row->approval_status == '3'){
+        } elseif ($row->approval_status == '3') {
             $aproval_status = 'Approved By HO';
-        }elseif($row->approval_status == '4'){
+        } elseif ($row->approval_status == '4') {
             $aproval_status = 'Rejected';
+        }
+
+        if ($row->dealer_board == '0') {
+            $dealer_board = 'Pending';
+        } elseif ($row->dealer_board == '1') {
+            $dealer_board = 'Done';
+        }
+
+        if ($row->welcome_kit == '0') {
+            $welcome_kit = 'Pending';
+        } elseif ($row->welcome_kit == '1') {
+            $welcome_kit = 'Done';
         }
         return [
             date('d M Y', strtotime($row->created_at)),
             date('d M Y', strtotime($row->appointment_date)),
+            $row->ho_approve_date ? date('d M Y', strtotime($row->ho_approve_date)) : '-',
             $aproval_status,
             $row->sales_approve_user ? $row->sales_approve_user->name : '-',
             $row->ho_approve_user ? $row->ho_approve_user->name : '-',
@@ -160,7 +173,11 @@ class MarketingDealerAppointmentExport implements FromCollection, WithHeadings, 
             $row->solar_anticipated_business_1 ? $row->solar_anticipated_business_1 : '-',
             $row->solar_next_year_business_1 ? $row->solar_next_year_business_1 : '-',
             $row->anticipated_business_total ? $row->anticipated_business_total : '-',
-            $row->appointment_kyc_detail ? ($row->appointment_kyc_detail->dealer_code??'-') : '-',
+            $row->appointment_kyc_detail ? ($row->appointment_kyc_detail->dealer_code ?? '-') : '-',
+            $dealer_board,
+            $welcome_kit,
+            $row->board_install_date ? date('d M Y', strtotime($row->board_install_date)) : '-',
+            $row->welcome_kit_date ? date('d M Y', strtotime($row->welcome_kit_date)) : '-',
         ];
     }
 
@@ -170,6 +187,51 @@ class MarketingDealerAppointmentExport implements FromCollection, WithHeadings, 
             AfterSheet::class => function (AfterSheet $event) {
                 $lastRow = $event->sheet->getHighestDataRow() + 1;
                 $lastColumn = $event->sheet->getHighestDataColumn();
+                $rowCount = $event->sheet->getHighestDataRow();
+                for ($row = 1; $row <= $rowCount; $row++) {
+                    $boardDate = $event->sheet->getCell('CN' . $row)->getValue();
+                    $approveDate = $event->sheet->getCell('C' . $row)->getValue();
+                    if ($boardDate == '-') {
+                        $event->sheet->getStyle('CP' . $row)->applyFromArray([
+                            'fill' => [
+                                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                                'startColor' => ['rgb' => 'FF0000'],
+                            ],
+                        ]);
+                    } else {
+                        $approved_date = $event->sheet->getCell('C' . $row)->getValue();
+                        $board_installation_date = $event->sheet->getCell('CN' . $row)->getValue();
+                        if ($approved_date != null && $board_installation_date != null) {
+                            //Check the day between approved date and board installation date
+                            $approved_date = date('Y-m-d', strtotime($approved_date));
+                            $board_installation_date = date('Y-m-d', strtotime($board_installation_date));
+                            $diff = abs(strtotime($approved_date) - strtotime($board_installation_date));
+                            $days = floor($diff / (60 * 60 * 24));
+                            if ($days <= 7) {
+                                $event->sheet->getStyle('CP' . $row)->applyFromArray([
+                                    'fill' => [
+                                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                                        'startColor' => ['rgb' => '00FF00'], // Green color
+                                    ],
+                                ]);
+                            } else {
+                                $event->sheet->getStyle('CP' . $row)->applyFromArray([
+                                    'fill' => [
+                                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                                        'startColor' => ['rgb' => 'FF0000'],
+                                    ],
+                                ]);
+                            }
+                        } else {
+                            $event->sheet->getStyle('CP' . $row)->applyFromArray([
+                                'fill' => [
+                                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                                    'startColor' => ['rgb' => 'FF0000'],
+                                ],
+                            ]);
+                        }
+                    }
+                }
 
                 $event->sheet->getStyle('A1:' . $lastColumn . '1')->applyFromArray([
                     'font' => [

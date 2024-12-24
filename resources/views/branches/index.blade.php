@@ -103,6 +103,17 @@
                   </div>
                 </div>
               </div>
+            <div class="col-md-12">
+                <div class="input_sectuin">
+                  <label class="col-form-label">Branch SAP Code <span class="text-danger"> *</span></label>
+                    <div class="form-group has-default bmd-form-group">
+                      <input type="text" id="branch_sap_code" name="branch_sap_code" class="form-control" value="{!! old( 'branch_sap_code') !!}" maxlength="200" required>
+                      @if ($errors->has('branch_sap_code'))
+                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('branch_sap_code') }}</p></div>
+                      @endif
+                  </div>
+                </div>
+              </div>
 
         </div>
         <div class="clearfix"></div>
@@ -155,6 +166,7 @@ $(document).ready(function() {
          success: function (data) {
                $('#branch_name').val(data.branch_name);
                $('#branch_code').val(data.branch_code);
+               $('#branch_sap_code').val(data.branch_sap_code);
 	        $('#branch_id').val(data.id);
 	        var title = '{!! trans('panel.global.edit') !!}' ;
 	        $('.modal-title').text(title);

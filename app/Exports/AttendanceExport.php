@@ -20,23 +20,12 @@ class AttendanceExport implements FromCollection,WithHeadings,ShouldAutoSize,Wit
         $this->end_date = $request->end_date;
         $this->executive_id = $request->executive_id;
         $this->active = $request->active;
+        $this->status = $request->status;
     }
 
     public function collection()
     {
         return Attendance::with('users')->where(function($query) {
-                        // if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                        // {
-                        //     $query->whereIn('user_id', getUsersReportingToAuth());
-                        // }
-                        // if($this->start_date)
-                        // {
-                        //     $query->whereDate('punchin_date','>=',$this->start_date);
-                        // }
-                        // if($this->end_date)
-                        // {
-                        //     $query->whereDate('punchin_date','<=',$this->end_date);
-                        // }
 
                      if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
                         {
@@ -53,6 +42,9 @@ class AttendanceExport implements FromCollection,WithHeadings,ShouldAutoSize,Wit
                         if($this->executive_id)
                         {
                             $query->where('user_id', $this->executive_id);
+                        }
+                        if ($this->status != null && $this->status != "") {
+                            $query->where('attendance_status', $this->status);
                         }
                         if (!empty($this->active) && $this->active != null && $this->active != "") {
                             $active = $this->active;

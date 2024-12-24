@@ -166,9 +166,6 @@ class MarketingController extends Controller
 
     public function marketings_new_dealer(MarketingDealerAppointmentDataTable $dataTable, Request $request)
     {
-        if($request->ip() != '111.118.252.250'){
-            return view('work_in_progress');
-        }
         $divisions = DealerAppointment::groupBy('division')->pluck('division');
         return $dataTable->render('marketing.new_dealer', compact('divisions'));
     }

@@ -27,7 +27,7 @@ class BranchExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMap
 
     public function headings(): array
     {
-        return ['id','branch_name','branch_code','created_by','updated_by','active'];
+        return ['id','branch_name','branch_code','Branch SAP Code','created_by','updated_by','active'];
     }
 
     public function map($data): array
@@ -36,6 +36,7 @@ class BranchExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMap
             $data['id'],
             isset($data['branch_name']) ? $data['branch_name'] :'',
             isset($data['branch_code']) ? $data['branch_code'] :'',
+            isset($data['branch_sap_code']) ? $data['branch_sap_code'] :'',
             isset($data['getuser']['name']) ? $data['getuser']['name'] :'',
             isset($data['updated_by']) ? $data['updated_by'] :'',
             isset($data['active']) ? $data['active'] :'',

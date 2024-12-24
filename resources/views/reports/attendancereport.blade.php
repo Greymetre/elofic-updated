@@ -54,13 +54,14 @@
                       </select>
                     </div>
 
-                    <!-- <div class="p-2" style="width: 250px;">
-                      <select class="selectpicker" name="active" id="active" data-style="select-with-transition" title="Select User Status">
-                        <option value="">Select User Status</option>
-                        <option value="Y">Active</option>
-                        <option value="N">Inactive</option>
-                      </select>
-                    </div> -->
+                    <div class="p-2" style="width: 250px;">
+                      <select class="select2" name="status" id="status" data-style="select-with-transition" title="Select User">
+                      <option value="">Select Status</option>
+                      <option value="0">Pending</option>
+                      <option value="1">Approved</option>
+                      <option value="2">Rejected</option>                  
+                    </select>
+                    </div>
 
                     <div class="p-2">
                       <input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly>
@@ -289,7 +290,8 @@
             d.executive_id = $('#executive_id').val(),
             d.active = $('#active').val(),
               d.start_date = $('#start_date').val(),
-              d.end_date = $('#end_date').val()
+              d.end_date = $('#end_date').val(),
+              d.status = $('#status').val()
           }
         },
 
@@ -409,6 +411,9 @@
         table.draw();
       });
       $('#active').change(function() {
+        table.draw();
+      });
+      $('#status').change(function() {
         table.draw();
       });
 
