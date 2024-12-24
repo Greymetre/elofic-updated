@@ -62,8 +62,7 @@
                      <option value="">Select Status</option>
                      <option value="0">Pending</option>
                      <option value="1">Approved</option>
-                     <option value="2">Rejected</option>
-                  
+                     <option value="2">Rejected</option>                  
                    </select>
                   </div>
 
