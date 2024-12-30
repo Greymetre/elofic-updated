@@ -5,7 +5,7 @@
    <meta charset="utf-8">
    <meta name="viewport" content="width=device-width, initial-scale=1">
    <meta name="csrf-token" content="{{ csrf_token() }}">
-   <title>{{ config('app.name', 'Laravel') }}</title>
+   <title>{{ config('app.name', 'Bediya Silver') }}</title>
    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
    <!-- CSS Files -->
@@ -1457,6 +1457,15 @@
                            <i class="material-icons icon">history</i>
                            <span>{!! trans('panel.sidemenu.warranty_activation') !!}</span>
                            <div class="d-none mobile_hide"> {!! trans('panel.sidemenu.warranty_activation') !!}</div>
+                        </a>
+                     </li>
+                     @endif
+                     @if(auth()->user()->can('end_user_access'))
+                     <li class="nav-link-btn {{ request()->is('end_user*') ? 'active' : '' }}">
+                        <a class="hoveradd2" href="{{ url('end_user') }}">
+                           <i class="material-icons icon">history</i>
+                           <span>End Users</span>
+                           <div class="d-none mobile_hide"> End Users</div>
                         </a>
                      </li>
                      @endif

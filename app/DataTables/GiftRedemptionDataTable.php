@@ -29,7 +29,7 @@ class GiftRedemptionDataTable extends DataTable
                 return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
             })
             ->editColumn('contact_person', function ($data) {
-                return $data->customer->first_name.' '.$data->customer->last_name;
+                return $data->customer->first_name . ' ' . $data->customer->last_name;
             })
             ->editColumn('customer.name', function ($data) {
                 $customer_name = '<a target="_blank" href="' . route('customers.show', [encrypt($data->customer->id)]) . '">' . $data->customer->name . '</a>';
@@ -50,15 +50,15 @@ class GiftRedemptionDataTable extends DataTable
                 return $parents;
             })
             ->addColumn('mode', function ($query) {
-                if($query->redeem_mode == '1'){
+                if ($query->redeem_mode == '1') {
                     return 'Gift';
-                }elseif($query->redeem_mode == '2'){
+                } elseif ($query->redeem_mode == '2') {
                     return 'NEFT';
                 }
-              })
-              ->addColumn('product.categories.category_name', function ($query) {
+            })
+            ->addColumn('product.categories.category_name', function ($query) {
                 return $query->product->categories->category_name;
-              })
+            })
             ->editColumn('status', function ($data) {
                 if ($data->status == '0') {
                     return '<button id="' . $data->id . '" data-status="0" class="ChangeStatusGift btn btn-warning">Pendding</button>';
@@ -69,7 +69,7 @@ class GiftRedemptionDataTable extends DataTable
                 } elseif ($data->status == '2') {
                     return '<button id="' . $data->id . '" data-status="2" class="ChangeStatusGift btn btn-danger">Rejected</button>';
                 } elseif ($data->status == '4') {
-                    return '<button id="' . $data->id . '" data-status="4" class=" btn btn-success">Success</button><p class="badge badge-info">Remark - '.$data->remark.'</p>';
+                    return '<button id="' . $data->id . '" data-status="4" class=" btn btn-success">Success</button><p class="badge badge-info">Remark - ' . $data->remark . '</p>';
                 }
             })
             ->addColumn('action', function ($query) {
@@ -113,6 +113,9 @@ class GiftRedemptionDataTable extends DataTable
                 $data->whereIn('customer_id', $parent_customer_id);
             }
         }
+        if ($request->customer_id && $request->customer_id != null  && !empty($request->customer_id)) {
+            $data->where('customer_id', $request->customer_id);
+        }
         if ($request->start_date && $request->start_date != null && $request->start_date != '' && $request->end_date && $request->end_date != null && $request->end_date != '') {
             $startDate = date('Y-m-d', strtotime($request->start_date));
             $endDate = date('Y-m-d', strtotime($request->end_date));
@@ -123,8 +126,8 @@ class GiftRedemptionDataTable extends DataTable
             $data->where('customer_id', $request->customer_id);
         }
         if ($request->status != null  && $request->status != '') {
-            if($request->status == '3' || $request->status == '4'){
-                $request->status = $request->status == '4'?'3':'4';
+            if ($request->status == '3' || $request->status == '4') {
+                $request->status = $request->status == '4' ? '3' : '4';
             }
             $data->where('status', $request->status);
         }

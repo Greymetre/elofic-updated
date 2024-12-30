@@ -41,6 +41,7 @@ use App\Models\Order;
 use App\Models\TransactionHistory;
 use App\Models\UserEducation;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
 
 class UsersController extends Controller
@@ -57,7 +58,7 @@ class UsersController extends Controller
     public function index(UsersDataTable $dataTable, Request $request)
     {
         //abort_if(Gate::denies('user_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        
+
         return $dataTable->render('users.index');
     }
 
@@ -68,7 +69,7 @@ class UsersController extends Controller
         $cities = City::where('active', '=', 'Y')->pluck('city_name', 'id');
         $reportings = User::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
-          })->where('active', '=', 'Y')->select('id', 'name')->get();
+        })->where('active', '=', 'Y')->select('id', 'name')->get();
         $customertype = CustomerType::select('id', 'customertype_name')->orderBy('id', 'desc')->get();
 
         $branches = Branch::where('active', '=', 'Y')->get();
@@ -226,7 +227,7 @@ class UsersController extends Controller
         $cities = City::where('active', '=', 'Y')->pluck('city_name', 'id');
         $reportings = User::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
-          })->where('active', '=', 'Y')->select('id', 'name')->get();
+        })->where('active', '=', 'Y')->select('id', 'name')->get();
 
         $branches = Branch::where('active', '=', 'Y')->get();
         $designations = Designation::where('active', '=', 'Y')->get();
@@ -370,6 +371,16 @@ class UsersController extends Controller
             }
         }
         if ($request['password'] && !empty($request['password']) && !$user->roles()->where('id', '29')->exists()) {
+            $user->tokens()->delete();
+            $sessionFiles = File::files(storage_path('framework/sessions'));            
+            foreach ($sessionFiles as $file) {
+                $sessionContent = File::get($file);
+                if (str_contains($sessionContent, 'user_idsss";i:' . $user->id . ';')) {
+                    echo $file->getFilename();
+                    echo"<br>";
+                    File::delete($file);
+                }
+            }
             Auth::logout();
             return redirect()->route('login')->with('status', 'Password updated successfully. Please log in with your new password.');
         } else {
@@ -431,6 +442,17 @@ class UsersController extends Controller
     public function active(Request $request)
     {
         if (User::where('id', $request['id'])->update(['active' => ($request['active'] == 'Y') ? 'N' : 'Y'])) {
+            $user = User::find($request['id']);
+            $user->tokens()->delete();
+            $sessionFiles = File::files(storage_path('framework/sessions'));            
+            foreach ($sessionFiles as $file) {
+                $sessionContent = File::get($file);
+                if (str_contains($sessionContent, 'user_idsss";i:' . $user->id . ';')) {
+                    echo $file->getFilename();
+                    echo"<br>";
+                    File::delete($file);
+                }
+            }
             $message = ($request['active'] == 'Y') ? 'Inactive' : 'Active';
             return response()->json(['status' => 'success', 'message' => 'User ' . $message . ' Successfully!']);
         }

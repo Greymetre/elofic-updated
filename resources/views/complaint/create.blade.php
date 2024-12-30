@@ -33,6 +33,10 @@
       .row {
          align-items: end !important;
       }
+
+      .swal2-container.swal2-center.swal2-fade.swal2-shown {
+         z-index: 999999999 !important;
+      }
    </style>
    <div class="row">
       <div class="col-md-12">
@@ -41,19 +45,19 @@
                <div class="nav-tabs-navigation">
                   <div class="nav-tabs-wrapper new_id">
                      <h4 class="card-title ">
-                        Complaint Creation  </h4>
-                        @if(auth()->user()->can(['district_access']))
+                        Complaint Creation </h4>
+                     @if(auth()->user()->can(['district_access']))
 
-                        <ul class="nav nav-tabs pull-right" data-tabs="tabs">
-                           <li class="nav-item">
-                              <a class="nav-link" href="{{ url('complaints') }}">
-                                 <i class="material-icons">next_plan</i> {!! trans('panel.complaint.title') !!}
-                                 <div class="ripple-container"></div>
-                              </a>
-                           </li>
-                        </ul>
-                        @endif
-                   
+                     <ul class="nav nav-tabs pull-right" data-tabs="tabs">
+                        <li class="nav-item">
+                           <a class="nav-link" href="{{ url('complaints') }}">
+                              <i class="material-icons">next_plan</i> {!! trans('panel.complaint.title') !!}
+                              <div class="ripple-container"></div>
+                           </a>
+                        </li>
+                     </ul>
+                     @endif
+
                   </div>
                </div>
             </div>
@@ -242,36 +246,7 @@
                         @endif
                      </div>
                   </div>
-                  <!-- <div class="col-md-3">
-                     <div class="form-group">
-                        <label class="bmd-label-floating">Claim Amount </label>
-                        <input type="number" name="claim_amount" id="claim_amount" class="form-control" value="{!! old( 'claim_amount', $complaints['claim_amount']) !!}">
-                        @if ($errors->has('claim_amount'))
-                        <div class="error col-lg-12">
-                           <p class="text-danger">{{ $errors->first('claim_amount') }}</p>
-                        </div>
-                        @endif
-                     </div>
-                  </div>
-                  <div class="col-md-3">
-                     <div class="form-group">
-                        <label class="bmd-label-floating">Assign User </label>
-                        <select name="complaint_status" id="complaint_status" class="select2 form-control">
-                           <option value="">Complaint Status</option>
-                           <option value="0" {!! old('complaint_status', $complaints['complaint_status'])=='0' ? 'selected' :'' !!}>Open</option>
-                           <option value="1" {!! old('complaint_status', $complaints['complaint_status'])=='1' ? 'selected' :'' !!}>Pendding</option>
-                           <option value="2" {!! old('complaint_status', $complaints['complaint_status'])=='2' ? 'selected' :'' !!}>Work Done</option>
-                           <option value="3" {!! old('complaint_status', $complaints['complaint_status'])=='3' ? 'selected' :'' !!}>Completed</option>
-                           <option value="3" {!! old('complaint_status', $complaints['complaint_status'])=='4' ? 'selected' :'' !!}>Closed</option>
-                           <option value="3" {!! old('complaint_status', $complaints['complaint_status'])=='5' ? 'selected' :'' !!}>Cancel</option>
-                        </select>
-                        @if ($errors->has('complaint_status'))
-                        <div class="error col-lg-12">
-                           <p class="text-danger">{{ $errors->first('complaint_status') }}</p>
-                        </div>
-                        @endif
-                     </div>
-                  </div> -->
+
                </div>
                <div class="basic_details mt-1">
                   <h3><b>Complaint Registration :</b></h3>
@@ -365,22 +340,7 @@
                            </div>
                         </div>
                         <div class="col-md-3">
-                           <!-- <div class="form-group">
-                              <label class="bmd-label-floating">Seller Branch </label>
-                              <select disabled name="seller_branch" id="seller_branch" class="select2 form-control">
-                                 <option value="">Seller Branch</option>
-                                 @if($branchs)
-                                 @foreach($branchs as $branch)
-                                 <option value="{{$branch->id}}">[{{$branch->branch_code}}] {{$branch->branch_name}}</option>
-                                 @endforeach
-                                 @endif
-                              </select>
-                              @if ($errors->has('seller_branch'))
-                              <div class="error col-lg-12">
-                                 <p class="text-danger">{{ $errors->first('seller_branch') }}</p>
-                              </div>
-                              @endif
-                           </div> -->
+
                         </div>
                      </div>
                      <div class="row mt-3">
@@ -529,46 +489,9 @@
                               @endif
                            </div>
                         </div>
-                        <!-- <div class="col-md-3">
-                        <div class="form-group">
-                           <label class="bmd-label-floating">Assign User </label>
-                           <select name="fault_type" id="fault_type" class="select2 form-control">
-                              <option value="">Fault Type</option>
-                              <option value="Site" {!! old('fault_type', $complaints['fault_type'])=='Site' ? 'selected' :'' !!}>Site</option>
-                              <option value="Company" {!! old('fault_type', $complaints['fault_type'])=='Company' ? 'selected' :'' !!}>Company</option>
-                           </select>
-                           @if ($errors->has('fault_type'))
-                           <div class="error col-lg-12">
-                              <p class="text-danger">{{ $errors->first('fault_type') }}</p>
-                           </div>
-                           @endif
-                        </div>
-                     </div> -->
+
                      </div>
-                     <!-- <div class="row mt-3">
-                     <div class="col-md-6">
-                        <div class="form-group">
-                           <label class="bmd-label-floating">Service Centre Remarks </label>
-                           <textarea type="text" name="service_centre_remark" cols="20" rows="3" class="form-control"> {!! old( 'service_centre_remark', $complaints['service_centre_remark']) !!} </textarea>
-                           @if ($errors->has('service_centre_remark'))
-                           <div class="error col-lg-12">
-                              <p class="text-danger">{{ $errors->first('service_centre_remark') }}</p>
-                           </div>
-                           @endif
-                        </div>
-                     </div>
-                     <div class="col-md-6">
-                        <div class="form-group">
-                           <label class="bmd-label-floating">Remarks </label>
-                           <textarea type="text" name="remark" cols="20" rows="3" class="form-control"> {!! old( 'remark', $complaints['remark']) !!} </textarea>
-                           @if ($errors->has('remark'))
-                           <div class="error col-lg-12">
-                              <p class="text-danger">{{ $errors->first('remark') }}</p>
-                           </div>
-                           @endif
-                        </div>
-                     </div>
-                  </div> -->
+
                   </div>
                </div>
                <div class="contact_details mt-1">
@@ -624,6 +547,45 @@
                         </div>
                      </div>
                      <div class="row mt-3">
+
+                        <div class="col-md-3">
+                           <div class="input_section">
+                              <label class="col-form-label">State </label>
+                              <select name="customer_state" id="customer_state" class="select2 form-control" required>
+                                 <option value="">Select State</option>
+                                 @foreach($states as $state)
+                                 <option value="{{$state->id}}">{{$state->state_name}}</option>
+                                 @endforeach
+                              </select>
+                              @if ($errors->has('customer_state'))
+                              <div class="error">
+                                 <p class="text-danger">{{ $errors->first('customer_state') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+                        <div class="col-md-3">
+                           <div class="input_section">
+                              <label class="col-form-label">District </label>
+                              <select name="customer_district" id="customer_district" class="select2 form-control" required></select>
+                              @if ($errors->has('customer_district'))
+                              <div class="error">
+                                 <p class="text-danger">{{ $errors->first('customer_district') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+                        <div class="col-md-3">
+                           <div class="input_section">
+                              <label class="col-form-label">City </label>
+                              <select name="customer_city" id="customer_city" class="select2 form-control" required></select>
+                              @if ($errors->has('customer_city'))
+                              <div class="error">
+                                 <p class="text-danger">{{ $errors->first('customer_city') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
                         <div class="col-md-3">
                            <div class="input_section">
                               <label class="col-form-label">Place </label>
@@ -635,10 +597,12 @@
                               @endif
                            </div>
                         </div>
+                     </div>
+                     <div class="row mt-3">
                         <div class="col-md-3">
                            <div class="input_section">
                               <label class="col-form-label">Pincode </label>
-                              <select name="customer_pindcode" id="customer_pindcode" placeholder="Select Pincode" class="select2 form-control" required>
+                              <select name="customer_pindcode" id="customer_pindcode" placeholder="Select Pincode" class="select2 form-control">
                                  <option value="" disabled selected>Select Pincode</option>
                                  @if($pincodes && count($pincodes) > 0)
                                  @foreach($pincodes as $pincode)
@@ -649,52 +613,6 @@
                               @if ($errors->has('customer_pindcode'))
                               <div class="error">
                                  <p class="text-danger">{{ $errors->first('customer_pindcode') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                        <div class="col-md-3">
-                           <div class="input_section">
-                              <label class="col-form-label">Country </label>
-                              <input type="text" readonly name="customer_country" id="customer_country" class="form-control" value="{!! old( 'customer_country', $complaints['customer_country']) !!}">
-                              @if ($errors->has('customer_country'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('customer_country') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                        <div class="col-md-3">
-                           <div class="input_section">
-                              <label class="col-form-label">State </label>
-                              <input type="text" readonly name="customer_state" id="customer_state" class="form-control" value="{!! old( 'customer_state', $complaints['customer_state']) !!}">
-                              @if ($errors->has('customer_state'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('customer_state') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                     </div>
-                     <div class="row mt-3">
-                        <div class="col-md-3">
-                           <div class="input_section">
-                              <label class="col-form-label">District </label>
-                              <input type="text" readonly name="customer_district" id="customer_district" class="form-control" value="{!! old( 'customer_district', $complaints['customer_district']) !!}">
-                              @if ($errors->has('customer_district'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('customer_district') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                        <div class="col-md-3">
-                           <div class="input_section">
-                              <label class="col-form-label">City </label>
-                              <input type="text" readonly name="customer_city" id="customer_city" class="form-control" value="{!! old( 'customer_city', $complaints['customer_city']) !!}">
-                              @if ($errors->has('customer_city'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('customer_city') }}</p>
                               </div>
                               @endif
                            </div>
@@ -785,7 +703,7 @@
                                  <div style="position: relative;" class="img-div">
                                     <button title="Delete Image" type="button" class="badge badge-danger delete-img-btn" data-mediaid="{{$media->id}}">X</button>
                                     <a href="{{$media->getFullUrl()}}" download target="_blank">
-                                    @if($media->mime_type == 'application/pdf')
+                                       @if($media->mime_type == 'application/pdf')
                                        <img class="m-2 rounded img-fluid" src="{{url('/public/assets/img/pdf-icon.jpg')}}" style="width: 170px;height:170px;">
                                        @else
                                        <img class="m-2 rounded img-fluid" src="{!! $media->getFullUrl() !!}" style="width: 170px;height:170px;">
@@ -910,13 +828,13 @@
                      var today = new Date();
                      today.setHours(0, 0, 0, 0);
 
-                     if(res.check_Warranty.seller_details && res.check_Warranty.seller_details != null){
+                     if (res.check_Warranty.seller_details && res.check_Warranty.seller_details != null) {
                         console.log(res.check_Warranty.seller_details.id);
                         var newOption = new Option(res.check_Warranty.seller_details.name, res.check_Warranty.seller_details.id, false, false);
                         $('#party_name').append(newOption).trigger('change');
                         $("#party_name").option(res.check_Warranty.seller_details.id);
                         $("#party_name").trigger('change');
-                     }else{
+                     } else {
                         $("#party_name").val('');
                         $("#party_name").trigger('change');
                      }
@@ -933,10 +851,9 @@
                         var attaExt = res.check_Warranty.media[0].original_url.split('.').pop().toLowerCase();
                         $("#invoice-div").removeClass('d-none');
                         $("#invoice-div a").prop('href', res.check_Warranty.media[0].original_url);
-                        if(attaExt == 'pdf')
-                        {
+                        if (attaExt == 'pdf') {
                            $("#invoice-img").attr('src', '{{url("/public/assets/img/pdf-icon.jpg")}}');
-                        }else{
+                        } else {
                            $("#invoice-img").attr('src', res.check_Warranty.media[0].original_url);
                         }
                      } else {
@@ -1009,19 +926,16 @@
                   $("#customer_email").val(res.data.customer_email);
                   $("#customer_address").val(res.data.customer_address);
                   $("#customer_place").val(res.data.customer_place);
-                  $("#customer_pindcode").val(res.data.customer_pindcode).trigger("change");;
-                  $("#customer_state").val(res.data.customer_state);
-                  $("#customer_district").val(res.data.customer_district);
-                  $("#customer_city").val(res.data.customer_city);
-
-                  $("#customer_name").prop('readonly', true);
-                  $("#customer_email").prop('readonly', true);
-                  $("#customer_address").prop('readonly', true);
-                  $("#customer_place").prop('readonly', true);
-                  $("#customer_pindcode").prop('disabled', true);
-                  $("#customer_state").prop('readonly', true);
-                  $("#customer_district").prop('readonly', true);
-                  $("#customer_city").prop('readonly', true);
+                  $("#customer_state").val(res.data.state_id).trigger("change");
+                  setTimeout(() => {
+                     $("#customer_district").val(res.data.district_id).trigger("change");
+                  }, 500);
+                  setTimeout(() => {
+                     $("#customer_city").val(res.data.city_id).trigger("change");
+                  }, 1000);
+                  setTimeout(() => {
+                     $("#customer_pindcode").val(res.data.customer_pindcode).trigger("change");
+                  }, 1500);
 
                } else {
                   $("#customer_name").val("");
@@ -1049,22 +963,26 @@
          });
       }).trigger('keyup');
       $(document).on("change", "#customer_pindcode", function() {
-         var customer_pindcode = $(this).val();
-         $.ajax({
-            url: "{{ url('getAddressData') }}",
-            dataType: "json",
-            type: "POST",
-            data: {
-               _token: "{{csrf_token()}}",
-               pincode_id: customer_pindcode
-            },
-            success: function(res) {
-               $("#customer_country").val(res.country_name);
-               $("#customer_state").val(res.state_name);
-               $("#customer_district").val(res.district_name);
-               $("#customer_city").val(res.city_name);
-            }
-         });
+         // var customer_pindcode = $(this).val();
+         // $.ajax({
+         //    url: "{{ url('getAddressData') }}",
+         //    dataType: "json",
+         //    type: "POST",
+         //    data: {
+         //       _token: "{{csrf_token()}}",
+         //       pincode_id: customer_pindcode
+         //    },
+         //    success: function(res) {
+         //       console.log(res);
+         //       // $("#customer_country").val(res.country_name);
+         //       $("#customer_state").val(res.state_id);
+         //       $("#customer_state").change();
+         //       $("#customer_district").val(res.district_id);
+         //       $("#customer_district").change();
+         //       $("#customer_city").val(res.city_id);
+         //       $("#customer_city").change();
+         //    }
+         // });
       });
       $("#go-search").on('click', function() {
          var search = $("#serail_number").val();
@@ -1142,7 +1060,7 @@
          if ($(this).val().length > 4) {
             $("#product_serail_number").keyup();
          }
-      }).trigger();
+      }).trigger("keyup");
       $("#product_id").on("change", function() {
          var product_id = $(this).val();
          if (product_id != null && product_id != '') {
@@ -1182,6 +1100,68 @@
             $("#product_no").prop('readonly', false);
             $("#phase").prop('readonly', false);
          }
+      });
+
+      $("#customer_state").on("change", function() {
+         var state_id = $(this).val();
+         if (state_id != null && state_id != '') {
+            $.ajax({
+               url: "{{ url('getDistrict') }}",
+               dataType: "json",
+               type: "POST",
+               data: {
+                  _token: "{{csrf_token()}}",
+                  state_id: state_id
+               },
+               success: function(res) {
+                  var options = '<option value="">Select District</option>';
+                  $.each(res, function(key, val) {
+                     options += '<option value="' + val.id + '">' + val.district_name + '</option>';
+                  })
+                  $("#customer_district").html(options);
+               }
+            });
+         }
+      });
+
+      $("#customer_district").on("change", function() {
+         var district_id = $(this).val();
+         $.ajax({
+            url: "{{ url('getCity') }}",
+            dataType: "json",
+            type: "POST",
+            data: {
+               _token: "{{csrf_token()}}",
+               district_id: district_id
+            },
+            success: function(res) {
+               var options = '<option value="">Select City</option>';
+               $.each(res, function(key, val) {
+                  options += '<option value="' + val.id + '">' + val.city_name + '</option>';
+               })
+               $("#customer_city").html(options);
+            }
+         });
+      });
+
+      $("#customer_city").on("change", function() {
+         var city_id = $(this).val();
+         $.ajax({
+            url: "{{ url('getPincode') }}",
+            dataType: "json",
+            type: "POST",
+            data: {
+               _token: "{{csrf_token()}}",
+               city_id: city_id
+            },
+            success: function(res) {
+               var options = '<option value="">Select Pincode</option>';
+               $.each(res, function(key, val) {
+                  options += '<option value="' + val.id + '">' + val.pincode + '</option>';
+               })
+               $("#customer_pindcode").html(options);
+            }
+         });
       });
    </script>
 </x-app-layout>

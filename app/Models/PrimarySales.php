@@ -17,6 +17,7 @@ class PrimarySales extends Model
         'invoice_date',
         'month',
         'division',
+        'bp_code',
         'dealer',
         'customer_id',
         'branch',
