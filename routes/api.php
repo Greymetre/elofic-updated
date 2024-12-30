@@ -162,6 +162,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::get('getCartItems', [OrderController::class, 'getCartItems']);
     Route::any('getOrderPfd', [OrderController::class, 'getOrderPfd']);
     Route::post('customer/deleteOrder', [OrderController::class, 'deleteOrder']);
+    Route::post('submitFullyDispatched', [OrderController::class, 'submitFullyDispatched']);
 
     //Leave
     Route::any('addLeaves', [LeaveController::class, 'addLeaves']);

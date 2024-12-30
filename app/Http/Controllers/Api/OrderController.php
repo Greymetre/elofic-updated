@@ -23,6 +23,7 @@ use App\Models\Customers;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\Sales;
+use App\Models\Status;
 use Excel;
 use Illuminate\Support\Facades\Mail;
 use stdClass;
@@ -64,19 +65,19 @@ class OrderController extends Controller
                 $startDate = date('Y-m-d', strtotime($start_date));
                 $endDate = date('Y-m-d', strtotime($end_date));
                 $query->whereDate('order_date', '>=', $startDate)
-                      ->whereDate('order_date', '<=', $endDate);
+                    ->whereDate('order_date', '<=', $endDate);
             }
 
-            if(!empty($customer_id)){
+            if (!empty($customer_id)) {
                 $query->where(function ($query) use ($customer_id) {
                     $query->where('buyer_id', '=', $customer_id)
-                          ->orWhere('seller_id', '=', $customer_id);
+                        ->orWhere('seller_id', '=', $customer_id);
                 });
             }
 
-            if(!empty($selecteduser_id)){
+            if (!empty($selecteduser_id)) {
                 $query->where('created_by', $selecteduser_id);
-            }else{
+            } else {
                 $query->whereIn('created_by', $user_ids);
             }
 
@@ -93,8 +94,8 @@ class OrderController extends Controller
             $data = collect([]);
             $users = User::whereDoesntHave('roles', function ($query) {
                 $query->where('id', 29);
-            })->where('active', 'Y')->whereIn('id',$user_ids)->select('id', 'name')->orderBy('name', 'asc')->get();
-            $all_status = [['id' => '0', 'name' => 'Pending'], ['id' => '1', 'name' => 'Dispatched'], ['id' => '2', 'name' => 'Partially Dispatched'], ['id' => '3', 'name' => 'Full Dispatch'] ,['id' => '4', 'name' => 'Cancel'] ];
+            })->where('active', 'Y')->whereIn('id', $user_ids)->select('id', 'name')->orderBy('name', 'asc')->get();
+            $all_status = [['id' => '0', 'name' => 'Pending'], ['id' => '1', 'name' => 'Dispatched'], ['id' => '2', 'name' => 'Partially Dispatched'], ['id' => '3', 'name' => 'Full Dispatch'], ['id' => '4', 'name' => 'Cancel']];
             if ($db_data->isNotEmpty()) {
                 foreach ($db_data as $key => $value) {
                     $data->push([
@@ -116,9 +117,9 @@ class OrderController extends Controller
                         'creatd_by'    => isset($value['createdbyname']) ? $value['createdbyname']['name'] : '',
                     ]);
                 }
-                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data , 'users' => $users ,  'all_status' => $all_status ], $this->successStatus);
+                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data, 'users' => $users,  'all_status' => $all_status], $this->successStatus);
             }
-            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data , 'users' => $users , 'all_status' => $all_status  ], 200);
+            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data, 'users' => $users, 'all_status' => $all_status], 200);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
@@ -136,16 +137,16 @@ class OrderController extends Controller
             $user = $request->user();
             $user_id = $user->id;
             $order_id = $request->input('order_id');
-            $data = $this->orders->with('orderdetails', 'orderdetails.products', 'statusname', 'orderdetails.productdetails', 'createdbyname' , 'getsalesdetail')->where('id', $order_id)->first();
-            $salesdetails = Sales::where('order_id' , $order_id)->first() ?? [];
+            $data = $this->orders->with('orderdetails', 'orderdetails.products', 'statusname', 'orderdetails.productdetails', 'createdbyname', 'getsalesdetail')->where('id', $order_id)->first();
+            $salesdetails = Sales::where('order_id', $order_id)->first() ?? [];
 
             $data['schme_amount'] = (string)$data['schme_amount'];
             $data['order_status'] = isset($data['statusname']) ? $data['statusname']['status_name'] : 'Pending';
             $data['dispatch_date'] = isset($salesdetails) ? (isset($salesdetails['dispatch_date']) ? Carbon::parse($salesdetails['dispatch_date'])->format('d-m-Y') : '') : '';
-            $data['lr_no'] = isset($salesdetails) ? isset($salesdetails['lr_no']) ? (string)$salesdetails['lr_no']  : '' :'';
-            $data['invoice_no'] = isset($salesdetails) ? (isset($salesdetails['invoice_no']) ? $salesdetails['invoice_no']  : '') :'';
-            $data['invoice_date'] = isset($salesdetails) ? (isset($salesdetails['invoice_date']) ? Carbon::parse($salesdetails['invoice_date'])->format('d-m-Y') : '') :'';
-            $data['transport_name'] = isset($salesdetails) ? (isset($salesdetails['transport_details']) ? $salesdetails['transport_details']  : '') :'';
+            $data['lr_no'] = isset($salesdetails) ? isset($salesdetails['lr_no']) ? (string)$salesdetails['lr_no']  : '' : '';
+            $data['invoice_no'] = isset($salesdetails) ? (isset($salesdetails['invoice_no']) ? $salesdetails['invoice_no']  : '') : '';
+            $data['invoice_date'] = isset($salesdetails) ? (isset($salesdetails['invoice_date']) ? Carbon::parse($salesdetails['invoice_date'])->format('d-m-Y') : '') : '';
+            $data['transport_name'] = isset($salesdetails) ? (isset($salesdetails['transport_details']) ? $salesdetails['transport_details']  : '') : '';
             $data['ebd_amount'] = (string)$data['ebd_amount'];
             $data['ebd_discount'] = (string)$data['ebd_discount'];
             $data['special_discount'] = (string)$data['special_discount'];
@@ -166,7 +167,7 @@ class OrderController extends Controller
             $data['gst12_amt'] = (string)$data['gst12_amt'];
             $data['gst18_amt'] = (string)$data['gst18_amt'];
             $data['gst28_amt'] = (string)$data['gst28_amt'];
-            $data['status_id'] = ($data['status_id'] && $data['status_id'] != NULL)?(string)$data['status_id']:"0";
+            $data['status_id'] = ($data['status_id'] && $data['status_id'] != NULL) ? (string)$data['status_id'] : "0";
             $data['address_id'] = (string)$data['address_id'];
             $data['suc_del'] = (string)$data['suc_del'];
             $data['gst_amount'] = (string)$data['gst_amount'];
@@ -179,14 +180,14 @@ class OrderController extends Controller
             $data['cash_discount'] = (string)$data['cash_discount'];
             $data['cash_amount'] = (string)$data['cash_amount'];
             $data['product_cat_id'] = (string)$data['product_cat_id'];
-            $data['extra_discount_amount'] = isset($data['extra_discount_amount']) && $data['extra_discount_amount'] > 0  ? (string)$data['extra_discount_amount'] : '' ;
-            $data['special_distribution_discount_amount'] = isset($data['special_distribution_discount_amount']) && $data['special_distribution_discount_amount'] > 0  ? (string)$data['special_distribution_discount_amount'] : '' ;
-            $data['distribution_margin_discount_amount'] = isset($data['distribution_margin_discount_amount']) && $data['distribution_margin_discount_amount'] > 0  ? (string)$data['distribution_margin_discount_amount'] : '' ;
-            $data['fan_extra_discount'] = isset($data['fan_extra_discount']) && $data['fan_extra_discount'] > 0  ? (string)$data['fan_extra_discount'] : '' ;
-            $data['fan_extra_discount_amount'] = isset($data['fan_extra_discount_amount']) && $data['fan_extra_discount_amount'] > 0  ? (string)$data['fan_extra_discount_amount'] : '' ;
-            $data['cash_discount'] = isset($data['cash_discount']) && $data['cash_discount'] > 0  ? (string)$data['cash_discount'] : '' ;
-            $data['cash_amount'] = isset($data['cash_amount']) && $data['cash_amount'] > 0  ? (string)$data['cash_amount'] : '' ;
-            $data['dod_discount_amount'] = isset($data['dod_discount_amount']) && $data['dod_discount_amount'] > 0  ? (string)$data['dod_discount_amount'] : '' ;
+            $data['extra_discount_amount'] = isset($data['extra_discount_amount']) && $data['extra_discount_amount'] > 0  ? (string)$data['extra_discount_amount'] : '';
+            $data['special_distribution_discount_amount'] = isset($data['special_distribution_discount_amount']) && $data['special_distribution_discount_amount'] > 0  ? (string)$data['special_distribution_discount_amount'] : '';
+            $data['distribution_margin_discount_amount'] = isset($data['distribution_margin_discount_amount']) && $data['distribution_margin_discount_amount'] > 0  ? (string)$data['distribution_margin_discount_amount'] : '';
+            $data['fan_extra_discount'] = isset($data['fan_extra_discount']) && $data['fan_extra_discount'] > 0  ? (string)$data['fan_extra_discount'] : '';
+            $data['fan_extra_discount_amount'] = isset($data['fan_extra_discount_amount']) && $data['fan_extra_discount_amount'] > 0  ? (string)$data['fan_extra_discount_amount'] : '';
+            $data['cash_discount'] = isset($data['cash_discount']) && $data['cash_discount'] > 0  ? (string)$data['cash_discount'] : '';
+            $data['cash_amount'] = isset($data['cash_amount']) && $data['cash_amount'] > 0  ? (string)$data['cash_amount'] : '';
+            $data['dod_discount_amount'] = isset($data['dod_discount_amount']) && $data['dod_discount_amount'] > 0  ? (string)$data['dod_discount_amount'] : '';
 
 
             if (!empty($data['orderdetails'])) {
@@ -224,7 +225,7 @@ class OrderController extends Controller
                 $data['buyer_address'] = isset($data['buyers']['customeraddress']) ? $data['buyers']['customeraddress'] : '';
                 $data['buyer_type'] = isset($data['buyers']['customertypes']) ? $data['buyers']['customertypes']['customertype_name'] : '';
                 $data['orderdetails'] = $orderdetails;
-                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data ], $this->successStatus);
+                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], $this->successStatus);
             }
             return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data], 200);
         } catch (\Exception $e) {
@@ -254,22 +255,22 @@ class OrderController extends Controller
                         $rows['discount'] = $product->productpriceinfo->discount;
                         if ($product->productpriceinfo->gst == '5') {
                             $gst = 5;
-                            $gst_amount = (($rows['quantity']*$rows['price'])*5)/100;
+                            $gst_amount = (($rows['quantity'] * $rows['price']) * 5) / 100;
                         } elseif ($product->productpriceinfo->gst == '12') {
                             $gst = 12;
-                            $gst_amount = (($rows['quantity']*$rows['price'])*12)/100;
+                            $gst_amount = (($rows['quantity'] * $rows['price']) * 12) / 100;
                         } elseif ($product->productpriceinfo->gst == '18') {
                             $gst = 18;
-                            $gst_amount = (($rows['quantity']*$rows['price'])*18)/100;
+                            $gst_amount = (($rows['quantity'] * $rows['price']) * 18) / 100;
                         } elseif ($product->productpriceinfo->gst == '28') {
                             $gst = 28;
-                            $gst_amount = (($rows['quantity']*$rows['price'])*28)/100;
+                            $gst_amount = (($rows['quantity'] * $rows['price']) * 28) / 100;
                         } else {
                             $gst = 0;
                             $gst_amount = 0;
                         }
                     }
-               
+
 
                     // calculate lime total for retailer/ please remove this code after adding app live
                     // if(isset($rows['line_total']) && isset($rows['quantity']) && isset($rows['price'])){
@@ -278,7 +279,7 @@ class OrderController extends Controller
                     //     }
                     // }
 
-                   
+
                     $orderdetail->push([
                         'active' => 'Y',
                         'order_id' => isset($response['order_id']) ? $response['order_id'] : null,
@@ -485,10 +486,10 @@ class OrderController extends Controller
                 $startDate = date('Y-m-d', strtotime($start_date));
                 $endDate = date('Y-m-d', strtotime($end_date));
                 $query->whereDate('order_date', '>=', $startDate)
-                        ->whereDate('order_date', '<=', $endDate);
+                    ->whereDate('order_date', '<=', $endDate);
             }
 
-            if(!empty($selecteduser_id)){
+            if (!empty($selecteduser_id)) {
                 $query->where('created_by', $selecteduser_id);
             }
 
@@ -498,7 +499,7 @@ class OrderController extends Controller
             $all_status = [['id' => '0', 'name' => 'Pending'], ['id' => '1', 'name' => 'Approved'], ['id' => '2', 'name' => 'Reject']];
             $users = User::whereDoesntHave('roles', function ($query) {
                 $query->where('id', 29);
-            })->where('active', 'Y')->whereIn('id',$user_ids)->select('id', 'name')->orderBy('name', 'asc')->get();
+            })->where('active', 'Y')->whereIn('id', $user_ids)->select('id', 'name')->orderBy('name', 'asc')->get();
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
             $data = collect([]);
             if ($db_data->isNotEmpty()) {
@@ -522,9 +523,9 @@ class OrderController extends Controller
                         'discount_status' => (($value['discount_status'] == '1') ? 'Approved' : (($value['discount_status'] == '2') ? 'Reject' : 'Pending')),
                     ]);
                 }
-                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data , 'all_users' => $users , 'all_status' => $all_status], $this->successStatus);
+                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data, 'all_users' => $users, 'all_status' => $all_status], $this->successStatus);
             }
-            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data , 'all_users' => $users , 'all_status' => $all_status], 200);
+            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data, 'all_users' => $users, 'all_status' => $all_status], 200);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
@@ -541,11 +542,11 @@ class OrderController extends Controller
             $query = $this->orders->where(function ($query) use ($user_ids) {
                 $query->whereIn('created_by', $user_ids);
             })
-            ->latest()
-            ->where(function ($query) {
-                $query->where('special_discount', '>', 0)
-                      ->orWhere('deal_discount', '>', 0);
-            });
+                ->latest()
+                ->where(function ($query) {
+                    $query->where('special_discount', '>', 0)
+                        ->orWhere('deal_discount', '>', 0);
+                });
 
             $start_date = $request->startdate ?? '';
             $end_date   = $request->enddate ?? '';
@@ -556,10 +557,10 @@ class OrderController extends Controller
                 $startDate = date('Y-m-d', strtotime($start_date));
                 $endDate = date('Y-m-d', strtotime($end_date));
                 $query->whereDate('order_date', '>=', $startDate)
-                        ->whereDate('order_date', '<=', $endDate);
+                    ->whereDate('order_date', '<=', $endDate);
             }
 
-            if(!empty($selecteduser_id)){
+            if (!empty($selecteduser_id)) {
                 $query->where('created_by', $selecteduser_id);
             }
 
@@ -569,7 +570,7 @@ class OrderController extends Controller
             $all_status = [['id' => '0', 'name' => 'Pending'], ['id' => '1', 'name' => 'Approved'], ['id' => '2', 'name' => 'Reject']];
             $users = User::whereDoesntHave('roles', function ($query) {
                 $query->where('id', 29);
-            })->where('active', 'Y')->whereIn('id',$user_ids)->select('id', 'name')->orderBy('name', 'asc')->get();
+            })->where('active', 'Y')->whereIn('id', $user_ids)->select('id', 'name')->orderBy('name', 'asc')->get();
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
             $data = collect([]);
             if ($db_data->isNotEmpty()) {
@@ -595,9 +596,9 @@ class OrderController extends Controller
                         'discount_status' => (($value['discount_status'] == '1') ? 'Approved' : (($value['discount_status'] == '2') ? 'Reject' : 'Pending')),
                     ]);
                 }
-                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data , 'all_users' => $users , 'all_status' => $all_status], $this->successStatus);
+                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data, 'all_users' => $users, 'all_status' => $all_status], $this->successStatus);
             }
-            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data , 'all_users' => $users , 'all_status' => $all_status], 200);
+            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data, 'all_users' => $users, 'all_status' => $all_status], 200);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
@@ -666,5 +667,53 @@ class OrderController extends Controller
         Order::where('id', $request->order_id)->delete();
 
         return response()->json(['status' => 'success', 'message' => 'Order deleted successfully.'], 200);
+    }
+
+    public function submitFullyDispatched(Request $request)
+    {
+        //$orderid = decrypt($orderid);
+        try {
+
+            $validator = Validator::make($request->all(), [
+                'invoice_no'       => 'required',
+                'order_id'         => 'required',
+                'invoice_date'     => 'required',
+                // 'transport_name'   => 'required',
+                // 'lr_no'            => 'required',
+                'dispatch_date'    => 'required'
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
+            }
+
+            $orderid = $request['order_id'];
+            $status_id = Status::where('status_name', '=', 'Dispatched')->pluck('id')->first();
+            // Order::where('id', '=', $orderid)->update(['status_id' => $status_id, 'cash_discount' => $request->cash_discount, 'cash_amount' => $request->cash_amount, 'sub_total' => $request->sub_total, 'grand_total' => $request->grand_total, 'order_remark' => $request->order_remark]);
+            $orders = $this->orders->with('orderdetails')->find($orderid);
+            $orders['invoice_date'] = $request['invoice_date'];
+            $orders['invoice_no'] = $request['invoice_no'];
+            // $orders['transport_name'] = $request['transport_name'];
+            $orders['lr_no'] = $request['lr_no'];
+            $orders['dispatch_date'] = $request['dispatch_date'];
+            $orders['transport_details'] = $request['transport_details'];
+            $orders['order_id'] = $orderid;
+            $orders['saledetail'] = $orders['orderdetails'];
+            $data = collect([$orders]);
+            // dd($data);
+            $response = insertSales($data);
+            if ($response['status'] == 'success') {
+
+                $status_id = Status::where('status_name', '=', 'Dispatched')->pluck('id')->first();
+
+                Order::where('id', '=', $request['order_id'])->update(['status_id' => $status_id]);
+
+                return response(['status' => 'success', 'message' => 'Order Dispatched Successfully.'], 200);
+            } else {
+                Order::where('id', '=', $orderid)->update(['status_id' => null]);
+                return response(['status' => 'error', 'message' => 'Order Status Not Updated.'], 200);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
     }
 }

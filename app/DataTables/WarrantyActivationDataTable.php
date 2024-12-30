@@ -27,24 +27,32 @@ class WarrantyActivationDataTable extends DataTable
             ->eloquent($query)
             ->addIndexColumn()
             ->addColumn('cust_status', function ($query) {
-                if($query->customer->status == '0'){
+                if ($query->customer) {
+                    if ($query->customer->status == '0') {
+                        return 'Inactive';
+                    } elseif ($query->customer->status == '1') {
+                        return 'Active';
+                    }
+                } else {
                     return 'Inactive';
-                }elseif($query->customer->status == '1'){
-                    return 'Active';
                 }
                 return '-';
             })
             ->addColumn('customer.customer_name', function ($query) {
-                return '<a href="'.route("warranty_activation.show", encrypt($query->id)).'">'.$query->customer->customer_name.'</a>';
+                if ($query->customer) {
+                    return '<a href="' . route("warranty_activation.show", encrypt($query->id)) . '">' . $query->customer->customer_name . '</a>';
+                } else {
+                    return '-';
+                }
             })
             ->addColumn('status', function ($query) {
-                if($query->status == '0'){
+                if ($query->status == '0') {
                     return 'In Verification';
-                }elseif($query->status == '1'){
+                } elseif ($query->status == '1') {
                     return 'Activated';
-                }elseif($query->status == '2'){
+                } elseif ($query->status == '2') {
                     return 'Pending Activated';
-                }elseif($query->status == '3'){
+                } elseif ($query->status == '3') {
                     return 'Reject';
                 }
             })
@@ -52,7 +60,7 @@ class WarrantyActivationDataTable extends DataTable
                 $btn = '';
                 $activebtn = '';
                 if (auth()->user()->can(['scheme_delete'])) {
-                    $btn = $btn . ' <a href="'.route("warranty_activation.edit", encrypt($query->id)).'" class="btn btn-success btn-just-icon btn-sm" title="' . trans('panel.global.edit') . ' Warranty Activation">
+                    $btn = $btn . ' <a href="' . route("warranty_activation.edit", encrypt($query->id)) . '" class="btn btn-success btn-just-icon btn-sm" title="' . trans('panel.global.edit') . ' Warranty Activation">
                                 <i class="material-icons">edit</i>
                               </a>';
                 }
@@ -76,29 +84,28 @@ class WarrantyActivationDataTable extends DataTable
      */
     public function query(WarrantyActivation $model, Request $request)
     {
-        
+
         $data = $model->with('customer', 'seller_details', 'product_details');
-        if($request->branch_id && $request->branch_id != null && $request->branch_id != ''){
+        if ($request->branch_id && $request->branch_id != null && $request->branch_id != '') {
             $data->where('branch_id', $request->branch_id);
         }
-        if($request->parent_customer && $request->parent_customer != null  && $request->parent_customer != ''){
+        if ($request->parent_customer && $request->parent_customer != null  && $request->parent_customer != '') {
             $data->where('customer_id', $request->parent_customer);
         }
-        if($request->status != null  && $request->status != ''){
+        if ($request->status != null  && $request->status != '') {
             $data->where('status', $request->status);
         }
-        if($request->product_id && $request->product_id != null  && $request->product_id != ''){
+        if ($request->product_id && $request->product_id != null  && $request->product_id != '') {
             $data->where('product_id', $request->product_id);
         }
-        if($request->state_id && $request->state_id != null  && $request->state_id != ''){
+        if ($request->state_id && $request->state_id != null  && $request->state_id != '') {
             $all_end_users = EndUser::where('state_id', $request->state_id)->pluck('id');
-            if(count($all_end_users) > 0){
+            if (count($all_end_users) > 0) {
                 $data->whereIn('end_user_id', $all_end_users);
-            }else{
+            } else {
                 $data->where('id', '0');
             }
         }
-        
         $data = $data->latest()->newQuery();
         return $data;
     }

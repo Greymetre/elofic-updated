@@ -131,8 +131,8 @@ class PrimarySalesExport implements FromCollection, WithHeadings,WithMapping, Sh
         }
 
         
-        $query = $query->latest()->get();   
-
+        $query = $query->latest()->get(); 
+        
         return $query;
     }
 

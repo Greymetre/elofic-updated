@@ -127,7 +127,7 @@ class AttendanceController extends Controller
     }
 
     $attendancesummary = $attendancesummary->limit(4500)->get();
-    
+
     $date1 = $start_date;
     $date2 = $end_date;
 
@@ -156,6 +156,7 @@ class AttendanceController extends Controller
       $total_h = 0;
       $total_hd = 0;
       $total_p = 0;
+      $total_pn = 0;
       $total_atte = 0;
 
       foreach ($period as $key => $value) {
@@ -229,6 +230,9 @@ class AttendanceController extends Controller
                 $label_data[] = 'H';
                 $total_h++;
               }
+            } else if ($attendance_details->attendance_status == '2') {
+              $label_data[] = 'A';
+              $total_a++;
             } else {
               if ($attendance_details->working_type == 'Full Day Leave') {
                 $label_data[] =  'LOPN';
@@ -240,8 +244,8 @@ class AttendanceController extends Controller
                 $label_data[] =  'LOPN';
                 $total_lop++;
               } else {
-                $label_data[] = 'A';
-                $total_a++;
+                $label_data[] = 'PN';
+                $total_pn++;
               }
             }
           } else {
@@ -268,6 +272,7 @@ class AttendanceController extends Controller
       $label_data[] = (string)$total_h;
       $label_data[] = (string)$total_hd;
       $label_data[] = (string)$total_p;
+      $label_data[] = (string)$total_pn;
       $label_data[] = (string)$total_atte;
 
       $return =  [
@@ -301,6 +306,7 @@ class AttendanceController extends Controller
       'Holiday (H)',
       'Half Day (1/2P+1/2LOP)',
       'Present (P)',
+      'Present Not Approve (PN)',
       'TOTAL Days',
     ];
 
@@ -325,7 +331,7 @@ class AttendanceController extends Controller
       $ipAddress = $request->ip();
       $accessToken = '4060dae74e438c';
       $location = Location::get($ipAddress);
-      $addressP = getLatLongToAddress($location->latitude,$location->longitude);
+      $addressP = getLatLongToAddress($location->latitude, $location->longitude);
       if (Attendance::updateOrCreate(['user_id' => $request['user_id'], 'punchin_date' => date('Y-m-d', strtotime($request['punchin_date']))], [
         'user_id' => $request['user_id'],
         'active' => 'Y',
