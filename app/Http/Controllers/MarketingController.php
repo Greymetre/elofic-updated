@@ -31,9 +31,10 @@ class MarketingController extends Controller
         $cities = Marketing::latest()->get()->unique('event_center');
         $branchs = Marketing::latest()->get()->unique('branch');
         $categories = Marketing::latest()->get()->unique('category_of_participant');
+        $divisions = Marketing::latest()->get()->unique('division');
         $branding_team_members = Marketing::latest()->get()->unique('branding_team_member');
         abort_if(Gate::denies('marketing_master_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return $dataTable->render('marketing.index', compact('states','event_districts','event_under_names','cities','branchs','categories','branding_team_members'));
+        return $dataTable->render('marketing.index', compact('states','event_districts','event_under_names','cities','branchs','categories','branding_team_members','divisions'));
     }
 
     /**
@@ -141,7 +142,8 @@ class MarketingController extends Controller
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         $googleDrivelink = $request->input('google_drivelink');
-        Excel::import(new MarketingMasterImport($googleDrivelink),request()->file('import_file'));
+        $countOfParticipant = $request->input('count_of_participant');
+        Excel::import(new MarketingMasterImport($googleDrivelink,$countOfParticipant),request()->file('import_file'));
         return redirect('marketings')->with('success', 'Data imported and updated successfully.');
     }
 

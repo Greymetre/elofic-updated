@@ -52,6 +52,17 @@
                         @endif
                       </select>
                     </div>
+                    <!-- Division filter -->
+                    <div class="p-2" style="width:200px;">
+                      <select class="select2" name="division" id="division" data-style="select-with-transition" title="Select Division">
+                        <option value="" selected>Select Division</option>
+                        @if(@isset($divisions ))
+                        @foreach($divisions as $division)
+                        <option value="{!! $division->division !!}">{!! $division->division !!}</option>
+                        @endforeach
+                        @endif
+                      </select>
+                    </div>
                     <!-- Event Center filter -->
                     <div class="p-2" style="width:200px;">
                       <select class="select2" name="event_center" id="event_center" data-style="select-with-transition" title="Select City">
@@ -185,6 +196,7 @@
                 <th>S. No</th>
                 <th>Action</th>
                 <th>Event Date</th>
+                <th>Division</th>
                 <th>Event Center</th>
                 <th>Event District</th>
                 <th>State</th>
@@ -236,6 +248,7 @@
               d.branch = $('#branch').val(),
               d.event_under = $('#event_under').val(),
               d.district = $('#district').val(),
+              d.division = $('#division').val(),
               d.branding_team_member = $('#branding_team_member').val(),
               d.category_of_participant = $('#category_of_participant').val()
           }
@@ -245,7 +258,7 @@
             name: 'id',
             orderable: true,
             searchable: true,
-            "defaultContent": 'orderno'
+            "defaultContent": ''
           },
           {
             data: 'action',
@@ -256,7 +269,13 @@
             data: 'event_date',
             name: 'event_date',
             orderable: false,
-            "defaultContent": 'orderno'
+            "defaultContent": ''
+          },
+          {
+            data: 'division',
+            name: 'division',
+            orderable: false,
+            "defaultContent": ''
           },
           {
             data: 'event_center',
@@ -349,6 +368,10 @@
         table.draw();
       });
       $('#district').change(function() {
+        getCounts();
+        table.draw();
+      });
+      $('#division').change(function() {
         getCounts();
         table.draw();
       });

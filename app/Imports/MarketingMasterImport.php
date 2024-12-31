@@ -31,10 +31,12 @@ class MarketingMasterImport implements ToCollection, WithValidation, WithHeading
     use Importable;
 
     protected $googleDrivelink;
+    protected $countOfParticipant;
 
-    public function __construct($googleDrivelink)
+    public function __construct($googleDrivelink, $countOfParticipant)
     {
         $this->googleDrivelink = $googleDrivelink;
+        $this->countOfParticipant = $countOfParticipant;
     }
 
     public function model(array $row)
@@ -55,6 +57,7 @@ class MarketingMasterImport implements ToCollection, WithValidation, WithHeading
 
             Marketing::create([
                 'event_date' => $row['event_date'],
+                'division' => $row['division'],
                 'event_center' => $row['event_center'],
                 'place_of_participant' => $row['place_of_participant'],
                 'event_district' => $row['event_district'],
@@ -67,7 +70,9 @@ class MarketingMasterImport implements ToCollection, WithValidation, WithHeading
                 'name_of_participant' => $row['name_of_participant'],
                 'category_of_participant' => $row['category_of_participant'],
                 'mob_no_of_participant' => $row['mob_no_of_participant'],
-                'google_drivelink' => $this->googleDrivelink
+                'google_drivelink' => $this->googleDrivelink,
+                'count_of_participant' => $this->countOfParticipant,
+                'created_by' => Auth::user()->id
             ]);
         }
     }
@@ -79,6 +84,7 @@ class MarketingMasterImport implements ToCollection, WithValidation, WithHeading
             'branch' => 'required|exists:branches,branch_name',
             'state' => 'required|exists:states,state_name',
             'category_of_participant' => 'required|in:Plumber,Mechanic,Village influencer,Retailer',
+            'division' => 'required|exists:divisions,division_name',
         ];
         return $rules;
     }
