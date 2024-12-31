@@ -49,6 +49,17 @@
               </div>
               <div class="col-md-6">
                 <div class="form-group">
+                  <label class="bmd-label-floating">Count Of Participants <span class="text-danger"> *</span> <small>(the total number of people or groups of people that are involved in an event.)</small></label>
+                  <input type="number" name="count_of_participant" class="form-control" required>
+                  @if ($errors->has('count_of_participant'))
+                  <div class="error col-lg-12">
+                    <p class="text-danger">{{ $errors->first('count_of_participant') }}</p>
+                  </div>
+                  @endif
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
                   <div class="fileinput fileinput-new text-center" data-provides="fileinput">
                     <span class="btn btn-just-icon btn-theme btn-file">
                       <span class="fileinput-new"><i class="material-icons">attach_file</i></span>

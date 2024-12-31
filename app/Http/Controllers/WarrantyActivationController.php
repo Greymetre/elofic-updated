@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\DataTables\WarrantyActivationDataTable;
 use App\Exports\WarrantyActivactionExport;
 use App\Models\Branch;
+use App\Models\City;
 use App\Models\Customers;
+use App\Models\District;
 use App\Models\EndUser;
 use App\Models\Pincode;
 use App\Models\SchemeHeader;
@@ -15,6 +17,7 @@ use App\Models\WarrantyActivation;
 use App\Models\WarrantyTimeline;
 use Illuminate\Http\Request;
 use Gate;
+use Validator;
 use Excel;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Redirect;
@@ -74,19 +77,19 @@ class WarrantyActivationController extends Controller
     {
         try {
             abort_if(Gate::denies('warranty_activation_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-            if (!$request->end_user_id || $request->end_user_id == NULL || $request->end_user_id == '') {
-                if (!empty($request['customer_pindcode'])) {
-                    $pincodes = Pincode::with('cityname', 'cityname.districtname')->where('pincode', '=', $request['customer_pindcode'])->first();
-                    $request['customer_state'] = !empty($pincodes['cityname']['districtname']['statename']) ? $pincodes['cityname']['districtname']['statename']['state_name'] : '';
-                    $request['state_id'] = !empty($pincodes['cityname']['districtname']['state_id']) ? $pincodes['cityname']['districtname']['state_id'] : '';
-                    $request['customer_district'] = !empty($pincodes['cityname']['districtname']) ? $pincodes['cityname']['districtname']['district_name'] : '';
-                    $request['customer_city'] = !empty($pincodes['cityname']) ? $pincodes['cityname']['city_name'] : '';
-                    $request['customer_country'] = !empty($pincodes['cityname']['districtname']['statename']['countryname']) ? $pincodes['cityname']['districtname']['statename']['countryname']['country_name'] : '';
-                } else {
-                    $state_is = State::find($request['customer_state']);
-                    $request['customer_state'] = $state_is->state_name;
-                    $request['state_id'] = $state_is->id;
-                }
+            // dd($request->all());
+            $rules = [
+                'customer_number'    => 'required',
+                'customer_state'          => 'required',
+                'customer_district'    => 'required',
+                'customer_city'            => 'required',
+            ];
+            $validator = Validator::make($request->all(), $rules);
+            if ($validator->passes()) {
+                $Cstate = State::where('id', $request->customer_state)->first();
+                $Cdistrict = District::where('id', $request->customer_district)->first();
+                $Ccity = City::where('id', $request->customer_city)->first();
+
                 $end_user = EndUser::updateOrCreate(['customer_number' => $request->customer_number ?? ''], [
                     'customer_name' => $request->customer_name ?? '',
                     'customer_number' => $request->customer_number ?? '',
@@ -95,53 +98,56 @@ class WarrantyActivationController extends Controller
                     'customer_place' => $request->customer_place ?? '',
                     'customer_pindcode' => $request->customer_pindcode ?? '',
                     'customer_country' => $request->customer_country ?? '',
-                    'customer_state' => $request->customer_state ?? '',
-                    'state_id' => $request->state_id ?? '',
-                    'customer_district' => $request->customer_district ?? '',
-                    'customer_city' => $request->customer_city ?? '',
-                    'status' => $request->customer_status ?? ''
+                    'customer_state' => $Cstate->state_name ?? '',
+                    'customer_district' => $Cdistrict->district_name ?? '',
+                    'customer_city' => $Ccity->city_name ?? '',
+                    'state_id' => $Cstate->id ?? '',
+                    'district_id' => $Cdistrict->id ?? '',
+                    'city_id' => $Ccity->id ?? '',
                 ]);
                 $request->end_user_id = $end_user->id;
-            }
-            $data = WarrantyActivation::where('product_serail_number', $request->product_serail_number)->where('status', '!=', '3')->first();
-            if ($data) {
-                return Redirect::to('warranty_activation')->with('message_info', 'This serial number('.$request->product_serail_number.') already in Warranty Activation.');
-            } else {
-                $wararanty = WarrantyActivation::create([
-                    'product_serail_number' => $request->product_serail_number ?? NULL,
-                    'product_id' => $request->product_id ?? NULL,
-                    'end_user_id' => $request->end_user_id ?? NULL,
-                    'branch_id' => $request->branch_id ?? NULL,
-                    'customer_id' => $request->customer_id ?? NULL,
-                    'status' => $request->status ?? 0,
-                    'sale_bill_no' => $request->sale_bill_no ?? NULL,
-                    'sale_bill_date' => $request->sale_bill_date ?? NULL,
-                    'warranty_date' => $request->warranty_date ?? NULL,
-                    'created_by' => auth()->user()->id
-                ]);
-                if ($request->status == '1') {
-                    $checkTrans = TransactionHistory::where('coupon_code', $wararanty->product_serail_number)->first();
-                    if ($checkTrans) {
-                        TransactionHistory::where('coupon_code', $wararanty->product_serail_number)->update(['status' => '1']);
-                        $customer = Customers::find($wararanty->customer_id);
-                        $noti_data = [
-                            'fcm_token' =>  $customer->customerdetails->fcm_token,
-                            'title' => 'Points Activated ✅',
-                            'msg' => $customer->name . ' your ' . $checkTrans->point . ' provisional points are successfully activated in Silver Saarthi.',
-                        ];
-                        $send_notification = SendNotifications::send($noti_data);
+                $data = WarrantyActivation::where('product_serail_number', $request->product_serail_number)->where('status', '!=', '3')->first();
+                if ($data) {
+                    return Redirect::to('warranty_activation')->with('message_info', 'This serial number(' . $request->product_serail_number . ') already in Warranty Activation.');
+                } else {
+                    $wararanty = WarrantyActivation::create([
+                        'product_serail_number' => $request->product_serail_number ?? NULL,
+                        'product_id' => $request->product_id ?? NULL,
+                        'end_user_id' => $request->end_user_id ?? NULL,
+                        'branch_id' => $request->branch_id ?? NULL,
+                        'customer_id' => $request->customer_id ?? NULL,
+                        'status' => $request->status ?? 0,
+                        'sale_bill_no' => $request->sale_bill_no ?? NULL,
+                        'sale_bill_date' => $request->sale_bill_date ?? NULL,
+                        'warranty_date' => $request->warranty_date ?? NULL,
+                        'created_by' => auth()->user()->id
+                    ]);
+                    if ($request->status == '1') {
+                        $checkTrans = TransactionHistory::where('coupon_code', $wararanty->product_serail_number)->first();
+                        if ($checkTrans) {
+                            TransactionHistory::where('coupon_code', $wararanty->product_serail_number)->update(['status' => '1']);
+                            $customer = Customers::find($wararanty->customer_id);
+                            $noti_data = [
+                                'fcm_token' =>  $customer->customerdetails->fcm_token,
+                                'title' => 'Points Activated ✅',
+                                'msg' => $customer->name . ' your ' . $checkTrans->point . ' provisional points are successfully activated in Silver Saarthi.',
+                            ];
+                            $send_notification = SendNotifications::send($noti_data);
+                        }
+                    }
+                    if ($request->hasFile('warranty_activation_attach')) {
+                        $file = $request->file('warranty_activation_attach');
+                        $customname = time() . '.' . $file->getClientOriginalExtension();
+                        $wararanty->addMedia($file)
+                            ->usingFileName($customname)
+                            ->toMediaCollection('warranty_activation_attach');
                     }
                 }
-                if ($request->hasFile('warranty_activation_attach')) {
-                    $file = $request->file('warranty_activation_attach');
-                    $customname = time() . '.' . $file->getClientOriginalExtension();
-                    $wararanty->addMedia($file)
-                        ->usingFileName($customname)
-                        ->toMediaCollection('warranty_activation_attach');
-                }
-            }
 
-            return Redirect::to($request->previous_url.'?serial_no='.$request->product_serail_number)->with('message_success', 'Warranty Activation Store Successfully.');
+                return Redirect::to($request->previous_url . '?serial_no=' . $request->product_serail_number)->with('message_success', 'Warranty Activation Store Successfully.');
+            } else {
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
         } catch (\Exception $e) {
             return redirect()->back()->withErrors($e->getMessage())->withInput();
         }

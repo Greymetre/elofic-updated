@@ -55,6 +55,7 @@ use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\ExpensesTypeController;
 use App\Http\Controllers\SalesWeightageController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\EndUserController;
 use App\Http\Controllers\GiftBrandController;
 use App\Http\Controllers\GiftCategoryController;
 use App\Http\Controllers\GiftModelController;
@@ -223,9 +224,11 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('customers-template', [CustomerController::class, 'template'])->name('customers.template');
     Route::post('customers-upload', [CustomerController::class, 'upload'])->name('customers.upload');
     Route::post('customers-active', [CustomerController::class, 'active'])->name('customers.active');
-
     Route::any('customers-survey', [CustomerController::class, 'survey'])->name('customers.survey');
     Route::any('survey-download', [CustomerController::class, 'surveyDownload'])->name('survey-download');
+    
+    //End User Routs
+    Route::resource('end_user', EndUserController::class);
 
     //
     Route::any('distributors', [CustomerController::class, 'distributors'])->name('distributors.index');

@@ -43,6 +43,10 @@ class PrimarySales extends Model
         'new_group_name',
         'product_id',
         'sap_code',
+        'group_1',
+        'group_2',
+        'group_3',
+        'group_4',
         'created_at',
         'updated_at'
     ];

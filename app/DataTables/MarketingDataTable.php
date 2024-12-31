@@ -51,6 +51,9 @@ class MarketingDataTable extends DataTable
         if ($request->district != null && $request->district != '') {
             $data->where('event_district', $request->district);
         }
+        if ($request->division != null && $request->division != '') {
+            $data->where('division', $request->division);
+        }
 
         if ($request->event_under != null && $request->event_under != '') {
             $data->where('event_under_name', $request->event_under);

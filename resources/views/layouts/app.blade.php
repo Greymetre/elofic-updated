@@ -1463,7 +1463,7 @@
                      @if(auth()->user()->can('end_user_access'))
                      <li class="nav-link-btn {{ request()->is('end_user*') ? 'active' : '' }}">
                         <a class="hoveradd2" href="{{ url('end_user') }}">
-                           <i class="material-icons icon">history</i>
+                           <i class="material-icons icon">group</i>
                            <span>End Users</span>
                            <div class="d-none mobile_hide"> End Users</div>
                         </a>

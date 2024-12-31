@@ -929,13 +929,13 @@
                   $("#customer_state").val(res.data.state_id).trigger("change");
                   setTimeout(() => {
                      $("#customer_district").val(res.data.district_id).trigger("change");
-                  }, 500);
-                  setTimeout(() => {
-                     $("#customer_city").val(res.data.city_id).trigger("change");
                   }, 1000);
                   setTimeout(() => {
-                     $("#customer_pindcode").val(res.data.customer_pindcode).trigger("change");
+                     $("#customer_city").val(res.data.city_id).trigger("change");
                   }, 1500);
+                  setTimeout(() => {
+                     $("#customer_pindcode").val(res.data.customer_pindcode).trigger("change");
+                  }, 2000);
 
                } else {
                   $("#customer_name").val("");
