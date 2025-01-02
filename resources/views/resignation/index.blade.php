@@ -35,7 +35,7 @@
                         <option value="">Select User</option>
                         @if(@isset($users ))
                         @foreach($users as $user)
-                        <option value="{!! $user['id'] !!}" >{!! $user['name'] !!}</option>
+                        <option value="{!! $user['id'] !!}">{!! $user['name'] !!}</option>
                         @endforeach
                         @endif
                       </select>
@@ -52,7 +52,7 @@
                     </div>
 
                     <div class="p-2" style="width:180px;">
-                      <select class="selectpicker"  name="status" id="status" data-style="select-with-transition" title="Select Status">
+                      <select class="selectpicker" name="status" id="status" data-style="select-with-transition" title="Select Status">
                         <option value="">Select Status</option>
                         <option value="0">Pendding</option>
                         <option value="1">Accepted</option>
@@ -143,7 +143,7 @@
                 <th>Date Of Joining</th>
                 <th>Notice</th>
                 <th>Last Working Date</th>
-                <th>Reason</th>
+                <th class="lenth_text">Reason</th>
                 <th>Personal Email ID</th>
                 <th>Personal Mobile Number</th>
                 <th>Action</th>
@@ -255,7 +255,7 @@
             defaultContent: '',
             orderable: false,
             render: function(data, type, row) {
-              return data ? `${data} Month` : '';
+              return data > 5 ? `${data} Days` : `${data} Month`;
             }
           },
           {

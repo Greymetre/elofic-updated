@@ -2352,6 +2352,9 @@
    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js" integrity="sha512-F636MAkMAhtTplahL9F6KmTfxTmYcAcjcCkyu0f0voT3N/6vzAuJ4Num55a0gEJ+hRLHhdz3vDvZpf6kqgEa5w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
    <script>
       $(function() {
+         //Initialize Select2 Elements
+         $('.select2').select2()
+         
          $('#toggle-one').bootstrapToggle();
          $('.datetimepicker').datetimepicker({
             format: 'YYYY-MM-DD HH:mm'
@@ -2375,8 +2378,6 @@
             }
          });
 
-         //Initialize Select2 Elements
-         $('.select2').select2()
 
          //Initialize Select2 Elements
          $('.select2bs4').select2({

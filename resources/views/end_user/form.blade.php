@@ -22,7 +22,8 @@
                     <div class="nav-tabs-navigation">
                         <div class="nav-tabs-wrapper new_id">
                             <h4 class="card-title ">
-                            {{$endUser->exists ? 'Edit':'Create'}} End User </h4>
+                                {{$endUser->exists ? 'Edit':'Create'}} End User
+                            </h4>
                             @if(auth()->user()->can(['district_access']))
                             <ul class="nav nav-tabs pull-right" data-tabs="tabs">
                                 <li class="nav-item">
@@ -208,7 +209,6 @@
             </div>
             <script src="{{ url('/').'/'.asset('assets/js/jquery.custom.js') }}"></script>
             <script>
-                
                 $("#customer_number").on("keyup", function() {
                     var customer_number = $(this).val();
                     $.ajax({
@@ -228,6 +228,11 @@
                                 $("#customer_address").val(res.data.customer_address);
                                 $("#customer_place").val(res.data.customer_place);
                                 $("#customer_state").val(res.data.state_id).trigger("change");
+                                if(res.data.status == '1') {
+                                    $('#active').prop('checked', true);
+                                } else if (res.data.status == '0') {
+                                    $('#inactive').prop('checked', true);
+                                }
                                 setTimeout(() => {
                                     $("#customer_district").val(res.data.district_id).trigger("change");
                                 }, 1000);

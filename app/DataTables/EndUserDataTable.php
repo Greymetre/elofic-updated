@@ -39,8 +39,19 @@ class EndUserDataTable extends DataTable
                     return '';
                 }
             })
+            ->addColumn('status', function ($data) {
+                if (auth()->user()->can(['user_active'])) {
+                    $active = ($data->status == '1') ? 'checked="" value="' . $data->status . '"' : 'value="' . $data->status . '"';
+                    return '<div class="togglebutton">
+                        <label>
+                          <input type="checkbox"' . $active . ' id="' . $data->id . '" class="activeRecord">
+                          <span class="toggle"></span>
+                        </label>
+                      </div>';
+                }
+            })
 
-            ->rawColumns(['pincodeDetails.pincode', 'action']);
+            ->rawColumns(['pincodeDetails.pincode', 'action', 'status']);
     }
 
     /**
@@ -54,8 +65,12 @@ class EndUserDataTable extends DataTable
 
         $data = $model->with('state', 'district', 'city', 'pincodeDetails');
 
-        if ($request->status != null  && $request->status != '') {
-            $data->where('status', $request->status);
+        if ($request->start_date != null  && $request->start_date != '') {
+            $data->whereDate('created_at', '>=', $request->start_date);
+        }
+
+        if ($request->end_date != null  && $request->end_date != '') {
+            $data->whereDate('created_at', '<=', $request->end_date);
         }
 
         $data = $data->latest()->newQuery();

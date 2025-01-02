@@ -121,11 +121,11 @@
                   <div class="col-md-3">
                      <div class="input_section">
                         <label class="col-form-label">Assign User </label>
-                        <select name="assign_user" id="assign_user" class="select2 form-control">
+                        <select name="assign_user" id="assign_user" class="select2 form-control" required>
                            <option value="">Select User</option>
                            @if($assign_users)
                            @foreach($assign_users as $assign_user)
-                           <option value="{{$assign_user->id}}" {!! old('assign_user', $complaints['assign_user'])==$assign_user->id ? 'selected':'' !!} >[{{$assign_user->id}}] {{$assign_user->name}}</option>
+                           <option value="{{$assign_user->id}}" {!! old('assign_user', $complaints['assign_user'])==$assign_user->id ? 'selected':'' !!} >[{{$assign_user->employee_codes}}] {{$assign_user->name}}</option>
                            @endforeach
                            @endif
                         </select>
@@ -143,7 +143,7 @@
                            <option value="">Select Service Center</option>
                            @if($service_centers)
                            @foreach($service_centers as $service_center)
-                           <option value="{{$service_center->id}}" {!! old('service_center', $complaints['service_center'])==$service_center->id ? 'selected':'' !!} >[{{$service_center->id}}] {{$service_center->name}}</option>
+                           <option value="{{$service_center->id}}" {!! old('service_center', $complaints['service_center'])==$service_center->id ? 'selected':'' !!} >[{{$service_center->customer_code}}] {{$service_center->name}}</option>
                            @endforeach
                            @endif
                         </select>
@@ -755,16 +755,16 @@
          $("#serail_number").trigger("keyup");
          $('#company_sale_bill_date').datepicker({
             maxDate: 0,
-            dateFormat: 'yy-mm-dd',
+            dateFormat: 'dd-mm-yy',
          });
          $('#customer_bill_date').datepicker({
             maxDate: 0,
-            dateFormat: 'yy-mm-dd',
+            dateFormat: 'dd-mm-yy',
          });
          $('#complaint_date').datepicker({
             minDate: 0,
             maxDate: 0,
-            dateFormat: 'yy-mm-dd',
+            dateFormat: 'dd-mm-yy',
          });
       });
       $("#company_sale_bill_date").on('change', function() {
@@ -832,7 +832,7 @@
                         console.log(res.check_Warranty.seller_details.id);
                         var newOption = new Option(res.check_Warranty.seller_details.name, res.check_Warranty.seller_details.id, false, false);
                         $('#party_name').append(newOption).trigger('change');
-                        $("#party_name").option(res.check_Warranty.seller_details.id);
+                        $("#party_name").val(res.check_Warranty.seller_details.id);
                         $("#party_name").trigger('change');
                      } else {
                         $("#party_name").val('');
@@ -962,28 +962,6 @@
             }
          });
       }).trigger('keyup');
-      $(document).on("change", "#customer_pindcode", function() {
-         // var customer_pindcode = $(this).val();
-         // $.ajax({
-         //    url: "{{ url('getAddressData') }}",
-         //    dataType: "json",
-         //    type: "POST",
-         //    data: {
-         //       _token: "{{csrf_token()}}",
-         //       pincode_id: customer_pindcode
-         //    },
-         //    success: function(res) {
-         //       console.log(res);
-         //       // $("#customer_country").val(res.country_name);
-         //       $("#customer_state").val(res.state_id);
-         //       $("#customer_state").change();
-         //       $("#customer_district").val(res.district_id);
-         //       $("#customer_district").change();
-         //       $("#customer_city").val(res.city_id);
-         //       $("#customer_city").change();
-         //    }
-         // });
-      });
       $("#go-search").on('click', function() {
          var search = $("#serail_number").val();
          if (!search || search == '' || search == null) {

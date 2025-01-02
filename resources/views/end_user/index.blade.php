@@ -14,14 +14,14 @@
           <h4 class="card-title ">End User {!! trans('panel.global.list') !!}
             <span class="">
               <div class="btn-group header-frm-btn">
-                @if(auth()->user()->can(['new_joining_download']))
+                @if(auth()->user()->can(['end_user_download']))
                 <form method="POST" action="{{ URL::to('new-joining/download') }}" class="form-horizontal">
-                  @csrf 
-                  <div class="d-flex flex-wrap flex-row">                   
+                  @csrf
+                  <div class="d-flex flex-wrap flex-row">
                     <div class="p-2" style="width:160px;"><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
                     <div class="p-2" style="width:160px;"><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
                     <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Damage Entries"><i class="material-icons">cloud_download</i></button></div>
-                </div>
+                  </div>
                 </form>
                 @endif
                 <!-- </div> -->
@@ -61,11 +61,11 @@
                   <!-- <p>{!!  trans('panel.global.add') !!} Transaction</p> -->
                   <!-- <a href="{{ route('damage_entries.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Damage Entry"><i class="material-icons">add_circle</i></a> -->
                   <!-- <p>{!!  trans('panel.global.add') !!} Manual Transaction</p> -->
-                      <a href="{{ route('end_user.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} End User"><i class="material-icons">add_circle</i></a>
+                  <a href="{{ route('end_user.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} End User"><i class="material-icons">add_circle</i></a>
                   @endif
                   <!-- </div>
                   </div> -->
-                 
+
                 </div>
               </div>
             </span>
@@ -116,6 +116,7 @@
               <thead class=" text-primary">
                 <th>{!! trans('panel.global.no') !!}</th>
                 <th>Action</th>
+                <th>Status</th>
                 <th>Customer Name</th>
                 <th>Mobile Number</th>
                 <th>Email</th>
@@ -173,6 +174,13 @@
             searchable: false
           },
           {
+            data: 'status',
+            name: 'status',
+            "defaultContent": '',
+            orderable: false,
+            searchable: false
+          },
+          {
             data: 'customer_name',
             name: 'customer_name',
             "defaultContent": '',
@@ -195,21 +203,30 @@
             data: 'state.state_name',
             name: 'state.state_name',
             "defaultContent": '',
-            orderable: false
+            orderable: false,
+            render: function(data, type, row) {
+              return data && data.trim() !== '' ? data : row.customer_state;
+            }
           },
           {
             data: 'district.district_name',
             name: 'district.district_name',
             "defaultContent": '',
             orderable: false,
-            searchable: false
+            searchable: false,
+            render: function(data, type, row) {
+              return data && data.trim() !== '' ? data : row.customer_district;
+            }
           },
           {
             data: 'city.city_name',
             name: 'city.city_name',
             "defaultContent": '',
             orderable: false,
-            searchable: false
+            searchable: false,
+            render: function(data, type, row) {
+              return data && data.trim() !== '' ? data : row.customer_city;
+            }
           },
           {
             data: 'pincodeDetails.pincode',
@@ -221,10 +238,50 @@
         ]
       });
       $('#start_date').change(function() {
+        var selectedStartDate = $('#start_date').datepicker('getDate');
+        $('#end_date').datepicker("option", "minDate", selectedStartDate);
         table.draw();
       });
       $('#end_date').change(function() {
         table.draw();
+      });
+    });
+
+    $('body').on('click', '.activeRecord', function() {
+      var $this = $(this);
+      var id = $(this).attr("id");
+      var active = $(this).attr("value");
+      var status = '';
+      if (active == '1') {
+        status = 'Incative ?';
+      } else {
+        status = 'Ative ?';
+      }
+      var token = $("meta[name='csrf-token']").attr("content");
+      if (!confirm("Are You sure want " + status)) {
+        return false;
+      }
+      $.ajax({
+        url: "{{ url('end-users-active') }}",
+        type: 'POST',
+        data: {
+          _token: token,
+          id: id,
+          active: active
+        },
+        success: function(data) {
+          $('.message').empty();
+          $('.alert').show();
+          if (data.status == 'success') {
+            var newValue = active == '1' ? '0' : '1';
+            $this.val(newValue);
+            $('.alert').addClass("alert-success");
+          } else {
+            $('.alert').addClass("alert-danger");
+          }
+          $('.message').append(data.message);
+          table.draw();
+        },
       });
     });
   </script>

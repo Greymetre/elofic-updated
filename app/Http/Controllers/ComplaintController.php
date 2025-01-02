@@ -66,9 +66,9 @@ class ComplaintController extends Controller
         })
             ->with(['roles' => function ($query) {
                 $query->with('permissions');
-            }])->select('id', 'name')
+            }])->select('id', 'name', 'employee_codes')
             ->get();
-        $service_centers = Customers::where('customertype', '4')->select('id', 'name')->get();
+        $service_centers = Customers::where('customertype', '4')->select('id', 'name', 'customer_code')->get();
         $branchs = Branch::where('active', 'Y')->select('id', 'branch_name', 'branch_code')->get();
         $pincodes = Pincode::where('active', 'Y')->select('id', 'pincode')->get();
         $divisions = Division::where('active', 'Y')->select('id', 'division_name')->get();
@@ -195,12 +195,12 @@ class ComplaintController extends Controller
         })
             ->with(['roles' => function ($query) {
                 $query->with('permissions');
-            }])->select('id', 'name')
+            }])->select('id', 'name', 'employee_codes')
             ->get();
         $work_done = ComplaintWorkDone::where('complaint_id', $complaint->id)->latest()->first();
         $complete_complaint = ComplaintTimeline::where('complaint_id', $complaint->id)->where('status', '3')->latest()->first();
         $service_bill = ServiceBill::with('service_bill_products')->where('complaint_id', $complaint->id)->latest()->first();
-        $service_centers = Customers::where('customertype', '4')->select('id', 'name')->get();
+        $service_centers = Customers::where('customertype', '4')->select('id', 'name', 'customer_code')->get();
         return view('complaint.show', compact('complaint', 'timelines', 'assign_users', 'service_centers', 'work_done', 'service_bill', 'complete_complaint'));
     }
 
