@@ -106,7 +106,7 @@
                     <option value="">Select User</option>
                     @if($assign_users)
                     @foreach($assign_users as $assign_user)
-                    <option value="{{$assign_user->id}}" {!! old('assign_user', $complaint['assign_user'])==$assign_user->id ? 'selected':'' !!} >[{{$assign_user->id}}] {{$assign_user->name}}</option>
+                    <option value="{{$assign_user->id}}" {!! old('assign_user', $complaint['assign_user'])==$assign_user->id ? 'selected':'' !!} >[{{$assign_user->employee_codes}}] {{$assign_user->name}}</option>
                     @endforeach
                     @endif
                   </select>
@@ -125,7 +125,7 @@
                     <option value="">Select Service Center</option>
                     @if($service_centers)
                     @foreach($service_centers as $service_center)
-                    <option value="{{$service_center->id}}" {!! old('service_center', $complaint['service_center'])==$service_center->id ? 'selected':'' !!} >[{{$service_center->id}}] {{$service_center->name}}</option>
+                    <option value="{{$service_center->id}}" {!! old('service_center', $complaint['service_center'])==$service_center->id ? 'selected':'' !!} >[{{$service_center->customer_code}}] {{$service_center->name}}</option>
                     @endforeach
                     @endif
                   </select>

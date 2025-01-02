@@ -130,7 +130,7 @@ class EndUserController extends Controller
             $Cstate = State::where('id', $request->customer_state)->first();
             $Cdistrict = District::where('id', $request->customer_district)->first();
             $Ccity = City::where('id', $request->customer_city)->first();
-
+            
             $end_user = EndUser::updateOrCreate(['customer_number' => $request->customer_number ?? ''], [
                 'customer_name' => $request->customer_name ?? '',
                 'customer_number' => $request->customer_number ?? '',
@@ -162,5 +162,16 @@ class EndUserController extends Controller
     public function destroy(EndUser $endUser)
     {
         //
+    }
+
+    public function active(Request $request)
+    {
+        if (EndUser::where('id', $request['id'])->update(['status' => ($request['active'] == '1') ? '0' : '1'])) {
+            $user = EndUser::find($request['id']);
+            
+            $message = ($request['active'] == '1') ? 'Inactive' : 'Active';
+            return response()->json(['status' => 'success', 'message' => 'End User ' . $message . ' Successfully!']);
+        }
+        return response()->json(['status' => 'error', 'message' => 'Error in Status Update']);
     }
 }

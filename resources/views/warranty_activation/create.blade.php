@@ -338,7 +338,7 @@
                            </div>
                            <div class="col-md-6">
                               <div class="input_section">
-                                 <label for="sale_bill_no" class="col-form-label">Co Sale Bill No.</label>
+                                 <label for="sale_bill_no" class="col-form-label">Saller Bill No.</label>
                                  <input type="text" name="sale_bill_no" id="sale_bill_no" class="form-control" value="{!! old( 'sale_bill_no' , $warranty_activation['sale_bill_no']) !!}" required>
                                  @if ($errors->has('sale_bill_no'))
                                  <div class="error col-lg-12">

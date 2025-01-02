@@ -502,7 +502,7 @@ class CustomerController extends Controller
                         }
                     })
                     ->whereIn('id', $customer_ids_assign)
-                    ->select('id', 'name', 'first_name', 'last_name', 'mobile', 'email', 'profile_image', 'customer_code', 'latitude', 'longitude', 'customertype')
+                    ->select('id', 'name', 'first_name', 'last_name', 'mobile', 'email', 'profile_image', 'customer_code', 'latitude', 'longitude', 'customertype','sap_code')
                     // dd($query->toSql());
                     ->orderBy('name', 'asc')
                     ->paginate($pageSize);
@@ -517,7 +517,7 @@ class CustomerController extends Controller
                 foreach ($db_data as $key => $value) {
                     $data->push([
                         'customer_id' => isset($value['id']) ? $value['id'] : 0,
-                        'name' => isset($value['name']) ? $value['name'] : '',
+                        'name' => isset($value['name']) ? $value['name'].'('.$value['sap_code'].')': '',
                         //'first_name' => isset($value['first_name']) ? $value['first_name'] : '',
                         //'last_name' => isset($value['last_name']) ? $value['last_name'] : '',
                         'mobile' => isset($value['mobile']) ? $value['mobile'] : '',

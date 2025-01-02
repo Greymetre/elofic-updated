@@ -29,7 +29,7 @@ class ResignationController extends Controller
         $divisions = Division::where('active', 'Y')->get();
         $users = User::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
-        })->where('active', 'Y')->get();
+        })->get();
         return $dataTable->render('resignation.index', compact('branches', 'divisions', 'users'));
     }
 
@@ -42,7 +42,7 @@ class ResignationController extends Controller
     {
         $all_users = User::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
-        })->where('active', 'Y')->get();
+        })->get();
         if (!auth()->user()->hasRole('superadmin') && !auth()->user()->hasRole('Admin') && !auth()->user()->hasRole('Sub_Admin') && !auth()->user()->hasRole('HR_Admin')) {
             $userid = !empty($userid) ? $userid : Auth::user()->id;
             $all_ids_array = array($userid);

@@ -139,6 +139,7 @@
                                             <label for="notice">Notice</label>
                                             <select class="form-control select2 {{ $errors->has('notice') ? 'is-invalid' : '' }}" onchange="calculateRD()" name="notice" id="notice" required>
                                                 <option value="">Select Notice Period</option>
+                                                <option value="15">15 Days</option>
                                                 <option value="1">1 Month</option>
                                                 <option value="2">2 Month</option>
                                                 <option value="3">3 Month</option>
@@ -283,31 +284,39 @@
                     user_id: user_id
                 },
                 success: function(res) {
-                    console.log(res);
                     $("#employee_code").val(res.employee_codes);
                     $("#designation").val(res.getdesignation?.designation_name || '');
                     $("#reporting_manager").val(res.reportinginfo?.name || '');
                     $("#mobile").val(res.mobile);
                     $("#branch_id").val(res.branch_id);
                     $("#date_of_joining").val(res.userinfo.date_of_joining);
-                    console.log(res);
+
                 }
             });
         }
 
         function calculateRD() {
             var noticeP = parseInt($('#notice').val(), 10);
+            var submitDateValue = $('#submit_date').val();
 
-            if(noticeP != '' && noticeP != null){
-                let today = new Date($('#submit_date').val());
-                let nextMonth = new Date(today);
-                nextMonth.setMonth(today.getMonth() + noticeP);
-    
-                let formattedDate = nextMonth.toISOString().split('T')[0];
-    
+            if (!isNaN(noticeP) && submitDateValue) {
+                let today = new Date(submitDateValue);
+                let lastWorkingDate;
+
+                if (noticeP > 5) {
+                    lastWorkingDate = new Date(today);
+                    lastWorkingDate.setDate(today.getDate() + noticeP); // Assume 1 month = 30 days
+                } else {
+                    lastWorkingDate = new Date(today);
+                    lastWorkingDate.setMonth(today.getMonth() + noticeP);
+                }
+
+                let formattedDate = lastWorkingDate.toISOString().split('T')[0];
+
                 $("#last_working_date").val(formattedDate);
+            } else {
+                alert('Please provide a valid notice period and submit date.');
             }
-
         }
     </script>
 

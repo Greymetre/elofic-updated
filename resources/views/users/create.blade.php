@@ -1278,7 +1278,7 @@
     })
     
     $("#roles").on("change", function() {
-       if (jQuery.inArray("8", $(this).val()) !== -1) {
+       if (jQuery.inArray("8", $(this).val()) !== -1 || jQuery.inArray("37", $(this).val()) !== -1) {
           $("#branch-data").removeClass('d-none');
        } else {
           $("#branch-data").addClass('d-none');

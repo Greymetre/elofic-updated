@@ -38,6 +38,7 @@ class CustomController extends Controller
             $pageSize = $request->input('pageSize');
             $query = CustomerType::where(function ($query) {
                 $query->where('active', '=', 'Y');
+                $query->where('type_name', '=', 'retailer');
             })->select('id', 'customertype_name');
 
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
