@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\DataTables\EndUserDataTable;
+use App\Exports\EndUserExport;
 use App\Models\City;
 use App\Models\District;
 use App\Models\EndUser;
@@ -11,6 +12,7 @@ use App\Models\State;
 use Illuminate\Http\Request;
 use Validator;
 use Gate;
+use Excel;
 use Illuminate\Http\Response;
 
 class EndUserController extends Controller
@@ -173,5 +175,14 @@ class EndUserController extends Controller
             return response()->json(['status' => 'success', 'message' => 'End User ' . $message . ' Successfully!']);
         }
         return response()->json(['status' => 'error', 'message' => 'Error in Status Update']);
+    }
+
+    public function download(Request $request)
+    {
+        abort_if(Gate::denies('end_user_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        // return $request;
+        return Excel::download(new EndUserExport($request), 'EndUser.xlsx');
     }
 }

@@ -230,6 +230,7 @@ Route::group(['middleware' => ['auth']], function () {
     //End User Routs
     Route::resource('end_user', EndUserController::class);
     Route::post('end-users-active', [EndUserController::class, 'active'])->name('end-users.active');
+    Route::post('end-user/download', [EndUserController::class, 'download'])->name('end-users.download');
 
     //
     Route::any('distributors', [CustomerController::class, 'distributors'])->name('distributors.index');

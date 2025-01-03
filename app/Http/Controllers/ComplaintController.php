@@ -443,8 +443,6 @@ class ComplaintController extends Controller
                     return response()->json(['status' => 'error', 'message' => 'To complete this complaint, You need to Activate Warranty. <a href="' . route('warranty_activation.create') . '?serial_no=' . $complaint->product_serail_number . '" style="color:blue;">Click here</a> to Activate Warranty.']);
                 } else if (!$service_bill) {
                     return response()->json(['status' => 'error', 'message' => 'To complete this complaint, You need to add service bill. <a href="' . route('service_bills.create') . '?complaint_id=' . $request->id . '" style="color:blue;">Click here</a> to add.']);
-                } else if ($service_bill->status != '3') {
-                    return response()->json(['status' => 'error', 'message' => 'To complete this complaint, You need to approve the service bill first. <a href="' . route('service_bills.show', $service_bill->id) . '" style="color:blue;">Click here</a> to check.']);
                 } else {
                     return response()->json(['status' => 'success', 'message' => 'Take remark and complete complaint.']);
                 }

@@ -140,25 +140,25 @@
             <span class="btn btn-sm btn-success">Approved</span>
             <button type="button" class="btn btn-sm btn-warning ml-2" onclick="changeStatus('0','{{$dealerAppointment->id}}')">Pending</button>
             @if($dealerAppointment->getMedia('certificate')->count() < 1 )
-            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#generateCertificateModal">Generate Certificate</button>
-            @endif
-            @endif
-            @if(auth()->user()->can(['dealer_appointment_edit']))
-            <a href="{{route('dealer-appointment.edit', $dealerAppointment->id)}}" class="btn btn-info btn-sm ml-2" title="Edit Appointment Form">Edit</a>
-            @endif
-            @if(auth()->user()->can(['dealer_appointment_reject']))
-            @if($dealerAppointment->approval_status != '4')
-            <button type="button" class="btn btn-sm btn-danger ml-2" onclick="changeStatus('4','{{$dealerAppointment->id}}')">Reject</button>
-            @else
-            <button type="button" class="btn btn-sm btn-warning ml-2" onclick="changeStatus('0','{{$dealerAppointment->id}}')">Pending</button>
-            <button type="button" class="btn btn-sm btn-danger ml-2">Rejected</button>
-            @endif
-            @endif
-            @if($dealerAppointment->division == 'PUMP&MOTORS')
-            <button type="button" class="btn btn-info ml-2" data-toggle="modal" data-target="#exampleModal">
-              BM Remark
-            </button>
-            @endif
+              <button type="button" class="btn btn-info" data-toggle="modal" data-target="#generateCertificateModal">Generate Certificate</button>
+              @endif
+              @endif
+              @if(auth()->user()->can(['dealer_appointment_edit']))
+              <a href="{{route('dealer-appointment.edit', $dealerAppointment->id)}}" class="btn btn-info btn-sm ml-2" title="Edit Appointment Form">Edit</a>
+              @endif
+              @if(auth()->user()->can(['dealer_appointment_reject']))
+              @if($dealerAppointment->approval_status != '4')
+              <button type="button" class="btn btn-sm btn-danger ml-2" onclick="changeStatus('4','{{$dealerAppointment->id}}')">Reject</button>
+              @else
+              <button type="button" class="btn btn-sm btn-warning ml-2" onclick="changeStatus('0','{{$dealerAppointment->id}}')">Pending</button>
+              <button type="button" class="btn btn-sm btn-danger ml-2">Rejected</button>
+              @endif
+              @endif
+              @if($dealerAppointment->division == 'PUMP&MOTORS')
+              <button type="button" class="btn btn-info ml-2" data-toggle="modal" data-target="#exampleModal">
+                BM Remark
+              </button>
+              @endif
               <a href="{{ url('/dealer-appointments') }}" class="btn btn-primary btn-sm ml-2">Back</a>
           </div>
         </div>
@@ -890,7 +890,7 @@
               <div class="col-md-3 mb-3 ml-5 text-center border rounded">
                 <p class="attach-p">{{ucfirst(str_replace('_',' ',$media->collection_name))}}</p>
                 <a href="{{$media->getFullUrl()}}" download="" target="_blank">
-                  @if($media->collection_name == 'shop_image')
+                  @if(str_contains($media->mime_type, 'image'))
                   <img class="m-2 rounded img-fluid" src="{!! $media->getFullUrl() !!}" style="width: 170px;height:170px;">
                   @else
                   {{ucfirst(str_replace('_','',$media->collection_name))}}.pdf
