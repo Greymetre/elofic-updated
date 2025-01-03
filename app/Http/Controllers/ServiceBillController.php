@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Redirect;
 use App\DataTables\ServiceBillDataTable;
 use App\Models\Category;
 use App\Models\Complaint;
+use App\Models\ComplaintTimeline;
 use App\Models\Division;
 use App\Models\ServiceBill;
 use App\Models\ServiceBillProductDetails;
@@ -162,6 +163,13 @@ class ServiceBillController extends Controller
                     }
                 }
             }
+
+            ComplaintTimeline::create([
+                'complaint_id' => $request->complaint_id,
+                'created_by' => auth()->user()->id,
+                'status' => '102',
+                'remark' => 'Service Bill Created',
+            ]);
 
 
             return Redirect::to('service_bills')->with('message_success', 'Service Bill Store Successfully and the Service Bill number is <span title="Copy" id="copyText">' . $serviceBillNo . '</span>');

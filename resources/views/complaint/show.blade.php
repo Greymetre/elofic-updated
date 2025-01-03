@@ -16,18 +16,19 @@
       padding: 5px 10px;
       width: 90%;
     }
+
+    .card.blck-clr p,
+    .card.blck-clr i {
+      color: #4a4a4a !important;
+    }
+    .swal2-container.swal2-center.swal2-fade.swal2-shown{
+      z-index: 999999 !important;
+    }
   </style>
-  <div class="content-header">
-    <div class="container-fluid">
-      <div class="row mb-2">
-      </div><!-- /.row -->
-    </div><!-- /.container-fluid -->
-  </div>
   <!-- Main content -->
   <section class="content">
     <div class="row">
       <div class="col-9">
-
         @if(Session::has('success'))
         <div class="alert alert-success" id="hide_div">
           <button type="button" class="close" data-dismiss="alert">×</button>
@@ -95,7 +96,6 @@
 
 
               </div>
-              <!-- /.col -->
             </div>
             <input type="hidden" id="complaint_id" name="expense" value="{{$complaint['id']}}">
             <div class="row">
@@ -139,28 +139,24 @@
             </div>
             <hr>
 
-            <div class="invoice p-3 mb-1">
-              <!-- title row -->
+            <div class="invoice">
               <div class="row">
                 <div class="col-4">
                   <h4>
                     <small class="float-left">COMPLAINT <p style="font-size: 22px; color:#5252b7">#{!! $complaint['complaint_number'] !!}</p></small>
                   </h4>
                 </div>
-
-                <!-- /.col -->
               </div>
-              <!-- info row -->
-              <div class="row invoice-info mt-1">
+              <div class="row invoice-info">
                 <div class="col-md-6">
-                  <h4><em>Complaint From</em></h4>
-                  <h6 style="color: #5252b7;">{{$complaint->customer->customer_name}}</h6>
-                  <p>At - {{$complaint->customer->customer_address}} {{$complaint->customer->customer_place}} Po - {{$complaint->customer->customer_city}} District - {{$complaint->customer->customer_district}} State - {{$complaint->customer->customer_state}} Pin - {{$complaint->customer->pincodeDetails?$complaint->customer->pincodeDetails->pincode:'-'}}</p>
-                  <p>{{$complaint->customer->customer_district}}, {{$complaint->customer->customer_state}}, {{$complaint->customer->customer_country}}</p>
-                  <p>{{$complaint->customer->customer_number}}</p>
+                  <h4 class="m-0"><em>Complaint From</em></h4>
+                  <h6 class="m-0" style="color: #5252b7;">{{$complaint->customer->customer_name}}</h6>
+                  <p class="m-0">At - {{$complaint->customer->customer_address}} {{$complaint->customer->customer_place}} Po - {{$complaint->customer->customer_city}} District - {{$complaint->customer->customer_district}} State - {{$complaint->customer->customer_state}} Pin - {{$complaint->customer->pincodeDetails?$complaint->customer->pincodeDetails->pincode:'-'}}</p>
+                  <p class="m-0">{{$complaint->customer->customer_district}}, {{$complaint->customer->customer_state}}, {{$complaint->customer->customer_country}}</p>
+                  <p class="m-0">{{$complaint->customer->customer_number}}</p>
                 </div>
                 <div class="col-md-6 text-right">
-                  <p>Complaint Status :
+                  <p class="m-0">Complaint Status :
                     @if($complaint->complaint_status == '0')
                     <span class="badge badge-secondary">Open</span>
                     @elseif($complaint->complaint_status == '1')
@@ -175,9 +171,9 @@
                     <span class="badge badge-danger">Cancel</span>
                     @endif
                   </p>
-                  <p>Complaint Date : {{date('d-m-Y', strtotime($complaint->complaint_date))}}</p>
-                  <p>Created By : {{$complaint->createdbyname?$complaint->createdbyname->name:'-'}}</p>
-                  <p>Closed Date : -</p>
+                  <p class="m-0">Complaint Date : {{date('d-m-Y', strtotime($complaint->complaint_date))}}</p>
+                  <p class="m-0">Created By : {{$complaint->createdbyname?$complaint->createdbyname->name:'-'}}</p>
+                  <p class="m-0">Closed Date : -</p>
                 </div>
               </div>
 
@@ -192,45 +188,37 @@
                 <div class="col-md-4"></div>
               </div>
 
-              <table class="table responsive border-0 mt-4 new-table">
+              <table class="table table-striped responsive border-0 new-table">
                 <tr>
-                  <td><em>Category</em></td>
-                  <td><em>Product/Model(Code)</em></td>
-                  <td><em>Description</em></td>
-                </tr>
-                <tr>
-                  <th class="pt-0">{{$complaint->product_details?$complaint->product_details->categories->category_name:'-'}}</th>
-                  <th class="pt-0">{{$complaint->product_code??'-'}}</th>
-                  <th class="pt-0">{{$complaint->product_details?$complaint->product_details->description:'-'}}</th>
+                  <td><em>Category :</em></td>
+                  <th>{{$complaint->product_details?$complaint->product_details->categories->category_name:'-'}}</th>
+                  <td><em>Product/Model(Code) :</em></td>
+                  <th>{{$complaint->product_code??'-'}}</th>
+                  <td><em>Description :</em></td>
+                  <th>{{$complaint->product_details?$complaint->product_details->model_no:'-'}}</th>
                 </tr>
 
                 <tr>
-                  <td><em>Product Serial Number</em></td>
-                  <td><em>HP</em></td>
-                  <td><em>Stage</em></td>
-                </tr>
-                <tr>
-                  <th class="pt-0">{{$complaint->product_serail_number??'-'}}</th>
-                  <th class="pt-0">{{$complaint->product_details?$complaint->product_details->specification:'-'}}</th>
-                  <th class="pt-0">{{$complaint->product_details?$complaint->product_details->product_no:''}}</th>
+                  <td><em>Product Serial Number :</em></td>
+                  <th>{{$complaint->product_serail_number??'-'}}</th>
+                  <td><em>HP :</em></td>
+                  <th>{{$complaint->product_details?$complaint->product_details->specification:'-'}}</th>
+                  <td><em>Stage :</em></td>
+                  <th>{{$complaint->product_details?$complaint->product_details->product_no:''}}</th>
                 </tr>
 
                 <tr>
-                  <td><em>Phase</em></td>
-                  <td><em>Warranty/Customer Bill Date</em></td>
-                  <td><em>Service Paid/Free</em></td>
-                </tr>
-                <tr>
-                  <th class="pt-0">{{($complaint->product_details && $complaint->product_details->phase != '')?$complaint->product_details->phase:'-'}}</th>
-                  <th class="pt-0">{{$complaint->customer_bill_date?date('d-m-Y', strtotime($complaint->customer_bill_date)):'-'}}</th>
-                  <th class="pt-0">{{$complaint->service_type??'-'}}</th>
+                  <td><em>Phase :</em></td>
+                  <th>{{($complaint->product_details && $complaint->product_details->phase != '')?$complaint->product_details->phase:'-'}}</th>
+                  <td><em>Warranty/Customer Bill Date :</em></td>
+                  <th>{{$complaint->customer_bill_date?date('d-m-Y', strtotime($complaint->customer_bill_date)):'-'}}</th>
+                  <td><em>Service Paid/Free :</em></td>
+                  <th>{{$complaint->service_type??'-'}}</th>
                 </tr>
 
                 <tr>
-                  <td><em>Seller</em></td>
-                </tr>
-                <tr>
-                  <th class="pt-0">{{$complaint->seller??'-'}}</th>
+                  <td><em>Seller :</em></td>
+                  <th>{{$complaint->seller??'-'}}</th>
                 </tr>
               </table>
 
@@ -495,7 +483,7 @@
                   <td>{{$service_bill?$service_bill->service_bill_products->sum('subtotal'):'-'}}</td>
                   @if($service_bill && !empty($service_bill))
                   @if($service_bill->status == '0')
-                  <td><span class="badge badge-secondary">Draft</span></td>
+                  <td><a href="{{route('service_bills.show', $service_bill->id)}}" title="Show Service Bill"><span class="badge badge-secondary">Draft</span></td>
                   @elseif($service_bill->status == '1')
                   <td><span class="badge badge-warning">Claimed</span></td>
                   @elseif($service_bill->status == '2')
@@ -511,25 +499,17 @@
                 </tr>
 
               </table>
-
-
-              <!-- /.row -->
             </div>
-            <!-- /.card-body -->
           </div>
-          <!-- /.card -->
         </div>
-        <!-- /.col -->
       </div>
 
 
 
       <div class="col-3">
-        <!-- <h4>Time Line</h4> -->
 
-        <div class="card">
+        <div class="card blck-clr">
           <div class="card-body">
-            <!-- <h4>Time Line</h4> -->
 
             <div class="row">
               <div class="col-12">
@@ -556,6 +536,14 @@
                 @php $status_is = 'Canceled'; @endphp
                 @endif
 
+                @if($timeline->status == '102')
+                <div class="d-flex">
+                  <i class="material-icons">double_arrow</i>
+                  <p>
+                    Complaint <b> {!! $complaint['complaint_number'] !!} </b> {{$timeline->remark}} by <b>{{$timeline->created_by_details->name}}</b> on <b>{{date("d M Y, h:i a", strtotime($timeline->created_at));}}.</b>
+                  </p>
+                </div>
+                @else
                 @if($timeline->status == '100' || $timeline->status == '101')
                 @if($timeline->status == '100')
                 <div class="d-flex">
@@ -584,25 +572,18 @@
                   </p>
                 </div>
                 @endif
+                @endif
                 @endforeach
                 @endif
 
                 <p>
                   <b> #{!! $complaint['complaint_number'] !!} Created on {{date("d M Y, h:i a", strtotime($complaint->created_at));}}
                 </p>
-
-
-
               </div>
-
             </div>
           </div>
         </div>
       </div>
-
-
-      <!-- /.row -->
-
 
       <!-- new model for reject status -->
 

@@ -221,7 +221,6 @@
                         },
                         success: function(res) {
                             if (res.status === true) {
-                                console.log(res.data);
                                 $("#customer_name").val(res.data.customer_name);
                                 $("#end_user_id").val(res.data.id);
                                 $("#customer_email").val(res.data.customer_email);

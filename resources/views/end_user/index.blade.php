@@ -15,12 +15,12 @@
             <span class="">
               <div class="btn-group header-frm-btn">
                 @if(auth()->user()->can(['end_user_download']))
-                <form method="POST" action="{{ URL::to('new-joining/download') }}" class="form-horizontal">
+                <form method="POST" action="{{ URL::to('end-user/download') }}" class="form-horizontal">
                   @csrf
                   <div class="d-flex flex-wrap flex-row">
                     <div class="p-2" style="width:160px;"><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
                     <div class="p-2" style="width:160px;"><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
-                    <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Damage Entries"><i class="material-icons">cloud_download</i></button></div>
+                    <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} End User"><i class="material-icons">cloud_download</i></button></div>
                   </div>
                 </form>
                 @endif
@@ -120,6 +120,7 @@
                 <th>Customer Name</th>
                 <th>Mobile Number</th>
                 <th>Email</th>
+                <th>Address</th>
                 <th>State</th>
                 <th>District</th>
                 <th>City</th>
@@ -196,6 +197,12 @@
           {
             data: 'customer_email',
             name: 'customer_email',
+            "defaultContent": '',
+            orderable: false
+          },
+          {
+            data: 'customer_address',
+            name: 'customer_address',
             "defaultContent": '',
             orderable: false
           },

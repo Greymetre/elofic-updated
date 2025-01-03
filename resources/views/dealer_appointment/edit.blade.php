@@ -984,7 +984,7 @@
                 <div class="col-md-3 mb-3 ml-5 text-center border rounded">
                   <p class="attach-p">{{ucfirst(str_replace('_',' ',$media->collection_name))}}</p>
                   <a href="{{$media->getFullUrl()}}" download="" target="_blank">
-                    @if($media->collection_name == 'shop_image')
+                    @if(str_contains($media->mime_type, 'image'))
                     <img class="m-2 rounded img-fluid" src="{!! $media->getFullUrl() !!}" style="width: 170px;height:170px;">
                     @else
                     {{ucfirst(str_replace('_','',$media->collection_name))}}.pdf

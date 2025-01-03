@@ -153,7 +153,7 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
     public function headings(): array
     {
 
-        $headings = ['FY', 'Quarter', 'Div', 'Dealer','Customer ID', 'City', 'State', 'Final Branch', 'Sales person', 'Emp Code', 'New Group Name', 'Sale Return Qty', 'Sale Return Value', 'Sales Quantity', 'Sales Net Amount', 'After  Sales Return Quantity', 'After Sales Return Net Amount', 'Discount (CN)', 'Scheme Name'];
+        $headings = ['FY', 'Quarter', 'Div', 'Dealer', 'BP Code','Customer ID', 'City', 'State', 'Final Branch', 'Sales person', 'Emp Code', 'New Group Name', 'Sale Return Qty', 'Sale Return Value', 'Sales Quantity', 'Sales Net Amount', 'After  Sales Return Quantity', 'After Sales Return Net Amount', 'Discount (CN)', 'Scheme Name'];
 
         return $headings;
     }
@@ -193,52 +193,53 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
         $response[1] = $this->quarter ? 'Q' . $this->quarter : '-';
         $response[2] = $data['division'] ?? '';
         $response[3] = $data['customer'] ? $data['customer']['name'] : '-';
-        $response[4] = $data['customer_id'] ? $data['customer_id'] : '-';
-        $response[5] = data_get($data, 'customer.customeraddress.cityname.city_name', '-');
-        $response[6] = data_get($data, 'customer.customeraddress.statename.state_name', '-');
-        $response[7] = $data['branch'] ? $data['branch']['branch_name'] : $data['final_branch'];
-        $response[8] = $data['user'] ? $data['user']['name'] : '-';
-        $response[9] = $data['emp_code'] ?? '-';
-        $response[10] = $data['new_group_name'] ?? '-';
-        $response[11] = '-';
+        $response[4] = $data['customer'] ? $data['customer']['customer_code'] : '-';
+        $response[5] = $data['customer_id'] ? $data['customer_id'] : '-';
+        $response[6] = data_get($data, 'customer.customeraddress.cityname.city_name', '-');
+        $response[7] = data_get($data, 'customer.customeraddress.statename.state_name', '-');
+        $response[8] = $data['branch'] ? $data['branch']['branch_name'] : $data['final_branch'];
+        $response[9] = $data['user'] ? $data['user']['name'] : '-';
+        $response[10] = $data['emp_code'] ?? '-';
+        $response[11] = $data['new_group_name'] ?? '-';
         $response[12] = '-';
+        $response[13] = '-';
         if($this->pSchemes->id == 20){
-            $response[13] = $data['total_quantity'].' ('. $data['ceiling_fan_quantity'] .')' ?? '-';
+            $response[14] = $data['total_quantity'].' ('. $data['ceiling_fan_quantity'] .')' ?? '-';
         }else{
-            $response[13] = $data['total_quantity'] ?? '-';
+            $response[14] = $data['total_quantity'] ?? '-';
         }
-        $response[14] = $data['total_net_amount'] ?? '-';
-        $response[15] = $data['total_quantity'] ?? '-';
-        $response[16] = $data['total_net_amount'] > 0 ? number_format($data['total_net_amount'] / 100000, 2, '.', '') : '-';
+        $response[15] = $data['total_net_amount'] ?? '-';
+        $response[16] = $data['total_quantity'] ?? '-';
+        $response[17] = $data['total_net_amount'] > 0 ? number_format($data['total_net_amount'] / 100000, 2, '.', '') : '-';
         if (!in_array('FAN', $this->division)) {
-            $response[17] = $CM ? $CM->points . '%' : '0%';
-            $response[18] = $CM ? $CM->primaryscheme->scheme_name : '-';
+            $response[18] = $CM ? $CM->points . '%' : '0%';
+            $response[19] = $CM ? $CM->primaryscheme->scheme_name : '-';
         } else {
             if ($this->pSchemes->scheme_type == 'gift') {
                 if ($CM) {
                     if ($CM->slab_min <= $data['total_net_amount'] / 100000) {
-                        $response[17] = $CM->gift;
+                        $response[18] = $CM->gift;
                     } else {
-                        $checkOthers = PrimarySchemeDetail::where('primary_scheme_id', $this->scheme_id)->where('slab_min', '<=', $response[16])->first();
-                        $response[17] = $checkOthers ? $checkOthers->gift : '-';
+                        $checkOthers = PrimarySchemeDetail::where('primary_scheme_id', $this->scheme_id)->where('slab_min', '<=', $response[17])->first();
+                        $response[18] = $checkOthers ? $checkOthers->gift : '-';
                     }
                 } else {
-                    $response[17] = '-';
+                    $response[18] = '-';
                 }
-                $response[18] = $CM ? $CM->primaryscheme->scheme_name : '-';
+                $response[19] = $CM ? $CM->primaryscheme->scheme_name : '-';
             } else {
                 if($this->pSchemes->id == 38){
                     if($data->group_4_quantity > 0 && $data->total_quantity >= 300){
                         $additional = $data->group_4_quantity*40;
                         $remain = ($data->total_quantity-$data->group_4_quantity)*20;
-                        $response[17] = $additional+$remain;
+                        $response[18] = $additional+$remain;
                     }else{
-                        $response[18] = $CM ? ($CM->primaryscheme->per_pcs == 1 ? $CM->points * $data['total_quantity'] : $CM->points) : '0';
+                        $response[19] = $CM ? ($CM->primaryscheme->per_pcs == 1 ? $CM->points * $data['total_quantity'] : $CM->points) : '0';
                     }
                 }else{
-                    $response[17] = $CM ? ($CM->primaryscheme->per_pcs == 1 ? $CM->points * $data['total_quantity'] : $CM->points) : '0';
+                    $response[18] = $CM ? ($CM->primaryscheme->per_pcs == 1 ? $CM->points * $data['total_quantity'] : $CM->points) : '0';
                 }
-                $response[18] = $CM ? $CM->primaryscheme->scheme_name : '-';
+                $response[19] = $CM ? $CM->primaryscheme->scheme_name : '-';
             }
         }
         return $response;
@@ -247,7 +248,7 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
     public function styles(Worksheet $sheet)
     {
 
-        $sheet->getStyle('A1:S1')->applyFromArray([
+        $sheet->getStyle('A1:T1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['rgb' => 'FFFFFF'],

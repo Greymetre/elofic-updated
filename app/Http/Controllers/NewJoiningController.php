@@ -207,7 +207,7 @@ class NewJoiningController extends Controller
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         // return $request;
-        return Excel::download(new NewJoiningExport($request), 'new_joining_rpoet.xlsx');
+        return Excel::download(new NewJoiningExport($request), 'NewJoining.xlsx');
     }
 
     // privacy-policy

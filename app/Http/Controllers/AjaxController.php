@@ -1170,6 +1170,18 @@ class AjaxController extends Controller
                 })
                     ->first();
                 if ($data) {
+                    $state = State::where('state_name', $data->customer_state)->first();
+                    $district = District::where('district_name', $data->customer_district)->first();
+                    $city = City::where('city_name', $data->customer_city)->first();
+                    if($state && $state != NULL && !empty($state) && $data->state_id == NULL){
+                        $data->state_id = $state->id;
+                    }
+                    if($district && $district != NULL && !empty($district) && $data->district_id == NULL){
+                        $data->district_id = $district->id;
+                    }
+                    if($city && $city != NULL && !empty($city) && $data->city_id == NULL){
+                        $data->city_id = $city->id;
+                    }
                     return response()->json(['status' => true, 'data' => $data]);
                 } else {
                     return response()->json(['status' => false, 'data' => null]);

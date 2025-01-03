@@ -1070,7 +1070,7 @@
                   </li>
                   @endif
                   @if(auth()->user()->can('hr_access'))
-                  <li class="nav-link {{ request()->is('reports/attendancereport*') || request()->is('reports/attendancereportSummary*') || request()->is('holidays*') || request()->is('leaves*') || request()->is('appraisal*') || request()->is('sales_weightage*') || request()->is('users*') || request()->is('targets*') || request()->is('livelocation*') || request()->is('roles*') || request()->is('permissions*') || request()->is('tours*') || request()->is('usercity*') || request()->is('new-joinings*') ? 'active' : '' }}">
+                  <li class="nav-link {{ request()->is('reports/attendancereport*') || request()->is('reports/attendancereportSummary*') || request()->is('holidays*') || request()->is('leaves*') || request()->is('appraisal*') || request()->is('sales_weightage*') || request()->is('users*') || request()->is('targets*') || request()->is('livelocation*') || request()->is('permissions*') || request()->is('tours*') || request()->is('usercity*') || request()->is('new-joinings*') ? 'active' : '' }}">
                      <a class="collapsed hoveradd" data-toggle="collapse" href="#hr" aria-expanded="false">
                         <i class="material-icons icon">family_restroom</i>
                         <span> {!! trans('panel.sidemenu.hr') !!}
@@ -1348,7 +1348,7 @@
             </li>
             @endif
             @if(auth()->user()->can('services_access'))
-            <li class="nav-link {{ request()->is('services*') || request()->is('warranty_activation*') || request()->is('complaint-type*') || request()->is('complaints*') || request()->is('service-charge*') || request()->is('service_bills*') ? 'active' : '' }}">
+            <li class="nav-link {{ request()->is('services*') || request()->is('warranty_activation*') || request()->is('complaint-type*') || request()->is('complaints*') || request()->is('service-charge*') || request()->is('service_bills*') || request()->is('end_user*') ? 'active' : '' }}">
                <a class="collapsed hoveradd" data-toggle="collapse" href="#serviceMenu" aria-expanded="false">
                   <i class="material-icons icon">design_services</i>
                   <span> {!! trans('panel.sidemenu.services') !!}
@@ -1695,7 +1695,7 @@
             </li>
             @endif
             @if(auth()->user()->can('status_access'))
-            <li class="nav-link {{request()->is('loyalty-app-setting*') ? 'active' : '' }}">
+            <li class="nav-link {{request()->is('loyalty-app-setting*')  || request()->is('roles*') ? 'active' : '' }}">
                <a class="collapsed hoveradd" data-toggle="collapse" href="#settingMenu" aria-expanded="false">
                   <i class="material-icons icon">settings</i>
                   <span> {!! trans('panel.sidemenu.setting_master') !!}
