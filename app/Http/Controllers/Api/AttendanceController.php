@@ -116,6 +116,7 @@ class AttendanceController extends Controller
                 'punchin_image' => !empty($request['punchin_image']) ? $request['punchin_image'] :'',
                 'punchin_summary' => !empty($request['punchin_summary']) ? $request['punchin_summary'] :'',
                 'working_type' => !empty($request['type']) ? $request['type'] :'',
+                'punchin_from' => 'App',
                 'created_at' => getcurentDateTime(),
             ]))
             {

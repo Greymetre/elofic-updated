@@ -14,7 +14,8 @@
       height: 42px;
       margin-top: 7px;
     }
-   /* div#submitAttendance{
+
+    /* div#submitAttendance{
       z-index: 9;
     }*/
   </style>
@@ -56,11 +57,11 @@
 
                     <div class="p-2" style="width: 250px;">
                       <select class="select2" name="status" id="status" data-style="select-with-transition" title="Select User">
-                      <option value="">Select Status</option>
-                      <option value="0">Pending</option>
-                      <option value="1">Approved</option>
-                      <option value="2">Rejected</option>                  
-                    </select>
+                        <option value="">Select Status</option>
+                        <option value="0">Pending</option>
+                        <option value="1">Approved</option>
+                        <option value="2">Rejected</option>
+                      </select>
                     </div>
 
                     <div class="p-2">
@@ -78,14 +79,14 @@
                 </form>
                 @endif
                 <div class="next-btn">
-                @if(auth()->user()->can(['attendance_create']))
+                  @if(auth()->user()->can(['attendance_create']))
 
-                <a data-toggle="modal" data-target="#submitAttendance" class="custom-btn create" title="Punch In">
-                  Punch In
-                </a>
-                @endif
-                <a href="{{ URL::to('attendance-location') }}" class="btn btn-just-icon btn-theme  d-none" title="Update Location"><i class="material-icons">add_location</i></a>
-              </div>
+                  <a data-toggle="modal" data-target="#submitAttendance" class="custom-btn create" title="Punch In">
+                    Punch In
+                  </a>
+                  @endif
+                  <a href="{{ URL::to('attendance-location') }}" class="btn btn-just-icon btn-theme  d-none" title="Update Location"><i class="material-icons">add_location</i></a>
+                </div>
               </div>
             </span>
           </h4>
@@ -119,22 +120,15 @@
                 <th>Punch in Date</th>
                 <th>Punch In Time</th>
                 <th>Punch In Address</th>
-                <!-- <th>Punch Image</th>
-              <th>Punch Out Date</th> -->
                 <th>Punch Out Time</th>
                 <th>Punch Out Address</th>
                 <th>Working Time</th>
-                <!-- <th>Status</th> -->
-                <!--  <th>Punch In Longitude</th>
-              <th>Punch In Letitude</th>
-              <th>Punch Out Longitude</th>
-              <th>Punch Out Letitude</th> -->
                 <th>Punch In summary</th>
-                <!-- <th>Punch Out summary</th> -->
                 <th>Working Type</th>
                 <th>Attendance Status</th>
                 <th>Remark</th>
                 <th>Action</th>
+                <th>From</th>
               </thead>
               <tbody></tbody>
             </table>
@@ -176,10 +170,10 @@
                 </div>
               </div>
               <div class="col-md-6">
-            <div class="input_section">
+                <div class="input_section">
                   <label class="col-form-label">Punch In</label>
                   <input type="text" name="punchin_date" id="punchin_date" class="form-control datetimepicker" value="{!! old( 'punchin_date') !!}" required>
-                 </div>
+                </div>
               </div>
               <div class="col-md-6">
                 <div class="input_section">
@@ -271,6 +265,124 @@
     $(document).ready(function() {
 
       //new user filters  starts
+      var isSuperAdmin = @json(Auth::user()->hasRole('superadmin'));
+
+      console.log(isSuperAdmin);
+
+      var columns = [{
+          data: 'DT_RowIndex',
+          name: 'DT_RowIndex',
+          orderable: false,
+          searchable: false
+        },
+        {
+          data: 'user_id',
+          name: 'user_id',
+          "defaultContent": ''
+        },
+        {
+          data: 'action_status',
+          name: 'action_status',
+          "defaultContent": '',
+          className: 'td-actions text-center',
+          orderable: false,
+          searchable: false
+        },
+        {
+          data: 'users.name',
+          name: 'users.name',
+          "defaultContent": '',
+          orderable: false
+        },
+        {
+          data: 'punchin_date',
+          name: 'punchin_date',
+          "defaultContent": '',
+          orderable: false,
+          searchable: false
+        },
+        {
+          data: 'punchin_time',
+          name: 'punchin_time',
+          "defaultContent": '',
+          orderable: false,
+          searchable: false
+        },
+        {
+          data: 'punchin_address',
+          name: 'punchin_address',
+          "defaultContent": '',
+          orderable: false,
+          searchable: false
+        },
+        {
+          data: 'punchout_time',
+          name: 'punchout_time',
+          "defaultContent": '',
+          orderable: false,
+          searchable: false
+        },
+        {
+          data: 'punchout_address',
+          name: 'punchout_address',
+          "defaultContent": '',
+          orderable: false,
+          searchable: false
+        },
+        {
+          data: 'worked_time',
+          name: 'worked_time',
+          "defaultContent": '',
+          orderable: false,
+          searchable: false
+        },
+        {
+          data: 'punchin_summary',
+          name: 'punchin_summary',
+          "defaultContent": '',
+          orderable: false,
+          searchable: false
+        },
+        {
+          data: 'working_type',
+          name: 'working_type',
+          "defaultContent": '',
+          orderable: false
+        },
+        {
+          data: 'current_status',
+          name: 'current_status',
+          "defaultContent": '',
+          orderable: false,
+          searchable: false
+        },
+        {
+          data: 'remark_status',
+          name: 'remark_status',
+          "defaultContent": '',
+          orderable: false,
+          searchable: false
+        },
+        {
+          data: 'action',
+          name: 'action',
+          "defaultContent": '',
+          className: 'td-actions text-center',
+          orderable: false,
+          searchable: false
+        },
+      ];
+
+      if (isSuperAdmin) {
+        columns.push({
+          data: 'punchin_from',
+          name: 'punchin_from',
+          defaultContent: '',
+          className: 'td-actions text-center',
+          orderable: false,
+          searchable: false
+        });
+      }
 
       $.ajaxSetup({
         headers: {
@@ -288,123 +400,14 @@
           url: "{{url('reports/attendancereport')}}",
           data: function(d) {
             d.executive_id = $('#executive_id').val(),
-            d.active = $('#active').val(),
+              d.active = $('#active').val(),
               d.start_date = $('#start_date').val(),
               d.end_date = $('#end_date').val(),
               d.status = $('#status').val()
           }
         },
+        columns: columns
 
-        columns: [{
-            data: 'DT_RowIndex',
-            name: 'DT_RowIndex',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'user_id',
-            name: 'user_id',
-            "defaultContent": ''
-          },
-          {
-            data: 'action_status',
-            name: 'action_status',
-            "defaultContent": '',
-            className: 'td-actions text-center',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'users.name',
-            name: 'users.name',
-            "defaultContent": '',
-            orderable: false
-          },
-          {
-            data: 'punchin_date',
-            name: 'punchin_date',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'punchin_time',
-            name: 'punchin_time',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'punchin_address',
-            name: 'punchin_address',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          },
-          // {data: 'punchin', name: 'punchin',"defaultContent": '', orderable: false, searchable: false},
-          // {data: 'punchout_date', name: 'punchout_date',"defaultContent": '', orderable: false, searchable: false},
-          {
-            data: 'punchout_time',
-            name: 'punchout_time',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'punchout_address',
-            name: 'punchout_address',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'worked_time',
-            name: 'worked_time',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          },
-          // {data: 'punchin_longitude', name: 'punchin_longitude',"defaultContent": '', orderable: false, searchable: false},
-          // {data: 'punchin_latitude', name: 'punchin_latitude',"defaultContent": '', orderable: false, searchable: false},
-          // {data: 'punchout_longitude', name: 'punchout_longitude',"defaultContent": '', orderable: false, searchable: false},
-          // {data: 'punchout_latitude', name: 'punchout_latitude',"defaultContent": '', orderable: false, searchable: false},
-          {
-            data: 'punchin_summary',
-            name: 'punchin_summary',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          },
-          // {data: 'punchout_summary', name: 'punchout_summary',"defaultContent": '', orderable: false, searchable: false},
-          {
-            data: 'working_type',
-            name: 'working_type',
-            "defaultContent": '',
-            orderable: false
-          },
-          {
-            data: 'current_status',
-            name: 'current_status',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'remark_status',
-            name: 'remark_status',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'action',
-            name: 'action',
-            "defaultContent": '',
-            className: 'td-actions text-center',
-            orderable: false,
-            searchable: false
-          },
-        ]
       });
 
       $('#executive_id').change(function() {

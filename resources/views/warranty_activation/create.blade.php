@@ -439,30 +439,32 @@
                      }
                   }
                });
+               $.ajax({
+                  url: "{{ url('getProductInfoBySerialNo') }}",
+                  dataType: "json",
+                  type: "POST",
+                  data: {
+                     _token: "{{csrf_token()}}",
+                     serial_no: serial_no
+                  },
+                  success: function(res) {
+                     if (res.status === true) {
+                        if (res.check_Warranty != null) {
+                           $("#customer_number").val(res.check_Warranty.customer.customer_number);
+                           $("#customer_number").keyup();
+                        }
+                     } else {
+                        $("#customer_id").val(" ");
+                        $("#customer_id").prop('readonly', false);
+                     }
+                  }
+               });
             }).trigger('change');
 
             $("#select_product_id").on("change", function() {
                $('#product_id').val($(this).val());
             })
-            $("#customer_pindcode").on("change", function() {
-               // var customer_pindcode = $(this).val();
-               // $.ajax({
-               //    url: "{{ url('getAddressData') }}",
-               //    dataType: "json",
-               //    type: "POST",
-               //    data: {
-               //       _token: "{{csrf_token()}}",
-               //       pincode_id: customer_pindcode
-               //    },
-               //    success: function(res) {
-               //       $("#customer_country").val(res.country_name);
-               //       $("#customer_state").val(res.state_id);
-               //       $("#customer_state").change();
-               //       $("#customer_district").val(res.district_name);
-               //       $("#customer_city").val(res.city_name);
-               //    }
-               // });
-            }).trigger('change');
+
 
             $("#customer_number").on("keyup", function() {
                var customer_number = $(this).val();
@@ -476,7 +478,6 @@
                   },
                   success: function(res) {
                      if (res.status === true) {
-                        console.log(res.data);
                         $("#customer_name").val(res.data.customer_name);
                         $("#end_user_id").val(res.data.id);
                         $("#customer_email").val(res.data.customer_email);

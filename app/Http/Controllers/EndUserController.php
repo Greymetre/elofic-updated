@@ -24,9 +24,6 @@ class EndUserController extends Controller
      */
     public function index(EndUserDataTable $dataTable, Request $request)
     {
-        if ($request->ip() != '111.118.252.250') {
-            return view('work_in_progress');
-        }
         abort_if(Gate::denies('end_user_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         return $dataTable->render('end_user.index');

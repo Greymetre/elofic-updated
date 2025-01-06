@@ -21,7 +21,8 @@
     .card.blck-clr i {
       color: #4a4a4a !important;
     }
-    .swal2-container.swal2-center.swal2-fade.swal2-shown{
+
+    .swal2-container.swal2-center.swal2-fade.swal2-shown {
       z-index: 999999 !important;
     }
   </style>
@@ -229,7 +230,7 @@
                 </div>
                 <div class="col-md-6 text-center" style="line-height: 0px;">
                   <h6><em>Close Remark</em></h6>
-                  <p><b>-</b></p>
+                  <p><b>{{$close_complaint?$close_complaint->remark:'-'}}</b></p>
                 </div>
               </div>
 
@@ -759,6 +760,51 @@
               }
               $('.message').append(data.message);
             },
+          });
+        });
+
+        $('body').on('click', '.close_status', function() {
+          var id = $('#complaint_id').val();
+
+          Swal.fire({
+            title: 'Enter your remark',
+            input: 'text',
+            inputPlaceholder: 'Remark',
+            showCancelButton: true,
+            inputValidator: (value) => {
+              if (!value) {
+                return 'You need to write something!';
+              }
+            }
+          }).then((result) => {
+            console.log(result);
+            if (result.value) {
+              $.ajax({
+                url: "{{ url('complaint-close') }}",
+                type: 'POST',
+                data: {
+                  _token: token,
+                  id: id,
+                  remark: result.value
+                },
+                success: function(data) {
+                  if (data.status == 'success') {
+                    $('.message').empty();
+                    $('.alert').show();
+                    $('.alert').addClass("alert-success");
+                    $('.message').append(data.message);
+                    setTimeout(function() {
+                      location.reload();
+                    }, 700);
+                  } else {
+                    $('.message').empty();
+                    $('.alert').show();
+                    $('.alert').addClass("alert-danger");
+                    $('.message').append(data.message);
+                  }
+                }
+              })
+            }
           });
         });
 

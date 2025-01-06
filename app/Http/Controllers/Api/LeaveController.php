@@ -56,6 +56,7 @@ class LeaveController extends Controller
                     'punchin_time' => date('G:i', strtotime('10:00:00')),
                     'punchin_summary' => !empty($request['reason']) ? $request['reason'] : '',
                     'working_type' => !empty($request['type']) ? $request['type'] : '',
+                    'punchin_from' => 'App',
                     'created_at' => getcurentDateTime(),
                     'updated_at' => getcurentDateTime(),
                 ]);

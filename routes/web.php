@@ -851,6 +851,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('complaint-open', [ComplaintController::class, 'openComplaint'])->name('openComplaint');
     Route::post('complaint-complete', [ComplaintController::class, 'completeComplaint'])->name('completeComplaint');
     Route::post('check-complaint-complete', [ComplaintController::class, 'checkCompleteComplaint'])->name('checkCompleteComplaint');
+    Route::post('complaint-close', [ComplaintController::class, 'closeComplaint'])->name('closeComplaint');
     Route::any('complaint_download', [ComplaintController::class, 'complaint_download'])->name('complaint_download');
     Route::any('complaint-work-done/{complaint}', [ComplaintController::class, 'work_done'])->name('complaint_work_done');
     Route::any('complaint-work-done-submit', [ComplaintController::class, 'work_done_submit'])->name('complaint_work_done_submit');
