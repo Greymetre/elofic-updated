@@ -37,6 +37,45 @@
       .swal2-container.swal2-center.swal2-fade.swal2-shown {
          z-index: 999999999 !important;
       }
+
+      /*********** For all file preview *****************/
+
+      .preview-container {
+         display: flex;
+         flex-direction: column;
+         gap: 10px;
+      }
+
+      .image-preview {
+         display: flex;
+         flex-wrap: wrap;
+         gap: 10px;
+      }
+
+      .image-preview img {
+         max-width: 150px;
+         max-height: 150px;
+         border: 1px solid #ddd;
+         border-radius: 5px;
+      }
+
+      .file-preview {
+         display: flex;
+         flex-direction: column;
+         gap: 5px;
+         color: #000 !important;
+      }
+
+      .file-item {
+         display: flex;
+         align-items: center;
+         gap: 10px;
+         font-size: 14px;
+      }
+
+      .file-item i {
+         font-size: 20px;
+      }
    </style>
    <div class="row">
       <div class="col-md-12">
@@ -696,7 +735,11 @@
                         <div class="col-md-9">
                            <div class="input_section">
                               <label class="col-form-label">Attachments </label>
-                              <input type="file" multiple name="images[]" class="form-controll">
+                              <input type="file" multiple name="files[]" class="form-control" id="fileInput">
+                              <div class="preview-container">
+                                 <div class="image-preview" id="imagePreview"></div>
+                                 <div class="file-preview" id="filePreview"></div>
+                              </div>
                               <div class="row mt-3">
                                  @if($complaints->exists && $complaints->getMedia('complaint_attach')->count() > 0 && Storage::disk('s3')->exists($complaints->getMedia('complaint_attach')[0]->getPath()))
                                  @foreach($complaints->getMedia('complaint_attach') as $k=>$media)
@@ -800,6 +843,7 @@
             },
             success: function(res) {
                if (res.status === true) {
+                  console.log(res.data_all.invoice_date.split('-').reverse().join('-'));
                   $("#product_code").val(res.data.product_code);
                   $("#product_name").val(res.data.product_name);
                   $("#product_id").val(res.data.id);
@@ -813,13 +857,13 @@
                   $("#specification").prop('readonly', true);
                   $("#product_no").prop('readonly', true);
                   $("#phase").prop('readonly', true);
-                  $("#company_sale_bill_date").val(res.data_all.invoice_date);
+                  $("#company_sale_bill_date").val(res.data_all.invoice_date.split('-').reverse().join('-'));
                   $("#company_sale_bill_no").val(res.data_all.invoice_no);
                   $("#seller").val(res.data_all.party_name);
                   $("#seller").prop('readonly', true);
                   $("#company_sale_bill_date").change();
                   if (res.check_Warranty != null) {
-                     $("#customer_bill_date").val(res.check_Warranty.sale_bill_date);
+                     $("#customer_bill_date").val(res.check_Warranty.sale_bill_date.split('-').reverse().join('-'));
                      $("#customer_bill_no").val(res.check_Warranty.sale_bill_no);
                      $("#customer_number").val(res.check_Warranty.customer.customer_number);
                      $("#customer_number").keyup();
@@ -829,7 +873,6 @@
                      today.setHours(0, 0, 0, 0);
 
                      if (res.check_Warranty.seller_details && res.check_Warranty.seller_details != null) {
-                        console.log(res.check_Warranty.seller_details.id);
                         var newOption = new Option(res.check_Warranty.seller_details.name, res.check_Warranty.seller_details.id, false, false);
                         $('#party_name').append(newOption).trigger('change');
                         $("#party_name").val(res.check_Warranty.seller_details.id);
@@ -1139,6 +1182,37 @@
                })
                $("#customer_pindcode").html(options);
             }
+         });
+      });
+
+      $(document).ready(function() {
+         $('#fileInput').on('change', function() {
+            const imagePreviewContainer = $('#imagePreview');
+            const filePreviewContainer = $('#filePreview');
+            imagePreviewContainer.empty(); // Clear previous images
+            filePreviewContainer.empty(); // Clear previous file previews
+
+            const files = this.files;
+            $.each(files, function(index, file) {
+               if (file.type.startsWith('image/')) {
+                  // Handle image files
+                  const reader = new FileReader();
+                  reader.onload = function(e) {
+                     const img = $('<img>').attr('src', e.target.result);
+                     imagePreviewContainer.append(img);
+                  };
+                  reader.readAsDataURL(file);
+               } else {
+                  // Handle non-image files
+                  const fileName = file.name;
+                  // Create file item
+                  const fileItem = $('<div>').addClass('file-item');
+                  const name = $('<span>').text(fileName);
+
+                  fileItem.append(name);
+                  filePreviewContainer.append(fileItem);
+               }
+            });
          });
       });
    </script>

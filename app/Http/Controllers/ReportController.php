@@ -453,12 +453,18 @@ class ReportController extends Controller
                         $query->whereIn('user_id', $all_reporting_user_ids);
                     }
                 })
-                ->select('id', 'user_id', 'punchin_date', 'punchin_time', 'punchin_longitude', 'punchin_latitude', 'punchin_address', 'punchin_image', 'punchout_date', 'punchout_time', 'punchout_latitude', 'punchout_longitude', 'punchout_address', 'punchout_image', 'worked_time', 'punchin_summary', 'punchout_summary', 'working_type', 'attendance_status', 'remark_status')
+                ->select('id', 'user_id', 'punchin_date', 'punchin_time', 'punchin_longitude', 'punchin_latitude', 'punchin_address', 'punchin_image', 'punchout_date', 'punchout_time', 'punchout_latitude', 'punchout_longitude', 'punchout_address', 'punchout_image', 'worked_time', 'punchin_summary', 'punchout_summary', 'working_type', 'attendance_status', 'remark_status', 'punchin_from')
                 ->latest();
             return Datatables::of($data)
                 ->addIndexColumn()
                 ->editColumn('punchin_date', function ($data) {
                     return isset($data->punchin_date) ? stringtodate($data->punchin_date) : '';
+                })
+                ->editColumn('punchin_from', function ($data) {
+                    if (Auth::user()->hasRole('superadmin') || Auth::user()->hasRole('Admin	')) {
+                        return $data->punchin_from;
+                    }
+                    return '';
                 })
 
                 ->addColumn('current_status', function ($query) {
@@ -473,34 +479,12 @@ class ReportController extends Controller
                     return $status;
                 })
 
-
-                // ->editColumn('punchout_date', function($data)
-                // {
-                //     return isset($data->punchout_date) ? stringtodate($data->punchout_date) : stringtodate($data->punchin_date);
-                // })
-
-                // ->addColumn('punchin', function ($query) {
-                //     $punchin_image = !empty($query->punchin_image) ? env('IMAGE_UPLOADS').$query->punchin_image : asset('assets/img/placeholder.jpg') ;
-                //         return '<img src="'.$punchin_image.'" border="0" width="70" class="img-rounded imageDisplayModel" align="center" />';
-                //     })
                 ->addColumn('punchout', function ($query) {
                     $punchout_image = !empty($query->punchout_image) ? env('IMAGE_UPLOADS') . $query->punchout_image : asset('assets/img/placeholder.jpg');
                     return '<img src="' . $punchout_image . '" border="0" width="70" class="img-rounded imageDisplayModel" align="center" />';
                 })
                 ->addColumn('action', function ($query) {
                     $btn = '';
-
-                    // if(auth()->user()->can(['attendance_delete'])  && $query->punchin_date == date('Y-m-d'))
-                    // {
-                    // $btn = '<a href="" class="btn btn-danger btn-just-icon btn-sm deleteAttendance" value="' . $query->id . '" title="Delete Attendance">
-                    //                     <i class="material-icons">clear</i>
-                    //                   </a>
-                    //                   <a href="javascript:void(0)" class="btn btn-theme btn-just-icon btn-sm removePunchout" value="' . $query->id . '" title="Remove Puncout">
-                    //                 <i class="material-icons">schedule</i>
-                    //               </a>';
-
-
-                    // }
 
 
                     if (auth()->user()->can(['attendance_delete'])) {
@@ -564,7 +548,7 @@ class ReportController extends Controller
 
 
 
-                ->rawColumns(['punchin', 'punchout', 'action', 'action_status', 'current_status'])
+                ->rawColumns(['punchin', 'punchout', 'action', 'action_status', 'current_status', 'punchin_from'])
                 ->make(true);
         }
         return view('reports.attendancereport', compact('users', 'branches'));

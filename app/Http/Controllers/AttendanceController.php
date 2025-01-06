@@ -340,6 +340,7 @@ class AttendanceController extends Controller
         'punchin_summary' => !empty($request['punchin_summary']) ? $request['punchin_summary'] : '',
         'punchin_address' => !empty($addressP) ? $addressP : '',
         'working_type' => !empty($request['working_type']) ? $request['working_type'] : '',
+        'punchin_from' => 'Web',
         'created_at' => getcurentDateTime(),
         'updated_at' => getcurentDateTime(),
       ])) {

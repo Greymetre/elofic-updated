@@ -199,9 +199,10 @@ class ComplaintController extends Controller
             ->get();
         $work_done = ComplaintWorkDone::where('complaint_id', $complaint->id)->latest()->first();
         $complete_complaint = ComplaintTimeline::where('complaint_id', $complaint->id)->where('status', '3')->latest()->first();
+        $close_complaint = ComplaintTimeline::where('complaint_id', $complaint->id)->where('status', '4')->latest()->first();
         $service_bill = ServiceBill::with('service_bill_products')->where('complaint_id', $complaint->id)->latest()->first();
         $service_centers = Customers::where('customertype', '4')->select('id', 'name', 'customer_code')->get();
-        return view('complaint.show', compact('complaint', 'timelines', 'assign_users', 'service_centers', 'work_done', 'service_bill', 'complete_complaint'));
+        return view('complaint.show', compact('complaint', 'timelines', 'assign_users', 'service_centers', 'work_done', 'service_bill', 'complete_complaint', 'close_complaint'));
     }
 
     /**
@@ -464,6 +465,24 @@ class ComplaintController extends Controller
                 'remark' => $request->remark,
                 'created_by' => auth()->user()->id,
                 'status' => '3',
+            ]);
+            return response()->json(['status' => 'success', 'message' => 'Complaint Complete Successfully.']);
+        } else {
+            return response()->json(['status' => 'error', 'message' => 'Complaint Not Found.']);
+        }
+    }
+    public function closeComplaint(Request $request)
+    {
+        $complaint = Complaint::find($request->id);
+        if ($complaint) {
+            $complaint->complaint_status = '4';
+            $complaint->save();
+
+            ComplaintTimeline::create([
+                'complaint_id' => $request->id,
+                'remark' => $request->remark,
+                'created_by' => auth()->user()->id,
+                'status' => '4',
             ]);
             return response()->json(['status' => 'success', 'message' => 'Complaint Complete Successfully.']);
         } else {
