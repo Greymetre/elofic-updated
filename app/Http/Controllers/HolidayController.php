@@ -96,7 +96,7 @@ class HolidayController extends Controller
            // 'branch' => 'required',
             'holiday_date' => 'required|array',
             'name' => 'required|array',
-            'branch' => 'required|unique:'.with(new Holiday)->getTable().',branch',
+            'branch' => 'required',
            
         ]);
         if ($validator->fails()) {
