@@ -78,6 +78,7 @@ use App\Http\Controllers\FieldKonnectAppSettings;
 use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\PrimarySchemeController;
 use App\Http\Controllers\ResignationController;
+use App\Http\Controllers\WareHouseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -226,6 +227,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('customers-active', [CustomerController::class, 'active'])->name('customers.active');
     Route::any('customers-survey', [CustomerController::class, 'survey'])->name('customers.survey');
     Route::any('survey-download', [CustomerController::class, 'surveyDownload'])->name('survey-download');
+    
+    //Ware House Routs
+    Route::resource('ware_house', WareHouseController::class);
     
     //End User Routs
     Route::resource('end_user', EndUserController::class);

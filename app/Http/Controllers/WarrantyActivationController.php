@@ -60,7 +60,7 @@ class WarrantyActivationController extends Controller
     {
         abort_if(Gate::denies('warranty_activation_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $branches = Branch::where('active', 'Y')->get();
-        $customers = Customers::select('id', 'name', 'mobile')->get();
+        $customers = Customers::where('active', 'Y')->where('customertype', ['1', '2', '3'])->select('id', 'name', 'mobile')->get();
         $customers_dealer = Customers::where('customertype', ['1', '3'])->select('id', 'name', 'mobile')->get();
         $pincodes = Pincode::all();
         $states = State::all();
@@ -177,7 +177,7 @@ class WarrantyActivationController extends Controller
         $this->warranty_activation = WarrantyActivation::find(decrypt($id));
         abort_if(Gate::denies('warranty_activation_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $branches = Branch::where('active', 'Y')->get();
-        $customers = Customers::where('customertype', '2')->select('id', 'name', 'mobile')->get();
+        $customers = Customers::where('active', 'Y')->where('customertype', ['1', '2', '3'])->select('id', 'name', 'mobile')->get();
         $customers_dealer = Customers::where('customertype', ['1', '3'])->select('id', 'name', 'mobile')->get();
         $pincodes = Pincode::all();
         $states = State::all();
