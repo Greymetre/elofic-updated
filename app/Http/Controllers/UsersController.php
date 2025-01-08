@@ -92,6 +92,7 @@ class UsersController extends Controller
             'last_name'   =>  isset($request['last_name']) ? $request['last_name'] : '',
             'mobile'   =>  isset($request['mobile']) ? $request['mobile'] : null,
             'email'   =>  isset($request['email']) ? $request['email'] : '',
+            'leave_balance'   =>  isset($request['leave_balance']) ? $request['leave_balance'] : '0.00',
             'password'   =>  isset($request['password']) ? Hash::make($request['password']) : '',
             'notification_id'   =>  isset($request['notification_id']) ? $request['notification_id'] : '',
             'device_type'   =>  isset($request['device_type']) ? $request['device_type'] : '',
@@ -335,6 +336,7 @@ class UsersController extends Controller
         $user->last_name = isset($request['last_name']) ? $request['last_name'] : '';
         $user->mobile = isset($request['mobile']) ? $request['mobile'] : '';
         $user->email = isset($request['email']) ? $request['email'] : '';
+        $user->leave_balance = isset($request['leave_balance']) ? $request['leave_balance'] : '0.00';
         $user->show_attandance_report = isset($request['show_attandance_report']) ? $request['show_attandance_report'] : '';
         if ($request['password'] && !empty($request['password'])) {
             $user->password = isset($request['password']) ? Hash::make($request['password']) : '';

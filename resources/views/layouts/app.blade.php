@@ -980,12 +980,21 @@
                               </a>
                            </li>
                            @endif
-                           @if(auth()->user()->can('stock_access'))
+                           @if(auth()->user()->can('stock_accessss'))
                            <li class="nav-link-btn {{ request()->is('stock*') ? 'active' : '' }}">
                               <a class="hoveradd2" href="{{ url('stock') }}">
                                  <i class="material-icons icon">donut_small</i>
                                  <span>Stock</span>
                                  <div class="d-none mobile_hide"> Stock</div>
+                              </a>
+                           </li>
+                           @endif
+                           @if(auth()->user()->can('sap_stock_access'))
+                           <li class="nav-link-btn {{ request()->is('sap_stock*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('sap_stock') }}">
+                                 <i class="material-icons icon">donut_small</i>
+                                 <span>SAP Stock</span>
+                                 <div class="d-none mobile_hide"> SAP Stock</div>
                               </a>
                            </li>
                            @endif

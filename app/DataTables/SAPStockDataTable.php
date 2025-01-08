@@ -2,7 +2,7 @@
 
 namespace App\DataTables;
 
-use App\Models\WareHouse;
+use App\Models\SapStock;
 use Yajra\DataTables\Html\Button;
 use Yajra\DataTables\Html\Column;
 use Yajra\DataTables\Html\Editor\Editor;
@@ -11,7 +11,7 @@ use Yajra\DataTables\Services\DataTable;
 
 use Illuminate\Support\Facades\Auth;
 
-class WareHouseDataTable extends DataTable
+class SAPStockDataTable extends DataTable
 {
     
     public function dataTable($query)
@@ -22,28 +22,8 @@ class WareHouseDataTable extends DataTable
             ->editColumn('created_at', function($data)
             {
                 return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
-            })
-            ->addColumn('action', function ($query) {
-                  $btn = '';
-                  $activebtn ='';
-                  if(auth()->user()->can(['ware_house_edit']))
-                  {
-                    $btn = $btn.'<a href"javascript:void(0)" class="btn btn-info btn-just-icon btn-sm edit" id="'.$query->id.'" title="'.trans('panel.global.edit').' '.trans('panel.category.title_singular').'">
-                          <i class="material-icons">edit</i>
-                        </a>';
-                  }
-                  if(auth()->user()->can(['ware_house_delete']))
-                  {
-                    $btn = $btn.' <a href="#" class="btn btn-danger btn-just-icon btn-sm delete" value="'.$query->id.'" title="'.trans('panel.global.delete').' '.trans('panel.category.title_singular').'">
-                                <i class="material-icons">clear</i>
-                              </a>';
-                  }
-                  return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
-                                '.$btn.'
-                            </div>';
-            })
-      
-            ->rawColumns(['action','created_at']);
+            })      
+            ->rawColumns(['created_at']);
     }
 
     /**
@@ -52,9 +32,9 @@ class WareHouseDataTable extends DataTable
      * @param \App\Category $model
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function query(WareHouse $model)
+    public function query(SapStock $model)
     {
-        return $model->latest()->newQuery();
+        return $model->with('product','warehouse','product_category')->latest()->newQuery();
     }
 
     /**

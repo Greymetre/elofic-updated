@@ -131,7 +131,6 @@
   </div>
 </div>
 <script src="{{ url('/').'/'.asset('assets/js/jquery.custom.js') }}"></script>
-<script src="{{ url('/').'/'.asset('assets/js/validation_products.js') }}"></script>
 <script type="text/javascript">
   $(function () {
     $.ajaxSetup({
@@ -157,12 +156,13 @@
       var base_url =$('.baseurl').data('baseurl');
       var id = $(this).attr('id');
       $.ajax({
-        url: base_url + '/categories/'+id,
+        url: base_url + '/ware_house/'+id,
        dataType:"json",
        success:function(data)
        {
-        $('#category_name').val(data.category_name);
-        $('#sap_code').val(data.sap_code);
+        console.log(data);
+        $('#warehouse_code').val(data.warehouse_code);
+        $('#warehouse_name').val(data.warehouse_name);
         $('#warehouse_id').val(data.id);
         var title = '{!! trans('panel.global.edit') !!}' ;
         $('.modal-title').text(title);
@@ -172,74 +172,42 @@
       })
      });
     
-    $('body').on('click', '.categoryActive', function () {
-        var id = $(this).attr("id");
-        var active = $(this).attr("value");
-        var status = '';
-        if(active == 'Y')
-        {
-          status = 'Incative ?';
-        }
-        else
-        {
-           status = 'Ative ?';
-        }
-        var token = $("meta[name='csrf-token']").attr("content");
-        if(!confirm("Are You sure want "+status)) {
-           return false;
-        }
-        $.ajax({
-            url: "{{ url('categories-active') }}",
-            type: 'POST',
-            data: {_token: token,id: id,active:active},
-            success: function (data) {
-              $('.message').empty();
-              $('.alert').show();
-              if(data.status == 'success')
-              {
-                $('.alert').addClass("alert-success");
-              }
-              else
-              {
-                $('.alert').addClass("alert-danger");
-              }
-              $('.message').append(data.message);
-              table.draw();
-            },
-        });
-    });
+    
     $('.create').click(function () {
-        $('#category_id').val('');
         $('#createWarehouseForm').trigger("reset");
-        $("#category_image").attr({ "src": '{!! asset('assets/img/placeholder.jpg') !!}' });
         $('.modal-title').text('{!! trans('panel.global.add') !!}');
     });
     
     $('body').on('click', '.delete', function () {
-        var id = $(this).attr("value");
-        var token = $("meta[name='csrf-token']").attr("content");
-        if(!confirm("Are You sure want to delete ?")) {
-           return false;
+    var id = $(this).attr("value");
+    var token = $("meta[name='csrf-token']").attr("content");
+
+    if (!confirm("Are you sure you want to delete?")) {
+        return false;
+    }
+
+    $.ajax({
+        url: '/ware_house/' + id,
+        type: 'DELETE',          
+        data: {
+            _token: token,        
+            id: id                
+        },
+        success: function (data) {
+            $('.alert').show();
+            if (data.status === 'success') {
+                $('.alert').addClass("alert-success").text(data.message);
+            } else {
+                $('.alert').addClass("alert-danger").text(data.message);
+            }
+            table.draw();
+        },
+        error: function (xhr) {
+            $('.alert').show().addClass("alert-danger").text("An error occurred.");
         }
-        $.ajax({
-            url: "{{ url('categories') }}"+'/'+id,
-            type: 'DELETE',
-            data: {_token: token,id: id},
-            success: function (data) {
-              $('.alert').show();
-              if(data.status == 'success')
-              {
-                $('.alert').addClass("alert-success");
-              }
-              else
-              {
-                $('.alert').addClass("alert-danger");
-              }
-              $('.message').append(data.message);
-              table.draw();
-            },
-        });
     });
+});
+
      
     });
 </script>
