@@ -30,7 +30,7 @@ use App\Http\Controllers\Api\ReportingActivityController;
 use App\Http\Controllers\Api\TourPlanController;
 use App\Http\Controllers\Api\TransactionHistoryController;
 use App\Http\Controllers\Api\ReportController;
-
+use App\Http\Controllers\Api\SapStockController;
 
 /*
 |--------------------------------------------------------------------------
@@ -72,6 +72,7 @@ Route::any('getRetailerList', [CustomController::class, 'getRetailerList']);
 Route::any('getslider', [CustomController::class, 'getslider']);
 Route::get('getsettings', [DashboardController::class, 'getsettings']);
 Route::get('get-field-connet-version', [DashboardController::class, 'getVersion']);
+Route::any('insert_sap_stock', [SapStockController::class, 'insertSapStock']);
 
 Route::any('emailExists', [CustomController::class, 'emailExists']);
 /*================= Customer Routes ============================*/

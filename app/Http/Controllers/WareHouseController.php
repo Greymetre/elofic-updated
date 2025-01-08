@@ -18,9 +18,6 @@ class WareHouseController extends Controller
      */
     public function index(WareHouseDataTable $dataTable, Request $request)
     {
-        if($request->ip() != '111.118.252.250'){
-            return view('work_in_progress');
-        }
         abort_if(Gate::denies('ware_house_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         return $dataTable->render('ware_house.index');
     }
@@ -75,7 +72,7 @@ class WareHouseController extends Controller
      */
     public function show(WareHouse $wareHouse)
     {
-        //
+        return response()->json($wareHouse);
     }
 
     /**
@@ -109,6 +106,10 @@ class WareHouseController extends Controller
      */
     public function destroy(WareHouse $wareHouse)
     {
-        //
+        if($wareHouse->delete())
+        {
+            return response()->json(['status' => 'success','message' => 'Ware House deleted successfully!']);
+        }
+        return response()->json(['status' => 'error','message' => 'Error in Ware House Delete!']);
     }
 }

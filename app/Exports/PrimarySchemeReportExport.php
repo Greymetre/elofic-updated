@@ -193,7 +193,7 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
         $response[1] = $this->quarter ? 'Q' . $this->quarter : '-';
         $response[2] = $data['division'] ?? '';
         $response[3] = $data['customer'] ? $data['customer']['name'] : '-';
-        $response[4] = $data['customer'] ? $data['customer']['customer_code'] : '-';
+        $response[4] = $data['customer'] ? $data['customer']['sap_code'] : '-';
         $response[5] = $data['customer_id'] ? $data['customer_id'] : '-';
         $response[6] = data_get($data, 'customer.customeraddress.cityname.city_name', '-');
         $response[7] = data_get($data, 'customer.customeraddress.statename.state_name', '-');

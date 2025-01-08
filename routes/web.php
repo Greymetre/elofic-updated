@@ -78,7 +78,9 @@ use App\Http\Controllers\FieldKonnectAppSettings;
 use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\PrimarySchemeController;
 use App\Http\Controllers\ResignationController;
+use App\Http\Controllers\SapStockController;
 use App\Http\Controllers\WareHouseController;
+use App\Models\SapStock;
 
 /*
 |--------------------------------------------------------------------------
@@ -230,6 +232,9 @@ Route::group(['middleware' => ['auth']], function () {
     
     //Ware House Routs
     Route::resource('ware_house', WareHouseController::class);
+
+    //SAP Stock Routs
+    Route::any('sap_stock', [SapStockController::class, 'index'])->name('sap_stock.index');
     
     //End User Routs
     Route::resource('end_user', EndUserController::class);
