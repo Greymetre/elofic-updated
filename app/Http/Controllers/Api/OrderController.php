@@ -294,6 +294,8 @@ class OrderController extends Controller
                         'line_total' => isset($rows['line_total']) ? $rows['line_total'] : 0.00,
                         'created_at' => getcurentDateTime(),
                         'ebd_amount' => isset($rows['ebd_amount']) ? $rows['ebd_amount'] : 0.00,
+                        // 'agri_standard_dis' => isset($rows['agri_standard_dis']) ? $rows['agri_standard_dis'] : 0.00,
+                        // 'agri_standard_dis_amounts' => isset($rows['agri_standard_dis_amounts']) ? $rows['agri_standard_dis_amounts'] : 0.00,
                         // 'ebd_amount' => isset($rows['ebd_amount']) ? $rows['ebd_amount'] :0.00,
                         // 'cluster_discount' => isset($rows['cluster_discount']) ? $rows['cluster_discount'] :0.00,
                         // 'cluster_amount' => isset($rows['cluster_amount']) ? $rows['cluster_amount'] :0.00,

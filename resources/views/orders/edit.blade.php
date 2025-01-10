@@ -1028,14 +1028,6 @@
       function sellerinfo() {
          var customer_id = $("select[name=seller_id]").val();
 
-         // var cust_type = $("select[name=seller_id]").children(":selected").data('allowtype');
-         // if(cust_type == '2'){
-         //  $('#de_dis').show();
-         // }else{
-         // $('#de_dis').hide();
-         // }
-
-
          if (customer_id) {
             $.ajax({
                url: "{{ url('getCustomerData') }}",
@@ -1662,18 +1654,31 @@
             $('#all-discount-div-pump').css('height', 'auto');
             $('#all-discount-div-fan').css('opacity', '0');
             $('#all-discount-div-fan').css('height', '0px');
+            $('#all-discount-div-agri').css('opacity', '0');
+            $('#all-discount-div-agri').css('height', '0px');
          } else if (category == '2') {
             $('#all-discount-div-fan').css('opacity', '1');
             $('#all-discount-div-fan').css('height', 'auto');
             $('#all-discount-div-pump').css('opacity', '0');
             $('#all-discount-div-pump').css('height', '0px');
+            $('#all-discount-div-agri').css('opacity', '0');
+            $('#all-discount-div-agri').css('height', '0px');
+         } else if (category == '4') {
+            $('#all-discount-div-agri').css('opacity', '1');
+            $('#all-discount-div-agri').css('height', 'auto');
+            $('#all-discount-div-pump').css('opacity', '0');
+            $('#all-discount-div-pump').css('height', '0px');
+            $('#all-discount-div-fan').css('opacity', '0');
+            $('#all-discount-div-fan').css('height', '0px');
          } else {
             $('#all-discount-div-pump').css('opacity', '0');
             $('#all-discount-div-pump').css('height', '0px');
             $('#all-discount-div-fan').css('opacity', '0');
             $('#all-discount-div-fan').css('height', '0px');
+            $('#all-discount-div-agri').css('opacity', '0');
+            $('#all-discount-div-agri').css('height', '0px');
          }
-      })
+      }).trigger('change');
 
 
 
