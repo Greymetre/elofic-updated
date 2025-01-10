@@ -11,7 +11,7 @@ class Order extends Model
 
     protected $table = 'orders';
 
-    protected $fillable = [ 'active','buyer_id','seller_id','executive_id','total_qty','shipped_qty','orderno','order_date','completed_date','estimated_date','total_gst','total_discount','extra_discount','extra_discount_amount','sub_total','grand_total','order_taking','status_id','address_id','suc_del','gst_amount','schme_amount','ebd_amount','ebd_discount',	'special_discount','special_amount','cluster_discount','cluster_amount','deal_discount','deal_amount','distributor_discount','distributor_amount','frieght_discount','frieght_amount',	'gst5_amt','gst12_amt','gst18_amt','gst28_amt','order_remark','discount_status','created_by', 'updated_by','deleted_at','created_at','updated_at','beatscheduleid',];
+    protected $fillable = [ 'active','buyer_id','seller_id','executive_id','total_qty','shipped_qty','orderno','order_date','completed_date','estimated_date','total_gst','total_discount','extra_discount','extra_discount_amount','sub_total','grand_total','order_taking','status_id','address_id','suc_del','gst_amount','schme_amount','ebd_amount','ebd_discount',	'special_discount','special_amount','cluster_discount','cluster_amount','deal_discount','deal_amount','distributor_discount','distributor_amount','frieght_discount','frieght_amount', 'agri_standard_discount', 'agri_standard_discount_amount','gst5_amt','gst12_amt','gst18_amt','gst28_amt','order_remark','discount_status','created_by', 'updated_by','deleted_at','created_at','updated_at','beatscheduleid',];
 
     public function message()
     {
@@ -46,12 +46,6 @@ class Order extends Model
             
             $created_at = getcurentDateTime();
             $request['orderno'] = !empty($request['orderno']) ? $request['orderno'] : date('Y').'_'.$request['seller_id'].'_'.autoIncrementId('Order','id');
-
-                //  if(!empty($request['buyer_id'])){
-                //    $buyer = $request['buyer_id'];
-                //    }else{
-                //     $buyer = $request['seller_id'];
-                //    }
 
             if( $order_id = Order::insertGetId([
                 'active' => 'Y',
@@ -102,6 +96,9 @@ class Order extends Model
                 'distribution_margin_discount_amount' => (isset($request['distribution_margin_discount_amount']) && $request['distribution_margin_discount_amount'] != NULL) ? $request['distribution_margin_discount_amount'] :0.00,
                 'fan_extra_discount' => isset($request['fan_extra_discount']) ? $request['fan_extra_discount'] :0,
                 'fan_extra_discount_amount' => (isset($request['fan_extra_discount_amount']) && $request['fan_extra_discount_amount'] != NULL) ? $request['fan_extra_discount_amount'] :0.00,
+                'agri_standard_discount' => isset($request['agri_standard_discount']) ? $request['agri_standard_discount'] :"0.00",
+                'agri_standard_discount_amount' => isset($request['agri_standard_discount_amount']) ? $request['agri_standard_discount_amount'] : "0.00",
+                'advance' => isset($request['advance']) ? $request['advance'] : "0.00",
                 'gst5_amt' => isset($request['gst5_amt']) ? $request['gst5_amt'] :0.00,   
                 'gst12_amt' => isset($request['gst12_amt']) ? $request['gst12_amt'] :0.00,   
                 'gst18_amt' => isset($request['gst18_amt']) ? $request['gst18_amt'] :0.00,   

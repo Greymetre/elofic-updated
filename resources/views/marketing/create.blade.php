@@ -38,7 +38,7 @@
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
-                  <label class="bmd-label-floating">Google DriveLink <span class="text-danger"> *</span></label>
+                  <label for="google_drivelink">Google DriveLink <span class="text-danger"> *</span></label>
                   <input type="text" name="google_drivelink" class="form-control" required>
                   @if ($errors->has('google_drivelink'))
                   <div class="error col-lg-12">
@@ -49,7 +49,7 @@
               </div>
               <div class="col-md-6">
                 <div class="form-group">
-                  <label class="bmd-label-floating">Count Of Participants <span class="text-danger"> *</span> <small>(the total number of people or groups of people that are involved in an event.)</small></label>
+                  <label for="count_of_participant">Count Of Participants <span class="text-danger"> *</span> <small>(the total number of people or groups of people that are involved in an event.)</small></label>
                   <input type="number" name="count_of_participant" class="form-control" required>
                   @if ($errors->has('count_of_participant'))
                   <div class="error col-lg-12">

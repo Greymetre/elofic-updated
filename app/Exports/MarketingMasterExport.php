@@ -71,7 +71,7 @@ class MarketingMasterExport implements FromCollection,WithHeadings,ShouldAutoSiz
 
     public function headings(): array
     {
-        return ['Event Date','Event Center','Place of Participant','Event District','State','Event Under Dealer','Branch','TM/ ASM Name Responsible for Event','Branding Team Member','Name of Participant','Category of Participant','Mob. No. of Participant','Google Drive Photo Link','Create Date','Create By'];
+        return ['Event Date','Event Center','Place of Participant','Event District','State','Event Under Dealer','Branch','TM/ ASM Name Responsible for Event','Branding Team Member','Name of Participant','Category of Participant','Mob. No. of Participant','Google Drive Photo Link','No. of Participant','Create Date','Create By'];
     }
 
     public function map($data): array
@@ -90,6 +90,7 @@ class MarketingMasterExport implements FromCollection,WithHeadings,ShouldAutoSiz
             !empty($data['category_of_participant']) ? $data['category_of_participant'] : '' ,
             !empty($data['mob_no_of_participant']) ? $data['mob_no_of_participant'] : '' ,
             !empty($data['google_drivelink']) ? $data['google_drivelink'] : '' ,
+            !empty($data['count_of_participant']) ? $data['count_of_participant'] : '' ,
             !empty($data['created_at']) ? date('d-M-Y', strtotime($data['created_at'])) : '' ,
             !empty($data['created_by']) ? $data['createdByName']['name'] : '' ,
 

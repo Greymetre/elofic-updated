@@ -684,6 +684,7 @@
                     </div>
                   </div>
                 </div>
+                @if(Auth::user()->id == '1')
                 <div class="col-md-6">
                   <div class="input_section">
                     <label class="col-form-label">{!! trans('panel.user.salary') !!}</label>
@@ -775,6 +776,7 @@
                     </div>
                   </div>
                 </div>
+                @endif
                 <div class="col-md-6">
                   <div class="input_section">
                     <label class="col-form-label">{!! trans('panel.user.pf_number') !!}</label>

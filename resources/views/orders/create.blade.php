@@ -45,61 +45,61 @@
                   <div class="col-md-4">
                      <div class="input_section">
                         <label class="col-form-label">{!! trans('panel.order.order_date') !!}</label>
-                        
-                           <div class="form-group has-default bmd-form-group">
-                              <input type="text" name="order_date" class="form-control datepicker" id="order_date" value="{{ old( 'order_date' , (!empty($orders->order_date)) ? ($orders->order_date) : date('Y-m-d') ) }}" autocomplete="off" readonly>
-                              @if($errors->has('order_date'))
-                              <div class="invalid-feedback">
-                                 {{ $errors->first('order_date') }}
-                              </div>
-                              @endif
+
+                        <div class="form-group has-default bmd-form-group">
+                           <input type="text" name="order_date" class="form-control datepicker" id="order_date" value="{{ old( 'order_date' , (!empty($orders->order_date)) ? ($orders->order_date) : date('Y-m-d') ) }}" autocomplete="off" readonly>
+                           @if($errors->has('order_date'))
+                           <div class="invalid-feedback">
+                              {{ $errors->first('order_date') }}
                            </div>
-                        
+                           @endif
+                        </div>
+
                      </div>
                   </div>
 
                   <div class="col-md-3">
                      <div class="input_section">
                         <label class="col-form-label">Order Taking</label>
-                      
-                           <div class="form-group has-default bmd-form-group">
-                              <select class="form-control select2" name="order_taking" style="width: 100%;" required>
-                                 <!-- <option value="">Select Order Taking</option> -->
-                                 <!-- <option value="MobileApp" {{ old( 'order_taking' , (!empty($orders->order_taking)) ? ($orders->order_taking) :('') ) == 'MobileApp' ? 'selected' : '' }}>MobileApp</option> -->
-                                 <option value="Web" {{ old( 'order_taking' , (!empty($orders->order_taking)) ? ($orders->order_taking) :('') ) == 'Web' ? 'selected' : '' }} selected>Web</option>
-                                 <!-- <option value="Calling" {{ old( 'order_taking' , (!empty($orders->order_taking)) ? ($orders->order_taking) :('') ) == 'Calling' ? 'selected' : '' }}>Calling</option> -->
-                              </select>
-                           </div>
-                           @if ($errors->has('seller_id'))
-                           <div class="error">
-                              <p class="text-danger">{{ $errors->first('seller_id') }}</p>
-                           </div>
-                           @endif
-                     
+
+                        <div class="form-group has-default bmd-form-group">
+                           <select class="form-control select2" name="order_taking" style="width: 100%;" required>
+                              <!-- <option value="">Select Order Taking</option> -->
+                              <!-- <option value="MobileApp" {{ old( 'order_taking' , (!empty($orders->order_taking)) ? ($orders->order_taking) :('') ) == 'MobileApp' ? 'selected' : '' }}>MobileApp</option> -->
+                              <option value="Web" {{ old( 'order_taking' , (!empty($orders->order_taking)) ? ($orders->order_taking) :('') ) == 'Web' ? 'selected' : '' }} selected>Web</option>
+                              <!-- <option value="Calling" {{ old( 'order_taking' , (!empty($orders->order_taking)) ? ($orders->order_taking) :('') ) == 'Calling' ? 'selected' : '' }}>Calling</option> -->
+                           </select>
+                        </div>
+                        @if ($errors->has('seller_id'))
+                        <div class="error">
+                           <p class="text-danger">{{ $errors->first('seller_id') }}</p>
+                        </div>
+                        @endif
+
                      </div>
                   </div>
 
                   <div class="col-md-4">
                      <div class="input_section">
                         <label class="col-form-label">Employee</label>
-                      
-                           <div class="form-group has-default bmd-form-group">
-                              <select class="form-control select2" name="executive_id" style="width: 100%;" required>
-                                 <option value="">Select Employee</option>
-                                 @if(@isset($users ))
-                                 @foreach($users as $user)
-                                 <option value="{!! $user['id'] !!}" {{ old( 'executive_id' , (!empty($orders->executive_id))?($orders->executive_id):('') ) == $user['id'] ? 'selected' : '' }}>{!! $user['name'] !!}</option>
-                                 @endforeach
-                                 @endif
-                              </select>
-                           </div>
-                           @if ($errors->has('executive_id'))
-                           <div class="error">
-                              <p class="text-danger">{{ $errors->first('executive_id') }}</p>
-                           </div>
-                           @endif
+
+                        <div class="form-group has-default bmd-form-group">
+                           <select class="form-control select2" name="executive_id" style="width: 100%;" required>
+                              <option value="">Select Employee</option>
+                              @if(@isset($users ))
+                              @foreach($users as $user)
+                              <option value="{!! $user['id'] !!}" {{ old( 'executive_id' , (!empty($orders->executive_id))?($orders->executive_id):('') ) == $user['id'] ? 'selected' : '' }}>{!! $user['name'] !!}</option>
+                              @endforeach
+                              @endif
+                           </select>
                         </div>
-                    
+                        @if ($errors->has('executive_id'))
+                        <div class="error">
+                           <p class="text-danger">{{ $errors->first('executive_id') }}</p>
+                        </div>
+                        @endif
+                     </div>
+
                   </div>
 
 
@@ -137,81 +137,81 @@
                        </div>
                   </div> -->
 
-                       <div class="col-md-6">
+                  <div class="col-md-6">
                      <div class="input_section">
                         <label class="col-form-label">{!! trans('panel.global.bill_to') !!}<span class="text-danger"> *</span></label>
-                       
-                           <div class="form-group has-default bmd-form-group">
-                              <select class="form-control select2 seller" name="seller_id" style="width: 100%;" required onchange="sellerinfo()" id="seller_id">
-                                 <!-- <option value="">Select {!! trans('panel.global.seller') !!}</option> -->
-                                 <option value="">Select Customer</option>
-                                 @if(@isset($sellers ))
-                                 @foreach($sellers as $seller)
-                                 <option value="{!! $seller['id'] !!}" data-allowtype="{{$seller->customertype}}" {{ old( 'seller_id' , (!empty($orders->seller_id)) ? ($orders->seller_id) :('') ) == $seller['id'] ? 'selected' : '' }}>{!! $seller['name'] !!}</option>
-                                 @endforeach
-                                 @endif
-                              </select>
-                           </div>
-                           @if ($errors->has('seller_id'))
-                           <div class="error">
-                              <p class="text-danger">{{ $errors->first('seller_id') }}</p>
-                           </div>
-                           @endif
+
+                        <div class="form-group has-default bmd-form-group">
+                           <select class="form-control select2 seller" name="seller_id" style="width: 100%;" required onchange="sellerinfo()" id="seller_id">
+                              <!-- <option value="">Select {!! trans('panel.global.seller') !!}</option> -->
+                              <option value="">Select Customer</option>
+                              @if(@isset($sellers ))
+                              @foreach($sellers as $seller)
+                              <option value="{!! $seller['id'] !!}" data-allowtype="{{$seller->customertype}}" {{ old( 'seller_id' , (!empty($orders->seller_id)) ? ($orders->seller_id) :('') ) == $seller['id'] ? 'selected' : '' }}>{!! $seller['name'] !!}</option>
+                              @endforeach
+                              @endif
+                           </select>
                         </div>
-                      </div>
-<div class="col-md-6">
+                        @if ($errors->has('seller_id'))
+                        <div class="error">
+                           <p class="text-danger">{{ $errors->first('seller_id') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+                  <div class="col-md-6">
                      <div class="input_section">
                         <label class="col-form-label">Address : </label>
                         <span class="seller_address"></span>
                      </div>
-               </div>
+                  </div>
                </div>
                <div class="row">
-             
+
                   <div class="col-md-6" id="de_dis" style="display:none;">
                      <div class="input_section">
                         <!-- <label class="col-md-3 col-form-label">{!! trans('panel.global.buyer') !!}<span class="text-danger"> *</span></label> -->
                         <label class="col-form-label">Dealer/Distributer<span class="text-danger"> *</span></label>
-                      
-                           <div class="form-group has-default bmd-form-group">
-                              <select class="form-control select2 buyer" name="buyer_id" style="width: 100%;" onchange="buyerinfo()">
-                                 <!-- <option value="">Select {!! trans('panel.global.buyer') !!}</option> -->
-                                 <option value="">Select Dealer/Distributer</option>
-                                 @if(@isset($buyers ))
-                                 @foreach($buyers as $buyer)
-                                 <option value="{!! $buyer['id'] !!}" {{ old( 'buyer_id' , (!empty($orders->buyer_id)) ? ($orders->buyer_id) :('') ) == $buyer['id'] ? 'selected' : '' }}>{!! $buyer['name'] !!}</option>
-                                 @endforeach
-                                 @endif
-                              </select>
-                           </div>
-                           @if($errors->has('seller_id'))
-                           <div class="error">
-                              <p class="text-danger">{{ $errors->first('seller_id') }}</p>
-                           </div>
-                           @endif
+
+                        <div class="form-group has-default bmd-form-group">
+                           <select class="form-control select2 buyer" name="buyer_id" style="width: 100%;" onchange="buyerinfo()">
+                              <!-- <option value="">Select {!! trans('panel.global.buyer') !!}</option> -->
+                              <option value="">Select Dealer/Distributer</option>
+                              @if(@isset($buyers ))
+                              @foreach($buyers as $buyer)
+                              <option value="{!! $buyer['id'] !!}" {{ old( 'buyer_id' , (!empty($orders->buyer_id)) ? ($orders->buyer_id) :('') ) == $buyer['id'] ? 'selected' : '' }}>{!! $buyer['name'] !!}</option>
+                              @endforeach
+                              @endif
+                           </select>
                         </div>
-                   </div>
-                   <div class="col-md-6">
+                        @if($errors->has('seller_id'))
+                        <div class="error">
+                           <p class="text-danger">{{ $errors->first('seller_id') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+                  <div class="col-md-6">
                      <div class="input_section">
                         <label class="col-form-label">Address : </label>
                         <span class="buyer_address"></span>
                      </div>
                   </div>
-                
+
                   @if($orders->exists && @isset($orders['orderno']))
                   <div class="col-md-6">
                      <div class="input_section">
                         <label class="col-form-label">{!! trans('panel.order.orderno') !!}</label>
-                      
-                           <div class="form-group has-default bmd-form-group">
-                              <input type="text" class="form-control" name="orderno" value="{!! old( 'orderno', $orders['orderno']) !!}">
-                              @if ($errors->has('orderno'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('orderno') }}</p>
-                              </div>
-                              @endif
+
+                        <div class="form-group has-default bmd-form-group">
+                           <input type="text" class="form-control" name="orderno" value="{!! old( 'orderno', $orders['orderno']) !!}">
+                           @if ($errors->has('orderno'))
+                           <div class="error">
+                              <p class="text-danger">{{ $errors->first('orderno') }}</p>
                            </div>
-                        
+                           @endif
+                        </div>
+
                      </div>
                   </div>
                   @endif
@@ -219,17 +219,17 @@
                <div class="row">
                   <div class="col-md-6">
                      <div class="input_section">
-                  <label class="col-form-label">Division : </label>
-                 
-                     <select name="product_cat_id" id="product_cat_id" class="form-control select2" onchange="getProductlist()" required>
-                        <option value="">Select Division</option>
-                        @if(count($category) > 0)
-                        @foreach($category as $cat)
-                        <option value="{{$cat->id}}">{{$cat->category_name}}</option>
-                        @endforeach
-                        @endif
-                     </select>
-                  </div>
+                        <label class="col-form-label">Division : </label>
+
+                        <select name="product_cat_id" id="product_cat_id" class="form-control select2" onchange="getProductlist()" required>
+                           <option value="">Select Division</option>
+                           @if(count($category) > 0)
+                           @foreach($category as $cat)
+                           <option value="{{$cat->id}}">{{$cat->category_name}}</option>
+                           @endforeach
+                           @endif
+                        </select>
+                     </div>
                   </div>
                </div>
                <br>
@@ -329,13 +329,13 @@
                                  <td>{{ $key + 1 }}</td>
                                  <td>
                                     <div class="input_section">
-                                    <select class="form-control product rowchange select2" name="orderdetail[{{ $key }}][product_id]">
-                                       @if ($rows['product_id'] !== null)
-                                       <option value="{!! $rows['product_id'] !!}">{!! $rows['products']['display_name'] !!}</option>
-                                       @endif
-                                    </select>
-                                    <div class="error-product"></div>
-                                 </div>
+                                       <select class="form-control product rowchange select2" name="orderdetail[{{ $key }}][product_id]">
+                                          @if ($rows['product_id'] !== null)
+                                          <option value="{!! $rows['product_id'] !!}">{!! $rows['products']['display_name'] !!}</option>
+                                          @endif
+                                       </select>
+                                       <div class="error-product"></div>
+                                    </div>
                                  </td>
                                  <td style="display: none;">
                                     <select class="form-control productdetails rowchange select2" name="orderdetail[{{ $key }}][product_detail]" onchange="getproductdetailinfo(this)">
@@ -475,7 +475,10 @@
                                  <td hidden>
                                     <input type="text" name="orderdetail[1][distributot_dis]" class="distributot_dis">
 
+                                    <input type="text" name="orderdetail[1][agri_standard_dis]" class="agri_standard_dis">
+
                                     <input type="text" name="orderdetail[1][distributot_amounts]" class="distributot_amounts" hidden>
+                                    <input type="text" name="orderdetail[1][agri_standard_dis_amounts]" class="agri_standard_dis_amounts" hidden>
 
 
                                     <input type="text" name="orderdetail[1][frieght_dis]" class="frieght_dis">
@@ -570,67 +573,65 @@
                               <label class="bmd-label">MOU Discount%</label>
                            </div>
                            <div class="col-sm-4">
-                           <!--    <div class="input-group">
-                                 <div class="input-group-prepend">
-                                 </div> -->
-                                 <input type="number" name='distributor_discount' class="form-control distributor_discount" value="{!! old( 'distributor_discount', $orders['distributor_discount']) !!}" />
-                           
-                              </div>
-                              <div class="col-sm-4">
-                                       <input type="text" name="distributor_discount_amount" class="form-control distributor_discount_amount" readonly>
-                                    </div>
-                              @if($errors->has('distributor_discount'))
-                              <div class="invalid-feedback">
-                                 {{ $errors->first('distributor_discount') }}
-                              </div>
-                              @endif
+
+                              <input type="number" name='distributor_discount' class="form-control distributor_discount" value="{!! old( 'distributor_discount', $orders['distributor_discount']) !!}" />
+
                            </div>
-                     
+                           <div class="col-sm-4">
+                              <input type="text" name="distributor_discount_amount" class="form-control distributor_discount_amount" readonly>
+                           </div>
+                           @if($errors->has('distributor_discount'))
+                           <div class="invalid-feedback">
+                              {{ $errors->first('distributor_discount') }}
+                           </div>
+                           @endif
+                        </div>
+
 
                         <div class="form-group row">
                            <div class="col-sm-4">
                               <label class="bmd-label">Special Discount%</label>
                            </div>
                            <div class="col-sm-4">
-                             <!--  <div class="input-group">
+                              <!--  <div class="input-group">
                                  <div class="input-group-prepend">
                                  </div> -->
-                                 <input type="number" name='special_discount' class="form-control special_discount" value="{!! old( 'special_discount', $orders['special_discount']) !!}" />
-</div>
-<div class="col-sm-4">
-                                 <input type="text" name="special_discount_amount" class="form-control special_discount_amount" readonly>
-                              </div>
-                              @if($errors->has('special_discount'))
-                              <div class="invalid-feedback">
-                                 {{ $errors->first('special_discount') }}
-                              </div>
-                              @endif
+                              <input type="number" name='special_discount' class="form-control special_discount" value="{!! old( 'special_discount', $orders['special_discount']) !!}" />
                            </div>
-               
+                           <div class="col-sm-4">
+                              <input type="text" name="special_discount_amount" class="form-control special_discount_amount" readonly>
+                           </div>
+                           @if($errors->has('special_discount'))
+                           <div class="invalid-feedback">
+                              {{ $errors->first('special_discount') }}
+                           </div>
+                           @endif
+                        </div>
+
 
                         <div class="form-group row">
                            <div class="col-sm-4">
                               <label class="bmd-label">Frieght Discount%</label>
                            </div>
-                          <!--  <div class="col-sm-8">
+                           <!--  <div class="col-sm-8">
                               <div class="input-group">
                                  <div class="input-group-prepend">
                                  </div> -->
-                                 <div class="col-sm-4">
-                                    <select name='frieght_discount' class="form-control frieght_discount">
-                                       <option value="">Select Frieght Discount</option>
-                                       <option value="1">1%</option>
-                                    </select>
-                                 </div>
-                                 <div class="col-sm-4">
-                                    <input type="text" name="frieght_discount_amount" class="form-control frieght_discount_amount" readonly>
-                                 </div>
-                              </div>
-                              @if($errors->has('frieght_discount'))
-                              <div class="invalid-feedback">
-                                 {{ $errors->first('frieght_discount') }}
-                              </div>
-                              @endif
+                           <div class="col-sm-4">
+                              <select name='frieght_discount' class="form-control frieght_discount">
+                                 <option value="">Select Frieght Discount</option>
+                                 <option value="1">1%</option>
+                              </select>
+                           </div>
+                           <div class="col-sm-4">
+                              <input type="text" name="frieght_discount_amount" class="form-control frieght_discount_amount" readonly>
+                           </div>
+                        </div>
+                        @if($errors->has('frieght_discount'))
+                        <div class="invalid-feedback">
+                           {{ $errors->first('frieght_discount') }}
+                        </div>
+                        @endif
                         <!--    </div>
                         </div> -->
 
@@ -658,21 +659,21 @@
                               <label class="bmd-label">Deal Discount%</label>
                            </div>
                            <div class="col-sm-4">
-                            <!--   <div class="input-group">
+                              <!--   <div class="input-group">
                                  <div class="input-group-prepend">
                                  </div> -->
-                                 <input type="number" name='extra_discount' class="form-control deal_discnt" value="{!! old( 'extra_discount', $orders['extra_discount']) !!}" />
-                              </div>
-                              <div class="col-sm-4">
-                                 <input type="text" name="extra_discount_amount" class="form-control extra_discount_amount" readonly>
-                              </div>
-                              @if($errors->has('extra_discount'))
-                              <div class="invalid-feedback">
-                                 {{ $errors->first('extra_discount') }}
-                              </div>
-                              @endif
+                              <input type="number" name='extra_discount' class="form-control deal_discnt" value="{!! old( 'extra_discount', $orders['extra_discount']) !!}" />
                            </div>
-                      
+                           <div class="col-sm-4">
+                              <input type="text" name="extra_discount_amount" class="form-control extra_discount_amount" readonly>
+                           </div>
+                           @if($errors->has('extra_discount'))
+                           <div class="invalid-feedback">
+                              {{ $errors->first('extra_discount') }}
+                           </div>
+                           @endif
+                        </div>
+
                      </div>
                      <div id="all-discount-div-fan">
 
@@ -818,6 +819,26 @@
                               <input type="text" name="total_fan_discount_amount" class="total_fan_discount_amount form-control" readonly>
                            </div>
                         </div>
+                     </div>
+                     <div id="all-discount-div-agri">
+                        <!-- <div class="form-group row">
+                           <div class="col-sm-4">
+                              <label class="bmd-label">Standard Discount%</label>
+                           </div>
+                           <div class="col-sm-4">
+
+                              <input type="number" name='agri_standard_discount' class="form-control agri_standard_discount" value="{!! old( 'agri_standard_discount', $orders['agri_standard_discount']) !!}" />
+
+                           </div>
+                           <div class="col-sm-4">
+                              <input type="text" name="agri_standard_discount_amount" class="form-control agri_standard_discount_amount" readonly>
+                           </div>
+                           @if($errors->has('agri_standard_discount'))
+                           <div class="invalid-feedback">
+                              {{ $errors->first('agri_standard_discount') }}
+                           </div>
+                           @endif
+                        </div> -->
                      </div>
 
                      <div class="form-group row">
@@ -1001,6 +1022,7 @@
                '<td hidden><input type="text" name="orderdetail[' + counter + '][deal_dis]" class="deal_dis"><input type="text" name="orderdetail[' + counter + '][deal_amounts]" class="deal_amounts" hidden></td>' +
                '<td hidden><input type="text" name="orderdetail[' + counter + '][fan_extra_dis]" class="fan_extra_dis"><input type="text" name="orderdetail[' + counter + '][fan_extra_amount]" class="fan_extra_amount" hidden></td>' +
                '<td hidden><input type="text" name="orderdetail[' + counter + '][special_dis]" class="special_dis"><input type="text" name="orderdetail[' + counter + '][special_amounts]" class="special_amounts" hidden></td>' +
+               '<td hidden><input type="text" name="orderdetail[' + counter + '][agri_standard_dis]" class="agri_standard_dis"><input type="text" name="orderdetail[' + counter + '][agri_standard_dis_amounts]" class="agri_standard_dis_amounts" hidden></td>' +
                '<td hidden><input type="text" name="orderdetail[' + counter + '][distributot_dis]" class="distributot_dis"><input type="text" name="orderdetail[' + counter + '][distributot_amounts]" class="distributot_amounts" hidden> <input type="text" name="orderdetail[' + counter + '][frieght_dis]" class="frieght_dis"><input type="text" name="orderdetail[' + counter + '][frieght_amounts]" class="frieght_amounts"><input type="text" name="orderdetail[' + counter + '][five_gst]" class="five_gst" hidden> <input type="text" name="orderdetail[' + counter + '][twelve_gst]" class="twelve_gst" hidden> <input type="text" name="orderdetail[' + counter + '][eighteen_gst]" class="eighteen_gst" hidden> <input type="text" name="orderdetail[' + counter + '][twenti_eight_gst]" class="twenti_eight_gst" hidden></td>' +
                '<td class="td-actions text-center"><a href="#" class="remove-rows btn btn-danger btn-xs"><i class="fa fa-minus"></i></a></td> </tr>';
             $table.append(newRow);
@@ -1022,6 +1044,7 @@
             $('.deal_discnt').keyup();
             $('.fan_extra_discount').keyup();
             $('.distributor_discount').keyup();
+            $('.agri_standard_discount').keyup();
             $('.special_discount').keyup();
             $('.frieght_discount').change();
             //}, 100);
@@ -1109,6 +1132,11 @@
          $('.distributot_dis').val(distributot_dis);
       }).trigger('keyup');
 
+      $('.agri_standard_discount').on('keyup', function() {
+         var agri_standard_dis = $(this).val();
+         $('.agri_standard_dis').val(agri_standard_dis);
+      }).trigger('keyup');
+
       $('.frieght_discount').on('change', function() {
          var frieght_discount = $(this).val();
          // $('#tab_logic tbody tr').find('.clustered_dis').val(cls_ter);
@@ -1159,22 +1187,37 @@
                         $('#all-discount-div-pump').css('height', '0px');
                         $('#all-discount-div-fan').css('opacity', '0');
                         $('#all-discount-div-fan').css('height', '0px');
+                        $('#all-discount-div-agri').css('opacity', '0');
+                        $('#all-discount-div-agri').css('height', '0px');
                      } else {
                         if (category == '1') {
                            $('#all-discount-div-pump').css('opacity', '1');
                            $('#all-discount-div-pump').css('height', 'auto');
                            $('#all-discount-div-fan').css('opacity', '0');
                            $('#all-discount-div-fan').css('height', '0px');
+                           $('#all-discount-div-agri').css('opacity', '0');
+                           $('#all-discount-div-agri').css('height', '0px');
                         } else if (category == '2') {
                            $('#all-discount-div-fan').css('opacity', '1');
                            $('#all-discount-div-fan').css('height', 'auto');
                            $('#all-discount-div-pump').css('opacity', '0');
                            $('#all-discount-div-pump').css('height', '0px');
+                           $('#all-discount-div-agri').css('opacity', '0');
+                           $('#all-discount-div-agri').css('height', '0px');
+                        } else if (category == '4') {
+                           $('#all-discount-div-agri').css('opacity', '1');
+                           $('#all-discount-div-agri').css('height', 'auto');
+                           $('#all-discount-div-pump').css('opacity', '0');
+                           $('#all-discount-div-pump').css('height', '0px');
+                           $('#all-discount-div-fan').css('opacity', '0');
+                           $('#all-discount-div-fan').css('height', '0px');
                         } else {
                            $('#all-discount-div-pump').css('opacity', '0');
                            $('#all-discount-div-pump').css('height', '0px');
                            $('#all-discount-div-fan').css('opacity', '0');
                            $('#all-discount-div-fan').css('height', '0px');
+                           $('#all-discount-div-agri').css('opacity', '0');
+                           $('#all-discount-div-agri').css('height', '0px');
                         }
                         $('#de_dis').hide();
                      }
@@ -1348,6 +1391,13 @@
                $(this).find('.distributot_amounts').val((distributots_dis_cal).toFixed(2));
                // end distributor
 
+               // start code for agri_standard_discount
+               var agri_standards_dis = $(this).find('.agri_standard_dis').val();
+               var agri_standards_dis_cal = total * agri_standards_dis / 100;
+               total = total - agri_standards_dis_cal;
+               $(this).find('.agri_standard_dis_amounts').val((agri_standards_dis_cal).toFixed(2));
+               // end agri_standard_discount
+
                // start special discount
                var special_dis = $(this).find('.special_dis').val();
                var special_dis_cal = total * special_dis / 100;
@@ -1369,12 +1419,9 @@
                var clusters_discount = $(this).find('.clustered_dis').val();
                var clus_dis = total * clusters_discount / 100;
                total = total - clus_dis;
-               console.log(total);
                $(this).find('.clus_amounts').val((clus_dis).toFixed(2));
 
                //end clustor 
-
-               console.log(total, ' = after cluster');
 
                //new code for dod
                var dod_discount = $(this).find('.dod_dis').val();
@@ -1385,8 +1432,6 @@
 
                //end dod 
 
-               console.log(total, ' = dod');
-
                //new code for SD
                var sd_discount = $(this).find('.sd_dis').val();
                var sd_dis = total * sd_discount / 100;
@@ -1395,8 +1440,6 @@
                $(this).find('.sd_amounts').val((sd_dis).toFixed(2));
 
                //end SD 
-
-               console.log(total, ' = sd');
 
                //new code for dm
                var dm_discount = $(this).find('.dm_dis').val();
@@ -1431,8 +1474,6 @@
 
                $(this).find('.deal_amounts').val((deal_dis_cal).toFixed(2));
                // end deal discount 
-               
-               console.log(total, ' = Last');
 
                //new gst single discount
                // var gst = $(this).find('.gst_percent').html();
@@ -1513,6 +1554,7 @@
          cluster_amnt = 0;
          ebd_amnt = 0;
          distributot_amounts = 0;
+         agri_standard_dis_amounts = 0;
          frieght_amounts = 0;
          total = 0;
          subtotal = 0;
@@ -1561,7 +1603,7 @@
          });
 
          //cluster discout end
-         
+
          //dod discout start
          $('.dodp_amounts').each(function() {
             dodp_amounts += parseFloat($(this).val());
@@ -1583,7 +1625,7 @@
             $('.distribution_margin_discount_amount').val(dm_amounts.toFixed(2));
          });
          //dm discout end     
-         
+
          //fan extra discount
          $('.fan_extra_amount').each(function() {
             fan_extra_amount += parseFloat($(this).val());
@@ -1628,6 +1670,14 @@
          $('.distributot_amounts').each(function() {
             distributot_amounts += parseFloat($(this).val());
             $('.distributor_discount_amount').val(distributot_amounts.toFixed(2));
+         });
+         //end distributor discount
+
+         //distributor discount
+         $('.agri_standard_dis_amounts').each(function() {
+            agri_standard_dis_amounts += parseFloat($(this).val());
+            console.log(agri_standard_dis_amounts);
+            $('.agri_standard_discount_amount').val(agri_standard_dis_amounts.toFixed(2));
          });
          //end distributor discount
 
@@ -1790,16 +1840,29 @@
             $('#all-discount-div-pump').css('height', 'auto');
             $('#all-discount-div-fan').css('opacity', '0');
             $('#all-discount-div-fan').css('height', '0px');
+            $('#all-discount-div-agri').css('opacity', '0');
+            $('#all-discount-div-agri').css('height', '0px');
          } else if (category == '2') {
             $('#all-discount-div-fan').css('opacity', '1');
             $('#all-discount-div-fan').css('height', 'auto');
             $('#all-discount-div-pump').css('opacity', '0');
             $('#all-discount-div-pump').css('height', '0px');
+            $('#all-discount-div-agri').css('opacity', '0');
+            $('#all-discount-div-agri').css('height', '0px');
+         } else if (category == '4') {
+            $('#all-discount-div-agri').css('opacity', '1');
+            $('#all-discount-div-agri').css('height', 'auto');
+            $('#all-discount-div-pump').css('opacity', '0');
+            $('#all-discount-div-pump').css('height', '0px');
+            $('#all-discount-div-fan').css('opacity', '0');
+            $('#all-discount-div-fan').css('height', '0px');
          } else {
             $('#all-discount-div-pump').css('opacity', '0');
             $('#all-discount-div-pump').css('height', '0px');
             $('#all-discount-div-fan').css('opacity', '0');
             $('#all-discount-div-fan').css('height', '0px');
+            $('#all-discount-div-agri').css('opacity', '0');
+            $('#all-discount-div-agri').css('height', '0px');
          }
       })
    </script>

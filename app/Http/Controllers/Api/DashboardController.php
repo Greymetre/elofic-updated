@@ -725,4 +725,13 @@ class DashboardController extends Controller
         $login_user = $request->user();
         return response()->json(['status' => 'success', 'user_status' => $login_user->active], 200);
     }
+
+    public function getLeaveBalance(Request $request)
+    {
+        $user = $request->user();
+        $leaveBalance = $user->leave_balance;
+        if ($leaveBalance) {
+            return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $leaveBalance], 200);
+        }
+    }
 }

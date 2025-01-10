@@ -51,10 +51,10 @@ class OrderController extends Controller
         $sellers_ids = $this->orders->distinct()->pluck('seller_id');
         $buyer_ids = $this->orders->distinct()->pluck('buyer_id');
         $divisions = Category::where('active', 'Y')->get();
-        $retailers = Customers::whereIn("id" , $buyer_ids)->get();
-        $distributors = Customers::whereIn("id" , $sellers_ids)->get();
+        $retailers = Customers::whereIn("id", $buyer_ids)->get();
+        $distributors = Customers::whereIn("id", $sellers_ids)->get();
         $customer_types = CustomerType::where('active', 'Y')->get();
-        return $dataTable->render('orders.index', compact('divisions','retailers','distributors','customer_types'));
+        return $dataTable->render('orders.index', compact('divisions', 'retailers', 'distributors', 'customer_types'));
     }
 
     /**
@@ -67,48 +67,9 @@ class OrderController extends Controller
         abort_if(Gate::denies('order_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $products = Product::where('active', '=', 'Y')->select('id', 'product_name', 'product_image', 'display_name', 'product_code')->orderBy('product_name', 'asc')->get();
 
-        // $products = Product::where('active','=','Y')->select('id', 'product_name','product_image','display_name','product_code')->get();
         $userids = getUsersReportingToAuth();
-
-
-        // $sellers = Customers::whereHas('customertypes', function($query){
-        //                         $query->where('type_name', '=', 'distributor');
-        //                     })
-        //                     ->where(function($query) use($userids){
-        //                         if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-        //                         {
-        //                             $query->whereIn('executive_id',$userids);
-        //                         }
-        //                     })
-        //                     ->where('active','=','Y')
-        //                     ->select('id', 'name','mobile')
-        //                     ->get();
-
-
-        // $sellers = Customers::where(function($query) use($userids){
-        //                         if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-        //                         {
-        //                             $query->whereIn('executive_id',$userids);
-        //                         }
-        //                     })
-        //                     ->where('active','=','Y')
-        //                     ->select('id', 'name','mobile','customertype')
-        //                     ->get();
-
-
         $sellers = array();
 
-
-        // $buyers = Customers::whereIn('customertype', ['2','3','4','5','6'])
-        //                     ->where(function($query) use($userids){
-        //                         if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-        //                         {
-        //                             $query->whereIn('executive_id',$userids);
-        //                         }
-        //                     })
-        //                     ->where('active','=','Y')
-        //                     ->select('id', 'name','mobile')
-        //                     ->get();
 
         $buyers = Customers::whereIn('customertype', ['1', '3', '4', '5', '6'])
             ->where(function ($query) use ($userids) {
@@ -124,6 +85,8 @@ class OrderController extends Controller
             if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                 $query->whereIn('id', $userids);
             }
+        })->whereHas('roles', function ($query) {
+            $query->whereNot('id', ['29']);
         })->select('id', 'name')->orderBy('id', 'desc')->get();
 
         $category = Category::where('active', 'Y')->get();
@@ -203,6 +166,8 @@ class OrderController extends Controller
                         'special_amounts' => isset($rows['special_amounts']) ? $rows['special_amounts'] : 0.00,
                         'frieght_discount' => isset($rows['frieght_dis']) ? $rows['frieght_dis'] : 0.00,
                         'frieght_amount' => isset($rows['frieght_amounts']) ? $rows['frieght_amounts'] : 0.00,
+                        'agri_standard_dis' => isset($rows['agri_standard_dis']) ? $rows['agri_standard_dis'] : 0.00,
+                        'agri_standard_dis_amounts' => isset($rows['agri_standard_dis_amounts']) ? $rows['agri_standard_dis_amounts'] : 0.00,
                         'created_at' => getcurentDateTime(),
                     ]);
                 }
@@ -248,21 +213,21 @@ class OrderController extends Controller
         $id = decrypt($id);
         $orders = $this->orders->with('sellers', 'createdbyname')->find($id);
         $orderdetails = OrderDetails::with('products')->where('order_id', '=', $id)->get();
-            if ($orders->product_cat_id == '1') {
-                $totalLP = 0;
-                foreach ($orderdetails as $key => $value) {
-                    $totalLP += $value->price*$value->quantity;
-                }
-                if($totalLP > 0){
-                    $ttdis = number_format(((1-($orders->sub_total/$totalLP))*100),2);
-                }else{
-                    $ttdis = false;
-                }
-            }else{
-                $ttdis = false;
-                $totalLP = false;
+        if ($orders->product_cat_id == '1') {
+            $totalLP = 0;
+            foreach ($orderdetails as $key => $value) {
+                $totalLP += $value->price * $value->quantity;
             }
-        
+            if ($totalLP > 0) {
+                $ttdis = number_format(((1 - ($orders->sub_total / $totalLP)) * 100), 2);
+            } else {
+                $ttdis = false;
+            }
+        } else {
+            $ttdis = false;
+            $totalLP = false;
+        }
+
         return view('orders.show', compact('orderdetails', 'orders', 'ttdis', 'totalLP'));
     }
 
@@ -282,73 +247,37 @@ class OrderController extends Controller
         $products = Product::where('active', '=', 'Y')->select('id', 'display_name', 'product_image')->get();
 
 
-
-        // Optionally, you can save the PDF file path to your database or perform any other necessary actions
-
-        // $sellers = Customers::whereHas('customertypes', function($query){
-        //                         $query->where('type_name', '=', 'distributor');
-        //                     })
-        //                     ->where(function($query) use($userids){
-        //                         if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-        //                         {
-        //                             $query->whereIn('executive_id',$userids);
-        //                         }
-        //                     })
-        //                     ->where('active','=','Y')
-        //                     ->select('id', 'name','mobile')
-        //                     ->get();
-
         $sellers = Customers::where(function ($query) use ($userids) {
             if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
-                if(Auth::user()->hasRole('Accounts Order')){
-                    $userids = User::whereIn('branch_id', explode(',',Auth::user()->branch_show))->pluck('id');
+                if (Auth::user()->hasRole('Accounts Order')) {
+                    $userids = User::whereIn('branch_id', explode(',', Auth::user()->branch_show))->pluck('id');
                 }
                 $query->whereIn('executive_id', $userids)
-                      ->orWhereIn('created_by', $userids);
+                    ->orWhereIn('created_by', $userids);
             }
         })
             ->where('active', '=', 'Y')
             ->select('id', 'name', 'mobile')
             ->get();
 
-        //$sellers = array();
-
-
-
-        // $buyers = Customers::whereIn('customertype', ['2','3','4','5','6'])
-        //                     ->where(function($query) use($userids){
-        //                         if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-        //                         {
-        //                             $query->whereIn('executive_id',$userids);
-        //                         }
-        //                     })
-        //                     ->where('active','=','Y')
-        //                     ->select('id', 'name','mobile')
-        //                     ->get();
-
         $buyers = Customers::whereIn('customertype', ['1', '3', '4', '5', '6'])
             ->where(function ($query) use ($userids) {
                 if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                     $query->whereIn('executive_id', $userids)
-                          ->orWhereIn('created_by', $userids);
+                        ->orWhereIn('created_by', $userids);
                 }
             })
             ->where('active', '=', 'Y')
             ->select('id', 'name', 'mobile')
             ->get();
 
-        // $users = User::where(function($query) use($userids){
-        //                         if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-        //                         {
-        //                             $query->whereIn('id',$userids);
-        //                         }
-        //                     })->select('id','name')->orderBy('id','desc')->get();  
-
         $users = User::where(function ($query) use ($userids) {
             if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                 $query->whereIn('id', $userids);
             }
-        })->where('active', 'Y')->select('id', 'name')->orderBy('id', 'desc')->get();
+        })->whereHas('roles', function ($query) {
+            $query->whereNot('id', ['29']);
+        })->select('id', 'name')->orderBy('id', 'desc')->get();
 
         $category = Category::where('active', 'Y')->get();
         return view('orders.edit', compact('products', 'sellers', 'buyers', 'orderdetail', 'users', 'category'))->with('orders', $orders);
@@ -379,9 +308,9 @@ class OrderController extends Controller
         $request['gst18_amt'] = $request['28_gst'];
         $ss_customer_type = Customers::where('id', $request['seller_id'])->pluck('customertype')->first();
 
-            if($ss_customer_type == '1' || $ss_customer_type == '3'){
-                $request['buyer_id'] = $request['seller_id'];
-            }
+        if ($ss_customer_type == '1' || $ss_customer_type == '3') {
+            $request['buyer_id'] = $request['seller_id'];
+        }
 
         $orders = Order::with('orderdetails')->find($id);
         $orders->buyer_id = isset($request['seller_id']) ? $request['seller_id'] : null;
@@ -663,7 +592,7 @@ class OrderController extends Controller
 
                 $status_id = Status::where('status_name', '=', 'Dispatched')->pluck('id')->first();
                 $partiallystatus = Status::where('status_name', '=', 'Partially Dispatched')->pluck('id')->first();
-              
+
                 if ($request['orderdetail']) {
                     foreach ($request['orderdetail'] as $key => $rows) {
                         // code chnanges
@@ -671,8 +600,8 @@ class OrderController extends Controller
                         //     ->where('product_detail_id', '=', $rows['product_detail'])->first();
                         $orderdetail = OrderDetails::where('order_id', '=', $request['order_id'])
                             ->where('product_id', '=', ($rows['product_id'] ?? ''))->first();
-                        
-                        if(isset($orderdetail)){
+
+                        if (isset($orderdetail)) {
                             if ($orderdetail['shipped_qty'] + $rows['quantity'] == $orderdetail['quantity']) {
                                 $orderdetail->status_id = $status_id;
                             } else {
@@ -734,7 +663,7 @@ class OrderController extends Controller
             $orders->status_id = NULL;
             // $orders->order_remark = $request->remark;
             $orders->save();
-            OrderDetails::where('order_id', $orderid)->update(['shipped_qty'=>'0']);
+            OrderDetails::where('order_id', $orderid)->update(['shipped_qty' => '0']);
             $sales = Sales::where('order_id', $orderid)->first();
             SalesDetails::where('sales_id', $sales->id)->delete();
             $sales->delete();
@@ -772,8 +701,8 @@ class OrderController extends Controller
                 if (isset($request['orderdetail'])) {
                     foreach ($request['orderdetail'] as $key => $rows) {
                         $orderdetail = OrderDetails::where('order_id', '=', $request['order_id'])
-                        ->where('product_id', '=', ($rows['product_id'] ?? ''))->first();
-                        if(isset($orderdetail)){
+                            ->where('product_id', '=', ($rows['product_id'] ?? ''))->first();
+                        if (isset($orderdetail)) {
                             $orderdetail->cash_dis = $rows['cash_dis'];
                             $orderdetail->cash_amounts = $rows['cash_amounts'];
                             $orderdetail->status_id = $partiallystatus;
@@ -820,6 +749,6 @@ class OrderController extends Controller
     {
         OrderDetails::where('id', $request->detailID)->delete();
 
-        return response()->json(['status'=>'success']);
+        return response()->json(['status' => 'success']);
     }
 }

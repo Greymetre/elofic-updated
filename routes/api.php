@@ -73,6 +73,7 @@ Route::any('getslider', [CustomController::class, 'getslider']);
 Route::get('getsettings', [DashboardController::class, 'getsettings']);
 Route::get('get-field-connet-version', [DashboardController::class, 'getVersion']);
 Route::any('insert_sap_stock', [SapStockController::class, 'insertSapStock']);
+Route::any('insert_sap_sell', [SapStockController::class, 'insertSapSell']);
 
 Route::any('emailExists', [CustomController::class, 'emailExists']);
 /*================= Customer Routes ============================*/
@@ -134,6 +135,7 @@ Route::group(['middleware' => ['auth:customers']], function () {
 Route::group(['middleware' => ['auth:users']], function () {
     // Dashboard
     Route::any('dashboard', [DashboardController::class, 'dashboard']);
+    Route::any('getLeaveBalance', [DashboardController::class, 'getLeaveBalance']);
     Route::any('getUserSataus', [DashboardController::class, 'getUserSataus']);
     Route::any('pendingCounts', [DashboardController::class, 'pendingCounts']);
     Route::any('getUserDashboardData', [DashboardController::class, 'getUserDashboardData']);

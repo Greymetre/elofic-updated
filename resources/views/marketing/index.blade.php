@@ -12,7 +12,7 @@
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
-          <h4 class="card-title">Marketing Customer Master
+          <h4 class="card-title">Marketing Master
             <span class="">
               <div class="btn-group header-frm-btn">
                 @if(auth()->user()->can(['marketing_master_download']))
@@ -209,6 +209,7 @@
                 <th>Category of Participant</th>
                 <th>Place of Participant</th>
                 <th>Mob. No. of Participant</th>
+                <th>No. of Participant</th>
               </thead>
               <tbody>
               </tbody>
@@ -357,6 +358,13 @@
           {
             data: 'mob_no_of_participant',
             name: 'mob_no_of_participant',
+            "defaultContent": '',
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: 'count_of_participant',
+            name: 'count_of_participant',
             "defaultContent": '',
             orderable: true,
             searchable: true,
