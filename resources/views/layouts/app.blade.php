@@ -1943,6 +1943,15 @@
                                  </a>
                               </li>
                               @endif
+                              @if(auth()->user()->can('asm_rating_report'))
+                              <li class="nav-link-btn {{ request()->is('reports/asm_rating*') ? 'active' : '' }}">
+                                 <a class="hoveradd2" href="{{ url('reports/asm_rating') }}">
+                                    <i class="material-icons icon">trending_down</i>
+                                    <span>ASM Rating Report</span>
+                                    <div class="d-none mobile_hide"> ASM Rating Report</div>
+                                 </a>
+                              </li>
+                              @endif
                               @if(auth()->user()->can('dashboard_primary_sales_access'))
                               <li class="nav-link-btn {{ request()->is('reports/primary_sales*') ? 'active' : '' }}">
                                  <a class="hoveradd2" href="{{ url('reports/primary_sales') }}">

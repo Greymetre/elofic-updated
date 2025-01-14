@@ -36,7 +36,7 @@
                                 'files'=>true
                                 ]) !!}
                                 <div class="row">
-                                   <!--  <div class="p-2" style="width: 250px;">
+                                    <!--  <div class="p-2" style="width: 250px;">
                                         <select class="selectpicker" multiple name="branch_id" id="branch_id" data-style="select-with-transition" title="Select Branch">
                                             <option value="">Select Branch</option>
                                             @if(@isset($branches ))
@@ -47,7 +47,7 @@
                                         </select>
                                     </div> -->
 
-                                   <!--  <div class="p-2" style="width: 250px;">
+                                    <!--  <div class="p-2" style="width: 250px;">
                                         <select class="selectpicker" name="executive_id" id="executive_id" data-style="select-with-transition" title="Select User">
                                             <option value="">Select User</option>
                                             @if(@isset($users ))
@@ -58,7 +58,7 @@
                                         </select>
                                     </div> -->
 
-                                   <!--  <div class="p-2" style="width: 250px;">
+                                    <!--  <div class="p-2" style="width: 250px;">
                                         <select class="selectpicker" name="division_id" id="division_id" data-style="select-with-transition" title="Select Division">
                                             <option value="">Select Division</option>
                                             @if(@isset($divisions ))
@@ -69,7 +69,7 @@
                                         </select>
                                     </div> -->
 
-                                   <!--  <div class="p-2" style="width: 250px;">
+                                    <!--  <div class="p-2" style="width: 250px;">
                                         <select class="selectpicker"  multiple name="designation_id[]" id="designation_id" data-style="select-with-transition" title="Select Designation">
                                             <option value="">Select Designation</option>
                                             @if(@isset($designations ))
@@ -80,7 +80,7 @@
                                         </select>
                                     </div> -->
 
-                                   <!--  <div class="p-2" style="width: 250px;">
+                                    <!--  <div class="p-2" style="width: 250px;">
                                         <select class="selectpicker" name="f_year" id="f_year2" data-style="select-with-transition" title="Select Financial Year">
                                             <option value="">Select Financial Year</option>
                                              <option value="{{Carbon\Carbon::now()->format('Y')-2}}_{{Carbon\Carbon::now()->format('y')-1}}">{{Carbon\Carbon::now()->format('Y')-2}}-{{Carbon\Carbon::now()->format('y')-1}}</option> 
@@ -89,18 +89,18 @@
                                     </div> -->
 
                                     <div class="p-2" style="width: 250px;">
-                                        <select class="selectpicker" name="f_year" id="f_year2" data-style="select-with-transition">
+                                        <select class="selectpicker" name="f_year" id="f_year" data-style="select-with-transition">
                                             <!-- <option value="">Select Financial Year</option> -->
-                                               @foreach($sale_weightage_years as $sale_weightage_year)
-                                            <option value="{{$sale_weightage_year->financial_year}}">{{$sale_weightage_year->financial_year}}</option>
-                                             @endforeach
+                                            @foreach($sale_weightage_years as $sale_weightage_year)
+                                            <option value="{{$sale_weightage_year->financial_year}}" {{$curruntfinancial_year == $sale_weightage_year->financial_year ? 'selected' : ''}}>{{$sale_weightage_year->financial_year}}</option>
+                                            @endforeach
                                         </select>
                                     </div>
 
 
 
 
-                                   <!--  <div class="p-2" style="width: 250px;">
+                                    <!--  <div class="p-2" style="width: 250px;">
                                         <select class="selectpicker" name="appraisal_type" id="appraisal_type" data-style="select-with-transition" title="Select Appraisal Type">
                                             <option value="">Select Appraisal Type</option>
                                             <option value="quarterly">Quarterly</option>
@@ -113,7 +113,7 @@
                                         <select class="selectpicker" name="appraisal_session" id="appraisal_session" data-style="select-with-transition" title="Select Appraisal Type">
                                         </select>
                                     </div>
-                                    <input type="hidden" name="user_id" value="{{$user_id}}">
+                                    <input type="hidden" name="user_id" id="appraiser_user_id" value="{{$user_id}}">
 
                                     <div class="table-responsive w-100 p-2">
                                         <table class="table kvcodes-dynamic-rows-example" id="table_appraisal">
@@ -133,38 +133,38 @@
                                             </thead>
                                             <tbody>
 
-                                            @foreach($sale_weightages as $sale_weightage)
-                                                <?php 
+                                                @foreach($sale_weightages as $sale_weightage)
+                                                <?php
 
-                                               $categories = explode(",",$sale_weightage->category_name);
-                                               $name = explode(",",$sale_weightage->name);
-                                               $weightage = explode(",",$sale_weightage->weightage);
-                                               $indicator = explode(",",$sale_weightage->indicator);
-                                               $annum_target = explode(",",$sale_weightage->annum_target);
-                                               $i=0;
-                                                  ?> 
-                                              
-                                                @foreach($categories as $category) 
+                                                $categories = explode(",", $sale_weightage->category_name);
+                                                $name = explode(",", $sale_weightage->name);
+                                                $weightage = explode(",", $sale_weightage->weightage);
+                                                $indicator = explode(",", $sale_weightage->indicator);
+                                                $annum_target = explode(",", $sale_weightage->annum_target);
+                                                $i = 0;
+                                                ?>
+
+                                                @foreach($categories as $category)
 
                                                 <tr>
                                                     <input type="hidden" name="sale_weightage_id[]" value="{{$sale_weightage->id}}">
-                                                     <td>
+                                                    <td>
                                                         <h6>{{$sale_weightage?$category:''}}</h6>
 
                                                     </td>
                                                     <td>
                                                         <h6>{{$sale_weightage?$name[$i]:''}}</h6>
 
-                                                         <input type="hidden" name="kra_names[]" value="{{$sale_weightage?$name[$i]:''}}">
+                                                        <input type="hidden" name="kra_names[]" value="{{$sale_weightage?$name[$i]:''}}">
                                                     </td>
                                                     <td>
                                                         {{$sale_weightage?$indicator[$i]:''}}
                                                     </td>
-                                                     <td>{{$sale_weightage?$annum_target[$i]:''}}</td>
-                                                     <td>
+                                                    <td>{{$sale_weightage?$annum_target[$i]:''}}</td>
+                                                    <td>
                                                         {{$sale_weightage?$weightage[$i]:''}}%
 
-                                                      <input type="hidden" name="weightage[]" class="weightage" value="{{$sale_weightage?$weightage[$i]:''}}">
+                                                        <input type="hidden" name="weightage[]" class="weightage" value="{{$sale_weightage?$weightage[$i]:''}}">
 
                                                     </td>
 
@@ -184,20 +184,20 @@
                                                     </td>
                                                 </tr>
 
-                                                  <?php $i++; ?>
-                                                   @endforeach 
-                                                   @endforeach 
- 
-                                              
+                                                <?php $i++; ?>
+                                                @endforeach
+                                                @endforeach
+
+
                                             </tbody>
                                         </table>
                                         <div class="form-group p-2">
                                             <label for="remark">Remark</label>
                                             <input type="text" class="form-control" name="remark" id="remark" placeholder="Remark">
                                         </div>
-                                          {{ Form::submit('Submit', array('class' => 'btn btn-theme pull-right')) }}
+                                        {{ Form::submit('Submit', array('class' => 'btn btn-theme pull-right')) }}
                                     </div>
-                                  
+
                                     {{ Form::close() }}
                                 </div>
                             </div>
@@ -244,10 +244,63 @@
         $("#f_year").on("change", function() {
             $(".appended").remove();
             $('#appraisalCreateForm').find("input:not(:submit, :hidden)").val('');
-            var executive_id = $("#executive_id").val();
+            var executive_id = $("#appraiser_user_id").val();
             var f_year = $(this).val();
             var appraisal_type = $("#appraisal_type").val();
             var appraisal_session = $("#appraisal_session").val();
+
+            $.ajax({
+                url: "{{ url('geSalesWeightages') }}",
+                data: {
+                    "executive_id": executive_id,
+                    "f_year": f_year
+                },
+                success: function(res) {
+                    console.log(res);
+                    if (res.status === "success" && res.sale_weightages.length > 0) {
+                        // Clear existing rows in the table body
+                        $("#table_appraisal tbody").empty();
+
+                        // Populate new rows
+                        res.sale_weightages.forEach(function(weightage) {
+                            var row = `
+                        <tr>
+                            <input type="hidden" name="sale_weightage_id[]" value="${weightage.id}">
+                            <td><h6>${weightage.category_name}</h6></td>
+                            <td>
+                                <h6>${weightage.name}</h6>
+                                <input type="hidden" name="kra_names[]" value="${weightage.name}">
+                            </td>
+                            <td>${weightage.indicator}</td>
+                            <td>${weightage.annum_target}</td>
+                            <td>
+                                ${weightage.weightage}%
+                                <input type="hidden" name="weightage[]" class="weightage" value="${weightage.weightage}">
+                            </td>
+                            <td>
+                                <input type="number" name="target[]" class="target">
+                            </td>
+                            <td>
+                                <input type="number" class="achivment" name="achivment[]">
+                            </td>
+                            <td>
+                                <input name="acual[]" class="acual" type="text" readonly>
+                            </td>
+                            <td>10</td>
+                            <td>
+                                <input name="rating[]" class="all_rating" max="10" type="number" required>
+                                <p class="rat-err"></p>
+                            </td>
+                        </tr>
+                    `;
+                            $("#table_appraisal tbody").append(row);
+                        });
+                    } else {
+                        // If no data, display a message or leave table empty
+                        $("#table_appraisal tbody").html("<tr><td colspan='10' class='text-center'>No data available for the selected year</td></tr>");
+                    }
+                }
+            });
 
             getAllRatings(executive_id, f_year, appraisal_type, appraisal_session);
         })
@@ -325,7 +378,7 @@
             }
         })
 
-        function getAllRatings(executive_id, f_year, appraisal_type, appraisal_session){
+        function getAllRatings(executive_id, f_year, appraisal_type, appraisal_session) {
             if (executive_id != '' && f_year != '' && appraisal_type != '') {
                 if (appraisal_type == 'quarterly' || appraisal_type == 'half_yearly') {
                     if (appraisal_session != '') {
@@ -386,7 +439,7 @@
                                             });
                                             var NewTh = '<th class="text-center appended">';
                                             if (item.user_id != item.rating_by_user.id) {
-                                                 NewTh += item.rating_by_user.name+'('+item.rating_by_user.getdesignation.designation_name+')';
+                                                NewTh += item.rating_by_user.name + '(' + item.rating_by_user.getdesignation.designation_name + ')';
                                             } else {
                                                 NewTh += 'Self';
                                             }
@@ -429,7 +482,7 @@
                                     } else if (selftotalPer > 80) {
                                         $("#auth-user-grade").html("GRADE-A+(SPECIAL)");
                                     }
-                                    $("#auth-user-per").html(selftotalPer+"%");
+                                    $("#auth-user-per").html(selftotalPer + "%");
                                     if (selftotalPer < 51) {
                                         $("#auth-user-grade").html("GRADE-C(Poor)");
                                     } else if (selftotalPer > 50 && selftotalPer < 61) {
@@ -441,7 +494,7 @@
                                     } else if (selftotalPer > 80) {
                                         $("#auth-user-grade").html("GRADE-A+(SPECIAL)");
                                     }
-                                    $("#auth-user-per").html(selftotalPer+"%");
+                                    $("#auth-user-per").html(selftotalPer + "%");
                                 } else {
                                     $('input[name="target[]"], input[name="achivment[]"], input[name="acual[]"], input[name="rating[]"]').val('');
                                     const rows = document.querySelectorAll('tr');
@@ -469,7 +522,7 @@
                             if (res.length > 0) {
                                 var old_data = '';
                                 var tttr = '<tr class="appended"><td colspan="6" class="tottal-td">Total</td><td class="tottal-td" id="auth-user-per"></td>';
-                                    var tttr2 = '<tr class="appended"><td colspan="6" class="tottal-td">Grade</td><td class="tottal-td" id="auth-user-grade"></td>';
+                                var tttr2 = '<tr class="appended"><td colspan="6" class="tottal-td">Grade</td><td class="tottal-td" id="auth-user-grade"></td>';
                                 var totalPer = 0;
                                 var selftotalPer = 0;
                                 $.each(res, function(i, item) {
@@ -515,7 +568,7 @@
                                         });
                                         var NewTh = '<th class="text-center appended">';
                                         if (item.user_id != item.rating_by_user.id) {
-                                             NewTh += item.rating_by_user.name+'('+item.rating_by_user.getdesignation.designation_name+')';
+                                            NewTh += item.rating_by_user.name + '(' + item.rating_by_user.getdesignation.designation_name + ')';
                                         } else {
                                             NewTh += 'Self';
                                         }
@@ -558,7 +611,7 @@
                                 } else if (selftotalPer > 80) {
                                     $("#auth-user-grade").html("GRADE-A+(SPECIAL)");
                                 }
-                                $("#auth-user-per").html(selftotalPer+"%");
+                                $("#auth-user-per").html(selftotalPer + "%");
                             } else {
                                 $('input[name="target[]"], input[name="achivment[]"], input[name="acual[]"], input[name="rating[]"]').val('');
                                 const rows = document.querySelectorAll('tr');
@@ -583,12 +636,6 @@
                 $(".appended").remove();
             }
         }
-
-
-
-
-
-
     </script>
 
 </x-app-layout>

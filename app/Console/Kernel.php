@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
 
     protected $commands = [
         \App\Console\Commands\MoveStorageToS3::class,
+        Commands\UpdateLeaveBalance::class,
     ];
 
     /**
@@ -26,21 +27,12 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         //$schedule->command(EveryNight::class, ['--force'])->dailyAt('13:00');
-        $schedule->command(EveryNight::class)->timezone('Asia/Kolkata')->dailyAt('23:00');
-        $schedule->command(AutoPunchOut::class)->timezone('Asia/Kolkata')->dailyAt('22:30');
-        $schedule->command(AddressUpdate::class)->timezone('Asia/Kolkata')->everyFourHours();
+        // $schedule->command(EveryNight::class)->timezone('Asia/Kolkata')->dailyAt('23:00');
+        // $schedule->command(AutoPunchOut::class)->timezone('Asia/Kolkata')->dailyAt('22:30');
+        // $schedule->command(AddressUpdate::class)->timezone('Asia/Kolkata')->everyFourHours();
         $schedule->command('backup:run')->monthlyOn(1, '00:00');
-
-        // $schedule->call(function () {
-        //     $users = User::where('active', 'Y')->get();
-        //     foreach ($users as $user) {
-        //         $pinchinnotify = collect([
-        //             'title' => 'Punch In Now',
-        //             'body' =>  $user->name . 'Please Punch In Now.'
-        //         ]);
-        //         sendNotification($user->id, $pinchinnotify);
-        //     }
-        // })->timezone('Asia/Kolkata')->dailyAt('10:00');
+        $schedule->command('update:leave-balance')->monthlyOn(1, '00:00');
+       
     }
 
     /**

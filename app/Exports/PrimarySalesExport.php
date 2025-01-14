@@ -79,20 +79,14 @@ class PrimarySalesExport implements FromCollection, WithHeadings,WithMapping, Sh
         if ($this->financial_year && $this->financial_year != '' && $this->financial_year != null) {
             $f_year_array = explode('-', $this->financial_year);
 
-            $financial_year_start = $f_year_array[0] . '-04-01';
-            $financial_year_end = $f_year_array[1] . '-03-31';
-
-            $query->where(function ($q) use ($f_year_array, $financial_year_start, $financial_year_end) {
-                $q->where('invoice_date', '>=', $financial_year_start)
-                    ->where('invoice_date', '<=', $financial_year_end);;
-            });
+            $startDateFormatted = $f_year_array[0] . '-04-01';
+            $endDateFormatted = $f_year_array[1] . '-03-31';
         }
 
         if ($this->month && $this->month != '' && $this->month != null && $this->financial_year && $this->financial_year != '' && $this->financial_year != null) {
 
             $f_year_array = explode('-', $this->financial_year);
-
-            if ($this->month == 'Jan' || $this->month == 'Feb' || $this->month == 'Mar') {
+            if (array_intersect($this->month, ['Jan', 'Feb', 'Mar'])) {
                 $currentYear = $f_year_array[1];
                 $monthNumbers = array_map(function($month) {
                     return Carbon::parse($month)->month;
@@ -124,15 +118,15 @@ class PrimarySalesExport implements FromCollection, WithHeadings,WithMapping, Sh
                 $endDateFormatted = $lastDate->toDateString();
             }
 
-            $query->where(function ($q) use ($startDateFormatted, $endDateFormatted) {
-                $q->where('invoice_date', '>=', $startDateFormatted)
-                    ->where('invoice_date', '<=', $endDateFormatted);;
-            });
         }
 
+        $query->where(function ($q) use ($startDateFormatted, $endDateFormatted) {
+            $q->where('invoice_date', '>=', $startDateFormatted)
+                ->where('invoice_date', '<=', $endDateFormatted);;
+        });
         
         $query = $query->latest()->get(); 
-        
+       
         return $query;
     }
 

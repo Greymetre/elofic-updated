@@ -71,7 +71,9 @@ class LeaveController extends Controller
 
             $dates = [];
             $currentDate = clone $fromDate;
+            $days = 0;
             while ($currentDate <= $toDate) {
+                $days++;
                 $dates[] = $currentDate->format('Y-m-d');
                 $currentDate->modify('+1 day');
             }
@@ -89,6 +91,17 @@ class LeaveController extends Controller
                     'updated_at' => getcurentDateTime(),
                 ]);
             }
+
+            if($request['type'] == 'First half leave' || $request['type'] == 'Second Half Leave'){
+                $user = User::find($request['user_id']);
+                $user->leave_balance = $user->leave_balance - 0.5;
+                $user->save();
+            }elseif($request['type'] == 'Full Day Leave' || $request['type'] == 'Leave'){
+                $user = User::find($request['user_id']);
+                $user->leave_balance = $user->leave_balance - $days;
+                $user->save();
+            }
+
             Leave::create([
                 'user_id' => $request['user_id'],
                 'active' => 'Y',

@@ -234,6 +234,7 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
                         $remain = ($data->total_quantity-$data->group_4_quantity)*20;
                         $response[18] = $additional+$remain;
                     }else{
+                        $response[18] =$CM ? ($CM->primaryscheme->per_pcs == 1 ? $CM->points * $data['total_quantity'] : $CM->points) : '0';
                         $response[19] = $CM ? ($CM->primaryscheme->per_pcs == 1 ? $CM->points * $data['total_quantity'] : $CM->points) : '0';
                     }
                 }else{

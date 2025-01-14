@@ -312,21 +312,13 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('salesweightage/multiupdate', [SalesWeightageController::class, 'multiupdate'])->name('salesweightage.multiupdate');
 
     //Appraisal
-    //Route::get('appraisal/create', [AppraisalController::class, 'create']);
-
-    // Route::get('appraisal/{id}/create', [AppraisalController::class, 'create']);
-    // Route::get('appraisal/index', [AppraisalController::class, 'index'])->name('appraisal.index');
-    // Route::any('appraisal/store', [AppraisalController::class, 'store'])->name('appraisal.store');
-    // Route::post('appraisal/update', [AppraisalController::class, 'update'])->name('appraisal.update');
-    // Route::any('appraisal-download', [ AppraisalController::class, 'download'])->name('appraisal.download');
-    // Route::any('getappraisal', [ AppraisalController::class, 'getappraisal'])->name('appraisal.getappraisal');
-
     Route::get('appraisal/{id}/create', [AppraisalController::class, 'create']);
     Route::get('appraisal/index', [AppraisalController::class, 'index'])->name('appraisal.index');
     Route::any('appraisal/store', [AppraisalController::class, 'store'])->name('appraisal.store');
     Route::post('appraisal/update', [AppraisalController::class, 'update'])->name('appraisal.update');
     Route::any('appraisal-download', [AppraisalController::class, 'download'])->name('appraisal.download');
     Route::any('getappraisal', [AppraisalController::class, 'getappraisal'])->name('appraisal.getappraisal');
+    Route::any('geSalesWeightages', [AppraisalController::class, 'geSalesWeightages'])->name('appraisal.geSalesWeightages');
     Route::get('appraisal/{id}/{year}/edit', [AppraisalController::class, 'edit']);
 
     Route::get('appraisal/{id}/{year}/viewappraisal', [AppraisalController::class, 'viewappraisal']);
@@ -660,10 +652,12 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('reports/attendancereport', [ReportController::class, 'attendancereport']);
     Route::any('reports/reports_sale', [UsersController::class, 'reports_sale']);
     Route::any('reports/fos_rating', [UsersController::class, 'fos_rating']);
+    Route::any('reports/asm_rating', [UsersController::class, 'asm_rating']);
     Route::any('reports/primary_sales', [ReportController::class, 'primary_sales']);
     Route::any('reports/secondary_sales', [ReportController::class, 'secondary_sales']);
     Route::get('user_sales_report_download', [UsersController::class, 'user_sales_report_download']);
     Route::get('fos_rating_report_download', [UsersController::class, 'fos_rating_report_download']);
+    Route::get('asm_rating_report_download', [UsersController::class, 'asm_rating_report_download']);
     Route::any('reports/customersreport', [ReportController::class, 'customersReport']);
     Route::any('reports/loyalty_summary_report', [ReportController::class, 'loyaltySummaryReport'])->name('loyaltySummaryReport');
     Route::any('reports/loyalty_dealer_wise_summary_report', [ReportController::class, 'loyaltyDealerWiseSummaryReport'])->name('loyaltyDealerWiseSummaryReport');

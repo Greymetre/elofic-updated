@@ -216,4 +216,9 @@ class User extends Authenticatable implements HasMedia
     {
         return $this->hasMany(Expenses::class, 'user_id', 'id');
     }
+
+    public function target()
+    {
+        return $this->hasMany(SalesTargetUsers::class, 'user_id', 'id');
+    }
 }

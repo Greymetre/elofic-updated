@@ -1336,20 +1336,14 @@ class AjaxController extends Controller
         if ($request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
             $f_year_array = explode('-', $request->financial_year);
 
-            $financial_year_start = $f_year_array[0] . '-04-01';
-            $financial_year_end = $f_year_array[1] . '-03-31';
-
-            $query->where(function ($q) use ($f_year_array, $financial_year_start, $financial_year_end) {
-                $q->where('invoice_date', '>=', $financial_year_start)
-                    ->where('invoice_date', '<=', $financial_year_end);;
-            });
+            $startDateFormatted = $f_year_array[0] . '-04-01';
+            $endDateFormatted = $f_year_array[1] . '-03-31';
         }
 
         if ($request->month && $request->month != '' && $request->month != null && $request->financial_year && $request->financial_year != '' && $request->financial_year != null) {
 
             $f_year_array = explode('-', $request->financial_year);
-
-            if ($request->month == 'Jan' || $request->month == 'Feb' || $request->month == 'Mar') {
+            if (array_intersect($request->month, ['Jan', 'Feb', 'Mar'])) {
                 $currentYear = $f_year_array[1];
                 $monthNumbers = array_map(function ($month) {
                     return Carbon::parse($month)->month;
@@ -1381,12 +1375,13 @@ class AjaxController extends Controller
                 $endDateFormatted = $lastDate->toDateString();
             }
 
-            $query->where(function ($q) use ($startDateFormatted, $endDateFormatted) {
-                $q->where('invoice_date', '>=', $startDateFormatted)
-                    ->where('invoice_date', '<=', $endDateFormatted);;
-            });
         }
-
+        
+        $query->where(function ($q) use ($startDateFormatted, $endDateFormatted) {
+            $q->where('invoice_date', '>=', $startDateFormatted)
+                ->where('invoice_date', '<=', $endDateFormatted);;
+        });
+        
         $data['total_qty'] = $query->sum('quantity');
         $data['total_sale'] = number_format(($query->sum('net_amount') / 100000), 2, '.', '') . " (Lac)";
 

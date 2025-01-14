@@ -121,7 +121,8 @@
                     url: "{{ route('appraisal.index') }}",
                     data: function(d) {
                         d.user_id = $('#executive_id').val(),
-                            d.division_id = $('#division_id').val()
+                            d.division_id = $('#division_id').val(),
+                            d.financial_year = $('#financial_year').val()
                     }
                 },
                 columns: [{
@@ -187,6 +188,9 @@
                 table.draw();
             })
             $("#division_id").on('change', function() {
+                table.draw();
+            })
+            $("#financial_year").on('change', function() {
                 table.draw();
             })
         });
