@@ -47,15 +47,16 @@
 
 
                                     <div class="p-2" style="width: 250px;">
-                                        <select class="selectpicker" name="f_year" id="f_year" data-style="select-with-transition">
-                                            <!-- <option value="">Select Financial Year</option> -->
+                                        <select class="selectpicker" name="f_year_visible" id="f_year" data-style="select-with-transition" disabled>
                                             @foreach($sale_weightage_years as $sale_weightage_year)
-                                            <option value="{{$sale_weightage_year->financial_year}}" <?php if ($appraisal_detail->year == $sale_weightage_year->financial_year) {
-                                                                                                            echo "selected";
-                                                                                                        }  ?>>{{$sale_weightage_year->financial_year}}</option>
+                                            <option value="{{$sale_weightage_year->financial_year}}"
+                                                @if($appraisal_detail->year == $sale_weightage_year->financial_year) selected @endif>
+                                                {{$sale_weightage_year->financial_year}}
+                                            </option>
                                             @endforeach
-
                                         </select>
+                                        <!-- Hidden input to submit the value -->
+                                        <input type="hidden" name="f_year" value="{{ $appraisal_detail->year }}">
                                     </div>
 
 
@@ -137,8 +138,8 @@
                                                 <tr>
                                                     @if(in_array(auth()->user()->id, $appraisal_detail->rating_bys))
                                                     @php
-                                                        $rattingId = App\Models\Appraisal::where('rating_by', auth()->user()->id)->where('weightage_id', $appraisal_detail->weightage_id)->where('user_id', explode(',', $appraisal_detail->user_ids)[0])->where('year', $appraisal_detail->year)->value('id');
-                                                        @endphp
+                                                    $rattingId = App\Models\Appraisal::where('rating_by', auth()->user()->id)->where('weightage_id', $appraisal_detail->weightage_id)->where('user_id', explode(',', $appraisal_detail->user_ids)[0])->where('year', $appraisal_detail->year)->value('id');
+                                                    @endphp
                                                     <input type="hidden" name="appraisal_ids[]" value="{{$rattingId}}">
                                                     @else
                                                     <input type="hidden" name="appraisal_ids[]" value="">

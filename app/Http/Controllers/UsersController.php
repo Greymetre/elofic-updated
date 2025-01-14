@@ -20,6 +20,7 @@ use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Hash;
 use App\DataTables\UsersDataTable;
 use App\DataTables\UserCityDataTable;
+use App\Exports\ASMRatingReportExport;
 use App\Exports\FOSRatingReportExport;
 use App\Imports\UserImport;
 use App\Exports\UserExport;
@@ -743,6 +744,132 @@ class UsersController extends Controller
 
         return view('reports.fos_rating', compact('months', 'users', 'designations', 'divisions', 'branchs'));
     }
+    public function asm_rating(Request $request)
+    {
+        if($request->ip() != '111.118.252.250') {
+            return view('work_in_progress');
+        }
+        $user_ids = getUsersReportingToAuth();
+        $users = User::where('active', 'Y')->where('sales_type', 'Primary')->whereIn('id', $user_ids)->get();
+        $designations = Designation::where('active', 'Y')->get();
+        $divisions = Division::where('active', 'Y')->get();
+        $branchs = Branch::where('active', 'Y')->get();
+
+        $currentMonth = Carbon::now()->month; // Get the current month number
+        
+        $FinancialYears = getFinancialYears();
+
+        // if ($request->ajax()) {
+        //     $query = User::with(['all_attendance_details', 'visits', 'customers', 'userinfo', 'cities'])
+        //         ->where('sales_type', 'Secondary')
+        //         ->where('active', 'Y');
+
+        //     if ($request->user_id) {
+        //         $query->where('id', $request->user_id);
+        //     } else {
+        //         $query->whereIn('id', $user_ids);
+        //     }
+
+        //     if ($request->designation_id) {
+        //         $query->where('designation_id', $request->designation_id);
+        //     }
+
+        //     if ($request->division_id) {
+        //         $query->where('division_id', $request->division_id);
+        //     }
+
+        //     if ($request->branch_id) {
+        //         $query->where('branch_id', $request->branch_id);
+        //     }
+
+        //     if ($request->start_date && !empty($request->start_date) && $request->end_date && !empty($request->end_date)) {
+        //         $start_date = $request->start_date;
+        //         $end_date = $request->end_date;
+        //         $query->whereHas('userinfo', function ($query) use ($end_date, $start_date) {
+        //             $query->where('date_of_joining', '>=', $start_date)
+        //                 ->where('date_of_joining', '<=', $end_date);
+        //         });
+        //     }
+
+
+        //     $data = $query->get()->map(function ($user) use ($lastDate) {
+        //         $working_days = $user->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Full Day Leave', 'Leave', 'Holiday'])->where('punchin_date', '<=', $lastDate)->count();
+        //         $order_value = Order::where('created_by', $user->id)->where('order_date', '<=', $lastDate)->sum('sub_total');
+        //         $sale_index = $working_days ? (($order_value / 100000) / $working_days) * 100 : 0;
+
+        //         $registered_retailers = Customers::where(['customertype' => '2', 'created_by' => $user->id])->where('created_at', '<=', $lastDate . ' 23:59:59')->count();
+        //         $registration_index = $working_days ? (($registered_retailers / $working_days) / 5) * 100 : 0;
+
+        //         $total_visit = $user->visits->where('checkin_date', '<=', $lastDate)->count();
+        //         $visit_index = $working_days ? (($total_visit / $working_days) / 10) * 100 : 0;
+
+        //         $sharthi_customer = TransactionHistory::where('created_at', '<=', $lastDate . ' 23:59:59')->groupBy('customer_id')->pluck('customer_id')->toArray();
+        //         $activation_retailers = Customers::where(['customertype' => '2', 'created_by' => $user->id])->where('created_at', '<=', $lastDate . ' 23:59:59')->whereIn('id', $sharthi_customer)->count();
+        //         $activation_index = $working_days ? (($activation_retailers / $working_days) / 5) * 100 : 0;
+
+        //         $user->performance_rating = ($sale_index * 0.5) + ($registration_index * 0.1) + ($visit_index * 0.1) + ($activation_index * 0.3);
+        //         return $user;
+        //     })->sortByDesc('performance_rating');
+
+        //     return Datatables::of($data)
+        //         ->addIndexColumn()
+        //         ->addColumn('cities', function ($user) {
+        //             $district_ids = City::whereIn('id', $user->cities->pluck('city_id'))->pluck('district_id');
+        //             return implode(", ", District::whereIn('id', $district_ids)->pluck('district_name')->toArray());
+        //         })
+        //         ->addColumn('userinfo.date_of_joining', function ($user) {
+        //             return date('d M y', strtotime($user->userinfo->date_of_joining));
+        //         })
+        //         ->addColumn('yesterday_productivity_visit', function ($user) use ($yesterday) {
+        //             $retailers = Customers::where('customertype', '2')->pluck('id');
+        //             $order_counts = Order::where('order_date', $yesterday)->where('created_by', $user->id)->whereIn('buyer_id', $retailers)->count();
+        //             $yesterday_visit = $user->visits->where('checkin_date', $yesterday)->count();
+        //             return $yesterday_visit ? number_format(($order_counts / $yesterday_visit) * 100, 2) . "%" : "0.00%";
+        //         })
+        //         ->addColumn('order_value_current_month', function ($user) use ($lastDate, $firstDate) {
+        //             $order_value = Order::where('order_date', '>=', $firstDate)->where('order_date', '<=', $lastDate)->where('created_by', $user->id)->sum('sub_total');
+        //             return $order_value ? number_format(($order_value - ($order_value * 0.35)) / 100000, 2) : "0.00";
+        //         })
+        //         ->addColumn('total_order_value', function ($user) use ($lastDate) {
+        //             $order_value = Order::where('order_date', '<=', $lastDate)->where('created_by', $user->id)->sum('sub_total');
+        //             return $order_value ? number_format(($order_value - ($order_value * 0.35)) / 100000, 2) : "0.00";
+        //         })
+        //         ->addColumn('sale_index', function ($user) use ($lastDate) {
+        //             $working_days = $user->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Full Day Leave', 'Leave', 'Holiday'])->where('punchin_date', '<=', $lastDate)->count();
+        //             $order_value = Order::where('order_date', '<=', $lastDate)->where('created_by', $user->id)->sum('sub_total');
+        //             $sale_index = $working_days ? (($order_value / 100000) / $working_days) * 100 : 0;
+        //             return number_format($sale_index, 2) . "%";
+        //         })
+        //         ->addColumn('registration_index', function ($user) use ($lastDate) {
+        //             $working_days = $user->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Full Day Leave', 'Leave', 'Holiday'])->where('punchin_date', '<=', $lastDate)->count();
+        //             $registered_retailers = Customers::where(['customertype' => '2', 'created_by' => $user->id])->where('created_at', '<=', $lastDate . ' 23:59:59')->count();
+        //             $registration_index = $working_days ? (($registered_retailers / $working_days) / 5) * 100 : 0;
+        //             return number_format($registration_index, 2) . "%";
+        //         })
+        //         ->addColumn('visit_index', function ($user) use ($lastDate) {
+        //             $working_days = $user->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Full Day Leave', 'Leave', 'Holiday'])->where('punchin_date', '<=', $lastDate)->count();
+        //             $total_visit = $user->visits->where('checkin_date', '<=', $lastDate)->count();
+        //             $visit_index = $working_days ? (($total_visit / $working_days) / 10) * 100 : 0;
+        //             return number_format($visit_index, 2) . "%";
+        //         })
+        //         ->addColumn('activation_index', function ($user) use ($lastDate) {
+        //             $working_days = $user->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Full Day Leave', 'Leave', 'Holiday'])->where('punchin_date', '<=', $lastDate)->count();
+        //             $sharthi_customer = TransactionHistory::where('created_at', '<=', $lastDate . ' 23:59:59')->groupBy('customer_id')->pluck('customer_id')->toArray();
+        //             $activation_retailers = Customers::where(['customertype' => '2', 'created_by' => $user->id])->where('created_at', '<=', $lastDate . ' 23:59:59')->whereIn('id', $sharthi_customer)->count();
+        //             $activation_index = $working_days ? (($activation_retailers / $working_days) / 5) * 100 : 0;
+        //             return number_format($activation_index, 2) . "%";
+        //         })
+        //         ->addColumn('performance_rating', function ($user) {
+        //             $performance_rating = number_format($user->performance_rating, 2);
+        //             $badge_class = $performance_rating < 25 ? 'danger' : ($performance_rating < 30 ? 'warning' : 'success');
+        //             return "<span class='badge badge-{$badge_class} p-2' style='font-size: 14px;font-weight: 900;text-shadow: 1px 2px 3px #000;'>{$performance_rating}%</span>";
+        //         })
+        //         ->rawColumns(['cities', 'userinfo.date_of_joining', 'yesterday_productivity_visit', 'order_value_current_month', 'total_order_value', 'sale_index', 'registration_index', 'visit_index', 'activation_index', 'performance_rating'])
+        //         ->make(true);
+        // }
+
+        return view('reports.asm_rating', compact('users', 'designations', 'divisions', 'branchs','FinancialYears'));
+    }
 
 
 
@@ -752,6 +879,14 @@ class UsersController extends Controller
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         return Excel::download(new FOSRatingReportExport($request), 'FOS_Rating_Report.xlsx');
+    }
+
+    public function asm_rating_report_download(Request $request)
+    {
+        abort_if(Gate::denies('user_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new ASMRatingReportExport($request), 'ASM_Rating_Report.xlsx');
     }
 
     public function CustomerUserView(Request $request)

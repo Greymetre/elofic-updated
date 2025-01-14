@@ -115,20 +115,31 @@ class AppraisalController extends Controller
 
             // tttttt
             $userids = getUsersReportingToAuth();
-            $data = User::with(['getpmsdetail', 'createdbyname', 'getbranch', 'getdivision', 'getdesignation'])->where(function ($query) use ($request, $userids) {
-                if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
-                    $query->whereIn('id', $userids);
-                }
+            $data = User::with([
+                'getpmsdetail' => function ($query) use ($request) {
+                    $financialYear = $request['financial_year'] ?? getCurrentFinancialYear();
+                    // dd($financialYear);
+                    $query->where('year', $financialYear);
+                },
+                'createdbyname',
+                'getbranch',
+                'getdivision',
+                'getdesignation'
+            ])
+                ->where(function ($query) use ($request, $userids) {
+                    if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                        $query->whereIn('id', $userids);
+                    }
 
-                if (!empty($request['user_id'])) {
-                    $query->where('id', $request['user_id']);
-                }
-                if (!empty($request['division_id'])) {
-                    $query->where('division_id', $request['division_id']);
-                }
-            })->latest();
+                    if (!empty($request['user_id'])) {
+                        $query->where('id', $request['user_id']);
+                    }
 
-            //ttttt
+                    if (!empty($request['division_id'])) {
+                        $query->where('division_id', $request['division_id']);
+                    }
+                })
+                ->latest();
 
             return Datatables::of($data)
                 ->addIndexColumn()
@@ -287,14 +298,13 @@ class AppraisalController extends Controller
 
         $designation_id = $user_details->designation_id;
 
-        //$sale_weightage = salesWeightage::where('division_id',$division_id)->whereRaw("FIND_IN_SET('$designation_id', designation_id)")->get();
+        $curruntfinancial_year = getCurrentFinancialYear();
 
-        $sale_weightages = salesWeightage::where('division_id', $division_id)->whereRaw("FIND_IN_SET('$designation_id', designation_id)")->get();
-
-        //dd($sale_weightage);
+        $sale_weightages = salesWeightage::where('division_id', $division_id)->where('financial_year', $curruntfinancial_year)->whereRaw("FIND_IN_SET('$designation_id', designation_id)")->get();
 
 
-        return view('appraisal.create', compact('users', 'branches', 'sale_weightages', 'divisions', 'designations', 'user_id', 'sale_weightage_years'))->with('appraisal', $this->appraisal);
+
+        return view('appraisal.create', compact('users', 'branches', 'sale_weightages', 'divisions', 'designations', 'user_id', 'sale_weightage_years','curruntfinancial_year'))->with('appraisal', $this->appraisal);
     }
 
     public function store(Request $request)
@@ -353,6 +363,7 @@ class AppraisalController extends Controller
 
 
         //new
+
 
         if (!empty($request['kra_names'])) {
             foreach ($request['kra_names'] as $key => $rows) {
@@ -791,7 +802,7 @@ class AppraisalController extends Controller
                     $check_same_user2 = explode(',', $val2->user_id);
                     $main_user = User::find($check_same_user[0]);
                     $rp_user = User::find($val2->rating_by);
-                    
+
                     if ($rp_user->hasRole('ASM')) {
                         if (!in_array($val2->rating_by, $check_same_user) && in_array($main_user->id, $check_same_user2) && $rp_user->roles[0]->id != $main_user->roles[0]->id) {
                             $rats = Appraisal::where('year', $val2->year)->where('user_id', $main_user->id)->where('rating_by', $val2->rating_by)->get();
@@ -831,9 +842,9 @@ class AppraisalController extends Controller
                                         }
                                     }
                                 }
-                            } 
-                        } 
-                    } 
+                            }
+                        }
+                    }
                     if ($rp_user->hasRole('Branch Manager')) {
                         if (!in_array($val2->rating_by, $check_same_user) && in_array($main_user->id, $check_same_user2) && $rp_user->roles[0]->id != $main_user->roles[0]->id) {
                             $rats = Appraisal::where('year', $val2->year)->where('user_id', $main_user->id)->where('rating_by', $val2->rating_by)->get();
@@ -875,7 +886,7 @@ class AppraisalController extends Controller
                                 }
                             }
                         }
-                    } 
+                    }
                     if ($rp_user->hasRole('Regional Manager')) {
                         if (!in_array($val2->rating_by, $check_same_user) && in_array($main_user->id, $check_same_user2) && $rp_user->roles[0]->id != $main_user->roles[0]->id) {
                             $rats = Appraisal::where('year', $val2->year)->where('user_id', $main_user->id)->where('rating_by', $val2->rating_by)->get();
@@ -915,9 +926,9 @@ class AppraisalController extends Controller
                                         }
                                     }
                                 }
-                            } 
+                            }
                         }
-                    } 
+                    }
                     if ($rp_user->hasRole('State Head')) {
                         if (!in_array($val2->rating_by, $check_same_user) && in_array($main_user->id, $check_same_user2) && $rp_user->roles[0]->id != $main_user->roles[0]->id) {
                             $rats = Appraisal::where('year', $val2->year)->where('user_id', $main_user->id)->where('rating_by', $val2->rating_by)->get();
@@ -959,7 +970,7 @@ class AppraisalController extends Controller
                                 }
                             }
                         }
-                    } 
+                    }
                     if ($rp_user->hasRole('Asst General Manager')) {
                         if (!in_array($val2->rating_by, $check_same_user) && in_array($main_user->id, $check_same_user2) && $rp_user->roles[0]->id != $main_user->roles[0]->id) {
                             $rats = Appraisal::where('year', $val2->year)->where('user_id', $main_user->id)->where('rating_by', $val2->rating_by)->get();
@@ -1001,7 +1012,7 @@ class AppraisalController extends Controller
                                 }
                             }
                         }
-                    } 
+                    }
                     if ($rp_user->hasRole('Cluster Head')) {
                         if (!in_array($val2->rating_by, $check_same_user) && in_array($main_user->id, $check_same_user2) && $rp_user->roles[0]->id != $main_user->roles[0]->id) {
                             $rats = Appraisal::where('year', $val2->year)->where('user_id', $main_user->id)->where('rating_by', $val2->rating_by)->get();
@@ -1043,7 +1054,7 @@ class AppraisalController extends Controller
                                 }
                             }
                         }
-                    } 
+                    }
                     if ($rp_user->hasRole('Head office')) {
                         if (!in_array($val2->rating_by, $check_same_user) && in_array($main_user->id, $check_same_user2) && $rp_user->roles[0]->id != $main_user->roles[0]->id) {
                             $rats = Appraisal::where('year', $val2->year)->where('user_id', $main_user->id)->where('rating_by', $val2->rating_by)->get();
@@ -1085,7 +1096,7 @@ class AppraisalController extends Controller
                                 }
                             }
                         }
-                    } 
+                    }
                 }
                 $data[$k][27] = $asmrat;
                 $data[$k][28] = $bmrat;
@@ -1145,8 +1156,17 @@ class AppraisalController extends Controller
     }
 
 
-    public function getSalesweitagDetail(Request $request)
+    public function geSalesWeightages(Request $request)
     {
-        $division_id = $request->division_id;
+        $user_details = User::where('id', $request->executive_id)->first();
+        $division_id = $user_details->division_id;
+
+        $designation_id = $user_details->designation_id;
+
+        $curruntfinancial_year = $request->f_year;
+
+        $sale_weightages = salesWeightage::where('division_id', $division_id)->where('financial_year', $curruntfinancial_year)->whereRaw("FIND_IN_SET('$designation_id', designation_id)")->get();
+
+        return response()->json(['status' => 'success', 'sale_weightages' => $sale_weightages]);
     }
 }

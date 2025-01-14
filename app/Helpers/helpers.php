@@ -246,7 +246,7 @@ if (! function_exists('distance')) {
             ->whereNotNull('longitude')
             ->select('latitude', 'longitude', DB::raw('( 6367 * acos( cos( radians(' . $latitude . ') ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( latitude ) ) ) ) AS distance'))
             ->first();
-        return isset($data['distance']) ? round($data['distance'] * 1000, 2) : '';
+        return isset($data['distance']) ? round($data['distance'], 2) : '';
     }
 }
 if (! function_exists('amountConversion')) {
@@ -868,3 +868,44 @@ function isHoliday($checkDate, $branchId, $holidayData)
     }
     return false;
 }
+
+if (!function_exists('getCurrentFinancialYear')) {
+    function getCurrentFinancialYear()
+    {
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
+
+        if ($currentMonth >= 4) { // Financial year starts in April
+            $startYear = $currentYear;
+            $endYear = $currentYear + 1;
+        } else {
+            $startYear = $currentYear - 1;
+            $endYear = $currentYear;
+        }
+
+        return "{$startYear}-". substr($endYear, -2);;
+    }
+}
+
+function getFinancialYears()
+{
+    $currentYear = Carbon::now()->year;
+    $currentMonth = Carbon::now()->month;
+
+    // Determine the current financial year based on the month
+    if ($currentMonth >= 4) {
+        // If the month is April (4) or later, the financial year starts in the current year
+        $startYear = $currentYear;
+    } else {
+        // Otherwise, it starts in the previous year
+        $startYear = $currentYear - 1;
+    }
+
+    // Financial years to return
+    return [
+        ($startYear - 1) . '-' . $startYear, // Past financial year
+        $startYear . '-' . ($startYear + 1), // Current financial year
+        ($startYear + 1) . '-' . ($startYear + 2), // Next financial year
+    ];
+}
+

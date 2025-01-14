@@ -209,15 +209,17 @@
                 </tr>
 
                 <tr>
+                  <td><em>Product SAP Code :</em></td>
+                  <th>{{$complaint->product_details?$complaint->product_details->sap_code:'-'}}</th>
                   <td><em>Phase :</em></td>
                   <th>{{($complaint->product_details && $complaint->product_details->phase != '')?$complaint->product_details->phase:'-'}}</th>
                   <td><em>Warranty/Customer Bill Date :</em></td>
                   <th>{{$complaint->customer_bill_date?date('d-m-Y', strtotime($complaint->customer_bill_date)):'-'}}</th>
-                  <td><em>Service Paid/Free :</em></td>
-                  <th>{{$complaint->service_type??'-'}}</th>
                 </tr>
 
                 <tr>
+                  <td><em>Service Paid/Free :</em></td>
+                  <th>{{$complaint->service_type??'-'}}</th>
                   <td><em>Seller :</em></td>
                   <th>{{$complaint->seller??'-'}}</th>
                 </tr>
