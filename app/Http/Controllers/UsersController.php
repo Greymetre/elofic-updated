@@ -746,9 +746,6 @@ class UsersController extends Controller
     }
     public function asm_rating(Request $request)
     {
-        if($request->ip() != '111.118.252.250') {
-            return view('work_in_progress');
-        }
         $user_ids = getUsersReportingToAuth();
         $users = User::where('active', 'Y')->where('sales_type', 'Primary')->whereIn('id', $user_ids)->get();
         $designations = Designation::where('active', 'Y')->get();
