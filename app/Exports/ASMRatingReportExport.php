@@ -22,6 +22,7 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Illuminate\Support\Facades\Auth;
 use Excel;
+use DB;
 
 
 class ASMRatingReportExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithEvents
@@ -121,15 +122,31 @@ class ASMRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
             $selectedmonths[] = $startDate->format('M');
             $startDate->addMonth();
         }
-        dd($this->start_date, $this->end_date);
+
         $working_days_trg = 20 * $monthCount;
         $visit_count_trg = 120 * $monthCount;
         $unique_visit_count_trg = 8 * $monthCount;
+        $active_customer_trg = 8 * $monthCount;
         $working_days = $query->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Office Meeting', 'Full Day Leave', 'Leave', 'Holiday'])->where('punchin_date', '>=', $this->start_date)->where('punchin_date', '<=', $this->end_date)->count();
         $visit_count = $query->visits->where('checkin_date', '>=', $this->start_date)->where('checkin_date', '<=', $this->end_date)->count() > 0 ? $query->visits->where('checkin_date', '>=', $this->start_date)->where('checkin_date', '<=', $this->end_date)->count() : "0";
         $unique_visit_count = $query->visits->where('checkin_date', '>=', $this->start_date)->where('checkin_date', '<=', $this->end_date)->map(fn($visit) => optional(optional($visit->customers)->customeraddress)->city_id)->filter()->unique()->count();
         $user_target = $query->target->whereIn('month', $selectedmonths)->sum('target');
         $user_achiv = $query->primarySales->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->sum('net_amount');
+        $user_achiv_new = $query->primarySales()->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->whereHas('customer', function ($query) {
+            $query->where('working_status', 'New');
+        })->sum('net_amount');
+        DB::statement("SET SESSION group_concat_max_len = 10000000");
+        $user_ids = getUsersReportingToAuth($query->id);
+        $total_assign_customer_ids = EmployeeDetail::where('user_id', $query->id)->pluck('customer_id')->toArray();
+        $active_customer = 0;
+        foreach (array_chunk($total_assign_customer_ids, 500) as $chunk) {
+            $active_customer += TransactionHistory::whereBetween('created_at', [$this->start_date, $this->end_date])
+                ->whereIn('customer_id', $chunk)
+                ->groupBy('customer_id')
+                ->selectRaw('customer_id')
+                ->get()
+                ->count();
+        }
         return [
             $query['getbranch'] ? $query['getbranch']['branch_name'] : '-',
             $query['employee_codes'],
@@ -140,20 +157,46 @@ class ASMRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
             round(($working_days / $working_days_trg) * 100, 0) . '%',
             (($working_days / $working_days_trg) * 100 >= 100) ? '100%' : round(($working_days / $working_days_trg) * 100, 0) . '%',
             (($working_days / $working_days_trg) * 100 >= 100) ? '5' : (round((5 * (($working_days / $working_days_trg) * 100)) / 100, 0) > 0 ? round((5 * (($working_days / $working_days_trg) * 100)) / 100, 0) : '0'),
+
             $visit_count,
             round(($visit_count / $visit_count_trg) * 100, 0) . '%',
             (($visit_count / $visit_count_trg) * 100 >= 100) ? '100%' : round(($visit_count / $visit_count_trg) * 100, 0) . '%',
             (($visit_count / $visit_count_trg) * 100 >= 100) ? '5' : (round((5 * (($visit_count / $visit_count_trg) * 100)) / 100, 0) > 0 ? round((5 * (($visit_count / $visit_count_trg) * 100)) / 100, 0) : '0'),
-            // $unique_visit_count,
-            // round(($unique_visit_count / $unique_visit_count_trg) * 100, 0) . '%',
-            // (($unique_visit_count / $unique_visit_count_trg) * 100 >= 100) ? '100%' : round(($unique_visit_count / $unique_visit_count_trg) * 100, 0) . '%',
-            // (($unique_visit_count / $unique_visit_count_trg) * 100 >= 100) ? '5' : (round((5 * (($unique_visit_count / $unique_visit_count_trg) * 100)) / 100, 0) > 0 ? round((5 * (($unique_visit_count / $unique_visit_count_trg) * 100)) / 100, 0) : '0'),
-            // $user_target,
-            // $user_achiv > 0 ? round(($user_achiv / 100000), 2) : '0',
-            // $user_target > 0 ? round((($user_achiv / 100000) / $user_target) * 100, 0) . '%' : '0%',
-            // $user_target > 0 ? (((($user_achiv / 100000) / $user_target) * 100) >= 100 ? '100%' : round((($user_achiv / 100000) / $user_target) * 100, 0) . '%') : '0%',
-            // $user_target > 0 ? (((($user_achiv / 100000) / $user_target) * 100) >= 100 ? '40' : round(40 * ((($user_achiv / 100000) / $user_target) * 100) / 100, 0)) : '0',
-            // $user_achiv > 0 ? round((($user_achiv / 100000) * 40) / 100, 1) : '0',
+
+            $unique_visit_count,
+            round(($unique_visit_count / $unique_visit_count_trg) * 100, 0) . '%',
+            (($unique_visit_count / $unique_visit_count_trg) * 100 >= 100) ? '100%' : round(($unique_visit_count / $unique_visit_count_trg) * 100, 0) . '%',
+            (($unique_visit_count / $unique_visit_count_trg) * 100 >= 100) ? '5' : (round((5 * (($unique_visit_count / $unique_visit_count_trg) * 100)) / 100, 0) > 0 ? round((5 * (($unique_visit_count / $unique_visit_count_trg) * 100)) / 100, 0) : '0'),
+
+            $user_target,
+            $user_achiv > 0 ? round(($user_achiv / 100000), 2) : '0',
+            $user_target > 0 ? round((($user_achiv / 100000) / $user_target) * 100, 0) . '%' : '0%',
+            $user_target > 0 ? (((($user_achiv / 100000) / $user_target) * 100) >= 100 ? '100%' : round((($user_achiv / 100000) / $user_target) * 100, 0) . '%') : '0%',
+            $user_target > 0 ? (((($user_achiv / 100000) / $user_target) * 100) >= 100 ? '40' : round(40 * ((($user_achiv / 100000) / $user_target) * 100) / 100, 0)) : '0',
+
+            $user_achiv > 0 ? round((($user_achiv / 100000) * 40) / 100, 1) : '0',
+            $user_achiv_new > 0 ? round(($user_achiv_new / 100000), 2) : '0',
+            ((($user_achiv / 100000) * 40) / 100) > 0 ? round((($user_achiv_new / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100, 0) . '%' : '0%',
+            ((($user_achiv / 100000) * 40) / 100) > 0 ? (((($user_achiv_new / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100) >= 100 ? '100%' : round((($user_achiv_new / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100, 0) . '%') : '0%',
+            ((($user_achiv / 100000) * 40) / 100) > 0 ? (((($user_achiv_new / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100) >= 100 ? '10' : round(10 * ((($user_achiv_new / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100) / 100, 0)) : '0',
+            $user_achiv > 0 ? round((($user_achiv / 100000) * 60) / 100, 2) : '0',
+
+            '-',
+            '-',
+            '-',
+            '-',
+            '-',
+            '-',
+            '-',
+            '-',
+            '-',
+            '-',
+
+            $active_customer > 0 ? $active_customer : '0',
+            round(($active_customer / $active_customer_trg) * 100, 0) . '%',
+            (($active_customer / $active_customer_trg) * 100 >= 100) ? '100%' : round(($active_customer / $active_customer_trg) * 100, 0) . '%',
+            (($active_customer / $active_customer_trg) * 100 >= 100) ? '5' : (round((5 * (($active_customer / $active_customer_trg) * 100)) / 100, 0) > 0 ? round((5 * (($active_customer / $active_customer_trg) * 100)) / 100, 0) : '0'),
+
         ];
     }
 
