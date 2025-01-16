@@ -1527,4 +1527,10 @@ class AjaxController extends Controller
             'retailer_count' => $retailer_count,
         ]);
     }
+
+    public function getLeaveBalance(Request $request)
+    {
+        $data = User::where('id', $request->user_id)->first();
+        return response()->json(['status' => 'success', 'leave_balance' => $data->leave_balance]);
+    }
 }

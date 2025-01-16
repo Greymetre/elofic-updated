@@ -13,6 +13,7 @@ use App\Models\DealerAppointment;
 use App\Models\Marketing;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Str;
 use Gate;
 use Excel;
 
@@ -25,16 +26,32 @@ class MarketingController extends Controller
      */
     public function index(MarketingDataTable $dataTable, Request $request)
     {
-        $states = Marketing::latest()->get()->unique('state');
-        $event_districts = Marketing::latest()->get()->unique('event_district');
-        $event_under_names = Marketing::latest()->get()->unique('event_under_name');
-        $cities = Marketing::latest()->get()->unique('event_center');
-        $branchs = Marketing::latest()->get()->unique('branch');
-        $categories = Marketing::latest()->get()->unique('category_of_participant');
-        $divisions = Marketing::latest()->get()->unique('division');
+        $states = Marketing::latest()->get()->unique(function ($item) {
+            return Str::lower($item->state);
+        });
+        $event_districts = Marketing::latest()->get()->unique(function ($item) {
+            return Str::lower($item->event_district);
+        });
+        $event_under_names = Marketing::latest()->get()->unique(function ($item) {
+            return Str::lower($item->event_under_name);
+        });
+        $cities = Marketing::latest()->get()->unique(function ($item) {
+            return Str::lower($item->event_center);
+        });
+        $branchs = Marketing::latest()->get()->unique(function ($item) {
+            return Str::lower($item->branch);
+        });
+        $categories = Marketing::latest()->get()
+        ->unique(function ($item) {
+            return Str::lower($item->category_of_participant);
+        });
+        $divisions = Marketing::latest()->get()
+            ->unique(function ($item) {
+                return Str::lower($item->division);
+            });
         $branding_team_members = Marketing::latest()->get()->unique('branding_team_member');
         abort_if(Gate::denies('marketing_master_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return $dataTable->render('marketing.index', compact('states','event_districts','event_under_names','cities','branchs','categories','branding_team_members','divisions'));
+        return $dataTable->render('marketing.index', compact('states', 'event_districts', 'event_under_names', 'cities', 'branchs', 'categories', 'branding_team_members', 'divisions'));
     }
 
     /**
@@ -136,14 +153,14 @@ class MarketingController extends Controller
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function marketings_upload(Request $request) 
+    public function marketings_upload(Request $request)
     {
-      abort_if(Gate::denies('marketing_master_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('marketing_master_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         $googleDrivelink = $request->input('google_drivelink');
         $countOfParticipant = $request->input('count_of_participant');
-        Excel::import(new MarketingMasterImport($googleDrivelink,$countOfParticipant),request()->file('import_file'));
+        Excel::import(new MarketingMasterImport($googleDrivelink, $countOfParticipant), request()->file('import_file'));
         return redirect('marketings')->with('success', 'Data imported and updated successfully.');
     }
 
@@ -212,6 +229,4 @@ class MarketingController extends Controller
         // return $request;
         return Excel::download(new MarketingDealerAppointmentExport($request), 'new_dealer_appointment.xlsx');
     }
-        
-
 }
