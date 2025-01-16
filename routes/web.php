@@ -653,11 +653,13 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('reports/reports_sale', [UsersController::class, 'reports_sale']);
     Route::any('reports/fos_rating', [UsersController::class, 'fos_rating']);
     Route::any('reports/asm_rating', [UsersController::class, 'asm_rating']);
+    Route::any('reports/ch_rating', [UsersController::class, 'ch_rating']);
     Route::any('reports/primary_sales', [ReportController::class, 'primary_sales']);
     Route::any('reports/secondary_sales', [ReportController::class, 'secondary_sales']);
     Route::get('user_sales_report_download', [UsersController::class, 'user_sales_report_download']);
     Route::get('fos_rating_report_download', [UsersController::class, 'fos_rating_report_download']);
     Route::get('asm_rating_report_download', [UsersController::class, 'asm_rating_report_download']);
+    Route::get('ch_rating_report_download', [UsersController::class, 'ch_rating_report_download']);
     Route::any('reports/customersreport', [ReportController::class, 'customersReport']);
     Route::any('reports/loyalty_summary_report', [ReportController::class, 'loyaltySummaryReport'])->name('loyaltySummaryReport');
     Route::any('reports/loyalty_dealer_wise_summary_report', [ReportController::class, 'loyaltyDealerWiseSummaryReport'])->name('loyaltyDealerWiseSummaryReport');
@@ -1002,6 +1004,7 @@ Route::any('changeAppointmentStatus', [AjaxController::class, 'changeAppointment
 Route::any('getWorkDoneTime', [AjaxController::class, 'getWorkDoneTime']);
 Route::any('getPrimarySachme', [AjaxController::class, 'getPrimarySachme']);
 Route::any('getExpenseCount', [AjaxController::class, 'getExpenseCount']);
+Route::any('getLeaveBalance', [AjaxController::class, 'getLeaveBalance']);
 Route::any('marketing/getCounts', [AjaxController::class, 'marketingGetCounts'])->name('marketing.getCounts');
 
 

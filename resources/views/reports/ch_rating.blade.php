@@ -6,11 +6,11 @@
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
-          <h4 class="card-title">ASM Rating Report
+          <h4 class="card-title">CH/BM Rating Report
             <span class="">
               <div class="btn-group header-frm-btn">
                 @if(auth()->user()->can(['checkin_download']))
-                <form method="GET" action="{{ URL::to('asm_rating_report_download') }}">
+                <form method="GET" action="{{ URL::to('ch_rating_report_download') }}">
                   <div class="d-flex flex-wrap flex-row">
                     <div class="p-2" style="width: 200px;">
                       <select name="user_id" id="user_id" class="form-control select2">
@@ -20,7 +20,7 @@
                         @endforeach
                       </select>
                     </div>
-                    <div class="p-2" style="width: 200px;">
+                    {{--<div class="p-2" style="width: 200px;">
                       <select name="designation_id" id="designation_id" class="form-control select2">
                         <option value="" disabled selected>Designations</option>
                         @foreach($designations as $designation)
@@ -35,7 +35,7 @@
                         <option value="{{$division->id}}">{{$division->division_name}}</option>
                         @endforeach
                       </select>
-                    </div>
+                    </div>--}}
                     <div class="p-2" style="width: 200px;">
                       <select name="branch_id" id="branch_id" class="form-control select2">
                         <option value="" disabled selected>Branch</option>
@@ -54,7 +54,6 @@
                     </div>
                     <div class="p-2" style="width: 200px;">
                       <select name="month[]" multiple id="month" class="form-control select2" title="Select Month" placeholder="Select Month">
-                      <option value="" disabled selected hidden>Select Month</option>
                         <option value="Apr">April</option>
                         <option value="May">May</option>
                         <option value="Jun">June</option>

@@ -146,7 +146,7 @@
         <div class="modal-body">
           <form method="POST" action="{{ route('leaves.store') }}" enctype="multipart/form-data" id="createleadstagesForm"> @csrf
             <div class="row">
-              <div class="col-md-12">
+              <div class="col-md-6">
                 <div class="input_section">
                   <label class="col-form-label">User</label>
                   <select class="form-control" name="user_id" id="user_id" style="width: 100%;" required>
@@ -158,6 +158,14 @@
                     @endif
                   </select>
                 </div>
+              </div>
+              <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">Leave Balance</label>
+                  <div>
+                  <input type="number" readonly name="leave_balance" id="leave_balance" class="form-control" value="">
+                </div>
+              </div>
               </div>
               <div class="col-md-6">
                 <div class="input_section">
@@ -181,8 +189,8 @@
                   <div>
                   <select class=" form-control" name="type" id="type" style="width: 100%;" required>
                     <option value="">Select Type</option>
-                    <option value="Leave" data-is-city="false">Leave</option>
-                    <option value="Holiday" data-is-city="false">Holiday</option>
+                    <!-- <option value="Leave" data-is-city="false">Leave</option>
+                    <option value="Holiday" data-is-city="false">Holiday</option> -->
                     <option value="First half leave" data-is-city="false">First Half Leave</option>
                     <option value="Second Half Leave" data-is-city="false">Second Half Leave</option>
                     <option value="Full Day Leave" data-is-city="false">Full Day Leave</option>
@@ -478,12 +486,25 @@
 
     $(document).on("change", "#user_id", function(e) {
       var selectedDate = $('#punchin_date').val();
+      var user_id = $(this).val();
+        $.ajax({
+          url: "{{ url('getLeaveBalance') }}",
+          dataType: "json",
+          type: "POST",
+          data: {
+            _token: "{{csrf_token()}}",
+            user_id: user_id
+          },
+          success: function(res) {
+            if (res.status == 'success') {
+              $("#leave_balance").val(res.leave_balance);
+            }
+          }
+        })
       if (selectedDate && selectedDate != null && selectedDate != '') {
         var formatedValue = moment(selectedDate).format('YYYY-MM-DD');
-        console.log(formatedValue);
         var todayDate = moment().format('YYYY-MM-DD');
 
-        var user_id = $(this).val();
         if (user_id == '{{auth()->user()->id}}') {
           if (formatedValue === todayDate) {
             $("#date_error").addClass('d-none');
