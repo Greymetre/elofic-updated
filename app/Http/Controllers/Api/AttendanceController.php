@@ -47,7 +47,7 @@ class AttendanceController extends Controller
             $query = $this->attendances->where(function ($query) use($user_id) {
                                         $query->where('user_id', '=', $user_id);
                                     })
-                                    ->select('id','punchin_date', 'punchin_time', 'punchin_longitude', 'punchin_latitude', 'punchin_address', 'punchin_image', 'punchout_date', 'punchout_time', 'punchout_latitude', 'punchout_longitude', 'punchout_address', 'punchout_image')->orderBy('punchin_date', 'desc')->where('punchin_date', '<=', Carbon::today()->toDateString());
+                                    ->select('id','punchin_date', 'punchin_time', 'punchin_longitude', 'punchin_latitude', 'punchin_address', 'punchin_image', 'punchout_date', 'punchout_time', 'punchout_latitude', 'punchout_longitude', 'punchout_address', 'flag', 'punchout_image','working_type')->orderBy('punchin_date', 'desc')->where('punchin_date', '<=', Carbon::today()->toDateString());
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
             $data = collect([]);
             if($db_data->isNotEmpty())
@@ -67,6 +67,8 @@ class AttendanceController extends Controller
                         'punchout_longitude' => !empty($value['punchout_longitude']) ? $value['punchout_longitude'] : '',
                         'punchout_address' => !empty($value['punchout_address']) ? $value['punchout_address'] : '',
                         'punchout_image' => !empty($value['punchout_image']) ? $value['punchout_image'] : '',
+                        'punchin_flag' => !empty($value['flag']) ? true : false,
+                        'working_type' => !empty($value['working_type']) ? $value['working_type'] : '',
                     ]);
                 }
                 return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','data' => $data ], $this->successStatus);
@@ -105,6 +107,7 @@ class AttendanceController extends Controller
             if($punchin = $this->attendances->updateOrCreate([
                 'user_id' => $user->id, 'punchin_date' => $punchin_date],[
                 'active' => 'Y',
+                'flag' => 'true',
                 'user_id' => $user->id,
                 'punchin_date' => $punchin_date,
                 'punchin_time' => getcurentTime(),
@@ -258,16 +261,22 @@ class AttendanceController extends Controller
                 $filename = 'punchout_'.$request['punchin_id'];
                 $request['punchout_image'] = fileupload($image, $this->path, $filename);
             }
+            $punchindetails = Attendance::where('id',$request->punchin_id)->where('user_id',$user->id)->first();
+            if($punchindetails->working_type == 'Second Half Leave'){
+                $punchout_time = '14:00:00';
+            }else{
+                $punchout_time = getcurentTime();
+            }
             $request['punchout_address'] = getLatLongToAddress($request['punchout_latitude'], $request['punchout_longitude']);
             $punchout = Attendance::where('id',$request->punchin_id)->where('user_id',$user->id)->first();
-            $punchout->punchout_date = getcurentDate() ; 
-            $punchout->punchout_time = getcurentTime() ;
+            $punchout->punchout_date = getcurentDate(); 
+            $punchout->punchout_time = $punchout_time;
             $punchout->punchout_latitude = !empty($request['punchout_latitude']) ? $request['punchout_latitude'] :null; 
             $punchout->punchout_longitude = !empty($request['punchout_longitude']) ? $request['punchout_longitude'] :null ; 
             $punchout->punchout_address = !empty($request['punchout_address']) ? $request['punchout_address'] :'' ;
             $punchout->punchout_image = !empty($request['punchout_image']) ? $request['punchout_image'] :'' ;
             $punchout->punchout_summary = !empty($request['punchout_summary']) ? $request['punchout_summary'] :'';
-            $punchout->worked_time = gmdate("H:i:s", strtotime(getcurentDateTime()) - strtotime($punchout->punchin_date.' '.$punchout->punchin_time) );
+            $punchout->worked_time = gmdate(strtotime($punchout->punchin_date.' '.$punchout_time) - strtotime($punchout->punchin_date.' '.$punchout->punchin_time) );
             if($punchout->save())
             {
                 // $useractivity = array(

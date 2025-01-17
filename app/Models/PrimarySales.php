@@ -49,6 +49,7 @@ class PrimarySales extends Model
         'product_id',
         'sap_code',
         'remarks',
+        'new',
         'serial_no',
         'item_no',
         'group_1',
