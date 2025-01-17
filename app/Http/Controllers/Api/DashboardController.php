@@ -114,7 +114,7 @@ class DashboardController extends Controller
                     $todate = date('Y-m-d');
                     break;
             }
-            $punchin = Attendance::where('user_id', $user_id)->whereDate('punchin_date', getcurentDate())->select('punchin_time', 'punchout_time')->first();
+            $punchin = Attendance::where('user_id', $user_id)->whereDate('punchin_date', getcurentDate())->select('id','punchin_time', 'punchout_time', 'working_type','flag')->first();
             $orders = Order::where(function ($query) use ($user_id, $fromdate, $todate) {
                 $query->where('created_by', '=', $user_id);
                 if (!empty($fromdate) && !empty($todate)) {
@@ -202,8 +202,11 @@ class DashboardController extends Controller
             });
             $avgsales = ($achievement > 0 && $attendances->sum('working_days') > 0) ? $achievement / $attendances->sum('working_days') : 0;
             $data = collect([
+                'punchin_id' => (!empty($punchin['id'])) ? $punchin['id'] : '',
                 'punchin' => (!empty($punchin['punchin_time'])) ? true : false,
+                'punchin_flag' => (!empty($punchin['flag'])) ? true : false,
                 'punchout' => (!empty($punchin['punchout_time'])) ? true : false,
+                'working_type' => (!empty($punchin['working_type'])) ? $punchin['working_type'] : '',
                 'buyer' => 'Retailer',
                 'seller' => 'Distributor',
                 'totalcounter' => $total_beat_counter,

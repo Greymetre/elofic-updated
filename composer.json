@@ -9,6 +9,7 @@
         "barryvdh/laravel-dompdf": "^2.1",
         "dompdf/dompdf": "^2.0",
         "edujugon/push-notification": "^5.4",
+        "google/apiclient": "^2.18",
         "guzzlehttp/guzzle": "^7.2",
         "intervention/image": "^2.7",
         "ipinfo/ipinfo": "^3.1",
