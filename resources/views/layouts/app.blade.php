@@ -1916,7 +1916,7 @@
                                  </li>
                                  @endif -->
                      @if(auth()->user()->can('reports_sale'))
-                     <li class="nav-link-btn add_icon {{ request()->is('reports/reports_sale*') || request()->is('reports/fos_rating*') || request()->is('reports/primary_sales*') || request()->is('reports/secondary_sales*') || request()->is('reports/product_analysis_qty*') || request()->is('reports/product_analysis_branch*') || request()->is('reports/product_analysis_value*') || request()->is('reports/group_wise_analysis*') ? 'active' : '' }}">
+                     <li class="nav-link-btn add_icon {{ request()->is('reports/reports_sale*') || request()->is('reports/fos_rating*') || request()->is('reports/primary_sales*') || request()->is('reports/secondary_sales*') || request()->is('reports/product_analysis_qty*') || request()->is('reports/product_analysis_branch*') || request()->is('reports/product_analysis_value*') || request()->is('reports/group_wise_analysis*') || request()->is('reports/asm_rating*') || request()->is('reports/ch_rating*') ? 'active' : '' }}">
                         <a class="hoveradd" data-toggle="collapse" href="#salesReportsMenu" aria-expanded="false">
                            <i class="material-icons icon">point_of_sale</i>
                            <span>Sales</span>

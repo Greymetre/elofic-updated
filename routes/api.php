@@ -144,6 +144,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::any('getProfile', [LoginController::class, 'getProfile']);
     Route::post('updateProfile', [LoginController::class, 'updateProfile']);
     Route::any('logout', [LoginController::class, 'logout']);
+    Route::any('getOrderDiscountLimit', [LoginController::class, 'getOrderDiscountLimit']);
 
     // Customer
     Route::post('storeCustomer', [CustomerController::class, 'storeCustomer']);
