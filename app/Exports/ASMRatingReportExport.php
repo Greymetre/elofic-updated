@@ -132,9 +132,8 @@ class ASMRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
         $unique_visit_count = $query->visits->where('checkin_date', '>=', $this->start_date)->where('checkin_date', '<=', $this->end_date)->map(fn($visit) => optional(optional($visit->customers)->customeraddress)->city_id)->filter()->unique()->count();
         $user_target = $query->target->whereIn('month', $selectedmonths)->sum('target');
         $user_achiv = $query->primarySales->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->sum('net_amount');
-        $user_achiv_new = $query->primarySales()->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->whereHas('customer', function ($query) {
-            $query->where('working_status', 'New');
-        })->sum('net_amount');
+        $user_achiv_new_dealer = $query->primarySales()->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->where('new_dealer', 'Y')->sum('net_amount');
+        $user_achiv_new_product = $query->primarySales()->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->where('new_product', 'Y')->sum('net_amount');
         DB::statement("SET SESSION group_concat_max_len = 10000000");
         $user_ids = getUsersReportingToAuth($query->id);
         $total_assign_customer_ids = EmployeeDetail::where('user_id', $query->id)->pluck('customer_id')->toArray();
@@ -175,16 +174,17 @@ class ASMRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
             $user_target > 0 ? (((($user_achiv / 100000) / $user_target) * 100) >= 100 ? '40' : round(40 * ((($user_achiv / 100000) / $user_target) * 100) / 100, 0)) : '0',
 
             $user_achiv > 0 ? round((($user_achiv / 100000) * 40) / 100, 1) : '0',
-            $user_achiv_new > 0 ? round(($user_achiv_new / 100000), 2) : '0',
-            ((($user_achiv / 100000) * 40) / 100) > 0 ? round((($user_achiv_new / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100, 0) . '%' : '0%',
-            ((($user_achiv / 100000) * 40) / 100) > 0 ? (((($user_achiv_new / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100) >= 100 ? '100%' : round((($user_achiv_new / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100, 0) . '%') : '0%',
-            ((($user_achiv / 100000) * 40) / 100) > 0 ? (((($user_achiv_new / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100) >= 100 ? '10' : round(10 * ((($user_achiv_new / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100) / 100, 0)) : '0',
-            $user_achiv > 0 ? round((($user_achiv / 100000) * 60) / 100, 2) : '0',
+            $user_achiv_new_dealer > 0 ? round(($user_achiv_new_dealer / 100000), 2) : '0',
+            ((($user_achiv / 100000) * 40) / 100) > 0 ? round((($user_achiv_new_dealer / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100, 0) . '%' : '0%',
+            ((($user_achiv / 100000) * 40) / 100) > 0 ? (((($user_achiv_new_dealer / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100) >= 100 ? '100%' : round((($user_achiv_new_dealer / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100, 0) . '%') : '0%',
+            ((($user_achiv / 100000) * 40) / 100) > 0 ? (((($user_achiv_new_dealer / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100) >= 100 ? '10' : round(10 * ((($user_achiv_new_dealer / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100) / 100, 0)) : '0',
 
-            '-',
-            '-',
-            '-',
-            '-',
+            $user_achiv > 0 ? round((($user_achiv / 100000) * 60) / 100, 2) : '0',
+            $user_achiv_new_product > 0 ? round(($user_achiv_new_product / 100000), 2) : '0',
+            ((($user_achiv / 100000) * 60) / 100) > 0 ? round((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100, 0) . '%' : '0%',
+            ((($user_achiv / 100000) * 60) / 100) > 0 ? (((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100) >= 100 ? '100%' : round((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100, 0) . '%') : '0%',
+            ((($user_achiv / 100000) * 60) / 100) > 0 ? (((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100) >= 100 ? '10' : round(10 * ((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100) / 100, 0)) : '0',
+
             '-',
             '-',
             '-',

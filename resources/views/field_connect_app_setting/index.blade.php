@@ -100,20 +100,20 @@
                   </span>
                </div>
             </div>
-               @endif
-               {!! Form::model($field_konnect_app_setting,[
-               'route' => 'field-konnect-app-setting.store',
-               'method' => 'POST',
-               'id' => 'storeLoyaltyAppSetting',
-               'files'=>true
-               ]) !!}
+            @endif
+            {!! Form::model($field_konnect_app_setting,[
+            'route' => 'field-konnect-app-setting.store',
+            'method' => 'POST',
+            'id' => 'storeLoyaltyAppSetting',
+            'files'=>true
+            ]) !!}
 
 
 
-               <div class="row">
+            <div class="row">
 
 
-               </div>
+            </div>
             <hr>
 
             <div class="card-body">
@@ -121,10 +121,7 @@
 
                   <div class="col-md-6">
                      <div class="input_section">
-
                         <label class="col-form-label">App Version </label>
-
-
                         <input type="number" name="app_version" placeholder="1.01" step="0.01" class="form-control" id="app_version" value="{{old('app_version', $field_konnect_app_setting['app_version'])}}" required>
                         @if ($errors->has('app_version'))
                         <div class="error col-lg-12">
@@ -135,9 +132,18 @@
                   </div>
                   <div class="col-md-6">
                      <div class="input_section">
-
+                        <label class="col-form-label">Order Discount Limit </label>
+                        <input type="number" name="order_discount_limit" placeholder="1" step="1" class="form-control" id="order_discount_limit" value="{{old('order_discount_limit', $field_konnect_app_setting['order_discount_limit'])}}" required>
+                        @if ($errors->has('order_discount_limit'))
+                        <div class="error col-lg-12">
+                           <p class="text-danger">{{ $errors->first('order_discount_limit') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+                  <div class="col-md-6">
+                     <div class="input_section">
                         <label class="bmd-label-floating">Upload Product Catalogue </label>
-
                         <input type="file" name="product_catalogue" accept="application/pdf" id="product_catalogue" class="form-control">
                         <input type="hidden" multiple name="id" id="id" class="form-control" value="{!! old( 'id', $field_konnect_app_setting?$field_konnect_app_setting['id']:'') !!}">
                         @if ($errors->has('product_catalogue'))

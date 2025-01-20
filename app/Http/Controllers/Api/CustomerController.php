@@ -472,6 +472,7 @@ class CustomerController extends Controller
             // foreach ($customerIdChunks as $chunk) {
                 $query = $this->customers->with('customeraddress', 'customerdetails', 'customertypes')
                     ->where('active', 'Y')
+                    // ->whereNotNull('sap_code')
                     ->where(function ($query) use ($search, $customer_id, $branch_user_id, $customertype) {
                         if (!empty($search)) {
                             $query->where(function ($query) use ($search) {
@@ -517,7 +518,7 @@ class CustomerController extends Controller
                 foreach ($db_data as $key => $value) {
                     $data->push([
                         'customer_id' => isset($value['id']) ? $value['id'] : 0,
-                        'name' => isset($value['name']) ? $value['name'].'('.$value['sap_code'].')': '',
+                        'name' => isset($value['name']) ? $value['name'].' ('.$value['sap_code'].')': '',
                         //'first_name' => isset($value['first_name']) ? $value['first_name'] : '',
                         //'last_name' => isset($value['last_name']) ? $value['last_name'] : '',
                         'mobile' => isset($value['mobile']) ? $value['mobile'] : '',
@@ -556,9 +557,7 @@ class CustomerController extends Controller
             $pageSize = $request->input('pageSize');
             $search = $request->input('search');
             $query = $this->customers
-                // ->whereHas('customertypes', function($query) use($user){
-                //     $query->where('type_name', '=', 'distributor');
-                // })
+                // ->whereNotNull('sap_code')
                 ->with('customertypes', 'firmtypes')
                 ->whereHas('customertypes', function ($query) {
                     $query->where('type_name', '=', 'distributor')->orWhere('type_name', '=', 'Dealer');
@@ -576,14 +575,14 @@ class CustomerController extends Controller
                             ->orWhere('mobile', 'like', "%{$search}%");
                     });
                 }
-                $query = $query->select('id', 'name', 'first_name', 'last_name', 'mobile', 'email', 'profile_image', 'customer_code')->orderBy('name', 'asc');
+                $query = $query->select('id', 'name', 'first_name', 'last_name', 'mobile', 'email', 'profile_image', 'customer_code', 'sap_code')->orderBy('name', 'asc');
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
             $data = collect([]);
             if ($db_data->isNotEmpty()) {
                 foreach ($db_data as $key => $value) {
                     $data->push([
                         'customer_id' => isset($value['id']) ? $value['id'] : 0,
-                        'name' => isset($value['name']) ? $value['name'] : '',
+                        'name' => isset($value['name']) ? $value['name'].' ('.$value['sap_code'].')': '',
                         'first_name' => isset($value['first_name']) ? $value['first_name'] : '',
                         'last_name' => isset($value['last_name']) ? $value['last_name'] : '',
                         'mobile' => isset($value['mobile']) ? $value['mobile'] : '',

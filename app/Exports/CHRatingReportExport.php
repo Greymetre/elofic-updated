@@ -142,9 +142,8 @@ class CHRatingReportExport implements FromCollection, WithHeadings, ShouldAutoSi
         $branch_ids = explode(',', $query->branch_id);
         $achiv = PrimarySales::whereIn('emp_code', $emp_codes)->whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->sum('net_amount')/100000;
 
-        $new_achiv = PrimarySales::whereIn('emp_code', $emp_codes)->whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->whereHas('customer', function ($query) {
-            $query->where('working_status', 'New');
-        })->sum('net_amount')/100000;
+        $new_achiv_dealer = PrimarySales::whereIn('emp_code', $emp_codes)->whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->where('new_dealer', 'Y')->sum('net_amount')/100000;
+        $new_achiv_product = PrimarySales::whereIn('emp_code', $emp_codes)->whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->where('new_product', 'Y')->sum('net_amount')/100000;
         
         $branch_names = Branch::whereIn('id', $branch_ids)->pluck('branch_name')->toArray();
         $targets = BranchWiseTarget::whereIn('branch_id', $branch_ids)->whereIn('month', $selectedmonths)->sum('target');
@@ -169,12 +168,18 @@ class CHRatingReportExport implements FromCollection, WithHeadings, ShouldAutoSi
             $ly_targets > 0 ? (round((($achiv-$ly_targets)/$ly_targets)*100,0) >= 100 ? '25' : round((25*(($achiv-$ly_targets)/$ly_targets)*100/100),0)  ) : '0',
 
             round((($achiv*40)/100),0),
-            round($new_achiv,0),
-            ($achiv*40)/100 > 0 ? round(($new_achiv/(($achiv*40)/100))*100,0) . '%' : '0%',
-            ($achiv*40)/100 > 0 ? (round(($new_achiv/(($achiv*40)/100))*100,0) >= 100 ? '100%' : round(($new_achiv/(($achiv*40)/100))*100,0) . '%') : '0%',
-            ($achiv*40)/100 > 0 ? (round(($new_achiv/(($achiv*40)/100))*100,0) >= 100 ? '15' : round((15*($new_achiv/(($achiv*40)/100))*100/100),0)  ) : '0',
+            round($new_achiv_dealer,0),
+            ($achiv*40)/100 > 0 ? round(($new_achiv_dealer/(($achiv*40)/100))*100,0) . '%' : '0%',
+            ($achiv*40)/100 > 0 ? (round(($new_achiv_dealer/(($achiv*40)/100))*100,0) >= 100 ? '100%' : round(($new_achiv_dealer/(($achiv*40)/100))*100,0) . '%') : '0%',
+            ($achiv*40)/100 > 0 ? (round(($new_achiv_dealer/(($achiv*40)/100))*100,0) >= 100 ? '15' : round((15*($new_achiv_dealer/(($achiv*40)/100))*100/100),0)  ) : '0',
 
             round((($achiv*60)/100),0),
+            round($new_achiv_product,0),
+            ($achiv*60)/100 > 0 ? round(($new_achiv_product/(($achiv*60)/100))*100,0) . '%' : '0%',
+            ($achiv*60)/100 > 0 ? (round(($new_achiv_product/(($achiv*60)/100))*100,0) >= 100 ? '100%' : round(($new_achiv_product/(($achiv*60)/100))*100,0) . '%') : '0%',
+            ($achiv*60)/100 > 0 ? (round(($new_achiv_product/(($achiv*60)/100))*100,0) >= 100 ? '5' : round((5*($new_achiv_product/(($achiv*60)/100))*100/100),0)  ) : '0',
+
+
         ];
 
 

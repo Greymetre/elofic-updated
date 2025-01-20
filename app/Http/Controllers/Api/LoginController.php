@@ -10,6 +10,7 @@ use App\Models\BeatUser;
 use App\Models\CustomerDetails;
 use App\Models\Customers;
 use App\Models\CustomerType;
+use App\Models\FieldKonnectAppSetting;
 use App\Models\MobileUserLoginDetails;
 use App\Models\ParentDetail;
 use App\Models\Pincode;
@@ -472,5 +473,15 @@ class LoginController extends Controller
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
+    }
+
+    public function getOrderDiscountLimit(Request $request)
+    {
+        try{
+        $order_discount_limit = FieldKonnectAppSetting::where('id', '1')->first();
+        return response()->json(['status' => 'success', 'order_discount_limit' => $order_discount_limit->order_discount_limit], $this->successStatus);
+    } catch (\Exception $e) {
+        return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+    }
     }
 }

@@ -53,8 +53,8 @@
                       </select>
                     </div>
                     <div class="p-2" style="width: 200px;">
-                      <select name="month[]" multiple id="month" class="form-control select2" title="Select Month" placeholder="Select Month">
-                      <option value="" disabled selected hidden>Select Month</option>
+                      <select name="month[]" multiple id="month" class="selectpicker" title="Select Month" placeholder="Select Month">
+                      <option value="" disabled hidden>Select Month</option>
                         <option value="Apr">April</option>
                         <option value="May">May</option>
                         <option value="Jun">June</option>
