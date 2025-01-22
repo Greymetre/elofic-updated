@@ -718,4 +718,56 @@ class OrderController extends Controller
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
     }
+
+    public function submitPartiallyDispatched(Request $request)
+    {
+        try {
+            $user = $request->user();
+            $request['active'] = 'Y';
+            $request['created_by'] = $user->id;
+            $validator = Validator::make($request->all(), [
+                'buyer_id' => 'required',
+                'seller_id' => 'required',
+                'invoice_no' => 'required',
+                'order_id' => 'required',
+                'grand_total' => 'required',
+                'lr_no'            => 'required',
+                'dispatch_date'    => 'required'
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
+            }
+
+            $request['saledetail'] = $request['orderdetail'];
+            $request['status_id'] = 2;
+            $data = collect([$request]);
+            $response = insertSales($data);
+            if ($response['status'] == 'success') {
+                $partiallystatus = 2;
+                if (isset($request['orderdetail'])) {
+                    foreach ($request['orderdetail'] as $key => $rows) {
+                        $orderdetail = OrderDetails::where('order_id', '=', $request['order_id'])
+                            ->where('product_id', '=', ($rows['product_id'] ?? ''))->first();
+                        if (isset($orderdetail)) {
+                            $orderdetail->cash_dis = $rows['cash_dis'];
+                            $orderdetail->cash_amounts = $rows['cash_amounts'];
+                            $orderdetail->status_id = $partiallystatus;
+                            $orderdetail->increment('shipped_qty', $rows['quantity']);
+                            $orderdetail->save();
+                        }
+                    }
+                }
+                if (OrderDetails::where('order_id', '=', $request['order_id'])->where('status_id', '=', $partiallystatus)->exists()) {
+                    Order::where('id', '=', $request['order_id'])->update(['status_id' => $partiallystatus, 'cash_discount' => $request->cash_discount, 'cash_amount' => $request->cash_amount, 'order_remark' => $request->order_remark]);
+                } else {
+                    Order::where('id', '=', $request['order_id'])->update(['status_id' => $partiallystatus, 'cash_discount' => $request->cash_discount, 'cash_amount' => $request->cash_amount, 'order_remark' => $request->order_remark]);
+                }
+                return response(['status' => 'success', 'message' => 'Order Partially Dispatched Successfully.'], 200);
+            }
+            return response(['status' => 'error', 'message' => 'Order Status Not Updated.'], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
+    }
 }

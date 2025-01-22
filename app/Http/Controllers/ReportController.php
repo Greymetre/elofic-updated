@@ -457,6 +457,9 @@ class ReportController extends Controller
                 ->latest();
             return Datatables::of($data)
                 ->addIndexColumn()
+                ->addColumn('checkbox', function ($data) {
+                    return '<input type="checkbox" class="row-checkbox" value="' . $data->id . '">';
+                })
                 ->editColumn('punchin_date', function ($data) {
                     return isset($data->punchin_date) ? stringtodate($data->punchin_date) : '';
                 })
@@ -548,7 +551,7 @@ class ReportController extends Controller
 
 
 
-                ->rawColumns(['punchin', 'punchout', 'action', 'action_status', 'current_status', 'punchin_from'])
+                ->rawColumns(['punchin', 'punchout', 'action', 'action_status', 'current_status', 'punchin_from','checkbox'])
                 ->make(true);
         }
         return view('reports.attendancereport', compact('users', 'branches'));

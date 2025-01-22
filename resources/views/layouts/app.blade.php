@@ -980,7 +980,7 @@
                               </a>
                            </li>
                            @endif
-                           @if(auth()->user()->can('stock_accessss'))
+                           @if(auth()->user()->can('stock_access'))
                            <li class="nav-link-btn {{ request()->is('stock*') ? 'active' : '' }}">
                               <a class="hoveradd2" href="{{ url('stock') }}">
                                  <i class="material-icons icon">donut_small</i>
