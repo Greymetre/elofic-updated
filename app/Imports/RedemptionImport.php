@@ -48,18 +48,18 @@ class RedemptionImport implements ToCollection, WithValidation, WithHeadingRow, 
                 }
                 $updateStatus = Redemption::where('id', $row['redemption_id'])->update(['status' => $row['status'], 'invoice_number' => $row['invoice_number'], 'remark' => $row['details'], 'updated_at' => $update_at]);
             } else if ($redemptio_is->redeem_mode == '1') {
-                // dd($row);
-                if ($row['approve_date'] && $row['approve_date'] != null && $row['approve_date'] != '') {
+                // dd($row['approve_date']);
+                if ($row['approve_date'] && $row['approve_date'] != null && $row['approve_date'] != '' && is_numeric($row['approve_date'])) {
                     $unixTimestamp = ($row['approve_date'] - 25569) * 86400;
                     $carbonDate = Carbon::createFromTimestamp($unixTimestamp);
                     $row['approve_date'] = $carbonDate;
                 }
-                if ($row['dispatch_date'] && $row['dispatch_date'] != null && $row['dispatch_date'] != '') {
+                if ($row['dispatch_date'] && $row['dispatch_date'] != null && $row['dispatch_date'] != '' && is_numeric($row['dispatch_date'])) {
                     $unixTimestamp = ($row['dispatch_date'] - 25569) * 86400;
                     $carbonDate = Carbon::createFromTimestamp($unixTimestamp);
                     $row['dispatch_date'] = $carbonDate;
                 }
-                if ($row['gift_recived_date'] && $row['gift_recived_date'] != null && $row['gift_recived_date'] != '') {
+                if ($row['gift_recived_date'] && $row['gift_recived_date'] != null && $row['gift_recived_date'] != '' && is_numeric($row['gift_recived_date'])) {
                     $unixTimestamp = ($row['gift_recived_date'] - 25569) * 86400;
                     $carbonDate = Carbon::createFromTimestamp($unixTimestamp);
                     $row['gift_recived_date'] = $carbonDate;

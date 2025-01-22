@@ -9,6 +9,7 @@ use App\Models\EmployeeDetail;
 use App\Models\MobileUserLoginDetails;
 use App\Models\Order;
 use App\Models\OrderDetails;
+use App\Models\PrimarySales;
 use App\Models\Redemption;
 use App\Models\TransactionHistory;
 use App\Models\User;
@@ -114,6 +115,7 @@ class ASMRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
 
     public function map($query): array
     {
+        $f_year_array = explode('-', $this->financial_year);
         $startDate = Carbon::parse($this->start_date);
         $endDate = Carbon::parse($this->end_date);
         $monthCount = $startDate->diffInMonths($endDate) + 1;
@@ -138,14 +140,27 @@ class ASMRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
         $user_ids = getUsersReportingToAuth($query->id);
         $total_assign_customer_ids = EmployeeDetail::where('user_id', $query->id)->pluck('customer_id')->toArray();
         $active_customer = 0;
+
         foreach (array_chunk($total_assign_customer_ids, 500) as $chunk) {
             $active_customer += TransactionHistory::whereBetween('created_at', [$this->start_date, $this->end_date])
                 ->whereIn('customer_id', $chunk)
+                ->whereNotIn('customer_id', function ($query) {
+                    $query->select('customer_id')
+                        ->from('transaction_histories')
+                        ->where('created_at', '<', $this->start_date);
+                })
                 ->groupBy('customer_id')
                 ->selectRaw('customer_id')
                 ->get()
                 ->count();
         }
+
+        $debtors_start_date = $f_year_array[0].'-04-01';
+        $debtors_end_date = $f_year_array[0].'-09-31';
+
+        $debtors_sales = PrimarySales::where('branch_id', $query->branch_id)->where('invoice_date', '>=', $debtors_start_date)->where('invoice_date', '<=', $debtors_end_date)->sum('net_amount');
+        
+
         return [
             $query['getbranch'] ? $query['getbranch']['branch_name'] : '-',
             $query['employee_codes'],
@@ -185,8 +200,8 @@ class ASMRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
             ((($user_achiv / 100000) * 60) / 100) > 0 ? (((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100) >= 100 ? '100%' : round((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100, 0) . '%') : '0%',
             ((($user_achiv / 100000) * 60) / 100) > 0 ? (((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100) >= 100 ? '10' : round(10 * ((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100) / 100, 0)) : '0',
 
-            '-',
-            '-',
+            $debtors_sales > 0 ? round(($debtors_sales/100000), 0) : '0',
+            $debtors_sales > 0 ? round((($debtors_sales/100000)/240), 0) : '0',
             '-',
             '-',
             '-',

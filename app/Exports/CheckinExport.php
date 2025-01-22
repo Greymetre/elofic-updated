@@ -28,7 +28,7 @@ class CheckinExport implements FromCollection, WithHeadings, ShouldAutoSize, Wit
         return CheckIn::with('beatschedules', 'customers', 'users', 'orders', 'visitreports', 'visitreports.visittypename', 'orders_sum')->where(function ($query) {
             if ($this->user_id) {
                 $query->where('user_id', $this->user_id);
-            }elseif (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+            } elseif (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                 $query->whereIn('user_id', $this->userids);
             }
             if ($this->startdate) {
@@ -39,7 +39,7 @@ class CheckinExport implements FromCollection, WithHeadings, ShouldAutoSize, Wit
             }
         })
             ->select('id', 'customer_id', 'user_id', 'checkin_date', 'checkin_time', 'checkout_date', 'checkout_time', 'checkin_address', 'checkout_address', 'distance', 'beatscheduleid', 'created_at')
-            ->latest()->limit(2000)->get();
+            ->latest()->get();
     }
 
     public function headings(): array
@@ -49,26 +49,25 @@ class CheckinExport implements FromCollection, WithHeadings, ShouldAutoSize, Wit
 
     public function map($data): array
     {
-
         $sum_qty = 0;
-        if (!empty($data['orders_sum'])) {
-            foreach ($data['orders_sum'] as $key_new => $datas) {
-                $order_id = $datas->id;
-                $sum_qty += OrderDetails::where('order_id', $order_id)->sum('quantity') ?? 0;
-            }
-        }
+        // if (!empty($data['orders_sum'])) {
+        //     foreach ($data['orders_sum'] as $key_new => $datas) {
+        //         $order_id = $datas->id;
+        //         $sum_qty += OrderDetails::where('order_id', $order_id)->sum('quantity') ?? 0;
+        //     }
+        // }
 
 
 
-        if(!empty($data->checkout_time) && !empty($data->checkin_time)){
-            $parsedTime1 = Carbon::createFromFormat('H:i:s', $data->checkout_time);
-            $parsedTime2 = Carbon::createFromFormat('H:i:s', $data->checkin_time);
+        // if (!empty($data->checkout_time) && !empty($data->checkin_time)) {
+        //     $parsedTime1 = Carbon::createFromFormat('H:i:s', $data->checkout_time);
+        //     $parsedTime2 = Carbon::createFromFormat('H:i:s', $data->checkin_time);
 
-            $difference = $parsedTime1->diff($parsedTime2);
-            $interval = $difference->format('%H:%I:%S');
-        }else{
+        //     $difference = $parsedTime1->diff($parsedTime2);
+        //     $interval = $difference->format('%H:%I:%S');
+        // } else {
             $interval = '-';
-        }
+        // }
 
         return [
             $data['id'],
@@ -98,7 +97,7 @@ class CheckinExport implements FromCollection, WithHeadings, ShouldAutoSize, Wit
 
 
             isset($data['customers']['customeraddress']['address1']) ? $data['customers']['customeraddress']['address1'] . ' ' . $data['customers']['customeraddress']['address2'] : '',
-            $data['customers']?((date("Y-m-d", strtotime($data['customers']['created_at'])) == date("Y-m-d", strtotime($data['checkin_date']))) ? 'New' : 'Existing'):'-',
+            $data['customers'] ? ((date("Y-m-d", strtotime($data['customers']['created_at'])) == date("Y-m-d", strtotime($data['checkin_date']))) ? 'New' : 'Existing') : '-',
             isset($data['visitreports']['visittypename']['type_name']) ? $data['visitreports']['visittypename']['type_name'] : '',
             isset($data['visitreports']['description']) ? $data['visitreports']['description'] : '',
             // isset($data['orders']) ?$data['orders']->sum('total_qty') : 0,

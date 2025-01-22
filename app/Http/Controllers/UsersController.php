@@ -870,9 +870,6 @@ class UsersController extends Controller
     }
     public function ch_rating(Request $request)
     {
-        if($request->ip() != '111.118.252.250') {
-            return view('work_in_progress');
-        }
         // $user_ids = getUsersReportingToAuth();
         $roles = ['PUMPBM', 'PUMPCH', 'FAN&A/BM/MM', 'FAN/CH/GM/SH'];
         $users = User::where('active', 'Y')->whereIn('designation_id', ['5','6','7'])

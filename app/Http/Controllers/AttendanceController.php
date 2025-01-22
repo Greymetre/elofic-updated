@@ -430,15 +430,16 @@ class AttendanceController extends Controller
   public function approveAttendance(Request $request)
   {
     try {
-      if (Attendance::where('id', '=', $request['id'])->update([
-        'attendance_status' => 1,
-        'remark_status' => null
-      ])) {
-        return redirect()->back()->with('message_success', 'Attendance Approved Successfully');
+      $ids = explode(',', $request['id']);
+      foreach ($ids as $key => $value) {
+        Attendance::where('id', '=', $value)->update([
+          'attendance_status' => 1,
+          'remark_status' => null
+        ]);
       }
-      return redirect()->back()->with('message_danger', 'Error in Attendance Approved')->withInput();
+      return  response()->json(['status' => 'success', 'message' => 'Attendance Approved Successfully']);
     } catch (\Exception $e) {
-      return redirect()->back()->withErrors($e->getMessage())->withInput();
+      return response()->json(['status' => 'error', 'message' => 'Attendance Not Approved Successfully']);
     }
   }
 
@@ -447,13 +448,14 @@ class AttendanceController extends Controller
   {
     $remark_status  = $request['remark_status'] ?? null;
     try {
-      if (Attendance::where('id', '=', $request['attendance_id'])->update([
-        'attendance_status' => 2,
-        'remark_status' => $remark_status ?? null,
-      ])) {
-        return Redirect::to('reports/attendancereport')->with('message_success', 'Attendance Rejected Successfully');
+      $id_array = explode(',', $request['attendance_id']);
+      foreach ($id_array as $key => $value) {
+        Attendance::where('id', '=', $value)->update([
+          'attendance_status' => 2,
+          'remark_status' => $remark_status ?? null,
+        ]);
       }
-      return redirect()->back()->with('message_danger', 'Error in Attendance Rejected')->withInput();
+      return Redirect::to('reports/attendancereport')->with('message_success', 'Attendance Rejected Successfully');
     } catch (\Exception $e) {
       return redirect()->back()->withErrors($e->getMessage())->withInput();
     }

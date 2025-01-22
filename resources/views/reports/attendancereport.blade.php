@@ -79,6 +79,10 @@
                 </form>
                 @endif
                 <div class="next-btn">
+                  <div class="btn-group multi-a-r d-none">
+                    <button class="btn btn-success btn-sm multiChange mr-1" data-status="1"  title="Approve">Approve</button>
+                    <button class="btn btn-danger btn-sm multiChange mr-2" data-status="2" title="Reject">Reject</button>
+                  </div>
                   @if(auth()->user()->can(['attendance_create']))
 
                   <a data-toggle="modal" data-target="#submitAttendance" class="custom-btn create" title="Punch In">
@@ -114,6 +118,7 @@
             <table id="getattendance" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
               <thead class=" text-primary">
                 <th>No</th>
+                <th>#</th>
                 <th>User ID</th>
                 <th>Status</th>
                 <th>User Name</th>
@@ -269,12 +274,14 @@
 
       console.log(isSuperAdmin);
 
-      var columns = [{
+      var columns = [
+        {
           data: 'DT_RowIndex',
           name: 'DT_RowIndex',
           orderable: false,
           searchable: false
         },
+        { data: 'checkbox', name: 'checkbox', orderable: false, searchable: false },
         {
           data: 'user_id',
           name: 'user_id',
@@ -515,7 +522,45 @@
         });
       });
 
+      $('body').on('click', '.multiChange', function () {
+      const selectedValues = [];
+        $('.row-checkbox:checked').each(function () {
+            selectedValues.push($(this).val());
+        });
+        const status = $(this).data('status');
 
+        var token = $("meta[name='csrf-token']").attr("content");
+        if(status == 1){
+          if(!confirm("Are You sure want to approve "+selectedValues.length+" attaendance?")) {
+             return false;
+          }
+          $.ajax({
+            url: "{{ url('approveAttendance')}}",
+            type: 'POST',
+            data: {
+              _token: token,
+              id: selectedValues.toString()
+            },
+            success: function(data) {
+              table.draw();
+              $('.message').empty();
+              $('.alert').show();
+              if (data.status == 'success') {
+                $('.alert').addClass("alert-success");
+              } else {
+                $('.alert').addClass("alert-danger");
+              }
+              $('.message').append(data.message);
+            },
+          });
+        }else{
+          if(!confirm("Are You sure want to reject "+selectedValues.length+" attaendance?")) {
+             return false;
+          }
+          $('#attendance_id').val(selectedValues);
+          $("#rejec_attendance").modal();
+        }        
+    });
 
       //approve
       $('body').on('click', '.approve_status', function() {
@@ -533,6 +578,8 @@
             id: id
           },
           success: function(data) {
+            console.log(data);
+            table.draw();
             $('.message').empty();
             $('.alert').show();
             if (data.status == 'success') {
@@ -541,8 +588,6 @@
               $('.alert').addClass("alert-danger");
             }
             $('.message').append(data.message);
-            //oTable.draw();
-            table.draw();
           },
         });
       });
@@ -684,5 +729,21 @@
         }
       });
     }
+
+    $(document).on('click', '.row-checkbox', function () {
+        
+        const selectedValues = [];
+        $('.row-checkbox:checked').each(function () {
+            selectedValues.push($(this).val());
+        });
+
+        if(selectedValues.length > 0){
+          $(".multi-a-r").removeClass('d-none');
+        }else{
+          $(".multi-a-r").addClass('d-none');
+        }
+    });
+
+
   </script>
 </x-app-layout>
