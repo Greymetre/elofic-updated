@@ -418,7 +418,7 @@
                        <input type="text" name="detail[{!! $index+1 !!}][detail_description]" class="form-control" value="{!! $rows['detail_description'] !!}"/>
                      </td> -->
                 <td>
-                  <input type="number" name="detail[{!! $index+1 !!}][mrp]" class="form-control" value="{!! $rows['mrp'] !!}" step="0.00" min="0" />
+                  <input type="number" name="detail[{!! $index+1 !!}][mrp]"  class="form-control" value="{!! $rows['mrp'] !!}" step="0.01" min="0" />
                 </td>
                 <td><input type="number" readonly name="detail[{!! $index+1 !!}][price]" class="form-control" value="{!! $rows['price'] !!}" step="0.00" min="0" /></td>
                 <!--                      <td>

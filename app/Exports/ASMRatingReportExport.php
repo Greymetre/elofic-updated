@@ -2,7 +2,9 @@
 
 namespace App\Exports;
 
+use App\Models\BranchStock;
 use App\Models\City;
+use App\Models\CustomerOutstanting;
 use App\Models\Customers;
 use App\Models\District;
 use App\Models\EmployeeDetail;
@@ -155,11 +157,20 @@ class ASMRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
                 ->count();
         }
 
-        $debtors_start_date = $f_year_array[0].'-04-01';
-        $debtors_end_date = $f_year_array[0].'-09-31';
+        $debtors_start_date = $f_year_array[0] . '-04-01';
+        $debtors_end_date = $f_year_array[0].'-12-31';
+        // $debtors_end_date = now()->toDateString();
 
-        $debtors_sales = PrimarySales::where('branch_id', $query->branch_id)->where('invoice_date', '>=', $debtors_start_date)->where('invoice_date', '<=', $debtors_end_date)->sum('net_amount');
-        
+        $debtors_start_date_or = Carbon::createFromFormat('Y-m-d', $f_year_array[0] . '-04-01');
+        $debtors_end_date_or = now();
+
+        // $days_difference = $debtors_start_date_or->diffInDays($debtors_end_date_or);
+        $days_difference = 270;
+
+        $debtors_sales = PrimarySales::where('branch_id', $query->branch_id)->where('invoice_date', '>=', $debtors_start_date)->where('invoice_date', '<=', $debtors_end_date)->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount');
+        $total_debtors = CustomerOutstanting::where('branch_id', $query->branch_id)->whereIn('division_id', ['10', '18'])->where('year', $f_year_array[0])->sum('amount');
+        $total_inventory = BranchStock::where('branch_id', $query->branch_id)->whereIn('division_id', ['10', '18'])->where('year', $f_year_array[0])->sum('amount');
+
 
         return [
             $query['getbranch'] ? $query['getbranch']['branch_name'] : '-',
@@ -200,13 +211,13 @@ class ASMRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
             ((($user_achiv / 100000) * 60) / 100) > 0 ? (((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100) >= 100 ? '100%' : round((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100, 0) . '%') : '0%',
             ((($user_achiv / 100000) * 60) / 100) > 0 ? (((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100) >= 100 ? '10' : round(10 * ((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100) / 100, 0)) : '0',
 
-            $debtors_sales > 0 ? round(($debtors_sales/100000), 0) : '0',
-            $debtors_sales > 0 ? round((($debtors_sales/100000)/240), 0) : '0',
-            '-',
-            '-',
-            '-',
-            '-',
-
+            $debtors_sales > 0 ? round(($debtors_sales / 100000), 2) : '0',
+            $debtors_sales > 0 ? round((($debtors_sales / 100000) / $days_difference), 2) : '0',
+            $total_debtors > 0 ? round($total_debtors, 1) : '0',
+            $days = ($debtors_sales / 100000) / 270 > 0 && $total_debtors > 0 ? round(($total_debtors / (($debtors_sales / 100000) / $days_difference)), 0) : '100',
+            $percentage = $days <= 30 ? '100%' : ($days <= 60 ? '80%' : ($days <= 90 ? '50%' : '0%')),
+            $debtor = (20*(int)$percentage)/100,
+            
             $active_customer > 0 ? $active_customer : '0',
             round(($active_customer / $active_customer_trg) * 100, 0) . '%',
             (($active_customer / $active_customer_trg) * 100 >= 100) ? '100%' : round(($active_customer / $active_customer_trg) * 100, 0) . '%',

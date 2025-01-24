@@ -113,9 +113,11 @@ class AttendanceController extends Controller
       new DateTime($end_date)
     );
 
+    $last60Days = Carbon::now()->subDays(60);
 
 
-    $attendancesummary = User::with(['attendance_details', 'createdbyname', 'getbranch'])->where('active', 'Y')->whereDoesntHave('roles', function ($query) {
+
+    $attendancesummary = User::with(['attendance_details', 'createdbyname', 'getbranch', 'userinfo'])->where('active', 'Y')->whereDoesntHave('roles', function ($query) {
       $query->where('id', 29);
     })->where('show_attandance_report', '1');
     if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
@@ -143,7 +145,7 @@ class AttendanceController extends Controller
     }
 
 
-    $data = $attendancesummary->map(function ($item, $key) use ($label2, $date1, $date2, $period) {
+    $data = $attendancesummary->map(function ($item, $key) use ($label2, $date1, $date2, $period, $last60Days) {
 
 
       //neww
@@ -158,6 +160,8 @@ class AttendanceController extends Controller
       $total_p = 0;
       $total_pn = 0;
       $total_atte = 0;
+      $total_al = 0;
+      $total_hdal = 0;
 
       foreach ($period as $key => $value) {
         $like_date =  $value->format('j-M-Y');
@@ -173,9 +177,9 @@ class AttendanceController extends Controller
 
         $userId = $item->id;
         $branchId = $item->branch_id;
-        $holiday_detail = Holiday::where('branch', $branchId)->first();
-        $hoday_dates = $holiday_detail->holiday_date ?? '';
-        $check_date_attendance  = explode(',', $hoday_dates);
+        $holiday_detail = Holiday::where('branch', $branchId)->get();
+        $holiday_dates = $holiday_detail->pluck('holiday_date')->toArray(); // Extract holiday_date values
+        $check_date_attendance = explode(',', implode(',', $holiday_dates));
 
         if (in_array($check, $check_date_attendance)) {
           $label_data[] = 'H';
@@ -191,17 +195,17 @@ class AttendanceController extends Controller
 
             if ($attendance_details->attendance_status == '1') {
               if ($attendance_details->working_type == 'Leave') {
-                $label_data[] =  'LOP';
-                $total_lop++;
+                $label_data[] =  'AL';
+                $total_al++;
               } elseif ($dayname == 'Sunday') {
                 $label_data[] =  'PW';
                 $total_pw++;
               } elseif ($attendance_details->working_type == 'Second Half Leave' || $attendance_details->working_type == 'First Half Leave') {
-                $label_data[] =  '1/2P+1/2LOP';
-                $total_hd++;
+                $label_data[] =  '1/2P+1/2AL';
+                $total_hdal++;
               } elseif ($attendance_details->working_type == 'Full Day Leave') {
-                $label_data[] =  'LOP';
-                $total_lop++;
+                $label_data[] =  'AL';
+                $total_al++;
               } elseif ($attendance_details->working_type == 'Local Market Visit') {
                 $label_data[] =  'P';
                 $total_p++;
@@ -231,12 +235,20 @@ class AttendanceController extends Controller
                 $total_h++;
               }
             } else if ($attendance_details->attendance_status == '2') {
-              $label_data[] = 'A';
-              $total_a++;
+              if ($attendance_details->working_type == 'Full Day Leave' && $attendance_details->working_type == 'Leave') {
+                $label_data[] =  'LOPN';
+                $total_lop++;
+              } elseif ($attendance_details->working_type == 'Second Half Leave' || $attendance_details->working_type == 'First Half Leave') {
+                $label_data[] =  '1/2P+1/2LOPN';
+                $total_hd++;
+              } else {
+                $label_data[] = 'A';
+                $total_a++;
+              }
             } else {
               if ($attendance_details->working_type == 'Full Day Leave') {
                 $label_data[] =  'LOPN';
-                $total_a++;
+                $total_lop++;
               } elseif ($attendance_details->working_type == 'Second Half Leave' || $attendance_details->working_type == 'First Half Leave') {
                 $label_data[] =  '1/2P+1/2LOPN';
                 $total_hd++;
@@ -254,25 +266,39 @@ class AttendanceController extends Controller
               $label_data[] = 'W/o';
               $total_wo++;
             } else {
-              $label_data[] = 'MIS';
-              $total_mis++;
+              $date_of_joining_object = new DateTime($item->userinfo->date_of_joining);
+              if ($date_of_joining_object <= $value) {
+                $label_data[] = 'MIS';
+                $total_mis++;
+              } else {
+                $label_data[] = '-';
+              }
             }
           }
         }
       }
 
-
       //neww
 
+      $sundayPunchinCount = Attendance::where('punchin_date', '>=', $last60Days)
+        ->whereRaw('DAYOFWEEK(punchin_date) = 1')
+        ->where('user_id', $item->id)
+        ->count();
+
+      $label_data[] = $item->leave_balance ?? '0';
+      $label_data[] = $sundayPunchinCount > 0 ? $sundayPunchinCount : '0';
       $label_data[] = (string)$total_wo;
       $label_data[] = (string)$total_a;
       $label_data[] = (string)$total_lop;
+      $label_data[] = (string)$total_al;
       $label_data[] = (string)$total_mis;
       $label_data[] = (string)$total_pw;
       $label_data[] = (string)$total_h;
       $label_data[] = (string)$total_hd;
+      $label_data[] = (string)$total_hdal;
       $label_data[] = (string)$total_p;
       $label_data[] = (string)$total_pn;
+      $label_data[] = $total_wo + $total_al + $total_pw + $total_h + $total_hdal + $total_p;
       $label_data[] = (string)$total_atte;
 
       $return =  [
@@ -282,6 +308,7 @@ class AttendanceController extends Controller
         $item->getbranch->branch_name ?? '',
         $item->getdivision->division_name ?? '',
         $item->getdesignation->designation_name ?? '',
+        $item->userinfo ? date('d M Y', strtotime($item->userinfo->date_of_joining)) : '-',
       ];
 
       return  $option_array = array_merge($return, $label_data);
@@ -295,18 +322,24 @@ class AttendanceController extends Controller
       'Branch',
       'Division',
       'Designation',
+      'DOJ',
     ];
 
     $label3 = [
+      'Leave Balance',
+      'Comp Leave Balance',
       'Week Of (W/o)',
       'Absent (A)',
       'LOP',
+      'AL',
       'MIS Punch (MIS)',
       'Present Week of (PW)',
       'Holiday (H)',
       'Half Day (1/2P+1/2LOP)',
+      'Half Day (1/2P+1/AL)',
       'Present (P)',
       'Present Not Approve (PN)',
+      'Paid Days',
       'TOTAL Days',
     ];
 

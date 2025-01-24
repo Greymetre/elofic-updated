@@ -28,7 +28,7 @@ class CheckinExport implements FromCollection, WithHeadings, ShouldAutoSize, Wit
         return CheckIn::with('beatschedules', 'customers', 'users', 'orders', 'visitreports', 'visitreports.visittypename', 'orders_sum')->where(function ($query) {
             if ($this->user_id) {
                 $query->where('user_id', $this->user_id);
-            } elseif (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+            } elseif (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('Sub_Admin') && !Auth::user()->hasRole('HR_Admin')) {
                 $query->whereIn('user_id', $this->userids);
             }
             if ($this->startdate) {
@@ -38,7 +38,7 @@ class CheckinExport implements FromCollection, WithHeadings, ShouldAutoSize, Wit
                 $query->whereDate('checkin_date', '<=', $this->enddate);
             }
         })
-            ->select('id', 'customer_id', 'user_id', 'checkin_date', 'checkin_time', 'checkout_date', 'checkout_time', 'checkin_address', 'checkout_address', 'distance', 'beatscheduleid', 'created_at')
+            ->select('id', 'customer_id', 'user_id', 'checkin_date', 'checkin_time', 'checkout_date', 'checkout_time' ,'time_interval', 'checkin_address', 'checkout_address', 'distance', 'beatscheduleid', 'created_at')
             ->latest()->get();
     }
 
@@ -59,16 +59,6 @@ class CheckinExport implements FromCollection, WithHeadings, ShouldAutoSize, Wit
 
 
 
-        // if (!empty($data->checkout_time) && !empty($data->checkin_time)) {
-        //     $parsedTime1 = Carbon::createFromFormat('H:i:s', $data->checkout_time);
-        //     $parsedTime2 = Carbon::createFromFormat('H:i:s', $data->checkin_time);
-
-        //     $difference = $parsedTime1->diff($parsedTime2);
-        //     $interval = $difference->format('%H:%I:%S');
-        // } else {
-            $interval = '-';
-        // }
-
         return [
             $data['id'],
             isset($data['checkin_date']) ? $data['checkin_date'] : '',
@@ -81,7 +71,7 @@ class CheckinExport implements FromCollection, WithHeadings, ShouldAutoSize, Wit
 
             isset($data['checkin_time']) ? $data['checkin_time'] : '',
             isset($data['checkout_time']) ? $data['checkout_time'] : '',
-            $interval,
+            isset($data['time_interval']) ? $data['time_interval'] : '-',
             isset($data['checkin_address']) ? $data['checkin_address'] : '',
             isset($data['checkout_address']) ? $data['checkout_address'] : '',
             isset($data['distance']) ? $data['distance'] : '',

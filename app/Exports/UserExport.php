@@ -57,9 +57,9 @@ class UserExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMa
     public function headings(): array
     {
         if (Auth::user()->id == 1) {
-            return ['ID', 'Employees Code', 'User Name', 'Designation', 'Role', 'Branch Name', 'Location', 'Department', 'Division', 'Reporting To', 'Mobile', 'Email', 'Gender', 'Date Of Joining', 'Date Of Birth', 'Age', 'CTC Annual', 'Gross Salary Monthly', 'CTC Per Month', 'Last Year Increments', 'Last Year Increment Percent', 'Last Year Increments Value', 'Last Promotion', 'Marital Status', 'Father Name', 'Father Date Of Birth', 'Mother Name', 'Mother  DOB', 'Marriage Anniversary', 'Spouse name', 'Spouse Date Of Birth', 'Children-1', 'Children-1 DOB', 'Children-2', 'Children-2 DOB', 'Children-3', 'Children-3 DOB', 'Children-4', 'Children-4 DOB', 'Children-5', 'Children-5 DOB', 'PAN Number', 'Adhar Number', 'Emergency Number', 'Current Address', 'Permanent Address', 'Biometric Code', 'Account Number', 'Bank Name', 'IFSC Code', 'PF Number', 'UN Number', 'ESI Number', 'Probation Period', 'Date of Confirmation', 'Notice Period', 'Date of leaving', 'High School', 'Higher Secondary', 'Graducation', 'Post Graducation', 'Other', 'Current Company TENURE', 'Previous Exp', 'Total Exp', 'Sales Type', 'Status', 'profile_image', 'designation_id', 'branch_id', 'division_id', 'department_id', 'Reporting ID', 'Role Ids', 'payroll', 'Attandance Summary Report', 'Order Mails', 'Order Mail Type', 'Order Mail Type ID', 'Leave Balance'];
+            return ['ID', 'Employees Code', 'User Name', 'Designation', 'Role', 'Branch Name', 'Location', 'Department', 'Division', 'Reporting To', 'Mobile', 'Email', 'Gender', 'Date Of Joining', 'Date Of Birth', 'Age', 'CTC Annual', 'Gross Salary Monthly', 'CTC Per Month', 'Last Year Increments', 'Last Year Increment Percent', 'Last Year Increments Value', 'Last Promotion', 'Marital Status', 'Father Name', 'Father Date Of Birth', 'Mother Name', 'Mother  DOB', 'Marriage Anniversary', 'Spouse name', 'Spouse Date Of Birth', 'Children-1', 'Children-1 DOB', 'Children-2', 'Children-2 DOB', 'Children-3', 'Children-3 DOB', 'Children-4', 'Children-4 DOB', 'Children-5', 'Children-5 DOB', 'PAN Number', 'Adhar Number', 'Emergency Number', 'Current Address', 'Permanent Address', 'Biometric Code', 'Account Number', 'Bank Name', 'IFSC Code', 'PF Number', 'UN Number', 'ESI Number', 'Probation Period', 'Date of Confirmation', 'Notice Period', 'Date of leaving', 'High School', 'Higher Secondary', 'Graducation', 'Post Graducation', 'Other', 'Current Company TENURE', 'Previous Exp', 'Total Exp', 'Sales Type', 'Status', 'profile_image', 'designation_id', 'branch_id', 'division_id', 'department_id', 'Reporting ID', 'Role Ids', 'payroll', 'Attandance Summary Report', 'Order Mails', 'Order Mail Type', 'Order Mail Type ID', 'Leave Balance', 'Grade'];
         } else {
-            return ['ID', 'Employees Code', 'User Name', 'Designation', 'Role', 'Branch Name', 'Location', 'Department', 'Division', 'Reporting To', 'Mobile', 'Email', 'Gender', 'Date Of Joining', 'Date Of Birth', 'Age', 'Last Promotion', 'Marital Status', 'Father Name', 'Father Date Of Birth', 'Mother Name', 'Mother  DOB', 'Marriage Anniversary', 'Spouse name', 'Spouse Date Of Birth', 'Children-1', 'Children-1 DOB', 'Children-2', 'Children-2 DOB', 'Children-3', 'Children-3 DOB', 'Children-4', 'Children-4 DOB', 'Children-5', 'Children-5 DOB', 'PAN Number', 'Adhar Number', 'Emergency Number', 'Current Address', 'Permanent Address', 'Biometric Code', 'Account Number', 'Bank Name', 'IFSC Code', 'PF Number', 'UN Number', 'ESI Number', 'Probation Period', 'Date of Confirmation', 'Notice Period', 'Date of leaving', 'High School', 'Higher Secondary', 'Graducation', 'Post Graducation', 'Other', 'Current Company TENURE', 'Previous Exp', 'Total Exp', 'Sales Type', 'Status', 'profile_image', 'designation_id', 'branch_id', 'division_id', 'department_id', 'Reporting ID', 'Role Ids', 'payroll', 'Attandance Summary Report', 'Order Mails', 'Order Mail Type', 'Order Mail Type ID', 'Leave Balance'];
+            return ['ID', 'Employees Code', 'User Name', 'Designation', 'Role', 'Branch Name', 'Location', 'Department', 'Division', 'Reporting To', 'Mobile', 'Email', 'Gender', 'Date Of Joining', 'Date Of Birth', 'Age', 'Last Promotion', 'Marital Status', 'Father Name', 'Father Date Of Birth', 'Mother Name', 'Mother  DOB', 'Marriage Anniversary', 'Spouse name', 'Spouse Date Of Birth', 'Children-1', 'Children-1 DOB', 'Children-2', 'Children-2 DOB', 'Children-3', 'Children-3 DOB', 'Children-4', 'Children-4 DOB', 'Children-5', 'Children-5 DOB', 'PAN Number', 'Adhar Number', 'Emergency Number', 'Current Address', 'Permanent Address', 'Biometric Code', 'Account Number', 'Bank Name', 'IFSC Code', 'PF Number', 'UN Number', 'ESI Number', 'Probation Period', 'Date of Confirmation', 'Notice Period', 'Date of leaving', 'High School', 'Higher Secondary', 'Graducation', 'Post Graducation', 'Other', 'Current Company TENURE', 'Previous Exp', 'Total Exp', 'Sales Type', 'Status', 'profile_image', 'designation_id', 'branch_id', 'division_id', 'department_id', 'Reporting ID', 'Role Ids', 'payroll', 'Attandance Summary Report', 'Order Mails', 'Order Mail Type', 'Order Mail Type ID', 'Leave Balance', 'Grade'];
         }
     }
 
@@ -165,18 +165,19 @@ class UserExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMa
                 $data['sales_type'],
                 $status,
                 $data['profile_image'],
-                $data['designation_id'] ?? NULL,
-                $data['branch_id'] ?? NULL,
-                $data['division_id'] ?? NULL,
-                $data['department_id'] ?? NULL,
-                $data['reportingid'] ?? NULL,
+                $data['designation_id'] ?? '-',
+                $data['branch_id'] ?? '-',
+                $data['division_id'] ?? '-',
+                $data['department_id'] ?? '-',
+                $data['reportingid'] ?? '-',
                 $roles,
-                $data['payroll'] ?? NULL,
+                $data['payroll'] ?? '-',
                 (string)$data['show_attandance_report'] ?? '0',
                 $data['userinfo'] ? $data['userinfo']['order_mails'] : '',
                 implode(',', $mail_types_name),
                 $data['userinfo'] ? $data['userinfo']['order_mails_type'] : '',
-                $data['leave_balance'] ?? NULL,
+                $data['leave_balance'] ?? '-',
+                $data['grade'] ?? '-',
             ];
         } else {
             return [
@@ -242,18 +243,19 @@ class UserExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMa
                 $data['sales_type'],
                 $status,
                 $data['profile_image'],
-                $data['designation_id'] ?? NULL,
-                $data['branch_id'] ?? NULL,
-                $data['division_id'] ?? NULL,
-                $data['department_id'] ?? NULL,
-                $data['reportingid'] ?? NULL,
+                $data['designation_id'] ?? '-',
+                $data['branch_id'] ?? '-',
+                $data['division_id'] ?? '-',
+                $data['department_id'] ?? '-',
+                $data['reportingid'] ?? '-',
                 $roles,
-                $data['payroll'] ?? NULL,
+                $data['payroll'] ?? '-',
                 (string)$data['show_attandance_report'] ?? '0',
                 $data['userinfo'] ? $data['userinfo']['order_mails'] : '',
                 implode(',', $mail_types_name),
                 $data['userinfo'] ? $data['userinfo']['order_mails_type'] : '',
-                $data['leave_balance'] ?? NULL,
+                $data['leave_balance'] ?? '-',
+                $data['grade'] ?? '-',
             ];
         }
     }

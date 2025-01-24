@@ -3,8 +3,10 @@
 namespace App\Exports;
 
 use App\Models\Branch;
+use App\Models\BranchStock;
 use App\Models\BranchWiseTarget;
 use App\Models\City;
+use App\Models\CustomerOutstanting;
 use App\Models\Customers;
 use App\Models\District;
 use App\Models\EmployeeDetail;
@@ -63,7 +65,7 @@ class CHRatingReportExport implements FromCollection, WithHeadings, ShouldAutoSi
             $query->where('branch_id', $this->branch_id);
         }
 
-        $query = $query->where('sales_type', 'Primary')->whereIn('designation_id', ['5','6','7'])->latest()->get();
+        $query = $query->where('sales_type', 'Primary')->whereIn('designation_id', ['5', '6', '7'])->latest()->get();
 
         if ($this->financial_year && $this->financial_year != '' && $this->financial_year != null) {
             $f_year_array = explode('-', $this->financial_year);
@@ -113,7 +115,7 @@ class CHRatingReportExport implements FromCollection, WithHeadings, ShouldAutoSi
 
     public function headings(): array
     {
-        return [['Branch','CH/BM','AOP','','','','','GOLY','','','','','New Channel Sale-40% of Total sale','','','','','New Product sale-60%','','','','','Debtors','','','','','','Inventory','','','','','','Bonus Points','','Final rating'],['','','Tar','Ach','% ACHD','For Rating %','Final Rating','LY-Tar','ACH','GOLY','For Rating %','Final Rating','Tar','Ach','% ACHD','For Rating %','Final Rating','Tar','Ach','% ACHD','For Rating %','Final Rating','TOTAL SALES FROM APR TO DEC','AVR PER DAYS SALES','TOTAL DEBTORS','DAYS','For Rating %','Final Rating','TOTAL SALES FROM APR TO NOV','AVR PER DAYS SALES','TOTAL INVENTORY','DAYS','For Rating %','Final Rating','ach >110%','Goly >125%','']];
+        return [['Branch', 'CH/BM', 'AOP', '', '', '', '', 'GOLY', '', '', '', '', 'New Channel Sale-40% of Total sale', '', '', '', '', 'New Product sale-60%', '', '', '', '', 'Debtors', '', '', '', '', '', 'Inventory', '', '', '', '', '', 'Bonus Points', '', 'Final rating'], ['', '', 'Tar', 'Ach', '% ACHD', 'For Rating %', 'Final Rating', 'LY-Tar', 'ACH', 'GOLY', 'For Rating %', 'Final Rating', 'Tar', 'Ach', '% ACHD', 'For Rating %', 'Final Rating', 'Tar', 'Ach', '% ACHD', 'For Rating %', 'Final Rating', 'TOTAL SALES CURRENT FINANCIAL YEAR', 'AVR PER DAYS SALES', 'TOTAL DEBTORS', 'DAYS', 'For Rating %', 'Final Rating', 'TOTAL SALES CURRENT FINANCIAL YEAR', 'AVR PER DAYS SALES', 'TOTAL INVENTORY', 'DAYS', 'For Rating %', 'Final Rating', 'ach >110%', 'Goly >125%', '']];
     }
 
     public function map($query): array
@@ -136,71 +138,80 @@ class CHRatingReportExport implements FromCollection, WithHeadings, ShouldAutoSi
         $lastyrstartdate = Carbon::createFromFormat('Y-m-d', $this->start_date)->subYear()->format('Y-m-d');
         $lastyrenddate = Carbon::createFromFormat('Y-m-d', $this->end_date)->subYear()->format('Y-m-d');
 
-
         $user_ids = getUsersReportingToAuth($query->id);
         $emp_codes = User::whereIn('id', $user_ids)->pluck('employee_codes');
         $branch_ids = explode(',', $query->branch_id);
-        $achiv = PrimarySales::whereIn('emp_code', $emp_codes)->whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->sum('net_amount')/100000;
 
-        $new_achiv_dealer = PrimarySales::whereIn('emp_code', $emp_codes)->whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->where('new_dealer', 'Y')->sum('net_amount')/100000;
-        $new_achiv_product = PrimarySales::whereIn('emp_code', $emp_codes)->whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->where('new_product', 'Y')->sum('net_amount')/100000;
-        
+        $targets = SalesTargetUsers::with('user')->whereIn('branch_id', $branch_ids)->whereIn('month', $selectedmonths)->where('type', 'primary')->whereHas('user', function ($query) {
+            $query->whereIn('division_id', ['10', '18']);
+        })->sum('target');
+        $achiv = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount') / 100000;
+        $ly_targets = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $lastyrstartdate)->where('invoice_date', '<=', $lastyrenddate)->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount') / 100000;
+
+        $new_achiv_dealer = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->where('new_dealer', 'Y')->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount') / 100000;
+        $new_achiv_product = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->where('new_product', 'Y')->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount') / 100000;
+
         $branch_names = Branch::whereIn('id', $branch_ids)->pluck('branch_name')->toArray();
-        $targets = SalesTargetUsers::whereIn('branch_id', $branch_ids)->whereIn('month', $selectedmonths)->where('type', 'primary')->sum('target');
-        // $achiv = BranchWiseTarget::whereIn('branch_id', $branch_ids)->whereIn('month', $selectedmonths)->sum('achievement');
-        $ly_targets = PrimarySales::whereIn('emp_code', $emp_codes)->whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $lastyrstartdate)->where('invoice_date', '<=', $lastyrenddate)->sum('net_amount')/100000;
 
-        $debtors_start_date = $f_year_array[0].'-04-01';
-        $debtors_end_date = $f_year_array[0].'-12-31';
+        $debtors_start_date = $f_year_array[0] . '-04-01';
+        $debtors_end_date = $f_year_array[0] . '-12-31';
+        // $debtors_end_date = now()->toDateString();
 
-        $debtors_sales = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $debtors_start_date)->where('invoice_date', '<=', $debtors_end_date)->sum('net_amount');
+        $debtors_start_date_or = Carbon::createFromFormat('Y-m-d', $f_year_array[0] . '-04-01');
+        $debtors_end_date_or = now();
+
+        // $days_difference = $debtors_start_date_or->diffInDays($debtors_end_date_or);
+        $days_difference = 270;
+
+        $debtors_sales = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $debtors_start_date)->where('invoice_date', '<=', $debtors_end_date)->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount');
+        $total_debtors = CustomerOutstanting::whereIn('branch_id', $branch_ids)->whereIn('division_id', ['10', '18'])->where('year', $f_year_array[0])->sum('amount');
+        $total_inventory = BranchStock::whereIn('branch_id', $branch_ids)->whereIn('division_id', ['10', '18'])->where('year', $f_year_array[0])->sum('amount');
 
         return [
             count($branch_names) > 0 ? implode(',', $branch_names) : '-',
             $query['name'],
 
             $targets > 0 ? $targets : '0',
-            round($achiv,0),
-            $targets > 0 ? round(($achiv/$targets)*100,0) . '%' : '0%',
-            $targets > 0 ? (round(($achiv/$targets)*100,0) >= 100 ? '100%' : round(($achiv/$targets)*100,0) . '%' ) : '0%',
-            $targets > 0 ? (round(($achiv/$targets)*100,0) >= 100 ? '25' : round((25*($achiv/$targets)*100/100),0)  ) : '0',
+            round($achiv, 0),
+            $targets > 0 ? round(($achiv / $targets) * 100, 0) . '%' : '0%',
+            $targets > 0 ? (round(($achiv / $targets) * 100, 0) >= 100 ? '100%' : round(($achiv / $targets) * 100, 0) . '%') : '0%',
+            $aop = $targets > 0 ? (round(($achiv / $targets) * 100, 0) >= 100 ? '25' : round((25 * ($achiv / $targets) * 100 / 100), 0)) : '0',
 
-            $ly_targets > 0 ? round($ly_targets,0) : '0',
-            round($achiv,0),
-            $ly_targets > 0 ? round((($achiv-$ly_targets)/$ly_targets)*100,0) . '%' : '0%',
-            $ly_targets > 0 ? (round((($achiv-$ly_targets)/$ly_targets)*100,0) >= 100 ? '100%' : round((($achiv-$ly_targets)/$ly_targets)*100,0) . '%' ) : '0%',
-            $ly_targets > 0 ? (round((($achiv-$ly_targets)/$ly_targets)*100,0) >= 100 ? '25' : round((25*(($achiv-$ly_targets)/$ly_targets)*100/100),0)  ) : '0',
+            $ly_targets > 0 ? round($ly_targets, 0) : '0',
+            round($achiv, 0),
+            $ly_targets > 0 ? round((($achiv - $ly_targets) / $ly_targets) * 100, 0) . '%' : '0%',
+            $ly_targets > 0 ? (round((($achiv - $ly_targets) / $ly_targets) * 100, 0) >= 100 ? '100%' : round((($achiv - $ly_targets) / $ly_targets) * 100, 0) . '%') : '0%',
+            $goly = $ly_targets > 0 ? (round((($achiv - $ly_targets) / $ly_targets) * 100, 0) >= 100 ? '25' : round((25 * (($achiv - $ly_targets) / $ly_targets) * 100 / 100), 0)) : '0',
 
-            round((($achiv*40)/100),0),
-            round($new_achiv_dealer,0),
-            ($achiv*40)/100 > 0 ? round(($new_achiv_dealer/(($achiv*40)/100))*100,0) . '%' : '0%',
-            ($achiv*40)/100 > 0 ? (round(($new_achiv_dealer/(($achiv*40)/100))*100,0) >= 100 ? '100%' : round(($new_achiv_dealer/(($achiv*40)/100))*100,0) . '%') : '0%',
-            ($achiv*40)/100 > 0 ? (round(($new_achiv_dealer/(($achiv*40)/100))*100,0) >= 100 ? '15' : round((15*($new_achiv_dealer/(($achiv*40)/100))*100/100),0)  ) : '0',
+            round((($achiv * 40) / 100), 0),
+            round($new_achiv_dealer, 0),
+            ($achiv * 40) / 100 > 0 ? round(($new_achiv_dealer / (($achiv * 40) / 100)) * 100, 0) . '%' : '0%',
+            ($achiv * 40) / 100 > 0 ? (round(($new_achiv_dealer / (($achiv * 40) / 100)) * 100, 0) >= 100 ? '100%' : round(($new_achiv_dealer / (($achiv * 40) / 100)) * 100, 0) . '%') : '0%',
+            $new_chanel = ($achiv * 40) / 100 > 0 ? (round(($new_achiv_dealer / (($achiv * 40) / 100)) * 100, 0) >= 100 ? '15' : round((15 * ($new_achiv_dealer / (($achiv * 40) / 100)) * 100 / 100), 0)) : '0',
 
-            round((($achiv*60)/100),0),
-            round($new_achiv_product,0),
-            ($achiv*60)/100 > 0 ? round(($new_achiv_product/(($achiv*60)/100))*100,0) . '%' : '0%',
-            ($achiv*60)/100 > 0 ? (round(($new_achiv_product/(($achiv*60)/100))*100,0) >= 100 ? '100%' : round(($new_achiv_product/(($achiv*60)/100))*100,0) . '%') : '0%',
-            ($achiv*60)/100 > 0 ? (round(($new_achiv_product/(($achiv*60)/100))*100,0) >= 100 ? '5' : round((5*($new_achiv_product/(($achiv*60)/100))*100/100),0)  ) : '0',
+            round((($achiv * 60) / 100), 0),
+            round($new_achiv_product, 0),
+            ($achiv * 60) / 100 > 0 ? round(($new_achiv_product / (($achiv * 60) / 100)) * 100, 0) . '%' : '0%',
+            ($achiv * 60) / 100 > 0 ? (round(($new_achiv_product / (($achiv * 60) / 100)) * 100, 0) >= 100 ? '100%' : round(($new_achiv_product / (($achiv * 60) / 100)) * 100, 0) . '%') : '0%',
+            $new_product = ($achiv * 60) / 100 > 0 ? (round(($new_achiv_product / (($achiv * 60) / 100)) * 100, 0) >= 100 ? '5' : round((5 * ($new_achiv_product / (($achiv * 60) / 100)) * 100 / 100), 0)) : '0',
 
-            $debtors_sales > 0 ? round(($debtors_sales/100000), 0) : '0',
-            $debtors_sales > 0 ? round((($debtors_sales/100000)/270), 0) : '0',
+            $debtors_sales > 0 ? round(($debtors_sales / 100000), 2) : '0',
+            $debtors_sales > 0 ? round((($debtors_sales / 100000) / $days_difference), 2) : '0',
+            $total_debtors > 0 ? round($total_debtors, 1) : '0',
+            $days = ($debtors_sales / 100000) / 270 > 0 && $total_debtors > 0 ? round(($total_debtors / (($debtors_sales / 100000) / $days_difference)), 0) : '100',
+            $percentage = $days <= 30 ? '100%' : ($days <= 60 ? '80%' : ($days <= 90 ? '50%' : '0%')),
+            $debtor = (20*(int)$percentage)/100,
 
-            '-',
-            '-',
-            '-',
-            '-',
-            '-',
-            '-',
-            '-',
-            '-',
-            '-',
-            '-',
-            '-',
-            '-',
-            '-',
+            $debtors_sales > 0 ? round(($debtors_sales / 100000), 2) : '0',
+            $debtors_sales > 0 ? round((($debtors_sales / 100000) / $days_difference), 2) : '0',
+            $total_inventory > 0 ? round($total_inventory, 2) : '0',
+            $inv_days = ($debtors_sales / 100000) / 270 > 0 && $total_inventory > 0 ? round(($total_inventory / (($debtors_sales / 100000) / $days_difference)), 0) : '100',
+            $percentage = $inv_days <= 30 ? '100%' : ($inv_days <= 60 ? '80%' : ($inv_days <= 90 ? '50%' : '0%')),
+            $inventory = (10*(int)$percentage)/100,
+            '0',
+            '0',
+            (int)$aop + (int)$goly + (int)$new_chanel + (int)$new_product + (int)$debtor + (int)$inventory
         ];
-
     }
 
     public function registerEvents(): array
@@ -220,7 +231,7 @@ class CHRatingReportExport implements FromCollection, WithHeadings, ShouldAutoSi
                 $event->sheet->mergeCells('AC1:AH1');
                 $event->sheet->mergeCells('AI1:AJ1');
                 $event->sheet->mergeCells('AK1:AK2');
-                
+
 
                 // for ($row = 1; $row <= $rowCount; $row++) {
                 //     $cellValue = $event->sheet->getCell('AC' . $row)->getValue();

@@ -50,10 +50,11 @@ class CutomerOutstantingImport implements ToCollection, WithValidation, WithHead
                             'customer_id' => $row['customer_id'],
                             'days' => (string)$k,
                             'year' => $row['year'],
+                            'division_id' => $row['division_id'],
+                            'branch_id' => $row['branch_id'],
                             'quarter' => $row['quarter']
                         ],
                         [
-                            'branch_id' => $row['branch_id'],
                             'user_id' => $row['user_id'],
                             'customer_name' => $row['customer_name'],
                             'amount' => $val
@@ -67,7 +68,10 @@ class CutomerOutstantingImport implements ToCollection, WithValidation, WithHead
     public function rules(): array
     {
         $rules = [
-            'customer_id' => 'required',
+            'customer_id' => 'required|exists:customers,id',
+            'user_id' => 'nullable|exists:users,id',
+            'branch_id' => 'required|exists:branches,id',
+            'division_id' => 'required|exists:divisions,id',
         ];
         return $rules;
     }

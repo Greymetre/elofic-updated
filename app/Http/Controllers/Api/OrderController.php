@@ -141,6 +141,7 @@ class OrderController extends Controller
             $salesdetails = Sales::where('order_id', $order_id)->first() ?? [];
 
             $data['schme_amount'] = (string)$data['schme_amount'];
+            $data['schme_val'] = (string)$data['schme_val'];
             $data['order_status'] = isset($data['statusname']) ? $data['statusname']['status_name'] : 'Pending';
             $data['dispatch_date'] = isset($salesdetails) ? (isset($salesdetails['dispatch_date']) ? Carbon::parse($salesdetails['dispatch_date'])->format('d-m-Y') : '') : '';
             $data['lr_no'] = isset($salesdetails) ? isset($salesdetails['lr_no']) ? (string)$salesdetails['lr_no']  : '' : '';
@@ -202,7 +203,7 @@ class OrderController extends Controller
                         //'detail_title' =>  isset($value['productdetails']['detail_title']) ? $value['productdetails']['detail_title'] : '',
                         'detail_title' =>  isset($value['products']['product_no']) ? $value['products']['product_no'] : '',
                         'quantity' =>  isset($value['quantity']) ? $value['quantity'] : 0,
-                        'ebd_amount' =>  isset($value['ebd_amount']) ? $value['ebd_amount'] : 0,
+                        'ebd_amount' =>  isset($value['price']) ? $value['price'] : 0.00,
                         'gst' =>  isset($value['products']['productpriceinfo']) ? $value['products']['productpriceinfo']['gst'] : 0,
                         'shipped_qty'  =>  isset($value['shipped_qty']) ? $value['shipped_qty'] : 0,
                         'price'  =>  isset($value['price']) ? $value['price'] : 0.00,

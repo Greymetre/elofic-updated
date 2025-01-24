@@ -11,7 +11,7 @@ class CheckIn extends Model
 
     protected $table = 'check_in';
 
-    protected $fillable = [ 'active', 'customer_id', 'user_id', 'checkin_date', 'checkin_time', 'checkin_latitude', 'checkin_longitude', 'checkin_address', 'checkout_date', 'checkout_time', 'checkout_latitude', 'checkout_longitude', 'checkout_address', 'deleted_at', 'created_at', 'updated_at', 'distance', 'beatscheduleid' ];
+    protected $fillable = [ 'active', 'customer_id', 'user_id', 'checkin_date', 'checkin_time', 'checkin_latitude', 'checkin_longitude', 'checkin_address', 'checkout_date', 'checkout_time', 'time_interval', 'checkout_latitude', 'checkout_longitude', 'checkout_address', 'deleted_at', 'created_at', 'updated_at', 'distance', 'beatscheduleid' ];
 
     public function users()
     {
