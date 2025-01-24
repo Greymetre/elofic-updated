@@ -52,6 +52,7 @@ class User extends Authenticatable implements HasMedia
         'division_id',
         'payroll',
         'lave_balance',
+        'grade',
         'sales_type',
         'customerid',
         'show_attandance_report'

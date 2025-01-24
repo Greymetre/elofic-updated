@@ -51,11 +51,11 @@ class BranchStockImport implements ToCollection, WithValidation, WithHeadingRow,
                             'branch_id' => $row['branch_id'],
                             'days' => $k,
                             'year' => $row['year'],
-                            'quarter' => $row['quarter']
+                            'quarter' => $row['quarter'],
+                            'division_id' => $row['division_id']
                         ],
                         [
                             'branch_name' => $row['branch_name'],
-                            'division_id' => $row['division_id'],
                             'amount' => $val
                         ]
                     );
@@ -67,7 +67,8 @@ class BranchStockImport implements ToCollection, WithValidation, WithHeadingRow,
     public function rules(): array
     {
         $rules = [
-            'branch_id' => 'required',
+            'branch_id' => 'required|exists:branches,id',
+            'division_id' => 'required|exists:divisions,id',
         ];
         return $rules;
     }

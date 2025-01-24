@@ -59,6 +59,7 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
                 DB::raw('SUM(quantity) as total_quantity'),
                 DB::raw('SUM(net_amount) as total_net_amount'),
                 DB::raw('final_branch'),
+                DB::raw('final_branch'),
                 DB::raw('emp_code'),
                 DB::raw('branch_id'),
                 DB::raw('customer_id'),
@@ -93,6 +94,7 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
         if ($this->pSchemes->assign_to == 'branch') {
             $data->whereIn('branch_id', $pSchemesBranch);
         }
+
         if ($this->pSchemes->repetition == '3') {
             $data->where('invoice_date', '>=', $this->pSchemes->start_date)->where('invoice_date', '<=', $this->pSchemes->end_date);
         }

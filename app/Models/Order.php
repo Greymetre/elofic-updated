@@ -11,7 +11,7 @@ class Order extends Model
 
     protected $table = 'orders';
 
-    protected $fillable = [ 'active','buyer_id','seller_id','executive_id','total_qty','shipped_qty','orderno','order_date','completed_date','estimated_date','total_gst','total_discount','extra_discount','extra_discount_amount','sub_total','grand_total','order_taking','status_id','address_id','suc_del','gst_amount','schme_amount','ebd_amount','ebd_discount',	'special_discount','special_amount','cluster_discount','cluster_amount','deal_discount','deal_amount','distributor_discount','distributor_amount','frieght_discount','frieght_amount', 'agri_standard_discount', 'agri_standard_discount_amount','gst5_amt','gst12_amt','gst18_amt','gst28_amt','order_remark','discount_status','created_by', 'updated_by','deleted_at','created_at','updated_at','beatscheduleid',];
+    protected $fillable = [ 'active','buyer_id','seller_id','executive_id','total_qty','shipped_qty','orderno','order_date','completed_date','estimated_date','total_gst','total_discount','extra_discount','extra_discount_amount','sub_total','grand_total','order_taking','status_id','address_id','suc_del','gst_amount','schme_amount','schme_val','ebd_amount','ebd_discount',	'special_discount','special_amount','cluster_discount','cluster_amount','deal_discount','deal_amount','distributor_discount','distributor_amount','frieght_discount','frieght_amount', 'agri_standard_discount', 'agri_standard_discount_amount','gst5_amt','gst12_amt','gst18_amt','gst28_amt','order_remark','discount_status','created_by', 'updated_by','deleted_at','created_at','updated_at','beatscheduleid',];
 
     public function message()
     {
@@ -68,6 +68,7 @@ class Order extends Model
                 'suc_del' => isset($request['suc_del'])?  $request['suc_del']:'',  
                 'beatscheduleid' => isset($request['beatscheduleid']) ? $request['beatscheduleid'] :null,   
                 'gst_amount' => isset($request['gst_amount']) ? $request['gst_amount'] :null,   
+                'schme_val' => isset($request['schme_val']) ? $request['schme_val'] :null,   
                 'schme_amount' => isset($request['schme_amount']) ? $request['schme_amount'] :null,   
                 'ebd_discount' => isset($request['ebd_discount']) ? $request['ebd_discount'] :null,   
                 'ebd_amount' => isset($request['ebd_amount']) ? $request['ebd_amount'] :null,   

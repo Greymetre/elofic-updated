@@ -182,13 +182,14 @@ class CheckinController extends Controller
             }
 
             $request['checkout_address'] = getLatLongToAddress($request['checkout_latitude'], $request['checkout_longitude']);
-
+            $check_in = CheckIn::where('id', $request['checkin_id'])->first();
             if ($this->checkin->where('id', '=', $request['checkin_id'])->update([
                 'checkout_date' => getcurentDate(),
                 'checkout_time' => getcurentTime(),
                 'checkout_latitude' => !empty($request['checkout_latitude']) ? $request['checkout_latitude'] : '',
                 'checkout_longitude' => !empty($request['checkout_longitude']) ? $request['checkout_longitude'] : '',
                 'checkout_address' => !empty($request['checkout_address']) ? $request['checkout_address'] : '',
+                'time_interval' => gmdate("H:i:s", strtotime(getcurentDateTime()) - strtotime($check_in->checkin_date . ' ' . $check_in->checkin_time))
             ])) {
                 VisitReport::insertGetId([
                     'checkin_id' => isset($request['checkin_id']) ? $request['checkin_id'] : null,

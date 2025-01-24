@@ -37,13 +37,14 @@ class CutomerOutstantingExport implements FromCollection, WithHeadings, ShouldAu
             'customer_id',
             'branch_id',
             'user_id',
+            'division_id',
             'year',
             'quarter',
             DB::raw('SUM(amount) as total_amounts'),
             DB::raw('GROUP_CONCAT(amount) as amounts'),
             DB::raw('GROUP_CONCAT(days) as days'),
             DB::raw('JSON_OBJECTAGG(days, amount) as day_amount_pairs'),
-        )->groupBy('customer_id', 'branch_id', 'user_id', 'year', 'quarter',)->get();
+        )->groupBy('customer_id', 'branch_id', 'user_id', 'division_id', 'year', 'quarter',)->get();
 
         return $data;
     }
@@ -55,6 +56,7 @@ class CutomerOutstantingExport implements FromCollection, WithHeadings, ShouldAu
             'Branch',
             'Customer ID',
             'User ID',
+            'Division ID',
             'Dealer Name',
             'Year',
             'Quarter',
@@ -78,6 +80,7 @@ class CutomerOutstantingExport implements FromCollection, WithHeadings, ShouldAu
             $data->branch ? $data->branch->branch_name : '-',
             $data->customer_id ? $data->customer_id : '-',
             $data->user_id ? $data->user_id : '-',
+            $data->division_id ? $data->division_id : '-',
             $data->customer ? $data->customer->name : '-',
             $data->year ? $data->year : '-',
             $data->quarter ? $data->quarter : '-',

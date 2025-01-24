@@ -898,6 +898,19 @@
                     </div>
                   </div>
                 </div>
+                <div class="col-md-6">
+                  <div class="input_section">
+                    <label class="col-form-label">Grade</label>
+                    <div class="form-group has-default bmd-form-group">
+                      <input type="text" name="grade" class="form-control" value="{!! old( 'grade', $user->grade?$user->grade:'') !!}">
+                      @if ($errors->has('grade'))
+                      <div class="error">
+                        <p class="text-danger">{{ $errors->first('grade') }}</p>
+                      </div>
+                      @endif
+                    </div>
+                  </div>
+                </div>
                 <!-- user sales type -->
                 <div class="col-md-6">
                   <div class="input_section">

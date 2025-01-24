@@ -169,7 +169,9 @@ class LeaveController extends Controller
             $toDate = new DateTime($leave->to_date);
             $dates = [];
             $currentDate = clone $fromDate;
+            $days = 0;
             while ($currentDate <= $toDate) {
+                $days++;
                 $dates[] = $currentDate->format('Y-m-d');
                 $currentDate->modify('+1 day');
             }
@@ -177,6 +179,17 @@ class LeaveController extends Controller
             foreach ($dates as $date) {
                 Attendance::where(['user_id' => $leave->user_id, 'punchin_date' => date('Y-m-d', strtotime($date))])->delete();
             }
+            
+            if($leave->type == 'First half leave' || $leave->type == 'Second Half Leave'){
+                $user = User::find($leave->user_id);
+                $user->leave_balance = $user->leave_balance + 0.5;
+                $user->save();
+            }elseif($leave->type == 'Full Day Leave' || $leave->type == 'Leave'){
+                $user = User::find($leave->user_id);
+                $user->leave_balance = $user->leave_balance + $days;
+                $user->save();
+            }
+
             if ($leave->delete()) {
                 return response()->json(['status' => 'success', 'message' => 'Leave deleted successfully!']);
             }
