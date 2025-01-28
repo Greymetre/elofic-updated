@@ -57,6 +57,7 @@ class PrimarySales extends Model
         'group_2',
         'group_3',
         'group_4',
+        'sell_from',
         'created_at',
         'updated_at'
     ];

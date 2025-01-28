@@ -230,7 +230,7 @@
                   <div class="col-md-3">
                      <div class="input_section">
                         <label class="col-form-label">Complaint Date </label>
-                        <input type="text" readonly name="complaint_date" id="complaint_date" class="form-control datepicker" value="{!! old( 'complaint_date', $complaints['complaint_date'])?? Carbon\Carbon::now()->toDateString() !!}">
+                        <input type="text" readonly name="complaint_date" id="complaint_date" class="form-control datepicker" value="{!! old('complaint_date', isset($complaints['complaint_date']) ? \Carbon\Carbon::parse($complaints['complaint_date'])->format('d-m-Y') : \Carbon\Carbon::now()->format('d-m-Y')) !!}">
                         @if ($errors->has('complaint_date'))
                         <div class="error">
                            <p class="text-danger">{{ $errors->first('complaint_date') }}</p>
@@ -404,7 +404,7 @@
                         <div class="col-md-3">
                            <div class="input_section">
                               <label class="col-form-label">Product Group </label>
-                              <input readonly type="text" name="product_group" class="form-control" value="{!! old( 'product_group', $complaints['product_group']) !!}">
+                              <input readonly type="text" name="product_group" id="product_group" class="form-control" value="{!! old( 'product_group', $complaints['product_group']) !!}">
                               @if ($errors->has('product_group'))
                               <div class="error">
                                  <p class="text-danger">{{ $errors->first('product_group') }}</p>
@@ -811,7 +811,13 @@
          });
       });
       $("#company_sale_bill_date").on('change', function() {
-         var selectedDate = moment($(this).val());
+         var selectedDate = moment($(this).val(), 'DD-MM-YYYY');
+
+         if (!selectedDate.isValid()) {
+            // console.error("Invalid date format. Please use DD-MM-YYYY.");
+            return;
+         }
+
          var today = moment();
          var diffMonths = today.diff(selectedDate, 'months');
          selectedDate.add(diffMonths, 'months');
@@ -821,7 +827,13 @@
          $("#company_bill_date_month").val(diffMonths + " Month " + diffDays + " Day");
       });
       $("#customer_bill_date").on('change', function() {
-         var selectedDate = moment($(this).val());
+         
+         var selectedDate = moment($(this).val(), 'DD-MM-YYYY');
+         if (!selectedDate.isValid()) {
+            console.error("Invalid date format. Please use DD-MM-YYYY.");
+            return;
+         }
+         
          var today = moment();
          var diffMonths = today.diff(selectedDate, 'months');
          selectedDate.add(diffMonths, 'months');
@@ -843,17 +855,19 @@
             },
             success: function(res) {
                if (res.status === true) {
-                  console.log(res.data_all.invoice_date.split('-').reverse().join('-'));
+                  console.log(res.data.subcategories);
                   $("#product_code").val(res.data.product_code);
                   $("#product_name").val(res.data.product_name);
                   $("#product_id").val(res.data.id);
                   $("#product_id").change();
                   $("#category").val(res.data.categories.category_name);
+                  $("#product_group").val(res.data.subcategories.subcategory_name);
                   $("#specification").val(res.data.specification);
                   $("#product_no").val(res.data.product_no);
                   $("#phase").val(res.data.phase);
                   $("#product_code").prop('readonly', true);
                   $("#category").prop('readonly', true);
+                  $("#product_group").prop('readonly', true);
                   $("#specification").prop('readonly', true);
                   $("#product_no").prop('readonly', true);
                   $("#phase").prop('readonly', true);
@@ -885,9 +899,13 @@
                      if (warrantyDate > today) {
                         $("#under_warranty").val('Yes');
                         $("#under_warranty").change();
+                        $("#service_type").val('Free');
+                        $("#service_type").change();
                      } else {
                         $("#under_warranty").val('No');
                         $("#under_warranty").change();
+                        $("#service_type").val('Paid');
+                        $("#service_type").change();
                      }
 
                      if (res.check_Warranty.media.length > 0) {

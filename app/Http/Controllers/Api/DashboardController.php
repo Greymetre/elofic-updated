@@ -25,6 +25,7 @@ use App\Models\Order;
 use App\Models\OrderDetails;
 use App\Models\Sales;
 use App\Models\CheckIn;
+use App\Models\CompOffLeave;
 use App\Models\CustomerDetails;
 use App\Models\Payment;
 use App\Models\PaymentDetail;
@@ -114,7 +115,7 @@ class DashboardController extends Controller
                     $todate = date('Y-m-d');
                     break;
             }
-            $punchin = Attendance::where('user_id', $user_id)->whereDate('punchin_date', getcurentDate())->select('id','punchin_time', 'punchout_time', 'working_type','flag')->first();
+            $punchin = Attendance::where('user_id', $user_id)->whereDate('punchin_date', getcurentDate())->select('id', 'punchin_time', 'punchout_time', 'working_type', 'flag')->first();
             $orders = Order::where(function ($query) use ($user_id, $fromdate, $todate) {
                 $query->where('created_by', '=', $user_id);
                 if (!empty($fromdate) && !empty($todate)) {
@@ -547,7 +548,7 @@ class DashboardController extends Controller
         }
 
         $query = SalesTargetUsers::with('user');
-        if(!$slected_user->hasRole('superadmin') && !$slected_user->hasRole('Admin')){
+        if (!$slected_user->hasRole('superadmin') && !$slected_user->hasRole('Admin')) {
             $query->whereIn('user_id', $user_ids);
         }
 
@@ -570,7 +571,7 @@ class DashboardController extends Controller
             if ($value->user_id == $request->user_id) {
                 $target += $value->target;
                 $achievement += $value->achievement;
-            }else if ($value->type == 'primary') {
+            } else if ($value->type == 'primary') {
                 $target += $value->target;
                 $achievement += $value->achievement;
             }
@@ -596,7 +597,7 @@ class DashboardController extends Controller
 
                     $firstDateFormatted = $firstDate->toDateString();
                     $lastDateFormatted = $lastDate->toDateString();
-                    
+
                     $achievement = PrimarySales::whereIn('emp_code', $all_emp_codes)->where('invoice_date', '>=', $firstDateFormatted)->where('invoice_date', '<=', $lastDateFormatted);
 
                     if ($request->branch_id && !empty($request->branch_id)) {
@@ -631,9 +632,9 @@ class DashboardController extends Controller
                     }
                 } else {
                     $achievement = PrimarySales::where('invoice_date', '>=', date('Y-m') . '-01')
-                    ->where('invoice_date', '<=', date('Y-m') . '-31')
-                    ->whereIn('emp_code', User::where('sales_type', 'Primary')->pluck('employee_codes'))
-                    ->whereIn('emp_code', $all_emp_codes);
+                        ->where('invoice_date', '<=', date('Y-m') . '-31')
+                        ->whereIn('emp_code', User::where('sales_type', 'Primary')->pluck('employee_codes'))
+                        ->whereIn('emp_code', $all_emp_codes);
 
                     // PrimarySales::whereIn('emp_code', $all_emp_codes)->whereIn('division', ['PUMP', 'MOTOR'])->where('invoice_date', '>=', date('Y-m') . '-01');
                     if ($request->branch_id && !empty($request->branch_id)) {
@@ -667,8 +668,8 @@ class DashboardController extends Controller
         $data['order_value'] = $order_value > 0 ? number_format(($order_value / 100000), 2, '.', '') : "";
         $data['order_qty'] = $order_qty > 0 ? $order_qty : "";
         $data['customer_visit'] = $customer_visit > 0 ? (string)$customer_visit : "";
-        $data['todayBeatSchedule'] = count($todayBeatSchedule) > 0 ? true:false;
-        $data['beatUser'] = count($beatUser) > 0 ? true:false;
+        $data['todayBeatSchedule'] = count($todayBeatSchedule) > 0 ? true : false;
+        $data['beatUser'] = count($beatUser) > 0 ? true : false;
 
         $branches = Branch::where('active', 'Y')->select('id', 'branch_name')->get();
         $divisions = Division::where('active', 'Y')->select('id', 'division_name')->get();
@@ -731,10 +732,17 @@ class DashboardController extends Controller
 
     public function getLeaveBalance(Request $request)
     {
-        $user = $request->user();
-        $leaveBalance = $user->leave_balance;
-        if ($leaveBalance) {
-            return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $leaveBalance], 200);
+        try {
+            $user = $request->user();
+            $data['leaveBalance'] = $user->leave_balance;
+            $last60Days = Carbon::now()->subDays(60);
+            $sundayPunchinCount = CompOffLeave::where('comp_off_date', '>=', $last60Days)->where('is_used', false)
+                ->where('user_id', $user->id)
+                ->sum('balance');
+            $data['comb_off'] = $sundayPunchinCount > 0 ? $sundayPunchinCount : '0';
+            return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
     }
 }

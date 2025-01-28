@@ -76,11 +76,11 @@ use App\Http\Controllers\ServiceBillController;
 use App\Http\Controllers\ServiceChargeProductsController;
 use App\Http\Controllers\FieldKonnectAppSettings;
 use App\Http\Controllers\MarketingController;
+use App\Http\Controllers\MspActivityController;
 use App\Http\Controllers\PrimarySchemeController;
 use App\Http\Controllers\ResignationController;
 use App\Http\Controllers\SapStockController;
 use App\Http\Controllers\WareHouseController;
-use App\Models\SapStock;
 
 /*
 |--------------------------------------------------------------------------
@@ -426,6 +426,12 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('stock_template', [ProductController::class, 'stock_template'])->name('stock.template');
     Route::post('stock/upload', [ProductController::class, 'stock_upload'])->name('stock.upload');
     Route::any('stock/download', [ProductController::class, 'stock_download'])->name('stock.download');
+
+    // Customer Outstanting
+    Route::any('msp_activity', [MspActivityController::class, 'index'])->name('msp_activity.index');
+    Route::any('msp_activity_template', [MspActivityController::class, 'msp_activity_template'])->name('msp_activity.template');
+    Route::post('msp_activity/upload', [MspActivityController::class, 'msp_activity_upload'])->name('msp_activity.upload');
+    Route::any('msp_activity/download', [MspActivityController::class, 'msp_activity_download'])->name('msp_activity.download');
 
     //Orders
     Route::resource('orders', OrderController::class);

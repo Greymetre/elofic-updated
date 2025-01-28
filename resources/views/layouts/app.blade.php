@@ -1566,6 +1566,15 @@
                         </a>
                      </li>
                      @endif
+                     @if(auth()->user()->can('msp_activity_access'))
+                     <li class="nav-link-btn {{ request()->is('msp_activity*') ? 'active' : '' }}">
+                        <a class="hoveradd2" href="{{ url('msp_activity') }}">
+                           <i class="material-icons icon">celebration</i>
+                           <span>MSP Activity</span>
+                           <div class="d-none mobile_hide"> MSP Activity</div>
+                        </a>
+                     </li>
+                     @endif
                   </ul>
                </div>
             </li>

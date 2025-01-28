@@ -1144,9 +1144,10 @@ class AjaxController extends Controller
                             $query->where('serial_no', '=', $serial_no);
                         }
                     })
-                    ->first();
+                    ->latest()->first();
                 if ($data) {
                     $data->product->categories = $data->product->categories;
+                    $data->product->subcategories = $data->product->subcategories;
                     $check_Warranty = WarrantyActivation::with('media', 'customer', 'seller_details')->where('status', '!=', '3')->where('product_serail_number', $serial_no)->first();
                     return response()->json(['status' => true, 'data_all' => $data, 'data' => $data->product, 'check_Warranty' => $check_Warranty]);
                 } else {

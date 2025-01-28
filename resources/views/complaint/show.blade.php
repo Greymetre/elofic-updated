@@ -17,10 +17,10 @@
       width: 90%;
     }
 
-    /* .card.blck-clr p,
+    .card.blck-clr p,
     .card.blck-clr i {
       color: #4a4a4a !important;
-    } */
+    }
 
     .swal2-container.swal2-center.swal2-fade.swal2-shown {
       z-index: 999999 !important;
