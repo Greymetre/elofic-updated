@@ -191,7 +191,7 @@
                     <option value="">Select Type</option>
                     <!-- <option value="Leave" data-is-city="false">Leave</option>
                     <option value="Holiday" data-is-city="false">Holiday</option> -->
-                    <option value="First half leave" data-is-city="false">First Half Leave</option>
+                    <option value="First Half Leave" data-is-city="false">First Half Leave</option>
                     <option value="Second Half Leave" data-is-city="false">Second Half Leave</option>
                     <option value="Full Day Leave" data-is-city="false">Full Day Leave</option>
                   </select>

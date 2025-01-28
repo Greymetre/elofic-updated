@@ -126,7 +126,7 @@ class ComplaintController extends Controller
             $newComplaintNumber = $this->getComplaintNumber();
             $complaint = Complaint::create([
                 'complaint_number' => $newComplaintNumber,
-                'complaint_date' => $request->complaint_date ?? NULL,
+                'complaint_date' => $request->complaint_date ? date('Y-m-d', strtotime($request->complaint_date)) : NULL,
                 'claim_amount' => $request->claim_amount ?? NULL,
                 'seller' => $request->seller ?? NULL,
                 'end_user_id' => $request->end_user_id ?? NULL,

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\DataTables\LeaveDataTable;
 use App\Models\Attendance;
+use App\Models\CompOffLeave;
 use App\Models\Leave;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -92,11 +93,11 @@ class LeaveController extends Controller
                 ]);
             }
 
-            if($request['type'] == 'First half leave' || $request['type'] == 'Second Half Leave'){
+            if ($request['type'] == 'First Half Leave' || $request['type'] == 'Second Half Leave') {
                 $user = User::find($request['user_id']);
                 $user->leave_balance = $user->leave_balance - 0.5;
                 $user->save();
-            }elseif($request['type'] == 'Full Day Leave' || $request['type'] == 'Leave'){
+            } elseif ($request['type'] == 'Full Day Leave' || $request['type'] == 'Leave') {
                 $user = User::find($request['user_id']);
                 $user->leave_balance = $user->leave_balance - $days;
                 $user->save();
@@ -163,7 +164,7 @@ class LeaveController extends Controller
      */
     public function destroy($id)
     {
-        try {
+        // try {
             $leave = Leave::find($id);
             $fromDate = new DateTime($leave->from_date);
             $toDate = new DateTime($leave->to_date);
@@ -179,24 +180,47 @@ class LeaveController extends Controller
             foreach ($dates as $date) {
                 Attendance::where(['user_id' => $leave->user_id, 'punchin_date' => date('Y-m-d', strtotime($date))])->delete();
             }
-            
-            if($leave->type == 'First half leave' || $leave->type == 'Second Half Leave'){
-                $user = User::find($leave->user_id);
-                $user->leave_balance = $user->leave_balance + 0.5;
-                $user->save();
-            }elseif($leave->type == 'Full Day Leave' || $leave->type == 'Leave'){
-                $user = User::find($leave->user_id);
-                $user->leave_balance = $user->leave_balance + $days;
-                $user->save();
+
+            if ($leave->type == 'First Half Leave' || $leave->type == 'Second Half Leave') {
+                if ($leave->bal_type == 'Comp-off Balance') {
+                    $compOffs = CompOffLeave::whereRaw("FIND_IN_SET(?, leave_id)", [$id])->get();
+
+                    foreach ($compOffs as $compOff) {
+                        $compOff->balance += 0.50;
+
+                        $leaveIds = explode(',', $compOff->leave_id);
+                        $leaveIds = array_filter($leaveIds, fn($ids) => $ids != $id);
+                        $compOff->leave_id = implode(',', $leaveIds);
+                        $compOff->is_used = false;
+                        $compOff->save();
+                    }
+                }else {
+                    $user = User::find($leave->user_id);
+                    $user->leave_balance = $user->leave_balance + 0.50;
+                    $user->save();
+                }
+            } elseif ($leave->type == 'Full Day Leave' || $leave->type == 'Leave') {
+                if ($leave->bal_type == 'Comp-off Balance') {
+                    $compOff = CompOffLeave::where('leave_id', $id)->first();
+                    if ($compOff) {
+                        $compOff->balance = $compOff->balance + 1.00;
+                        $compOff->is_used = false;
+                        $compOff->save();
+                    }
+                }else{
+                    $user = User::find($leave->user_id);
+                    $user->leave_balance = $user->leave_balance + $days;
+                    $user->save();
+                }
             }
 
             if ($leave->delete()) {
                 return response()->json(['status' => 'success', 'message' => 'Leave deleted successfully!']);
             }
             return response()->json(['status' => 'error', 'message' => 'Error in Attendance Delete!']);
-        } catch (\Exception $e) {
-            return redirect()->back()->withErrors($e->getMessage())->withInput();
-        }
+        // } catch (\Exception $e) {
+        //     return redirect()->back()->withErrors($e->getMessage())->withInput();
+        // }
     }
 
     public function approveLeave(Request $request)

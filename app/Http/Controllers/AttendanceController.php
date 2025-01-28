@@ -26,6 +26,7 @@ use App\Models\Holiday;
 
 use App\Exports\ExcelExport;
 use App\Models\Beat;
+use App\Models\CompOffLeave;
 use App\Models\Media;
 use App\Models\TourDetail;
 use DateTime;
@@ -365,6 +366,19 @@ class AttendanceController extends Controller
       $accessToken = '4060dae74e438c';
       $location = Location::get($ipAddress);
       $addressP = getLatLongToAddress($location->latitude, $location->longitude);
+      $isSunday = Carbon::parse($request['punchin_date'])->isSunday();
+      
+      if ($isSunday) {
+        $expiryDate = Carbon::parse($request['punchin_date'])->addDays(60);
+
+        CompOffLeave::create([
+          'user_id' => $request['user_id'],
+          'comp_off_date' => $request['punchin_date'],
+          'expiry_date' => $expiryDate,
+          'is_used' => false,
+        ]);
+      }
+
       if (Attendance::updateOrCreate(['user_id' => $request['user_id'], 'punchin_date' => date('Y-m-d', strtotime($request['punchin_date']))], [
         'user_id' => $request['user_id'],
         'active' => 'Y',

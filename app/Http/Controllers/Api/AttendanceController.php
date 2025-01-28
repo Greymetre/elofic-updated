@@ -16,6 +16,7 @@ use App\Models\Attendance;
 use App\Models\TourProgramme;
 use App\Models\BeatSchedule;
 use App\Models\Beat;
+use App\Models\CompOffLeave;
 use App\Models\TourDetail;
 use App\Models\User;
 use Carbon\Carbon;
@@ -96,6 +97,17 @@ class AttendanceController extends Controller
                 $request['punchin_image'] = fileupload($image, $this->path, $filename);
             }
             $punchin_date = getcurentDate();
+            $isSunday = Carbon::parse($punchin_date)->isSunday();
+            if ($isSunday) {
+                $expiryDate = Carbon::parse($punchin_date)->addDays(60);
+
+                CompOffLeave::create([
+                    'user_id' => $user->id,
+                    'comp_off_date' => $punchin_date,
+                    'expiry_date' => $expiryDate,
+                    'is_used' => false,
+                ]);
+            }
             // $request['punchin_address'] = getLatLongToAddress($request['punchin_latitude'],$request['punchin_longitude']);
             $request['punchin_address'] = getLatLongToAddress($request['punchin_longitude'], $request['punchin_latitude']);
             //$request['punchin_address'] = '';

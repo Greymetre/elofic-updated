@@ -52,6 +52,9 @@ class ComplaintDataTable extends DataTable
             //                     ' . $btn . '
             //                 </div>';
             // })
+            ->addColumn('complaint_date', function ($query) {
+                return date('d-m-Y', strtotime($query->complaint_date));
+            })
             ->addColumn('complaint_number', function ($query) {
                 if (auth()->user()->can(['complaint_view'])) {
                     $btn = ' <a href="'.route('complaints.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Complaint">
