@@ -13,6 +13,14 @@
                 <form method="GET" action="{{ URL::to('checkin-download') }}">
                   <div class="d-flex flex-row">
                     <div class="p-2" style="width: 200px;">
+                      <select name="division_id" id="division_id" class="form-control select2">
+                        <option value="" disabled selected>Select Division</option>
+                        @foreach($divisions as $division)
+                        <option value="{{$division->id}}">{{$division->division_name}}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                    <div class="p-2" style="width: 200px;">
                       <select name="user_id" id="user_id" class="form-control select2">
                         <option value="" disabled selected>Select User</option>
                         @foreach($users as $user)
@@ -100,6 +108,7 @@
           'data': function(d) {
             d._token = token,
               d.user_id = $('#user_id').val(),
+              d.division_id = $('#division_id').val(),
               d.start_date = $('#start_date').val(),
               d.end_date = $('#end_date').val()
           }
@@ -228,6 +237,9 @@
         oTable.draw();
       });
       $('#user_id').change(function() {
+        oTable.draw();
+      });
+      $('#division_id').change(function() {
         oTable.draw();
       });
     });

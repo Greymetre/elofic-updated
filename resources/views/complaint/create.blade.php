@@ -871,11 +871,13 @@
                   $("#specification").prop('readonly', true);
                   $("#product_no").prop('readonly', true);
                   $("#phase").prop('readonly', true);
-                  $("#company_sale_bill_date").val(res.data_all.invoice_date.split('-').reverse().join('-'));
+                  if(res.data_all.invoice_date != '' && res.data_all.invoice_date != null){
+                     $("#company_sale_bill_date").val(res.data_all.invoice_date.split('-').reverse().join('-'));
+                     $("#company_sale_bill_date").change();
+                  }
                   $("#company_sale_bill_no").val(res.data_all.invoice_no);
                   $("#seller").val(res.data_all.party_name);
                   $("#seller").prop('readonly', true);
-                  $("#company_sale_bill_date").change();
                   if (res.check_Warranty != null) {
                      $("#customer_bill_date").val(res.check_Warranty.sale_bill_date.split('-').reverse().join('-'));
                      $("#customer_bill_no").val(res.check_Warranty.sale_bill_no);
