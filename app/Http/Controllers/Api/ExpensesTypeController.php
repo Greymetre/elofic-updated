@@ -91,7 +91,7 @@ class ExpensesTypeController extends Controller
                     'expenses_type'  => "required",
                     'claim_amount'  => "required",
                     'date'  => "required",
-                    'expense_file.*' => 'mimes:jpeg,jpg,png,pdf,doc',
+                    'expense_file.*' => 'mimes:jpeg,jpg,png,pdf,doc,webp',
                 ]
             );
 
@@ -344,7 +344,7 @@ class ExpensesTypeController extends Controller
                 $request->all(),
                 [
                     'expense_id'  => "required",
-                    'expense_file.*' => 'mimes:jpeg,jpg,png,pdf,doc',
+                    'expense_file.*' => 'mimes:jpeg,jpg,png,pdf,doc,webp',
                 ]
             );
             if ($validator->fails()) {

@@ -9,7 +9,7 @@
           <h4 class="card-title">ASM Rating Report
             <span class="">
               <div class="btn-group header-frm-btn">
-                @if(auth()->user()->can(['checkin_download']))
+                @if(auth()->user()->can(['asm_rating_download']))
                 <form method="GET" action="{{ URL::to('asm_rating_report_download') }}">
                   <div class="d-flex flex-wrap flex-row">
                     <div class="p-2" style="width: 200px;">
@@ -76,10 +76,17 @@
                       <input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly>
                     </div>--}}
                     <div class="p-2">
-                      <button class="btn btn-just-icon btn-theme" title="Checkin Download">
+                      <button class="btn btn-just-icon btn-theme" value="simple" name="download" type="submit" title="Rating Download">
                         <i class="material-icons">cloud_download</i>
                       </button>
                     </div>
+                    @if(auth()->user()->can(['asm_rating_detailed_download']))
+                    <div class="p-2">
+                      <button class="btn btn-just-icon btn-theme" value="detailed" name="download" type="submit" title="Rating Details Download(PMS)">
+                        <i class="material-icons">cloud_download</i>
+                      </button>
+                    </div>
+                    @endif
                   </div>
                 </form>
                 @endif

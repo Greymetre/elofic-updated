@@ -17,8 +17,8 @@ class MSPActivityExport implements FromCollection, WithHeadings, ShouldAutoSize,
 {
     public function __construct($request)
     {
-        $this->startdate = $request->input('start_date');
-        $this->enddate = $request->input('end_date');
+        $this->financial_year = $request->input('financial_year');
+        $this->month = $request->input('month');
         $this->branch_id = $request->input('branch_id');
         $this->dealer_id = $request->input('dealer_id');
     }
@@ -26,11 +26,23 @@ class MSPActivityExport implements FromCollection, WithHeadings, ShouldAutoSize,
     public function collection()
     {
         $data = MspActivity::with('user');
+        
         if($this->branch_id && !empty($this->branch_id)){
             $data->whereHas('user', function($query) {
                 $query->where('branch_id', $this->branch_id);
             });
         }
+
+        if($this->financial_year && !empty($this->financial_year)){
+            $parts = explode('-', $this->financial_year);
+            $financial_year = $parts[0] . '-' . substr($parts[1], -2);
+            $data->where('fyear', $financial_year);
+        }
+
+        if($this->month && !empty($this->month)){
+            $data->whereIn('month', $this->month);
+        }
+
         return $data->get();
     }
 

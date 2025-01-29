@@ -163,7 +163,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('reports/product_analysis_qty', [ReportController::class, 'product_analysis_qty']);
     Route::any('product_analysis_qty/download', [ReportController::class, 'product_analysis_qty_download'])->name('product_analysis_qty.download');
     Route::any('product_analysis_qty/list', [ReportController::class, 'product_analysis_qty_list'])->name('product_analysis_qty.list');
-    
+
     // Product Analysis Value
     Route::any('reports/product_analysis_value', [ReportController::class, 'product_analysis_value']);
     Route::any('product_analysis_value/download', [ReportController::class, 'product_analysis_value_download'])->name('product_analysis_value.download');
@@ -173,7 +173,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('reports/group_wise_analysis', [ReportController::class, 'group_wise_analysis']);
     Route::any('group_wise_analysis/download', [ReportController::class, 'group_wise_analysis_download'])->name('group_wise_analysis.download');
     Route::any('group_wise_analysis/list', [ReportController::class, 'group_wise_analysis_list'])->name('group_wise_analysis.list');
-    
+
     // Per Employee Costing
     Route::any('reports/per_employee_costing', [ReportController::class, 'per_employee_costing'])->name('per_employee_costing');
     Route::any('per_employee_costing/download', [ReportController::class, 'per_employee_costing_download'])->name('per_employee_costing.download');
@@ -192,7 +192,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('reports/new_dealer_sale', [ReportController::class, 'new_dealer_sale']);
     Route::any('new_dealer_sale/download', [ReportController::class, 'new_dealer_sale_download'])->name('new_dealer_sale.download');
     Route::any('new_dealer_sale/list', [ReportController::class, 'new_dealer_sale_list'])->name('new_dealer_sale.list');
-    
+
     // User Incentive
     Route::any('reports/user_incentive', [ReportController::class, 'user_incentive']);
     Route::any('user_incentive/download', [ReportController::class, 'user_incentive_download'])->name('user_incentive.download');
@@ -229,13 +229,13 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('customers-active', [CustomerController::class, 'active'])->name('customers.active');
     Route::any('customers-survey', [CustomerController::class, 'survey'])->name('customers.survey');
     Route::any('survey-download', [CustomerController::class, 'surveyDownload'])->name('survey-download');
-    
+
     //Ware House Routs
     Route::resource('ware_house', WareHouseController::class);
 
     //SAP Stock Routs
     Route::any('sap_stock', [SapStockController::class, 'index'])->name('sap_stock.index');
-    
+
     //End User Routs
     Route::resource('end_user', EndUserController::class);
     Route::post('end-users-active', [EndUserController::class, 'active'])->name('end-users.active');
@@ -283,13 +283,13 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('roles-download', [RolesController::class, 'download'])->name('roles.download');
     Route::any('roles-template', [RolesController::class, 'template'])->name('roles.template');
     Route::post('roles-upload', [RolesController::class, 'upload'])->name('roles.upload');
-    //braches 
+    //braches
     Route::resource('branches', BranchController::class);
     Route::any('branch_report/download', [BranchController::class, 'branch_report_download'])->name('branch_report.download');
-    //Division 
+    //Division
     Route::resource('division', DivisionController::class);
     Route::any('division_report/download', [DivisionController::class, 'division_report_download'])->name('division_report.download');
-    //Designation 
+    //Designation
     Route::resource('designation', DesignationController::class);
     //holidays
     Route::resource('holidays', HolidayController::class);
@@ -522,7 +522,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::delete('beatcustomer-delete/{id}', [BeatController::class, 'beatCustomerDelete']);
     Route::delete('beat-user-delete/{id}', [BeatController::class, 'beatUserDelete']);
     Route::any('beats-schedule/{id}', [BeatController::class, 'beatsSchedule']);
-    //Current Location 
+    //Current Location
     Route::any('livelocation', [BeatController::class, 'livelocation']);
     //Attendance
     Route::any('attendances', [AttendanceController::class, 'index'])->name('attendances.index');
@@ -887,7 +887,7 @@ Route::group(['middleware' => ['auth']], function () {
     // FieldKonnectAppSetting App Setting Route
     Route::resource('field-konnect-app-setting', FieldKonnectAppSettings::class);
     Route::resource('delar-portal-setting', DealerPortalSettingsController::class);
-    
+
     // Damage Entry Route
     Route::resource('damage_entries', DamageEntryController::class);
     Route::get('damage-entries-change-status', [DamageEntryController::class, 'changeStatus'])->name('damage_entries.changeStatus');
@@ -1012,7 +1012,7 @@ Route::any('getPrimarySachme', [AjaxController::class, 'getPrimarySachme']);
 Route::any('getExpenseCount', [AjaxController::class, 'getExpenseCount']);
 Route::any('getLeaveBalance', [AjaxController::class, 'getLeaveBalance']);
 Route::any('marketing/getCounts', [AjaxController::class, 'marketingGetCounts'])->name('marketing.getCounts');
-
+Route::any('getProductTimeInterval', [AjaxController::class, 'getProductTimeInterval']);
 
 
 
