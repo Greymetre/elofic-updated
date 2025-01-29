@@ -298,6 +298,9 @@ class ReportController extends Controller
                     if ($request->user_id && $request->user_id != null && $request->user_id != '') {
                         $query->where('user_id', $request->user_id);
                     }
+                    if ($request->division_id && $request->division_id != null && $request->division_id != '') {
+                        $query->where('division_id', $request->division_id);
+                    }
                     if ($request->start_date && $request->start_date != null && $request->start_date != '' && $request->end_date && $request->end_date != null && $request->end_date != '') {
                         $startDate = date('Y-m-d', strtotime($request->start_date));
                         $endDate = date('Y-m-d', strtotime($request->end_date));
@@ -363,7 +366,8 @@ class ReportController extends Controller
         $users = user::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
         })->whereIn('id', $userids)->select('id', 'name')->orderBy('name', 'asc')->get();
-        return view('reports.customervisit', compact('users'));
+        $divisions = Division::where('active', 'Y')->get();
+        return view('reports.customervisit', compact('users', 'divisions'));
     }
 
     public function attendancereport(Request $request)

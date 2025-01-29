@@ -21,6 +21,7 @@ class CheckinExport implements FromCollection, WithHeadings, ShouldAutoSize, Wit
         $this->startdate = $request->input('start_date');
         $this->enddate = $request->input('end_date');
         $this->user_id = $request->input('user_id');
+        $this->division_id = $request->input('division_id');
         $this->userids = getUsersReportingToAuth();
     }
     public function collection()
@@ -30,6 +31,11 @@ class CheckinExport implements FromCollection, WithHeadings, ShouldAutoSize, Wit
                 $query->where('user_id', $this->user_id);
             } elseif (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('Sub_Admin') && !Auth::user()->hasRole('HR_Admin')) {
                 $query->whereIn('user_id', $this->userids);
+            }
+            if ($this->division_id && $this->division_id != null && $this->division_id != '') {
+                $query->whereHas('users', function ($query) {
+                    $query->where('division_id', $this->division_id);
+                });
             }
             if ($this->startdate) {
                 $query->whereDate('checkin_date', '>=', $this->startdate);

@@ -22,18 +22,27 @@ class MspActivityController extends Controller
      */
     public function index(Request $request)
     {
-        if($request->ip() != '111.118.252.250') {
-            return view('work_in_progress');
-        }
         $userids = getUsersReportingToAuth();
         $branches = Branch::where('active', 'Y')->latest()->get();
+        $FinancialYears = getFinancialYears();
 
         if ($request->ajax()) {
+            
             $data = MspActivity::with('user');
             if($request->branch_id && !empty($request->branch_id)){
                 $data->whereHas('user', function($query) use ($request) {
                     $query->where('branch_id', $request->branch_id);
                 });
+            }
+
+            if($request->financial_year && !empty($request->financial_year)){
+                $parts = explode('-', $request->financial_year);
+                $financial_year = $parts[0] . '-' . substr($parts[1], -2);
+                $data->where('fyear', $financial_year);
+            }
+
+            if($request->month && !empty($request->month)){
+                $data->whereIn('month', $request->month);
             }
             
             return DataTables::of($data)
@@ -56,7 +65,7 @@ class MspActivityController extends Controller
                 ->make(true);
         }
 
-        return view('msp_activity.index', compact('branches'));
+        return view('msp_activity.index', compact('branches','FinancialYears'));
     }
 
     /**

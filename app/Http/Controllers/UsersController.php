@@ -20,6 +20,7 @@ use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Hash;
 use App\DataTables\UsersDataTable;
 use App\DataTables\UserCityDataTable;
+use App\Exports\ASMRatingDetailReportExport;
 use App\Exports\ASMRatingReportExport;
 use App\Exports\CHRatingReportExport;
 use App\Exports\FOSRatingReportExport;
@@ -1011,7 +1012,14 @@ class UsersController extends Controller
         abort_if(Gate::denies('user_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        return Excel::download(new ASMRatingReportExport($request), 'ASM_Rating_Report.xlsx');
+        if($request->download == 'simple'){
+            return Excel::download(new ASMRatingReportExport($request), 'Rating Report.xlsx');
+        }else{
+            if($request->ip() != '111.118.252.250') {
+                return view('work_in_progress');
+            }
+            return Excel::download(new ASMRatingDetailReportExport($request), 'Detail Rating_Report(PMS).xlsx');
+        }
     }
     
     public function ch_rating_report_download(Request $request)

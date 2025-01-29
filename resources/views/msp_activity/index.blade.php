@@ -30,6 +30,31 @@
                         @endif
                       </select>
                     </div>
+                    <div class="p-2" style="width: 200px;">
+                      <select name="financial_year" id="financial_year" class="form-control select2">
+                        <option value="" disabled selected>Select Financial Year</option>
+                        @foreach($FinancialYears as $FinancialYear)
+                        <option value="{{$FinancialYear}}">{{$FinancialYear}}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                    <div class="p-2" style="width: 200px;">
+                      <select name="month[]" multiple id="month" class="selectpicker" title="Select Month" placeholder="Select Month">
+                      <option value="" disabled hidden>Select Month</option>
+                        <option value="Apr">April</option>
+                        <option value="May">May</option>
+                        <option value="Jun">June</option>
+                        <option value="Jul">July</option>
+                        <option value="Aug">August</option>
+                        <option value="Sep">September</option>
+                        <option value="Oct">October</option>
+                        <option value="Nov">November</option>
+                        <option value="Dec">December</option>
+                        <option value="Jan">January</option>
+                        <option value="Feb">February</option>
+                        <option value="Mar">March</option>
+                      </select>
+                    </div>
                     <div class="p-2" style="width:200px;">
                       <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Primary Sales">
                         <i class="material-icons">cloud_download</i>
@@ -125,6 +150,8 @@
           url: "{{ route('msp_activity.index') }}",
           data: function(d) {
               d.branch_id = $('#branch_id').val(),
+              d.financial_year = $('#financial_year').val(),
+              d.month = $('#month').val(),
               d.search = $('input[type="search"]').val()
           }
         },
@@ -158,6 +185,12 @@
         ]
       });
       $('#branch_id').change(function() {
+        table.draw();
+      });
+      $('#financial_year').change(function() {
+        table.draw();
+      });
+      $('#month').change(function() {
         table.draw();
       });
     });
