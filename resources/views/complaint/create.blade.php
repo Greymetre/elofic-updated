@@ -827,13 +827,13 @@
          $("#company_bill_date_month").val(diffMonths + " Month " + diffDays + " Day");
       });
       $("#customer_bill_date").on('change', function() {
-         
+
          var selectedDate = moment($(this).val(), 'DD-MM-YYYY');
          if (!selectedDate.isValid()) {
             console.error("Invalid date format. Please use DD-MM-YYYY.");
             return;
          }
-         
+
          var today = moment();
          var diffMonths = today.diff(selectedDate, 'months');
          selectedDate.add(diffMonths, 'months');
@@ -843,6 +843,10 @@
          $("#customer_bill_date_month").val(diffMonths + " Month " + diffDays + " Day");
       });
       $("#product_serail_number").on("keyup", function() {
+         var product_serail_number = $('#product_serail_number').val();
+         if(product_serail_number == ''){
+            return ;
+         }
          var serial_no = $(this).val();
          var chekcPro = '{{($complaints && $complaints->product_id)?$complaints->product_id:""}}'
          $.ajax({
@@ -854,8 +858,7 @@
                serial_no: serial_no
             },
             success: function(res) {
-               if (res.status === true) {
-                  console.log(res.data.subcategories);
+               if (res.status === true ) {
                   $("#product_code").val(res.data.product_code);
                   $("#product_name").val(res.data.product_name);
                   $("#product_id").val(res.data.id);
@@ -878,7 +881,8 @@
                   $("#company_sale_bill_no").val(res.data_all.invoice_no);
                   $("#seller").val(res.data_all.party_name);
                   $("#seller").prop('readonly', true);
-                  if (res.check_Warranty != null) {
+                  
+                  if (res.check_Warranty != null && res.check_Warranty.status == "1") {
                      $("#customer_bill_date").val(res.check_Warranty.sale_bill_date.split('-').reverse().join('-'));
                      $("#customer_bill_no").val(res.check_Warranty.sale_bill_no);
                      $("#customer_number").val(res.check_Warranty.customer.customer_number);
@@ -911,6 +915,7 @@
                      }
 
                      if (res.check_Warranty.media.length > 0) {
+                        $('#warranty_bill').val('Yes').trigger('change');;
                         var attaExt = res.check_Warranty.media[0].original_url.split('.').pop().toLowerCase();
                         $("#invoice-div").removeClass('d-none');
                         $("#invoice-div a").prop('href', res.check_Warranty.media[0].original_url);
@@ -920,26 +925,52 @@
                            $("#invoice-img").attr('src', res.check_Warranty.media[0].original_url);
                         }
                      } else {
+                        $('#warranty_bill').val('No').trigger('change');
                         $("#invoice-div").addClass('d-none');
                      }
                      $("#submit-btn").prop("disabled", false);
                   } else {
-                     var active_url = "{{ route('warranty_activation.create') }}?serial_no=" + serial_no;
-                     Swal.fire({
-                        title: "Warranty is not active of " + serial_no + " serial number. Please activate the warranty first.",
-                        icon: "error",
-                        showCancelButton: true,
-                        confirmButtonText: '<a href="' + active_url + '" style="color: white; text-decoration: none;">Activate Warranty</a>',
-                        cancelButtonText: "Cancel",
-                        cancelButtonColor: '#d33',
-                        confirmButtonColor: '#3085d6'
-                     });
-
+                     if(res.check_Warranty.status == "0"){
+                        var active_url = "{{ route('warranty_activation.edit', ['warranty_activation' => '__ID__']) }}";
+                        var encrypt_id = res.encrypt_id;  
+                        active_url = active_url.replace('__ID__', encrypt_id); 
+                        Swal.fire({
+                           title: "Warranty is in IN Verification " + serial_no + " serial number. Please activate the warranty first.",
+                           icon: "error",
+                           showCancelButton: true,
+                           confirmButtonText: '<a href="' + active_url + '" style="color: white; text-decoration: none;">Activate Warranty</a>',
+                           cancelButtonText: "Cancel",
+                           cancelButtonColor: '#d33',
+                           confirmButtonColor: '#3085d6'
+                        });
+                     }else{
+                        var active_url = "{{ route('warranty_activation.create') }}?serial_no=" + serial_no;
+                        Swal.fire({
+                           title: "Warranty is not active of " + serial_no + " serial number. Please activate the warranty first.",
+                           icon: "error",
+                           showCancelButton: true,
+                           confirmButtonText: '<a href="' + active_url + '" style="color: white; text-decoration: none;">Activate Warranty</a>',
+                           cancelButtonText: "Cancel",
+                           cancelButtonColor: '#d33',
+                           confirmButtonColor: '#3085d6'
+                        });
+                     }
                      $("#submit-btn").prop("disabled", true);
                      $("#customer_bill_date").val(" ");
                      $("#customer_number").val(" ");
                   }
                } else {
+                 
+                var active_url = "{{ route('warranty_activation.create') }}?serial_no=" + serial_no;
+                Swal.fire({
+                    title: "Warranty is not active of " + serial_no + " serial number. Please activate the warranty first.",
+                    icon: "error",
+                    showCancelButton: true,
+                    confirmButtonText: '<a href="' + active_url + '" style="color: white; text-decoration: none;">Activate Warranty</a>',
+                    cancelButtonText: "Cancel",
+                    cancelButtonColor: '#d33',
+                    confirmButtonColor: '#3085d6'
+                });
                   $("#party_name").val('');
                   $("#party_name").change();
                   $("#company_sale_bill_date").val(" ");

@@ -96,7 +96,7 @@ if (! function_exists('receiverNotification')) {
     function receiverNotification($data, $receiver_id)
     {
         $url = 'https://fcm.googleapis.com/fcm/send';
-        // $server_key = 'AAAAz12287M:APA91bELeMYiEsqBNzFfKvKgcdPA645159iYFc9fMLxiPTDvWJwoS2xOP14m1ZfbyOkVT9m6qe4aviKIaXUdk3NeO12Ft3NQBJt5J9rnM6fCeMyK98Qsjp5eZdhpj79h07Em7nJ_482Y';  
+        // $server_key = 'AAAAz12287M:APA91bELeMYiEsqBNzFfKvKgcdPA645159iYFc9fMLxiPTDvWJwoS2xOP14m1ZfbyOkVT9m6qe4aviKIaXUdk3NeO12Ft3NQBJt5J9rnM6fCeMyK98Qsjp5eZdhpj79h07Em7nJ_482Y';
         $serverKey = 'AAAAVO4fLoE:APA91bHceRDC8GZgOFCIzfiBjqMx5vqgpC14s3Z-4dh-qOqvyTWg6zl8TTeIwZrepNs_cojgUcY6PbXwGPLx5VuGTiw-5vZUlj7jvasgatM4x22yEyj0gaYVCwpl9vJeJDmdo7E5vWEy';
         $notification_id = User::where('id', $receiver_id)->pluck('notification_id')->first();
         $fields = array();
@@ -272,15 +272,15 @@ if (! function_exists('submitUserActivity')) {
         // $address = getLatLongToAddress($data['latitude'] , $data['longitude']);
         // return UserActivity::insert([
         //     "active"   =>  "Y",
-        //     "userid" => isset($data['userid']) ? $data['userid'] : $data['user_id'] , 
+        //     "userid" => isset($data['userid']) ? $data['userid'] : $data['user_id'] ,
         //     "customerid" => isset($data['customer_id']) ? $data['customer_id'] : null ,
-        //     'latitude' => isset($data['latitude']) ? $data['latitude'] : null , 
-        //     'longitude' => isset($data['longitude']) ? $data['longitude'] : null , 
-        //     'time' => isset($data['time']) ? date('Y-m-d H:i:s',strtotime($data['time'])) : date('Y-m-d H:i:s') , 
+        //     'latitude' => isset($data['latitude']) ? $data['latitude'] : null ,
+        //     'longitude' => isset($data['longitude']) ? $data['longitude'] : null ,
+        //     'time' => isset($data['time']) ? date('Y-m-d H:i:s',strtotime($data['time'])) : date('Y-m-d H:i:s') ,
         //     // 'address' => isset($address) ? $address : '' ,
-        //     'address' => '', 
-        //     'description' => isset($data['description']) ? $data['description'] : '' , 
-        //     'type' => isset($data['type']) ? $data['type'] : '' , 
+        //     'address' => '',
+        //     'description' => isset($data['description']) ? $data['description'] : '' ,
+        //     'type' => isset($data['type']) ? $data['type'] : '' ,
         //     'created_at' => date('Y-m-d H:i:s')
 
         // ]);
@@ -293,11 +293,11 @@ if (! function_exists('submitUserActivity')) {
             "customerid" => isset($data['customer_id']) ? $data['customer_id'] : null,
             'latitude' => isset($data['latitude']) ? $data['latitude'] : null,
             'longitude' => isset($data['longitude']) ? $data['longitude'] : null,
-            //'time' => isset($data['time']) ? date('Y-m-d H:i:s',strtotime($data['time'])) : date('Y-m-d H:i:s') , 
+            //'time' => isset($data['time']) ? date('Y-m-d H:i:s',strtotime($data['time'])) : date('Y-m-d H:i:s') ,
             'address' => isset($address) ? $address : '',
-            //'address' => '', 
-            //'description' => isset($data['description']) ? $data['description'] : '' , 
-            //'type' => isset($data['type']) ? $data['type'] : '' , 
+            //'address' => '',
+            //'description' => isset($data['description']) ? $data['description'] : '' ,
+            //'type' => isset($data['type']) ? $data['type'] : '' ,
             'created_at' => date('Y-m-d H:i:s')
         ]);
     }
@@ -363,7 +363,7 @@ if (! function_exists('getLatLongToAddress')) {
         //         $addressline = $results['data'][0]['name'].', '.$results['data'][0]['county'].', '.$results['data'][0]['region'].', '.$results['data'][0]['postal_code'];
 
         //     }
-        // } 
+        // }
         $addressline = '';
         $queryString = http_build_query([
             //   'access_key' => 'd342b3255ee297b500728db66a690965',
@@ -814,6 +814,11 @@ function getAllChild($users_id, $all_user)
 function getCustomerAttachmentByDocumentName($document_name, $customer_id)
 {
     return Attachment::where('document_name', $document_name)->where('customer_id', $customer_id)->first();
+}
+
+function cretaDate($date)
+{
+    return Carbon::createFromFormat('d-m-Y',$date)->format('Y-m-d');
 }
 
 function haversineGreatCircleDistance($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371)

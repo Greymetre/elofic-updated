@@ -69,8 +69,8 @@
                            <label class="col-form-label">Select Status</label>
                            <select name="status" id="status" class="select2" required>
                               <option value="">Select Status</option>
-                              <option value="0" {{($warranty_activation->exists && $warranty_activation->status == '0')?'selected':''}}>In Verification</option>
-                              <option value="1" {{(!$warranty_activation->exists || $warranty_activation->status == '1')?'selected':''}}>Activated</option>
+                              <option value="0" {{($warranty_activation->exists && $warranty_activation->status == '0')?'selected': (isset($status_flag) && $status_flag == '0' ? 'selected' : '' )}}>In Verification</option>
+                              <option value="1" {{(!$warranty_activation->exists  && $warranty_activation->status == '1') ? 'selected': (isset($status_flag) && $status_flag == '1' ? 'selected' : '' )}}>Activated</option>
                               <option value="2" {{($warranty_activation->exists && $warranty_activation->status == '2')?'selected':''}}>Pending Activated</option>
                               <option value="3" {{($warranty_activation->exists && $warranty_activation->status == '3')?'selected':''}}>Rejected</option>
                            </select>
@@ -125,9 +125,9 @@
 
                         <div class="col-md-6">
                            <div class="input_section">
-                              <label for="branch_id" class="col-form-label">Branch</label>
+                              <label for="branch_id"  class="col-form-label">Branch</label>
 
-                              <select name="branch_id" placeholder="Select Branch" class="select2 form-control" required>
+                              <select name="branch_id" id="branch_id" placeholder="Select Branch" class="select2 form-control" required>
                                  <option value="" disabled selected>Select Branch</option>
                                  @if($branches && count($branches) > 0)
                                  @foreach($branches as $branche)
@@ -291,13 +291,13 @@
 
                      </div>
                      <div class="pt-4">
-                        <h5>Other Details</h5>
+                        <h5>Other Details</h5> 
                         <div class="row">
                            <div class="col-md-6">
                               <div class="input_section">
                                  <label for="customer_id" class="col-form-label">Seller</label>
 
-                                 <select name="customer_id" placeholder="Select Customers" class="select2 form-control" required>
+                                 <select name="customer_id" id="customer_id" placeholder="Select Customers" class="select2 form-control" required>
                                     <option value="" disabled selected>Select Customer</option>
                                     @if($customers && count($customers) > 0)
                                     @foreach($customers as $customer)
@@ -313,9 +313,45 @@
                               </div>
                            </div>
                            <div class="col-md-6">
+                            <div class="input_section">
+                               <label for="	party_name" class="col-form-label">Seller (Company billed Party )</label>
+                               <input type="text" name="party_name" id="party_name" class="form-control" value="{!! old( 'party_name') !!}" placeholder="Company billed Party">
+                               @if ($errors->has('party_name'))
+                               <div class="error">
+                                  <p class="text-danger">{{ $errors->first('party_name') }}</p>
+                               </div>
+                               @endif
+                            </div>
+                         </div>
+                         <div class="col-md-6">
+                            <div class="input_section">
+                               <label for="invoice_date" class="col-form-label">
+                                Company Sale Bill Date</label>
+
+                                <input type="text" name="invoice_date" id="invoice_date" class="form-control" value="{!! old( 'invoice_date') !!}" placeholder="Company Sale Bill Date">
+                                @if ($errors->has('invoice_date'))
+                                <div class="error">
+                                   <p class="text-danger">{{ $errors->first('invoice_date') }}</p>
+                                </div>
+                                @endif
+                            </div>
+                         </div>
+                         <div class="col-md-6">
+                            <div class="input_section">
+                               <label for="invoice_no" class="col-form-label">Company Sale Bill NO</label>
+
+                               <input type="text" name="invoice_no" id="invoice_no" class="form-control" value="{!! old( 'invoice_no') !!}" placeholder="Company Sale Bill NO">
+                                @if ($errors->has('invoice_no'))
+                                <div class="error">
+                                   <p class="text-danger">{{ $errors->first('invoice_no') }}</p>
+                                </div>
+                                @endif
+                            </div>
+                         </div>
+                           <div class="col-md-6">
                               <div class="input_section">
                                  <label for="sale_bill_date" class="col-form-label">Sale Bill Date</label>
-                                 <input type="text" name="sale_bill_date" id="sale_bill_date" class="datepicker form-control" placeholder="Sale Bill Date" autocomplete="off" value="{!! old( 'sale_bill_date' , $warranty_activation['sale_bill_date']) !!}" required>
+                                 <input type="text" name="sale_bill_date" id="sale_bill_date" class="datepicker form-control" placeholder="Sale Bill Date" autocomplete="off" value="{!! old( 'sale_bill_date' , $warranty_activation['sale_bill_date']) !!}" required >
                                  @if ($errors->has('sale_bill_date'))
                                  <div class="error">
                                     <p class="text-danger">{{ $errors->first('sale_bill_date') }}</p>
@@ -328,7 +364,7 @@
                               <div class="input_section">
                                  <label for="warranty_date" class="col-form-label">Warranty Date</label>
 
-                                 <input type="text" name="warranty_date" id="warranty_date" class="datepicker form-control" placeholder="Warranty Date" autocomplete="off" value="{!! old( 'warranty_date' , $warranty_activation['warranty_date']) !!}" required>
+                                 <input type="text" name="warranty_date" id="warranty_date" class="datepicker form-control" placeholder="Warranty Date" autocomplete="off" value="{!! old( 'warranty_date' , $warranty_activation['warranty_date']) !!}" required disabled>
                                  @if ($errors->has('warranty_date'))
                                  <div class="error col-lg-12">
                                     <p class="text-danger">{{ $errors->first('warranty_date') }}</p>
@@ -417,6 +453,24 @@
                   $("#product_serail_number").keyup();
                }
             })
+
+            $('#sale_bill_date').datepicker({
+                dateFormat: 'dd-mm-yy',
+            });
+
+            $('#invoice_date').datepicker({
+                maxDate: 0,
+                dateFormat: 'dd-mm-yy',
+            });
+            $("#invoice_date").on('change', function() {
+               var selectedStartDate = $('#invoice_date').datepicker('getDate');
+               $('#sale_bill_date').datepicker("option", "minDate", selectedStartDate);
+                var selectedDate = moment($(this).val(), 'DD-MM-YYYY');
+                if (!selectedDate.isValid()) {
+                    $("#invoice_date").val('');
+                    return;
+                }
+            });
             $("#product_serail_number").on("keyup", function() {
                var serial_no = $(this).val();
                $.ajax({
@@ -431,6 +485,16 @@
                      if (res.status == true) {
                         $('#select_product_id').html(res.html);
                         $('#product_id').val($('#select_product_id').val());
+                        if(res.service){
+                            $('#invoice_no').val(res.service.invoice_no);
+                            let invoiceDate = res.service.invoice_date;
+                            if (invoiceDate) {
+                                let dateParts = invoiceDate.split('-'); // Split YYYY-MM-DD
+                                let formattedDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`; // Rearrange to DD-MM-YYYY
+                                $('#invoice_date').val(formattedDate).trigger('change');
+                            }
+                            $('#party_name').val(res.service.party_name);
+                        }
                         if (res.slected === true) {
                            $('#select_product_id').prop('disabled', true);
                         } else {
@@ -450,7 +514,13 @@
                   success: function(res) {
                      if (res.status === true) {
                         if (res.check_Warranty != null) {
+                           console.log(res.check_Warranty.sale_bill_date);
+                           $("#customer_id").val(res.check_Warranty.customer_id).trigger('change');
+                           $('#sale_bill_date').val(moment(res.check_Warranty.sale_bill_date).format('DD-MM-YYYY')).trigger('change');
                            $("#customer_number").val(res.check_Warranty.customer.customer_number);
+                           $('#sale_bill_no').val(res.check_Warranty.sale_bill_no);
+                           $('#branch_id').val(res.check_Warranty.branch_id).trigger('change');
+
                            $("#customer_number").keyup();
                         }
                      } else {
@@ -463,7 +533,44 @@
 
             $("#select_product_id").on("change", function() {
                $('#product_id').val($(this).val());
+               getProductTimeInterval();
             })
+
+            $('#sale_bill_date').on('change' , function(){
+                setTimeout(() => {
+                   getProductTimeInterval();
+                }, 500);
+            });
+
+
+
+
+            function getProductTimeInterval(){
+                var product_id = $('#select_product_id').val();
+                var sale_bill_date = $('#sale_bill_date').val();
+                console.log("details" , product_id , sale_bill_date);
+                if(sale_bill_date != "" && product_id != ""){
+                    $('#warranty_date').prop('disabled' , false);
+                    $.ajax({
+                        url: "{{ url('getProductTimeInterval') }}",
+                        dataType: "json",
+                        type: "POST",
+                        data: {
+                            _token: "{{csrf_token()}}",
+                            product_id: product_id,
+                            sale_bill_date : sale_bill_date,
+                        },
+                        success: function(res) {
+                            console.log("warrayu" , res);
+                            if (res.status == "success") {
+                                $('#warranty_date').val(res.warrenty_expire_date).trigger('change');
+                            } else {
+
+                            }
+                        }
+                    });
+                }
+            }
 
 
             $("#customer_number").on("keyup", function() {
