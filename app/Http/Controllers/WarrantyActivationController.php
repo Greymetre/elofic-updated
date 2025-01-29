@@ -15,12 +15,15 @@ use App\Models\State;
 use App\Models\TransactionHistory;
 use App\Models\WarrantyActivation;
 use App\Models\WarrantyTimeline;
+use App\Models\Services;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Gate;
 use Validator;
 use Excel;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Redirect;
+use Carbon\Carbon;
 
 class WarrantyActivationController extends Controller
 {
@@ -59,12 +62,13 @@ class WarrantyActivationController extends Controller
     public function create(Request $request)
     {
         abort_if(Gate::denies('warranty_activation_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $status_flag = isset($request->serial_no) ? '1' : '0';
         $branches = Branch::where('active', 'Y')->get();
         $customers = Customers::where('active', 'Y')->where('customertype', ['1', '2', '3'])->select('id', 'name', 'mobile')->get();
         $customers_dealer = Customers::where('customertype', ['1', '3'])->select('id', 'name', 'mobile')->get();
         $pincodes = Pincode::all();
         $states = State::all();
-        return view('warranty_activation.create', compact('customers', 'pincodes', 'branches', 'request', 'states'))->with('warranty_activation', $this->warranty_activation);
+        return view('warranty_activation.create', compact('customers', 'pincodes', 'branches', 'request', 'states' , 'status_flag'))->with('warranty_activation', $this->warranty_activation);
     }
 
     /**
@@ -89,6 +93,24 @@ class WarrantyActivationController extends Controller
                 $Cstate = State::where('id', $request->customer_state)->first();
                 $Cdistrict = District::where('id', $request->customer_district)->first();
                 $Ccity = City::where('id', $request->customer_city)->first();
+                $service = Services::where(['serial_no' => $request->product_serail_number])->first();
+                if(!isset($service)){
+                    $product = Product::find($request->select_product_id);
+                    $branch = Branch::find($request->branch_id);
+                    $invoice_date_formatted = cretaDate($request->invoice_date);
+                    Services::create([
+                        'product_code' => $product->product_code ?? '',
+                        'product_name' => $product->product_name ?? '',
+                        'product_description' => $product->description ?? '',
+                        'group' => $product->new_group ?? '',
+                        'serial_no' => $request->product_serail_number ?? '',
+                        'party_name' => $request->party_name ?? '',
+                        'invoice_no' => $request->invoice_no ?? '',
+                        'invoice_date' =>$invoice_date_formatted ?? '',
+                        'branch_code' => $branch->branch_code ?? '',
+                        'qty' => '1',
+                    ]);
+                }
 
                 $end_user = EndUser::updateOrCreate(['customer_number' => $request->customer_number ?? ''], [
                     'customer_name' => $request->customer_name ?? '',
@@ -110,6 +132,8 @@ class WarrantyActivationController extends Controller
                 if ($data) {
                     return Redirect::to('warranty_activation')->with('message_info', 'This serial number(' . $request->product_serail_number . ') already in Warranty Activation.');
                 } else {
+                    $sale_bill_date = cretaDate($request->sale_bill_date);
+                    $warranty_date = cretaDate($request->warranty_date);
                     $wararanty = WarrantyActivation::create([
                         'product_serail_number' => $request->product_serail_number ?? NULL,
                         'product_id' => $request->product_id ?? NULL,
@@ -118,8 +142,8 @@ class WarrantyActivationController extends Controller
                         'customer_id' => $request->customer_id ?? NULL,
                         'status' => $request->status ?? 0,
                         'sale_bill_no' => $request->sale_bill_no ?? NULL,
-                        'sale_bill_date' => $request->sale_bill_date ?? NULL,
-                        'warranty_date' => $request->warranty_date ?? NULL,
+                        'sale_bill_date' =>  $sale_bill_date ?? NULL,
+                        'warranty_date' => $warranty_date ?? NULL,
                         'created_by' => auth()->user()->id
                     ]);
                     if ($request->status == '1') {

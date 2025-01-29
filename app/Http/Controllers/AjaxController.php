@@ -18,6 +18,7 @@ use App\Http\Controllers\SendNotifications;
 use Carbon\Carbon;
 use LDAP\Result;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Crypt;
 
 class AjaxController extends Controller
 {
@@ -1075,6 +1076,7 @@ class AjaxController extends Controller
         try {
             $serial_no = $request->serial_no;
             $serial_no_product_code = Services::where('serial_no', $serial_no)->value('product_code');
+            $service = Services::where('serial_no', $serial_no)->first();
             $all_products = Product::all();
             $html = '<option value="">Select Product</option>';
             $slected = false;
@@ -1088,6 +1090,7 @@ class AjaxController extends Controller
             }
             $data['status'] = true;
             $data['html'] = $html;
+            $data['service'] = $service;
             $data['slected'] = $slected;
             return response()->json($data);
         } catch (\Exception $e) {
@@ -1149,7 +1152,8 @@ class AjaxController extends Controller
                     $data->product->categories = $data->product->categories;
                     $data->product->subcategories = $data->product->subcategories;
                     $check_Warranty = WarrantyActivation::with('media', 'customer', 'seller_details')->where('status', '!=', '3')->where('product_serail_number', $serial_no)->first();
-                    return response()->json(['status' => true, 'data_all' => $data, 'data' => $data->product, 'check_Warranty' => $check_Warranty]);
+                    $encrypt_id = Crypt::encrypt($check_Warranty->id);
+                    return response()->json(['status' => true, 'data_all' => $data, 'data' => $data->product, 'check_Warranty' => $check_Warranty , 'encrypt_id' => $encrypt_id]);
                 } else {
                     return response()->json(['status' => false, 'data' => null]);
                 }
@@ -1377,12 +1381,12 @@ class AjaxController extends Controller
             }
 
         }
-        
+
         $query->where(function ($q) use ($startDateFormatted, $endDateFormatted) {
             $q->where('invoice_date', '>=', $startDateFormatted)
                 ->where('invoice_date', '<=', $endDateFormatted);;
         });
-        
+
         $data['total_qty'] = $query->sum('quantity');
         $data['total_sale'] = number_format(($query->sum('net_amount') / 100000), 2, '.', '') . " (Lac)";
 
@@ -1533,5 +1537,25 @@ class AjaxController extends Controller
     {
         $data = User::where('id', $request->user_id)->first();
         return response()->json(['status' => 'success', 'leave_balance' => $data->leave_balance]);
+    }
+
+
+    // getproduct inteval time
+    public function getProductTimeInterval(Request $request)
+    {
+        $product = Product::find($request->product_id);
+        if(!isset($product)){
+            return response()->json(['status' => 'error', 'product' => "Not Found"]);
+        }
+        $date = Carbon::parse($request->sale_bill_date);
+        $warranty_expire_date = '';
+        if($product->expiry_interval == "Month"){
+            $warranty_expire_date = $date->addMonths($product->expiry_interval_preiod)->format('d-m-Y');
+        }else if($product->expiry_interval == "Day"){
+            $warranty_expire_date = $date->addDays($product->expiry_interval_preiod)->format('d-m-Y');
+        }else if($product->expiry_interval == "Year"){
+            $warranty_expire_date = $date->addYears($product->expiry_interval_preiod)->format('d-m-Y');
+        }
+        return response()->json(['status' => 'success', 'warrenty_expire_date' => $warranty_expire_date]);
     }
 }
