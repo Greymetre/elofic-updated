@@ -1129,7 +1129,7 @@
                return;
             }
          }
-         if ($(this).val().length > 4) {
+         if ($(this).val().length > 7 ) {
             $("#product_serail_number").keyup();
          }
       }).trigger("keyup");

@@ -1152,7 +1152,10 @@ class AjaxController extends Controller
                     $data->product->categories = $data->product->categories;
                     $data->product->subcategories = $data->product->subcategories;
                     $check_Warranty = WarrantyActivation::with('media', 'customer', 'seller_details')->where('status', '!=', '3')->where('product_serail_number', $serial_no)->first();
-                    $encrypt_id = Crypt::encrypt($check_Warranty->id);
+                    $encrypt_id = "";
+                    if(isset($check_Warranty)){
+                        $encrypt_id = Crypt::encrypt($check_Warranty->id) ?? '';
+                    }
                     return response()->json(['status' => true, 'data_all' => $data, 'data' => $data->product, 'check_Warranty' => $check_Warranty , 'encrypt_id' => $encrypt_id]);
                 } else {
                     return response()->json(['status' => false, 'data' => null]);

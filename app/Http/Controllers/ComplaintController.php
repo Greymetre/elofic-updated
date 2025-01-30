@@ -165,8 +165,8 @@ class ComplaintController extends Controller
                 'created_by_device' => 'user',
                 'created_by' => auth()->user()->id
             ]);
-            if ($request->images && count($request->images) > 0) {
-                foreach ($request->images as $file) {
+            if ($request->files && count($request->files) > 0) {
+                foreach ($request->files as $file) {
                     $customname = time() . '.' . $file->getClientOriginalExtension();
                     $complaint->addMedia($file)
                         ->usingFileName($customname)
@@ -242,8 +242,8 @@ class ComplaintController extends Controller
      */
     public function update(Request $request, Complaint $complaint)
     {
-        if ($request->images && count($request->images) > 0) {
-            foreach ($request->images as $file) {
+        if ($request->files && count($request->file('files')) > 0) {
+            foreach ($request->file('files') as $file) {
                 $customname = time() . '.' . $file->getClientOriginalExtension();
                 $complaint->addMedia($file)
                     ->usingFileName($customname)
