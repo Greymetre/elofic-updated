@@ -206,7 +206,8 @@ class WarrantyActivationController extends Controller
         $pincodes = Pincode::all();
         $states = State::all();
         $serial_no = $this->warranty_activation->product_serail_number;
-        return view('warranty_activation.create', compact('customers', 'pincodes', 'branches', 'states'))->with('warranty_activation', $this->warranty_activation);
+        $service = Services::where('serial_no', $serial_no)->orderBy('created_at', 'desc')->first();
+        return view('warranty_activation.create', compact('customers', 'pincodes', 'branches', 'states' , 'service'))->with('warranty_activation', $this->warranty_activation);
     }
 
     /**

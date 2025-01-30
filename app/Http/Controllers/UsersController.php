@@ -1015,9 +1015,6 @@ class UsersController extends Controller
         if($request->download == 'simple'){
             return Excel::download(new ASMRatingReportExport($request), 'Rating Report.xlsx');
         }else{
-            if($request->ip() != '111.118.252.250') {
-                return view('work_in_progress');
-            }
             return Excel::download(new ASMRatingDetailReportExport($request), 'Detail Rating_Report(PMS).xlsx');
         }
     }
