@@ -361,7 +361,7 @@ class DealerAppointmentController extends Controller
         } else if ($appointment->division == 'SERVICE') {
             $division = 'Pumps, Motors & Solar Products Range';
             $logoPath = public_path('assets/img/certificate_logo2.png');
-            $brand = 'SILVER CONSUMER ELECTRICALS PRIVATE LIMITED';
+            $brand = 'SILVER CONSUMER ELECTRICALS LIMITED';
         }
         $backImage = public_path('assets/img/certificate_side.png');
         $sinceImage = public_path('assets/img/1981.png');

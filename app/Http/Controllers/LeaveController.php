@@ -201,11 +201,13 @@ class LeaveController extends Controller
                 }
             } elseif ($leave->type == 'Full Day Leave' || $leave->type == 'Leave') {
                 if ($leave->bal_type == 'Comp-off Balance') {
-                    $compOff = CompOffLeave::where('leave_id', $id)->first();
-                    if ($compOff) {
-                        $compOff->balance = $compOff->balance + 1.00;
-                        $compOff->is_used = false;
-                        $compOff->save();
+                    $compOffs = CompOffLeave::whereRaw("FIND_IN_SET(?, leave_id)", [$id])->get();
+                    foreach ($compOffs as $compOff) {
+                        if ($compOff) {
+                            $compOff->balance = $compOff->balance + 1.00;
+                            $compOff->is_used = false;
+                            $compOff->save();
+                        }
                     }
                 }else{
                     $user = User::find($leave->user_id);
