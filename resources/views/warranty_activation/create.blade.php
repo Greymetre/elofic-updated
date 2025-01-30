@@ -315,7 +315,7 @@
                            <div class="col-md-6">
                             <div class="input_section">
                                <label for="	party_name" class="col-form-label">Seller (Company billed Party )</label>
-                               <input type="text" name="party_name" id="party_name" class="form-control" value="{!! old( 'party_name') !!}" placeholder="Company billed Party">
+                               <input type="text" name="party_name" id="party_name" class="form-control" value="{!! old( 'party_name' , isset($service) ? $service->party_name : '') !!}" placeholder="Company billed Party">
                                @if ($errors->has('party_name'))
                                <div class="error">
                                   <p class="text-danger">{{ $errors->first('party_name') }}</p>
@@ -328,7 +328,7 @@
                                <label for="invoice_date" class="col-form-label">
                                 Company Sale Bill Date</label>
 
-                                <input type="text" name="invoice_date" id="invoice_date" class="form-control" value="{!! old( 'invoice_date') !!}" placeholder="Company Sale Bill Date">
+                                <input type="text" name="invoice_date" id="invoice_date" class="form-control" value="{!! old( 'invoice_date' , isset($service) ? $service->party_name : '') !!}" placeholder="Company Sale Bill Date">
                                 @if ($errors->has('invoice_date'))
                                 <div class="error">
                                    <p class="text-danger">{{ $errors->first('invoice_date') }}</p>
@@ -449,7 +449,11 @@
          <script>
             $(document).ready(function() {
                var sr_no = '{{$request->serial_no??""}}';
+               console.log("serial_no" ,sr_no );
+               
                if (sr_no != '') {
+                  $("#product_serail_number").keyup();
+               }else{
                   $("#product_serail_number").keyup();
                }
             })
