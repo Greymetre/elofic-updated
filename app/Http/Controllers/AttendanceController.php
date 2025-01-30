@@ -27,6 +27,7 @@ use App\Models\Holiday;
 use App\Exports\ExcelExport;
 use App\Models\Beat;
 use App\Models\CompOffLeave;
+use App\Models\Leave;
 use App\Models\Media;
 use App\Models\TourDetail;
 use DateTime;
@@ -163,6 +164,8 @@ class AttendanceController extends Controller
       $total_atte = 0;
       $total_al = 0;
       $total_hdal = 0;
+      $total_co = 0;
+      $total_con = 0;
 
       foreach ($period as $key => $value) {
         $like_date =  $value->format('j-M-Y');
@@ -194,19 +197,33 @@ class AttendanceController extends Controller
 
           if (!empty($attendance_details)) {
 
+            if ($attendance_details->working_type == 'Second Half Leave' || $attendance_details->working_type == 'First Half Leave' || $attendance_details->working_type == 'Full Day Leave' || $attendance_details->working_type == 'Leave') {
+              $leaveExists = Leave::where('user_id', $attendance_details->user_id)
+                ->whereDate('from_date', '<=', $attendance_details->punchin_date)
+                ->whereDate('to_date', '>=', $attendance_details->punchin_date)
+                ->first();
+            }
+
             if ($attendance_details->attendance_status == '1') {
-              if ($attendance_details->working_type == 'Leave') {
-                $label_data[] =  'AL';
-                $total_al++;
+              if ($attendance_details->working_type == 'Leave' || $attendance_details->working_type == 'Full Day Leave') {
+                if ($leaveExists->bal_type == 'Comp-off Balance') {
+                  $label_data[] =  'Comp Off';
+                  $total_co++;
+                } else {
+                  $label_data[] =  'AL';
+                  $total_al++;
+                }
               } elseif ($dayname == 'Sunday') {
                 $label_data[] =  'PW';
                 $total_pw++;
               } elseif ($attendance_details->working_type == 'Second Half Leave' || $attendance_details->working_type == 'First Half Leave') {
-                $label_data[] =  '1/2P+1/2AL';
-                $total_hdal++;
-              } elseif ($attendance_details->working_type == 'Full Day Leave') {
-                $label_data[] =  'AL';
-                $total_al++;
+                if ($leaveExists->bal_type == 'Comp-off Balance') {
+                  $label_data[] =  '1/2P+1/2Comp Off';
+                  $total_co++;
+                } else {
+                  $label_data[] =  '1/2P+1/2AL';
+                  $total_hdal++;
+                }
               } elseif ($attendance_details->working_type == 'Local Market Visit') {
                 $label_data[] =  'P';
                 $total_p++;
@@ -236,26 +253,44 @@ class AttendanceController extends Controller
                 $total_h++;
               }
             } else if ($attendance_details->attendance_status == '2') {
-              if ($attendance_details->working_type == 'Full Day Leave' && $attendance_details->working_type == 'Leave') {
-                $label_data[] =  'LOPN';
-                $total_lop++;
+              if ($attendance_details->working_type == 'Full Day Leave' || $attendance_details->working_type == 'Leave') {
+                if ($leaveExists->bal_type == 'Comp-off Balance') {
+                  $label_data[] =  'Comp Off N';
+                  $total_con++;
+                } else {
+                  $label_data[] =  'LOPN';
+                  $total_lop++;
+                }
               } elseif ($attendance_details->working_type == 'Second Half Leave' || $attendance_details->working_type == 'First Half Leave') {
-                $label_data[] =  '1/2P+1/2LOPN';
-                $total_hd++;
+                if ($leaveExists->bal_type == 'Comp-off Balance') {
+                  $label_data[] =  '1/2P+1/2Comp Off N';
+                  $total_con++;
+                } else {
+                  $label_data[] =  '1/2P+1/2LOPN';
+                  $total_hd++;
+                }
               } else {
                 $label_data[] = 'A';
                 $total_a++;
               }
             } else {
-              if ($attendance_details->working_type == 'Full Day Leave') {
-                $label_data[] =  'LOPN';
-                $total_lop++;
+              if ($attendance_details->working_type == 'Full Day Leave' || $attendance_details->working_type == 'Leave') {
+                
+                if ($leaveExists->bal_type == 'Comp-off Balance') {
+                  $label_data[] =  'Comp Off N';
+                  $total_con++;
+                } else {
+                  $label_data[] =  'LOPN';
+                  $total_lop++;
+                }
               } elseif ($attendance_details->working_type == 'Second Half Leave' || $attendance_details->working_type == 'First Half Leave') {
-                $label_data[] =  '1/2P+1/2LOPN';
-                $total_hd++;
-              } elseif ($attendance_details->working_type == 'Leave') {
-                $label_data[] =  'LOPN';
-                $total_lop++;
+                if ($leaveExists->bal_type == 'Comp-off Balance') {
+                  $label_data[] =  '1/2P+1/2Comp Off N';
+                  $total_con++;
+                } else {
+                  $label_data[] =  '1/2P+1/2LOPN';
+                  $total_hd++;
+                }
               } else {
                 $label_data[] = 'PN';
                 $total_pn++;
@@ -281,10 +316,9 @@ class AttendanceController extends Controller
 
       //neww
 
-      $sundayPunchinCount = Attendance::where('punchin_date', '>=', $last60Days)
-        ->whereRaw('DAYOFWEEK(punchin_date) = 1')
+      $sundayPunchinCount = CompOffLeave::where('comp_off_date', '>=', $last60Days)->where('is_used', false)
         ->where('user_id', $item->id)
-        ->count();
+        ->sum('balance');
 
       $label_data[] = $item->leave_balance ?? '0';
       $label_data[] = $sundayPunchinCount > 0 ? $sundayPunchinCount : '0';
@@ -292,6 +326,8 @@ class AttendanceController extends Controller
       $label_data[] = (string)$total_a;
       $label_data[] = (string)$total_lop;
       $label_data[] = (string)$total_al;
+      $label_data[] = (string)$total_con;
+      $label_data[] = (string)$total_co;
       $label_data[] = (string)$total_mis;
       $label_data[] = (string)$total_pw;
       $label_data[] = (string)$total_h;
@@ -333,6 +369,8 @@ class AttendanceController extends Controller
       'Absent (A)',
       'LOP',
       'AL',
+      'Comp Off NP',
+      'Comp Off A',
       'MIS Punch (MIS)',
       'Present Week of (PW)',
       'Holiday (H)',
@@ -367,7 +405,7 @@ class AttendanceController extends Controller
       $location = Location::get($ipAddress);
       $addressP = getLatLongToAddress($location->latitude, $location->longitude);
       $isSunday = Carbon::parse($request['punchin_date'])->isSunday();
-      
+
       if ($isSunday) {
         $expiryDate = Carbon::parse($request['punchin_date'])->addDays(60);
 

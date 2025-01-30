@@ -204,6 +204,7 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
             $query['userinfo'] ? $query['userinfo']['total_exp'] : '0',
             $query['userinfo'] ? date('d M Y', strtotime($query['userinfo']['date_of_joining'])) : '',
             "=BH{$rowNumber}",
+            
             $working_days,
             round(($working_days / $working_days_trg) * 100, 0) . '%',
             (($working_days / $working_days_trg) * 100 >= 100) ? '100%' : round(($working_days / $working_days_trg) * 100, 0) . '%',

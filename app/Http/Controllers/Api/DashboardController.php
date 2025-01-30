@@ -564,6 +564,7 @@ class DashboardController extends Controller
         } else {
             $query->where(['month' => $month, 'year' => $year]);
         }
+        
         $total_data = $query->get();
         $target = 0;
         $achievement = 0;
@@ -665,6 +666,7 @@ class DashboardController extends Controller
             $data['achiv_per'] = "";
             $data['target_per'] = "";
         }
+        
         $data['order_value'] = $order_value > 0 ? number_format(($order_value / 100000), 2, '.', '') : "";
         $data['order_qty'] = $order_qty > 0 ? $order_qty : "";
         $data['customer_visit'] = $customer_visit > 0 ? (string)$customer_visit : "";

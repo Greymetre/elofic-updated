@@ -92,7 +92,7 @@ class LeaveController extends Controller
                         ->where('is_used', false)
                         ->where('expiry_date', '>=', now())
                         ->where('balance', '>', 0.6)
-                        ->first();
+                        ->get();
                 }
 
                 if ($compOff) {
@@ -110,7 +110,21 @@ class LeaveController extends Controller
                             $compOff->update(['is_used' => true, 'balance' => 0.00]);
                         }
                     } else {
-                        $compOff->update(['is_used' => true, 'leave_id' => $leave->id, 'balance' => 0.00]);
+                        if ($compOff->count() >= $days) {
+                            $compOff->take($days)->each(function ($comp) use ($leave) {
+                                $comp->update([
+                                    'is_used'  => true,
+                                    'leave_id' => $leave->id,
+                                    'balance'  => 0.00
+                                ]);
+                            });
+                        } else {
+                            $leave->delete();
+                            foreach ($dates as $date) {
+                                Attendance::where(['user_id' => $leave->user_id, 'punchin_date' => date('Y-m-d', strtotime($date))])->delete();
+                            }
+                            return response()->json(['status' => 'error', 'message' => 'No Comp Off Balance', 'data' => $leave], 200);
+                        }
                     }
                 } else {
                     $leave->delete();
