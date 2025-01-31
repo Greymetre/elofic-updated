@@ -818,8 +818,32 @@ function getCustomerAttachmentByDocumentName($document_name, $customer_id)
 
 function cretaDate($date)
 {
-    return Carbon::createFromFormat('d-m-Y',$date)->format('Y-m-d');
+
+    if (!$date) {
+        return null; // Or return today's date: Carbon::now()->format('Y-m-d')
+    }
+
+    try {
+        return Carbon::parse($date)->format('Y-m-d');
+    } catch (\Exception $e) {
+        return null; // Handle invalid date formats
+    }
 }
+
+function cretaDateForFront($date)
+{
+
+    if (!$date) {
+        return null; // Or return today's date: Carbon::now()->format('Y-m-d')
+    }
+
+    try {
+        return Carbon::parse($date)->format('d-m-Y');
+    } catch (\Exception $e) {
+        return null; // Handle invalid date formats
+    }
+}
+
 
 function haversineGreatCircleDistance($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371)
 {

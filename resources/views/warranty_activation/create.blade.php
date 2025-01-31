@@ -148,6 +148,7 @@
                      </div>
 
                   </div>
+
                   <div class="pt-4">
                      <h5>Contact Details</h5>
                      <div class="row">
@@ -176,7 +177,7 @@
                               @endif
                            </div>
                         </div>
-
+                    
                         <div class="col-md-6">
                            <div class="input_section">
                               <label for="customer_email" class="col-form-label">Email</label>
@@ -203,7 +204,6 @@
                               @endif
                            </div>
                         </div>
-
                         <div class="col-md-6">
                            <div class="input_section">
                               <label for="customer_state" class="col-form-label">State</label>
@@ -212,7 +212,7 @@
                                  <option value="" disabled selected>Select State</option>
                                  @if($states && count($states) > 0)
                                  @foreach($states as $state)
-                                 <option value="{{$state->id}}" {!! old( 'customer_state' , $warranty_activation['customer']?$warranty_activation['customer']['customer_state']:'')==$state->id?'selected':'' !!}>{{$state->state_name}}</option>
+                                 <option value="{{$state->id}}" {!! old( 'customer_state' , $warranty_activation['customer']?$warranty_activation['customer']['customer_state']:'')==$state->state_name?'selected':'' !!}>{{$state->state_name}}</option>
                                  @endforeach
                                  @endif
                               </select>
@@ -328,7 +328,7 @@
                                <label for="invoice_date" class="col-form-label">
                                 Company Sale Bill Date</label>
 
-                                <input type="text" name="invoice_date" id="invoice_date" class="form-control" value="{!! old( 'invoice_date' , isset($service) ? $service->party_name : '') !!}" placeholder="Company Sale Bill Date">
+                                <input type="text" name="invoice_date" id="invoice_date" class="form-control" value="{!! old( 'invoice_date' , isset($service) ? $service->invoice_date : '') !!}" placeholder="Company Sale Bill Date">
                                 @if ($errors->has('invoice_date'))
                                 <div class="error">
                                    <p class="text-danger">{{ $errors->first('invoice_date') }}</p>
@@ -340,7 +340,7 @@
                             <div class="input_section">
                                <label for="invoice_no" class="col-form-label">Company Sale Bill NO</label>
 
-                               <input type="text" name="invoice_no" id="invoice_no" class="form-control" value="{!! old( 'invoice_no') !!}" placeholder="Company Sale Bill NO">
+                               <input type="text" name="invoice_no" id="invoice_no" class="form-control" value="{!! old( 'invoice_no' , isset($service) ? $service->invoice_no : '')  !!}" placeholder="Company Sale Bill NO">
                                 @if ($errors->has('invoice_no'))
                                 <div class="error">
                                    <p class="text-danger">{{ $errors->first('invoice_no') }}</p>
@@ -448,12 +448,8 @@
          <script src="{{ url('/').'/'.asset('assets/js/jquery.custom.js') }}"></script>
          <script>
             $(document).ready(function() {
-               var sr_no = '{{$request->serial_no??""}}';
-               console.log("serial_no" ,sr_no );
-               
+               var sr_no = '{{$request->serial_no??""}}';               
                if (sr_no != '') {
-                  $("#product_serail_number").keyup();
-               }else{
                   $("#product_serail_number").keyup();
                }
             })
@@ -521,7 +517,7 @@
                            console.log(res.check_Warranty.sale_bill_date);
                            $("#customer_id").val(res.check_Warranty.customer_id).trigger('change');
                            $('#sale_bill_date').val(moment(res.check_Warranty.sale_bill_date).format('DD-MM-YYYY')).trigger('change');
-                           $("#customer_number").val(res.check_Warranty.customer.customer_number);
+                           $("#customer_number").val(res.check_Warranty.customer.customer_number ?? '');
                            $('#sale_bill_no').val(res.check_Warranty.sale_bill_no);
                            $('#branch_id').val(res.check_Warranty.branch_id).trigger('change');
 
