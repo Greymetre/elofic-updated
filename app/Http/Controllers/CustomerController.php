@@ -93,6 +93,7 @@ class CustomerController extends Controller
             if (auth()->user()->hasRole('Customer Dealer')) {
                 $request['parent_id'] = auth()->user()->customerid;
             }
+            // dd($request['executive_id']);
             $data = Customers::with('customertypes', 'firmtypes', 'createdbyname')
                 ->where(function ($query) use ($request, $userids) {
                     if (!empty($request['executive_id'])) {
@@ -163,7 +164,7 @@ class CustomerController extends Controller
                                 ->Orwhere('mobile', 'like', "%{$search}%");
                         });
                     }
-                    if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('Sub_Support')  && !Auth::user()->hasRole('HO_Account')  && !Auth::user()->hasRole('HR_Admin') && !Auth::user()->hasRole('Service Admin') && !Auth::user()->hasRole('All Customers') && !Auth::user()->hasRole('Sub_Admin') && !Auth::user()->hasRole('Customer Dealer') && !Auth::user()->hasRole('Data_Crm')) {
+                    if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('Sub_Support')  && !Auth::user()->hasRole('HO_Account')  && !Auth::user()->hasRole('HR_Admin') && !Auth::user()->hasRole('Service Admin') && !Auth::user()->hasRole('All Customers') && !Auth::user()->hasRole('Sub_Admin') && !Auth::user()->hasRole('Customer Dealer') && !Auth::user()->hasRole('Data_Crm')  && !Auth::user()->hasRole('Sub billing')) {
                         $query->whereIn('executive_id', $userids)
                             ->orWhereIn('created_by', $userids);
                     }

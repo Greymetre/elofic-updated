@@ -126,7 +126,7 @@ class ComplaintController extends Controller
             $newComplaintNumber = $this->getComplaintNumber();
             $complaint = Complaint::create([
                 'complaint_number' => $newComplaintNumber,
-                'complaint_date' => $request->complaint_date ? date('Y-m-d', strtotime($request->complaint_date)) : NULL,
+                'complaint_date' => $request->complaint_date ? cretaDate($request->complaint_date)  : NULL,
                 'claim_amount' => $request->claim_amount ?? NULL,
                 'seller' => $request->seller ?? NULL,
                 'end_user_id' => $request->end_user_id ?? NULL,
@@ -146,8 +146,8 @@ class ComplaintController extends Controller
                 'purchased_branch' => $request->purchased_branch ?? NULL,
                 'product_group' => $request->product_group ?? NULL,
                 'company_sale_bill_no' => $request->company_sale_bill_no ?? NULL,
-                'company_sale_bill_date' => $request->company_sale_bill_date ?? NULL,
-                'customer_bill_date' => $request->customer_bill_date ?? NULL,
+                'company_sale_bill_date' => $request->company_sale_bill_date ? cretaDate($request->company_sale_bill_date)  : NULL,
+                'customer_bill_date' => $request->customer_bill_date ? cretaDate($request->customer_bill_date) : NULL,
                 'customer_bill_no' => $request->customer_bill_no ?? NULL,
                 'company_bill_date_month' => $request->company_bill_date_month ?? NULL,
                 'under_warranty' => $request->under_warranty ?? NULL,
@@ -165,13 +165,14 @@ class ComplaintController extends Controller
                 'created_by_device' => 'user',
                 'created_by' => auth()->user()->id
             ]);
-            if ($request->files && count($request->files) > 0) {
-                foreach ($request->files as $file) {
+            if ($request->file('files') && count($request->file('files')) > 0) {
+                foreach ($request->file('files') as $file) {
                     $customname = time() . '.' . $file->getClientOriginalExtension();
                     $complaint->addMedia($file)
                         ->usingFileName($customname)
                         ->toMediaCollection('complaint_attach');
                 }
+            
             }
 
             return Redirect::to('complaints')->with('message_success', 'Complaint Store Successfully and the complaint number is <span title="Copy" id="copyText">' . $newComplaintNumber . '</span>');
@@ -242,7 +243,7 @@ class ComplaintController extends Controller
      */
     public function update(Request $request, Complaint $complaint)
     {
-        if ($request->files && count($request->file('files')) > 0) {
+        if ($request->file('files') && count($request->file('files')) > 0) {
             foreach ($request->file('files') as $file) {
                 $customname = time() . '.' . $file->getClientOriginalExtension();
                 $complaint->addMedia($file)
@@ -250,6 +251,10 @@ class ComplaintController extends Controller
                     ->toMediaCollection('complaint_attach');
             }
         }
+        $request['complaint_date'] = $request->complaint_date ? cretaDate($request->complaint_date) : NULL;
+        $request['company_sale_bill_date'] = $request->company_sale_bill_date ? cretaDate($request->company_sale_bill_date) : NULL;
+        $request['customer_bill_date'] =  $request->customer_bill_date ? cretaDate($request->customer_bill_date) : NULL;
+
         $complaint->update($request->all());
         $newComplaintNumber = $complaint->complaint_number;
 
@@ -432,21 +437,17 @@ class ComplaintController extends Controller
     {
         $complaint = Complaint::find($request->id);
         if ($complaint) {
-            if (empty($complaint->service_center)) {
-                return response()->json(['status' => 'success', 'message' => 'Take remark and complete complaint.']);
+            $warranty = WarrantyActivation::where('product_serail_number', $complaint->product_serail_number)->where('status', '1')->first();
+            $work_done = ComplaintWorkDone::where('complaint_id', $complaint->id)->latest()->first();
+            $service_bill = ServiceBill::where('complaint_id', $request->id)->first();
+            if (!$complaint->product_serail_number) {
+                return response()->json(['status' => 'error', 'message' => 'To complete this complaint, You need to add the product serial number first. <a href="' . route('complaints.edit', $request->id) . '" style="color:blue;">Click here</a> to add product serial number.']);
+            } else if (!$warranty) {
+                return response()->json(['status' => 'error', 'message' => 'To complete this complaint, You need to Activate Warranty. <a href="' . route('warranty_activation.create') . '?serial_no=' . $complaint->product_serail_number . '" style="color:blue;">Click here</a> to Activate Warranty.']);
+            } else if (!$service_bill) {
+                return response()->json(['status' => 'error', 'message' => 'To complete this complaint, You need to add service bill. <a href="' . route('service_bills.create') . '?complaint_id=' . $request->id . '" style="color:blue;">Click here</a> to add.']);
             } else {
-                $warranty = WarrantyActivation::where('product_serail_number', $complaint->product_serail_number)->where('status', '1')->first();
-                $work_done = ComplaintWorkDone::where('complaint_id', $complaint->id)->latest()->first();
-                $service_bill = ServiceBill::where('complaint_id', $request->id)->first();
-                if (!$complaint->product_serail_number) {
-                    return response()->json(['status' => 'error', 'message' => 'To complete this complaint, You need to add the product serial number first. <a href="' . route('complaints.edit', $request->id) . '" style="color:blue;">Click here</a> to add product serial number.']);
-                } else if (!$warranty) {
-                    return response()->json(['status' => 'error', 'message' => 'To complete this complaint, You need to Activate Warranty. <a href="' . route('warranty_activation.create') . '?serial_no=' . $complaint->product_serail_number . '" style="color:blue;">Click here</a> to Activate Warranty.']);
-                } else if (!$service_bill) {
-                    return response()->json(['status' => 'error', 'message' => 'To complete this complaint, You need to add service bill. <a href="' . route('service_bills.create') . '?complaint_id=' . $request->id . '" style="color:blue;">Click here</a> to add.']);
-                } else {
-                    return response()->json(['status' => 'success', 'message' => 'Take remark and complete complaint.']);
-                }
+                return response()->json(['status' => 'success', 'message' => 'Take remark and complete complaint.']);
             }
         } else {
             return response()->json(['status' => 'error', 'message' => 'Complaint Not Found.']);

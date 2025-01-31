@@ -230,18 +230,61 @@ class WarrantyActivationController extends Controller
                     'remark' => $request->remark ?? NULL,
                 ]);
             }
+            $Cstate = State::where('id', $request->customer_state)->first();
+            $Cdistrict = District::where('id', $request->customer_district)->first();
+            $Ccity = City::where('id', $request->customer_city)->first();
+            $service = Services::where(['serial_no' => $request->product_serail_number])->orderBy('created_at', 'desc')->first();
+            $end_user = EndUser::updateOrCreate(['customer_number' => $request->customer_number ?? ''], [
+                'customer_name' => $request->customer_name ?? '',
+                'customer_number' => $request->customer_number ?? '',
+                'customer_email' => $request->customer_email ?? '',
+                'customer_address' => $request->customer_address ?? '',
+                'customer_place' => $request->customer_place ?? '',
+                'customer_pindcode' => $request->customer_pindcode ?? '',
+                'customer_country' => $request->customer_country ?? '',
+                'customer_state' => $Cstate->state_name ?? '',
+                'customer_district' => $Cdistrict->district_name ?? '',
+                'customer_city' => $Ccity->city_name ?? '',
+                'state_id' => $Cstate->id ?? '',
+                'district_id' => $Cdistrict->id ?? '',
+                'city_id' => $Ccity->id ?? '',
+            ]);
+
+            if(isset($service)){
+                $product = Product::find($request->select_product_id);
+                $branch = Branch::find($request->branch_id);
+                $invoice_date_formatted = cretaDate($request->invoice_date);
+               
+                $service->update([
+                    'product_code' => $product->product_code ?? '',
+                    'product_name' => $product->product_name ?? '',
+                    'product_description' => $product->description ?? '',
+                    'group' => $product->new_group ?? '',
+                    'serial_no' => $request->product_serail_number ?? '',
+                    'party_name' => $request->party_name ?? '',
+                    'invoice_no' => $request->invoice_no ?? '',
+                    'invoice_date' =>$invoice_date_formatted ?? '',
+                    'branch_code' => $branch->branch_code ?? '',
+                    'qty' => '1',
+                ]);
+              
+            }
+            $sale_bill_date = cretaDate($request->sale_bill_date);
+            $warranty_date = cretaDate($request->warranty_date);
             $warrantyactivation->product_serail_number = $request->product_serail_number ?? NULL;
             $warrantyactivation->product_id = $request->select_product_id ?? NULL;
-            $warrantyactivation->end_user_id = $request->end_user_id ?? NULL;
+            $warrantyactivation->end_user_id = $end_user->id ?? NULL;
             $warrantyactivation->branch_id = $request->branch_id ?? NULL;
             $warrantyactivation->customer_id = $request->customer_id ?? NULL;
             $warrantyactivation->status = $request->status ?? 0;
             $warrantyactivation->remark = $request->remark ?? NULL;
             $warrantyactivation->sale_bill_no = $request->sale_bill_no ?? NULL;
-            $warrantyactivation->sale_bill_date = $request->sale_bill_date ?? NULL;
-            $warrantyactivation->warranty_date = $request->warranty_date ?? NULL;
+            $warrantyactivation->sale_bill_date = $sale_bill_date ?? NULL;
+            $warrantyactivation->warranty_date = $warranty_date ?? NULL;
             $warrantyactivation->created_by = auth()->user()->id;
             $warrantyactivation->save();
+
+          
             if ($request->hasFile('warranty_activation_attach')) {
                 $file = $request->file('warranty_activation_attach');
                 $customname = time() . '.' . $file->getClientOriginalExtension();

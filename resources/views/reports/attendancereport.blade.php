@@ -45,7 +45,7 @@
                     </div>
 
                     <div class="p-2" style="width: 250px;">
-                      <select class="selectpicker" name="executive_id" id="executive_id" data-style="select-with-transition" title="Select User">
+                      <select class="select2" name="executive_id" id="executive_id" data-style="select-with-transition" title="Select User">
                         <option value="">Select User</option>
                         @if(@isset($users ))
                         @foreach($users as $user)
