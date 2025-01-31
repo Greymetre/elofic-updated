@@ -384,7 +384,7 @@
                 <tr>
                   <th class="pt-0">{{$work_done?$work_done->done_by:'-'}}</th>
                   <th class="pt-0">{{$work_done?$work_done->remark:'-'}}</th>
-                  <th class="pt-0">{{$work_done?date('d M Y h:i A', strtotime($work_done->created_at)):'-'}}</th>
+                  <th class="pt-0">{{$work_done?cretaDateForFront($work_done->created_at):'-'}}</th>
                   <th class="pt-0">
                     @if($work_done && !empty($work_done) && $work_done->getMedia('complaint_work_done_attach')->count() > 0 && Storage::disk('s3')->exists($work_done->getMedia('complaint_work_done_attach')[0]->getPath()))
                     <a href="{!! $work_done->getMedia('complaint_work_done_attach')[0]->getFullUrl() !!}" target="_blank" data-title="Invoice">
@@ -420,7 +420,7 @@
                   <td>[{{$complaint->product_code}}] {{$complaint->product_name}}</td>
                   <td>
                     @if ($complaint->customer_bill_date)
-                    {{ date('d-m-Y', strtotime($complaint->customer_bill_date)) }}
+                    {{ cretaDateForFront($complaint->customer_bill_date) }}
                     @else
                     -
                     @endif
@@ -580,7 +580,7 @@
                 @endif
 
                 <p>
-                  <b> #{!! $complaint['complaint_number'] !!} Created on {{date("d M Y, h:i a", strtotime($complaint->created_at));}}
+                  <b> #{!! $complaint['complaint_number'] !!} Created by {{ $complaint->createdbyname->name?? '' }} At {{date("d M Y, h:i a", strtotime($complaint->created_at));}} 
                 </p>
               </div>
             </div>
