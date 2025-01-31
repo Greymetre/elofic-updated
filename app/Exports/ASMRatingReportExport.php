@@ -9,6 +9,7 @@ use App\Models\Customers;
 use App\Models\District;
 use App\Models\EmployeeDetail;
 use App\Models\MobileUserLoginDetails;
+use App\Models\MspActivity;
 use App\Models\Order;
 use App\Models\OrderDetails;
 use App\Models\PrimarySales;
@@ -77,7 +78,7 @@ class ASMRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
             if (array_intersect($this->month, ['Jan', 'Feb', 'Mar'])) {
                 $currentYear = $f_year_array[1];
                 $monthNumbers = array_map(function ($month) {
-                    return Carbon::parse($month)->month;
+                    return Carbon::parse($month. ' 01 2025')->month;
                 }, $this->month);
 
                 // Get the first month number and the last month number
@@ -89,10 +90,11 @@ class ASMRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
                 $lastDate = Carbon::createFromDate($currentYear, $lastMonthNumber, 1)->endOfMonth();
                 $this->start_date = $firstDate->toDateString();
                 $this->end_date = $lastDate->toDateString();
+                dd($this->start_date, $this->end_date, 'mONTH');
             } else {
                 $currentYear = $f_year_array[0];
                 $monthNumbers = array_map(function ($month) {
-                    return Carbon::parse($month)->month;
+                    return Carbon::parse($month. ' 01 2025')->month;
                 }, $this->month);
 
                 // Get the first month number and the last month number
@@ -106,7 +108,6 @@ class ASMRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
                 $this->end_date = $lastDate->toDateString();
             }
         }
-
         return $query;
     }
 
@@ -131,6 +132,7 @@ class ASMRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
         $visit_count_trg = 120 * $monthCount;
         $unique_visit_count_trg = 8 * $monthCount;
         $active_customer_trg = 8 * $monthCount;
+        $msp_activity_trg = 4 * $monthCount;
         $working_days = $query->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Office Meeting', 'Full Day Leave', 'Leave', 'Holiday'])->where('punchin_date', '>=', $this->start_date)->where('punchin_date', '<=', $this->end_date)->count();
         $visit_count = $query->visits->where('checkin_date', '>=', $this->start_date)->where('checkin_date', '<=', $this->end_date)->count() > 0 ? $query->visits->where('checkin_date', '>=', $this->start_date)->where('checkin_date', '<=', $this->end_date)->count() : "0";
         $unique_visit_count = $query->visits->where('checkin_date', '>=', $this->start_date)->where('checkin_date', '<=', $this->end_date)->map(fn($visit) => optional(optional($visit->customers)->customeraddress)->city_id)->filter()->unique()->count();
@@ -169,7 +171,12 @@ class ASMRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
 
         $debtors_sales = PrimarySales::where('branch_id', $query->branch_id)->where('invoice_date', '>=', $debtors_start_date)->where('invoice_date', '<=', $debtors_end_date)->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount');
         $total_debtors = CustomerOutstanting::where('branch_id', $query->branch_id)->whereIn('division_id', ['10', '18'])->where('year', $f_year_array[0])->sum('amount');
-        $total_inventory = BranchStock::where('branch_id', $query->branch_id)->whereIn('division_id', ['10', '18'])->where('year', $f_year_array[0])->sum('amount');
+
+        $msp_activitys = MspActivity::where('emp_code', $query->employee_codes);
+        if(isset($this->month) && count($this->month) > 0){
+            $msp_activitys->whereIn('month', $this->month);
+        }
+        $msp_activitys = $msp_activitys->where('fyear', getCurrentFinancialYear($this->financial_year))->sum('msp_count');
 
         static $rowNumber = 3;
         $result = [
@@ -225,13 +232,11 @@ class ASMRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
             (($active_customer / $active_customer_trg) * 100 >= 100) ? '100%' : round(($active_customer / $active_customer_trg) * 100, 0) . '%',
             $sarthi_custo = (($active_customer / $active_customer_trg) * 100 >= 100) ? '5' : (round((5 * (($active_customer / $active_customer_trg) * 100)) / 100, 0) > 0 ? round((5 * (($active_customer / $active_customer_trg) * 100)) / 100, 0) : '0'),
 
-            '0',
-            '0%',
-            '0',
+            $msp_activitys > 0 ? $msp_activitys : '0',
+            $msp_activitys > 0 ? round(($msp_activitys/$msp_activity_trg)*100,   0) : '0',
+            $msp_final = (($msp_activitys/$msp_activity_trg)*100 >= 100) ? '5' : (round((5 * (($msp_activitys/$msp_activity_trg)*100)) / 100, 0) > 0 ? round((5 * (($msp_activitys/$msp_activity_trg)*100)) / 100, 0) : '0'),
 
-            $sarthi_custo + $debtor + $newpro + $new_sale + $all_cust + $uniq_cust + $targets + $number_days,
-
-
+            $sarthi_custo + $debtor + $newpro + $new_sale + $all_cust + $uniq_cust + $targets + $number_days + $msp_final,
 
         ];
         $rowNumber++;

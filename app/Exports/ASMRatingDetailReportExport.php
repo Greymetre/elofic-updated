@@ -9,6 +9,7 @@ use App\Models\Customers;
 use App\Models\District;
 use App\Models\EmployeeDetail;
 use App\Models\MobileUserLoginDetails;
+use App\Models\MspActivity;
 use App\Models\Order;
 use App\Models\OrderDetails;
 use App\Models\PrimarySales;
@@ -182,9 +183,15 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
             }
         }
 
+        $msp_activitys = MspActivity::where('emp_code', $query->employee_codes);
+        if(isset($this->month) && count($this->month) > 0){
+            $msp_activitys->whereIn('month', $this->month);
+        }
+        $msp_activitys = $msp_activitys->where('fyear', getCurrentFinancialYear($this->financial_year))->sum('msp_count');
+
         static $rowNumber = 3;
 
-        return [
+        $result = [
             $query['getdivision'] ? $query['getdivision']['division_name'] : '-',
             $query['getdepartment'] ? $query['getdepartment']['name'] : '-',
             $query['getbranch'] ? $query['getbranch']['branch_name'] : '-',
@@ -250,10 +257,11 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
             (($active_customer / $active_customer_trg) * 100 >= 100) ? '100%' : round(($active_customer / $active_customer_trg) * 100, 0) . '%',
             $sarthi_custo = (($active_customer / $active_customer_trg) * 100 >= 100) ? '5' : (round((5 * (($active_customer / $active_customer_trg) * 100)) / 100, 0) > 0 ?  round((5 * (($active_customer / $active_customer_trg) * 100)) / 100, 0) : '0'),
 
-            '-',
-            '-',
-            '-',
-            $sarthi_custo + $debtor + $newpro + $new_sale + $all_cust + $uniq_cust + $targets + $number_days,
+            $msp_activitys > 0 ? $msp_activitys : '0',
+            $msp_activitys > 0 ? round(($msp_activitys/$msp_activity_trg)*100,   0) : '0',
+            $msp_final = (($msp_activitys/$msp_activity_trg)*100 >= 100) ? '5' : (round((5 * (($msp_activitys/$msp_activity_trg)*100)) / 100, 0) > 0 ? round((5 * (($msp_activitys/$msp_activity_trg)*100)) / 100, 0) : '0'),
+
+            $sarthi_custo + $debtor + $newpro + $new_sale + $all_cust + $uniq_cust + $targets + $number_days + $msp_final,
             
             $query['userinfo'] ? $query['userinfo']['gross_salary_monthly'] : '',
             $query['userinfo'] ? $query['userinfo']['salary'] : '',
@@ -267,6 +275,7 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
 
         ];
         $rowNumber++;
+        return $result;
     }
 
     public function registerEvents(): array

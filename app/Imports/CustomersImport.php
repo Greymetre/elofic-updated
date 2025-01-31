@@ -155,12 +155,11 @@ class CustomersImport implements ToCollection, WithValidation, WithHeadingRow, W
       } else {
 
 
-        if ($customer = Customers::create([
+        if ($customer = Customers::updateOrCreate(['mobile' =>  !empty($row['mobile']) ? (string)$row['mobile'] : '',],[
           'active' => 'Y',
           'name' => !empty($row['firm_name']) ? ucfirst($row['firm_name']) : '',
           'first_name' => !empty($row['first_name']) ? ucfirst($row['first_name']) : '',
           'last_name' => !empty($row['last_name']) ? ucfirst($row['last_name']) : '',
-          'mobile' =>  !empty($row['mobile']) ? (string)$row['mobile'] : '',
           'email' => !empty($row['email']) ? $row['email'] : null,
           'working_status' => !empty($row['working_status']) ? $row['working_status'] : null,
           'creation_date' => !empty($row['creation_date']) ? $row['creation_date'] : null,
@@ -227,20 +226,7 @@ class CustomersImport implements ToCollection, WithValidation, WithHeadingRow, W
             }
           }
 
-          // parent end
 
-          $customerdetails->push([
-            'active' => 'Y',
-            'customer_id' => $customer['id'],
-            // 'gstin_no' => !empty($row['gstin_no'])? $row['gstin_no']:null,
-            // 'pan_no' => !empty($row['pan_no'])? $row['pan_no']:null,
-            // 'aadhar_no' => !empty($row['aadhar_no'])? $row['aadhar_no']:null,
-            // 'otherid_no' => !empty($row['otherid_no'])? $row['otherid_no']:null,
-            'enrollment_date' => !empty($row['enrollment_date']) ? $row['enrollment_date'] : null,
-            'approval_date' => !empty($row['approval_date']) ? $row['approval_date'] : null,
-            'created_at' => getcurentDateTime(),
-            'updated_at' => getcurentDateTime()
-          ]);
           $pincode = Pincode::where('pincode', '=', $row['pincode_id'])->select('id', 'city_id')->first();
           $addressdetails->push([
             'active' => 'Y',
@@ -261,8 +247,19 @@ class CustomersImport implements ToCollection, WithValidation, WithHeadingRow, W
             'created_at' => getcurentDateTime(),
             'updated_at' => getcurentDateTime()
           ]);
+          // dd($customerdetails, $customer);
           if ($customerdetails->isNotEmpty()) {
-            CustomerDetails::insert($customerdetails->toArray());
+            CustomerDetails::updateOrCreate(['customer_id' => $customer['id'],],[
+              'active' => 'Y',
+              // 'gstin_no' => !empty($row['gstin_no'])? $row['gstin_no']:null,
+              // 'pan_no' => !empty($row['pan_no'])? $row['pan_no']:null,
+              // 'aadhar_no' => !empty($row['aadhar_no'])? $row['aadhar_no']:null,
+              // 'otherid_no' => !empty($row['otherid_no'])? $row['otherid_no']:null,
+              'enrollment_date' => !empty($row['enrollment_date']) ? $row['enrollment_date'] : null,
+              'approval_date' => !empty($row['approval_date']) ? $row['approval_date'] : null,
+              'created_at' => getcurentDateTime(),
+              'updated_at' => getcurentDateTime()
+            ]);
           }
           if ($addressdetails->isNotEmpty()) {
             Address::insert($addressdetails->toArray());
