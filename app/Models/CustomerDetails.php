@@ -17,7 +17,7 @@ class CustomerDetails extends Model
     {
         try
         {
-            
+
             $customer = CustomerDetails::firstOrNew(array('customer_id' => $request['customer_id']));
             $customer->active = 'Y';
             $customer->customer_id = isset($request['customer_id'])? $request['customer_id']:null;
