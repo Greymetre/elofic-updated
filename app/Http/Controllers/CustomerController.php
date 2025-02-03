@@ -161,7 +161,8 @@ class CustomerController extends Controller
                                 ->Orwhere('first_name', 'like', "%{$search}%")
                                 ->Orwhere('last_name', 'like', "%{$search}%")
                                 ->Orwhere('email', 'like', "%{$search}%")
-                                ->Orwhere('mobile', 'like', "%{$search}%");
+                                ->Orwhere('mobile', 'like', "%{$search}%")
+                                ->Orwhere('sap_code', 'like', "%{$search}%");
                         });
                     }
                     if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('Sub_Support')  && !Auth::user()->hasRole('HO_Account')  && !Auth::user()->hasRole('HR_Admin') && !Auth::user()->hasRole('Service Admin') && !Auth::user()->hasRole('All Customers') && !Auth::user()->hasRole('Sub_Admin') && !Auth::user()->hasRole('Customer Dealer') && !Auth::user()->hasRole('Data_Crm')  && !Auth::user()->hasRole('Sub billing')) {
@@ -241,7 +242,14 @@ class CustomerController extends Controller
                 ->addColumn('createdbyname.name', function ($query) {
                     return $query->created_by ? $query->createdbyname->name : 'Self';
                 })
-                ->rawColumns(['action', 'beat_name', 'image', 'checkbox', 'createdbyname.name', 'profileimage'])
+                ->addColumn('mobile', function ($query) {
+                    $whatsappLink = "https://wa.me/" . $query->mobile;
+                    return '<a style="display: flex;align-items: center;" href="' . $whatsappLink . '" target="_blank">
+                                <i class="fa fa-whatsapp text-success mr-1" style="font-size:20px"></i>
+                                '. $query->mobile .'
+                            </a> ';
+                })
+                ->rawColumns(['action', 'beat_name', 'image', 'checkbox', 'createdbyname.name', 'profileimage','mobile'])
                 ->make(true);
         }
         $divisions = Division::where('active', 'Y')->get();

@@ -14,6 +14,16 @@
                   <div class="d-flex flex-wrap flex-row">
                     <div class="p-2" style="width:200px;">
                       <div class="dropdown bootstrap-select">
+                        <select class="select2" name="division_id" id="division_id" data-style="select-with-transition" title="Select User type">
+                          <option class="bs-title-option" value="">Division</option>
+                          @foreach($divisions as $division)
+                          <option value="{{$division->id}}">{{$division->division_name}}</option>
+                          @endforeach
+                        </select>
+                      </div>
+                    </div>
+                    <div class="p-2" style="width:200px;">
+                      <div class="dropdown bootstrap-select">
                         <select class="select2" name="user_type" id="user_type" data-style="select-with-transition" title="Select User type">
                           <option class="bs-title-option" value="employee">Employee</option>
                           <option class="bs-title-option" value="customer">Customer</option>
@@ -135,6 +145,7 @@
           data: function (d) {
                 d.user_type = $('#user_type').val()
                 d.active = $('#active').val()
+                d.division_id = $('#division_id').val()
             }
         },
         columns: [{
@@ -176,7 +187,6 @@
             name: 'employee_codes',
             "defaultContent": '',
             orderable: false,
-            searchable: false
           },
           {
             data: 'name',
@@ -244,6 +254,9 @@
         table.draw();
       });
       $('#active').change(function(){
+        table.draw();
+      });
+      $('#division_id').change(function(){
         table.draw();
       });
 

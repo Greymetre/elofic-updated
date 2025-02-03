@@ -93,7 +93,14 @@ class UsersDataTable extends DataTable
                 }
                 return $roles;
             })
-            ->rawColumns(['action', 'image', 'active', 'roles', 'getBranchNames']);
+            ->addColumn('mobile', function ($query) {
+                $whatsappLink = "https://wa.me/" . $query->mobile;
+                return '<a style="display: flex;align-items: center;" href="' . $whatsappLink . '" target="_blank">
+                            <i class="fa fa-whatsapp text-success mr-1" style="font-size:20px"></i>
+                            '. $query->mobile .'
+                        </a> ';
+            })
+            ->rawColumns(['action', 'image', 'active', 'roles', 'getBranchNames', 'mobile']);
     }
 
     /**
@@ -112,6 +119,9 @@ class UsersDataTable extends DataTable
                 }
                 if($request->active && !empty($request->active)){
                     $query->where('active', $request->active);
+                }
+                if($request->division_id && !empty($request->division_id)){
+                    $query->where('division_id', $request->division_id);
                 }
             })
             ->whereHas('roles', function ($query) use ($request) {

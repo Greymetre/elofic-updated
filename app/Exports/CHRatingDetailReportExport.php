@@ -2,18 +2,20 @@
 
 namespace App\Exports;
 
+use App\Models\Branch;
 use App\Models\BranchStock;
+use App\Models\BranchWiseTarget;
 use App\Models\City;
 use App\Models\CustomerOutstanting;
 use App\Models\Customers;
 use App\Models\District;
 use App\Models\EmployeeDetail;
 use App\Models\MobileUserLoginDetails;
-use App\Models\MspActivity;
 use App\Models\Order;
 use App\Models\OrderDetails;
 use App\Models\PrimarySales;
 use App\Models\Redemption;
+use App\Models\SalesTargetUsers;
 use App\Models\TransactionHistory;
 use App\Models\User;
 use Carbon\Carbon;
@@ -29,7 +31,7 @@ use Excel;
 use DB;
 
 
-class ASMRatingDetailReportExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithEvents
+class CHRatingDetailReportExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithEvents
 {
     public function __construct($request)
     {
@@ -69,7 +71,8 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
             });
         }
 
-        $query = $query->where('sales_type', 'Primary')->latest()->get();
+
+        $query = $query->where('sales_type', 'Primary')->whereIn('designation_id', ['5', '6', '7'])->latest()->get();
 
         if ($this->financial_year && $this->financial_year != '' && $this->financial_year != null) {
             $f_year_array = explode('-', $this->financial_year);
@@ -120,13 +123,14 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
     public function headings(): array
     {
         return [
-            ['Division', 'Department', 'Branch', 'Emp Code', 'User Name', 'Designation', 'Reporting Manager', 'Email', 'Mobile Number', 'Head Quarter', 'Date Of Birth', 'Education', 'Age', 'Company TENURE(in year)', 'Previous Exp(in year)', 'Total Exp(in year)', 'DOJ', 'Final Rating', 'Number of days  dedicated to market visits', '', '', '', 'All Customer Visit', '', '', '', 'Number of new market place (white) mapped', '', '', '', 'Target Vs Ach', '', '', '', '', 'sales from new dealers as 40% of total Sales', '', '', '', '', 'sales from New products as 60% of total  sales', '', '', '', '', 'Debtors', '', '', '', '', 'Weightage', 'Saarthi Activation', '', '', '', 'MSP activity', '', '', '', 'Gross Salary Monthly', 'CTC Per Month', 'CTC Annual', 'Last Yr Gross Increments Value', 'Last Yr Increments %', 'Last Yr Increment Value', 'Remark', 'Current Year Increment'],
-            ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'Ach', '% ACHD', 'For Rating %', 'Final Rating', 'Ach', '% ACHD', 'For Rating %', 'Final Rating', 'Ach', '% ACHD', 'For Rating %', 'Final Rating', 'Target', 'Ach', '% ACHD', 'For Rating %', 'Final Rating', 'Target', 'Ach', '% ACHD', 'For Rating %', 'Final Rating', 'Target', 'Ach', '% ACHD', 'For Rating %', 'Final Rating', 'TOTAL SALES FROM APR TO AUG', 'AVR PER DAYS SALES', 'TOTAL DEBTORS', 'DAYS', 'For Rating %', 'Final Rating', 'Ach', '% ACHD', 'For Rating %', 'Final Rating', 'Ach', '% ACHD', 'For Rating %', 'Final Rating']
+            ['Division', 'Department', 'Branch', 'Emp Code', 'User Name', 'Designation', 'Reporting Manager', 'Email', 'Mobile Number', 'Head Quarter', 'Date Of Birth', 'Education', 'Age', 'Company TENURE(in year)', 'Previous Exp(in year)', 'Total Exp(in year)', 'AOP', '', '', '', '', 'GOLY', '', '', '', '', 'New Channel Sale-40% of Total sale', '', '', '', '', 'New Product sale-60%', '', '', '', '', 'Debtors', '', '', '', '', '', 'Inventory', '', '', '', '', '', 'Bonus Points', '', 'Final rating', 'Gross Salary Monthly', 'CTC Per Month', 'CTC Annual', 'Last Yr Gross Increments Value', 'Last Yr Increments %', 'Last Yr Increment Value', 'Remark', 'Current Year Increment'],
+            ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'Tar', 'Ach', '% ACHD', 'For Rating %', 'Final Rating', 'LY-Tar', 'ACH', 'GOLY', 'For Rating %', 'Final Rating', 'Tar', 'Ach', '% ACHD', 'For Rating %', 'Final Rating', 'Tar', 'Ach', '% ACHD', 'For Rating %', 'Final Rating', 'TOTAL SALES CURRENT FINANCIAL YEAR', 'AVR PER DAYS SALES', 'TOTAL DEBTORS', 'DAYS', 'For Rating %', 'Final Rating', 'TOTAL SALES CURRENT FINANCIAL YEAR', 'AVR PER DAYS SALES', 'TOTAL INVENTORY', 'DAYS', 'For Rating %', 'Final Rating', 'ach >110%', 'Goly >125%', '']
         ];
     }
 
     public function map($query): array
     {
+        
         $f_year_array = explode('-', $this->financial_year);
         $startDate = Carbon::parse($this->start_date);
         $endDate = Carbon::parse($this->end_date);
@@ -137,37 +141,23 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
             $startDate->addMonth();
         }
 
-        $working_days_trg = 20 * $monthCount;
-        $visit_count_trg = 120 * $monthCount;
-        $unique_visit_count_trg = 8 * $monthCount;
-        $active_customer_trg = 8 * $monthCount;
-        $msp_activity_trg = 4 * $monthCount;
+        $lastyrstartdate = Carbon::createFromFormat('Y-m-d', $this->start_date)->subYear()->format('Y-m-d');
+        $lastyrenddate = Carbon::createFromFormat('Y-m-d', $this->end_date)->subYear()->format('Y-m-d');
 
-        $working_days = $query->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Office Meeting', 'Full Day Leave', 'Leave', 'Holiday'])->where('punchin_date', '>=', $this->start_date)->where('punchin_date', '<=', $this->end_date)->count();
-        $visit_count = $query->visits->where('checkin_date', '>=', $this->start_date)->where('checkin_date', '<=', $this->end_date)->count() > 0 ? $query->visits->where('checkin_date', '>=', $this->start_date)->where('checkin_date', '<=', $this->end_date)->count() : "0";
-        $unique_visit_count = $query->visits->where('checkin_date', '>=', $this->start_date)->where('checkin_date', '<=', $this->end_date)->map(fn($visit) => optional(optional($visit->customers)->customeraddress)->city_id)->filter()->unique()->count();
-        $user_target = $query->target->whereIn('month', $selectedmonths)->sum('target');
-        $user_achiv = $query->primarySales->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->sum('net_amount');
-        $user_achiv_new_dealer = $query->primarySales()->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->where('new_dealer', 'Y')->sum('net_amount');
-        $user_achiv_new_product = $query->primarySales()->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->where('new_product', 'Y')->sum('net_amount');
-        DB::statement("SET SESSION group_concat_max_len = 10000000");
         $user_ids = getUsersReportingToAuth($query->id);
-        $total_assign_customer_ids = EmployeeDetail::where('user_id', $query->id)->pluck('customer_id')->toArray();
-        $active_customer = 0;
+        $emp_codes = User::whereIn('id', $user_ids)->pluck('employee_codes');
+        $branch_ids = explode(',', $query->branch_id);
 
-        foreach (array_chunk($total_assign_customer_ids, 500) as $chunk) {
-            $active_customer += TransactionHistory::whereBetween('created_at', [$this->start_date, $this->end_date])
-                ->whereIn('customer_id', $chunk)
-                ->whereNotIn('customer_id', function ($query) {
-                    $query->select('customer_id')
-                        ->from('transaction_histories')
-                        ->where('created_at', '<', $this->start_date);
-                })
-                ->groupBy('customer_id')
-                ->selectRaw('customer_id')
-                ->get()
-                ->count();
-        }
+        $targets = SalesTargetUsers::with('user')->whereIn('branch_id', $branch_ids)->whereIn('month', $selectedmonths)->where('type', 'primary')->whereHas('user', function ($query) {
+            $query->whereIn('division_id', ['10', '18']);
+        })->sum('target');
+        $achiv = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount') / 100000;
+        $ly_targets = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $lastyrstartdate)->where('invoice_date', '<=', $lastyrenddate)->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount') / 100000;
+
+        $new_achiv_dealer = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->where('new_dealer', 'Y')->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount') / 100000;
+        $new_achiv_product = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->where('new_product', 'Y')->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount') / 100000;
+
+        $branch_names = Branch::whereIn('id', $branch_ids)->pluck('branch_name')->toArray();
 
         $debtors_start_date = $f_year_array[0] . '-04-01';
         $debtors_end_date = $f_year_array[0] . '-12-31';
@@ -179,9 +169,10 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
         // $days_difference = $debtors_start_date_or->diffInDays($debtors_end_date_or);
         $days_difference = 270;
 
-        $debtors_sales = PrimarySales::where('branch_id', $query->branch_id)->where('invoice_date', '>=', $debtors_start_date)->where('invoice_date', '<=', $debtors_end_date)->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount');
-        $total_debtors = CustomerOutstanting::where('branch_id', $query->branch_id)->whereIn('division_id', ['10', '18'])->where('year', $f_year_array[0])->sum('amount');
-        
+        $debtors_sales = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $debtors_start_date)->where('invoice_date', '<=', $debtors_end_date)->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount');
+        $total_debtors = CustomerOutstanting::whereIn('branch_id', $branch_ids)->whereIn('division_id', ['10', '18'])->where('year', $f_year_array[0])->sum('amount');
+        $total_inventory = BranchStock::whereIn('branch_id', $branch_ids)->whereIn('division_id', ['10', '18'])->where('year', $f_year_array[0])->sum('amount');
+
         $degree_name = array();
         if (!empty($query['geteducation'])) {
             foreach ($query['geteducation'] as $key_new => $datas) {
@@ -189,18 +180,10 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
             }
         }
 
-        $msp_activitys = MspActivity::where('emp_code', $query->employee_codes);
-        if(isset($this->month) && count($this->month) > 0){
-            $msp_activitys->whereIn('month', $this->month);
-        }
-        $msp_activitys = $msp_activitys->where('fyear', getCurrentFinancialYear($this->financial_year))->sum('msp_count');
-
-        static $rowNumber = 3;
-
-        $result = [
+        return [
             $query['getdivision'] ? $query['getdivision']['division_name'] : '-',
             $query['getdepartment'] ? $query['getdepartment']['name'] : '-',
-            $query['getbranch'] ? $query['getbranch']['branch_name'] : '-',
+            count($branch_names) > 0 ? implode(',', $branch_names) : '-',
             $query['employee_codes'],
             $query['name'] ?? '-',
             $query['getdesignation'] ? $query['getdesignation']['designation_name'] : '-',
@@ -214,60 +197,48 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
             $query['userinfo'] ? $query['userinfo']['current_company_tenture'] : '0',
             $query['userinfo'] ? $query['userinfo']['previous_exp'] : '0',
             $query['userinfo'] ? $query['userinfo']['total_exp'] : '0',
-            $query['userinfo'] ? date('d M Y', strtotime($query['userinfo']['date_of_joining'])) : '',
-            "=BG{$rowNumber}",
-            
-            $working_days,
-            round(($working_days / $working_days_trg) * 100, 0) . '%',
-            (($working_days / $working_days_trg) * 100 >= 100) ? '100%' : round(($working_days / $working_days_trg) * 100, 0) . '%',
-            $number_days = (($working_days / $working_days_trg) * 100 >= 100) ? '5' : (round((5 * (($working_days / $working_days_trg) * 100)) / 100, 0) > 0 ? round((5 * (($working_days / $working_days_trg) * 100)) / 100, 0) : '0'),
 
-            $visit_count,
-            round(($visit_count / $visit_count_trg) * 100, 0) . '%',
-            (($visit_count / $visit_count_trg) * 100 >= 100) ? '100%' : round(($visit_count / $visit_count_trg) * 100, 0) . '%',
-            $all_cust = (($visit_count / $visit_count_trg) * 100 >= 100) ? '5' : (round((5 * (($visit_count / $visit_count_trg) * 100)) / 100, 0) > 0 ? round((5 * (($visit_count / $visit_count_trg) * 100)) / 100, 0) : '0'),
+            $targets > 0 ? $targets : '0',
+            round($achiv, 0),
+            $targets > 0 ? round(($achiv / $targets) * 100, 0) . '%' : '0%',
+            $targets > 0 ? (round(($achiv / $targets) * 100, 0) >= 100 ? '100%' : round(($achiv / $targets) * 100, 0) . '%') : '0%',
+            $aop = $targets > 0 ? (round(($achiv / $targets) * 100, 0) >= 100 ? '25' : round((25 * ($achiv / $targets) * 100 / 100), 0)) : '0',
 
-            $unique_visit_count,
-            round(($unique_visit_count / $unique_visit_count_trg) * 100, 0) . '%',
-            (($unique_visit_count / $unique_visit_count_trg) * 100 >= 100) ? '100%' : round(($unique_visit_count / $unique_visit_count_trg) * 100, 0) . '%',
-            $uniq_cust = (($unique_visit_count / $unique_visit_count_trg) * 100 >= 100) ? '5' : (round((5 * (($unique_visit_count / $unique_visit_count_trg) * 100)) / 100, 0) > 0 ? round((5 * (($unique_visit_count / $unique_visit_count_trg) * 100)) / 100, 0) : '0'),
+            $ly_targets > 0 ? round($ly_targets, 0) : '0',
+            round($achiv, 0),
+            $ly_targets > 0 ? round((($achiv - $ly_targets) / $ly_targets) * 100, 0) . '%' : '0%',
+            $ly_targets > 0 ? (round((($achiv - $ly_targets) / $ly_targets) * 100, 0) >= 100 ? '100%' : round((($achiv - $ly_targets) / $ly_targets) * 100, 0) . '%') : '0%',
+            $goly = $ly_targets > 0 ? (round((($achiv - $ly_targets) / $ly_targets) * 100, 0) >= 100 ? '25' : round((25 * (($achiv - $ly_targets) / $ly_targets) * 100 / 100), 0)) : '0',
 
-            $user_target,
-            $user_achiv > 0 ? round(($user_achiv / 100000), 2) : '0',
-            $user_target > 0 ? round((($user_achiv / 100000) / $user_target) * 100, 0) . '%' : '0%',
-            $user_target > 0 ? (((($user_achiv / 100000) / $user_target) * 100) >= 100 ? '100%' : round((($user_achiv / 100000) / $user_target) * 100, 0) . '%') : '0%',
-            $targets = $user_target > 0 ? (((($user_achiv / 100000) / $user_target) * 100) >= 100 ? '40' : round(40 * ((($user_achiv / 100000) / $user_target) * 100) / 100, 0)) : '0',
+            round((($achiv * 40) / 100), 0),
+            round($new_achiv_dealer, 0),
+            ($achiv * 40) / 100 > 0 ? round(($new_achiv_dealer / (($achiv * 40) / 100)) * 100, 0) . '%' : '0%',
+            ($achiv * 40) / 100 > 0 ? (round(($new_achiv_dealer / (($achiv * 40) / 100)) * 100, 0) >= 100 ? '100%' : round(($new_achiv_dealer / (($achiv * 40) / 100)) * 100, 0) . '%') : '0%',
+            $new_chanel = ($achiv * 40) / 100 > 0 ? (round(($new_achiv_dealer / (($achiv * 40) / 100)) * 100, 0) >= 100 ? '15' : round((15 * ($new_achiv_dealer / (($achiv * 40) / 100)) * 100 / 100), 0)) : '0',
 
-            $user_achiv > 0 ? round((($user_achiv / 100000) * 40) / 100, 1) : '0',
-            $user_achiv_new_dealer > 0 ? round(($user_achiv_new_dealer / 100000), 2) : '0',
-            ((($user_achiv / 100000) * 40) / 100) > 0 ? round((($user_achiv_new_dealer / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100, 0) . '%' : '0%',
-            ((($user_achiv / 100000) * 40) / 100) > 0 ? (((($user_achiv_new_dealer / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100) >= 100 ? '100%' : round((($user_achiv_new_dealer / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100, 0) . '%') : '0%',
-            $new_sale = ((($user_achiv / 100000) * 40) / 100) > 0 ? (((($user_achiv_new_dealer / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100) >= 100 ? '10' : round(10 * ((($user_achiv_new_dealer / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100) / 100, 0)) : '0',
-
-            $user_achiv > 0 ? round((($user_achiv / 100000) * 60) / 100, 2) : '0',
-            $user_achiv_new_product > 0 ? round(($user_achiv_new_product / 100000), 2) : '0',
-            ((($user_achiv / 100000) * 60) / 100) > 0 ? round((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100, 0) . '%' : '0%',
-            ((($user_achiv / 100000) * 60) / 100) > 0 ? (((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100) >= 100 ? '100%' : round((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100, 0) . '%') : '0%',
-            $newpro = ((($user_achiv / 100000) * 60) / 100) > 0 ? (((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100) >= 100 ? '10' : round(10 * ((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100) / 100, 0)) : '0',
+            round((($achiv * 60) / 100), 0),
+            round($new_achiv_product, 0),
+            ($achiv * 60) / 100 > 0 ? round(($new_achiv_product / (($achiv * 60) / 100)) * 100, 0) . '%' : '0%',
+            ($achiv * 60) / 100 > 0 ? (round(($new_achiv_product / (($achiv * 60) / 100)) * 100, 0) >= 100 ? '100%' : round(($new_achiv_product / (($achiv * 60) / 100)) * 100, 0) . '%') : '0%',
+            $new_product = ($achiv * 60) / 100 > 0 ? (round(($new_achiv_product / (($achiv * 60) / 100)) * 100, 0) >= 100 ? '5' : round((5 * ($new_achiv_product / (($achiv * 60) / 100)) * 100 / 100), 0)) : '0',
 
             $debtors_sales > 0 ? round(($debtors_sales / 100000), 2) : '0',
             $debtors_sales > 0 ? round((($debtors_sales / 100000) / $days_difference), 2) : '0',
             $total_debtors > 0 ? round($total_debtors, 1) : '0',
             $days = ($debtors_sales / 100000) / 270 > 0 && $total_debtors > 0 ? round(($total_debtors / (($debtors_sales / 100000) / $days_difference)), 0) : '100',
             $percentage = $days <= 30 ? '100%' : ($days <= 60 ? '80%' : ($days <= 90 ? '50%' : '0%')),
-            $debtor = (20 * (int)$percentage) / 100,
+            $debtor = (20*(int)$percentage)/100,
 
-            $active_customer > 0 ? $active_customer : '0',
-            round(($active_customer / $active_customer_trg) * 100, 0) . '%',
-            (($active_customer / $active_customer_trg) * 100 >= 100) ? '100%' : round(($active_customer / $active_customer_trg) * 100, 0) . '%',
-            $sarthi_custo = (($active_customer / $active_customer_trg) * 100 >= 100) ? '5' : (round((5 * (($active_customer / $active_customer_trg) * 100)) / 100, 0) > 0 ?  round((5 * (($active_customer / $active_customer_trg) * 100)) / 100, 0) : '0'),
+            $debtors_sales > 0 ? round(($debtors_sales / 100000), 2) : '0',
+            $debtors_sales > 0 ? round((($debtors_sales / 100000) / $days_difference), 2) : '0',
+            $total_inventory > 0 ? round($total_inventory, 2) : '0',
+            $inv_days = ($debtors_sales / 100000) / 270 > 0 && $total_inventory > 0 ? round(($total_inventory / (($debtors_sales / 100000) / $days_difference)), 0) : '100',
+            $percentage = $inv_days <= 30 ? '100%' : ($inv_days <= 60 ? '80%' : ($inv_days <= 90 ? '50%' : '0%')),
+            $inventory = (10*(int)$percentage)/100,
+            '0',
+            '0',
+            (int)$aop + (int)$goly + (int)$new_chanel + (int)$new_product + (int)$debtor + (int)$inventory,
 
-            $msp_activitys > 0 ? $msp_activitys : '0',
-            $msp_activitys > 0 ? round(($msp_activitys/$msp_activity_trg)*100,   0) : '0',
-            $msp_final = (($msp_activitys/$msp_activity_trg)*100 >= 100) ? '5' : (round((5 * (($msp_activitys/$msp_activity_trg)*100)) / 100, 0) > 0 ? round((5 * (($msp_activitys/$msp_activity_trg)*100)) / 100, 0) : '0'),
-
-            $sarthi_custo + $debtor + $newpro + $new_sale + $all_cust + $uniq_cust + $targets + $number_days + $msp_final,
-            
             $query['userinfo'] ? $query['userinfo']['gross_salary_monthly'] : '',
             $query['userinfo'] ? $query['userinfo']['salary'] : '',
             $query['userinfo'] ? $query['userinfo']['ctc_annual'] : '',
@@ -277,10 +248,7 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
 
             '-',
             '-',
-
         ];
-        $rowNumber++;
-        return $result;
     }
 
     public function registerEvents(): array
@@ -306,25 +274,25 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
                 $event->sheet->mergeCells('N1:N2');
                 $event->sheet->mergeCells('O1:O2');
                 $event->sheet->mergeCells('P1:P2');
-                $event->sheet->mergeCells('Q1:Q2');
-                $event->sheet->mergeCells('R1:R2');
-                $event->sheet->mergeCells('S1:V1');
-                $event->sheet->mergeCells('W1:Z1');
-                $event->sheet->mergeCells('AA1:AD1');
-                $event->sheet->mergeCells('AE1:AI1');
-                $event->sheet->mergeCells('AJ1:AN1');
-                $event->sheet->mergeCells('AO1:AS1');
-                $event->sheet->mergeCells('AT1:AY1');
-                $event->sheet->mergeCells('AZ1:BC1');
-                $event->sheet->mergeCells('BD1:BG1');
-                $event->sheet->mergeCells('BH1:BH2');
-                $event->sheet->mergeCells('BI1:BI2');
-                $event->sheet->mergeCells('BJ1:BJ2');
-                $event->sheet->mergeCells('BK1:BK2');
-                $event->sheet->mergeCells('BL1:BL2');
-                $event->sheet->mergeCells('BM1:BM2');
-                $event->sheet->mergeCells('BN1:BN2');
-                $event->sheet->mergeCells('BO1:BO2');
+                $event->sheet->mergeCells('Q1:U1');
+                $event->sheet->mergeCells('V1:Z1');
+                $event->sheet->mergeCells('AA1:AE1');
+                $event->sheet->mergeCells('AF1:AJ1');
+                $event->sheet->mergeCells('AK1:AP1');
+                $event->sheet->mergeCells('AQ1:AV1');
+                $event->sheet->mergeCells('AW1:AX1');
+                $event->sheet->mergeCells('AY1:AY2');
+                $event->sheet->mergeCells('AZ1:AZ2');
+                $event->sheet->mergeCells('BA1:BA2');
+                $event->sheet->mergeCells('BA1:BA2');
+                $event->sheet->mergeCells('BB1:BB2');
+                $event->sheet->mergeCells('BC1:BC2');
+                $event->sheet->mergeCells('BD1:BD2');
+                $event->sheet->mergeCells('BE1:BE2');
+                $event->sheet->mergeCells('BF1:BF2');
+                $event->sheet->mergeCells('BG1:BG2');               
+
+
                 // for ($row = 1; $row <= $rowCount; $row++) {
                 //     $cellValue = $event->sheet->getCell('AC' . $row)->getValue();
                 //     $color = self::getColorBasedOnValue($cellValue);
@@ -343,7 +311,7 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
                 //     ]);
                 // }
 
-                $event->sheet->getStyle('A1:BO2')->applyFromArray([
+                $event->sheet->getStyle('A1:BG2')->applyFromArray([
                     'font' => [
                         'bold' => true,
                         'color' => ['rgb' => 'FFFFFF'],
@@ -364,7 +332,7 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
                     ],
                 ]);
 
-                $event->sheet->getStyle('A' . $lastRow . ':BO' . $lastRow)->applyFromArray([
+                $event->sheet->getStyle('A' . $lastRow . ':BG' . $lastRow)->applyFromArray([
                     'font' => ['bold' => true],
                     'alignment' => [
                         'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,
@@ -392,4 +360,14 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
         ];
     }
 
+    private static function getColorBasedOnValue($value)
+    {
+        if ($value <= 24.99) {
+            return 'FF0000'; // Red
+        } elseif ($value >= 25 && $value <= 29.99) {
+            return 'FFFF00'; // Yellow
+        } elseif ($value >= 29.99) {
+            return '00FF00'; // Green
+        }
+    }
 }
