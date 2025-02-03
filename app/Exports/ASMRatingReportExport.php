@@ -41,6 +41,7 @@ class ASMRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
         $this->branch_id = $request->input('branch_id');
         $this->month = $request->input('month');
         $this->financial_year = $request->input('financial_year');
+        $this->role_id = $request->input('role_id');
         $this->srno = 0;
     }
 
@@ -61,6 +62,12 @@ class ASMRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
         }
         if ($this->branch_id && $this->branch_id != '' && $this->branch_id != NULL) {
             $query->where('branch_id', $this->branch_id);
+        }
+
+        if ($this->role_id && $this->role_id != '' && $this->role_id != NULL && count($this->role_id) > 0) {
+            $query->whereHas('roles', function ($query) {
+                $query->whereIn('id', $this->role_id);
+            });
         }
 
         $query = $query->where('sales_type', 'Primary')->latest()->get();
@@ -90,7 +97,6 @@ class ASMRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
                 $lastDate = Carbon::createFromDate($currentYear, $lastMonthNumber, 1)->endOfMonth();
                 $this->start_date = $firstDate->toDateString();
                 $this->end_date = $lastDate->toDateString();
-                dd($this->start_date, $this->end_date, 'mONTH');
             } else {
                 $currentYear = $f_year_array[0];
                 $monthNumbers = array_map(function ($month) {

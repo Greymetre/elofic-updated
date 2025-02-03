@@ -6,18 +6,26 @@
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
-          <h4 class="card-title">ASM Rating Report
+          <h4 class="card-title">Rating Report
             <span class="">
               <div class="btn-group header-frm-btn">
                 @if(auth()->user()->can(['asm_rating_download']))
                 <form method="GET" action="{{ URL::to('asm_rating_report_download') }}">
                   <div class="d-flex flex-wrap flex-row">
                     <div class="p-2" style="width: 200px;">
+                      <select name="role_id[]" multiple id="role_id" class="form-control select2" required>
+                        <option value="" disabled>Role</option>
+                        @foreach($roles as $role)
+                        <option value="{{$role->id}}">{{$role->name}}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                    <div class="p-2" style="width: 200px;">
                       <select name="user_id" id="user_id" class="form-control select2">
                         <option value="" disabled selected>User</option>
-                        @foreach($users as $user)
+                        <!-- @foreach($users as $user)
                         <option value="{{$user->id}}">{{$user->name}}</option>
-                        @endforeach
+                        @endforeach -->
                       </select>
                     </div>
                     <div class="p-2" style="width: 200px;">
@@ -29,7 +37,7 @@
                       </select>
                     </div>
                     <div class="p-2" style="width: 200px;">
-                      <select name="division_id" id="division_id" class="form-control select2">
+                      <select name="division_id" id="division_id" class="form-control select2" required>
                         <option value="" disabled selected>Divisions</option>
                         @foreach($divisions as $division)
                         <option value="{{$division->id}}">{{$division->division_name}}</option>
@@ -45,7 +53,7 @@
                       </select>
                     </div>
                     <div class="p-2" style="width: 200px;">
-                      <select name="financial_year" id="financial_year" class="form-control select2">
+                      <select name="financial_year" id="financial_year" class="form-control select2" required>
                         <option value="" disabled selected>Select Financial Year</option>
                         @foreach($FinancialYears as $FinancialYear)
                         <option value="{{$FinancialYear}}">{{$FinancialYear}}</option>
@@ -54,7 +62,7 @@
                     </div>
                     <div class="p-2" style="width: 200px;">
                       <select name="month[]" multiple id="month" class="selectpicker" title="Select Month" placeholder="Select Month">
-                      <option value="" disabled hidden>Select Month</option>
+                        <option value="" disabled hidden>Select Month</option>
                         <option value="Apr">April</option>
                         <option value="May">May</option>
                         <option value="Jun">June</option>
@@ -107,6 +115,15 @@
             </span>
           </div>
           @endif
+          @if (session('info'))
+          <div class="alert alert-info alert-dismissible fade show" role="alert">
+            {{ session('info') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          @endif
+
           <div class="table-responsive">
             {{-- <table id="getfosrating" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
               <thead class=" text-primary">
@@ -268,5 +285,25 @@
         oTable.draw();
       });
     });
+
+    $("#role_id").on("change", function() {
+      var roles = $(this).val();
+      $.ajax({
+        url: "{{ url('getUserList') }}",
+        dataType: "json",
+        type: "POST",
+        data: {
+          _token: "{{csrf_token()}}",
+          roles: roles
+        },
+        success: function(res) {
+          var html = '<option value="">Select User</option>';
+          $.each(res, function(k, v) {
+            html += '<option value="' + v.id + '"> (' + v.employee_codes + ') ' + v.name + '</option>';
+          });
+          $("#user_id").html(html);
+        }
+      });
+    }).trigger("chnage");
   </script>
 </x-app-layout>

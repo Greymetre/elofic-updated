@@ -22,6 +22,7 @@ use App\DataTables\UsersDataTable;
 use App\DataTables\UserCityDataTable;
 use App\Exports\ASMRatingDetailReportExport;
 use App\Exports\ASMRatingReportExport;
+use App\Exports\CHRatingDetailReportExport;
 use App\Exports\CHRatingReportExport;
 use App\Exports\FOSRatingReportExport;
 use App\Imports\UserImport;
@@ -60,9 +61,9 @@ class UsersController extends Controller
 
     public function index(UsersDataTable $dataTable, Request $request)
     {
-        //abort_if(Gate::denies('user_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-
-        return $dataTable->render('users.index');
+        abort_if(Gate::denies('user_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $divisions = Division::where('active', 'Y')->get();
+        return $dataTable->render('users.index', compact('divisions'));
     }
 
     public function create()
@@ -869,13 +870,15 @@ class UsersController extends Controller
         //         ->make(true);
         // }
 
-        return view('reports.asm_rating', compact('users', 'designations', 'divisions', 'branchs', 'FinancialYears'));
+        $roles = Role::whereNotIn('name', ['superadmin', 'Admin', 'Sub_Admin', 'HR_Admin', 'HO_Account', 'Sub_Support', 'Accounts Order', 'Service Admin', 'All Customers', 'Sub billing', 'Sales Admin', 'Marketing_Admin', 'MIS_ADMIN', 'Marketing Team', 'Data_Crm'])->select('name', 'id')->get();
+
+        return view('reports.asm_rating', compact('users', 'designations', 'divisions', 'branchs', 'FinancialYears', 'roles'));
     }
     public function ch_rating(Request $request)
     {
         // $user_ids = getUsersReportingToAuth();
         $roles = ['PUMPBM', 'PUMPCH', 'FAN&A/BM/MM', 'FAN/CH/GM/SH'];
-        $users = User::where('active', 'Y')->whereIn('designation_id', ['5','6','7'])
+        $users = User::where('active', 'Y')->whereIn('designation_id', ['5', '6', '7'])
             ->get();
         // $designations = Designation::where('active', 'Y')->get();
         // $divisions = Division::where('active', 'Y')->get();
@@ -1009,16 +1012,30 @@ class UsersController extends Controller
 
     public function asm_rating_report_download(Request $request)
     {
+
         abort_if(Gate::denies('user_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        if($request->download == 'simple'){
-            return Excel::download(new ASMRatingReportExport($request), 'Rating Report.xlsx');
-        }else{
-            return Excel::download(new ASMRatingDetailReportExport($request), 'Detail Rating_Report(PMS).xlsx');
+        if (empty(array_diff($request->role_id, [2, 32]))) {
+            if ($request->download == 'simple') {
+                return Excel::download(new ASMRatingReportExport($request), 'Rating Report.xlsx');
+            } else {
+                return Excel::download(new ASMRatingDetailReportExport($request), 'Detail Rating Report(PMS).xlsx');
+            }
+        } else if (empty(array_diff($request->role_id, [3, 6, 13]))) {
+            if ($request->ip() != '111.118.252.250') {
+                return view('work_in_progress');
+            }
+            if ($request->download == 'simple') {
+                return Excel::download(new CHRatingReportExport($request), 'Rating Report.xlsx');
+            } else {
+                return Excel::download(new CHRatingDetailReportExport($request), 'Detail Rating Report(PMS).xlsx');
+            }
+        } else {
+            return redirect()->back()->with('info', 'Working on this role type user rating report !!');
         }
     }
-    
+
     public function ch_rating_report_download(Request $request)
     {
         abort_if(Gate::denies('user_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');

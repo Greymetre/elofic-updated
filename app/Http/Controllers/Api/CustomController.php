@@ -251,6 +251,9 @@ class CustomController extends Controller
                 }
             })->select('id', 'name');
 
+
+            // dd($query->toSql());
+
             // Handle pagination manually due to chunking
             if (!empty($customer_ids_assign)) {
                 $chunkedData = collect();

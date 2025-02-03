@@ -261,16 +261,23 @@ class AjaxController extends Controller
             $payroll = $request->input('payroll');
             $branch_id = $request->input('branch_id');
             $division_id = $request->input('division_id');
+            $roles = $request->input('roles');
             $userids = getUsersReportingToAuth();
             $login_userid = Auth::user()->id;
             $all_users = User::all();
             $userinfo = User::where('id', '=', $login_userid)->first();
             $data = User::whereDoesntHave('roles', function ($query) {
                 $query->where('id', 29);
-            })->where(function ($query) use ($beat_id, $userids, $payroll, $userinfo, $branch_id, $division_id) {
+            })->where(function ($query) use ($beat_id, $userids, $payroll, $userinfo, $branch_id, $division_id, $roles) {
                 if (isset($beat_id)) {
                     $query->whereHas('userbeats', function ($query) use ($beat_id) {
                         $query->where('beat_id', '=', $beat_id);
+                    });
+                }
+                if (isset($roles) && count($roles) > 0) {
+                    // dd($roles);
+                    $query->whereHas('roles', function ($query) use ($roles) {
+                        $query->whereIn('id', $roles);
                     });
                 }
                 if (isset($payroll)) {
