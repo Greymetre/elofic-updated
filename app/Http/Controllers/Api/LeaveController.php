@@ -36,7 +36,7 @@ class LeaveController extends Controller
                 'from_date' => 'required|before_or_equal:to_date',
                 'to_date' => 'required|after_or_equal:from_date',
                 'type' => 'required',
-                // 'bal_type' => 'required',
+                'bal_type' => 'required',
             ]);
             if ($validator->fails()) {
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);

@@ -100,6 +100,16 @@
             </span>
           </div>
           @endif
+          @if(session()->has('message_danger'))
+          <div class="alert alert-danger">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <i class="material-icons">close</i>
+            </button>
+            <span>
+              {{ session()->get('message_danger') }}
+            </span>
+          </div>
+          @endif
           <div class="alert " style="display: none;">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
               <i class="material-icons">close</i>
@@ -169,6 +179,14 @@
               </div>
               <div class="col-md-6">
                 <div class="input_section">
+                  <label class="col-form-label">Comp off Balance</label>
+                  <div>
+                  <input type="number" readonly name="comp_off_balance" id="comp_off_balance" class="form-control" value="">
+                </div>
+              </div>
+              </div>
+              <div class="col-md-6">
+                <div class="input_section">
                   <label class="col-form-label">From Date</label>
                   <div>
                   <input type="text" name="from_date" id="from_date" class="datepicker" value="{!! old( 'from_date') !!}" required>
@@ -185,12 +203,22 @@
               </div>
               <div class="col-md-6">
                 <div class="input_section">
+                  <label class="col-form-label">Balance Type</label>
+                  <div>
+                  <select class=" form-control" name="bal_type" id="bal_type" style="width: 100%;" required>
+                    <option value="">Select Type</option>
+                    <option value="Leave Balance" data-is-city="false">Leave Balance</option>
+                    <option value="Comp-off Balance" data-is-city="false">Comp-off Balance</option>
+                  </select>
+                </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="input_section">
                   <label class="col-form-label">Type</label>
                   <div>
                   <select class=" form-control" name="type" id="type" style="width: 100%;" required>
                     <option value="">Select Type</option>
-                    <!-- <option value="Leave" data-is-city="false">Leave</option>
-                    <option value="Holiday" data-is-city="false">Holiday</option> -->
                     <option value="First Half Leave" data-is-city="false">First Half Leave</option>
                     <option value="Second Half Leave" data-is-city="false">Second Half Leave</option>
                     <option value="Full Day Leave" data-is-city="false">Full Day Leave</option>
@@ -240,9 +268,9 @@
                 <div class="input_section">
                   <label class="col-form-label">Remark</label>
                   <div>
-                  <input type="text" name="remark_status" id="remark_status" class="form-control" value="{!! old( 'remark_status') !!}" required> <br><br>
-                  <input type="text" name="leave_id" id="leave_id" class="form-control" hidden>
-</div>
+                    <input type="text" name="remark_status" id="remark_status" class="form-control" value="{!! old( 'remark_status') !!}" required> <br><br>
+                    <input type="text" name="leave_id" id="leave_id" class="form-control" hidden>
+                  </div>
                 </div>
               </div>
             </div>
@@ -497,7 +525,13 @@
           },
           success: function(res) {
             if (res.status == 'success') {
+              if(res.comp_off_balance != '' && res.comp_off_balance > 0){
+                $('#bal_type option[value="Comp-off Balance"]').prop('disabled', false);
+              }else{
+                $('#bal_type option[value="Comp-off Balance"]').prop('disabled', true);
+              }
               $("#leave_balance").val(res.leave_balance);
+              $("#comp_off_balance").val(res.comp_off_balance);
             }
           }
         })
@@ -539,7 +573,6 @@
                 $("#city_div").show();
                 var html = '<option value="">Select City</option>';
                 $.each(res.data, function(index, element) {
-                  console.log(element);
                   html += '<option value="' + element.id + '">' + element.city_name + '</option>';
                 });
                 $("#city").html(html);

@@ -786,6 +786,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('transaction_history_manualcreate', [TransactionHistoryController::class, 'manualcreate'])->name('transaction_history.manualcreate');
     Route::POST('transaction_history_manualstore', [TransactionHistoryController::class, 'manualstore'])->name('transaction_history.manualstore');
     Route::POST('transaction_history_manualupdate', [TransactionHistoryController::class, 'manualupdate'])->name('transaction_history.manualupdate');
+    // point recalculate 
+    Route::post('point-recalculate', [TransactionHistoryController::class, 'point_recalculate'])->name('transaction_history.point_recalculate');
 
     // Mobile User Login Sarthi Details
     Route::get('mobile_user_login', [MobileUserLoginDetailsController::class, 'mobile_user_login'])->name('mobile_user_login');

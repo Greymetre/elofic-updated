@@ -65,6 +65,19 @@
                 </form>
                 @endif
                 <div class="next-btn">
+                  <div class="btn-group multi-a-r d-none">
+                    <button class="btn btn-just-icon btn-success" title="Re-Calculate Point" id="recalcute_point">
+                      <i class="material-icons">check</i> 
+                    </button>
+                  </div>
+                  <div class="p-2">
+                     <input type="text" name="point_search" id="point_serch" class="from-control" placeholder="Point" style="border: 2px solid #1072ae;
+                     border-radius: 100px;
+                     height: 40px;
+                     text-align: center;
+                     width: 198px;
+                     font-size: initial;">
+                  </div>
                   <div class="p-2" style="width:160px;">
                     <select class="select2" name="customer_id" id="customer_id" data-style="select-with-transition" title="Select">
                       <option value="">First Name</option>
@@ -178,6 +191,7 @@
             <table id="getTransactionHistory" class="table table-striped- table-bschemeed table-hover table-checkable no-wrap">
               <thead class=" text-primary">
                 <th>{!! trans('panel.global.no') !!}</th>
+                <th>#</th>
                 <th>{!! trans('panel.expenses.fields.date') !!}</th>
                 <th>Firm Name</th>
                 <th>CONTACT PERSON</th>
@@ -218,12 +232,13 @@
           'url': "{{ route('transaction_history.index') }}",
           'data': function(d) {
             d.branch_id = $('#branch_id').val(),
-              d.parent_customer = $('#parent_customer').val(),
-              d.scheme_name = $('#scheme_name').val(),
-              d.start_date = $('#start_date').val(),
-              d.end_date = $('#end_date').val(),
-              d.customer_id = $('#customer_id').val()
-            d.designation = $('#designation').val()
+            d.parent_customer = $('#parent_customer').val(),
+            d.scheme_name = $('#scheme_name').val(),
+            d.start_date = $('#start_date').val(),
+            d.end_date = $('#end_date').val(),
+            d.customer_id = $('#customer_id').val(),
+            d.designation = $('#designation').val(),
+            d.point = $('#point_serch').val()
           }
         },
         columns: [{
@@ -232,6 +247,7 @@
             orderable: false,
             searchable: false
           },
+          { data: 'checkbox', name: 'checkbox', orderable: false, searchable: false },
           {
             data: 'created_at',
             name: 'created_at',
@@ -318,6 +334,44 @@
       $('#end_date').change(function() {
         table.draw();
       });
+
+      $('#point_serch').on('keyup' , function(){
+        table.draw();
+      })
+
+      $(document).on('click', '.row-checkbox', function () {
+          const selectedValues = [];
+          $('.row-checkbox:checked').each(function () {
+              selectedValues.push($(this).val());
+          });
+          if(selectedValues.length > 0){
+            $(".multi-a-r").removeClass('d-none');
+          }else{
+            $(".multi-a-r").addClass('d-none');
+          }
+      });
+
+      $(document).on('click' , '#recalcute_point' , function(){
+        const selectedValues = [];
+          $('.row-checkbox:checked').each(function () {
+              selectedValues.push($(this).val());
+          });
+          var token = $("meta[name='csrf-token']").attr("content");
+          $.ajax({
+            url: "{{ route('transaction_history.point_recalculate') }}",
+            type: 'POST',
+            data: {
+              _token: token,
+              ids: selectedValues,
+            },
+            success: function(data) {
+              if (data.status == 'true') {
+                $('.alert').addClass("alert-success");
+              } 
+              table.draw();
+            },
+          });
+      })
       $('body').on('click', '.activeRecord', function() {
         var id = $(this).attr("id");
         var active = $(this).attr("value");
