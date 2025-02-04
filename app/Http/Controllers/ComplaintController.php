@@ -57,6 +57,7 @@ class ComplaintController extends Controller
      */
     public function create(Request $request)
     {
+        $serial_number = $request->serial_number ?? '';
         $newComplaintNumber = $this->getComplaintNumber();
 
         $roleName = "Service Eng";
@@ -78,7 +79,7 @@ class ComplaintController extends Controller
             $this->complaint['serail_number'] = $request->serial_no;
         }
         $states = State::where('active', 'Y')->select('id', 'state_name')->get();
-        return view('complaint.create', compact('assign_users', 'service_centers', 'branchs', 'pincodes', 'divisions', 'complaint_types', 'newComplaintNumber', 'products', 'states'))->with('complaints', $this->complaint);
+        return view('complaint.create', compact('serial_number','assign_users', 'service_centers', 'branchs', 'pincodes', 'divisions', 'complaint_types', 'newComplaintNumber', 'products', 'states'))->with('complaints', $this->complaint);
     }
 
     /**

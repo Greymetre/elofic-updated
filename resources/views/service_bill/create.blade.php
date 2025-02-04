@@ -246,7 +246,6 @@ body table td {
 
                   </table>
                </div>
-
                <h3 class="mt-2"><b>Complaint Category: </b></h3>
                <div class="border border-dark rounded p-4">
                   <div class="row mt-2 mb-2">
@@ -456,8 +455,7 @@ body table td {
                      </div>
                   </div>
                </div>
-
-               @if($service_bill->exists && count($service_bill->service_bill_products) > 0)
+               @if(isset($complaint->service_center))
                <h3 class="mt-2"><b>Service: </b></h3>
                <hr>
                <div class="row mt-2 mb-2">
@@ -474,7 +472,7 @@ body table td {
                            <td>#</td>
                         </tr>
                      </thead>
-
+                     @if($service_bill->exists && count($service_bill->service_bill_products) > 0)
                      <tbody>
                         @foreach($service_bill->service_bill_products as $k=>$product)
                         <tr>
@@ -518,6 +516,7 @@ body table td {
                      <tbody>
 
                      </tbody>
+                     @endif
                   </table>
                   <button type="button" class="btn btn-info btn-sm" id="add-service">ADD</button>
                </div>
