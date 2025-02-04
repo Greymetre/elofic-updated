@@ -64,13 +64,14 @@
                            <input type="hidden" name="previous_url" placeholder="Warranty Activation Status" value="{{ strtok(url()->previous(), '?') }}">
                         </div>
                      </div>
+
                      <div class="col-md-6">
                         <div class="input_section">
                            <label class="col-form-label">Select Status</label>
                            <select name="status" id="status" class="select2" required>
                               <option value="">Select Status</option>
                               <option value="0" {{($warranty_activation->exists && $warranty_activation->status == '0')?'selected': (isset($status_flag) && $status_flag == '0' ? 'selected' : '' )}}>In Verification</option>
-                              <option value="1" {{(!$warranty_activation->exists  && $warranty_activation->status == '1') ? 'selected': (isset($status_flag) && $status_flag == '1' ? 'selected' : '' )}}>Activated</option>
+                              <option value="1" {{($warranty_activation->exists  && $warranty_activation->status == '1') ? 'selected': (isset($status_flag) && $status_flag == '1' ? 'selected' : '' )}}>Activated</option>
                               <option value="2" {{($warranty_activation->exists && $warranty_activation->status == '2')?'selected':''}}>Pending Activated</option>
                               <option value="3" {{($warranty_activation->exists && $warranty_activation->status == '3')?'selected':''}}>Rejected</option>
                            </select>
@@ -86,6 +87,7 @@
                   </div>
                   <div class="mt-5">
                      <h5 class="newdata">Warranty Details</h5>
+                     <input type="hidden" name="back" value="{{ isset($back) ? $back : false }}">
                      <input type="hidden" name="warranty_id" value="{{$warranty_activation->id}}">
                      <div class="row">
                         <div class="col-md-6">
@@ -208,7 +210,7 @@
                            <div class="input_section">
                               <label for="customer_state" class="col-form-label">State</label>
 
-                              <select name="customer_state" id="customer_state" placeholder="Select State" class="select2 form-control" required>
+                              <select name="customer_state" id="customer_state" placeholder="Select State" class="select2 form-control" >
                                  <option value="" disabled selected>Select State</option>
                                  @if($states && count($states) > 0)
                                  @foreach($states as $state)
@@ -228,7 +230,7 @@
                            <div class="input_section">
                               <label for="customer_district" class="col-form-label">District</label>
 
-                              <select name="customer_district" id="customer_district" class="select2 form-control" required></select>
+                              <select name="customer_district" id="customer_district" class="select2 form-control" ></select>
                               @if ($errors->has('customer_district'))
                               <div class="error">
                                  <p class="text-danger">{{ $errors->first('customer_district') }}</p>
@@ -240,7 +242,7 @@
                            <div class="input_section">
                               <label for="customer_city" class="col-form-label">City</label>
 
-                              <select name="customer_city" id="customer_city" class="select2 form-control" required></select>
+                              <select name="customer_city" id="customer_city" class="select2 form-control" ></select>
                               @if ($errors->has('customer_city'))
                               <div class="error">
                                  <p class="text-danger">{{ $errors->first('customer_city') }}</p>
@@ -324,6 +326,17 @@
                             </div>
                          </div>
                          <div class="col-md-6">
+                           <div class="input_section">
+                              <label for="sale_bill_date" class="col-form-label">Sale Bill Date</label>
+                              <input type="text" name="sale_bill_date" id="sale_bill_date" class="datepicker form-control" placeholder="Sale Bill Date" autocomplete="off" value="{!! old( 'sale_bill_date' , $warranty_activation['sale_bill_date']) !!}" required >
+                              @if ($errors->has('sale_bill_date'))
+                              <div class="error">
+                                 <p class="text-danger">{{ $errors->first('sale_bill_date') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+                         <div class="col-md-6">
                             <div class="input_section">
                                <label for="invoice_date" class="col-form-label">
                                 Company Sale Bill Date</label>
@@ -337,6 +350,18 @@
                             </div>
                          </div>
                          <div class="col-md-6">
+                           <div class="input_section">
+                              <label for="warranty_date" class="col-form-label">Warranty Date</label>
+
+                              <input type="text" name="warranty_date" id="warranty_date" class="datepicker form-control" placeholder="Warranty Date" autocomplete="off" value="{!! old( 'warranty_date' , $warranty_activation['warranty_date']) !!}" required disabled>
+                              @if ($errors->has('warranty_date'))
+                              <div class="error col-lg-12">
+                                 <p class="text-danger">{{ $errors->first('warranty_date') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+                         <div class="col-md-6">
                             <div class="input_section">
                                <label for="invoice_no" class="col-form-label">Company Sale Bill NO</label>
 
@@ -348,33 +373,12 @@
                                 @endif
                             </div>
                          </div>
-                           <div class="col-md-6">
-                              <div class="input_section">
-                                 <label for="sale_bill_date" class="col-form-label">Sale Bill Date</label>
-                                 <input type="text" name="sale_bill_date" id="sale_bill_date" class="datepicker form-control" placeholder="Sale Bill Date" autocomplete="off" value="{!! old( 'sale_bill_date' , $warranty_activation['sale_bill_date']) !!}" required >
-                                 @if ($errors->has('sale_bill_date'))
-                                 <div class="error">
-                                    <p class="text-danger">{{ $errors->first('sale_bill_date') }}</p>
-                                 </div>
-                                 @endif
-                              </div>
-                           </div>
+                          
+
 
                            <div class="col-md-6">
                               <div class="input_section">
-                                 <label for="warranty_date" class="col-form-label">Warranty Date</label>
-
-                                 <input type="text" name="warranty_date" id="warranty_date" class="datepicker form-control" placeholder="Warranty Date" autocomplete="off" value="{!! old( 'warranty_date' , $warranty_activation['warranty_date']) !!}" required disabled>
-                                 @if ($errors->has('warranty_date'))
-                                 <div class="error col-lg-12">
-                                    <p class="text-danger">{{ $errors->first('warranty_date') }}</p>
-                                 </div>
-                                 @endif
-                              </div>
-                           </div>
-                           <div class="col-md-6">
-                              <div class="input_section">
-                                 <label for="sale_bill_no" class="col-form-label">Saller Bill No.</label>
+                                 <label for="sale_bill_no" class="col-form-label">Seller Bill No.</label>
                                  <input type="text" name="sale_bill_no" id="sale_bill_no" class="form-control" value="{!! old( 'sale_bill_no' , $warranty_activation['sale_bill_no']) !!}" required>
                                  @if ($errors->has('sale_bill_no'))
                                  <div class="error col-lg-12">

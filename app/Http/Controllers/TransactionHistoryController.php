@@ -307,4 +307,47 @@ class TransactionHistoryController extends Controller
 
         return back()->with('message_success', $_SESSION['tr_msg']);
     }
+
+    // recalculate point 
+
+    public function point_recalculate(Request $request) {
+        $ids = $request->ids ?? [];
+        $transactionHistories = TransactionHistory::whereIn('id', $ids)->get();
+    
+        foreach ($transactionHistories as $transactionHistory) {
+            if ($transactionHistory->scheme && $transactionHistory->scheme->product) {
+                $schemeDetails = SchemeDetails::where('product_id', $transactionHistory->scheme->product->id)->first();
+                if ($schemeDetails) {
+                    // Update points
+                    $transactionHistory->update([
+                        'active_point' => $schemeDetails->active_point,
+                        'provision_point' => $schemeDetails->provision_point,
+                        'point' => $schemeDetails->points,
+                    ]);
+                }
+            }
+        }
+    
+        return response()->json(['status' => true]);
+    }
+    
+    // public function point_recalculate(Request $request){
+    //     $ids = $request->ids ?? [];
+    //     foreach($ids as $key => $id){
+    //         $transactionHistory = TransactionHistory::find($id);
+    //         if(isset($transactionHistory)){
+    //             if(isset($transactionHistory->scheme->product)){
+    //                 $scheme_details = SchemeDetails::where(['product_id'=> $transactionHistory->scheme->product->id])->first();
+    //                 if(isset($scheme_details)){
+    //                     $transactionHistory->update([
+    //                             'active_point' => $scheme_details->active_point,
+    //                             'provision_point' => $scheme_details->provision_point,
+    //                             'point' => $scheme_details->points,
+    //                     ]);
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     return response()->json(['status' => true]);
+    // }
 }

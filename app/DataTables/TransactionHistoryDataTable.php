@@ -31,6 +31,9 @@ class TransactionHistoryDataTable extends DataTable
             ->editColumn('contact_person', function ($data) {
                 return $data->customer->first_name . ' ' . $data->customer->last_name;
             })
+            ->addColumn('checkbox', function ($data) {
+                return '<input type="checkbox" class="row-checkbox" value="' . $data->id . '">';
+            })
             ->editColumn('customer.name', function ($data) {
                 $customer_name = '<a target="_blank" href="' . route('customers.show', [encrypt($data->customer->id)]) . '">' . $data->customer->name . '</a>';
 
@@ -69,7 +72,7 @@ class TransactionHistoryDataTable extends DataTable
                                 ' . $btn . '
                             </div>' . $activebtn;
             })
-            ->rawColumns(['action', 'contact_person', 'parent_name', 'subcategory_name', 'product_name', 'customer.name']);
+            ->rawColumns(['action','checkbox', 'contact_person', 'parent_name', 'subcategory_name', 'product_name', 'customer.name']);
     }
 
     /**
@@ -119,6 +122,10 @@ class TransactionHistoryDataTable extends DataTable
         }
         if ($request->customer_id && $request->customer_id != null  && $request->customer_id != '') {
             $data->where('customer_id', $request->customer_id);
+        }
+
+        if(isset($request->point) && $request->point != ''){
+            $data->where('point' , $request->point);
         }
         $data = $data->latest()->newQuery();
         return $data;

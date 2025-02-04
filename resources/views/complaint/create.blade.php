@@ -816,8 +816,10 @@
          if (!selectedDate.isValid()) {
             // console.error("Invalid date format. Please use DD-MM-YYYY.");
             return;
+         
          }
-
+         var selectedStartDate = $('#company_sale_bill_date').datepicker('getDate');
+         $('#customer_bill_date').datepicker("option", "minDate", selectedStartDate);
          var today = moment();
          var diffMonths = today.diff(selectedDate, 'months');
          selectedDate.add(diffMonths, 'months');
@@ -938,7 +940,7 @@
                            title: "Warranty is in IN Verification " + serial_no + " serial number. Please activate the warranty first.",
                            icon: "error",
                            showCancelButton: true,
-                           confirmButtonText: '<a href="' + active_url + '" style="color: white; text-decoration: none;">Activate Warranty</a>',
+                           confirmButtonText: '<a href="' + active_url + "?back=true" + '" style="color: white; text-decoration: none;">Activate Warranty</a>',
                            cancelButtonText: "Cancel",
                            cancelButtonColor: '#d33',
                            confirmButtonColor: '#3085d6'
@@ -1237,6 +1239,10 @@
       });
 
       $(document).ready(function() {
+         var serial_number = "{{ $serial_number }}";
+         if(serial_number && serial_number != ''){
+            $('#serail_number').val(serial_number).trigger("keyup");;
+         }
          $('#fileInput').on('change', function() {
             const imagePreviewContainer = $('#imagePreview');
             const filePreviewContainer = $('#filePreview');
