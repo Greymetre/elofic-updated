@@ -76,6 +76,9 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
 
             $this->start_date = $f_year_array[0] . '-04-01';
             $this->end_date = $f_year_array[1] . '-03-31';
+            if($this->end_date > now()->toDateString()){
+                $this->end_date = now()->toDateString();
+            }
         }
 
         if ($this->month && $this->month != '' && $this->month != null && $this->financial_year && $this->financial_year != '' && $this->financial_year != null) {
@@ -128,9 +131,15 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
     public function map($query): array
     {
         $f_year_array = explode('-', $this->financial_year);
-        $startDate = Carbon::parse($this->start_date);
+        
+        if(isset($query['userinfo']['date_of_joining']) && $query['userinfo']['date_of_joining'] != null && $query['userinfo']['date_of_joining'] > $this->start_date && $query['userinfo']['date_of_joining'] < $this->end_date){
+            $startDate = Carbon::parse($startDate = Carbon::parse($query['userinfo']['date_of_joining']));    
+        }else{
+            $startDate = Carbon::parse($this->start_date);
+        }
         $endDate = Carbon::parse($this->end_date);
         $monthCount = $startDate->diffInMonths($endDate) + 1;
+        
         $selectedmonths = [];
         while ($startDate->lessThanOrEqualTo($endDate)) {
             $selectedmonths[] = $startDate->format('M');
@@ -217,38 +226,56 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
             $query['userinfo'] ? date('d M Y', strtotime($query['userinfo']['date_of_joining'])) : '',
             "=BG{$rowNumber}",
             
-            $working_days,
-            round(($working_days / $working_days_trg) * 100, 0) . '%',
-            (($working_days / $working_days_trg) * 100 >= 100) ? '100%' : round(($working_days / $working_days_trg) * 100, 0) . '%',
-            $number_days = (($working_days / $working_days_trg) * 100 >= 100) ? '5' : (round((5 * (($working_days / $working_days_trg) * 100)) / 100, 0) > 0 ? round((5 * (($working_days / $working_days_trg) * 100)) / 100, 0) : '0'),
+            $working_days.' ('.$working_days_trg.')',
+            $this->getPer($working_days, $working_days_trg) . '%',
+            $this->getPer($working_days, $working_days_trg) >= 100 ? '100%' :$this->getPer($working_days, $working_days_trg) . '%',
+            $number_days = $this->getFR($this->getPer($working_days, $working_days_trg), 5),
+            // round(($working_days / $working_days_trg) * 100, 0) . '%',
+            // (($working_days / $working_days_trg) * 100 >= 100) ? '100%' : round(($working_days / $working_days_trg) * 100, 0) . '%',
+            // $number_days = (($working_days / $working_days_trg) * 100 >= 100) ? '5' : (round((5 * (($working_days / $working_days_trg) * 100)) / 100, 0) > 0 ? round((5 * (($working_days / $working_days_trg) * 100)) / 100, 0) : '0'),
 
-            $visit_count,
-            round(($visit_count / $visit_count_trg) * 100, 0) . '%',
-            (($visit_count / $visit_count_trg) * 100 >= 100) ? '100%' : round(($visit_count / $visit_count_trg) * 100, 0) . '%',
-            $all_cust = (($visit_count / $visit_count_trg) * 100 >= 100) ? '5' : (round((5 * (($visit_count / $visit_count_trg) * 100)) / 100, 0) > 0 ? round((5 * (($visit_count / $visit_count_trg) * 100)) / 100, 0) : '0'),
+            $visit_count .' ('.$visit_count_trg.')',
+            $this->getPer($visit_count, $visit_count_trg) . '%',
+            $this->getPer($visit_count, $visit_count_trg) >= 100 ? '100%' :$this->getPer($visit_count, $visit_count_trg) . '%',
+            $all_cust = $this->getFR($this->getPer($visit_count, $visit_count_trg), 5),
+            // round(($visit_count / $visit_count_trg) * 100, 0) . '%',
+            // (($visit_count / $visit_count_trg) * 100 >= 100) ? '100%' : round(($visit_count / $visit_count_trg) * 100, 0) . '%',
+            // $all_cust = (($visit_count / $visit_count_trg) * 100 >= 100) ? '5' : (round((5 * (($visit_count / $visit_count_trg) * 100)) / 100, 0) > 0 ? round((5 * (($visit_count / $visit_count_trg) * 100)) / 100, 0) : '0'),
 
-            $unique_visit_count,
-            round(($unique_visit_count / $unique_visit_count_trg) * 100, 0) . '%',
-            (($unique_visit_count / $unique_visit_count_trg) * 100 >= 100) ? '100%' : round(($unique_visit_count / $unique_visit_count_trg) * 100, 0) . '%',
-            $uniq_cust = (($unique_visit_count / $unique_visit_count_trg) * 100 >= 100) ? '5' : (round((5 * (($unique_visit_count / $unique_visit_count_trg) * 100)) / 100, 0) > 0 ? round((5 * (($unique_visit_count / $unique_visit_count_trg) * 100)) / 100, 0) : '0'),
+            $unique_visit_count . '('. $unique_visit_count_trg .')',
+            $this->getPer($unique_visit_count, $unique_visit_count_trg) . '%',
+            $this->getPer($unique_visit_count, $unique_visit_count_trg) >= 100 ? '100%' :$this->getPer($unique_visit_count, $unique_visit_count_trg) . '%',
+            $uniq_cust = $this->getFR($this->getPer($unique_visit_count, $unique_visit_count_trg), 5),
+            // round(($unique_visit_count / $unique_visit_count_trg) * 100, 0) . '%',
+            // (($unique_visit_count / $unique_visit_count_trg) * 100 >= 100) ? '100%' : round(($unique_visit_count / $unique_visit_count_trg) * 100, 0) . '%',
+            // $uniq_cust = (($unique_visit_count / $unique_visit_count_trg) * 100 >= 100) ? '5' : (round((5 * (($unique_visit_count / $unique_visit_count_trg) * 100)) / 100, 0) > 0 ? round((5 * (($unique_visit_count / $unique_visit_count_trg) * 100)) / 100, 0) : '0'),
 
             $user_target,
             $user_achiv > 0 ? round(($user_achiv / 100000), 2) : '0',
-            $user_target > 0 ? round((($user_achiv / 100000) / $user_target) * 100, 0) . '%' : '0%',
-            $user_target > 0 ? (((($user_achiv / 100000) / $user_target) * 100) >= 100 ? '100%' : round((($user_achiv / 100000) / $user_target) * 100, 0) . '%') : '0%',
-            $targets = $user_target > 0 ? (((($user_achiv / 100000) / $user_target) * 100) >= 100 ? '40' : round(40 * ((($user_achiv / 100000) / $user_target) * 100) / 100, 0)) : '0',
+            $this->getPer($user_achiv/100000, $user_target) . '%',
+            $this->getPer($user_achiv/100000, $user_target) >= 100 ? '100%' :$this->getPer($user_achiv/100000, $user_target) . '%',
+            $targets = $this->getFR($this->getPer($user_achiv/100000, $user_target), 40),
+            // $user_target > 0 ? round((($user_achiv / 100000) / $user_target) * 100, 0) . '%' : '0%',
+            // $user_target > 0 ? (((($user_achiv / 100000) / $user_target) * 100) >= 100 ? '100%' : round((($user_achiv / 100000) / $user_target) * 100, 0) . '%') : '0%',
+            // $targets = $user_target > 0 ? (((($user_achiv / 100000) / $user_target) * 100) >= 100 ? '40' : round(40 * ((($user_achiv / 100000) / $user_target) * 100) / 100, 0)) : '0',
 
-            $user_achiv > 0 ? round((($user_achiv / 100000) * 40) / 100, 1) : '0',
+            $fachiv = $user_achiv > 0 ? round((($user_achiv / 100000) * 40) / 100, 1) : '0',
             $user_achiv_new_dealer > 0 ? round(($user_achiv_new_dealer / 100000), 2) : '0',
-            ((($user_achiv / 100000) * 40) / 100) > 0 ? round((($user_achiv_new_dealer / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100, 0) . '%' : '0%',
-            ((($user_achiv / 100000) * 40) / 100) > 0 ? (((($user_achiv_new_dealer / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100) >= 100 ? '100%' : round((($user_achiv_new_dealer / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100, 0) . '%') : '0%',
-            $new_sale = ((($user_achiv / 100000) * 40) / 100) > 0 ? (((($user_achiv_new_dealer / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100) >= 100 ? '10' : round(10 * ((($user_achiv_new_dealer / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100) / 100, 0)) : '0',
+            $this->getPer($user_achiv_new_dealer/100000, $fachiv) . '%',
+            $this->getPer($user_achiv_new_dealer/100000, $fachiv) >= 100 ? '100%' :$this->getPer($user_achiv_new_dealer/100000, $fachiv) . '%',
+            $new_sale = $this->getFR($this->getPer($user_achiv_new_dealer/100000, $fachiv), 10),
+            // ((($user_achiv / 100000) * 40) / 100) > 0 ? round((($user_achiv_new_dealer / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100, 0) . '%' : '0%',
+            // ((($user_achiv / 100000) * 40) / 100) > 0 ? (((($user_achiv_new_dealer / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100) >= 100 ? '100%' : round((($user_achiv_new_dealer / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100, 0) . '%') : '0%',
+            // $new_sale = ((($user_achiv / 100000) * 40) / 100) > 0 ? (((($user_achiv_new_dealer / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100) >= 100 ? '10' : round(10 * ((($user_achiv_new_dealer / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100) / 100, 0)) : '0',
 
-            $user_achiv > 0 ? round((($user_achiv / 100000) * 60) / 100, 2) : '0',
+            $sachiv = $user_achiv > 0 ? round((($user_achiv / 100000) * 60) / 100, 2) : '0',
             $user_achiv_new_product > 0 ? round(($user_achiv_new_product / 100000), 2) : '0',
-            ((($user_achiv / 100000) * 60) / 100) > 0 ? round((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100, 0) . '%' : '0%',
-            ((($user_achiv / 100000) * 60) / 100) > 0 ? (((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100) >= 100 ? '100%' : round((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100, 0) . '%') : '0%',
-            $newpro = ((($user_achiv / 100000) * 60) / 100) > 0 ? (((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100) >= 100 ? '10' : round(10 * ((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100) / 100, 0)) : '0',
+            $this->getPer($user_achiv_new_product/100000, $sachiv) . '%',
+            $this->getPer($user_achiv_new_product/100000, $sachiv) >= 100 ? '100%' :$this->getPer($user_achiv_new_product/100000, $sachiv) . '%',
+            $newpro = $this->getFR($this->getPer($user_achiv_new_product/100000, $sachiv), 10),
+            // ((($user_achiv / 100000) * 60) / 100) > 0 ? round((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100, 0) . '%' : '0%',
+            // ((($user_achiv / 100000) * 60) / 100) > 0 ? (((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100) >= 100 ? '100%' : round((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100, 0) . '%') : '0%',
+            // $newpro = ((($user_achiv / 100000) * 60) / 100) > 0 ? (((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100) >= 100 ? '10' : round(10 * ((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100) / 100, 0)) : '0',
 
             $debtors_sales > 0 ? round(($debtors_sales / 100000), 2) : '0',
             $debtors_sales > 0 ? round((($debtors_sales / 100000) / $days_difference), 2) : '0',
@@ -258,13 +285,19 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
             $debtor = (20 * (int)$percentage) / 100,
 
             $active_customer > 0 ? $active_customer : '0',
-            round(($active_customer / $active_customer_trg) * 100, 0) . '%',
-            (($active_customer / $active_customer_trg) * 100 >= 100) ? '100%' : round(($active_customer / $active_customer_trg) * 100, 0) . '%',
-            $sarthi_custo = (($active_customer / $active_customer_trg) * 100 >= 100) ? '5' : (round((5 * (($active_customer / $active_customer_trg) * 100)) / 100, 0) > 0 ?  round((5 * (($active_customer / $active_customer_trg) * 100)) / 100, 0) : '0'),
+            $this->getPer($active_customer, $active_customer_trg) . '%',
+            $this->getPer($active_customer, $active_customer_trg) >= 100 ? '100%' :$this->getPer($active_customer, $active_customer_trg) . '%',
+            $sarthi_custo = $this->getFR($this->getPer($active_customer, $active_customer_trg), 5),
+            // round(($active_customer / $active_customer_trg) * 100, 0) . '%',
+            // (($active_customer / $active_customer_trg) * 100 >= 100) ? '100%' : round(($active_customer / $active_customer_trg) * 100, 0) . '%',
+            // $sarthi_custo = (($active_customer / $active_customer_trg) * 100 >= 100) ? '5' : (round((5 * (($active_customer / $active_customer_trg) * 100)) / 100, 0) > 0 ?  round((5 * (($active_customer / $active_customer_trg) * 100)) / 100, 0) : '0'),
 
             $msp_activitys > 0 ? $msp_activitys : '0',
-            $msp_activitys > 0 ? round(($msp_activitys/$msp_activity_trg)*100,   0) : '0',
-            $msp_final = (($msp_activitys/$msp_activity_trg)*100 >= 100) ? '5' : (round((5 * (($msp_activitys/$msp_activity_trg)*100)) / 100, 0) > 0 ? round((5 * (($msp_activitys/$msp_activity_trg)*100)) / 100, 0) : '0'),
+            $this->getPer($msp_activitys, $msp_activity_trg) . '%',
+            // $this->getPer($msp_activitys, $msp_activity_trg) >= 100 ? '100%' :$this->getPer($msp_activitys, $msp_activity_trg) . '%',
+            $msp_final = $this->getFR($this->getPer($msp_activitys, $msp_activity_trg), 5),
+            // $msp_activitys > 0 ? round(($msp_activitys/$msp_activity_trg)*100,   0) : '0',
+            // $msp_final = (($msp_activitys/$msp_activity_trg)*100 >= 100) ? '5' : (round((5 * (($msp_activitys/$msp_activity_trg)*100)) / 100, 0) > 0 ? round((5 * (($msp_activitys/$msp_activity_trg)*100)) / 100, 0) : '0'),
 
             $sarthi_custo + $debtor + $newpro + $new_sale + $all_cust + $uniq_cust + $targets + $number_days + $msp_final,
             
@@ -281,6 +314,20 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
         ];
         $rowNumber++;
         return $result;
+    }
+
+    public function getPer($achiv, $trg)
+    {
+        return $trg > 0 ? round(($achiv / $trg) * 100, 0) : '0';
+    }
+    public function getFR($achivper, $tpoint)
+    {
+        if($achivper >= 100){
+            return $tpoint;
+        }else{
+            return round(($tpoint * $achivper) / 100, 0) > 0 ? round(($tpoint * $achivper) / 100, 0) : '0';
+        }
+        return round(($achiv / $trg) * 100, 0);
     }
 
     public function registerEvents(): array

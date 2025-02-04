@@ -54,25 +54,26 @@ class LeaveController extends Controller
      */
     public function store(Request $request)
     {
+        
         try {
             $validator = Validator::make($request->all(), [
                 'user_id' => 'required',
                 'from_date' => 'required|before_or_equal:to_date',
                 'to_date' => 'required|after_or_equal:from_date',
                 'type' => 'required',
+                'bal_type' => 'required',
             ]);
             if ($validator->fails()) {
                 return redirect()->back()
                     ->withErrors($validator)
                     ->withInput();
             }
-
             $fromDate = new DateTime($request->from_date);
             $toDate = new DateTime($request->to_date);
 
             $dates = [];
-            $currentDate = clone $fromDate;
             $days = 0;
+            $currentDate = clone $fromDate;
             while ($currentDate <= $toDate) {
                 $days++;
                 $dates[] = $currentDate->format('Y-m-d');
@@ -87,36 +88,90 @@ class LeaveController extends Controller
                     'punchin_time' => date('G:i', strtotime('10:00:00')),
                     'punchin_summary' => !empty($request['reason']) ? $request['reason'] : '',
                     'working_type' => !empty($request['type']) ? $request['type'] : '',
-                    'punchin_from' => 'Web',
+                    'punchin_from' => 'App',
                     'created_at' => getcurentDateTime(),
                     'updated_at' => getcurentDateTime(),
                 ]);
             }
 
-            if ($request['type'] == 'First Half Leave' || $request['type'] == 'Second Half Leave') {
-                $user = User::find($request['user_id']);
-                $user->leave_balance = $user->leave_balance - 0.5;
-                $user->save();
-            } elseif ($request['type'] == 'Full Day Leave' || $request['type'] == 'Leave') {
-                $user = User::find($request['user_id']);
-                $user->leave_balance = $user->leave_balance - $days;
-                $user->save();
-            }
-
-            Leave::create([
+            $leave = Leave::create([
                 'user_id' => $request['user_id'],
                 'active' => 'Y',
                 'from_date' => date('Y-m-d', strtotime($request['from_date'])),
                 'to_date' => date('Y-m-d', strtotime($request['to_date'])),
                 'reason' => !empty($request['reason']) ? $request['reason'] : '',
                 'type' => !empty($request['type']) ? $request['type'] : '',
+                'bal_type' => !empty($request['bal_type']) ? $request['bal_type'] : NULL,
                 'created_by' => auth()->user()->id,
                 'created_at' => getcurentDateTime(),
                 'updated_at' => getcurentDateTime(),
             ]);
-            return Redirect::to('leaves')->with('message_success', 'Leave Added Successfully');
 
-            return redirect()->back()->with('message_danger', 'Error in add leave')->withInput();
+            if ($request['bal_type'] === 'Comp-off Balance') {
+                if ($request['type'] == 'First Half Leave' || $request['type'] == 'Second Half Leave') {
+                    $compOff = CompOffLeave::where('user_id', $request['user_id'])
+                        ->where('is_used', false)
+                        ->where('expiry_date', '>=', now())
+                        ->first();
+                } else {
+                    $compOff = CompOffLeave::where('user_id', $request['user_id'])
+                        ->where('is_used', false)
+                        ->where('expiry_date', '>=', now())
+                        ->where('balance', '>', 0.6)
+                        ->get();
+                }
+
+                if ($compOff) {
+
+                    if ($request['type'] == 'First Half Leave' || $request['type'] == 'Second Half Leave') {
+                        $compOff->balance = $compOff->balance - 0.50;
+                        if (!empty($compOff->leave_id)) {
+                            $compOff->leave_id = $compOff->leave_id . ',' . $leave->id;
+                        } else {
+                            $compOff->leave_id = $leave->id;
+                        }
+                        $compOff->is_used = false;
+                        $compOff->save();
+                        if ($compOff->balance == 0.00) {
+                            $compOff->update(['is_used' => true, 'balance' => 0.00]);
+                        }
+                    } else {
+                        if ($compOff->count() >= $days) {
+                            $compOff->take($days)->each(function ($comp) use ($leave) {
+                                $comp->update([
+                                    'is_used'  => true,
+                                    'leave_id' => $leave->id,
+                                    'balance'  => 0.00
+                                ]);
+                            });
+                        } else {
+                            $leave->delete();
+                            foreach ($dates as $date) {
+                                Attendance::where(['user_id' => $leave->user_id, 'punchin_date' => date('Y-m-d', strtotime($date))])->delete();
+                            }
+                            return redirect()->back()->with('message_danger', 'No Comp Off Balance');
+                        }
+                    }
+                } else {
+                    $leave->delete();
+                    foreach ($dates as $date) {
+                        Attendance::where(['user_id' => $leave->user_id, 'punchin_date' => date('Y-m-d', strtotime($date))])->delete();
+                    }
+                    return redirect()->back()->with('message_danger', 'No Comp Off Balance');
+                }
+            } else {
+                if ($request['type'] == 'First Half Leave' || $request['type'] == 'Second Half Leave') {
+                    $user = User::find($request['user_id']);
+                    $user->leave_balance = $user->leave_balance - 0.5;
+                    $user->save();
+                } elseif ($request['type'] == 'Full Day Leave' || $request['type'] == 'Leave') {
+                    $user = User::find($request['user_id']);
+                    $user->leave_balance = $user->leave_balance - $days;
+                    $user->save();
+                }
+            }
+
+            return Redirect::to('leaves')->with('message_success', 'Leave Added Successfully');
         } catch (\Exception $e) {
             return redirect()->back()->withErrors($e->getMessage())->withInput();
         }
