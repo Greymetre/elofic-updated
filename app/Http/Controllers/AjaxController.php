@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CustomerDetails, DealerAppointment, DealerAppointmentKyc, EndUser, Expenses, GiftModel, GiftSubcategory, Marketing, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, PrimaryScheme, Redemption, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation};
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CompOffLeave, CustomerDetails, DealerAppointment, DealerAppointmentKyc, EndUser, Expenses, GiftModel, GiftSubcategory, Marketing, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, PrimaryScheme, Redemption, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation};
 use App\Models\UserLiveLocation;
 use App\Models\UserActivity;
 use App\Http\Controllers\SendNotifications;
@@ -1546,7 +1546,11 @@ class AjaxController extends Controller
     public function getLeaveBalance(Request $request)
     {
         $data = User::where('id', $request->user_id)->first();
-        return response()->json(['status' => 'success', 'leave_balance' => $data->leave_balance]);
+        $last60Days = Carbon::now()->subDays(60);
+        $comp_off_balance = CompOffLeave::where('comp_off_date', '>=', $last60Days)->where('is_used', false)
+                ->where('user_id', $request->user_id)
+                ->sum('balance');
+        return response()->json(['status' => 'success', 'leave_balance' => $data->leave_balance, 'comp_off_balance' => $comp_off_balance]);
     }
 
 

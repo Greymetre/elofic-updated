@@ -84,7 +84,6 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
         }
         $data->where(function ($query) use ($pSchemesGroups) {
             foreach ($pSchemesGroups as $key => $value) {
-                // dd($value->groups);
                 $groupsArray = explode(',', $value->groups);
                 // Apply OR WHERE IN for each group type
                 $query->orWhereIn($value->group_type, $groupsArray);
