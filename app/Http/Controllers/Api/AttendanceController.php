@@ -110,6 +110,7 @@ class AttendanceController extends Controller
             }
             // $request['punchin_address'] = getLatLongToAddress($request['punchin_latitude'],$request['punchin_longitude']);
             $request['punchin_address'] = getLatLongToAddress($request['punchin_longitude'], $request['punchin_latitude']);
+            // dd($request['punchin_address']);
             //$request['punchin_address'] = '';
             if ($punchin = $this->attendances->updateOrCreate([
                 'user_id' => $user->id,

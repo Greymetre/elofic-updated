@@ -174,7 +174,9 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
 
             }
         } else {
+            
             $CM = PrimarySchemeDetail::where('groups', $data['new_group_name'])->where('min', '<=', $data['total_quantity'])->where('max', '>=', $data['total_quantity'])->where('primary_scheme_id', $this->scheme_id)->first();
+
         }
 
         if ($this->types && !empty($this->types)) {
@@ -220,14 +222,16 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
                 if ($CM) {
                     if ($CM->slab_min <= $data['total_net_amount'] / 100000) {
                         $response[18] = $CM->gift;
+                        $response[19] = $CM->primaryscheme->scheme_name;
                     } else {
                         $checkOthers = PrimarySchemeDetail::where('primary_scheme_id', $this->scheme_id)->where('slab_min', '<=', $response[17])->first();
                         $response[18] = $checkOthers ? $checkOthers->gift : '-';
+                        $response[19] = $checkOthers ? $CM->primaryscheme->scheme_name : '-';
                     }
                 } else {
                     $response[18] = '-';
+                    $response[19] = '-';
                 }
-                $response[19] = $CM ? $CM->primaryscheme->scheme_name : '-';
             } else {
                 if($this->pSchemes->id == 38){
                     if($data->group_4_quantity > 0 && $data->total_quantity >= 300){

@@ -7,6 +7,7 @@ use App\Models\PrimarySales;
 use App\Models\Product;
 use App\Models\SapStock;
 use App\Models\WareHouse;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Validator;
@@ -92,6 +93,7 @@ class SapStockController extends Controller
     public function insertSapSell(Request $request)
     {
         try {
+            // return response()->json($request->branch_code);
             $validator = Validator::make($request->all(), [
                 'branch_code' => 'required',
                 'sinv_branch' => 'required',
@@ -128,16 +130,19 @@ class SapStockController extends Controller
 
             $documentLines = $request['documentLines'];
             $invoice_date = \DateTime::createFromFormat('dmY', $request['sinv_dt']);
-            // $invoice_date = date('Y-m-d', strtotime($invoice_date));
-            $month = date('M', strtotime($request['sinv_dt']));
+
+            $month = date('M', strtotime(Carbon::parse($invoice_date)->toDateString()));
             $month = strtoupper(substr($month, 0, 3));
+
             // $itm_group_name_array = explode(' ', $request['itm_group_name']);
             // $division = $itm_group_name_array[0];
             $division = 'PUMP';
-            // dd($invoice_date, $month, $division);
+
 
 
             foreach ($documentLines as $key => $value) {
+                $itm_group_name_array = explode(' ', $value['itm_group_name']);
+                $division = $itm_group_name_array[0];
                 $serial_numbers = [];
                 foreach ($value['serial_no'] as $serial) {
                     if (isset($serial['DistNumber'], $serial['Quantity'])) {
@@ -145,7 +150,7 @@ class SapStockController extends Controller
                     }
                 }
                 $dist_number_string = implode(',', $serial_numbers);
-                // dd($dist_number_string);
+
                 PrimarySales::create([
                     'branch_id' => $request['branch_code'],
                     'final_branch' => $request['sinv_branch'],
