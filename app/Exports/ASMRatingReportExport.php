@@ -70,50 +70,72 @@ class ASMRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
             });
         }
 
-        $query = $query->where('sales_type', 'Primary')->latest()->get();
+        // $query = $query->where('sales_type', 'Primary')->latest()->get();
 
-        if ($this->financial_year && $this->financial_year != '' && $this->financial_year != null) {
+
+
+        if ($this->month && $this->financial_year) {
+            $f_year_array = explode('-', $this->financial_year);
+
+            // Month mapping to numbers
+            $monthMap = [
+                "Apr" => 4,
+                "May" => 5,
+                "Jun" => 6,
+                "Jul" => 7,
+                "Aug" => 8,
+                "Sep" => 9,
+                "Oct" => 10,
+                "Nov" => 11,
+                "Dec" => 12,
+                "Jan" => 1,
+                "Feb" => 2,
+                "Mar" => 3
+            ];
+
+            // Convert selected months to numbers
+            $monthNumbers = array_map(fn($month) => $monthMap[$month], $this->month);
+
+            // Separate months into financial year groups
+            $currentYearMonths = array_filter($monthNumbers, fn($m) => $m >= 4 && $m <= 12);
+            $nextYearMonths = array_filter($monthNumbers, fn($m) => $m >= 1 && $m <= 3);
+
+            // Get the correct first and last months
+            $firstMonthNumber = !empty($currentYearMonths) ? min($currentYearMonths) : min($nextYearMonths);
+            $lastMonthNumber = !empty($nextYearMonths) ? max($nextYearMonths) : max($currentYearMonths);
+
+            // Assign years based on financial year rules
+            $startYear = in_array($firstMonthNumber, range(4, 12)) ? $f_year_array[0] : $f_year_array[1];
+            $endYear = in_array($lastMonthNumber, range(1, 3)) ? $f_year_array[1] : $f_year_array[0];
+
+            // Create Carbon instances
+            $firstDate = Carbon::createFromDate($startYear, $firstMonthNumber, 1)->startOfMonth();
+            $lastDate = Carbon::createFromDate($endYear, $lastMonthNumber, 1)->endOfMonth();
+
+            // Set start and end date
+            $this->start_date = $firstDate->toDateString();
+            $this->end_date = $lastDate->toDateString();
+        } elseif ($this->financial_year && $this->financial_year != '' && $this->financial_year != null) {
             $f_year_array = explode('-', $this->financial_year);
 
             $this->start_date = $f_year_array[0] . '-04-01';
             $this->end_date = $f_year_array[1] . '-03-31';
-        }
-
-        if ($this->month && $this->month != '' && $this->month != null && $this->financial_year && $this->financial_year != '' && $this->financial_year != null) {
-
-            $f_year_array = explode('-', $this->financial_year);
-            if (array_intersect($this->month, ['Jan', 'Feb', 'Mar'])) {
-                $currentYear = $f_year_array[1];
-                $monthNumbers = array_map(function ($month) {
-                    return Carbon::parse($month. ' 01 2025')->month;
-                }, $this->month);
-
-                // Get the first month number and the last month number
-                $firstMonthNumber = min($monthNumbers);
-                $lastMonthNumber = max($monthNumbers);
-
-                // Create Carbon instances for the first and last dates
-                $firstDate = Carbon::createFromDate($currentYear, $firstMonthNumber, 1)->startOfMonth();
-                $lastDate = Carbon::createFromDate($currentYear, $lastMonthNumber, 1)->endOfMonth();
-                $this->start_date = $firstDate->toDateString();
-                $this->end_date = $lastDate->toDateString();
-            } else {
-                $currentYear = $f_year_array[0];
-                $monthNumbers = array_map(function ($month) {
-                    return Carbon::parse($month. ' 01 2025')->month;
-                }, $this->month);
-
-                // Get the first month number and the last month number
-                $firstMonthNumber = min($monthNumbers);
-                $lastMonthNumber = max($monthNumbers);
-
-                // Create Carbon instances for the first and last dates
-                $firstDate = Carbon::createFromDate($currentYear, $firstMonthNumber, 1)->startOfMonth();
-                $lastDate = Carbon::createFromDate($currentYear, $lastMonthNumber, 1)->endOfMonth();
-                $this->start_date = $firstDate->toDateString();
-                $this->end_date = $lastDate->toDateString();
+            if ($this->end_date > now()->toDateString()) {
+                $this->end_date = now()->toDateString();
             }
         }
+
+        $query = $query->withCount([
+            'all_attendance_details as working_days' => function ($query) {
+                $query->whereNotIn('working_type', ['Office Work', 'Office Meeting', 'Full Day Leave', 'Leave', 'Holiday'])
+                    ->whereBetween('punchin_date', [$this->start_date, $this->end_date]);
+            },
+            'visits as visit_count' => function ($query) {
+                $query->whereBetween('checkin_date', [$this->start_date, $this->end_date]);
+            }
+        ])
+            ->latest()
+            ->get();
         return $query;
     }
 
@@ -125,9 +147,15 @@ class ASMRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
     public function map($query): array
     {
         $f_year_array = explode('-', $this->financial_year);
-        $startDate = Carbon::parse($this->start_date);
+
+        if (isset($query['userinfo']['date_of_joining']) && $query['userinfo']['date_of_joining'] != null && $query['userinfo']['date_of_joining'] > $this->start_date && $query['userinfo']['date_of_joining'] < $this->end_date) {
+            $startDate = Carbon::parse($startDate = Carbon::parse($query['userinfo']['date_of_joining']));
+        } else {
+            $startDate = Carbon::parse($this->start_date);
+        }
         $endDate = Carbon::parse($this->end_date);
         $monthCount = $startDate->diffInMonths($endDate) + 1;
+
         $selectedmonths = [];
         while ($startDate->lessThanOrEqualTo($endDate)) {
             $selectedmonths[] = $startDate->format('M');
@@ -139,9 +167,28 @@ class ASMRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
         $unique_visit_count_trg = 8 * $monthCount;
         $active_customer_trg = 8 * $monthCount;
         $msp_activity_trg = 4 * $monthCount;
-        $working_days = $query->all_attendance_details->whereNotIn('working_type', ['Office Work', 'Office Meeting', 'Full Day Leave', 'Leave', 'Holiday'])->where('punchin_date', '>=', $this->start_date)->where('punchin_date', '<=', $this->end_date)->count();
-        $visit_count = $query->visits->where('checkin_date', '>=', $this->start_date)->where('checkin_date', '<=', $this->end_date)->count() > 0 ? $query->visits->where('checkin_date', '>=', $this->start_date)->where('checkin_date', '<=', $this->end_date)->count() : "0";
-        $unique_visit_count = $query->visits->where('checkin_date', '>=', $this->start_date)->where('checkin_date', '<=', $this->end_date)->map(fn($visit) => optional(optional($visit->customers)->customeraddress)->city_id)->filter()->unique()->count();
+
+        $unique_visit_count = $query->visits
+            ->whereBetween('checkin_date', [$this->start_date, $this->end_date])
+            ->filter(function ($visit) {
+                $city_id = optional(optional($visit->customers)->customeraddress)->city_id;
+
+                if (!$city_id) {
+                    return false; // Skip visits without a city
+                }
+
+                // Check if there exists any customer in the same city created before this visit's check-in date
+                $existing_customer = Customers::whereHas('customeraddress', function ($q) use ($city_id) {
+                    $q->where('city_id', $city_id);
+                })
+                    ->where('created_at', '<', $visit->checkin_date)
+                    ->exists();
+
+                return !$existing_customer; // Only include if no customer existed in that city before this visit
+            })
+            ->unique(fn($visit) => optional(optional($visit->customers)->customeraddress)->city_id)
+            ->count();
+
         $user_target = $query->target->whereIn('month', $selectedmonths)->sum('target');
         $user_achiv = $query->primarySales->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->sum('net_amount');
         $user_achiv_new_dealer = $query->primarySales()->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->where('new_dealer', 'Y')->sum('net_amount');
@@ -166,88 +213,108 @@ class ASMRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
         }
 
         $debtors_start_date = $f_year_array[0] . '-04-01';
-        $debtors_end_date = $f_year_array[0].'-12-31';
-        // $debtors_end_date = now()->toDateString();
+        // $debtors_end_date = $f_year_array[0] . '-12-31';
+        $debtors_end_date = now()->toDateString();
 
         $debtors_start_date_or = Carbon::createFromFormat('Y-m-d', $f_year_array[0] . '-04-01');
         $debtors_end_date_or = now();
 
-        // $days_difference = $debtors_start_date_or->diffInDays($debtors_end_date_or);
-        $days_difference = 270;
+        $days_difference = $debtors_start_date_or->diffInDays($debtors_end_date_or);
+        // $days_difference = 270;
 
         $debtors_sales = PrimarySales::where('branch_id', $query->branch_id)->where('invoice_date', '>=', $debtors_start_date)->where('invoice_date', '<=', $debtors_end_date)->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount');
         $total_debtors = CustomerOutstanting::where('branch_id', $query->branch_id)->whereIn('division_id', ['10', '18'])->where('year', $f_year_array[0])->sum('amount');
 
+        $degree_name = array();
+        if (!empty($query['geteducation'])) {
+            foreach ($query['geteducation'] as $key_new => $datas) {
+                $degree_name[] = isset($datas->degree_name) ? $datas->degree_name : '';
+            }
+        }
+
         $msp_activitys = MspActivity::where('emp_code', $query->employee_codes);
-        if(isset($this->month) && count($this->month) > 0){
+        if (isset($this->month) && count($this->month) > 0) {
             $msp_activitys->whereIn('month', $this->month);
         }
         $msp_activitys = $msp_activitys->where('fyear', getCurrentFinancialYear($this->financial_year))->sum('msp_count');
 
         static $rowNumber = 3;
+
         $result = [
             $query['getbranch'] ? $query['getbranch']['branch_name'] : '-',
             $query['employee_codes'],
-            $query['name'],
+            $query['name'] ?? '-',
             $query['userinfo'] ? date('d M Y', strtotime($query['userinfo']['date_of_joining'])) : '',
-
             "=AT{$rowNumber}",
 
-            $working_days,
-            round(($working_days / $working_days_trg) * 100, 0) . '%',
-            (($working_days / $working_days_trg) * 100 >= 100) ? '100%' : round(($working_days / $working_days_trg) * 100, 0) . '%',
-            $number_days = (($working_days / $working_days_trg) * 100 >= 100) ? '5' : (round((5 * (($working_days / $working_days_trg) * 100)) / 100, 0) > 0 ? round((5 * (($working_days / $working_days_trg) * 100)) / 100, 0) : '0'),
+            $query['working_days'] . ' (' . $working_days_trg . ')',
+            $this->getPer($query['working_days'], $working_days_trg) . '%',
+            $this->getPer($query['working_days'], $working_days_trg) >= 100 ? '100%' : $this->getPer($query['working_days'], $working_days_trg) . '%',
+            $number_days = $this->getFR($this->getPer($query['working_days'], $working_days_trg), 5),
 
-            $visit_count,
-            round(($visit_count / $visit_count_trg) * 100, 0) . '%',
-            (($visit_count / $visit_count_trg) * 100 >= 100) ? '100%' : round(($visit_count / $visit_count_trg) * 100, 0) . '%',
-            $all_cust = (($visit_count / $visit_count_trg) * 100 >= 100) ? '5' : (round((5 * (($visit_count / $visit_count_trg) * 100)) / 100, 0) > 0 ? round((5 * (($visit_count / $visit_count_trg) * 100)) / 100, 0) : '0'),
+            $query['visit_count'] . ' (' . $visit_count_trg . ')',
+            $this->getPer($query['visit_count'], $visit_count_trg) . '%',
+            $this->getPer($query['visit_count'], $visit_count_trg) >= 100 ? '100%' : $this->getPer($query['visit_count'], $visit_count_trg) . '%',
+            $all_cust = $this->getFR($this->getPer($query['visit_count'], $visit_count_trg), 5),
 
-            $unique_visit_count,
-            round(($unique_visit_count / $unique_visit_count_trg) * 100, 0) . '%',
-            (($unique_visit_count / $unique_visit_count_trg) * 100 >= 100) ? '100%' : round(($unique_visit_count / $unique_visit_count_trg) * 100, 0) . '%',
-            $uniq_cust = (($unique_visit_count / $unique_visit_count_trg) * 100 >= 100) ? '5' : (round((5 * (($unique_visit_count / $unique_visit_count_trg) * 100)) / 100, 0) > 0 ? round((5 * (($unique_visit_count / $unique_visit_count_trg) * 100)) / 100, 0) : '0'),
+            $unique_visit_count . '(' . $unique_visit_count_trg . ')',
+            $this->getPer($unique_visit_count, $unique_visit_count_trg) . '%',
+            $this->getPer($unique_visit_count, $unique_visit_count_trg) >= 100 ? '100%' : $this->getPer($unique_visit_count, $unique_visit_count_trg) . '%',
+            $uniq_cust = $this->getFR($this->getPer($unique_visit_count, $unique_visit_count_trg), 5),
 
             $user_target,
             $user_achiv > 0 ? round(($user_achiv / 100000), 2) : '0',
-            $user_target > 0 ? round((($user_achiv / 100000) / $user_target) * 100, 0) . '%' : '0%',
-            $user_target > 0 ? (((($user_achiv / 100000) / $user_target) * 100) >= 100 ? '100%' : round((($user_achiv / 100000) / $user_target) * 100, 0) . '%') : '0%',
-            $targets = $user_target > 0 ? (((($user_achiv / 100000) / $user_target) * 100) >= 100 ? '40' : round(40 * ((($user_achiv / 100000) / $user_target) * 100) / 100, 0)) : '0',
+            $this->getPer($user_achiv / 100000, $user_target) . '%',
+            $this->getPer($user_achiv / 100000, $user_target) >= 100 ? '100%' : $this->getPer($user_achiv / 100000, $user_target) . '%',
+            $targets = $this->getFR($this->getPer($user_achiv / 100000, $user_target), 40),
 
-            $user_achiv > 0 ? round((($user_achiv / 100000) * 40) / 100, 1) : '0',
+            $fachiv = $user_achiv > 0 ? round((($user_achiv / 100000) * 40) / 100, 1) : '0',
             $user_achiv_new_dealer > 0 ? round(($user_achiv_new_dealer / 100000), 2) : '0',
-            ((($user_achiv / 100000) * 40) / 100) > 0 ? round((($user_achiv_new_dealer / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100, 0) . '%' : '0%',
-            ((($user_achiv / 100000) * 40) / 100) > 0 ? (((($user_achiv_new_dealer / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100) >= 100 ? '100%' : round((($user_achiv_new_dealer / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100, 0) . '%') : '0%',
-            $new_sale = ((($user_achiv / 100000) * 40) / 100) > 0 ? (((($user_achiv_new_dealer / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100) >= 100 ? '10' : round(10 * ((($user_achiv_new_dealer / 100000) / ((($user_achiv / 100000) * 40) / 100)) * 100) / 100, 0)) : '0',
+            $this->getPer($user_achiv_new_dealer / 100000, $fachiv) . '%',
+            $this->getPer($user_achiv_new_dealer / 100000, $fachiv) >= 100 ? '100%' : $this->getPer($user_achiv_new_dealer / 100000, $fachiv) . '%',
+            $new_sale = $this->getFR($this->getPer($user_achiv_new_dealer / 100000, $fachiv), 10),
 
-            $user_achiv > 0 ? round((($user_achiv / 100000) * 60) / 100, 2) : '0',
+            $sachiv = $user_achiv > 0 ? round((($user_achiv / 100000) * 60) / 100, 2) : '0',
             $user_achiv_new_product > 0 ? round(($user_achiv_new_product / 100000), 2) : '0',
-            ((($user_achiv / 100000) * 60) / 100) > 0 ? round((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100, 0) . '%' : '0%',
-            ((($user_achiv / 100000) * 60) / 100) > 0 ? (((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100) >= 100 ? '100%' : round((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100, 0) . '%') : '0%',
-            $newpro = ((($user_achiv / 100000) * 60) / 100) > 0 ? (((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100) >= 100 ? '10' : round(10 * ((($user_achiv_new_product / 100000) / ((($user_achiv / 100000) * 60) / 100)) * 100) / 100, 0)) : '0',
+            $this->getPer($user_achiv_new_product / 100000, $sachiv) . '%',
+            $this->getPer($user_achiv_new_product / 100000, $sachiv) >= 100 ? '100%' : $this->getPer($user_achiv_new_product / 100000, $sachiv) . '%',
+            $newpro = $this->getFR($this->getPer($user_achiv_new_product / 100000, $sachiv), 5),
 
             $debtors_sales > 0 ? round(($debtors_sales / 100000), 2) : '0',
             $debtors_sales > 0 ? round((($debtors_sales / 100000) / $days_difference), 2) : '0',
             $total_debtors > 0 ? round($total_debtors, 1) : '0',
             $days = ($debtors_sales / 100000) / 270 > 0 && $total_debtors > 0 ? round(($total_debtors / (($debtors_sales / 100000) / $days_difference)), 0) : '100',
             $percentage = $days <= 30 ? '100%' : ($days <= 60 ? '80%' : ($days <= 90 ? '50%' : '0%')),
-            $debtor = (20*(int)$percentage)/100,
-            
-            $active_customer > 0 ? $active_customer : '0',
-            round(($active_customer / $active_customer_trg) * 100, 0) . '%',
-            (($active_customer / $active_customer_trg) * 100 >= 100) ? '100%' : round(($active_customer / $active_customer_trg) * 100, 0) . '%',
-            $sarthi_custo = (($active_customer / $active_customer_trg) * 100 >= 100) ? '5' : (round((5 * (($active_customer / $active_customer_trg) * 100)) / 100, 0) > 0 ? round((5 * (($active_customer / $active_customer_trg) * 100)) / 100, 0) : '0'),
+            $debtor = (20 * (int)$percentage) / 100,
 
-            $msp_activitys > 0 ? $msp_activitys : '0',
-            $msp_activitys > 0 ? round(($msp_activitys/$msp_activity_trg)*100,   0) : '0',
-            $msp_final = (($msp_activitys/$msp_activity_trg)*100 >= 100) ? '5' : (round((5 * (($msp_activitys/$msp_activity_trg)*100)) / 100, 0) > 0 ? round((5 * (($msp_activitys/$msp_activity_trg)*100)) / 100, 0) : '0'),
+            $active_customer > 0 ? $active_customer : '0',
+            $this->getPer($active_customer, $active_customer_trg) . '%',
+            $this->getPer($active_customer, $active_customer_trg) >= 100 ? '100%' : $this->getPer($active_customer, $active_customer_trg) . '%',
+            $sarthi_custo = $this->getFR($this->getPer($active_customer, $active_customer_trg), 5),
+
+            $msp_activitys > 0 ? $msp_activitys . ' (' . $msp_activity_trg . ')' : '0 (' . $msp_activity_trg . ')',
+            $this->getPer($msp_activitys, $msp_activity_trg) . '%',
+            $msp_final = $this->getFR($this->getPer($msp_activitys, $msp_activity_trg), 5),
 
             $sarthi_custo + $debtor + $newpro + $new_sale + $all_cust + $uniq_cust + $targets + $number_days + $msp_final,
 
         ];
         $rowNumber++;
-
         return $result;
+    }
+
+    public function getPer($achiv, $trg)
+    {
+        return $trg > 0 ? round(($achiv / $trg) * 100, 0) : '0';
+    }
+    public function getFR($achivper, $tpoint)
+    {
+        if ($achivper >= 100) {
+            return $tpoint;
+        } else {
+            return round(($tpoint * $achivper) / 100, 0) > 0 ? round(($tpoint * $achivper) / 100, 0) : '0';
+        }
+        return round(($achiv / $trg) * 100, 0);
     }
 
     public function registerEvents(): array

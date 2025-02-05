@@ -375,13 +375,14 @@ if (! function_exists('getLatLongToAddress')) {
         ]);
 
         $ch = curl_init(sprintf('%s?%s', 'http://api.positionstack.com/v1/reverse', $queryString));
+        
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $json = curl_exec($ch);
         curl_close($ch);
         $results = json_decode($json, true);
         if (!empty($results['data'])) {
-            // $addressline = $results['data'][0]['name'].', '.$results['data'][0]['county'].', '.$results['data'][0]['region'].', '.$results['data'][0]['postal_code'];
-            $addressline = $results['data'][0]['label'];
+            $addressline = $results['data'][0]['name'].', '.$results['data'][0]['county'].', '.$results['data'][0]['region'].', '.$results['data'][0]['postal_code'];
+            // $addressline = $results['data'][0]['label'];
         }
         return $addressline;
     }

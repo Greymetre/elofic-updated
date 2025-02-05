@@ -164,7 +164,7 @@
               <div class="col-md-6">
                 <div class="input_section">
                   <label class="col-form-label">User</label>
-                  <select class="form-control" name="user_id" id="user_id" style="width: 100%;" required>
+                  <select class="form-control select2" name="user_id" id="user_id" style="width: 100%;" required>
                     <option value="">Select User</option>
                     @if(@isset($users))
                     @foreach($users as $user)
