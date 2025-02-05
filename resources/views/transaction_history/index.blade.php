@@ -365,8 +365,18 @@
               ids: selectedValues,
             },
             success: function(data) {
-              if (data.status == 'true') {
-                $('.alert').addClass("alert-success");
+              $('.message').empty();
+              if (data.status == true) {
+                  if(data.update == true){
+                    $('.alert').show();
+                    $('.alert').addClass("alert-success");
+                    $('.message').append('Point updated successfully');
+                  }
+                  if(data.message != ''){
+                    $('.alert').show();
+                    $('.alert').addClass("alert-danger");
+                    $('.message').append(data.message);
+                  }
               } 
               table.draw();
             },
