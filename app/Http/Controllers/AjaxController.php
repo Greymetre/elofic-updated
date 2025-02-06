@@ -19,6 +19,7 @@ use Carbon\Carbon;
 use LDAP\Result;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Crypt;
+use App\Models\MarketingActivity;
 
 class AjaxController extends Controller
 {
@@ -1571,5 +1572,72 @@ class AjaxController extends Controller
             $warranty_expire_date = $date->addYears($product->expiry_interval_preiod)->format('d-m-Y');
         }
         return response()->json(['status' => 'success', 'warrenty_expire_date' => $warranty_expire_date]);
+    }
+
+    // get seller or buyre
+    public function getSellerBuyer(Request $request)
+    {
+        $userids = getUsersReportingToAuth();
+        $query = Customers::query();
+
+        // Filter by seller or buyer type
+        if ($request->is_seller == 1) {
+            $query->where(function ($query) use ($userids) {
+                if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                    if (Auth::user()->hasRole('Accounts Order')) {
+                        $userids = User::whereIn('branch_id', explode(',', Auth::user()->branch_show))->pluck('id');
+                    }
+                    $query->whereIn('executive_id', $userids)
+                        ->orWhereIn('created_by', $userids);
+                }
+            });
+        } elseif ($request->is_seller == 0) {
+            $query->whereIn('customertype', ['1', '3', '4', '5', '6'])
+                ->where(function ($query) use ($userids) {
+                    if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                        $query->whereIn('executive_id', $userids)
+                            ->orWhereIn('created_by', $userids);
+                    }
+                });
+        }
+
+        // Search functionality
+        if (!empty($request->q)) {
+            $query->where('name', 'LIKE', '%' . $request->q . '%')
+                ->orWhere('mobile', 'LIKE', '%' . $request->q . '%');
+        }
+
+        // Pagination
+        $users = $query->where('active', 'Y')
+            ->select('id', 'name')
+            ->paginate(10); // Adjust limit per page
+
+        if ($request->selected) {
+            $selectedUser = Customers::find($request->selected);
+            if ($selectedUser) {
+                // Add the selected user at the top of the list
+                $users->prepend($selectedUser);
+            }
+        }
+
+        return response()->json([
+            'results' => $users->items(), 
+            'pagination' => ['more' => $users->hasMorePages()],
+        ]);
+    }
+
+    // Add Marketing actinity 
+    public function addMarketingType(Request $request){
+        $type = $request->type ?? '';
+        if(isset($type)){
+            $slug = strtolower(str_replace(' ', '_', $type));
+
+            $marketing_type = MarketingActivity::updateOrCreate(
+                ['slug' => $slug ],
+                ['type' => $type ]
+            );
+            return response()->json(['status' => true , 'marketing_type' => $marketing_type]);
+        } 
+        return response()->json(['status' => false ]);
     }
 }

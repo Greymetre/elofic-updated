@@ -25,6 +25,30 @@
     .swal2-container.swal2-center.swal2-fade.swal2-shown {
       z-index: 999999 !important;
     }
+
+  .invoice-info {
+      margin-top: 20px;
+  }
+  .invoice-info .col-md-6 {
+      background: #f8f9fa;
+      border-radius: 11px;
+      padding: 4px;
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  .invoice-info h6 {
+      font-weight: bold;
+      color: #6e7c85; /* Bootstrap primary color */
+      margin-bottom: 8px;
+  }
+  .invoice-info p {
+      font-size: 14px;
+      color: #333;
+      background: #ffffff; /* White background for text */
+      padding: 10px;
+      border-radius: 5px;
+      display: inline-block;
+      box-shadow: inset 0px 1px 3px rgba(0, 0, 0, 0.1);
+  }
   </style>
   <!-- Main content -->
   <section class="content">
@@ -188,7 +212,52 @@
                 </div>
                 <div class="col-md-4"></div>
               </div>
-
+              {{-- <div class="row invoice-info mt-4">
+                <div class="col-md-4">
+                  <h4><b>Warranty Details</b></h4>
+                </div>
+                <div class="col-md-4 text-center">
+                </div>
+                <div class="col-md-4"></div>
+              </div> --}}
+              
+              <div class="row">
+              <table class="table table-striped responsive">
+                <tr >
+                  <th>Category</th>
+                  <th>Product/Model(Code)</th>
+                  <th>Description</th>
+                  <th>Product Serial Number</th>
+                  <th>HP</th>
+                  <th>Stage</th>
+                </tr>
+                <tr>
+                    <td>{{ $complaint->product_details ? $complaint->product_details->categories->category_name : '-' }}</td>
+                    <td>{{ $complaint->product_code ?? '-' }}</td>
+                    <td>{{ $complaint->product_details ? $complaint->product_details->model_no : '-' }}</td>
+                    <td>{{ $complaint->product_serail_number ?? '-' }}</td>
+                    <td>{{ $complaint->product_details ? $complaint->product_details->specification : '-' }}</td>
+                    <td>{{$complaint->product_details?$complaint->product_details->product_no:''}}</td>
+                </tr>
+                <tr>
+                  <th>Product SAP Code</th>
+                  <th>Phase</th>
+                  <th>Warranty/Customer Bill Date</th>
+                  <th>Service Paid/Free</th>
+                  <th>Seller</th>
+                  <th></th>
+                </tr>
+                <tr>
+                    <td>{{$complaint->product_details?$complaint->product_details->sap_code:'-'}}</td>
+                    <td>{{($complaint->product_details && $complaint->product_details->phase != '')?$complaint->product_details->phase:'-'}}</td>
+                    <td>{{$complaint->customer_bill_date?date('d-m-Y', strtotime($complaint->customer_bill_date)):'-'}}</td>
+                    <td>{{$complaint->service_type??'-'}}</td>
+                    <td>{{$complaint->seller??'-'}}</td>
+                    <td></td>
+                </tr>
+              </table>
+              </div>
+{{-- 
               <table class="table table-striped responsive border-0 new-table">
                 <tr>
                   <td><em>Category :</em></td>
@@ -223,8 +292,14 @@
                   <td><em>Seller :</em></td>
                   <th>{{$complaint->seller??'-'}}</th>
                 </tr>
-              </table>
-
+              </table> --}}
+              
+              <div class="row">
+                <div class="col-md-6">
+                </div>
+                <div class="col-md-6">
+                </div>
+              </div>
               <div class="row invoice-info">
                 <div class="col-md-6 text-center" style="line-height: 15px;">
                   <h6><em>Complete Remark</em></h6>
@@ -236,7 +311,21 @@
                 </div>
               </div>
 
-              <table class="table responsive border-0 mt-4 new-table">
+              <div class="row invoice-info">
+                <div class="col-md-4 text-center" style="line-height: 15px;">
+                  <h6><em>Replacement Tag</em></h6>
+                  <p><b>{{$service_bill?$service_bill->replacement_tag:'-'}}</b></p>
+                </div>
+                <div class="col-md-4 text-center" style="line-height: 0px;">
+                  <h6><em>Replacement Tag Serial Number</em></h6>
+                  <p><b>{{$service_bill?$service_bill->replacement_tag_number:'-'}}</b></p>
+                </div>
+                <div class="col-md-4 text-center" style="line-height: 0px;">
+                  <h6><em>Replacement Tag Description</em></h6>
+                  <p><b>-</b></p>
+                </div>
+              </div>
+              {{-- <table class="table responsive border-0 mt-4 new-table">
                 <tr>
                   <td><em>Replacement Tag</em></td>
                   <td><em>Replacement Tag Serial Number</em></td>
@@ -247,12 +336,12 @@
                   <th class="pt-0">{{$service_bill?$service_bill->replacement_tag_number:'-'}}</th>
                   <th class="pt-0">-</th>
                 </tr>
-              </table>
+              </table> --}}
 
               <hr class="mb-4">
 
               <div class="row invoice-info">
-                <div class="col-md-6 mb-3">
+                <div class="col-md-4 mb-3">
                   <h6 class="mr-2 mb-0">Invoice(Warranty) Image : </h6>
                   <div class="d-flex invoice-info all-attach">
                     @if($complaint->warranty_details)
@@ -285,7 +374,7 @@
                 </div>
                 @if($complaint->exists && $complaint->getMedia('complaint_attach')->count() > 0 && Storage::disk('s3')->exists($complaint->getMedia('complaint_attach')[0]->getPath()))
                 @foreach($complaint->getMedia('complaint_attach') as $k => $media)
-                <div class="col-md-6 mb-2">
+                <div class="col-md-4 mb-2">
                   <h6 class="mr-2 mb-0">Complaint Attachments:</h6>
                   <div class="d-flex invoice-info all-attach">
                     @if($media->mime_type == 'application/pdf')

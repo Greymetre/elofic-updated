@@ -247,29 +247,29 @@ class OrderController extends Controller
         $products = Product::where('active', '=', 'Y')->select('id', 'display_name', 'product_image')->get();
 
 
-        $sellers = Customers::where(function ($query) use ($userids) {
-            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
-                if (Auth::user()->hasRole('Accounts Order')) {
-                    $userids = User::whereIn('branch_id', explode(',', Auth::user()->branch_show))->pluck('id');
-                }
-                $query->whereIn('executive_id', $userids)
-                    ->orWhereIn('created_by', $userids);
-            }
-        })
-            ->where('active', '=', 'Y')
-            ->select('id', 'name', 'mobile')
-            ->get();
+        // $sellers = Customers::where(function ($query) use ($userids) {
+        //     if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+        //         if (Auth::user()->hasRole('Accounts Order')) {
+        //             $userids = User::whereIn('branch_id', explode(',', Auth::user()->branch_show))->pluck('id');
+        //         }
+        //         $query->whereIn('executive_id', $userids)
+        //             ->orWhereIn('created_by', $userids);
+        //     }
+        // })
+        //     ->where('active', '=', 'Y')
+        //     ->select('id', 'name', 'mobile')
+        //     ->get();
 
-        $buyers = Customers::whereIn('customertype', ['1', '3', '4', '5', '6'])
-            ->where(function ($query) use ($userids) {
-                if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
-                    $query->whereIn('executive_id', $userids)
-                        ->orWhereIn('created_by', $userids);
-                }
-            })
-            ->where('active', '=', 'Y')
-            ->select('id', 'name', 'mobile')
-            ->get();
+        // $buyers = Customers::whereIn('customertype', ['1', '3', '4', '5', '6'])
+        //     ->where(function ($query) use ($userids) {
+        //         if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+        //             $query->whereIn('executive_id', $userids)
+        //                 ->orWhereIn('created_by', $userids);
+        //         }
+        //     })
+        //     ->where('active', '=', 'Y')
+        //     ->select('id', 'name', 'mobile')
+        //     ->get();
 
         $users = User::where(function ($query) use ($userids) {
             if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
@@ -280,7 +280,7 @@ class OrderController extends Controller
         })->select('id', 'name')->orderBy('id', 'desc')->get();
 
         $category = Category::where('active', 'Y')->get();
-        return view('orders.edit', compact('products', 'sellers', 'buyers', 'orderdetail', 'users', 'category'))->with('orders', $orders);
+        return view('orders.edit', compact('products', 'orderdetail', 'users', 'category'))->with('orders', $orders);
     }
 
     /**
