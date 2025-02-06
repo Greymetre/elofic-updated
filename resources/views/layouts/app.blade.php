@@ -2484,5 +2484,5 @@
   gtag('config', 'G-8D1DXGE6Z6');
 </script>
 </body>
-
+@yield('script')
 </html>

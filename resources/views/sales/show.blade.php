@@ -84,7 +84,7 @@
                     @if($sales->exists && isset($sales['saledetails']))
                         @foreach($sales['saledetails'] as $rows )
                         <tr>
-                            <td>{!! $rows['products']['display_name'] !!}</td>
+                            <td>{!! $rows['products']['product_name'] !!}</td>
                             <td>GST Percent : <span class="gst_percent">{!! isset($rows['productdetails']['gst']) ? $rows['productdetails']['gst'] : '' !!}</span> <br>
                             GST Amount : <span class="gstamount">{!! $rows['tax_amount'] !!}</span> <br>
                             </td>

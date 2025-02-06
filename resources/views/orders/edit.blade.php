@@ -115,7 +115,7 @@
                               <select class="form-control select2 seller" name="seller_id" style="width: 100%;" required onchange="sellerinfo()" id="seller_id">
                                  <!-- <option value="">Select {!! trans('panel.global.seller') !!}</option> -->
                                  <option value="">Select Customer</option>
-                                 @if(@isset($sellers ))
+                                 {{-- @if(@isset($sellers ))
                                  @foreach($sellers as $seller)
 
                                  <!-- <option value="{!! $seller['id'] !!}" data-allowtype="{{$seller->customertype}}"    {{ old( 'seller_id' , (!empty($orders->seller_id)) ? ($orders->seller_id) :('') ) == $seller['id'] ? 'selected' : '' }}>{!! $seller['name'] !!}</option> -->
@@ -123,7 +123,7 @@
                                  <option value="{!! $seller['id'] !!}" data-allowtype="{{$seller->customertype}}" {{ old( 'seller_id' , (!empty($orders->buyer_id)) ? ($orders->buyer_id) :('') ) == $seller['id'] ? 'selected' : '' }}>{!! $seller['name'] !!}</option>
 
                                  @endforeach
-                                 @endif
+                                 @endif --}}
                               </select>
                            </div>
                            @if ($errors->has('seller_id'))
@@ -150,15 +150,15 @@
                         <label class="col-form-label">Dealer/Distributer<span class="text-danger"> *</span></label>
                        
                            <div class="form-group has-default bmd-form-group">
-                              <select class="form-control select2 buyer" name="buyer_id" style="width: 100%;" onchange="buyerinfo()">
+                              <select class="form-control select2 buyer" name="buyer_id" style="width: 100%;" onchange="buyerinfo()" id="buyer_id">
                                  <!-- <option value="">Select {!! trans('panel.global.buyer') !!}</option> -->
                                  <option value="">Select Dealer/Distributer</option>
-                                 @if(@isset($buyers ))
+                                 {{-- @if(@isset($buyers ))
                                  @foreach($buyers as $buyer)
                                  <!-- <option value="{!! $buyer['id'] !!}" {{ old( 'buyer_id' , (!empty($orders->buyer_id)) ? ($orders->buyer_id) :('') ) == $buyer['id'] ? 'selected' : '' }}>{!! $buyer['name'] !!}</option> -->
                                  <option value="{!! $buyer['id'] !!}" {{ old( 'buyer_id' , (!empty($orders->seller_id)) ? ($orders->seller_id) :('') ) == $buyer['id'] ? 'selected' : '' }}>{!! $buyer['name'] !!}</option>
                                  @endforeach
-                                 @endif
+                                 @endif --}}
                               </select>
                            </div>
                            @if($errors->has('seller_id'))
@@ -885,7 +885,12 @@
    <!-- <script src="{{ url('/').'/'.asset('assets/js/validation_orders.js') }}"></script> -->
    <!-- <script src="{{ url('/').'/'.asset('assets/js/invoice_js') }}"></script> -->
    <script type="text/javascript">
+
+
+
+
       $(document).ready(function() {
+
 
          var $table = $('table.kvcodes-dynamic-rows-example'),
             counter = $('#tab_logic tr:last').attr('value');
@@ -934,7 +939,6 @@
 
          });
 
-
          $table.on('click', '.remove-rows', function() {
             $(this).closest('tr').remove();
             calc($(this));
@@ -951,28 +955,7 @@
                });
             }
          });
-
-         // $('#tab_logic tbody').on('keyup change',function(){
-         //    calc();
-         // });
-
-         // $('#tab_logic tbody').on('keyup change', 'tr', function() {
-         //    calc($(this)); // Pass the current row to the calc function
-         // });
-
-
       });
-
-
-
-
-
-      //new
-
-
-
-
-
 
 
       $('.cluster_discount').on('change', function() {
@@ -1711,5 +1694,96 @@
       // }, 1000);
    </script>
 
+@section('script')
+   <script type="">
+
+      $(document).ready(function () {
+         function initializeSelect2(selector, is_seller, selectedId = null) {
+            // Initialize select2
+            $(selector).select2({
+               ajax: {
+                  url: "{{ url('getSellerBuyer') }}",
+                  type: "POST",
+                  dataType: "json",
+                  delay: 250, // Delay to prevent excessive requests
+                  data: function (params) {
+                     return {
+                           _token: "{{ csrf_token() }}",
+                           q: params.term, // Search term
+                           page: params.page || 1, // Pagination
+                           is_seller: is_seller,
+                           selected: selectedId // Include selected ID for pre-loading
+                     };
+                  },
+                  processResults: function (data, params) {
+                     params.page = params.page || 1;
+                 
+                     // If the search term is empty, fetch the first 10 records
+                     if (!params.term) {
+                           return {
+                              results: $.map(data.results, function (item) {
+                                 return { id: item.id, text: item.name };
+                              }),
+                              pagination: { more: data.pagination.more }
+                           };
+                     }
+
+                     // If there is a search term, return matching records
+                     return {
+                           results: $.map(data.results, function (item) {
+                              return { id: item.id, text: item.name };
+                           }),
+                           pagination: { more: data.pagination.more }
+                     };
+                  },
+                  cache: true
+               },
+               placeholder: "Search...",
+        });
+
+
+            // Load pre-selected value if available
+            if (selectedId) {
+                  $.ajax({
+                     url: "{{ url('getSellerBuyer') }}",
+                     type: "POST",
+                     dataType: "json",
+                     data: {
+                        _token: "{{ csrf_token() }}",
+                        selected: selectedId,
+                        is_seller: is_seller
+                     },
+                     success: function (res) {
+                        // Append the selected user
+                        if (selectedId) {
+                           let selectedItem = res.results.find(item => item.id == selectedId); // Find the selected item from the response
+                           if (selectedItem) {
+                              let newOption = new Option(selectedItem.name, selectedItem.id, true, true);
+                              $(selector).append(newOption).trigger('change'); // Append the selected user
+                           }
+                        }
+
+                        // Append the rest of the users (10 others), avoiding duplicate selected user
+                        res.results.forEach(function (item) {
+                           if (item.id !== selectedId) {
+                              let newOption = new Option(item.name, item.id, false, false);
+                              $(selector).append(newOption).trigger('change');
+                           }
+                        });
+                     }
+                  });
+            }
+         }
+
+         // Get selected IDs from the backend
+         var buyer_id = "{{ $orders->buyer_id ?? '' }}";
+         var seller_id = "{{ $orders->seller_id ?? '' }}";
+
+         // Initialize Select2 for seller and buyer with selected IDs
+         initializeSelect2("#seller_id", 1, buyer_id);
+         initializeSelect2("#buyer_id", 0, seller_id);
+      });
+   </script>
+@endsection
 
 </x-app-layout>
