@@ -1015,8 +1015,8 @@ Route::any('getExpenseCount', [AjaxController::class, 'getExpenseCount']);
 Route::any('getLeaveBalance', [AjaxController::class, 'getLeaveBalance']);
 Route::any('marketing/getCounts', [AjaxController::class, 'marketingGetCounts'])->name('marketing.getCounts');
 Route::any('getProductTimeInterval', [AjaxController::class, 'getProductTimeInterval']);
-
-
+Route::any('getSellerBuyer', [AjaxController::class, 'getSellerBuyer']);
+Route::any('addMarketingType', [AjaxController::class, 'addMarketingType']);
 
 
 //Clear Cache facade value:

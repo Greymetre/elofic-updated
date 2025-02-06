@@ -41,6 +41,65 @@
       iframe {
          position: relative;
       }
+
+      #badge-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px; /* Adds space between badges */
+    }
+
+    /* Style for the badges */
+    .badge {
+         background-color: #17a2b8;
+         color: white;
+         padding: 6px 12px;
+         border-radius: 20px;
+         font-size: 10px;
+         display: flex;
+         align-items: center;
+         justify-content: space-between;
+      }
+
+    /* Add hover effect on badges */
+    .badge:hover {
+        background-color: #138496; /* Slightly darker shade of blue */
+        cursor: pointer;
+    }
+
+    /* Style for the close button */
+    .badge .close {
+        color: white;
+        background: transparent;
+        border: none;
+        font-size: 16px;
+        margin-left: 10px;
+        cursor: pointer;
+    }
+
+    /* Close button hover effect */
+    .badge .close:hover {
+        color: #ff4d4f; /* Red color when hovering over the cross button */
+    }
+
+    /* Style for the input field */
+    .input-group input {
+        border-radius: 20px 0 0 20px;
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    /* Style for the "Add" button */
+    .input-group-prepend .btn {
+        border-radius: 0 20px 20px 0;
+        background-color: #28a745;
+        color: white;
+        font-size: 14px;
+    }
+
+    /* Hover effect for Add button */
+    .input-group-prepend .btn:hover {
+        background-color: #218838;
+    }
    </style>
    <div class="row">
       <div class="col-md-12">
@@ -177,9 +236,48 @@
                   {{ Form::submit('Submit', array('class' => 'btn btn-theme')) }}
                </div>
             </div>
-
-
             {{ Form::close() }}
+ 
+            <hr class="mt-5">
+            <div class="card-body">
+               <div class="row">
+
+                  
+                  <!-- Form Section -->
+                  <div class="col-md-6">
+                     <div class="input_section">
+                        <label class="col-form-label"style="color: #53697c">Marketing Activity </label>
+                         <div class="input-group">
+                             <input type="text" name="activity_type" placeholder="Activity Type"  class="form-control" id="activity_type" >
+                             <div class="input-group-prepend ml-2">
+                                    <button class="btn btn-primary" type="button" id="marketing_type">Add</button>
+                              </div>
+                         </div>
+                         <div id="badge-container" class="mt-2">
+                           <!-- Static Badges -->
+                           <span class="badge badge-info mr-2 mb-2">
+                              Marketing
+                              <button type="button" class="close" aria-label="Close" onclick="removeBadge(this)">
+                                  <span aria-hidden="true">&times;</span>
+                              </button>
+                          </span>
+                          <span class="badge badge-info mr-2 mb-2">
+                           Development
+                           <button type="button" class="close" aria-label="Close" onclick="removeBadge(this)">
+                               <span aria-hidden="true">&times;</span>
+                           </button>
+                       </span>
+                       <span class="badge badge-info mr-2 mb-2">
+                           Sales
+                           <button type="button" class="close" aria-label="Close" onclick="removeBadge(this)">
+                               <span aria-hidden="true">&times;</span>
+                           </button>
+                       </span>
+                       </div>
+                     </div>
+                 </div>                 
+               </div>
+            </div>
          </div>
       </div>
    </div>
@@ -214,6 +312,23 @@
             },
          });
       });
+
+      $('#marketing_type').on('click' , function(){
+         var type = $('#activity_type').val();
+         if(type!=''){
+            $.ajax({
+                url: "{{ url('addMarketingType') }}",
+                data: {
+                    "type": type
+                },
+                success: function(res) {
+                    if (res.status == true) {
+                        getupdateMarketingType();
+                    }
+                }
+            });
+         }
+      })
       // 
    </script>
 </x-app-layout>
