@@ -67,46 +67,54 @@ class CHRatingReportExport implements FromCollection, WithHeadings, ShouldAutoSi
 
         $query = $query->where('sales_type', 'Primary')->whereIn('designation_id', ['5', '6', '7'])->latest()->get();
 
-        if ($this->financial_year && $this->financial_year != '' && $this->financial_year != null) {
+        if ($this->month && $this->financial_year) {
+            $f_year_array = explode('-', $this->financial_year);
+
+            // Month mapping to numbers
+            $monthMap = [
+                "Apr" => 4,
+                "May" => 5,
+                "Jun" => 6,
+                "Jul" => 7,
+                "Aug" => 8,
+                "Sep" => 9,
+                "Oct" => 10,
+                "Nov" => 11,
+                "Dec" => 12,
+                "Jan" => 1,
+                "Feb" => 2,
+                "Mar" => 3
+            ];
+
+            // Convert selected months to numbers
+            $monthNumbers = array_map(fn($month) => $monthMap[$month], $this->month);
+
+            // Separate months into financial year groups
+            $currentYearMonths = array_filter($monthNumbers, fn($m) => $m >= 4 && $m <= 12);
+            $nextYearMonths = array_filter($monthNumbers, fn($m) => $m >= 1 && $m <= 3);
+
+            // Get the correct first and last months
+            $firstMonthNumber = !empty($currentYearMonths) ? min($currentYearMonths) : min($nextYearMonths);
+            $lastMonthNumber = !empty($nextYearMonths) ? max($nextYearMonths) : max($currentYearMonths);
+
+            // Assign years based on financial year rules
+            $startYear = in_array($firstMonthNumber, range(4, 12)) ? $f_year_array[0] : $f_year_array[1];
+            $endYear = in_array($lastMonthNumber, range(1, 3)) ? $f_year_array[1] : $f_year_array[0];
+
+            // Create Carbon instances
+            $firstDate = Carbon::createFromDate($startYear, $firstMonthNumber, 1)->startOfMonth();
+            $lastDate = Carbon::createFromDate($endYear, $lastMonthNumber, 1)->endOfMonth();
+
+            // Set start and end date
+            $this->start_date = $firstDate->toDateString();
+            $this->end_date = $lastDate->toDateString();
+        } elseif ($this->financial_year && $this->financial_year != '' && $this->financial_year != null) {
             $f_year_array = explode('-', $this->financial_year);
 
             $this->start_date = $f_year_array[0] . '-04-01';
             $this->end_date = $f_year_array[1] . '-03-31';
-        }
-
-        if ($this->month && $this->month != '' && $this->month != null && $this->financial_year && $this->financial_year != '' && $this->financial_year != null) {
-
-            $f_year_array = explode('-', $this->financial_year);
-            if (array_intersect($this->month, ['Jan', 'Feb', 'Mar'])) {
-                $currentYear = $f_year_array[1];
-                $monthNumbers = array_map(function ($month) {
-                    return Carbon::parse($month)->month;
-                }, $this->month);
-
-                // Get the first month number and the last month number
-                $firstMonthNumber = min($monthNumbers);
-                $lastMonthNumber = max($monthNumbers);
-
-                // Create Carbon instances for the first and last dates
-                $firstDate = Carbon::createFromDate($currentYear, $firstMonthNumber, 1)->startOfMonth();
-                $lastDate = Carbon::createFromDate($currentYear, $lastMonthNumber, 1)->endOfMonth();
-                $this->start_date = $firstDate->toDateString();
-                $this->end_date = $lastDate->toDateString();
-            } else {
-                $currentYear = $f_year_array[0];
-                $monthNumbers = array_map(function ($month) {
-                    return Carbon::parse($month)->month;
-                }, $this->month);
-
-                // Get the first month number and the last month number
-                $firstMonthNumber = min($monthNumbers);
-                $lastMonthNumber = max($monthNumbers);
-
-                // Create Carbon instances for the first and last dates
-                $firstDate = Carbon::createFromDate($currentYear, $firstMonthNumber, 1)->startOfMonth();
-                $lastDate = Carbon::createFromDate($currentYear, $lastMonthNumber, 1)->endOfMonth();
-                $this->start_date = $firstDate->toDateString();
-                $this->end_date = $lastDate->toDateString();
+            if ($this->end_date > now()->toDateString()) {
+                $this->end_date = now()->toDateString();
             }
         }
 
@@ -129,12 +137,9 @@ class CHRatingReportExport implements FromCollection, WithHeadings, ShouldAutoSi
             $selectedmonths[] = $startDate->format('M');
             $startDate->addMonth();
         }
-
-        $working_days_trg = 20 * $monthCount;
-        $visit_count_trg = 120 * $monthCount;
-        $unique_visit_count_trg = 8 * $monthCount;
-        $active_customer_trg = 8 * $monthCount;
-
+        $firstYearMonths = array_filter($selectedmonths, fn($m) => in_array($m, ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"])); // 2024
+        $secondYearMonths = array_filter($selectedmonths, fn($m) => in_array($m, ["Jan", "Feb", "Mar"])); // 2025
+        
         $lastyrstartdate = Carbon::createFromFormat('Y-m-d', $this->start_date)->subYear()->format('Y-m-d');
         $lastyrenddate = Carbon::createFromFormat('Y-m-d', $this->end_date)->subYear()->format('Y-m-d');
 
@@ -142,11 +147,30 @@ class CHRatingReportExport implements FromCollection, WithHeadings, ShouldAutoSi
         $emp_codes = User::whereIn('id', $user_ids)->pluck('employee_codes');
         $branch_ids = explode(',', $query->branch_id);
 
-        $targets = SalesTargetUsers::with('user')->whereIn('branch_id', $branch_ids)->whereIn('month', $selectedmonths)->where('type', 'primary')->whereHas('user', function ($query) {
+        $targets = SalesTargetUsers::with('user')
+        ->whereIn('branch_id', $branch_ids)
+        ->where(function ($query) use ($firstYearMonths, $secondYearMonths, $f_year_array) {
+            if (!empty($firstYearMonths)) {
+                $query->orWhere(function ($q) use ($firstYearMonths, $f_year_array) {
+                    $q->whereIn('month', $firstYearMonths)->where('year', $f_year_array[0]);
+                });
+            }
+            if (!empty($secondYearMonths)) {
+                $query->orWhere(function ($q) use ($secondYearMonths, $f_year_array) {
+                    $q->whereIn('month', $secondYearMonths)->where('year', $f_year_array[1]);
+                });
+            }
+        })
+        ->where('type', 'primary')
+        ->whereHas('user', function ($query) {
             $query->whereIn('division_id', ['10', '18']);
-        })->sum('target');
+        })
+        ->sum('target');
+
         $achiv = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount') / 100000;
-        $ly_targets = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $lastyrstartdate)->where('invoice_date', '<=', $lastyrenddate)->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount') / 100000;
+        $ly_targets = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $lastyrstartdate)->where('invoice_date', '<=', $lastyrenddate)->whereIn('division', ['PUMP', 'MOTOR']);  //->sum('net_amount') / 100000;
+
+        dd($ly_targets->toSql(), $ly_targets->getBindings(), $f_year_array[0]-1);
 
         $new_achiv_dealer = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->where('new_dealer', 'Y')->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount') / 100000;
         $new_achiv_product = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->where('new_product', 'Y')->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount') / 100000;
@@ -200,14 +224,14 @@ class CHRatingReportExport implements FromCollection, WithHeadings, ShouldAutoSi
             $total_debtors > 0 ? round($total_debtors, 1) : '0',
             $days = ($debtors_sales / 100000) / 270 > 0 && $total_debtors > 0 ? round(($total_debtors / (($debtors_sales / 100000) / $days_difference)), 0) : '100',
             $percentage = $days <= 30 ? '100%' : ($days <= 60 ? '80%' : ($days <= 90 ? '50%' : '0%')),
-            $debtor = (20*(int)$percentage)/100,
+            $debtor = (20 * (int)$percentage) / 100,
 
             $debtors_sales > 0 ? round(($debtors_sales / 100000), 2) : '0',
             $debtors_sales > 0 ? round((($debtors_sales / 100000) / $days_difference), 2) : '0',
             $total_inventory > 0 ? round($total_inventory, 2) : '0',
             $inv_days = ($debtors_sales / 100000) / 270 > 0 && $total_inventory > 0 ? round(($total_inventory / (($debtors_sales / 100000) / $days_difference)), 0) : '100',
             $percentage = $inv_days <= 30 ? '100%' : ($inv_days <= 60 ? '80%' : ($inv_days <= 90 ? '50%' : '0%')),
-            $inventory = (10*(int)$percentage)/100,
+            $inventory = (10 * (int)$percentage) / 100,
             '0',
             '0',
             (int)$aop + (int)$goly + (int)$new_chanel + (int)$new_product + (int)$debtor + (int)$inventory
