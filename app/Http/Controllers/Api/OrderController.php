@@ -29,6 +29,7 @@ use Illuminate\Support\Facades\Mail;
 use stdClass;
 use Dompdf\Dompdf;
 use Dompdf\Options;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
@@ -730,6 +731,7 @@ class OrderController extends Controller
                 'buyer_id' => 'required',
                 'seller_id' => 'required',
                 'invoice_no' => 'required',
+                'invoice_date' => 'required',
                 'order_id' => 'required',
                 'grand_total' => 'required',
                 'lr_no'            => 'required',
@@ -739,6 +741,9 @@ class OrderController extends Controller
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
 
+            $order = Order::where('id', '=', $request['order_id'])->first();
+            
+            $request['orderno'] = $order->orderno;
             $request['saledetail'] = $request['orderdetail'];
             $request['status_id'] = 2;
             $data = collect([$request]);
@@ -750,8 +755,8 @@ class OrderController extends Controller
                         $orderdetail = OrderDetails::where('order_id', '=', $request['order_id'])
                             ->where('product_id', '=', ($rows['product_id'] ?? ''))->first();
                         if (isset($orderdetail)) {
-                            $orderdetail->cash_dis = $rows['cash_dis'];
-                            $orderdetail->cash_amounts = $rows['cash_amounts'];
+                            // $orderdetail->cash_dis = $rows['cash_dis'];
+                            // $orderdetail->cash_amounts = $rows['cash_amounts'];
                             $orderdetail->status_id = $partiallystatus;
                             $orderdetail->increment('shipped_qty', $rows['quantity']);
                             $orderdetail->save();

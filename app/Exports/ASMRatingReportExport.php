@@ -174,17 +174,18 @@ class ASMRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
                 $city_id = optional(optional($visit->customers)->customeraddress)->city_id;
 
                 if (!$city_id) {
-                    return false; // Skip visits without a city
+                    return true;
                 }
 
-                // Check if there exists any customer in the same city created before this visit's check-in date
                 $existing_customer = Customers::whereHas('customeraddress', function ($q) use ($city_id) {
                     $q->where('city_id', $city_id);
                 })
+                ->whereHas('createdbyname', function ($q) {
+                    $q->where('division_id', $this->division_id);
+                })
                     ->where('created_at', '<', $visit->checkin_date)
                     ->exists();
-
-                return !$existing_customer; // Only include if no customer existed in that city before this visit
+                return !$existing_customer;
             })
             ->unique(fn($visit) => optional(optional($visit->customers)->customeraddress)->city_id)
             ->count();
