@@ -75,9 +75,6 @@
           </button>
           <strong class="message"></strong>
         </div>
-
-
-
         <div class="card">
           <div class="card-body">
             <div class="row">
@@ -165,13 +162,15 @@
             <hr>
 
             <div class="invoice">
-              <div class="row">
+              {{-- <div class="row">
                 <div class="col-4">
                   <h4>
                     <small class="float-left">COMPLAINT <p style="font-size: 22px; color:#5252b7">#{!! $complaint['complaint_number'] !!}</p></small>
                   </h4>
                 </div>
-              </div>
+              </div> --}}
+              <p style="font-size: 16px; color:#5252b7">#{!! $complaint['complaint_number'] !!}</p>
+
               <div class="row invoice-info">
                 <div class="col-md-6">
                   <h4 class="m-0"><em>Complaint From</em></h4>
@@ -222,42 +221,45 @@
               </div> --}}
               
               <div class="row">
-              <table class="table table-striped responsive">
-                <tr >
-                  <th>Category</th>
-                  <th>Product/Model(Code)</th>
-                  <th>Description</th>
-                  <th>Product Serial Number</th>
-                  <th>HP</th>
-                  <th>Stage</th>
-                </tr>
-                <tr>
-                    <td>{{ $complaint->product_details ? $complaint->product_details->categories->category_name : '-' }}</td>
-                    <td>{{ $complaint->product_code ?? '-' }}</td>
-                    <td>{{ $complaint->product_details ? $complaint->product_details->model_no : '-' }}</td>
-                    <td>{{ $complaint->product_serail_number ?? '-' }}</td>
-                    <td>{{ $complaint->product_details ? $complaint->product_details->specification : '-' }}</td>
-                    <td>{{$complaint->product_details?$complaint->product_details->product_no:''}}</td>
-                </tr>
-                <tr>
-                  <th>Product SAP Code</th>
-                  <th>Phase</th>
-                  <th>Warranty/Customer Bill Date</th>
-                  <th>Service Paid/Free</th>
-                  <th>Seller</th>
-                  <th></th>
-                </tr>
-                <tr>
-                    <td>{{$complaint->product_details?$complaint->product_details->sap_code:'-'}}</td>
-                    <td>{{($complaint->product_details && $complaint->product_details->phase != '')?$complaint->product_details->phase:'-'}}</td>
-                    <td>{{$complaint->customer_bill_date?date('d-m-Y', strtotime($complaint->customer_bill_date)):'-'}}</td>
-                    <td>{{$complaint->service_type??'-'}}</td>
-                    <td>{{$complaint->seller??'-'}}</td>
-                    <td></td>
-                </tr>
-              </table>
+                <div class="table-responsive">
+                  <table class="table table-striped">
+                    <tr>
+                      <th>Category</th>
+                      <th>Product/Model(Code)</th>
+                      <th>Description</th>
+                      <th>Product Serial Number</th>
+                      <th>HP</th>
+                      <th>Stage</th>
+                    </tr>
+                    <tr>
+                      <td>{{ $complaint->product_details ? $complaint->product_details->categories->category_name : '-' }}</td>
+                      <td>{{ $complaint->product_code ?? '-' }}</td>
+                      <td>{{ $complaint->product_details ? $complaint->product_details->model_no : '-' }}</td>
+                      <td>{{ $complaint->product_serail_number ?? '-' }}</td>
+                      <td>{{ $complaint->product_details ? $complaint->product_details->specification : '-' }}</td>
+                      <td>{{$complaint->product_details?$complaint->product_details->product_no:''}}</td>
+                    </tr>
+                    <tr>
+                      <th>Product SAP Code</th>
+                      <th>Phase</th>
+                      <th>Warranty/Customer Bill Date</th>
+                      <th>Service Paid/Free</th>
+                      <th>Seller</th>
+                      <th></th>
+                    </tr>
+                    <tr>
+                      <td>{{$complaint->product_details?$complaint->product_details->sap_code:'-'}}</td>
+                      <td>{{($complaint->product_details && $complaint->product_details->phase != '')?$complaint->product_details->phase:'-'}}</td>
+                      <td>{{$complaint->customer_bill_date?date('d-m-Y', strtotime($complaint->customer_bill_date)):'-'}}</td>
+                      <td>{{$complaint->service_type??'-'}}</td>
+                      <td>{{$complaint->seller??'-'}}</td>
+                      <td></td>
+                    </tr>
+                  </table>
+                </div>
               </div>
-{{-- 
+              
+                  {{-- 
               <table class="table table-striped responsive border-0 new-table">
                 <tr>
                   <td><em>Category :</em></td>

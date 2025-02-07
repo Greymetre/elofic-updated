@@ -13,6 +13,7 @@ use Gate;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use DateTime;
+use Carbon\Carbon;
 
 class LeaveController extends Controller
 {
@@ -310,5 +311,26 @@ class LeaveController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->withErrors($e->getMessage())->withInput();
         }
+    }
+
+    // comboOffLeave 
+    public function comboOffLeave(Request $request){
+        $expiryDate = Carbon::parse($request['combo_off_date'])->addDays(60);
+        $isSunday = Carbon::parse($request['combo_off_date'])->isSunday();
+        if(!$isSunday){
+            return redirect()->back()->with('message_danger', 'Combo of leave apply only on sunday.')->withInput();
+        }
+        $compOffLeave = CompOffLeave::where(['user_id' => $request->user_id , 'comp_off_date' => $request['combo_off_date']])->first();
+        
+        if(isset($compOffLeave)){
+            return redirect()->back()->with('message_danger', 'This date has already been added as a comp-off date for this user.')->withInput();
+        }
+        CompOffLeave::create([
+            'user_id' => $request['user_id'],
+            'comp_off_date' => $request['combo_off_date'],
+            'expiry_date' => $expiryDate,
+            'is_used' => false,
+        ]);
+        return redirect()->route('leaves.index')->with('message_success', 'A comp-off date added for this user.')->withInput();
     }
 }

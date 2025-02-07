@@ -623,6 +623,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('leaves-approved', [LeaveController::class, 'approved'])->name('leaves.approved');
     Route::any('leaveapproval', [LeaveController::class, 'leaveApproval'])->name('leaves.approval');
     Route::any('leaverejected', [LeaveController::class, 'leaveRejected'])->name('leaves.rejected');
+    Route::post('combo-off-leave', [LeaveController::class, 'comboOffLeave'])->name('comboOffLeave');
     /*============= Team ====================*/
     Route::resource('teams', TeamController::class);
     /*============= Holiday ====================*/

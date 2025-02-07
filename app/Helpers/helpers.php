@@ -21,6 +21,7 @@ use App\Models\Settings;
 use App\Models\SchemeHeader;
 use App\Models\Coupons;
 use App\Models\Holiday;
+use App\Models\OrderDetails;
 use App\Models\Payment;
 use Illuminate\Support\Str;
 

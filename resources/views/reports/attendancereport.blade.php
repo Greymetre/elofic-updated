@@ -203,7 +203,7 @@
               </div>
               <div class="col-md-6" id="city_div" style="display: none;">
                 <label class="col-form-label">Select City</label>
-                <select class="form-control" name="city" id="city">
+                <select class="form-control select2" name="city" id="city">
 
                 </select>
               </div>
