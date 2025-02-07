@@ -691,18 +691,22 @@ class OrderController extends Controller
             }
 
             $orderid = $request['order_id'];
+            
             $status_id = Status::where('status_name', '=', 'Dispatched')->pluck('id')->first();
             // Order::where('id', '=', $orderid)->update(['status_id' => $status_id, 'cash_discount' => $request->cash_discount, 'cash_amount' => $request->cash_amount, 'sub_total' => $request->sub_total, 'grand_total' => $request->grand_total, 'order_remark' => $request->order_remark]);
             $orders = $this->orders->with('orderdetails')->find($orderid);
             $orders['invoice_date'] = $request['invoice_date'];
             $orders['invoice_no'] = $request['invoice_no'];
-            // $orders['transport_name'] = $request['transport_name'];
+            $orders['transport_name'] = $request['transport_name'];
             $orders['lr_no'] = $request['lr_no'];
             $orders['dispatch_date'] = $request['dispatch_date'];
             $orders['transport_details'] = $request['transport_details'];
             $orders['order_id'] = $orderid;
+            $orders['status_id'] = $status_id;
             $orders['saledetail'] = $orders['orderdetails'];
             $data = collect([$orders]);
+            
+            
             // dd($data);
             $response = insertSales($data);
             if ($response['status'] == 'success') {
@@ -757,7 +761,7 @@ class OrderController extends Controller
                         if (isset($orderdetail)) {
                             // $orderdetail->cash_dis = $rows['cash_dis'];
                             // $orderdetail->cash_amounts = $rows['cash_amounts'];
-                            $orderdetail->status_id = $partiallystatus;
+                            $orderdetail->status_id = $request['status_id'];
                             $orderdetail->increment('shipped_qty', $rows['quantity']);
                             $orderdetail->save();
                         }
