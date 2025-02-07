@@ -90,12 +90,16 @@
               <thead class=" text-primary">
                 <th>{!! trans('panel.global.no') !!}</th>
                 <!-- <th>{!! trans('panel.global.action') !!}</th> -->
+                <th>Date</th>
+                <th>Service Center</th>
+                <th>Service Center Code</th>
+                <th>Seller Name</th>
                 <th>Complaint Number</th>
                 <th>Customer</th>
-                <th>Complaint Date</th>
+             
                 <th>Complaint Type</th>
                 <th>Purchased Party Name</th>
-                <th>Service Center</th>
+                
                 <th>Complaint Status</th>
               </thead>
               <tbody>
@@ -127,6 +131,30 @@
             orderable: false,
             searchable: false
           },
+          {
+            data: 'complaint_date',
+            name: 'complaint_date',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'service_center_details.name',
+            name: 'service_center_details.name',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'service_center_details.customer_code',
+            name: 'service_center_details.customer_code',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'warranty_details.seller_details.name',
+            name: 'warranty_details.seller_details.name',
+            orderable: false,
+            "defaultContent": ''
+          },
           // {
           //   data: 'action',
           //   name: 'action',
@@ -148,12 +176,7 @@
                 return data.customer.customer_name + ' (' + data.customer.customer_number + ')';
             }
           },
-          {
-            data: 'complaint_date',
-            name: 'complaint_date',
-            orderable: false,
-            "defaultContent": ''
-          },
+          
           {
             data: 'complaint_type_details.name',
             name: 'complaint_type_details.name',
@@ -166,12 +189,7 @@
             orderable: false,
             "defaultContent": ''
           },
-          {
-            data: 'service_center_details.name',
-            name: 'service_center_details.name',
-            orderable: false,
-            "defaultContent": ''
-          },
+          
           {
             data: 'status',
             name: 'status',

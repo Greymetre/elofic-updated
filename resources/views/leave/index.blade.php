@@ -66,13 +66,18 @@
                 </form> -->
                 @endif
                 <div class="next-btn">
-                @if(auth()->user()->can(['leave_create']))
-                <a data-toggle="modal" data-target="#submitLeave" class="custom-btn create" title="Punch In">
-                  Add Leave
-                </a>
-                @endif
-                <a href="{{ URL::to('attendance-location') }}" class="btn btn-just-icon btn-theme  d-none" title="Update Location"><i class="material-icons">add_location</i></a>
-              </div>
+                    @if(auth()->user()->can(['leave_create']))
+                        <a data-toggle="modal" data-target="#submitLeave" class="custom-btn create" title="Punch In">
+                            Add Leave
+                        </a>
+                    @endif
+                    <a href="{{ URL::to('attendance-location') }}" class="btn btn-just-icon btn-theme d-none" title="Update Location">
+                        <i class="material-icons">add_location</i>
+                    </a>
+                    <a data-toggle="modal" data-target="#AddComboLeave" class="custom-btn create" title="Add Combo Leave">
+                         Add Combo Leave
+                    </a>
+                </div>
               </div>
             </span>
           </h4>
@@ -159,7 +164,7 @@
               <div class="col-md-6">
                 <div class="input_section">
                   <label class="col-form-label">User</label>
-                  <select class="form-control" name="user_id" id="user_id" style="width: 100%;" required>
+                  <select class="form-control select2" name="user_id" id="user_id" style="width: 100%;" required>
                     <option value="">Select User</option>
                     @if(@isset($users))
                     @foreach($users as $user)
@@ -242,6 +247,71 @@
     </div>
   </div>
 
+
+  <div class="modal fade bd-example-modal-lg" id="AddComboLeave" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content card">
+        <div class="card-header card-header-icon card-header-theme">
+          <div class="card-icon">
+            <i class="material-icons">perm_identity</i>
+          </div>
+          <h4 class="card-title">
+            <span class="modal-title">Add </span> Combo Leave <span class="pull-right">
+              <a href="javascript:void(0)" class="btn btn-just-icon btn-danger" data-dismiss="modal">
+                <i class="material-icons">clear</i>
+              </a>
+            </span>
+          </h4>
+        </div>
+        <div class="modal-body">
+          <form method="POST" action="{{ route('comboOffLeave') }}" enctype="multipart/form-data" id="createComboLeave"> 
+            @csrf
+            <div class="row">
+              <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">User</label>
+                  <select class="form-control select2" name="user_id" id="user_id_c" style="width: 100%;" required>
+                    <option value="">Select User</option>
+                    @if(@isset($users))
+                    @foreach($users as $user)
+                    <option value="{!! $user['id'] !!}">{!! $user['name'] !!}</option>
+                    @endforeach
+                    @endif
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">Leave Balance</label>
+                  <div>
+                  <input type="number" readonly name="leave_balance" id="leave_balance_c" class="form-control" value="">
+                </div>
+              </div>
+              </div>
+              <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">Comp off Balance</label>
+                  <div>
+                  <input type="number" readonly name="comp_off_balance" id="comp_off_balance_c" class="form-control" value="">
+                </div>
+              </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">Date</label>
+                  <div>
+                  <input type="text" name="combo_off_date" id="combo_off_date" class="datepicker" value="{!! old( 'to_date') !!}" required>
+                </div>
+              </div>
+              </div>
+            </div>
+            <button id="add_leave" class="btn btn-info save pull-right"> Submit</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- new model for reject attendance -->
 
@@ -553,6 +623,30 @@
       }
     });
 
+    $(document).on("change", "#user_id_c", function(e) {
+      var user_id = $(this).val();
+        $.ajax({
+          url: "{{ url('getLeaveBalance') }}",
+          dataType: "json",
+          type: "POST",
+          data: {
+            _token: "{{csrf_token()}}",
+            user_id: user_id
+          },
+          success: function(res) {
+            if (res.status == 'success') {
+              if(res.comp_off_balance != '' && res.comp_off_balance > 0){
+                $('#bal_type option[value="Comp-off Balance"]').prop('disabled', false);
+              }else{
+                $('#bal_type option[value="Comp-off Balance"]').prop('disabled', true);
+              }
+              $("#leave_balance_c").val(res.leave_balance);
+              $("#comp_off_balance_c").val(res.comp_off_balance);
+            }
+          }
+        })
+    });
+
     $("#working_type").on("change", function() {
       var selectedOption = $(this).find('option:selected');
       var is_city = selectedOption.data('is-city');
@@ -608,5 +702,23 @@
         }
       });
     }
+  </script>
+  <script>
+      $(document).ready(function () {
+          $("#combo_off_date").datepicker({
+              dateFormat: "yy-mm-dd",
+              beforeShowDay: function(date) {
+                  var day = date.getDay();
+                  var today = new Date();
+                  
+                  // Allow only past Sundays
+                  if (day === 0 && date < today) {
+                      return [true, ""]; // Enable the date
+                  } else {
+                      return [false, ""]; // Disable other dates
+                  }
+              }
+          });
+      });
   </script>
 </x-app-layout>
