@@ -1239,7 +1239,7 @@
       });
 
       $(document).ready(function() {
-         var serial_number = "{{ $serial_number }}";
+         var serial_number = "{{ $serial_number ?? '' }}";
          if(serial_number && serial_number != ''){
             $('#serail_number').val(serial_number).trigger("keyup");;
          }
