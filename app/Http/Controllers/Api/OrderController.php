@@ -749,11 +749,11 @@ class OrderController extends Controller
             
             $request['orderno'] = $order->orderno;
             $request['saledetail'] = $request['orderdetail'];
-            $request['status_id'] = 2;
+            // $request['status_id'] = status_id;
             $data = collect([$request]);
             $response = insertSales($data);
             if ($response['status'] == 'success') {
-                $partiallystatus = 2;
+                $partiallystatus = $request['status_id'];
                 if (isset($request['orderdetail'])) {
                     foreach ($request['orderdetail'] as $key => $rows) {
                         $orderdetail = OrderDetails::where('order_id', '=', $request['order_id'])

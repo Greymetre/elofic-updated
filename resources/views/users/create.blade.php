@@ -1171,7 +1171,7 @@
           </div> -->
                 <div class="col-md-6">
                   <div class="input_section">
-                    <label class="col-form-label">{!! trans('panel.user.current_company_tenture') !!}(in year)</label>
+                    <label class="col-form-label">{!! trans('panel.user.current_company_tenture') !!}(in month)</label>
 
                     <div class="form-group has-default bmd-form-group">
                       <input placeholder="In Year" readonly type="number" name="current_company_tenture" id="current_company_tenture" class="form-control" value="{!! old( 'current_company_tenture', $user->userinfo?$user->userinfo->current_company_tenture:'') !!}">
@@ -1273,10 +1273,16 @@
       $('#total_exp').val(parseInt(current_company_tenture) + parseInt(previous_exp));
 
       var DOJ = $('#date_of_joining').val();
-      doj = new Date(DOJ);
+      var doj = new Date(DOJ);
       var today = new Date();
-      var current_company_tenture = Math.floor((today - doj) / (365.25 * 24 * 60 * 60 * 1000));
-      $('#current_company_tenture').val(current_company_tenture);
+
+      var yearDiff = today.getFullYear() - doj.getFullYear();
+      var monthDiff = today.getMonth() - doj.getMonth();
+
+      var current_company_tenure = (yearDiff * 12) + monthDiff;
+      current_company_tenure = current_company_tenure < 0 ? 0 : current_company_tenure;
+
+      $('#current_company_tenture').val(current_company_tenure);
       var previous_exp = $('#previous_exp').val();
 
       $('#total_exp').val(parseInt(current_company_tenture) + parseInt(previous_exp));
@@ -1284,10 +1290,16 @@
 
     $(document).on('change', '#date_of_joining', function() {
       var DOB = $(this).val();
-      dob = new Date(DOB);
+      var doj = new Date(DOJ);
       var today = new Date();
-      var current_company_tenture = Math.floor((today - dob) / (365.25 * 24 * 60 * 60 * 1000));
-      $('#current_company_tenture').val(current_company_tenture);
+
+      var yearDiff = today.getFullYear() - doj.getFullYear();
+      var monthDiff = today.getMonth() - doj.getMonth();
+
+      var current_company_tenure = (yearDiff * 12) + monthDiff;
+      current_company_tenure = current_company_tenure < 0 ? 0 : current_company_tenure;
+
+      $('#current_company_tenture').val(current_company_tenure);
       var previous_exp = $('#previous_exp').val();
 
       $('#total_exp').val(parseInt(current_company_tenture) + parseInt(previous_exp));

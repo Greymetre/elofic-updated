@@ -130,16 +130,7 @@
                 <th>No</th>
                 <th>Employees Code</th>
                 <th>FOS Name</th>
-                <th>Area Of Operation (Districts Covered)</th>
-                <th>Date of Appointment</th>
-                <th>Yesterday Productivity vs Visit</th>
-                <th>Order Value This Month (in Lacs After 35%)</th>
-                <th>Total Order Value in Lacs After 35%</th>
-                <th>Sale Index</th>
-                <th>Registration Index</th>
-                <th>Visit Index</th>
-                <th>Activation Index</th>
-                <th>Performance Rating</th>
+                <th>Action</th>
               </thead>
               <tbody>
               </tbody>
@@ -161,7 +152,7 @@
         ],
         "ajax": {
           'type': 'POST',
-          'url': "{{ url('reports/fos_rating') }}",
+          'url': "{{ url('reports/asm_rating') }}",
           'data': function(d) {
             d._token = token,
               d.user_id = $('#user_id').val(),
@@ -192,71 +183,8 @@
             orderable: false
           },
           {
-            data: 'cities',
-            name: 'cities',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'userinfo.date_of_joining',
-            name: 'userinfo.date_of_joining',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'yesterday_productivity_visit',
-            name: 'yesterday_productivity_visit',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'order_value_current_month',
-            name: 'order_value_current_month',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'total_order_value',
-            name: 'total_order_value',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'sale_index',
-            name: 'sale_index',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'registration_index',
-            name: 'registration_index',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'visit_index',
-            name: 'visit_index',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'activation_index',
-            name: 'activation_index',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'performance_rating',
-            name: 'performance_rating',
+            data: 'action',
+            name: 'action',
             "defaultContent": '',
             orderable: false,
             searchable: false

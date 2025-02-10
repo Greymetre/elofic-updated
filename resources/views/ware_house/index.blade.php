@@ -68,7 +68,7 @@
         <div class="table-responsive">
           <table id="getcategory" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
             <thead class=" text-primary">
-              <th>{!! trans('panel.global.no') !!}</th>
+              <th>ID</th>
               <th>{!! trans('panel.global.action') !!}</th>
               <th>Ware House Code</th>
               <th>Ware House Name</th>
@@ -144,7 +144,7 @@
         "order": [ [0, 'desc'] ],
         ajax: "{{ route('ware_house.index') }}",
         columns: [
-            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+            { data: 'id', name: 'id', orderable: false, searchable: false },
             {data: 'action', name: 'action',"defaultContent": '',orderable: false, searchable: false},
              {data: 'warehouse_code', name: 'warehouse_code',"defaultContent": '', orderable: false, searchable: false},
             {data: 'warehouse_name', name: 'warehouse_name',"defaultContent": '', orderable: false, searchable: false},

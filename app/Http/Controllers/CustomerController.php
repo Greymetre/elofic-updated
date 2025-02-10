@@ -21,6 +21,7 @@ use App\Exports\SurveyExport;
 use App\Exports\CustomersTemplate;
 use App\Http\Requests\CustomersRequest;
 use App\Models\TransactionHistory;
+use PDF;
 
 use App\Models\EmployeeDetail;
 use App\Models\ParentDetail;
@@ -909,5 +910,15 @@ class CustomerController extends Controller
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         return Excel::download(new SurveyExport($request), 'survey.xlsx');
+    }
+
+    public function balance_confirmation(Request $request)
+    {
+
+        return view('redemption.balance_pdf');
+
+        $pdf = PDF::loadView('redemption.balance_pdf');
+
+        return $pdf->download('document.pdf');
     }
 }

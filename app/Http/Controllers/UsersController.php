@@ -1023,9 +1023,6 @@ class UsersController extends Controller
                 return Excel::download(new ASMRatingDetailReportExport($request), 'Detail Rating Report(PMS).xlsx');
             }
         } else if (empty(array_diff($request->role_id, [3, 6, 13]))) {
-            if ($request->ip() != '111.118.252.250') {
-                return view('work_in_progress');
-            }
             if ($request->download == 'simple') {
                 return Excel::download(new CHRatingReportExport($request), 'Rating Report.xlsx');
             } else {

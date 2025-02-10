@@ -12,6 +12,7 @@ use App\Models\MobileUserLoginDetails;
 use App\Models\MspActivity;
 use App\Models\Order;
 use App\Models\OrderDetails;
+use App\Models\ParentDetail;
 use App\Models\PrimarySales;
 use App\Models\Redemption;
 use App\Models\TransactionHistory;
@@ -180,9 +181,9 @@ class ASMRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
                 $existing_customer = Customers::whereHas('customeraddress', function ($q) use ($city_id) {
                     $q->where('city_id', $city_id);
                 })
-                ->whereHas('createdbyname', function ($q) {
-                    $q->where('division_id', $this->division_id);
-                })
+                    ->whereHas('createdbyname', function ($q) {
+                        $q->where('division_id', $this->division_id);
+                    })
                     ->where('created_at', '<', $visit->checkin_date)
                     ->exists();
                 return !$existing_customer;
@@ -190,16 +191,60 @@ class ASMRatingReportExport implements FromCollection, WithHeadings, ShouldAutoS
             ->unique(fn($visit) => optional(optional($visit->customers)->customeraddress)->city_id)
             ->count();
 
+        // if ($request->ip() != '111.118.252.250') {
+
+        //     $uniqueVisits = $query->visits
+        //         ->whereBetween('checkin_date', [$this->start_date, $this->end_date])
+        //         ->filter(function ($visit) {
+        //             $city_id = optional(optional($visit->customers)->customeraddress)->city_id;
+
+        //             if (!$city_id) {
+        //                 return true;
+        //             }
+
+        //             $existing_customer = Customers::whereHas('customeraddress', function ($q) use ($city_id) {
+        //                 $q->where('city_id', $city_id);
+        //             })
+        //                 ->whereHas('createdbyname', function ($q) {
+        //                     $q->where('division_id', $this->division_id);
+        //                 })
+        //                 ->where('created_at', '<', $visit->checkin_date)
+        //                 ->exists();
+
+        //             return !$existing_customer;
+        //         })
+        //         ->unique(fn($visit) => optional(optional($visit->customers)->customeraddress)->city_id)
+        //         ->map(function ($visit) {
+        //             $city_name = optional(optional($visit->customers)->customeraddress)->cityname->city_name ?? 'Unknown City';
+        //             return [
+        //                 'city_name' => $city_name,
+        //                 'visit_date' => $visit->checkin_date,
+        //                 'customer_id' => $visit->customer_id,
+        //             ];
+        //         });
+
+        //     dd($uniqueVisits);
+        // }
+
         $user_target = $query->target->whereIn('month', $selectedmonths)->sum('target');
         $user_achiv = $query->primarySales->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->sum('net_amount');
         $user_achiv_new_dealer = $query->primarySales()->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->where('new_dealer', 'Y')->sum('net_amount');
         $user_achiv_new_product = $query->primarySales()->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->where('new_product', 'Y')->sum('net_amount');
         DB::statement("SET SESSION group_concat_max_len = 10000000");
         $user_ids = getUsersReportingToAuth($query->id);
-        $total_assign_customer_ids = EmployeeDetail::where('user_id', $query->id)->pluck('customer_id')->toArray();
+
+        $total_assign_customer_ids = EmployeeDetail::where('user_id', $query->id)
+            ->pluck('customer_id')
+            ->toArray();
+
+        $child_customer_ids = ParentDetail::whereIn('parent_id', $total_assign_customer_ids)
+            ->pluck('customer_id')
+            ->toArray();
+
+        $all_customer_ids = array_merge($total_assign_customer_ids, $child_customer_ids);
         $active_customer = 0;
 
-        foreach (array_chunk($total_assign_customer_ids, 500) as $chunk) {
+        foreach (array_chunk($all_customer_ids, 500) as $chunk) {
             $active_customer += TransactionHistory::whereBetween('created_at', [$this->start_date, $this->end_date])
                 ->whereIn('customer_id', $chunk)
                 ->whereNotIn('customer_id', function ($query) {
