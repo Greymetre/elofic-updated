@@ -1291,6 +1291,7 @@ return [
 
     'complaint'           => [
         'title'          => 'Complaints',
+        'new_title'      => 'CareKonnect',
         'title_singular' => 'Complaint',
         'detail_title' => 'Complaint Detail',
         'fields'         => [
