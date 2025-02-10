@@ -74,9 +74,11 @@
                     <a href="{{ URL::to('attendance-location') }}" class="btn btn-just-icon btn-theme d-none" title="Update Location">
                         <i class="material-icons">add_location</i>
                     </a>
+                    @if(auth()->user()->can(['add_comp_off_leave']))
                     <a data-toggle="modal" data-target="#AddComboLeave" class="custom-btn create" title="Add Combo Leave">
-                         Add Combo Leave
+                         Add Comp Off Leave
                     </a>
+                    @endif
                 </div>
               </div>
             </span>
@@ -256,7 +258,7 @@
             <i class="material-icons">perm_identity</i>
           </div>
           <h4 class="card-title">
-            <span class="modal-title">Add </span> Combo Leave <span class="pull-right">
+            <span class="modal-title">Add </span> Comp Off Leave <span class="pull-right">
               <a href="javascript:void(0)" class="btn btn-just-icon btn-danger" data-dismiss="modal">
                 <i class="material-icons">clear</i>
               </a>

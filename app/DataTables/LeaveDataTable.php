@@ -90,7 +90,7 @@ class LeaveDataTable extends DataTable
      */
     public function query(Leave $model)
     {
-        return $model->with('users', 'createdbyname')->newQuery();
+       return $model->with('users', 'createdbyname')->orderBy('id', 'desc')->newQuery();
     }
 
     /**

@@ -168,9 +168,7 @@ class CHRatingReportExport implements FromCollection, WithHeadings, ShouldAutoSi
         ->sum('target');
 
         $achiv = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount') / 100000;
-        $ly_targets = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $lastyrstartdate)->where('invoice_date', '<=', $lastyrenddate)->whereIn('division', ['PUMP', 'MOTOR']);  //->sum('net_amount') / 100000;
-
-        dd($ly_targets->toSql(), $ly_targets->getBindings(), $f_year_array[0]-1);
+        $ly_targets = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $lastyrstartdate)->where('invoice_date', '<=', $lastyrenddate)->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount') / 100000;
 
         $new_achiv_dealer = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->where('new_dealer', 'Y')->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount') / 100000;
         $new_achiv_product = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $this->start_date)->where('invoice_date', '<=', $this->end_date)->where('new_product', 'Y')->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount') / 100000;
@@ -178,14 +176,14 @@ class CHRatingReportExport implements FromCollection, WithHeadings, ShouldAutoSi
         $branch_names = Branch::whereIn('id', $branch_ids)->pluck('branch_name')->toArray();
 
         $debtors_start_date = $f_year_array[0] . '-04-01';
-        $debtors_end_date = $f_year_array[0] . '-12-31';
-        // $debtors_end_date = now()->toDateString();
+        // $debtors_end_date = $f_year_array[0] . '-12-31';
+        $debtors_end_date = now()->toDateString();
 
         $debtors_start_date_or = Carbon::createFromFormat('Y-m-d', $f_year_array[0] . '-04-01');
         $debtors_end_date_or = now();
 
-        // $days_difference = $debtors_start_date_or->diffInDays($debtors_end_date_or);
-        $days_difference = 270;
+        $days_difference = $debtors_start_date_or->diffInDays($debtors_end_date_or);
+        // $days_difference = 270;
 
         $debtors_sales = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $debtors_start_date)->where('invoice_date', '<=', $debtors_end_date)->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount');
         $total_debtors = CustomerOutstanting::whereIn('branch_id', $branch_ids)->whereIn('division_id', ['10', '18'])->where('year', $f_year_array[0])->sum('amount');
