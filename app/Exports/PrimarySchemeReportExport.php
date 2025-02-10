@@ -174,10 +174,15 @@ class PrimarySchemeReportExport implements FromCollection, WithHeadings, ShouldA
 
             }
         } else {
-            
-            $CM = PrimarySchemeDetail::where('groups', $data['new_group_name'])->where('min', '<=', $data['total_quantity'])->where('max', '>=', $data['total_quantity'])->where('primary_scheme_id', $this->scheme_id)->first();
+            if($this->pSchemes->primaryscheme_details[0]->max == '0'){
+                $CM = PrimarySchemeDetail::where('groups', $data['new_group_name'])->where('slab_min', '<=', $data['total_net_amount'] / 100000)->where('slab_max', '>=', $data['total_net_amount'] / 100000)->where('primary_scheme_id', $this->scheme_id)->first();
+            }else{
+                $CM = PrimarySchemeDetail::where('groups', $data['new_group_name'])->where('min', '<=', $data['total_quantity'])->where('max', '>=', $data['total_quantity'])->where('primary_scheme_id', $this->scheme_id)->first();
+            }
 
         }
+
+        // dd($CM);
 
         if ($this->types && !empty($this->types)) {
             if ($this->types == 'qualified') {
