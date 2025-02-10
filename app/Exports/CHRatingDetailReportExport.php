@@ -131,7 +131,7 @@ class CHRatingDetailReportExport implements FromCollection, WithHeadings, Should
     public function headings(): array
     {
         return [
-            ['Division', 'Department', 'Branch', 'Emp Code', 'User Name', 'Designation', 'Reporting Manager', 'Email', 'Mobile Number', 'Head Quarter', 'Date Of Birth', 'Education', 'Age', 'Company TENURE(in year)', 'Previous Exp(in year)', 'Total Exp(in year)', 'AOP', '', '', '', '', 'GOLY', '', '', '', '', 'New Channel Sale-40% of Total sale', '', '', '', '', 'New Product sale-60%', '', '', '', '', 'Debtors', '', '', '', '', '', 'Inventory', '', '', '', '', '', 'Bonus Points', '', 'Final rating', 'Gross Salary Monthly', 'CTC Per Month', 'CTC Annual', 'Last Yr Gross Increments Value', 'Last Yr Increments %', 'Last Yr Increment Value', 'Remark', 'Current Year Increment'],
+            ['Division', 'Department', 'Branch', 'Emp Code', 'User Name', 'Designation', 'Reporting Manager', 'Email', 'Mobile Number', 'Head Quarter', 'Date Of Birth', 'Education', 'Age', 'Company TENURE(in year)', 'Previous Exp(in year)', 'Total Exp(in year)', 'AOP', '', '', '', '', 'GOLY', '', '', '', '', 'New Channel Sale-40% of Total sale', '', '', '', '', 'New Product sale-60%', '', '', '', '', 'Debtors', '', '', '', '', '', 'Inventory', '', '', '', '', '', 'Bonus Points', '', 'Final rating', 'Gross Salary Monthly', 'CTC Per Month', 'CTC Annual', 'Last Yr Gross Increments Value', 'Last Yr Increments %', 'Last Yr Increment Value','Last Promostion', 'Remark By Reporting manager', 'Current Year Increment'],
             ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'Tar', 'Ach', '% ACHD', 'For Rating %', 'Final Rating', 'LY-Tar', 'ACH', 'GOLY', 'For Rating %', 'Final Rating', 'Tar', 'Ach', '% ACHD', 'For Rating %', 'Final Rating', 'Tar', 'Ach', '% ACHD', 'For Rating %', 'Final Rating', 'TOTAL SALES CURRENT FINANCIAL YEAR', 'AVR PER DAYS SALES', 'TOTAL DEBTORS', 'DAYS', 'For Rating %', 'Final Rating', 'TOTAL SALES CURRENT FINANCIAL YEAR', 'AVR PER DAYS SALES', 'TOTAL INVENTORY', 'DAYS', 'For Rating %', 'Final Rating', 'ach >110%', 'Goly >125%', '']
         ];
     }
@@ -168,14 +168,14 @@ class CHRatingDetailReportExport implements FromCollection, WithHeadings, Should
         $branch_names = Branch::whereIn('id', $branch_ids)->pluck('branch_name')->toArray();
 
         $debtors_start_date = $f_year_array[0] . '-04-01';
-        $debtors_end_date = $f_year_array[0] . '-12-31';
-        // $debtors_end_date = now()->toDateString();
+        // $debtors_end_date = $f_year_array[0] . '-12-31';
+        $debtors_end_date = now()->toDateString();
 
         $debtors_start_date_or = Carbon::createFromFormat('Y-m-d', $f_year_array[0] . '-04-01');
         $debtors_end_date_or = now();
 
-        // $days_difference = $debtors_start_date_or->diffInDays($debtors_end_date_or);
-        $days_difference = 270;
+        $days_difference = $debtors_start_date_or->diffInDays($debtors_end_date_or);
+        // $days_difference = 270;
 
         $debtors_sales = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $debtors_start_date)->where('invoice_date', '<=', $debtors_end_date)->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount');
         $total_debtors = CustomerOutstanting::whereIn('branch_id', $branch_ids)->whereIn('division_id', ['10', '18'])->where('year', $f_year_array[0])->sum('amount');
@@ -253,6 +253,7 @@ class CHRatingDetailReportExport implements FromCollection, WithHeadings, Should
             $query['userinfo'] ? $query['userinfo']['last_year_increments'] : '',
             $query['userinfo'] ? $query['userinfo']['last_year_increment_percent'] : '',
             $query['userinfo'] ? $query['userinfo']['last_year_increment_value'] : '',
+            $query['userinfo'] ? $query['userinfo']['last_promotion'] : '',
 
             '-',
             '-',
@@ -299,6 +300,7 @@ class CHRatingDetailReportExport implements FromCollection, WithHeadings, Should
                 $event->sheet->mergeCells('BE1:BE2');
                 $event->sheet->mergeCells('BF1:BF2');
                 $event->sheet->mergeCells('BG1:BG2');
+                $event->sheet->mergeCells('BH1:BH2');
 
 
                 // for ($row = 1; $row <= $rowCount; $row++) {
@@ -319,7 +321,7 @@ class CHRatingDetailReportExport implements FromCollection, WithHeadings, Should
                 //     ]);
                 // }
 
-                $event->sheet->getStyle('A1:BG2')->applyFromArray([
+                $event->sheet->getStyle('A1:BH2')->applyFromArray([
                     'font' => [
                         'bold' => true,
                         'color' => ['rgb' => 'FFFFFF'],
@@ -340,7 +342,7 @@ class CHRatingDetailReportExport implements FromCollection, WithHeadings, Should
                     ],
                 ]);
 
-                $event->sheet->getStyle('A' . $lastRow . ':BG' . $lastRow)->applyFromArray([
+                $event->sheet->getStyle('A' . $lastRow . ':BH' . $lastRow)->applyFromArray([
                     'font' => ['bold' => true],
                     'alignment' => [
                         'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,

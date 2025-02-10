@@ -15,7 +15,7 @@ class SalesDetails extends Model
 
     public function products()
     {
-        return $this->belongsTo('App\Models\Product', 'product_id', 'id')->select('id','product_name','display_name','product_image');
+        return $this->belongsTo('App\Models\Product', 'product_id', 'id')->select('id','product_name','display_name','product_image', 'brand_id', 'model_no');
     }
 
     public function sales()

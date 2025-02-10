@@ -1640,4 +1640,19 @@ class AjaxController extends Controller
         } 
         return response()->json(['status' => false ]);
     }
+
+    // get users by branch id
+    public function getUserByBranch(Request $request)
+    {
+        $branch_id = $request->branch_id ?? '';
+        $users = User::where(['branch_id'=> $branch_id])->get();
+        $html = '<option value="">Select User</option>'; // Default option
+
+        if ($users->isNotEmpty()) {
+            foreach ($users as $user) {
+                $html .= '<option value="' . $user->id . '">' . $user->name . '</option>';
+            }
+        }
+        return response()->json(['html' => $html]);
+    }
 }
