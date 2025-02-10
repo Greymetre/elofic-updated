@@ -84,7 +84,7 @@
                <div class="nav-tabs-navigation">
                   <div class="nav-tabs-wrapper new_id">
                      <h4 class="card-title ">
-                        Complaint Creation </h4>
+                        {!! trans('panel.complaint.new_title') !!} </h4>
                      @if(auth()->user()->can(['district_access']))
 
                      <ul class="nav nav-tabs pull-right" data-tabs="tabs">
@@ -140,32 +140,55 @@
                'files'=>true
                ]) !!}
                <div class="row">
+                  <div class="col-12">
+                     <div class="p-2 mb-3 text-white text-center" style="background-color: #3972af;">
+                        <h4 class="m-0"><strong>Product Details</strong></h4>
+                     </div>
+                  </div>
                   @if(!$complaints->exists)
-                  <div class="col-md-4">
+                  <div class="col-md-3">
+                     <div class="input-group">
+                        <input type="text" name="serail_number" id="serail_number" class="form-control" 
+                           placeholder="Enter Serial Number"
+                           value="{!! old('serail_number', $complaints['serail_number']) !!}" style="
+                           height: 54px;">
+                        <button type="button" class="btn btn-success w-auto px-3" id="go-search">Go</button>
+                     </div>
+                     <p class="text-danger d-none" id="search_error"></p>
+                     @if ($errors->has('serail_number'))
+                     <div class="error col-lg-12">
+                        <p class="text-danger">{{ $errors->first('serail_number') }}</p>
+                     </div>
+                     @endif
+                  </div>                  
+                  @endif
+                  <div class="col-md-3">
                      <div class="input_section">
-                        <label class="col-form-label">Search By Searial Number </label>
-                        <input type="text" name="serail_number" id="serail_number" class="form-control" value="{!! old( 'serail_number', $complaints['serail_number']) !!}">
-                        <p class="text-danger d-none" id="search_error"></p>
-                        @if ($errors->has('serail_number'))
-                        <div class="error col-lg-12">
-                           <p class="text-danger">{{ $errors->first('serail_number') }}</p>
+                        <label class="col-form-label">Branch </label>
+                        <select name="branch_id" id="branch_id" class="select2 form-control">
+                           <option value="">Select Branch</option>
+                           @if($branchs)
+                           @foreach($branchs as $branch)
+                           <option value="{{$branch->id}}" {!! old('branch_id') !!}>[{{$branch->branch_code}}] {{$branch->branch_name}}</option>
+                           @endforeach
+                           @endif
+                        </select>
+                        @if ($errors->has('branch_id'))
+                        <div class="error">
+                           <p class="text-danger">{{ $errors->first('branch_id') }}</p>
                         </div>
                         @endif
                      </div>
                   </div>
-                  <div class="col-md-2">
-                     <button type="button" class="btn btn-success" id="go-search">Go Search</button>
-                  </div>
-                  @endif
                   <div class="col-md-3">
                      <div class="input_section">
                         <label class="col-form-label">Assign User </label>
                         <select name="assign_user" id="assign_user" class="select2 form-control" required>
                            <option value="">Select User</option>
-                           @if($assign_users)
-                           @foreach($assign_users as $assign_user)
-                           <option value="{{$assign_user->id}}" {!! old('assign_user', $complaints['assign_user'])==$assign_user->id ? 'selected':'' !!} >[{{$assign_user->employee_codes}}] {{$assign_user->name}}</option>
-                           @endforeach
+                           @if($assign_users && $complaints['assign_user'])
+                              @foreach($assign_users as $assign_user)
+                              <option value="{{$assign_user->id}}" {!! old('assign_user', $complaints['assign_user'])==$assign_user->id ? 'selected':'' !!} >[{{$assign_user->employee_codes}}] {{$assign_user->name}}</option>
+                              @endforeach
                            @endif
                         </select>
                         @if ($errors->has('assign_user'))
@@ -219,7 +242,7 @@
                   <div class="col-md-3">
                      <div class="input_section">
                         <label class="col-form-label">Complaint Number </label>
-                        <input type="text" readonly name="complaint_number" class="form-control" value="{!! old( 'complaint_number', $complaints['complaint_number']) ?? $newComplaintNumber !!}">
+                        <input type="text" readonly name="complaint_number" id="complaint_number" class="form-control" value="{!! old( 'complaint_number', $complaints['complaint_number']) ?? $newComplaintNumber !!}">
                         @if ($errors->has('complaint_number'))
                         <div class="error col-lg-12">
                            <p class="text-danger">{{ $errors->first('complaint_number') }}</p>
@@ -288,8 +311,7 @@
 
                </div>
                <div class="basic_details mt-1">
-                  <h3><b>Complaint Registration :</b></h3>
-                  <div class="border rounded p-4">
+                  <div class=" rounded p-2">
                      <div class="row mt-3">
                         <div class="col-md-3">
                            <div class="input_section">
@@ -298,6 +320,28 @@
                               @if ($errors->has('product_serail_number'))
                               <div class="error">
                                  <p class="text-danger">{{ $errors->first('product_serail_number') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+                        <div class="col-md-3">
+                           <div class="input_section">
+                              <label class="col-form-label">Division </label>
+                              <input readonly type="text" name="category" id="category" class="form-control" value="{!! old( 'category', $complaints['category']) !!}">
+                              @if ($errors->has('category'))
+                              <div class="error col-lg-12">
+                                 <p class="text-danger">{{ $errors->first('category') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+                        <div class="col-md-3">
+                           <div class="input_section">
+                              <label class="col-form-label">Product Group </label>
+                              <input readonly type="text" name="product_group" id="product_group" class="form-control" value="{!! old( 'product_group', $complaints['product_group']) !!}">
+                              @if ($errors->has('product_group'))
+                              <div class="error">
+                                 <p class="text-danger">{{ $errors->first('product_group') }}</p>
                               </div>
                               @endif
                            </div>
@@ -334,19 +378,6 @@
                         </div>
                         <div class="col-md-3">
                            <div class="input_section">
-                              <label class="col-form-label">Division </label>
-                              <input readonly type="text" name="category" id="category" class="form-control" value="{!! old( 'category', $complaints['category']) !!}">
-                              @if ($errors->has('category'))
-                              <div class="error col-lg-12">
-                                 <p class="text-danger">{{ $errors->first('category') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                     </div>
-                     <div class="row mt-3">
-                        <div class="col-md-3">
-                           <div class="input_section">
                               <label class="col-form-label">HP </label>
                               <input readonly type="text" name="specification" id="specification" class="form-control" value="{!! old( 'specification', $complaints['specification']) !!}">
                               @if ($errors->has('specification'))
@@ -378,6 +409,10 @@
                               @endif
                            </div>
                         </div>
+                     </div>
+                     <div class="row mt-3">
+                     
+                     
                         <div class="col-md-3">
 
                         </div>
@@ -401,17 +436,7 @@
                               @endif
                            </div>
                         </div>
-                        <div class="col-md-3">
-                           <div class="input_section">
-                              <label class="col-form-label">Product Group </label>
-                              <input readonly type="text" name="product_group" id="product_group" class="form-control" value="{!! old( 'product_group', $complaints['product_group']) !!}">
-                              @if ($errors->has('product_group'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('product_group') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
+                      
                         <div class="col-md-3">
                            <div class="input_section">
                               <label class="col-form-label">Company Sale Bill NO </label>
@@ -505,7 +530,7 @@
                         <div class="col-md-3">
                            <div class="input_section">
                               <label class="col-form-label">Customer Bill Date Month </label>
-                              <input readonly type="text" name="customer_bill_date_month" id="customer_bill_date_month" class="form-control" value="{!! old( 'customer_bill_date_month', $complaints['customer_bill_date_month']) !!}">
+                              <input readonly type="text" autocomplete="off" name="customer_bill_date_month" id="customer_bill_date_month" class="form-control" value="{!! old( 'customer_bill_date_month', $complaints['customer_bill_date_month']) !!}">
                               @if ($errors->has('customer_bill_date_month'))
                               <div class="error">
                                  <p class="text-danger">{{ $errors->first('customer_bill_date_month') }}</p>
@@ -534,13 +559,19 @@
                   </div>
                </div>
                <div class="contact_details mt-1">
-                  <h3><b>Contact Details :</b></h3>
-                  <div class="border rounded p-4">
+                  <div class="col-12">
+                     <div class="p-2 mb-3 text-white text-center" style="background-color: #3972af;">
+                        <h4 class="m-0"><strong>Customer Details</strong></h4>
+                     </div>
+                  </div>
+                  <div class=" rounded p-2">
                      <div class="row mt-3">
                         <div class="col-md-3">
                            <div class="input_section">
                               <label class="col-form-label">Customer Number Search</label>
-                              <input type="number" name="customer_number" id="customer_number" class="form-control" value="{!! old( 'customer_number', $complaints['customer']?$complaints['customer']['customer_number']:'') !!}" required>
+                              <input type="number" name="customer_number" id="customer_number" class="form-control" 
+                              value="{!! old('customer_number', $complaints['customer'] ? $complaints['customer']['customer_number'] : '') !!}" 
+                              required maxlength="10">
                               <input type="hidden" name="end_user_id" id="end_user_id">
                               @if ($errors->has('customer_number'))
                               <div class="error">
@@ -641,8 +672,8 @@
                         <div class="col-md-3">
                            <div class="input_section">
                               <label class="col-form-label">Pincode </label>
-                              <select name="customer_pindcode" id="customer_pindcode" placeholder="Select Pincode" class="select2 form-control">
-                                 <option value="" disabled selected>Select Pincode</option>
+                              <select name="customer_pindcode" id="customer_pindcode" placeholder="Select Pincode" class="select2 form-control"  onchange="getAddressDataByPincode()">
+                                 <option value="" disabled selected >Select Pincode</option>
                                  @if($pincodes && count($pincodes) > 0)
                                  @foreach($pincodes as $pincode)
                                  <option value="{{$pincode->id}}">{{$pincode->pincode}}</option>
@@ -828,6 +859,29 @@
          $("#company_bill_date_month").focus();
          $("#company_bill_date_month").val(diffMonths + " Month " + diffDays + " Day");
       });
+
+      $('#customer_bill_date').on('change', function () {
+        if ($(this).val().length >= 10) {
+            var selectedDate = moment($(this).val().trim(), 'DD-MM-YYYY', true);
+            var billDate = moment($('#company_sale_bill_date').val().trim(), 'DD-MM-YYYY', true);
+
+            console.log("Selected Date:", selectedDate.format('DD-MM-YYYY'));
+            console.log("Bill Date:", billDate.format('DD-MM-YYYY'));
+
+            if (!selectedDate.isValid() || !billDate.isValid()) {
+                alert("Invalid date format. Please use DD-MM-YYYY.");
+                $(this).val($('#company_sale_bill_date').val()); // Clear input
+                return;
+            }
+
+            if (selectedDate.isSameOrBefore(billDate)) {
+                alert("Selected date must be greater than the bill date.");
+                $(this).val($('#company_sale_bill_date').val()); // Clear input
+                return;
+            }
+        }
+    }).trigger('change');
+
       $("#customer_bill_date").on('change', function() {
 
          var selectedDate = moment($(this).val(), 'DD-MM-YYYY');
@@ -847,8 +901,17 @@
       $("#product_serail_number").on("keyup", function() {
          var product_serail_number = $('#product_serail_number').val();
          if(product_serail_number == ''){
+            $("input, select, textarea")
+            .not("#serail_number, #complaint_number, #complaint_date, #submit-btn , #company_sale_bill_date , #customer_bill_date") // Multiple exclusions in a single string
+            .val("")
+            .trigger('change');
+            $("input, select, textarea, button")
+            .not("#serail_number, #complaint_number, #complaint_date, #product_serail_number, #product_group, #company_bill_date_month, #customer_bill_date_month")
+            .prop("readonly", false)
+            .prop("disabled", false);
             return ;
          }
+
          var serial_no = $(this).val();
          var chekcPro = '{{($complaints && $complaints->product_id)?$complaints->product_id:""}}'
          $.ajax({
@@ -860,6 +923,10 @@
                serial_no: serial_no
             },
             success: function(res) {
+               $("input, select, textarea")
+               .not("#serail_number, #complaint_number, #complaint_date, #submit-btn , #company_sale_bill_date , #customer_bill_date")
+               .val("")
+               .trigger('change');
                if (res.status === true ) {
                   $("#product_code").val(res.data.product_code);
                   $("#product_name").val(res.data.product_name);
@@ -885,6 +952,10 @@
                   $("#seller").prop('readonly', true);
                   
                   if (res.check_Warranty != null && res.check_Warranty.status == "1") {
+                     $("input, select, textarea, button")
+                     .not("#serail_number, #complaint_number, #complaint_date, #product_serail_number, #product_group, #company_bill_date_month, #customer_bill_date_month")
+                     .prop("readonly", false)
+                     .prop("disabled", false);
                      $("#customer_bill_date").val(res.check_Warranty.sale_bill_date.split('-').reverse().join('-'));
                      $("#customer_bill_no").val(res.check_Warranty.sale_bill_no);
                      $("#customer_number").val(res.check_Warranty.customer.customer_number);
@@ -932,6 +1003,8 @@
                      }
                      $("#submit-btn").prop("disabled", false);
                   } else {
+                     $("input, select, textarea, button").not("#serail_number").prop("readonly", true).prop("disabled", true);
+                     $('#submit-btn').prop("disabled", true);
                      if(res.check_Warranty.status == "0"){
                         var active_url = "{{ route('warranty_activation.edit', ['warranty_activation' => '__ID__']) }}";
                         var encrypt_id = res.encrypt_id;  
@@ -962,7 +1035,8 @@
                      $("#customer_number").val(" ");
                   }
                } else {
-                 
+                  $("input, select, textarea, button").not("#serail_number").prop("readonly", true).prop("disabled", true);
+                  $('#submit-btn').prop("disabled", true);
                 var active_url = "{{ route('warranty_activation.create') }}?serial_no=" + serial_no;
                 Swal.fire({
                     title: "Warranty is not active of " + serial_no + " serial number. Please activate the warranty first.",
@@ -1058,6 +1132,32 @@
             }
          });
       }).trigger('keyup');
+
+
+      function getAddressDataByPincode(){
+         var pincode_id = $("select[name=customer_pindcode]").val();
+         var token = $("meta[name='csrf-token']").attr("content");
+         if(pincode_id){
+            $.ajax({
+               url: "{{ url('/getAddressData') }}" ,
+               dataType: "json",
+               type: "POST",
+               data:{ _token: token, pincode_id:pincode_id},
+               success: function(res){
+                  if(res)
+                  {
+                     $("#customer_state").val(res.state_id).trigger('change');
+                     setTimeout(() => {
+                        $("#customer_district").val(res.district_id).trigger('change');
+                     }, 100);
+                     setTimeout(() => {
+                        $("#customer_city").val(res.city_id).trigger('change');
+                     }, 300); 
+                  }
+               }
+            });
+         } 
+      } 
       $("#go-search").on('click', function() {
          var search = $("#serail_number").val();
          if (!search || search == '' || search == null) {
@@ -1131,10 +1231,9 @@
                return;
             }
          }
-         if ($(this).val().length > 7 ) {
-            $("#product_serail_number").keyup();
-         }
-      }).trigger("keyup");
+         $("#product_serail_number").keyup();
+      });
+      
       $("#product_id").on("change", function() {
          var product_id = $(this).val();
          if (product_id != null && product_id != '') {
@@ -1175,6 +1274,23 @@
             $("#phase").prop('readonly', false);
          }
       });
+      
+      $('#branch_id').on('change' , function(){
+           $('#assign_user').empty();
+           var branch_id = $(this).val();
+           $.ajax({
+            url: "{{ url('getUserByBranch') }}",
+            dataType: "json",
+            type: "POST",
+            data: {
+               _token: "{{csrf_token()}}",
+               branch_id: branch_id
+            },
+            success: function(res) {
+               $('#assign_user').html(res.html);
+            }
+         });
+      }); 
 
       $("#customer_state").on("change", function() {
          var state_id = $(this).val();
@@ -1219,6 +1335,7 @@
       });
 
       $("#customer_city").on("change", function() {
+         var sel_id = $('#customer_pindcode').val() ;
          var city_id = $(this).val();
          $.ajax({
             url: "{{ url('getPincode') }}",
@@ -1231,7 +1348,7 @@
             success: function(res) {
                var options = '<option value="">Select Pincode</option>';
                $.each(res, function(key, val) {
-                  options += '<option value="' + val.id + '">' + val.pincode + '</option>';
+                  options += '<option value="' + val.id + '" ' + (sel_id == val.id ? 'selected' : '') + '>' + val.pincode + '</option>';
                })
                $("#customer_pindcode").html(options);
             }
@@ -1270,6 +1387,18 @@
                   filePreviewContainer.append(fileItem);
                }
             });
+         });
+
+         // jquery validation 
+
+         $("#customer_number").on("input", function () {
+            let value = $(this).val();
+
+            // Remove non-numeric characters and ensure max 10 digits
+            value = value.replace(/\D/g, '').substring(0, 10);
+
+            // Set the cleaned value back
+            $(this).val(value);
          });
       });
    </script>
