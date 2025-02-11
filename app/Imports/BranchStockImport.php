@@ -49,13 +49,13 @@ class BranchStockImport implements ToCollection, WithValidation, WithHeadingRow,
                     $salesTargetUsers = BranchStock::updateOrCreate(
                         [
                             'branch_id' => $row['branch_id'],
-                            'warehouse_id' => $row['warehouse_id'],
                             'days' => $k,
                             'year' => $row['year'],
                             'quarter' => $row['quarter'],
                             'division_id' => $row['division_id']
                         ],
                         [
+                            'warehouse_id' => $row['warehouse_id'],
                             'branch_name' => $row['branch_name'],
                             'amount' => $val
                         ]
@@ -70,7 +70,7 @@ class BranchStockImport implements ToCollection, WithValidation, WithHeadingRow,
         $rules = [
             'branch_id' => 'required|exists:branches,id',
             'division_id' => 'required|exists:divisions,id',
-            'warehouse_id' => 'required|exists:ware_houses,id',
+            'warehouse_id' => 'nullable|exists:ware_houses,id',
         ];
         return $rules;
     }

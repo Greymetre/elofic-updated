@@ -1655,4 +1655,10 @@ class AjaxController extends Controller
         }
         return response()->json(['html' => $html]);
     }
+
+    public function getPMS(Request $request)
+    {
+        $user = User::with('getbranch', 'getdivision', 'getdesignation', 'all_attendance_details', 'visits', 'customers', 'userinfo', 'target', 'primarySales')->where('id', $request->id)->first();
+        dd($request->all());
+    }
 }
