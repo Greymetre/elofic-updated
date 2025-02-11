@@ -1,4 +1,17 @@
 <x-app-layout>
+  <style>
+    #pmsForm table th {
+      font-weight: bold !important;
+      white-space: break-spaces;
+      border: 2px solid #aba7a7 !important;
+      background-color: #cdcbcba3;
+    }
+
+    #pmsForm table td {
+      border: 2px solid #aba7a7 !important;
+      white-space: break-spaces;
+    }
+  </style>
   <div class="row">
     <div class="col-md-12">
       <div class="card">
@@ -95,6 +108,13 @@
                       </button>
                     </div>
                     @endif
+                    @if(auth()->user()->can(['pms_remark']))
+                    <div class="p-2">
+                      <button class="btn btn-just-icon btn-theme edit_remark" type="buutton" title="Added Remark(PMS)">
+                        <i class="material-icons">add_task</i>
+                      </button>
+                    </div>
+                    @endif
                   </div>
                 </form>
                 @endif
@@ -130,7 +150,7 @@
                 <th>No</th>
                 <th>Employees Code</th>
                 <th>FOS Name</th>
-                <th>Action</th>
+                <!-- <th>Action</th> -->
               </thead>
               <tbody>
               </tbody>
@@ -158,42 +178,49 @@
               <tbody>
                 <tr>
                   <th>Name</th>
-                  <td><input type="text" class="form-control" name="name" value="Gajendra Singh Rajput" readonly></td>
+                  <td id="psname"></td>
                   <th>Branch</th>
-                  <td><input type="text" class="form-control" name="branch" value="Indore" readonly></td>
+                  <td id="psbranch"></td>
                   <th>Designation</th>
-                  <td><input type="text" class="form-control" name="designation" value="Manager" readonly></td>
+                  <td id="psdesignation"></td>
                 </tr>
                 <tr>
                   <th>Final Rating</th>
-                  <td><input type="number" class="form-control" name="final_rating" value="80" readonly></td>
+                  <td id="psrating"></td>
                   <th>Company Tenure (in Months)</th>
-                  <td><input type="number" class="form-control" name="tenure" value="14" readonly></td>
+                  <td id="pscompany_tenure"></td>
                   <th>Gross Salary</th>
-                  <td><input type="number" class="form-control" name="gross_salary" value="50000" readonly></td>
+                  <td id="psgross_salary"></td>
                 </tr>
                 <tr>
                   <th>Last Year Gross Increment Value</th>
-                  <td><input type="number" class="form-control" name="last_year_increment_value" value="5000" readonly></td>
+                  <td id="pslast_year_inc_value"></td>
                   <th>Last Year Increment %</th>
-                  <td><input type="text" class="form-control" name="last_year_increment" value="10%" readonly></td>
+                  <td id="pslast_year_inc_per"></td>
                   <th>Total Target</th>
-                  <td><input type="number" class="form-control" name="total_target" value="1000000"></td>
+                  <td id="pstarget"></td>
                 </tr>
                 <tr>
                   <th>Total Sales</th>
-                  <td><input type="number" class="form-control" id="totalSales" name="total_sales" value="500000"></td>
+                  <td id="pssale"></td>
                   <th>Percentage Achievement</th>
-                  <td><input type="number" class="form-control" id="percentageAchievement" name="percentage_achievement"></td>
+                  <td id="pssale_per"></td>
                   <th>Recommended CY Increment %</th>
-                  <td><input type="number" class="form-control" name="recommended_increment" value="10"></td>
+                  <td><input type="number" class="form-control" name="recommended_increment" value=""></td>
                 </tr>
                 <tr>
                   <th>Recommended Designation</th>
-                  <td><input type="text" class="form-control" name="recommended_designation" value="ASM"></td>
+                  <td>
+                    <select name="designation_id" id="designation_id" class="form-control select2" required>
+                      <option value="" disabled selected>Designations</option>
+                      @foreach($designations as $designation)
+                      <option value="{{$designation->id}}">{{$designation->designation_name}}</option>
+                      @endforeach
+                    </select>
+                  </td>
                   <th>Remark</th>
                   <td colspan="3">
-                    <textarea class="form-control" name="remarks" placeholder="Enter remarks"></textarea>
+                    <textarea class="form-control" name="remarks" placeholder="Enter remarks" required></textarea>
                   </td>
                 </tr>
               </tbody>
@@ -248,13 +275,13 @@
             "defaultContent": '',
             orderable: false
           },
-          {
-            data: 'action',
-            name: 'action',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          }
+          // {
+          //   data: 'action',
+          //   name: 'action',
+          //   "defaultContent": '',
+          //   orderable: false,
+          //   searchable: false
+          // }
         ]
       });
       $('#start_date').change(function() {
@@ -301,35 +328,64 @@
     }).trigger("chnage");
 
     $(document).on("click", ".edit_remark", function() {
-      var id = $(this).data("id");
-      console.log(id);
-      $.ajax({
-        url: "{{ url('getPMS') }}/",
-        type: 'GET',
-        dataType: 'json',
-        data: {
-          _token: "{{csrf_token()}}",
-          id: id
-        },
-        success: function(res) {
-          $("#pmsForm").find("input[name='name']").val(res.name);
-          $("#pmsForm").find("input[name='branch']").val(res.branch);
-          $("#pmsForm").find("input[name='designation']").val(res.designation);
-          $("#pmsForm").find("input[name='final_rating']").val(res.final_rating);
-          $("#pmsForm").find("input[name='tenure']").val(res.tenure);
-          $("#pmsForm").find("input[name='gross_salary']").val(res.gross_salary);
-          $("#pmsForm").find("input[name='last_year_increment_value']").val(res.last_year_increment_value);
-          $("#pmsForm").find("input[name='last_year_increment']").val(res.last_year_increment);
-          $("#pmsForm").find("input[name='total_target']").val(res.total_target);
-          $("#pmsForm").find("input[name='total_sales']").val(res.total_sales);
-          $("#pmsForm").find("input[name='percentage_achievement']").val(res.percentage_achievement);
-          $("#pmsForm").find("input[name='recommended_increment']").val(res.recommended_increment);
-          $("#pmsForm").find("input[name='recommended_designation']").val(res.recommended_designation);
-          $("#pmsForm").find("textarea[name='remarks']").val(res.remarks);
-          $("#pmsForm").find("input[name='id']").val(res.id);
-        }
-      })
-      $("#pmsModal").modal("show");
+      event.preventDefault();
+      var role_id = $("#role_id").val();
+      var user_id = $("#user_id").val();
+      var division_id = $("#division_id").val();
+      var financial_year = $("#financial_year").val();
+      if (!role_id || role_id.length === 0 || !user_id || !division_id || !financial_year) {
+        alert("Role, User, Division and Financial Year fields are required!");
+      } else {
+        $("#loader").show();
+        $.ajax({
+          url: "{{ url('getPMS') }}/",
+          type: 'GET',
+          dataType: 'json',
+          data: {
+            _token: "{{csrf_token()}}",
+            role_id: role_id,
+            user_id: user_id,
+            division_id: division_id,
+            financial_year: financial_year
+          },
+          success: function(res) {
+            if (res.status == 'success') {
+              $("#loader").hide();
+              $("#psname").html(res.data.name);
+              $("#psbranch").html(res.data.branch);
+              $("#psdesignation").html(res.data.designation);
+              $("#psrating").html(res.data.rating);
+              $("#pscompany_tenure").html(res.data.company_tenure);
+              $("#psgross_salary").html(res.data.gross_salary);
+              $("#pslast_year_inc_value").html(res.data.last_year_inc_value);
+              $("#pslast_year_inc_per").html(res.data.last_year_inc_per);
+              $("#pstarget").html(res.data.target);
+              $("#pssale").html(res.data.sale);
+              $("#pssale_per").html(res.data.sale_per + '%');
+
+              $("#pmsModal").modal("show");
+            } else {
+              Swal.fire({
+                icon: 'info',
+                title: 'Heads up!',
+                text: res.message,
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 5000,
+              });
+
+            }
+          },
+          error: function(xhr, status, error) {
+            $("#loader").hide();
+            alert("An error occurred: " + error);
+          },
+          complete: function() {
+            $("#loader").hide();
+          }
+        })
+      }
     });
   </script>
 </x-app-layout>

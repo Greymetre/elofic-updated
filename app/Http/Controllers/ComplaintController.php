@@ -60,15 +60,18 @@ class ComplaintController extends Controller
         $serial_number = $request->serial_number ?? '';
         $newComplaintNumber = $this->getComplaintNumber();
 
-        $roleName = "Service Eng";
+        $roleNames = ["Service Eng", "Service Admin"]; // Add more roles as needed
 
-        $assign_users = User::whereHas('roles', function ($query) use ($roleName) {
-            $query->where('name', $roleName);
+        $assign_users = User::whereHas('roles', function ($query) use ($roleNames) {
+            $query->whereIn('name', $roleNames); // Check for multiple roles
         })
-            ->with(['roles' => function ($query) {
-                $query->with('permissions');
-            }])->select('id', 'name', 'employee_codes')
-            ->get();
+        ->with(['roles' => function ($query) {
+            $query->with('permissions');
+        }])
+        ->select('id', 'name', 'employee_codes')
+        ->get();
+
+
         $service_centers = Customers::where('customertype', '4')->select('id', 'name', 'customer_code')->get();
         $branchs = Branch::where('active', 'Y')->select('id', 'branch_name', 'branch_code')->get();
         $pincodes = Pincode::where('active', 'Y')->select('id', 'pincode')->get();
@@ -90,7 +93,6 @@ class ComplaintController extends Controller
      */
     public function store(Request $request)
     {
-
         $rules = [
             'customer_number'    => 'required',
             'customer_state'          => 'required',

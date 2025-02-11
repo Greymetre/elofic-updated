@@ -164,6 +164,17 @@
                   @endif
                   <div class="col-md-3">
                      <div class="input_section">
+                        <label class="col-form-label">Complaint Number </label>
+                        <input type="text" readonly name="complaint_number" id="complaint_number" class="form-control" value="{!! old( 'complaint_number', $complaints['complaint_number']) ?? $newComplaintNumber !!}">
+                        @if ($errors->has('complaint_number'))
+                        <div class="error col-lg-12">
+                           <p class="text-danger">{{ $errors->first('complaint_number') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+                  <!-- <div class="col-md-3">
+                     <div class="input_section">
                         <label class="col-form-label">Branch </label>
                         <select name="branch_id" id="branch_id" class="select2 form-control">
                            <option value="">Select Branch</option>
@@ -179,13 +190,13 @@
                         </div>
                         @endif
                      </div>
-                  </div>
+                  </div> -->
                   <div class="col-md-3">
                      <div class="input_section">
-                        <label class="col-form-label">Assign User </label>
+                        <label class="col-form-label">Assign Service Engineer</label>
                         <select name="assign_user" id="assign_user" class="select2 form-control" required>
                            <option value="">Select User</option>
-                           @if($assign_users && $complaints['assign_user'])
+                           @if($assign_users)
                               @foreach($assign_users as $assign_user)
                               <option value="{{$assign_user->id}}" {!! old('assign_user', $complaints['assign_user'])==$assign_user->id ? 'selected':'' !!} >[{{$assign_user->employee_codes}}] {{$assign_user->name}}</option>
                               @endforeach
@@ -239,13 +250,238 @@
                   </table>
                </div>
                <div class="row mt-3">
+                   <div class="col-md-3">
+                     <div class="input_section">
+                        <label class="col-form-label">Searial Number </label>
+                        <input {{($complaints->exists && empty($complaints['product_serail_number']))?'':'readonly'}} type="text" name="product_serail_number" id="product_serail_number" class="form-control" value="{!! old( 'product_serail_number', $complaints['product_serail_number']) !!}">
+                        @if ($errors->has('product_serail_number'))
+                        <div class="error">
+                           <p class="text-danger">{{ $errors->first('product_serail_number') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
                   <div class="col-md-3">
                      <div class="input_section">
-                        <label class="col-form-label">Complaint Number </label>
-                        <input type="text" readonly name="complaint_number" id="complaint_number" class="form-control" value="{!! old( 'complaint_number', $complaints['complaint_number']) ?? $newComplaintNumber !!}">
-                        @if ($errors->has('complaint_number'))
+                        <label class="col-form-label">Division </label>
+                        <input readonly type="text" name="category" id="category" class="form-control" value="{!! old( 'category', $complaints['category']) !!}">
+                        @if ($errors->has('category'))
                         <div class="error col-lg-12">
-                           <p class="text-danger">{{ $errors->first('complaint_number') }}</p>
+                           <p class="text-danger">{{ $errors->first('category') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+                  <div class="col-md-3">
+                     <div class="input_section">
+                        <label class="col-form-label">Product Group </label>
+                        <input readonly type="text" name="product_group" id="product_group" class="form-control" value="{!! old( 'product_group', $complaints['product_group']) !!}">
+                        @if ($errors->has('product_group'))
+                        <div class="error">
+                           <p class="text-danger">{{ $errors->first('product_group') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+                   <div class="col-md-3">
+                     <div class="input_section">
+                        <label class="col-form-label">Product/Model(Code) </label>
+                        <input readonly type="text" name="product_code" id="product_code" class="form-control" value="{!! old( 'product_code', $complaints['product_code']) !!}">
+                        @if ($errors->has('product_code'))
+                        <div class="error">
+                           <p class="text-danger">{{ $errors->first('product_code') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+                  <div class="col-md-3">
+                     <div class="input_section">
+                        <label class="col-form-label">Product Name </label>
+                        <select name="product_id" id="product_id" class="select2">
+                           <option value="">Select Product</option>
+                           @if(count($products) > 0)
+                           @foreach($products as $product)
+                           <option value="{{$product->id}}" {{($complaints && $complaints['product_id']==$product->id)?'selected':''}}>{{$product->product_name}}</option>
+                           @endforeach
+                           @endif
+                        </select>
+                        <input readonly type="hidden" name="product_name" id="product_name" class="form-control" value="{!! old( 'product_name', $complaints['product_name']) !!}">
+                        @if ($errors->has('product_name'))
+                        <div class="error">
+                           <p class="text-danger">{{ $errors->first('product_name') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+                  <div class="col-md-3">
+                     <div class="input_section">
+                        <label class="col-form-label">HP </label>
+                        <input readonly type="text" name="specification" id="specification" class="form-control" value="{!! old( 'specification', $complaints['specification']) !!}">
+                        @if ($errors->has('specification'))
+                        <div class="error col-lg-12">
+                           <p class="text-danger">{{ $errors->first('specification') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+                  <div class="col-md-3">
+                     <div class="input_section">
+                        <label class="col-form-label">Stage </label>
+                        <input readonly type="text" name="product_no" id="product_no" class="form-control" value="{!! old( 'product_no', $complaints['product_no']) !!}">
+                        @if ($errors->has('product_no'))
+                        <div class="error col-lg-12">
+                           <p class="text-danger">{{ $errors->first('product_no') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+                  <div class="col-md-3">
+                     <div class="input_section">
+                        <label class="col-form-label">Phase </label>
+                        <input readonly type="text" name="phase" id="phase" class="form-control" value="{!! old( 'phase', $complaints['phase']) !!}">
+                        @if ($errors->has('phase'))
+                        <div class="error">
+                           <p class="text-danger">{{ $errors->first('phase') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+                  <div class="col-md-3">
+                     <div class="input_section">
+                        <label class="col-form-label">Bill By Company (Party Name)</label>
+                        <input type="text" name="seller" id="seller" class="form-control" value="{{old('seller', $complaints['seller'])}}">
+                        @if ($errors->has('seller'))
+                        <div class="error">
+                           <p class="text-danger">{{ $errors->first('seller') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+                <div class="col-md-3">
+                     <div class="input_section">
+                        <label class="col-form-label">Company Sale Bill Date </label>
+                        <input type="text" name="company_sale_bill_date" id="company_sale_bill_date" class="form-control datepicker" value="{!! old( 'company_sale_bill_date', $complaints['company_sale_bill_date']) !!}">
+                        @if ($errors->has('company_sale_bill_date'))
+                        <div class="error">
+                           <p class="text-danger">{{ $errors->first('company_sale_bill_date') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+                  <div class="col-md-3">
+                     <div class="input_section">
+                        <label class="col-form-label">Company Sale Bill NO </label>
+                        <input type="text" name="company_sale_bill_no" id="company_sale_bill_no" class="form-control" value="{!! old( 'company_sale_bill_no', $complaints['company_sale_bill_no']) !!}">
+                        @if ($errors->has('company_sale_bill_no'))
+                        <div class="error">
+                           <p class="text-danger">{{ $errors->first('company_sale_bill_no') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+                  <div class="col-md-3">
+                     <div class="input_section">
+                        <label class="col-form-label">Total Month Bill By Company </label>
+                        <input readonly type="text" name="company_bill_date_month" id="company_bill_date_month" class="form-control" value="{!! old( 'company_bill_date_month', $complaints['company_bill_date_month']) !!}">
+                        @if ($errors->has('company_bill_date_month'))
+                        <div class="error">
+                           <p class="text-danger">{{ $errors->first('company_bill_date_month') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+
+                  <div class="col-md-3">
+                     <div class="input_section">
+                        <label class="col-form-label">Bill To Customer (Party Name)</label>
+                        <select name="party_name" id="party_name" class="select2 form-control">
+                           @if(old('party_name', $complaints['party_name']))
+                           <option selected value="{{$complaints['party_name']}}">{{$complaints['party']['name']}}</option>
+                           @endif
+                        </select>
+                        @if ($errors->has('party_name'))
+                        <div class="error">
+                           <p class="text-danger">{{ $errors->first('party_name') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+                 <div class="col-md-3">
+                     <div class="input_section">
+                        <label class="col-form-label">Warranty / Customer Bill Date </label>
+                        <input type="text" name="customer_bill_date" id="customer_bill_date" class="form-control datepicker" value="{!! old( 'customer_bill_date', $complaints['customer_bill_date']) !!}">
+                        @if ($errors->has('customer_bill_date'))
+                        <div class="error">
+                           <p class="text-danger">{{ $errors->first('customer_bill_date') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+                  <div class="col-md-3">
+                     <div class="input_section">
+                        <label class="col-form-label">Customer Bill No.</label>
+                        <input type="text" name="customer_bill_no" id="customer_bill_no" class="form-control" value="{!! old( 'customer_bill_no', $complaints['customer_bill_no']) !!}">
+                        @if ($errors->has('customer_bill_no'))
+                        <div class="error">
+                           <p class="text-danger">{{ $errors->first('customer_bill_no') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+                   <div class="col-md-3">
+                     <div class="input_section">
+                        <label class="col-form-label">Total Month Of Customer </label>
+                        <input readonly type="text" autocomplete="off" name="customer_bill_date_month" id="customer_bill_date_month" class="form-control" value="{!! old( 'customer_bill_date_month', $complaints['customer_bill_date_month']) !!}">
+                        @if ($errors->has('customer_bill_date_month'))
+                        <div class="error">
+                           <p class="text-danger">{{ $errors->first('customer_bill_date_month') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+                  <div class="col-md-3">
+                     <div class="input_section">
+                        <label class="col-form-label">Under Warranty </label>
+                        <select name="under_warranty" id="under_warranty" class="select2 form-control">
+                           <option value="">Under Warranty</option>
+                           <option value="Yes" {!! old('under_warranty', $complaints['under_warranty'])=='Yes' ? 'selected' :'' !!}>Yes</option>
+                           <option value="No" {!! old('under_warranty', $complaints['under_warranty'])=='No' ? 'selected' :'' !!}>No</option>
+                        </select>
+                        @if ($errors->has('under_warranty'))
+                        <div class="error">
+                           <p class="text-danger">{{ $errors->first('under_warranty') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+                  <div class="col-md-3">
+                     <div class="input_section">
+                        <label class="col-form-label">Service Paid/Free </label>
+                        <select name="service_type" id="service_type" class="select2 form-control">
+                           <option value="">Service Paid/Free</option>
+                           <option value="Paid" {!! old('service_type', $complaints['service_type'])=='Paid' ? 'selected' :'' !!}>Paid</option>
+                           <option value="Free" {!! old('service_type', $complaints['service_type'])=='Free' ? 'selected' :'' !!}>Free</option>
+                           <option value="later_update" {!! old('service_type', $complaints['service_type'])=='later_update' ? 'selected' :'' !!}>F&A Later Update</option>
+                        </select>
+                        @if ($errors->has('service_type'))
+                        <div class="error">
+                           <p class="text-danger">{{ $errors->first('service_type') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+                 
+                  <div class="col-md-3">
+                     <div class="input_section">
+                        <label class="col-form-label">Warranty/Bill </label>
+                        <select name="warranty_bill" id="warranty_bill" class="select2 form-control">
+                           <option value="">Warranty/Bill</option>
+                           <option value="Yes" {!! old('warranty_bill', $complaints['warranty_bill'])=='Yes' ? 'selected' :'' !!}>Yes</option>
+                           <option value="No" {!! old('warranty_bill', $complaints['warranty_bill'])=='No' ? 'selected' :'' !!}>No</option>
+                        </select>
+                        @if ($errors->has('warranty_bill'))
+                        <div class="error">
+                           <p class="text-danger">{{ $errors->first('warranty_bill') }}</p>
                         </div>
                         @endif
                      </div>
@@ -261,255 +497,11 @@
                         @endif
                      </div>
                   </div>
-                  <div class="col-md-3">
-                     <div class="input_section">
-                        <label class="col-form-label">Seller (Company billed Party )</label>
-                        <input type="text" name="seller" id="seller" class="form-control" value="{{old('seller', $complaints['seller'])}}">
-                        @if ($errors->has('seller'))
-                        <div class="error">
-                           <p class="text-danger">{{ $errors->first('seller') }}</p>
-                        </div>
-                        @endif
-                     </div>
-                  </div>
-                  <div class="col-md-3">
-                     <div class="input_section">
-                        <label class="col-form-label">Purchased Party Name </label>
-                        <select name="party_name" id="party_name" class="select2 form-control">
-                           @if(old('party_name', $complaints['party_name']))
-                           <option selected value="{{$complaints['party_name']}}">{{$complaints['party']['name']}}</option>
-                           @endif
-                        </select>
-                        @if ($errors->has('party_name'))
-                        <div class="error">
-                           <p class="text-danger">{{ $errors->first('party_name') }}</p>
-                        </div>
-                        @endif
-                     </div>
-                  </div>
+                 
                </div>
                <div class="basic_details mt-1">
                   <div class=" rounded p-2">
                      <div class="row mt-3">
-                        <div class="col-md-3">
-                           <div class="input_section">
-                              <label class="col-form-label">Product Searial Number </label>
-                              <input {{($complaints->exists && empty($complaints['product_serail_number']))?'':'readonly'}} type="text" name="product_serail_number" id="product_serail_number" class="form-control" value="{!! old( 'product_serail_number', $complaints['product_serail_number']) !!}">
-                              @if ($errors->has('product_serail_number'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('product_serail_number') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                        <div class="col-md-3">
-                           <div class="input_section">
-                              <label class="col-form-label">Division </label>
-                              <input readonly type="text" name="category" id="category" class="form-control" value="{!! old( 'category', $complaints['category']) !!}">
-                              @if ($errors->has('category'))
-                              <div class="error col-lg-12">
-                                 <p class="text-danger">{{ $errors->first('category') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                        <div class="col-md-3">
-                           <div class="input_section">
-                              <label class="col-form-label">Product Group </label>
-                              <input readonly type="text" name="product_group" id="product_group" class="form-control" value="{!! old( 'product_group', $complaints['product_group']) !!}">
-                              @if ($errors->has('product_group'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('product_group') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                        <div class="col-md-3">
-                           <div class="input_section">
-                              <label class="col-form-label">Product/Model(Code) </label>
-                              <input readonly type="text" name="product_code" id="product_code" class="form-control" value="{!! old( 'product_code', $complaints['product_code']) !!}">
-                              @if ($errors->has('product_code'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('product_code') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                        <div class="col-md-3">
-                           <div class="input_section">
-                              <label class="col-form-label">Product Name </label>
-                              <select name="product_id" id="product_id" class="select2">
-                                 <option value="">Select Product</option>
-                                 @if(count($products) > 0)
-                                 @foreach($products as $product)
-                                 <option value="{{$product->id}}" {{($complaints && $complaints['product_id']==$product->id)?'selected':''}}>{{$product->product_name}}</option>
-                                 @endforeach
-                                 @endif
-                              </select>
-                              <input readonly type="hidden" name="product_name" id="product_name" class="form-control" value="{!! old( 'product_name', $complaints['product_name']) !!}">
-                              @if ($errors->has('product_name'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('product_name') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                        <div class="col-md-3">
-                           <div class="input_section">
-                              <label class="col-form-label">HP </label>
-                              <input readonly type="text" name="specification" id="specification" class="form-control" value="{!! old( 'specification', $complaints['specification']) !!}">
-                              @if ($errors->has('specification'))
-                              <div class="error col-lg-12">
-                                 <p class="text-danger">{{ $errors->first('specification') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                        <div class="col-md-3">
-                           <div class="input_section">
-                              <label class="col-form-label">Stage </label>
-                              <input readonly type="text" name="product_no" id="product_no" class="form-control" value="{!! old( 'product_no', $complaints['product_no']) !!}">
-                              @if ($errors->has('product_no'))
-                              <div class="error col-lg-12">
-                                 <p class="text-danger">{{ $errors->first('product_no') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                        <div class="col-md-3">
-                           <div class="input_section">
-                              <label class="col-form-label">Phase </label>
-                              <input readonly type="text" name="phase" id="phase" class="form-control" value="{!! old( 'phase', $complaints['phase']) !!}">
-                              @if ($errors->has('phase'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('phase') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                        <div class="col-md-3">
-                           <div class="input_section">
-                              <label class="col-form-label">Company Sale Bill NO </label>
-                              <input type="text" name="company_sale_bill_no" id="company_sale_bill_no" class="form-control" value="{!! old( 'company_sale_bill_no', $complaints['company_sale_bill_no']) !!}">
-                              @if ($errors->has('company_sale_bill_no'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('company_sale_bill_no') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                        <div class="col-md-3">
-                           <div class="input_section">
-                              <label class="col-form-label">Company Sale Bill NO </label>
-                              <input type="text" name="company_sale_bill_no" id="company_sale_bill_no" class="form-control" value="{!! old( 'company_sale_bill_no', $complaints['company_sale_bill_no']) !!}">
-                              @if ($errors->has('company_sale_bill_no'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('company_sale_bill_no') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                        <div class="col-md-3">
-                           <div class="input_section">
-                              <label class="col-form-label">Company Sale Bill Date </label>
-                              <input type="text" name="company_sale_bill_date" id="company_sale_bill_date" class="form-control datepicker" value="{!! old( 'company_sale_bill_date', $complaints['company_sale_bill_date']) !!}">
-                              @if ($errors->has('company_sale_bill_date'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('company_sale_bill_date') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                        <div class="col-md-3">
-                           <div class="input_section">
-                              <label class="col-form-label">Warranty / Customer Bill Date </label>
-                              <input type="text" name="customer_bill_date" id="customer_bill_date" class="form-control datepicker" value="{!! old( 'customer_bill_date', $complaints['customer_bill_date']) !!}">
-                              @if ($errors->has('customer_bill_date'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('customer_bill_date') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                        <div class="col-md-3">
-                           <div class="input_section">
-                              <label class="col-form-label">Customer Bill No.</label>
-                              <input type="text" name="customer_bill_no" id="customer_bill_no" class="form-control" value="{!! old( 'customer_bill_no', $complaints['customer_bill_no']) !!}">
-                              @if ($errors->has('customer_bill_no'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('customer_bill_no') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                        <div class="col-md-3">
-                           <div class="input_section">
-                              <label class="col-form-label">Company Bill Date Month </label>
-                              <input readonly type="text" name="company_bill_date_month" id="company_bill_date_month" class="form-control" value="{!! old( 'company_bill_date_month', $complaints['company_bill_date_month']) !!}">
-                              @if ($errors->has('company_bill_date_month'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('company_bill_date_month') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                        <div class="col-md-3">
-                           <div class="input_section">
-                              <label class="col-form-label">Under Warranty </label>
-                              <select name="under_warranty" id="under_warranty" class="select2 form-control">
-                                 <option value="">Under Warranty</option>
-                                 <option value="Yes" {!! old('under_warranty', $complaints['under_warranty'])=='Yes' ? 'selected' :'' !!}>Yes</option>
-                                 <option value="No" {!! old('under_warranty', $complaints['under_warranty'])=='No' ? 'selected' :'' !!}>No</option>
-                              </select>
-                              @if ($errors->has('under_warranty'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('under_warranty') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                        <div class="col-md-3">
-                           <div class="input_section">
-                              <label class="col-form-label">Service Paid/Free </label>
-                              <select name="service_type" id="service_type" class="select2 form-control">
-                                 <option value="">Service Paid/Free</option>
-                                 <option value="Paid" {!! old('service_type', $complaints['service_type'])=='Paid' ? 'selected' :'' !!}>Paid</option>
-                                 <option value="Free" {!! old('service_type', $complaints['service_type'])=='Free' ? 'selected' :'' !!}>Free</option>
-                                 <option value="later_update" {!! old('service_type', $complaints['service_type'])=='later_update' ? 'selected' :'' !!}>F&A Later Update</option>
-                              </select>
-                              @if ($errors->has('service_type'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('service_type') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                        <div class="col-md-3">
-                           <div class="input_section">
-                              <label class="col-form-label">Customer Bill Date Month </label>
-                              <input readonly type="text" autocomplete="off" name="customer_bill_date_month" id="customer_bill_date_month" class="form-control" value="{!! old( 'customer_bill_date_month', $complaints['customer_bill_date_month']) !!}">
-                              @if ($errors->has('customer_bill_date_month'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('customer_bill_date_month') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                        <div class="col-md-3">
-                           <div class="input_section">
-                              <label class="col-form-label">Warranty/Bill </label>
-                              <select name="warranty_bill" id="warranty_bill" class="select2 form-control">
-                                 <option value="">Warranty/Bill</option>
-                                 <option value="Yes" {!! old('warranty_bill', $complaints['warranty_bill'])=='Yes' ? 'selected' :'' !!}>Yes</option>
-                                 <option value="No" {!! old('warranty_bill', $complaints['warranty_bill'])=='No' ? 'selected' :'' !!}>No</option>
-                              </select>
-                              @if ($errors->has('warranty_bill'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('warranty_bill') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
                      </div>
                   </div>
                </div>
@@ -670,7 +662,7 @@
                         <div class="col-md-3">
                            <div class="input_section">
                               <label class="col-form-label">Customer Complaint Type </label>
-                              <select name="complaint_type" id="complaint_type" placeholder="Select Pincode" class="select2 form-control" required>
+                              <select name="complaint_type" id="complaint_type" placeholder="Select Pincode" class="select2 form-control" >
                                  <option value="" disabled selected>Complaint Type</option>
                                  @if($complaint_types && count($complaint_types) > 0)
                                  @foreach($complaint_types as $complaint_type)
@@ -856,7 +848,7 @@
          var diffMonths = today.diff(selectedDate, 'months');
          selectedDate.add(diffMonths, 'months');
          var diffDays = today.diff(selectedDate, 'days');
-
+         $('#customer_bill_date').val($('#company_sale_bill_date').val()).trigger('change');
          $("#company_bill_date_month").focus();
          $("#company_bill_date_month").val(diffMonths + " Month " + diffDays + " Day");
       });
@@ -869,13 +861,13 @@
             console.log("Selected Date:", selectedDate.format('DD-MM-YYYY'));
             console.log("Bill Date:", billDate.format('DD-MM-YYYY'));
 
-            if (!selectedDate.isValid() || !billDate.isValid()) {
+            if (!selectedDate.isValid() && !billDate.isValid()) {
                 alert("Invalid date format. Please use DD-MM-YYYY.");
                 $(this).val($('#company_sale_bill_date').val()); // Clear input
                 return;
             }
 
-            if (selectedDate.isSameOrBefore(billDate)) {
+            if (selectedDate.isBefore(billDate)) {
                 alert("Selected date must be greater than the bill date.");
                 $(this).val($('#company_sale_bill_date').val()); // Clear input
                 return;
@@ -977,7 +969,7 @@
                      }
 
                      if (warrantyDate > today) {
-                        $("#under_warranty").val('Yes');
+                        $("#under_warranty").val('Yes').trigger('change');
                         $("#under_warranty").change();
                         $("#service_type").val('Free');
                         $("#service_type").change();
@@ -1006,7 +998,7 @@
                   } else {
                      $("input, select, textarea, button").not("#serail_number").prop("readonly", true).prop("disabled", true);
                      $('#submit-btn').prop("disabled", true);
-                     if(res.check_Warranty.status == "0"){
+                     if(res.check_Warranty && res.check_Warranty.status == "0"){
                         var active_url = "{{ route('warranty_activation.edit', ['warranty_activation' => '__ID__']) }}";
                         var encrypt_id = res.encrypt_id;  
                         active_url = active_url.replace('__ID__', encrypt_id); 
@@ -1079,6 +1071,13 @@
             }
          });
       }).trigger('keyup');
+
+      $("#under_warranty").on('change' , function() {
+         var under_warrenty = $(this).val();
+         if(under_warrenty == 'Yes'){
+            $('#service_type').val('Free').trigger('change');
+         }
+      })
 
       $("#customer_number").on("keyup", function() {
          var customer_number = $(this).val();
@@ -1252,6 +1251,7 @@
                   $("#product_name").val(res.product_name);
                   $("#category").val(res.categories.category_name);
                   $("#specification").val(res.specification);
+                    $("#product_group").val(res.subcategories.subcategory_name);
                   $("#product_no").val(res.product_no);
                   $("#phase").val(res.phase);
                   $("#product_code").prop('readonly', true);
@@ -1276,19 +1276,19 @@
          }
       });
       
-      $('#branch_id').on('change' , function(){
-           $('#assign_user').empty();
-           var branch_id = $(this).val();
+      $('#customer_city').on('change' , function(){
+           // $('#assign_user').empty();
+           var customer_city = $(this).val();
            $.ajax({
             url: "{{ url('getUserByBranch') }}",
             dataType: "json",
             type: "POST",
             data: {
                _token: "{{csrf_token()}}",
-               branch_id: branch_id
+               customer_city: customer_city
             },
             success: function(res) {
-               $('#assign_user').html(res.html);
+               $('#assign_user').val(res.id).trigger('change');
             }
          });
       }); 
@@ -1335,26 +1335,29 @@
          });
       });
 
-      $("#customer_city").on("change", function() {
-         var sel_id = $('#customer_pindcode').val() ;
-         var city_id = $(this).val();
-         $.ajax({
-            url: "{{ url('getPincode') }}",
-            dataType: "json",
-            type: "POST",
-            data: {
-               _token: "{{csrf_token()}}",
-               city_id: city_id
-            },
-            success: function(res) {
-               var options = '<option value="">Select Pincode</option>';
-               $.each(res, function(key, val) {
-                  options += '<option value="' + val.id + '" ' + (sel_id == val.id ? 'selected' : '') + '>' + val.pincode + '</option>';
-               })
-               $("#customer_pindcode").html(options);
-            }
-         });
-      });
+      // $("#customer_city").on("change", function() {
+      //    var sel_id = $('#customer_pindcode').val() ;
+      //    var city_id = $(this).val();
+      //    $.ajax({
+      //       url: "{{ url('getPincode') }}",
+      //       dataType: "json",
+      //       type: "POST",
+      //       data: {
+      //          _token: "{{csrf_token()}}",
+      //          city_id: city_id
+      //       },
+      //       success: function(res) {
+      //          var options = '<option value="">Select Pincode</option>';
+      //          $.each(res, function(key, val) {
+      //             if(sel_id == val.id){
+      //                 options += '<option value="' + val.id + '" ' + (sel_id == val.id ? 'selected' : '') + '>' + val.pincode + '</option>';
+      //             }
+                 
+      //          })
+      //          $("#customer_pindcode").append(options);
+      //       }
+      //    });
+      // });
 
       $(document).ready(function() {
          var serial_number = "{{ $serial_number ?? '' }}";
@@ -1408,6 +1411,7 @@
                $("#customer_number_error").hide();
             }
          });
+
 
       });
    </script>
