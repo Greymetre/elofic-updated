@@ -125,7 +125,7 @@
           @endif
 
           <div class="table-responsive">
-            {{-- <table id="getfosrating" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
+            <table id="getfosrating" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
               <thead class=" text-primary">
                 <th>No</th>
                 <th>Employees Code</th>
@@ -134,8 +134,74 @@
               </thead>
               <tbody>
               </tbody>
-            </table> --}}
+            </table>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="pmsModal" tabindex="-1" aria-labelledby="pmsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="pmsModalLabel">PMS Form</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="pmsForm">
+            @csrf
+            <table class="table table-bordered">
+              <tbody>
+                <tr>
+                  <th>Name</th>
+                  <td><input type="text" class="form-control" name="name" value="Gajendra Singh Rajput" readonly></td>
+                  <th>Branch</th>
+                  <td><input type="text" class="form-control" name="branch" value="Indore" readonly></td>
+                  <th>Designation</th>
+                  <td><input type="text" class="form-control" name="designation" value="Manager" readonly></td>
+                </tr>
+                <tr>
+                  <th>Final Rating</th>
+                  <td><input type="number" class="form-control" name="final_rating" value="80" readonly></td>
+                  <th>Company Tenure (in Months)</th>
+                  <td><input type="number" class="form-control" name="tenure" value="14" readonly></td>
+                  <th>Gross Salary</th>
+                  <td><input type="number" class="form-control" name="gross_salary" value="50000" readonly></td>
+                </tr>
+                <tr>
+                  <th>Last Year Gross Increment Value</th>
+                  <td><input type="number" class="form-control" name="last_year_increment_value" value="5000" readonly></td>
+                  <th>Last Year Increment %</th>
+                  <td><input type="text" class="form-control" name="last_year_increment" value="10%" readonly></td>
+                  <th>Total Target</th>
+                  <td><input type="number" class="form-control" name="total_target" value="1000000"></td>
+                </tr>
+                <tr>
+                  <th>Total Sales</th>
+                  <td><input type="number" class="form-control" id="totalSales" name="total_sales" value="500000"></td>
+                  <th>Percentage Achievement</th>
+                  <td><input type="number" class="form-control" id="percentageAchievement" name="percentage_achievement"></td>
+                  <th>Recommended CY Increment %</th>
+                  <td><input type="number" class="form-control" name="recommended_increment" value="10"></td>
+                </tr>
+                <tr>
+                  <th>Recommended Designation</th>
+                  <td><input type="text" class="form-control" name="recommended_designation" value="ASM"></td>
+                  <th>Remark</th>
+                  <td colspan="3">
+                    <textarea class="form-control" name="remarks" placeholder="Enter remarks"></textarea>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="text-center">
+              <button type="submit" class="btn btn-success btn-lg">Submit</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -233,5 +299,37 @@
         }
       });
     }).trigger("chnage");
+
+    $(document).on("click", ".edit_remark", function() {
+      var id = $(this).data("id");
+      console.log(id);
+      $.ajax({
+        url: "{{ url('getPMS') }}/",
+        type: 'GET',
+        dataType: 'json',
+        data: {
+          _token: "{{csrf_token()}}",
+          id: id
+        },
+        success: function(res) {
+          $("#pmsForm").find("input[name='name']").val(res.name);
+          $("#pmsForm").find("input[name='branch']").val(res.branch);
+          $("#pmsForm").find("input[name='designation']").val(res.designation);
+          $("#pmsForm").find("input[name='final_rating']").val(res.final_rating);
+          $("#pmsForm").find("input[name='tenure']").val(res.tenure);
+          $("#pmsForm").find("input[name='gross_salary']").val(res.gross_salary);
+          $("#pmsForm").find("input[name='last_year_increment_value']").val(res.last_year_increment_value);
+          $("#pmsForm").find("input[name='last_year_increment']").val(res.last_year_increment);
+          $("#pmsForm").find("input[name='total_target']").val(res.total_target);
+          $("#pmsForm").find("input[name='total_sales']").val(res.total_sales);
+          $("#pmsForm").find("input[name='percentage_achievement']").val(res.percentage_achievement);
+          $("#pmsForm").find("input[name='recommended_increment']").val(res.recommended_increment);
+          $("#pmsForm").find("input[name='recommended_designation']").val(res.recommended_designation);
+          $("#pmsForm").find("textarea[name='remarks']").val(res.remarks);
+          $("#pmsForm").find("input[name='id']").val(res.id);
+        }
+      })
+      $("#pmsModal").modal("show");
+    });
   </script>
 </x-app-layout>

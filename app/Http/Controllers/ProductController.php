@@ -422,9 +422,10 @@ class ProductController extends Controller
         $branches = Branch::where('active', 'Y')->latest()->get();
 
         if ($request->ajax()) {
-            $data = BranchStock::with('branch','division')->select(
+            $data = BranchStock::with('branch','division', 'warehouse')->select(
                 'division_id',
                 'branch_id',
+                'warehouse_id',
                 'year',
                 'quarter',
                 DB::raw('SUM(amount) as total_amounts'),
@@ -435,7 +436,7 @@ class ProductController extends Controller
             if($request->branch_id && !empty($request->branch_id)){
                 $data->where('branch_id', $request->branch_id);
             }
-            $data = $data->groupBy('division_id','branch_id', 'year', 'quarter');
+            $data = $data->groupBy('division_id','branch_id', 'year', 'quarter', 'warehouse_id');
             
             return Datatables::of($data)
                 ->addIndexColumn()

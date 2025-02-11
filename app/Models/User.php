@@ -50,6 +50,7 @@ class User extends Authenticatable implements HasMedia
         'employee_codes',
         'department_id',
         'division_id',
+        'warehouse_id',
         'payroll',
         'lave_balance',
         'grade',
@@ -221,5 +222,10 @@ class User extends Authenticatable implements HasMedia
     public function target()
     {
         return $this->hasMany(SalesTargetUsers::class, 'user_id', 'id');
+    }
+
+    public function warehouse()
+    {
+        return $this->belongsTo('App\Models\WareHouse', 'warehouse_id', 'id');
     }
 }

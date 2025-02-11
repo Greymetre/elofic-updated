@@ -101,6 +101,7 @@ class UserImport implements ToCollection, WithValidation, WithHeadingRow, WithBa
                     'division_id' => !empty($row['division_id']) ? $row['division_id'] : '',
                     'department_id' => !empty($row['department_id']) ? $row['department_id'] : '',
                     'payroll' => !empty($row['payroll']) ? $row['payroll'] : '',
+                    'warehouse_id' => !empty($row['warehouse_id']) ? $row['warehouse_id'] : NULL,
                     'reportingid' => !empty($row['reporting_id']) ? $row['reporting_id'] : '',
                     'sales_type' => !empty($row['sales_type']) ? $row['sales_type'] : '',
                     'show_attandance_report' => !empty($row['attandance_summary_report']) ? (int)$row['attandance_summary_report'] : '',
@@ -246,6 +247,7 @@ class UserImport implements ToCollection, WithValidation, WithHeadingRow, WithBa
                     'branch_id' => !empty($row['branch_id']) ? $row['branch_id'] : '',
                     'designation_id' => !empty($row['designation_id']) ? $row['designation_id'] : '',
                     'division_id' => !empty($row['division_id']) ? $row['division_id'] : '',
+                    'warehouse_id' => !empty($row['warehouse_id']) ? $row['warehouse_id'] : NULL,
                     'department_id' => !empty($row['department_id']) ? $row['department_id'] : '',
                     'created_at' => getcurentDateTime(),
                     'updated_at' => getcurentDateTime()
