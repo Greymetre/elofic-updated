@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CompOffLeave, CustomerDetails, DealerAppointment, DealerAppointmentKyc, EndUser, Expenses, GiftModel, GiftSubcategory, Marketing, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, PrimaryScheme, Redemption, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation};
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Branch, BranchStock, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CompOffLeave, CustomerDetails, CustomerOutstanting, DealerAppointment, DealerAppointmentKyc, EmployeeDetail, EndUser, Expenses, GiftModel, GiftSubcategory, Marketing, MspActivity, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, PrimaryScheme, Redemption, SalesTargetUsers, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation};
 use App\Models\UserLiveLocation;
 use App\Models\UserActivity;
 use App\Http\Controllers\SendNotifications;
@@ -1161,10 +1161,10 @@ class AjaxController extends Controller
                     $data->product->subcategories = $data->product->subcategories;
                     $check_Warranty = WarrantyActivation::with('media', 'customer', 'seller_details')->where('status', '!=', '3')->where('product_serail_number', $serial_no)->first();
                     $encrypt_id = "";
-                    if(isset($check_Warranty)){
+                    if (isset($check_Warranty)) {
                         $encrypt_id = Crypt::encrypt($check_Warranty->id) ?? '';
                     }
-                    return response()->json(['status' => true, 'data_all' => $data, 'data' => $data->product, 'check_Warranty' => $check_Warranty , 'encrypt_id' => $encrypt_id]);
+                    return response()->json(['status' => true, 'data_all' => $data, 'data' => $data->product, 'check_Warranty' => $check_Warranty, 'encrypt_id' => $encrypt_id]);
                 } else {
                     return response()->json(['status' => false, 'data' => null]);
                 }
@@ -1189,13 +1189,13 @@ class AjaxController extends Controller
                     $state = State::where('state_name', $data->customer_state)->first();
                     $district = District::where('district_name', $data->customer_district)->first();
                     $city = City::where('city_name', $data->customer_city)->first();
-                    if($state && $state != NULL && !empty($state) && $data->state_id == NULL){
+                    if ($state && $state != NULL && !empty($state) && $data->state_id == NULL) {
                         $data->state_id = $state->id;
                     }
-                    if($district && $district != NULL && !empty($district) && $data->district_id == NULL){
+                    if ($district && $district != NULL && !empty($district) && $data->district_id == NULL) {
                         $data->district_id = $district->id;
                     }
-                    if($city && $city != NULL && !empty($city) && $data->city_id == NULL){
+                    if ($city && $city != NULL && !empty($city) && $data->city_id == NULL) {
                         $data->city_id = $city->id;
                     }
                     return response()->json(['status' => true, 'data' => $data]);
@@ -1390,7 +1390,6 @@ class AjaxController extends Controller
                 $startDateFormatted = $firstDate->toDateString();
                 $endDateFormatted = $lastDate->toDateString();
             }
-
         }
 
         $query->where(function ($q) use ($startDateFormatted, $endDateFormatted) {
@@ -1549,8 +1548,8 @@ class AjaxController extends Controller
         $data = User::where('id', $request->user_id)->first();
         $last60Days = Carbon::now()->subDays(60);
         $comp_off_balance = CompOffLeave::where('comp_off_date', '>=', $last60Days)->where('is_used', false)
-                ->where('user_id', $request->user_id)
-                ->sum('balance');
+            ->where('user_id', $request->user_id)
+            ->sum('balance');
         return response()->json(['status' => 'success', 'leave_balance' => $data->leave_balance, 'comp_off_balance' => $comp_off_balance]);
     }
 
@@ -1559,16 +1558,16 @@ class AjaxController extends Controller
     public function getProductTimeInterval(Request $request)
     {
         $product = Product::find($request->product_id);
-        if(!isset($product)){
+        if (!isset($product)) {
             return response()->json(['status' => 'error', 'product' => "Not Found"]);
         }
         $date = Carbon::parse($request->sale_bill_date);
         $warranty_expire_date = '';
-        if($product->expiry_interval == "Month"){
+        if ($product->expiry_interval == "Month") {
             $warranty_expire_date = $date->addMonths($product->expiry_interval_preiod)->format('d-m-Y');
-        }else if($product->expiry_interval == "Day"){
+        } else if ($product->expiry_interval == "Day") {
             $warranty_expire_date = $date->addDays($product->expiry_interval_preiod)->format('d-m-Y');
-        }else if($product->expiry_interval == "Year"){
+        } else if ($product->expiry_interval == "Year") {
             $warranty_expire_date = $date->addYears($product->expiry_interval_preiod)->format('d-m-Y');
         }
         return response()->json(['status' => 'success', 'warrenty_expire_date' => $warranty_expire_date]);
@@ -1621,31 +1620,32 @@ class AjaxController extends Controller
         }
 
         return response()->json([
-            'results' => $users->items(), 
+            'results' => $users->items(),
             'pagination' => ['more' => $users->hasMorePages()],
         ]);
     }
 
     // Add Marketing actinity 
-    public function addMarketingType(Request $request){
+    public function addMarketingType(Request $request)
+    {
         $type = $request->type ?? '';
-        if(isset($type)){
+        if (isset($type)) {
             $slug = strtolower(str_replace(' ', '_', $type));
 
             $marketing_type = MarketingActivity::updateOrCreate(
-                ['slug' => $slug ],
-                ['type' => $type ]
+                ['slug' => $slug],
+                ['type' => $type]
             );
-            return response()->json(['status' => true , 'marketing_type' => $marketing_type]);
-        } 
-        return response()->json(['status' => false ]);
+            return response()->json(['status' => true, 'marketing_type' => $marketing_type]);
+        }
+        return response()->json(['status' => false]);
     }
 
     // get users by branch id
     public function getUserByBranch(Request $request)
     {
         $branch_id = $request->branch_id ?? '';
-        $users = User::where(['branch_id'=> $branch_id])->get();
+        $users = User::where(['branch_id' => $branch_id])->get();
         $html = '<option value="">Select User</option>'; // Default option
 
         if ($users->isNotEmpty()) {
@@ -1654,5 +1654,251 @@ class AjaxController extends Controller
             }
         }
         return response()->json(['html' => $html]);
+    }
+
+    public function getPMS(Request $request)
+    {
+        if($request->ip() != '111.118.252.250') {
+            return response()->json(['status' => 'error', 'message' => 'Coming Soon. Working on it!!']);
+        }
+        $f_year_array = explode('-', $request->financial_year);
+
+        $start_date = $f_year_array[0] . '-04-01';
+        $end_date = $f_year_array[1] . '-03-31';
+        if ($end_date > now()->toDateString()) {
+            $end_date = now()->toDateString();
+        }
+
+        $user = User::with('getbranch', 'getdivision', 'getdesignation', 'all_attendance_details', 'visits', 'customers', 'userinfo', 'target', 'primarySales')->where('id', $request->user_id);
+
+        $user = $user->withCount([
+            'all_attendance_details as working_days' => function ($user) use ($start_date, $end_date) {
+                $user->whereNotIn('working_type', ['Office Work', 'Office Meeting', 'Full Day Leave', 'Leave', 'Holiday'])
+                    ->whereBetween('punchin_date', [$start_date, $end_date]);
+            },
+            'visits as visit_count' => function ($user) use ($start_date, $end_date) {
+                $user->whereBetween('checkin_date', [$start_date, $end_date]);
+            }
+        ]);
+
+        $user = $user->first();
+
+        if (empty(array_diff($request->role_id, [2, 32]))) {
+
+            if (isset($user['userinfo']['date_of_joining']) && $user['userinfo']['date_of_joining'] != null && $user['userinfo']['date_of_joining'] > $start_date && $user['userinfo']['date_of_joining'] < $end_date) {
+                $startDate = Carbon::parse($startDate = Carbon::parse($user['userinfo']['date_of_joining']));
+            } else {
+                $startDate = Carbon::parse($start_date);
+            }
+            $endDate = Carbon::parse($end_date);
+            $monthCount = $startDate->diffInMonths($endDate) + 1;
+
+            $selectedmonths = [];
+            while ($startDate->lessThanOrEqualTo($endDate)) {
+                $selectedmonths[] = $startDate->format('M');
+                $startDate->addMonth();
+            }
+
+            $working_days_trg = 20 * $monthCount;
+            $visit_count_trg = 120 * $monthCount;
+            $unique_visit_count_trg = 8 * $monthCount;
+            $active_customer_trg = 8 * $monthCount;
+            $msp_activity_trg = 4 * $monthCount;
+
+            $unique_visit_count = $user->visits
+                ->whereBetween('checkin_date', [$start_date, $end_date])
+                ->filter(function ($visit) use ($request) {
+                    $city_id = optional(optional($visit->customers)->customeraddress)->city_id;
+
+                    if (!$city_id) {
+                        return true;
+                    }
+
+                    $existing_customer = Customers::whereHas('customeraddress', function ($q) use ($city_id) {
+                        $q->where('city_id', $city_id);
+                    })
+                        ->whereHas('createdbyname', function ($q) use ($request) {
+                            $q->where('division_id', $request->division_id);
+                        })
+                        ->where('created_at', '<', $visit->checkin_date)
+                        ->exists();
+                    return !$existing_customer;
+                })
+                ->unique(fn($visit) => optional(optional($visit->customers)->customeraddress)->city_id)
+                ->count();
+
+            $user_target = $user->target->whereIn('month', $selectedmonths)->sum('target');
+            $user_achiv = $user->primarySales->where('invoice_date', '>=', $start_date)->where('invoice_date', '<=', $end_date)->sum('net_amount');
+            $user_achiv_new_dealer = $user->primarySales()->where('invoice_date', '>=', $start_date)->where('invoice_date', '<=', $end_date)->where('new_dealer', 'Y')->sum('net_amount');
+            $user_achiv_new_product = $user->primarySales()->where('invoice_date', '>=', $start_date)->where('invoice_date', '<=', $end_date)->where('new_product', 'Y')->sum('net_amount');
+            DB::statement("SET SESSION group_concat_max_len = 10000000");
+
+            $total_assign_customer_ids = EmployeeDetail::where('user_id', $user->id)
+                ->pluck('customer_id')
+                ->toArray();
+
+            $child_customer_ids = ParentDetail::whereIn('parent_id', $total_assign_customer_ids)
+                ->pluck('customer_id')
+                ->toArray();
+
+            $all_customer_ids = array_merge($total_assign_customer_ids, $child_customer_ids);
+            $active_customer = 0;
+
+            foreach (array_chunk($all_customer_ids, 500) as $chunk) {
+                $active_customer += TransactionHistory::whereBetween('created_at', [$start_date, $end_date])
+                    ->whereIn('customer_id', $chunk)
+                    ->whereNotIn('customer_id', function ($query) use ($start_date) {
+                        $query->select('customer_id')
+                            ->from('transaction_histories')
+                            ->where('created_at', '<', $start_date);
+                    })
+                    ->groupBy('customer_id')
+                    ->selectRaw('customer_id')
+                    ->get()
+                    ->count();
+            }
+
+            $debtors_start_date = $f_year_array[0] . '-04-01';
+
+            $debtors_end_date = now()->toDateString();
+
+            $debtors_start_date_or = Carbon::createFromFormat('Y-m-d', $f_year_array[0] . '-04-01');
+            $debtors_end_date_or = now();
+
+            $days_difference = $debtors_start_date_or->diffInDays($debtors_end_date_or);
+
+            $debtors_sales = PrimarySales::where('branch_id', $user->branch_id)->where('invoice_date', '>=', $debtors_start_date)->where('invoice_date', '<=', $debtors_end_date)->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount');
+            $total_debtors = CustomerOutstanting::where('branch_id', $user->branch_id)->whereIn('division_id', ['10', '18'])->where('year', $f_year_array[0])->sum('amount');
+
+            $degree_name = array();
+            if (!empty($user['geteducation'])) {
+                foreach ($user['geteducation'] as $key_new => $datas) {
+                    $degree_name[] = isset($datas->degree_name) ? $datas->degree_name : '';
+                }
+            }
+
+            $msp_activitys = MspActivity::where('emp_code', $user->employee_codes);
+            if (isset($request->month) && count($request->month) > 0) {
+                $msp_activitys->whereIn('month', $request->month);
+            }
+            $msp_activitys = $msp_activitys->where('fyear', getCurrentFinancialYear($request->financial_year))->sum('msp_count');
+
+            $fachiv = $user_achiv > 0 ? round((($user_achiv / 100000) * 40) / 100, 1) : 0;
+            $sachiv = $user_achiv > 0 ? round((($user_achiv / 100000) * 60) / 100, 2) : 0;
+            $days = ($debtors_sales / 100000) / 270 > 0 && $total_debtors > 0 ? round(($total_debtors / (($debtors_sales / 100000) / $days_difference)), 0) : '100';
+            $percentage = $days <= 30 ? '100%' : ($days <= 60 ? '80%' : ($days <= 90 ? '50%' : '0%'));
+
+            $rating_is = $this->getFR($this->getPer($user['working_days'], $working_days_trg), 5) + $this->getFR($this->getPer($user['visit_count'], $visit_count_trg), 5) + $this->getFR($this->getPer($unique_visit_count, $unique_visit_count_trg), 5) + $this->getFR($this->getPer($user_achiv / 100000, $user_target), 40) + $this->getFR($this->getPer($user_achiv_new_dealer / 100000, $fachiv), 10) + $this->getFR($this->getPer($user_achiv_new_product / 100000, $sachiv), 5) + (20 * (int)$percentage) / 100 + $this->getFR($this->getPer($active_customer, $active_customer_trg), 5) + $this->getFR($this->getPer($msp_activitys, $msp_activity_trg), 5);
+
+
+            $popup_data = array();
+
+            $popup_data['name'] = $user->name;
+            $popup_data['branch'] = $user->getbranch ? $user->getbranch->branch_name : '-';
+            $popup_data['designation'] = $user->getdesignation ? $user->getdesignation->designation_name : '-';
+            $popup_data['rating'] = $rating_is;
+            $popup_data['company_tenure'] = $user->userinfo ? $user->userinfo->current_company_tenture : '-';
+            $popup_data['gross_salary'] = $user->userinfo ? $user->userinfo->gross_salary_monthly : '-';
+            $popup_data['last_year_inc_value'] = $user->userinfo ? $user->userinfo->last_year_increments : '-';
+            $popup_data['last_year_inc_per'] = $user->userinfo ? $user->userinfo->last_year_increment_percent : '-';
+            $popup_data['target'] = $user_target;
+            $popup_data['sale'] = round(($user_achiv / 100000), 2);
+            $popup_data['sale_per'] = $this->getPer($user_achiv / 100000, $user_target);
+
+            return response()->json(['status' => 'success', 'data' => $popup_data]);
+        } else if (empty(array_diff($request->role_id, [3, 6, 13]))) {
+
+            
+            $startDate = Carbon::parse($start_date);
+            $endDate = Carbon::parse($end_date);
+            $monthCount = $startDate->diffInMonths($endDate) + 1;
+            $selectedmonths = [];
+            while ($startDate->lessThanOrEqualTo($endDate)) {
+                $selectedmonths[] = $startDate->format('M');
+                $startDate->addMonth();
+            }
+
+            $lastyrstartdate = Carbon::createFromFormat('Y-m-d', $start_date)->subYear()->format('Y-m-d');
+            $lastyrenddate = Carbon::createFromFormat('Y-m-d', $end_date)->subYear()->format('Y-m-d');
+
+            $user_ids = getUsersReportingToAuth($user->id);
+            $emp_codes = User::whereIn('id', $user_ids)->pluck('employee_codes');
+            $branch_ids = explode(',', $user->branch_id);
+
+            $targets = SalesTargetUsers::with('user')->whereIn('branch_id', $branch_ids)->whereIn('month', $selectedmonths)->where('type', 'primary')->whereHas('user', function ($query) {
+                $query->whereIn('division_id', ['10', '18']);
+            })->sum('target');
+            $achiv = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $start_date)->where('invoice_date', '<=', $end_date)->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount') / 100000;
+            $ly_targets = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $lastyrstartdate)->where('invoice_date', '<=', $lastyrenddate)->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount') / 100000;
+
+            $new_achiv_dealer = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $start_date)->where('invoice_date', '<=', $end_date)->where('new_dealer', 'Y')->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount') / 100000;
+            $new_achiv_product = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $start_date)->where('invoice_date', '<=', $end_date)->where('new_product', 'Y')->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount') / 100000;
+
+            $branch_names = Branch::whereIn('id', $branch_ids)->pluck('branch_name')->toArray();
+
+            $debtors_start_date = $f_year_array[0] . '-04-01';
+            // $debtors_end_date = $f_year_array[0] . '-12-31';
+            $debtors_end_date = now()->toDateString();
+
+            $debtors_start_date_or = Carbon::createFromFormat('Y-m-d', $f_year_array[0] . '-04-01');
+            $debtors_end_date_or = now();
+
+            $days_difference = $debtors_start_date_or->diffInDays($debtors_end_date_or);
+            // $days_difference = 270;
+
+            $debtors_sales = PrimarySales::whereIn('branch_id', $branch_ids)->where('invoice_date', '>=', $debtors_start_date)->where('invoice_date', '<=', $debtors_end_date)->whereIn('division', ['PUMP', 'MOTOR'])->sum('net_amount');
+            $total_debtors = CustomerOutstanting::whereIn('branch_id', $branch_ids)->whereIn('division_id', ['10', '18'])->where('year', $f_year_array[0])->sum('amount');
+            $total_inventory = BranchStock::whereIn('branch_id', $branch_ids)->whereIn('division_id', ['10', '18'])->where('year', $f_year_array[0])->sum('amount');
+
+            $aop = $targets > 0 ? (round(($achiv / $targets) * 100, 0) >= 100 ? '25' : round((25 * ($achiv / $targets) * 100 / 100), 0)) : 0;
+            $goly = $ly_targets > 0 ? (round((($achiv - $ly_targets) / $ly_targets) * 100, 0) >= 100 ? '25' : round((25 * (($achiv - $ly_targets) / $ly_targets) * 100 / 100), 0)) : 0;
+            $new_chanel = ($achiv * 40) / 100 > 0 ? (round(($new_achiv_dealer / (($achiv * 40) / 100)) * 100, 0) >= 100 ? '15' : round((15 * ($new_achiv_dealer / (($achiv * 40) / 100)) * 100 / 100), 0)) : 0;
+            $new_product = ($achiv * 60) / 100 > 0 ? (round(($new_achiv_product / (($achiv * 60) / 100)) * 100, 0) >= 100 ? '5' : round((5 * ($new_achiv_product / (($achiv * 60) / 100)) * 100 / 100), 0)) : 0;
+
+            $days = ($debtors_sales / 100000) / 270 > 0 && $total_debtors > 0 ? round(($total_debtors / (($debtors_sales / 100000) / $days_difference)), 0) : '100';
+            $percentage = $days <= 30 ? '100%' : ($days <= 60 ? '80%' : ($days <= 90 ? '50%' : '0%'));
+            $debtor = (20 * (int)$percentage) / 100;
+
+            $inv_days = ($debtors_sales / 100000) / 270 > 0 && $total_inventory > 0 ? round(($total_inventory / (($debtors_sales / 100000) / $days_difference)), 0) : '100';
+            $percentage = $inv_days <= 30 ? '100%' : ($inv_days <= 60 ? '80%' : ($inv_days <= 90 ? '50%' : '0%'));
+            $inventory = (10 * (int)$percentage) / 100;
+
+            $rating_is = (int)$aop + (int)$goly + (int)$new_chanel + (int)$new_product + (int)$debtor + (int)$inventory;
+
+            $popup_data = array();
+
+            $popup_data['name'] = $user->name;
+            $popup_data['branch'] = count($branch_names) > 0 ? implode(',', $branch_names) : '-';
+            $popup_data['designation'] = $user->getdesignation ? $user->getdesignation->designation_name : '-';
+            $popup_data['rating'] = $rating_is;
+            $popup_data['company_tenure'] = $user->userinfo ? $user->userinfo->current_company_tenture : '-';
+            $popup_data['gross_salary'] = $user->userinfo ? $user->userinfo->gross_salary_monthly : '-';
+            $popup_data['last_year_inc_value'] = $user->userinfo ? $user->userinfo->last_year_increments : '-';
+            $popup_data['last_year_inc_per'] = $user->userinfo ? $user->userinfo->last_year_increment_percent : '-';
+            $popup_data['target'] = $targets;
+            $popup_data['sale'] = round($achiv, 2);
+            $popup_data['sale_per'] = $this->getPer($achiv, $targets);
+
+            return response()->json(['status' => 'success', 'data' => $popup_data]);
+
+        } else {
+            return response()->json(['status' => 'error', 'message' => 'Working on this role type user rating report !!']);
+        }
+
+        dd($request->all());
+    }
+
+    public function getPer($achiv, $trg)
+    {
+        return $trg > 0 ? round(($achiv / $trg) * 100, 0) : '0';
+    }
+    public function getFR($achivper, $tpoint)
+    {
+        if ($achivper >= 100) {
+            return $tpoint;
+        } else {
+            return round(($tpoint * $achivper) / 100, 0) > 0 ? round(($tpoint * $achivper) / 100, 0) : '0';
+        }
+        return round(($achiv / $trg) * 100, 0);
     }
 }

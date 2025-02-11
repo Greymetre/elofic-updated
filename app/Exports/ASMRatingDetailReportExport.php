@@ -142,7 +142,7 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
     public function headings(): array
     {
         return [
-            ['Division', 'Department', 'Branch', 'Emp Code', 'User Name', 'Designation', 'Reporting Manager', 'Email', 'Mobile Number', 'Head Quarter', 'Date Of Birth', 'Education', 'Age', 'Company TENURE(in year)', 'Previous Exp(in year)', 'Total Exp(in year)', 'DOJ', 'Final Rating', 'Number of days  dedicated to market visits', '', '', '', 'All Customer Visit', '', '', '', 'Number of new market place (white) mapped', '', '', '', 'Target Vs Ach', '', '', '', '', 'sales from new dealers as 40% of total Sales', '', '', '', '', 'sales from New products as 60% of total  sales', '', '', '', '', 'Debtors', '', '', '', '', 'Weightage', 'Saarthi Activation', '', '', '', 'MSP activity', '', '', '', 'Gross Salary Monthly', 'CTC Per Month', 'CTC Annual', 'Last Yr Gross Increments Value', 'Last Yr Increments %', 'Last Yr Increment Value','Last Promostion', 'Remark By Reporting manager', 'Current Year Increment'],
+            ['Division', 'Department', 'Branch', 'Emp Code', 'User Name', 'Designation', 'Reporting Manager', 'Email', 'Mobile Number', 'Head Quarter', 'Date Of Birth', 'Education', 'Age', 'Company TENURE(in month)', 'Previous Exp(in year)', 'Total Exp(in year)', 'DOJ', 'Final Rating', 'Number of days  dedicated to market visits', '', '', '', 'All Customer Visit', '', '', '', 'Number of new market place (white) mapped', '', '', '', 'Target Vs Ach', '', '', '', '', 'sales from new dealers as 40% of total Sales', '', '', '', '', 'sales from New products as 60% of total  sales', '', '', '', '', 'Debtors', '', '', '', '', 'Weightage', 'Saarthi Activation', '', '', '', 'MSP activity', '', '', '', 'Gross Salary Monthly', 'Last Yr Gross Increments Value', 'Last Yr Increments %','Last Promostion','Recommended CY Increment%', 'Remark By Reporting manager', 'Current Year Increment'],
             ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'Ach', '% ACHD', 'For Rating %', 'Final Rating', 'Ach', '% ACHD', 'For Rating %', 'Final Rating', 'Ach', '% ACHD', 'For Rating %', 'Final Rating', 'Target', 'Ach', '% ACHD', 'For Rating %', 'Final Rating', 'Target', 'Ach', '% ACHD', 'For Rating %', 'Final Rating', 'Target', 'Ach', '% ACHD', 'For Rating %', 'Final Rating', 'TOTAL SALES FROM APR TO AUG', 'AVR PER DAYS SALES', 'TOTAL DEBTORS', 'DAYS', 'For Rating %', 'Final Rating', 'Ach', '% ACHD', 'For Rating %', 'Final Rating', 'Ach', '% ACHD', 'For Rating %', 'Final Rating']
         ];
     }
@@ -316,13 +316,11 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
             $sarthi_custo + $debtor + $newpro + $new_sale + $all_cust + $uniq_cust + $targets + $number_days + $msp_final,
 
             $query['userinfo'] ? $query['userinfo']['gross_salary_monthly'] : '',
-            $query['userinfo'] ? $query['userinfo']['salary'] : '',
-            $query['userinfo'] ? $query['userinfo']['ctc_annual'] : '',
             $query['userinfo'] ? $query['userinfo']['last_year_increments'] : '',
             $query['userinfo'] ? $query['userinfo']['last_year_increment_percent'] : '',
-            $query['userinfo'] ? $query['userinfo']['last_year_increment_value'] : '',
             $query['userinfo'] ? $query['userinfo']['last_promotion'] : '',
 
+            '-',
             '-',
             '-',
 
@@ -386,8 +384,6 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
                 $event->sheet->mergeCells('BL1:BL2');
                 $event->sheet->mergeCells('BM1:BM2');
                 $event->sheet->mergeCells('BN1:BN2');
-                $event->sheet->mergeCells('BO1:BO2');
-                $event->sheet->mergeCells('BP1:BP2');
                 // for ($row = 1; $row <= $rowCount; $row++) {
                 //     $cellValue = $event->sheet->getCell('AC' . $row)->getValue();
                 //     $color = self::getColorBasedOnValue($cellValue);
@@ -406,7 +402,7 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
                 //     ]);
                 // }
 
-                $event->sheet->getStyle('A1:BP2')->applyFromArray([
+                $event->sheet->getStyle('A1:BN2')->applyFromArray([
                     'font' => [
                         'bold' => true,
                         'color' => ['rgb' => 'FFFFFF'],
@@ -427,7 +423,7 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
                     ],
                 ]);
 
-                $event->sheet->getStyle('A' . $lastRow . ':BP' . $lastRow)->applyFromArray([
+                $event->sheet->getStyle('A' . $lastRow . ':BN' . $lastRow)->applyFromArray([
                     'font' => ['bold' => true],
                     'alignment' => [
                         'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,

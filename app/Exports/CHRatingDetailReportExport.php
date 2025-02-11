@@ -131,7 +131,7 @@ class CHRatingDetailReportExport implements FromCollection, WithHeadings, Should
     public function headings(): array
     {
         return [
-            ['Division', 'Department', 'Branch', 'Emp Code', 'User Name', 'Designation', 'Reporting Manager', 'Email', 'Mobile Number', 'Head Quarter', 'Date Of Birth', 'Education', 'Age', 'Company TENURE(in year)', 'Previous Exp(in year)', 'Total Exp(in year)', 'AOP', '', '', '', '', 'GOLY', '', '', '', '', 'New Channel Sale-40% of Total sale', '', '', '', '', 'New Product sale-60%', '', '', '', '', 'Debtors', '', '', '', '', '', 'Inventory', '', '', '', '', '', 'Bonus Points', '', 'Final rating', 'Gross Salary Monthly', 'CTC Per Month', 'CTC Annual', 'Last Yr Gross Increments Value', 'Last Yr Increments %', 'Last Yr Increment Value','Last Promostion', 'Remark By Reporting manager', 'Current Year Increment'],
+            ['Division', 'Department', 'Branch', 'Emp Code', 'User Name', 'Designation', 'Reporting Manager', 'Email', 'Mobile Number', 'Head Quarter', 'Date Of Birth', 'Education', 'Age', 'Company TENURE(in month)', 'Previous Exp(in year)', 'Total Exp(in year)', 'AOP', '', '', '', '', 'GOLY', '', '', '', '', 'New Channel Sale-40% of Total sale', '', '', '', '', 'New Product sale-60%', '', '', '', '', 'Debtors', '', '', '', '', '', 'Inventory', '', '', '', '', '', 'Bonus Points', '', 'Final rating', 'Gross Salary Monthly', 'Last Yr Gross Increments Value', 'Last Yr Increments %','Last Promostion','Recommended CY Increment%', 'Remark By Reporting manager', 'Current Year Increment'],
             ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'Tar', 'Ach', '% ACHD', 'For Rating %', 'Final Rating', 'LY-Tar', 'ACH', 'GOLY', 'For Rating %', 'Final Rating', 'Tar', 'Ach', '% ACHD', 'For Rating %', 'Final Rating', 'Tar', 'Ach', '% ACHD', 'For Rating %', 'Final Rating', 'TOTAL SALES CURRENT FINANCIAL YEAR', 'AVR PER DAYS SALES', 'TOTAL DEBTORS', 'DAYS', 'For Rating %', 'Final Rating', 'TOTAL SALES CURRENT FINANCIAL YEAR', 'AVR PER DAYS SALES', 'TOTAL INVENTORY', 'DAYS', 'For Rating %', 'Final Rating', 'ach >110%', 'Goly >125%', '']
         ];
     }
@@ -248,13 +248,11 @@ class CHRatingDetailReportExport implements FromCollection, WithHeadings, Should
             (int)$aop + (int)$goly + (int)$new_chanel + (int)$new_product + (int)$debtor + (int)$inventory,
 
             $query['userinfo'] ? $query['userinfo']['gross_salary_monthly'] : '',
-            $query['userinfo'] ? $query['userinfo']['salary'] : '',
-            $query['userinfo'] ? $query['userinfo']['ctc_annual'] : '',
             $query['userinfo'] ? $query['userinfo']['last_year_increments'] : '',
             $query['userinfo'] ? $query['userinfo']['last_year_increment_percent'] : '',
-            $query['userinfo'] ? $query['userinfo']['last_year_increment_value'] : '',
             $query['userinfo'] ? $query['userinfo']['last_promotion'] : '',
 
+            '-',
             '-',
             '-',
         ];
@@ -299,8 +297,6 @@ class CHRatingDetailReportExport implements FromCollection, WithHeadings, Should
                 $event->sheet->mergeCells('BD1:BD2');
                 $event->sheet->mergeCells('BE1:BE2');
                 $event->sheet->mergeCells('BF1:BF2');
-                $event->sheet->mergeCells('BG1:BG2');
-                $event->sheet->mergeCells('BH1:BH2');
 
 
                 // for ($row = 1; $row <= $rowCount; $row++) {
@@ -321,7 +317,7 @@ class CHRatingDetailReportExport implements FromCollection, WithHeadings, Should
                 //     ]);
                 // }
 
-                $event->sheet->getStyle('A1:BH2')->applyFromArray([
+                $event->sheet->getStyle('A1:BF2')->applyFromArray([
                     'font' => [
                         'bold' => true,
                         'color' => ['rgb' => 'FFFFFF'],
@@ -342,7 +338,7 @@ class CHRatingDetailReportExport implements FromCollection, WithHeadings, Should
                     ],
                 ]);
 
-                $event->sheet->getStyle('A' . $lastRow . ':BH' . $lastRow)->applyFromArray([
+                $event->sheet->getStyle('A' . $lastRow . ':BF' . $lastRow)->applyFromArray([
                     'font' => ['bold' => true],
                     'alignment' => [
                         'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,

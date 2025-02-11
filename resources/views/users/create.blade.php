@@ -1103,6 +1103,24 @@
                     @endif
                   </div>
                 </div>
+                <div class="col-md-6">
+                  <div class="input_section">
+                    <label class="col-form-label">Selecte Ware House</label>
+                    <div class="form-group has-default bmd-form-group">
+                      <select class="form-control" name="warehouse_id">
+                        <option value="" disabled selected>Select Ware House</option>
+                        @foreach($warehouses as $warehouse)
+                        <option value="{{$warehouse->id}}" {{ (($warehouse->id == old('warehouse_id', $user->id?($user->warehouse?$user->warehouse->id:''):''))) ? 'selected' : '' }}>{{$warehouse->warehouse_name}}</option>
+                        @endforeach
+                      </select>
+                      @if($errors->has('warehouse_id'))
+                      <div class="invalid-feedback">
+                        {{ $errors->first('warehouse_id') }}
+                      </div>
+                      @endif
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             <hr class="my-3">

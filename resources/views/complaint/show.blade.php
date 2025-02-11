@@ -519,9 +519,15 @@
                   <td>
                     @if ($complaint->customer_bill_date)
                     @php
-                    $today = Carbon\Carbon::today();
-                    $date = Carbon\Carbon::parse($complaint->customer_bill_date);
-                    if ($date !== false) {
+                    try{
+                      $today = Carbon\Carbon::today();
+                      $date = Carbon\Carbon::parse($complaint->customer_bill_date);
+                    }catch(\Exception $e){
+                      $today = null;
+                      $date = null;
+                    }
+                  
+                    if ($date != null && $date !== false) {
                     $date->addMonths(18);
                     } else {
                     $date = null;

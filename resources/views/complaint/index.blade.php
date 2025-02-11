@@ -86,7 +86,7 @@
             <span class="message"></span>
           </div>
           <div class="table-responsive">
-            <table id="getscheme" class="table table-striped- table-bschemeed table-hover table-checkable responsive no-wrap">
+            <table id="getscheme" class="table table-striped- table-bschemeed table-hover table-checkable  no-wrap">
               <thead class=" text-primary">
                 <th>{!! trans('panel.global.no') !!}</th>
                 <!-- <th>{!! trans('panel.global.action') !!}</th> -->
@@ -94,12 +94,30 @@
                 <th>Service Center</th>
                 <th>Service Center Code</th>
                 <th>Seller Name</th>
-                <th>Complaint Number</th>
-                <th>Customer</th>
-             
-                <th>Complaint Type</th>
+                <th>Customer Name</th>
+                <th>Customer Email</th>
+                <th>Contact No</th>
+                <th>Address</th>
+                <th>Place</th>
+                <th>Pincode</th>
+                <th>Country</th>
+                <th>State</th>
+                <th>City</th>
+                <th>Customer Complaint Type</th>      
+                <th>Division</th> 
+                <th>Product Name</th>
+                <th>Product Code</th> 
+                <th>Product Category</th>         
+                <th>Product Serial No</th>  
+                <th>HP</th> 
+                <th>Stage</th>
+                <th>Phase</th>
+                <th>Warranty Customer Bill Date</th>
+                <th>Service Paid/Free</th>
+                <th>Work Done Time</th>
+                <th>Action Done By ASC</th>
                 <th>Purchased Party Name</th>
-                
+             
                 <th>Complaint Status</th>
               </thead>
               <tbody>
@@ -150,25 +168,149 @@
             "defaultContent": ''
           },
           {
-            data: 'warranty_details.seller_details.name',
-            name: 'warranty_details.seller_details.name',
+            data: 'seller',
+            name: 'seller',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'customer.customer_name',
+            name: 'customer.customer_name',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'customer.customer_email',
+            name: 'customer.customer_email',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'customer.customer_number',
+            name: 'customer.customer_number',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'customer.customer_address',
+            name: 'customer.customer_address',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'customer.customer_place',
+            name: 'customer.customer_place',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'customer.customer_pindcode',
+            name: 'customer.customer_pindcode',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'customer.customer_country',
+            name: 'customer.customer_country',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'customer.customer_state',
+            name: 'customer.customer_state',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'customer.customer_city',
+            name: 'customer.customer_city',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'complaint_type_details.name',
+            name: 'complaint_type_details.name',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'division_details.division_name',
+            name: 'division_details.division_name',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'product_details.product_name',
+            name: 'product_details.product_name',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'product_details.product_code',
+            name: 'product_details.product_code',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'product_details.categories.category_name',
+            name: 'product_details.categories.category_name',
+            orderable: false,
+            "defaultContent": ''
+          },	
+          {
+            data: 'product_serail_number',
+            name: 'product_serail_number',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'product_details.specification',
+            name: 'product_details.specification',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'product_details.product_no',
+            name: 'product_details.product_no',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'product_details.phase',
+            name: 'product_details.phase',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'customer_bill_date',
+            name: 'customer_bill_date',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'service_type',
+            name: 'service_type',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'work_done_time',
+            name: 'work_done_time',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'complaint_work_dones',
+            name: 'complaint_work_dones',
             orderable: false,
             "defaultContent": ''
           },
           // {
-          //   data: 'action',
-          //   name: 'action',
-          //   "defaultContent": '',
-          //   className: 'text-center',
+          //   data: 'complaint_number',
+          //   name: 'complaint_number',
           //   orderable: false,
-          //   searchable: false
+          //   "defaultContent": ''
           // },
-          {
-            data: 'complaint_number',
-            name: 'complaint_number',
-            orderable: false,
-            "defaultContent": ''
-          },
           {
             data: null,
             orderable: false,
@@ -177,18 +319,26 @@
             }
           },
           
-          {
-            data: 'complaint_type_details.name',
-            name: 'complaint_type_details.name',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'party.name',
-            name: 'party.name',
-            orderable: false,
-            "defaultContent": ''
-          },
+          // {
+          //   data: 'complaint_type_details.name',
+          //   name: 'complaint_type_details.name',
+          //   orderable: false,
+          //   "defaultContent": ''
+          // },
+          // {
+          //   data: 'action',
+          //   name: 'action',
+          //   "defaultContent": '',
+          //   className: 'text-center',
+          //   orderable: false,
+          //   searchable: false
+          // },
+          // {
+          //   data: 'party.name',
+          //   name: 'party.name',
+          //   orderable: false,
+          //   "defaultContent": ''
+          // },
           
           {
             data: 'status',

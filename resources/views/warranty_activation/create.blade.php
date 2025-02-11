@@ -459,6 +459,7 @@
             })
 
             $('#sale_bill_date').datepicker({
+                maxDate: 0,
                 dateFormat: 'dd-mm-yy',
             });
 
@@ -475,6 +476,29 @@
                     return;
                 }
             });
+
+            $('#sale_bill_date').on('change', function () {
+                 if ($(this).val().length >= 10) {
+                     var selectedDate = moment($(this).val().trim(), 'DD-MM-YYYY', true);
+                     var billDate = moment($('#invoice_date').val().trim(), 'DD-MM-YYYY', true);
+
+                     console.log("Selected Date:", selectedDate.format('DD-MM-YYYY'));
+                     console.log("Bill Date:", billDate.format('DD-MM-YYYY'));
+
+                     if (!selectedDate.isValid() || !billDate.isValid()) {
+                         alert("Invalid date format. Please use DD-MM-YYYY.");
+                         $(this).val($('#invoice_date').val()); // Clear input
+                         return;
+                     }
+
+                     if (selectedDate.isSameOrBefore(billDate)) {
+                         alert("Selected date must be greater than the bill date.");
+                         $(this).val($('#invoice_date').val()); // Clear input
+                         return;
+                     }
+                 }
+             }).trigger('change');
+
             $("#product_serail_number").on("keyup", function() {
                var serial_no = $(this).val();
                $.ajax({

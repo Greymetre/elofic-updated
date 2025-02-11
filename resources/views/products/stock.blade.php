@@ -89,6 +89,7 @@
             <table id="getprimarysales" class="table table-striped table-bordered table-hover table-checkable no-wrap">
               <thead class=" text-primary">
                 <th>Branch</th>
+                <th>Ware House</th>
                 <th>Division</th>
                 <th>Year</th>
                 <th>Quarter</th>
@@ -138,6 +139,13 @@
           {
             data: 'branch.branch_name',
             name: 'branch.branch_name',
+            orderable: false,
+            searchable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'warehouse.warehouse_name',
+            name: 'warehouse.warehouse_name',
             orderable: false,
             searchable: false,
             "defaultContent": ''

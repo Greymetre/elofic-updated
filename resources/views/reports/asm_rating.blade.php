@@ -1,4 +1,17 @@
 <x-app-layout>
+  <style>
+    #pmsForm table th {
+      font-weight: bold !important;
+      white-space: break-spaces;
+      border: 2px solid #aba7a7 !important;
+      background-color: #cdcbcba3;
+    }
+
+    #pmsForm table td {
+      border: 2px solid #aba7a7 !important;
+      white-space: break-spaces;
+    }
+  </style>
   <div class="row">
     <div class="col-md-12">
       <div class="card">
@@ -95,6 +108,13 @@
                       </button>
                     </div>
                     @endif
+                    @if(auth()->user()->can(['pms_remark']))
+                    <div class="p-2">
+                      <button class="btn btn-just-icon btn-theme edit_remark" type="buutton" title="Added Remark(PMS)">
+                        <i class="material-icons">add_task</i>
+                      </button>
+                    </div>
+                    @endif
                   </div>
                 </form>
                 @endif
@@ -125,17 +145,90 @@
           @endif
 
           <div class="table-responsive">
-            {{-- <table id="getfosrating" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
+            <table id="getfosrating" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
               <thead class=" text-primary">
                 <th>No</th>
                 <th>Employees Code</th>
                 <th>FOS Name</th>
-                <th>Action</th>
+                <!-- <th>Action</th> -->
               </thead>
               <tbody>
               </tbody>
-            </table> --}}
+            </table>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="pmsModal" tabindex="-1" aria-labelledby="pmsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="pmsModalLabel">PMS Form</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="pmsForm">
+            @csrf
+            <table class="table table-bordered">
+              <tbody>
+                <tr>
+                  <th>Name</th>
+                  <td id="psname"></td>
+                  <th>Branch</th>
+                  <td id="psbranch"></td>
+                  <th>Designation</th>
+                  <td id="psdesignation"></td>
+                </tr>
+                <tr>
+                  <th>Final Rating</th>
+                  <td id="psrating"></td>
+                  <th>Company Tenure (in Months)</th>
+                  <td id="pscompany_tenure"></td>
+                  <th>Gross Salary</th>
+                  <td id="psgross_salary"></td>
+                </tr>
+                <tr>
+                  <th>Last Year Gross Increment Value</th>
+                  <td id="pslast_year_inc_value"></td>
+                  <th>Last Year Increment %</th>
+                  <td id="pslast_year_inc_per"></td>
+                  <th>Total Target</th>
+                  <td id="pstarget"></td>
+                </tr>
+                <tr>
+                  <th>Total Sales</th>
+                  <td id="pssale"></td>
+                  <th>Percentage Achievement</th>
+                  <td id="pssale_per"></td>
+                  <th>Recommended CY Increment %</th>
+                  <td><input type="number" class="form-control" name="recommended_increment" value=""></td>
+                </tr>
+                <tr>
+                  <th>Recommended Designation</th>
+                  <td>
+                    <select name="designation_id" id="designation_id" class="form-control select2" required>
+                      <option value="" disabled selected>Designations</option>
+                      @foreach($designations as $designation)
+                      <option value="{{$designation->id}}">{{$designation->designation_name}}</option>
+                      @endforeach
+                    </select>
+                  </td>
+                  <th>Remark</th>
+                  <td colspan="3">
+                    <textarea class="form-control" name="remarks" placeholder="Enter remarks" required></textarea>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="text-center">
+              <button type="submit" class="btn btn-success btn-lg">Submit</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -182,13 +275,13 @@
             "defaultContent": '',
             orderable: false
           },
-          {
-            data: 'action',
-            name: 'action',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          }
+          // {
+          //   data: 'action',
+          //   name: 'action',
+          //   "defaultContent": '',
+          //   orderable: false,
+          //   searchable: false
+          // }
         ]
       });
       $('#start_date').change(function() {
@@ -233,5 +326,66 @@
         }
       });
     }).trigger("chnage");
+
+    $(document).on("click", ".edit_remark", function() {
+      event.preventDefault();
+      var role_id = $("#role_id").val();
+      var user_id = $("#user_id").val();
+      var division_id = $("#division_id").val();
+      var financial_year = $("#financial_year").val();
+      if (!role_id || role_id.length === 0 || !user_id || !division_id || !financial_year) {
+        alert("Role, User, Division and Financial Year fields are required!");
+      } else {
+        $("#loader").show();
+        $.ajax({
+          url: "{{ url('getPMS') }}/",
+          type: 'GET',
+          dataType: 'json',
+          data: {
+            _token: "{{csrf_token()}}",
+            role_id: role_id,
+            user_id: user_id,
+            division_id: division_id,
+            financial_year: financial_year
+          },
+          success: function(res) {
+            if (res.status == 'success') {
+              $("#loader").hide();
+              $("#psname").html(res.data.name);
+              $("#psbranch").html(res.data.branch);
+              $("#psdesignation").html(res.data.designation);
+              $("#psrating").html(res.data.rating);
+              $("#pscompany_tenure").html(res.data.company_tenure);
+              $("#psgross_salary").html(res.data.gross_salary);
+              $("#pslast_year_inc_value").html(res.data.last_year_inc_value);
+              $("#pslast_year_inc_per").html(res.data.last_year_inc_per);
+              $("#pstarget").html(res.data.target);
+              $("#pssale").html(res.data.sale);
+              $("#pssale_per").html(res.data.sale_per + '%');
+
+              $("#pmsModal").modal("show");
+            } else {
+              Swal.fire({
+                icon: 'info',
+                title: 'Heads up!',
+                text: res.message,
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 5000,
+              });
+
+            }
+          },
+          error: function(xhr, status, error) {
+            $("#loader").hide();
+            alert("An error occurred: " + error);
+          },
+          complete: function() {
+            $("#loader").hide();
+          }
+        })
+      }
+    });
   </script>
 </x-app-layout>
