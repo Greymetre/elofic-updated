@@ -288,28 +288,6 @@
                      </div>
                   </div>
                </div>
-               <div class="row">
-                  <div class="col-md-3">
-                     <div class="input_section">
-                        <label class="col-form-label">Product Laying at </label>
-                        <select name="product_laying" id="product_laying" class="select2 form-control">
-                           <option value="">Product Laying at</option>
-                           <option value="Customer" {!! old('product_laying', $complaints['product_laying'])=='Customer' ? 'selected' :'' !!}>Customer</option>
-                           <option value="Dealer" {!! old('product_laying', $complaints['product_laying'])=='Dealer' ? 'selected' :'' !!}>Dealer</option>
-                           <option value="Distributor" {!! old('product_laying', $complaints['product_laying'])=='Distributor' ? 'selected' :'' !!}>Distributor</option>
-                           <option value="Retailer" {!! old('product_laying', $complaints['product_laying'])=='Retailer' ? 'selected' :'' !!}>Retailer</option>
-                           <option value="ASC" {!! old('product_laying', $complaints['product_laying'])=='ASC' ? 'selected' :'' !!}>ASC</option>
-                           <option value="Branch" {!! old('product_laying', $complaints['product_laying'])=='Branch' ? 'selected' :'' !!}>Branch</option>
-                        </select>
-                        @if ($errors->has('product_laying'))
-                        <div class="error col-lg-12">
-                           <p class="text-danger">{{ $errors->first('product_laying') }}</p>
-                        </div>
-                        @endif
-                     </div>
-                  </div>
-
-               </div>
                <div class="basic_details mt-1">
                   <div class=" rounded p-2">
                      <div class="row mt-3">
@@ -409,34 +387,17 @@
                               @endif
                            </div>
                         </div>
-                     </div>
-                     <div class="row mt-3">
-                     
-                     
-                        <div class="col-md-3">
-
-                        </div>
-                     </div>
-                     <div class="row mt-3">
                         <div class="col-md-3">
                            <div class="input_section">
-                              <label class="col-form-label">Service Branch </label>
-                              <select name="purchased_branch" id="purchased_branch" class="select2 form-control">
-                                 <option value="">Service Branch</option>
-                                 @if($branchs)
-                                 @foreach($branchs as $branch)
-                                 <option value="{{$branch->id}}" {!! old('purchased_branch', $complaints['purchased_branch'])==$branch->id ? 'selected':'' !!}>[{{$branch->branch_code}}] {{$branch->branch_name}}</option>
-                                 @endforeach
-                                 @endif
-                              </select>
-                              @if ($errors->has('purchased_branch'))
+                              <label class="col-form-label">Company Sale Bill NO </label>
+                              <input type="text" name="company_sale_bill_no" id="company_sale_bill_no" class="form-control" value="{!! old( 'company_sale_bill_no', $complaints['company_sale_bill_no']) !!}">
+                              @if ($errors->has('company_sale_bill_no'))
                               <div class="error">
-                                 <p class="text-danger">{{ $errors->first('purchased_branch') }}</p>
+                                 <p class="text-danger">{{ $errors->first('company_sale_bill_no') }}</p>
                               </div>
                               @endif
                            </div>
                         </div>
-                      
                         <div class="col-md-3">
                            <div class="input_section">
                               <label class="col-form-label">Company Sale Bill NO </label>
@@ -459,8 +420,6 @@
                               @endif
                            </div>
                         </div>
-                     </div>
-                     <div class="row mt-3">
                         <div class="col-md-3">
                            <div class="input_section">
                               <label class="col-form-label">Warranty / Customer Bill Date </label>
@@ -509,8 +468,6 @@
                               @endif
                            </div>
                         </div>
-                     </div>
-                     <div class="row mt-3">
                         <div class="col-md-3">
                            <div class="input_section">
                               <label class="col-form-label">Service Paid/Free </label>
@@ -553,14 +510,12 @@
                               @endif
                            </div>
                         </div>
-
                      </div>
-
                   </div>
                </div>
-               <div class="contact_details mt-1">
+               <div class="contact_details mt-2">
                   <div class="col-12">
-                     <div class="p-2 mb-3 text-white text-center" style="background-color: #3972af;">
+                     <div class="p-2  text-white text-center" style="background-color: #3972af;">
                         <h4 class="m-0"><strong>Customer Details</strong></h4>
                      </div>
                   </div>
@@ -573,6 +528,7 @@
                               value="{!! old('customer_number', $complaints['customer'] ? $complaints['customer']['customer_number'] : '') !!}" 
                               required maxlength="10">
                               <input type="hidden" name="end_user_id" id="end_user_id">
+                              <span id="customer_number_error" style="color: red; display: none;"></span>
                               @if ($errors->has('customer_number'))
                               <div class="error">
                                  <p class="text-danger">{{ $errors->first('customer_number') }}</p>
@@ -606,20 +562,6 @@
                         </div>
                         <div class="col-md-3">
                            <div class="input_section">
-                              <label class="col-form-label">Address </label>
-                              <input type="text" name="customer_address" id="customer_address" class="form-control" value="{!! old( 'customer_address', $complaints['customer_address']) !!}">
-                              @if ($errors->has('customer_address'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('customer_address') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                     </div>
-                     <div class="row mt-3">
-
-                        <div class="col-md-3">
-                           <div class="input_section">
                               <label class="col-form-label">State </label>
                               <select name="customer_state" id="customer_state" class="select2 form-control" required>
                                  <option value="">Select State</option>
@@ -634,6 +576,9 @@
                               @endif
                            </div>
                         </div>
+                      
+                     </div>
+                     <div class="row mt-3">
                         <div class="col-md-3">
                            <div class="input_section">
                               <label class="col-form-label">District </label>
@@ -667,8 +612,6 @@
                               @endif
                            </div>
                         </div>
-                     </div>
-                     <div class="row mt-3">
                         <div class="col-md-3">
                            <div class="input_section">
                               <label class="col-form-label">Pincode </label>
@@ -687,6 +630,62 @@
                               @endif
                            </div>
                         </div>
+                        <div class="col-md-12">
+                           <div class="input_section">
+                              <label class="col-form-label">Address </label>
+                              <input type="text" name="customer_address" id="customer_address" class="form-control" value="{!! old( 'customer_address', $complaints['customer_address']) !!}">
+                              @if ($errors->has('customer_address'))
+                              <div class="error">
+                                 <p class="text-danger">{{ $errors->first('customer_address') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+                     </div>
+                    
+                     <div class="row mt-3">
+                        <div class="col-12">
+                           <div class="p-2  text-white text-center" style="background-color: #3972af;">
+                              <h4 class="m-0"><strong>Complaints Details</strong></h4>
+                           </div>
+                        </div>
+                        <div class="col-md-3">
+                           <div class="input_section">
+                              <label class="col-form-label">Service Branch </label>
+                              <select name="purchased_branch" id="purchased_branch" class="select2 form-control">
+                                 <option value="">Service Branch</option>
+                                 @if($branchs)
+                                 @foreach($branchs as $branch)
+                                 <option value="{{$branch->id}}" {!! old('purchased_branch', $complaints['purchased_branch'])==$branch->id ? 'selected':'' !!}>[{{$branch->branch_code}}] {{$branch->branch_name}}</option>
+                                 @endforeach
+                                 @endif
+                              </select>
+                              @if ($errors->has('purchased_branch'))
+                              <div class="error">
+                                 <p class="text-danger">{{ $errors->first('purchased_branch') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+                        <div class="col-md-3">
+                           <div class="input_section">
+                              <label class="col-form-label">Customer Complaint Type </label>
+                              <select name="complaint_type" id="complaint_type" placeholder="Select Pincode" class="select2 form-control" required>
+                                 <option value="" disabled selected>Complaint Type</option>
+                                 @if($complaint_types && count($complaint_types) > 0)
+                                 @foreach($complaint_types as $complaint_type)
+                                 <option value="{{$complaint_type->id}}" {!! old( 'complaint_type' , $complaints['complaint_type'])==$complaint_type->id?'selected':'' !!}>{{$complaint_type->name}}</option>
+                                 @endforeach
+                                 @endif
+                              </select>
+                              @if ($errors->has('complaint_type'))
+                              <div class="error">
+                                 <p class="text-danger">{{ $errors->first('complaint_type') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+                       
                         <!-- <div class="col-md-3">
                         <div class="form-group">
                            <label class="bmd-label-floating">Pincode </label>
@@ -724,9 +723,28 @@
                               @endif
                            </div>
                         </div>
+                        <div class="col-md-3">
+                           <div class="input_section">
+                              <label class="col-form-label">Product Laying at </label>
+                              <select name="product_laying" id="product_laying" class="select2 form-control">
+                                 <option value="">Product Laying at</option>
+                                 <option value="Customer" {!! old('product_laying', $complaints['product_laying'])=='Customer' ? 'selected' :'' !!}>Customer</option>
+                                 <option value="Dealer" {!! old('product_laying', $complaints['product_laying'])=='Dealer' ? 'selected' :'' !!}>Dealer</option>
+                                 <option value="Distributor" {!! old('product_laying', $complaints['product_laying'])=='Distributor' ? 'selected' :'' !!}>Distributor</option>
+                                 <option value="Retailer" {!! old('product_laying', $complaints['product_laying'])=='Retailer' ? 'selected' :'' !!}>Retailer</option>
+                                 <option value="ASC" {!! old('product_laying', $complaints['product_laying'])=='ASC' ? 'selected' :'' !!}>ASC</option>
+                                 <option value="Branch" {!! old('product_laying', $complaints['product_laying'])=='Branch' ? 'selected' :'' !!}>Branch</option>
+                              </select>
+                              @if ($errors->has('product_laying'))
+                              <div class="error col-lg-12">
+                                 <p class="text-danger">{{ $errors->first('product_laying') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
                      </div>
                      <div class="row mt-3">
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                            <div class="input_section">
                               <label class="col-form-label">Description / CRM Remark </label>
                               <textarea type="text" name="description" cols="30" rows="7" class="form-control"> {!! old( 'description', $complaints['description']) !!} </textarea>
@@ -737,24 +755,7 @@
                               @endif
                            </div>
                         </div>
-                        <div class="col-md-6">
-                           <div class="input_section">
-                              <label class="col-form-label">Customer Complaint Type </label>
-                              <select name="complaint_type" id="complaint_type" placeholder="Select Pincode" class="select2 form-control" required>
-                                 <option value="" disabled selected>Complaint Type</option>
-                                 @if($complaint_types && count($complaint_types) > 0)
-                                 @foreach($complaint_types as $complaint_type)
-                                 <option value="{{$complaint_type->id}}" {!! old( 'complaint_type' , $complaints['complaint_type'])==$complaint_type->id?'selected':'' !!}>{{$complaint_type->name}}</option>
-                                 @endforeach
-                                 @endif
-                              </select>
-                              @if ($errors->has('complaint_type'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('complaint_type') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
+                       
                      </div>
                      <div class="row mt-3">
                         <div class="col-md-3 d-none" id="invoice-div">
@@ -1399,7 +1400,15 @@
 
             // Set the cleaned value back
             $(this).val(value);
+
+            // Check if the length is exactly 10 digits
+            if (value.length !== 10) {
+               $("#customer_number_error").text("Customer number must be exactly 10 digits.").show();
+            } else {
+               $("#customer_number_error").hide();
+            }
          });
+
       });
    </script>
 </x-app-layout>
