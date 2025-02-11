@@ -1150,10 +1150,10 @@
                      $("#customer_state").val(res.state_id).trigger('change');
                      setTimeout(() => {
                         $("#customer_district").val(res.district_id).trigger('change');
-                     }, 100);
+                     }, 1000);
                      setTimeout(() => {
                         $("#customer_city").val(res.city_id).trigger('change');
-                     }, 300); 
+                     }, 2000); 
                   }
                }
             });
