@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Carbon\Carbon;
 
 class Complaint extends Model implements HasMedia
 {
@@ -65,10 +66,25 @@ class Complaint extends Model implements HasMedia
         return $this->belongsTo('App\Models\Division', 'division', 'id');
     }
 
+
+    public function complaint_work_dones()
+    {
+        return $this->hasMany('App\Models\ComplaintWorkDone', 'id', 'complaint_id');
+    }
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('complaint_attach')
             ->useFallbackUrl(asset(config('constants.NO_IMAGE_URL')))
             ->useFallbackPath(public_path(config('constants.NO_IMAGE_URL')));
+    }
+
+    public function getCustomerBillDateAttribute($value)
+    {
+        try {
+            return $value ? Carbon::parse($value)->format('d-m-Y') : null;
+        } catch (\Exception $e) {
+            return null; // Return null if parsing fails
+        }
     }
 }

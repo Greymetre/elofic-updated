@@ -8,6 +8,9 @@ use Yajra\DataTables\Html\Column;
 use Yajra\DataTables\Html\Editor\Editor;
 use Yajra\DataTables\Html\Editor\Fields;
 use Yajra\DataTables\Services\DataTable;
+use App\Models\ComplaintTimeline;
+use Carbon\Carbon;
+use App\Models\ComplaintWorkDone;
 
 use Illuminate\Support\Facades\Auth;
 
@@ -34,6 +37,20 @@ class ComplaintDataTable extends DataTable
                     return '<a href="'.route('complaints.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Complaint"><span class="badge badge-danger">Canceled</span></a>';
                 }
             })
+            ->addColumn('work_done_time', function ($query) {
+                $date = ComplaintTimeline::where(['complaint_id' => $query->id , 'status'=>2])->first();
+                if(isset($date)){
+                   return Carbon::parse($date->created_at)->format('d-m-Y h:i a');
+                } 
+                return "NOT DONE";
+            })
+            // ->addColumn('complaint_work_dones', function ($query) {
+            //     $data = ComplaintWorkDone::where(['complaint_id' => $query->id])->orderBy('id', 'desc')->first();
+            //     if(isset($date)){
+            //         return $data;
+            //     } 
+            //     return "NOT DONE";
+            // })
             // ->addColumn('action', function ($query) {
             //     $btn = '';
             //     $activebtn = '';
@@ -79,7 +96,7 @@ class ComplaintDataTable extends DataTable
      */
     public function query(Complaint $model)
     {
-        return $model->with('party', 'service_center_details', 'customer', 'complaint_type_details')->latest()->newQuery();
+        return $model->with('party', 'service_center_details', 'customer', 'complaint_type_details' , 'product_details.categories' , 'division_details')->latest()->newQuery();
     }
 
     /**
