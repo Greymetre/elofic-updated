@@ -82,9 +82,9 @@ class Complaint extends Model implements HasMedia
     public function getCustomerBillDateAttribute($value)
     {
         try {
-            return $value ? Carbon::parse($value)->format('d-m-Y') : null;
+            return $value ? Carbon::parse($value)->format('d-m-Y') : '';
         } catch (\Exception $e) {
-            return null; // Return null if parsing fails
+            return ''; // Return null if parsing fails
         }
     }
 }

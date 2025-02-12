@@ -58,7 +58,7 @@ class UserCityMapedExport implements FromCollection,WithHeadings,ShouldAutoSize,
 
     public function headings(): array
     {
-        return ['user_id','user_name','reportingid', 'reporting_name', 'city_id', 'city_name', 'grade', 'district_id', 'district_name', 'status_id', 'state_name'];
+        return ['user_id','user_name','reportingid', 'reporting_name', 'city_id', 'city_name', 'grade', 'district_id', 'district_name', 'status_id', 'state_name', 'Delete'];
     }
 
     public function map($data): array

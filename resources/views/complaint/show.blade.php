@@ -207,7 +207,7 @@
                 <div class="col-md-4"></div>
                 <div class="col-md-4 text-center" style="line-height: 0px;">
                   <h5><em>Complaint Type</em></h5>
-                  <p><b>{{$complaint->complaint_type_details->name}}</b></p>
+                  <p><b>{{$complaint->complaint_type_details->name ?? ''}}</b></p>
                 </div>
                 <div class="col-md-4"></div>
               </div>

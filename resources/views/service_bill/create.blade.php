@@ -200,27 +200,34 @@ body table td {
                            </td>
                            <td>
                               @if($complaint)
-                              @if ($complaint->customer_bill_date)
-                              @php
-                              $today = Carbon\Carbon::today();
-                              $date = Carbon\Carbon::parse($complaint->customer_bill_date);
-                              if ($date !== false) {
-                              $date->addMonths(18);
-                              } else {
-                              $date = null;
-                              }
-                              @endphp
-                              @if ($date)
-                              {{ $date->format('d-m-Y') }}
-                              @else
-                              Invalid date
-                              @endif
-                              @else
-                              -
-                              @endif
-                              @else
-                              -
-                              @endif
+                               @if ($complaint->customer_bill_date)
+                                   @php
+                                       $today = \Carbon\Carbon::today();
+
+                                       try {
+                                           $date = \Carbon\Carbon::parse($complaint->customer_bill_date);
+                                           if ($date !== false) {
+                                               $date->addMonths(18);
+                                           } else {
+                                               $date = null;
+                                           }
+                                       } catch (Exception $e) {
+                                           $date = null;
+                                       }
+                                   @endphp
+                                   @if ($date)
+                                       {{ $date->format('d-m-Y') }}
+                                   @else
+                                       Invalid date
+                                   @endif
+                               @else
+                                   -
+                               @endif
+                           @else
+                               -
+                           @endif
+
+
                            </td>
                            <td>
                               @if($complaint)
