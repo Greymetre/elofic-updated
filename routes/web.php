@@ -1020,7 +1020,9 @@ Route::any('getSellerBuyer', [AjaxController::class, 'getSellerBuyer']);
 Route::any('addMarketingType', [AjaxController::class, 'addMarketingType']);
 Route::any('getUserByBranch', [AjaxController::class, 'getUserByBranch']);
 Route::any('getPMS', [AjaxController::class, 'getPMS']);
-
+Route::any('getPincodeSearch', [AjaxController::class, 'getPincodeSearch']);
+Route::any('getAllCustomer', [AjaxController::class, 'getAllCustomer']);
+Route::any('getAllPartyName', [AjaxController::class, 'getAllPartyName']);
 
 //Clear Cache facade value:
 Route::get('/clear-cache', function () {

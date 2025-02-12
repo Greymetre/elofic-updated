@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Branch, BranchStock, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CompOffLeave, CustomerDetails, CustomerOutstanting, DealerAppointment, DealerAppointmentKyc, EmployeeDetail, EndUser, Expenses, GiftModel, GiftSubcategory, Marketing, MspActivity, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, PrimaryScheme, Redemption, SalesTargetUsers, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation};
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Branch, BranchStock, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CompOffLeave, CustomerDetails, CustomerOutstanting, DealerAppointment, DealerAppointmentKyc, EmployeeDetail, EndUser, Expenses, GiftModel, GiftSubcategory, Marketing, MspActivity, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, PrimaryScheme, Redemption, SalesTargetUsers, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation };
 use App\Models\UserLiveLocation;
 use App\Models\UserActivity;
 use App\Http\Controllers\SendNotifications;
@@ -20,6 +20,7 @@ use LDAP\Result;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\MarketingActivity;
+
 
 class AjaxController extends Controller
 {
@@ -1625,6 +1626,85 @@ class AjaxController extends Controller
         ]);
     }
 
+    // get pincode
+    public function getPincodeSearch(Request $request)
+    {
+        $query = Pincode::query();
+
+        // Search functionality
+        if (!empty($request->q)) {
+            $query->where('pincode', 'LIKE', '%' . $request->q . '%');
+        }
+
+        // Pagination
+        $pincodes = $query->where('active', 'Y')->paginate(10); // Adjust limit per page
+
+        if ($request->selected) {
+            $selectedPincode = Pincode::find($request->selected);
+            if ($selectedPincode) {
+                $pincodes->prepend($selectedPincode);
+            }
+        }
+
+        return response()->json([
+            'results' => $pincodes->items(), // Corrected from `$users` to `$pincodes`
+            'pagination' => ['more' => $pincodes->hasMorePages()],
+        ]);
+    }
+
+    // get All Seller by pagination 
+    public function getAllCustomer(Request $request)
+    {
+        $query = Customers::query();
+
+        // Search functionality
+        if (!empty($request->q)) {
+            $query->where('name', 'LIKE', '%' . $request->q . '%')
+                 ->Orwhere('mobile', 'LIKE', '%' . $request->q . '%');
+        }
+
+        // Pagination
+        $customers = $query->where('active', 'Y')->paginate(10); // Adjust limit per page
+
+        if ($request->selected) {
+            $selected_customer = Pincode::find($request->selected);
+            if ($selected_customer) {
+                $customers->prepend($selected_customer);
+            }
+        }
+
+        return response()->json([
+            'results' => $customers->items(), // Corrected from `$users` to `$pincodes`
+            'pagination' => ['more' => $customers->hasMorePages()],
+        ]);
+    }
+
+     public function getAllPartyName(Request $request)
+    {
+        $query = Customers::query();
+
+        // Search functionality
+        if (!empty($request->q)) {
+            $query->where('name', 'LIKE', '%' . $request->q . '%')
+                 ->Orwhere('mobile', 'LIKE', '%' . $request->q . '%');
+        }
+
+        // Pagination
+        $customers = $query->where('active', 'Y')->paginate(10); // Adjust limit per page
+
+        if ($request->selected) {
+            $selected_customer = Customers::where(['name' => $request->selected])->first();
+            if ($selected_customer) {
+                $customers->prepend($selected_customer);
+            }
+        }
+
+        return response()->json([
+            'results' => $customers->items(), // Corrected from `$users` to `$pincodes`
+            'pagination' => ['more' => $customers->hasMorePages()],
+        ]);
+    }
+
     // Add Marketing actinity 
     public function addMarketingType(Request $request)
     {
@@ -1644,7 +1724,34 @@ class AjaxController extends Controller
     // get users by branch id
     public function getUserByBranch(Request $request)
     {
-        $branch_id = $request->branch_id ?? '';
+        $customer_city = $request->customer_city ?? '';
+        $roleNames = ["Service Eng", "Service Admin"];
+        $assign_users = User::whereHas('roles', function ($query) use ($roleNames) {
+             $query->whereIn('name', $roleNames); // Filter users by roles
+            })
+            ->whereHas('cities', function ($query) use ($customer_city) {
+                $query->where('city_id', $customer_city); // Filter users assigned to the specific city
+            })
+            ->with(['roles' => function ($query) {
+                $query->with('permissions'); // Include role permissions
+            }])
+            ->select('id', 'name', 'employee_codes')
+            ->get();
+
+        $html = '<option value="">Select User</option>'; // Default option
+ 
+        $id = $assign_users[0]->id ?? '';
+        if ($assign_users->isNotEmpty()) {
+            foreach ($assign_users as $user) {
+                $html .= '<option value="' . $user->id . '">' . $user->name . '</option>';
+            }
+        }
+        return response()->json(['html' => $html , 'id' => $id]);
+    }
+
+    public function getUserCity(Request $request)
+    {
+        $branch_id = $request->customer_city ?? '';
         $users = User::where(['branch_id' => $branch_id])->get();
         $html = '<option value="">Select User</option>'; // Default option
 

@@ -57,7 +57,7 @@
                'files'=>true
                ]) !!}
                <div class="form-group">
-                  <div class="row">
+                  <!-- <div class="row">
                      <div class="col-md-6">
                         <div class="input_section">
                            <label for="status" class="col-form-label">Warranty Activation Status</label>
@@ -65,18 +65,7 @@
                         </div>
                      </div>
 
-                     <div class="col-md-6">
-                        <div class="input_section">
-                           <label class="col-form-label">Select Status</label>
-                           <select name="status" id="status" class="select2" required>
-                              <option value="">Select Status</option>
-                              <option value="0" {{($warranty_activation->exists && $warranty_activation->status == '0')?'selected': (isset($status_flag) && $status_flag == '0' ? 'selected' : '' )}}>In Verification</option>
-                              <option value="1" {{($warranty_activation->exists  && $warranty_activation->status == '1') ? 'selected': (isset($status_flag) && $status_flag == '1' ? 'selected' : '' )}}>Activated</option>
-                              <option value="2" {{($warranty_activation->exists && $warranty_activation->status == '2')?'selected':''}}>Pending Activated</option>
-                              <option value="3" {{($warranty_activation->exists && $warranty_activation->status == '3')?'selected':''}}>Rejected</option>
-                           </select>
-                        </div>
-                     </div>
+                     
                      <div class="col-md-6 reject-remark d-none">
                         <div class="input_section">
                            <label for="remark" class="col-form-label">Reject Remark <span class="text-danger">*</span></label>
@@ -84,8 +73,8 @@
                            <textarea name="remark" id="remark" class="form-control">{{$warranty_activation->remark??""}}</textarea>
                         </div>
                      </div>
-                  </div>
-                  <div class="mt-5">
+                  </div> -->
+                  <div class="mt-2">
                      <h5 class="newdata">Warranty Details</h5>
                      <input type="hidden" name="back" value="{{ isset($back) ? $back : false }}">
                      <input type="hidden" name="warranty_id" value="{{$warranty_activation->id}}">
@@ -107,9 +96,16 @@
                               <label for="product_id" class="col-form-label">Product</label>
 
                               <select name="select_product_id" id="select_product_id" placeholder="Select Product" class="select2 form-control">
-                                 @if($warranty_activation->exists && $warranty_activation->product_details)
+                                 <option value="">Select Product</option>
+                                 @foreach($products as $product)
+                                     <option value="{{ $product->id }}"
+                                         @if(isset($warranty_activation->product_details->id) && $product->id == $warranty_activation->product_details->id) selected @endif>
+                                         {{ $product->product_name }}
+                                     </option>
+                                 @endforeach
+                                 <!-- @if($warranty_activation->exists && $warranty_activation->product_details)
                                  <option value="{{$warranty_activation->product_details->id}}" selected>{{$warranty_activation->product_details->product_name}}</option>
-                                 @endif
+                                 @endif -->
                               </select>
                               <input type="hidden" name="product_id" id="product_id">
                               @if ($errors->has('product_id'))
@@ -119,10 +115,6 @@
                               @endif
                            </div>
                         </div>
-
-
-
-
 
 
                         <div class="col-md-6">
@@ -145,7 +137,146 @@
                            </div>
                         </div>
 
+                        <input type="hidden" name="status" id="status" value="1">
+                      <!--   <div class="col-md-6">
+                           <div class="input_section">
+                              <label class="col-form-label">Select Status</label>
+                              <select name="status" id="status" class="select2" required>
+                                 <option value="">Select Status</option>
+                                 <option value="0" {{($warranty_activation->exists && $warranty_activation->status == '0')?'selected': (isset($status_flag) && $status_flag == '0' ? 'selected' : '' )}}>In Verification</option>
+                                 <option value="1" {{($warranty_activation->exists  && $warranty_activation->status == '1') ? 'selected': (isset($status_flag) && $status_flag == '1' ? 'selected' : '' )}}>Activated</option>
+                                 <option value="2" {{($warranty_activation->exists && $warranty_activation->status == '2')?'selected':''}}>Pending Activated</option>
+                                 <option value="3" {{($warranty_activation->exists && $warranty_activation->status == '3')?'selected':''}}>Rejected</option>
+                              </select>
+                           </div>
+                        </div> -->
+ 
+                      
+                        <div class="col-md-6">
+                           <div class="input_section">
+                              <label for="party_name" class="col-form-label">Bill By Company (Party Name)</label>
+                              <input type="hidden" id="party_name_input" name="party_name_input">
+                              <select name="party_name" id="party_name" placeholder="Select Customers" class="select2 form-control" required>
+                                 <option value="" disabled selected>Select Customer</option>
+                                <!--  @if($customers && count($customers) > 0)
+                                 @foreach($customers as $customer)
+                                 <option value="{{$customer->id}}" {!! old( 'customer_id' , $warranty_activation['customer_id'])==$customer->id?'selected':'' !!}>{{$customer->name}}({{$customer->mobile}})</option>
+                                 @endforeach
+                                 @endif -->
+                              </select>
+                              @if ($errors->has('customer_id'))
+                              <div class="error">
+                                 <p class="text-danger">{{ $errors->first('customer_id') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+                          <div class="col-md-6">
+                           <div class="input_section">
+                              <label for="customer_id" class="col-form-label">Bill To Customer (Party Name)</label>
 
+                              <select name="customer_id" id="customer_id" placeholder="Select Customers" class="select2 form-control" required>
+                                 <option value="" disabled selected>Select Customer</option>
+                                <!--  @if($customers && count($customers) > 0)
+                                 @foreach($customers as $customer)
+                                 <option value="{{$customer->id}}" {!! old( 'customer_id' , $warranty_activation['customer_id'])==$customer->id?'selected':'' !!}>{{$customer->name}}({{$customer->mobile}})</option>
+                                 @endforeach
+                                 @endif -->
+                              </select>
+                              @if ($errors->has('customer_id'))
+                              <div class="error">
+                                 <p class="text-danger">{{ $errors->first('customer_id') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+                          <!--  <div class="col-md-6">
+                            <div class="input_section">
+                               <label for="  party_name" class="col-form-label">Seller (Company billed Party )</label>
+                               <input type="text" name="party_name" id="party_name" class="form-control" value="{!! old( 'party_name' , isset($service) ? $service->party_name : '') !!}" placeholder="Company billed Party">
+                               @if ($errors->has('party_name'))
+                               <div class="error">
+                                  <p class="text-danger">{{ $errors->first('party_name') }}</p>
+                               </div>
+                               @endif
+                            </div>
+                         </div> -->
+                       
+                         <div class="col-md-6">
+                            <div class="input_section">
+                               <label for="invoice_date" class="col-form-label">
+                                Company Sale Bill Date</label>
+
+                                <input type="text" name="invoice_date" id="invoice_date" class="form-control datepicker" 
+                                  value="{{ old('invoice_date', isset($service) && $service->invoice_date ? \Carbon\Carbon::parse($service->invoice_date)->format('d-m-Y') : '') }}" 
+                                  placeholder="Company Sale Bill Date" autocomplete="off">
+                                @if ($errors->has('invoice_date'))
+                                <div class="error">
+                                   <p class="text-danger">{{ $errors->first('invoice_date') }}</p>
+                                </div>
+                                @endif
+                            </div>
+                         </div>
+                           <div class="col-md-6">
+                           <div class="input_section">
+                              <label for="sale_bill_date" class="col-form-label">Warranty / Customer Bill Date</label>
+                             <input type="text" name="sale_bill_date" id="sale_bill_date" 
+                               class="datepicker form-control" placeholder="Sale Bill Date" 
+                               autocomplete="off"
+                               value="{{ old('sale_bill_date', !empty($warranty_activation['sale_bill_date']) ? \Carbon\Carbon::parse($warranty_activation['sale_bill_date'])->format('d-m-Y') : '') }}" 
+                               required>
+                              @if ($errors->has('sale_bill_date'))
+                              <div class="error">
+                                 <p class="text-danger">{{ $errors->first('sale_bill_date') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+                  
+                         <div class="col-md-6">
+                            <div class="input_section">
+                               <label for="invoice_no" class="col-form-label">Company Sale Bill NO</label>
+
+                               <input type="text" name="invoice_no" id="invoice_no" class="form-control" value="{!! old( 'invoice_no' , isset($service) ? $service->invoice_no : '')  !!}" placeholder="Company Sale Bill NO">
+                                @if ($errors->has('invoice_no'))
+                                <div class="error">
+                                   <p class="text-danger">{{ $errors->first('invoice_no') }}</p>
+                                </div>
+                                @endif
+                            </div>
+                         </div>  
+                           <div class="col-md-6">
+                           <div class="input_section">
+                              <label for="sale_bill_no" class="col-form-label">Customer Bill No.</label>
+                              <input type="text" name="sale_bill_no" id="sale_bill_no" class="form-control" value="{!! old( 'sale_bill_no' , $warranty_activation['sale_bill_no']) !!}" required>
+                              @if ($errors->has('sale_bill_no'))
+                              <div class="error col-lg-12">
+                                 <p class="text-danger">{{ $errors->first('sale_bill_no') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+                        <div class="col-md-6">
+                           <div class="input_section">
+                              <label for="warranty_date" class="col-form-label">Warranty Date</label>
+
+                              <input type="text" name="warranty_date" id="warranty_date" class="datepicker form-control" 
+                               placeholder="Warranty Date" autocomplete="off"
+                               value="{{ old('warranty_date', isset($warranty_activation['warranty_date']) ? \Carbon\Carbon::parse($warranty_activation['warranty_date'])->format('d-m-Y') : '') }}"
+                               required disabled>
+
+                              @if ($errors->has('warranty_date'))
+                              <div class="error col-lg-12">
+                                 <p class="text-danger">{{ $errors->first('warranty_date') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+                        <!-- <div class="col-md-6">
+                          
+                        </div> -->
+
+                      
 
                      </div>
 
@@ -179,6 +310,8 @@
                               @endif
                            </div>
                         </div>
+
+                        
                     
                         <div class="col-md-6">
                            <div class="input_section">
@@ -193,19 +326,28 @@
                            </div>
                         </div>
 
-
                         <div class="col-md-6">
                            <div class="input_section">
-                              <label for="customer_address" class="col-form-label">Address</label>
-
-                              <input type="text" name="customer_address" id="customer_address" class="form-control" value="{!! old( 'customer_address' , $warranty_activation['customer']?$warranty_activation['customer']['customer_address']:'') !!}" required>
-                              @if ($errors->has('customer_address'))
+                              <label for="customer_pindcode" class="col-form-label">Pincode</label>
+                              <input type="hidden" id="customer_pindcode_input" name="customer_pindcode_input" value="" >
+                              <select name="customer_pindcode" id="customer_pindcode" placeholder="Select Pincode" class="select2 form-control" onchange="getAddressDataByPincode()">
+                                 <option value="" disabled selected>Select Pincode</option>
+                                <!--  @if($pincodes && count($pincodes) > 0)
+                                 @foreach($pincodes as $pincode)
+                                 <option value="{{$pincode->id}}" {!! old( 'customer_pindcode' , $warranty_activation['customer']?$warranty_activation['customer']['customer_pindcode']:'')==$pincode->id?'selected':'' !!}>{{$pincode->pincode}}</option>
+                                 @endforeach
+                                 @endif -->
+                              </select>
+                              @if ($errors->has('customer_pindcode'))
                               <div class="error">
-                                 <p class="text-danger">{{ $errors->first('customer_address') }}</p>
+                                 <p class="text-danger">{{ $errors->first('customer_pindcode') }}</p>
                               </div>
                               @endif
                            </div>
                         </div>
+
+
+                       
                         <div class="col-md-6">
                            <div class="input_section">
                               <label for="customer_state" class="col-form-label">State</label>
@@ -251,6 +393,18 @@
                            </div>
 
                         </div>
+                         <div class="col-md-6">
+                           <div class="input_section">
+                              <label for="customer_address" class="col-form-label">Address</label>
+
+                              <input type="text" name="customer_address" id="customer_address" class="form-control" value="{!! old( 'customer_address' , $warranty_activation['customer']?$warranty_activation['customer']['customer_address']:'') !!}" required>
+                              @if ($errors->has('customer_address'))
+                              <div class="error">
+                                 <p class="text-danger">{{ $errors->first('customer_address') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
                         <div class="col-md-6">
                            <div class="input_section">
                               <label for="customer_place" class="col-form-label">Place</label>
@@ -263,25 +417,7 @@
                               @endif
                            </div>
                         </div>
-                        <div class="col-md-6">
-                           <div class="input_section">
-                              <label for="customer_pindcode" class="col-form-label">Pincode</label>
-
-                              <select name="customer_pindcode" id="customer_pindcode" placeholder="Select Pincode" class="select2 form-control">
-                                 <option value="" disabled selected>Select Pincode</option>
-                                 @if($pincodes && count($pincodes) > 0)
-                                 @foreach($pincodes as $pincode)
-                                 <option value="{{$pincode->id}}" {!! old( 'customer_pindcode' , $warranty_activation['customer']?$warranty_activation['customer']['customer_pindcode']:'')==$pincode->id?'selected':'' !!}>{{$pincode->pincode}}</option>
-                                 @endforeach
-                                 @endif
-                              </select>
-                              @if ($errors->has('customer_pindcode'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('customer_pindcode') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
+                        
                         <div class="col-md-6 mt-3">
                            <div class="input_section">
                               <label for="customer_status" class="col-form-label">Customer status</label>
@@ -292,104 +428,7 @@
                         </div>
 
                      </div>
-                     <div class="pt-4">
-                        <h5>Other Details</h5> 
-                        <div class="row">
-                           <div class="col-md-6">
-                              <div class="input_section">
-                                 <label for="customer_id" class="col-form-label">Seller</label>
-
-                                 <select name="customer_id" id="customer_id" placeholder="Select Customers" class="select2 form-control" required>
-                                    <option value="" disabled selected>Select Customer</option>
-                                    @if($customers && count($customers) > 0)
-                                    @foreach($customers as $customer)
-                                    <option value="{{$customer->id}}" {!! old( 'customer_id' , $warranty_activation['customer_id'])==$customer->id?'selected':'' !!}>{{$customer->name}}({{$customer->mobile}})</option>
-                                    @endforeach
-                                    @endif
-                                 </select>
-                                 @if ($errors->has('customer_id'))
-                                 <div class="error">
-                                    <p class="text-danger">{{ $errors->first('customer_id') }}</p>
-                                 </div>
-                                 @endif
-                              </div>
-                           </div>
-                           <div class="col-md-6">
-                            <div class="input_section">
-                               <label for="	party_name" class="col-form-label">Seller (Company billed Party )</label>
-                               <input type="text" name="party_name" id="party_name" class="form-control" value="{!! old( 'party_name' , isset($service) ? $service->party_name : '') !!}" placeholder="Company billed Party">
-                               @if ($errors->has('party_name'))
-                               <div class="error">
-                                  <p class="text-danger">{{ $errors->first('party_name') }}</p>
-                               </div>
-                               @endif
-                            </div>
-                         </div>
-                         <div class="col-md-6">
-                           <div class="input_section">
-                              <label for="sale_bill_date" class="col-form-label">Sale Bill Date</label>
-                              <input type="text" name="sale_bill_date" id="sale_bill_date" class="datepicker form-control" placeholder="Sale Bill Date" autocomplete="off" value="{!! old( 'sale_bill_date' , $warranty_activation['sale_bill_date']) !!}" required >
-                              @if ($errors->has('sale_bill_date'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('sale_bill_date') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                         <div class="col-md-6">
-                            <div class="input_section">
-                               <label for="invoice_date" class="col-form-label">
-                                Company Sale Bill Date</label>
-
-                                <input type="text" name="invoice_date" id="invoice_date" class="form-control" value="{!! old( 'invoice_date' , isset($service) ? $service->invoice_date : '') !!}" placeholder="Company Sale Bill Date">
-                                @if ($errors->has('invoice_date'))
-                                <div class="error">
-                                   <p class="text-danger">{{ $errors->first('invoice_date') }}</p>
-                                </div>
-                                @endif
-                            </div>
-                         </div>
-                         <div class="col-md-6">
-                           <div class="input_section">
-                              <label for="warranty_date" class="col-form-label">Warranty Date</label>
-
-                              <input type="text" name="warranty_date" id="warranty_date" class="datepicker form-control" placeholder="Warranty Date" autocomplete="off" value="{!! old( 'warranty_date' , $warranty_activation['warranty_date']) !!}" required disabled>
-                              @if ($errors->has('warranty_date'))
-                              <div class="error col-lg-12">
-                                 <p class="text-danger">{{ $errors->first('warranty_date') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                         <div class="col-md-6">
-                            <div class="input_section">
-                               <label for="invoice_no" class="col-form-label">Company Sale Bill NO</label>
-
-                               <input type="text" name="invoice_no" id="invoice_no" class="form-control" value="{!! old( 'invoice_no' , isset($service) ? $service->invoice_no : '')  !!}" placeholder="Company Sale Bill NO">
-                                @if ($errors->has('invoice_no'))
-                                <div class="error">
-                                   <p class="text-danger">{{ $errors->first('invoice_no') }}</p>
-                                </div>
-                                @endif
-                            </div>
-                         </div>
-                          
-
-
-                           <div class="col-md-6">
-                              <div class="input_section">
-                                 <label for="sale_bill_no" class="col-form-label">Seller Bill No.</label>
-                                 <input type="text" name="sale_bill_no" id="sale_bill_no" class="form-control" value="{!! old( 'sale_bill_no' , $warranty_activation['sale_bill_no']) !!}" required>
-                                 @if ($errors->has('sale_bill_no'))
-                                 <div class="error col-lg-12">
-                                    <p class="text-danger">{{ $errors->first('sale_bill_no') }}</p>
-                                 </div>
-                                 @endif
-                              </div>
-                           </div>
-                        </div>
-
-                     </div>
+                   
                   </div>
                   <div class="row mt-2">
                      <div class="col-md-6">
@@ -449,14 +488,160 @@
                </div>
             </div>
          </div>
+         <div class="modal fade bd-example-modal-lg" id="createpincode" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+           <div class="modal-dialog modal-lg" role="document">
+             <div class="modal-content card">
+               <div class="card-header card-header-icon card-header-theme">
+                 <div class="card-icon">
+                   <i class="material-icons">perm_identity</i>
+                 </div>
+                 <h4 class="card-title"><span class="modal-title">{!! trans('panel.global.add') !!}</span> {!! trans('panel.pincode.title_singular') !!}
+                   <span class="pull-right" >
+                     <a href="javascript:void(0)" class="btn btn-just-icon btn-danger" data-dismiss="modal"><i class="material-icons">clear</i></a>
+                   </span>
+                 </h4>
+               </div>
+               <div class="modal-body">
+                 <form method="POST" action="{{ route('pincode.store') }}" enctype="multipart/form-data" id="createpincodeForm">
+                 @csrf
+                 <div class="row">
+                     <div class="col-md-6">
+                       <div class="input_section">
+                         <label class="col-form-label">{!! trans('panel.pincode.pincode') !!} <span class="text-danger"> *</span></label>
+                        
+                           <div class="form-group has-default bmd-form-group">
+                             <input type="text" name="pincode" id="pincode" class="form-control" value="{!! old( 'pincode') !!}" maxlength="200" required>
+                             @if ($errors->has('pincode'))
+                               <div class="error"><p class="text-danger">{{ $errors->first('pincode') }}</p></div>
+                             @endif
+                           </div>
+                         
+                       </div>
+                     </div>
+                   <div class="col-md-6">
+                       <div class="input_section">
+                         <label class="col-form-label">{!! trans('panel.pincode.city') !!}<span class="text-danger"> *</span></label>
+                        
+                           <div class="form-group has-default bmd-form-group">
+                           <!-- <input list="browsers" name="city_id" id="browser" class="form-control"> -->
+                           <select class="form-control select2" name="city_id" id="browser">
+                           
+                             @if(@isset($cities ))
+                               @foreach($cities as $city)
+                               <option value="{!! $city['id'] !!}">{!! $city['city_name'] !!}</option>
+                               @endforeach
+                             @endif
+                           
+                             </select>
+                             <!-- <select class="form-control select2" name="city_id" id="city_id" style="width: 100%;" required>
+                                 <option value="">Select {!! trans('panel.pincode.city') !!}</option>
+                                 @if(@isset($cities ))
+                                 @foreach($cities as $city)
+                                 <option value="{!! $city['id'] !!}" {{ old( 'city_id') == $city['id'] ? 'selected' : '' }}>{!! $city['city_name'] !!}</option>
+                                 @endforeach
+                                 @endif
+                              </select> -->
+                           </div>
+                           @if ($errors->has('country_id'))
+                            <div class="error">
+                               <p class="text-danger">{{ $errors->first('country_id') }}</p>
+                            </div>
+                           @endif
+                        
+                       </div>
+                     </div>
+                      </div>
+                 <div class="clearfix"></div>
+                 <div class="pull-right">
+                   <input type="hidden" name="id" id="pincode_id" />
+                   <button class="btn btn-info save"> Submit</button>
+                 </form>
+                 </div>
+               </div>
+            
+           </div>
          <script src="{{ url('/').'/'.asset('assets/js/jquery.custom.js') }}"></script>
          <script>
+            $(document).ready(function () {
+                $("#createpincodeForm").on("submit", function (e) {
+                    e.preventDefault(); // Prevent default form submission (page refresh)
+
+                    let formData = new FormData(this);
+                    let submitButton = $(".save");
+
+                    submitButton.prop("disabled", true).text("Submitting...");
+
+                    $.ajax({
+                        url: $(this).attr("action"),
+                        type: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function (response) {
+                            if (response.success) {
+                                alert("Pincode added successfully!");
+                                
+                                // Close modal
+                                $("#createpincode").modal("hide");
+
+                                // Reset form
+                                $("#createpincodeForm")[0].reset();
+
+                                // Optionally refresh a specific section (like a table)
+                                // $("#pincodeTable").load(location.href + " #pincodeTable");
+                            } else {
+                                alert("Error: " + response.message);
+                            }
+                        },
+                        error: function (xhr) {
+                            let errors = xhr.responseJSON.errors;
+                            let errorMessages = "";
+
+                            $.each(errors, function (key, value) {
+                                errorMessages += value[0] + "\n";
+                            });
+
+                            alert("Validation Errors:\n" + errorMessages);
+                        },
+                        complete: function () {
+                            submitButton.prop("disabled", false).text("Submit");
+                        }
+                    });
+                });
+            });
+
             $(document).ready(function() {
                var sr_no = '{{$request->serial_no??""}}';               
                if (sr_no != '') {
                   $("#product_serail_number").keyup();
                }
+               $('#storeTransactionHistoryData').validate({
+                   rules:{
+                     customer_number:
+                     {
+                       required:true,
+                       minlength:10,
+                       maxlength: 10,
+                     },
+                   },
+                   highlight: function(element) {
+                     $(element).closest('.error').css("display", "none");
+                   },
+                   unhighlight: function(element) {
+                     $(element).closest('.error').css("display", "block");
+                   }
+               });
             })
+
+            $("#customer_number").on("input", function () {
+               let value = $(this).val();
+
+               // Remove non-numeric characters and ensure max 10 digits
+               value = value.replace(/\D/g, '').substring(0, 10);
+
+               // Set the cleaned value back
+               $(this).val(value);
+            });
 
             $('#sale_bill_date').datepicker({
                 maxDate: 0,
@@ -468,38 +653,59 @@
                 dateFormat: 'dd-mm-yy',
             });
             $("#invoice_date").on('change', function() {
-               var selectedStartDate = $('#invoice_date').datepicker('getDate');
-               $('#sale_bill_date').datepicker("option", "minDate", selectedStartDate);
-                var selectedDate = moment($(this).val(), 'DD-MM-YYYY');
+                var selectedStartDate = $('#invoice_date').datepicker('getDate');
+                var today = new Date(); // Get today's date
+
+                // Set sale bill date minimum to selected invoice date
+                $('#sale_bill_date').datepicker("option", "minDate", selectedStartDate);
+
+                // Validate date format
+                var selectedDate = moment($(this).val(), 'DD-MM-YYYY', true);
                 if (!selectedDate.isValid()) {
+                    alert("Invalid date format. Please use DD-MM-YYYY.");
                     $("#invoice_date").val('');
+                    return;
+                }
+
+                // Check if selected date is greater than today
+                if (selectedDate.isAfter(moment(today))) {
+                    alert("Invoice date cannot be greater than today's date.");
+                    $("#invoice_date").val(''); // Reset input
                     return;
                 }
             });
 
-            $('#sale_bill_date').on('change', function () {
-                 if ($(this).val().length >= 10) {
-                     var selectedDate = moment($(this).val().trim(), 'DD-MM-YYYY', true);
-                     var billDate = moment($('#invoice_date').val().trim(), 'DD-MM-YYYY', true);
+           $('#sale_bill_date').on('change', function () {
+                if ($(this).val().length >= 10 && $('#invoice_date').val().length >= 10) {
+                    var selectedDate = moment($(this).val().trim(), 'DD-MM-YYYY', true);
+                    var billDate = moment($('#invoice_date').val().trim(), 'DD-MM-YYYY', true);
+                    var today = moment(); // Get today's date
 
-                     console.log("Selected Date:", selectedDate.format('DD-MM-YYYY'));
-                     console.log("Bill Date:", billDate.format('DD-MM-YYYY'));
+                    // Check if dates are valid
+                    if (!selectedDate.isValid() || !billDate.isValid()) {
+                        alert("Invalid date format. Please use DD-MM-YYYY.");
+                        $(this).val($('#invoice_date').val()); // Reset input
+                        return;
+                    }
 
-                     if (!selectedDate.isValid() || !billDate.isValid()) {
-                         alert("Invalid date format. Please use DD-MM-YYYY.");
-                         $(this).val($('#invoice_date').val()); // Clear input
-                         return;
-                     }
+                    // Check if sale bill date is before invoice date
+                    if (selectedDate.isBefore(billDate)) {
+                        alert("Selected date must be greater than or equal to the invoice date.");
+                        $(this).val(''); // Reset input
+                        return;
+                    }
 
-                     if (selectedDate.isSameOrBefore(billDate)) {
-                         alert("Selected date must be greater than the bill date.");
-                         $(this).val($('#invoice_date').val()); // Clear input
-                         return;
-                     }
-                 }
-             }).trigger('change');
+                    // Check if sale bill date is greater than today
+                    if (selectedDate.isAfter(today)) {
+                        alert("Sale bill date cannot be greater than today's date.");
+                        $(this).val(''); // Reset input
+                        return;
+                    }
+                }
+            }).trigger('change');
 
-            $("#product_serail_number").on("keyup", function() {
+            $("#product_serail_number").on("input", function() {
+               $('#select_product_id').empty();
                var serial_no = $(this).val();
                $.ajax({
                   url: "{{ url('getProductByCoupon') }}",
@@ -521,7 +727,7 @@
                                 let formattedDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`; // Rearrange to DD-MM-YYYY
                                 $('#invoice_date').val(formattedDate).trigger('change');
                             }
-                            $('#party_name').val(res.service.party_name);
+                            $('#party_name_input').val(res.service.party_name);
                         }
                         if (res.slected === true) {
                            $('#select_product_id').prop('disabled', true);
@@ -542,9 +748,11 @@
                   success: function(res) {
                      if (res.status === true) {
                         if (res.check_Warranty != null) {
-                           console.log(res.check_Warranty.sale_bill_date);
                            $("#customer_id").val(res.check_Warranty.customer_id).trigger('change');
-                           $('#sale_bill_date').val(moment(res.check_Warranty.sale_bill_date).format('DD-MM-YYYY')).trigger('change');
+                           let formattedDate = moment(res.check_Warranty.sale_bill_date, 'YYYY-MM-DD').format('DD-MM-YYYY');
+                            if ($('#sale_bill_date').length) {
+                                $('#sale_bill_date').val(formattedDate).trigger('change');
+                            } 
                            $("#customer_number").val(res.check_Warranty.customer.customer_number ?? '');
                            $('#sale_bill_no').val(res.check_Warranty.sale_bill_no);
                            $('#branch_id').val(res.check_Warranty.branch_id).trigger('change');
@@ -567,7 +775,7 @@
             $('#sale_bill_date').on('change' , function(){
                 setTimeout(() => {
                    getProductTimeInterval();
-                }, 500);
+                }, 2000);
             });
 
 
@@ -576,7 +784,6 @@
             function getProductTimeInterval(){
                 var product_id = $('#select_product_id').val();
                 var sale_bill_date = $('#sale_bill_date').val();
-                console.log("details" , product_id , sale_bill_date);
                 if(sale_bill_date != "" && product_id != ""){
                     $('#warranty_date').prop('disabled' , false);
                     $.ajax({
@@ -600,7 +807,30 @@
                 }
             }
 
-
+            function getAddressDataByPincode(){
+               var pincode_id = $("select[name=customer_pindcode]").val();
+               var token = $("meta[name='csrf-token']").attr("content");
+               if(pincode_id){
+                  $.ajax({
+                     url: "{{ url('/getAddressData') }}" ,
+                     dataType: "json",
+                     type: "POST",
+                     data:{ _token: token, pincode_id:pincode_id},
+                     success: function(res){
+                        if(res)
+                        {
+                           $("#customer_state").val(res.state_id).trigger('change');
+                           setTimeout(() => {
+                              $("#customer_district").val(res.district_id).trigger('change');
+                           }, 1000);
+                           setTimeout(() => {
+                              $("#customer_city").val(res.city_id).trigger('change');
+                           }, 2000); 
+                        }
+                     }
+                  });
+               } 
+            } 
             $("#customer_number").on("keyup", function() {
                var customer_number = $(this).val();
                $.ajax({
@@ -627,6 +857,7 @@
                         }, 1500);
                         setTimeout(() => {
                            $("#customer_pindcode").val(res.data.customer_pindcode).trigger("change");
+                           $("#customer_pindcode_input").val(res.data.customer_pindcode).trigger("change");
                         }, 2000);
 
                      } else {
@@ -636,9 +867,9 @@
                         $("#customer_address").val("");
                         $("#customer_place").val("");
                         $("#customer_pindcode").val("").trigger("change");;
-                        $("#customer_state").val("");
-                        $("#customer_district").val("");
-                        $("#customer_city").val("");
+                        $("#customer_state").val("").trigger("change");
+                        $("#customer_district").val("").trigger("change");
+                        $("#customer_city").val("").trigger("change");
 
                         $("#customer_name").prop('readonly', false);
                         $("#customer_email").prop('readonly', false);
@@ -705,24 +936,244 @@
                });
             });
 
-            $("#customer_city").on("change", function() {
-               var city_id = $(this).val();
-               $.ajax({
-                  url: "{{ url('getPincode') }}",
-                  dataType: "json",
+            // $("#customer_city").on("change", function() {
+            //    var city_id = $(this).val();
+            //    $.ajax({
+            //       url: "{{ url('getPincode') }}",
+            //       dataType: "json",
+            //       type: "POST",
+            //       data: {
+            //          _token: "{{csrf_token()}}",
+            //          city_id: city_id
+            //       },
+            //       success: function(res) {
+            //          var options = '<option value="">Select Pincode</option>';
+            //          $.each(res, function(key, val) {
+            //             options += '<option value="' + val.id + '">' + val.pincode + '</option>';
+            //          })
+            //          $("#customer_pindcode").html(options);
+            //       }
+            //    });
+            // });
+         </script>
+   @section('script')
+   <script type="text/javascript">
+      $(document).ready(function () {
+         function initializeSelect2(selector, selectedId = null) {
+            // if ($(selector).hasClass("select2-initialized")) {
+            //    return; // Prevent multiple initializations
+            // }
+            $(selector).addClass("select2-initialized");
+
+            $(selector).select2({
+               ajax: {
+                  url: "{{ url('getPincodeSearch') }}",
                   type: "POST",
-                  data: {
-                     _token: "{{csrf_token()}}",
-                     city_id: city_id
+                  dataType: "json",
+                  delay: 250,
+                  data: function (params) {
+                     return {
+                        _token: "{{ csrf_token() }}",
+                        q: params.term, 
+                        page: params.page || 1,
+                        selected: selectedId
+                     };
                   },
-                  success: function(res) {
-                     var options = '<option value="">Select Pincode</option>';
-                     $.each(res, function(key, val) {
-                        options += '<option value="' + val.id + '">' + val.pincode + '</option>';
-                     })
-                     $("#customer_pindcode").html(options);
+                  processResults: function (data, params) {
+                     if (!data.results.length) {
+                         setTimeout(function () {
+                             $("#createpincode").modal("show"); // Open modal
+                         }, 500);
+                     }
+                     params.page = params.page || 1;
+                     return {
+                        results: data.results.map(item => ({ id: item.id, text: item.pincode })),
+                        pagination: { more: data.pagination.more }
+                     };
+                  },
+                  cache: true
+               },
+               placeholder: "Search...",
+            });
+
+            // Load pre-selected value if available (only once)
+            if (selectedId) {
+               $.ajax({
+                  url: "{{ url('getPincodeSearch') }}",
+                  type: "POST",
+                  dataType: "json",
+                  data: {
+                     _token: "{{ csrf_token() }}",
+                     selected: selectedId,
+                  },
+                  success: function (res) {
+                     if (res.results.length) {
+                        let selectedItem = res.results.find(item => item.id == selectedId);
+                        if (selectedItem) {
+                           let newOption = new Option(selectedItem.pincode, selectedItem.id, true, true);
+                           $(selector).append(newOption).trigger('change');
+                        }
+                     }
                   }
                });
+            }
+         }
+
+         $('#customer_pindcode_input').on('change' , function(){
+            var customer_pindcode_input = $(this).val();
+            initializeSelect2("#customer_pindcode", customer_pindcode_input);
+         })
+
+         // Get selected ID from the backend
+         var pincode = "{{ $warranty_activation['customer']['customer_pindcode'] ?? '' }}";
+         initializeSelect2("#customer_pindcode", pincode);
+      });
+
+      $(document).ready(function () {
+         function initializeSelect3(selector, selectedId = null) {
+            if ($(selector).hasClass("select2-initialized")) {
+               return; // Prevent multiple initializations
+            }
+            $(selector).addClass("select2-initialized");
+
+            $(selector).select2({
+               ajax: {
+                  url: "{{ url('getAllCustomer') }}",
+                  type: "POST",
+                  dataType: "json",
+                  delay: 250,
+                  data: function (params) {
+                     return {
+                        _token: "{{ csrf_token() }}",
+                        q: params.term, 
+                        page: params.page || 1,
+                        selected: selectedId
+                     };
+                  },
+                  processResults: function (data, params) {
+                     params.page = params.page || 1;
+                     return {
+                        results: data.results.map(item => ({
+                              id: item.id,
+                              text: item.name + ' (' + item.mobile + ')' // Correct format
+                          })),
+                        pagination: { more: data.pagination.more }
+                     };
+                  },
+                  cache: true
+               },
+               placeholder: "Search...",
             });
-         </script>
+
+            // Load pre-selected value if available (only once)
+            if (selectedId) {
+               $.ajax({
+                  url: "{{ url('getAllCustomer') }}",
+                  type: "POST",
+                  dataType: "json",
+                  data: {
+                     _token: "{{ csrf_token() }}",
+                     selected: selectedId,
+                  },
+                  success: function (res) {
+                     if (res.results.length) {
+                        let selectedItem = res.results.find(item => item.id == selectedId);
+                          if (selectedItem) {
+                              let full_name = selectedItem.name + ' (' + selectedItem.mobile + ')'; // Correct format
+                              let newOption = new Option(full_name, selectedItem.id, true, true);
+                              $(selector).append(newOption).trigger('change');
+                          }
+                     }
+                  }
+               });
+            }
+         }
+
+      function initializeSelect4(selector, selectedId = null) {
+          // if ($(selector).hasClass("select2-initialized")) {
+          //     return; // Prevent multiple initializations
+          // }
+          $(selector).addClass("select2-initialized");
+
+          $(selector).select2({
+              ajax: {
+                  url: "{{ url('getAllPartyName') }}",
+                  type: "POST",
+                  dataType: "json",
+                  delay: 250,
+                  data: function (params) {
+                      return {
+                          _token: "{{ csrf_token() }}",
+                          q: params.term, 
+                          page: params.page || 1,
+                          selected: selectedId
+                      };
+                  },
+                  processResults: function (data, params) {
+                      params.page = params.page || 1;
+
+                      let results = data.results.map(item => ({
+                          id: item.name, // Use name as ID
+                          text: item.name + ' (' + item.mobile + ')' // Correct format
+                      }));
+
+                      // Always add "Damage Entry" as the first option
+                      results.unshift({ id: "Damage Entry", text: "Damage Entry" });
+
+                      return {
+                          results: results,
+                          pagination: { more: data.pagination.more }
+                      };
+                  },
+                  cache: true
+              },
+              placeholder: "Search...",
+          });
+
+          // Load pre-selected value only if "Damage Entry" is selected
+          if (selectedId === "Damage Entry") {
+              let newOption = new Option("Damage Entry", "Damage Entry", true, true);
+              $(selector).append(newOption).trigger('change');
+          } else if (selectedId) {
+              $.ajax({
+                  url: "{{ url('getAllPartyName') }}",
+                  type: "POST",
+                  dataType: "json",
+                  data: {
+                      _token: "{{ csrf_token() }}",
+                      selected: selectedId,
+                  },
+                  success: function (res) {
+                      if (res.results.length) {
+                          let selectedItem = res.results.find(item => item.name == selectedId);
+                          if (selectedItem) {
+                              let full_name = selectedItem.name + ' (' + selectedItem.mobile + ')';
+                              let newOption = new Option(full_name, selectedItem.name, true, true);
+                              $(selector).append(newOption).trigger('change');
+                          }
+                      }
+                  }
+              });
+          }
+      }
+
+
+
+
+         // Get selected ID from the backend
+         $('#party_name_input').on('change' , function(){
+            setTimeout(function(){
+             let party_name = $('#party_name_input').val();
+             initializeSelect4("#party_name", party_name);
+            },1000)
+           
+         })
+         var customer_id = "{{ $warranty_activation['customer_id'] ?? '' }}";
+         var party_name = "{{ $service->party_name ?? '' }}";
+         initializeSelect3("#customer_id", customer_id);
+         initializeSelect4("#party_name", party_name);
+      });
+   </script>
+
+   @endsection
 </x-app-layout>

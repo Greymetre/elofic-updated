@@ -38,13 +38,17 @@ class UserCityImport implements ToCollection,WithValidation,WithHeadingRow, With
     {
 
         foreach ($rows as $row) {
-            UserCityAssign::updateOrCreate(['city_id' => $row['city_id'], 'userid' => $row['user_id'] ],[
-                'userid' => $row['user_id'],
-                'reportingid' => $row['reportingid'],
-                'city_id' => $row['city_id'],
-                'created_at' => getcurentDateTime() ,
-                'updated_at' => getcurentDateTime()
-            ]);
+            if($row['delete'] == 'Y'){
+                UserCityAssign::where('city_id', $row['city_id'])->where('userid', $row['user_id'])->delete();
+            }else{
+                UserCityAssign::updateOrCreate(['city_id' => $row['city_id'], 'userid' => $row['user_id'] ],[
+                    'userid' => $row['user_id'],
+                    'reportingid' => $row['reportingid'],
+                    'city_id' => $row['city_id'],
+                    'created_at' => getcurentDateTime() ,
+                    'updated_at' => getcurentDateTime()
+                ]);
+            }
         }
     }
 

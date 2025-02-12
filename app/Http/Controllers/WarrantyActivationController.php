@@ -63,12 +63,16 @@ class WarrantyActivationController extends Controller
     {
         abort_if(Gate::denies('warranty_activation_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $status_flag = isset($request->serial_no) ? '1' : '0';
+         $back = isset($request->back) ?$request->back : false;
         $branches = Branch::where('active', 'Y')->get();
+        $products = Product::all();
         $customers = Customers::where('active', 'Y')->where('customertype', ['1', '2', '3'])->select('id', 'name', 'mobile')->get();
         $customers_dealer = Customers::where('customertype', ['1', '3'])->select('id', 'name', 'mobile')->get();
         $pincodes = Pincode::all();
         $states = State::all();
-        return view('warranty_activation.create', compact('customers', 'pincodes', 'branches', 'request', 'states' , 'status_flag'))->with('warranty_activation', $this->warranty_activation);
+        $cities = City::where('active','=','Y')->select('id', 'city_name')->orderBy('city_name','asc')->get();
+
+        return view('warranty_activation.create', compact('customers', 'pincodes', 'branches', 'request', 'states' , 'status_flag' , 'products' ,'cities' , 'back'))->with('warranty_activation', $this->warranty_activation);
     }
 
     /**
@@ -168,7 +172,15 @@ class WarrantyActivationController extends Controller
                     }
                 }
 
-                return Redirect::to($request->previous_url . '?serial_no=' . $request->product_serail_number)->with('message_success', 'Warranty Activation Store Successfully.');
+                if(isset($request->back) && $request->back == true){
+                    return redirect()->to(url('complaints/create') . '?' . http_build_query(['serial_number' => $request->product_serail_number]))
+                    ->with('message_success', 'Warranty Activation Store Successfully.');           
+                }
+
+                if(isset($request->previous_url)){
+                    return Redirect::to($request->previous_url . '?serial_no=' . $request->product_serail_number)->with('message_success', 'Warranty Activation Store Successfully.');
+                }
+                return Redirect::to("warranty_activation")->with('message_success', 'Warranty Activation Store Successfully.');
             } else {
                 return redirect()->back()->withErrors($validator)->withInput();
             }
@@ -202,13 +214,14 @@ class WarrantyActivationController extends Controller
         $back = isset($request->back) ?$request->back : false;
         abort_if(Gate::denies('warranty_activation_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $branches = Branch::where('active', 'Y')->get();
+        $products = Product::all();
         $customers = Customers::where('active', 'Y')->select('id', 'name', 'mobile')->get();
         $customers_dealer = Customers::where('customertype', ['1', '3'])->select('id', 'name', 'mobile')->get();
         $pincodes = Pincode::all();
         $states = State::all();
         $serial_no = $this->warranty_activation->product_serail_number;
         $service = Services::where('serial_no', $serial_no)->orderBy('created_at', 'desc')->first();
-        return view('warranty_activation.create', compact('customers', 'pincodes', 'branches', 'states' , 'service' , 'back'))->with('warranty_activation', $this->warranty_activation);
+        return view('warranty_activation.create', compact('customers', 'pincodes', 'branches', 'states' , 'service' , 'back' ,'products'))->with('warranty_activation', $this->warranty_activation);
     }
 
     /**
@@ -298,7 +311,8 @@ class WarrantyActivationController extends Controller
             }
             if(isset($request->back) && $request->back == true){
                 return redirect()->to(url('complaints/create') . '?' . http_build_query(['serial_number' => $request->product_serail_number]))
-                ->with('message_success', 'Warranty Activation Updated Successfully.');            }
+                ->with('message_success', 'Warranty Activation Updated Successfully.');            
+            }
             return Redirect::to('warranty_activation')->with('message_success', 'Warranty Activation Update Successfully.');
         } catch (\Exception $e) {
             return redirect()->back()->withErrors($e->getMessage())->withInput();

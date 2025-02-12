@@ -43,36 +43,44 @@ class PincodeController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(PincodeRequest $request)
-    {
-        try
-        { 
-            $useraccess = !empty($request['id']) ? 'pincode_edit' : 'pincode_create' ;
-            abort_if(Gate::denies($useraccess), Response::HTTP_FORBIDDEN, '403 Forbidden');
-            if(!empty($request['id']))
-            {
-                $city = Pincode::where('id',$request['id'])->first();
-                $city->pincode = isset($request['pincode']) ? $request['pincode'] :'';
-                $city->city_id = isset($request['city_id']) ? $request['city_id'] :'';
-                $city->updated_by = isset($request['updated_by']) ? $request['updated_by'] :Auth::user()->id;
-                $city->save();
-            }
-            else
-            {
-                $request['created_by'] = Auth::user()->id;
-                $request['active'] = 'Y';
-                $city = Pincode::create($request->except(['_token']));
-            } 
-            if($city)
-            {
-              return Redirect::to('pincode')->with('message_success', 'Pincode Store Successfully');
-            }
-            return redirect()->back()->with('message_danger', 'Error in Data Store')->withInput();  
-        }     
-        catch(\Exception $e)
         {
-          return redirect()->back()->withErrors($e->getMessage())->withInput();
+            try {
+                $useraccess = !empty($request['id']) ? 'pincode_edit' : 'pincode_create';
+                abort_if(Gate::denies($useraccess), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+                if (!empty($request['id'])) {
+                    $pincode = Pincode::find($request['id']);
+
+                    if (!$pincode) {
+                        return request()->ajax()
+                            ? response()->json(['success' => false, 'message' => 'Pincode not found'], 404)
+                            : redirect()->back()->with('message_danger', 'Pincode not found');
+                    }
+
+                    $pincode->pincode = $request->pincode ?? '';
+                    $pincode->city_id = $request->city_id ?? '';
+                    $pincode->updated_by = $request->updated_by ?? Auth::user()->id;
+                    $pincode->save();
+                } else {
+                    $request['created_by'] = Auth::user()->id;
+                    $request['active'] = 'Y';
+                    $pincode = Pincode::create($request->except(['_token']));
+                }
+
+                if (request()->ajax()) {
+                    return response()->json(['success' => true, 'message' => 'Pincode stored successfully']);
+                }
+
+                return Redirect::to('pincode')->with('message_success', 'Pincode stored successfully');
+            } catch (\Exception $e) {
+                if (request()->ajax()) {
+                    return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+                }
+
+                return redirect()->back()->withErrors($e->getMessage())->withInput();
+            }
         }
-    }
+
 
     /**
      * Display the specified resource.
