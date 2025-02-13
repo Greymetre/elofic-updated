@@ -10,6 +10,7 @@
     #pmsForm table td {
       border: 2px solid #aba7a7 !important;
       white-space: break-spaces;
+      padding: 5px !important;
     }
   </style>
   <div class="row">
@@ -150,7 +151,8 @@
                 <th>No</th>
                 <th>Employees Code</th>
                 <th>FOS Name</th>
-                <!-- <th>Action</th> -->
+                <th>Recommended CY Increment%</th>
+                <th>Remark By Reporting Manager</th>
               </thead>
               <tbody>
               </tbody>
@@ -172,7 +174,7 @@
           </button>
         </div>
         <div class="modal-body">
-          <form id="pmsForm">
+          <form action="{{url('/pms-form')}}" method="POST" id="pmsForm">
             @csrf
             <table class="table table-bordered">
               <tbody>
@@ -206,7 +208,7 @@
                   <th>Percentage Achievement</th>
                   <td id="pssale_per"></td>
                   <th>Recommended CY Increment %</th>
-                  <td><input type="number" class="form-control" name="recommended_increment" value=""></td>
+                  <td><input type="number" class="form-control" name="recommended_increment" value="" required></td>
                 </tr>
                 <tr>
                   <th>Recommended Designation</th>
@@ -220,12 +222,14 @@
                   </td>
                   <th>Remark</th>
                   <td colspan="3">
-                    <textarea class="form-control" name="remarks" placeholder="Enter remarks" required></textarea>
+                    <textarea class="form-control" rows="10" name="remarks" placeholder="Enter remarks" required></textarea>
                   </td>
                 </tr>
               </tbody>
             </table>
             <div class="text-center">
+              <input type="hidden" name="user_id" id="pms_user_id">
+              <input type="hidden" name="fyear" id="pms_fyear">
               <button type="submit" class="btn btn-success btn-lg">Submit</button>
             </div>
           </form>
@@ -275,13 +279,20 @@
             "defaultContent": '',
             orderable: false
           },
-          // {
-          //   data: 'action',
-          //   name: 'action',
-          //   "defaultContent": '',
-          //   orderable: false,
-          //   searchable: false
-          // }
+          {
+            data: 'increment',
+            name: 'increment',
+            "defaultContent": '',
+            orderable: false,
+            searchable: false
+          },
+          {
+            data: 'remark',
+            name: 'remark',
+            "defaultContent": '',
+            orderable: false,
+            searchable: false
+          }
         ]
       });
       $('#start_date').change(function() {
@@ -361,6 +372,8 @@
               $("#pslast_year_inc_per").html(res.data.last_year_inc_per);
               $("#pstarget").html(res.data.target);
               $("#pssale").html(res.data.sale);
+              $("#pms_user_id").val(user_id);
+              $("#pms_fyear").val(financial_year);
               $("#pssale_per").html(res.data.sale_per + '%');
 
               $("#pmsModal").modal("show");

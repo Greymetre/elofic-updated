@@ -16,6 +16,7 @@ use App\Models\PrimarySales;
 use App\Models\Redemption;
 use App\Models\TransactionHistory;
 use App\Models\User;
+use App\Models\UserPmsRemark;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -244,6 +245,8 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
 
         static $rowNumber = 3;
 
+        $pmsData = UserPmsRemark::where(['user_id' => $query['id'], 'fyear' => $this->financial_year])->first();
+
         $result = [
             $query['getdivision'] ? $query['getdivision']['division_name'] : '-',
             $query['getdepartment'] ? $query['getdepartment']['name'] : '-',
@@ -320,9 +323,8 @@ class ASMRatingDetailReportExport implements FromCollection, WithHeadings, Shoul
             $query['userinfo'] ? $query['userinfo']['last_year_increment_percent'] : '',
             $query['userinfo'] ? $query['userinfo']['last_promotion'] : '',
 
-            '-',
-            '-',
-            '-',
+            $pmsData ? $pmsData->recommended_increment.'%' : '',
+            $pmsData ? $pmsData->remark : '',
 
         ];
         $rowNumber++;

@@ -20,7 +20,7 @@ class Product extends Model
 
     public function subcategories()
     {
-        return $this->belongsTo('App\Models\Subcategory', 'subcategory_id', 'id')->select('id','subcategory_name','subcategory_image');
+        return $this->belongsTo('App\Models\Subcategory', 'subcategory_id', 'id')->select('id','subcategory_name','subcategory_image' , 'service_category_id');
     }
 
     public function brands()

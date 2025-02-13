@@ -11,6 +11,7 @@ use App\Models\Division;
 use App\Models\ServiceBill;
 use App\Models\ServiceBillProductDetails;
 use App\Models\ServiceChargeChargeType;
+use App\Models\ServiceChargeProducts;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Gate;
@@ -46,11 +47,20 @@ class ServiceBillController extends Controller
     public function create(Request $request)
     {
         if ($request->complaint_id) {
-            $complaint = Complaint::find($request->complaint_id);
+            $complaint = Complaint::with(['product_details.subcategories'])->find($request->complaint_id);
         } else {
             $complaint = Complaint::find(0);
         }
-        $charge_type = ServiceChargeChargeType::all();
+
+        if(isset($complaint->product_details->subcategories)){
+            $service_charge_products = ServiceChargeProducts::where([
+                'category_id' => $complaint->product_details->subcategories->service_category_id
+            ])->distinct('charge_type_id')->pluck('charge_type_id');
+            $charge_type = ServiceChargeChargeType::whereIn('id',$service_charge_products)->orWhere('id' , 4)->get();
+        }else{
+            $charge_type = ServiceChargeChargeType::all();
+        }
+ 
         $all_complaint_number = Complaint::with('product_details')->get();
         $lastServiceBillId = ServiceBill::max('bill_no');
         $newserviceBillNo = $lastServiceBillId ? $lastServiceBillId + 1 : 1;

@@ -44,6 +44,7 @@ use App\Models\District;
 use App\Models\Order;
 use App\Models\TransactionHistory;
 use App\Models\UserEducation;
+use App\Models\UserPmsRemark;
 use App\Models\WareHouse;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
@@ -85,7 +86,7 @@ class UsersController extends Controller
         $warehouses = WareHouse::all();
 
 
-        return view('users.create', compact('roles', 'cities', 'reportings', 'branches', 'designations', 'divisions', 'customertype', 'departments', 'pay_rolls','warehouses'))->with('user', $this->user);
+        return view('users.create', compact('roles', 'cities', 'reportings', 'branches', 'designations', 'divisions', 'customertype', 'departments', 'pay_rolls', 'warehouses'))->with('user', $this->user);
     }
 
     public function store(UserRequest $request)
@@ -245,7 +246,7 @@ class UsersController extends Controller
         $pay_rolls = Config('constants.pay_roll');
         $warehouses = WareHouse::all();
         // dd($user);
-        return view('users.create', compact('roles', 'user', 'cities', 'reportings', 'branches', 'designations', 'divisions', 'customertype', 'departments', 'pay_rolls','warehouses'));
+        return view('users.create', compact('roles', 'user', 'cities', 'reportings', 'branches', 'designations', 'divisions', 'customertype', 'departments', 'pay_rolls', 'warehouses'));
     }
 
     //public function update(Request $request, User $user)
@@ -797,19 +798,27 @@ class UsersController extends Controller
                 });
             }
 
+            $year = date('Y');
+            $month = date('m');
 
+            if ($month >= 4) {
+                $financial_year = $year . '-' . ($year + 1);
+            } else {
+                $financial_year = ($year - 1) . '-' . $year;
+            }
 
             return Datatables::of($query)
                 ->addIndexColumn()
-                ->addColumn('action', function ($query) use ($request) {
-                    if($request->ip() == '111.118.252.250') {
-                        return '<button class="btn btn-info btn-sm edit_remark" data-id='.$query->id.'><i class="material-icons">add_task</i></button>';
-                    }else{
-                        return '-';
-                    }
+                ->addColumn('increment', function ($query) use ($financial_year) {
+                    $pmsData = UserPmsRemark::where(['user_id' => $query['id'], 'fyear' => $financial_year])->first();
+                    return $pmsData ? $pmsData->recommended_increment : '';
                 })
-               
-                ->rawColumns(['action'])
+                ->addColumn('remark', function ($query) use ($financial_year) {
+                    $pmsData = UserPmsRemark::where(['user_id' => $query['id'], 'fyear' => $financial_year])->first();
+                    return $pmsData ? $pmsData->remark : '';
+                })
+
+                ->rawColumns(['increment', 'remark'])
                 ->make(true);
         }
 
@@ -993,5 +1002,23 @@ class UsersController extends Controller
         $roles = Role::where('name', '!=', 'super-admin')->pluck('name', 'id');
         // $customers = Customers::where('active', 'Y')->get();
         return view('users.customer_user_create', compact('roles'))->with('user', $this->user);
+    }
+
+
+    public function pms_form(Request $request)
+    {
+        $update = UserPmsRemark::updateOrCreate(
+            [
+                'user_id' => $request->user_id,
+                'fyear' => $request->fyear,
+            ],
+            [
+                'recommended_increment' => $request->recommended_increment,
+                'recommended_designation' => $request->designation_id,
+                'remark' => $request->remarks,
+            ]
+        );
+
+        return redirect('reports/asm_rating')->with('info', 'Successfully Updated');
     }
 }
