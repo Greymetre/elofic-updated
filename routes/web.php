@@ -661,6 +661,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('reports/fos_rating', [UsersController::class, 'fos_rating']);
     Route::any('reports/asm_rating', [UsersController::class, 'asm_rating']);
     Route::any('reports/ch_rating', [UsersController::class, 'ch_rating']);
+    Route::post('pms-form', [UsersController::class, 'pms_form']);
     Route::any('reports/primary_sales', [ReportController::class, 'primary_sales']);
     Route::any('reports/secondary_sales', [ReportController::class, 'secondary_sales']);
     Route::get('user_sales_report_download', [UsersController::class, 'user_sales_report_download']);
@@ -1023,6 +1024,8 @@ Route::any('getPMS', [AjaxController::class, 'getPMS']);
 Route::any('getPincodeSearch', [AjaxController::class, 'getPincodeSearch']);
 Route::any('getAllCustomer', [AjaxController::class, 'getAllCustomer']);
 Route::any('getAllPartyName', [AjaxController::class, 'getAllPartyName']);
+Route::any('getProductWarrentyTime', [AjaxController::class, 'getProductWarrentyTime']);
+Route::any('getServiceChargeType', [AjaxController::class, 'getServiceChargeType']);
 
 //Clear Cache facade value:
 Route::get('/clear-cache', function () {

@@ -487,7 +487,7 @@ body table td {
                            <input type="hidden" name="service[{{$k}}][service_bill_product_id]" id="service_bill_product_id" value="{{$product->id}}"></div>
                            <td>
                               <div class="input_section">
-                              <select required name="service[{{$k}}][service_type]" class="form-control select2 chargety">
+                              <select required name="service[{{$k}}][service_type]" class="form-control select2 chargety service_charge_type">
                                  @if(count($charge_type) > 0)
                                  @if($complaint->product_details->category_id == '2')
                                  @php $charge_type = $charge_type->whereIn('id', ['2','3']); @endphp
@@ -651,6 +651,7 @@ body table td {
                }
             }
          });
+        
       });
       $(document).ready(function() {
          var division = $('#product_division').val();
@@ -658,7 +659,40 @@ body table td {
             $('#division').val(division);
             $('#division').change();
          }
+         let complaint_id = "{{$complaint->id ?? ''}}";
+         console.log("complaint_id" , complaint_id);
+         if(complaint_id){
+             getServiceChargeType(complaint_id , '.chargety');
+         }
       })
+
+       // get service types
+      function getServiceChargeType(complaint_id = '', class_name = '') {
+          if (!class_name) {
+              console.warn("Class name is empty. No elements will be updated.");
+              return;
+          }
+
+          $.ajax({
+              url: "{{ url('getServiceChargeType') }}",
+              dataType: "json",
+              type: "POST",
+              data: {
+                  _token: "{{ csrf_token() }}",
+                  complaint_id: complaint_id
+              },
+              success: function(res) {
+                  if (res.status === true) {
+                      $(class_name).html(res.html);
+                  }
+              },
+              error: function(xhr, status, error) {
+                  console.error("Error fetching service charge types:", error);
+              }
+          });
+      }
+
+
       $('#repaired_replacement').on('change', function() {
          if ($(this).val() == 'Replacement') {
             $("#replacement_tag").val('Yes');
@@ -689,6 +723,8 @@ body table td {
          counter++;
          $("#table-service").append(newTR);
          $('.select2').select2();
+         // let complaint_id = "{{$complaint->id ?? ''}}";
+         // getServiceChargeType(complaint_id, '.chargety')
       });
 
       $(document).ready(function() {

@@ -487,13 +487,14 @@
                         @endif
                      </div>
                   </div>
+                  <input type="hidden" readonly name="complaint_date" id="complaint_date" class="form-control datepicker" value="{!! old('complaint_date', isset($complaints['complaint_date']) ? \Carbon\Carbon::parse($complaints['complaint_date'])->format('d-m-Y') : \Carbon\Carbon::now()->format('d-m-Y')) !!}">
                   <div class="col-md-3">
                      <div class="input_section">
-                        <label class="col-form-label">Complaint Date </label>
-                        <input type="text" readonly name="complaint_date" id="complaint_date" class="form-control datepicker" value="{!! old('complaint_date', isset($complaints['complaint_date']) ? \Carbon\Carbon::parse($complaints['complaint_date'])->format('d-m-Y') : \Carbon\Carbon::now()->format('d-m-Y')) !!}">
-                        @if ($errors->has('complaint_date'))
+                        <label class="col-form-label">Total Warranty Product In Month</label>
+                        <input type="text"  name="warrenty_time" id="warrenty_time" class="form-control datepicker" value="">
+                        @if ($errors->has('warrenty_time'))
                         <div class="error">
-                           <p class="text-danger">{{ $errors->first('complaint_date') }}</p>
+                           <p class="text-danger">{{ $errors->first('warrenty_time') }}</p>
                         </div>
                         @endif
                      </div>
@@ -646,12 +647,15 @@
                            <div class="input_section">
                               <label class="col-form-label">Service Branch </label>
                               <select name="purchased_branch" id="purchased_branch" class="select2 form-control">
-                                 <option value="">Service Branch</option>
-                                 @if($branchs)
-                                 @foreach($branchs as $branch)
-                                 <option value="{{$branch->id}}" {!! old('purchased_branch', $complaints['purchased_branch'])==$branch->id ? 'selected':'' !!}>[{{$branch->branch_code}}] {{$branch->branch_name}}</option>
-                                 @endforeach
-                                 @endif
+                                  <option value="">Service Branch</option>
+                                  @if(!empty($branchs))
+                                      @foreach($branchs as $branch)
+                                          <option value="{{ $branch->id }}" 
+                                              {{ (isset($complaints['purchased_branch']) && $complaints['purchased_branch'] == $branch->id) ? 'selected' : '' }}>
+                                              [{{ $branch->branch_code }}] {{ $branch->branch_name }}
+                                          </option>
+                                      @endforeach
+                                  @endif
                               </select>
                               @if ($errors->has('purchased_branch'))
                               <div class="error">
@@ -740,7 +744,7 @@
                         <div class="col-md-12">
                            <div class="input_section">
                               <label class="col-form-label">Description / CRM Remark </label>
-                              <textarea type="text" name="description" cols="30" rows="7" class="form-control"> {!! old( 'description', $complaints['description']) !!} </textarea>
+                              <textarea type="text" name="description" id="description" cols="30" rows="7" class="form-control"> {!! old( 'description', $complaints['description']) !!} </textarea>
                               @if ($errors->has('description'))
                               <div class="error">
                                  <p class="text-danger">{{ $errors->first('description') }}</p>
@@ -820,9 +824,8 @@
             }
          });
       }, 1000);
-      $(document).ready(function() {
-         $("#serail_number").trigger("keyup");
-         $('#company_sale_bill_date').datepicker({
+      $(document).ready(function() {        
+          $('#company_sale_bill_date').datepicker({
             maxDate: 0,
             dateFormat: 'dd-mm-yy',
          });
@@ -835,6 +838,8 @@
             maxDate: 0,
             dateFormat: 'dd-mm-yy',
          });
+
+
       });
       $("#company_sale_bill_date").on('change', function() {
          var selectedDate = moment($(this).val(), 'DD-MM-YYYY');
@@ -859,16 +864,11 @@
         if ($(this).val().length >= 10) {
             var selectedDate = moment($(this).val().trim(), 'DD-MM-YYYY', true);
             var billDate = moment($('#company_sale_bill_date').val().trim(), 'DD-MM-YYYY', true);
-
-            console.log("Selected Date:", selectedDate.format('DD-MM-YYYY'));
-            console.log("Bill Date:", billDate.format('DD-MM-YYYY'));
-
             if (!selectedDate.isValid() && !billDate.isValid()) {
                 alert("Invalid date format. Please use DD-MM-YYYY.");
                 $(this).val($('#company_sale_bill_date').val()); // Clear input
                 return;
             }
-
             if (selectedDate.isBefore(billDate)) {
                 alert("Selected date must be greater than the bill date.");
                 $(this).val($('#company_sale_bill_date').val()); // Clear input
@@ -895,18 +895,18 @@
       });
 
       let debounceTimer; // Store the debounce timer
-      $("#product_serail_number").on("keyup", function() {
-          var product_serail_number = $('#product_serail_number').val();
+      $("#product_serail_number").on("keyup", function() { 
          clearTimeout(debounceTimer); 
          debounceTimer = setTimeout(() => {
-           
+            var product_serail_number = $('#product_serail_number').val();
+
             if(product_serail_number == ''){
                $("input, select, textarea")
-               .not("#serail_number, #complaint_number, #complaint_date, #submit-btn , #company_sale_bill_date , #customer_bill_date , input[name='_token'] , #product_serail_number") // Multiple exclusions in a single string
+               .not("#serail_number, #complaint_number, #complaint_date, #submit-btn , #company_sale_bill_date , #customer_bill_date , input[name='_token'] , #product_serail_number , #warrenty_time , #description , input[name='_method']") // Multiple exclusions in a single string
                .val("")
                .trigger('change');
                $("input, select, textarea, button")
-               .not("#serail_number, #complaint_number, #complaint_date, #product_serail_number, #product_group, #company_bill_date_month, #customer_bill_date_month")
+               .not("#serail_number, #complaint_number, #complaint_date, #product_serail_number, #product_group, #company_bill_date_month, #customer_bill_date_month , #warrenty_time , #description , input[name='_method']")
                .prop("readonly", false)
                .prop("disabled", false);
                return ;
@@ -924,10 +924,11 @@
                },
                success: function(res) {
                   $("input, select, textarea")
-                  .not("#serail_number, #complaint_number, #complaint_date, #submit-btn , #company_sale_bill_date , #customer_bill_date , input[name='_token'] , #product_serail_number")
+                  .not("#serail_number, #complaint_number, #complaint_date, #submit-btn , #company_sale_bill_date , #customer_bill_date , input[name='_token'] , #product_serail_number , #warrenty_time , #purchased_branch , #complaint_type , #register_by , #product_laying  , input[name='_method']")
                   .val("")
                   .trigger('change');
                   if (res.status === true ) {
+                     console.log("inside");
                      $("#product_code").val(res.data.product_code);
                      $("#product_name").val(res.data.product_name);
                      $("#product_id").val(res.data.id);
@@ -953,7 +954,7 @@
                      
                      if (res.check_Warranty != null && res.check_Warranty.status == "1") {
                         $("input, select, textarea, button")
-                        .not("#serail_number, #complaint_number, #complaint_date, #product_serail_number, #product_group, #company_bill_date_month, #customer_bill_date_month")
+                        .not("#serail_number, #complaint_number, #complaint_date, #product_serail_number, #product_group, #company_bill_date_month, #customer_bill_date_month , #warrenty_time , #purchased_branch , #complaint_type , #register_by , #product_laying , input[name='_method']")
                         .prop("readonly", false)
                         .prop("disabled", false);
                         $("#customer_bill_date").val(res.check_Warranty.sale_bill_date.split('-').reverse().join('-'));
@@ -1077,7 +1078,7 @@
                   }
                }
             });
-         }, 500);
+          }, 500);
       }).trigger('keyup');
 
       $("#under_warranty").on('change' , function() {
@@ -1259,19 +1260,22 @@
                   $("#product_name").val(res.product_name);
                   $("#category").val(res.categories.category_name);
                   $("#specification").val(res.specification);
-                    $("#product_group").val(res.subcategories.subcategory_name);
+                  $("#product_group").val(res.subcategories.subcategory_name);
                   $("#product_no").val(res.product_no);
+                  $("#warrenty_time").val(res.warrenty_time);
                   $("#phase").val(res.phase);
                   $("#product_code").prop('readonly', true);
                   $("#category").prop('readonly', true);
                   $("#specification").prop('readonly', true);
                   $("#product_no").prop('readonly', true);
                   $("#phase").prop('readonly', true);
+                  $("#warrenty_time").prop('readonly', true);
                }
             });
          } else {
             $("#product_code").val("");
             $("#product_name").val("");
+            $("#warrenty_time").val("");
             $("#category").val("");
             $("#specification").val("");
             $("#product_no").val("");
@@ -1281,24 +1285,31 @@
             $("#specification").prop('readonly', false);
             $("#product_no").prop('readonly', false);
             $("#phase").prop('readonly', false);
+            $("#warrenty_time").prop('readonly', false);
          }
       });
       
       $('#customer_city').on('change' , function(){
            // $('#assign_user').empty();
            var customer_city = $(this).val();
-           $.ajax({
-            url: "{{ url('getUserByBranch') }}",
-            dataType: "json",
-            type: "POST",
-            data: {
-               _token: "{{csrf_token()}}",
-               customer_city: customer_city
-            },
-            success: function(res) {
-               $('#assign_user').val(res.id).trigger('change');
-            }
-         });
+           var selected_user_id = "{{ $complaints['assign_user'] ?? '' }}";
+           if(selected_user_id){
+                $('#assign_user').val(selected_user_id).trigger('change');
+           }else{
+               $.ajax({
+               url: "{{ url('getUserByBranch') }}",
+               dataType: "json",
+               type: "POST",
+               data: {
+                  _token: "{{csrf_token()}}",
+                  customer_city: customer_city,
+               },
+               success: function(res) {
+                  $('#assign_user').val(res.id).trigger('change');
+               }
+            });
+         }
+
       }); 
 
       $("#customer_state").on("change", function() {

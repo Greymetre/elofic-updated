@@ -18,6 +18,7 @@ use App\Models\Redemption;
 use App\Models\SalesTargetUsers;
 use App\Models\TransactionHistory;
 use App\Models\User;
+use App\Models\UserPmsRemark;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -188,6 +189,8 @@ class CHRatingDetailReportExport implements FromCollection, WithHeadings, Should
             }
         }
 
+        $pmsData = UserPmsRemark::where(['user_id' => $query['id'], 'fyear' => $this->financial_year])->first();
+
         return [
             $query['getdivision'] ? $query['getdivision']['division_name'] : '-',
             $query['getdepartment'] ? $query['getdepartment']['name'] : '-',
@@ -252,9 +255,8 @@ class CHRatingDetailReportExport implements FromCollection, WithHeadings, Should
             $query['userinfo'] ? $query['userinfo']['last_year_increment_percent'] : '',
             $query['userinfo'] ? $query['userinfo']['last_promotion'] : '',
 
-            '-',
-            '-',
-            '-',
+            $pmsData ? $pmsData->recommended_increment.'%' : '',
+            $pmsData ? $pmsData->remark : '',
         ];
     }
 

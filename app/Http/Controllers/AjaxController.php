@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Branch, BranchStock, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CompOffLeave, CustomerDetails, CustomerOutstanting, DealerAppointment, DealerAppointmentKyc, EmployeeDetail, EndUser, Expenses, GiftModel, GiftSubcategory, Marketing, MspActivity, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, PrimaryScheme, Redemption, SalesTargetUsers, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation };
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Branch, BranchStock, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CompOffLeave, CustomerDetails, CustomerOutstanting, DealerAppointment, DealerAppointmentKyc, EmployeeDetail, EndUser, Expenses, GiftModel, GiftSubcategory, Marketing, MspActivity, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, PrimaryScheme, Redemption, SalesTargetUsers, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation,ServiceChargeChargeType };
 use App\Models\UserLiveLocation;
 use App\Models\UserActivity;
 use App\Http\Controllers\SendNotifications;
@@ -407,7 +407,8 @@ class AjaxController extends Controller
                 'end_date' => $data['getSchemeDetail']['orderscheme']['end_date'] ?? 0,
 
                 'productdetails' => $data['productdetails'],
-                'categories' => $data['categories']
+                'categories' => $data['categories'],
+                'subcategories' => $data['subcategories']
             ]);
 
 
@@ -457,6 +458,16 @@ class AjaxController extends Controller
                     $product['scheme_discount'] = 0.00;
                 }
             }
+
+            $warrenty_time = $data->expiry_interval_preiod ?? 0;;
+            if ($data->expiry_interval == "Month") {
+                $warrenty_time = $data->expiry_interval_preiod;
+            } else if ($data->expiry_interval == "Day") {
+                $warrenty_time = round($data->expiry_interval_preiod/30);
+            } else if ($data->expiry_interval == "Year") {
+                $warrenty_time = round($data->expiry_interval_preiod*12);
+            }
+            $product['warrenty_time'] = $warrenty_time;
             return response()->json($product);
         } catch (\Exception $e) {
             return $e;
@@ -1162,10 +1173,11 @@ class AjaxController extends Controller
                     $data->product->subcategories = $data->product->subcategories;
                     $check_Warranty = WarrantyActivation::with('media', 'customer', 'seller_details')->where('status', '!=', '3')->where('product_serail_number', $serial_no)->first();
                     $encrypt_id = "";
+                   
                     if (isset($check_Warranty)) {
                         $encrypt_id = Crypt::encrypt($check_Warranty->id) ?? '';
                     }
-                    return response()->json(['status' => true, 'data_all' => $data, 'data' => $data->product, 'check_Warranty' => $check_Warranty, 'encrypt_id' => $encrypt_id]);
+                    return response()->json(['status' => true, 'data_all' => $data, 'data' => $data->product, 'check_Warranty' => $check_Warranty, 'encrypt_id' => $encrypt_id ]);
                 } else {
                     return response()->json(['status' => false, 'data' => null]);
                 }
@@ -1574,6 +1586,24 @@ class AjaxController extends Controller
         return response()->json(['status' => 'success', 'warrenty_expire_date' => $warranty_expire_date]);
     }
 
+    public function getProductWarrentyTime(Request $request)
+    {
+        $product = Product::find($request->product_id);
+        if (!isset($product)) {
+            return response()->json(['status' => 'error', 'product' => "Not Found"]);
+        }
+
+        $warrenty_time = $product->expiry_interval_preiod ?? 0;;
+        if ($product->expiry_interval == "Month") {
+            $warrenty_time = $product->expiry_interval_preiod;
+        } else if ($product->expiry_interval == "Day") {
+            $warrenty_time = round($product->expiry_interval_preiod/30);
+        } else if ($product->expiry_interval == "Year") {
+            $warrenty_time = round($product->expiry_interval_preiod*12);
+        }
+        return response()->json(['status' => 'success', 'warrenty_time' => $warrenty_time]);
+    }
+
     // get seller or buyre
     public function getSellerBuyer(Request $request)
     {
@@ -1749,6 +1779,8 @@ class AjaxController extends Controller
         return response()->json(['html' => $html , 'id' => $id]);
     }
 
+
+
     public function getUserCity(Request $request)
     {
         $branch_id = $request->customer_city ?? '';
@@ -1765,9 +1797,6 @@ class AjaxController extends Controller
 
     public function getPMS(Request $request)
     {
-        if($request->ip() != '111.118.252.250') {
-            return response()->json(['status' => 'error', 'message' => 'Coming Soon. Working on it!!']);
-        }
         $f_year_array = explode('-', $request->financial_year);
 
         $start_date = $f_year_array[0] . '-04-01';
@@ -2007,5 +2036,26 @@ class AjaxController extends Controller
             return round(($tpoint * $achivper) / 100, 0) > 0 ? round(($tpoint * $achivper) / 100, 0) : '0';
         }
         return round(($achiv / $trg) * 100, 0);
+    }
+
+    // get srevice charge type
+    public function getServiceChargeType(Request $request){
+        $complaint = Complaint::with(['product_details.subcategories'])->find($request->complaint_id);
+        if(!isset($complaint->product_details->subcategories)){
+           return response()->json(['status' => false , 'html' => '']);
+        }
+        $service_charge_products = ServiceChargeProducts::where([
+            'category_id' => $complaint->product_details->subcategories->service_category_id
+        ])->distinct('charge_type_id')->pluck('charge_type_id');
+        $service_charge_types = ServiceChargeChargeType::whereIn('id',$service_charge_products)->orWhere('id' , 4)->get();
+        $html = '<option value="">Select Type</option>';
+
+        if(isset($service_charge_types)){
+            foreach($service_charge_types as $service_charge){
+                $html = $html . '<option value=" '.$service_charge->id.'">'.$service_charge->charge_type.'</option>';
+            } 
+        }
+
+        return response()->json(['status' => true , 'html' => $html]);
     }
 }
