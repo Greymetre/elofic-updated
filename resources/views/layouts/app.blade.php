@@ -837,6 +837,15 @@
                               </a>
                            </li>
                            @endif
+                           @if(auth()->user()->can('market_intelligence_access'))
+                           <li class="nav-link-btn {{ request()->is('market_intelligences*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('market_intelligences') }}">
+                                 <i class="material-icons icon">key</i>
+                                 <span>Market Intelligence</span>
+                                 <div class="d-none mobile_hide"> Market Intelligence</div>
+                              </a>
+                           </li>
+                           @endif
                            @if(auth()->user()->can('country_access'))
                            <li class="nav-link-btn add_icon {{ request()->is('country*') || request()->is('state*') || request()->is('district*') || request()->is('city*') || request()->is('pincode*') ? 'active' : '' }}">
                               <a class="collapsed hoveradd " data-toggle="collapse" href="#addressMenu" aria-expanded="false">

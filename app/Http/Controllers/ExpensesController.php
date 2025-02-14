@@ -81,7 +81,7 @@ class ExpensesController extends Controller
 
         $pay_rolls = Config('constants.pay_roll');
 
-        return $dataTable->render('expenses.index', compact('branches', 'pay_rolls', 'divisions', 'pending_count', 'approve_count', 'reject_count','checked_count'));
+        return $dataTable->render('expenses.index', compact('branches', 'pay_rolls', 'divisions', 'pending_count', 'approve_count', 'reject_count', 'checked_count'));
     }
 
     /**
@@ -826,6 +826,52 @@ class ExpensesController extends Controller
             }
         } else {
             return redirect()->back()->withErrors($validator)->withInput();
+        }
+    }
+
+    public function approveExpenses(Request $request)
+    {
+        try {
+            $ids = explode(',', $request['id']);
+            foreach ($ids as $key => $value) {
+                $update = Expenses::where('id', $value)->update(['reason' => 'Multiple Approve', 'checker_status' => '1', 'approve_reject_by' => Auth::user()->id, 'approve_amount' => DB::raw('claim_amount')]);
+
+                if ($update) {
+                    $logdata = array(
+                        'log_date' => date('Y-m-d'),
+                        'expense_id' => $value,
+                        'created_by' => Auth::user()->id,
+                        'status_type' => 'approved'
+                    );
+                    ExpenseLog::create($logdata);
+                }
+            }
+            return  response()->json(['status' => 'success', 'message' => 'Expense Approved Successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Expense Not Approved Successfully']);
+        }
+    }
+
+    public function rejectExpenses(Request $request)
+    {
+        try {
+            $ids = explode(',', $request['id']);
+            foreach ($ids as $key => $value) {
+                $update = Expenses::where('id', $value)->update(['reason' => 'Multiple Approve', 'checker_status' => '2', 'approve_reject_by' => Auth::user()->id, 'approve_amount' => NULL]);
+
+                if ($update) {
+                    $logdata = array(
+                        'log_date' => date('Y-m-d'),
+                        'expense_id' => $value,
+                        'created_by' => Auth::user()->id,
+                        'status_type' => 'rejected'
+                    );
+                    ExpenseLog::create($logdata);
+                }
+            }
+            return  response()->json(['status' => 'success', 'message' => 'Expense Rejected Successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Expense Not Rejected Successfully']);
         }
     }
 }

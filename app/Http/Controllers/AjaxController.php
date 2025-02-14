@@ -2058,4 +2058,6 @@ class AjaxController extends Controller
 
         return response()->json(['status' => true , 'html' => $html]);
     }
+
+
 }

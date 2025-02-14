@@ -29,6 +29,9 @@ class ExpensesDataTable extends DataTable
             ->addColumn('id', function ($query) {
                 return $query->id ?? '';
             })
+            ->addColumn('checkbox', function ($query) {
+                return '<input type="checkbox" class="row-checkbox" value="' . $query->id . '">';
+            })
             ->addColumn('users.name', function ($query) {
                 $name = '(' . $query->users->employee_codes . ')' . $query->users->name;
                 return $name;
@@ -120,7 +123,7 @@ class ExpensesDataTable extends DataTable
                                             ' . $btn . '
                                         </div>' . $activebtn;
             })
-            ->rawColumns(['checker_status', 'action', 'users.name']);
+            ->rawColumns(['checker_status', 'action', 'users.name', 'checkbox']);
     }
 
     /**

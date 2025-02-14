@@ -76,6 +76,7 @@ use App\Http\Controllers\ServiceBillController;
 use App\Http\Controllers\ServiceChargeProductsController;
 use App\Http\Controllers\FieldKonnectAppSettings;
 use App\Http\Controllers\MarketingController;
+use App\Http\Controllers\MarketIntelligencesFieldController;
 use App\Http\Controllers\MspActivityController;
 use App\Http\Controllers\PrimarySchemeController;
 use App\Http\Controllers\ResignationController;
@@ -647,6 +648,8 @@ Route::group(['middleware' => ['auth']], function () {
     /*============= Event ====================*/
 
     //Fields
+    Route::resource('market_intelligences', MarketIntelligencesFieldController::class);
+    //Fields
     Route::resource('fields', FieldController::class);
     Route::post('fields-active', [FieldController::class, 'active'])->name('fields.active');
     Route::any('contacts', [ContactController::class, 'index'])->name('contacts.index');
@@ -738,6 +741,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('getexpenseType', [ExpensesController::class, 'getexpenseType'])->name('getexpenseType');
     Route::post('getexpenseUserType', [ExpensesController::class, 'getexpenseUserType'])->name('getexpenseUserType');
     Route::post('getexpenseUserTypeEdit', [ExpensesController::class, 'getexpenseUserTypeEdit'])->name('getexpenseUserTypeEdit');
+    Route::any('approveExpenses', [ExpensesController::class, 'approveExpenses'])->name('approveExpenses');
+    Route::any('rejectExpenses', [ExpensesController::class, 'rejectExpenses'])->name('rejectExpenses');
 
     Route::get('deletImages', [ExpensesController::class, 'deletImages'])->name('deletImages');
     Route::get('deleteview', [ExpensesController::class, 'deleteview'])->name('deleteview');
@@ -1026,6 +1031,7 @@ Route::any('getAllCustomer', [AjaxController::class, 'getAllCustomer']);
 Route::any('getAllPartyName', [AjaxController::class, 'getAllPartyName']);
 Route::any('getProductWarrentyTime', [AjaxController::class, 'getProductWarrentyTime']);
 Route::any('getServiceChargeType', [AjaxController::class, 'getServiceChargeType']);
+Route::any('getServiceServiceEngiByDivision', [AjaxController::class, 'getServiceServiceEngiByDivision']);
 
 //Clear Cache facade value:
 Route::get('/clear-cache', function () {
