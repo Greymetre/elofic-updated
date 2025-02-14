@@ -66,7 +66,7 @@ $(document).ready(function () {
         },
 
         columns: [
-            // {data: 'DT_RowIndex',name: 'DT_RowIndex',orderable: false,searchable: false},
+            { data: 'checkbox', name: 'checkbox', orderable: false, searchable: false },
             {
                 data: 'id',
                 name: 'id',
@@ -232,6 +232,63 @@ $(document).ready(function () {
         localStorage.setItem("expense_id", $(this).val());
         oTable.draw();
     });
+
+    $('body').on('click', '.multiChange', function () {
+        const selectedValues = [];
+          $('.row-checkbox:checked').each(function () {
+              selectedValues.push($(this).val());
+          });
+          const status = $(this).data('status');
+  
+          var token = $("meta[name='csrf-token']").attr("content");
+          if(status == 1){
+            if(!confirm("Are You sure want to approve "+selectedValues.length+" Expenses?")) {
+               return false;
+            }
+            $.ajax({
+              url: multiApprove,
+              type: 'POST',
+              data: {
+                _token: token,
+                id: selectedValues.toString()
+              },
+              success: function(data) {
+                oTable.draw();
+                $('.message').empty();
+                $('.alert').show();
+                if (data.status == 'success') {
+                  $('.alert').addClass("alert-success");
+                } else {
+                  $('.alert').addClass("alert-danger");
+                }
+                $('.message').append(data.message);
+              },
+            });
+          }else{
+            if(!confirm("Are You sure want to reject "+selectedValues.length+" Expenses?")) {
+               return false;
+            }
+            $.ajax({
+                url: multiReject,
+                type: 'POST',
+                data: {
+                  _token: token,
+                  id: selectedValues.toString()
+                },
+                success: function(data) {
+                  oTable.draw();
+                  $('.message').empty();
+                  $('.alert').show();
+                  if (data.status == 'success') {
+                    $('.alert').addClass("alert-success");
+                  } else {
+                    $('.alert').addClass("alert-danger");
+                  }
+                  $('.message').append(data.message);
+                },
+              });
+          }        
+      });
 
 });
 

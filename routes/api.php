@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\ExpensesTypeController;
 use App\Http\Controllers\Api\GiftController;
 use App\Http\Controllers\Api\LeaveController;
 use App\Http\Controllers\Api\LoginController;
+use App\Http\Controllers\Api\MarketIntelligenceController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PrimarySchemeReportController;
@@ -140,6 +141,8 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::any('pendingCounts', [DashboardController::class, 'pendingCounts']);
     Route::any('getUserDashboardData', [DashboardController::class, 'getUserDashboardData']);
     Route::any('getSarthiPoints', [DashboardController::class, 'getSarthiPoints']);
+    
+    Route::any('getMarketIntelligencesField', [MarketIntelligenceController::class, 'getFields']);
 
     Route::any('getProfile', [LoginController::class, 'getProfile']);
     Route::post('updateProfile', [LoginController::class, 'updateProfile']);

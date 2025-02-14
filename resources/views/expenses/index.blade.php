@@ -118,6 +118,10 @@
                  @endif
 
                  <div class="next-btn">
+                 <div class="btn-group multi-a-r d-none">
+                    <button class="btn btn-success btn-sm multiChange mr-1" data-status="1"  title="Approve">Approve</button>
+                    <button class="btn btn-danger btn-sm multiChange mr-2" data-status="2" title="Reject">Reject</button>
+                  </div>
                    @if(auth()->user()->can(['expenses_create']))
                    <a href="{{ route('expenses.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.expenses.title_singular') !!}"><i class="material-icons">add_circle</i></a>
                    @endif
@@ -160,6 +164,7 @@
            <div class="table-responsive">
              <table id="getallexpenses" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
                <thead class=" text-primary">
+                  <th>#</th>
                  <th>{!! trans('panel.expenses.fields.expense_id') !!}</th>
                  <th>Expense Date</th>
                  <th>{!! trans('panel.expenses.fields.user') !!}</th>
@@ -277,6 +282,8 @@
      var expensesMainUrl = "{{ url('expenses') }}";
      var removeSessionUrl = "{{ route('remove.session') }}";
      var session_exec = "{{ session('executive_id') }}";
+     var multiApprove = "{{ url('approveExpenses')}}";
+     var multiReject = "{{ url('rejectExpenses')}}";
      var token = $("meta[name='csrf-token']").attr("content");
 
 
@@ -333,6 +340,22 @@
          }
        });
      }).trigger("chnage");
+
+    $(document).on('click', '.row-checkbox', function () {
+        
+        const selectedValues = [];
+        $('.row-checkbox:checked').each(function () {
+            selectedValues.push($(this).val());
+        });
+
+        if(selectedValues.length > 0){
+          $(".multi-a-r").removeClass('d-none');
+        }else{
+          $(".multi-a-r").addClass('d-none');
+        }
+    });
    </script>
-   <script src="{{asset('assets/js/expense_filter.js?')}}"></script>
+   
+   <script src="{!! asset('assets/js/expense_filter.js?v='.time()) !!}"></script>
+
  </x-app-layout>

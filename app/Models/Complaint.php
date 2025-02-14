@@ -87,4 +87,13 @@ class Complaint extends Model implements HasMedia
             return ''; // Return null if parsing fails
         }
     }
+
+    public function getComplaintDateAttribute($value)
+    {
+        try {
+            return $value ? Carbon::parse($value)->format('d-m-Y') : '';
+        } catch (\Exception $e) {
+            return ''; // Return null if parsing fails
+        }
+    }
 }

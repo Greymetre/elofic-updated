@@ -924,7 +924,7 @@
                },
                success: function(res) {
                   $("input, select, textarea")
-                  .not("#serail_number, #complaint_number, #complaint_date, #submit-btn , #company_sale_bill_date , #customer_bill_date , input[name='_token'] , #product_serail_number , #warrenty_time , #purchased_branch , #complaint_type , #register_by , #product_laying  , input[name='_method']")
+                  .not("#serail_number, #complaint_number, #complaint_date, #submit-btn , #company_sale_bill_date , #customer_bill_date , input[name='_token'] , #product_serail_number , #warrenty_time , #purchased_branch , #complaint_type , #register_by , #product_laying  , input[name='_method'] , #description")
                   .val("")
                   .trigger('change');
                   if (res.status === true ) {
@@ -954,7 +954,7 @@
                      
                      if (res.check_Warranty != null && res.check_Warranty.status == "1") {
                         $("input, select, textarea, button")
-                        .not("#serail_number, #complaint_number, #complaint_date, #product_serail_number, #product_group, #company_bill_date_month, #customer_bill_date_month , #warrenty_time , #purchased_branch , #complaint_type , #register_by , #product_laying , input[name='_method']")
+                        .not("#serail_number, #complaint_number, #complaint_date, #product_serail_number, #product_group, #company_bill_date_month, #customer_bill_date_month , #warrenty_time , #purchased_branch , #complaint_type , #register_by , #product_laying , input[name='_method'] , #description")
                         .prop("readonly", false)
                         .prop("disabled", false);
                         $("#customer_bill_date").val(res.check_Warranty.sale_bill_date.split('-').reverse().join('-'));

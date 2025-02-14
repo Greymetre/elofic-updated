@@ -23,6 +23,7 @@ use App\Models\Coupons;
 use App\Models\Holiday;
 use App\Models\OrderDetails;
 use App\Models\Payment;
+use App\Models\ComplaintTimeline;
 use Illuminate\Support\Str;
 
 if (! function_exists('sendmessage')) {
@@ -939,5 +940,49 @@ function getFinancialYears()
         $startYear . '-' . ($startYear + 1), // Current financial year
         ($startYear + 1) . '-' . ($startYear + 2), // Next financial year
     ];
+}
+
+
+function complaintClose($complaint_id){
+    $complaint = ComplaintTimeline::where(['complaint_id' => $complaint_id , 'status' => '4'])->first();
+    if(isset($complaint)){
+         try {
+            return $complaint->created_at ? Carbon::parse($complaint->created_at)->format('d-m-Y h:i:s') : '';
+        } catch (\Exception $e) {
+            return ''; // Return null if parsing fails
+        }
+    }
+    return "Not Closed Yet";
+}
+
+function complaintCloseIn($complaint_date, $complaint_id) {
+    $complaint = ComplaintTimeline::where(['complaint_id' => $complaint_id, 'status' => '4'])->first();
+    
+    if (isset($complaint)) {
+        try {
+            $complaintCreatedAt = Carbon::parse($complaint->created_at);
+            $complaintDate = Carbon::parse($complaint_date);
+            
+            // Calculate the difference in hours
+            $hoursDifference = $complaintDate->diff($complaintCreatedAt);
+            $hours = str_pad($hoursDifference->h, 2, '0', STR_PAD_LEFT);
+            $minutes = str_pad($hoursDifference->i, 2, '0', STR_PAD_LEFT);
+            $seconds = str_pad($hoursDifference->s, 2, '0', STR_PAD_LEFT);
+
+            return "{$hours}:{$minutes}:{$seconds}";
+        } catch (\Exception $e) {
+            return ''; // Return empty if parsing fails
+        }
+    }
+
+     return "Not Closed Yet";
+}
+
+function getDateInIndFomate($value){
+    try {
+        return $value ? Carbon::parse($value)->format('d-m-Y') : '';
+    } catch (\Exception $e) {
+        return ''; // Return null if parsing fails
+    }
 }
 

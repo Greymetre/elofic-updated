@@ -49,6 +49,47 @@
       display: inline-block;
       box-shadow: inset 0px 1px 3px rgba(0, 0, 0, 0.1);
   }
+
+  .open_status{
+    background: #fbfb7a !important;
+    color: black;
+  }
+  .open_status:hover {
+      background: #f5f500 !important; /* Darker yellow on hover */
+      color: #000000; /* Keep text black */
+      cursor: pointer;
+  }
+  .done_status {
+      background: #95badb !important;
+      color: black;
+      transition: background 0.3s, color 0.3s;
+  }
+
+  .done_status:hover {
+      background: #3e6b91 !important; /* Darker shade of blue on hover */
+      color: black; /* Change text color for better contrast */
+      cursor: pointer;
+  }
+  .back_button {
+      background: #29bad5 !important;
+      color: black;
+      transition: background 0.3s, color 0.3s;
+  }
+
+  .back_button:hover {
+      background: #1f94a8 !important; /* Darker shade of cyan on hover */
+      color: black; /* Change text color for better contrast */
+      cursor: pointer;
+  }
+  .open_complaint{
+      background: #f5f500 !important; /* Darker yellow on hover */
+      color: #000000; /* Keep text black */
+  }
+  .done_complaints{
+     background: #95badb !important;
+      color: black;
+  }
+
   </style>
   <!-- Main content -->
   <section class="content">
@@ -69,539 +110,436 @@
         @endif
 
 
-        <div class="alert" style="display: none;" id="hide_check">
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <i class="material-icons">close</i>
-          </button>
-          <strong class="message"></strong>
-        </div>
-        <div class="card">
-          <div class="card-body">
-            <div class="row">
-              <div class="col-4">
-                <h3 class="card-title pb-3">Complaint View</h3>
-              </div>
-              <div class="col-8 text-right">
+        <div class="row">
+          <div class="col-md-12">
+              <div class="card mt-0 p-0">
+                  <div class="card-header m-0 card-header-tabs card-header-warning">
+                      <div class="d-flex justify-content-between align-items-center">
+                          <h4 class="card-title m-0">ViewKonnect</h4>
+                          <div>
+                              @if(auth()->user()->can(['compalint_change_status']))
+                                  @if($complaint->complaint_status == '0')
+                                      <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending </b></button>
+                                      <a href="{{ route('complaint_work_done', $complaint) }}" class="btn btn-sm  done_status"><b>Work Done</b></a>
+                                  @elseif($complaint->complaint_status == '1')
+                                      <button type="button" class="btn btn-sm  open_status"><b>Open </b></button>
+                                      <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel </b></button>
+                                  @elseif($complaint->complaint_status == '2')
+                                      <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending </b></button>
+                                      <button type="button" class="btn btn-sm  open_status"><b>Open </b></button>
+                                      <button type="button" class="btn btn-sm btn-primary complete_status"><b>Complete </b></button>
+                                  @elseif($complaint->complaint_status == '3')
+                                      <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending </b></button>
+                                      <button type="button" class="btn btn-sm  open_status"><b>Open </b></button>
+                                      <button type="button" class="btn btn-sm btn-success close_status"><b>Close </b></button>
+                                  @elseif($complaint->complaint_status == '5')
+                                      <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending </b></button>
+                                      <button type="button" class="btn btn-sm  open_status"><b>Open </b></button>
+                                  @endif
+                              @endif
 
+                              @if(auth()->user()->can(['complaint_edit']))
+                                  <a class="btn btn-warning btn-sm" href="{{ route('complaints.edit', $complaint->id) }}"><b>Edit</b></a>
+                              @endif
 
-                @if(auth()->user()->can(['compalint_change_status']))
-
-                @if($complaint->complaint_status=='0')
-                <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending Complaint</b></button>
-                <a href="{{route('complaint_work_done', $complaint)}}" type="button" class="btn btn-sm btn-info done_status"><b>Work Done</b></a>
-                @elseif($complaint->complaint_status=='1')
-                <button type="button" class="btn btn-sm btn-success open_status"><b>Open Complaint</b></button>
-                <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel Complaint</b></button>
-                @elseif($complaint->complaint_status=='2')
-                <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending Complaint</b></button>
-                <button type="button" class="btn btn-sm btn-success open_status"><b>Open Complaint</b></button>
-                <button type="button bg-primary" class="btn btn-sm complete_status"><b>Complete Complaint</b></button>
-                @elseif($complaint->complaint_status=='3')
-                <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending Complaint</b></button>
-                <button type="button" class="btn btn-sm btn-success open_status"><b>Open Complaint</b></button>
-                <button type="button" class="btn btn-sm btn-info close_status"><b>Close Complaint</b></button>
-                @elseif($complaint->complaint_status=='5')
-                <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending Complaint</b></button>
-                <button type="button" class="btn btn-sm btn-success open_status"><b>Open Complaint</b></button>
-                @endif
-
-                @endif
-
-                <?php
-                if (auth()->user()->can(['complaint_edit'])) { ?>
-
-                  <a class="btn btn-warning btn-sm" href="{{route('complaints.edit', $complaint->id)}}"><b>Edit</b></a>
-
-                <?php } ?>
-
-                <a class="btn btn-primary btn-sm" href="{{route('complaints.index')}}"><b>Back</b></a>
-
-
-              </div>
-            </div>
-            <input type="hidden" id="complaint_id" name="expense" value="{{$complaint['id']}}">
-            <div class="row">
-              <div class="col-md-6">
-                <div class="">
-                  <label>Assign User </label>
-                  <select name="assign_user" id="assign_user" class="select2 form-control">
-                    <option value="">Select User</option>
-                    @if($assign_users)
-                    @foreach($assign_users as $assign_user)
-                    <option value="{{$assign_user->id}}" {!! old('assign_user', $complaint['assign_user'])==$assign_user->id ? 'selected':'' !!} >[{{$assign_user->employee_codes}}] {{$assign_user->name}}</option>
-                    @endforeach
-                    @endif
-                  </select>
-                  @if ($errors->has('assign_user'))
-                  <div class="error col-lg-12">
-                    <p class="text-danger">{{ $errors->first('assign_user') }}</p>
+                              <a class="btn btn-primary btn-sm back_button" href="{{ route('complaints.index') }}"><b>Back</b></a>
+                          </div>
+                      </div>
                   </div>
-                  @endif
-                </div>
               </div>
-              <input type="hidden" name="complaint_id" id="complaint_id" value="{{$complaint->id}}">
-              <div class="col-md-6">
-                <div class="">
-                  <label>Service Center </label>
-                  <select name="service_center" id="service_center" class="select2 form-control">
-                    <option value="">Select Service Center</option>
-                    @if($service_centers)
-                    @foreach($service_centers as $service_center)
-                    <option value="{{$service_center->id}}" {!! old('service_center', $complaint['service_center'])==$service_center->id ? 'selected':'' !!} >[{{$service_center->customer_code}}] {{$service_center->name}}</option>
-                    @endforeach
-                    @endif
-                  </select>
-                  @if ($errors->has('service_center'))
-                  <div class="error col-lg-12">
-                    <p class="text-danger">{{ $errors->first('service_center') }}</p>
-                  </div>
-                  @endif
-                </div>
-              </div>
-            </div>
-            <hr>
-
-            <div class="invoice">
-              {{-- <div class="row">
-                <div class="col-4">
-                  <h4>
-                    <small class="float-left">COMPLAINT <p style="font-size: 22px; color:#5252b7">#{!! $complaint['complaint_number'] !!}</p></small>
-                  </h4>
-                </div>
-              </div> --}}
-              <p style="font-size: 16px; color:#5252b7">#{!! $complaint['complaint_number'] !!}</p>
-
-              <div class="row invoice-info">
-                <div class="col-md-6">
-                  <h4 class="m-0"><em>Complaint From</em></h4>
-                  <h6 class="m-0" style="color: #5252b7;">{{$complaint->customer->customer_name}}</h6>
-                  <p class="m-0">At - {{$complaint->customer->customer_address}} {{$complaint->customer->customer_place}} Po - {{$complaint->customer->customer_city}} District - {{$complaint->customer->customer_district}} State - {{$complaint->customer->customer_state}} Pin - {{$complaint->customer->pincodeDetails?$complaint->customer->pincodeDetails->pincode:'-'}}</p>
-                  <p class="m-0">{{$complaint->customer->customer_district}}, {{$complaint->customer->customer_state}}, {{$complaint->customer->customer_country}}</p>
-                  <p class="m-0">{{$complaint->customer->customer_number}}</p>
-                </div>
-                <div class="col-md-6 text-right">
-                  <p class="m-0">Complaint Status :
-                    @if($complaint->complaint_status == '0')
-                    <span class="badge badge-secondary">Open</span>
-                    @elseif($complaint->complaint_status == '1')
-                    <span class="badge badge-warning">Pending</span>
-                    @elseif($complaint->complaint_status == '2')
-                    <span class="badge badge-info">Work Done</span>
-                    @elseif($complaint->complaint_status == '3')
-                    <span class="badge badge-success">Completed</span>
-                    @elseif($complaint->complaint_status == '4')
-                    <span class="badge badge-primary">Closed</span>
-                    @elseif($complaint->complaint_status == '5')
-                    <span class="badge badge-danger">Cancel</span>
-                    @endif
-                  </p>
-                  <p class="m-0">Complaint Date : {{date('d-m-Y', strtotime($complaint->complaint_date))}}</p>
-                  <p class="m-0">Created By : {{$complaint->createdbyname?$complaint->createdbyname->name:'-'}}</p>
-                  <p class="m-0">Closed Date : -</p>
-                </div>
-              </div>
-
-              <hr>
-
-              <div class="row invoice-info">
-                <div class="col-md-4"></div>
-                <div class="col-md-4 text-center" style="line-height: 0px;">
-                  <h5><em>Complaint Type</em></h5>
-                  <p><b>{{$complaint->complaint_type_details->name ?? ''}}</b></p>
-                </div>
-                <div class="col-md-4"></div>
-              </div>
-              {{-- <div class="row invoice-info mt-4">
-                <div class="col-md-4">
-                  <h4><b>Warranty Details</b></h4>
-                </div>
-                <div class="col-md-4 text-center">
-                </div>
-                <div class="col-md-4"></div>
-              </div> --}}
-              
-              <div class="row">
-                <div class="table-responsive">
-                  <table class="table table-striped">
-                    <tr>
-                      <th>Category</th>
-                      <th>Product/Model(Code)</th>
-                      <th>Description</th>
-                      <th>Product Serial Number</th>
-                      <th>HP</th>
-                      <th>Stage</th>
-                    </tr>
-                    <tr>
-                      <td>{{ $complaint->product_details ? $complaint->product_details->categories->category_name : '-' }}</td>
-                      <td>{{ $complaint->product_code ?? '-' }}</td>
-                      <td>{{ $complaint->product_details ? $complaint->product_details->model_no : '-' }}</td>
-                      <td>{{ $complaint->product_serail_number ?? '-' }}</td>
-                      <td>{{ $complaint->product_details ? $complaint->product_details->specification : '-' }}</td>
-                      <td>{{$complaint->product_details?$complaint->product_details->product_no:''}}</td>
-                    </tr>
-                    <tr>
-                      <th>Product SAP Code</th>
-                      <th>Phase</th>
-                      <th>Warranty/Customer Bill Date</th>
-                      <th>Service Paid/Free</th>
-                      <th>Seller</th>
-                      <th></th>
-                    </tr>
-                    <tr>
-                      <td>{{$complaint->product_details?$complaint->product_details->sap_code:'-'}}</td>
-                      <td>{{($complaint->product_details && $complaint->product_details->phase != '')?$complaint->product_details->phase:'-'}}</td>
-                      <td>{{$complaint->customer_bill_date?date('d-m-Y', strtotime($complaint->customer_bill_date)):'-'}}</td>
-                      <td>{{$complaint->service_type??'-'}}</td>
-                      <td>{{$complaint->seller??'-'}}</td>
-                      <td></td>
-                    </tr>
-                  </table>
-                </div>
-              </div>
-              
-                  {{-- 
-              <table class="table table-striped responsive border-0 new-table">
-                <tr>
-                  <td><em>Category :</em></td>
-                  <th>{{$complaint->product_details?$complaint->product_details->categories->category_name:'-'}}</th>
-                  <td><em>Product/Model(Code) :</em></td>
-                  <th>{{$complaint->product_code??'-'}}</th>
-                  <td><em>Description :</em></td>
-                  <th>{{$complaint->product_details?$complaint->product_details->model_no:'-'}}</th>
-                </tr>
-
-                <tr>
-                  <td><em>Product Serial Number :</em></td>
-                  <th>{{$complaint->product_serail_number??'-'}}</th>
-                  <td><em>HP :</em></td>
-                  <th>{{$complaint->product_details?$complaint->product_details->specification:'-'}}</th>
-                  <td><em>Stage :</em></td>
-                  <th>{{$complaint->product_details?$complaint->product_details->product_no:''}}</th>
-                </tr>
-
-                <tr>
-                  <td><em>Product SAP Code :</em></td>
-                  <th>{{$complaint->product_details?$complaint->product_details->sap_code:'-'}}</th>
-                  <td><em>Phase :</em></td>
-                  <th>{{($complaint->product_details && $complaint->product_details->phase != '')?$complaint->product_details->phase:'-'}}</th>
-                  <td><em>Warranty/Customer Bill Date :</em></td>
-                  <th>{{$complaint->customer_bill_date?date('d-m-Y', strtotime($complaint->customer_bill_date)):'-'}}</th>
-                </tr>
-
-                <tr>
-                  <td><em>Service Paid/Free :</em></td>
-                  <th>{{$complaint->service_type??'-'}}</th>
-                  <td><em>Seller :</em></td>
-                  <th>{{$complaint->seller??'-'}}</th>
-                </tr>
-              </table> --}}
-              
-              <div class="row">
-                <div class="col-md-6">
-                </div>
-                <div class="col-md-6">
-                </div>
-              </div>
-              <div class="row invoice-info">
-                <div class="col-md-6 text-center" style="line-height: 15px;">
-                  <h6><em>Complete Remark</em></h6>
-                  <p><b>{{$complete_complaint?$complete_complaint->remark:'-'}}</b></p>
-                </div>
-                <div class="col-md-6 text-center" style="line-height: 0px;">
-                  <h6><em>Close Remark</em></h6>
-                  <p><b>{{$close_complaint?$close_complaint->remark:'-'}}</b></p>
-                </div>
-              </div>
-
-              <div class="row invoice-info">
-                <div class="col-md-4 text-center" style="line-height: 15px;">
-                  <h6><em>Replacement Tag</em></h6>
-                  <p><b>{{$service_bill?$service_bill->replacement_tag:'-'}}</b></p>
-                </div>
-                <div class="col-md-4 text-center" style="line-height: 0px;">
-                  <h6><em>Replacement Tag Serial Number</em></h6>
-                  <p><b>{{$service_bill?$service_bill->replacement_tag_number:'-'}}</b></p>
-                </div>
-                <div class="col-md-4 text-center" style="line-height: 0px;">
-                  <h6><em>Replacement Tag Description</em></h6>
-                  <p><b>-</b></p>
-                </div>
-              </div>
-              {{-- <table class="table responsive border-0 mt-4 new-table">
-                <tr>
-                  <td><em>Replacement Tag</em></td>
-                  <td><em>Replacement Tag Serial Number</em></td>
-                  <td><em>Replacement Tag Description</em></td>
-                </tr>
-                <tr>
-                  <th class="pt-0">{{$service_bill?$service_bill->replacement_tag:'-'}}</th>
-                  <th class="pt-0">{{$service_bill?$service_bill->replacement_tag_number:'-'}}</th>
-                  <th class="pt-0">-</th>
-                </tr>
-              </table> --}}
-
-              <hr class="mb-4">
-
-              <div class="row invoice-info">
-                <div class="col-md-4 mb-3">
-                  <h6 class="mr-2 mb-0">Invoice(Warranty) Image : </h6>
-                  <div class="d-flex invoice-info all-attach">
-                    @if($complaint->warranty_details)
-                    @if($complaint->warranty_details->exists && $complaint->warranty_details->getMedia('warranty_activation_attach')->count() > 0 && Storage::disk('s3')->exists($complaint->warranty_details->getMedia('warranty_activation_attach')[0]->getPath()))
-
-                    @php
-                    $media = $complaint->warranty_details->getMedia('warranty_activation_attach')[0];
-                    $mediaUrl = $media->getFullUrl();
-                    $mediaName = $media->name;
-                    @endphp
-
-                    @if($media->mime_type == 'application/pdf')
-                    <a href="{{ $mediaUrl }}" target="_blank" data-title="Invoice">
-                      <img width="60" style="height: 65px !important;" class="img-fluid rounded" src="{{url('/public/assets/img/pdf-icon.jpg')}}">
-                    </a>
-                    <h6 class="ml-2 mb-0">{{ $mediaName }}</h6>
-                    @else
-                    <a href="{{ $mediaUrl }}" data-lightbox="mygallery" data-title="Invoice">
-                      <img width="60" style="height: 65px !important;" src="{{ $mediaUrl }}" class="img-fluid rounded">
-                    </a>
-                    <h6 class="ml-2 mb-0">{{ $mediaName }}</h6>
-                    @endif
-
-                    @else
-                    <img width="50" src="{{ url('/').'/'.asset('assets/img/placeholder.jpg') }}" class="imagepreview1">
-                    @endif
-                    @endif
-
-                  </div>
-                </div>
-                @if($complaint->exists && $complaint->getMedia('complaint_attach')->count() > 0 && Storage::disk('s3')->exists($complaint->getMedia('complaint_attach')[0]->getPath()))
-                @foreach($complaint->getMedia('complaint_attach') as $k => $media)
-                <div class="col-md-4 mb-2">
-                  <h6 class="mr-2 mb-0">Complaint Attachments:</h6>
-                  <div class="d-flex invoice-info all-attach">
-                    @if($media->mime_type == 'application/pdf')
-                    <a href="{{ $media->getFullUrl() }}" target="_blank"><img width="60" style="height: 65px !important;" class="img-fluid rounded" src="{{url('/public/assets/img/pdf-icon.jpg')}}"></a>
-                    <h6 class="ml-2 mb-0">{{ $mediaName }}</h6>
-                    @else
-                    <a href="{{ $media->getFullUrl() }}" data-lightbox="mygallery">
-                      <img width="60" style="height: 65px !important;" class="img-fluid rounded" src="{!! $media->getFullUrl() !!}">
-                    </a>
-                    <h6 class="ml-2 mb-0">{{ $media->name }}</h6>
-                    @endif
-                  </div>
-                </div>
-                @endforeach
-                @endif
-
-              </div>
-
-              <hr class="mt-4">
-              <h4>ATTACHMENT</h4>
-              <table class="table responsive border-0 mt-4 new-table">
-                <tr>
-                  <th class="pb-0">SITE/SERVICE</th>
-                  <th class="pb-0">BRANCH</th>
-                  <th class="pb-0">Parchased Party Name</th>
-                  <th class="pb-0">Warranty / Bill</th>
-                </tr>
-                <tr>
-                  <td class="pt-0">-</td>
-                  <td class="pt-0">{{$complaint->purchased_branch_details?$complaint->purchased_branch_details->branch_name:'-'}}</td>
-                  <td class="pt-0">{{$complaint->party?$complaint->party->name:'-'}}</td>
-                  <td class="pt-0">{{$complaint->warranty_bill??'-'}}</td>
-                </tr>
-
-                <tr>
-                  <th class="pb-0">Customer Bill No.</th>
-                  <th class="pb-0">Warranty/Custtomer Bill Date</th>
-                  <th class="pb-0">Under Warranty</th>
-                  <th class="pb-0">Service Paid/Free</th>
-                </tr>
-                <tr>
-                  <td class="pt-0">{{$complaint->customer_bill_no??'-'}}</td>
-                  <td class="pt-0">{{$complaint->customer_bill_date?date('d-m-Y', strtotime($complaint->customer_bill_date)):'-'}}</td>
-                  <td class="pt-0">{{$complaint->under_warranty??'-'}}</td>
-                  <td class="pt-0">{{$complaint->service_type??'-'}}</td>
-                </tr>
-
-                <tr>
-                  <th class="pb-0">Company Sale Bill No.</th>
-                  <th class="pb-0">Company Sale Bill Date</th>
-                  <th class="pb-0">Service Centre Remarks</th>
-                  <th class="pb-0">Fault Type</th>
-                </tr>
-                <tr>
-                  <td class="pt-0">{{$complaint->company_sale_bill_no??'-'}}</td>
-                  <td class="pt-0">{{$complaint->company_sale_bill_date?date('d-m-Y', strtotime($complaint->company_sale_bill_date)):'-'}}</td>
-                  <td class="pt-0">{{$complaint->service_centre_remark??'-'}}</td>
-                  <td class="pt-0">{{$complaint->fault_type??'-'}}</td>
-                </tr>
-
-                <tr>
-                  <th class="pb-0">Remark</th>
-                  <th class="pb-0">Complaint Register By</th>
-                  <th class="pb-0">Division</th>
-                  <th class="pb-0"> </th>
-                </tr>
-                <tr>
-                  <td class="pt-0">{{$complaint->remark??'-'}}</td>
-                  <td class="pt-0">{{$complaint->register_by??'-'}}</td>
-
-                  <td class="pt-0">{{$complaint->division_details?$complaint->division_details->division_name:'-'}}</td>
-                  <td class="pt-0"> </td>
-                </tr>
-
-
-              </table>
-
-              <hr class="mt-3 mb-3">
-
-              <div class="row invoice-info mt-4">
-                <div class="col-md-4">
-                  <h4><b>Work Done Detail</b></h4>
-                </div>
-                <div class="col-md-4 text-center">
-                </div>
-                <div class="col-md-4"></div>
-              </div>
-
-              <table class="table responsive border-0 new-table">
-                <tr>
-                  <td><em>Action Done by ASC</em></td>
-                  <td><em>Service centre remark</em></td>
-                  <td><em>Work Done At</em></td>
-                  <td><em>Attachment</em></td>
-                </tr>
-                <tr>
-                  <th class="pt-0">{{$work_done?$work_done->done_by:'-'}}</th>
-                  <th class="pt-0">{{$work_done?$work_done->remark:'-'}}</th>
-                  <th class="pt-0">{{$work_done?cretaDateForFront($work_done->created_at):'-'}}</th>
-                  <th class="pt-0">
-                    @if($work_done && !empty($work_done) && $work_done->getMedia('complaint_work_done_attach')->count() > 0 && Storage::disk('s3')->exists($work_done->getMedia('complaint_work_done_attach')[0]->getPath()))
-                    <a href="{!! $work_done->getMedia('complaint_work_done_attach')[0]->getFullUrl() !!}" target="_blank" data-title="Invoice">
-                      <h6 class="ml-2 mb-0">{{$work_done->getMedia('complaint_work_done_attach')[0]->name}}</h6>
-                      @else
-                      -
-                      @endif
-                  </th>
-                </tr>
-              </table>
-
-              <hr class="mt-3 mb-3">
-
-              <div class="row invoice-info mt-4">
-                <div class="col-md-4">
-                  <h4><b>Warranty Details</b></h4>
-                </div>
-                <div class="col-md-4 text-center">
-                </div>
-                <div class="col-md-4"></div>
-              </div>
-
-              <table class="table table-striped responsive">
-                <tr>
-                  <th>Product Serial No.</th>
-                  <th>Product</th>
-                  <th>Warranty Start Date</th>
-                  <th>Warranty Upto</th>
-                  <th>Warranty Status</th>
-                </tr>
-                <tr>
-                  <td>{{strtoupper($complaint->product_serail_number)}}</td>
-                  <td>[{{$complaint->product_code}}] {{$complaint->product_name}}</td>
-                  <td>
-                    @if ($complaint->customer_bill_date)
-                    {{ cretaDateForFront($complaint->customer_bill_date) }}
-                    @else
-                    -
-                    @endif
-                  </td>
-                  <td>
-                    @if ($complaint->customer_bill_date)
-                    @php
-                    try{
-                      $today = Carbon\Carbon::today();
-                      $date = Carbon\Carbon::parse($complaint->customer_bill_date);
-                    }catch(\Exception $e){
-                      $today = null;
-                      $date = null;
-                    }
-                  
-                    if ($date != null && $date !== false) {
-                    $date->addMonths(18);
-                    } else {
-                    $date = null;
-                    }
-                    @endphp
-                    @if ($date)
-                    {{ $date->format('d-m-Y') }}
-                    @else
-                    Invalid date
-                    @endif
-                    @else
-                    -
-                    @endif
-                  </td>
-                  <td>
-                    @if ($complaint->customer_bill_date)
-                    @if ($date)
-                    @if ($date->gt($today))
-                    <span class="badge badge-success">In Warranty</span>
-                    @else
-                    <span class="badge badge-danger">Out Of Warranty</span>
-                    @endif
-                    @else
-                    Invalid date
-                    @endif
-                    @else
-                    -
-                    @endif
-                  </td>
-                </tr>
-
-              </table>
-
-              <hr class="mt-3 mb-3">
-
-              <div class="row invoice-info mt-4">
-                <div class="col-md-4">
-                  <h4><b>Service Bill Details</b></h4>
-                </div>
-                <div class="col-md-4 text-center">
-                </div>
-                <div class="col-md-4"></div>
-              </div>
-
-              <table class="table table-striped responsive">
-                <tr>
-                  <th>Serial No.</th>
-                  <th>Total Amount</th>
-                  <th>Service Bill Status</th>
-                </tr>
-                <tr>
-                  <td>{{strtoupper($complaint->product_serail_number)}}</td>
-                  <td>{{$service_bill?$service_bill->service_bill_products->sum('subtotal'):'-'}}</td>
-                  @if($service_bill && !empty($service_bill))
-                  @if($service_bill->status == '0')
-                  <td><a href="{{route('service_bills.show', $service_bill->id)}}" title="Show Service Bill"><span class="badge badge-secondary">Draft</span></td>
-                  @elseif($service_bill->status == '1')
-                  <td><span class="badge badge-warning">Claimed</span></td>
-                  @elseif($service_bill->status == '2')
-                  <td><span class="badge badge-info">Customer payble</span></td>
-                  @elseif($service_bill->status == '3')
-                  <td><span class="badge badge-success">Approve</span></td>
-                  @elseif($service_bill->status == '4')
-                  <td><span class="badge badge-danger">Cancel</span></td>
-                  @endif
-                  @else
-                  <td>-</td>
-                  @endif
-                </tr>
-
-              </table>
-            </div>
           </div>
         </div>
+       <div class="card" style="color:black;">
+          <div class="card-body">
+              <div class="row">
+                  <div class="col-md-3">
+                      <label>Complaint No.</label>
+                      <p class="border p-2 bg-light">#{!! $complaint['complaint_number'] !!}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>Complaint Date.</label>
+                      <p class="border p-2 bg-light">{!! $complaint['complaint_date'] !!}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>Assign User</label>
+                      <select name="assign_user" id="assign_user" class="select2 form-control">
+                          <option value="">Select User</option>
+                          @if($assign_users)
+                              @foreach($assign_users as $assign_user)
+                                  <option value="{{$assign_user->id}}" {!! old('assign_user', $complaint['assign_user'])==$assign_user->id ? 'selected':'' !!} >
+                                      [{{$assign_user->employee_codes}}] {{$assign_user->name}}
+                                  </option>
+                              @endforeach
+                          @endif
+                      </select>
+                      @if ($errors->has('assign_user'))
+                          <div class="error col-lg-12">
+                              <p class="text-danger">{{ $errors->first('assign_user') }}</p>
+                          </div>
+                      @endif
+                  </div>
+                  <div class="col-md-3">
+                      <label>Service Center</label>
+                      <select name="service_center" id="service_center" class="select2 form-control">
+                          <option value="">Select Service Center</option>
+                          @if($service_centers)
+                              @foreach($service_centers as $service_center)
+                                  <option value="{{$service_center->id}}" {!! old('service_center', $complaint['service_center'])==$service_center->id ? 'selected':'' !!} >
+                                      [{{$service_center->customer_code}}] {{$service_center->name}}
+                                  </option>
+                              @endforeach
+                          @endif
+                      </select>
+                      @if ($errors->has('service_center'))
+                          <div class="error col-lg-12">
+                              <p class="text-danger">{{ $errors->first('service_center') }}</p>
+                          </div>
+                      @endif
+                  </div>
+                  <div class="col-md-3">
+                      <label>Complaint Status</label>
+                      @if( $complaint['complaint_status'] == 0)
+                         <p class="border p-2 open_complaint">OPEN</p>
+                      @elseif($complaint['complaint_status'] == 1)
+                         <p class="border p-2 badge-warning">PENDING</p>
+                      @elseif($complaint['complaint_status'] == 2)
+                         <p class="border p-2 done_complaints">WORK DONE</p>
+                      @elseif($complaint['complaint_status'] == 3)
+                         <p class="border p-2 badge-info">COMPLETE</p>
+                      @elseif($complaint['complaint_status'] == 4)
+                         <p class="border p-2 badge-success">Closed</p>
+                      @else
+                        <p class="border p-2 bg-light">{!! $complaint['complaint_status'] !!}</p>
+                      @endif
+                  </div>
+                  <div class="col-md-3">
+                      <label>Created By</label>
+                      <p class="border p-2 bg-light">{{$complaint->createdbyname ? $complaint->createdbyname->name : '-'}}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>Close Date & Time</label>
+                      <p class="border p-2 bg-light">{{$complaint['complaint_status'] == 4 ?  complaintClose($complaint->id) : "Not Closed Yet"}}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>Total Time Hrs Close</label>
+                      <p class="border p-2 bg-light">{{$complaint['complaint_status'] == 4 ? complaintCloseIn($complaint->created_at,$complaint->id) : 'Not Closed Yet'}}</p>
+                  </div>
+                 <input type="hidden" name="complaint_id" id="complaint_id" value="{{$complaint->id}}">
+                 <!--  Customer Details -->
+                  <div class="col-md-12">
+                     <div class="p-1 mb-2 text-white text-center" style="background-color: #3972af;">
+                        <h4 class="m-0"><strong>Customer Details</strong></h4>
+                     </div>
+                  </div>
+                  <div class="col-md-3">
+                    <label>Customer Name</label>
+                    <p class="border p-2 bg-light">{{$complaint->customer->customer_name ?? '-'}}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>Customer Number</label>
+                      <p class="border p-2 bg-light">{{$complaint->customer->customer_number ?? '-'}}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>Customer Email</label>
+                      <p class="border p-2 bg-light">{{$complaint->customer->customer_email != '' ? $complaint->customer->customer_email : '-'}}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>State</label>
+                      <p class="border p-2 bg-light">{{$complaint->customer->customer_state ?? '-'}}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>District</label>
+                      <p class="border p-2 bg-light">{{$complaint->customer->customer_district ?? '-'}}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>City</label>
+                      <p class="border p-2 bg-light">{{$complaint->customer->customer_city ?? '-'}}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>Place</label>
+                      <p class="border p-2 bg-light">{{$complaint->customer->customer_place ?? '-'}}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>Pincode</label>
+                      <p class="border p-2 bg-light">{{$complaint->customer->customer_pindcode ?? '-'}}</p>
+                  </div>
+                  <div class="col-md-12">
+                      <label>Address</label>
+                      <p class="border p-2 bg-light">{{$complaint->customer->customer_address ?? '-'}}</p>
+                  </div>
+                  <!--  Complaint-Type -->
+                   <div class="col-md-12">
+                     <div class="p-1 mb-2 text-white text-center" style="background-color: #3972af;">
+                        <h4 class="m-0"><strong>Complaint-Type : {{$complaint->complaint_type_details->name ?? '-'}}</strong></h4>
+                     </div>
+                  </div>
+                   <div class="col-md-3">
+                    <label>Serial Number </label>
+                    <p class="border p-2 bg-light">{{$complaint->product_serail_number ?? '-'}}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>Division</label>
+                      <p class="border p-2 bg-light">{{$complaint->division ?? '-'}}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>Product Group</label>
+                      <p class="border p-2 bg-light">{{$complaint->product_group ??  '-'}}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>Product SAP Code</label>
+                      <p class="border p-2 bg-light">{{$complaint->product_details->sap_code ?? '-'}}</p>
+                  </div>
+                   <div class="col-md-3">
+                    <label>Product Name</label>
+                    <p class="border p-2 bg-light">{{$complaint->product_name ?? '-'}}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>HP</label>
+                      <p class="border p-2 bg-light">{{$complaint->specification ?? '-'}}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>Stage</label>
+                      <p class="border p-2 bg-light">{{$complaint->product_no ?? '-'}}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>Phase</label>
+                      <p class="border p-2 bg-light">{{$complaint->phase ?? '-'}}</p>
+                  </div>
+                   <div class="col-md-3">
+                    <label>Model & Code </label>
+                    <p class="border p-2 bg-light">{{$complaint->product_code ?? '-'}}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>Bill By Company (Party Name)</label>
+                      <p class="border p-2 bg-light">{{$complaint->seller ?? '-'}}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>Company Sale Bill Date</label>
+                      <p class="border p-2 bg-light">{{getDateInIndFomate($complaint->company_sale_bill_date) ?? '-'}}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>Company Sale Bill NO</label>
+                      <p class="border p-2 bg-light">{{ $complaint->company_sale_bill_no ?? '-'}}</p>
+                  </div>
+                   <div class="col-md-3">
+                    <label>Bill To Customer (Party Name)</label>
+                    <p class="border p-2 bg-light">{{$complaint->party->customer_name ?? '-'}}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>Warranty / Customer Bill Date</label>
+                      <p class="border p-2 bg-light">{{getDateInIndFomate($complaint->customer_bill_date) ?? '-'}}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>Customer Bill No.</label>
+                      <p class="border p-2 bg-light">{{$complaint->customer_bill_no ?? '-'}}</p>
+                  </div>
+                   <div class="col-md-3">
+                      <label>Warranty Upto</label>
+                      <p class="border p-2 bg-light">{{$complaint->customer->customer_state ?? '-'}}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>Warranty Status</label>
+                      <p class="border p-2 {{$complaint->under_warranty == 'Yes' ? 'badge-success' : 'badge-danger'}}">
+                        {{$complaint->under_warranty ?? '' }}
+                      </p>
+                  </div>
+                   <div class="col-md-3">
+                    <label>Warranty/Bill</label>
+                    <p class="border p-2 bg-light">{{$complaint->warranty_bill ?? '-'}}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>Service Paid/Free</label>
+                      <p class="border p-2 bg-light">{{$complaint->service_type ?? '-'}}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>Total Warranty Product In Month</label>
+                      <p class="border p-2 bg-light">{{$complaint->product_details->expiry_interval_preiod  ?? '-'}}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>Service Branch</label>
+                      <p class="border p-2 bg-light">{{$complaint->purchased_branch_details->branch_code ?? '-'}} {{$complaint->purchased_branch_details->branch_name ?? '-'}}</p>
+                  </div>
+                   <div class="col-md-3">
+                    <label>Complaint Register By</label>
+                    <p class="border p-2 bg-light">{{$complaint->register_by ?? '-'}}</p>
+                  </div>
+                  <div class="col-md-3">
+                      <label>Product Laying at</label>
+                      <p class="border p-2 bg-light">{{$complaint->product_laying ?? '-'}}</p>
+                  </div>
+                   <div class="col-md-4">
+                      <label>CRM Remark</label>
+                      <p class="border p-2 bg-light">{{$complaint->description ?? '-'}}</p>
+                  </div>
+                  <div class="col-md-4">
+                    <label>Warranty Card Invoice</label>
+                    <div class="d-flex flex-wrap align-items-center all-attach">
+                        @if($complaint->warranty_details)
+                            @php
+                                $mediaItems = $complaint->warranty_details->getMedia('warranty_activation_attach');
+                            @endphp
+
+                            @if($mediaItems->count() > 0)
+                                @foreach($mediaItems as $media)
+                                    @php $mediaUrl = $media->getFullUrl(); @endphp
+                                    
+                                    <a href="{{ $mediaUrl }}" target="_blank" class="m-1">
+                                        <img width="80" height="80" class="img-fluid rounded border" 
+                                             src="{{ $media->mime_type == 'application/pdf' ? asset('assets/img/pdf-icon.jpg') : $mediaUrl }}">
+                                    </a>
+                                @endforeach
+                            @else
+                                <img width="80" height="80" class="img-fluid rounded border" src="{{ asset('assets/img/placeholder.jpg') }}">
+                            @endif
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Product Photo -->
+                <div class="col-md-4">
+                    <label>Product Photo</label>
+                    <div class="d-flex flex-wrap align-items-center all-attach">
+                        @if($complaint->exists && $complaint->getMedia('complaint_attach')->count() > 0)
+                            @foreach($complaint->getMedia('complaint_attach') as $media)
+                                <a href="{{ $media->getFullUrl() }}" target="_blank" class="m-1">
+                                    <img width="80" height="80" class="img-fluid rounded border" 
+                                         src="{{ $media->mime_type == 'application/pdf' ? asset('assets/img/pdf-icon.jpg') : $media->getFullUrl() }}">
+                                </a>
+                            @endforeach
+                        @else
+                            <p class="border p-2 bg-light">No Image Found</p>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Work Done Status -->
+                <div class="col-md-12 mt-2">
+                   <div class="p-1 mb-2 text-white text-center" style="background-color: #3972af;">
+                      <h4 class="m-0"><strong>Work Done Details</strong></h4>
+                   </div>
+                </div>
+                <div class="col-md-3">
+                    <label>Action Done by ASC</label>
+                    <p class="border p-2 bg-light">{{$work_done?$work_done->done_by:'-'}}</p>
+                </div>
+                <div class="col-md-3">
+                    <label>Service Center Remark</label>
+                    <p class="border p-2 bg-light">{{$work_done?$work_done->remark:'-'}}</p>
+                </div>
+                <div class="col-md-3">
+                    <label>Work Done Date</label>
+                    <p class="border p-2 bg-light">{{getDateInIndFomate($work_done->created_at) ??   'Not Done Yet'}}</p>
+                </div>
+                <div class="col-md-3">
+                    <label>Attachment</label>
+                     @if($work_done && $work_done->getMedia('complaint_work_done_attach')->count() > 0)
+                        @php
+                            $mediaItems = $work_done->getMedia('complaint_work_done_attach');
+                        @endphp
+
+                        <div class="d-flex flex-wrap align-items-center all-attach">
+                            @foreach($mediaItems as $media)
+                                <a href="{{ $media->getFullUrl() }}" target="_blank" class="m-1">
+                                    <img width="80" height="80" class="img-fluid rounded border"
+                                         src="{{ $media->mime_type == 'application/pdf' ? asset('assets/img/pdf-icon.jpg') : $media->getFullUrl() }}">
+                                </a>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="border p-2 bg-light">No Attachments Found</p>
+                    @endif
+                </div>
+
+                <!-- Compleate and Close Details -->
+                <div class="col-md-12 mt-2">
+                   <div class="p-1 mb-2 text-white text-center" style="background-color: #3972af;">
+                      <h4 class="m-0"><strong>Complete & Close Details</strong></h4>
+                   </div>
+                </div>
+                <div class="col-md-3">
+                    <label>Replacement Tag</label>
+                    <p class="border p-2 bg-light">{{$service_bill->replacement_tag ?$service_bill->replacement_tag:'-'}}</p>
+                </div>
+                <div class="col-md-3">
+                    <label>Replacement Tag No</label>
+                    <p class="border p-2 bg-light">{{$service_bill->replacement_tag_number?$service_bill->replacement_tag_number:'-'}}</p>
+                </div>
+                <div class="col-md-3">
+                    <label>Complete Remark</label>
+                    <p class="border p-2 bg-light">{{$complete_complaint?$complete_complaint->remark:'-'}}</p>
+                </div>
+                <div class="col-md-3">
+                    <label>Close Remark</label>
+                    <p class="border p-2 bg-light">{{$close_complaint?$close_complaint->remark:'-'}}</p>
+                </div>
+                <div class="col-md-3">
+                    <label>Category Of Complaint</label>
+                    <p class="border p-2 bg-light">{{$service_bill->category ?$service_bill->category:'-'}}</p>
+                </div>
+                <div class="col-md-3">
+                    <label>Complaint Type</label>
+                     <p class="border p-2 bg-light">{{$service_bill->complaint_type ?$service_bill->complaint_type:'-'}}</p>
+                </div>
+                <div class="col-md-3">
+                    <label>Complaint Reason</label>
+                     <p class="border p-2 bg-light">{{$service_bill->complaint_reason ?$service_bill->complaint_reason:'-'}}</p>
+                </div>
+                <div class="col-md-3">
+                    <label>Condition Of Service</label>
+                     <p class="border p-2 bg-light">{{$service_bill->condition_of_service ?$service_bill->condition_of_service:'-'}}</p>
+                </div>
+                <div class="col-md-3">
+                    <label>Received Product</label>
+                    <p class="border p-2 bg-light">{{$service_bill->received_product ?$service_bill->received_product:'-'}}</p>
+                </div>
+                <div class="col-md-3">
+                    <label>Nature Of Fault</label>
+                     <p class="border p-2 bg-light">{{$service_bill->nature_of_fault ?$service_bill->nature_of_fault:'-'}}</p>
+                </div>
+                <div class="col-md-3">
+                    <label>Service Location</label>
+                     <p class="border p-2 bg-light">{{$service_bill->service_location ?$service_bill->service_location:'-'}}</p>
+                </div>
+                 <!-- Service Bill Details -->
+                <div class="col-md-12 mt-2">
+                   <div class="p-1 mb-2 text-white text-center" style="background-color: #3972af;">
+                      <h4 class="m-0"><strong>Service Bill Details</strong></h4>
+                   </div>
+                </div>
+                <div class="col-md-12">
+                    <table class="table table-striped responsive">
+                      <tr>
+                        <th>Serial No.</th>
+                        <th>Total Amount</th>
+                        <th>Service Bill Date</th>
+                        <th>Service Bill Status</th>
+                      </tr>
+                      <tr>
+                        <td>{{strtoupper($complaint->product_serail_number)}}</td>
+                        <td>{{$service_bill?$service_bill->service_bill_products->sum('subtotal'):'-'}}</td>
+                        <td>{{$service_bill? getDateInIndFomate($service_bill->created_at):'-'}}</td>
+                        @if($service_bill && !empty($service_bill))
+                        @if($service_bill->status == '0')
+                        <td><a href="{{route('service_bills.show', $service_bill->id)}}" title="Show Service Bill"><span class="badge badge-secondary">Draft</span></td>
+                        @elseif($service_bill->status == '1')
+                        <td><span class="badge badge-warning">Claimed</span></td>
+                        @elseif($service_bill->status == '2')
+                        <td><span class="badge badge-info">Customer payble</span></td>
+                        @elseif($service_bill->status == '3')
+                        <td><span class="badge badge-success">Approve</span></td>
+                        @elseif($service_bill->status == '4')
+                        <td><span class="badge badge-danger">Cancel</span></td>
+                        @endif
+                        @else
+                        <td>-</td>
+                        @endif
+                      </tr>
+
+                    </table>
+                </div>
+              </div>
+          </div>
+      </div>
       </div>
 
 
