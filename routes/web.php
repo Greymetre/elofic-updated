@@ -649,6 +649,7 @@ Route::group(['middleware' => ['auth']], function () {
 
     //Fields
     Route::resource('market_intelligences', MarketIntelligencesFieldController::class);
+    Route::any('market_intelligences_download', [MarketIntelligencesFieldController::class, 'download'])->name('market_intelligences.download');
     //Fields
     Route::resource('fields', FieldController::class);
     Route::post('fields-active', [FieldController::class, 'active'])->name('fields.active');

@@ -108,7 +108,13 @@ class ServiceBillController extends Controller
             'service_location' => $request->service_location,
             'repaired_replacement' => $request->repaired_replacement,
             'replacement_tag' => $replacement_tag,
-            'replacement_tag_number' => $replacement_tag_number
+            'replacement_tag_number' => $replacement_tag_number,
+            'line_voltage' => $request->line_voltage ?? '',
+            'load_voltage' => $request->load_voltage ?? '',
+            'current' => $request->current ?? '',
+            'water_source' => $request->water_source ?? '',
+            'panel_rating_running' => $request->panel_rating_running ?? '',
+            'panel_rating_starting' => $request->panel_rating_starting ?? '',
         ]);
 
         if ($new_service_bill) {

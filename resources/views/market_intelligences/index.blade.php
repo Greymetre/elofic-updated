@@ -10,7 +10,14 @@
             <span class="">
               <div class="btn-group header-frm-btn">
                 <div class="next-btn">
+                  @if(auth()->user()->can('market_intelligence_create'))
                   <a href="{{ route('market_intelligences.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Field"><i class="material-icons">add_circle</i></a>
+
+                  @endif
+                  @if(auth()->user()->can('market_intelligence_report_download'))
+
+                  <a href="{{ route('market_intelligences.download') }}" class="btn btn-just-icon btn-theme" title="Download Market Intelligence Report"><i class="material-icons">download</i></a>
+                  @endif
                 </div>
               </div>
             </span>

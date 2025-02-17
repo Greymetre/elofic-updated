@@ -143,6 +143,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::any('getSarthiPoints', [DashboardController::class, 'getSarthiPoints']);
     
     Route::any('getMarketIntelligencesField', [MarketIntelligenceController::class, 'getFields']);
+    Route::any('MarketIntelligenceStore', [MarketIntelligenceController::class, 'MarketIntelligenceStore']);
 
     Route::any('getProfile', [LoginController::class, 'getProfile']);
     Route::post('updateProfile', [LoginController::class, 'updateProfile']);

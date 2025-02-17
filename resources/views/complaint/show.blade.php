@@ -149,6 +149,12 @@
               </div>
           </div>
         </div>
+        <div class="alert" style="display: none;" id="hide_check">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <i class="material-icons">close</i>
+          </button>
+          <strong class="message"></strong>
+        </div>
        <div class="card" style="color:black;">
           <div class="card-body">
               <div class="row">
@@ -208,6 +214,8 @@
                          <p class="border p-2 badge-info">COMPLETE</p>
                       @elseif($complaint['complaint_status'] == 4)
                          <p class="border p-2 badge-success">Closed</p>
+                      @elseif($complaint['complaint_status'] == 5)
+                         <p class="border p-2 badge-danger">Cancelled</p>
                       @else
                         <p class="border p-2 bg-light">{!! $complaint['complaint_status'] !!}</p>
                       @endif
@@ -261,7 +269,7 @@
                   </div>
                   <div class="col-md-3">
                       <label>Pincode</label>
-                      <p class="border p-2 bg-light">{{$complaint->customer->customer_pindcode ?? '-'}}</p>
+                      <p class="border p-2 bg-light">{{getPincode($complaint->customer->customer_pindcode) ?? '-'}}</p>
                   </div>
                   <div class="col-md-12">
                       <label>Address</label>
@@ -279,7 +287,7 @@
                   </div>
                   <div class="col-md-3">
                       <label>Division</label>
-                      <p class="border p-2 bg-light">{{$complaint->division ?? '-'}}</p>
+                      <p class="border p-2 bg-light">{{$complaint->product_details->categories->category_name ?? '-'}}</p>
                   </div>
                   <div class="col-md-3">
                       <label>Product Group</label>
@@ -428,7 +436,7 @@
                 </div>
                 <div class="col-md-3">
                     <label>Work Done Date</label>
-                    <p class="border p-2 bg-light">{{getDateInIndFomate($work_done->created_at) ??   'Not Done Yet'}}</p>
+                    <p class="border p-2 bg-light">{{isset($work_done->created_at) ? getDateInIndFomate($work_done->created_at) :   'Not Done Yet'}}</p>
                 </div>
                 <div class="col-md-3">
                     <label>Attachment</label>
@@ -458,11 +466,11 @@
                 </div>
                 <div class="col-md-3">
                     <label>Replacement Tag</label>
-                    <p class="border p-2 bg-light">{{$service_bill->replacement_tag ?$service_bill->replacement_tag:'-'}}</p>
+                    <p class="border p-2 bg-light">{{isset($service_bill->replacement_tag) ?$service_bill->replacement_tag:'-'}}</p>
                 </div>
                 <div class="col-md-3">
                     <label>Replacement Tag No</label>
-                    <p class="border p-2 bg-light">{{$service_bill->replacement_tag_number?$service_bill->replacement_tag_number:'-'}}</p>
+                    <p class="border p-2 bg-light">{{isset($service_bill->replacement_tag_number)?$service_bill->replacement_tag_number:'-'}}</p>
                 </div>
                 <div class="col-md-3">
                     <label>Complete Remark</label>
@@ -474,31 +482,31 @@
                 </div>
                 <div class="col-md-3">
                     <label>Category Of Complaint</label>
-                    <p class="border p-2 bg-light">{{$service_bill->category ?$service_bill->category:'-'}}</p>
+                    <p class="border p-2 bg-light">{{$service_bill->category  ??'-'}}</p>
                 </div>
                 <div class="col-md-3">
                     <label>Complaint Type</label>
-                     <p class="border p-2 bg-light">{{$service_bill->complaint_type ?$service_bill->complaint_type:'-'}}</p>
+                     <p class="border p-2 bg-light">{{$service_bill->complaint_type ??'-'}}</p>
                 </div>
                 <div class="col-md-3">
                     <label>Complaint Reason</label>
-                     <p class="border p-2 bg-light">{{$service_bill->complaint_reason ?$service_bill->complaint_reason:'-'}}</p>
+                     <p class="border p-2 bg-light">{{$service_bill->complaint_reason ?? '-'}}</p>
                 </div>
                 <div class="col-md-3">
                     <label>Condition Of Service</label>
-                     <p class="border p-2 bg-light">{{$service_bill->condition_of_service ?$service_bill->condition_of_service:'-'}}</p>
+                     <p class="border p-2 bg-light">{{$service_bill->condition_of_service??'-'}}</p>
                 </div>
                 <div class="col-md-3">
                     <label>Received Product</label>
-                    <p class="border p-2 bg-light">{{$service_bill->received_product ?$service_bill->received_product:'-'}}</p>
+                    <p class="border p-2 bg-light">{{$service_bill->received_product??'-'}}</p>
                 </div>
                 <div class="col-md-3">
                     <label>Nature Of Fault</label>
-                     <p class="border p-2 bg-light">{{$service_bill->nature_of_fault ?$service_bill->nature_of_fault:'-'}}</p>
+                     <p class="border p-2 bg-light">{{$service_bill->nature_of_fault??'-'}}</p>
                 </div>
                 <div class="col-md-3">
                     <label>Service Location</label>
-                     <p class="border p-2 bg-light">{{$service_bill->service_location ?$service_bill->service_location:'-'}}</p>
+                     <p class="border p-2 bg-light">{{$service_bill->service_location??'-'}}</p>
                 </div>
                  <!-- Service Bill Details -->
                 <div class="col-md-12 mt-2">

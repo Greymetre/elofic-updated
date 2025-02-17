@@ -69,8 +69,17 @@ class Complaint extends Model implements HasMedia
 
     public function complaint_work_dones()
     {
-        return $this->hasMany('App\Models\ComplaintWorkDone', 'id', 'complaint_id');
+        return $this->hasMany('App\Models\ComplaintWorkDone', 'complaint_id', 'id');
     }
+
+    public function complaint_time_line(){
+        return $this->hasMany('App\Models\ComplaintTimeline', 'complaint_id', 'id');
+    }
+
+    public function service_bill(){
+        return $this->hasOne('App\Models\ServiceBill', 'complaint_id', 'id');
+    }
+
 
     public function registerMediaCollections(): void
     {
@@ -92,6 +101,15 @@ class Complaint extends Model implements HasMedia
     {
         try {
             return $value ? Carbon::parse($value)->format('d-m-Y') : '';
+        } catch (\Exception $e) {
+            return ''; // Return null if parsing fails
+        }
+    }
+
+    public function getUpdatedAtAttribute($value)
+    {
+        try {
+            return $value ? Carbon::parse($value)->format('d-m-Y h:i:s') : '';
         } catch (\Exception $e) {
             return ''; // Return null if parsing fails
         }

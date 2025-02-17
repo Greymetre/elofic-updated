@@ -23,6 +23,7 @@ use App\Models\Coupons;
 use App\Models\Holiday;
 use App\Models\OrderDetails;
 use App\Models\Payment;
+use App\Models\Pincode;
 use App\Models\ComplaintTimeline;
 use Illuminate\Support\Str;
 
@@ -978,11 +979,37 @@ function complaintCloseIn($complaint_date, $complaint_id) {
      return "Not Closed Yet";
 }
 
+function calculatedTAT($datetocal, $complaint_date) {
+    if (isset($datetocal) && isset($complaint_date)) {
+        try {
+            $complaintCreatedAt = Carbon::parse($complaint_date);
+            $complaintDate = Carbon::parse($datetocal);
+            
+            // Calculate the difference in hours
+            $hoursDifference = $complaintDate->diff($complaintCreatedAt);
+            $hours = str_pad($hoursDifference->h, 2, '0', STR_PAD_LEFT);
+            $minutes = str_pad($hoursDifference->i, 2, '0', STR_PAD_LEFT);
+            $seconds = str_pad($hoursDifference->s, 2, '0', STR_PAD_LEFT);
+
+            return "{$hours}:{$minutes}:{$seconds}";
+        } catch (\Exception $e) {
+            return ''; // Return empty if parsing fails
+        }
+    }
+
+     return "Not Perfomed";
+}
+
 function getDateInIndFomate($value){
     try {
         return $value ? Carbon::parse($value)->format('d-m-Y') : '';
     } catch (\Exception $e) {
         return ''; // Return null if parsing fails
     }
+}
+
+function getPincode($id){
+    $pincode = Pincode::find($id);
+    return $pincode->pincode ?? '';
 }
 

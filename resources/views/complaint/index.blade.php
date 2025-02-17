@@ -91,6 +91,7 @@
                 <th>{!! trans('panel.global.no') !!}</th>
                 <!-- <th>{!! trans('panel.global.action') !!}</th> -->
                 <th>Date</th>
+                <th>Complaint Number</th>
                 <th>Service Center</th>
                 <th>Service Center Code</th>
                 <th>Seller Name</th>
@@ -116,8 +117,37 @@
                 <th>Service Paid/Free</th>
                 <th>Work Done Time</th>
                 <th>Action Done By ASC</th>
+                <th>Service Center Remark</th>
+                <!-- <th>Last Status</th> -->
+                <th>Last Status Update Time</th>
+                <th>Pending TAT</th>
+                <th>Open TAT</th>
+                <th>Cancelled TAT</th>
+                <th>Work Done TAT</th>
+                <th>Completed TAT</th>
+                <th>Close TAT</th>
+                <th>Serive Bill status</th>
+                <th>Service Bill Approved Date</th>
+                <th>Description</th>
+                <th>Service Branch</th>
                 <th>Purchased Party Name</th>
-             
+                <th>Warrenty Bill</th>
+                <th>Customer Bill No </th>
+                <th>Customer Bill Date</th>
+                <th>Under Warrantye</th>
+                <th>Service Type</th>
+                <th>Company Sale Bill No.</th>
+                <th>company sale bill date</th>
+                <th>service centre remarks</th>
+                <th>complaint register by</th>
+                <th>division name</th>
+                <th>work complated duration</th>
+                <th>open duration</th>
+                <th>closed date</th>
+             <!--    <th>complaint feedback type</th>
+                <th>feedback</th> -->
+                <th>created by</th>
+                <th>created at</th>
                 <th>Complaint Status</th>
               </thead>
               <tbody>
@@ -137,217 +167,89 @@
         }
       });
       var table = $('#getscheme').DataTable({
-        processing: true,
-        serverSide: true,
-        "order": [
-          [0, 'desc']
-        ],
-        "ajax": "{{ route('complaints.index') }}",
-        columns: [{
-            data: 'DT_RowIndex',
-            name: 'DT_RowIndex',
-            orderable: false,
-            searchable: false
+          processing: true,
+          serverSide: true,
+          order: [[0, 'desc']],
+          ajax: {
+              url: "{{ route('complaints.index') }}",
+              type: "POST",  // Change GET to POST
+              headers: {
+                  "Accept": "application/json"  // This forces Laravel to return JSON properly
+              },
+              data: function (d) {
+                  // This helps if you want to manually filter data
+                  d._token = "{{ csrf_token() }}"; // Add CSRF token for Laravel
+              }
           },
-          {
-            data: 'complaint_date',
-            name: 'complaint_date',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'service_center_details.name',
-            name: 'service_center_details.name',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'service_center_details.customer_code',
-            name: 'service_center_details.customer_code',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'seller',
-            name: 'seller',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'customer.customer_name',
-            name: 'customer.customer_name',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'customer.customer_email',
-            name: 'customer.customer_email',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'customer.customer_number',
-            name: 'customer.customer_number',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'customer.customer_address',
-            name: 'customer.customer_address',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'customer.customer_place',
-            name: 'customer.customer_place',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'customer.customer_pindcode',
-            name: 'customer.customer_pindcode',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'customer.customer_country',
-            name: 'customer.customer_country',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'customer.customer_state',
-            name: 'customer.customer_state',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'customer.customer_city',
-            name: 'customer.customer_city',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'complaint_type_details.name',
-            name: 'complaint_type_details.name',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'division_details.division_name',
-            name: 'division_details.division_name',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'product_details.product_name',
-            name: 'product_details.product_name',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'product_details.product_code',
-            name: 'product_details.product_code',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'product_details.categories.category_name',
-            name: 'product_details.categories.category_name',
-            orderable: false,
-            "defaultContent": ''
-          },	
-          {
-            data: 'product_serail_number',
-            name: 'product_serail_number',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'product_details.specification',
-            name: 'product_details.specification',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'product_details.product_no',
-            name: 'product_details.product_no',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'product_details.phase',
-            name: 'product_details.phase',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'customer_bill_date',
-            name: 'customer_bill_date',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'service_type',
-            name: 'service_type',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'work_done_time',
-            name: 'work_done_time',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'complaint_work_dones',
-            name: 'complaint_work_dones',
-            orderable: false,
-            "defaultContent": ''
-          },
-          // {
-          //   data: 'complaint_number',
-          //   name: 'complaint_number',
-          //   orderable: false,
-          //   "defaultContent": ''
-          // },
-          {
-            data: null,
-            orderable: false,
-            render: function(data, type, full, meta) {
-                return data.customer.customer_name + ' (' + data.customer.customer_number + ')';
-            }
-          },
-          
-          // {
-          //   data: 'complaint_type_details.name',
-          //   name: 'complaint_type_details.name',
-          //   orderable: false,
-          //   "defaultContent": ''
-          // },
-          // {
-          //   data: 'action',
-          //   name: 'action',
-          //   "defaultContent": '',
-          //   className: 'text-center',
-          //   orderable: false,
-          //   searchable: false
-          // },
-          // {
-          //   data: 'party.name',
-          //   name: 'party.name',
-          //   orderable: false,
-          //   "defaultContent": ''
-          // },
-          
-          {
-            data: 'status',
-            name: 'status',
-            orderable: false,
-            "defaultContent": ''
-          },
-        ]
+          columns: [
+              {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
+              {data: 'complaint_date', name: 'complaint_date', orderable: false, defaultContent: ''},
+              {data: 'complaint_number', name: 'complaint_number', orderable: false, defaultContent: ''},
+              {data: 'service_center_details.name', name: 'service_center_details.name', orderable: false, defaultContent: '', searchable: false},
+              {data: 'service_center_details.customer_code', name: 'service_center_details.customer_code', orderable: false, defaultContent: '', searchable: false},
+              {data: 'seller', name: 'seller', orderable: false, defaultContent: '', searchable: false},
+              {data: 'customer.customer_name', name: 'customer.customer_name', orderable: false, defaultContent: '', searchable: false},
+              {data: 'customer.customer_email', name: 'customer.customer_email', orderable: false, defaultContent: '', searchable: false},
+              {data: 'customer.customer_number', name: 'customer.customer_number', orderable: false, defaultContent: '', searchable: false},
+              {data: 'customer.customer_address', name: 'customer.customer_address', orderable: false, defaultContent: '', searchable: false},
+              {data: 'customer.customer_place', name: 'customer.customer_place', orderable: false, defaultContent: '', searchable: false},
+              {data: 'customer_pindcode', name: 'customer_pindcode', orderable: false, defaultContent: '', searchable: false},
+              {data: 'customer.customer_country', name: 'customer.customer_country', orderable: false, defaultContent: '', searchable: false},
+              {data: 'customer.customer_state', name: 'customer.customer_state', orderable: false, defaultContent: '', searchable: false},
+              {data: 'customer.customer_city', name: 'customer.customer_city', orderable: false, defaultContent: '', searchable: false},
+              {data: 'complaint_type_details.name', name: 'complaint_type_details.name', orderable: false, defaultContent: '', searchable: false},
+              {data: 'product_details.categories.category_name', name: 'product_details.categories.category_name', orderable: false, defaultContent: '', searchable: false},
+              {data: 'product_details.product_name', name: 'product_details.product_name', orderable: false, defaultContent: '', searchable: false},
+              {data: 'product_details.product_code', name: 'product_details.product_code', orderable: false, defaultContent: '', searchable: false},
+              {data: 'product_details.categories.category_name', name: 'product_details.categories.category_name', orderable: false, defaultContent: '', searchable: false},  
+              {data: 'product_serail_number', name: 'product_serail_number', orderable: false, defaultContent: '', searchable: false},
+              {data: 'product_details.specification', name: 'product_details.specification', orderable: false, defaultContent: '', searchable: false},
+              {data: 'product_details.product_no', name: 'product_details.product_no', orderable: false, defaultContent: '', searchable: false},
+              {data: 'product_details.phase', name: 'product_details.phase', orderable: false, defaultContent: '', searchable: false},
+              {data: 'customer_bill_date', name: 'customer_bill_date', orderable: false, defaultContent: '', searchable: false},
+              {data: 'service_type', name: 'service_type', orderable: false, defaultContent: '', searchable: false},
+              {data: 'work_done_time', name: 'work_done_time', orderable: false, defaultContent: '', searchable: false},
+              {data: 'complaint_work_dones', name: 'complaint_work_dones', orderable: false, defaultContent: '', searchable: false},
+              {data: 'complaint_work_remark', name: 'complaint_work_remark', orderable: false, defaultContent: '', searchable: false},
+              {data: 'updated_at', name: 'updated_at', orderable: false, defaultContent: '', searchable: false},
+              {data: 'pending_tat', name: 'pending_tat', orderable: false, defaultContent: '', searchable: false},
+              {data: 'open_tat', name: 'open_tat', orderable: false, defaultContent: '', searchable: false},
+              {data: 'canceled_tat', name: 'canceled_tat', orderable: false, defaultContent: '', searchable: false},
+              {data: 'work_done_tat', name: 'work_done_tat', orderable: false, defaultContent: '', searchable: false},
+              {data: 'compleated_tat', name: 'compleated_tat', orderable: false, defaultContent: '', searchable: false},
+              {data: 'close_tat', name: 'close_tat', orderable: false, defaultContent: '', searchable: false},
+              {data: 'service_bill_status', name: 'service_bill_status', orderable: false, defaultContent: '', searchable: false},
+              {data: 'service_bill_date', name: 'service_bill_date', orderable: false, defaultContent: '', searchable: false},
+              {data: 'description', name: 'description', orderable: false, defaultContent: '', searchable: false},
+              {data: 'service_branch', name: 'service_branch', orderable: false, defaultContent: '', searchable: false},
+              {
+                  data: null,
+                  orderable: false,
+                  render: function(data, type, full, meta) {
+                      return data.customer.customer_name + ' (' + data.customer.customer_number + ')';
+                  }
+              },
+              {data: 'warranty_bill', name: 'warranty_bill', orderable: false, defaultContent: '', searchable: false},
+              {data: 'customer_bill_no', name: 'customer_bill_no', orderable: false, defaultContent: '', searchable: false},
+              {data: 'customer_bill_date', name: 'customer_bill_date', orderable: false, defaultContent: '', searchable: false},
+              {data: 'under_warranty', name: 'under_warranty', orderable: false, defaultContent: '', searchable: false},
+              {data: 'service_type', name: 'service_type', orderable: false, defaultContent: '', searchable: false},
+              {data: 'company_sale_bill_no', name: 'company_sale_bill_no', orderable: false, defaultContent: '', searchable: false},
+              {data: 'company_sale_bill_date', name: 'company_sale_bill_date', orderable: false, defaultContent: '', searchable: false},
+              {data: 'service_center_remark', name: 'service_center_remark', orderable: false, defaultContent: '', searchable: false},
+              {data: 'register_by', name: 'register_by', orderable: false, defaultContent: '', searchable: false},
+              {data: 'product_details.categories.category_name', name: 'product_details.categories.category_name', orderable: false, defaultContent: '', searchable: false},
+              {data: 'work_complated_duration', name: 'work_complated_duration', orderable: false, defaultContent: '', searchable: false},
+              {data: 'open_duration', name: 'open_duration', orderable: false, defaultContent: '', searchable: false},
+              {data: 'closed_date', name: 'closed_date', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'complaint_feedback', name: 'complaint_feedback', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'feedback', name: 'feedback', orderable: false, defaultContent: '', searchable: false},
+              {data: 'createdbyname.name', name: 'createdbyname.name', orderable: false, defaultContent: '', searchable: false},
+              {data: 'created_at', name: 'created_at', orderable: false, defaultContent: '', searchable: false},
+              {data: 'status', name: 'status', orderable: false, defaultContent: ''}
+          ]
       });
+
 
       $('body').on('click', '.activeRecord', function() {
         var id = $(this).attr("id");
