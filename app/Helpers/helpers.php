@@ -1013,3 +1013,14 @@ function getPincode($id){
     return $pincode->pincode ?? '';
 }
 
+function calcalutedTatByStatus($status , $query , $created_at){
+  $complaint_status_date = $query->complaint_time_line
+        ->where('status', $status)
+        ->sortByDesc('id') // Correct ordering method for collections
+        ->first();
+  if(isset($complaint_status_date->created_at) && isset($query->created_at)){
+    return calculatedTAT($complaint_status_date->created_at,$query->created_at);
+  }
+  return "Action Not Perfomed";
+}
+

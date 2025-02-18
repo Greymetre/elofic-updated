@@ -866,6 +866,7 @@ Route::group(['middleware' => ['auth']], function () {
 
     // Complaint Route
     Route::resource('complaints', ComplaintController::class);
+    Route::post('getComplaints', [ComplaintController::class, 'getComplaints'])->name('getComplaints');
     Route::post('complaint-attach-delete', [ComplaintController::class, 'deleteAttachment'])->name('deleteAttachment');
     Route::post('complaint-cancel', [ComplaintController::class, 'cancelComplaint'])->name('cancelComplaint');
     Route::post('complaint-pending', [ComplaintController::class, 'pendingComplaint'])->name('pendingComplaint');

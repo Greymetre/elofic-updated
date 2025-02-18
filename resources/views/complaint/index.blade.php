@@ -6,6 +6,28 @@
       color: #000;
       text-shadow: 0 0 3px #fff;
     }
+    .table-input {
+        width: 100%;
+        padding: 5px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        outline: none;
+        background: white;
+/*        color: black;*/
+        width: 100px;
+    }
+
+    .table-input::placeholder {
+          color: rgba(0, 0, 0, 0.5); /* Light greyish-white for better visibility */
+          opacity: 1; /* Ensures visibility in all browsers */
+      }
+
+    .table-input:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
   </style>
   <div class="row">
     <div class="col-md-12">
@@ -86,69 +108,130 @@
             <span class="message"></span>
           </div>
           <div class="table-responsive">
-            <table id="getscheme" class="table table-striped- table-bschemeed table-hover table-checkable  no-wrap">
+            <table id="getComplaints" class="table table-striped- table-bschemeed table-hover table-checkable  no-wrap">
               <thead class=" text-primary">
-                <th>{!! trans('panel.global.no') !!}</th>
-                <!-- <th>{!! trans('panel.global.action') !!}</th> -->
-                <th>Date</th>
-                <th>Complaint Number</th>
-                <th>Service Center</th>
-                <th>Service Center Code</th>
-                <th>Seller Name</th>
-                <th>Customer Name</th>
-                <th>Customer Email</th>
-                <th>Contact No</th>
-                <th>Address</th>
-                <th>Place</th>
-                <th>Pincode</th>
-                <th>Country</th>
-                <th>State</th>
-                <th>City</th>
-                <th>Customer Complaint Type</th>      
-                <th>Division</th> 
-                <th>Product Name</th>
-                <th>Product Code</th> 
-                <th>Product Category</th>         
-                <th>Product Serial No</th>  
-                <th>HP</th> 
-                <th>Stage</th>
-                <th>Phase</th>
-                <th>Warranty Customer Bill Date</th>
-                <th>Service Paid/Free</th>
-                <th>Work Done Time</th>
-                <th>Action Done By ASC</th>
-                <th>Service Center Remark</th>
-                <!-- <th>Last Status</th> -->
-                <th>Last Status Update Time</th>
-                <th>Pending TAT</th>
-                <th>Open TAT</th>
-                <th>Cancelled TAT</th>
-                <th>Work Done TAT</th>
-                <th>Completed TAT</th>
-                <th>Close TAT</th>
-                <th>Serive Bill status</th>
-                <th>Service Bill Approved Date</th>
-                <th>Description</th>
-                <th>Service Branch</th>
-                <th>Purchased Party Name</th>
-                <th>Warrenty Bill</th>
-                <th>Customer Bill No </th>
-                <th>Customer Bill Date</th>
-                <th>Under Warrantye</th>
-                <th>Service Type</th>
-                <th>Company Sale Bill No.</th>
-                <th>company sale bill date</th>
-                <th>service centre remarks</th>
-                <th>complaint register by</th>
-                <th>division name</th>
-                <th>work complated duration</th>
-                <th>open duration</th>
-                <th>closed date</th>
-             <!--    <th>complaint feedback type</th>
-                <th>feedback</th> -->
-                <th>created by</th>
-                <th>created at</th>
-                <th>Complaint Status</th>
+               <tr>
+                    <th></th>
+                    <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="complaint_date" id="complaint_date" autocomplete="off" readonly></th>
+                    <th><input type="text" class="form-control table-input" name="complaint_number" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="service_center_name" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="service_center_code" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="seller"  placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="customer_name" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="customer_email" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="customer_number" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="customer_address" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="customer_place" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="pincode" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="customer_country" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="customer_state" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="customer_city" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                </tr>
+                <tr>
+                  <th>{!! trans('panel.global.no') !!}</th>
+                  <!-- <th>{!! trans('panel.global.action') !!}</th> -->
+                  <th>Date</th>
+                  <th>Complaint Number</th>
+                  <th>Service Center</th>
+                  <th>Service Center Code</th>
+                  <th>Seller Name</th>
+                  <th>Customer Name</th>
+                  <th>Customer Email</th>
+                  <th>Contact No</th>
+                  <th>Address</th>
+                  <th>Place</th>
+                  <th>Pincode</th>
+                  <th>Country</th>
+                  <th>State</th>
+                  <th>City</th>
+                  <th>Customer Complaint Type</th>      
+                  <th>Division</th> 
+                  <th>Product Name</th>
+                  <th>Product Code</th> 
+                  <th>Product Category</th>         
+                  <th>Product Serial No</th>  
+                  <th>HP</th> 
+                  <th>Stage</th>
+                  <th>Phase</th>
+                  <th>Warranty Customer Bill Date</th>
+                  <th>Service Paid/Free</th>
+                  <th>Work Done Time</th>
+                  <th>Action Done By ASC</th>
+                  <th>Service Center Remark</th>
+                  <!-- <th>Last Status</th> -->
+                  <th>Last Status Update Time</th>
+                  <th>Pending TAT</th>
+                  <th>Open TAT</th>
+                  <th>Cancelled TAT</th>
+                  <th>Work Done TAT</th>
+                  <th>Completed TAT</th>
+                  <th>Close TAT</th>
+                  <th>Serive Bill status</th>
+                  <th>Service Bill Approved Date</th>
+                  <th>Description</th>
+                  <th>Service Branch</th>
+                  <th>Purchased Party Name</th>
+                  <th>Warrenty Bill</th>
+                  <th>Customer Bill No </th>
+                  <th>Customer Bill Date</th>
+                  <th>Under Warrantye</th>
+                  <th>Service Type</th>
+                  <th>Company Sale Bill No.</th>
+                  <th>Company Sale Bill Date</th>
+                  <th>Service Centre Remarks</th>
+                  <th>Complaint Register By</th>
+                  <th>Division Name</th>
+                  <th>Work Completed Duration</th>
+                  <th>Open Duration</th>
+                  <th>Closed Date</th>
+                  <!-- <th>Complaint Feedback Type</th>
+                  <th>Feedback</th> -->
+                  <th>Created By</th>
+                  <th>Created At</th>
+                  <th>Complaint Status</th>
+              </tr>
               </thead>
               <tbody>
               </tbody>
@@ -166,20 +249,30 @@
           'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
       });
-      var table = $('#getscheme').DataTable({
+      var table = $('#getComplaints').DataTable({
           processing: true,
           serverSide: true,
           order: [[0, 'desc']],
           ajax: {
-              url: "{{ route('complaints.index') }}",
+              url: "{{ route('getComplaints') }}",
               type: "POST",  // Change GET to POST
-              headers: {
-                  "Accept": "application/json"  // This forces Laravel to return JSON properly
-              },
               data: function (d) {
-                  // This helps if you want to manually filter data
-                  d._token = "{{ csrf_token() }}"; // Add CSRF token for Laravel
-              }
+                d._token = "{{ csrf_token() }}"; // CSRF Token
+                d.complaint_date = $('input[name="complaint_date"]').val();
+                d.complaint_number = $('input[name="complaint_number"]').val();
+                d.service_center_name = $('input[name="service_center_name"]').val();
+                d.service_center_code = $('input[name="service_center_code"]').val();
+                d.seller = $('input[name="seller"]').val();
+                d.customer_name = $('input[name="customer_name"]').val();
+                d.customer_email = $('input[name="customer_email"]').val();
+                d.customer_number = $('input[name="customer_number"]').val();
+                d.customer_address = $('input[name="customer_address"]').val();
+                d.customer_place = $('input[name="customer_place"]').val();
+                d.customer_country = $('input[name="customer_country"]').val();
+                d.customer_state = $('input[name="customer_state"]').val();
+                d.customer_city = $('input[name="customer_city"]').val();
+                d.pincode       = $('input[name="pincode"]').val();
+            }
           },
           columns: [
               {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
@@ -249,6 +342,16 @@
               {data: 'status', name: 'status', orderable: false, defaultContent: ''}
           ]
       });
+
+      $('.table-input').on('keyup change', function () {
+        table.draw();
+      });
+
+
+      $('#complaint_date').datepicker({
+          maxDate: 0,
+          dateFormat: 'dd-mm-yy',
+       });
 
 
       $('body').on('click', '.activeRecord', function() {

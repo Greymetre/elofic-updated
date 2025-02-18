@@ -1546,6 +1546,7 @@ class AjaxController extends Controller
         $mechanic_count = (clone $data)->where('category_of_participant', 'Mechanic')->count();
         $village_influencer_count = (clone $data)->where('category_of_participant', 'Village influencer')->count();
         $retailer_count = (clone $data)->where('category_of_participant', 'Retailer')->count();
+        $electrician_count = (clone $data)->where('category_of_participant', 'Electrician')->count();
 
         return response()->json([
             'total' => $total,
@@ -1553,6 +1554,7 @@ class AjaxController extends Controller
             'mechanic_count' => $mechanic_count,
             'village_influencer_count' => $village_influencer_count,
             'retailer_count' => $retailer_count,
+            'electrician_count' => $electrician_count
         ]);
     }
 

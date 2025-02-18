@@ -90,11 +90,29 @@
       color: black;
   }
 
+  section.content {
+      position: relative;
+  }
+
+  button#toggle-btn {
+      position: fixed;
+      right: 10px;
+      z-index: 19;
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      top: 25%;
+      font-size: 41px;
+      border-radius: 50px;
+      line-height: 20px;
+  }
+
   </style>
   <!-- Main content -->
   <section class="content">
+    <button id="toggle-btn" class="btn btn-primary mb-2"><i class="bx bx-chevron-right toggle"></i></button>
     <div class="row">
-      <div class="col-9">
+      <div class="col-9 main-content1">
         @if(Session::has('success'))
         <div class="alert alert-success" id="hide_div">
           <button type="button" class="close" data-dismiss="alert">×</button>
@@ -552,7 +570,7 @@
 
 
 
-      <div class="col-3">
+      <div class="col-3 sidebar1">
 
         <div class="card blck-clr">
           <div class="card-body">
@@ -719,6 +737,24 @@
       <script src="{{ url('/').'/'.asset('lightboxx/js/lightbox-plus-jquery.min.js') }}"></script>
 
       <!-- for checked -->
+      <script>
+        $(document).ready(function() {
+            $("#toggle-btn").click(function() {
+                $(".sidebar1").toggle();
+                if ($(".sidebar1").is(":visible")) {
+                    $(".main-content1").removeClass("col-md-12").addClass("col-md-9");
+                } else {
+                    $(".main-content1").removeClass("col-md-9").addClass("col-md-12");
+                }
+                let icon = this.querySelector(".toggle");
+                if (icon.classList.contains("bx-chevron-right")) {
+                    icon.classList.replace("bx-chevron-right", "bx-chevron-left");
+                } else {
+                    icon.classList.replace("bx-chevron-left", "bx-chevron-right");
+                }
+            });
+        });
+      </script>
       <script type="text/javascript">
         var token = $("meta[name='csrf-token']").attr("content");
         $('body').on('click', '.open_status', function() {
