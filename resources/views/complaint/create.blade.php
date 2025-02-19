@@ -739,6 +739,22 @@
                               @endif
                            </div>
                         </div>
+                         <div class="col-md-3">
+                           <div class="input_section">
+                              <label class="col-form-label">Complaint Recieved Via </label>
+                              <select name="complaint_recieve_via" id="complaint_recieve_via" class="select2 form-control">
+                                 <option value="">Complaint Recieved Via</option>
+                                 <option value="WhatsApp" {!! old( 'register_by' , $complaints['complaint_recieve_via'])=='WhatsApp' ?'selected':'' !!}>WhatsApp</option>
+                                 <option value="Toll-Free Call" {!! old( 'register_by' , $complaints['complaint_recieve_via'])=='Toll-Free Call' ?'selected':'' !!}>Toll-Free Call</option>
+                                 <option value="E-Mail" {!! old( 'register_by' , $complaints['complaint_recieve_via'])=='E-Mail' ?'selected':'' !!}>E-Mail</option>
+                              </select>
+                              @if ($errors->has('register_by'))
+                              <div class="error">
+                                 <p class="text-danger">{{ $errors->first('register_by') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
                      </div>
                      <div class="row mt-3">
                         <div class="col-md-12">
@@ -902,11 +918,11 @@
 
             if(product_serail_number == ''){
                $("input, select, textarea")
-               .not("#serail_number, #complaint_number, #complaint_date, #submit-btn , #company_sale_bill_date , #customer_bill_date , input[name='_token'] , #product_serail_number , #warrenty_time , #description , input[name='_method']") // Multiple exclusions in a single string
+               .not("#serail_number, #complaint_number, #complaint_date, #submit-btn , #company_sale_bill_date , #customer_bill_date , input[name='_token'] , #product_serail_number , #warrenty_time , #description , input[name='_method , #complaint_recieve_via']") // Multiple exclusions in a single string
                .val("")
                .trigger('change');
                $("input, select, textarea, button")
-               .not("#serail_number, #complaint_number, #complaint_date, #product_serail_number, #product_group, #company_bill_date_month, #customer_bill_date_month , #warrenty_time , #description , input[name='_method']")
+               .not("#serail_number, #complaint_number, #complaint_date, #product_serail_number, #product_group, #company_bill_date_month, #customer_bill_date_month , #warrenty_time , #description , input[name='_method'] , #complaint_recieve_via")
                .prop("readonly", false)
                .prop("disabled", false);
                return ;
@@ -924,7 +940,7 @@
                },
                success: function(res) {
                   $("input, select, textarea")
-                  .not("#serail_number, #complaint_number, #complaint_date, #submit-btn , #company_sale_bill_date , #customer_bill_date , input[name='_token'] , #product_serail_number , #warrenty_time , #purchased_branch , #complaint_type , #register_by , #product_laying  , input[name='_method'] , #description")
+                  .not("#serail_number, #complaint_number, #complaint_date, #submit-btn , #company_sale_bill_date , #customer_bill_date , input[name='_token'] , #product_serail_number , #warrenty_time , #purchased_branch , #complaint_type , #register_by , #product_laying  , input[name='_method'] , #description , #complaint_recieve_via")
                   .val("")
                   .trigger('change');
                   if (res.status === true ) {
@@ -954,7 +970,7 @@
                      
                      if (res.check_Warranty != null && res.check_Warranty.status == "1") {
                         $("input, select, textarea, button")
-                        .not("#serail_number, #complaint_number, #complaint_date, #product_serail_number, #product_group, #company_bill_date_month, #customer_bill_date_month , #warrenty_time , #purchased_branch , #complaint_type , #register_by , #product_laying , input[name='_method'] , #description")
+                        .not("#serail_number, #complaint_number, #complaint_date, #product_serail_number, #product_group, #company_bill_date_month, #customer_bill_date_month , #warrenty_time , #purchased_branch , #complaint_type , #register_by , #product_laying , input[name='_method'] , #description , #complaint_recieve_via")
                         .prop("readonly", false)
                         .prop("disabled", false);
                         $("#customer_bill_date").val(res.check_Warranty.sale_bill_date.split('-').reverse().join('-'));

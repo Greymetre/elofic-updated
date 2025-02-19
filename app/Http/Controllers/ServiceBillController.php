@@ -153,6 +153,20 @@ class ServiceBillController extends Controller
                     ->usingFileName($customname)
                     ->toMediaCollection('photo_5');
             }
+            if ($request->hasFile('voltage_image')) {
+                $file = $request->file('voltage_image');
+                $customname = time() . '.' . $file->getClientOriginalExtension();
+                $new_service_bill->addMedia($file)
+                    ->usingFileName($customname)
+                    ->toMediaCollection('voltage_image');
+            }
+            if ($request->hasFile('current_image')) {
+                $file = $request->file('current_image');
+                $customname = time() . '.' . $file->getClientOriginalExtension();
+                $new_service_bill->addMedia($file)
+                    ->usingFileName($customname)
+                    ->toMediaCollection('current_image');
+            }
             if ($request->service && count($request->service) > 0) {
                 foreach ($request->service as $service) {
                     if (isset($service['service_bill_product_id']) && !empty($service['service_bill_product_id'])) {

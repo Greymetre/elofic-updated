@@ -195,6 +195,14 @@
                     <h5 class="card-title" id="electrician_count"></h5>
                   </div>
                 </div>
+              </div>
+              <div class="col-sm">
+                <div class="card text-center m-1">
+                  <div class="card-body">
+                    <h4 class="card-text text-center">Exhibition</h4>
+                    <h5 class="card-title" id="exhibition_count"></h5>
+                  </div>
+                </div>
               </div> 
             </div>
           </div>
@@ -462,6 +470,7 @@
          $('#retailer_count').html(res.retailer_count);
          $('#village_influencer_count').html(res.village_influencer_count);
          $('#electrician_count').html(res.electrician_count);
+         $('#exhibition_count').html(res.exhibition_count);
        }
      });
     }

@@ -45,6 +45,7 @@ class ComplaintExport implements FromCollection, WithHeadings, ShouldAutoSize, W
             'product_details.categories',
             'createdbyname',
             'complaint_work_dones',
+            'warranty_details'
         ]);
 
         if ($this->start_date && $this->end_date) {
@@ -74,7 +75,7 @@ class ComplaintExport implements FromCollection, WithHeadings, ShouldAutoSize, W
             'Customer Complaint Type', // Keep the reference point
             
             // Newly added fields
-            'Division',
+            // 'Division',
             'Product Name',
             'Product Code',
             'Product Category',
@@ -144,7 +145,7 @@ class ComplaintExport implements FromCollection, WithHeadings, ShouldAutoSize, W
         $close_tat = calcalutedTatByStatus(4,$data,$data['created_at']);
 
         $work_complated_duration = calcalutedTatByStatus(3,$data,$data['created_at']);
-        $open_duration = calcalutedTatByStatus(3,$data,$data['created_at']);
+        $open_duration = calcalutedTatByStatus(0,$data,$data['created_at']);
 
         $closed_date = 'Not Closed Yet';
         $complaint_status = $data->complaint_time_line->where('status' , 4)->sortByDesc('id')->first();
@@ -199,7 +200,7 @@ class ComplaintExport implements FromCollection, WithHeadings, ShouldAutoSize, W
             $data['customer']['customer_state']?$data['customer']['customer_state'] : '',
             $data['customer']['customer_city']?$data['customer']['customer_city'] : '',
             $data['complaint_type_details']['name'] ??  '',
-            $data['product_details']['categories']['category_name'] ??  '',
+            // $data['product_details']['categories']['category_name'] ??  '',
             $data['product_details']['product_name'] ??  '',
             $data['product_details']['product_code'] ??  '',
             $data['product_details']['categories']['category_name'] ??  '',
@@ -207,7 +208,7 @@ class ComplaintExport implements FromCollection, WithHeadings, ShouldAutoSize, W
             $data['product_details']['specification'] ??  '',
             $data['product_details']['product_no'] ??  '',
             $data['product_details']['phase'] ??  '',
-            $data['customer_bill_date'] ??  '',
+            isset($data['warranty_details']['warranty_date']) ? getDateInIndFomate($data['warranty_details']['warranty_date']) : '',
             $data['service_type'] ??  '',
             isset($data['complaint_time_line']->where('status',2)->sortByDesc('id')->first()->created_at) ?Carbon::parse($data['complaint_time_line']->where('status',2)->sortByDesc('id')->first()->created_at)->format('d-m-Y h:i a') : '',
             isset($data['complaint_work_dones']->sortByDesc('id')->first()->done_by) ? $data->complaint_work_dones->sortByDesc('id')->first()->done_by : '',
@@ -226,11 +227,11 @@ class ComplaintExport implements FromCollection, WithHeadings, ShouldAutoSize, W
             isset($data['customer']['customer_name']) ?  $data['customer']['customer_name'] : '',
             $data['warranty_bill']??  '',
             $data['customer_bill_no']??  '',
-            $data['customer_bill_date']??  '',
+            isset($data['customer_bill_date']) ? getDateInIndFomate($data['customer_bill_date']) : '',
             $data['under_warranty']??  '',
             $data['service_type']??  '',
             $data['company_sale_bill_no'] ?? '',
-            $data['company_sale_bill_date']??  '',
+            isset($data['company_sale_bill_date']) ? getDateInIndFomate($data['company_sale_bill_date']): '',
             isset($data['complaint_work_dones']->sortByDesc('id')->first()->remark) ? $data['complaint_work_dones']->sortByDesc('id')->first()->remark : '',
             $data['register_by']??  '',
             isset($data['product_details']['categories']['category_name']) ? $data['product_details']['categories']['category_name'] : '',
@@ -247,9 +248,16 @@ class ComplaintExport implements FromCollection, WithHeadings, ShouldAutoSize, W
     {
         return [
             AfterSheet::class => function (AfterSheet $event) {
-                $lastRow = $event->sheet->getHighestDataRow() + 1;
-              
-                $event->sheet->getStyle('A1:BD1')->applyFromArray([
+                $sheet = $event->sheet->getDelegate();
+                $lastRow = $sheet->getHighestDataRow();
+                $lastColumn = $sheet->getHighestDataColumn();
+
+                $firstRowRange = 'A1:' . $lastColumn . '1';
+                $sheet->getRowDimension(1)->setRowHeight(25);
+                $sheet->getStyle($firstRowRange)->getAlignment()->setWrapText(true);
+                $sheet->getStyle($firstRowRange)->getFont()->setSize(14);
+
+                $event->sheet->getStyle($firstRowRange)->applyFromArray([
                     'font' => [
                         'bold' => true,
                         'color' => ['rgb' => 'FFFFFF'],
@@ -260,7 +268,7 @@ class ComplaintExport implements FromCollection, WithHeadings, ShouldAutoSize, W
                     ],
                     'fill' => [
                         'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                        'startColor' => ['rgb' => '336677'],
+                        'startColor' => ['rgb' => '00aadb'],
                     ],
                     'borders' => [
                         'allBorders' => [
@@ -270,12 +278,15 @@ class ComplaintExport implements FromCollection, WithHeadings, ShouldAutoSize, W
                     ],
                 ]);
 
-                $event->sheet->getStyle('A' . $lastRow . ':AA' . $lastRow)->applyFromArray([
+                $event->sheet->getStyle('A1:' . $lastColumn . '' . $lastRow)->applyFromArray([
                     'borders' => [
-                        'top' => [
+                        'allBorders' => [
                             'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                            'color' => ['argb' => '000000'], // Border color
+                            'color' => ['argb' => '000000'],
                         ],
+                    ],
+                    'alignment' => [
+                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
                     ],
                 ]);
             },

@@ -16,7 +16,7 @@
         outline: none;
         background: white;
 /*        color: black;*/
-        width: 100px;
+        width: 150px;
     }
 
     .table-input::placeholder {
@@ -112,7 +112,7 @@
               <thead class=" text-primary">
                <tr>
                     <th></th>
-                    <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="complaint_date" id="complaint_date" autocomplete="off" readonly></th>
+                    <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="complaint_date" id="complaint_date" autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input" name="complaint_number" placeholder="Search..."></th>
                     <th><input type="text" class="form-control table-input" name="service_center_name" placeholder="Search..."></th>
                     <th><input type="text" class="form-control table-input" name="service_center_code" placeholder="Search..."></th>
@@ -126,48 +126,66 @@
                     <th><input type="text" class="form-control table-input" name="customer_country" placeholder="Search..."></th>
                     <th><input type="text" class="form-control table-input" name="customer_state" placeholder="Search..."></th>
                     <th><input type="text" class="form-control table-input" name="customer_city" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="customer_complaint_type" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="category_name" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="product_name" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="product_code" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="category_name_1" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="product_serail_number" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="specification" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="product_no" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="phase" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="customer_bill_date" id="customer_bill_date" autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="service_type" placeholder="Search..."></th>
+                    <th><div style="width:150px"></div></th>
+                    <th><div style="width:150px"></div></th>
+                    <th><div style="width:150px"></div></th>
+                    <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="last_update_date" id="last_update_date" autocomplete="off"></th>
+                    <th><div style="width:150px"></div></th>
+                    <th><div style="width:150px"></div></th>
+                    <th><div style="width:150px"></div></th>
+                    <th><div style="width:150px"></div></th>
+                    <th><div style="width:150px"></div></th>
+                    <th><div style="width:150px"></div></th>
+                    <th>
+                        <select class="form-control table-input" name="service_status">
+                            <option value="">Select</option>
+                            <option value="0">Draft</option>
+                            <option value="1">Claimed</option>
+                            <option value="2">Customer Payable</option>
+                            <option value="3">Approved</option>
+                            <option value="4">Cancelled</option>
+                        </select>
+                    </th>
+                    <th><div style="width:150px"></div></th>
+                    <th><input type="text" class="form-control table-input" name="description" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="service_branch" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="purchased_party_name" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="warranty_bill" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="customer_bill_no" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="customer_bill_date_1" id="customer_bill_date_1" autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="under_warranty" placeholder="Search..."></th>
+                     <th><input type="text" class="form-control table-input" name="service_type_1" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="company_sale_bill_no" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="company_sale_bill_date" id="company_sale_bill_date" autocomplete="off"></th>
+                    <th><div style="width:150px"></div></th>
+                    <th><input type="text" class="form-control table-input" name="register_by" placeholder="Search..."></th>
+                    <th><div style="width:150px"></div></th>
+                    <th><div style="width:150px"></div></th>
+                    <th><div style="width:150px"></div></th>
+                    <th><input type="text" name="createdbyname_name" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="created_at" id="created_at" autocomplete="off"></th>
+                    <th>
+                        <select class="form-control table-input" name="status">
+                            <option value="">Select</option>
+                            <option value="0">Open</option>
+                            <option value="1">Pending</option>
+                            <option value="2">Work Done</option>
+                            <option value="3">Completed</option>
+                            <option value="4">Closed</option>
+                            <option value="5">Canceled</option>
+                        </select>
+                    </th>
                 </tr>
                 <tr>
                   <th>{!! trans('panel.global.no') !!}</th>
@@ -216,13 +234,13 @@
                   <th>Warrenty Bill</th>
                   <th>Customer Bill No </th>
                   <th>Customer Bill Date</th>
-                  <th>Under Warrantye</th>
+                  <th>Under Warranty</th>
                   <th>Service Type</th>
                   <th>Company Sale Bill No.</th>
                   <th>Company Sale Bill Date</th>
                   <th>Service Centre Remarks</th>
                   <th>Complaint Register By</th>
-                  <th>Division Name</th>
+                  <!-- <th>Division Name</th> -->
                   <th>Work Completed Duration</th>
                   <th>Open Duration</th>
                   <th>Closed Date</th>
@@ -272,6 +290,33 @@
                 d.customer_state = $('input[name="customer_state"]').val();
                 d.customer_city = $('input[name="customer_city"]').val();
                 d.pincode       = $('input[name="pincode"]').val();
+                d.customer_complaint_type = $('input[name="customer_complaint_type"]').val();
+                d.category_name = $('input[name="category_name"]').val();
+                d.product_name = $('input[name="product_name"]').val();
+                d.product_code = $('input[name="product_code"]').val();
+                d.product_serail_number = $('input[name="product_serail_number"]').val();
+                d.specification = $('input[name="specification"]').val();
+                d.product_no = $('input[name="product_no"]').val();
+                d.phase = $('input[name="phase"]').val();
+                d.category_name_1 = $('input[name="category_name_1"]').val();
+                d.customer_bill_date = $('input[name="customer_bill_date"]').val();
+                d.service_type = $('input[name="service_type"]').val();
+                d.last_update_date = $('input[name="last_update_date"]').val();
+                d.service_status = $('select[name="service_status"]').val();
+                d.description    = $('input[name="description"]').val();
+                d.service_branch = $('input[name="service_branch"]').val();
+                d.purchased_party_name = $('input[name="purchased_party_name"]').val();
+                d.warranty_bill = $('input[name="warranty_bill"]').val();
+                d.customer_bill_no = $('input[name="customer_bill_no"]').val();
+                d.customer_bill_date_1 = $('input[name="customer_bill_date_1"]').val();
+                d.under_warranty = $('input[name="under_warranty"]').val();
+                d.service_type_1 = $('input[name="service_type_1"]').val();
+                d.company_sale_bill_no = $('input[name="company_sale_bill_no"]').val();
+                d.company_sale_bill_date = $('input[name="company_sale_bill_date"]').val();
+                d.register_by = $('input[name="register_by"]').val();
+                d.createdbyname_name = $('input[name="createdbyname_name"]').val();
+                d.created_at = $('input[name="created_at"]').val();
+                d.status = $('select[name="status"]').val();
             }
           },
           columns: [
@@ -299,7 +344,7 @@
               {data: 'product_details.specification', name: 'product_details.specification', orderable: false, defaultContent: '', searchable: false},
               {data: 'product_details.product_no', name: 'product_details.product_no', orderable: false, defaultContent: '', searchable: false},
               {data: 'product_details.phase', name: 'product_details.phase', orderable: false, defaultContent: '', searchable: false},
-              {data: 'customer_bill_date', name: 'customer_bill_date', orderable: false, defaultContent: '', searchable: false},
+              {data: 'warranty_details.warranty_date', name: 'warranty_details.warranty_date', orderable: false, defaultContent: '', searchable: false},
               {data: 'service_type', name: 'service_type', orderable: false, defaultContent: '', searchable: false},
               {data: 'work_done_time', name: 'work_done_time', orderable: false, defaultContent: '', searchable: false},
               {data: 'complaint_work_dones', name: 'complaint_work_dones', orderable: false, defaultContent: '', searchable: false},
@@ -331,7 +376,7 @@
               {data: 'company_sale_bill_date', name: 'company_sale_bill_date', orderable: false, defaultContent: '', searchable: false},
               {data: 'service_center_remark', name: 'service_center_remark', orderable: false, defaultContent: '', searchable: false},
               {data: 'register_by', name: 'register_by', orderable: false, defaultContent: '', searchable: false},
-              {data: 'product_details.categories.category_name', name: 'product_details.categories.category_name', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'product_details.categories.category_name', name: 'product_details.categories.category_name', orderable: false, defaultContent: '', searchable: false},
               {data: 'work_complated_duration', name: 'work_complated_duration', orderable: false, defaultContent: '', searchable: false},
               {data: 'open_duration', name: 'open_duration', orderable: false, defaultContent: '', searchable: false},
               {data: 'closed_date', name: 'closed_date', orderable: false, defaultContent: '', searchable: false},
@@ -347,12 +392,32 @@
         table.draw();
       });
 
-
       $('#complaint_date').datepicker({
           maxDate: 0,
           dateFormat: 'dd-mm-yy',
        });
 
+      $('#customer_bill_date').datepicker({
+          dateFormat: 'dd-mm-yy',
+      });
+
+      $('#last_update_date').datepicker({
+          maxDate: 0,
+          dateFormat: 'dd-mm-yy',
+      });
+
+      $('#customer_bill_date_1').datepicker({
+          dateFormat: 'dd-mm-yy',
+      });
+
+      $('#company_sale_bill_date').datepicker({
+          dateFormat: 'dd-mm-yy',
+      });
+
+      $('#created_at').datepicker({
+          dateFormat: 'dd-mm-yy',
+      });
+      
 
       $('body').on('click', '.activeRecord', function() {
         var id = $(this).attr("id");

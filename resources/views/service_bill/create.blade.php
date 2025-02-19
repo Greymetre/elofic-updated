@@ -432,7 +432,7 @@ body table td {
                <h3 class="mt-2" style="color: black;"><b>Photos: </b></h3>
                <div class="border border-dark rounded p-4">
                   <div class="row mt-2 mb-2">
-                     <div class="col-md-2">
+                     <div class="col-md-3">
                         <label for="product_sr_no">Product Sr. No.</label>
                         <div class="inp-div">
                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
@@ -448,7 +448,7 @@ body table td {
                         </div>
                         @endif
                      </div>
-                     <div class="col-md-2">
+                     <div class="col-md-3">
                         <label for="scr_job_card">SCR-Job Card</label>
                         <div class="inp-div">
                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
@@ -464,8 +464,8 @@ body table td {
                         </div>
                         @endif
                      </div>
-                     <div class="col-md-2">
-                        <label for="photo_3">Photo 3</label>
+                     <div class="col-md-3">
+                        <label for="photo_3">Complaint Photo 1</label>
                         <div class="inp-div">
                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                            <p class="m-0">Attach a File</p>
@@ -480,8 +480,8 @@ body table td {
                         </div>
                         @endif
                      </div>
-                     <div class="col-md-2">
-                        <label for="photo_4">Photo 4</label>
+                     <div class="col-md-3">
+                        <label for="photo_4">Complaint Photo 2</label>
                         <div class="inp-div">
                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                            <p class="m-0">Attach a File</p>
@@ -496,8 +496,8 @@ body table td {
                         </div>
                         @endif
                      </div>
-                     <div class="col-md-2">
-                        <label for="photo_5">Photo 5</label>
+                     <div class="col-md-3">
+                        <label for="photo_5">Complaint/Spare Photo </label>
                         <div class="inp-div">
                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                            <p class="m-0">Attach a File</p>
@@ -508,6 +508,38 @@ body table td {
                         <div class="imgdiv">
                            <a target="_blank" href="{{ $service_bill->getMedia('photo_5')[0]->getFullUrl() }}">
                               <img width="150" src="{{ $service_bill->getMedia('photo_5')[0]->getFullUrl() }}" alt="">
+                           </a>
+                        </div>
+                        @endif
+                     </div>
+                     <div class="col-md-3">
+                        <label for="photo_5">Voltage </label>
+                        <div class="inp-div">
+                           <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                           <p class="m-0">Attach a File</p>
+                           <input type="file" name="voltage_image" id="voltage_image" class="form-control file-input" accept="image/*">
+                        </div>
+                        <span class="file-count">0</span> files selected
+                        @if($service_bill->exists && $service_bill->getMedia('voltage_image')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('voltage_image')[0]->getPath()))
+                        <div class="imgdiv">
+                           <a target="_blank" href="{{ $service_bill->getMedia('voltage_image')[0]->getFullUrl() }}">
+                              <img width="150" src="{{ $service_bill->getMedia('voltage_image')[0]->getFullUrl() }}" alt="">
+                           </a>
+                        </div>
+                        @endif
+                     </div>
+                     <div class="col-md-3">
+                        <label for="photo_5">Current </label>
+                        <div class="inp-div">
+                           <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                           <p class="m-0">Attach a File</p>
+                           <input type="file" name="current_image" id="current_image" class="form-control file-input" accept="image/*">
+                        </div>
+                        <span class="file-count">0</span> files selected
+                        @if($service_bill->exists && $service_bill->getMedia('current_image')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('current_image')[0]->getPath()))
+                        <div class="imgdiv">
+                           <a target="_blank" href="{{ $service_bill->getMedia('current_image')[0]->getFullUrl() }}">
+                              <img width="150" src="{{ $service_bill->getMedia('current_image')[0]->getFullUrl() }}" alt="">
                            </a>
                         </div>
                         @endif

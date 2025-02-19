@@ -34,7 +34,9 @@ class MarketingMasterTemplate implements FromCollection, WithHeadings, ShouldAut
             'Branding Team Member',
             'Name of Participant',
             'Category of Participant',
-            'Mob No of Participant'
+            'Mob No of Participant',
+            'id',
+            'Delete'
         ];
     }
 }
