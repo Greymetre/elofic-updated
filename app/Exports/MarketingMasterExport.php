@@ -56,6 +56,9 @@ class MarketingMasterExport implements FromCollection,WithHeadings,ShouldAutoSiz
         if ($this->request->branding_team_member != null && $this->request->branding_team_member != '') {
             $data->where('branding_team_member', $this->request->branding_team_member);
         }
+        if ($this->request->created_by != null && $this->request->created_by != '') {
+            $data->where('created_by', $this->request->created_by);
+        }
 
         if ($this->request->start_date) {
             $data->where('event_date', '>=', $this->request->start_date);
@@ -64,9 +67,9 @@ class MarketingMasterExport implements FromCollection,WithHeadings,ShouldAutoSiz
         if ($this->request->end_date) {
             $data->where('event_date', '<=', $this->request->end_date);
         }
+
         
         return $data->get();
-        
     }
 
     public function headings(): array

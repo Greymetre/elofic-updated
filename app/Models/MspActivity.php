@@ -18,6 +18,7 @@ class MspActivity extends Model
         'msp_count',
         'created_at',
         'updated_at',
+        'activity_type'
     ];
 
 

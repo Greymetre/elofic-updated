@@ -32,6 +32,7 @@ use App\Http\Controllers\Api\TourPlanController;
 use App\Http\Controllers\Api\TransactionHistoryController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SapStockController;
+use App\Http\Controllers\Api\MspActivityController;
 
 /*
 |--------------------------------------------------------------------------
@@ -258,4 +259,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::get('getPrimarySchemes', [PrimarySchemeReportController::class, 'getPrimarySchemes']);
     Route::get('getPrimarySchemeData', [PrimarySchemeReportController::class, 'getPrimarySchemeData']);
     
+    // msp activity
+
+    Route::apiResource('user/msp_activity', MspActivityController::class)->only(['index','store']);
 });

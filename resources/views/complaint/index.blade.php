@@ -40,7 +40,8 @@
             <span class="">
               <div class="btn-group header-frm-btn">
               @if(auth()->user()->can(['complaint_download']))
-                <form method="GET" action="{{ URL::to('complaint_download') }}" class="form-horizontal">
+                <form method="POST" action="{{ URL::to('complaint_download') }}" class="form-horizontal">
+                  @csrf
                   <div class="d-flex flex-wrap flex-row">
                     <!-- <div class="p-2" style="width:200px;">
                       <select class="select2" name="branch_id" id="branch_id" data-style="select-with-transition" title="Select Branch">
@@ -64,20 +65,72 @@
                     </div>  -->
                     <div class="p-2" style="width:180px;"><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
                     <div class="p-2" style="width:180px;"><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
-                    <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.complaint.title_singular') !!}"><i class="material-icons">cloud_download</i></button></div>
+                    <div class="p-2"><button class="btn btn-just-icon btn-theme" id="button_download" type="button" title="{!!  trans('panel.global.download') !!} {!! trans('panel.complaint.title_singular') !!}"><i class="material-icons">cloud_download</i></button></div>
+                     <div class="p-2">@if(auth()->user()->can(['complaint_create']))
+                        <a href="{{ route('complaints.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.complaint.title_singular') !!}"><i class="material-icons">add_circle</i></a>
+                        @endif
+                      </div>
                   </div>
                 </form>
                 @endif
-                <div class="next-btn">
-                @if(auth()->user()->can(['complaint_create']))
-                <a href="{{ route('complaints.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} {!! trans('panel.complaint.title_singular') !!}"><i class="material-icons">add_circle</i></a>
-                @endif
-              </div>
               </div>
             </span>
           </h4>
         </div>
-
+        <div class="card-body">
+          <div class="col-md-12 p-3">
+            <div class="row">
+              <div class="col-sm">
+                <div class="card text-center m-1">
+                  <div class="card-body">
+                    <h4 class="card-text">Pending Complaints</h4>
+                    <h5 class="card-title" id="complaints_pending"></h5>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm">
+                <div class="card text-center m-1">
+                  <div class="card-body">
+                    <h4 class="card-text text-center">Unsigned Complaints</h4>
+                    <h5 class="card-title" id="complaints_unsigned"></h5>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm">
+                <div class="card text-center m-1">
+                  <div class="card-body">
+                    <h4 class="card-text text-center">Cancelled Complaints</h4>
+                    <h5 class="card-title" id="complaints_cancelled"></h5>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm">
+                <div class="card text-center m-1">
+                  <div class="card-body">
+                    <h4 class="card-text text-center">Complaints In Process</h4>
+                    <h5 class="card-title" id="complaints_in_process"></h5>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm">
+                <div class="card text-center m-1">
+                  <div class="card-body">
+                    <h4 class="card-text text-center">Complete Complaints</h4>
+                    <h5 class="card-title" id="complaints_complete"></h5>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm">
+                <div class="card text-center m-1">
+                  <div class="card-body">
+                    <h4 class="card-text text-center">Closed Complaints</h4>
+                    <h5 class="card-title" id="complaints_closed"></h5>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="card-body">
           @if(count($errors) > 0)
           <div class="alert alert-danger">
@@ -113,30 +166,30 @@
                <tr>
                     <th></th>
                     <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="complaint_date" id="complaint_date" autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input" name="complaint_number" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" name="service_center_name" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" name="service_center_code" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" name="seller"  placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" name="customer_name" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" name="customer_email" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" name="customer_number" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" name="customer_address" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" name="customer_place" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" name="pincode" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" name="customer_country" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" name="customer_state" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" name="customer_city" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" name="customer_complaint_type" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" name="category_name" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" name="product_name" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" name="product_code" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" name="category_name_1" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" name="product_serail_number" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" name="specification" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" name="product_no" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" name="phase" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="complaint_number" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="service_center_name" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="service_center_code" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="seller"  placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="customer_name" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="customer_email" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="customer_number" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="customer_address" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="customer_place" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="pincode" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="customer_country" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="customer_state" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="customer_city" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="customer_complaint_type" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="category_name" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="product_name" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="product_code" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="category_name_1" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="product_serail_number" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="specification" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="product_no" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="phase" placeholder="Search..." autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="customer_bill_date" id="customer_bill_date" autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input" name="service_type" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="service_type" placeholder="Search..." autocomplete="off"></th>
                     <th><div style="width:150px"></div></th>
                     <th><div style="width:150px"></div></th>
                     <th><div style="width:150px"></div></th>
@@ -158,22 +211,22 @@
                         </select>
                     </th>
                     <th><div style="width:150px"></div></th>
-                    <th><input type="text" class="form-control table-input" name="description" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" name="service_branch" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" name="purchased_party_name" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" name="warranty_bill" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" name="customer_bill_no" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="description" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="service_branch" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="purchased_party_name" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="warranty_bill" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="customer_bill_no" placeholder="Search..." autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="customer_bill_date_1" id="customer_bill_date_1" autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input" name="under_warranty" placeholder="Search..."></th>
-                     <th><input type="text" class="form-control table-input" name="service_type_1" placeholder="Search..."></th>
-                    <th><input type="text" class="form-control table-input" name="company_sale_bill_no" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="under_warranty" placeholder="Search..." autocomplete="off"></th>
+                     <th><input type="text" class="form-control table-input" name="service_type_1" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="company_sale_bill_no" placeholder="Search..." autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="company_sale_bill_date" id="company_sale_bill_date" autocomplete="off"></th>
                     <th><div style="width:150px"></div></th>
-                    <th><input type="text" class="form-control table-input" name="register_by" placeholder="Search..."></th>
+                    <th><input type="text" class="form-control table-input" name="register_by" placeholder="Search..." autocomplete="off"></th>
                     <th><div style="width:150px"></div></th>
                     <th><div style="width:150px"></div></th>
                     <th><div style="width:150px"></div></th>
-                    <th><input type="text" name="createdbyname_name" class="form-control table-input" placeholder="Search..."></th>
+                    <th><input type="text" name="createdbyname_name" class="form-control table-input" placeholder="Search..." autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="created_at" id="created_at" autocomplete="off"></th>
                     <th>
                         <select class="form-control table-input" name="status">
@@ -388,6 +441,48 @@
           ]
       });
 
+      $(document).ready(function () {
+          // Initialize datepickers
+          $('.datepicker').datepicker({
+              maxDate: 0,
+              dateFormat: 'dd-mm-yy',
+              onClose: function () {
+                  $(this).blur(); // Ensure input loses focus when closed
+              }
+          });
+
+          // Close datepicker or blur input/select on key press (except Tab)
+          $(document).on('keydown', function (e) {
+              if (e.key !== 'Tab') {
+                  $('.datepicker').datepicker('hide');
+                  // $('input.table-input, select.table-input').blur();
+              }
+          });
+
+          // Close datepicker or blur input/select on mouse wheel scroll
+          $(document).on('wheel', function () {
+              $('.datepicker').datepicker('hide');
+              // $('input.table-input, select.table-input').blur();
+          });
+
+          // Close datepicker or blur input/select on mouse click outside any input/select
+          $(document).on('click', function (event) {
+              if (!$(event.target).closest('input.table-input, select.table-input').length) {
+                  $('.datepicker').datepicker('hide');
+                  $('select.table-input').blur();
+              }
+          });
+
+          // Close datepicker or blur input/select on arrow key movement
+          $(document).on('keydown', function (e) {
+              if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                  $('.datepicker').datepicker('hide');
+                  // $('input.table-input, select.table-input').blur();
+              }
+          });
+      });
+
+
       $('.table-input').on('keyup change', function () {
         table.draw();
       });
@@ -480,6 +575,26 @@
           },
         });
       });
+      $('#button_download').on('click', function() {
+          let form = $('<form>', {
+              method: 'POST',
+              action: "{{ URL::to('complaint_download') }}"
+          });
+
+          form.append($('<input>', {type: 'hidden', name: '_token', value: $('input[name="_token"]').val()}));
+
+          // Collect all filter inputs (both text and select fields)
+          $('.table-input, .table-select').each(function() {
+              let inputName = $(this).attr('name');
+              let inputValue = $(this).val();
+              form.append($('<input>', {type: 'hidden', name: inputName, value: inputValue}));
+          });
+          form.append($('<input>', {type: 'hidden', name: 'start_date', value: $('#start_date').val()}));
+          form.append($('<input>', {type: 'hidden', name: 'end_date', value: $('#end_date').val()}));
+
+          $('body').append(form);
+          form.submit();
+      });
 
     });
 
@@ -508,5 +623,29 @@
         });
       });
     });
+
+
+    $(document).ready(function(){
+      getCountsOfComplaints();
+    })
+
+    function getCountsOfComplaints() {
+       $.ajax({
+         url: "{{ url('getCountsOfComplaints') }}",
+         dataType: "json",
+         type: "POST",
+         data: {
+           _token: "{{csrf_token()}}",
+         },
+         success: function(res) {
+           $('#complaints_pending').html(res.complaints_pending);
+           $('#complaints_unsigned').html(res.complaints_unsigned);
+           $('#complaints_cancelled').html(res.complaints_cancelled);
+           $('#complaints_in_process').html(res.complaints_in_process);
+           $('#complaints_complete').html(res.complaints_complete);
+           $('#complaints_closed').html(res.complaints_closed);
+         }
+       });
+    }
   </script>
 </x-app-layout>

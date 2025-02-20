@@ -1026,6 +1026,8 @@ Route::any('marketing/getCounts', [AjaxController::class, 'marketingGetCounts'])
 Route::any('getProductTimeInterval', [AjaxController::class, 'getProductTimeInterval']);
 Route::any('getSellerBuyer', [AjaxController::class, 'getSellerBuyer']);
 Route::any('addMarketingType', [AjaxController::class, 'addMarketingType']);
+Route::any('getMarketingType', [AjaxController::class, 'getMarketingType']);
+Route::any('deleteMarketingType', [AjaxController::class, 'deleteMarketingType']);
 Route::any('getUserByBranch', [AjaxController::class, 'getUserByBranch']);
 Route::any('getPMS', [AjaxController::class, 'getPMS']);
 Route::any('getPincodeSearch', [AjaxController::class, 'getPincodeSearch']);
@@ -1034,6 +1036,7 @@ Route::any('getAllPartyName', [AjaxController::class, 'getAllPartyName']);
 Route::any('getProductWarrentyTime', [AjaxController::class, 'getProductWarrentyTime']);
 Route::any('getServiceChargeType', [AjaxController::class, 'getServiceChargeType']);
 Route::any('getServiceServiceEngiByDivision', [AjaxController::class, 'getServiceServiceEngiByDivision']);
+Route::any('getCountsOfComplaints', [AjaxController::class, 'getCountsOfComplaints']);
 
 //Clear Cache facade value:
 Route::get('/clear-cache', function () {

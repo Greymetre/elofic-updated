@@ -240,9 +240,8 @@
  
             <hr class="mt-5">
             <div class="card-body">
+               <div id="success-message"></div>
                <div class="row">
-
-                  
                   <!-- Form Section -->
                   <div class="col-md-6">
                      <div class="input_section">
@@ -255,24 +254,6 @@
                          </div>
                          <div id="badge-container" class="mt-2">
                            <!-- Static Badges -->
-                           <span class="badge badge-info mr-2 mb-2">
-                              Marketing
-                              <button type="button" class="close" aria-label="Close" onclick="removeBadge(this)">
-                                  <span aria-hidden="true">&times;</span>
-                              </button>
-                          </span>
-                          <span class="badge badge-info mr-2 mb-2">
-                           Development
-                           <button type="button" class="close" aria-label="Close" onclick="removeBadge(this)">
-                               <span aria-hidden="true">&times;</span>
-                           </button>
-                       </span>
-                       <span class="badge badge-info mr-2 mb-2">
-                           Sales
-                           <button type="button" class="close" aria-label="Close" onclick="removeBadge(this)">
-                               <span aria-hidden="true">&times;</span>
-                           </button>
-                       </span>
                        </div>
                      </div>
                  </div>                 
@@ -285,6 +266,9 @@
    </div>
    <script src="{{ url('/').'/'.asset('assets/js/validation_loyalty.js') }}"></script>
    <script>
+      $(document).ready(function(){
+         getupdateMarketingType();
+      })
       $('body').on('click', '.close-btn', function() {
          var deleteButton = $(this);
          var id = $(this).data("id");
@@ -313,22 +297,134 @@
          });
       });
 
-      $('#marketing_type').on('click' , function(){
-         var type = $('#activity_type').val();
-         if(type!=''){
-            $.ajax({
-                url: "{{ url('addMarketingType') }}",
-                data: {
-                    "type": type
-                },
-                success: function(res) {
-                    if (res.status == true) {
-                        getupdateMarketingType();
-                    }
-                }
-            });
-         }
-      })
+     function getupdateMarketingType() {
+          $.ajax({
+              url: "{{ url('getMarketingType') }}",
+              method: "GET",
+              success: function (res) {
+                  if (res.status) {
+                      $("#badge-container").html(res.html); // Inject HTML from the response
+                  }
+              },
+              error: function () {
+                  alert("Error fetching marketing types.");
+              }
+          });
+      }
+
+      function removeBadge(id) {
+         if (!confirm("Are you sure you want to delete this marketing type?")) {
+              return;
+          }
+          $.ajax({
+              url: "{{ url('deleteMarketingType') }}", // Make sure this route is defined in Laravel
+              method: "POST",
+              data: {
+                  "id": id,
+                  "_token": "{{ csrf_token() }}" // CSRF token for security
+              },
+              success: function (res) {
+                  if (res.status === true) {
+                      $('#badge_' + id).remove(); // Remove badge from the UI
+                      $('#success-message').html(
+                        '<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+                            '<strong>Success!</strong> Marketing activity removed successfully.' +
+                            '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                                '<span aria-hidden="true">&times;</span>' +
+                            '</button>' +
+                        '</div>'
+                     );
+                  }
+              },
+              error: function () {
+                  alert("Something went wrong!");
+              }
+          });
+      }
+
+
+      // function removeBadge(element, id) {
+      //    console.log(element, id);
+      //     if (!confirm("Are you sure you want to delete this marketing type?")) {
+      //         return;
+      //     }
+
+      //     $.ajax({
+      //         url: "{{ url('deleteMarketingType') }}",
+      //         method: "POST",
+      //         data: {
+      //             "id": id,
+      //             "_token": "{{ csrf_token() }}" // CSRF token for security
+      //         },
+      //         success: function (res) {
+      //             if (res.status) {
+      //                 $(element).closest("span").remove(); // Remove badge from UI
+      //                 // Show success message
+      //                  $('#success-message').html(
+      //                      '<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+      //                          '<strong>Success!</strong> Marketing activity removed successfully.' +
+      //                          '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+      //                              '<span aria-hidden="true">&times;</span>' +
+      //                          '</button>' +
+      //                      '</div>'
+      //                  );
+      //             } else {
+      //                 alert(res.message);
+      //             }
+      //         },
+      //         error: function () {
+      //             alert("Error deleting marketing type.");
+      //         }
+      //     });
+      // }
+
+
+
+      $('#marketing_type').on('click', function () {
+          var type = $('#activity_type').val().trim(); // Trim to remove extra spaces
+
+          if (type !== '') {
+              $.ajax({
+                  url: "{{ url('addMarketingType') }}",
+                  method: "POST", // Assuming it's a POST request
+                  data: {
+                      "type": type,
+                      "_token": "{{ csrf_token() }}" // Add CSRF token for security
+                  },
+                  success: function (res) {
+                      if (res.status === true) {
+                          getupdateMarketingType(); // Refresh the list
+                          
+                          // Show success message
+                          $('#success-message').html(
+                              '<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+                                  '<strong>Success!</strong> Marketing activity added successfully.' +
+                                  '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                                      '<span aria-hidden="true">&times;</span>' +
+                                  '</button>' +
+                              '</div>'
+                          );
+
+                          // Clear input field
+                          $('#activity_type').val('');
+                      }
+                  },
+                  error: function () {
+                      $('#success-message').html(
+                          '<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
+                              '<strong>Error!</strong> Something went wrong. Please try again.' +
+                              '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                                  '<span aria-hidden="true">&times;</span>' +
+                              '</button>' +
+                          '</div>'
+                      );
+                  }
+              });
+          } else {
+              alert('Please enter an activity type.');
+          }
+      });
+
       // 
    </script>
 </x-app-layout>

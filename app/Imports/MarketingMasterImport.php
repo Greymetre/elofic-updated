@@ -61,7 +61,7 @@ class MarketingMasterImport implements ToCollection, WithValidation, WithHeading
                 Marketing::updateOrCreate([
                     'mob_no_of_participant' => $row['mob_no_of_participant'],
                 ], [
-                    'event_date' => $row['event_date'],
+                    'event_date' => Carbon::parse($row['event_date'])->toDateString(),
                     'division' => $row['division'],
                     'event_center' => $row['event_center'],
                     'place_of_participant' => $row['place_of_participant'],
@@ -92,7 +92,7 @@ class MarketingMasterImport implements ToCollection, WithValidation, WithHeading
             ],
             'branch' => 'required|exists:branches,branch_name',
             'state' => 'required|exists:states,state_name',
-            'category_of_participant' => 'required|in:Plumber,Mechanic,Village influencer,Retailer',
+            'category_of_participant' => 'required|in:Plumber,Mechanic,Village influencer,Retailer,Exhibition Visitors,Electrician',
             'division' => 'required|exists:divisions,division_name',
             'event_date' => 'required|date',
         ];

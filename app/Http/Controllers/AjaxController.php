@@ -1547,7 +1547,7 @@ class AjaxController extends Controller
         $village_influencer_count = (clone $data)->where('category_of_participant', 'Village influencer')->count();
         $retailer_count = (clone $data)->where('category_of_participant', 'Retailer')->count();
         $electrician_count = (clone $data)->where('category_of_participant', 'Electrician')->count();
-        $exhibition_count = (clone $data)->where('category_of_participant', 'Exhibition')->count();
+        $exhibition_count = (clone $data)->where('category_of_participant', 'Exhibition Visitors')->count();
 
         return response()->json([
             'total' => $total,
@@ -1745,7 +1745,6 @@ class AjaxController extends Controller
         $type = $request->type ?? '';
         if (isset($type)) {
             $slug = strtolower(str_replace(' ', '_', $type));
-
             $marketing_type = MarketingActivity::updateOrCreate(
                 ['slug' => $slug],
                 ['type' => $type]
@@ -1754,6 +1753,69 @@ class AjaxController extends Controller
         }
         return response()->json(['status' => false]);
     }
+
+   public function getMarketingType(Request $request)
+    {
+        try {
+            $types = MarketingActivity::select('id', 'type')->get(); // Fetching data
+
+            $html = '';
+            foreach ($types as $type) {
+                $html .= '
+                    <span class="badge badge-info mr-2 mb-2" id="badge_' . $type->id . '">
+                        ' . e($type->type) . '
+                        <button type="button" class="close" aria-label="Close" onclick="removeBadge(' . $type->id . ')">
+                            <span aria-hidden="true" style="color:red">&times;</span>
+                        </button>
+                    </span>
+                ';
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Marketing types retrieved successfully',
+                'html' => $html
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong!',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function deleteMarketingType(Request $request)
+    {
+        try {
+            $id = $request->id;
+
+            $marketingType = MarketingActivity::find($id);
+            if (!$marketingType) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Marketing type not found'
+                ], 404);
+            }
+
+            $marketingType->delete();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Marketing type deleted successfully'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong!',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
 
     // get users by branch id
     public function getUserByBranch(Request $request)
@@ -2063,5 +2125,18 @@ class AjaxController extends Controller
         return response()->json(['status' => true , 'html' => $html]);
     }
 
+    // get the total of complaints
+    public function getCountsOfComplaints(Request $request)
+    {
+        $query = Complaint::query(); // Use query builder
 
+        return response()->json([
+            'complaints_pending'    => $query->where('complaint_status', '1')->count(),
+            'complaints_unsigned'   => $query->whereNull('assign_user')->count(),
+            'complaints_cancelled'  => $query->where('complaint_status', '5')->count(),
+            'complaints_in_process' => $query->whereIn('complaint_status', ['0', '2'])->count(),
+            'complaints_complete'   => $query->where('complaint_status', '3')->count(),
+            'complaints_closed'     => $query->where('complaint_status', '4')->count(),
+        ]);
+    }
 }
