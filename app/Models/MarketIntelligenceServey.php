@@ -39,7 +39,7 @@ class MarketIntelligenceServey extends Model implements HasMedia
 
     public function createdbyname()
     {
-        return $this->belongsTo('App\Models\User', 'created_by', 'id')->select('id','name');
+        return $this->belongsTo('App\Models\User', 'created_by', 'id')->select('id','name' ,'employee_codes');
     }
 
     public function state()

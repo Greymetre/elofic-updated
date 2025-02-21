@@ -9,6 +9,8 @@ use App\Models\MspActivity;
 use Carbon\Carbon;
 use App\Models\MspActivityCity;
 use App\Models\MspActivityCustomer;
+use App\Models\Branch;
+use App\Models\User;
 
 use Validator;
 
@@ -84,10 +86,15 @@ class MspActivityController extends Controller
 
             // Format activity date
             $activityDate = Carbon::parse($request->activity_date);
-            $month = $activityDate->format('m'); 
+            $month = $activityDate->format('M'); 
             $year  = $activityDate->format('Y'); 
-            $nextYear = substr($year + 1, -2);
-            $formattedYear = "$year-$nextYear";
+
+            // Determine financial year
+            $startYear = ($activityDate->month >= 4) ? $year : $year - 1;
+            $endYear = substr($startYear + 1, -2); // Get last two digits of next year
+
+            $formattedYear = "$startYear-$endYear";
+
 
             // Create Marketing Activity
             $activity = MspActivity::create([
@@ -130,4 +137,168 @@ class MspActivityController extends Controller
             ], $this->internalError);
         }
     }
+
+    public function getMspActivityFilter(Request $request){
+        try{
+            $users          = User::with('getbranch')->whereIn('id',getUsersReportingToAuth($request->user()->id))->select('id','name' ,'employee_codes' , 'branch_id')->get();
+            $financial_year = $this->getFinancialYearList();
+            $branchIds = $users->pluck('branch_id')->unique()->filter();
+            // Get only those branches
+            $branches = Branch::whereIn('id', $branchIds)
+                ->select('id', 'branch_name')
+                ->get();
+            return response()->json([
+                'status'  => true,
+                'message' => 'Marketing activity added successfully',
+                'users'    => $users,
+                'financial_year'=> $financial_year,
+                'branches'      => $branches
+            ], $this->successStatus);
+        }catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong!',
+                'error' => $e->getMessage()
+            ], $this->internalError);
+        }
+    }
+
+    public function getMspActivityCount(Request $request)
+    {
+        try {
+            // Get financial year
+            $activities = $this->marketingActivity->select('id', 'type')->get(); 
+
+            $financial_year = $request->financial_year ?? $this->getFinancialYear();
+            
+            // Optional filters
+            $employee_codes = $request->employee_codes ?? null;
+            $branch_id      = $request->branch_id ?? null;
+
+
+            // Extract start and end year from financial year (e.g., "2024-25")
+            $startYear = substr($financial_year, 0, 4);
+            $endYear = substr($financial_year, -2); // Last two digits of next year
+
+            // Mapping numeric month to three-letter format
+            $monthMapping = [
+                "01" => "Jan", "02" => "Feb", "03" => "Mar",
+                "04" => "Apr", "05" => "May", "06" => "Jun",
+                "07" => "Jul", "08" => "Aug", "09" => "Sep",
+                "10" => "Oct", "11" => "Nov", "12" => "Dec"
+            ];
+
+            // Generate 12-month period from April (startYear) to March (endYear)
+            $months = [];
+            for ($i = 4; $i <= 12; $i++) { // April to December of startYear
+                $months[sprintf('%02d/%s', $i, substr($startYear, -2))] = $monthMapping[sprintf('%02d', $i)];
+            }
+            for ($i = 1; $i <= 3; $i++) { // January to March of endYear
+                $months[sprintf('%02d/%s', $i, $endYear)] = $monthMapping[sprintf('%02d', $i)];
+            }
+
+            // Get all activity types
+            $activities = $this->marketingActivity->select('id', 'type')->get();
+
+            // Fetch all relevant activity data first
+            $query = MspActivity::with('user')->selectRaw('
+                        month, 
+                        activity_type, 
+                        COUNT(*) as total_performed, 
+                        SUM(msp_count) as total_participants
+                    ')
+                    ->where('fyear', $financial_year)
+                    ->groupBy('month', 'activity_type');
+
+            // Apply optional filters
+
+            if (isset($branch_id) && isset($employee_codes)) {
+                $query->whereHas('user', function($query1) use ($request) {
+                    $query1->where('branch_id', $request->branch_id);
+                });
+                $query->where('emp_code', $employee_codes);
+            }else if (isset($branch_id)) {
+                $query->whereHas('user', function($query1) use ($request) {
+                    $query1->where('branch_id', $request->branch_id);
+                });
+            }else if (isset($employee_codes)) {
+                $query->where('emp_code', $employee_codes);
+            }else{
+                $query->where('emp_code', $request->user()->employee_codes);
+            }
+
+
+            // Fetch the data
+
+            $activityData = $query->get()->groupBy('month');
+
+            // Prepare the result array
+            $activityReport = [];
+
+            foreach ($months as $formattedMonth => $dbMonth) {
+                $monthData = $activityData[$dbMonth] ?? collect();
+                // $monthArray = [
+                //     'month' => $formattedMonth,
+                //     'activities' => []
+                // ];
+
+                foreach ($activities as $activity) {
+                    // Find activity data or default to 0
+                    $data = $monthData->where('activity_type', $activity->id)->first();
+
+                    $activityReport[$formattedMonth][] = [
+                        'activity_name' => $activity->type,
+                        'total_performed' => $data->total_performed ?? 0, // How many times performed
+                        'total_participants' => $data->total_participants ?? 0, // Total participants (msp_count)
+                    ];
+                }
+
+                // $activityReport[] = $monthArray;
+            }
+
+            return response()->json([
+                'status'  => true,
+                'activities'=> $activities,
+                'data'=> $activityReport,
+            ], $this->successStatus);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+
+    private function getFinancialYear()
+    {
+        $date = now(); // Get current date using Carbon
+
+        $year = $date->year;
+        $startYear = ($date->month >= 4) ? $year : $year - 1;
+        $endYear = substr($startYear + 1, -2); 
+
+        return $startYear . '-' . $endYear;
+    }
+
+    private function getFinancialYearList()
+    {
+        $currentYear = now()->year;
+        $currentMonth = now()->month;
+
+        // Determine the starting financial year
+        $startYear = ($currentMonth >= 4) ? $currentYear : $currentYear - 1;
+
+        // Generate last three, current, and next three financial years
+        $financialYears = [];
+        for ($i = -3; $i <= 3; $i++) {
+            $year = $startYear + $i;
+            $nextYear = substr($year + 1, -2); // Get last two digits of next year
+
+            $financialYears[] = [            // Unique ID (can be the start year)
+                'year' => "$year-$nextYear"  // Financial year in "YYYY-YY" format
+            ];
+        }
+        // Output the financial years
+        return $financialYears;
+    }
+
+    
 }

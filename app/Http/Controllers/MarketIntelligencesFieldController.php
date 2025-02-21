@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\DataTables\MarketIntelligencesFieldsDataTable;
+use App\DataTables\MarketIntelligencesDataTable;
 use App\Exports\ExcelExport;
 use App\Models\CustomerType;
 use App\Models\Division;
@@ -210,8 +211,16 @@ class MarketIntelligencesFieldController extends Controller
             $data[$key]['list_price'] = $value->list_price ?? '-';
             $data[$key]['landed'] = $value->landed_to_dealers ?? '-';
             $data[$key]['remark'] = $value->remark ?? '-';
-            $data[$key]['image'] = $value->getMedia('servey_image')->count() > 0 && Storage::disk('s3')->exists($value->getMedia('servey_image')[0]->getPath()) ? 'Yes' : 'No';
+            $data[$key]['image'] = $value->getMedia('servey_image')->count() > 0 
+                ? $value->getMedia('servey_image')[0]->getFullUrl() 
+                : 'No';
         }
         return Excel::download(new ExcelExport($heading, $data), 'MarketIntelligencesFields.xlsx');
+    }
+
+    public function marketIntelligence(MarketIntelligencesDataTable $dataTable, Request $request)
+    {
+        //abort_if(Gate::denies('fields_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        return $dataTable->render('reports.customer_makert_intelligence');
     }
 }

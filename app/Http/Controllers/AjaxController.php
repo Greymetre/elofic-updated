@@ -2129,14 +2129,13 @@ class AjaxController extends Controller
     public function getCountsOfComplaints(Request $request)
     {
         $query = Complaint::query(); // Use query builder
-
-        return response()->json([
-            'complaints_pending'    => $query->where('complaint_status', '1')->count(),
-            'complaints_unsigned'   => $query->whereNull('assign_user')->count(),
-            'complaints_cancelled'  => $query->where('complaint_status', '5')->count(),
-            'complaints_in_process' => $query->whereIn('complaint_status', ['0', '2'])->count(),
-            'complaints_complete'   => $query->where('complaint_status', '3')->count(),
-            'complaints_closed'     => $query->where('complaint_status', '4')->count(),
+         return response()->json([
+            'complaints_pending'    => (clone $query)->where('complaint_status', '1')->count(),
+            'complaints_work_done'  => (clone $query)->where('complaint_status', '2')->count(),
+            'complaints_cancelled'  => (clone $query)->where('complaint_status', '5')->count(),
+            'complaints_in_process' => (clone $query)->where('complaint_status', '0')->count(),
+            'complaints_complete'   => (clone $query)->where('complaint_status', '3')->count(),
+            'complaints_closed'     => (clone $query)->where('complaint_status', '4')->count(),
         ]);
     }
 }

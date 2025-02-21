@@ -36,9 +36,10 @@ class UserCityImport implements ToCollection,WithValidation,WithHeadingRow, With
     }
     public function collection(Collection $rows)
     {
-
+        
         foreach ($rows as $row) {
-            if($row['delete'] == 'Y'){
+            
+            if(isset($row['delete']) && $row['delete'] == 'Y'){
                 UserCityAssign::where('city_id', $row['city_id'])->where('userid', $row['user_id'])->delete();
             }else{
                 UserCityAssign::updateOrCreate(['city_id' => $row['city_id'], 'userid' => $row['user_id'] ],[

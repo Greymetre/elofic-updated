@@ -262,4 +262,6 @@ Route::group(['middleware' => ['auth:users']], function () {
     // msp activity
 
     Route::apiResource('user/msp_activity', MspActivityController::class)->only(['index','store']);
+    Route::get('user/msp-activity-counts', [MspActivityController::class , 'getMspActivityCount']);
+    Route::get('user/msp-activity-filter', [MspActivityController::class , 'getMspActivityFilter']);
 });

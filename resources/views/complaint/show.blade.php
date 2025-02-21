@@ -576,7 +576,9 @@
           <div class="card-body">
 
             <div class="row">
+
               <div class="col-12">
+
                 <h3 class="card-title pb-3">Time Line</h3>
                 <hr>
                 <p class="lead"></p>
@@ -644,6 +646,9 @@
                   <b> #{!! $complaint['complaint_number'] !!} Created by {{ $complaint->createdbyname->name?? '' }} At {{date("d M Y, h:i a", strtotime($complaint->created_at));}} 
                 </p>
               </div>
+              <button class="btn btn-primary w-100 mb-3" id="openModalButton">
+                + Add Task
+              </button>
             </div>
           </div>
         </div>
@@ -728,7 +733,45 @@
           </div>
         </div>
       </div>
-
+     <div class="modal fade bd-example-modal-lg" id="addTask" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content card">
+          <div class="card-header card-header-icon card-header-theme">
+            <h4 class="card-title">
+              <span class="modal-title">{!! trans('panel.global.add') !!}</span> Task
+              <span class="pull-right">
+                <a href="javascript:void(0)" class="btn btn-just-icon btn-danger" id="closeModalButton">
+                  <i class="material-icons">clear</i>
+                </a>
+              </span>
+            </h4>
+          </div>
+          <div class="modal-body">
+            <form method="POST" action="#" enctype="multipart/form-data" id="createWarehouseForm">
+              @csrf
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="input_section">
+                    <label class="col-form-label">Task <span class="text-danger"> *</span></label>
+                    <div class="form-group has-default bmd-form-group">
+                      <input type="text" name="complaint_task" id="complaint_task" class="form-control" value="{!! old('complaint_task') !!}" maxlength="200" required>
+                      @if ($errors->has('complaint_task'))
+                        <div class="error"><p class="text-danger">{{ $errors->first('complaint_task') }}</p></div>
+                      @endif
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="clearfix"></div>
+              <div class="pull-right">
+                <input type="hidden" name="id" id="warehouse_id" />
+                <button class="btn btn-info save"> Submit</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
       <!-- end model for status -->
 
       <!-- Custom styles for this page -->
@@ -753,6 +796,20 @@
                     icon.classList.replace("bx-chevron-left", "bx-chevron-right");
                 }
             });
+
+              $("#openModalButton").click(function () {
+                $("#addTask").modal("show");
+              });
+               $("#closeModalButton").click(function () {
+                $("#addTask").modal("hide");
+              });
+
+              // Close Modal when clicking outside (optional)
+              $("#addTask").on("click", function (e) {
+                if ($(e.target).hasClass("modal")) {
+                  $("#addTask").modal("hide");
+                }
+              });
         });
       </script>
       <script type="text/javascript">

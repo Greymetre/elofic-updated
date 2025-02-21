@@ -94,7 +94,7 @@ class MarketingMasterImport implements ToCollection, WithValidation, WithHeading
             'state' => 'required|exists:states,state_name',
             'category_of_participant' => 'required|in:Plumber,Mechanic,Village influencer,Retailer,Exhibition Visitors,Electrician',
             'division' => 'required|exists:divisions,division_name',
-            'event_date' => 'required|date',
+            'event_date' => 'required|date|before_or_equal:today',
         ];
         return $rules;
     }

@@ -2219,6 +2219,13 @@
                         </a>
                      </li>
                      @endif
+                      <li class="nav-link-btn {{ request()->is('reports/marketIntelligence*') ? 'active' : '' }}">
+                        <a class="hoveradd2" href="{{ url('reports/marketIntelligence') }}">
+                           <i class="material-icons icon">nature_people</i>
+                           <span> Market Intelligence</span>
+                           <div class="d-none mobile_hide"> Market Intelligence</div>
+                        </a>
+                     </li>
                   </ul>
                </div>
             </li>

@@ -28,6 +28,15 @@
         border-color: #007bff;
         box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
     }
+
+    .hover-effect {
+      cursor: pointer;
+      transition: transform 0.2s ease-in-out;
+    }
+
+    .hover-effect:hover {
+      transform: scale(1.05); /* Slightly increase size on hover */
+    }
   </style>
   <div class="row">
     <div class="col-md-12">
@@ -81,50 +90,50 @@
           <div class="col-md-12 p-3">
             <div class="row">
               <div class="col-sm">
-                <div class="card text-center m-1">
-                  <div class="card-body">
+                <div class="card text-center m-1 hover-effect">
+                  <div class="card-body " onclick="change_complaints_type(1)">
                     <h4 class="card-text">Pending Complaints</h4>
                     <h5 class="card-title" id="complaints_pending"></h5>
                   </div>
                 </div>
               </div>
               <div class="col-sm">
-                <div class="card text-center m-1">
-                  <div class="card-body">
-                    <h4 class="card-text text-center">Unsigned Complaints</h4>
-                    <h5 class="card-title" id="complaints_unsigned"></h5>
-                  </div>
-                </div>
-              </div>
-              <div class="col-sm">
-                <div class="card text-center m-1">
-                  <div class="card-body">
-                    <h4 class="card-text text-center">Cancelled Complaints</h4>
-                    <h5 class="card-title" id="complaints_cancelled"></h5>
-                  </div>
-                </div>
-              </div>
-              <div class="col-sm">
-                <div class="card text-center m-1">
-                  <div class="card-body">
+                <div class="card text-center m-1 hover-effect">
+                  <div class="card-body " onclick="change_complaints_type(0)">
                     <h4 class="card-text text-center">Complaints In Process</h4>
                     <h5 class="card-title" id="complaints_in_process"></h5>
                   </div>
                 </div>
               </div>
               <div class="col-sm">
-                <div class="card text-center m-1">
-                  <div class="card-body">
+                <div class="card text-center m-1 hover-effect">
+                  <div class="card-body hover-effect" onclick="change_complaints_type(2)">
+                    <h4 class="card-text text-center">Work Done Complaints</h4>
+                    <h5 class="card-title" id="complaints_work_done"></h5>
+                  </div>
+                </div>
+              </div>
+               <div class="col-sm">
+                <div class="card text-center m-1 hover-effect">
+                  <div class="card-body " onclick="change_complaints_type(3)">
                     <h4 class="card-text text-center">Complete Complaints</h4>
                     <h5 class="card-title" id="complaints_complete"></h5>
                   </div>
                 </div>
               </div>
               <div class="col-sm">
-                <div class="card text-center m-1">
-                  <div class="card-body">
+                <div class="card text-center m-1 hover-effect">
+                  <div class="card-body" onclick="change_complaints_type(4)">
                     <h4 class="card-text text-center">Closed Complaints</h4>
                     <h5 class="card-title" id="complaints_closed"></h5>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm">
+                <div class="card text-center m-1 hover-effect">
+                  <div class="card-body " onclick="change_complaints_type(5)">
+                    <h4 class="card-text text-center">Cancelled Complaints</h4>
+                    <h5 class="card-title" id="complaints_cancelled"></h5>
                   </div>
                 </div>
               </div>
@@ -169,6 +178,17 @@
                     <th><input type="text" class="form-control table-input" name="complaint_number" placeholder="Search..." autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input" name="service_center_name" placeholder="Search..." autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input" name="service_center_code" placeholder="Search..." autocomplete="off"></th>
+                    <th>
+                        <select class="form-control table-input" name="status" id="status">
+                            <option value="">Select</option>
+                            <option value="0">Open</option>
+                            <option value="1">Pending</option>
+                            <option value="2">Work Done</option>
+                            <option value="3">Completed</option>
+                            <option value="4">Closed</option>
+                            <option value="5">Canceled</option>
+                        </select>
+                    </th>
                     <th><input type="text" class="form-control table-input" name="seller"  placeholder="Search..." autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input" name="customer_name" placeholder="Search..." autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input" name="customer_email" placeholder="Search..." autocomplete="off"></th>
@@ -228,17 +248,7 @@
                     <th><div style="width:150px"></div></th>
                     <th><input type="text" name="createdbyname_name" class="form-control table-input" placeholder="Search..." autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="created_at" id="created_at" autocomplete="off"></th>
-                    <th>
-                        <select class="form-control table-input" name="status">
-                            <option value="">Select</option>
-                            <option value="0">Open</option>
-                            <option value="1">Pending</option>
-                            <option value="2">Work Done</option>
-                            <option value="3">Completed</option>
-                            <option value="4">Closed</option>
-                            <option value="5">Canceled</option>
-                        </select>
-                    </th>
+                    
                 </tr>
                 <tr>
                   <th>{!! trans('panel.global.no') !!}</th>
@@ -247,6 +257,7 @@
                   <th>Complaint Number</th>
                   <th>Service Center</th>
                   <th>Service Center Code</th>
+                  <th>Complaint Status</th>
                   <th>Seller Name</th>
                   <th>Customer Name</th>
                   <th>Customer Email</th>
@@ -301,7 +312,7 @@
                   <th>Feedback</th> -->
                   <th>Created By</th>
                   <th>Created At</th>
-                  <th>Complaint Status</th>
+
               </tr>
               </thead>
               <tbody>
@@ -378,6 +389,7 @@
               {data: 'complaint_number', name: 'complaint_number', orderable: false, defaultContent: ''},
               {data: 'service_center_details.name', name: 'service_center_details.name', orderable: false, defaultContent: '', searchable: false},
               {data: 'service_center_details.customer_code', name: 'service_center_details.customer_code', orderable: false, defaultContent: '', searchable: false},
+              {data: 'status', name: 'status', orderable: false, defaultContent: ''},
               {data: 'seller', name: 'seller', orderable: false, defaultContent: '', searchable: false},
               {data: 'customer.customer_name', name: 'customer.customer_name', orderable: false, defaultContent: '', searchable: false},
               {data: 'customer.customer_email', name: 'customer.customer_email', orderable: false, defaultContent: '', searchable: false},
@@ -437,7 +449,7 @@
               // {data: 'feedback', name: 'feedback', orderable: false, defaultContent: '', searchable: false},
               {data: 'createdbyname.name', name: 'createdbyname.name', orderable: false, defaultContent: '', searchable: false},
               {data: 'created_at', name: 'created_at', orderable: false, defaultContent: '', searchable: false},
-              {data: 'status', name: 'status', orderable: false, defaultContent: ''}
+
           ]
       });
 
@@ -629,6 +641,10 @@
       getCountsOfComplaints();
     })
 
+    function change_complaints_type(type){
+        $('#status').val(type).trigger('change');
+    }
+
     function getCountsOfComplaints() {
        $.ajax({
          url: "{{ url('getCountsOfComplaints') }}",
@@ -639,7 +655,7 @@
          },
          success: function(res) {
            $('#complaints_pending').html(res.complaints_pending);
-           $('#complaints_unsigned').html(res.complaints_unsigned);
+           $('#complaints_work_done').html(res.complaints_work_done);
            $('#complaints_cancelled').html(res.complaints_cancelled);
            $('#complaints_in_process').html(res.complaints_in_process);
            $('#complaints_complete').html(res.complaints_complete);
