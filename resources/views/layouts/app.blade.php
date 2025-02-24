@@ -930,8 +930,8 @@
                   <li class="nav-link {{ request()->is('categories*') || request()->is('subcategories*') || request()->is('brands*') || request()->is('products*') || request()->is('units*') || request()->is('production*') ? 'active' : '' }}">
                      <a class="collapsed hoveradd" data-toggle="collapse" href="#productMenu" aria-expanded="false">
                         <i class="material-icons icon">conveyor_belt</i>
-                        <span> {!! trans('panel.sidemenu.product_master') !!}
-                        </span>
+                        <span> {!! trans('panel.sidemenu.product_master') !!} 
+                        </span> 
                         <div class="d-none mobile_hide">{!! trans('panel.sidemenu.product_master') !!}</div>
                      </a>
                      <div class="collapse" id="productMenu" style="">
@@ -1016,6 +1016,16 @@
                               </a>
                            </li>
                            @endif
+
+                           <!-- @if(auth()->user()->can('ware_house_access')) -->
+                           <li class="nav-link-btn {{ request()->is('planned-sop*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('planned-sop') }}">
+                                 <i class="material-icons icon">warehouse</i>
+                                 <span>Planned S&OP</span>
+                                 <div class="d-none mobile_hide"> Planned S&OP</div>
+                              </a>
+                           </li>
+                           <!-- @endif -->
                            @if(auth()->user()->can('stockdetails_access'))
                            <!-- <li class="nav-item {{ request()->is('production*') ? 'active' : '' }}">
                                  <a class="nav-link" href="{{ url('production') }}">

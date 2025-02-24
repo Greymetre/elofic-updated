@@ -23,9 +23,9 @@ class MarketingDataTable extends DataTable
             ->editColumn('action', function ($data) {
                 $btn = '';
 
-                if (auth()->user()->can(['marketing_master_show'])) {
-                    $btn .= '<a href="' . route('dealer-appointment.show', $data->id) . '" class="btn btn-info btn-just-icon btn-sm" title="Show Appointment Form" ><i class="material-icons">visibility</i></a>';
-                }
+                // if (auth()->user()->can(['marketing_master_show'])) {
+                //     $btn .= '<a href="' . route('dealer-appointment.show', $data->id) . '" class="btn btn-info btn-just-icon btn-sm" title="Show Appointment Form" ><i class="material-icons">visibility</i></a>';
+                // }
                 return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">' . $btn . '</div>';
             })
             ->editColumn('event_date', function ($data) {

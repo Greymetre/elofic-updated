@@ -118,7 +118,7 @@
             <table id="getattendance" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
               <thead class=" text-primary">
                 <th>No</th>
-                <th>#</th>
+                <th> <input type="checkbox" id="checkAll"> </th>
                 <th>User ID</th>
                 <th>Status</th>
                 <th>User Name</th>
@@ -743,6 +743,11 @@
           $(".multi-a-r").addClass('d-none');
         }
     });
+
+    $("#checkAll").on("click", function () {
+    $('input:checkbox').not(this).prop('checked', this.checked);
+    $(".multi-a-r").toggleClass('d-none');
+});
 
 
   </script>

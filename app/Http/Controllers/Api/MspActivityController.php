@@ -11,8 +11,10 @@ use App\Models\MspActivityCity;
 use App\Models\MspActivityCustomer;
 use App\Models\Branch;
 use App\Models\User;
-
+use Illuminate\Support\Facades\File;
 use Validator;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 class MspActivityController extends Controller
 {
@@ -41,13 +43,12 @@ class MspActivityController extends Controller
     {
         try {
             $activities = $this->marketingActivity->select('id', 'type')->get(); // Use `get()` instead of `all()`
-            
+
             return response()->json([
                 'status' => true,
                 'message' => 'Marketing activities retrieved successfully',
                 'data' => $activities
             ], $this->successStatus);
-
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
@@ -86,8 +87,8 @@ class MspActivityController extends Controller
 
             // Format activity date
             $activityDate = Carbon::parse($request->activity_date);
-            $month = $activityDate->format('M'); 
-            $year  = $activityDate->format('Y'); 
+            $month = $activityDate->format('M');
+            $year  = $activityDate->format('Y');
 
             // Determine financial year
             $startYear = ($activityDate->month >= 4) ? $year : $year - 1;
@@ -128,7 +129,6 @@ class MspActivityController extends Controller
                 'message' => 'Marketing activity added successfully',
                 'data'    => $activity
             ], $this->successStatus);
-
         } catch (\Exception $e) {
             return response()->json([
                 'status'  => false,
@@ -138,9 +138,10 @@ class MspActivityController extends Controller
         }
     }
 
-    public function getMspActivityFilter(Request $request){
-        try{
-            $users          = User::with('getbranch')->whereIn('id',getUsersReportingToAuth($request->user()->id))->select('id','name' ,'employee_codes' , 'branch_id')->get();
+    public function getMspActivityFilter(Request $request)
+    {
+        try {
+            $users          = User::whereIn('id', getUsersReportingToAuth($request->user()->id))->select('id', 'name', 'employee_codes', 'branch_id')->get();
             $financial_year = $this->getFinancialYearList();
             $branchIds = $users->pluck('branch_id')->unique()->filter();
             // Get only those branches
@@ -151,10 +152,10 @@ class MspActivityController extends Controller
                 'status'  => true,
                 'message' => 'Marketing activity added successfully',
                 'users'    => $users,
-                'financial_year'=> $financial_year,
+                'financial_year' => $financial_year,
                 'branches'      => $branches
             ], $this->successStatus);
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
                 'message' => 'Something went wrong!',
@@ -167,12 +168,12 @@ class MspActivityController extends Controller
     {
         try {
             // Get financial year
-            $activities = $this->marketingActivity->select('id', 'type')->get(); 
+            $activities = $this->marketingActivity->select('id', 'type')->get();
 
             $financial_year = $request->financial_year ?? $this->getFinancialYear();
-            
+
             // Optional filters
-            $employee_codes = $request->employee_codes ?? null;
+            $employee_codes = $request->emp_code ?? null;
             $branch_id      = $request->branch_id ?? null;
 
 
@@ -182,10 +183,18 @@ class MspActivityController extends Controller
 
             // Mapping numeric month to three-letter format
             $monthMapping = [
-                "01" => "Jan", "02" => "Feb", "03" => "Mar",
-                "04" => "Apr", "05" => "May", "06" => "Jun",
-                "07" => "Jul", "08" => "Aug", "09" => "Sep",
-                "10" => "Oct", "11" => "Nov", "12" => "Dec"
+                "01" => "Jan",
+                "02" => "Feb",
+                "03" => "Mar",
+                "04" => "Apr",
+                "05" => "May",
+                "06" => "Jun",
+                "07" => "Jul",
+                "08" => "Aug",
+                "09" => "Sep",
+                "10" => "Oct",
+                "11" => "Nov",
+                "12" => "Dec"
             ];
 
             // Generate 12-month period from April (startYear) to March (endYear)
@@ -207,23 +216,23 @@ class MspActivityController extends Controller
                         COUNT(*) as total_performed, 
                         SUM(msp_count) as total_participants
                     ')
-                    ->where('fyear', $financial_year)
-                    ->groupBy('month', 'activity_type');
+                ->where('fyear', $financial_year)
+                ->groupBy('month', 'activity_type');
 
             // Apply optional filters
 
             if (isset($branch_id) && isset($employee_codes)) {
-                $query->whereHas('user', function($query1) use ($request) {
+                $query->whereHas('user', function ($query1) use ($request) {
                     $query1->where('branch_id', $request->branch_id);
                 });
                 $query->where('emp_code', $employee_codes);
-            }else if (isset($branch_id)) {
-                $query->whereHas('user', function($query1) use ($request) {
+            } else if (isset($branch_id)) {
+                $query->whereHas('user', function ($query1) use ($request) {
                     $query1->where('branch_id', $request->branch_id);
                 });
-            }else if (isset($employee_codes)) {
+            } else if (isset($employee_codes)) {
                 $query->where('emp_code', $employee_codes);
-            }else{
+            } else {
                 $query->where('emp_code', $request->user()->employee_codes);
             }
 
@@ -248,18 +257,49 @@ class MspActivityController extends Controller
 
                     $activityReport[$formattedMonth][] = [
                         'activity_name' => $activity->type,
-                        'total_performed' => $data->total_performed ?? 0, // How many times performed
-                        'total_participants' => $data->total_participants ?? 0, // Total participants (msp_count)
+                        'total_performed' => isset($data->total_performed) ? (int)$data->total_performed : 0, // How many times performed
+                        'total_participants' => isset($data->total_participants) ? (int)$data->total_participants : 0, // Total participants (msp_count)
                     ];
                 }
 
                 // $activityReport[] = $monthArray;
             }
 
+            $pdfDirectory = public_path('pdf/orders/');
+            $files = File::files($pdfDirectory);
+            $now = time();
+
+            foreach ($files as $file) {
+                if ($now - $file->getMTime() > (3 * 3600)) {
+                    File::delete($file->getRealPath());
+                }
+            }
+
+            $data_pdf = [
+                'activities' => $activities,
+                'data' => $activityReport
+            ];
+
+            $html = view('msp_activity.pdf', $data_pdf)->render();
+            File::makeDirectory($pdfDirectory, $mode = 0755, true, true);
+            $pdfFilePath = $pdfDirectory . 'MspActivity_' . time() . '.pdf';
+
+            $options = new Options();
+            $options->set('isHtml5ParserEnabled', true);
+            $options->set('isRemoteEnabled', true);
+            $dompdf = new Dompdf($options);
+            $dompdf->loadHtml($html);
+            $dompdf->setPaper('A4', 'landscape');
+            $dompdf->render();
+
+            file_put_contents($pdfFilePath, $dompdf->output());
+            $data_main['pdf_url'] = $url = url(str_replace('/var/www/html/', '', $pdfFilePath));
+
             return response()->json([
                 'status'  => true,
-                'activities'=> $activities,
-                'data'=> $activityReport,
+                'activities' => $activities,
+                'data' => $activityReport,
+                'pdf_url' => $data_main
             ], $this->successStatus);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -273,7 +313,7 @@ class MspActivityController extends Controller
 
         $year = $date->year;
         $startYear = ($date->month >= 4) ? $year : $year - 1;
-        $endYear = substr($startYear + 1, -2); 
+        $endYear = substr($startYear + 1, -2);
 
         return $startYear . '-' . $endYear;
     }
@@ -299,6 +339,4 @@ class MspActivityController extends Controller
         // Output the financial years
         return $financialYears;
     }
-
-    
 }

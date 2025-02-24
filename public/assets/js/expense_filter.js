@@ -239,7 +239,7 @@ $(document).ready(function () {
               selectedValues.push($(this).val());
           });
           const status = $(this).data('status');
-  
+
           var token = $("meta[name='csrf-token']").attr("content");
           if(status == 1){
             if(!confirm("Are You sure want to approve "+selectedValues.length+" Expenses?")) {
@@ -264,7 +264,30 @@ $(document).ready(function () {
                 $('.message').append(data.message);
               },
             });
-          }else{
+          }else if(status == 3){
+            if(!confirm("Are You sure want to checked "+selectedValues.length+" Expenses?")) {
+               return false;
+            }
+            $.ajax({
+              url: multiCheck,
+              type: 'POST',
+              data: {
+                _token: token,
+                id: selectedValues.toString()
+              },
+              success: function(data) {
+                oTable.draw();
+                $('.message').empty();
+                $('.alert').show();
+                if (data.status == 'success') {
+                  $('.alert').addClass("alert-success");
+                } else {
+                  $('.alert').addClass("alert-danger");
+                }
+                $('.message').append(data.message);
+              },
+            });
+          }else if(status == 2){
             if(!confirm("Are You sure want to reject "+selectedValues.length+" Expenses?")) {
                return false;
             }
@@ -678,4 +701,9 @@ $('body').on('click', '.checked_status', function () {
 
     }
 
+});
+
+$("#checkAll").on("click", function () {
+    $('input:checkbox').not(this).prop('checked', this.checked);
+    $(".multi-a-r").toggleClass('d-none');
 });

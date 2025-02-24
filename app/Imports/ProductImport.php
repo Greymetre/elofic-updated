@@ -82,6 +82,8 @@ class ProductImport implements ToCollection,WithValidation,WithHeadingRow, WithB
                     'isprimary' => isset($row['isprimary'])? $row['isprimary']:1,
                     'hsn_code' => isset($row['hsn_code'])? $row['hsn_code']:null,
                     'ean_code' => isset($row['ean_code'])? $row['ean_code']:null,
+                    'top_sku'          => !empty($rows['top_sku']) ? $rows['top_sku'] :null,
+                    'budget_for_month' => !empty($rows['budget_for_month']) ? $rows['budget_for_month'] :null,
                     'created_at' => getcurentDateTime() ,
                     'updated_at' => getcurentDateTime()
                 ]);

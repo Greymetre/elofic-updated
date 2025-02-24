@@ -108,7 +108,7 @@
                       </select>
                     </div>
                     <!-- Created By filter -->
-                    {{--<div class="p-2" style="width:200px;">
+                    <div class="p-2" style="width:200px;">
                       <select class="select2" name="created_by" id="created_by" data-style="select-with-transition" title="Select Category">
                         <option value="" selected>Select Created By</option>
                         @if(@isset($users ))
@@ -117,7 +117,7 @@
                         @endforeach
                         @endif
                       </select>
-                    </div>--}}
+                    </div>
                     <!-- Date Range filter -->
                     <div class="p-2" style="width:150px;"><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
                     <div class="p-2" style="width:150px;"><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
@@ -460,6 +460,7 @@
 
     function getCounts() {
      var state = $('#state').val();
+     var created_by = $('#created_by').val();
      var district = $('#district').val();
      var event_under = $('#event_under').val();
      var event_center = $('#event_center').val();
@@ -475,6 +476,7 @@
          _token: "{{csrf_token()}}",
          state: state,
          district: district,
+        //  created_by: created_by,
          event_under: event_under,
          event_center: event_center,
          branch: branch,

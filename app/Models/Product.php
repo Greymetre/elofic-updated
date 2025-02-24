@@ -39,12 +39,12 @@ class Product extends Model
 
     public function productdetails()
     {
-        return $this->hasMany('App\Models\ProductDetails', 'product_id', 'id')->select('id','product_id','detail_title','detail_description','mrp','price','selling_price','gst','isprimary','hsn_code','ean_code','discount','max_discount');
+        return $this->hasMany('App\Models\ProductDetails', 'product_id', 'id')->select('id','product_id','detail_title','detail_description','mrp','price','selling_price','gst','isprimary','hsn_code','ean_code','discount','max_discount','budget_for_month','top_sku');
     }
 
     public function productpriceinfo()
     {
-        return $this->belongsTo('App\Models\ProductDetails', 'id', 'product_id')->select('id','detail_title','product_id','mrp','price','selling_price','gst','discount');
+        return $this->belongsTo('App\Models\ProductDetails', 'id', 'product_id')->select('id','detail_title','product_id','mrp','price','selling_price','gst','discount','budget_for_month','top_sku');
     }
 
     public function serial_numbers()

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Branch, BranchStock, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CompOffLeave, CustomerDetails, CustomerOutstanting, DealerAppointment, DealerAppointmentKyc, EmployeeDetail, EndUser, Expenses, GiftModel, GiftSubcategory, Marketing, MspActivity, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, PrimaryScheme, Redemption, SalesTargetUsers, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation,ServiceChargeChargeType };
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Branch, BranchStock, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CompOffLeave, CustomerDetails, CustomerOutstanting, DealerAppointment, DealerAppointmentKyc, EmployeeDetail, EndUser, Expenses, GiftModel, GiftSubcategory, Marketing, MspActivity, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, PrimaryScheme, Redemption, SalesTargetUsers, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation,ServiceChargeChargeType,OrderDetails};
 use App\Models\UserLiveLocation;
 use App\Models\UserActivity;
 use App\Http\Controllers\SendNotifications;
@@ -310,7 +310,7 @@ class AjaxController extends Controller
             $data = User::where(function ($query) use ($branch_id) {
 
                 if (isset($branch_id)) {
-                    $query->where('branch_id', '=', $branch_id);
+                    $query->whereRaw("FIND_IN_SET(?, branch_id)", [$branch_id]);
                 }
                 $query->where('active', '=', 'Y');
             })
@@ -384,6 +384,7 @@ class AjaxController extends Controller
             $product = collect([
                 'id' => isset($data['id']) ? $data['id'] : '',
                 'product_name' => isset($data['product_name']) ? $data['product_name'] : '',
+                'product_description' => isset($data['description']) ? $data['description'] : '',
                 'product_code' => isset($data['product_code']) ? $data['product_code'] : '',
                 'specification' => isset($data['specification']) ? $data['specification'] : '',
                 'product_no' => isset($data['product_no']) ? $data['product_no'] : '',
@@ -396,6 +397,8 @@ class AjaxController extends Controller
                 'gst' => isset($data['productdetails'][0]['gst']) ? $data['productdetails'][0]['gst'] : '',
                 'discount' => isset($data['productdetails'][0]['discount']) ? $data['productdetails'][0]['discount'] : '',
                 'max_discount' => ($data['productdetails'][0]['max_discount']) ? $data['productdetails'][0]['max_discount'] : 0.00,
+                'budget_for_month' => ($data['productdetails'][0]['budget_for_month']) ? $data['productdetails'][0]['budget_for_month'] : '',
+                'top_sku' => ($data['productdetails'][0]['top_sku']) ? $data['productdetails'][0]['top_sku'] : '',
                 'scheme_discount' => $data['getSchemeDetail']['points'] ?? 0.00,
                 'repetition' => $data['getSchemeDetail']['orderscheme']['repetition'] ?? '',
                 'scheme_name' => $data['getSchemeDetail']['orderscheme']['scheme_name'] ?? '',
@@ -2136,6 +2139,40 @@ class AjaxController extends Controller
             'complaints_in_process' => (clone $query)->where('complaint_status', '0')->count(),
             'complaints_complete'   => (clone $query)->where('complaint_status', '3')->count(),
             'complaints_closed'     => (clone $query)->where('complaint_status', '4')->count(),
+        ]);
+    }
+
+    // function for get sale data of orders
+    public function getSaledata(Request $request){
+        $product_id = $request->product_id ?? '';        
+        $now = Carbon::now();
+        $lastMonth = $now->subMonth()->format('Y-m'); // Last month
+        $threeMonthsAgo = $now->subMonths(3)->format('Y-m'); // Three months ago
+        $lastYearSameMonth = Carbon::now()->subYear()->format('Y-m'); // Same month last year
+
+        $last_month_sale = OrderDetails::where('product_id', $product_id)
+                ->whereYear('created_at', Carbon::now()->subMonth()->year)
+                ->whereMonth('created_at', Carbon::now()->subMonth()->month)
+                ->sum('quantity'); // Change 'quantity' based on what you sum (e.g., total_price)
+
+         // Get last three months' average sales (excluding current month)
+         $last_three_month_avg = OrderDetails::where('product_id', $product_id)
+        ->whereBetween('created_at', [
+            Carbon::now()->subMonths(4)->startOfMonth(), // 4 months ago (excluding current month)
+            Carbon::now()->subMonth()->endOfMonth() // End of last month
+        ])
+        ->sum('quantity') / 3; // Divide by 3 for average
+
+        // Get last year's same month sales
+        $last_year_same_month = OrderDetails::where('product_id', $product_id)
+        ->whereYear('created_at', Carbon::now()->subYear()->year)
+        ->whereMonth('created_at', Carbon::now()->subYear()->month)
+        ->sum('quantity');
+
+        return response()->json([
+            'last_month_sale' => $last_month_sale,
+            'last_three_month_avg' => round($last_three_month_avg, 2),
+            'last_year_same_month' => $last_year_same_month,
         ]);
     }
 }

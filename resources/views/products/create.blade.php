@@ -352,6 +352,7 @@
                 </div>
               </div>
             </div>
+           
             <div class="col-md-6">
               <div class="input_section">
                 <label class="col-form-label">SAP Code</label>
@@ -360,6 +361,32 @@
                   @if ($errors->has('sap_code'))
                   <div class="error col-lg-12">
                     <p class="text-danger">{{ $errors->first('sap_code') }}</p>
+                  </div>
+                  @endif
+                </div>
+              </div>
+            </div>
+             <div class="col-md-6">
+              <div class="input_section">
+                <label class="col-form-label">Budget for the month (Qty.)</label>
+                <div class="form-group has-default bmd-form-group">
+                  <input type="number" name="budget_for_month" id="budget_for_month" class="form-control" value="{!! old( 'budget_for_month', !empty($products['productpriceinfo']['budget_for_month'] ) ? $products['productpriceinfo']['budget_for_month'] :'' ) !!}" min="0" step="0.01">
+                  @if ($errors->has('budget_for_month'))
+                  <div class="error col-lg-12">
+                    <p class="text-danger">{{ $errors->first('budget_for_month') }}</p>
+                  </div>
+                  @endif
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="input_section">
+                <label class="col-form-label">TOP 20 SKU for the Branch</label>
+                <div class="form-group has-default bmd-form-group">
+                  <input type="text" name="top_sku" id="top_sku" class="form-control" value="{!! old( 'top_sku', !empty($products['productpriceinfo']['top_sku']) ? $products['productpriceinfo']['top_sku'] :'' ) !!}">
+                  @if ($errors->has('top_sku'))
+                  <div class="error col-lg-12">
+                    <p class="text-danger">{{ $errors->first('top_sku') }}</p>
                   </div>
                   @endif
                 </div>

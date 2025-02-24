@@ -13,7 +13,10 @@ class MarketIntelligenceController extends Controller
 {
     public function getFields(Request $request)
     {
+        $user = $request->user();
+
         $field = MarketIntelligencesField::with('fieldsData:id,value,field_id')
+            ->where('division_id' , $user->division_id)
             ->select('id', 'field_name')
             ->get()
             ->mapWithKeys(function ($item) {

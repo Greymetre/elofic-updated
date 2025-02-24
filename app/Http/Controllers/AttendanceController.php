@@ -275,7 +275,7 @@ class AttendanceController extends Controller
               }
             } else {
               if ($attendance_details->working_type == 'Full Day Leave' || $attendance_details->working_type == 'Leave') {
-                
+
                 if ($leaveExists->bal_type == 'Comp-off Balance') {
                   $label_data[] =  'Comp Off N';
                   $total_con++;
@@ -297,12 +297,16 @@ class AttendanceController extends Controller
               }
             }
           } else {
+            $date_of_joining_object = new DateTime($item->userinfo->date_of_joining);
 
             if ($dayname == 'Sunday') {
-              $label_data[] = 'W/o';
-              $total_wo++;
+              if ($date_of_joining_object <= $value) {
+                $label_data[] = 'W/o';
+                $total_wo++;
+              } else {
+                $label_data[] = '-';
+              }
             } else {
-              $date_of_joining_object = new DateTime($item->userinfo->date_of_joining);
               if ($date_of_joining_object <= $value) {
                 $label_data[] = 'MIS';
                 $total_mis++;

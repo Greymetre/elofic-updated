@@ -119,6 +119,7 @@
 
                  <div class="next-btn">
                  <div class="btn-group multi-a-r d-none">
+                    <button class="btn btn-dark btn-sm multiChange mr-1" data-status="3"  title="Check">Check</button>
                     <button class="btn btn-success btn-sm multiChange mr-1" data-status="1"  title="Approve">Approve</button>
                     <button class="btn btn-danger btn-sm multiChange mr-2" data-status="2" title="Reject">Reject</button>
                   </div>
@@ -164,7 +165,7 @@
            <div class="table-responsive">
              <table id="getallexpenses" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
                <thead class=" text-primary">
-                  <th>#</th>
+                  <th> <input type="checkbox" id="checkAll"> </th>
                  <th>{!! trans('panel.expenses.fields.expense_id') !!}</th>
                  <th>Expense Date</th>
                  <th>{!! trans('panel.expenses.fields.user') !!}</th>
@@ -283,6 +284,7 @@
      var removeSessionUrl = "{{ route('remove.session') }}";
      var session_exec = "{{ session('executive_id') }}";
      var multiApprove = "{{ url('approveExpenses')}}";
+     var multiCheck = "{{ url('checkExpenses')}}";
      var multiReject = "{{ url('rejectExpenses')}}";
      var token = $("meta[name='csrf-token']").attr("content");
 
