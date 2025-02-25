@@ -23,13 +23,13 @@ class MarketingDataTable extends DataTable
             ->editColumn('action', function ($data) {
                 $btn = '';
 
-                if (auth()->user()->can(['marketing_master_show'])) {
-                    $btn .= '<a href="' . route('dealer-appointment.show', $data->id) . '" class="btn btn-info btn-just-icon btn-sm" title="Show Appointment Form" ><i class="material-icons">visibility</i></a>';
-                }
+                // if (auth()->user()->can(['marketing_master_show'])) {
+                //     $btn .= '<a href="' . route('dealer-appointment.show', $data->id) . '" class="btn btn-info btn-just-icon btn-sm" title="Show Appointment Form" ><i class="material-icons">visibility</i></a>';
+                // }
                 return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">' . $btn . '</div>';
             })
             ->editColumn('event_date', function ($data) {
-                return isset($data->event_date) ? showdatetimeformat($data->event_date) : '';
+                return isset($data->event_date) ? date('d M Y', strtotime($data->event_date)) : '';
             })
             ->rawColumns(['action']);
     }
@@ -81,6 +81,9 @@ class MarketingDataTable extends DataTable
 
         if ($request->end_date != null && $request->end_date != '') {
             $data->where('event_date', '<=', $request->end_date);
+        }
+        if ($request->created_by != null && $request->created_by != '') {
+            $data->where('created_by', $request->created_by);
         }
 
         return $data->latest();

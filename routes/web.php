@@ -82,6 +82,8 @@ use App\Http\Controllers\PrimarySchemeController;
 use App\Http\Controllers\ResignationController;
 use App\Http\Controllers\SapStockController;
 use App\Http\Controllers\WareHouseController;
+use App\Http\Controllers\PlannedSOPController;
+use App\Http\Controllers\ClaimGenerationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -649,6 +651,9 @@ Route::group(['middleware' => ['auth']], function () {
 
     //Fields
     Route::resource('market_intelligences', MarketIntelligencesFieldController::class);
+    Route::any('market_intelligences_download', [MarketIntelligencesFieldController::class, 'download'])->name('market_intelligences.download');
+    Route::any('reports/marketIntelligence', [MarketIntelligencesFieldController::class, 'marketIntelligence'])->name('reports.marketIntelligence');
+
     //Fields
     Route::resource('fields', FieldController::class);
     Route::post('fields-active', [FieldController::class, 'active'])->name('fields.active');
@@ -742,6 +747,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('getexpenseUserType', [ExpensesController::class, 'getexpenseUserType'])->name('getexpenseUserType');
     Route::post('getexpenseUserTypeEdit', [ExpensesController::class, 'getexpenseUserTypeEdit'])->name('getexpenseUserTypeEdit');
     Route::any('approveExpenses', [ExpensesController::class, 'approveExpenses'])->name('approveExpenses');
+    Route::any('checkExpenses', [ExpensesController::class, 'checkExpenses'])->name('checkExpenses');
     Route::any('rejectExpenses', [ExpensesController::class, 'rejectExpenses'])->name('rejectExpenses');
 
     Route::get('deletImages', [ExpensesController::class, 'deletImages'])->name('deletImages');
@@ -865,6 +871,7 @@ Route::group(['middleware' => ['auth']], function () {
 
     // Complaint Route
     Route::resource('complaints', ComplaintController::class);
+    Route::post('getComplaints', [ComplaintController::class, 'getComplaints'])->name('getComplaints');
     Route::post('complaint-attach-delete', [ComplaintController::class, 'deleteAttachment'])->name('deleteAttachment');
     Route::post('complaint-cancel', [ComplaintController::class, 'cancelComplaint'])->name('cancelComplaint');
     Route::post('complaint-pending', [ComplaintController::class, 'pendingComplaint'])->name('pendingComplaint');
@@ -964,6 +971,13 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('service-charge/products/{id}/delete', [ServiceChargeProductsController::class, 'productdelete'])->name('servicecharge.products.delete');
     Route::any('service-charge/products/download', [ServiceChargeProductsController::class, 'productdownload'])->name('servicecharge.products.download');
     Route::any('service-charge/products/upload', [ServiceChargeProductsController::class, 'productupload'])->name('servicecharge.products.upload');
+
+    Route::resource('planned-sop', PlannedSOPController::class);
+    Route::any('planned-sop-list', [PlannedSOPController::class , 'plannedSopList'])->name('plannedSopList');
+
+    // claim gerneration 
+    Route::resource('claim-generation', ClaimGenerationController::class);
+    Route::any('claim-generation-list', [ClaimGenerationController::class , 'getClaims'])->name('getClaims');
 });
 
 Route::any('getState', [AjaxController::class, 'getState']);
@@ -1024,6 +1038,8 @@ Route::any('marketing/getCounts', [AjaxController::class, 'marketingGetCounts'])
 Route::any('getProductTimeInterval', [AjaxController::class, 'getProductTimeInterval']);
 Route::any('getSellerBuyer', [AjaxController::class, 'getSellerBuyer']);
 Route::any('addMarketingType', [AjaxController::class, 'addMarketingType']);
+Route::any('getMarketingType', [AjaxController::class, 'getMarketingType']);
+Route::any('deleteMarketingType', [AjaxController::class, 'deleteMarketingType']);
 Route::any('getUserByBranch', [AjaxController::class, 'getUserByBranch']);
 Route::any('getPMS', [AjaxController::class, 'getPMS']);
 Route::any('getPincodeSearch', [AjaxController::class, 'getPincodeSearch']);
@@ -1032,6 +1048,8 @@ Route::any('getAllPartyName', [AjaxController::class, 'getAllPartyName']);
 Route::any('getProductWarrentyTime', [AjaxController::class, 'getProductWarrentyTime']);
 Route::any('getServiceChargeType', [AjaxController::class, 'getServiceChargeType']);
 Route::any('getServiceServiceEngiByDivision', [AjaxController::class, 'getServiceServiceEngiByDivision']);
+Route::any('getCountsOfComplaints', [AjaxController::class, 'getCountsOfComplaints']);
+Route::any('getSaledata', [AjaxController::class, 'getSaledata']);
 
 //Clear Cache facade value:
 Route::get('/clear-cache', function () {

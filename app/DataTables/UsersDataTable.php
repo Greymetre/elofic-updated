@@ -114,7 +114,7 @@ class UsersDataTable extends DataTable
         $userids = getUsersReportingToAuth();
         $data = $model->with('createdbyname', 'getbranch', 'getdesignation', 'reportinginfo', 'userinfo', 'getdivision')
             ->where(function ($query) use ($userids, $request) {
-                if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('Sub_Admin')) {
                     $query->whereIn('id', $userids);
                 }
                 if($request->active && !empty($request->active)){

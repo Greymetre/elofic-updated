@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Carbon\Carbon;
 
 class WarrantyActivation extends Model implements HasMedia
 {
@@ -45,5 +46,14 @@ class WarrantyActivation extends Model implements HasMedia
              ->useFallbackUrl(asset(config('constants.NO_IMAGE_URL')))
              ->useFallbackPath(public_path(config('constants.NO_IMAGE_URL')))
              ->singleFile();
+    }
+
+     public function getWarrantyDateAttribute($value)
+    {
+        try {
+            return $value ? Carbon::parse($value)->format('d-m-Y') : '';
+        } catch (\Exception $e) {
+            return ''; // Return null if parsing fails
+        }
     }
 }

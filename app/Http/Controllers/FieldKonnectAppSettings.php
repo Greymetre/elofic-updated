@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Division;
 use Illuminate\Http\Request;
 use App\Models\FieldKonnectAppSetting;
 use App\Models\Media;
@@ -24,7 +25,8 @@ class FieldKonnectAppSettings extends Controller
     public function index()
     {
         $this->field_konnect_app_setting =  FieldKonnectAppSetting::first();
-        return view('field_connect_app_setting.index')->with('field_konnect_app_setting', $this->field_konnect_app_setting);
+        $divisions = Division::all();
+        return view('field_connect_app_setting.index', compact('divisions'))->with('field_konnect_app_setting', $this->field_konnect_app_setting);
 
     }
 

@@ -37,6 +37,16 @@ class MarketIntelligenceServey extends Model implements HasMedia
         'updated_at'
     ];
 
+    public function createdbyname()
+    {
+        return $this->belongsTo('App\Models\User', 'created_by', 'id')->select('id','name' ,'employee_codes');
+    }
+
+    public function state()
+    {
+        return $this->belongsTo('App\Models\State', 'state_id', 'id')->select('id','state_name');
+    }
+
     public function registerMediaCollections(): void {
         $this->addMediaCollection('servey_image')
              ->useFallbackUrl(asset(config('constants.NO_IMAGE_URL')))

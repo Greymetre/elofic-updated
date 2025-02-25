@@ -150,6 +150,8 @@ class ProductController extends Controller
                             'hsn_code'      => !empty($rows['hsn_code']) ? $rows['hsn_code'] :null,
                             'ean_code'      => !empty($rows['ean_code']) ? $rows['ean_code'] :null,
                             'isprimary'      => !empty($rows['isprimary']) ? $rows['isprimary'] :0,
+                            'top_sku'          => !empty($rows['top_sku']) ? $rows['top_sku'] :null,
+                            'budget_for_month' => !empty($rows['budget_for_month']) ? $rows['budget_for_month'] :null,
                             'created_at'    => getcurentDateTime(),
                             'updated_at'    => getcurentDateTime(),
                         ]);
@@ -288,6 +290,8 @@ class ProductController extends Controller
                                 'gst'       => !empty($request['gst']) ? $request['gst'] :0,
                                 'hsn_code'      => !empty($rows['hsn_code']) ? $rows['hsn_code'] :null,
                                 'ean_code'      => !empty($rows['ean_code']) ? $rows['ean_code'] :null,
+                                'top_sku'          => !empty($request['top_sku']) ? $request['top_sku'] :null,
+                                'budget_for_month' => !empty($request['budget_for_month']) ? $request['budget_for_month'] :null,
                                 'created_at'    => getcurentDateTime(),
                                 'updated_at'    => getcurentDateTime(),
                             ]);
@@ -305,6 +309,8 @@ class ProductController extends Controller
                                 'discount' => isset($request['discount']) ? $request['discount'] :0.00,
                                 'max_discount' => isset($request['max_discount']) ? $request['max_discount'] :0.00,
                                 'gst'       => isset($request['gst']) ? $request['gst'] :0,
+                                'top_sku'          => !empty($request['top_sku']) ? $request['top_sku'] :null,
+                                'budget_for_month' => !empty($request['budget_for_month']) ? $request['budget_for_month'] :null,
                                 'hsn_code'      => isset($rows['hsn_code']) ? $rows['hsn_code'] :null,
                                 'ean_code'      => isset($rows['ean_code']) ? $rows['ean_code'] :null,
                                 'updated_at'    => getcurentDateTime(),

@@ -744,6 +744,11 @@
         }
     });
 
+    $("#checkAll").on("click", function () {
+    $('input:checkbox').not(this).prop('checked', this.checked);
+    $(".multi-a-r").toggleClass('d-none');
+});
+
 
   </script>
 </x-app-layout>

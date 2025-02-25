@@ -145,7 +145,7 @@ body table td {
                   </div>
                </div>
 
-               <h3 class="mt-2"><b>Complaint Details: </b></h3>
+               <h3 class="mt-2" style="color: black;"><b>Complaint Details: </b></h3>
                <hr>
                <div class="row mt-2 mb-2">
                   <table class="table" id="complain_details">
@@ -169,8 +169,8 @@ body table td {
                      </tbody>
                   </table>
                </div>
-
-               <h3 class="mt-2"><b>Warranty Details: </b></h3>
+ 
+               <h3 class="mt-2" style="color: black;"><b>Warranty Details: </b></h3>
                <hr>
                <div class="row mt-2 mb-2">
                   <table class="table table-striped responsive" id="warranty_details">
@@ -253,7 +253,7 @@ body table td {
 
                   </table>
                </div>
-               <h3 class="mt-2"><b>Complaint Category: </b></h3>
+               <h3 class="mt-2" style="color: black;"><b>Complaint Category: </b></h3>
                <div class="border border-dark rounded p-4">
                   <div class="row mt-2 mb-2">
                      <div class="col-md-3">
@@ -346,7 +346,59 @@ body table td {
                   </div>
                </div>
 
-               <h3 class="mt-2"><b>Service Type: </b></h3>
+                 <h3 class="mt-2" style="color: black;"><b>Field Data: </b></h3>
+               <div class="border border-dark rounded p-4">
+                  <div class="row mt-2 mb-2">
+                      <div class="col-md-3">
+                        <div class="input_section">
+                           <label class="col-form-label" for="line_voltage">Line Voltage (V)</label>
+                           <input type="text" class="form-control"  value="{{$service_bill->line_voltage ?? ''}}" name="line_voltage" id="line_voltage" placeholder="Enter Line Voltage (V)">
+                        </div>
+                     </div>
+                     <div class="col-md-3">
+                        <div class="input_section">
+                           <label class="col-form-label" for="load_voltage">Load Voltage (V)</label>
+                           <input type="text" class="form-control"  value="{{$service_bill->load_voltage ?? ''}}" name="load_voltage" id="load_voltage" placeholder="Enter Load Voltage (V)">
+                        </div>
+                     </div>
+                     <div class="col-md-3">
+                        <div class="input_section">
+                           <label class="col-form-label" for="current">Current (A)</label>
+                           <input type="text" class="form-control" value="{{$service_bill->current ?? ''}}" name="current" id="current" placeholder="Enter Current Voltage (V)">
+                        </div>
+                     </div>
+
+                      <div class="col-md-3">
+                        <div class="input_section">
+                           <label class="input_section" for="water_source">Water Source (Product Used)</label>
+                           <select name="water_source" id="water_source" class="select2">
+                              <option value="">Select Water Source (Product Used)</option>
+                              <option value="Munciple Water Supply" {{($service_bill && $service_bill->water_source == 'Munciple Water Supply')?'selected':''}}>Munciple Water Supply</option>
+                              <option value="Munciple Water Supply" {{($service_bill && $service_bill->water_source == 'Well')?'selected':''}}>Well</option>
+                              <option value="Munciple Water Supply" {{($service_bill && $service_bill->water_source == 'BoreWell')?'selected':''}}>BoreWell</option>
+                              <option value="Munciple Water Supply" {{($service_bill && $service_bill->water_source == 'Water Sump')?'selected':''}}>Water Sump</option>
+                              <option value="Munciple Water Supply" {{($service_bill && $service_bill->water_source == 'Hand Pump')?'selected':''}}>Hand Pump </option>
+                              <option value="Munciple Water Supply" {{($service_bill && $service_bill->water_source == 'Pond / Dam')?'selected':''}}>Pond / Dam</option>
+                              <option value="Munciple Water Supply" {{($service_bill && $service_bill->water_source == 'RO Water Plant')?'selected':''}}>RO Water Plant</option>                              
+                           </select>
+                        </div>
+                     </div>
+                     <div class="col-md-3">
+                        <div class="input_section">
+                           <label class="col-form-label" for="panel_rating_running">Panel Rating-Running Capacitor (mfd) </label>
+                           <input type="text" class="form-control" name="panel_rating_running" id="panel_rating_running" value="{{$service_bill->panel_rating_running ?? ''}}" placeholder="Enter Panel Rating-Running Capacitor (mfd)">
+                        </div>
+                     </div>
+                     <div class="col-md-3">
+                        <div class="input_section">
+                           <label class="col-form-label" for="panel_rating_starting">Panel Rating-Starting Capacitor (mfd)</label>
+                           <input type="text" class="form-control" value="{{$service_bill->panel_rating_starting ?? ''}}" name="panel_rating_starting" id="panel_rating_starting" placeholder="Enter Panel Rating-Starting Capacitor (mfd)">
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <h3 class="mt-2" style="color: black;"><b>Service Type: </b></h3>
                <div class="border border-dark rounded p-4">
                   <div class="row mt-2 mb-2">
                      <div class="col-md-3">
@@ -377,10 +429,10 @@ body table td {
                   </div>
                </div>
 
-               <h3 class="mt-2"><b>Photos: </b></h3>
+               <h3 class="mt-2" style="color: black;"><b>Photos: </b></h3>
                <div class="border border-dark rounded p-4">
                   <div class="row mt-2 mb-2">
-                     <div class="col-md-2">
+                     <div class="col-md-3">
                         <label for="product_sr_no">Product Sr. No.</label>
                         <div class="inp-div">
                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
@@ -396,7 +448,7 @@ body table td {
                         </div>
                         @endif
                      </div>
-                     <div class="col-md-2">
+                     <div class="col-md-3">
                         <label for="scr_job_card">SCR-Job Card</label>
                         <div class="inp-div">
                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
@@ -412,8 +464,8 @@ body table td {
                         </div>
                         @endif
                      </div>
-                     <div class="col-md-2">
-                        <label for="photo_3">Photo 3</label>
+                     <div class="col-md-3">
+                        <label for="photo_3">Complaint Photo 1</label>
                         <div class="inp-div">
                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                            <p class="m-0">Attach a File</p>
@@ -428,8 +480,8 @@ body table td {
                         </div>
                         @endif
                      </div>
-                     <div class="col-md-2">
-                        <label for="photo_4">Photo 4</label>
+                     <div class="col-md-3">
+                        <label for="photo_4">Complaint Photo 2</label>
                         <div class="inp-div">
                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                            <p class="m-0">Attach a File</p>
@@ -444,8 +496,8 @@ body table td {
                         </div>
                         @endif
                      </div>
-                     <div class="col-md-2">
-                        <label for="photo_5">Photo 5</label>
+                     <div class="col-md-3">
+                        <label for="photo_5">Complaint/Spare Photo </label>
                         <div class="inp-div">
                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
                            <p class="m-0">Attach a File</p>
@@ -460,10 +512,42 @@ body table td {
                         </div>
                         @endif
                      </div>
+                     <div class="col-md-3">
+                        <label for="photo_5">Voltage </label>
+                        <div class="inp-div">
+                           <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                           <p class="m-0">Attach a File</p>
+                           <input type="file" name="voltage_image" id="voltage_image" class="form-control file-input" accept="image/*">
+                        </div>
+                        <span class="file-count">0</span> files selected
+                        @if($service_bill->exists && $service_bill->getMedia('voltage_image')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('voltage_image')[0]->getPath()))
+                        <div class="imgdiv">
+                           <a target="_blank" href="{{ $service_bill->getMedia('voltage_image')[0]->getFullUrl() }}">
+                              <img width="150" src="{{ $service_bill->getMedia('voltage_image')[0]->getFullUrl() }}" alt="">
+                           </a>
+                        </div>
+                        @endif
+                     </div>
+                     <div class="col-md-3">
+                        <label for="photo_5">Current </label>
+                        <div class="inp-div">
+                           <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
+                           <p class="m-0">Attach a File</p>
+                           <input type="file" name="current_image" id="current_image" class="form-control file-input" accept="image/*">
+                        </div>
+                        <span class="file-count">0</span> files selected
+                        @if($service_bill->exists && $service_bill->getMedia('current_image')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('current_image')[0]->getPath()))
+                        <div class="imgdiv">
+                           <a target="_blank" href="{{ $service_bill->getMedia('current_image')[0]->getFullUrl() }}">
+                              <img width="150" src="{{ $service_bill->getMedia('current_image')[0]->getFullUrl() }}" alt="">
+                           </a>
+                        </div>
+                        @endif
+                     </div>
                   </div>
                </div>
                @if(isset($complaint->service_center))
-               <h3 class="mt-2"><b>Service: </b></h3>
+               <h3 class="mt-2" style="color: black;"><b>Service: </b></h3>
                <hr>
                <div class="row mt-2 mb-2">
                   <table class="table table-striped" id="table-service">

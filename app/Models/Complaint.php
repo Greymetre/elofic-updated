@@ -12,7 +12,7 @@ class Complaint extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia;
 
-    protected $fillable = ['complaint_number', 'complaint_date', 'claim_amount', 'complaint_status', 'seller', 'end_user_id', 'party_name', 'product_laying', 'service_center', 'assign_user', 'product_id', 'product_serail_number', 'product_code', 'product_name', 'category', 'specification', 'product_no', 'phase', 'seller_branch', 'purchased_branch', 'product_group', 'company_sale_bill_no', 'company_sale_bill_date', 'customer_bill_date', 'customer_bill_no', 'company_bill_date_month', 'under_warranty', 'service_type', 'customer_bill_date_month', 'warranty_bill', 'fault_type', 'service_centre_remark', 'remark', 'division', 'register_by', 'complaint_type', 'description', 'created_by_device', 'created_by', 'created_at', 'updated_at'];
+    protected $fillable = ['complaint_number', 'complaint_date', 'claim_amount', 'complaint_status', 'seller', 'end_user_id', 'party_name', 'product_laying', 'service_center', 'assign_user', 'product_id', 'product_serail_number', 'product_code', 'product_name', 'category', 'specification', 'product_no', 'phase', 'seller_branch', 'purchased_branch', 'product_group', 'company_sale_bill_no', 'company_sale_bill_date', 'customer_bill_date', 'customer_bill_no', 'company_bill_date_month', 'under_warranty', 'service_type', 'customer_bill_date_month', 'warranty_bill', 'fault_type', 'service_centre_remark', 'remark', 'division', 'register_by', 'complaint_type', 'description', 'created_by_device', 'created_by', 'created_at', 'updated_at' , 'complaint_recieve_via'];
 
     public $timestamps = true;
 
@@ -69,8 +69,17 @@ class Complaint extends Model implements HasMedia
 
     public function complaint_work_dones()
     {
-        return $this->hasMany('App\Models\ComplaintWorkDone', 'id', 'complaint_id');
+        return $this->hasMany('App\Models\ComplaintWorkDone', 'complaint_id', 'id');
     }
+
+    public function complaint_time_line(){
+        return $this->hasMany('App\Models\ComplaintTimeline', 'complaint_id', 'id');
+    }
+
+    public function service_bill(){
+        return $this->hasOne('App\Models\ServiceBill', 'complaint_id', 'id');
+    }
+
 
     public function registerMediaCollections(): void
     {
@@ -92,6 +101,15 @@ class Complaint extends Model implements HasMedia
     {
         try {
             return $value ? Carbon::parse($value)->format('d-m-Y') : '';
+        } catch (\Exception $e) {
+            return ''; // Return null if parsing fails
+        }
+    }
+
+    public function getUpdatedAtAttribute($value)
+    {
+        try {
+            return $value ? Carbon::parse($value)->format('d-m-Y h:i:s') : '';
         } catch (\Exception $e) {
             return ''; // Return null if parsing fails
         }

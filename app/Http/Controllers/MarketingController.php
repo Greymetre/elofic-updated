@@ -11,6 +11,7 @@ use App\Exports\MarketingMasterTemplate;
 use App\Imports\MarketingMasterImport;
 use App\Models\DealerAppointment;
 use App\Models\Marketing;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Str;
@@ -49,9 +50,13 @@ class MarketingController extends Controller
             ->unique(function ($item) {
                 return Str::lower($item->division);
             });
+            $users = User::whereIn('id', Marketing::latest()->pluck('created_by')->unique())
+            ->latest()
+            ->select('id', 'name')
+            ->get();
         $branding_team_members = Marketing::latest()->get()->unique('branding_team_member');
         abort_if(Gate::denies('marketing_master_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return $dataTable->render('marketing.index', compact('states', 'event_districts', 'event_under_names', 'cities', 'branchs', 'categories', 'branding_team_members', 'divisions'));
+        return $dataTable->render('marketing.index', compact('states', 'event_districts', 'event_under_names', 'cities', 'branchs', 'categories', 'branding_team_members', 'divisions', 'users'));
     }
 
     /**

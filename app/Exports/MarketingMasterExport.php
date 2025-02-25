@@ -56,6 +56,9 @@ class MarketingMasterExport implements FromCollection,WithHeadings,ShouldAutoSiz
         if ($this->request->branding_team_member != null && $this->request->branding_team_member != '') {
             $data->where('branding_team_member', $this->request->branding_team_member);
         }
+        if ($this->request->created_by != null && $this->request->created_by != '') {
+            $data->where('created_by', $this->request->created_by);
+        }
 
         if ($this->request->start_date) {
             $data->where('event_date', '>=', $this->request->start_date);
@@ -64,14 +67,14 @@ class MarketingMasterExport implements FromCollection,WithHeadings,ShouldAutoSiz
         if ($this->request->end_date) {
             $data->where('event_date', '<=', $this->request->end_date);
         }
+
         
         return $data->get();
-        
     }
 
     public function headings(): array
     {
-        return ['Event Date','Event Center','Place of Participant','Event District','State','Event Under Dealer','Branch','TM/ ASM Name Responsible for Event','Branding Team Member','Name of Participant','Category of Participant','Mob. No. of Participant','Google Drive Photo Link','No. of Participant','Create Date','Create By'];
+        return ['Event Date','Event Center','Place of Participant','Event District','State','Event Under Dealer','Event Under Type','Branch','Division','TM/ ASM Name Responsible for Event','Branding Team Member','Name of Participant','Category of Participant','Mob. No. of Participant','Google Drive Photo Link','No. of Participant','Create Date','Create By', 'id'];
     }
 
     public function map($data): array
@@ -83,7 +86,9 @@ class MarketingMasterExport implements FromCollection,WithHeadings,ShouldAutoSiz
             !empty($data['event_district']) ? $data['event_district'] : '' ,
             !empty($data['state']) ? $data['state'] : '' ,
             !empty($data['event_under_name']) ? $data['event_under_name'] : '' ,
+            !empty($data['event_under_type']) ? $data['event_under_type'] : '' ,
             !empty($data['branch']) ? $data['branch'] : '' ,
+            !empty($data['division']) ? $data['division'] : '' ,
             !empty($data['responsible_for_event']) ? $data['responsible_for_event'] : '' ,
             !empty($data['branding_team_member']) ? $data['branding_team_member'] : '' ,
             !empty($data['name_of_participant']) ? $data['name_of_participant'] : '' ,
@@ -93,6 +98,7 @@ class MarketingMasterExport implements FromCollection,WithHeadings,ShouldAutoSiz
             !empty($data['count_of_participant']) ? $data['count_of_participant'] : '' ,
             !empty($data['created_at']) ? date('d-M-Y', strtotime($data['created_at'])) : '' ,
             !empty($data['created_by']) ? $data['createdByName']['name'] : '' ,
+            !empty($data['id']) ? $data['id'] : '' ,
 
         
         ];

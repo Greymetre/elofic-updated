@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Branch, BranchStock, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CompOffLeave, CustomerDetails, CustomerOutstanting, DealerAppointment, DealerAppointmentKyc, EmployeeDetail, EndUser, Expenses, GiftModel, GiftSubcategory, Marketing, MspActivity, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, PrimaryScheme, Redemption, SalesTargetUsers, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation,ServiceChargeChargeType };
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Branch, BranchStock, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CompOffLeave, CustomerDetails, CustomerOutstanting, DealerAppointment, DealerAppointmentKyc, EmployeeDetail, EndUser, Expenses, GiftModel, GiftSubcategory, Marketing, MspActivity, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, PrimaryScheme, Redemption, SalesTargetUsers, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation,ServiceChargeChargeType,OrderDetails};
 use App\Models\UserLiveLocation;
 use App\Models\UserActivity;
 use App\Http\Controllers\SendNotifications;
@@ -310,7 +310,7 @@ class AjaxController extends Controller
             $data = User::where(function ($query) use ($branch_id) {
 
                 if (isset($branch_id)) {
-                    $query->where('branch_id', '=', $branch_id);
+                    $query->whereRaw("FIND_IN_SET(?, branch_id)", [$branch_id]);
                 }
                 $query->where('active', '=', 'Y');
             })
@@ -384,6 +384,7 @@ class AjaxController extends Controller
             $product = collect([
                 'id' => isset($data['id']) ? $data['id'] : '',
                 'product_name' => isset($data['product_name']) ? $data['product_name'] : '',
+                'product_description' => isset($data['description']) ? $data['description'] : '',
                 'product_code' => isset($data['product_code']) ? $data['product_code'] : '',
                 'specification' => isset($data['specification']) ? $data['specification'] : '',
                 'product_no' => isset($data['product_no']) ? $data['product_no'] : '',
@@ -396,6 +397,8 @@ class AjaxController extends Controller
                 'gst' => isset($data['productdetails'][0]['gst']) ? $data['productdetails'][0]['gst'] : '',
                 'discount' => isset($data['productdetails'][0]['discount']) ? $data['productdetails'][0]['discount'] : '',
                 'max_discount' => ($data['productdetails'][0]['max_discount']) ? $data['productdetails'][0]['max_discount'] : 0.00,
+                'budget_for_month' => ($data['productdetails'][0]['budget_for_month']) ? $data['productdetails'][0]['budget_for_month'] : '',
+                'top_sku' => ($data['productdetails'][0]['top_sku']) ? $data['productdetails'][0]['top_sku'] : '',
                 'scheme_discount' => $data['getSchemeDetail']['points'] ?? 0.00,
                 'repetition' => $data['getSchemeDetail']['orderscheme']['repetition'] ?? '',
                 'scheme_name' => $data['getSchemeDetail']['orderscheme']['scheme_name'] ?? '',
@@ -1546,6 +1549,8 @@ class AjaxController extends Controller
         $mechanic_count = (clone $data)->where('category_of_participant', 'Mechanic')->count();
         $village_influencer_count = (clone $data)->where('category_of_participant', 'Village influencer')->count();
         $retailer_count = (clone $data)->where('category_of_participant', 'Retailer')->count();
+        $electrician_count = (clone $data)->where('category_of_participant', 'Electrician')->count();
+        $exhibition_count = (clone $data)->where('category_of_participant', 'Exhibition Visitors')->count();
 
         return response()->json([
             'total' => $total,
@@ -1553,6 +1558,8 @@ class AjaxController extends Controller
             'mechanic_count' => $mechanic_count,
             'village_influencer_count' => $village_influencer_count,
             'retailer_count' => $retailer_count,
+            'electrician_count' => $electrician_count,
+            'exhibition_count' => $exhibition_count
         ]);
     }
 
@@ -1739,17 +1746,82 @@ class AjaxController extends Controller
     public function addMarketingType(Request $request)
     {
         $type = $request->type ?? '';
+        $activity_division = $request->activity_division ?? '';
         if (isset($type)) {
             $slug = strtolower(str_replace(' ', '_', $type));
-
             $marketing_type = MarketingActivity::updateOrCreate(
                 ['slug' => $slug],
+                ['activity_division' => $activity_division],
                 ['type' => $type]
             );
             return response()->json(['status' => true, 'marketing_type' => $marketing_type]);
         }
         return response()->json(['status' => false]);
     }
+
+   public function getMarketingType(Request $request)
+    {
+        try {
+            $types = MarketingActivity::with('division')->select('id', 'type', 'activity_division')->get(); // Fetching data
+
+            $html = '';
+            foreach ($types as $type) {
+                $divisionName = $type->division ? $type->division->division_name : 'No Division';
+                $html .= '
+                    <span class="badge badge-info mr-2 mb-2" id="badge_' . $type->id . '">
+                        ' . e($divisionName . ' - ' . $type->type) . '
+                        <button type="button" class="close" aria-label="Close" onclick="removeBadge(' . $type->id . ')">
+                            <span aria-hidden="true" style="color:red">&times;</span>
+                        </button>
+                    </span>
+                ';
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Marketing types retrieved successfully',
+                'html' => $html
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong!',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function deleteMarketingType(Request $request)
+    {
+        try {
+            $id = $request->id;
+
+            $marketingType = MarketingActivity::find($id);
+            if (!$marketingType) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Marketing type not found'
+                ], 404);
+            }
+
+            $marketingType->delete();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Marketing type deleted successfully'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong!',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
 
     // get users by branch id
     public function getUserByBranch(Request $request)
@@ -2059,5 +2131,51 @@ class AjaxController extends Controller
         return response()->json(['status' => true , 'html' => $html]);
     }
 
+    // get the total of complaints
+    public function getCountsOfComplaints(Request $request)
+    {
+        $query = Complaint::query(); // Use query builder
+         return response()->json([
+            'complaints_pending'    => (clone $query)->where('complaint_status', '1')->count(),
+            'complaints_work_done'  => (clone $query)->where('complaint_status', '2')->count(),
+            'complaints_cancelled'  => (clone $query)->where('complaint_status', '5')->count(),
+            'complaints_in_process' => (clone $query)->where('complaint_status', '0')->count(),
+            'complaints_complete'   => (clone $query)->where('complaint_status', '3')->count(),
+            'complaints_closed'     => (clone $query)->where('complaint_status', '4')->count(),
+        ]);
+    }
 
+    // function for get sale data of orders
+    public function getSaledata(Request $request){
+        $product_id = $request->product_id ?? '';        
+        $now = Carbon::now();
+        $lastMonth = $now->subMonth()->format('Y-m'); // Last month
+        $threeMonthsAgo = $now->subMonths(3)->format('Y-m'); // Three months ago
+        $lastYearSameMonth = Carbon::now()->subYear()->format('Y-m'); // Same month last year
+
+        $last_month_sale = OrderDetails::where('product_id', $product_id)
+                ->whereYear('created_at', Carbon::now()->subMonth()->year)
+                ->whereMonth('created_at', Carbon::now()->subMonth()->month)
+                ->sum('quantity'); // Change 'quantity' based on what you sum (e.g., total_price)
+
+         // Get last three months' average sales (excluding current month)
+         $last_three_month_avg = OrderDetails::where('product_id', $product_id)
+        ->whereBetween('created_at', [
+            Carbon::now()->subMonths(4)->startOfMonth(), // 4 months ago (excluding current month)
+            Carbon::now()->subMonth()->endOfMonth() // End of last month
+        ])
+        ->sum('quantity') / 3; // Divide by 3 for average
+
+        // Get last year's same month sales
+        $last_year_same_month = OrderDetails::where('product_id', $product_id)
+        ->whereYear('created_at', Carbon::now()->subYear()->year)
+        ->whereMonth('created_at', Carbon::now()->subYear()->month)
+        ->sum('quantity');
+
+        return response()->json([
+            'last_month_sale' => $last_month_sale,
+            'last_three_month_avg' => round($last_three_month_avg, 2),
+            'last_year_same_month' => $last_year_same_month,
+        ]);
+    }
 }

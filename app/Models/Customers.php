@@ -280,9 +280,7 @@ class Customers extends Authenticatable
 
     public function getretailers() {
         return $this->hasMany(ParentDetail::class, 'parent_id', 'id');
-    }
-
-    
+    }    
 
 
 }

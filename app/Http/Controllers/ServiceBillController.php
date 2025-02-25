@@ -108,7 +108,13 @@ class ServiceBillController extends Controller
             'service_location' => $request->service_location,
             'repaired_replacement' => $request->repaired_replacement,
             'replacement_tag' => $replacement_tag,
-            'replacement_tag_number' => $replacement_tag_number
+            'replacement_tag_number' => $replacement_tag_number,
+            'line_voltage' => $request->line_voltage ?? '',
+            'load_voltage' => $request->load_voltage ?? '',
+            'current' => $request->current ?? '',
+            'water_source' => $request->water_source ?? '',
+            'panel_rating_running' => $request->panel_rating_running ?? '',
+            'panel_rating_starting' => $request->panel_rating_starting ?? '',
         ]);
 
         if ($new_service_bill) {
@@ -146,6 +152,20 @@ class ServiceBillController extends Controller
                 $new_service_bill->addMedia($file)
                     ->usingFileName($customname)
                     ->toMediaCollection('photo_5');
+            }
+            if ($request->hasFile('voltage_image')) {
+                $file = $request->file('voltage_image');
+                $customname = time() . '.' . $file->getClientOriginalExtension();
+                $new_service_bill->addMedia($file)
+                    ->usingFileName($customname)
+                    ->toMediaCollection('voltage_image');
+            }
+            if ($request->hasFile('current_image')) {
+                $file = $request->file('current_image');
+                $customname = time() . '.' . $file->getClientOriginalExtension();
+                $new_service_bill->addMedia($file)
+                    ->usingFileName($customname)
+                    ->toMediaCollection('current_image');
             }
             if ($request->service && count($request->service) > 0) {
                 foreach ($request->service as $service) {

@@ -107,6 +107,17 @@
                         @endif
                       </select>
                     </div>
+                    <!-- Created By filter -->
+                    <div class="p-2" style="width:200px;">
+                      <select class="select2" name="created_by" id="created_by" data-style="select-with-transition" title="Select Category">
+                        <option value="" selected>Select Created By</option>
+                        @if(@isset($users ))
+                        @foreach($users as $user)
+                        <option value="{!! $user->id !!}">{!! $user->name !!}</option>
+                        @endforeach
+                        @endif
+                      </select>
+                    </div>
                     <!-- Date Range filter -->
                     <div class="p-2" style="width:150px;"><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
                     <div class="p-2" style="width:150px;"><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
@@ -188,6 +199,22 @@
                   </div>
                 </div>
               </div>
+              <div class="col-sm">
+                <div class="card text-center m-1">
+                  <div class="card-body">
+                    <h4 class="card-text text-center">Electrician</h4>
+                    <h5 class="card-title" id="electrician_count"></h5>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm">
+                <div class="card text-center m-1">
+                  <div class="card-body">
+                    <h4 class="card-text text-center">Exhibition Visitors</h4>
+                    <h5 class="card-title" id="exhibition_count"></h5>
+                  </div>
+                </div>
+              </div> 
             </div>
           </div>
           <div class="table-responsive">
@@ -252,6 +279,7 @@
               d.division = $('#division').val(),
               d.branding_team_member = $('#branding_team_member').val(),
               d.category_of_participant = $('#category_of_participant').val()
+              d.created_by = $('#created_by').val()
           }
         },
         columns: [{
@@ -264,18 +292,22 @@
           {
             data: 'action',
             name: 'action',
+            orderable: false,
+            searchable: false,
             "defaultContent": ''
           },
           {
             data: 'event_date',
             name: 'event_date',
             orderable: false,
+            searchable: false,
             "defaultContent": ''
           },
           {
             data: 'division',
             name: 'division',
             orderable: false,
+            searchable: false,
             "defaultContent": ''
           },
           {
@@ -325,14 +357,14 @@
             name: 'responsible_for_event',
             "defaultContent": '',
             orderable: true,
-            searchable: true,
+            searchable: false,
           },
           {
             data: 'branding_team_member',
             name: 'branding_team_member',
             "defaultContent": '',
             orderable: true,
-            searchable: true,
+            searchable: false,
           },
           {
             data: 'name_of_participant',
@@ -403,6 +435,10 @@
         getCounts();
         table.draw();
       });
+      $('#created_by').change(function() {
+        getCounts();
+        table.draw();
+      });
       $('#start_date').change(function() {
         getCounts();
         table.draw();
@@ -424,6 +460,7 @@
 
     function getCounts() {
      var state = $('#state').val();
+     var created_by = $('#created_by').val();
      var district = $('#district').val();
      var event_under = $('#event_under').val();
      var event_center = $('#event_center').val();
@@ -439,6 +476,7 @@
          _token: "{{csrf_token()}}",
          state: state,
          district: district,
+        //  created_by: created_by,
          event_under: event_under,
          event_center: event_center,
          branch: branch,
@@ -453,6 +491,8 @@
          $('#mechanic_count').html(res.mechanic_count);
          $('#retailer_count').html(res.retailer_count);
          $('#village_influencer_count').html(res.village_influencer_count);
+         $('#electrician_count').html(res.electrician_count);
+         $('#exhibition_count').html(res.exhibition_count);
        }
      });
     }

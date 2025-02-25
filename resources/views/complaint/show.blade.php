@@ -90,11 +90,29 @@
       color: black;
   }
 
+  section.content {
+      position: relative;
+  }
+
+  button#toggle-btn {
+      position: fixed;
+      right: 10px;
+      z-index: 19;
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      top: 25%;
+      font-size: 41px;
+      border-radius: 50px;
+      line-height: 20px;
+  }
+
   </style>
   <!-- Main content -->
   <section class="content">
+    <button id="toggle-btn" class="btn btn-primary mb-2"><i class="bx bx-chevron-right toggle"></i></button>
     <div class="row">
-      <div class="col-9">
+      <div class="col-9 main-content1">
         @if(Session::has('success'))
         <div class="alert alert-success" id="hide_div">
           <button type="button" class="close" data-dismiss="alert">×</button>
@@ -148,6 +166,12 @@
                   </div>
               </div>
           </div>
+        </div>
+        <div class="alert" style="display: none;" id="hide_check">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <i class="material-icons">close</i>
+          </button>
+          <strong class="message"></strong>
         </div>
        <div class="card" style="color:black;">
           <div class="card-body">
@@ -208,6 +232,8 @@
                          <p class="border p-2 badge-info">COMPLETE</p>
                       @elseif($complaint['complaint_status'] == 4)
                          <p class="border p-2 badge-success">Closed</p>
+                      @elseif($complaint['complaint_status'] == 5)
+                         <p class="border p-2 badge-danger">Cancelled</p>
                       @else
                         <p class="border p-2 bg-light">{!! $complaint['complaint_status'] !!}</p>
                       @endif
@@ -261,7 +287,7 @@
                   </div>
                   <div class="col-md-3">
                       <label>Pincode</label>
-                      <p class="border p-2 bg-light">{{$complaint->customer->customer_pindcode ?? '-'}}</p>
+                      <p class="border p-2 bg-light">{{getPincode($complaint->customer->customer_pindcode) ?? '-'}}</p>
                   </div>
                   <div class="col-md-12">
                       <label>Address</label>
@@ -279,7 +305,7 @@
                   </div>
                   <div class="col-md-3">
                       <label>Division</label>
-                      <p class="border p-2 bg-light">{{$complaint->division ?? '-'}}</p>
+                      <p class="border p-2 bg-light">{{$complaint->product_details->categories->category_name ?? '-'}}</p>
                   </div>
                   <div class="col-md-3">
                       <label>Product Group</label>
@@ -428,7 +454,7 @@
                 </div>
                 <div class="col-md-3">
                     <label>Work Done Date</label>
-                    <p class="border p-2 bg-light">{{getDateInIndFomate($work_done->created_at) ??   'Not Done Yet'}}</p>
+                    <p class="border p-2 bg-light">{{isset($work_done->created_at) ? getDateInIndFomate($work_done->created_at) :   'Not Done Yet'}}</p>
                 </div>
                 <div class="col-md-3">
                     <label>Attachment</label>
@@ -458,11 +484,11 @@
                 </div>
                 <div class="col-md-3">
                     <label>Replacement Tag</label>
-                    <p class="border p-2 bg-light">{{$service_bill->replacement_tag ?$service_bill->replacement_tag:'-'}}</p>
+                    <p class="border p-2 bg-light">{{isset($service_bill->replacement_tag) ?$service_bill->replacement_tag:'-'}}</p>
                 </div>
                 <div class="col-md-3">
                     <label>Replacement Tag No</label>
-                    <p class="border p-2 bg-light">{{$service_bill->replacement_tag_number?$service_bill->replacement_tag_number:'-'}}</p>
+                    <p class="border p-2 bg-light">{{isset($service_bill->replacement_tag_number)?$service_bill->replacement_tag_number:'-'}}</p>
                 </div>
                 <div class="col-md-3">
                     <label>Complete Remark</label>
@@ -474,31 +500,31 @@
                 </div>
                 <div class="col-md-3">
                     <label>Category Of Complaint</label>
-                    <p class="border p-2 bg-light">{{$service_bill->category ?$service_bill->category:'-'}}</p>
+                    <p class="border p-2 bg-light">{{$service_bill->category  ??'-'}}</p>
                 </div>
                 <div class="col-md-3">
                     <label>Complaint Type</label>
-                     <p class="border p-2 bg-light">{{$service_bill->complaint_type ?$service_bill->complaint_type:'-'}}</p>
+                     <p class="border p-2 bg-light">{{$service_bill->complaint_type ??'-'}}</p>
                 </div>
                 <div class="col-md-3">
                     <label>Complaint Reason</label>
-                     <p class="border p-2 bg-light">{{$service_bill->complaint_reason ?$service_bill->complaint_reason:'-'}}</p>
+                     <p class="border p-2 bg-light">{{$service_bill->complaint_reason ?? '-'}}</p>
                 </div>
                 <div class="col-md-3">
                     <label>Condition Of Service</label>
-                     <p class="border p-2 bg-light">{{$service_bill->condition_of_service ?$service_bill->condition_of_service:'-'}}</p>
+                     <p class="border p-2 bg-light">{{$service_bill->condition_of_service??'-'}}</p>
                 </div>
                 <div class="col-md-3">
                     <label>Received Product</label>
-                    <p class="border p-2 bg-light">{{$service_bill->received_product ?$service_bill->received_product:'-'}}</p>
+                    <p class="border p-2 bg-light">{{$service_bill->received_product??'-'}}</p>
                 </div>
                 <div class="col-md-3">
                     <label>Nature Of Fault</label>
-                     <p class="border p-2 bg-light">{{$service_bill->nature_of_fault ?$service_bill->nature_of_fault:'-'}}</p>
+                     <p class="border p-2 bg-light">{{$service_bill->nature_of_fault??'-'}}</p>
                 </div>
                 <div class="col-md-3">
                     <label>Service Location</label>
-                     <p class="border p-2 bg-light">{{$service_bill->service_location ?$service_bill->service_location:'-'}}</p>
+                     <p class="border p-2 bg-light">{{$service_bill->service_location??'-'}}</p>
                 </div>
                  <!-- Service Bill Details -->
                 <div class="col-md-12 mt-2">
@@ -544,13 +570,15 @@
 
 
 
-      <div class="col-3">
+      <div class="col-3 sidebar1">
 
         <div class="card blck-clr">
           <div class="card-body">
 
             <div class="row">
+
               <div class="col-12">
+
                 <h3 class="card-title pb-3">Time Line</h3>
                 <hr>
                 <p class="lead"></p>
@@ -618,6 +646,9 @@
                   <b> #{!! $complaint['complaint_number'] !!} Created by {{ $complaint->createdbyname->name?? '' }} At {{date("d M Y, h:i a", strtotime($complaint->created_at));}} 
                 </p>
               </div>
+              <button class="btn btn-primary w-100 mb-3" id="openModalButton">
+                + Add Task
+              </button>
             </div>
           </div>
         </div>
@@ -702,7 +733,45 @@
           </div>
         </div>
       </div>
-
+     <div class="modal fade bd-example-modal-lg" id="addTask" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content card">
+          <div class="card-header card-header-icon card-header-theme">
+            <h4 class="card-title">
+              <span class="modal-title">{!! trans('panel.global.add') !!}</span> Task
+              <span class="pull-right">
+                <a href="javascript:void(0)" class="btn btn-just-icon btn-danger" id="closeModalButton">
+                  <i class="material-icons">clear</i>
+                </a>
+              </span>
+            </h4>
+          </div>
+          <div class="modal-body">
+            <form method="POST" action="#" enctype="multipart/form-data" id="createWarehouseForm">
+              @csrf
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="input_section">
+                    <label class="col-form-label">Task <span class="text-danger"> *</span></label>
+                    <div class="form-group has-default bmd-form-group">
+                      <input type="text" name="complaint_task" id="complaint_task" class="form-control" value="{!! old('complaint_task') !!}" maxlength="200" required>
+                      @if ($errors->has('complaint_task'))
+                        <div class="error"><p class="text-danger">{{ $errors->first('complaint_task') }}</p></div>
+                      @endif
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="clearfix"></div>
+              <div class="pull-right">
+                <input type="hidden" name="id" id="warehouse_id" />
+                <button class="btn btn-info save"> Submit</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
       <!-- end model for status -->
 
       <!-- Custom styles for this page -->
@@ -711,6 +780,38 @@
       <script src="{{ url('/').'/'.asset('lightboxx/js/lightbox-plus-jquery.min.js') }}"></script>
 
       <!-- for checked -->
+      <script>
+        $(document).ready(function() {
+            $("#toggle-btn").click(function() {
+                $(".sidebar1").toggle();
+                if ($(".sidebar1").is(":visible")) {
+                    $(".main-content1").removeClass("col-md-12").addClass("col-md-9");
+                } else {
+                    $(".main-content1").removeClass("col-md-9").addClass("col-md-12");
+                }
+                let icon = this.querySelector(".toggle");
+                if (icon.classList.contains("bx-chevron-right")) {
+                    icon.classList.replace("bx-chevron-right", "bx-chevron-left");
+                } else {
+                    icon.classList.replace("bx-chevron-left", "bx-chevron-right");
+                }
+            });
+
+              $("#openModalButton").click(function () {
+                $("#addTask").modal("show");
+              });
+               $("#closeModalButton").click(function () {
+                $("#addTask").modal("hide");
+              });
+
+              // Close Modal when clicking outside (optional)
+              $("#addTask").on("click", function (e) {
+                if ($(e.target).hasClass("modal")) {
+                  $("#addTask").modal("hide");
+                }
+              });
+        });
+      </script>
       <script type="text/javascript">
         var token = $("meta[name='csrf-token']").attr("content");
         $('body').on('click', '.open_status', function() {
