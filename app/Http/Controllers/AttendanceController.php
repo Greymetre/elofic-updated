@@ -524,6 +524,7 @@ class AttendanceController extends Controller
       foreach ($ids as $key => $value) {
         Attendance::where('id', '=', $value)->update([
           'attendance_status' => 1,
+          'approve_reject_by' => Auth::user()->id,
           'remark_status' => null
         ]);
       }
@@ -542,6 +543,7 @@ class AttendanceController extends Controller
       foreach ($id_array as $key => $value) {
         Attendance::where('id', '=', $value)->update([
           'attendance_status' => 2,
+          'approve_reject_by' => Auth::user()->id,
           'remark_status' => $remark_status ?? null,
         ]);
       }

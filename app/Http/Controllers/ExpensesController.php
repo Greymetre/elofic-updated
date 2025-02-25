@@ -834,8 +834,10 @@ class ExpensesController extends Controller
         try {
             $ids = explode(',', $request['id']);
 
+            $reason = $request['reason'] ?? 'Checked';
+
             foreach ($ids as $key => $value) {
-                $update = Expenses::where('id', $value)->update(['reason' => 'Multiple Checked', 'checker_status' => '3']);
+                $update = Expenses::where('id', $value)->update(['reason' => $reason, 'checker_status' => '3']);
 
                 if ($update) {
                     $logdata = array(
@@ -857,8 +859,10 @@ class ExpensesController extends Controller
         try {
             $ids = explode(',', $request['id']);
 
+            $reason = $request['reason'] ?? 'Approved';
+
             foreach ($ids as $key => $value) {
-                $update = Expenses::where('id', $value)->update(['reason' => 'Multiple Approve', 'checker_status' => '1', 'approve_reject_by' => Auth::user()->id, 'approve_amount' => DB::raw('claim_amount')]);
+                $update = Expenses::where('id', $value)->update(['reason' => $reason, 'checker_status' => '1', 'approve_reject_by' => Auth::user()->id, 'approve_amount' => DB::raw('claim_amount')]);
 
                 if ($update) {
                     $logdata = array(
@@ -880,8 +884,9 @@ class ExpensesController extends Controller
     {
         try {
             $ids = explode(',', $request['id']);
+            $reason = $request['reason'] ?? 'Rejected';
             foreach ($ids as $key => $value) {
-                $update = Expenses::where('id', $value)->update(['reason' => 'Multiple Approve', 'checker_status' => '2', 'approve_reject_by' => Auth::user()->id, 'approve_amount' => NULL]);
+                $update = Expenses::where('id', $value)->update(['reason' => $reason, 'checker_status' => '2', 'approve_reject_by' => Auth::user()->id, 'approve_amount' => NULL]);
 
                 if ($update) {
                     $logdata = array(

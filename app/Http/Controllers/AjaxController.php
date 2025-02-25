@@ -1746,10 +1746,12 @@ class AjaxController extends Controller
     public function addMarketingType(Request $request)
     {
         $type = $request->type ?? '';
+        $activity_division = $request->activity_division ?? '';
         if (isset($type)) {
             $slug = strtolower(str_replace(' ', '_', $type));
             $marketing_type = MarketingActivity::updateOrCreate(
                 ['slug' => $slug],
+                ['activity_division' => $activity_division],
                 ['type' => $type]
             );
             return response()->json(['status' => true, 'marketing_type' => $marketing_type]);
@@ -1760,13 +1762,14 @@ class AjaxController extends Controller
    public function getMarketingType(Request $request)
     {
         try {
-            $types = MarketingActivity::select('id', 'type')->get(); // Fetching data
+            $types = MarketingActivity::with('division')->select('id', 'type', 'activity_division')->get(); // Fetching data
 
             $html = '';
             foreach ($types as $type) {
+                $divisionName = $type->division ? $type->division->division_name : 'No Division';
                 $html .= '
                     <span class="badge badge-info mr-2 mb-2" id="badge_' . $type->id . '">
-                        ' . e($type->type) . '
+                        ' . e($divisionName . ' - ' . $type->type) . '
                         <button type="button" class="close" aria-label="Close" onclick="removeBadge(' . $type->id . ')">
                             <span aria-hidden="true" style="color:red">&times;</span>
                         </button>

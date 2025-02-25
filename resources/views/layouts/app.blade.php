@@ -1439,6 +1439,15 @@
                         </a>
                      </li>
                      @endif
+                     @if(auth()->user()->can('claim_generation_access'))
+                     <li class="nav-link-btn {{ request()->is('claim-generation*') ? 'active' : '' }}">
+                        <a class="hoveradd2" href="{{ url('claim-generation') }}">
+                           <i class="material-icons icon">account_balance_wallet</i>
+                           <span>Claim Generation</span>
+                           <div class="d-none mobile_hide">Claim Generation</div>
+                        </a>
+                     </li>
+                     @endif
                      @if(auth()->user()->can('services_product_access'))
                      <li class="nav-link-btn add_icon {{ request()->is('service-charge*') ? 'active' : '' }}">
                         <a class="collapsed hoveradd" data-toggle="collapse" href="#serviceProductMenu" aria-expanded="false">

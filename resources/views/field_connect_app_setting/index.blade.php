@@ -243,6 +243,22 @@
                <div id="success-message"></div>
                <div class="row">
                   <!-- Form Section -->
+                  <div class="col-md-4">
+                     <div class="input_section">
+                        <label class="col-form-label">Division </label>
+                        <select name="activity_division" id="activity_division" class="form-control selec2">
+                           <option value="">Select Division</option>
+                           @foreach($divisions as $division)
+                           <option value="{{$division->id}}">{{$division->division_name}}</option>
+                           @endforeach
+                        </select>
+                        @if ($errors->has('activity_type'))
+                        <div class="error">
+                           <p class="text-danger">{{ $errors->first('activity_type') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
                   <div class="col-md-6">
                      <div class="input_section">
                         <label class="col-form-label"style="color: #53697c">Marketing Activity </label>
@@ -252,10 +268,10 @@
                                     <button class="btn btn-primary" type="button" id="marketing_type">Add</button>
                               </div>
                          </div>
-                         <div id="badge-container" class="mt-2">
-                           <!-- Static Badges -->
-                       </div>
+                         <!-- Static Badges -->
+                        </div>
                      </div>
+                     <div id="badge-container" class="mt-2">
                  </div>                 
                </div>
             </div>
@@ -382,13 +398,15 @@
 
       $('#marketing_type').on('click', function () {
           var type = $('#activity_type').val().trim(); // Trim to remove extra spaces
+          var division = $('#activity_division').val();
 
-          if (type !== '') {
+          if (type !== '' && division !== '') {
               $.ajax({
                   url: "{{ url('addMarketingType') }}",
                   method: "POST", // Assuming it's a POST request
                   data: {
                       "type": type,
+                      "activity_division": division,
                       "_token": "{{ csrf_token() }}" // Add CSRF token for security
                   },
                   success: function (res) {
@@ -421,7 +439,7 @@
                   }
               });
           } else {
-              alert('Please enter an activity type.');
+              alert('Please enter an activity type and division.');
           }
       });
 

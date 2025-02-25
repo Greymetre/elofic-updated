@@ -10,12 +10,17 @@ class MarketingActivity extends Model
     use HasFactory;
 
     protected $fillable = [
-        'slug' , 'type'
+        'slug' , 'type', 'activity_division'
     ];
 
     public function setSlugAttribute($value)
     {
         // Convert the slug to snake_case format
         $this->attributes['slug'] = strtolower(str_replace(' ', '_', $value));
+    }
+
+    public function division()
+    {
+        return $this->belongsTo(Division::class, 'activity_division', 'id');
     }
 }

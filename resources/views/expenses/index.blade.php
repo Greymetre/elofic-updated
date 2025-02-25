@@ -165,7 +165,7 @@
            <div class="table-responsive">
              <table id="getallexpenses" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
                <thead class=" text-primary">
-                  <th> <input type="checkbox" id="checkAll"> </th>
+                  <th> # </th>
                  <th>{!! trans('panel.expenses.fields.expense_id') !!}</th>
                  <th>Expense Date</th>
                  <th>{!! trans('panel.expenses.fields.user') !!}</th>

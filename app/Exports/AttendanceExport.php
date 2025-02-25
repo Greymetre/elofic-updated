@@ -25,7 +25,7 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
 
     public function collection()
     {
-        return Attendance::with('users')->where(function ($query) {
+        return Attendance::with('users', 'approveReject')->where(function ($query) {
 
             if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                 $query->whereIn('user_id', getUsersReportingToAuth());
@@ -49,14 +49,14 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                 });
             }
         })
-            ->select('id', 'user_id', 'punchin_date', 'punchin_time', 'punchin_address', 'punchout_date', 'punchout_time', 'punchout_address', 'worked_time', 'punchin_summary', 'punchout_summary', 'punchin_longitude', 'punchin_latitude', 'punchout_latitude', 'punchout_longitude', 'working_type', 'attendance_status', 'remark_status', 'attendance_status','punchin_from')
+            ->select('id', 'user_id', 'punchin_date', 'punchin_time', 'punchin_address', 'punchout_date', 'punchout_time', 'punchout_address', 'worked_time', 'punchin_summary', 'punchout_summary', 'punchin_longitude', 'punchin_latitude', 'punchout_latitude', 'punchout_longitude', 'working_type', 'attendance_status', 'remark_status', 'attendance_status','punchin_from', 'approve_reject_by')
             ->limit(5000)->latest()->get();
     }
 
     public function headings(): array
     {
         if (Auth::user()->hasRole('superadmin') || Auth::user()->hasRole('Admin')) {
-            return ['id', 'Employee Code', 'user_id', 'Designation', 'Branch', 'Division', 'punchin_date', 'punchin_time', 'punchout_time', 'worked_time', 'Working Type', 'Attendance Status', 'Remark Status', 'punchin_address', 'punchout_address', 'punchin_summary', 'punchin_longitude', 'punchin_latitude', 'punchout_longitude', 'punchout_latitude', 'From'];
+            return ['id', 'Employee Code', 'user_id', 'Designation', 'Branch', 'Division', 'punchin_date', 'punchin_time', 'punchout_time', 'worked_time', 'Working Type', 'Attendance Status', 'Remark Status', 'punchin_address', 'punchout_address', 'punchin_summary', 'punchin_longitude', 'punchin_latitude', 'punchout_longitude', 'punchout_latitude', 'From', 'Approve/Reject By'];
         } else {
             return ['id', 'Employee Code', 'user_id', 'Designation', 'Branch', 'Division', 'punchin_date', 'punchin_time', 'punchout_time', 'worked_time', 'Working Type', 'Attendance Status', 'Remark Status', 'punchin_address', 'punchout_address', 'punchin_summary', 'punchin_longitude', 'punchin_latitude', 'punchout_longitude', 'punchout_latitude'];
         }
@@ -100,6 +100,7 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                 isset($data['punchout_longitude']) ? $data['punchout_longitude'] : '',
                 isset($data['punchout_latitude']) ? $data['punchout_latitude'] : '',
                 $data['punchin_from'],
+                isset($data['approveReject']) ? $data['approveReject']['name'] : '',
             ];
         } else {
             return [

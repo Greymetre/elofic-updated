@@ -17,11 +17,8 @@ class MarketIntelligenceController extends Controller
 
         $field = MarketIntelligencesField::with('fieldsData:id,value,field_id')
             ->where('division_id' , $user->division_id)
-            ->select('id', 'field_name')
-            ->get()
-            ->mapWithKeys(function ($item) {
-                return [$item->field_name => $item->fieldsData];
-            });
+            ->select('id', 'field_name', 'key', 'field_type')
+            ->get();
         return response()->json(['status' => 'success', 'data' => $field], 200);
     }
 

@@ -39,10 +39,15 @@ class MspActivityController extends Controller
         $this->internalError = 500;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $activities = $this->marketingActivity->select('id', 'type')->get(); // Use `get()` instead of `all()`
+            $user = $request->user();
+            if($user->hasRole('superadmin') || $user->hasRole('Admin')) {
+                $activities = $this->marketingActivity->select('id', 'type')->get();
+            }else{
+                $activities = $this->marketingActivity->where('activity_division', $user->division_id)->select('id', 'type')->get();
+            }
 
             return response()->json([
                 'status' => true,

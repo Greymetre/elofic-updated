@@ -13,6 +13,7 @@
             border-collapse: collapse;
             width: 100%;
         }
+
         table {
             margin-top: 20px;
         }
@@ -54,16 +55,25 @@
         <thead>
             <tr>
                 <th rowspan="2">Month / Activity</th>
-                @foreach ($data as $k => $val)
-                <th colspan="2">{{ $k }}</th>
-                @endforeach
+                <th colspan="2">April</th>
+                <th colspan="2">May</th>
+                <th colspan="2">June</th>
+                <th colspan="2">July</th>
+                <th colspan="2">August</th>
+                <th colspan="2">September</th>
+                <th colspan="2">October</th>
+                <th colspan="2">November</th>
+                <th colspan="2">December</th>
+                <th colspan="2">January</th>
+                <th colspan="2">February</th>
+                <th colspan="2">March</th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 @foreach ($data as $k => $val)
                 <th>Part</th>
-                <th>Perf</th>
+                <th>Act</th>
                 @endforeach
             </tr>
             @foreach ($activities as $key => $activity)

@@ -56,6 +56,8 @@ class MarketIntelligencesFieldController extends Controller
             $request['is_required'] = ($request['is_required'] == 'on') ? true : false;
             $request['is_multiple'] = ($request['is_multiple'] == 'on') ? true : false;
             $request['active'] = 'Y';
+            $nextId = MarketIntelligencesField::max('id') + 1;
+            $request['key'] = $request['field_name'] ? str_replace(' ', '_', strtolower($request['field_name'])).'_'.$nextId : '';
             if ($fields = MarketIntelligencesField::create($request->except(['_token']))) {
                 if ($request['details']) {
                     foreach ($request['details'] as $key => $value) {
@@ -105,6 +107,7 @@ class MarketIntelligencesFieldController extends Controller
     public function update(Request $request, $id)
     {
         try {
+            $request['key'] = $request['field_name'] ? str_replace(' ', '_', strtolower($request['field_name'])).'_'.$id : '';
             if (MarketIntelligencesField::where('id', $id)->update($request->except(['_token', '_method', 'image', 'details']))) {
                 if ($request['details']) {
                     $fieldValue = array();

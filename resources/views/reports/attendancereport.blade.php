@@ -118,7 +118,7 @@
             <table id="getattendance" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
               <thead class=" text-primary">
                 <th>No</th>
-                <th> <input type="checkbox" id="checkAll"> </th>
+                <th>#</th>
                 <th>User ID</th>
                 <th>Status</th>
                 <th>User Name</th>

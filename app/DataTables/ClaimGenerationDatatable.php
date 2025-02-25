@@ -1,0 +1,116 @@
+<?php
+
+namespace App\DataTables;
+
+use App\Models\ClaimGeneration;
+use Illuminate\Http\Request;
+use Yajra\DataTables\Html\Button;
+use Yajra\DataTables\Html\Column;
+use Yajra\DataTables\Html\Editor\Editor;
+use Yajra\DataTables\Html\Editor\Fields;
+use Yajra\DataTables\Services\DataTable;
+
+use Illuminate\Support\Facades\Auth;
+
+use Carbon\Carbon;
+
+class ClaimGenerationDatatable extends DataTable
+{
+    
+    public function dataTable($query)
+    {
+        return datatables()
+            ->eloquent($query)
+            ->addIndexColumn()
+            ->addColumn('created_by', function($data){
+                return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
+            })
+            ->addColumn('service_center_name', function($data) {
+                return isset($data->service_center_details) 
+                    ? '[' . ($data->service_center_details->customer_code ?? '') . '] ' . ($data->service_center_details->name ?? '') 
+                    : '';
+            })
+            ->addColumn('month_year', function($data) {
+                return ($data->month ?? '') . '-' . ($data->year ?? '');
+            })
+             ->addColumn('action', function ($query) {
+                  $btn = '';
+                  if(auth()->user()->can(['claim_edit']))
+                  {
+                   $btn .= '<a href="' . route('claim-generation.edit', encrypt($query->id)) . '" class="btn btn-info btn-just-icon btn-sm" 
+                            title="' . trans('panel.global.edit') . ' ' . trans('panel.claim_generation.title_singular') . '">
+                            <i class="material-icons">edit</i>
+                        </a>';
+                  }
+                  return $btn;
+            })
+            ->rawColumns(['action' , 'service_center_name' , 'month_year']);
+    }
+
+    /**
+     * Get query source of dataTable.
+     *
+     * @param \App\Product $model
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+     public function query(ClaimGeneration $model, Request $request)
+    {
+        $data = $model->with(['service_center_details']);
+        if (!empty($request->start_month)) { 
+            $formatted_date = Carbon::createFromFormat('F Y', $request->start_month)->startOfMonth();
+            $month = $formatted_date->format('M'); // "Feb"
+            $year = $formatted_date->format('Y');  // "2025"
+
+            $data = $data->where('month', $month)->where('year', $year); 
+        }
+
+        if (!empty($request->service_center)) { 
+            $data = $data->where('service_center_id', $request->service_center);
+        }
+
+        return $data->latest();
+    }
+
+
+    /**
+     * Optional method if you want to use html builder.
+     *
+     * @return \Yajra\DataTables\Html\Builder
+     */
+    public function html()
+    {
+        return $this->builder()
+                    ->setTableId('product-table')
+                    ->columns($this->getColumns())
+                    ->minifiedAjax()
+                    ->dom('Bfrtip')
+                    ->orderBy(1)
+                    ->buttons(
+                        Button::make('create'),
+                        Button::make('export'),
+                        Button::make('print'),
+                        Button::make('reset'),
+                        Button::make('reload')
+                    );
+    }
+
+    /**
+     * Get columns.
+     *
+     * @return array
+     */
+    protected function getColumns()
+    {
+        return [
+            Column::computed('action')
+                  ->exportable(false)
+                  ->printable(false)
+                  ->width(60)
+                  ->addClass('text-center'),
+            Column::make('id'),
+            Column::make('add your columns'),
+            Column::make('created_at'),
+            Column::make('updated_at'),
+        ];
+    }
+}

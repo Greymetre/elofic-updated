@@ -83,6 +83,7 @@ use App\Http\Controllers\ResignationController;
 use App\Http\Controllers\SapStockController;
 use App\Http\Controllers\WareHouseController;
 use App\Http\Controllers\PlannedSOPController;
+use App\Http\Controllers\ClaimGenerationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -973,6 +974,10 @@ Route::group(['middleware' => ['auth']], function () {
 
     Route::resource('planned-sop', PlannedSOPController::class);
     Route::any('planned-sop-list', [PlannedSOPController::class , 'plannedSopList'])->name('plannedSopList');
+
+    // claim gerneration 
+    Route::resource('claim-generation', ClaimGenerationController::class);
+    Route::any('claim-generation-list', [ClaimGenerationController::class , 'getClaims'])->name('getClaims');
 });
 
 Route::any('getState', [AjaxController::class, 'getState']);

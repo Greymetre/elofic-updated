@@ -35,7 +35,7 @@ class UserExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMa
     {
         $data = User::with('createdbyname', 'getbranch', 'getdesignation', 'reportinginfo', 'userinfo', 'getdivision')
             ->where(function ($query) {
-                if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('Sub_Admin')) {
                     $query->whereIn('id', $this->userids);
                 }
                 if ($this->active && !empty($this->active)) {

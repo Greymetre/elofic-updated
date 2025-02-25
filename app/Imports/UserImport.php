@@ -77,6 +77,11 @@ class UserImport implements ToCollection, WithValidation, WithHeadingRow, WithBa
                     $unixTimestamp = strtotime('+' . $excelDate . ' days', strtotime('1970-01-01'));
                     $row['children_5_dob'] = !empty($row['children_5_dob']) ? Carbon::createFromTimestamp($unixTimestamp) : '';
                 }
+                if (is_numeric($row['date_of_joining'])) {
+                    $excelDate = $row['date_of_joining'] - 25569; // Adjust for Excel's epoch
+                    $unixTimestamp = strtotime('+' . $excelDate . ' days', strtotime('1970-01-01'));
+                    $row['date_of_joining'] = !empty($row['date_of_joining']) ? Carbon::createFromTimestamp($unixTimestamp) : '';
+                }
                 $name = trim($row['user_name']);
                 $last_name = (strpos($name, ' ') === false) ? '' : preg_replace('#.*\s([\w-]*)$#', '$1', $name);
                 $first_name = trim(preg_replace('#' . preg_quote($last_name, '#') . '#', '', $name));
