@@ -6,11 +6,25 @@
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
-          <h4 class="card-title ">Market Intelligence 
+          <h4 class="card-title ">Market Intelligence
             <span class="">
               <div class="btn-group header-frm-btn">
+                <form method="GET" action="{{ URL::to('customers-download') }}">
+                  <div class="d-flex flex-wrap flex-row">
+
+                    <div class="p-2" style="width:200px;">
+                      <select class="selectpicker" name="division_id" id="division_id" data-style="select-with-transition" title="Select Division">
+                        @if(@isset($divisions ))
+                        @foreach($divisions as $division)
+                        <option value="{!! $division['id'] !!}" {{ old( 'division_id') == $division->id || 10 == $division->id ? 'selected' : '' }}>{!! $division['division_name'] !!}</option>
+                        @endforeach
+                        @endif
+                      </select>
+                    </div>
+                  </div>
+                </form>
                 <div class="next-btn">
-                <!--   @if(auth()->user()->can('market_intelligence_create'))
+                  <!--   @if(auth()->user()->can('market_intelligence_create'))
                   <a href="{{ route('market_intelligences.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Field"><i class="material-icons">add_circle</i></a>
 
                   @endif -->
@@ -43,32 +57,14 @@
             <span class="message"></span>
           </div>
           <div class="table-responsive">
-            <table id="getfields" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
+            <table id="getPumpSR" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
               <thead class="text-primary">
-                  <th>{!! trans('panel.global.no') !!}</th>
-                  <th>Date</th>
-                  <th>User Name</th>
-                  <th>EMP</th>
-                  <th>State</th>
-                  <th>Division</th>
-                  <th>Category</th>
-                  <th>Brand Name</th>
-                  <th>Product Name</th>
-                  <th>Cooling Arrangement</th>
-                  <th>Type of Construction</th>
-                  <th>HP</th>
-                  <th>Stage</th>
-                  <th>Phase</th>
-                  <th>Head Range (MTR)</th>
-                  <th>Discharge Range (LPM)</th>
-                  <th>Suc x Del (MM)</th>
-                  <th>Speed (RPM)</th>
-                  <th>MRP</th>
-                  <th>List Price</th>
-                  <th>Landed to Dealers w/o Tax</th>
-                  <th>Remarks</th>
-                  <th>Upload Image</th>
-<!--                   <th>{!! trans('panel.global.created_at') !!}</th>
+                <th>{!! trans('panel.global.no') !!}</th>
+                <th>State</th>
+                @foreach($keys as $key)
+                <th>{{ $key->field_name }}</th>
+                @endforeach
+                <!-- <th>{!! trans('panel.global.created_at') !!}</th>
                   <th>{!! trans('panel.global.action') !!}</th> -->
               </thead>
 
@@ -89,7 +85,7 @@
           'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
       });
-      var table = $('#getfields').DataTable({
+      var table = $('#getPumpSR').DataTable({
         processing: true,
         serverSide: true,
         "order": [
@@ -115,12 +111,12 @@
           {
             data: 'createdbyname.employee_codes',
             name: 'createdbyname.employee_codes',
-             orderable: false,
+            orderable: false,
           },
-           {
+          {
             data: 'state.state_name',
             name: 'state.state_name',
-             orderable: false,
+            orderable: false,
           },
           {
             data: 'division_id',
@@ -132,7 +128,7 @@
             name: 'category_id',
             "defaultContent": ''
           },
-           {
+          {
             data: 'brand_id',
             name: 'brand_id',
             "defaultContent": ''
@@ -147,69 +143,9 @@
             name: 'cooling_arrangement_id',
             "defaultContent": ''
           },
-           {
+          {
             data: 'type_of_construction_id',
             name: 'type_of_construction_id',
-            "defaultContent": ''
-          },
-          {
-            data: 'hp_id',
-            name: 'hp_id',
-            "defaultContent": ''
-          },
-          {
-            data: 'stage',
-            name: 'stage',
-            "defaultContent": ''
-          },
-           {
-            data: 'phase_id',
-            name: 'phase_id',
-            "defaultContent": ''
-          },
-          {
-            data: 'head_range_mtr',
-            name: 'head_range_mtr',
-            "defaultContent": ''
-          },
-          {
-            data: 'discharge_range_lpm',
-            name: 'discharge_range_lpm',
-            "defaultContent": ''
-          },
-           {
-            data: 'sucx_del',
-            name: 'sucx_del',
-            "defaultContent": ''
-          },
-          {
-            data: 'speed',
-            name: 'speed',
-            "defaultContent": ''
-          },
-          {
-            data: 'mrp',
-            name: 'mrp',
-            "defaultContent": ''
-          }, 
-          {
-            data: 'list_price',
-            name: 'list_price',
-            "defaultContent": ''
-          },
-          {
-            data: 'landed_to_dealers',
-            name: 'landed_to_dealers',
-            "defaultContent": ''
-          },
-          {
-            data: 'remark',
-            name: 'remark',
-            "defaultContent": ''
-          },
-           {
-            data: 'uploaded_image',
-            name: 'uploaded_image',
             "defaultContent": ''
           }
         ]

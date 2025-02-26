@@ -281,6 +281,47 @@
         }).focus(function () {
             $(".ui-datepicker-calendar").hide(); // Hide date picker
         });
+
+        $('#button_export').on('click', function () {
+          let startMonth = $('#start_month').val();
+          let serviceCenter = $('#service_center').val();
+
+          // Create a new form dynamically
+          let form = $('<form>', {
+              method: 'POST',
+              action: "{{ route('claim-generation.export') }}", 
+          });
+
+          // Add CSRF token
+          let csrfToken = $('<input>', {
+              type: 'hidden',
+              name: '_token',
+              value: '{{ csrf_token() }}'
+          });
+
+          // Add search parameters
+          let startMonthField = $('<input>', {
+              type: 'hidden',
+              name: 'start_month',
+              value: startMonth
+          });
+
+          let serviceCenterField = $('<input>', {
+              type: 'hidden',
+              name: 'service_center',
+              value: serviceCenter
+          });
+
+          // Append inputs to form
+          form.append(csrfToken, startMonthField, serviceCenterField);
+
+          // Append form to body and submit
+          $('body').append(form);
+          form.submit();
+
+          // Remove form after submission to prevent duplication
+          form.remove();
+      });
     });
   </script>
 </x-app-layout>

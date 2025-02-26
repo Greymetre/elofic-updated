@@ -18,6 +18,9 @@ use App\Imports\CategoryImport;
 use App\Exports\CategoryExport;
 use App\Exports\CategoryTemplate;
 use App\Http\Requests\CategoryRequest;
+use App\Models\Attachment;
+use App\Models\Customers;
+use Illuminate\Support\Facades\Storage;
 
 class CategoryController extends Controller
 {

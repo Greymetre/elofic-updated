@@ -230,14 +230,14 @@ class CustomerController extends Controller
                                         </div>';
                 })
                 ->addColumn('image', function ($query) {
-                    $profileimage = !empty($query->profile_image) ? '/public/uploads/' . $query->profile_image : asset('assets/img/placeholder.jpg');
+                    $profileimage = !empty($query->profile_image) ? $query->profile_image : asset('assets/img/placeholder.jpg');
                     return '<img src="' . $profileimage . '" border="0" width="70" class="rounded imageDisplayModel" align="center" />';
                 })
                 ->addColumn('createdbyname.name', function ($query) {
                     return $query->created_by ? $query->createdbyname->name : 'Self';
                 })
                 ->addColumn('profileimage', function ($query) {
-                    $profileimage = !empty($query->shop_image) ? '/public/uploads/' . $query->shop_image : asset('assets/img/placeholder.jpg');
+                    $profileimage = !empty($query->shop_image) ? $query->shop_image : asset('assets/img/placeholder.jpg');
                     return '<img src="' . $profileimage . '" border="0" width="70" class="rounded imageDisplayModel" align="center" />';
                 })
                 ->addColumn('createdbyname.name', function ($query) {
@@ -603,7 +603,7 @@ class CustomerController extends Controller
                 $request['shop_image'] = fileupload($image, $this->path, $filename);
             }
             if ($request->file('imggstin')) {
-                $path = 'customers/';
+                $path = 'customers';
                 $image = $request->file('imggstin');
                 $filename = 'gstin_' . $id;
                 unset($request['imggstin']);
@@ -615,7 +615,7 @@ class CustomerController extends Controller
                 CustomerDetails::where('customer_id', $request->id)->update(['gstin_no_status' => '0']);
             }
             if ($request->file('imgpan')) {
-                $path = 'customers/';
+                $path = 'customers';
                 $image = $request->file('imgpan');
                 $filename = 'pan_' . $id;
                 unset($request['imgpan']);
@@ -627,7 +627,7 @@ class CustomerController extends Controller
                 CustomerDetails::where('customer_id', $request->id)->update(['pan_no_status' => '0']);
             }
             if ($request->file('imgaadhar')) {
-                $path = 'customers/';
+                $path = 'customers';
                 $image = $request->file('imgaadhar');
                 $filename = 'aadhar_' . $id;
                 unset($request['image']);
@@ -639,7 +639,7 @@ class CustomerController extends Controller
                 CustomerDetails::where('customer_id', $request->id)->update(['aadhar_no_status' => '0']);
             }
             if ($request->file('imgaadharback')) {
-                $path = 'customers/';
+                $path = 'customers';
                 $image = $request->file('imgaadharback');
                 $filename = 'aadharback_' . $id;
                 unset($request['image']);
@@ -651,7 +651,7 @@ class CustomerController extends Controller
                 CustomerDetails::where('customer_id', $request->id)->update(['aadhar_no_status' => '0']);
             }
             if ($request->file('imgbankpass')) {
-                $path = 'customers/';
+                $path = 'customers';
                 $image = $request->file('imgbankpass');
                 $filename = 'bankpass_' . $id;
                 unset($request['image']);
@@ -663,7 +663,7 @@ class CustomerController extends Controller
                 CustomerDetails::where('customer_id', $request->id)->update(['bank_status' => '0']);
             }
             if ($request->file('imgother')) {
-                $path = 'customers/';
+                $path = 'customers';
                 $image = $request->file('imgother');
                 $filename = 'other_' . $id;
                 unset($request['imgother']);

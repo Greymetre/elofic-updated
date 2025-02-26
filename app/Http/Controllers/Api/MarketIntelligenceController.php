@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\MarketIntelligenceServey;
+use App\Models\MarketIntelligenceServeyData;
 use App\Models\MarketIntelligencesField;
 use App\Models\MarketIntelligencesFielddata;
 use Illuminate\Http\Request;
 use Auth;
+use Illuminate\Support\Facades\Log;
 
 class MarketIntelligenceController extends Controller
 {
@@ -24,18 +26,28 @@ class MarketIntelligenceController extends Controller
 
     public function MarketIntelligenceStore(Request $request)
     {
-        $data = $request->all();
+        $nextId = MarketIntelligenceServey::max('id') + 1;
 
         $data['created_by'] = Auth::user()->id;
+        $data['title'] = 'Servey-' . $nextId;
 
-        
         $servey = MarketIntelligenceServey::create($data);
+        
         if ($request->hasFile('servey_image')) {
             $file = $request->file('servey_image');
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $servey->addMedia($file)
                 ->usingFileName($customname)
                 ->toMediaCollection('servey_image');
+        }
+
+        foreach (json_decode($request->data) as $key => $value) {
+            if ($key != '_token' && $key != 'servey_image') {
+                MarketIntelligenceServeyData::updateOrCreate(
+                    ['servey_id' => $servey->id, 'key' => $key],
+                    ['value' => $value]
+                );
+            }
         }
 
         return response()->json(['status' => 'success', 'message' => 'Market Intelligence created successfully', 'data' => $servey], 200);

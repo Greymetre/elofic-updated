@@ -8,6 +8,7 @@ use App\Exports\ExcelExport;
 use App\Models\CustomerType;
 use App\Models\Division;
 use App\Models\MarketIntelligenceServey;
+use App\Models\MarketIntelligenceServeyData;
 use App\Models\MarketIntelligencesField;
 use App\Models\MarketIntelligencesFielddata;
 use Illuminate\Http\Request;
@@ -57,7 +58,7 @@ class MarketIntelligencesFieldController extends Controller
             $request['is_multiple'] = ($request['is_multiple'] == 'on') ? true : false;
             $request['active'] = 'Y';
             $nextId = MarketIntelligencesField::max('id') + 1;
-            $request['key'] = $request['field_name'] ? str_replace(' ', '_', strtolower($request['field_name'])).'_'.$nextId : '';
+            $request['key'] = $request['field_name'] ? str_replace(' ', '_', strtolower($request['field_name'])) . '_' . $nextId : '';
             if ($fields = MarketIntelligencesField::create($request->except(['_token']))) {
                 if ($request['details']) {
                     foreach ($request['details'] as $key => $value) {
@@ -107,7 +108,7 @@ class MarketIntelligencesFieldController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $request['key'] = $request['field_name'] ? str_replace(' ', '_', strtolower($request['field_name'])).'_'.$id : '';
+            $request['key'] = $request['field_name'] ? str_replace(' ', '_', strtolower($request['field_name'])) . '_' . $id : '';
             if (MarketIntelligencesField::where('id', $id)->update($request->except(['_token', '_method', 'image', 'details']))) {
                 if ($request['details']) {
                     $fieldValue = array();
@@ -214,8 +215,8 @@ class MarketIntelligencesFieldController extends Controller
             $data[$key]['list_price'] = $value->list_price ?? '-';
             $data[$key]['landed'] = $value->landed_to_dealers ?? '-';
             $data[$key]['remark'] = $value->remark ?? '-';
-            $data[$key]['image'] = $value->getMedia('servey_image')->count() > 0 
-                ? $value->getMedia('servey_image')[0]->getFullUrl() 
+            $data[$key]['image'] = $value->getMedia('servey_image')->count() > 0
+                ? $value->getMedia('servey_image')[0]->getFullUrl()
                 : 'No';
         }
         return Excel::download(new ExcelExport($heading, $data), 'MarketIntelligencesFields.xlsx');
@@ -224,6 +225,9 @@ class MarketIntelligencesFieldController extends Controller
     public function marketIntelligence(MarketIntelligencesDataTable $dataTable, Request $request)
     {
         //abort_if(Gate::denies('fields_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return $dataTable->render('reports.customer_makert_intelligence');
+        $divisions = Division::where('active', 'Y')->get();
+        $keys = MarketIntelligencesField::where('division_id', 10)->get();
+
+        return $dataTable->render('reports.customer_makert_intelligence', compact('divisions', 'keys'));
     }
 }

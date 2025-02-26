@@ -14,24 +14,7 @@ class MarketIntelligenceServey extends Model implements HasMedia
     protected $table = 'market_intelligence_serveys';
 
     protected $fillable = [
-        'state_id',
-        'division_id',
-        'category_id',
-        'brand_id',
-        'product_name',
-        'cooling_arrangement_id',
-        'type_of_construction_id',
-        'hp_id',
-        'stage',
-        'phase_id',
-        'head_range_mtr',
-        'discharge_range_lpm',
-        'sucx_del',
-        'speed',
-        'mrp',
-        'list_price',
-        'landed_to_dealers',
-        'remark',
+        'title',
         'created_by',
         'crated_at',
         'updated_at'
@@ -42,9 +25,9 @@ class MarketIntelligenceServey extends Model implements HasMedia
         return $this->belongsTo('App\Models\User', 'created_by', 'id')->select('id','name' ,'employee_codes');
     }
 
-    public function state()
+    public function data()
     {
-        return $this->belongsTo('App\Models\State', 'state_id', 'id')->select('id','state_name');
+        return $this->hasMany(MarketIntelligenceServeyData::class, 'servey_id', 'id');
     }
 
     public function registerMediaCollections(): void {

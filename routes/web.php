@@ -978,6 +978,9 @@ Route::group(['middleware' => ['auth']], function () {
     // claim gerneration 
     Route::resource('claim-generation', ClaimGenerationController::class);
     Route::any('claim-generation-list', [ClaimGenerationController::class , 'getClaims'])->name('getClaims');
+    Route::any('claim-generation-export', [ClaimGenerationController::class , 'ClaimGenerationExport'])->name('claim-generation.export');
+    Route::any('claim-generation-list-single', [ClaimGenerationController::class , 'getClaimsSingle'])->name('getClaimsSingle');
+    Route::any('claim-generation-pdf/{id}', [ClaimGenerationController::class , 'claimGenerationPdf'])->name('claim-generation.pdf');
 });
 
 Route::any('getState', [AjaxController::class, 'getState']);
