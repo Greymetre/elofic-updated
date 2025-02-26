@@ -58,7 +58,7 @@
          <div class="row gx-4 mb-2 view-tab">
             <div class="col-auto">
                <div class="avatar avatar-xl position-relative">
-                  <img style="border-radius: 10%;" src="{!! !empty($customers['shop_image']) ? asset('uploads/'.$customers['shop_image']) : asset('/assets/img/placeholder.jpg') !!}" alt="profile_image" class="w-100 border-radius-lg shadow-sm imageDisplayModel">
+                  <img style="border-radius: 10%;" src="{!! !empty($customers['shop_image']) ? $customers['shop_image'] : asset('/assets/img/placeholder.jpg') !!}" alt="profile_image" class="w-100 border-radius-lg shadow-sm imageDisplayModel">
                </div>
             </div>
             <div class="col-auto my-auto">
@@ -222,7 +222,7 @@
                                     <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Aadhar No:</strong> &nbsp; {!! $customers['customerdetails']['aadhar_no'] !!} </li>
                                     @endif
                                     @if(isset($customers['customerdetails']['shop_image']) && $customers['customerdetails']['shop_image'] != '')
-                                    <li class="list-group-item border-0 ps-0 text-sm"><img src="{!! !empty($customers['customerdetails']['shop_image']) ? env('IMAGE_UPLOADS').$customers['customerdetails']['shop_image'] : asset('public/assets/img/placeholder.jpg') !!}" alt="profile_image" class="w-100 border-radius-lg shadow-sm"> </li>
+                                    <li class="list-group-item border-0 ps-0 text-sm"><img src="{!! !empty($customers['customerdetails']['shop_image']) ? $customers['customerdetails']['shop_image'] : asset('public/assets/img/placeholder.jpg') !!}" alt="profile_image" class="w-100 border-radius-lg shadow-sm"> </li>
                                     @endif
                                     @if(isset($customers['customerdetails']['aadhar_no']) && $customers['customerdetails']['visiting_card'] != '')
                                     <li class="list-group-item border-0 ps-0 text-sm"><img src="{!! $customers['customerdetails']['visiting_card'] !!}" alt="profile_image" class="w-100 border-radius-lg shadow-sm"> </li>
@@ -465,7 +465,7 @@
                            <div class="empty-div"></div>
                            <div class="fileinput fileinput-new text-center" data-provides="fileinput">
                               <div class="fileinput-new thumbnail">
-                                 <img src="{!! !empty($customers['profile_image']) ? asset('uploads/'.$customers['profile_image']) : asset('assets/img/placeholder.jpg') !!}" alt="profile_image" class="w-100 border-radius-lg shadow-sm imageDisplayModel">
+                                 <img src="{!! !empty($customers['profile_image']) ? $customers['profile_image'] : asset('assets/img/placeholder.jpg') !!}" alt="profile_image" class="w-100 border-radius-lg shadow-sm imageDisplayModel">
                               </div>
                               <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div><br>
                               @if ($errors->has('imggstin'))
@@ -496,7 +496,7 @@
                            </div>
                            <div class="fileinput fileinput-new text-center" data-provides="fileinput">
                               <div class="fileinput-new thumbnail">
-                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','gstin')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','gstin')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="border-radius-lg shadow-sm imageDisplayModel">
+                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','gstin')->pluck('file_path')->first()) ? $customers['customerdocuments']->where('document_name','gstin')->pluck('file_path')->first() : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="border-radius-lg shadow-sm imageDisplayModel">
                               </div>
                               <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div><br>
                               @if ($errors->has('imggstin'))
@@ -541,7 +541,7 @@
                            </div>
                            <div class="fileinput fileinput-new text-center" data-provides="fileinput">
                               <div class="fileinput-new thumbnail">
-                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','pan')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','pan')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="border-radius-lg shadow-sm imageDisplayModel">
+                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','pan')->pluck('file_path')->first()) ? $customers['customerdocuments']->where('document_name','pan')->pluck('file_path')->first() : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="border-radius-lg shadow-sm imageDisplayModel">
                               </div>
                               <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div><br>
                            </div>
@@ -579,11 +579,11 @@
                            </div>
                            <div class="fileinput fileinput-new text-center two-adhar-img" data-provides="fileinput">
                               <div class="fileinput-new thumbnail">
-                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','aadhar')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','aadhar')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="border-radius-lg shadow-sm imageDisplayModel">
+                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','aadhar')->pluck('file_path')->first()) ? $customers['customerdocuments']->where('document_name','aadhar')->pluck('file_path')->first() : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="border-radius-lg shadow-sm imageDisplayModel">
                               </div>
                               <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
                               <div class="fileinput-new thumbnail ml-2">
-                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','aadharback')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','aadharback')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="border-radius-lg shadow-sm imageDisplayModel">
+                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','aadharback')->pluck('file_path')->first()) ? $customers['customerdocuments']->where('document_name','aadharback')->pluck('file_path')->first() : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="border-radius-lg shadow-sm imageDisplayModel">
                               </div>
                               <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div><br>
                            </div>
@@ -645,7 +645,7 @@
                            </div>
                            <div class="fileinput fileinput-new text-center" data-provides="fileinput">
                               <div class="fileinput-new thumbnail">
-                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','bankpass')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','bankpass')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="border-radius-lg shadow-sm imageDisplayModel">
+                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','bankpass')->pluck('file_path')->first()) ? $customers['customerdocuments']->where('document_name','bankpass')->pluck('file_path')->first() : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="border-radius-lg shadow-sm imageDisplayModel">
                               </div>
                               <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div><br>
                            </div>
@@ -685,7 +685,7 @@
                            </div>
                            <div class="fileinput fileinput-new text-center" data-provides="fileinput">
                               <div class="fileinput-new thumbnail">
-                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','other')->pluck('file_path')->first()) ? asset('uploads/'.$customers['customerdocuments']->where('document_name','other')->pluck('file_path')->first()) : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="border-radius-lg shadow-sm imageDisplayModel">
+                                 <img src="{!! !empty($customers['customerdocuments']->where('document_name','other')->pluck('file_path')->first()) ? $customers['customerdocuments']->where('document_name','other')->pluck('file_path')->first() : url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="border-radius-lg shadow-sm imageDisplayModel">
                               </div>
                               <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div><br>
                            </div>

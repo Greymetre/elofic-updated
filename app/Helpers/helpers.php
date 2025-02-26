@@ -132,8 +132,13 @@ if (! function_exists('fileupload')) {
         // $filepath =  Storage::disk('s3')->put($path, $image);
         // return $filepath;
         $filename = $filename . date('ymdHis') . '.' . $image->getClientOriginalExtension();
-        $image->move(public_path('uploads/' . $path), $filename);
-        return $path . '/' . $filename;
+        // $image->move(public_path('uploads/' . $path), $filename);
+        $s3Path = 'uploads/' . $path . '/' . $filename;
+        $uploaded = Storage::disk('s3')->put($s3Path, file_get_contents($image));
+        if ($uploaded) {
+            return Storage::disk('s3')->url($s3Path); // Return the full S3 URL
+        }
+        // return $path . '/' . $filename;
     }
 }
 if (! function_exists('base64tofile')) {
@@ -1023,4 +1028,15 @@ function calcalutedTatByStatus($status , $query , $created_at){
   }
   return "Action Not Perfomed";
 }
+
+if (!function_exists('getServiceCharge')) {
+    function getServiceCharge($data, $serviceType) {
+        return isset($data['complaints']['service_bill']['service_bill_products'])
+            ? $data['complaints']['service_bill']['service_bill_products']
+                ->where('service_type', $serviceType)
+                ->sum('subtotal') ?? 0.0
+            : 0.0;
+    }
+}
+
 

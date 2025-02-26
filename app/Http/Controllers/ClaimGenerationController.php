@@ -7,8 +7,10 @@ use App\Models\ClaimGeneration;
 use App\Models\Customers;
 use App\Models\Complaint;
 use App\Models\ClaimGenerationDetail;
+use App\Exports\ClaimExport;
 
 use App\DataTables\ClaimGenerationDatatable;
+use App\DataTables\ClaimGenerationSingleDatabale;
 
 use Illuminate\Support\Facades\Redirect;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,6 +20,9 @@ use DataTables;
 use Validator;
 use Gate;
 use Auth;
+use Excel;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 class ClaimGenerationController extends Controller
 {
@@ -47,6 +52,11 @@ class ClaimGenerationController extends Controller
         return $dataTable->render('claim-generation.index');
     }
 
+    public function getClaimsSingle(ClaimGenerationSingleDatabale $dataTable, Request $request)
+    {
+        return $dataTable->render('claim-generation.show');
+    }
+
     /**
      * Show the form for creating a new resource.
      *
@@ -55,6 +65,13 @@ class ClaimGenerationController extends Controller
     public function create()
     {
         //
+    }
+
+    public function ClaimGenerationExport(Request $request){
+        abort_if(Gate::denies('export_claim_report'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new ClaimExport($request), 'claim.xlsx');
     }
 
     /**
@@ -86,6 +103,7 @@ class ClaimGenerationController extends Controller
            $month = $formatted_date->format('M'); // Short month format (e.g., "Feb")
            $year = $formatted_date->format('Y');
 
+           
            if ($complaints->isNotEmpty()) {
                 $firstComplaint = $complaints[0]; // Get the first complaint
                 $serviceCenterAcronym = collect(explode(' ', $firstComplaint->service_center_details->name))
@@ -150,7 +168,37 @@ class ClaimGenerationController extends Controller
      */
     public function show($id)
     {
-        //
+        abort_if(Gate::denies('claim_view'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $id = decrypt($id);
+        $claimGeneration = ClaimGeneration::find($id);
+        if(!$claimGeneration){
+          return redirect()->back()->with('message_danger', 'Record not found');
+        }
+        return view('claim-generation.show', compact('claimGeneration'));
+    }
+
+    public function claimGenerationPdf($id){
+        abort_if(Gate::denies('claim-pdf-generate'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $claimGeneration = ClaimGeneration::with(['claim_generation_details'])->find($id);
+        if(!$claimGeneration){
+          return redirect()->back()->with('message_danger', 'Record not found');
+        }
+         // return view('claim-generation.generate-claim-pdf', compact('claimGeneration'));
+        $options = new Options();
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isRemoteEnabled', true);
+
+        $dompdf = new Dompdf($options);
+        $html = view('claim-generation.generate-claim-pdf', compact('claimGeneration'))->render();
+
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+
+        // Directly download the PDF
+        return $dompdf->stream('MspActivity_' . time() . '.pdf', ['Attachment' => true]);
+
+       
     }
 
     /**
@@ -179,7 +227,36 @@ class ClaimGenerationController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        abort_if(Gate::denies('claim_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+         $request->validate([
+            'asc_bill_no' => 'required',
+            'asc_bill_date' => 'required',
+            'asc_bill_amount' => 'required',
+            'courier_details' => 'required',
+            'courier_date' => 'required',
+            'claim_sattlement_details' => 'required',
+        ]);
+
+        try{
+          $id = decrypt($id);
+          $claimGeneration = ClaimGeneration::find($id);
+          if(!$claimGeneration){
+             return redirect()->back()->with('message_danger', 'Record not found');
+          }
+          $data = $request->all();
+          $data['courier_date'] = cretaDate($request->courier_date);
+          $data['asc_bill_date'] = cretaDate($request->asc_bill_date);
+          $claimGeneration->update($data);
+           return Redirect::to('claim-generation')->with(
+                'message_success', 
+                'Claimed Updated Succussfully'
+            );
+        }catch (\Exception $e) {
+              return redirect()->back()->with(
+                'message_danger', 
+                'An error occurred: ' . $e->getMessage()
+            );
+        }
     }
 
     /**

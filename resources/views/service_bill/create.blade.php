@@ -352,19 +352,19 @@ body table td {
                       <div class="col-md-3">
                         <div class="input_section">
                            <label class="col-form-label" for="line_voltage">Line Voltage (V)</label>
-                           <input type="text" class="form-control"  value="{{$service_bill->line_voltage ?? ''}}" name="line_voltage" id="line_voltage" placeholder="Enter Line Voltage (V)">
+                           <input type="text" class="form-control"  value="{{$service_bill->line_voltage ?? ''}}" name="line_voltage" id="line_voltage" placeholder="Enter Line Voltage (V)"maxlength="3">
                         </div>
                      </div>
                      <div class="col-md-3">
                         <div class="input_section">
                            <label class="col-form-label" for="load_voltage">Load Voltage (V)</label>
-                           <input type="text" class="form-control"  value="{{$service_bill->load_voltage ?? ''}}" name="load_voltage" id="load_voltage" placeholder="Enter Load Voltage (V)">
+                           <input type="text" class="form-control"  value="{{$service_bill->load_voltage ?? ''}}" name="load_voltage" id="load_voltage" placeholder="Enter Load Voltage (V)"maxlength="3">
                         </div>
                      </div>
                      <div class="col-md-3">
                         <div class="input_section">
                            <label class="col-form-label" for="current">Current (A)</label>
-                           <input type="text" class="form-control" value="{{$service_bill->current ?? ''}}" name="current" id="current" placeholder="Enter Current Voltage (V)">
+                           <input type="text" class="form-control" value="{{$service_bill->current ?? ''}}" name="current" id="current" placeholder="Enter Current Voltage (V)" maxlength="2">
                         </div>
                      </div>
 
@@ -386,13 +386,13 @@ body table td {
                      <div class="col-md-3">
                         <div class="input_section">
                            <label class="col-form-label" for="panel_rating_running">Panel Rating-Running Capacitor (mfd) </label>
-                           <input type="text" class="form-control" name="panel_rating_running" id="panel_rating_running" value="{{$service_bill->panel_rating_running ?? ''}}" placeholder="Enter Panel Rating-Running Capacitor (mfd)">
+                           <input type="text" class="form-control" name="panel_rating_running" id="panel_rating_running" value="{{$service_bill->panel_rating_running ?? ''}}" placeholder="Enter Panel Rating-Running Capacitor (mfd)" maxlength="3">
                         </div>
                      </div>
                      <div class="col-md-3">
                         <div class="input_section">
                            <label class="col-form-label" for="panel_rating_starting">Panel Rating-Starting Capacitor (mfd)</label>
-                           <input type="text" class="form-control" value="{{$service_bill->panel_rating_starting ?? ''}}" name="panel_rating_starting" id="panel_rating_starting" placeholder="Enter Panel Rating-Starting Capacitor (mfd)">
+                           <input type="text" class="form-control" value="{{$service_bill->panel_rating_starting ?? ''}}" name="panel_rating_starting" id="panel_rating_starting" placeholder="Enter Panel Rating-Starting Capacitor (mfd)" maxlength="7">
                         </div>
                      </div>
                   </div>
@@ -612,7 +612,7 @@ body table td {
                   <button type="button" class="btn btn-info btn-sm" id="add-service">ADD</button>
                </div>
                @endif
-               <input type="submit" value="Add" class="btn btn-success float-right mt-2">
+               <input type="submit" value="Submit" class="btn btn-success float-right mt-2">
                {{ Form::close() }}
             </div>
          </div>
@@ -813,6 +813,47 @@ body table td {
 
       $(document).ready(function() {
          // $(".chargety").trigger("change");
+         $('#storeServiceBillData').validate({
+           rules:{
+             line_voltage:{
+               maxlength : 3,
+               number : true,
+             },
+             load_voltage:{
+               maxlength : 3,
+               number : true,
+             },
+             panel_rating_running:{
+               maxlength : 3,
+               number : true,
+             },
+             current:{
+               maxlength : 2,
+               number : true,
+             },
+             panel_rating_starting: {
+               pattern: /^\d{3}\/\d{3}$/, // Regex to validate "234/120" format
+             },
+           },
+           errorPlacement: function(error, element) {
+               error.addClass('text-danger'); // Add Bootstrap error styling
+               error.insertAfter(element.closest('.form-control')); // Insert after the select field
+           },
+           highlight: function(element) {
+               $(element).addClass('is-invalid'); // Highlight error
+           },
+           unhighlight: function(element) {
+               $(element).removeClass('is-invalid'); // Remove error highlight
+           }
+         });
+
+         $('#panel_rating_starting').on('input', function () {
+             let value = $(this).val().replace(/\D/g, ''); // Remove non-numeric characters
+             if (value.length > 3) {
+                 value = value.substring(0, 3) + '/' + value.substring(3, 6);
+             }
+             $(this).val(value);
+         });
       })
 
       $(document).on("change", ".chargety", function() {

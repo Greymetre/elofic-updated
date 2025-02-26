@@ -40,7 +40,7 @@ class PlannedSOPController extends Controller
         return view('planned_sop.index');
     }
 
-    public function getClaims(PlannedSopDatatable $dataTable, Request $request)
+    public function plannedSopList(PlannedSopDatatable $dataTable, Request $request)
     {
         return $dataTable->render('planned_sop.index');
     }

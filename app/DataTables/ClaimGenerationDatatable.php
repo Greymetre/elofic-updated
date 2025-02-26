@@ -27,13 +27,13 @@ class ClaimGenerationDatatable extends DataTable
             })
             ->addColumn('service_center_name', function($data) {
                 return isset($data->service_center_details) 
-                    ? '[' . ($data->service_center_details->customer_code ?? '') . '] ' . ($data->service_center_details->name ?? '') 
+                    ? '<a href="'. route('claim-generation.show', encrypt($data->id)).'">'.'[' . ($data->service_center_details->customer_code ?? '') . '] ' . ($data->service_center_details->name ?? '') . '</a>' 
                     : '';
             })
             ->addColumn('month_year', function($data) {
                 return ($data->month ?? '') . '-' . ($data->year ?? '');
             })
-             ->addColumn('action', function ($query) {
+            ->addColumn('action', function ($query) {
                   $btn = '';
                   if(auth()->user()->can(['claim_edit']))
                   {
@@ -44,7 +44,22 @@ class ClaimGenerationDatatable extends DataTable
                   }
                   return $btn;
             })
-            ->rawColumns(['action' , 'service_center_name' , 'month_year']);
+           ->editColumn('submitted_by_se', function ($query) {
+                return isset($query->submitted_by_se) && $query->submitted_by_se == 1 
+                    ? '<span class="badge badge-success">Yes</span>' 
+                    : '<span class="badge badge-danger">No</span>';
+            })
+           ->editColumn('claim_approved', function ($query) {
+                return isset($query->claim_approved) && $query->claim_approved == 1 
+                    ? '<span class="badge badge-success">Yes</span>' 
+                    : '<span class="badge badge-danger">No</span>';
+            })
+           ->editColumn('claim_done', function ($query) {
+                return isset($query->claim_done) && $query->claim_done == 1 
+                    ? '<span class="badge badge-success">Yes</span>' 
+                    : '<span class="badge badge-danger">No</span>';
+            })
+            ->rawColumns(['action' , 'service_center_name' , 'month_year' , 'submitted_by_se' , 'claim_approved' ,'claim_done']);
     }
 
     /**

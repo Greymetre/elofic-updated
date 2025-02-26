@@ -31,10 +31,16 @@ class ClaimGeneration extends Model
         return $this->belongsTo(Customers::class, 'service_center_id', 'id');
     }
 
+    public function claim_generation_details()
+    {
+        return $this->hasMany(ClaimGenerationDetail::class, 'claim_generation_id', 'id');
+    }
+
+
     public function getCourierDateAttribute($value)
     {
         try {
-            return cretaDate($value);
+            return cretaDateForFront($value);
         } catch (\Exception $e) {
             return ''; // Return null if parsing fails
         }
@@ -43,7 +49,7 @@ class ClaimGeneration extends Model
     public function getAscBillDateAttribute($value)
     {
         try {
-            return cretaDate($value);
+            return cretaDateForFront($value);
         } catch (\Exception $e) {
             return ''; // Return null if parsing fails
         }
