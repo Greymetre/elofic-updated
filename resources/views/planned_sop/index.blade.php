@@ -10,9 +10,12 @@
             <span class="">
               <div class="btn-group header-frm-btn">
                 <div class="next-btn">
-                  <!-- @if(auth()->user()->can(['product_create'])) -->
-                  <a href="{{ route('planned-sop.create') }}" class="btn btn-just-icon btn-theme" title="Add Planned SOP"><i class="material-icons">add_circle</i></a>
-                  <!-- @endif -->
+                  @if(auth()->user()->can(['sop_create']))
+                        <a href="{{ route('planned-sop.create') }}" class="btn btn-just-icon btn-theme" title="Add Planned SOP"><i class="material-icons">add_circle</i></a>
+                  @endif
+                  @if(auth()->user()->can(['sop_download']))
+                        <a href="{{ route('sop_download') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} S&OP"><i class="material-icons">cloud_download</i></a>
+                  @endif 
                 </div>
               </div>
             </span>
@@ -28,6 +31,16 @@
               @foreach($errors->all() as $error)
               <li>{{$error}}</li>
               @endforeach
+            </span>
+          </div>
+          @endif
+          @if(session()->has('message_success'))
+          <div class="alert alert-success">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <i class="material-icons">close</i>
+            </button>
+            <span>
+              {{ session()->get('message_success') }}
             </span>
           </div>
           @endif

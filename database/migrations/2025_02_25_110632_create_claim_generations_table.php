@@ -29,6 +29,7 @@ return new class extends Migration
             $table->tinyInteger('submitted_by_se')->nullable();
             $table->tinyInteger('claim_approved')->nullable();
             $table->tinyInteger('claim_done')->nullable();
+            $table->date('claim_date')->nullable();
             $table->timestamps();
         });
     }

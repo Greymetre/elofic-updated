@@ -30,6 +30,7 @@ use Excel;
 use Validator;
 use DataTables;
 use Carbon\Carbon;
+use Auth;
 
 class ComplaintController extends Controller
 {
@@ -930,6 +931,26 @@ class ComplaintController extends Controller
             return response()->json(['status' => 'success', 'message' => 'Complaint Complete Successfully.']);
         } else {
             return response()->json(['status' => 'error', 'message' => 'Complaint Not Found.']);
+        }
+    }
+
+    // add complaint notes 
+    public function complaint_add_notes(Request $request){
+        abort_if(Gate::denies('add_complaint_notes'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $request->validate([
+            'complaint_id' => 'required',
+            'complaint_notes' => 'required',
+        ]);
+        try{
+             $compalint_time_line = ComplaintTimeline::create([
+                  'complaint_id' => $request->complaint_id ?? '',
+                  'created_by'   => Auth::user()->name,
+                  'status'       => "Note" ,
+                  'remark'       => $request->complaint_notes ?? NULL
+            ]);  
+            return Redirect::to('complaints/' . $request->complaint_id)->with('message_success', 'Complaint Notes Added Successfully');
+        }catch(\Exception $e){
+            return redirect()->back()->withErrors($e->getMessage())->withInput();
         }
     }
 }

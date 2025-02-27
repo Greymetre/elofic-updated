@@ -1750,8 +1750,8 @@ class AjaxController extends Controller
         if (isset($type)) {
             $slug = strtolower(str_replace(' ', '_', $type));
             $marketing_type = MarketingActivity::updateOrCreate(
-                ['slug' => $slug],
-                ['activity_division' => $activity_division],
+                ['slug' => $slug,
+                'activity_division' => $activity_division],
                 ['type' => $type]
             );
             return response()->json(['status' => true, 'marketing_type' => $marketing_type]);
@@ -2147,8 +2147,14 @@ class AjaxController extends Controller
 
     // function for get sale data of orders
     public function getSaledata(Request $request){
-        $product_id = $request->product_id ?? '';        
-        $now = Carbon::now();
+        $product_id = $request->product_id ?? '';
+        $date = $request->date ?? '';
+
+        if(isset($date)){
+              $now = Carbon::createFromFormat('F Y', $request->date)->startOfMonth()->subMonth();
+        }else{
+              $now = Carbon::now();
+        }    
         $lastMonth = $now->subMonth()->format('Y-m'); // Last month
         $threeMonthsAgo = $now->subMonths(3)->format('Y-m'); // Three months ago
         $lastYearSameMonth = Carbon::now()->subYear()->format('Y-m'); // Same month last year

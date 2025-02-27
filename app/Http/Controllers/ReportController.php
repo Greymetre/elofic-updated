@@ -462,6 +462,9 @@ class ReportController extends Controller
             return Datatables::of($data)
                 ->addIndexColumn()
                 ->addColumn('checkbox', function ($data) {
+                    if($data->user_id == Auth::user()->id){
+                        return '';
+                    }
                     return '<input type="checkbox" class="row-checkbox" value="' . $data->id . '">';
                 })
                 ->editColumn('punchin_date', function ($data) {

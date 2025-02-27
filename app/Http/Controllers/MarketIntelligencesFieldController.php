@@ -11,6 +11,7 @@ use App\Models\MarketIntelligenceServey;
 use App\Models\MarketIntelligenceServeyData;
 use App\Models\MarketIntelligencesField;
 use App\Models\MarketIntelligencesFielddata;
+use App\Models\State;
 use Illuminate\Http\Request;
 use Excel;
 use Auth;
@@ -84,9 +85,18 @@ class MarketIntelligencesFieldController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(MarketIntelligenceServey $id)
     {
-        //
+        $fields = MarketIntelligencesField::where('division_id', $id->division_id)->get();
+
+        $state_id = $id->data->where('key', 'state_id')->first();
+        if ($state_id && $state_id->value) {
+            $id->data->state = State::where('id', $state_id->value)->first()->state_name;
+        } else {
+            $id->data->state = '-';
+        }
+
+        return view('market_intelligences.show', compact('fields', 'id'));
     }
 
     /**
@@ -166,55 +176,36 @@ class MarketIntelligencesFieldController extends Controller
         if ($request->ip() != '111.118.252.250') {
             return view('work_in_progress');
         }
-        $fields = MarketIntelligenceServey::with('createdbyname', 'state')->get();
+        $fields = MarketIntelligencesField::where('division_id', $request['division_id'])->get();
+        $severys = MarketIntelligenceServey::with('data', 'createdbyname')->where('division_id', $request['division_id'])->get();
+
         $data = array();
         $heading = [
             'Date',
             'User name',
-            'EMP',
-            'State',
-            'Division',
-            'Category',
-            'Brand Name',
-            'Product name',
-            'Cooling Arrangement',
-            'Type of Construction',
-            'HP',
-            'Stage',
-            'Phase',
-            'Head Range MTR',
-            'Discharge Range-LPM',
-            'Suc x Del (MM)',
-            'Speed (RPM)',
-            'MRP',
-            'List Price',
-            'Landed to dealers w/o Tax',
-            'Remarks',
-            'Upload Image'
+            'User Division',
+            'State'
         ];
 
         foreach ($fields as $key => $value) {
+            $heading[] = $value->field_name;
+        }
+
+        $heading[] = 'Uploaded Image';
+
+        foreach ($severys as $key => $value) {
             $data[$key]['date'] = date('d M Y', strtotime($value->created_at));
             $data[$key]['user_name'] = $value->createdbyname ? $value->createdbyname->name : '-';
-            $data[$key]['emp'] = $value->createdbyname ? $value->createdbyname->employee_codes : '-';
-            $data[$key]['state'] = $value->state ? $value->state->state_name : '-';
-            $data[$key]['division'] = $value->division_id ?? '-';
-            $data[$key]['category'] = $value->category_id ?? '-';
-            $data[$key]['brand'] = $value->brand_id ?? '-';
-            $data[$key]['product'] = $value->product_name ?? '-';
-            $data[$key]['cooling'] = $value->cooling_arrangement_id ?? '-';
-            $data[$key]['type'] = $value->type_of_construction_id ?? '-';
-            $data[$key]['hp'] = $value->hp_id ?? '-';
-            $data[$key]['stage'] = $value->stage ?? '-';
-            $data[$key]['phase'] = $value->phase_id ?? '-';
-            $data[$key]['head_range'] = $value->head_range_mtr ?? '-';
-            $data[$key]['discharge_range'] = $value->discharge_range_lpm ?? '-';
-            $data[$key]['suc_x_del'] = $value->sucx_del ?? '-';
-            $data[$key]['speed'] = $value->speed ?? '-';
-            $data[$key]['mrp'] = $value->mrp ?? '-';
-            $data[$key]['list_price'] = $value->list_price ?? '-';
-            $data[$key]['landed'] = $value->landed_to_dealers ?? '-';
-            $data[$key]['remark'] = $value->remark ?? '-';
+            $data[$key]['user_division'] = $value->createdbyname ? $value->createdbyname->getdivision->division_name : '-';
+            $state_id = $value->data->where('key', 'state_id')->first();
+            if ($state_id && $state_id->value) {
+                $data[$key]['state'] = State::where('id', $state_id->value)->first()->state_name;
+            } else {
+                $data[$key]['state'] = '-';
+            }
+            foreach ($fields as $k => $val) {
+                $data[$key][$val->key] = $value->data->where('key', $val->key)->first() ? $value->data->where('key', $val->key)->first()->value : '-';
+            }
             $data[$key]['image'] = $value->getMedia('servey_image')->count() > 0
                 ? $value->getMedia('servey_image')[0]->getFullUrl()
                 : 'No';

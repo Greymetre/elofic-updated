@@ -15,6 +15,7 @@ class MarketIntelligenceServey extends Model implements HasMedia
 
     protected $fillable = [
         'title',
+        'division_id',
         'created_by',
         'crated_at',
         'updated_at'
@@ -22,7 +23,12 @@ class MarketIntelligenceServey extends Model implements HasMedia
 
     public function createdbyname()
     {
-        return $this->belongsTo('App\Models\User', 'created_by', 'id')->select('id','name' ,'employee_codes');
+        return $this->belongsTo('App\Models\User', 'created_by', 'id')->select('id','name' ,'employee_codes', 'division_id');
+    }
+
+    public function division()
+    {
+        return $this->belongsTo('App\Models\Division', 'division_id', 'id')->select('id','division_name');
     }
 
     public function data()

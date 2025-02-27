@@ -26,10 +26,12 @@ class MarketIntelligenceController extends Controller
 
     public function MarketIntelligenceStore(Request $request)
     {
+        $user = $request->user();
         $nextId = MarketIntelligenceServey::max('id') + 1;
 
-        $data['created_by'] = Auth::user()->id;
+        $data['created_by'] = $user->id;
         $data['title'] = 'Servey-' . $nextId;
+        $data['division_id'] = $user->division_id;
 
         $servey = MarketIntelligenceServey::create($data);
         

@@ -27,13 +27,13 @@
                   @csrf
                   <div class="d-flex flex-wrap flex-row">
                     <div class="p-2" style="width:200px !important ;">
-                        <input type="text" class="form-control datepicker" id="start_month" name="start_month" placeholder="Select Month" autocomplete="off" readonly required> 
+                        <input type="text" class="form-control datepicker" id="start_month" name="start_month" placeholder="From Month" autocomplete="off" readonly required> 
                     </div>
-                   <!--  <div class="p-2" style="width:200px !important ;">
-                        <input type="text" class="form-control datepicker" id="end_month" name="end_month" placeholder="To Month" autocomplete="off" readonly required>
-                    </div> -->
                     <div class="p-2" style="width:200px !important ;">
-                        <select class="form-control select2" id="service_center" name="service_center" required>
+                        <input type="text" class="form-control datepicker" id="end_month" name="end_month" placeholder="To Month" autocomplete="off" readonly required>
+                    </div>
+                    <div class="p-2" style="width:200px !important ;">
+                        <select class="form-control select2" id="service_center" name="service_center">
                           <option value="">Select Service Center</option>
                             @if($service_centers)
                              @foreach($service_centers as $service_center)
@@ -141,7 +141,36 @@
         $('#button_view').on('click' , function(){
             getClaims();
         })
-
+        $('#generateClaim').validate({
+            rules: {
+                start_month: {
+                    required: true,
+                },
+                end_month: {
+                    required: true,
+                    equalTo: "#start_month" // Ensure it's the same as start_month
+                }
+            },
+            errorPlacement: function(error, element) {
+                error.addClass('text-danger'); // Add Bootstrap error styling
+                error.insertAfter(element.closest('.form-control')); // Insert after the select field
+            },
+            highlight: function(element) {
+              $(element).closest('.error').css("display", "none");
+            },
+            unhighlight: function(element) {
+              $(element).closest('.error').css("display", "block");
+            },
+            messages:{
+              name:{
+                minlength: "Please enter a valid Award Name.",
+                required: "Please enter Award Name",
+              },
+              description:{
+                required: "Please enter Description",
+              },
+            }
+        });
     })
 
     function getClaims(){
@@ -166,6 +195,7 @@
           data: function (d) {
                 d._token = token,
                 d.start_month = $('input[name="start_month"]').val();
+                d.end_month = $('input[name="end_month"]').val();
                 d.service_center = $('select[name="service_center"]').val();
             }
         },
@@ -266,7 +296,26 @@
   </script>
   <script>
     $(document).ready(function(){
-        $(".datepicker").datepicker({
+         $("#start_month").datepicker({
+            dateFormat: "MM yy", // Show only month and year
+            changeMonth: true,
+            changeYear: true,
+            showButtonPanel: true,
+            closeText: "Select", // Custom text for closing
+            maxDate: new Date(), // Restrict to the current month
+            onClose: function(dateText, inst) {
+                var month = $("#ui-datepicker-div .ui-datepicker-month option:selected").val();
+                var year = $("#ui-datepicker-div .ui-datepicker-year option:selected").val();
+                $(this).val($.datepicker.formatDate('MM yy', new Date(year, month, 1)));
+
+                // Update minDate for end_month to start_month onward
+                $("#end_month").datepicker("option", "minDate", new Date(year, month, 1));
+            }
+        }).focus(function () {
+            $(".ui-datepicker-calendar").hide(); // Hide date picker
+        });
+
+        $("#end_month").datepicker({
             dateFormat: "MM yy", // Show only month and year
             changeMonth: true,
             changeYear: true,
@@ -284,6 +333,7 @@
 
         $('#button_export').on('click', function () {
           let startMonth = $('#start_month').val();
+          let endMonth = $('#end_month').val();
           let serviceCenter = $('#service_center').val();
 
           // Create a new form dynamically
@@ -306,6 +356,12 @@
               value: startMonth
           });
 
+          let endMonthField = $('<input>', {
+              type: 'hidden',
+              name: 'end_month',
+              value: endMonth
+          });
+
           let serviceCenterField = $('<input>', {
               type: 'hidden',
               name: 'service_center',
@@ -313,7 +369,7 @@
           });
 
           // Append inputs to form
-          form.append(csrfToken, startMonthField, serviceCenterField);
+          form.append(csrfToken, startMonthField,endMonthField, serviceCenterField);
 
           // Append form to body and submit
           $('body').append(form);

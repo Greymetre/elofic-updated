@@ -580,6 +580,11 @@
               <div class="col-12">
 
                 <h3 class="card-title pb-3">Time Line</h3>
+                @if(auth()->user()->can(['add_complaint_notes']))
+                <button class="btn btn-sm btn-primary w-50 mb-3" id="openModalButton">
+                   + Add Notes
+                </button>
+                @endif
                 <hr>
                 <p class="lead"></p>
                 @if(count($timelines) > 0)
@@ -602,11 +607,19 @@
                 @php $status_is = 'Canceled'; @endphp
                 @endif
 
+
                 @if($timeline->status == '102')
                 <div class="d-flex">
                   <i class="material-icons">double_arrow</i>
                   <p>
                     Complaint <b> {!! $complaint['complaint_number'] !!} </b> {{$timeline->remark}} by <b>{{$timeline->created_by_details->name}}</b> on <b>{{date("d M Y, h:i a", strtotime($timeline->created_at));}}.</b>
+                  </p>
+                </div>
+                @elseif($timeline->status == 'Note')
+                <div class="d-flex">
+                  <i class="material-icons">double_arrow</i>
+                  <p>
+                    Complaint <b> {!! $complaint['complaint_number'] !!} </b> {{$timeline->remark}} by <b>{{$timeline->created_by_details->name ?? ''}}</b> on <b>{{date("d M Y, h:i a", strtotime($timeline->created_at));}}.</b>
                   </p>
                 </div>
                 @else
@@ -646,9 +659,7 @@
                   <b> #{!! $complaint['complaint_number'] !!} Created by {{ $complaint->createdbyname->name?? '' }} At {{date("d M Y, h:i a", strtotime($complaint->created_at));}} 
                 </p>
               </div>
-              <button class="btn btn-primary w-100 mb-3" id="openModalButton">
-                + Add Task
-              </button>
+
             </div>
           </div>
         </div>
@@ -738,7 +749,7 @@
         <div class="modal-content card">
           <div class="card-header card-header-icon card-header-theme">
             <h4 class="card-title">
-              <span class="modal-title">{!! trans('panel.global.add') !!}</span> Task
+              <span class="modal-title">{!! trans('panel.global.add') !!}</span> Notes
               <span class="pull-right">
                 <a href="javascript:void(0)" class="btn btn-just-icon btn-danger" id="closeModalButton">
                   <i class="material-icons">clear</i>
@@ -747,16 +758,17 @@
             </h4>
           </div>
           <div class="modal-body">
-            <form method="POST" action="#" enctype="multipart/form-data" id="createWarehouseForm">
+            <form method="POST" action="{{route('complaint_add_notes')}}" enctype="multipart/form-data" id="createWarehouseForm">
               @csrf
               <div class="row">
                 <div class="col-md-12">
                   <div class="input_section">
-                    <label class="col-form-label">Task <span class="text-danger"> *</span></label>
+                    <label class="col-form-label">Notes <span class="text-danger"> *</span></label>
                     <div class="form-group has-default bmd-form-group">
-                      <input type="text" name="complaint_task" id="complaint_task" class="form-control" value="{!! old('complaint_task') !!}" maxlength="200" required>
+                      <input type="hidden" name="complaint_id" id="complaint_id" class="form-control" value="{{$complaint->id}}">
+                      <input type="text" name="complaint_notes" id="complaint_notes" class="form-control" value="{!! old('complaint_task') !!}" maxlength="200" required>
                       @if ($errors->has('complaint_task'))
-                        <div class="error"><p class="text-danger">{{ $errors->first('complaint_task') }}</p></div>
+                        <div class="error"><p class="text-danger">{{ $errors->first('complaint_notes') }}</p></div>
                       @endif
                     </div>
                   </div>

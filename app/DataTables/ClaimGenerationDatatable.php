@@ -71,12 +71,21 @@ class ClaimGenerationDatatable extends DataTable
      public function query(ClaimGeneration $model, Request $request)
     {
         $data = $model->with(['service_center_details']);
-        if (!empty($request->start_month)) { 
+        if (!empty($request->start_month) && empty($request->end_month)) { 
             $formatted_date = Carbon::createFromFormat('F Y', $request->start_month)->startOfMonth();
-            $month = $formatted_date->format('M'); // "Feb"
-            $year = $formatted_date->format('Y');  // "2025"
+            $claim_date = $formatted_date->format("Y-m-d");
 
-            $data = $data->where('month', $month)->where('year', $year); 
+            $data = $data->whereDate('claim_date', $claim_date);
+        }
+
+        if (!empty($request->start_month) && !empty($request->end_month)) { 
+            $formatted_date_start = Carbon::createFromFormat('F Y', $request->start_month)->startOfMonth();
+            $formatted_date_end = Carbon::createFromFormat('F Y', $request->end_month)->endOfMonth(); // Use endOfMonth for full range
+
+            $claim_date_start = $formatted_date_start->format("Y-m-d");
+            $claim_date_end = $formatted_date_end->format("Y-m-d");
+
+            $data = $data->whereBetween('claim_date', [$claim_date_start, $claim_date_end]); // Filter between start and end
         }
 
         if (!empty($request->service_center)) { 
