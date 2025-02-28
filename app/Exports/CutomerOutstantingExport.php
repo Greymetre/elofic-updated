@@ -24,10 +24,7 @@ class CutomerOutstantingExport implements FromCollection, WithHeadings, ShouldAu
 {
     public function __construct($request)
     {
-        $this->startdate = $request->input('start_date');
-        $this->enddate = $request->input('end_date');
-        $this->branch_id = $request->input('branch_id');
-        $this->dealer_id = $request->input('dealer_id');
+        $this->request = $request;
     }
 
     public function collection()
@@ -44,7 +41,13 @@ class CutomerOutstantingExport implements FromCollection, WithHeadings, ShouldAu
             DB::raw('GROUP_CONCAT(amount) as amounts'),
             DB::raw('GROUP_CONCAT(days) as days'),
             DB::raw('JSON_OBJECTAGG(days, amount) as day_amount_pairs'),
-        )->groupBy('customer_id', 'branch_id', 'user_id', 'division_id', 'year', 'quarter',)->get();
+        );
+        
+        if($this->request->customer_id && !empty($this->request->customer_id)){
+            $data->where('customer_id', $this->request->customer_id);                
+        }
+        
+        $data = $data->groupBy('customer_id', 'branch_id', 'year', 'quarter')->get();
 
         return $data;
     }

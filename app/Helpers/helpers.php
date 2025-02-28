@@ -1039,4 +1039,56 @@ if (!function_exists('getServiceCharge')) {
     }
 }
 
+if (!function_exists('sendMessageByInfisms')) {
+    function sendMessageByInfisms($mobile_number, $template, $SenderId) {
+        try {
+            $curl = curl_init();
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => 'http://sms.infisms.co.in/API/SendSMS.aspx?UserID=SILCLN&UserPassword=sil%24clnco&PhoneNumber=' . $mobile_number . '&Text=' .$template . '&SenderId=' . $SenderId . '&AccountType=2&MessageType=0',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING       => '',
+                CURLOPT_MAXREDIRS      => 10,
+                CURLOPT_TIMEOUT        => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST  => 'GET',
+            ));
+
+            $response = curl_exec($curl);
+            
+            if ($response === false) {
+                throw new Exception('cURL Error: ' . curl_error($curl));
+            }
+
+            curl_close($curl);
+
+            // Check response for failure keywords (customize based on API response format)
+            if (is_numeric($response)) {
+                return [
+                    'status'  => 'success',
+                    'message' => 'SMS sent successfully',
+                    'message_id' => $response
+                ];
+            } else {
+                return [
+                    'status'  => 'fail',
+                    'message' => 'SMS sending failed',
+                    'response' => $response
+                ];
+            }
+
+        } catch (Exception $e) {
+            error_log('SMS Sending Error: ' . $e->getMessage());
+            return [
+                'status'  => 'fail',
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+}
+
+
+
+
+
 

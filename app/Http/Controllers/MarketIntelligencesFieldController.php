@@ -172,10 +172,6 @@ class MarketIntelligencesFieldController extends Controller
 
     public function download(Request $request)
     {
-
-        if ($request->ip() != '111.118.252.250') {
-            return view('work_in_progress');
-        }
         $fields = MarketIntelligencesField::where('division_id', $request['division_id'])->get();
         $severys = MarketIntelligenceServey::with('data', 'createdbyname')->where('division_id', $request['division_id'])->get();
 

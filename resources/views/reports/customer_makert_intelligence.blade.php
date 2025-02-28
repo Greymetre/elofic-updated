@@ -9,7 +9,7 @@
           <h4 class="card-title ">Market Intelligence
             <span class="">
               <div class="btn-group header-frm-btn">
-              @if(auth()->user()->can('market_intelligence_report_download'))
+                @if(auth()->user()->can('market_intelligence_report_download'))
                 <form method="GET" action="{{ route('market_intelligences.download') }}">
                   <div class="d-flex flex-wrap flex-row">
 
@@ -89,7 +89,12 @@
         "order": [
           [0, 'desc']
         ],
-        ajax: "{{ route('reports.marketIntelligence') }}",
+        ajax: {
+          url: "{{ route('reports.marketIntelligence') }}",
+          data: function(d) {
+            d.division_id = $('#division_id').val()
+          }
+        },
         columns: [{
             data: 'DT_RowIndex',
             name: 'DT_RowIndex',
@@ -126,6 +131,10 @@
             "defaultContent": ''
           }
         ]
+      });
+
+      $('#division_id').change(function() {
+        table.draw();
       });
 
 
