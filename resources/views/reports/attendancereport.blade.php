@@ -527,6 +527,10 @@
         $('.row-checkbox:checked').each(function () {
             selectedValues.push($(this).val());
         });
+        if(selectedValues.length == 0){
+          alert("Please select at least one record");
+          return false;
+        }
         const status = $(this).data('status');
 
         var token = $("meta[name='csrf-token']").attr("content");

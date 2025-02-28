@@ -85,73 +85,98 @@ class ClaimGenerationController extends Controller
         abort_if(Gate::denies('generate_claim'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $request->validate([
             'start_month' => 'required',
-            // 'end_month' => 'required',
-            'service_center' => 'required'
+            'end_month'   => 'required',
         ]);
         try {
             $startDate = Carbon::createFromFormat('F Y', $request->start_month)->startOfMonth()->startOfDay()->format('Y-m-d H:i:s');
             $endDate = Carbon::createFromFormat('F Y', $request->start_month)->endOfMonth()->endOfDay()->format('Y-m-d H:i:s');
 
-            $complaints = Complaint::with(['service_bill.service_bill_products' , 'service_center_details'])->whereHas('service_bill', function ($query) use ($startDate, $endDate) {
-                $query->where('status', 3)
-                      ->whereBetween('updated_at', [$startDate, $endDate]); // Ensures full range is covered
-            })
-            ->where('service_center' , $request->service_center)
-            ->get();
-
+            if(!empty($request->service_center)){
+                $complaints = Complaint::with(['service_bill.service_bill_products' , 'service_center_details'])->whereHas('service_bill', function ($query) use ($startDate, $endDate) {
+                    $query->where('status', 3)
+                          ->whereBetween('updated_at', [$startDate, $endDate]); // Ensures full range is covered
+                })
+                ->where('service_center' , $request->service_center)
+                ->get();
+            }else{
+                 $complaints = Complaint::with(['service_bill.service_bill_products' , 'service_center_details'])->whereHas('service_bill', function ($query) use ($startDate, $endDate) {
+                    $query->where('status', 3)
+                          ->whereBetween('updated_at', [$startDate, $endDate]); // Ensures full range is covered
+                })
+                ->whereNotNull('service_center')
+                ->get();
+            }
+                     
            $formatted_date = Carbon::createFromFormat('F Y', $request->start_month)->startOfMonth();
+
            $month = $formatted_date->format('M'); // Short month format (e.g., "Feb")
            $year = $formatted_date->format('Y');
-
-           
+           $claim_date = $formatted_date->format("Y-m-d");
            if ($complaints->isNotEmpty()) {
-                $firstComplaint = $complaints[0]; // Get the first complaint
-                $serviceCenterAcronym = collect(explode(' ', $firstComplaint->service_center_details->name))
-                ->map(function ($word) {
-                    // Remove special characters and numbers from each word
-                    $cleanWord = preg_replace('/[^A-Za-z]/', '', $word);
-                    return strtoupper(substr($cleanWord, 0, 1)); // Get first letter of cleaned word
-                })
-                ->implode('');
-                $claimNumber ='#'.$serviceCenterAcronym . '-' . $month . '-' . $year;
-                $allTotal = $complaints->sum(function ($complaint) {
-                    return $complaint->service_bill ? (float) $complaint->service_bill->service_bill_products->sum('subtotal') : 0.0;
-                });
-            }
+                // Group complaints by service center
+                $groupedComplaints = $complaints->groupBy('service_center');
+                $serviceCentersName = [];
 
-            if(isset($claimNumber)){
-                $claim_generation = ClaimGeneration::updateOrCreate(
-                    [
-                        'month' => $month,
-                        'year' => $year,
-                        'service_center_id' => $request->service_center,
-                    ],
-                    [
-                        'claim_number' => $claimNumber,
-                        'claim_amount' => $allTotal ?? NULL,
-                    ]
-                );
-                if(isset($claim_generation)){
-                    foreach ($complaints as $key => $complaint) {
-                        ClaimGenerationDetail::updateOrCreate([ 
-                                'claim_generation_id' => $claim_generation->id,
-                                'complaint_id'        => $complaint->id
-                        ],[]);
+                foreach ($groupedComplaints as $serviceCenter => $centerComplaints) {
+                    $firstComplaint = $centerComplaints->first(); // Get first complaint for details
+
+                    // Generate service center acronym
+                    $serviceCenterAcronym = collect(explode(' ', $firstComplaint->service_center_details->name ?? 'Unknown Name'))
+                        ->map(fn($word) => strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $word), 0, 1))) // Clean & get first letter
+                        ->implode('');
+
+                    // Create claim number
+                    $claimNumber = "#{$serviceCenterAcronym}-{$month}-{$year}";
+
+                    // Calculate total claim amount for this service center
+                    $totalByServiceCenter = $centerComplaints->sum(fn($complaint) => 
+                        $complaint->service_bill 
+                            ? (float) $complaint->service_bill->service_bill_products->sum('subtotal') 
+                            : 0.0
+                    );
+
+                    // Create or update ClaimGeneration
+                    $claimGeneration = ClaimGeneration::updateOrCreate(
+                        [
+                            'month'             => $month,
+                            'year'              => $year,
+                            'service_center_id' => $serviceCenter,
+                        ],
+                        [
+                            'claim_number' => $claimNumber,
+                            'claim_amount' => $totalByServiceCenter,
+                            'claim_date'   => $claim_date,
+                        ]
+                    );
+
+                    // Insert ClaimGenerationDetails for each complaint under this service center
+                    if ($claimGeneration) {
+                        foreach ($centerComplaints as $complaint) {
+                            ClaimGenerationDetail::updateOrCreate(
+                                [
+                                    'claim_generation_id' => $claimGeneration->id,
+                                    'complaint_id'        => $complaint->id
+                                ],
+                                []
+                            );
+                        }
                     }
+
+                    // Collect service center names for success message
+                    $serviceCentersName[] = $firstComplaint->service_center_details->name ?? "Unknown Name";
                 }
 
-               return redirect()->back()->with(
+                // Success message with service centers included
+                return redirect()->back()->with(
                     'message_success', 
-                    'Your claim has been generated for ' . $complaints[0]->service_center_details->name . ' for ' . $month .' - '. $year
+                    'Your claim has been generated for ' . implode(', ', $serviceCentersName) . ' for ' . $month . ' - ' . $year
                 );
+            }else{
+                return redirect()->back()->with(
+                    'message_danger', 
+                    'No claims found  in ' . $month .' - '. $year
+                );    
             }
-
-
-            return redirect()->back()->with(
-                'message_danger', 
-                'No claims found for the selected service center in ' . $month .' - '. $year
-            );
-  
         } catch (\Exception $e) {
               return redirect()->back()->with(
                 'message_danger', 

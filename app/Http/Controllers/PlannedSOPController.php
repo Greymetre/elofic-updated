@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use App\Models\PlannedSOP;
 use App\Models\Branch;
 use App\Models\Product;
+use App\Models\Category;
+
+use App\Exports\PlannedSopExport;
 
 use Illuminate\Support\Facades\Redirect;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,8 +18,10 @@ use App\DataTables\PlannedSopDatatable;
 use DataTables;
 // use Validator;
 use Gate;
-
+use Excel;
 use Auth;
+
+use Carbon\Carbon;
 
 class PlannedSOPController extends Controller
 {
@@ -52,10 +57,11 @@ class PlannedSOPController extends Controller
      */
     public function create()
     {
-        // abort_if(Gate::denies('product_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('sop_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $branches = Branch::select('branch_name' , 'id')->get();
+        $divisions = Category::select('category_name' , 'id')->get();
         $products = Product::where('active' , "Y")->select('product_name' , 'id')->get();
-        return view('planned_sop.create' , compact('branches' , 'products'))->with('plannedsop',$this->plannedsop);
+        return view('planned_sop.create' , compact('branches' , 'products' , 'divisions'))->with('plannedsop',$this->plannedsop);
     }
 
     /**
@@ -66,30 +72,46 @@ class PlannedSOPController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'branch_id' => 'required',
-            'product_id' => 'required',
-            'plan_next_month' => 'required'
-        ]);
+        abort_if(Gate::denies('sop_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         try{
-            $this->plannedsop->create([
-               'branch_id' => $request->branch_id ?? '',
-               'product_id' => $request->product_id ?? '',
-               'plan_next_month' => $request->plan_next_month ?? '',
-               'opening_stock'   => $request->opening_stock ?? NULL,
-               'budget_for_month' => $request->budget_for_month ?? NULL,
-               'last_month_sale'  => $request->last_month_sale ?? NULL,
-               'last_three_month_avg' => $request->last_three_month_avg ?? NULL,
-               'last_year_month_sale' => $request->last_year_month_sale ?? NULL,
-               'sku_unit_price'       => $request->sku_unit_price ?? NULL,
-               's_op_val'             => $request->s_op_val ?? NULL,
-               'top_sku'              => $request->top_sku  ?? NULL,
-               'created_by'           => Auth::user()->name ?? NULL,
-            ]);
+            if(isset($request->planning_month)){
+               $formatted_date = Carbon::createFromFormat('F Y', $request->planning_month)->startOfMonth();
+               $planning_month = $formatted_date->format("Y-m-d");
+            }
+
+            foreach ($request->product_id as $key => $product) {
+                $this->plannedsop->updateOrCreate(
+                    [
+                        'planning_month' => $planning_month,
+                        'product_id'     => $request->product_id[$key] ?? '',
+                    ],
+                    [
+                        'branch_id'            => $request->branch_id ?? '',
+                        'plan_next_month'      => $request->plan_next_month[$key] ?? '',
+                        'opening_stock'        => $request->opening_stock[$key] ?? NULL,
+                        'budget_for_month'     => $request->budget_for_month[$key] ?? NULL,
+                        'last_month_sale'      => $request->last_month_sale[$key] ?? NULL,
+                        'last_three_month_avg' => $request->last_three_month_avg[$key] ?? NULL,
+                        'last_year_month_sale' => $request->last_year_month_sale[$key] ?? NULL,
+                        'sku_unit_price'       => $request->sku_unit_price[$key] ?? NULL,
+                        's_op_val'             => $request->s_op_val[$key] ?? NULL,
+                        'top_sku'              => $request->top_sku[$key] ?? NULL,
+                        'created_by'           => Auth::user()->name ?? NULL,
+                    ]
+                );
+            }
             return Redirect::to('planned-sop')->with('message_success', 'Planned S & OP Created SucessFully');
         }catch(\Exception $e){
             return redirect()->back()->withErrors($e->getMessage())->withInput();
         }
+    }
+
+    public function sop_download(Request $request)
+    {
+        abort_if(Gate::denies('sop_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new PlannedSopExport($request), 'plannedsop.xlsx');
     }
 
     /**

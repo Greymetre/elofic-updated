@@ -30,6 +30,9 @@ class ExpensesDataTable extends DataTable
                 return $query->id ?? '';
             })
             ->addColumn('checkbox', function ($query) {
+                if($query->user_id == Auth::user()->id){
+                    return '';
+                }
                 return '<input type="checkbox" class="row-checkbox" value="' . $query->id . '">';
             })
             ->addColumn('users.name', function ($query) {

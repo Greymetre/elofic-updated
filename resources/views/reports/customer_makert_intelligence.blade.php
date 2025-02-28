@@ -9,11 +9,12 @@
           <h4 class="card-title ">Market Intelligence
             <span class="">
               <div class="btn-group header-frm-btn">
-                <form method="GET" action="{{ URL::to('customers-download') }}">
+              @if(auth()->user()->can('market_intelligence_report_download'))
+                <form method="GET" action="{{ route('market_intelligences.download') }}">
                   <div class="d-flex flex-wrap flex-row">
 
                     <div class="p-2" style="width:200px;">
-                      <select class="selectpicker" name="division_id" id="division_id" data-style="select-with-transition" title="Select Division">
+                      <select class="selectpicker" name="division_id" id="division_id" data-style="select-with-transition" title="Select Division" required>
                         @if(@isset($divisions ))
                         @foreach($divisions as $division)
                         <option value="{!! $division['id'] !!}" {{ old( 'division_id') == $division->id || 10 == $division->id ? 'selected' : '' }}>{!! $division['division_name'] !!}</option>
@@ -21,17 +22,15 @@
                         @endif
                       </select>
                     </div>
+                    <div class="p-2"><button class="btn btn-just-icon btn-theme" id="button_download" title="{!!  trans('panel.global.download') !!} Market Intelligence"><i class="material-icons">cloud_download</i></button></div>
                   </div>
                 </form>
+                @endif
                 <div class="next-btn">
                   <!--   @if(auth()->user()->can('market_intelligence_create'))
                   <a href="{{ route('market_intelligences.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Field"><i class="material-icons">add_circle</i></a>
 
                   @endif -->
-                  @if(auth()->user()->can('market_intelligence_report_download'))
-
-                  <a href="{{ route('market_intelligences.download') }}" class="btn btn-just-icon btn-theme" title="Download Market Intelligence Report"><i class="material-icons">download</i></a>
-                  @endif
                 </div>
               </div>
             </span>
@@ -60,12 +59,11 @@
             <table id="getPumpSR" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
               <thead class="text-primary">
                 <th>{!! trans('panel.global.no') !!}</th>
-                <th>State</th>
-                @foreach($keys as $key)
-                <th>{{ $key->field_name }}</th>
-                @endforeach
-                <!-- <th>{!! trans('panel.global.created_at') !!}</th>
-                  <th>{!! trans('panel.global.action') !!}</th> -->
+                <th>Title</th>
+                <th>Division</th>
+                <th>Created By</th>
+                <th>Uploaded Image</th>
+                <th>{!! trans('panel.global.action') !!}</th>
               </thead>
 
               <tbody>
@@ -99,53 +97,32 @@
             searchable: false
           },
           {
-            data: 'created_at',
-            name: 'created_at',
+            data: 'title',
+            name: 'title',
             orderable: false,
+            searchable: false
+          },
+          {
+            data: 'division.division_name',
+            name: 'division.division_name',
+            orderable: false,
+            searchable: false
           },
           {
             data: 'createdbyname.name',
             name: 'createdbyname.name',
             orderable: false,
+            searchable: false
           },
           {
-            data: 'createdbyname.employee_codes',
-            name: 'createdbyname.employee_codes',
+            data: 'uploaded_image',
+            name: 'uploaded_image',
             orderable: false,
+            searchable: false
           },
           {
-            data: 'state.state_name',
-            name: 'state.state_name',
-            orderable: false,
-          },
-          {
-            data: 'division_id',
-            name: 'division_id',
-            orderable: false,
-          },
-          {
-            data: 'category_id',
-            name: 'category_id',
-            "defaultContent": ''
-          },
-          {
-            data: 'brand_id',
-            name: 'brand_id',
-            "defaultContent": ''
-          },
-          {
-            data: 'product_name',
-            name: 'product_name',
-            "defaultContent": ''
-          },
-          {
-            data: 'cooling_arrangement_id',
-            name: 'cooling_arrangement_id',
-            "defaultContent": ''
-          },
-          {
-            data: 'type_of_construction_id',
-            name: 'type_of_construction_id',
+            data: 'action',
+            name: 'action',
             "defaultContent": ''
           }
         ]

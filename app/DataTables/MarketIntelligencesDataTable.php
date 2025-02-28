@@ -34,6 +34,12 @@ class MarketIntelligencesDataTable extends DataTable
 
                 return 'No';
             })
+            ->editColumn('action', function($data) {
+                $view = route('market-intelligences.show', $data->id);
+                return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
+                            <a href="'.$view.'" class="btn btn-info btn-just-icon btn-sm" title="View Market Intelligence Servey" ><i class="material-icons">visibility</i></a>
+                        </div>';
+            })
             ->rawColumns(['action' , 'uploaded_image']);
     }
 
@@ -45,7 +51,7 @@ class MarketIntelligencesDataTable extends DataTable
      */
     public function query(MarketIntelligenceServey $model)
     {
-        return $model->with('createdbyname', 'state')->latest()->newQuery();
+        return $model->with('createdbyname', 'division')->latest()->newQuery();
     }
 
     /**

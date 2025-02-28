@@ -652,6 +652,7 @@ Route::group(['middleware' => ['auth']], function () {
     //Fields
     Route::resource('market_intelligences', MarketIntelligencesFieldController::class);
     Route::any('market_intelligences_download', [MarketIntelligencesFieldController::class, 'download'])->name('market_intelligences.download');
+    Route::any('market_intelligences_show/{id}', [MarketIntelligencesFieldController::class, 'show'])->name('market-intelligences.show');
     Route::any('reports/marketIntelligence', [MarketIntelligencesFieldController::class, 'marketIntelligence'])->name('reports.marketIntelligence');
 
     //Fields
@@ -884,6 +885,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('complaint-work-done-submit', [ComplaintController::class, 'work_done_submit'])->name('complaint_work_done_submit');
     Route::any('complaint-assign-user', [ComplaintController::class, 'assign_user'])->name('complaint_assign_user');
     Route::any('complaint-assign-service-center', [ComplaintController::class, 'assign_service_center'])->name('complaint_assign_service_center');
+    Route::post('complaint-add-note', [ComplaintController::class, 'complaint_add_notes'])->name('complaint_add_notes');
 
     // Leaves Route
     Route::resource('leaves', LeaveController::class);
@@ -974,6 +976,7 @@ Route::group(['middleware' => ['auth']], function () {
 
     Route::resource('planned-sop', PlannedSOPController::class);
     Route::any('planned-sop-list', [PlannedSOPController::class , 'plannedSopList'])->name('plannedSopList');
+    Route::any('planned-sop-export' , [PlannedSOPController::class , 'sop_download'])->name('sop_download');
 
     // claim gerneration 
     Route::resource('claim-generation', ClaimGenerationController::class);

@@ -20,14 +20,22 @@ class ClaimExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
     protected $year;
     protected $formatted_date;
     protected $service_center;
+    protected $formatted_date_start;
+    protected $formatted_date_end;
+    protected $claim_date_start;
+    protected $claim_date_end;
 
     public function __construct(Request $request)
     {
-        if(!empty($request->input('start_month'))){
-            $this->formatted_date = Carbon::createFromFormat('F Y', $request->start_month)->startOfMonth();
-            $this->month = $this->formatted_date->format('M'); // Short month format (e.g., "Feb")
-            $this->year = $this->formatted_date->format('Y');
+
+        if (!empty($request->input('start_month')) && !empty($request->input('end_month'))) { 
+            $this->formatted_date_start = Carbon::createFromFormat('F Y', $request->input('start_month'))->startOfMonth();
+            $this->formatted_date_end = Carbon::createFromFormat('F Y', $request->input('end_month'))->endOfMonth(); // Use endOfMonth for full range
+
+            $this->claim_date_start = $this->formatted_date_start->format("Y-m-d");
+            $this->claim_date_end = $this->formatted_date_end->format("Y-m-d");
         }
+
         if(!empty($request->input('service_center'))){
             $this->service_center = $request->input('service_center');
         }
@@ -39,12 +47,9 @@ class ClaimExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
         $query = ClaimGenerationDetail::with(['claim.service_center_details' , 'complaints.service_bill.service_bill_products' , 'complaints.purchased_branch_details' , 'complaints.complaint_work_dones']);
 
         // Apply date range filter
-        if (!empty($this->month) && !empty($this->year)) {
+        if (!empty($this->claim_date_start) && !empty($this->claim_date_end)) {
             $query->whereHas('claim', function ($subquery) {
-                $subquery->where([
-                    'month' => $this->month,
-                    'year' => $this->year
-                ]);
+                $subquery->whereBetween('claim_date', [$this->claim_date_start, $this->claim_date_end]);
             });
         }
 

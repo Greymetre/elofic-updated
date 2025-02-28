@@ -24,6 +24,7 @@ class ClaimGeneration extends Model
         'submitted_by_se',
         'claim_approved',
         'claim_done',
+        'claim_date',
     ];
 
     public function service_center_details()

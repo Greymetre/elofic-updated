@@ -11,6 +11,7 @@ class PlannedSOP extends Model
 
     protected $fillable = [
         'branch_id',
+        'planning_month',
         'product_id',
         'plan_next_month',
         'opening_stock',

@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('planned_s_o_p_s', function (Blueprint $table) {
             $table->id();
+            $table->date('planning_month')->nullable();
             $table->bigInteger('order_id')->nullable();
             $table->bigInteger('division_id')->nullable();
             $table->bigInteger('branch_id')->nullable();

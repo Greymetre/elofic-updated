@@ -421,7 +421,7 @@ class ExpensesTypeController extends Controller
             if (!empty($request['user_id'])) {
                 $query->where('user_id', $request['user_id']);
             } else {
-                $query->whereIn('user_id', $userids)->whereNot('user_id', auth()->user()->id);
+                $query->whereIn('user_id', $userids);
             }
             // dd($query->toSql());
             $expenses = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->paginate(100);
@@ -457,7 +457,6 @@ class ExpensesTypeController extends Controller
 
                
                 foreach ($expenses as $expense) {
-
                     // $image = '';  
                     // if(isset($expense) && $expense->getMedia('expense_file')->count() > 0 && file_exists($expense->getFirstMedia('expense_file')->getPath())){
                     //  $image = $expense->getFirstMedia('expense_file')->getFullUrl();
@@ -502,6 +501,7 @@ class ExpensesTypeController extends Controller
                         //'expense_image' =>  $expense->getFirstMedia('expense_file')->getFullUrl(),
                         'expense_image' =>  $image,
                         'user_name' =>  $expense->users->name,
+                        'self' =>  $expense->is_self,
 
                     );
                 }
