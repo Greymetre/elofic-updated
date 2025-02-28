@@ -605,6 +605,10 @@
                 @php $status_is = 'Closed'; @endphp
                 @elseif($timeline->status == '5')
                 @php $status_is = 'Canceled'; @endphp
+                @elseif($timeline->status == '587')
+                @php $status_is = 'Message'; @endphp
+                @else
+                @php $status_is = '-'; @endphp
                 @endif
 
 
@@ -622,6 +626,14 @@
                     Complaint <b> {!! $complaint['complaint_number'] !!} </b> {{$timeline->remark}} by <b>{{$timeline->created_by_details->name ?? ''}}</b> on <b>{{date("d M Y, h:i a", strtotime($timeline->created_at));}}.</b>
                   </p>
                 </div>
+                @elseif($timeline->status == '587')
+                <div class="d-flex">
+                  <i class="material-icons">double_arrow</i>
+                  <p>
+                    Sent Message  <b> {!! $complaint['complaint_number'] !!} </b> {{$timeline->remark}} by <b>{{$timeline->created_by_details->name ?? ''}}</b> on <b>{{date("d M Y, h:i a", strtotime($timeline->created_at));}} to Customer.</b>
+                  </p>
+                </div>
+
                 @else
                 @if($timeline->status == '100' || $timeline->status == '101')
                 @if($timeline->status == '100')

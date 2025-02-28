@@ -3,6 +3,7 @@
 namespace App\DataTables;
 
 use App\Models\MarketIntelligenceServey;
+use Illuminate\Http\Request;
 use Yajra\DataTables\Html\Button;
 use Yajra\DataTables\Html\Column;
 use Yajra\DataTables\Html\Editor\Editor;
@@ -49,9 +50,17 @@ class MarketIntelligencesDataTable extends DataTable
      * @param \App\Field $model
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function query(MarketIntelligenceServey $model)
+    public function query(MarketIntelligenceServey $model, Request $request)
     {
-        return $model->with('createdbyname', 'division')->latest()->newQuery();
+        $data = $model->with('createdbyname', 'division');
+        
+        if($request->division_id && !empty($request->division_id)){
+            $data->where('division_id', $request->division_id);
+        }
+        
+        $data = $data->latest()->newQuery();
+
+        return $data;
     }
 
     /**

@@ -15,6 +15,7 @@ class Customers extends Authenticatable
     protected $table = 'customers';
 
     protected $fillable = [ 'active', 'name', 'first_name', 'last_name', 'mobile', 'email', 'password', 'notification_id', 'latitude', 'longitude', 'device_type', 'gender', 'profile_image', 'shop_image', 'customer_code', 'status_id', 'region_id', 'customertype', 'firmtype', 'created_by', 'updated_by', 'executive_id', 'otp', 'deleted_at', 'created_at', 'updated_at', 'beatscheduleid', 'manager_name', 'manager_phone','contact_number','parent_id','sap_code'];
+    protected $appends = ['full_address'];
 
     public function message()
     {
@@ -280,7 +281,26 @@ class Customers extends Authenticatable
 
     public function getretailers() {
         return $this->hasMany(ParentDetail::class, 'parent_id', 'id');
-    }    
+    } 
+    
+    public function getFullAddressAttribute()
+    {
+        if (!$this->customeraddress) {
+            return null;
+        }
+
+        $address1 = $this->customeraddress->address1 ?? '';
+        $address2 = $this->customeraddress->address2 ?? '';
+        $city = optional($this->customeraddress->cityname)->city_name ?? '';
+        $district = optional($this->customeraddress->districtname)->district_name ?? '';
+        $state = optional($this->customeraddress->statename)->state_name ?? '';
+        $pincode = optional($this->customeraddress->pincodename)->pincode ?? '';
+        $zipcode = $this->customeraddress->zipcode ?? '';
+
+        $fullAddress = trim("$address1, $address2, $city, $district, $state - $zipcode,$pincode", ', -');
+
+        return $fullAddress ?: null;
+    }
 
 
 }

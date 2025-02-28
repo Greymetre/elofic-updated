@@ -21,7 +21,7 @@ use App\Models\OrderDetails;
 use App\Models\Division;
 use App\Models\Department;
 use App\Models\Branch;
-use App\Models\{Address, BranchStock, CustomerOutstanting, DealerAppointment, EmployeeDetail, Media, TransactionHistory, MobileUserLoginDetails, Redemption, ParentDetail, PrimarySales, Product, SalesTargetUsers, State};
+use App\Models\{Address, Attachment, BranchStock, CustomerOutstanting, DealerAppointment, EmployeeDetail, Media, TransactionHistory, MobileUserLoginDetails, Redemption, ParentDetail, PrimarySales, Product, SalesTargetUsers, State};
 use Excel;
 use App\Exports\CounterVisitReportExport;
 use App\Exports\AdherenceDetailReportExport;
@@ -65,6 +65,8 @@ use App\Exports\TopDealerExport;
 use App\Exports\UserIncentiveExport;
 use App\Imports\CutomerOutstantingImport;
 use Carbon\Carbon;
+use Dompdf\Dompdf;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Role;
 
 class ReportController extends Controller
@@ -462,7 +464,7 @@ class ReportController extends Controller
             return Datatables::of($data)
                 ->addIndexColumn()
                 ->addColumn('checkbox', function ($data) {
-                    if($data->user_id == Auth::user()->id){
+                    if ($data->user_id == Auth::user()->id) {
                         return '';
                     }
                     return '<input type="checkbox" class="row-checkbox" value="' . $data->id . '">';
@@ -558,7 +560,7 @@ class ReportController extends Controller
 
 
 
-                ->rawColumns(['punchin', 'punchout', 'action', 'action_status', 'current_status', 'punchin_from','checkbox'])
+                ->rawColumns(['punchin', 'punchout', 'action', 'action_status', 'current_status', 'punchin_from', 'checkbox'])
                 ->make(true);
         }
         return view('reports.attendancereport', compact('users', 'branches'));
@@ -842,13 +844,13 @@ class ReportController extends Controller
         if ($request->ajax()) {
             $role = Role::find(29);
             $data = Customers::with('customertypes', 'firmtypes', 'createdbyname', 'getretailers', 'customeraddress.cityname', 'customeraddress.statename', 'getretailers.redemption', 'getretailers.transactions')->where('customertype', ['1', '3'])
-                ->where(function ($query) use ($request, $userids,$role) {
+                ->where(function ($query) use ($request, $userids, $role) {
                     if ($role && auth()->user()->hasRole($role->name)) {
                         $child_customer = ParentDetail::where('parent_id', auth()->user()->customerid)
                             ->pluck('customer_id')
                             ->push(auth()->user()->customerid);
                         $query->whereIn('id', $child_customer);
-                    }else{
+                    } else {
                         if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
                             $userIdsss = user::whereDoesntHave('roles', function ($query) {
                                 $query->where('id', 29);
@@ -3431,7 +3433,7 @@ class ReportController extends Controller
             $query->where('sales_person', $request->executive_id);
         }
 
-        $query = $query->groupBy('dealer','customer_id', 'final_branch', 'city')->orderBy('total_net_amounts', 'desc');
+        $query = $query->groupBy('dealer', 'customer_id', 'final_branch', 'city')->orderBy('total_net_amounts', 'desc');
 
         return Datatables::of($query)
             ->addIndexColumn()
@@ -3556,7 +3558,7 @@ class ReportController extends Controller
                 ->pluck('customer_id')
                 ->push(auth()->user()->customerid);
             $query->whereIn('customer_id', $child_customer);
-        }else{
+        } else {
             if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                 $userids = getUsersReportingToAuth();
                 $customer_ids = Customers::whereIn('executive_id', $userids)->orWhereIn('created_by', $userids)->pluck('id');
@@ -3585,11 +3587,11 @@ class ReportController extends Controller
         }
 
         // Grouping and ordering
-        $query->whereIn('division', ['PUMP', 'MOTOR'])->groupBy('dealer','customer_id', 'final_branch', 'city');
+        $query->whereIn('division', ['PUMP', 'MOTOR'])->groupBy('dealer', 'customer_id', 'final_branch', 'city');
 
         // Execute the primary query
         $results = $query->get();
-    
+
         // Calculate the last year's net amounts
         $lastYearAmounts = PrimarySales::select(
             'dealer',
@@ -3723,7 +3725,7 @@ class ReportController extends Controller
             $userids = getUsersReportingToAuth();
             $customer_ids = Customers::whereIn('executive_id', $userids)->orWhereIn('created_by', $userids)->pluck('id');
             $new_dealers = Customers::where('creation_date', '>=', $firstDateOfApril)->whereIn('id', $customer_ids)->pluck('id');
-        }else{
+        } else {
             $new_dealers = Customers::where('creation_date', '>=', $firstDateOfApril)->pluck('id');
         }
         DB::statement("SET SESSION group_concat_max_len = 10000000");
@@ -3882,10 +3884,10 @@ class ReportController extends Controller
                 $child_customer = ParentDetail::where('parent_id', auth()->user()->customerid)
                     ->pluck('customer_id')
                     ->push(auth()->user()->customerid);
-                    $retailers_sarthi = $child_customer->intersect($retailers_sarthi);
+                $retailers_sarthi = $child_customer->intersect($retailers_sarthi);
             }
             $data = Customers::with('customertypes', 'firmtypes', 'createdbyname', 'customeraddress.cityname', 'customeraddress.statename', 'customer_transacation')->whereIn('id', $retailers_sarthi)
-                ->where(function ($query) use ($request, $userids,$role) {
+                ->where(function ($query) use ($request, $userids, $role) {
                     if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
                         $userIdsss = user::whereDoesntHave('roles', function ($query) {
                             $query->where('id', 29);
@@ -4018,11 +4020,11 @@ class ReportController extends Controller
     public function customer_outstanting(Request $request)
     {
         $userids = getUsersReportingToAuth();
-        $branches = Branch::where('active', 'Y')->latest()->get();
+        $customers = Customers::whereIn('id', CustomerOutstanting::pluck('customer_id')->unique())->select('id', 'name')->get();
         $dealers = Customers::where('customertype', ['1', '3'])->get();
 
         if ($request->ajax()) {
-            $data = CustomerOutstanting::with('branch', 'customer')->select(
+            $data = CustomerOutstanting::with('branch', 'customer.customerdocuments')->select(
                 'customer_id',
                 'branch_id',
                 'year',
@@ -4031,7 +4033,13 @@ class ReportController extends Controller
                 DB::raw('GROUP_CONCAT(amount) as amounts'),
                 DB::raw('GROUP_CONCAT(days) as days'),
                 DB::raw('JSON_OBJECTAGG(days, amount) as day_amount_pairs'),
-            )->groupBy('customer_id', 'branch_id', 'year', 'quarter');
+            );
+
+            if ($request->customer_id && !empty($request->customer_id)) {
+                $data->where('customer_id', $request->customer_id);
+            }
+
+            $data = $data->groupBy('customer_id', 'branch_id', 'year', 'quarter');
 
             return Datatables::of($data)
                 ->addIndexColumn()
@@ -4055,12 +4063,20 @@ class ReportController extends Controller
                     $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
                     return $day_wise_amount_array['150'] ?? '0';
                 })
+                ->addColumn('balance_confirmations', function ($data) {
+                    return '-';
+                    if($data->customer->customerdocuments->where('document_name', 'balance_confirmations')->first()){
+                       return '<a href="'.$data->customer->customerdocuments->where('document_name', 'balance_confirmations')->first()->file_path.'" target="_blank">Download</a>';
+                    }else{
+                        return '-';
+                    }
+                })
 
-                ->rawColumns(['first_slot', 'second_slot', 'thired_slot', 'fourth_slot', 'fifth_slot'])
+                ->rawColumns(['first_slot', 'second_slot', 'thired_slot', 'fourth_slot', 'fifth_slot', 'balance_confirmations'])
                 ->make(true);
         }
 
-        return view('reports.customer_outstanting', compact('branches', 'dealers'));
+        return view('reports.customer_outstanting', compact('customers', 'dealers'));
     }
 
     public function customer_outstanting_upload(Request $request)
@@ -4083,10 +4099,73 @@ class ReportController extends Controller
 
     public function customer_outstanting_download(Request $request)
     {
-        abort_if(Gate::denies('customer_outstanting_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        if (ob_get_contents()) ob_end_clean();
-        ob_start();
-        return Excel::download(new CutomerOutstantingExport($request), 'customer_outstanding.xlsx');
+        if ($request->download == 'pdf') {
+            if ($request->ip() != '111.118.252.250') {
+                return view('work_in_progress');
+            }
+            $data = CustomerOutstanting::with('branch', 'customer')->select(
+                'customer_id',
+                'branch_id',
+                'user_id',
+                'division_id',
+                'year',
+                'quarter',
+                DB::raw('SUM(amount) as total_amounts'),
+            );
+
+            if ($request->customer_id && !empty($request->customer_id)) {
+                $data->where('customer_id', $request->customer_id);
+            }
+
+            $data = $data->groupBy('customer_id', 'branch_id', 'year', 'quarter')->get();
+            $logoPath = public_path('assets/img/certificate_logo_fan2.png');
+            $logoPath2 = public_path('assets/img/certificate_logo2.png');
+            $footerLogoImage = public_path('assets/img/certificate_footer_logo2.png');
+            $footerLogoImage64 = "data:image/png;base64," . base64_encode(file_get_contents($footerLogoImage));
+            $logoBase64 = "data:image/png;base64," . base64_encode(file_get_contents($logoPath));
+            $logoBase642 = "data:image/png;base64," . base64_encode(file_get_contents($logoPath2));
+            if ($request->balance_date) {
+                $bal_date = date('d.m.Y', strtotime($request->balance_date));
+            } else {
+                $bal_date = date('d.m.Y');
+            }
+            $data->chunk(50)->each(function ($batch) use ($logoBase64, $footerLogoImage64, $logoBase642, $bal_date) {
+                foreach ($batch as $key => $value) {
+                    $main_data = [
+                        'image' => $logoBase64,
+                        'image2' => $footerLogoImage64,
+                        'image3' => $logoBase642,
+                        'date' => $bal_date,
+                        'data' => $value
+                    ];
+                    $html = view('customers.BalanceConfirmationPDF', $main_data)->render();
+                    $dompdf = new Dompdf();
+                    $dompdf->loadHtml($html);
+                    $dompdf->render();
+
+                    $filename = 'balance_confirmation_' . $value->customer->id . '.pdf';
+                    $tempPath = storage_path('app/temp/' . $filename);
+                    file_put_contents($tempPath, $dompdf->output());
+                    $s3Path = 'uploads/balance_confirmations/' . $filename;
+                    $uploaded = Storage::disk('s3')->put($s3Path, fopen($tempPath, 'r+'));
+                    unlink($tempPath);
+
+                    if ($uploaded) {
+                        $filePath = Storage::disk('s3')->url($s3Path);
+                        Attachment::updateOrCreate(
+                            ['document_name' => 'balance_confirmations', 'customer_id' => $value->customer->id],
+                            ['file_path' => $filePath, 'active' => 'Y']
+                        );
+                    }
+                }
+            });
+            return redirect()->back()->with('message_success', 'PDF generation successfully.');
+        } else if ($request->download == 'excel') {
+            abort_if(Gate::denies('customer_outstanting_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+            if (ob_get_contents()) ob_end_clean();
+            ob_start();
+            return Excel::download(new CutomerOutstantingExport($request), 'customer_outstanding.xlsx');
+        }
     }
 
     public function user_incentive(Request $request)

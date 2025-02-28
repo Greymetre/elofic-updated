@@ -166,7 +166,7 @@ class ReportingActivityController extends Controller
             $orderData[$k]['time'] = date('H:i:s', strtotime($val->created_at));
             $orderData[$k]['latitude'] = '';
             $orderData[$k]['longitude'] = '';
-            $orderData[$k]['msg'] = $val->buyers->name.' - '.$val->buyers->customeraddress->cityname->city_name.',<br>Qty : '.$val->orderdetails->sum('quantity').',<br>Total : '.$val->grand_total;
+            $orderData[$k]['msg'] = $val->buyers->name.' - '.$val->buyers->customeraddress?->cityname?->city_name.',<br>Qty : '.$val->orderdetails->sum('quantity').',<br>Total : '.$val->grand_total;
         }
 
         foreach ($customer_add as $k => $val) {
@@ -175,7 +175,7 @@ class ReportingActivityController extends Controller
             $customerAddData[$k]['latitude'] = $val->latitude;
             $customerAddData[$k]['longitude'] = $val->longitude;
             if($val->customeraddress->cityname != null){
-                $customerAddData[$k]['msg'] = $val->name.' - '. $val->customeraddress->cityname->city_name;
+                $customerAddData[$k]['msg'] = $val->name.' - '. $val->customeraddress?->cityname?->city_name;
             }else{
                 $customerAddData[$k]['msg'] = $val->name.' - City not enter';
             }
@@ -186,7 +186,7 @@ class ReportingActivityController extends Controller
             $customerUpdateData[$k]['time'] = date('H:i:s', strtotime($val->created_at));
             $customerUpdateData[$k]['latitude'] = $val->latitude;
             $customerUpdateData[$k]['longitude'] = $val->longitude;
-            $customerUpdateData[$k]['msg'] = $val->name.' - '. $val->customeraddress->cityname->city_name;
+            $customerUpdateData[$k]['msg'] = $val->name.' - '. $val->customeraddress?->cityname?->city_name;
         }
 
         $data = array_merge($punchInData, $punchOutData, $checkInData, $checkOutData, $orderData, $customerAddData, $customerUpdateData);

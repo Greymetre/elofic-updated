@@ -617,6 +617,10 @@ class ComplaintController extends Controller
                 }
             
             }
+            $this->sendMsgToCustomer($complaint);
+            if(isset($complaint->service_center)){
+                $this->sendMsgToServiceCenter($complaint);
+            }
 
             return Redirect::to('complaints')->with('message_success', 'Complaint Store Successfully and the complaint number is <span title="Copy" id="copyText">' . $newComplaintNumber . '</span>');
         }else {
@@ -872,6 +876,7 @@ class ComplaintController extends Controller
             'status' => '101',
         ]);
 
+        $this->sendMsgToServiceCenter($compalint);
         return response()->json(['status' => 'success', 'message' => 'Service Center assign successfully.']);
     }
 
@@ -951,6 +956,73 @@ class ComplaintController extends Controller
             return Redirect::to('complaints/' . $request->complaint_id)->with('message_success', 'Complaint Notes Added Successfully');
         }catch(\Exception $e){
             return redirect()->back()->withErrors($e->getMessage())->withInput();
+        }
+    }
+
+    // send message
+    private function sendMsgToServiceCenter($compalint){
+        $complaint_number = $compalint->complaint_number ?? '-';
+        $service          = $compalint->service_type ?? '-';
+        $model_no         = $compalint->product_details->model_no ?? '-';
+        $serial_number    = $compalint->product_serail_number ?? '-';
+        $customer_name    = $compalint->customer->customer_name  ?? '';
+        $customer_location = 'Dist. ' . 
+            ($compalint->customer->customer_district ?? '-') . ' ' . 
+            ($compalint->customer->customer_state ?? '-');
+
+        $customer_contact = ($compalint->customer->customer_number ?? '-');
+        $SenderId         = "SILCCD";
+        $mobile_no        = $compalint->service_center_details->mobile ?? '';
+
+        $template = 'COM. NO: ' . $complaint_number . 
+            ' SERVICE: ' . $service . 
+            ' MODEL: ' . $model_no . 
+            ' SR NO: ' . $serial_number . 
+            ' CUS. NAME: ' . $customer_name . 
+            ' ' . $customer_location . 
+            ' ' . $customer_contact . 
+            ' SILVR';
+
+        $encoded_template = urlencode($template);
+        $message_res = sendMessageByInfisms($customer_contact , $encoded_template , $SenderId);
+    }
+
+    private function sendMsgToCustomer($compalint){
+         $complaint_number = $compalint->complaint_number ?? '';
+        $service          = $compalint->service_type ?? '';
+        $serial_number    = $compalint->product_serail_number ?? '-';
+        $product_code     = $compalint->product_code ?? '';
+        $model_no         = $compalint->product_details->model_no ?? '-';
+        $divisions_name   = $compalint->product_details->categories->category_name ?? '';
+        $service_center   = isset($compalint->service_center_details->name) ? $compalint->service_center_details->name . '-' : '-';
+        $SenderId         = "SILCCD";
+        $mobile_no        = $compalint->customer->customer_number ?? '';
+
+        // CN:{#var#} Registered,SN:{#var#},Model:{#var#},Ser:{#var#},Div:{#var#}.Team call You soon.Silver Consumer Electricals Ltd
+       // $template = 'CN:' . $complaint_number . 
+       //      ' Registered,SN:' . $serial_number . 
+       //      ',Model:' . $model_no . 
+       //      ',Ser:' . $service . 
+       //      ',Div:' . $divisions_name . 
+       //      '.Team call You soon.Silver Consumer Electricals Ltd';
+
+        // CN:{#var#} Registered,SN:{#var#},Model:{#var#},Ser:{#var#},Div:{#var#}.Team call You soon.Silver Consumer Electricals Ltd
+        $template1 = 'CN:' . $complaint_number . ' Registered,SN:' . $serial_number . ',Model:' . $model_no . ',Ser:' . $service .',Div'.$divisions_name. '.Team call You soon.Silver Consumer Electricals Ltd';
+
+        $template = 'COM.%20NO:'.$complaint_number.'%20SERVICE:'.$service.'%20ASC:%20'.$service_center.''.$product_code.'%20SILVR';
+        $message_res = sendMessageByInfisms($mobile_no , $template , $SenderId);
+
+        if(isset($message_res) && $message_res["status"] = "success"){
+             try{
+                 $compalint_time_line = ComplaintTimeline::create([
+                      'complaint_id' => $compalint->id ?? '',
+                      'created_by'   => Auth::user()->name,
+                      'status'       => "587" ,
+                      'remark'       => $template1 ??'',
+                ]);  
+            }catch(\Exception $e){
+               
+            }
         }
     }
 }
