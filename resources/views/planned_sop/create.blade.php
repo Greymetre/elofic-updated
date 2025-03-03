@@ -30,7 +30,7 @@
           </div>
           @endif
           {!! Form::model($plannedsop,[
-          'route' => $plannedsop->exists ? ['planned-sop.update', encrypt($planned-sop->id) ] : 'planned-sop.store',
+          'route' => $plannedsop->exists ? ['planned-sop.update', encrypt($plannedsop->id) ] : 'planned-sop.store',
           'method' => $plannedsop->exists ? 'PUT' : 'POST',
           'id' => 'createsopForm',
           'files'=>true
@@ -98,20 +98,20 @@
                         <thead>
                             <tr class="text-white">
                                 <th class="text-center" style="width: 50px !important;">#</th>
-                                <th class="text-center" style="width: 500px !important;">{!! trans('panel.global.products') !!}</th>
-                                <th class="text-center" style="width: 500px !important;">Product Group</th>
-                                <th class="text-center" style="width: 500px !important;">Product Code</th>
-                                <th class="text-center" style="width: 500px !important;">Product Description</th>
-                                <th class="text-center" style="width: 500px !important;">Opening stock as on 1st (Qty.)</th>
-                                <th class="text-center" style="width: 500px !important;">S&OP Plan for Next running month (M+1) (Qty.)</th>
-                                <th class="text-center" style="width: 500px !important;">Budget for the month (Qty.)</th>
-                                <th class="text-center" style="width: 500px !important;">LM Sale (Qty.)</th>
-                                <th class="text-center" style="width: 500px !important;">L3M Avg Sale (Qty.)</th>
-                                <th class="text-center" style="width: 500px !important;">LY same month sale (Qty.)</th>
-                                <th class="text-center" style="width: 500px !important;">SKU Unit Price</th>
-                                <th class="text-center" style="width: 500px !important;">S&OP Val_L (Unit Price *Qty.)</th>
-                                <th class="text-center" style="width: 500px !important;">TOP 20 SKU for the Branch (*)</th>
-                                <th class="text-center" style="width: 250px !important;">Actions</th>
+                                <th class="text-center" >{!! trans('panel.global.products') !!}</th>
+                                <th class="text-center" ><div style="width: 200px !important;">Product Group<div></th>
+                                <th class="text-center" ><div style="width: 200px !important;">Product Code</div></th>
+                                <th class="text-center"><div style="width: 200px !important;">Product Description<div></th>
+                                <th class="text-center"><div style="width: 200px !important;">Opening stock as on 1st (Qty.)</div></th>
+                                <th class="text-center" ><div style="width: 200px !important;">S&OP Plan for Next running month (M+1) (Qty.)</div></th>
+                                <th class="text-center"><div style="width: 200px !important;">Budget for the month (Qty.)</div></th>
+                                <th class="text-center" ><div style="width: 200px !important;">LM Sale (Qty.)</div></th>
+                                <th class="text-center" ><div style="width: 200px !important;">L3M Avg Sale (Qty.)</div></th>
+                                <th class="text-center"><div style="width: 200px !important;">LY same month sale (Qty.)</div></th>
+                                <th class="text-center"><div style="width: 200px !important;">SKU Unit Price</div></th>
+                                <th class="text-center"><div style="width: 200px !important;">S&OP Val_L (Unit Price *Qty.)</div></th>
+                                <th class="text-center" ><div style="width: 200px !important;">TOP 20 SKU for the Branch (*)</div></th>
+                                <th class="text-center"><div style="width: 200px !important;">Actions</div></th>
                             </tr>
                         </thead>
                         <tbody id="sopTableBody">

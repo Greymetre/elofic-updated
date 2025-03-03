@@ -1017,7 +1017,6 @@
                            </li>
                            @endif
 
-                           <!-- @if(auth()->user()->can('ware_house_access')) -->
                            <li class="nav-link-btn {{ request()->is('planned-sop*') ? 'active' : '' }}">
                               <a class="hoveradd2" href="{{ url('planned-sop') }}">
                                  <i class="material-icons icon">warehouse</i>
@@ -1025,7 +1024,6 @@
                                  <div class="d-none mobile_hide"> Planned S&OP</div>
                               </a>
                            </li>
-                           <!-- @endif -->
                            @if(auth()->user()->can('stockdetails_access'))
                            <!-- <li class="nav-item {{ request()->is('production*') ? 'active' : '' }}">
                                  <a class="nav-link" href="{{ url('production') }}">

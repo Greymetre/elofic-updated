@@ -749,13 +749,13 @@ class AjaxController extends Controller
                 }
             }
 
-            foreach ($customer_update as $k => $val) {
-                $customerUpdateData[$k]['title'] = 'Customer Edit';
-                $customerUpdateData[$k]['time'] = date('H:i:s', strtotime($val->created_at));
-                $customerUpdateData[$k]['latitude'] = $val->latitude;
-                $customerUpdateData[$k]['longitude'] = $val->longitude;
-                $customerUpdateData[$k]['msg'] = $val->name . ' - ' . $val->customeraddress?->cityname?->city_name;
-            }
+            // foreach ($customer_update as $k => $val) {
+            //     $customerUpdateData[$k]['title'] = 'Customer Edit';
+            //     $customerUpdateData[$k]['time'] = date('H:i:s', strtotime($val->created_at));
+            //     $customerUpdateData[$k]['latitude'] = $val->latitude;
+            //     $customerUpdateData[$k]['longitude'] = $val->longitude;
+            //     $customerUpdateData[$k]['msg'] = $val->name . ' - ' . $val->customeraddress?->cityname?->city_name;
+            // }
 
             $collections = array_merge($punchInData, $punchOutData, $checkInData, $checkOutData, $orderData, $customerAddData, $customerUpdateData);
 

@@ -25,14 +25,56 @@ class PlannedSopExport implements FromCollection, WithHeadings, ShouldAutoSize, 
 
    public function collection()
     {
-        $query = PlannedSOP::with(['getProduct.subcategories' , 'getProduct.categories', 'getBranch']);
-        return $query->latest()->get();
+        $data = PlannedSOP::with(['getProduct.subcategories' , 'getProduct.categories', 'getBranch']);
+        foreach ($this->filters as $key => $value) {
+               if (isset($value))  {
+                switch ($key) {
+                    case "created_by" : 
+                    case 'top_sku':
+                        $data->where($key, 'like', "%$value%");
+                        break;
+                    case "product_name" :
+                    case "description": 
+                    case "product_code":
+                        $data->whereHas('getProduct', function ($q) use ($value , $key) {
+                            $q->where($key, 'like', "%$value%");
+                        });
+                        break;
+                    case "branch_name":
+                        $data->whereHas('getBranch', function ($q) use ($value , $key) {
+                            $q->where($key, 'like', "%$value%");
+                        });
+                        break;
+                    case "category_name" : 
+                        $data->whereHas('getProduct.categories', function ($q) use ($value) {
+                            $q->where('category_name', 'like', "%$value%");
+                        });
+                        break;
+                    case "group_name" : 
+                        $data->whereHas('getProduct.subcategories', function ($q) use ($value) {
+                            $q->where('subcategory_name', 'like', "%$value%");
+                        });
+                        break;
+                    case 'plan_next_month':
+                    case 'budget_for_month':
+                    case 'last_month_sale':
+                    case 'last_three_month_avg':
+                    case 'last_year_month_sale':
+                    case 'sku_unit_price':
+                    case 's_op_val':
+                    case 'status':
+                     $data->where($key, 'like', "$value");
+                     break;
+                }
+            }
+        }
+        return $data->latest()->get();
     }
 
     public function headings(): array
     {
         return [
-             "Branch Name", "Group Name",  "Item Name" ,  "Product Desc." ,  "Opening stock as on 1st (Qty)",   "S&OP Plan for Next running month (M+1) (Qty.)" ,  "Budget for the month (Qty.)", "LM Sale (Qty.)" , "L3M Avg Sale (Qty.)" ,"LY same month sale (Qty.)" ,  "SKU Unit Price" , "S&OP Val_L (Unit Price *Qty.)"  , "TOP 20 SKU for the Branch (*)",   "Created at"
+             "Order Id" , "Branch Name","Division Name", "Group Name",  "Item Name" , "Product Code", "Product Desc." ,  "Opening stock as on 1st (Qty)",   "S&OP Plan for Next running month (M+1) (Qty.)" ,  "Budget for the month (Qty.)", "LM Sale (Qty.)" , "L3M Avg Sale (Qty.)" ,"LY same month sale (Qty.)" ,  "SKU Unit Price" , "S&OP Val_L (Unit Price *Qty.)"  , "TOP 20 SKU for the Branch (*)",   "Created By" , "Created At"
         ];
     }
 
@@ -40,9 +82,12 @@ class PlannedSopExport implements FromCollection, WithHeadings, ShouldAutoSize, 
     public function map($data): array
     {
         return [
+            $data['order_id'] ?? '',
             $data['getBranch']['branch_name'] ?? '',
-            $data['getProduct']['subcategories']['subcategory_name'] ?? '',
             $data['getProduct']['categories']['category_name'] ?? '',
+            $data['getProduct']['subcategories']['subcategory_name'] ?? '',
+            $data['getProduct']['product_name'] ?? '',
+            $data['getProduct']['product_code'] ?? '',
             $data['getProduct']['description'] ?? '',
             $data['opening_stock'] ?? '',
             $data['plan_next_month'] ?? '',
@@ -54,6 +99,7 @@ class PlannedSopExport implements FromCollection, WithHeadings, ShouldAutoSize, 
             $data['s_op_val'] ?? '',
             $data['top_sku'] ?? '',
             $data['created_by'] ?? '',
+            isset($data['created_at']) ? cretaDateForFront($data['created_at']) :  ''
         ];
     }
 

@@ -4064,9 +4064,8 @@ class ReportController extends Controller
                     return $day_wise_amount_array['150'] ?? '0';
                 })
                 ->addColumn('balance_confirmations', function ($data) {
-                    return '-';
                     if($data->customer->customerdocuments->where('document_name', 'balance_confirmations')->first()){
-                       return '<a href="'.$data->customer->customerdocuments->where('document_name', 'balance_confirmations')->first()->file_path.'" target="_blank">Download</a>';
+                       return '<a href="'.$data->customer->customerdocuments->where('document_name', 'balance_confirmations')->first()->file_path.'" target="_blank" title="Balance Confirmations" ><i class="material-icons" style="color: #0a77b1 !important; font-size: 25px;" >picture_as_pdf</i></a>';
                     }else{
                         return '-';
                     }
@@ -4100,9 +4099,6 @@ class ReportController extends Controller
     public function customer_outstanting_download(Request $request)
     {
         if ($request->download == 'pdf') {
-            if ($request->ip() != '111.118.252.250') {
-                return view('work_in_progress');
-            }
             $data = CustomerOutstanting::with('branch', 'customer')->select(
                 'customer_id',
                 'branch_id',

@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('planned_s_o_p_s', function (Blueprint $table) {
             $table->id();
             $table->date('planning_month')->nullable();
-            $table->bigInteger('order_id')->nullable();
+            $table->string('order_id')->nullable();
             $table->bigInteger('division_id')->nullable();
             $table->bigInteger('branch_id')->nullable();
             $table->bigInteger('product_id')->nullable();
@@ -30,6 +30,7 @@ return new class extends Migration
             $table->integer('s_op_val')->nullable();
             $table->string('top_sku')->nullable();
             $table->string('created_by')->nullable();
+            $table->tinyInteger('status')->default(1);
             $table->timestamps();
         });
     }

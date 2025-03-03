@@ -17,7 +17,7 @@
                       <select class="selectpicker" name="division_id" id="division_id" data-style="select-with-transition" title="Select Division" required>
                         @if(@isset($divisions ))
                         @foreach($divisions as $division)
-                        <option value="{!! $division['id'] !!}" {{ old( 'division_id') == $division->id || 10 == $division->id ? 'selected' : '' }}>{!! $division['division_name'] !!}</option>
+                        <option value="{!! $division['id'] !!}" {{ old( 'division_id') == $division->id ? 'selected' : '' }}>{!! $division['division_name'] !!}</option>
                         @endforeach
                         @endif
                       </select>
