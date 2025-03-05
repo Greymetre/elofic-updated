@@ -296,8 +296,13 @@
                   <!--  Complaint-Type -->
                    <div class="col-md-12">
                      <div class="p-1 mb-2 text-white text-center" style="background-color: #3972af;">
-                        <h4 class="m-0"><strong>Complaint-Type : {{$complaint->complaint_type_details->name ?? '-'}}</strong></h4>
+                      <h4 class="m-0"><strong>Product Details</strong></h4>
+                        <!-- <h4 class="m-0"><strong>Complaint-Type : {{$complaint->complaint_type_details->name ?? '-'}}</strong></h4> -->
                      </div>
+                  </div>
+                  <div class="col-md-3">
+                    <label>Complaint-Type </label>
+                    <p class="border p-2 bg-light">{{$complaint->complaint_type_details->name  ?? '-'}}</p>
                   </div>
                    <div class="col-md-3">
                     <label>Serial Number </label>

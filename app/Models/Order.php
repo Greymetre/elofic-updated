@@ -121,7 +121,7 @@ class Order extends Model
     }
     public function createdbyname()
     {
-        return $this->belongsTo('App\Models\User', 'created_by', 'id')->select('id','name','profile_image');
+        return $this->belongsTo('App\Models\User', 'created_by', 'id')->select('id','name','profile_image','branch_id');
     }
     public function updatedbyname()
     {

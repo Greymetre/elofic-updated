@@ -11,6 +11,7 @@ use Yajra\DataTables\Html\Editor\Fields;
 use Yajra\DataTables\Services\DataTable;
 
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class PlannedSopDatatable extends DataTable
 {
@@ -33,6 +34,17 @@ class PlannedSopDatatable extends DataTable
                      return '<span class="badge badge-dager">CANCEL</span>';
                  } 
             })
+            ->editColumn('planning_month' , function($data){
+                 try{
+                    if(isset($data->planning_month)){
+                        return \Carbon\Carbon::parse($data->planning_month)->format('F Y');
+                    }else{
+                         return "Not Found";
+                    }
+                 }catch(\Exception $e){
+                    return "Not Found";
+                 }
+            })
              ->addColumn('action', function ($query) {
                   $btn = '';
                   $activebtn ='';
@@ -47,21 +59,21 @@ class PlannedSopDatatable extends DataTable
                                     ' . csrf_field() . '
                                     ' . method_field('PUT') . '
                                     <input type="hidden" name="status" value="0">
-                                    <button type="button" class="btn btn-warning btn-just-icon btn-sm update-sop mr-2" data-id="' . $query->id . '" title="Delete SOP">
+                                    <button type="button" class="btn btn-warning btn-just-icon btn-sm update-sop mr-2" data-id="' . $query->id . '" title="Cancel SOP">
                                         <i class="material-icons">close</i>
                                     </button>
                                 </form>';
                     }
 
-                  if (auth()->user()->can(['sop_delete'])) {
+                    if (auth()->user()->can(['sop_delete'])) {
                         $btn .= '<form action="' . route('planned-sop.destroy', encrypt($query->id)) . '" method="POST" class="delete-form-' .$query->id . '" style="display:inline;">
-                                    ' . csrf_field() . '
-                                    ' . method_field('DELETE') . '
+                                ' . csrf_field() . '
+                                ' . method_field('DELETE') . '
 
-                                    <button type="button" class="btn btn-danger btn-just-icon btn-sm delete-sop " data-id="' . $query->id . '" title="Delete SOP">
-                                        <i class="material-icons">delete</i>
-                                    </button>
-                                </form>';
+                                <button type="button" class="btn btn-danger btn-just-icon btn-sm delete-sop " data-id="' . $query->id . '" title="Delete SOP">
+                                    <i class="material-icons">delete</i>
+                                </button>
+                            </form>';
                     }
                   return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
                                 '.$btn.'
@@ -122,6 +134,16 @@ class PlannedSopDatatable extends DataTable
                      break;
                 }
             }
+        }
+
+        if(isset($request->planning_month)){
+          try{
+            $formatted_date = Carbon::createFromFormat('F Y', $request->planning_month)->startOfMonth();
+            $planning_month = $formatted_date->format("Y-m-d");
+            $data->whereDate('planning_month' , $planning_month);
+          }catch(\Exception $e){
+             $data = $data->latest()->newQuery();
+          }
         }
         $data = $data->latest()->newQuery();
         return $data;

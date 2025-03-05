@@ -125,6 +125,7 @@ body table td {
                            @endif
                         </select>
                         <input type="hidden" readonly name="product_division" id="product_division" value="{{($complaint?($complaint->product_details?$complaint->product_details->categories->id:''):'')}}">
+                        <input type="hidden" readonly name="product_group" id="product_group" value="{{($complaint?($complaint->product_details?$complaint->product_details->subcategories->id:''):'')}}">
                         <input type="hidden" readonly name="complaint_details" id="complaint_details" value="{{($complaint?$complaint:'')}}">
                         <input type="hidden" readonly name="complaint_id" id="complaint_id" value="{{($complaint?($complaint->id?$complaint->id:''):'')}}">
                         <input type="hidden" readonly name="service_bill_id" id="service_bill_id" value="{{($service_bill?($service_bill->id?$service_bill->id:''):'')}}">
@@ -138,6 +139,20 @@ body table td {
                            @if($divisions && count($divisions) > 0)
                            @foreach($divisions as $division)
                            <option value="{{$division->id}}">{{$division->category_name}}</option>
+                           @endforeach
+                           @endif
+                        </select>
+                     </div>
+                  </div>
+
+                  <div class="col-md-3">
+                     <div class="input_section">
+                        <label for="division" class="col-form-label">Product Group</label>
+                        <select disabled name="subcategory_id" id="subcategory_id" class="select2">
+                           <option value="">Select Group</option>
+                           @if($groups && count($groups) > 0)
+                           @foreach($groups as $group)
+                           <option value="{{$group->id}}">{{$group->subcategory_name}}</option>
                            @endforeach
                            @endif
                         </select>
@@ -726,10 +741,14 @@ body table td {
 
                   if (res.data.product != '' && res.data.product != null) {
                      $('#division').val(res.data.product.category_id);
+                     $('#subcategory_id').val(res.data.product.subcategory_id);
                      $('#division').change();
+                      $('#subcategory_id').change();
                   } else {
                      $('#division').val('');
                      $('#division').change();
+                     $('#subcategory_id').val('');
+                     $('#subcategory_id').change();
                   }
 
                }
@@ -743,8 +762,13 @@ body table td {
             $('#division').val(division);
             $('#division').change();
          }
+         var groups = $('#product_group').val();
+         if (groups != '' && groups != null) {
+            $('#subcategory_id').val(groups);
+            $('#subcategory_id').change();
+         }
+
          let complaint_id = "{{$complaint->id ?? ''}}";
-         console.log("complaint_id" , complaint_id);
          if(complaint_id){
              getServiceChargeType(complaint_id , '.chargety');
          }
@@ -851,6 +875,22 @@ body table td {
              let value = $(this).val().replace(/\D/g, ''); // Remove non-numeric characters
              if (value.length > 3) {
                  value = value.substring(0, 3) + '/' + value.substring(3, 6);
+             }
+             $(this).val(value);
+         });
+
+         $('#line_voltage , #load_voltage , #panel_rating_running').on('input', function () {
+             let value = $(this).val().replace(/\D/g, ''); // Remove non-numeric characters
+             if (value.length > 3) {
+                 value = value.substring(0, 2);
+             }
+             $(this).val(value);
+         });
+
+         $('#current').on('input', function () {
+             let value = $(this).val().replace(/\D/g, ''); // Remove non-numeric characters
+             if (value.length > 2) {
+                 value = value.substring(0, 1);
              }
              $(this).val(value);
          });

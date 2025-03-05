@@ -784,6 +784,15 @@
                               </a>
                            </li>
                            @endif
+                           @if(auth()->user()->can(['customer_balance_confirmation_upload']))
+                           <li class="nav-link-btn {{ request()->is('customer_balance*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('customer_balance') }}">
+                                 <i class="material-icons icon">balance</i>
+                                 <span>Upload Balance Confirmation</span>
+                                 <div class="d-none mobile_hide">Upload Balance Confirmation</div>
+                              </a>
+                           </li>
+                           @endif
                            @if(auth()->user()->can(['distributor_access']))
                            <!-- <li class="nav-item {{ request()->is('distributors*') ? 'active' : '' }}">
                                  <a class="nav-link" href="{{ url('distributors') }}">

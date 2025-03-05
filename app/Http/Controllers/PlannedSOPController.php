@@ -166,7 +166,7 @@ class PlannedSOPController extends Controller
           return redirect()->back()->with('message_danger', 'Record not found');
         }
         try{
-            if(isset($request->start_month)){
+            if(isset($request->planning_month)){
                $formatted_date = Carbon::createFromFormat('F Y', $request->planning_month)->startOfMonth();
                $planning_month = $formatted_date->format("Y-m-d");
                $request["planning_month"] = $planning_month;

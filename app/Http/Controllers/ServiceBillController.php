@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Redirect;
 use App\DataTables\ServiceBillDataTable;
 use App\Models\Category;
+use App\Models\Subcategory;
 use App\Models\Complaint;
 use App\Models\ComplaintTimeline;
 use App\Models\Division;
@@ -66,8 +67,9 @@ class ServiceBillController extends Controller
         $newserviceBillNo = $lastServiceBillId ? $lastServiceBillId + 1 : 1;
         $serviceBillNo = str_pad($newserviceBillNo, 3, '0', STR_PAD_LEFT);
         $divisions = Category::where('active', 'Y')->select('id', 'category_name')->get();
+        $groups = Subcategory::where('active', 'Y')->select('id', 'subcategory_name')->get();
 
-        return view('service_bill.create', compact('complaint', 'serviceBillNo', 'all_complaint_number', 'divisions', 'charge_type'))->with('service_bill', $this->service_bill);
+        return view('service_bill.create', compact('complaint', 'serviceBillNo', 'all_complaint_number', 'divisions', 'charge_type' , 'groups'))->with('service_bill', $this->service_bill);
     }
 
     /**
@@ -233,8 +235,8 @@ class ServiceBillController extends Controller
         $all_complaint_number = Complaint::with('product_details')->get();
         $serviceBillNo = $serviceBill->bill_no;
         $divisions = Category::where('active', 'Y')->select('id', 'category_name')->get();
-
-        return view('service_bill.create', compact('complaint', 'serviceBillNo', 'all_complaint_number', 'divisions', 'charge_type'))->with('service_bill', $this->service_bill);
+        $groups = Subcategory::where('active', 'Y')->select('id', 'subcategory_name')->get();
+        return view('service_bill.create', compact('complaint', 'serviceBillNo', 'all_complaint_number', 'divisions', 'charge_type' , 'groups'))->with('service_bill', $this->service_bill);
     }
 
     /**

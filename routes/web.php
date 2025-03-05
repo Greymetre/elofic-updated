@@ -232,6 +232,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('customers-active', [CustomerController::class, 'active'])->name('customers.active');
     Route::any('customers-survey', [CustomerController::class, 'survey'])->name('customers.survey');
     Route::any('survey-download', [CustomerController::class, 'surveyDownload'])->name('survey-download');
+    Route::any('customer_balance', [CustomerController::class, 'customer_balance'])->name('customer_balance');
+    Route::any('customer_balance/update', [CustomerController::class, 'customer_balance_update'])->name('customer_balance.update');
+    Route::any('customer_balance/list', [CustomerController::class, 'customer_balance_list'])->name('customer_balance.list');
 
     //Ware House Routs
     Route::resource('ware_house', WareHouseController::class);
@@ -1107,6 +1110,11 @@ Route::get('/taskreminder', function () {
 
     Artisan::call('task:reminder');
 });
+
+Route::get('/dashboard/silver', function () {
+     return view('dashboard_silver');
+});
+
 
 
 require __DIR__ . '/auth.php';

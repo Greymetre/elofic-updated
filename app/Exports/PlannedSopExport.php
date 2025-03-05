@@ -68,13 +68,23 @@ class PlannedSopExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                 }
             }
         }
+
+        if(isset($this->filters['planning_month'])){
+          try{
+            $formatted_date = Carbon::createFromFormat('F Y', $this->filters['planning_month'])->startOfMonth();
+            $planning_month = $formatted_date->format("Y-m-d");
+            $data->whereDate('planning_month' , $planning_month);
+          }catch(\Exception $e){
+             $data->latest()->get();
+          }
+        }
         return $data->latest()->get();
     }
 
     public function headings(): array
     {
         return [
-             "Order Id" , "Branch Name","Division Name", "Group Name",  "Item Name" , "Product Code", "Product Desc." ,  "Opening stock as on 1st (Qty)",   "S&OP Plan for Next running month (M+1) (Qty.)" ,  "Budget for the month (Qty.)", "LM Sale (Qty.)" , "L3M Avg Sale (Qty.)" ,"LY same month sale (Qty.)" ,  "SKU Unit Price" , "S&OP Val_L (Unit Price *Qty.)"  , "TOP 20 SKU for the Branch (*)",   "Created By" , "Created At"
+             "Order Id" , "Month","Branch Name","Division Name", "Group Name",  "Item Name" , "Product Code", "Product Desc." ,  "Opening stock as on 1st (Qty)",   "S&OP Plan for Next running month (M+1) (Qty.)" ,  "Budget for the month (Qty.)", "LM Sale (Qty.)" , "L3M Avg Sale (Qty.)" ,"LY same month sale (Qty.)" ,  "SKU Unit Price" , "S&OP Val_L (Unit Price *Qty.)"  , "TOP 20 SKU for the Branch (*)",   "Created By" , "Created At"
         ];
     }
 
@@ -83,6 +93,7 @@ class PlannedSopExport implements FromCollection, WithHeadings, ShouldAutoSize, 
     {
         return [
             $data['order_id'] ?? '',
+            isset($data['planning_month']) ? \Carbon\Carbon::parse($data->planning_month)->format('F Y') : '',
             $data['getBranch']['branch_name'] ?? '',
             $data['getProduct']['categories']['category_name'] ?? '',
             $data['getProduct']['subcategories']['subcategory_name'] ?? '',

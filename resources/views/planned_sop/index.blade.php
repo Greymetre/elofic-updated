@@ -89,6 +89,9 @@
                 <tr>
                   <th></th>
                   <th><div style="width:150px"></div></th>
+                  <th><input type="text" class="form-control table-input datepicker" id="start_month" 
+                       name="planning_month" placeholder="S&OP Month" 
+                       autocomplete="off"></th>
                   <th><input type="text" class="form-control table-input" name="branch_name" placeholder="Search..." autocomplete="off"></th>
                   <th><input type="text" class="form-control table-input" name="category_name" placeholder="Search..." autocomplete="off"></th>
                   <th><input type="text" class="form-control table-input" name="group_name" placeholder="Search..." autocomplete="off"></th>
@@ -115,7 +118,8 @@
                 </tr>
                 <tr>
                   <th>{!! trans('panel.global.no') !!}</th>
-                   <th>{!! trans('panel.global.action') !!}</th>
+                  <th>{!! trans('panel.global.action') !!}</th>
+                  <th>Month</th>
                   <th>Branch Name</th>
                   <th>Division</th>
                   <th>Group Name</th>
@@ -179,6 +183,7 @@
                 d.top_sku = $('input[name="top_sku"]').val();
                 d.status =  $('select[name="status"]').val();
                 d.created_by = $('input[name="created_by"]').val();
+                d.planning_month = $('input[name="planning_month"]').val();
             }
         },
         columns: [{
@@ -190,6 +195,12 @@
            {
             data: 'action',
             name: 'action',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'planning_month',
+            name: 'planning_month',
             orderable: false,
             "defaultContent": ''
           },
@@ -316,7 +327,7 @@
               let inputValue = $(this).val();
               form.append($('<input>', {type: 'hidden', name: inputName, value: inputValue}));
           });
-
+          form.append($('<input>', {type: 'hidden', name: 'planning_month', value: $('input[id="start_month"]').val()}));
           $('body').append(form);
           form.submit();
       });
@@ -361,6 +372,12 @@
                 }
           });
       });
+
+      $('#start_month').datepicker({
+          maxDate: 0,
+          dateFormat: 'M yy',
+      });
+
 
     });
   </script>

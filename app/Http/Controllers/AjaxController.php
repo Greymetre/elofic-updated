@@ -2149,6 +2149,7 @@ class AjaxController extends Controller
     public function getSaledata(Request $request){
         $product_id = $request->product_id ?? '';
         $date = $request->date ?? '';
+        $branch_id = $request->branch_id ?? '';
 
         if(isset($date)){
               $now = Carbon::createFromFormat('F Y', $request->date)->startOfMonth()->subMonth();
@@ -2162,6 +2163,9 @@ class AjaxController extends Controller
         $last_month_sale = OrderDetails::where('product_id', $product_id)
                 ->whereYear('created_at', Carbon::now()->subMonth()->year)
                 ->whereMonth('created_at', Carbon::now()->subMonth()->month)
+                ->whereHas('orders.createdByName', function ($query) use ($branch_id) {
+                    $query->where('branch_id', $branch_id);
+                })
                 ->sum('quantity'); // Change 'quantity' based on what you sum (e.g., total_price)
 
          // Get last three months' average sales (excluding current month)
@@ -2170,12 +2174,18 @@ class AjaxController extends Controller
             Carbon::now()->subMonths(4)->startOfMonth(), // 4 months ago (excluding current month)
             Carbon::now()->subMonth()->endOfMonth() // End of last month
         ])
+        ->whereHas('orders.createdByName', function ($query) use ($branch_id) {
+            $query->where('branch_id', $branch_id);
+        })
         ->sum('quantity') / 3; // Divide by 3 for average
 
         // Get last year's same month sales
         $last_year_same_month = OrderDetails::where('product_id', $product_id)
         ->whereYear('created_at', Carbon::now()->subYear()->year)
         ->whereMonth('created_at', Carbon::now()->subYear()->month)
+        ->whereHas('orders.createdByName', function ($query) use ($branch_id) {
+            $query->where('branch_id', $branch_id);
+        })
         ->sum('quantity');
 
         return response()->json([

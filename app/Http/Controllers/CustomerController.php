@@ -100,7 +100,7 @@ class CustomerController extends Controller
                     if (!empty($request['executive_id'])) {
                         $query->where(function ($q) use ($request) {
                             $q->where('executive_id', $request['executive_id'])
-                              ->orWhere('created_by', $request['executive_id']);
+                                ->orWhere('created_by', $request['executive_id']);
                         });
                     }
                     if (!empty($request['parent_id'])) {
@@ -247,10 +247,10 @@ class CustomerController extends Controller
                     $whatsappLink = "https://wa.me/" . $query->mobile;
                     return '<a style="display: flex;align-items: center;" href="' . $whatsappLink . '" target="_blank">
                                 <i class="fa fa-whatsapp text-success mr-1" style="font-size:20px"></i>
-                                '. $query->mobile .'
+                                ' . $query->mobile . '
                             </a> ';
                 })
-                ->rawColumns(['action', 'beat_name', 'image', 'checkbox', 'createdbyname.name', 'profileimage','mobile'])
+                ->rawColumns(['action', 'beat_name', 'image', 'checkbox', 'createdbyname.name', 'profileimage', 'mobile'])
                 ->make(true);
         }
         $divisions = Division::where('active', 'Y')->get();
@@ -582,8 +582,8 @@ class CustomerController extends Controller
             ]);
             if ($validator->fails()) {
                 return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+                    ->withErrors($validator)
+                    ->withInput();
             }
             ////abort_if(Gate::denies('customer_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
             $request['updated_by'] = Auth::user()->id;
@@ -920,5 +920,51 @@ class CustomerController extends Controller
         $pdf = PDF::loadView('redemption.balance_pdf');
 
         return $pdf->download('document.pdf');
+    }
+
+    public function customer_balance(Request $request)
+    {
+        $customers['profile_image'] = Attachment::where([
+            'customer_id' => auth()->user()->customerid,
+            'document_name' => 'customer_balance_upload',
+        ])->value('file_path');
+
+        return view('customers.customer_balance', compact('customers'));
+    }
+
+    public function customer_balance_update(Request $request)
+    {
+        $customer = auth()->user();
+        $image = $request->file('image');
+        $filename = 'customer_balance_upload_' . $customer->customerid;
+        $existingAttachment = Attachment::where('document_name', 'customer_balance_upload')
+            ->where('customer_id', $customer->customerid)
+            ->first();
+
+        $docimage = [
+            'active'        => 'Y',
+            'file_path'     => fileupload($image, $this->path, $filename),
+            'document_name' =>  'customer_balance_upload',
+        ];
+
+        if ($existingAttachment) {
+            $existingAttachment->update($docimage);
+        } else {
+            Attachment::create(array_merge($docimage, ['customer_id' => $customer->customerid]));
+        }
+
+        return redirect()->back()->with('message_success', 'Balance confirmation uploaded successfully');
+    }
+
+    public function customer_balance_list(Request $request)
+    {
+        $data = Attachment::with('customer')->where('document_name', 'customer_balance_upload');
+        return Datatables::of($data)
+            ->addIndexColumn()
+            ->editColumn('upload_iamge', function ($item) {
+                return '<a href="'.$item->file_path.'" target="_blank"><img width="300" src="'.$item->file_path.'" alt=""></a>';
+            })
+            ->rawColumns(['upload_iamge'])
+            ->make(true);
     }
 }

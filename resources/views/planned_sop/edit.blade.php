@@ -44,10 +44,10 @@
               <div class="input_section">
                 <label class="col-form-label">S&OP Month<span class="text-danger"> *</span></label>
                 <div class="form-group has-default bmd-form-group">
-                <input type="text" class="form-control datepicker" id="start_month" 
-                       name="planning_month" placeholder="S&OP Month" 
-                       autocomplete="off" readonly required
-                       value="{{ old('planning_month', now()->addMonth()->format('F Y')) }}">
+                 <input type="text" class="form-control datepicker" id="start_month" 
+                         name="planning_month" placeholder="S&OP Month" 
+                         autocomplete="off" readonly required
+                         value="{{ old('planning_month', \Carbon\Carbon::parse($plannedsop->planning_month)->format('F Y')) }}">
                   @if ($errors->has('planning_month'))
                   <div class="error">
                     <p class="text-danger">{{ $errors->first('planning_month') }}</p>
@@ -335,6 +335,12 @@
       });
 
     $(document).on("change", "#product_id", function() {
+        var branch_id = $("#branch_id").val(); 
+        if(branch_id == '' || branch_id == null ){
+            alert("Please select a Branch .");
+            $(this).val('');
+            return ;
+        }
         var product_id = $(this).val();
         if (product_id != null && product_id != '') {
             $.ajax({
@@ -423,8 +429,9 @@
   function getSaledata() {
       var product_id = $("#product_id").val(); // Get product ID from the row
       var date = $("#start_month").val(); // Get product ID from the row
+      var branch_id = $('#branch_id').val();
 
-      if (product_id != null && product_id != '') {
+      if (product_id != null && product_id != '' && branch_id != '' && branch_id != null) {
           $.ajax({
               url: "{{ url('getSaledata') }}",
               dataType: "json",
@@ -432,7 +439,8 @@
               data: {
                   _token: "{{ csrf_token() }}",
                   product_id: product_id,
-                  date      : date
+                  date      : date,
+                  branch_id : branch_id
               },
               success: function(res) {
                   $("#last_month_sale").val(res.last_month_sale).prop('readonly', true);

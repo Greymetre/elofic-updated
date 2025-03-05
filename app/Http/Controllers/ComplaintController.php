@@ -617,7 +617,7 @@ class ComplaintController extends Controller
                 }
             
             }
-            $this->sendMsgToCustomer($complaint);
+            $this->sendMsgToCustomer($complaint , $type=1);
             if(isset($complaint->service_center)){
                 $this->sendMsgToServiceCenter($complaint);
             }
@@ -966,6 +966,8 @@ class ComplaintController extends Controller
         $model_no         = $compalint->product_details->model_no ?? '-';
         $serial_number    = $compalint->product_serail_number ?? '-';
         $customer_name    = $compalint->customer->customer_name  ?? '';
+        $customer_city    = $compalint->customer->customer_city ?? '';
+
         $customer_location = 'Dist. ' . 
             ($compalint->customer->customer_district ?? '-') . ' ' . 
             ($compalint->customer->customer_state ?? '-');
@@ -973,44 +975,36 @@ class ComplaintController extends Controller
         $customer_contact = ($compalint->customer->customer_number ?? '-');
         $SenderId         = "SILCCD";
         $mobile_no        = $compalint->service_center_details->mobile ?? '';
+        $service_center_mobile   = isset($compalint->service_center_details->mobile) ? $compalint->service_center_details->mobile  : '-';
 
-        $template = 'COM. NO: ' . $complaint_number . 
-            ' SERVICE: ' . $service . 
-            ' MODEL: ' . $model_no . 
-            ' SR NO: ' . $serial_number . 
-            ' CUS. NAME: ' . $customer_name . 
-            ' ' . $customer_location . 
-            ' ' . $customer_contact . 
-            ' SILVR';
+        $template = 'CN:'.$complaint_number.' SN:'.$serial_number.' Model:'.$model_no.' Assigned,Ser:'.$service.',Cus:'.$customer_name .'['. $customer_contact . '],' . $customer_city .'.Silver Consumer Electricals Ltd';
 
         $encoded_template = urlencode($template);
-        $message_res = sendMessageByInfisms($customer_contact , $encoded_template , $SenderId);
+        $message_res = sendMessageByInfisms($service_center_mobile , $encoded_template , $SenderId);
+        $this->sendMsgToCustomer($compalint , $type=2);
     }
 
-    private function sendMsgToCustomer($compalint){
-         $complaint_number = $compalint->complaint_number ?? '';
-        $service          = $compalint->service_type ?? '';
+    private function sendMsgToCustomer($compalint , $type=1){
+        $complaint_number = $compalint->complaint_number ?? '-';
+        $service          = $compalint->service_type ?? '-';
         $serial_number    = $compalint->product_serail_number ?? '-';
-        $product_code     = $compalint->product_code ?? '';
+        $product_code     = $compalint->product_code ?? '-';
         $model_no         = $compalint->product_details->model_no ?? '-';
         $divisions_name   = $compalint->product_details->categories->category_name ?? '';
-        $service_center   = isset($compalint->service_center_details->name) ? $compalint->service_center_details->name . '-' : '-';
+        $service_center   = isset($compalint->service_center_details->name) ? $compalint->service_center_details->name  : '-';
+        $service_center_code   = isset($compalint->service_center_details->customer_code) ? $compalint->service_center_details->customer_code  : '-';
+        $service_center_mobile   = isset($compalint->service_center_details->mobile) ? $compalint->service_center_details->mobile  : '-';
         $SenderId         = "SILCCD";
         $mobile_no        = $compalint->customer->customer_number ?? '';
+        $service_center_city = $compalint->service_center_details->customeraddress->cityname->city_name ?? '-';
 
-        // CN:{#var#} Registered,SN:{#var#},Model:{#var#},Ser:{#var#},Div:{#var#}.Team call You soon.Silver Consumer Electricals Ltd
-       // $template = 'CN:' . $complaint_number . 
-       //      ' Registered,SN:' . $serial_number . 
-       //      ',Model:' . $model_no . 
-       //      ',Ser:' . $service . 
-       //      ',Div:' . $divisions_name . 
-       //      '.Team call You soon.Silver Consumer Electricals Ltd';
-
-        // CN:{#var#} Registered,SN:{#var#},Model:{#var#},Ser:{#var#},Div:{#var#}.Team call You soon.Silver Consumer Electricals Ltd
-        $template1 = 'CN:' . $complaint_number . ' Registered,SN:' . $serial_number . ',Model:' . $model_no . ',Ser:' . $service .',Div'.$divisions_name. '.Team call You soon.Silver Consumer Electricals Ltd';
-
-        $template = 'COM.%20NO:'.$complaint_number.'%20SERVICE:'.$service.'%20ASC:%20'.$service_center.''.$product_code.'%20SILVR';
-        $message_res = sendMessageByInfisms($mobile_no , $template , $SenderId);
+        if($type == 1){
+            $template = 'CN:'.$complaint_number.' Registered,SN:'.$serial_number.',Model:'.$model_no.',Ser:'.$service.',Div:'.$divisions_name.'.Team call You soon.Silver Consumer Electricals Ltd';
+        }else if($type == 2){
+            $template = 'CN:'.$complaint_number.' assigned to ASC:'.$service_center.','.$service_center_city.', Mob:'.$service_center_mobile.'.Silver Consumer Electricals Ltd';
+        }
+        $encoded_template = urlencode($template);
+        $message_res = sendMessageByInfisms($mobile_no , $encoded_template , $SenderId);
 
         if(isset($message_res) && $message_res["status"] = "success"){
              try{
@@ -1018,7 +1012,7 @@ class ComplaintController extends Controller
                       'complaint_id' => $compalint->id ?? '',
                       'created_by'   => Auth::user()->name,
                       'status'       => "587" ,
-                      'remark'       => $template1 ??'',
+                      'remark'       => $template ??'',
                 ]);  
             }catch(\Exception $e){
                

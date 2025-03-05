@@ -33,7 +33,7 @@ class UserExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMa
 
     public function collection()
     {
-        $data = User::with('createdbyname', 'getbranch', 'getdesignation', 'reportinginfo', 'userinfo', 'getdivision')
+        $data = User::with('createdbyname', 'getbranch', 'getdesignation', 'reportinginfo', 'userinfo', 'getdivision', 'resignation')
             ->where(function ($query) {
                 if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('Sub_Admin')) {
                     $query->whereIn('id', $this->userids);
@@ -156,8 +156,8 @@ class UserExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMa
                 isset($data['userinfo']['esi_number']) ? $data['userinfo']['esi_number'] : '',
                 isset($data['userinfo']['probation_period']) ? $data['userinfo']['probation_period'] : '',
                 isset($data['userinfo']['date_of_confirmation']) ? $data['userinfo']['date_of_confirmation'] : '',
-                isset($data['userinfo']['date_of_confirmation']) ? $data['userinfo']['date_of_confirmation'] : '',
-                isset($data['userinfo']['date_of_leaving']) ? $data['userinfo']['date_of_leaving'] : '',
+                isset($data['resignation']['notice']) ? ($data['resignation']['notice'] > 10 ? $data['resignation']['notice'].' Days' : $data['resignation']['notice'].' Month') : '',
+                isset($data['resignation']['last_working_date']) ? date('d M Y', strtotime($data['resignation']['last_working_date'])) : '',
                 isset($data['geteducation']) ? $data['geteducation']->where('education_type_id', '0')->value('degree_name') : '',
                 isset($data['geteducation']) ? $data['geteducation']->where('education_type_id', '1')->value('degree_name') : '',
                 isset($data['geteducation']) ? $data['geteducation']->where('education_type_id', '2')->value('degree_name') : '',
@@ -235,8 +235,8 @@ class UserExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMa
                 isset($data['userinfo']['esi_number']) ? $data['userinfo']['esi_number'] : '',
                 isset($data['userinfo']['probation_period']) ? $data['userinfo']['probation_period'] : '',
                 isset($data['userinfo']['date_of_confirmation']) ? $data['userinfo']['date_of_confirmation'] : '',
-                isset($data['userinfo']['date_of_confirmation']) ? $data['userinfo']['date_of_confirmation'] : '',
-                isset($data['userinfo']['date_of_leaving']) ? $data['userinfo']['date_of_leaving'] : '',
+                isset($data['resignation']['notice']) ? ($data['resignation']['notice'] > 10 ? $data['resignation']['notice'].' Days' : $data['resignation']['notice'].' Month') : '',
+                isset($data['resignation']['last_working_date']) ? date('d M Y', strtotime($data['resignation']['last_working_date'])) : '',
                 isset($data['geteducation']) ? $data['geteducation']->where('education_type_id', '0')->value('degree_name') : '',
                 isset($data['geteducation']) ? $data['geteducation']->where('education_type_id', '1')->value('degree_name') : '',
                 isset($data['geteducation']) ? $data['geteducation']->where('education_type_id', '2')->value('degree_name') : '',
