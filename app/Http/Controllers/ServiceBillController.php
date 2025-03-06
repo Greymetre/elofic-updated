@@ -10,6 +10,7 @@ use App\Models\Complaint;
 use App\Models\ComplaintTimeline;
 use App\Models\Division;
 use App\Models\ServiceBill;
+use App\Models\ServiceGroupComplaint;
 use App\Models\ServiceBillProductDetails;
 use App\Models\ServiceChargeChargeType;
 use App\Models\ServiceChargeProducts;
@@ -62,6 +63,8 @@ class ServiceBillController extends Controller
         }else{
             $charge_type = ServiceChargeChargeType::all();
         }
+
+        $service_bill_complaint = ServiceGroupComplaint::where('subcategory_id' , $complaint->product_details->subcategories->id)->get();
  
         $all_complaint_number = Complaint::with('product_details')->get();
         $lastServiceBillId = ServiceBill::max('bill_no');
@@ -70,7 +73,7 @@ class ServiceBillController extends Controller
         $divisions = Category::where('active', 'Y')->select('id', 'category_name')->get();
         $groups = Subcategory::where('active', 'Y')->select('id', 'subcategory_name')->get();
 
-        return view('service_bill.create', compact('complaint', 'serviceBillNo', 'all_complaint_number', 'divisions', 'charge_type' , 'groups'))->with('service_bill', $this->service_bill);
+        return view('service_bill.create', compact('complaint', 'serviceBillNo', 'all_complaint_number', 'divisions', 'charge_type' , 'groups' , 'service_bill_complaint'))->with('service_bill', $this->service_bill);
     }
 
     /**
@@ -81,7 +84,6 @@ class ServiceBillController extends Controller
      */
     public function store(Request $request)
     {
-
         if ($request->service_bill_id && !empty($request->service_bill_id)) {
             $serviceBillNo = $request->service_bill_no;
         } else {
@@ -237,7 +239,8 @@ class ServiceBillController extends Controller
         $serviceBillNo = $serviceBill->bill_no;
         $divisions = Category::where('active', 'Y')->select('id', 'category_name')->get();
         $groups = Subcategory::where('active', 'Y')->select('id', 'subcategory_name')->get();
-        return view('service_bill.create', compact('complaint', 'serviceBillNo', 'all_complaint_number', 'divisions', 'charge_type' , 'groups'))->with('service_bill', $this->service_bill);
+        $service_bill_complaint = ServiceGroupComplaint::where('subcategory_id' , $complaint->product_details->subcategories->id)->get(); 
+        return view('service_bill.create', compact('complaint', 'serviceBillNo', 'all_complaint_number', 'divisions', 'charge_type' , 'groups' , 'service_bill_complaint'))->with('service_bill', $this->service_bill);
     }
 
     /**

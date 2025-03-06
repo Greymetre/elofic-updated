@@ -29,6 +29,7 @@ use GuzzleHttp\Client;
 
 use Validator;
 use Gate;
+use Illuminate\Support\Facades\File;
 
 class LoginController extends Controller
 {
@@ -63,6 +64,37 @@ class LoginController extends Controller
             if (!$user = $this->users->with('roles')->where('mobile', $username)->orWhere('email', $username)->first()) {
                 return response()->json(['status' => 'error', 'message' => 'User not found'], $this->notFound);
             }
+            $checkLastLogin = MobileUserLoginDetails::where('user_id', $user['id'])->first();
+            if ($checkLastLogin) {
+                if ($checkLastLogin->unique_id != NULL && $checkLastLogin->unique_id != $request['unique_id'] && $checkLastLogin->multi_login == '0') {
+                    return response()->json(['status' => 'error', 'message' =>  'Multiple device login is not allowed. For support, please contact FieldKonnect at 9990828928.'], $this->noContent);
+                };
+
+                MobileUserLoginDetails::updateOrCreate(['user_id' => $user['id']], [
+                    'app_version'   =>  $request['app_version'],
+                    'device_name'   =>  $request['device_name'],
+                    'device_type'   =>  $request['device_type'],
+                    'unique_id'   =>  $request['unique_id'],
+                    'last_login_date'   =>  Carbon::now(),
+                    'login_status'   =>  '1',
+                    'app'   =>  '2',
+                ]);
+            } else {
+                MobileUserLoginDetails::updateOrCreate(['user_id' => $user['id']], [
+                    'app_version'   =>  $request['app_version'],
+                    'device_name'   =>  $request['device_name'],
+                    'device_type'   =>  $request['device_type'],
+                    'unique_id'   =>  $request['unique_id'],
+                    'first_login_date'   =>  Carbon::now(),
+                    'last_login_date'   =>  Carbon::now(),
+                    'login_status'   =>  '1',
+                    'app'   =>  '2',
+                ]);
+            }
+            // if(!$user->hasRole('superadmin')){
+                $user->tokens()->delete();
+            // }
+
             if ($user->active != 'Y') {
                 return response()->json(['status' => 'error', 'message' => 'Your account is deactivated don\'t hesitate to get in touch with admin.'], $this->notFound);
             }
@@ -74,8 +106,8 @@ class LoginController extends Controller
                     'device_type' => isset($request['device_type']) ? $request['device_type'] : ''
                 ]);
                 $todayDate = Carbon::today()->toDateString();
-                $todayBeatSchedule = BeatSchedule::where('user_id',$user['id'])->where('beat_date',$todayDate)->get();
-                $beatUser = BeatUser::where('user_id',$user['id'])->get();
+                $todayBeatSchedule = BeatSchedule::where('user_id', $user['id'])->where('beat_date', $todayDate)->get();
+                $beatUser = BeatUser::where('user_id', $user['id'])->get();
                 $nestedData['id'] = isset($user['id']) ? $user['id'] : 0;
                 $nestedData['name'] = isset($user['name']) ? $user['name'] : '';
                 $nestedData['dividion_id'] = isset($user['division_id']) ? $user['division_id'] : '';
@@ -86,41 +118,18 @@ class LoginController extends Controller
                 $nestedData['profile_image'] = isset($user['profile_image']) ? $user['profile_image'] : '';
                 $nestedData['gender'] = isset($user['gender']) ? $user['gender'] : '';
                 $nestedData['payroll_id'] = isset($user['payroll']) ? $user['payroll'] : '';
-                $nestedData['todayBeatSchedule'] = count($todayBeatSchedule) > 0 ? true:false;
-                $nestedData['beatUser'] = count($beatUser) > 0 ? true:false;
+                $nestedData['todayBeatSchedule'] = count($todayBeatSchedule) > 0 ? true : false;
+                $nestedData['beatUser'] = count($beatUser) > 0 ? true : false;
                 $nestedData['access_token'] = $token;
                 $nestedData['roles'] = $user->roles->pluck('id')->toArray();
                 $nestedData['leave_balance'] = $user->leave_balance;
-                if($user->hasRole('Customer Dealer')){
+                if ($user->hasRole('Customer Dealer')) {
                     $user['provider'] = 'retailers';
-                }else{
+                } else {
                     $user['provider'] = 'users';
                 }
                 $user['entry_from'] = 'App';
                 $this->usersLogin->save_data($user);
-
-                $checkLastLogin = MobileUserLoginDetails::where('user_id', $user['id'])->first();
-                if ($checkLastLogin) {
-                    // if($checkLastLogin->device_name != $request['device_name']){
-                    //     return response()->json(['status' => 'error', 'message' =>  'You can not login from multiple devices'], $this->noContent);
-                    // }
-                    MobileUserLoginDetails::updateOrCreate(['user_id' => $user['id']], [
-                        'app_version'   =>  $request['app_version'],
-                        'device_name'   =>  $request['device_name'],
-                        'last_login_date'   =>  Carbon::now(),
-                        'login_status'   =>  '1',
-                        'app'   =>  '2',
-                    ]);
-                } else {
-                    MobileUserLoginDetails::updateOrCreate(['user_id' => $user['id']], [
-                        'app_version'   =>  $request['app_version'],
-                        'device_name'   =>  $request['device_name'],
-                        'first_login_date'   =>  Carbon::now(),
-                        'last_login_date'   =>  Carbon::now(),
-                        'login_status'   =>  '1',
-                        'app'   =>  '2',
-                    ]);
-                }
 
                 return response()->json(['status' => 'success', 'userinfo' => $nestedData], $this->successStatus);
             } else {
@@ -186,9 +195,9 @@ class LoginController extends Controller
                 $this->users->where('id', $user->id)->update([
                     'notification_id' => ""
                 ]);
-                if($user->hasRole('Customer Dealer')){
+                if ($user->hasRole('Customer Dealer')) {
                     $user['provider'] = 'retailers';
-                }else{
+                } else {
                     $user['provider'] = 'users';
                 }
                 $this->usersLogin->logout($user);
@@ -369,7 +378,7 @@ class LoginController extends Controller
                             'first_name'   =>  isset($request['first_name']) ? $request['first_name'] : '',
                             'last_name'   =>  isset($request['last_name']) ? $request['last_name'] : '',
                             'mobile'   =>  isset($request['mobile']) ? $request['mobile'] : null,
-                            'email'   =>  isset($request['email']) ? $request['email'] : 'customer'.$customer->id.'@gmail.com',
+                            'email'   =>  isset($request['email']) ? $request['email'] : 'customer' . $customer->id . '@gmail.com',
                             'password'   =>  Hash::make($passis),
                             'reportingid' => !empty($request['created_by']) ? $request['created_by'] : null,
                             'password_string'   =>  $passis,
@@ -477,11 +486,11 @@ class LoginController extends Controller
 
     public function getOrderDiscountLimit(Request $request)
     {
-        try{
-        $order_discount_limit = FieldKonnectAppSetting::where('id', '1')->first();
-        return response()->json(['status' => 'success', 'order_discount_limit' => $order_discount_limit->order_discount_limit], $this->successStatus);
-    } catch (\Exception $e) {
-        return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
-    }
+        try {
+            $order_discount_limit = FieldKonnectAppSetting::where('id', '1')->first();
+            return response()->json(['status' => 'success', 'order_discount_limit' => $order_discount_limit->order_discount_limit], $this->successStatus);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
     }
 }

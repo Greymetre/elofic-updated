@@ -993,6 +993,7 @@ Route::group(['middleware' => ['auth']], function () {
     // service bill complaint type  
     Route::resource('service-bills-complaints-type', ServiceBillComplaintType::class);
     Route::any('service-bills-complaints-type-list', [ServiceBillComplaintType::class , 'getServiceComplaintType'])->name('getServiceComplaintType');
+    Route::any('service_bill_complaint_type_download', [ServiceBillComplaintType::class, 'service_bill_complaint_type_download'])->name('service_bill_complaint_type_download');
 });
 
 Route::any('getState', [AjaxController::class, 'getState']);
@@ -1065,6 +1066,8 @@ Route::any('getServiceChargeType', [AjaxController::class, 'getServiceChargeType
 Route::any('getServiceServiceEngiByDivision', [AjaxController::class, 'getServiceServiceEngiByDivision']);
 Route::any('getCountsOfComplaints', [AjaxController::class, 'getCountsOfComplaints']);
 Route::any('getSaledata', [AjaxController::class, 'getSaledata']);
+Route::any('getServiceBillReason' , [AjaxController::class , 'getServiceBillReason']);
+Route::any('checkServiceBillComplaintType' , [AjaxController::class , 'checkServiceBillComplaintType']);
 
 //Clear Cache facade value:
 Route::get('/clear-cache', function () {

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Branch, BranchStock, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CompOffLeave, CustomerDetails, CustomerOutstanting, DealerAppointment, DealerAppointmentKyc, EmployeeDetail, EndUser, Expenses, GiftModel, GiftSubcategory, Marketing, MspActivity, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, PrimaryScheme, Redemption, SalesTargetUsers, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation,ServiceChargeChargeType,OrderDetails};
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Branch, BranchStock, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CompOffLeave, CustomerDetails, CustomerOutstanting, DealerAppointment, DealerAppointmentKyc, EmployeeDetail, EndUser, Expenses, GiftModel, GiftSubcategory, Marketing, MspActivity, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, PrimaryScheme, Redemption, SalesTargetUsers, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation,ServiceChargeChargeType,OrderDetails,ServiceComplaintReason , ServiceBillComplaintType, ServiceGroupComplaint};
 use App\Models\UserLiveLocation;
 use App\Models\UserActivity;
 use App\Http\Controllers\SendNotifications;
@@ -2193,5 +2193,50 @@ class AjaxController extends Controller
             'last_three_month_avg' => round($last_three_month_avg, 2),
             'last_year_same_month' => $last_year_same_month,
         ]);
+    }
+
+    // get service bill reason
+    public function getServiceBillReason(Request $request){
+        $complaint_type = $request->complaint_type ?? '';
+        $selected = $request->selected ?? '';
+        $reasons = ServiceComplaintReason::whereHas('service_bill_complaint_type', function ($query) use ($complaint_type) {
+            if (!empty($complaint_type)) {
+                $query->where('service_bill_complaint_type_name', $complaint_type);
+            }
+        })->get();
+        $html = '<option value="">Select Reasons</option>';
+        if(count($reasons) > 0){
+            foreach($reasons as $reason){
+                $selected_text = $selected == $reason->service_complaint_reasons ? 'selected' : '';
+                $html .= '<option value="' . htmlspecialchars($reason->service_complaint_reasons, ENT_QUOTES, 'UTF-8') . '" ' . $selected_text . '>' . 
+                 htmlspecialchars($reason->service_complaint_reasons ?? '', ENT_QUOTES, 'UTF-8') . 
+                 '</option>';
+
+            }
+        }
+        return response()->json(['status' => true , 'html' => $html]);
+    }
+
+    // check complaint type and reason is allready exist or not 
+    public function checkServiceBillComplaintType(Request $request){
+        $sub_category_id = $request->sub_category_id ?? '';
+        $complaint_type = $request->complaint_type ?? '';
+        
+        $serviceBillComplaintType = ServiceBillComplaintType::where('service_bill_complaint_type_name' , $complaint_type)->get() ?? '';
+        if(isset($sub_category_id) && isset($serviceBillComplaintType)){
+            $find = '';
+            foreach($serviceBillComplaintType as $serviceBillComplaint){
+               $find = ServiceGroupComplaint::where(['subcategory_id' => $sub_category_id , 'service_bill_complaint_id' => $serviceBillComplaint->id])->first() ?? '';
+               if(isset($find) && $find != ''){
+                break;
+               }
+            }
+            if(isset($find) && $find != ''){
+                $id = $find->service_bill_complaint_id ?? '';
+                $url = route('service-bills-complaints-type.edit', encrypt($id));
+                return response()->json(['status' => true , 'url' => $url]);
+            }
+        }
+        return response()->json(['status' => false , 'url' => '']);
     }
 }

@@ -168,10 +168,10 @@ class MobileUserLoginDetailsController extends Controller
                 }
             })
             ->addColumn('multi_login', function ($data) {
-                if ($data['multi_login'] == '0') {
-                    return '<span class="badge badge-danger multi_login_class" data-id="' . $data['user_id'] . '" data-multi="' . $data['multi_login'] . '">Not Allowed</span>';
-                } elseif ($data['multi_login'] == '1') {
-                    return '<span class="badge badge-info multi_login_class" data-id="' . $data['user_id'] . '" data-multi="' . $data['multi_login'] . '">Allowed</span>';
+                if ($data['unique_id'] == NULL) {
+                    return 'No UUID';
+                } else{
+                    return '<span class="badge badge-danger multi_login_class" data-id="' . $data['user_id'] . '" data-multi="' . $data['multi_login'] . '">Remove UUID</span>';
                 }
             })
             ->addColumn('first_login_date', function ($data) {
@@ -197,20 +197,10 @@ class MobileUserLoginDetailsController extends Controller
 
     public function user_app_details_multi_login(Request $request)
     {
-        if($request->ip() != '111.118.252.250') {
-            return view('work_in_progress');
-        }
         $user_id = $request->user_id;
-        $multi_login = $request->multi_login;
         $user = MobileUserLoginDetails::where('user_id', $user_id)->first();
-        if($multi_login == 0){
-            $user->multi_login = '1';
-            $msg = 'Multi Login Allowed Successfully';
-        }else{
-            $user->multi_login = '0';
-            $msg = 'Multi Login Stopped Allowed Successfully';
-        }
+        $user->unique_id = NULL;
         $user->save();
-        return response()->json(['status' => 'success', 'message' => $msg]);
+        return response()->json(['status' => 'success', 'message' => 'Removed UUID Successfully.']);
     }
 }

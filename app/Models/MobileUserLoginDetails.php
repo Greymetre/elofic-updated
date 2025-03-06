@@ -18,6 +18,8 @@ class MobileUserLoginDetails extends Model
         'app_version', 
         'device_type', 
         'device_name', 
+        'unique_id',
+        'multi_login',
         'first_login_date', 
         'last_login_date',
         'login_status',

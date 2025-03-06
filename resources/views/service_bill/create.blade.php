@@ -287,15 +287,12 @@ body table td {
                            <label class="col-form-label" for="complaint_type">Complaint Type</label>
                            <select name="complaint_type" id="complaint_type" class="select2">
                               <option value="">Select Complaint Type</option>
-                              <option value="Auto ON-OFF" {{($service_bill && $service_bill->complaint_type == 'Auto ON-OFF')?'selected':''}}>Auto ON-OFF</option>
-                              <option value="Body Current" {{($service_bill && $service_bill->complaint_type == 'Body Current')?'selected':''}}>Body Current</option>
-                              <option value="Body Damage" {{($service_bill && $service_bill->complaint_type == 'Body Damage')?'selected':''}}>Body Damage</option>
-                              <option value="Fan Does Not Start" {{($service_bill && $service_bill->complaint_type == 'Fan Does Not Start')?'selected':''}}>Fan Does Not Start</option>
-                              <option value="Fan Running Slow" {{($service_bill && $service_bill->complaint_type == 'Fan Running Slow')?'selected':''}}>Fan Running Slow</option>
-                              <option value="Fan Wobbling" {{($service_bill && $service_bill->complaint_type == 'Fan Wobbling')?'selected':''}}>Fan Wobbling</option>
-                              <option value="Noise Problem" {{($service_bill && $service_bill->complaint_type == 'Noise Problem')?'selected':''}}>Noise Problem</option>
-                              <option value="Oscillation Issue" {{($service_bill && $service_bill->complaint_type == 'Oscillation Issue')?'selected':''}}>Oscillation Issue</option>
-                              <option value="Poor Flow Of Air" {{($service_bill && $service_bill->complaint_type == 'Poor Flow Of Air')?'selected':''}}>Poor Flow Of Air</option>
+                               @if(count($service_bill_complaint) > 0)
+                                 @foreach($service_bill_complaint as $complaint_type)
+                                       <option value="{{$complaint_type->service_bill_complaint_type->service_bill_complaint_type_name ?? ''}}" 
+                                           data-complaint-id="{{ $complaint_type->service_bill_complaint_type->id ?? '' }}" {{($service_bill && $service_bill->complaint_type == $complaint_type->service_bill_complaint_type->service_bill_complaint_type_name)?'selected':''}}>{{$complaint_type->service_bill_complaint_type->service_bill_complaint_type_name ?? ''}}</option>
+                                 @endforeach
+                              @endif
                            </select>
                         </div>
                      </div>
@@ -304,11 +301,6 @@ body table td {
                            <label for="complaint_reason">Complaint Reason</label>
                            <select name="complaint_reason" id="complaint_reason" class="select2">
                               <option value="">Select Complaint Reason</option>
-                              <option value="Stator Dead" {{($service_bill && $service_bill->complaint_reason == 'Stator Dead')?'selected':''}}>Stator Dead</option>
-                              <option value="PCB Burn" {{($service_bill && $service_bill->complaint_reason == 'PCB Burn')?'selected':''}}>PCB Burn</option>
-                              <option value="CutOff Issue" {{($service_bill && $service_bill->complaint_reason == 'CutOff Issue')?'selected':''}}>CutOff Issue</option>
-                              <option value="Loose Connection" {{($service_bill && $service_bill->complaint_reason == 'Loose Connection')?'selected':''}}>Loose Connection</option>
-                              <option value="Low Voltage" {{($service_bill && $service_bill->complaint_reason == 'Low Voltage')?'selected':''}}>Low Voltage</option>
                            </select>
                         </div>
                      </div>
@@ -836,6 +828,10 @@ body table td {
       });
 
       $(document).ready(function() {
+         var selected = "{{ $service_bill->complaint_reason }}";
+         if(selected != null && selected != ''){
+            getServiceBillReason();
+         }
          // $(".chargety").trigger("change");
          $('#storeServiceBillData').validate({
            rules:{
@@ -1089,5 +1085,37 @@ body table td {
             $(this).closest('.col-md-2').find('.file-count').text(fileCount);
          });
       });
+
+      // get service bill reasons
+      $(document).on('change' , '#complaint_type' , function(){
+
+         getServiceBillReason();
+      })
+
+      function getServiceBillReason(){
+         var complaint_type = $('#complaint_type').val();
+         var selected = "{{ $service_bill->complaint_reason }}";
+         if(complaint_type != null && complaint_type != ''){
+             $("#complaint_reason").empty();
+             $.ajax({
+                 url: "{{ url('getServiceBillReason') }}",
+                 dataType: "json",
+                 type: "POST",
+                 data: {
+                     _token: "{{ csrf_token() }}",
+                     complaint_type: complaint_type,
+                     selected : selected
+                 },
+                 success: function(res) {
+                     if (res.status === true) {
+                         $("#complaint_reason").html(res.html);
+                     }
+                 },
+                 error: function(xhr, status, error) {
+                     console.error("Error fetching service charge types:", error);
+                 }
+             });
+         }
+      }
    </script>
 </x-app-layout>
