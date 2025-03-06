@@ -188,6 +188,11 @@ class User extends Authenticatable implements HasMedia
         return $this->hasOne(Attendance::class, 'user_id', 'id');
     }
 
+    public function resignation()
+    {
+        return $this->hasOne(Resignation::class, 'user_id', 'id');
+    }
+
     public function all_attendance_details()
     {
         return $this->hasMany(Attendance::class);

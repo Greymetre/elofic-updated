@@ -110,6 +110,7 @@
               <th>Emp Code</th>
               <th>{!! trans('panel.global.name') !!}</th>
               <th>Designation</th>
+              <th>WhatsApp</th>
               <th>{!! trans('panel.global.mobile') !!}</th>
               <th>{!! trans('panel.global.email') !!}</th>
               <th>Reporting Person</th>
@@ -197,6 +198,13 @@
           {
             data: 'getdesignation.designation_name',
             name: 'getdesignation.designation_name',
+            "defaultContent": '',
+            orderable: false,
+            searchable: false
+          },
+          {
+            data: 'wahtsappmobile',
+            name: 'wahtsappmobile',
             "defaultContent": '',
             orderable: false,
             searchable: false

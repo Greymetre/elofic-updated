@@ -10,6 +10,7 @@ class PlannedSOP extends Model
     use HasFactory;
 
     protected $fillable = [
+        'order_id',
         'branch_id',
         'planning_month',
         'product_id',
@@ -22,6 +23,7 @@ class PlannedSOP extends Model
         'sku_unit_price',
         's_op_val',
         'top_sku',
+        'status',
         'created_by',
     ];
 

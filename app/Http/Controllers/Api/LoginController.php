@@ -101,8 +101,10 @@ class LoginController extends Controller
 
                 $checkLastLogin = MobileUserLoginDetails::where('user_id', $user['id'])->first();
                 if ($checkLastLogin) {
+                    // if($checkLastLogin->device_name != $request['device_name']){
+                    //     return response()->json(['status' => 'error', 'message' =>  'You can not login from multiple devices'], $this->noContent);
+                    // }
                     MobileUserLoginDetails::updateOrCreate(['user_id' => $user['id']], [
-                        'user_id'   =>  $user['id'],
                         'app_version'   =>  $request['app_version'],
                         'device_name'   =>  $request['device_name'],
                         'last_login_date'   =>  Carbon::now(),
@@ -111,7 +113,6 @@ class LoginController extends Controller
                     ]);
                 } else {
                     MobileUserLoginDetails::updateOrCreate(['user_id' => $user['id']], [
-                        'user_id'   =>  $user['id'],
                         'app_version'   =>  $request['app_version'],
                         'device_name'   =>  $request['device_name'],
                         'first_login_date'   =>  Carbon::now(),
@@ -180,7 +181,6 @@ class LoginController extends Controller
             $user = $request->user();
             if ($request->user()->token()->revoke()) {
                 MobileUserLoginDetails::updateOrCreate(['user_id' => $user->id], [
-                    'user_id'   =>  $user->id,
                     'login_status'   =>  '0',
                 ]);
                 $this->users->where('id', $user->id)->update([

@@ -1,4 +1,12 @@
 <x-app-layout>
+  <style>
+    #copyText {
+      cursor: pointer;
+      font-weight: 800;
+      color: #000;
+      text-shadow: 0 0 3px #fff;
+    }
+  </style>
   <div class="row">
     <div class="col-md-12">
       <div class="card">
@@ -6,36 +14,16 @@
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
-          <h4 class="card-title ">Market Intelligence
+          <h4 class="card-title ">Service Complaint Types {!! trans('panel.global.list') !!}
             <span class="">
               <div class="btn-group header-frm-btn">
-                @if(auth()->user()->can('market_intelligence_report_download'))
-                <form method="GET" action="{{ route('market_intelligences.download') }}">
-                  <div class="d-flex flex-wrap flex-row">
-
-                    <div class="p-2" style="width:200px;">
-                      <select class="selectpicker" name="division_id" id="division_id" data-style="select-with-transition" title="Select Division" required>
-                        @if(@isset($divisions ))
-                        @foreach($divisions as $division)
-                        <option value="{!! $division['id'] !!}" {{ old( 'division_id') == $division->id ? 'selected' : '' }}>{!! $division['division_name'] !!}</option>
-                        @endforeach
-                        @endif
-                      </select>
-                    </div>
-                    <div class="p-2"><button class="btn btn-just-icon btn-theme" id="button_download" title="{!!  trans('panel.global.download') !!} Market Intelligence"><i class="material-icons">cloud_download</i></button></div>
-                  </div>
-                </form>
-                @endif
                 <div class="next-btn">
-                  <!--   @if(auth()->user()->can('market_intelligence_create'))
-                  <a href="{{ route('market_intelligences.create') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.add') !!} Field"><i class="material-icons">add_circle</i></a>
-
-                  @endif -->
-                </div>
+              </div>
               </div>
             </span>
           </h4>
         </div>
+
         <div class="card-body">
           @if(count($errors) > 0)
           <div class="alert alert-danger">
@@ -49,6 +37,26 @@
             </span>
           </div>
           @endif
+          @if(session()->has('message_success'))
+          <div class="alert alert-success">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <i class="material-icons">close</i>
+            </button>
+            <span>
+              {!!session()->get('message_success') !!}
+            </span>
+          </div>
+          @endif
+          @if(session()->has('message_error'))
+          <div class="alert alert-danger">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <i class="material-icons">close</i>
+            </button>
+            <span>
+              {!!session()->get('message_error') !!}
+            </span>
+          </div>
+          @endif
           <div class="alert " style="display: none;">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
               <i class="material-icons">close</i>
@@ -56,16 +64,13 @@
             <span class="message"></span>
           </div>
           <div class="table-responsive">
-            <table id="getPumpSR" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
-              <thead class="text-primary">
+            <table id="getscheme" class="table table-striped- table-bschemeed table-hover table-checkable responsive no-wrap">
+              <thead class=" text-primary">
                 <th>{!! trans('panel.global.no') !!}</th>
-                <th>Title</th>
-                <th>Division</th>
-                <th>Created By</th>
-                <th>Uploaded Image</th>
-                <th>{!! trans('panel.global.action') !!}</th>
+                <!-- <th>{!! trans('panel.global.action') !!}</th> -->
+                <th>Complaint Type</th>
+                <th>Product Group</th>
               </thead>
-
               <tbody>
               </tbody>
             </table>
@@ -74,7 +79,6 @@
       </div>
     </div>
   </div>
-
   <script src="{{ url('/').'/'.asset('assets/js/jquery.custom.js') }}"></script>
   <script type="text/javascript">
     $(function() {
@@ -83,62 +87,43 @@
           'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
       });
-      var table = $('#getPumpSR').DataTable({
+      var table = $('#getscheme').DataTable({
         processing: true,
         serverSide: true,
         "order": [
           [0, 'desc']
         ],
-        ajax: {
-          url: "{{ route('reports.marketIntelligence') }}",
-          data: function(d) {
-            d.division_id = $('#division_id').val()
-          }
-        },
+        "ajax": "{{ route('getServiceComplaintType') }}",
         columns: [{
             data: 'DT_RowIndex',
             name: 'DT_RowIndex',
             orderable: false,
             searchable: false
           },
+          // {
+          //   data: 'action',
+          //   name: 'action',
+          //   "defaultContent": '',
+          //   className: 'text-center',
+          //   orderable: false,
+          //   searchable: false
+          // },
           {
-            data: 'title',
-            name: 'title',
+            data: 'service_bill_complaint_type_name',
+            name: 'service_bill_complaint_type_name',
             orderable: false,
-            searchable: false
+            "defaultContent": ''
           },
           {
-            data: 'division.division_name',
-            name: 'division.division_name',
+            data: 'subcategory',
+            name: 'subcategory',
             orderable: false,
-            searchable: false
-          },
-          {
-            data: 'createdbyname.name',
-            name: 'createdbyname.name',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'uploaded_image',
-            name: 'uploaded_image',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'action',
-            name: 'action',
             "defaultContent": ''
           }
         ]
       });
 
-      $('#division_id').change(function() {
-        table.draw();
-      });
-
-
-      $('body').on('click', '.is_active', function() {
+      $('body').on('click', '.activeRecord', function() {
         var id = $(this).attr("id");
         var active = $(this).attr("value");
         var status = '';
@@ -152,7 +137,7 @@
           return false;
         }
         $.ajax({
-          url: "{{ url('fields-active') }}",
+          url: "{{ url('schemes-active') }}",
           type: 'POST',
           data: {
             _token: token,
@@ -173,7 +158,6 @@
         });
       });
 
-
       $('body').on('click', '.delete', function() {
         var id = $(this).attr("value");
         var token = $("meta[name='csrf-token']").attr("content");
@@ -181,13 +165,14 @@
           return false;
         }
         $.ajax({
-          url: "{{ url('market_intelligences') }}" + '/' + id,
+          url: "{{ url('schemes') }}" + '/' + id,
           type: 'DELETE',
           data: {
             _token: token,
             id: id
           },
           success: function(data) {
+            $('.message').empty();
             $('.alert').show();
             if (data.status == 'success') {
               $('.alert').addClass("alert-success");
@@ -200,6 +185,32 @@
         });
       });
 
+    });
+
+    $(document).ready(function() {
+      $("#copyText").click(function() {
+        var textToCopy = $("#copyText").text();
+        var tempInput = $("<input>");
+        $("body").append(tempInput);
+        tempInput.val(textToCopy).select();
+        document.execCommand("copy");
+        tempInput.remove();
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-end",
+          showConfirmButton: false,
+          timer: 4000,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
+          }
+        });
+        Toast.fire({
+          icon: "success",
+          title: "Service Bill number copied to clipboard: " + textToCopy
+        });
+      });
     });
   </script>
 </x-app-layout>

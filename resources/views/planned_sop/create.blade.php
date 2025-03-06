@@ -10,7 +10,7 @@
             <span class="pull-right">
               <div class="btn-group">
                 <!-- @if(auth()->user()->can(['product_access'])) -->
-                <a href="{{ url('planned-sop') }}" class="btn btn-just-icon btn-theme" title="{!! trans('panel.product.title_singular') !!}{!! trans('panel.global.list') !!}"><i class="material-icons">next_plan</i></a>
+                <a href="{{ url('planned-sop') }}" class="btn btn-just-icon btn-theme" title="Planned S&OP List"><i class="material-icons">next_plan</i></a>
                 <!-- @endif -->
               </div>
             </span>
@@ -30,7 +30,7 @@
           </div>
           @endif
           {!! Form::model($plannedsop,[
-          'route' => $plannedsop->exists ? ['planned-sop.update', encrypt($planned-sop->id) ] : 'planned-sop.store',
+          'route' => $plannedsop->exists ? ['planned-sop.update', encrypt($plannedsop->id) ] : 'planned-sop.store',
           'method' => $plannedsop->exists ? 'PUT' : 'POST',
           'id' => 'createsopForm',
           'files'=>true
@@ -98,25 +98,28 @@
                         <thead>
                             <tr class="text-white">
                                 <th class="text-center" style="width: 50px !important;">#</th>
-                                <th class="text-center" style="width: 500px !important;">{!! trans('panel.global.products') !!}</th>
-                                <th class="text-center" style="width: 500px !important;">Product Group</th>
-                                <th class="text-center" style="width: 500px !important;">Product Code</th>
-                                <th class="text-center" style="width: 500px !important;">Product Description</th>
-                                <th class="text-center" style="width: 500px !important;">Opening stock as on 1st (Qty.)</th>
-                                <th class="text-center" style="width: 500px !important;">S&OP Plan for Next running month (M+1) (Qty.)</th>
-                                <th class="text-center" style="width: 500px !important;">Budget for the month (Qty.)</th>
-                                <th class="text-center" style="width: 500px !important;">LM Sale (Qty.)</th>
-                                <th class="text-center" style="width: 500px !important;">L3M Avg Sale (Qty.)</th>
-                                <th class="text-center" style="width: 500px !important;">LY same month sale (Qty.)</th>
-                                <th class="text-center" style="width: 500px !important;">SKU Unit Price</th>
-                                <th class="text-center" style="width: 500px !important;">S&OP Val_L (Unit Price *Qty.)</th>
-                                <th class="text-center" style="width: 500px !important;">TOP 20 SKU for the Branch (*)</th>
-                                <th class="text-center" style="width: 250px !important;">Actions</th>
+                                <th class="text-center"><div style="width: 50px !important;">Actions</div></th>
+                                <th class="text-center" >{!! trans('panel.global.products') !!}</th>
+                                <th class="text-center" ><div style="width: 200px !important;">Product Group<div></th>
+                                <th class="text-center" ><div style="width: 200px !important;">Product Code</div></th>
+                                <th class="text-center"><div style="width: 200px !important;">Product Description<div></th>
+                                <th class="text-center"><div style="width: 200px !important;">Opening stock as on 1st (Qty.)</div></th>
+                                <th class="text-center" ><div style="width: 200px !important;">S&OP Plan for Next running month (M+1) (Qty.)</div></th>
+                                <th class="text-center"><div style="width: 200px !important;">Budget for the month (Qty.)</div></th>
+                                <th class="text-center" ><div style="width: 200px !important;">LM Sale (Qty.)</div></th>
+                                <th class="text-center" ><div style="width: 200px !important;">L3M Avg Sale (Qty.)</div></th>
+                                <th class="text-center"><div style="width: 200px !important;">LY same month sale (Qty.)</div></th>
+                                <th class="text-center"><div style="width: 200px !important;">SKU Unit Price</div></th>
+                                <th class="text-center"><div style="width: 200px !important;">S&OP Val_L (Unit Price *Qty.)</div></th>
+                                <th class="text-center" ><div style="width: 200px !important;">TOP 20 SKU for the Branch (*)</div></th>
                             </tr>
                         </thead>
                         <tbody id="sopTableBody">
                                <tr id='addr0' value="1">
                                 <td>1</td>
+                                 <td class="td-actions text-center">
+                                    <!-- <button type="button" class="btn btn-danger btn-xs remove-row"><i class="fa fa-minus"></i></button> -->
+                                </td>
                                 <td>
                                     <div class="input_section">
                                         <div class="form-group has-default bmd-form-group">
@@ -275,9 +278,7 @@
                                       </div>
                                     </div>
                                 </td>
-                                <td class="td-actions text-center">
-                                    <!-- <button type="button" class="btn btn-danger btn-xs remove-row"><i class="fa fa-minus"></i></button> -->
-                                </td>
+                               
                             </tr>
                         </tbody>
                     </table>
@@ -300,217 +301,7 @@
          </div>
 
 
-        <!-- <div class="row">
-            <div class="col-md-4">
-              <div class="input_section">
-                <label class="col-form-label">Branch Name<span class="text-danger"> *</span></label>
-                <div class="form-group has-default bmd-form-group">
-                  <select class="form-select select2" name="branch_id" id="branch_id" >
-                         <option value=''>Select Branch</option>
-                         @foreach($branches as $branch)
-                              <option value="{{ $branch->id }}" >{{ $branch->branch_name}}</option>
-                         @endforeach
-                  </select>
-                  @if ($errors->has('product_no'))
-                  <div class="error">
-                    <p class="text-danger">{{ $errors->first('product_no') }}</p>
-                  </div>
-                  @endif
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="input_section">
-                <label class="col-form-label">Product Name<span class="text-danger"> *</span></label>
-                <div class="form-group has-default bmd-form-group">
-                  <select class="form-select select2" name="product_id" id="product_id" >
-                         <option value=''>Select Product</option>
-                         @foreach($products as $product)
-                              <option value="{{ $product->id }}" >{{ $product->product_name}}</option>
-                         @endforeach
-                  </select>
-                  @if ($errors->has('product_no'))
-                  <div class="error">
-                    <p class="text-danger">{{ $errors->first('product_no') }}</p>
-                  </div>
-                  @endif
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="input_section">
-                <label class="col-form-label">Product Group Name<span class="text-danger"> *</span></label>
-                <div class="form-group has-default bmd-form-group">
-                <input type="text" class="form-control" name="product_group_name" id="product_group_name" readonly>
-                  @if ($errors->has('product_group_name'))
-                  <div class="error">
-                    <p class="text-danger">{{ $errors->first('product_group_name') }}</p>
-                  </div>
-                  @endif
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="input_section">
-                <label class="col-form-label">Division<span class="text-danger"> *</span></label>
-                <div class="form-group has-default bmd-form-group">
-                <input type="text" class="form-control" name="product_division" id="product_division" readonly>
-                  @if ($errors->has('product_division'))
-                  <div class="error">
-                    <p class="text-danger">{{ $errors->first('product_division') }}</p>
-                  </div>
-                  @endif
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="input_section">
-                <label class="col-form-label">Product Code<span class="text-danger"> *</span></label>
-                <div class="form-group has-default bmd-form-group">
-                <input type="text" class="form-control" name="product_code" id="product_code" readonly>
-                  @if ($errors->has('product_code'))
-                  <div class="error">
-                    <p class="text-danger">{{ $errors->first('product_code') }}</p>
-                  </div>
-                  @endif
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="input_section">
-                <label class="col-form-label">Product Description<span class="text-danger"> *</span></label>
-                <div class="form-group has-default bmd-form-group">
-                <input type="text" class="form-control" name="product_description" id="product_description" readonly>
-                  @if ($errors->has('product_description'))
-                  <div class="error">
-                    <p class="text-danger">{{ $errors->first('product_description') }}</p>
-                  </div>
-                  @endif
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="input_section">
-                <label class="col-form-label">Opening stock as on 1st (Qty.)<span class="text-danger"> *</span></label>
-                <div class="form-group has-default bmd-form-group">
-                <input type="text" class="form-control" name="opening_stock" id="opening_stock" readonly>
-                  @if ($errors->has('opening_stock'))
-                  <div class="error">
-                    <p class="text-danger">{{ $errors->first('opening_stock') }}</p>
-                  </div>
-                  @endif
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="input_section">
-                <label class="col-form-label">S&OP Plan for Next running month (M+1) (Qty.)<span class="text-danger"> *</span></label>
-                <div class="form-group has-default bmd-form-group">
-                <input type="number" class="form-control" name="plan_next_month" id="plan_next_month">
-                  @if ($errors->has('plan_next_month'))
-                  <div class="error">
-                    <p class="text-danger">{{ $errors->first('plan_next_month') }}</p>
-                  </div>
-                  @endif
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="input_section">
-                <label class="col-form-label">Budget for the month (Qty.)<span class="text-danger"> *</span></label>
-                <div class="form-group has-default bmd-form-group">
-                <input type="number" class="form-control" name="budget_for_month" id="budget_for_month" readonly>
-                  @if ($errors->has('budget_for_month'))
-                  <div class="error">
-                    <p class="text-danger">{{ $errors->first('budget_for_month') }}</p>
-                  </div>
-                  @endif
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="input_section">
-                <label class="col-form-label">LM Sale (Qty.)<span class="text-danger"> *</span></label>
-                <div class="form-group has-default bmd-form-group">
-                <input type="number" class="form-control" name="last_month_sale" id="last_month_sale" readonly>
-                  @if ($errors->has('last_month_sale'))
-                  <div class="error">
-                    <p class="text-danger">{{ $errors->first('last_month_sale') }}</p>
-                  </div>
-                  @endif
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="input_section">
-                <label class="col-form-label">L3M Avg Sale (Qty.)<span class="text-danger"> *</span></label>
-                <div class="form-group has-default bmd-form-group">
-                <input type="number" class="form-control" name="last_three_month_avg" id="last_three_month_avg" readonly>
-                  @if ($errors->has('last_three_month_avg'))
-                  <div class="error">
-                    <p class="text-danger">{{ $errors->first('last_three_month_avg') }}</p>
-                  </div>
-                  @endif
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="input_section">
-                <label class="col-form-label">LY same month sale (Qty.)<span class="text-danger"> *</span></label>
-                <div class="form-group has-default bmd-form-group">
-                <input type="number" class="form-control" name="last_year_month_sale" id="last_year_month_sale" readonly>
-                  @if ($errors->has('last_year_month_sale'))
-                  <div class="error">
-                    <p class="text-danger">{{ $errors->first('last_year_month_sale') }}</p>
-                  </div>
-                  @endif
-                </div>
-              </div>
-            </div>
-             <div class="col-md-4">
-              <div class="input_section">
-                <label class="col-form-label">SKU Unit Price<span class="text-danger"> *</span></label>
-                <div class="form-group has-default bmd-form-group">
-                <input type="number" class="form-control" name="sku_unit_price" id="sku_unit_price" readonly>
-                  @if ($errors->has('sku_unit_price'))
-                  <div class="error">
-                    <p class="text-danger">{{ $errors->first('sku_unit_price') }}</p>
-                  </div>
-                  @endif
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="input_section">
-                <label class="col-form-label">S&OP Val_L (Unit Price *Qty.)<span class="text-danger"> *</span></label>
-                <div class="form-group has-default bmd-form-group">
-                <input type="number" class="form-control" name="s_op_val" id="s_op_val" readonly>
-                  @if ($errors->has('s_op_val'))
-                  <div class="error">
-                    <p class="text-danger">{{ $errors->first('s_op_val') }}</p>
-                  </div>
-                  @endif
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="input_section">
-                <label class="col-form-label">TOP 20 SKU for the Branch (*)<span class="text-danger"> *</span></label>
-                <div class="form-group has-default bmd-form-group">
-                <input type="text" class="form-control" name="top_sku" id="top_sku" readonly>
-                  @if ($errors->has('top_sku'))
-                  <div class="error">
-                    <p class="text-danger">{{ $errors->first('top_sku') }}</p>
-                  </div>
-                  @endif
-                </div>
-              </div>
-            </div>
-          </div> 
-          <div class="pull-right col-md-12">
-            {{ Form::submit('Submit', array('class' => 'btn btn-theme pull-right')) }}
-          </div>
-        </div> -->
+       
          <div class="pull-right col-md-12">
             {{ Form::submit('Submit', array('class' => 'btn btn-theme pull-right')) }}
           </div>
@@ -531,6 +322,9 @@
           var newRow = `
               <tr id='addr${counter}' value="${counter}">
                   <td class="row-count">${counter}</td>
+                  <td class="td-actions text-center">
+                      <button type="button" class="btn btn-danger btn-xs remove-row"><i class="fa fa-minus"></i></button>
+                  </td>
                   <td>
                       <div class="input_section">
                           <div class="form-group has-default bmd-form-group">
@@ -590,9 +384,7 @@
                           <div class="form-group has-default bmd-form-group"><input type="text" class="form-control top_sku" name="top_sku[]" readonly> </div>
                       </div>
                   </td>
-                  <td class="td-actions text-center">
-                      <button type="button" class="btn btn-danger btn-xs remove-row"><i class="fa fa-minus"></i></button>
-                  </td>
+
               </tr>`;
 
           $('#sopTableBody').append(newRow);
@@ -640,40 +432,47 @@
         $(".ui-datepicker-calendar").hide(); // Hide date picker
     });
 
-    $(document).on("change", ".product", function() {
-        var $row = $(this).closest("tr"); // Get the current row
-        var product_id = $(this).val();
+    // $(document).on("change", ".product", function() {
+      
+    //     var $row = $(this).closest("tr"); // Get the current row
+    //     var product_id = $(this).val();
         
-        if (product_id != null && product_id != '') {
-            $.ajax({
-                url: "{{ url('getProductInfo') }}",
-                dataType: "json",
-                type: "POST",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    product_id: product_id
-                },
-                success: function(res) {
-                    $row.find(".product_description").val(res.product_description);
-                    $row.find(".product_division").val(res.categories.category_name);
-                    $row.find(".product_code").val(res.product_code);
-                    $row.find(".product_group_name").val(res.subcategories.subcategory_name);
-                    $row.find(".budget_for_month").val(res.budget_for_month);
-                    $row.find(".top_sku").val(res.top_sku);
-                    $row.find(".sku_unit_price").val(res.price).trigger('change');
+    //     if (product_id != null && product_id != '') {
+    //         $.ajax({
+    //             url: "{{ url('getProductInfo') }}",
+    //             dataType: "json",
+    //             type: "POST",
+    //             data: {
+    //                 _token: "{{ csrf_token() }}",
+    //                 product_id: product_id
+    //             },
+    //             success: function(res) {
+    //                 $row.find(".product_description").val(res.product_description);
+    //                 $row.find(".product_division").val(res.categories.category_name);
+    //                 $row.find(".product_code").val(res.product_code);
+    //                 $row.find(".product_group_name").val(res.subcategories.subcategory_name);
+    //                 $row.find(".budget_for_month").val(res.budget_for_month);
+    //                 $row.find(".top_sku").val(res.top_sku);
+    //                 $row.find(".sku_unit_price").val(res.price).trigger('change');
                     
-                    // Set read-only fields
-                    $row.find(".product_group_name, .product_description, .sku_unit_price, .product_division, .product_code, .budget_for_month, .top_sku").prop('readonly', true);
-                }
-            });
-        } else {
-            // Clear only the fields in this row
-            $row.find(".product_description, .product_division, .product_code, .product_group_name, .budget_for_month, .top_sku, .sku_unit_price").val('').trigger('change');
-            $row.find(".product_group_name, .product_description, .sku_unit_price, .product_division, .product_code, .budget_for_month, .top_sku").prop('readonly', true);
-        }
-    });
+    //                 // Set read-only fields
+    //                 $row.find(".product_group_name, .product_description, .sku_unit_price, .product_division, .product_code, .budget_for_month, .top_sku").prop('readonly', true);
+    //             }
+    //         });
+    //     } else {
+    //         // Clear only the fields in this row
+    //         $row.find(".product_description, .product_division, .product_code, .product_group_name, .budget_for_month, .top_sku, .sku_unit_price").val('').trigger('change');
+    //         $row.find(".product_group_name, .product_description, .sku_unit_price, .product_division, .product_code, .budget_for_month, .top_sku").prop('readonly', true);
+    //     }
+    // });
    
     $(document).on("change", ".product", function() {
+        var branch_id = $("#branch_id").val(); 
+        if(branch_id == '' || branch_id == null ){
+            alert("Please select a Branch .");
+            $('.product').val('');
+            return ;
+        }
         var $row = $(this).closest("tr"); // Get the row of the changed select box
         var product_id = $(this).val();
 
@@ -722,6 +521,10 @@
             $row.find('.s_op_val').val('');
         }
     });
+
+    $(document).on('change', '#branch_id', function () {
+        
+    });
   });
 
   function getProductlist() {
@@ -758,11 +561,13 @@
      });
   }
 
+
   function getSaledata($row) {
       var product_id = $row.find(".product").val(); // Get product ID from the row
       var date = $("#start_month").val(); // Get product ID from the row
+      var branch_id = $("#branch_id").val(); // Get product ID from the row
 
-      if (product_id != null && product_id != '') {
+       if (product_id != null && product_id != '' && branch_id != '' && branch_id != null) {
           $.ajax({
               url: "{{ url('getSaledata') }}",
               dataType: "json",
@@ -770,7 +575,8 @@
               data: {
                   _token: "{{ csrf_token() }}",
                   product_id: product_id,
-                  date      : date
+                  date      : date,
+                  branch_id  : branch_id
               },
               success: function(res) {
                   $row.find(".last_month_sale").val(res.last_month_sale).prop('readonly', true);

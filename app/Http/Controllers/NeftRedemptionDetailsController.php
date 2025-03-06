@@ -93,8 +93,8 @@ class NeftRedemptionDetailsController extends Controller
                 $request->tds = 10;
             }
         }
-        NeftRedemptionDetails::create([
-            'redemption_id' => $request->id,
+        NeftRedemptionDetails::updateOrCreate([
+            'redemption_id' => $request->id,],[
             'utr_number' => $request->utr_number,
             'tds' => $request->tds,
             'remark' => $request->remark
@@ -113,6 +113,8 @@ class NeftRedemptionDetailsController extends Controller
                         $status = 'Success';
                     } elseif ($request->status == '4') {
                         $status = 'Fail';
+                    } elseif ($request->status == '0') {
+                        $status = 'Pendding';
                     }
                 } elseif ($redemption->redeem_mode == '1') {
                     if ($request->status == '1') {
@@ -123,6 +125,8 @@ class NeftRedemptionDetailsController extends Controller
                         $status = 'Dispatch';
                     } elseif ($request->status == '4') {
                         $status = 'Success';
+                    } elseif ($request->status == '0') {
+                        $status = 'Pendding';
                     }
                 }
             }

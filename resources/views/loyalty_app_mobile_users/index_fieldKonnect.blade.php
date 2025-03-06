@@ -1,4 +1,9 @@
 <x-app-layout>
+  <style>
+    .multi_login_class {
+      cursor: pointer;
+    }
+  </style>
   <div class="row">
     <div class="col-md-12">
       <div class="card">
@@ -29,14 +34,14 @@
                       <input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly>
                     </div>
                     <div class="p-2">
-                    @if(auth()->user()->can(['mobile_app_login_details_download']))
+                      @if(auth()->user()->can(['mobile_app_login_details_download']))
                       <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('panel.mobile_app_login.mobile_app_login_details_download') !!}" name="export_branch" value="true"><i class="material-icons">cloud_download</i></button>
-                    @endif
+                      @endif
                     </div>
-                    </div>
+                  </div>
                 </form>
                 <div class="next-btn">
-                  
+
                 </div>
               </div>
             </span>
@@ -89,6 +94,7 @@
                 <th>{!! trans('panel.mobile_app_login.first_login_date') !!}</th>
                 <th>{!! trans('panel.mobile_app_login.last_login_date') !!}</th>
                 <th>{!! trans('panel.mobile_app_login.login_status') !!}</th>
+                <th>Multi Login</th>
               </thead>
               <tbody>
               </tbody>
@@ -119,9 +125,9 @@
           'url': "{{ url('user_app_details/list') }}",
           'data': function(d) {
             d._token = token,
-            d.user_id = $('#user').val(),
-            d.start_date = $('#start_date').val(),
-            d.end_date = $('#end_date').val()
+              d.user_id = $('#user').val(),
+              d.start_date = $('#start_date').val(),
+              d.end_date = $('#end_date').val()
           }
         },
         columns: [{
@@ -139,31 +145,31 @@
           {
             data: 'user.mobile',
             name: 'user.mobile',
-            orderable: true, 
+            orderable: true,
             "defaultContent": ''
           },
           {
             data: 'user.getbranch.branch_name',
             name: 'user.getbranch.branch_name',
-            orderable: true, 
+            orderable: true,
             searchable: true,
             "defaultContent": ''
           },
           {
             data: 'app_version',
             name: 'app_version',
-            orderable: true, 
+            orderable: true,
             searchable: true,
             "defaultContent": ''
           },
           {
             data: 'device_name',
             name: 'device_name',
-            orderable: true, 
+            orderable: true,
             searchable: true,
             "defaultContent": ''
           },
-         
+
           {
             data: 'first_login_date',
             name: 'first_login_date',
@@ -184,20 +190,71 @@
             orderable: false,
             searchable: false,
             "defaultContent": ''
+          },
+          {
+            data: 'multi_login',
+            name: 'multi_login',
+            orderable: false,
+            searchable: false,
+            "defaultContent": ''
           }
         ]
       });
 
-    $('#user').change(function() {
-      table.draw();
-    });
+      $('#user').change(function() {
+        table.draw();
+      });
 
-    $('#start_date').change(function() {
-      table.draw();
-    });
-    $('#end_date').change(function() {
-      table.draw();
-    });
+      $('#start_date').change(function() {
+        table.draw();
+      });
+      $('#end_date').change(function() {
+        table.draw();
+      });
+
+      $(document).on('click', '.multi_login_class', function(e) {
+        var userId = $(this).attr('data-id');
+        var status = $(this).attr('data-multi');
+
+        if(status == 0){
+          var msg = 'You want to allow Multi Login ?';
+        }else{
+          var msg = 'You want to allow Single Login ?';
+        }
+
+        swal.fire({
+          title: "Are you sure?",
+          text: msg,
+          type: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#DD6B55",
+          confirmButtonText: "Yes, change it!",
+          closeOnConfirm: false
+        }).then(function(result) {
+          if (result.value) {
+            console.log(result.value);
+            $.ajax({
+              url: "{{ url('user_app_details/multi_login') }}",
+              type: "POST",
+              data: {
+                '_token': token,
+                'user_id': userId,
+                'multi_login': status
+              },
+              success: function(data) {
+                table.draw();
+                if (data.status == 'success') {
+                  swal.fire("Success!", data.message, "success");
+                } else {
+                  swal.fire("Error!", 'Please wait for some time, Working on it !!', "error");
+                }
+              }
+            });
+          } else {
+            swal.fire("Cancelled", "Your imaginary file is safe :)", "error");
+          }
+        });
+      });
 
     });
   </script>

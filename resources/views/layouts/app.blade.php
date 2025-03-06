@@ -784,6 +784,15 @@
                               </a>
                            </li>
                            @endif
+                           @if(auth()->user()->can(['customer_balance_confirmation_upload']))
+                           <li class="nav-link-btn {{ request()->is('customer_balance*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('customer_balance') }}">
+                                 <i class="material-icons icon">balance</i>
+                                 <span>Upload Balance Confirmation</span>
+                                 <div class="d-none mobile_hide">Upload Balance Confirmation</div>
+                              </a>
+                           </li>
+                           @endif
                            @if(auth()->user()->can(['distributor_access']))
                            <!-- <li class="nav-item {{ request()->is('distributors*') ? 'active' : '' }}">
                                  <a class="nav-link" href="{{ url('distributors') }}">
@@ -1017,7 +1026,6 @@
                            </li>
                            @endif
 
-                           <!-- @if(auth()->user()->can('ware_house_access')) -->
                            <li class="nav-link-btn {{ request()->is('planned-sop*') ? 'active' : '' }}">
                               <a class="hoveradd2" href="{{ url('planned-sop') }}">
                                  <i class="material-icons icon">warehouse</i>
@@ -1025,7 +1033,6 @@
                                  <div class="d-none mobile_hide"> Planned S&OP</div>
                               </a>
                            </li>
-                           <!-- @endif -->
                            @if(auth()->user()->can('stockdetails_access'))
                            <!-- <li class="nav-item {{ request()->is('production*') ? 'active' : '' }}">
                                  <a class="nav-link" href="{{ url('production') }}">
@@ -1439,6 +1446,13 @@
                         </a>
                      </li>
                      @endif
+                     <li class="nav-link-btn {{ request()->is('service-bills-complaints-type*') ? 'active' : '' }}">
+                        <a class="hoveradd2" href="{{ url('service-bills-complaints-type') }}">
+                           <i class="material-icons icon">account_balance_wallet</i>
+                           <span>Service Bills Complaints Type</span>
+                           <div class="d-none mobile_hide"> Service Bills Complaints Type</div>
+                        </a>
+                     </li>
                      @if(auth()->user()->can('claim_generation_access'))
                      <li class="nav-link-btn {{ request()->is('claim-generation*') ? 'active' : '' }}">
                         <a class="hoveradd2" href="{{ url('claim-generation') }}">

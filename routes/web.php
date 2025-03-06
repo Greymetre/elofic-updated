@@ -84,6 +84,7 @@ use App\Http\Controllers\SapStockController;
 use App\Http\Controllers\WareHouseController;
 use App\Http\Controllers\PlannedSOPController;
 use App\Http\Controllers\ClaimGenerationController;
+use App\Http\Controllers\ServiceBillComplaintType;
 
 /*
 |--------------------------------------------------------------------------
@@ -232,6 +233,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('customers-active', [CustomerController::class, 'active'])->name('customers.active');
     Route::any('customers-survey', [CustomerController::class, 'survey'])->name('customers.survey');
     Route::any('survey-download', [CustomerController::class, 'surveyDownload'])->name('survey-download');
+    Route::any('customer_balance', [CustomerController::class, 'customer_balance'])->name('customer_balance');
+    Route::any('customer_balance/update', [CustomerController::class, 'customer_balance_update'])->name('customer_balance.update');
+    Route::any('customer_balance/list', [CustomerController::class, 'customer_balance_list'])->name('customer_balance.list');
 
     //Ware House Routs
     Route::resource('ware_house', WareHouseController::class);
@@ -816,6 +820,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('user_app_details/login_list/download', [MobileUserLoginDetailsController::class, 'user_app_details_download'])->name('user_app_details.login_list.download');
 
     Route::post('user_app_details/list', [MobileUserLoginDetailsController::class, 'user_app_details_list'])->name('user_app_details.list');
+    Route::post('user_app_details/multi_login', [MobileUserLoginDetailsController::class, 'user_app_details_multi_login'])->name('user_app_details.multi_login');
 
     //Gift Category Route
     Route::resource('gift-categories', GiftCategoryController::class);
@@ -984,6 +989,10 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('claim-generation-export', [ClaimGenerationController::class , 'ClaimGenerationExport'])->name('claim-generation.export');
     Route::any('claim-generation-list-single', [ClaimGenerationController::class , 'getClaimsSingle'])->name('getClaimsSingle');
     Route::any('claim-generation-pdf/{id}', [ClaimGenerationController::class , 'claimGenerationPdf'])->name('claim-generation.pdf');
+
+    // service bill complaint type  
+    Route::resource('service-bills-complaints-type', ServiceBillComplaintType::class);
+    Route::any('service-bills-complaints-type-list', [ServiceBillComplaintType::class , 'getServiceComplaintType'])->name('getServiceComplaintType');
 });
 
 Route::any('getState', [AjaxController::class, 'getState']);
@@ -1107,6 +1116,11 @@ Route::get('/taskreminder', function () {
 
     Artisan::call('task:reminder');
 });
+
+Route::get('/dashboard/silver', function () {
+     return view('dashboard_silver');
+});
+
 
 
 require __DIR__ . '/auth.php';

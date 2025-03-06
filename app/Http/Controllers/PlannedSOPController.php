@@ -76,10 +76,14 @@ class PlannedSOPController extends Controller
         try{
             if(isset($request->planning_month)){
                $formatted_date = Carbon::createFromFormat('F Y', $request->planning_month)->startOfMonth();
+               $for_oder_id = $formatted_date->format("F/Y");
                $planning_month = $formatted_date->format("Y-m-d");
             }
-
+            $division = Category::find($request->product_division);
             foreach ($request->product_id as $key => $product) {
+                $total = PlannedSOP::latest('id')->value('id');
+                $formattedTotal = str_pad($total, 3, '0', STR_PAD_LEFT);
+                $order_id = strtoupper(substr($division->category_name, 0, 3)) . '/' . $for_oder_id . '/'. $formattedTotal;  
                 $this->plannedsop->updateOrCreate(
                     [
                         'planning_month' => $planning_month,
@@ -87,6 +91,7 @@ class PlannedSOPController extends Controller
                     ],
                     [
                         'branch_id'            => $request->branch_id ?? '',
+                        'order_id'             => $order_id ?? '',
                         'plan_next_month'      => $request->plan_next_month[$key] ?? '',
                         'opening_stock'        => $request->opening_stock[$key] ?? NULL,
                         'budget_for_month'     => $request->budget_for_month[$key] ?? NULL,
@@ -133,7 +138,16 @@ class PlannedSOPController extends Controller
      */
     public function edit($id)
     {
-        //
+        abort_if(Gate::denies('sop_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $id = decrypt($id);
+        $plannedsop = PlannedSOP::find($id);
+        if(!$plannedsop){
+          return redirect()->back()->with('message_danger', 'Record not found');
+        }
+        $branches = Branch::select('branch_name' , 'id')->get();
+        $divisions = Category::select('category_name' , 'id')->get();
+        $products = Product::where('active' , "Y")->select('product_name' , 'id')->get();
+        return view('planned_sop.edit' , compact('branches' , 'products' , 'divisions' , 'plannedsop'));
     }
 
     /**
@@ -145,7 +159,24 @@ class PlannedSOPController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        abort_if(Gate::denies('sop_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $id = decrypt($id);
+        $plannedsop = PlannedSOP::find($id);
+        if(!$plannedsop){
+          return redirect()->back()->with('message_danger', 'Record not found');
+        }
+        try{
+            if(isset($request->planning_month)){
+               $formatted_date = Carbon::createFromFormat('F Y', $request->planning_month)->startOfMonth();
+               $planning_month = $formatted_date->format("Y-m-d");
+               $request["planning_month"] = $planning_month;
+            }
+            $plannedsop->update($request->all());
+            return Redirect::to('planned-sop')->with('message_success', 'Planned S&OP Updated Sucessfully.');
+        }
+        catch(\Exception $e){
+            return redirect()->back()->withErrors($e->getMessage())->withInput();
+        }
     }
 
     /**
@@ -156,6 +187,13 @@ class PlannedSOPController extends Controller
      */
     public function destroy($id)
     {
-        //
+        abort_if(Gate::denies('sop_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $id = decrypt($id);
+        $plannedsop = PlannedSOP::find($id);
+        if(!$plannedsop){
+          return redirect()->back()->with('message_danger', 'Record not found');
+        }
+        $plannedsop->delete();
+        return redirect()->back()->with('message_success', 'Record deleted Sucessfully.');
     }
 }
