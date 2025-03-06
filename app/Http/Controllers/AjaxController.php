@@ -1422,8 +1422,8 @@ class AjaxController extends Controller
     public function getServiceProduct(Request $request)
     {
         if ($request->ajax()) {
-
-            $data = ServiceChargeProducts::where('charge_type_id', $request->charge_type_id)->where('division_id', $request->charge_cat_id)->get();
+            $categoryIds = explode(',', $request->pro_sub_cat);
+            $data = ServiceChargeProducts::where('charge_type_id', $request->charge_type_id)->where('division_id', $request->charge_cat_id)->whereIn('category_id' , $categoryIds)->get();
 
             return response()->json($data);
         }

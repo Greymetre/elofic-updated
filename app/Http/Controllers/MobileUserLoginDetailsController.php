@@ -167,6 +167,13 @@ class MobileUserLoginDetailsController extends Controller
                     return '<span class="badge badge-info">Login</span>';
                 }
             })
+            ->addColumn('multi_login', function ($data) {
+                if ($data['multi_login'] == '0') {
+                    return '<span class="badge badge-danger multi_login_class" data-id="' . $data['user_id'] . '" data-multi="' . $data['multi_login'] . '">Not Allowed</span>';
+                } elseif ($data['multi_login'] == '1') {
+                    return '<span class="badge badge-info multi_login_class" data-id="' . $data['user_id'] . '" data-multi="' . $data['multi_login'] . '">Allowed</span>';
+                }
+            })
             ->addColumn('first_login_date', function ($data) {
                 return $data->first_login_date ? date('d M y h:i A', strtotime($data->first_login_date)) : '';
             })
@@ -174,7 +181,7 @@ class MobileUserLoginDetailsController extends Controller
                 return $data->last_login_date ? date('d M y h:i A', strtotime($data->last_login_date)) : '';
             })
            
-            ->rawColumns(['action', 'contact_person', 'login_status1', 'last_login_date', 'first_login_date','branches'])
+            ->rawColumns(['action', 'contact_person', 'login_status1', 'last_login_date', 'first_login_date','branches', 'multi_login'])
             ->make(true);
     }
 
@@ -186,5 +193,24 @@ class MobileUserLoginDetailsController extends Controller
         ob_start();
 
         return Excel::download(new MobileAppLoginUsersFieldKonnectExport($request), 'mobile_app_login_userd.xlsx');
+    }
+
+    public function user_app_details_multi_login(Request $request)
+    {
+        if($request->ip() != '111.118.252.250') {
+            return view('work_in_progress');
+        }
+        $user_id = $request->user_id;
+        $multi_login = $request->multi_login;
+        $user = MobileUserLoginDetails::where('user_id', $user_id)->first();
+        if($multi_login == 0){
+            $user->multi_login = '1';
+            $msg = 'Multi Login Allowed Successfully';
+        }else{
+            $user->multi_login = '0';
+            $msg = 'Multi Login Stopped Allowed Successfully';
+        }
+        $user->save();
+        return response()->json(['status' => 'success', 'message' => $msg]);
     }
 }

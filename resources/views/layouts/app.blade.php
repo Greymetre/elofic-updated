@@ -1446,6 +1446,13 @@
                         </a>
                      </li>
                      @endif
+                     <li class="nav-link-btn {{ request()->is('service-bills-complaints-type*') ? 'active' : '' }}">
+                        <a class="hoveradd2" href="{{ url('service-bills-complaints-type') }}">
+                           <i class="material-icons icon">account_balance_wallet</i>
+                           <span>Service Bills Complaints Type</span>
+                           <div class="d-none mobile_hide"> Service Bills Complaints Type</div>
+                        </a>
+                     </li>
                      @if(auth()->user()->can('claim_generation_access'))
                      <li class="nav-link-btn {{ request()->is('claim-generation*') ? 'active' : '' }}">
                         <a class="hoveradd2" href="{{ url('claim-generation') }}">

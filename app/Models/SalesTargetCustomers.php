@@ -11,7 +11,7 @@ class SalesTargetCustomers extends Model
 
     protected $table = 'salestargetcustomers';
 
-    protected $fillable = [ 'customer_id','type','month' ,'year', 'target', 'achievement',
+    protected $fillable = [ 'customer_id', 'branch_id', 'div_id','type','month' ,'year', 'target', 'achievement',
             'achievement_percent','created_at', 'updated_at' ];
 
     public $timestamps = true;

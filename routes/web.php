@@ -84,6 +84,7 @@ use App\Http\Controllers\SapStockController;
 use App\Http\Controllers\WareHouseController;
 use App\Http\Controllers\PlannedSOPController;
 use App\Http\Controllers\ClaimGenerationController;
+use App\Http\Controllers\ServiceBillComplaintType;
 
 /*
 |--------------------------------------------------------------------------
@@ -819,6 +820,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('user_app_details/login_list/download', [MobileUserLoginDetailsController::class, 'user_app_details_download'])->name('user_app_details.login_list.download');
 
     Route::post('user_app_details/list', [MobileUserLoginDetailsController::class, 'user_app_details_list'])->name('user_app_details.list');
+    Route::post('user_app_details/multi_login', [MobileUserLoginDetailsController::class, 'user_app_details_multi_login'])->name('user_app_details.multi_login');
 
     //Gift Category Route
     Route::resource('gift-categories', GiftCategoryController::class);
@@ -987,6 +989,10 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('claim-generation-export', [ClaimGenerationController::class , 'ClaimGenerationExport'])->name('claim-generation.export');
     Route::any('claim-generation-list-single', [ClaimGenerationController::class , 'getClaimsSingle'])->name('getClaimsSingle');
     Route::any('claim-generation-pdf/{id}', [ClaimGenerationController::class , 'claimGenerationPdf'])->name('claim-generation.pdf');
+
+    // service bill complaint type  
+    Route::resource('service-bills-complaints-type', ServiceBillComplaintType::class);
+    Route::any('service-bills-complaints-type-list', [ServiceBillComplaintType::class , 'getServiceComplaintType'])->name('getServiceComplaintType');
 });
 
 Route::any('getState', [AjaxController::class, 'getState']);

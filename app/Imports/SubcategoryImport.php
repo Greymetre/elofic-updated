@@ -52,7 +52,17 @@ class SubcategoryImport implements ToCollection, WithValidation, WithHeadingRow,
         return [
             'subcategory_name' => 'required',
             'category_id' => 'nullable|exists:categories,id',
-            'service_category_id' => 'nullable|exists:service_charge_categories,id',
+            'service_category_id' => [
+                'nullable',
+                'regex:/^\d+(,\d+)*$/',
+                function ($attribute, $value, $fail) {
+                    $ids = explode(',', $value);
+                    $count = DB::table('service_charge_categories')->whereIn('id', $ids)->count();
+                    if ($count !== count($ids)) {
+                        $fail("One or more selected service categories do not exist.");
+                    }
+                },
+            ],
         ];
     }
 

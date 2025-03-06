@@ -929,6 +929,7 @@ body table td {
          var serviceDistance = currentRow.find('input.distance');
          var serviceQuantity = currentRow.find('input.quantity');
          var pro_cat = '{{ $complaint?$complaint->product_details->category_id:"" }}';
+         var pro_sub_cat = '{{ $complaint ? $complaint->product_details->subcategories->service_category_id : "" }}';
          var serviceProductSelect = currentRow.find('select.chargeprod');
          var serviceAppreciation = currentRow.find('input.appreciation');
          if (id == "3") {
@@ -944,7 +945,8 @@ body table td {
                url: "{{url('/getServiceProduct')}}",
                data: {
                   'charge_type_id': id,
-                  'charge_cat_id': pro_cat
+                  'charge_cat_id': pro_cat,
+                  'pro_sub_cat'  : pro_sub_cat,
                },
                success: function(data) {
                   var html = '<option value="">Select Product</option>';
@@ -972,7 +974,8 @@ body table td {
                url: "{{url('/getServiceProduct')}}",
                data: {
                   'charge_type_id': id,
-                  'charge_cat_id': pro_cat
+                  'charge_cat_id': pro_cat,
+                  'pro_sub_cat'  : pro_sub_cat,
                },
                success: function(data) {
                   var html = '<option value="">Select Product</option>';

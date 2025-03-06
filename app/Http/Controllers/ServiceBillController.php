@@ -52,11 +52,12 @@ class ServiceBillController extends Controller
         } else {
             $complaint = Complaint::find(0);
         }
-
+        
         if(isset($complaint->product_details->subcategories)){
-            $service_charge_products = ServiceChargeProducts::where([
-                'category_id' => $complaint->product_details->subcategories->service_category_id
-            ])->distinct('charge_type_id')->pluck('charge_type_id');
+           $categoryIds = explode(',', $complaint->product_details->subcategories->service_category_id);
+            $service_charge_products = ServiceChargeProducts::whereIn('category_id', $categoryIds)
+                ->distinct()
+                ->pluck('charge_type_id');
             $charge_type = ServiceChargeChargeType::whereIn('id',$service_charge_products)->orWhere('id' , 4)->get();
         }else{
             $charge_type = ServiceChargeChargeType::all();

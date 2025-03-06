@@ -93,14 +93,13 @@ class UsersDataTable extends DataTable
                 }
                 return $roles;
             })
-            ->addColumn('mobile', function ($query) {
+            ->addColumn('wahtsappmobile', function ($query) {
                 $whatsappLink = "https://wa.me/" . $query->mobile;
                 return '<a style="display: flex;align-items: center;" href="' . $whatsappLink . '" target="_blank">
                             <i class="fa fa-whatsapp text-success mr-1" style="font-size:20px"></i>
-                            '. $query->mobile .'
                         </a> ';
             })
-            ->rawColumns(['action', 'image', 'active', 'roles', 'getBranchNames', 'mobile']);
+            ->rawColumns(['action', 'image', 'active', 'roles', 'getBranchNames', 'wahtsappmobile']);
     }
 
     /**
