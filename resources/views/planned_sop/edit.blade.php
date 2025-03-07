@@ -360,17 +360,18 @@
                     $("#budget_for_month").val(res.budget_for_month);
                     $("#top_sku").val(res.top_sku);
                     $("#sku_unit_price").val(res.price).trigger('change');
+                    $("#opening_stock").val(res.opening_stock.opening_stocks);
                     
                     // Set read-only fields
 
-                    $("#product_group_name, #product_description, #sku_unit_price, #product_division, #product_code, #budget_for_month, #top_sku").prop('readonly', true);
+                    $("#product_group_name, #product_description, #sku_unit_price, #opening_stock, #product_division, #product_code, #budget_for_month, #top_sku").prop('readonly', true);
                     getSaledata();
                 }
             });
         } else {
             // Clear only the fields in this row
-            $("#product_description, #product_division, #product_code, #product_group_name, #budget_for_month, #top_sku, #sku_unit_price").val('').trigger('change');
-            $("#product_group_name, #product_description, #sku_unit_price, #product_division, #product_code, #budget_for_month, #top_sku").prop('readonly', true);
+            $("#product_description, #product_division, #product_code, #product_group_name, #opening_stock, #budget_for_month, #top_sku, #sku_unit_price").val('').trigger('change');
+            $("#product_group_name, #product_description, #sku_unit_price, #product_division, #product_code, #opening_stock, #budget_for_month, #top_sku").prop('readonly', true);
         }
     });
    

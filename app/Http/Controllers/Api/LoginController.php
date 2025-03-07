@@ -66,9 +66,11 @@ class LoginController extends Controller
             }
             $checkLastLogin = MobileUserLoginDetails::where('user_id', $user['id'])->first();
             if ($checkLastLogin) {
-                if ($checkLastLogin->unique_id != NULL && $checkLastLogin->unique_id != $request['unique_id'] && $checkLastLogin->multi_login == '0') {
-                    return response()->json(['status' => 'error', 'message' =>  'Multiple device login is not allowed. For support, please contact FieldKonnect at 9990828928.'], $this->noContent);
-                };
+                if (!$user->hasRole('superadmin')) {
+                    if ($checkLastLogin->unique_id != NULL && $checkLastLogin->unique_id != $request['unique_id'] && $checkLastLogin->multi_login == '0') {
+                        return response()->json(['status' => 'error', 'message' =>  'Multiple device login is not allowed. For support, please contact FieldKonnect at 9990828928.'], $this->noContent);
+                    };
+                }
 
                 MobileUserLoginDetails::updateOrCreate(['user_id' => $user['id']], [
                     'app_version'   =>  $request['app_version'],
@@ -91,9 +93,9 @@ class LoginController extends Controller
                     'app'   =>  '2',
                 ]);
             }
-            // if(!$user->hasRole('superadmin')){
+            if (!$user->hasRole('superadmin')) {
                 $user->tokens()->delete();
-            // }
+            }
 
             if ($user->active != 'Y') {
                 return response()->json(['status' => 'error', 'message' => 'Your account is deactivated don\'t hesitate to get in touch with admin.'], $this->notFound);

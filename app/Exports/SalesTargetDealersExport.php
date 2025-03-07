@@ -180,6 +180,34 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
         $cy_start_date = Carbon::createFromFormat('Y-m-d', "$startYear-04-01")->toDateString();
         $cy_end_date = Carbon::createFromFormat('Y-m-d', "$endYear-03-31")->toDateString();
 
+        $customerCreationDate = isset($data['customer']['creation_date']) ? $data['customer']['creation_date'] : null;
+        $financialYearStartDate = "01-04-" . trim($f_year_array[0]);
+        $financialYearStartTimestamp = strtotime($financialYearStartDate);
+
+        $Cquarter = '-';
+
+        if ($customerCreationDate) {
+            $customerCreationTimestamp = strtotime($customerCreationDate);
+
+            if ($customerCreationTimestamp < $financialYearStartTimestamp) {
+                $DType = "Old";
+            } else {
+                $DType = "New";
+                $month = (int) date('m', $customerCreationTimestamp);
+                if ($month >= 4 && $month <= 6) {
+                    $Cquarter = "Q1";
+                } elseif ($month >= 7 && $month <= 9) {
+                    $Cquarter = "Q2";
+                } elseif ($month >= 10 && $month <= 12) {
+                    $Cquarter = "Q3";
+                } else {
+                    $Cquarter = "Q4";
+                }
+            }
+        } else {
+            $DType = "-";
+        }
+
         $ly_sales = number_format((PrimarySales::where('customer_id', $data['customer_id'])->where('invoice_date', '>=', $ly_start_date)->where('invoice_date', '<=', $ly_end_date)->sum('net_amount')) / 100000, 2, '.', '');
         $pump_sales = number_format((PrimarySales::where('customer_id', $data['customer_id'])->where('division', 'LIKE', '%PUMP%')->where('invoice_date', '>=', $cy_start_date)->where('invoice_date', '<=', $cy_end_date)->sum('net_amount')) / 100000, 2, '.', '');
         $motor_sales = number_format((PrimarySales::where('customer_id', $data['customer_id'])->where('division', 'LIKE', '%MOTOR%')->where('invoice_date', '>=', $cy_start_date)->where('invoice_date', '<=', $cy_end_date)->sum('net_amount')) / 100000, 2, '.', '');
@@ -533,16 +561,18 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
         $response[55] = '=ROUND((AT' . $this->rowIndex . ' + AW' . $this->rowIndex . ' + AZ' . $this->rowIndex . ') / 3,2)';
 
         $response[56] = '=Q' . $this->rowIndex . ' + AC' . $this->rowIndex . ' + AO' . $this->rowIndex . ' + BA' . $this->rowIndex;
-        $response[57] = round((floatval($pump_sales)+floatval($motor_sales)), 2);
+        $response[57] = round((floatval($pump_sales) + floatval($motor_sales)), 2);
         $response[58] = '=ROUND((S' . $this->rowIndex . ' + AE' . $this->rowIndex . ' + AQ' . $this->rowIndex . ' + BC' . $this->rowIndex . ') / 4,2)';
 
-        $response[60] = $pump_sales > 0 ? $pump_sales :"0.00";
-        $response[61] = $motor_sales > 0 ? $motor_sales :"0.00";
+        $response[60] = $pump_sales > 0 ? $pump_sales : "0.00";
+        $response[61] = $motor_sales > 0 ? $motor_sales : "0.00";
         $response[62] = "-";
-        $response[63] = $ly_sales > 0 ? $ly_sales :"0.00";
-        $response[64] = floatval($ly_sales) > 0 ? round((((floatval($pump_sales)+floatval($motor_sales)) - floatval($ly_sales))/floatval($ly_sales))*100, 2). '%' : 'LY No Sales';
+        $response[63] = $ly_sales > 0 ? $ly_sales : "0.00";
+        $response[64] = floatval($ly_sales) > 0 ? round((((floatval($pump_sales) + floatval($motor_sales)) - floatval($ly_sales)) / floatval($ly_sales)) * 100, 2) . '%' : 'LY No Sales';
         $response[65] = $data['customer']['id'] ?? '';
         $response[66] = $data['customer']['userdetails']['getdivision']['division_name'] ?? '';
+        // $response[67] = $DType;
+        // $response[68] = $Cquarter;
 
         $this->rowIndex++;
 

@@ -29,6 +29,7 @@ return new class extends Migration
             $table->integer('sku_unit_price')->nullable();
             $table->integer('s_op_val')->nullable();
             $table->string('top_sku')->nullable();
+            $table->integer('dispatch_against_plan')->default(0);
             $table->string('created_by')->nullable();
             $table->tinyInteger('status')->default(1);
             $table->timestamps();

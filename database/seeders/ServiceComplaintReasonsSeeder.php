@@ -76,6 +76,17 @@ class ServiceComplaintReasonsSeeder extends Seeder
                   ]
                 ],
                 [
+                  "reason_category"=> "Winding, Bush, TB set Burn & Stator Twisted",
+                  "reasons"=> [
+                    "Foreign Material / Sand / Mud In Water",
+                    "Manufacturing Fault - Clean Water Operation / Reason Inconclusive",
+                    "Dry Run Operation",
+                    "Less Water Fill in the Motor",
+                    "Pressure Cup / Diaphragm Damage",
+                    "Motor MS  End ring Corossion"
+                  ]
+                ],
+                [
                   "reason_category"=> "Low Discharge",
                   "reasons"=> [
                     "Low Water Yield / Low Water Level In Borewell",
@@ -90,12 +101,37 @@ class ServiceComplaintReasonsSeeder extends Seeder
                   ]
                 ],
                 [
+                  "reason_category"=> "Winding, Bush, TB Set & Rotor Spline Damage",
+                  "reasons"=> [
+                    "Foreign Material / Sand / Mud In Water",
+                    "Manufacturing Fault - Clean Water Operation / Reason Inconclusive",
+                    "Dry Run Operation",
+                    "Less Water Fill in the Motor"
+                  ]
+                ],
+                [
+                  "reason_category"=> "Winding, Bush, TB Set, Stator & Rotor Spline Damage",
+                  "reasons"=> [
+                    "Foreign Material / Sand / Mud In Water",
+                    "Manufacturing Fault - Clean Water Operation / Reason Inconclusive",
+                    "Dry Run Operation",
+                    "Less Water Fill in the Motor"
+                  ]
+                ],
+                [
+                  "reason_category"=> "Only Rotor Spline damage ",
+                  "reasons"=> [
+                    "Foreign Material / Sand / Mud In Water",
+                    "Manufacturing Fault - Clean Water Operation / Reason Inconclusive "
+                  ]
+                ],
+                [
                   "reason_category"=> "Controller Not Working (Solar)",
                   "reasons"=> [
-                    "Solar - Controller Parameter Issue",
+                    "Solar - Controller Parameter Issue ",
                     "Solar - Controller PCB Burn",
                     "Solar - Controller MCB Tripping / Burn",
-                    "Power Supply not reliable",
+                    "Power Supply not reliable ",
                     "Motor Base damage",
                     "Motor Housing damage",
                     "Bracket (Joint) Damage",
@@ -114,7 +150,7 @@ class ServiceComplaintReasonsSeeder extends Seeder
                   "reasons"=> [
                     "Foreign Material / Sand / Mud In Water",
                     "Dry Run Operation",
-                    "Manufacturing Fault - Clean Water Operation / Reason Inconclusive"
+                    "Manufacturing Fault - Clean Water Operation / Reason Inconclusive "
                   ]
                 ],
                 [

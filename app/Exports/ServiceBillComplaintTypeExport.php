@@ -122,7 +122,7 @@ class ServiceBillComplaintTypeExport implements FromCollection, WithHeadings, Sh
                     $sheet->getColumnDimension($columnID)->setAutoSize(true);
                 }
 
-                // ================= APPLY COLOR TO GROUPS IN COLUMN A ================= //
+                // ================= MERGE GROUPS IN COLUMN A ================= //
                 $colors = ['FFFF99', 'CCFFCC', 'FFCCCC', 'CCCCFF', 'FF99FF']; // Different colors for groups
                 $currentColorIndex = 0;
                 $previousValue = null;
@@ -132,7 +132,14 @@ class ServiceBillComplaintTypeExport implements FromCollection, WithHeadings, Sh
                     $cellValue = $sheet->getCell('A' . $row)->getValue();
 
                     if ($cellValue !== $previousValue) {
-                        // If a new group starts, switch color
+                        // If a new group starts, finalize the previous merge if applicable
+                        if ($previousValue !== null && $groupStartRow < $row - 1) {
+                            $mergeRange = "A{$groupStartRow}:A" . ($row - 1);
+                            $sheet->mergeCells($mergeRange);
+                            $sheet->getStyle("A{$groupStartRow}")->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                        }
+
+                        // Switch color for new group
                         $currentColorIndex = ($currentColorIndex + 1) % count($colors);
                         $groupStartRow = $row;
                     }
@@ -147,9 +154,17 @@ class ServiceBillComplaintTypeExport implements FromCollection, WithHeadings, Sh
 
                     $previousValue = $cellValue;
                 }
+
+                // Merge the last group
+                if ($groupStartRow < $lastRow) {
+                    $mergeRange = "A{$groupStartRow}:A{$lastRow}";
+                    $sheet->mergeCells($mergeRange);
+                    $sheet->getStyle("A{$groupStartRow}")->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                }
             },
         ];
     }
+
 
 
 }

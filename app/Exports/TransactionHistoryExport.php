@@ -141,7 +141,7 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
                 $empcode_arr[] = isset($datas->employee_detail->employee_codes) ? $datas->employee_detail->employee_codes : '';
             }
         }
-        if ($data['scheme']) {
+        if ($data['scheme'] && $data['scheme']['product']) {
             $scheme_details = SchemeDetails::where('product_id', $data['scheme']['product']['id'])->first();
         }
 
@@ -168,9 +168,9 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
                 implode(',', $branch_arr),
                 implode(',', $division_arr),
                 $data['coupon_code'],
-                $data['scheme'] ? $data['scheme']['product']['subcategories']['subcategory_name'] : '',
-                $data['scheme'] ? $data['scheme']['product']['id'] : '',
-                $data['scheme'] ? $data['scheme']['product']['product_name'] : '',
+                $data['scheme'] ? ($data['scheme']['product']?$data['scheme']['product']['subcategories']['subcategory_name'] : '') : '',
+                $data['scheme'] ? ($data['scheme']['product']?$data['scheme']['product']['id'] : '') : '',
+                $data['scheme'] ? ($data['scheme']['product']?$data['scheme']['product']['product_name'] : '') : '',
                 (isset($scheme_details)) ? $scheme_details->scheme->scheme_name : '',
                 $data['active_point'] + $data['provision_point'],
                 '',
@@ -197,9 +197,9 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, ShouldAu
                 implode(',', $branch_arr),
                 implode(',', $division_arr),
                 $data['coupon_code'],
-                $data['scheme'] ? $data['scheme']['product']['subcategories']['subcategory_name'] : '',
-                $data['scheme'] ? $data['scheme']['product']['id'] : '',
-                $data['scheme'] ? $data['scheme']['product']['product_name'] : '',
+                $data['scheme'] ? ($data['scheme']['product']?$data['scheme']['product']['subcategories']['subcategory_name'] : '') : '',
+                $data['scheme'] ? ($data['scheme']['product']?$data['scheme']['product']['id'] : '') : '',
+                $data['scheme'] ? ($data['scheme']['product']?$data['scheme']['product']['product_name'] : '') : '',
                 (isset($scheme_details)) ? $scheme_details->scheme->scheme_name : '',
                 $data['active_point'],
                 $data['provision_point'],

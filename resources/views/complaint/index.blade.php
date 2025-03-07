@@ -91,6 +91,14 @@
             <div class="row">
               <div class="col-sm">
                 <div class="card text-center m-1 hover-effect">
+                  <div class="card-body " onclick="change_complaints_type('')">
+                    <h4 class="card-text">All Complaints</h4>
+                    <h5 class="card-title" id="all_complaints"></h5>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm">
+                <div class="card text-center m-1 hover-effect">
                   <div class="card-body " onclick="change_complaints_type(1)">
                     <h4 class="card-text">Pending Complaints</h4>
                     <h5 class="card-title" id="complaints_pending"></h5>
@@ -654,6 +662,7 @@
            _token: "{{csrf_token()}}",
          },
          success: function(res) {
+           $('#all_complaints').html(res.all_complaints);
            $('#complaints_pending').html(res.complaints_pending);
            $('#complaints_work_done').html(res.complaints_work_done);
            $('#complaints_cancelled').html(res.complaints_cancelled);

@@ -25,6 +25,7 @@ use App\Models\OrderDetails;
 use App\Models\Payment;
 use App\Models\Pincode;
 use App\Models\ComplaintTimeline;
+use App\Models\OpeningStock;
 use Illuminate\Support\Str;
 
 if (! function_exists('sendmessage')) {
@@ -1100,4 +1101,14 @@ if (!function_exists('sendMessageByInfisms')) {
             ];
         }
     }
+}
+
+if (!function_exists('getCurrentOpeningStk')) {
+     function getCurrentOpeningStk($prodect_id , $branch_id){
+        $openingStock = OpeningStock::where(['product_id' => $prodect_id , 'branch_id' => $branch_id])->first();
+        if(isset($openingStock)){
+            return $openingStock->opening_stocks ?? "0";
+        }
+        return "0";
+     }
 }

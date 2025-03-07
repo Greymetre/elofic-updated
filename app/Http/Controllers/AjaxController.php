@@ -372,7 +372,7 @@ class AjaxController extends Controller
     {
         try {
             $product_id = $request->input('product_id');
-            $data = Product::with('productdetails', 'categories')
+            $data = Product::with('productdetails', 'categories' , 'opening_stock')
                 ->where(function ($query) use ($product_id) {
                     if (isset($product_id)) {
                         $query->where('id', '=', $product_id);
@@ -381,6 +381,7 @@ class AjaxController extends Controller
                 })
                 ->orderBy('product_name', 'asc')
                 ->first();
+
             $product = collect([
                 'id' => isset($data['id']) ? $data['id'] : '',
                 'product_name' => isset($data['product_name']) ? $data['product_name'] : '',
@@ -411,7 +412,8 @@ class AjaxController extends Controller
 
                 'productdetails' => $data['productdetails'],
                 'categories' => $data['categories'],
-                'subcategories' => $data['subcategories']
+                'subcategories' => $data['subcategories'],
+                'opening_stock' => $data['opening_stock']
             ]);
 
 
@@ -2136,6 +2138,7 @@ class AjaxController extends Controller
     {
         $query = Complaint::query(); // Use query builder
          return response()->json([
+            'all_complaints'    => (clone $query)->count(),
             'complaints_pending'    => (clone $query)->where('complaint_status', '1')->count(),
             'complaints_work_done'  => (clone $query)->where('complaint_status', '2')->count(),
             'complaints_cancelled'  => (clone $query)->where('complaint_status', '5')->count(),
@@ -2198,12 +2201,10 @@ class AjaxController extends Controller
     // get service bill reason
     public function getServiceBillReason(Request $request){
         $complaint_type = $request->complaint_type ?? '';
+        $complaintId = $request->complaintId ?? '';
+        $sub_category_id = $request->sub_category_id;
         $selected = $request->selected ?? '';
-        $reasons = ServiceComplaintReason::whereHas('service_bill_complaint_type', function ($query) use ($complaint_type) {
-            if (!empty($complaint_type)) {
-                $query->where('service_bill_complaint_type_name', $complaint_type);
-            }
-        })->get();
+        $reasons = ServiceComplaintReason::where('service_bill_complaint_id' , $complaintId)->get();
         $html = '<option value="">Select Reasons</option>';
         if(count($reasons) > 0){
             foreach($reasons as $reason){

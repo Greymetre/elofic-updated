@@ -1094,6 +1094,8 @@ body table td {
 
       function getServiceBillReason(){
          var complaint_type = $('#complaint_type').val();
+         var complaintId = $('#complaint_type option:selected').data('complaint-id'); // Get the data attribute
+         var subcategory_id = $('#subcategory_id').val();
          var selected = "{{ $service_bill->complaint_reason }}";
          if(complaint_type != null && complaint_type != ''){
              $("#complaint_reason").empty();
@@ -1104,6 +1106,8 @@ body table td {
                  data: {
                      _token: "{{ csrf_token() }}",
                      complaint_type: complaint_type,
+                     subcategory_id : subcategory_id,
+                     complaintId  : complaintId,
                      selected : selected
                  },
                  success: function(res) {

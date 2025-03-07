@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
-class PlannedSopExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithEvents
+class PlannedSopTemplate implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithEvents
 {
     protected $filters;
 
@@ -84,43 +84,19 @@ class PlannedSopExport implements FromCollection, WithHeadings, ShouldAutoSize, 
     public function headings(): array
     {
         return [
-             "Order Id" , "Month","Branch Name","Division Name", "Group Name",  "Item Name" , "Product Code", "Product Desc." ,  "Opening stock as on 1st (Qty)", "Curent Stk","S&OP Plan for Next running month (M+1) (Qty.)" ,  "Budget for the month (Qty.)", "LM Sale (Qty.)" , "L3M Avg Sale (Qty.)" ,"LY same month sale (Qty.)" ,  "SKU Unit Price" , "S&OP Val_L (Unit Price *Qty.)"  , "TOP 20 SKU for the Branch (*)","Dispatch against Plan" , "Pending against Plan",   "Created By" , "Created At"
+             "Order Id" , "S&OP Plan for Next running month (M+1) (Qty.)" ,"Dispatch against Plan" ,
         ];
     }
 
 
     public function map($data): array
     {
-        $result = (int) ($data['plan_next_month'] ?? 0) - (int) ($data['dispatch_against_plan'] ?? 0);
-        $current_opening_stock = 0;
-        if(isset($data['product_id']) && isset($data['branch_id'])){
-            $current_opening_stock = getCurrentOpeningStk($data['product_id'] , $data['branch_id']);
-        }
         return [
             $data['order_id'] ?? '',
-            isset($data['planning_month']) ? \Carbon\Carbon::parse($data->planning_month)->format('F Y') : '',
-            $data['getBranch']['branch_name'] ?? '',
-            $data['getProduct']['categories']['category_name'] ?? '',
-            $data['getProduct']['subcategories']['subcategory_name'] ?? '',
-            $data['getProduct']['product_name'] ?? '',
-            $data['getProduct']['product_code'] ?? '',
-            $data['getProduct']['description'] ?? '',
-            $data['opening_stock'] ?? '',
-            $current_opening_stock == 0 ? "0" : $current_opening_stock,
             $data['plan_next_month'] ?? '',
-            $data['budget_for_month'] ?? 0,
-            $data['last_month_sale'] ?? 0,
-            $data['last_three_month_avg'] ?? 0,
-            $data['last_year_month_sale'] ?? 0,
-            $data['sku_unit_price'] ?? '',
-            $data['s_op_val'] ?? '',
-            $data['top_sku'] ?? '',
             isset($data['dispatch_against_plan']) 
             ? ($data['dispatch_against_plan'] == 0 ? "0" : $data['dispatch_against_plan']) 
-            : '',
-            $result === 0 ? "0" : $result,
-            $data['created_by'] ?? '',
-            isset($data['created_at']) ? cretaDateForFront($data['created_at']) :  ''
+            : ''
         ];
     }
 

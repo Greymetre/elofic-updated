@@ -85,6 +85,7 @@ use App\Http\Controllers\WareHouseController;
 use App\Http\Controllers\PlannedSOPController;
 use App\Http\Controllers\ClaimGenerationController;
 use App\Http\Controllers\ServiceBillComplaintType;
+use App\Http\Controllers\OpeningStockController;
 
 /*
 |--------------------------------------------------------------------------
@@ -982,6 +983,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('planned-sop', PlannedSOPController::class);
     Route::any('planned-sop-list', [PlannedSOPController::class , 'plannedSopList'])->name('plannedSopList');
     Route::any('planned-sop-export' , [PlannedSOPController::class , 'sop_download'])->name('sop_download');
+    Route::any('planned-sop-import' , [PlannedSOPController::class , 'sop_import'])->name('sop_import');
+    Route::any('planned-sop-template' , [PlannedSOPController::class , 'sop_template'])->name('sop_template');
 
     // claim gerneration 
     Route::resource('claim-generation', ClaimGenerationController::class);
@@ -994,6 +997,12 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('service-bills-complaints-type', ServiceBillComplaintType::class);
     Route::any('service-bills-complaints-type-list', [ServiceBillComplaintType::class , 'getServiceComplaintType'])->name('getServiceComplaintType');
     Route::any('service_bill_complaint_type_download', [ServiceBillComplaintType::class, 'service_bill_complaint_type_download'])->name('service_bill_complaint_type_download');
+
+    // opening stock routes
+    Route::resource('opening-stocks', OpeningStockController::class)->only('index');
+    Route::any('opening-stocks-list', [OpeningStockController::class , 'getOpeningStocks'])->name('getOpeningStocks');
+    Route::any('opening-stocks-import', [OpeningStockController::class , 'openingStockImport'])->name('openingStockImport');
+    Route::any('opening-stocks-export', [OpeningStockController::class , 'openingStockExport'])->name('openingStockExport');
 });
 
 Route::any('getState', [AjaxController::class, 'getState']);
