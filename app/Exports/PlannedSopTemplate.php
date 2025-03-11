@@ -89,16 +89,22 @@ class PlannedSopTemplate implements FromCollection, WithHeadings, ShouldAutoSize
     }
 
 
-    public function map($data): array
+     public function map($data): array
     {
+        // If order_id is empty, skip the row
+        if (empty($data['order_id'])) {
+            return [];
+        }
+
         return [
-            $data['order_id'] ?? '',
+            $data['order_id'],
             $data['plan_next_month'] ?? '',
             isset($data['dispatch_against_plan']) 
-            ? ($data['dispatch_against_plan'] == 0 ? "0" : $data['dispatch_against_plan']) 
-            : ''
+                ? ($data['dispatch_against_plan'] == 0 ? "0" : $data['dispatch_against_plan']) 
+                : ''
         ];
     }
+
 
     public function registerEvents(): array
     {

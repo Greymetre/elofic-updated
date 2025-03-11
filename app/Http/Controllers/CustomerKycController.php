@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Gate;
 use Excel;
+use DB;
 
 class CustomerKycController extends Controller
 {

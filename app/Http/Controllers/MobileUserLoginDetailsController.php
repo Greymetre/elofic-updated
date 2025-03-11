@@ -133,7 +133,7 @@ class MobileUserLoginDetailsController extends Controller
         $currentYear = Carbon::now()->year;
         $years = range($currentYear - 2, $currentYear + 2);
 
-        abort_if(Gate::denies('loyalty_mobile_app_users_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('user_app_details_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         return view('loyalty_app_mobile_users.index_fieldKonnect', compact('branches', 'years', 'divisions'));
     }
 
@@ -168,6 +168,9 @@ class MobileUserLoginDetailsController extends Controller
                 }
             })
             ->addColumn('multi_login', function ($data) {
+                if(!auth()->user()->hasRole('superadmin')){
+                    return '<span class="badge badge-danger" data-id="' . $data['user_id'] . '" data-multi="' . $data['multi_login'] . '">Remove UUID</span>';
+                }
                 if ($data['unique_id'] == NULL) {
                     return 'No UUID';
                 } else{

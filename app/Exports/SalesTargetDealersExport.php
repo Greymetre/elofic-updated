@@ -571,8 +571,8 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
         $response[64] = floatval($ly_sales) > 0 ? round((((floatval($pump_sales) + floatval($motor_sales)) - floatval($ly_sales)) / floatval($ly_sales)) * 100, 2) . '%' : 'LY No Sales';
         $response[65] = $data['customer']['id'] ?? '';
         $response[66] = $data['customer']['userdetails']['getdivision']['division_name'] ?? '';
-        // $response[67] = $DType;
-        // $response[68] = $Cquarter;
+        $response[67] = $DType;
+        $response[68] = $Cquarter;
 
         $this->rowIndex++;
 
