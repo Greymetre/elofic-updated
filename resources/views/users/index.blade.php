@@ -110,7 +110,7 @@
               <th>Emp Code</th>
               <th>{!! trans('panel.global.name') !!}</th>
               <th>Designation</th>
-              <th>WhatsApp</th>
+              <th>Whats App</th>
               <th>{!! trans('panel.global.mobile') !!}</th>
               <th>{!! trans('panel.global.email') !!}</th>
               <th>Reporting Person</th>

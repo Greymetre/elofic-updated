@@ -6,7 +6,7 @@
         <div class="card-icon">
           <i class="material-icons">perm_identity</i>
         </div>
-        <h4 class="card-title ">{!! trans('panel.designation.title_singular') !!}{!! trans('panel.global.list') !!}
+        <h4 class="card-title ">{!! trans('panel.designation.title_singular') !!} {!! trans('panel.global.list') !!}
               <span class="">
                 <div class="btn-group header-frm-btn"> 
                   <div class="next-btn">
@@ -76,7 +76,7 @@
             <div class="input_section">
               <label class="col-form-label">{!! trans('panel.designation.fields.designation_name') !!} <span class="text-danger"> *</span></label>
                 <div class="form-group has-default bmd-form-group">
-                  <input type="text" name="designation_name" class="form-control" id="designation_name" value="{!! old( 'brand_name') !!}" maxlength="200" required>
+                  <input type="text" name="designation_name" class="form-control" id="designation_name" value="{!! old( 'designation_name') !!}" maxlength="200" required>
                   @if ($errors->has('designation_name'))
                     <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('designation_name') }}</p></div>
                   @endif
@@ -115,7 +115,7 @@ $(document).ready(function() {
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
             {data: 'action', name: 'action',"defaultContent": '', orderable: false, searchable: false},
             {data: 'active', name: 'active',"defaultContent": '',className: 'td-actions text-center', orderable: false, searchable: false},
-            {data: 'designation_name', name: 'brand_name',"defaultContent": ''},
+            {data: 'designation_name', name: 'designation_name',"defaultContent": ''},
         ]
     });
          

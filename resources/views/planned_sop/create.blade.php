@@ -493,9 +493,10 @@
                     $row.find(".budget_for_month").val(res.budget_for_month);
                     $row.find(".top_sku").val(res.top_sku);
                     $row.find(".sku_unit_price").val(res.price).trigger('change');
+                    $row.find(".opening_stock").val(res.opening_stock.opening_stocks);
                     
                     // Set read-only fields
-                    $row.find(".product_group_name, .product_description, .sku_unit_price, .product_division, .product_code, .budget_for_month, .top_sku").prop('readonly', true);
+                    $row.find(".product_group_name, .product_description, .sku_unit_price, .opening_stock, .product_division, .product_code, .budget_for_month, .top_sku").prop('readonly', true);
 
                     // Fetch and update sales data only for this row
                     getSaledata($row);
@@ -503,8 +504,8 @@
             });
         } else {
             // Clear only the fields in this row
-            $row.find(".product_description, .product_division, .product_code, .product_group_name, .budget_for_month, .top_sku, .sku_unit_price").val('').trigger('change');
-            $row.find(".product_group_name, .product_description, .sku_unit_price, .product_division, .product_code, .budget_for_month, .top_sku").prop('readonly', true);
+            $row.find(".product_description, .product_division, .product_code, .opening_stock, .product_group_name, .budget_for_month, .top_sku, .sku_unit_price").val('').trigger('change');
+            $row.find(".product_group_name, .product_description, .sku_unit_price, .opening_stock, .product_division, .product_code, .budget_for_month, .top_sku").prop('readonly', true);
         }
     });
 

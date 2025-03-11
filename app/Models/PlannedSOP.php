@@ -23,6 +23,7 @@ class PlannedSOP extends Model
         'sku_unit_price',
         's_op_val',
         'top_sku',
+        'dispatch_against_plan',
         'status',
         'created_by',
     ];

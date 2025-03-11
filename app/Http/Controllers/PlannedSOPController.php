@@ -10,6 +10,9 @@ use App\Models\Product;
 use App\Models\Category;
 
 use App\Exports\PlannedSopExport;
+use App\Exports\PlannedSopTemplate;
+
+use App\Imports\PlannedSopImport;
 
 use Illuminate\Support\Facades\Redirect;
 use Symfony\Component\HttpFoundation\Response;
@@ -118,6 +121,24 @@ class PlannedSOPController extends Controller
         ob_start();
         return Excel::download(new PlannedSopExport($request), 'plannedsop.xlsx');
     }
+
+     public function sop_template(Request $request)
+    {
+        abort_if(Gate::denies('sop_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new PlannedSopTemplate($request), 'PlannedSopTemplate.xlsx');
+    }
+
+    public function sop_import(Request $request){
+        abort_if(Gate::denies('sop_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        Excel::import(new PlannedSopImport,request()->file('import_file'));
+        return back();
+    }
+
+    
 
     /**
      * Display the specified resource.

@@ -1,0 +1,63 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+
+use App\Models\OpeningStock;
+
+use App\Imports\OpeningStockImport;
+use App\Exports\OpeningStockExport;
+
+use Gate;
+use DB;
+use Excel;
+use Validator;
+use DataTables;
+
+class OpeningStockController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        abort_if(Gate::denies('opening_stock_view'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        return view('opening-stocks.index');
+    }
+
+    public function getOpeningStocks(Request $request){
+       abort_if(Gate::denies('opening_stock_view'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $query = OpeningStock::with([
+            'branch',
+            'product.subcategories',
+            'warehouse',
+        ])->latest()->newQuery();
+
+         return DataTables::of($query)
+            ->addIndexColumn()
+            ->addIndexColumn()
+           
+            ->rawColumns(['action'])
+            ->make(true);
+    }
+
+    // import 
+    public function openingStockImport(Request $request){
+        abort_if(Gate::denies('opening_stock_import'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        Excel::import(new OpeningStockImport,request()->file('import_file'));
+        return back();
+    }
+
+     public function openingStockExport(Request $request){
+        abort_if(Gate::denies('opening_stock_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new OpeningStockExport($request), 'opening-stocks.xlsx');
+    }
+}

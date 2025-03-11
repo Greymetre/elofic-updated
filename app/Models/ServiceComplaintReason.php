@@ -12,4 +12,8 @@ class ServiceComplaintReason extends Model
     protected $fillable = [
            'service_bill_complaint_id' , 'service_complaint_reasons'
     ];
+
+    public function service_bill_complaint_type(){
+        return $this->belongsTo(ServiceBillComplaintType::class, 'service_bill_complaint_id' , 'id');
+    }
 }

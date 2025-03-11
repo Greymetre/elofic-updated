@@ -25,6 +25,7 @@ use App\Models\OrderDetails;
 use App\Models\Payment;
 use App\Models\Pincode;
 use App\Models\ComplaintTimeline;
+use App\Models\OpeningStock;
 use Illuminate\Support\Str;
 
 if (! function_exists('sendmessage')) {
@@ -384,7 +385,7 @@ if (! function_exists('getLatLongToAddress')) {
         ]);
 
         $ch = curl_init(sprintf('%s?%s', 'http://api.positionstack.com/v1/reverse', $queryString));
-        
+
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $json = curl_exec($ch);
         curl_close($ch);
@@ -450,7 +451,15 @@ if (! function_exists('getUsersReportingToAuth')) {
                 $test = getAllChild($test, $all_users);
             }
         } elseif ($userinfo->hasRole('Accounts Order') || $userinfo->hasRole('Marketing Team')) {
-            $all_ids_array = User::where('active', 'Y')->whereIn('branch_id', explode(',', $userinfo->branch_show))->pluck('id')->toArray();
+            $branches = explode(',', $userinfo->branch_show);
+            $all_ids_array = User::where('active', 'Y')
+                ->where(function ($query) use ($branches) {
+                    foreach ($branches as $branch) {
+                        $query->orWhereRaw("FIND_IN_SET(?, branch_id)", [$branch]);
+                    }
+                })
+                ->pluck('id')
+                ->toArray();
             $test = getAllChild(array($userid), $all_users);
             while (count($test) > 0) {
                 $all_ids_array = array_merge($all_ids_array, $test);
@@ -922,7 +931,7 @@ if (!function_exists('getCurrentFinancialYear')) {
             $endYear = $currentYear;
         }
 
-        return "{$startYear}-". substr($endYear, -2);;
+        return "{$startYear}-" . substr($endYear, -2);;
     }
 }
 
@@ -949,10 +958,11 @@ function getFinancialYears()
 }
 
 
-function complaintClose($complaint_id){
-    $complaint = ComplaintTimeline::where(['complaint_id' => $complaint_id , 'status' => '4'])->first();
-    if(isset($complaint)){
-         try {
+function complaintClose($complaint_id)
+{
+    $complaint = ComplaintTimeline::where(['complaint_id' => $complaint_id, 'status' => '4'])->first();
+    if (isset($complaint)) {
+        try {
             return $complaint->created_at ? Carbon::parse($complaint->created_at)->format('d-m-Y h:i:s') : '';
         } catch (\Exception $e) {
             return ''; // Return null if parsing fails
@@ -961,14 +971,15 @@ function complaintClose($complaint_id){
     return "Not Closed Yet";
 }
 
-function complaintCloseIn($complaint_date, $complaint_id) {
+function complaintCloseIn($complaint_date, $complaint_id)
+{
     $complaint = ComplaintTimeline::where(['complaint_id' => $complaint_id, 'status' => '4'])->first();
-    
+
     if (isset($complaint)) {
         try {
             $complaintCreatedAt = Carbon::parse($complaint->created_at);
             $complaintDate = Carbon::parse($complaint_date);
-            
+
             // Calculate the difference in hours
             $hoursDifference = $complaintDate->diff($complaintCreatedAt);
             $hours = str_pad($hoursDifference->h, 2, '0', STR_PAD_LEFT);
@@ -981,15 +992,16 @@ function complaintCloseIn($complaint_date, $complaint_id) {
         }
     }
 
-     return "Not Closed Yet";
+    return "Not Closed Yet";
 }
 
-function calculatedTAT($datetocal, $complaint_date) {
+function calculatedTAT($datetocal, $complaint_date)
+{
     if (isset($datetocal) && isset($complaint_date)) {
         try {
             $complaintCreatedAt = Carbon::parse($complaint_date);
             $complaintDate = Carbon::parse($datetocal);
-            
+
             // Calculate the difference in hours
             $hoursDifference = $complaintDate->diff($complaintCreatedAt);
             $hours = str_pad($hoursDifference->h, 2, '0', STR_PAD_LEFT);
@@ -1002,10 +1014,11 @@ function calculatedTAT($datetocal, $complaint_date) {
         }
     }
 
-     return "Not Perfomed";
+    return "Not Perfomed";
 }
 
-function getDateInIndFomate($value){
+function getDateInIndFomate($value)
+{
     try {
         return $value ? Carbon::parse($value)->format('d-m-Y') : '';
     } catch (\Exception $e) {
@@ -1013,38 +1026,42 @@ function getDateInIndFomate($value){
     }
 }
 
-function getPincode($id){
+function getPincode($id)
+{
     $pincode = Pincode::find($id);
     return $pincode->pincode ?? '';
 }
 
-function calcalutedTatByStatus($status , $query , $created_at){
-  $complaint_status_date = $query->complaint_time_line
+function calcalutedTatByStatus($status, $query, $created_at)
+{
+    $complaint_status_date = $query->complaint_time_line
         ->where('status', $status)
         ->sortByDesc('id') // Correct ordering method for collections
         ->first();
-  if(isset($complaint_status_date->created_at) && isset($query->created_at)){
-    return calculatedTAT($complaint_status_date->created_at,$query->created_at);
-  }
-  return "Action Not Perfomed";
+    if (isset($complaint_status_date->created_at) && isset($query->created_at)) {
+        return calculatedTAT($complaint_status_date->created_at, $query->created_at);
+    }
+    return "Action Not Perfomed";
 }
 
 if (!function_exists('getServiceCharge')) {
-    function getServiceCharge($data, $serviceType) {
+    function getServiceCharge($data, $serviceType)
+    {
         return isset($data['complaints']['service_bill']['service_bill_products'])
             ? $data['complaints']['service_bill']['service_bill_products']
-                ->where('service_type', $serviceType)
-                ->sum('subtotal') ?? 0.0
+            ->where('service_type', $serviceType)
+            ->sum('subtotal') ?? 0.0
             : 0.0;
     }
 }
 
 if (!function_exists('sendMessageByInfisms')) {
-    function sendMessageByInfisms($mobile_number, $template, $SenderId) {
+    function sendMessageByInfisms($mobile_number, $template, $SenderId)
+    {
         try {
             $curl = curl_init();
             curl_setopt_array($curl, array(
-                CURLOPT_URL => 'http://sms.infisms.co.in/API/SendSMS.aspx?UserID=SILCLN&UserPassword=sil%24clnco&PhoneNumber=' . $mobile_number . '&Text=' .$template . '&SenderId=' . $SenderId . '&AccountType=2&MessageType=0',
+                CURLOPT_URL => 'http://sms.infisms.co.in/API/SendSMS.aspx?UserID=SILCLN&UserPassword=sil%24clnco&PhoneNumber=' . $mobile_number . '&Text=' . $template . '&SenderId=' . $SenderId . '&AccountType=2&MessageType=0',
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING       => '',
                 CURLOPT_MAXREDIRS      => 10,
@@ -1055,7 +1072,7 @@ if (!function_exists('sendMessageByInfisms')) {
             ));
 
             $response = curl_exec($curl);
-            
+
             if ($response === false) {
                 throw new Exception('cURL Error: ' . curl_error($curl));
             }
@@ -1076,7 +1093,6 @@ if (!function_exists('sendMessageByInfisms')) {
                     'response' => $response
                 ];
             }
-
         } catch (Exception $e) {
             error_log('SMS Sending Error: ' . $e->getMessage());
             return [
@@ -1087,8 +1103,12 @@ if (!function_exists('sendMessageByInfisms')) {
     }
 }
 
-
-
-
-
-
+if (!function_exists('getCurrentOpeningStk')) {
+     function getCurrentOpeningStk($prodect_id , $branch_id){
+        $openingStock = OpeningStock::where(['product_id' => $prodect_id , 'branch_id' => $branch_id])->first();
+        if(isset($openingStock)){
+            return $openingStock->opening_stocks ?? "0";
+        }
+        return "0";
+     }
+}

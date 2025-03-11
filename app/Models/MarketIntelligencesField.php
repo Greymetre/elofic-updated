@@ -9,7 +9,7 @@ class MarketIntelligencesField extends Model
 {
     use HasFactory;
 
-    protected $fillable = [ 'active', 'field_name', 'field_type', 'label_name', 'placeholder', 'key', 'is_required', 'is_multiple', 'ranking', 'module','created_by', 'created_at', 'updated_at','division_id'];
+    protected $fillable = [ 'active', 'field_name', 'field_type', 'label_name', 'placeholder', 'key', 'is_required', 'is_multiple', 'ranking', 'module','created_by', 'created_at', 'updated_at','division_id','input_type'];
 
     public function createdbyname()
     {

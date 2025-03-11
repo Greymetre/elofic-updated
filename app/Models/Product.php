@@ -18,6 +18,12 @@ class Product extends Model
         return $this->belongsTo('App\Models\Category', 'category_id', 'id')->select('id','category_name','category_image');
     }
 
+    public function opening_stock()
+    {
+        return $this->hasOne('App\Models\OpeningStock', 'product_id', 'id')->select('id', 'product_id', 'opening_stocks');
+    }
+
+
     public function subcategories()
     {
         return $this->belongsTo('App\Models\Subcategory', 'subcategory_id', 'id')->select('id','subcategory_name','subcategory_image' , 'service_category_id');

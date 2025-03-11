@@ -1016,6 +1016,15 @@
                               </a>
                            </li>
                            @endif
+                            @if(auth()->user()->can('opening_stock_view'))
+                           <li class="nav-link-btn {{ request()->is('opening-stocks*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('opening-stocks') }}">
+                                 <i class="material-icons icon">donut_small</i>
+                                 <span>Opening Stock</span>
+                                 <div class="d-none mobile_hide"> Opening Stock</div>
+                              </a>
+                           </li>
+                           @endif
                            @if(auth()->user()->can('ware_house_access'))
                            <li class="nav-link-btn {{ request()->is('ware_house*') ? 'active' : '' }}">
                               <a class="hoveradd2" href="{{ url('ware_house') }}">

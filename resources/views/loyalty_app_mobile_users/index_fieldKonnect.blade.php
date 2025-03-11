@@ -215,12 +215,8 @@
       $(document).on('click', '.multi_login_class', function(e) {
         var userId = $(this).attr('data-id');
         var status = $(this).attr('data-multi');
+        var msg = 'You want to Remove UUID ?';
 
-        if(status == 0){
-          var msg = 'You want to allow Multi Login ?';
-        }else{
-          var msg = 'You want to allow Single Login ?';
-        }
 
         swal.fire({
           title: "Are you sure?",

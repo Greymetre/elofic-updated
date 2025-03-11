@@ -51,17 +51,6 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
             DB::raw('type'),
         ]);
 
-        // $data = SalesTargetUsers::with(['user','user.getdesignation','user.getdivision','user.getbranch'])->select([
-        //  DB::raw('GROUP_CONCAT(target) as targets'),
-        //  DB::raw('GROUP_CONCAT(achievement) as achievements'),
-        //  DB::raw('GROUP_CONCAT(month) as months'),  
-        //  DB::raw('GROUP_CONCAT(year) as years'),
-        //  DB::raw('GROUP_CONCAT(achievement_percent) as achievement_percents'),
-        //  DB::raw('user_id'),
-        // ]); 
-
-        // dd($data);
-
         if ($this->month == '' && empty($this->month)) {
             $data->where(function ($query) use ($f_year_array) {
                 $query->where('year', '=', $f_year_array[0])
@@ -110,7 +99,8 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
 
         $endYear = $f_year_array[1];
 
-        $headings = ['Dealer id', 'Employee Name', 'Firm Name', 'City', 'Branch', 'Division', 'Sales Type'];
+        // $headings = ['Dealer id', 'Employee Name', 'Firm Name', 'City', 'Branch', 'Division', 'Sales Type'];
+        $headings = ['Branch', 'BP Code', 'Firm Name', 'City', 'State', 'Employee Name', 'Dealer Appointment Date'];
 
         $quarterNames = ['Q1', 'Q2', 'Q3', 'Q4'];
 
@@ -146,6 +136,17 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
         }
 
         $headings[] = 'Total';
+        $headings[] = '';
+        $headings[] = '';
+        $headings[] = 'Pump Ach';
+        $headings[] = 'Motor Ach';
+        $headings[] = 'Return Amt';
+        $headings[] = 'LY Sales Ach';
+        $headings[] = 'GOLY %';
+        $headings[] = 'Dealer ID';
+        $headings[] = 'Division';
+        $headings[] = 'Dealer Type';
+        $headings[] = 'New Dealer Quarter';
 
         $sub_headings = ['', '', '', '', '', '', '', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%', 'Tgt', 'Ach', 'Ach%'];
 
@@ -161,14 +162,56 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
 
         $employee_name = PrimarySales::where('customer_id', $data['customer_id'])->orderBy('id', 'desc')->first();
 
-        $response[0] = $data['customer']['id'] ?? '';
-        $response[1] = $employee_name?$employee_name->sales_person:'-';
+        $response[0] = $data['customer']['userdetails']['getbranch']['branch_name'] ?? '-';
+        $response[1] = $data['customer']['sap_code'] ?? '-';
         $response[2] = $data['customer']['name'];
-        $response[3] = $data['customer']['customeraddress']['cityname']['city_name'] ?? '';
-        $response[4] = $data['customer']['userdetails']['getbranch']['branch_name'] ?? '';
-        $response[5] = $data['customer']['userdetails']['getdivision']['division_name'] ?? '';
-        $response[6] = $data['type'] ?? '';
+        $response[3] = $data['customer']['customeraddress']['cityname']['city_name'] ?? '-';
+        $response[4] = $data['customer']['customeraddress']['statename']['state_name'] ?? '-';
+        $response[5] = $employee_name ? $employee_name->sales_person : '-';
+        $response[6] = $data['customer']['creation_date'] ? date('d-M-Y', strtotime($data['customer']['creation_date'])) : '-';
+
         $f_year_array = explode('-', $this->financial_year);
+
+        list($startYear, $endYear) = explode('-', $this->financial_year);
+        $lastStartYear = $startYear - 1;
+        $lastEndYear = $endYear - 1;
+        $ly_start_date = Carbon::createFromFormat('Y-m-d', "$lastStartYear-04-01")->toDateString();
+        $ly_end_date = Carbon::createFromFormat('Y-m-d', "$lastEndYear-03-31")->toDateString();
+        $cy_start_date = Carbon::createFromFormat('Y-m-d', "$startYear-04-01")->toDateString();
+        $cy_end_date = Carbon::createFromFormat('Y-m-d', "$endYear-03-31")->toDateString();
+
+        $customerCreationDate = isset($data['customer']['creation_date']) ? $data['customer']['creation_date'] : null;
+        $financialYearStartDate = "01-04-" . trim($f_year_array[0]);
+        $financialYearStartTimestamp = strtotime($financialYearStartDate);
+
+        $Cquarter = '-';
+
+        if ($customerCreationDate) {
+            $customerCreationTimestamp = strtotime($customerCreationDate);
+
+            if ($customerCreationTimestamp < $financialYearStartTimestamp) {
+                $DType = "Old";
+            } else {
+                $DType = "New";
+                $month = (int) date('m', $customerCreationTimestamp);
+                if ($month >= 4 && $month <= 6) {
+                    $Cquarter = "Q1";
+                } elseif ($month >= 7 && $month <= 9) {
+                    $Cquarter = "Q2";
+                } elseif ($month >= 10 && $month <= 12) {
+                    $Cquarter = "Q3";
+                } else {
+                    $Cquarter = "Q4";
+                }
+            }
+        } else {
+            $DType = "-";
+        }
+
+        $ly_sales = number_format((PrimarySales::where('customer_id', $data['customer_id'])->where('invoice_date', '>=', $ly_start_date)->where('invoice_date', '<=', $ly_end_date)->sum('net_amount')) / 100000, 2, '.', '');
+        $pump_sales = number_format((PrimarySales::where('customer_id', $data['customer_id'])->where('division', 'LIKE', '%PUMP%')->where('invoice_date', '>=', $cy_start_date)->where('invoice_date', '<=', $cy_end_date)->sum('net_amount')) / 100000, 2, '.', '');
+        $motor_sales = number_format((PrimarySales::where('customer_id', $data['customer_id'])->where('division', 'LIKE', '%MOTOR%')->where('invoice_date', '>=', $cy_start_date)->where('invoice_date', '<=', $cy_end_date)->sum('net_amount')) / 100000, 2, '.', '');
+
         $data['months'] = explode(',', $data['months']);
         $data['targets'] = explode(',', $data['targets']);
         $data['achievements'] = explode(',', $data['achievements']);
@@ -518,8 +561,18 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
         $response[55] = '=ROUND((AT' . $this->rowIndex . ' + AW' . $this->rowIndex . ' + AZ' . $this->rowIndex . ') / 3,2)';
 
         $response[56] = '=Q' . $this->rowIndex . ' + AC' . $this->rowIndex . ' + AO' . $this->rowIndex . ' + BA' . $this->rowIndex;
-        $response[57] = '=R' . $this->rowIndex . ' + AD' . $this->rowIndex . ' + AP' . $this->rowIndex . ' + BB' . $this->rowIndex;
+        $response[57] = round((floatval($pump_sales) + floatval($motor_sales)), 2);
         $response[58] = '=ROUND((S' . $this->rowIndex . ' + AE' . $this->rowIndex . ' + AQ' . $this->rowIndex . ' + BC' . $this->rowIndex . ') / 4,2)';
+
+        $response[60] = $pump_sales > 0 ? $pump_sales : "0.00";
+        $response[61] = $motor_sales > 0 ? $motor_sales : "0.00";
+        $response[62] = "-";
+        $response[63] = $ly_sales > 0 ? $ly_sales : "0.00";
+        $response[64] = floatval($ly_sales) > 0 ? round((((floatval($pump_sales) + floatval($motor_sales)) - floatval($ly_sales)) / floatval($ly_sales)) * 100, 2) . '%' : 'LY No Sales';
+        $response[65] = $data['customer']['id'] ?? '';
+        $response[66] = $data['customer']['userdetails']['getdivision']['division_name'] ?? '';
+        $response[67] = $DType;
+        $response[68] = $Cquarter;
 
         $this->rowIndex++;
 
@@ -559,8 +612,16 @@ class SalesTargetDealersExport implements FromCollection, WithHeadings, ShouldAu
                 $event->sheet->mergeCells('AX1:AZ1');
                 $event->sheet->mergeCells('BA1:BC1');
                 $event->sheet->mergeCells('BD1:BF1');
+                $event->sheet->mergeCells('BG1:BG2');
+                $event->sheet->mergeCells('BH1:BH2');
+                $event->sheet->mergeCells('BI1:BI2');
+                $event->sheet->mergeCells('BJ1:BJ2');
+                $event->sheet->mergeCells('BK1:BK2');
+                $event->sheet->mergeCells('BL1:BL2');
+                $event->sheet->mergeCells('BM1:BM2');
+                $event->sheet->mergeCells('BN1:BN2');
+                $event->sheet->mergeCells('BO1:BO2');
 
-                
                 $event->sheet->getStyle('A1:' . $lastColumn . '2')->applyFromArray([
                     'font' => [
                         'bold' => true,

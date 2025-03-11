@@ -33,6 +33,7 @@ use App\Http\Controllers\Api\TransactionHistoryController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SapStockController;
 use App\Http\Controllers\Api\MspActivityController;
+use App\Http\Controllers\Api\ComplaintApiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -260,8 +261,10 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::get('getPrimarySchemeData', [PrimarySchemeReportController::class, 'getPrimarySchemeData']);
     
     // msp activity
-
     Route::apiResource('user/msp_activity', MspActivityController::class)->only(['index','store']);
     Route::get('user/msp-activity-counts', [MspActivityController::class , 'getMspActivityCount']);
     Route::get('user/msp-activity-filter', [MspActivityController::class , 'getMspActivityFilter']);
+
+    // Complaint Api's routes 
+    Route::apiResource('complaints', ComplaintApiController::class);
 });

@@ -813,6 +813,7 @@ class CustomerController extends Controller
                 'contact_number',
                 'latitude',
                 'longitude',
+                'sap_code',
                 DB::raw('(SELECT SUM(grand_total) FROM sales WHERE sales.buyer_id = customers.id) as totalamount'),
                 DB::raw('(SELECT SUM(paid_amount) FROM sales WHERE sales.buyer_id = id) as totalpaid')
             )->first();

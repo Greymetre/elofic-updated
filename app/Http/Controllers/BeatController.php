@@ -46,6 +46,7 @@ class BeatController extends Controller
     $users = User::whereDoesntHave('roles', function ($query) {
       $query->where('id', 29);
     })->select('id', 'name', 'mobile')->get();
+
     $states = State::where('active', '=', 'Y')->select('id', 'state_name')->get();
     $cities = [];
     $districts = [];

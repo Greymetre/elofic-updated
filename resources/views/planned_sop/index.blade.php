@@ -42,13 +42,36 @@
             <span class="">
               <div class="btn-group header-frm-btn">
                 <div class="next-btn">
+                  @if(auth()->user()->can(['sop_upload']))
+                  <form action="{{ URL::to('planned-sop-import') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
+                  {{ csrf_field() }}
+                  <div class="input-group">
+                    <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                      <span class="btn btn-just-icon btn-theme btn-file">
+                        <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
+                        <span class="fileinput-exists">Change</span>
+                        <input type="hidden">
+                        <input type="file" name="import_file" required accept=".xls,.xlsx" />
+                      </span>
+                    </div>
+                    <div class="input-group-append">
+                      <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.upload') !!} Opening Stock">
+                        <i class="material-icons">cloud_upload</i>
+                        <div class="ripple-container"></div>
+                      </button>
+                    </div>
+                  </div>
+                  </form> 
+                  @endif
                   @if(auth()->user()->can(['sop_create']))
                         <a href="{{ route('planned-sop.create') }}" class="btn btn-just-icon btn-theme" title="Add Planned SOP"><i class="material-icons">add_circle</i></a>
                   @endif
                   @if(auth()->user()->can(['sop_download']))
-                       <button class="btn btn-just-icon btn-theme" id="button_download" type="button" title="{!!  trans('panel.global.download') !!} S&OP"><i class="material-icons">cloud_download</i></button>
+                       <button class="btn btn-just-icon btn-theme mr-2" id="button_download" type="button" title="{!!  trans('panel.global.download') !!} S&OP"><i class="material-icons">cloud_download</i></button>
                         <!-- <a href="{{ route('sop_download') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} S&OP"><i class="material-icons">cloud_download</i></a> -->
-                  @endif 
+                  @endif
+                       <a href="{{ URL::to('planned-sop-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} Planned SOP"><i class="material-icons">text_snippet</i></a>
+ 
                 </div>
               </div>
             </span>

@@ -500,6 +500,11 @@ class SalesTargetUsersController extends Controller
 
             return Excel::download(new SalesDealersTargetBranchExport($request), 'sales_target_branch.xlsx');
         } elseif ($request->export_dealer_target) {
+
+            if($request->ip() != '111.118.252.250') {
+                return view('work_in_progress');
+            }
+            
             $validator = Validator::make($request->all(), [
                 'financial_year' => 'required',
             ]);
