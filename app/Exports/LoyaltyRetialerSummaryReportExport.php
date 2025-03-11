@@ -32,7 +32,7 @@ class LoyaltyRetialerSummaryReportExport implements FromCollection, WithHeadings
 
     public function collection()
     {
-        DB::statement("SET SESSION group_concat_max_len = 100000000");
+        DB::statement("SET SESSION group_concat_max_len = 100000");
         $retailers_sarthi = TransactionHistory::groupBy('customer_id')->pluck('customer_id');
         $userids = getUsersReportingToAuth();
         $data = Customers::with('customertypes', 'createdbyname', 'customeraddress.cityname', 'customeraddress.statename', 'customer_transacation')->whereIn('id', $retailers_sarthi)
@@ -51,7 +51,7 @@ class LoyaltyRetialerSummaryReportExport implements FromCollection, WithHeadings
                 if ($this->dealer_id && $this->dealer_id != '' && $this->dealer_id != null) {
                     $query->where('id', $this->dealer_id);
                 }
-            })->orderBy('id', 'asc')->get();
+            })->orderBy('id', 'asc')->paginate(1000);
 
         return $data;
     }

@@ -366,7 +366,7 @@
                   </div>
                    <div class="col-md-3">
                       <label>Warranty Upto</label>
-                      <p class="border p-2 bg-light">{{$complaint->customer->customer_state ?? '-'}}</p>
+                      <p class="border p-2 bg-light">{{$response['warrenty_expire_date'] ?? '-'}}</p>
                   </div>
                   <div class="col-md-3">
                       <label>Warranty Status</label>

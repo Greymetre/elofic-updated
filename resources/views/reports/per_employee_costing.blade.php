@@ -62,7 +62,7 @@
                         <option value="" selected>{!! trans('panel.secondary_dashboard.dealers_and_distibutors') !!}</option>
                         @if(@isset($ps_dealers ))
                         @foreach($ps_dealers as $dealer)
-                        <option value="{!! $dealer->dealer !!}">{!! $dealer->dealer !!}</option>
+                        <option value="{!! $dealer !!}">{!! $dealer !!}</option>
                         @endforeach
                         @endif
                       </select>
@@ -84,7 +84,7 @@
                         <option value="" selected>Model Name</option>
                         @if(@isset($ps_product_models ))
                         @foreach($ps_product_models as $product)
-                        <option value="{!! $product->model_name !!}">{!! $product->model_name !!}</option>
+                        <option value="{!! $product !!}">{!! $product !!}</option>
                         @endforeach
                         @endif
                       </select>
@@ -95,7 +95,7 @@
                         <option value="" selected>{!! trans('panel.secondary_dashboard.new_group_name') !!}</option>
                         @if(@isset($ps_new_group_names ))
                         @foreach($ps_new_group_names as $product)
-                        <option value="{!! $product->new_group !!}">{!! $product->new_group !!}</option>
+                        <option value="{!! $product !!}">{!! $product !!}</option>
                         @endforeach
                         @endif
                       </select>

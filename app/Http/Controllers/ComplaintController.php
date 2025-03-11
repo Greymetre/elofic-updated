@@ -31,6 +31,7 @@ use Validator;
 use DataTables;
 use Carbon\Carbon;
 use Auth;
+use App\Http\Controllers\AjaxController;
 
 class ComplaintController extends Controller
 {
@@ -650,7 +651,12 @@ class ComplaintController extends Controller
         $close_complaint = ComplaintTimeline::where('complaint_id', $complaint->id)->where('status', '4')->latest()->first();
         $service_bill = ServiceBill::with('service_bill_products')->where('complaint_id', $complaint->id)->latest()->first();
         $service_centers = Customers::where('customertype', '4')->select('id', 'name', 'customer_code')->get();
-        return view('complaint.show', compact('complaint', 'timelines', 'assign_users', 'service_centers', 'work_done', 'service_bill', 'complete_complaint', 'close_complaint'));
+        $result = app(AjaxController::class)->getProductTimeInterval(new Request([
+            'product_id' => $complaint->product_id,
+            'sale_bill_date' => $complaint->company_sale_bill_date
+        ]));
+        $response = $result->getData(true);
+        return view('complaint.show', compact('complaint', 'timelines', 'assign_users', 'service_centers', 'work_done', 'service_bill', 'complete_complaint', 'close_complaint' , 'response'));
     }
 
     /**

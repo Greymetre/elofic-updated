@@ -266,5 +266,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::get('user/msp-activity-filter', [MspActivityController::class , 'getMspActivityFilter']);
 
     // Complaint Api's routes 
-    Route::apiResource('complaints', ComplaintApiController::class);
+    Route::apiResource('complaints', ComplaintApiController::class)->only(['index' , 'show' , 'update']);
+    Route::post('complaint/work-done/{id}', [ComplaintApiController::class, 'work_done_submit']);
+    Route::get('complaint/select-option', [ComplaintApiController::class, 'select_option']);
 });
