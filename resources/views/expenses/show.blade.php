@@ -192,13 +192,20 @@
                   </address>
                 </div>
                 <!-- /.col -->
-                <div class="col-sm-3 invoice-col">
+                <div class="col-sm-4 invoice-col">
                   Status Change Reason
                   <address>
                     <strong>{{$expense->reason??""}}</strong><br>
                   </address>
                 </div>
-                <div class="col-sm-5 invoice-col">
+                <div class="col-sm-4 invoice-col">
+                  Department
+                  <address>
+                    <strong>{{$expense['users']['getdepartment']?$expense['users']['getdepartment']['name']:'-'}}</strong><br>
+                  </address>
+                </div>
+                <div class="col-sm-6 invoice-col"></div>
+                <div class="col-sm-6 invoice-col">
                   <div class="row">
                     <div class="col-md-6">
                       <h6>Today Plan - {{$paln->town??""}} </h6>

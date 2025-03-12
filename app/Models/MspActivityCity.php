@@ -10,4 +10,9 @@ class MspActivityCity extends Model
     use HasFactory;
 
     protected $fillable = ['msp_activity_id' , 'city_id'];
+
+    public function city()
+    {
+        return $this->belongsTo(City::class, 'city_id', 'id');
+    }
 }

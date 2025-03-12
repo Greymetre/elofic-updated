@@ -16,6 +16,7 @@ class SendPrimarySales extends Command
     {
         $geturl = "https://dashboard.fieldkonnect.io/power-bi/public/api/getPrimarySalesLastId";
         $getresponse = Http::timeout(240)->get($geturl);
+        Log::channel('sapstock')->error("All primary sales data processed started.");
 
         if (!$getresponse->successful()) {
             $this->error('Failed to fetch last sent ID.');
@@ -68,6 +69,8 @@ class SendPrimarySales extends Command
                 $this->error('Failed to send sales data: ' . $response->body());
             }
         });
+
+        Log::channel('sapstock')->error("All primary sales data processed completed.");
 
         $this->info('All primary sales data processed.');
     }

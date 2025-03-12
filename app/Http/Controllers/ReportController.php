@@ -563,7 +563,8 @@ class ReportController extends Controller
                 ->rawColumns(['punchin', 'punchout', 'action', 'action_status', 'current_status', 'punchin_from', 'checkbox'])
                 ->make(true);
         }
-        return view('reports.attendancereport', compact('users', 'branches'));
+        $divisions = Division::latest()->get();
+        return view('reports.attendancereport', compact('users', 'branches', 'divisions'));
     }
 
 

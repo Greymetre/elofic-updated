@@ -1,0 +1,449 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+use App\Models\ServiceBill;
+use App\Models\Complaint;
+use App\Models\ServiceGroupComplaint;
+use App\Models\ServiceChargeChargeType;
+use App\Models\ServiceChargeProducts;
+use App\Models\ServiceComplaintReason;
+
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
+
+use App\Http\Controllers\AjaxController;
+
+class ServiceBillController extends Controller
+{
+
+    public function __construct()
+    {
+        $this->serviceBill = new ServiceBill();
+
+
+        $this->successStatus = 200;
+        $this->created = 201;
+        $this->accepted = 202;
+        $this->noContent = 204;
+        $this->badrequest = 400;
+        $this->unauthorized = 401;
+        $this->notFound = 404;
+        $this->notactive = 406;
+        $this->internalError = 500;
+    }
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index(Request $request , $id)
+    {
+        
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create(Request $request , $id)
+    {
+        try{
+
+             $service_bill = ServiceBill::where('complaint_id' , $id)->exists();
+             if($service_bill){
+                 return response()->json(['status' => 'error', 'message' => 'Service bill allready created for this complaint'] , $this->badrequest);
+             }
+             $complaint = Complaint::with([
+                'service_center_details:id,customer_code,name',
+                'complaint_type_details',
+                'product_details.categories',
+                'product_details.subcategories',
+                'createdbyname:id,name',
+                'warranty_details'
+            ])->where('id', $id)
+                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                    return $query->where('assign_user', $request->user()->id);
+                })
+                ->first();
+
+            if (!$complaint) {
+                 return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'] , $this->notFound);
+            }
+
+            $data = collect($complaint->only([
+                'complaint_number',
+                'complaint_date',
+                'product_serail_number',
+                'customer_bill_date',
+                'under_warranty'
+            ]))->mapWithKeys(function ($value, $key) {
+                return [   
+                    match ($key) {
+                        'customer_bill_date' => 'warranty_start_date',
+                        default => $key,
+                    } => ($value === "" ? null : $value)
+                ];
+            })->toArray();
+            $lastServiceBillId = ServiceBill::max('bill_no');
+            $newserviceBillNo = $lastServiceBillId ? $lastServiceBillId + 1 : 1;
+            $serviceBillNo = str_pad($newserviceBillNo, 3, '0', STR_PAD_LEFT);
+            $data["division"] = $complaint->product_details?->categories?->category_name ?? null;
+            $data["group_name"] = $complaint->product_details?->subcategories?->subcategory_name ?? null;
+            $data['serviceBillNo'] = $serviceBillNo ?? null;
+            $data["recived_from "] = optional($complaint->createdbyname)->name ?? null;
+            $data["item "] = optional($complaint->product_details)->product_name ?? null;
+            $data["comments "] = $complaint ? $complaint->description : null;
+            $result = app(AjaxController::class)->getProductTimeInterval(new Request([
+                    'product_id' => $complaint->product_id,
+                    'sale_bill_date' => $complaint->company_sale_bill_date
+                ]));
+            $response = $result->getData(true);
+            $data['warranty_upto'] = $response['warrenty_expire_date'] ?? null;
+            $data += $this->getComplaintDropdowns($complaint);
+            if(isset($complaint->product_details->subcategories)){
+               $categoryIds = explode(',', $complaint->product_details->subcategories->service_category_id);
+              $service_charge_products = ServiceChargeProducts::whereIn('category_id', $categoryIds)
+                    ->distinct()
+                    ->pluck('charge_type_id');
+                $charge_types = ServiceChargeChargeType::whereIn('id',$service_charge_products)->orWhere('id' , 4)->get();
+            }else{
+                $charge_types = ServiceChargeChargeType::all();
+            }
+            if(isset($complaint->service_center)){
+                $data += [
+                    'charge_types ' => $charge_types->map(fn($charge_type) => [
+                        'key' => $charge_type->id, 
+                        'value' =>  $charge_type->charge_type
+                    ])->toArray()
+                ];
+            }
+
+
+            if($complaint){
+                return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
+            }else{
+                return response()->json(['status' => 'success', 'data' => "No Complaints"], $this->successStatus);
+            }
+        }catch(\Exception $e){
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
+    }
+
+
+    private function getComplaintDropdowns($complaint)
+    {
+        $category_of_complaint = ["Electrical Fault", "Mechanical Fault", "Physical Fault"];
+        $service_bill_complaint = ServiceGroupComplaint::where('subcategory_id', $complaint->product_details->subcategories->id)->get();
+        $condition_of_service = ["Full Finish", "Regular Repair", "Field Visit"];
+        $received_product = ["Pump", "Motor", "Pump Set", "Fan", "Heater", "Induction CookTop"];
+        $nature_of_faults = ["Transit Damage", "Manufacturing Fault", "Customer Field Fault"];
+        $service_locations = ["Site Visit", "At ASC"];
+        $water_sources = ["Munciple Water Supply", "Well", "BoreWell", "Water Sump", "Hand Pump", "Pond / Dam", "RO Water Plant"];
+
+        return [
+            'category_of_complaint' => collect($category_of_complaint)->map(fn($item) => ['key' => $item, 'value' => $item])->toArray(),
+            'complaint_type' => $service_bill_complaint->map(fn($complaint_type) => [
+                'id' => $complaint_type->service_bill_complaint_type?->id,
+                'key' => $complaint_type->service_bill_complaint_type->service_bill_complaint_type_name,
+                'value' => $complaint_type->service_bill_complaint_type->service_bill_complaint_type_name
+            ])->toArray(),
+            'condition_of_service' => collect($condition_of_service)->map(fn($item) => ['key' => $item, 'value' => $item])->toArray(),
+            'received_product' => collect($received_product)->map(fn($item) => ['key' => $item, 'value' => $item])->toArray(),
+            'service_locations' => collect($service_locations)->map(fn($item) => ['key' => $item, 'value' => $item])->toArray(),
+            'nature_of_faults' => collect($nature_of_faults)->map(fn($item) => ['key' => $item, 'value' => $item])->toArray(),
+            'water_sources' => collect($water_sources)->map(fn($item) => ['key' => $item, 'value' => $item])->toArray(),
+        ];
+    }
+
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request , $id)
+    {
+        try{
+
+            $complaint = Complaint::with([
+                'service_center_details:id,customer_code,name',
+                'complaint_type_details',
+                'product_details.categories',
+                'product_details.subcategories',
+                'createdbyname:id,name',
+                'warranty_details'
+            ])->where('id', $id)
+            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                return $query->where('assign_user', $request->user()->id);
+            })
+            ->first();
+
+            if (!$complaint) {
+                 return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'] , $this->notFound);
+            }
+
+            $validator = Validator::make($request->all(), [
+                'serviceBillNo' => 'required',
+                'category_of_complaint' => 'nullable|string',
+                'complaint_type' => 'nullable|exists:service_bill_complaint_types,service_bill_complaint_type_name',
+                'complaint_reason' => 'nullable|exists:service_complaint_reasons,service_complaint_reasons',
+                'condition_of_service' => 'nullable|string',
+                'received_product'     => 'nullable|string',
+                'nature_of_fault' => 'nullable|string',
+                'service_location'     => 'nullable|string',
+                'repaired_replacement' => 'nullable|in:Replacement,Repaired',
+                'line_voltage' => 'nullable|numeric|digits:3',
+                'load_voltage' => 'nullable|numeric|digits:3',
+                'current' => 'nullable|numeric|digits:2',
+                'water_source' => 'nullable|string',
+                'panel_rating_running' => 'nullable|numeric|digits:3',
+                'panel_rating_starting' => 'nullable|regex:/^\d+\/\d+$/',
+                'product_sr_no'   => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'scr_job_card'     => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'photo_3'         => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'photo_4'         => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'photo_5'         => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'voltage_image'   => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'current_image'   => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            ]);
+
+            // If validation fails, return JSON response
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422); // 422 Unprocessable Entity
+            }
+
+            if ($request->repaired_replacement == 'Replacement') {
+                $replacement_tag = 'Yes';
+                $replacement_tag_number = $request->replacement_tag_number;
+            } else {
+                $replacement_tag = 'No';
+                $replacement_tag_number = NULL;
+            }
+
+            $new_service_bill = ServiceBill::updateOrCreate(['complaint_id' => $complaint->id, 'complaint_no' => $complaint->complaint_number], [
+                'bill_no' => $request->serviceBillNo ?? null,
+                'complaint_id' => $complaint->id ?? null,
+                'complaint_no' => json_decode($complaint)->complaint_number ?? null,
+                'division' => $complaint->product_details->categories->id ?? null,
+                'category' => $request->category_of_complaint ?? null,
+                'complaint_type' => $request->complaint_type ?? null,
+                'complaint_reason' => $request->complaint_reason ?? null,
+                'condition_of_service' => $request->condition_of_service ?? null,
+                'received_product' => $request->received_product ?? null,
+                'nature_of_fault' => $request->nature_of_fault ?? null,
+                'service_location' => $request->service_location ?? null,
+                'repaired_replacement' => $request->repaired_replacement ?? null,
+                'replacement_tag' => $replacement_tag ?? null,
+                'replacement_tag_number' => $replacement_tag_number ?? null,
+                'line_voltage' => $request->line_voltage ?? '',
+                'load_voltage' => $request->load_voltage ?? '',
+                'current' => $request->current ?? '',
+                'water_source' => $request->water_source ?? '',
+                'panel_rating_running' => $request->panel_rating_running ?? '',
+                'panel_rating_starting' => $request->panel_rating_starting ?? '',
+            ]);
+
+            if ($new_service_bill) {
+            if ($request->hasFile('product_sr_no')) {
+                $file = $request->file('product_sr_no');
+                $customname = time() . '.' . $file->getClientOriginalExtension();
+                $new_service_bill->addMedia($file)
+                    ->usingFileName($customname)
+                    ->toMediaCollection('product_sr_no');
+            }
+            if ($request->hasFile('scr_job_card')) {
+                $file = $request->file('scr_job_card');
+                $customname = time() . '.' . $file->getClientOriginalExtension();
+                $new_service_bill->addMedia($file)
+                    ->usingFileName($customname)
+                    ->toMediaCollection('scr_job_card');
+            }
+            if ($request->hasFile('photo_3')) {
+                $file = $request->file('photo_3');
+                $customname = time() . '.' . $file->getClientOriginalExtension();
+                $new_service_bill->addMedia($file)
+                    ->usingFileName($customname)
+                    ->toMediaCollection('photo_3');
+            }
+            if ($request->hasFile('photo_4')) {
+                $file = $request->file('photo_4');
+                $customname = time() . '.' . $file->getClientOriginalExtension();
+                $new_service_bill->addMedia($file)
+                    ->usingFileName($customname)
+                    ->toMediaCollection('photo_4');
+            }
+            if ($request->hasFile('photo_5')) {
+                $file = $request->file('photo_5');
+                $customname = time() . '.' . $file->getClientOriginalExtension();
+                $new_service_bill->addMedia($file)
+                    ->usingFileName($customname)
+                    ->toMediaCollection('photo_5');
+            }
+            if ($request->hasFile('voltage_image')) {
+                $file = $request->file('voltage_image');
+                $customname = time() . '.' . $file->getClientOriginalExtension();
+                $new_service_bill->addMedia($file)
+                    ->usingFileName($customname)
+                    ->toMediaCollection('voltage_image');
+            }
+            if ($request->hasFile('current_image')) {
+                $file = $request->file('current_image');
+                $customname = time() . '.' . $file->getClientOriginalExtension();
+                $new_service_bill->addMedia($file)
+                    ->usingFileName($customname)
+                    ->toMediaCollection('current_image');
+            }
+            // if ($request->service && count($request->service) > 0) {
+            //     foreach ($request->service as $service) {
+            //         ServiceBillProductDetails::create([
+            //             'service_bill_id' => $new_service_bill->id,
+            //             'service_type' => $service['service_type'],
+            //             'product_id' => $service['product_id'],
+            //             'quantity' => $service['quantity'],
+            //             'distance' => $service['distance'],
+            //             'appreciation' => $service['appreciation'],
+            //             'price' => $service['price'],
+            //             'subtotal' => $service['subtotal']
+            //         ]);
+            //     }
+            // }
+
+            ComplaintTimeline::create([
+                'complaint_id' => $request->complaint_id,
+                'created_by' => auth()->user()->id,
+                'status' => '102',
+                'remark' => 'Service Bill Created',
+            ]);
+        }
+
+        }catch(\Exception $e){
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        //
+    }
+
+    public function serviceBillComplaintReasons(Request $request){
+        try{
+            $complaintId = $request->complaintId ?? '';
+            $selected = $request->selected ?? '';
+            $reasons = ServiceComplaintReason::where('service_bill_complaint_id' , $complaintId)->get();
+            $data = [
+                'complaint_reasons' => $reasons->map(fn($reason) => [
+                    'key' => $reason->service_complaint_reasons, 
+                    'value' =>  $reason->service_complaint_reasons
+                ])->toArray()
+            ];
+            if($data){
+                return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
+            }else{
+                return response()->json(['status' => 'success', 'data' => "No Reason"], $this->successStatus);
+            }
+        }catch(\Exception $e){
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
+    }
+
+    // get service charge product 
+    public function getServiceChargeProduct(Request $request , $id){
+        try{
+            $data = [];
+            $complaint = Complaint::where('id', $id)
+            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                return $query->where('assign_user', $request->user()->id);
+            })
+            ->first();
+
+            if (!$complaint) {
+                 return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'] , $this->notFound);
+            }
+
+            $pro_sub_cat = $complaint->product_details->subcategories->service_category_id;
+            $pro_cat =  $complaint ? $complaint->product_details->category_id : '';
+            $categoryIds = explode(',', $pro_sub_cat);
+            $service_charge_products = ServiceChargeProducts::where('charge_type_id', $request->charge_type_id)->whereIn('category_id' , $categoryIds)->get();
+            if(isset($service_charge_products)){
+                 $data = collect($service_charge_products)->toArray();
+            }
+            if($data){
+                return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
+            }else{
+                return response()->json(['status' => 'success', 'data' => "No Product"], $this->successStatus);
+            }
+        }catch(\Exception $e){
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
+    }
+
+    public function getServiceProductDetails(Request $request , $id)
+    {
+        try{
+            $data = [];
+           
+            $service_charge_products = ServiceChargeProducts::where('id', $request->id)->first();
+            if(isset($service_charge_products)){
+                 $data = collect($service_charge_products)->toArray();
+            }
+            if($data){
+                return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
+            }else{
+                return response()->json(['status' => 'success', 'data' => "No Product"], $this->successStatus);
+            }
+        }catch(\Exception $e){
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
+    }
+}

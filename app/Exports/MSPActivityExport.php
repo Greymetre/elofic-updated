@@ -25,21 +25,21 @@ class MSPActivityExport implements FromCollection, WithHeadings, ShouldAutoSize,
 
     public function collection()
     {
-        $data = MspActivity::with('user');
-        
-        if($this->branch_id && !empty($this->branch_id)){
-            $data->whereHas('user', function($query) {
+        $data = MspActivity::with('user', 'activityType', 'cities.city', 'customer.customer');
+
+        if ($this->branch_id && !empty($this->branch_id)) {
+            $data->whereHas('user', function ($query) {
                 $query->where('branch_id', $this->branch_id);
             });
         }
 
-        if($this->financial_year && !empty($this->financial_year)){
+        if ($this->financial_year && !empty($this->financial_year)) {
             $parts = explode('-', $this->financial_year);
             $financial_year = $parts[0] . '-' . substr($parts[1], -2);
             $data->where('fyear', $financial_year);
         }
 
-        if($this->month && !empty($this->month)){
+        if ($this->month && !empty($this->month)) {
             $data->whereIn('month', $this->month);
         }
 
@@ -50,11 +50,14 @@ class MSPActivityExport implements FromCollection, WithHeadings, ShouldAutoSize,
     {
 
         return [
-            'Emp Code',  
-            'Emp Name',  
-            'Fyear', 
-            'Month',
-            'MSP Count',
+            'Activity Date',
+            'Activity Type',
+            'Emp Code',
+            'Emp Name',
+            'Branch',
+            'Nos Participants',
+            'Activity  Location',
+            'Activity Event Under'
         ];
     }
 
@@ -63,13 +66,30 @@ class MSPActivityExport implements FromCollection, WithHeadings, ShouldAutoSize,
 
     public function map($data): array
     {
-       
+        $all_city = array();
+        if(count($data->cities) > 0){
+            foreach ($data->cities as $key => $value) {
+                array_push($all_city, $value->city?->city_name);
+            }
+        }
+
+        $all_customer = array();
+        if(count($data->customer) > 0){
+            foreach ($data->customer as $key => $value) {
+                array_push($all_customer, $value->customer?->name);
+            }
+        }
+
+
         return [
+            $data->activity_date ? date('d-M-Y', strtotime($data->activity_date)) : '-',
+            $data->activityType ? $data->activityType->type : '-',
             $data->emp_code ? $data->emp_code : '-',
             $data->user ? $data->user->name : '-',
-            $data->fyear ? $data->fyear : '-',
-            $data->month ? $data->month : '-',
+            $data->user ? ($data->user->getbranch?$data->user->getbranch->branch_name:'-') : '-',
             $data->msp_count ? $data->msp_count : '-',
+            count($all_city) > 0 ? implode(',', $all_city) : '-',
+            count($all_customer) > 0 ? implode(',', $all_customer) : '-',
         ];
     }
 

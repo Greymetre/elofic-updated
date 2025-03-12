@@ -21,6 +21,7 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
         $this->executive_id = $request->executive_id;
         $this->active = $request->active;
         $this->status = $request->status;
+        $this->division_id = $request->division_id;
     }
 
     public function collection()
@@ -46,6 +47,12 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                 $active = $this->active;
                 $query->whereHas('users', function ($query) use ($active) {
                     $query->where('active', $active);
+                });
+            }
+            if (!empty($this->division_id) && $this->division_id != null && $this->division_id != "") {
+                $division_id = $this->division_id;
+                $query->whereHas('users', function ($query) use ($division_id) {
+                    $query->where('division_id', $division_id);
                 });
             }
         })
