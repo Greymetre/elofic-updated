@@ -28,33 +28,67 @@ class LoyaltyRetialerSummaryReportExport implements FromCollection, WithHeadings
         $this->enddate = $request->input('end_date');
         $this->branch_id = $request->input('branch_id');
         $this->dealer_id = $request->input('dealer_id');
+        $this->pageSize = $request->input('pageSize');
+        $this->page = $request->input('page');
     }
 
     public function collection()
     {
         DB::statement("SET SESSION group_concat_max_len = 100000");
+
         $retailers_sarthi = TransactionHistory::groupBy('customer_id')->pluck('customer_id');
         $userids = getUsersReportingToAuth();
-        $data = Customers::with('customertypes', 'createdbyname', 'customeraddress.cityname', 'customeraddress.statename', 'customer_transacation')->whereIn('id', $retailers_sarthi)
-            ->where(function ($query) use ($userids) {
-                if ($this->branch_id && $this->branch_id != '' && $this->branch_id != null) {
-                    $userIdsss = User::where('branch_id', $this->branch_id)->whereIn('id', $userids)->pluck('id');
-                    $query->whereIn('executive_id', $userIdsss)
+
+        $query = Customers::with([
+            'customertypes',
+            'createdbyname.getbranch',
+            'customeraddress.cityname',
+            'customeraddress.statename',
+            'getparentdetail.parent_detail',
+            'transactions' => function ($q) {
+                $q->select('customer_id', 'status', 'point', 'active_point', 'provision_point');
+            },
+            'redemptions' => function ($q) {
+                $q->select('customer_id', 'status', 'redeem_mode', 'redeem_amount')
+                    ->whereNot('status', '2');
+            }
+        ])->whereIn('id', $retailers_sarthi);
+
+        if ($this->branch_id) {
+            $userIdsss = User::where('branch_id', $this->branch_id)
+                ->whereIn('id', $userids)
+                ->pluck('id');
+
+            $query->where(function ($q) use ($userIdsss) {
+                $q->whereIn('executive_id', $userIdsss)
                     ->orWhereIn('created_by', $userIdsss);
-                } else {
-                    if(!auth()->user()->hasRole('superadmin') && !auth()->user()->hasRole('Admin') && !auth()->user()->hasRole('Sub_Admin')){
-                        $query->whereIn('executive_id', $userids)
+            });
+        } else {
+            if (
+                !auth()->user()->hasRole('superadmin') &&
+                !auth()->user()->hasRole('Admin') &&
+                !auth()->user()->hasRole('Sub_Admin')
+            ) {
+                $query->where(function ($q) use ($userids) {
+                    $q->whereIn('executive_id', $userids)
                         ->orWhereIn('created_by', $userids);
-                    }
-                }
+                });
+            }
+        }
 
-                if ($this->dealer_id && $this->dealer_id != '' && $this->dealer_id != null) {
-                    $query->where('id', $this->dealer_id);
-                }
-            })->orderBy('id', 'asc')->paginate(1000);
+        if ($this->dealer_id) {
+            $query->whereHas('getparentdetail', function ($q) {
+                $q->where('parent_id', $this->dealer_id);
+            });
+        }
 
-        return $data;
+        $pageSize = $this->pageSize ?? 1000;
+        $page = $this->page ?? 1;
+
+        return $query->orderBy('id', 'asc')->get();
+        // ->paginate($pageSize, ['*'], 'page', $page);
     }
+
 
     public function headings(): array
     {
@@ -82,33 +116,29 @@ class LoyaltyRetialerSummaryReportExport implements FromCollection, WithHeadings
 
     public function map($data): array
     {
-        $all_parents = '';
-        if (count($data->getparentdetail) > 0) {
-            foreach ($data->getparentdetail as $key => $value) {
-                $all_parents .= $value->parent_detail?$value->parent_detail->name . ' ,':'';
-            }
-        }
+        // Get parent details
+        $all_parents = collect($data->getparentdetail)
+            ->map(fn($value) => $value->parent_detail->name ?? '')
+            ->filter()
+            ->implode(', ');
+
+        // if($data['id'] == 804){
+        //     dd($data);
+        // }
+
+        // Preloaded transaction data
+        $coupon_scan_nos = $data->transactions->count() ?? 0;
+        $total_points = $data->transactions->sum('point') ?? 0;
+        $active_points = $data->transactions->where('status', '1')->sum('point') ?? 0;
+        $active_points += $data->transactions->where('status', '0')->sum('active_point') ?? 0;
+        $provision_points = $data->transactions->where('status', '0')->sum('provision_point') ?? 0;
 
 
-        $coupon_scan_nos = TransactionHistory::where('customer_id', $data->id)->count();
-        $thistorys = TransactionHistory::where('customer_id', $data->id)->get();
-        $total_points = TransactionHistory::where('customer_id', $data->id)->sum('point') ?? 0;
-        $active_points = 0;
-        $provision_points = 0;
-        foreach ($thistorys as $thistory) {
-            if ($thistory->status == '1') {
-                $active_points += $thistory->point;
-            } else {
-                $active_points += $thistory->active_point;
-                $provision_points += $thistory->provision_point;
-            }
-        }
-        $redeem_gift = Redemption::where('customer_id', $data->id)->whereNot('status', '2')->where('redeem_mode', '1')->sum('redeem_amount') ?? 0;
-        $redeem_neft = Redemption::where('customer_id', $data->id)->whereNot('status', '2')->where('redeem_mode', '2')->sum('redeem_amount') ?? 0;
-        $total_redemption = Redemption::where('customer_id', $data->id)->whereNot('status', '2')->sum('redeem_amount') ?? 0;
-        $total_rejected = Redemption::where('customer_id', $data->id)->where('status', '2')->sum('redeem_amount') ?? 0;
+        // Preloaded redemption data
+        $redeem_gift = $data->redemptions->where('redeem_mode', '1')->sum('redeem_amount') ?? 0;
+        $redeem_neft = $data->redemptions->where('redeem_mode', '2')->sum('redeem_amount') ?? 0;
+        $total_redemption = $redeem_gift + $redeem_neft;
         $total_balance = (int)$active_points - (int)$total_redemption;
-
 
         return [
             $data['createdbyname']['getbranch']['branch_name'] ?? '',
@@ -117,16 +147,17 @@ class LoyaltyRetialerSummaryReportExport implements FromCollection, WithHeadings
             $all_parents,
             $data['customeraddress']['statename']['state_name'] ?? '',
             $data['customeraddress']['cityname']['city_name'] ?? '',
-            $coupon_scan_nos ?? '0',
-            $provision_point ?? '0',
-            $active_point ?? '0',
-            $total_points ?? '0',
-            $redeem_gift ?? '0',
-            $redeem_neft ?? '0',
-            $total_redemption ?? '0',
-            $total_balance ?? '0',
+            $coupon_scan_nos,
+            $provision_points,
+            $active_points,
+            $total_points,
+            $redeem_gift,
+            $redeem_neft,
+            $total_redemption,
+            $total_balance,
         ];
     }
+
 
     public function registerEvents(): array
     {

@@ -4,8 +4,8 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
-use App\Models\PrimarySale;
 use App\Models\PrimarySales;
+use Illuminate\Support\Facades\Log;
 
 class SendPrimarySales extends Command
 {
@@ -18,18 +18,6 @@ class SendPrimarySales extends Command
         $getresponse = Http::timeout(240)->get($geturl);
         Log::channel('sapstock')->error("All primary sales data processed started.");
 
-        if (!$getresponse->successful()) {
-            $this->error('Failed to fetch last sent ID.');
-            return;
-        }
-
-        $lastId = $getresponse->json();
-        $MylastId = PrimarySales::whereNotNull('id')->max('id');
-
-        if ($lastId >= $MylastId) {
-            $this->info('No new sales data to send.');
-            return;
-        }
 
         $url = "https://dashboard.fieldkonnect.io/power-bi/public/api/insertPrimarySales";
 
@@ -56,7 +44,6 @@ class SendPrimarySales extends Command
             'updated_at'
         )
             ->orderBy('id', 'desc')
-            ->limit(20000)
             ->get();
 
         $salesData->chunk(200)->each(function ($chunk) use ($url) {
