@@ -26,7 +26,7 @@
                         <option value="" disabled>{!! trans('panel.secondary_dashboard.division') !!}</option>
                         @if(@isset($ps_divisions ))
                         @foreach($ps_divisions as $division)
-                        <option value="{!! $division->division !!}">{!! $division->division !!}</option>
+                        <option value="{!! $division !!}">{!! $division !!}</option>
                         @endforeach
                         @endif
                       </select>
@@ -37,7 +37,7 @@
                         <option value="" disabled selected>{!! trans('panel.secondary_dashboard.branch') !!}</option>
                         @if(@isset($ps_branches ))
                         @foreach($ps_branches as $branch)
-                        <option value="{!! $branch->final_branch !!}">{!! $branch->final_branch !!}</option>
+                        <option value="{!! $branch !!}">{!! $branch !!}</option>
                         @endforeach
                         @endif
                       </select>
@@ -70,7 +70,7 @@
                         <option value="" selected>{!! trans('panel.secondary_dashboard.dealers_and_distibutors') !!}</option>
                         @if(@isset($ps_dealers ))
                         @foreach($ps_dealers as $dealer)
-                        <option value="{!! $dealer->dealer !!}">{!! $dealer->dealer !!}</option>
+                        <option value="{!! $dealer !!}">{!! $dealer !!}</option>
                         @endforeach
                         @endif
                       </select>
@@ -81,7 +81,7 @@
                         <option value="" selected>{!! trans('panel.secondary_dashboard.sales_person') !!}</option>
                         @if(@isset($ps_sales_persons ))
                         @foreach($ps_sales_persons as $sales_person)
-                        <option value="{!! $sales_person->sales_person !!}">{!! $sales_person->sales_person !!}</option>
+                        <option value="{!! $sales_person !!}">{!! $sales_person !!}</option>
                         @endforeach
                         @endif
                       </select>
@@ -92,7 +92,7 @@
                         <option value="" selected>{!! trans('panel.secondary_dashboard.product_model') !!}</option>
                         @if(@isset($ps_product_models ))
                         @foreach($ps_product_models as $product)
-                        <option value="{!! $product->product_name !!}">{!! $product->product_name !!}</option>
+                        <option value="{!! $product !!}">{!! $product !!}</option>
                         @endforeach
                         @endif
                       </select>
@@ -103,7 +103,7 @@
                         <option value="" selected>{!! trans('panel.secondary_dashboard.new_group_name') !!}</option>
                         @if(@isset($ps_new_group_names ))
                         @foreach($ps_new_group_names as $product)
-                        <option value="{!! $product->new_group !!}">{!! $product->new_group !!}</option>
+                        <option value="{!! $product !!}">{!! $product !!}</option>
                         @endforeach
                         @endif
                       </select>

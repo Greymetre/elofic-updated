@@ -45,6 +45,17 @@
                     </div>
 
                     <div class="p-2" style="width: 250px;">
+                    <select class="selectpicker" name="division_id" id="division_id" data-style="select-with-transition" title="Select Division">
+                     <option value="">Select Division</option>
+                    @if(@isset($divisions ))
+                    @foreach($divisions as $division)
+                     <option value="{!! $division['id'] !!}" {{ old( 'division') == $division['id'] ? 'selected' : '' }}>{!! $division['division_name'] !!}</option>
+                    @endforeach
+                    @endif
+                   </select>
+                  </div>
+
+                    <div class="p-2" style="width: 250px;">
                       <select class="select2" name="executive_id" id="executive_id" data-style="select-with-transition" title="Select User">
                         <option value="">Select User</option>
                         @if(@isset($users ))
@@ -406,6 +417,7 @@
         ajax: {
           url: "{{url('reports/attendancereport')}}",
           data: function(d) {
+            d.division_id = $('#division_id').val(),
             d.executive_id = $('#executive_id').val(),
               d.active = $('#active').val(),
               d.start_date = $('#start_date').val(),
@@ -417,6 +429,9 @@
 
       });
 
+      $('#division_id').change(function() {
+        table.draw();
+      });
       $('#executive_id').change(function() {
         table.draw();
       });

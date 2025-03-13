@@ -106,6 +106,7 @@ class MspActivityController extends Controller
             $activity = MspActivity::create([
                 'emp_code'      => $request->user()->employee_codes ?? '',
                 'fyear'         => $formattedYear,
+                'activity_date'         => Carbon::parse($request->activity_date)->toDateString(),
                 'month'         => $month,
                 'msp_count'     => $request->msp_count,
                 'activity_type' => $request->activity_type,

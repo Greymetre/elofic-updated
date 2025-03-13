@@ -14,6 +14,7 @@ class MspActivity extends Model
     protected $fillable = [
         'emp_code',
         'fyear',
+        'activity_date',
         'month',
         'msp_count',
         'created_at',
@@ -25,5 +26,20 @@ class MspActivity extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'emp_code', 'employee_codes');
+    }
+
+    public function activityType()
+    {
+        return $this->belongsTo(MarketingActivity::class, 'activity_type', 'id');
+    }
+
+    public function cities()
+    {
+        return $this->hasMany(MspActivityCity::class, 'msp_activity_id', 'id');
+    }
+
+    public function customer()
+    {
+        return $this->hasMany(MspActivityCustomer::class, 'msp_activity_id', 'id');
     }
 }

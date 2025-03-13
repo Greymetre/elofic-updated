@@ -105,7 +105,7 @@ class EmployeeCostingDataTable extends DataTable
         $endDateFormatted = $endDate->toDateString();
 
         // Build Query
-        $query = User::with(['primarySales', 'getdesignation', 'getbranch', 'getdivision', 'userinfo', 'expenses'])
+        $query = User::with(['primarySales:id,emp_code,invoice_date,net_amount', 'getdesignation', 'getbranch', 'getdivision', 'userinfo', 'expenses'])
             ->where('active', 'Y')
             ->whereHas('roles', function ($query) {
                 $query->whereIn('id', ['13', '6', '3', '2']);

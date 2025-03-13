@@ -563,7 +563,8 @@ class ReportController extends Controller
                 ->rawColumns(['punchin', 'punchout', 'action', 'action_status', 'current_status', 'punchin_from', 'checkbox'])
                 ->make(true);
         }
-        return view('reports.attendancereport', compact('users', 'branches'));
+        $divisions = Division::latest()->get();
+        return view('reports.attendancereport', compact('users', 'branches', 'divisions'));
     }
 
 
@@ -2341,34 +2342,57 @@ class ReportController extends Controller
 
     public function primary_sales(Request $request)
     {
-        $ps_branches = PrimarySales::latest()->get()->unique('final_branch');
-        $ps_divisions = PrimarySales::latest()->get()->unique('division');
-        $ps_months = PrimarySales::latest()->get()->unique('month');
-        $ps_dealers = PrimarySales::latest()->get()->unique('dealer');
-        $ps_product_models = PrimarySales::latest()->get()->unique('product_name');
-        $ps_new_group_names = PrimarySales::latest()->get()->unique('new_group');
-        $ps_product_models = PrimarySales::latest()->get()->unique('product_name');
-        $ps_sales_persons = PrimarySales::latest()->get()->unique('sales_person');
-        $users = user::whereDoesntHave('roles', function ($query) {
+        // Fetch distinct values directly from DB instead of fetching all rows
+        $ps_branches = PrimarySales::select('final_branch')->distinct()->pluck('final_branch');
+        $ps_divisions = PrimarySales::select('division')->distinct()->pluck('division');
+        $ps_months = PrimarySales::select('month')->distinct()->pluck('month');
+        $ps_dealers = PrimarySales::select('dealer')->distinct()->pluck('dealer');
+        $ps_product_models = PrimarySales::select('product_name')->distinct()->pluck('product_name');
+        $ps_new_group_names = PrimarySales::select('new_group')->distinct()->pluck('new_group');
+        $ps_sales_persons = PrimarySales::select('sales_person')->distinct()->pluck('sales_person');
+
+        // Get active users excluding role ID 29
+        $users = User::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
-        })->where('active', 'Y')->orderBy('name', 'asc')->get();
+        })
+            ->where('active', 'Y')
+            ->orderBy('name', 'asc')
+            ->get(['id', 'name']); // Fetch only required columns
+
         $currentYear = Carbon::now()->year;
         $years = range($currentYear - 2, $currentYear + 2);
 
+        // Optimize role check and filtering
         $total_query = PrimarySales::query();
 
         $role = Role::find(29);
         if ($role && auth()->user()->hasRole($role->name)) {
             $child_customer = ParentDetail::where('parent_id', auth()->user()->customerid)
                 ->pluck('customer_id')
-                ->push(auth()->user()->customerid);
+                ->push(auth()->user()->customerid)
+                ->toArray(); // Convert to array for better query performance
             $total_query->whereIn('customer_id', $child_customer);
         }
 
+        // Optimize sum calculations
         $total_qty = $total_query->sum('quantity');
         $total_sale = $total_query->sum('net_amount');
-        return view('reports.primary_sales', compact('years', 'users', 'ps_branches', 'ps_divisions', 'ps_months', 'ps_dealers', 'ps_product_models', 'ps_new_group_names', 'ps_sales_persons', 'total_qty', 'total_sale'));
+
+        return view('reports.primary_sales', compact(
+            'years',
+            'users',
+            'ps_branches',
+            'ps_divisions',
+            'ps_months',
+            'ps_dealers',
+            'ps_product_models',
+            'ps_new_group_names',
+            'ps_sales_persons',
+            'total_qty',
+            'total_sale'
+        ));
     }
+
 
     public function secondary_sales(Request $request)
     {
@@ -3266,10 +3290,11 @@ class ReportController extends Controller
     {
         $ps_branches = Branch::where('active', 'Y')->select('id', 'branch_name')->get();
         $ps_divisions = Division::where('active', 'Y')->select('id', 'division_name')->get();
-        $ps_months = PrimarySales::latest()->get()->unique('month');
-        $ps_dealers = PrimarySales::latest()->get()->unique('dealer');
-        $ps_product_models = PrimarySales::latest()->get()->unique('model_name');
-        $ps_new_group_names = PrimarySales::latest()->get()->unique('new_group');
+        $ps_months = PrimarySales::select('month')->distinct()->pluck('month');
+        $ps_dealers = PrimarySales::select('dealer')->distinct()->pluck('dealer');
+        $ps_product_models = PrimarySales::select('model_name')->distinct()->pluck('model_name');
+        $ps_new_group_names = PrimarySales::select('new_group')->distinct()->pluck('new_group');
+
         $ps_sales_persons = user::whereDoesntHave('roles', function ($query) {
             $query->where('id', 29);
         })->where('active', 'Y')->select('id', 'name')->orderBy('name', 'asc')->get();
@@ -3877,7 +3902,7 @@ class ReportController extends Controller
         $dealers = Customers::where('customertype', ['1', '3'])->get();
 
         if ($request->ajax()) {
-            DB::statement("SET SESSION group_concat_max_len = 100000000");
+            DB::statement("SET SESSION group_concat_max_len = 100000");
             $retailers_sarthi = TransactionHistory::groupBy('customer_id')->pluck('customer_id');
             $role = Role::find(29);
             if ($role && auth()->user()->hasRole($role->name)) {
@@ -4064,9 +4089,9 @@ class ReportController extends Controller
                     return $day_wise_amount_array['150'] ?? '0';
                 })
                 ->addColumn('balance_confirmations', function ($data) {
-                    if($data->customer->customerdocuments->where('document_name', 'balance_confirmations')->first()){
-                       return '<a href="'.$data->customer->customerdocuments->where('document_name', 'balance_confirmations')->first()->file_path.'" target="_blank" title="Balance Confirmations" ><i class="material-icons" style="color: #0a77b1 !important; font-size: 25px;" >picture_as_pdf</i></a>';
-                    }else{
+                    if ($data->customer->customerdocuments->where('document_name', 'balance_confirmations')->first()) {
+                        return '<a href="' . $data->customer->customerdocuments->where('document_name', 'balance_confirmations')->first()->file_path . '" target="_blank" title="Balance Confirmations" ><i class="material-icons" style="color: #0a77b1 !important; font-size: 25px;" >picture_as_pdf</i></a>';
+                    } else {
                         return '-';
                     }
                 })

@@ -34,6 +34,7 @@ use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SapStockController;
 use App\Http\Controllers\Api\MspActivityController;
 use App\Http\Controllers\Api\ComplaintApiController;
+use App\Http\Controllers\Api\ServiceBillController;
 
 /*
 |--------------------------------------------------------------------------
@@ -266,5 +267,14 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::get('user/msp-activity-filter', [MspActivityController::class , 'getMspActivityFilter']);
 
     // Complaint Api's routes 
-    Route::apiResource('complaints', ComplaintApiController::class);
+    Route::apiResource('complaints', ComplaintApiController::class)->only(['index' , 'show' , 'update']);
+    Route::post('complaint/work-done/{id}', [ComplaintApiController::class, 'work_done_submit']);
+    Route::get('complaint/select-option', [ComplaintApiController::class, 'select_option']);
+
+    // Service bill Api's routes
+    Route::get('complaint/{id}/service-bill', [ServiceBillController::class, 'create']);
+    Route::get('service-bill/reasons', [ServiceBillController::class, 'serviceBillComplaintReasons']);
+    Route::post('complaint/{id}/service-bill/create', [ServiceBillController::class, 'store']);
+    Route::get('complaint/{id}/service-charge-product', [ServiceBillController::class, 'getServiceChargeProduct']);
+    Route::get('service-charge-product/{id}', [ServiceBillController::class, 'getServiceProductDetails']);
 });
