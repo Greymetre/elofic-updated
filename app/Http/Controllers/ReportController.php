@@ -905,7 +905,7 @@ class ReportController extends Controller
 
                     $customerIds = $data->getretailers->pluck('customer_id');
                     if (count($customerIds) > 0) {
-                        $provision_point = TransactionHistory::whereIn('customer_id', $customerIds)->where('status', '0')->sum('point');
+                        $provision_point = TransactionHistory::whereIn('customer_id', $customerIds)->where('status', '0')->sum('provision_point');
                     } else {
                         $provision_point = 0;
                     }
@@ -917,6 +917,7 @@ class ReportController extends Controller
                     $customerIds = $data->getretailers->pluck('customer_id');
                     if (count($customerIds) > 0) {
                         $active_point = TransactionHistory::whereIn('customer_id', $customerIds)->where('status', '1')->sum('point');
+                        $active_point += TransactionHistory::whereIn('customer_id', $customerIds)->where('status', '0')->sum('active_point');
                     } else {
                         $active_point = 0;
                     }
@@ -927,14 +928,10 @@ class ReportController extends Controller
                     $customerIds = $data->getretailers->pluck('customer_id');
 
                     if (count($customerIds) > 0) {
-                        $active_point = TransactionHistory::whereIn('customer_id', $customerIds)->where('status', '1')->sum('point');
-                        $provision_point = TransactionHistory::whereIn('customer_id', $customerIds)->where('status', '0')->sum('point');
-                        $total_point = $provision_point + $active_point;
+                        $total_point = TransactionHistory::whereIn('customer_id', $customerIds)->sum('point');
                     } else {
-                        $active_point = 0;
-                        $provision_point = 0;
+                        $total_point = 0;
                     }
-                    $total_point = $provision_point + $active_point;
                     return isset($total_point) ? $total_point : '';
                 })
                 ->addColumn('redeem_gift', function ($data) {
@@ -958,14 +955,11 @@ class ReportController extends Controller
                 })
                 ->addColumn('balance_active_point', function ($data) {
                     $customerIds = $data->getretailers->pluck('customer_id');
-                    $redeem_neft = Redemption::with('customer')->where('status', '!=', '2')->whereIn('customer_id', $customerIds)->where('redeem_mode', '2')->sum('redeem_amount');
-                    $redeem_gift = Redemption::with('customer')->where('status', '!=', '2')->whereIn('customer_id', $customerIds)->where('redeem_mode', '1')->sum('redeem_amount');
-                    $total_redeem = $redeem_gift + $redeem_neft;
-                    $active_point = TransactionHistory::whereIn('customer_id', $customerIds)->where('point', '1')->sum('point');
-                    $provision_point = TransactionHistory::whereIn('customer_id', $customerIds)->where('point', '0')->sum('point');
-                    $total_point = $provision_point + $active_point;
+                    $total_redeem = Redemption::with('customer')->where('status', '!=', '2')->whereIn('customer_id', $customerIds)->sum('redeem_amount');
+                    $active_point = TransactionHistory::whereIn('customer_id', $customerIds)->where('status', '1')->sum('point');
+                    $active_point += TransactionHistory::whereIn('customer_id', $customerIds)->where('status', '0')->sum('active_point');
 
-                    $balance_active_point = $total_redeem - $total_point;
+                    $balance_active_point = $active_point - $total_redeem;
 
                     return isset($balance_active_point) ? $balance_active_point : '';
                 })
@@ -3911,7 +3905,22 @@ class ReportController extends Controller
                     ->push(auth()->user()->customerid);
                 $retailers_sarthi = $child_customer->intersect($retailers_sarthi);
             }
-            $data = Customers::with('customertypes', 'firmtypes', 'createdbyname', 'customeraddress.cityname', 'customeraddress.statename', 'customer_transacation')->whereIn('id', $retailers_sarthi)
+            $data = Customers::with([
+                'customertypes',
+                'firmtypes',
+                'createdbyname',
+                'customeraddress.cityname',
+                'customeraddress.statename',
+                'customer_transacation',
+                'getparentdetail.parent_detail',
+                'transactions' => function ($q) {
+                    $q->select('customer_id', 'status', 'point', 'active_point', 'provision_point');
+                },
+                'redemptions' => function ($q) {
+                    $q->select('customer_id', 'status', 'redeem_mode', 'redeem_amount')
+                        ->whereNot('status', '2');
+                }
+            ])->whereIn('id', $retailers_sarthi)
                 ->where(function ($query) use ($request, $userids, $role) {
                     if ($request->branch_id && $request->branch_id != '' && $request->branch_id != null) {
                         $userIdsss = user::whereDoesntHave('roles', function ($query) {
@@ -3927,7 +3936,9 @@ class ReportController extends Controller
                     }
 
                     if ($request->dealer_id && $request->dealer_id != '' && $request->dealer_id != null) {
-                        $query->where('id', $request->dealer_id);
+                        $query->whereHas('getparentdetail', function ($q) use ($request) {
+                            $q->where('parent_id', $request->dealer_id);
+                        });
                     }
                 })->orderBy('id', 'asc');
             return Datatables::of($data)
@@ -3939,10 +3950,7 @@ class ReportController extends Controller
                     return $data->createdbyname ? $data->createdbyname->getbranch->branch_name : '';
                 })
                 ->addColumn('coupon_scan_nos', function ($data) {
-
-                    $coupon_scan_nos = TransactionHistory::where('customer_id', $data->id)->count();
-
-                    return isset($coupon_scan_nos) ? $coupon_scan_nos : '';
+                    return $data->transactions->count();
                 })
                 ->addColumn('mobile_app_downloads', function ($data) {
 
@@ -3951,71 +3959,34 @@ class ReportController extends Controller
                     return isset($mobile_app_downloads) ? $mobile_app_downloads : '';
                 })
                 ->addColumn('provision_point', function ($data) {
-
-                    $thistorys = TransactionHistory::where('customer_id', $data->id)->get();
-                    $active_points = 0;
-                    $provision_points = 0;
-                    foreach ($thistorys as $thistory) {
-                        if ($thistory->status == '1') {
-                            $active_points += $thistory->point;
-                        } else {
-                            $active_points += $thistory->active_point;
-                            $provision_points += $thistory->provision_point;
-                        }
-                    }
-                    return $provision_points;
+                    return $data->transactions->where('status', '0')->sum('provision_point');
                 })
                 ->addColumn('active_point', function ($data) {
-                    $thistorys = TransactionHistory::where('customer_id', $data->id)->get();
-                    $total_points = TransactionHistory::where('customer_id', $data->id)->sum('point') ?? 0;
-                    $active_points = 0;
-                    $provision_points = 0;
-                    foreach ($thistorys as $thistory) {
-                        if ($thistory->status == '1') {
-                            $active_points += $thistory->point;
-                        } else {
-                            $active_points += $thistory->active_point;
-                            $provision_points += $thistory->provision_point;
-                        }
-                    }
-                    $total_redemption = Redemption::where('customer_id', $data->id)->whereNot('status', '2')->sum('redeem_amount') ?? 0;
-                    $total_rejected = Redemption::where('customer_id', $data->id)->where('status', '2')->sum('redeem_amount') ?? 0;
-                    $total_balance = (int)$active_points - (int)$total_redemption;
+                    $active_points = $data->transactions->where('status', '1')->sum('point') ?? 0;
+                    $active_points += $data->transactions->where('status', '0')->sum('active_point') ?? 0;
                     return  $active_points;
                 })
                 ->addColumn('total_point', function ($data) {
-                    $total_points = TransactionHistory::where('customer_id', $data->id)->sum('point') ?? 0;
+                    $total_points = $data->transactions->sum('point') ?? 0;
                     return $total_points;
                 })
                 ->addColumn('redeem_gift', function ($data) {
-                    $redeem_gift = Redemption::where('status', '!=', '2')->where('customer_id', $data->id)->where('redeem_mode', '1')->sum('redeem_amount');
-
-                    return isset($redeem_gift) ? $redeem_gift : '';
+                    $redeem_gift = $data->redemptions->where('redeem_mode', '1')->sum('redeem_amount') ?? '0';
+                    return $redeem_gift;
                 })
                 ->addColumn('redeem_neft', function ($data) {
-                    $redeem_neft = Redemption::where('status', '!=', '2')->where('customer_id', $data->id)->where('redeem_mode', '2')->sum('redeem_amount');
-
-                    return isset($redeem_neft) ? $redeem_neft : '';
+                    return $redeem_neft = $data->redemptions->where('redeem_mode', '2')->sum('redeem_amount') ?? '0';
                 })
                 ->addColumn('total_redeem', function ($data) {
                     $total_redemption = Redemption::where('customer_id', $data->id)->whereNot('status', '2')->sum('redeem_amount') ?? 0;
-                    return $total_redemption;
+                    return $data->redemptions->sum('redeem_amount') ?? '0';
                 })
                 ->addColumn('balance_active_point', function ($data) {
-                    $thistorys = TransactionHistory::where('customer_id', $data->id)->get();
-                    $total_points = TransactionHistory::where('customer_id', $data->id)->sum('point') ?? 0;
-                    $active_points = 0;
-                    $provision_points = 0;
-                    foreach ($thistorys as $thistory) {
-                        if ($thistory->status == '1') {
-                            $active_points += $thistory->point;
-                        } else {
-                            $active_points += $thistory->active_point;
-                            $provision_points += $thistory->provision_point;
-                        }
-                    }
-                    $total_redemption = Redemption::where('customer_id', $data->id)->whereNot('status', '2')->sum('redeem_amount') ?? 0;
-                    $total_rejected = Redemption::where('customer_id', $data->id)->where('status', '2')->sum('redeem_amount') ?? 0;
+                    $active_points = $data->transactions->where('status', '1')->sum('point') ?? 0;
+                    $active_points += $data->transactions->where('status', '0')->sum('active_point') ?? 0;
+                    $redeem_gift = $data->redemptions->where('redeem_mode', '1')->sum('redeem_amount') ?? 0;
+                    $redeem_neft = $data->redemptions->where('redeem_mode', '2')->sum('redeem_amount') ?? 0;
+                    $total_redemption = $redeem_gift + $redeem_neft;
                     $total_balance = (int)$active_points - (int)$total_redemption;
 
                     return $total_balance;

@@ -270,11 +270,14 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::apiResource('complaints', ComplaintApiController::class)->only(['index' , 'show' , 'update']);
     Route::post('complaint/work-done/{id}', [ComplaintApiController::class, 'work_done_submit']);
     Route::get('complaint/select-option', [ComplaintApiController::class, 'select_option']);
+    Route::get('complaint/filter-option', [ComplaintApiController::class, 'filter_option']);
 
     // Service bill Api's routes
     Route::get('complaint/{id}/service-bill', [ServiceBillController::class, 'create']);
     Route::get('service-bill/reasons', [ServiceBillController::class, 'serviceBillComplaintReasons']);
     Route::post('complaint/{id}/service-bill/create', [ServiceBillController::class, 'store']);
+    Route::get('complaint/{id}/service-bill/select-option', [ServiceBillController::class, 'select_option']);
+    Route::get('service-bill/{service_id}/details', [ServiceBillController::class, 'show']);
     Route::get('complaint/{id}/service-charge-product', [ServiceBillController::class, 'getServiceChargeProduct']);
     Route::get('service-charge-product/{id}', [ServiceBillController::class, 'getServiceProductDetails']);
 });

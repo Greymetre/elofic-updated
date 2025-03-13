@@ -578,7 +578,7 @@ body table td {
                            <input type="hidden" name="service[{{$k}}][service_bill_product_id]" id="service_bill_product_id" value="{{$product->id}}"></div>
                            <td>
                               <div class="input_section">
-                              <select required name="service[{{$k}}][service_type]" class="form-control select2 chargety service_charge_type">
+                              <select required name="service[{{$k}}][service_type]" class="form-control select2 chargety1 service_charge_type">
                                  @if(count($charge_type) > 0)
                                  @if($complaint->product_details->category_id == '2')
                                  @php $charge_type = $charge_type->whereIn('id', ['2','3']); @endphp
@@ -892,7 +892,7 @@ body table td {
          });
       })
 
-      $(document).on("change", ".chargety", function() {
+      $(document).on("change", ".chargety , .chargety1", function()  {
          var selectedValues = [];
          var id = $(this).val();
          $('.chargety').each(function() {

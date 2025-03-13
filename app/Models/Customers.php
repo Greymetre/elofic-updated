@@ -302,5 +302,15 @@ class Customers extends Authenticatable
         return $fullAddress ?: null;
     }
 
+    public function transactions()
+    {
+        return $this->hasMany(TransactionHistory::class, 'customer_id', 'id');
+    }
+
+    public function redemptions()
+    {
+        return $this->hasMany(Redemption::class, 'customer_id', 'id');
+    }
+
 
 }

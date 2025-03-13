@@ -8,12 +8,16 @@ use App\Models\Complaint;
 use App\Models\ComplaintWorkDone;
 use App\Models\ServiceBill;
 use App\Models\ComplaintTimeline;
+use App\Models\ComplaintType;
 use App\Models\Customers;
+use App\Models\Category;
 use App\Models\User;
 use App\Http\Controllers\AjaxController;
 use App\Http\Controllers\ComplaintController;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Carbon\Carbon;
+use App\Models\Branch;
 
 class ComplaintApiController extends Controller
 {
@@ -43,12 +47,38 @@ class ComplaintApiController extends Controller
     {
         try{
             if($request->user()->hasRole('Service Eng') || $request->user()->hasRole('superadmin')) {
+                $filters = $request->all();
                 if ($request->user()->hasRole('superadmin')) {
                     $query = Complaint::select('id', 'complaint_number', 'complaint_status', 'complaint_date');
                 } else {
                     $user_ids = getUsersReportingToAuth($request->user()->id);
                     $query = Complaint::whereIn('assign_user', $user_ids)
                         ->select('id', 'complaint_number', 'complaint_status', 'complaint_date');
+                }
+
+                if(isset($request->from_date) && isset($request->to_date)){
+                    $complaint_from_date = Carbon::parse($request->from_date)->startOfDay()->format('Y-m-d');
+                    $complaint_to_date = Carbon::parse($request->to_date)->startOfDay()->format('Y-m-d');
+                    $query->whereBetween('complaint_date', [$complaint_from_date, $complaint_to_date]);
+                }
+
+                foreach ($filters as $key => $value) {
+                    if (isset($value)) {
+                        switch ($key) {
+                            case 'complaint_status':
+                            case 'complaint_type': 
+                            case 'under_warranty':
+                            case 'purchased_branch':
+                            case 'service_type':
+                            case 'warranty_bill':
+                            case 'register_by':
+                            case 'category':
+                            case 'complaint_recieve_via';
+                                $query->where($key, $value);
+                                break;
+                            // Add more cases if needed
+                        }
+                    }
                 }
 
                 $complaints = [];
@@ -216,18 +246,22 @@ class ComplaintApiController extends Controller
                 $data['work_done_date'] = isset($work_done->created_at) ? getDateInIndFomate($work_done->created_at) : null;
 
                 // Complete & Close Details
-                $data += collect($service_bill?->only([
-                    'replacement_tag', 'replacement_tag_number', 'category' , 'complaint_type' , 'complaint_reason' , 'condition_of_service' , 'received_product' , 'nature_of_fault' , 'service_location' 
+                $data['service_bill'] = $service_bill ? collect($service_bill->only([
+                    'id', 'replacement_tag', 'replacement_tag_number', 'category', 
+                    'complaint_type', 'complaint_reason', 'condition_of_service', 
+                    'received_product', 'nature_of_fault', 'service_location'
                 ]))->mapWithKeys(function ($value, $key) {
                     return [   
                         match ($key) {
-                            'category' => 'service_bill_category',
+                            'id'              => 'service_bill_id',
+                            'category'        => 'service_bill_category',
                             'complaint_type'  => 'service_bill_complaint_type',
-                            'complaint_reason' => 'service_bill_complaint_reason',
-                            default => $key,
+                            'complaint_reason'=> 'service_bill_complaint_reason',
+                            default           => $key,
                         } => ($value === "" ? null : $value)
                     ];
-                })->toArray();
+                })->toArray() : null;
+
                 $data["complete_remark"] = $complete_complaint ? $complete_complaint->remark : null;
                 $data["close_remark"] = $close_complaint ? $close_complaint->remark : null;
 
@@ -238,7 +272,7 @@ class ComplaintApiController extends Controller
 
                 // attchments
                 $warranty_activation_attach = $complaint->warranty_details?->getMedia('warranty_activation_attach');
-                $data['warranty_activation_attachments'] = $warranty_activation_attach->map(function ($media) {
+                $data['warranty_activation_attachments'] = $warranty_activation_attach?->map(function ($media) {
                     return [
                         'url' => $media->getFullUrl(),
                         'type' => $media->mime_type,
@@ -249,7 +283,7 @@ class ComplaintApiController extends Controller
                 })->toArray();
 
                 $complaint_work_done_attach = $work_done?->getMedia('complaint_work_done_attach');
-                $data['complaint_work_done_attach'] = $complaint_work_done_attach->map(function ($media) {
+                $data['complaint_work_done_attach'] = $complaint_work_done_attach?->map(function ($media) {
                     return [
                         'url' => $media->getFullUrl(),
                         'type' => $media->mime_type,
@@ -260,7 +294,7 @@ class ComplaintApiController extends Controller
                 })->toArray();
 
                 $complaint_attach = $complaint?->getMedia('complaint_attach');
-                $data['complaint_attach'] = $complaint_attach->map(function ($media) {
+                $data['complaint_attach'] = $complaint_attach?->map(function ($media) {
                     return [
                         'url' => $media->getFullUrl(),
                         'type' => $media->mime_type,
@@ -513,6 +547,7 @@ class ComplaintApiController extends Controller
             $work_done_option = ["Repairing" , "Replacement" , "Telephonic Complaint Resolve" , "Complaint Cancelltion"];
             $status_option    = ["Open" , "Pending" , "Work Done" , "Complete" , "Closed" , "Cancelled"];
             $service_centers = Customers::where('customertype', '4')->select('id', 'name' , 'customer_code')->get();
+            $complaint_types = ComplaintType::where('active', 'Y')->select('id', 'name')->get();
             $user_ids = getUsersReportingToAuth($request->user()->id);
             $roleNames = ["Service Eng", "Service Admin"];
             $assign_users = User::whereIn('id', $user_ids)
@@ -535,11 +570,78 @@ class ComplaintApiController extends Controller
                 ])->toArray()
             ];
             $data += [
+                'complaint_types' => $complaint_types->map(fn($complaint_type) => [
+                    'key' => $complaint_type->id, 
+                    'value' => $complaint_type->name
+                ])->toArray()
+            ];
+            $data += [
                 'assign_users' => $assign_users->map(fn($user) => [
                     'key' => $user->id, 
                     'value' => "[{$user->employee_codes}] {$user->name}"
                 ])->toArray()
             ];
+            return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
+        }catch(\Exception $e){
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
+    }
+
+    public function filter_option(Request $request){
+        try{
+            $data = [];
+            $users          = User::whereIn('id', getUsersReportingToAuth($request->user()->id))->select('id', 'name', 'employee_codes', 'branch_id')->get();
+            $branchIds = $users->pluck('branch_id')->unique()->filter();
+            // Get only those branches
+            $branches = Branch::whereIn('id', $branchIds)
+                ->select('id', 'branch_name')
+                ->get();
+            $category = Category::where('active' , 'Y')->select('id' , 'category_name')->get(); 
+            $status_option    = ["Open" , "Pending" , "Work Done" , "Complete" , "Closed" , "Cancelled"];
+            $under_warranty   = ["Yes" , "No"];
+            $service_types   = ["Paid" , "Free"];
+            $complaint_register_by = ["Dealer" , " Distributor" , "Retailer" , "Marketing Team" , "ASC" , "Service Enginer" ];
+
+            $complaint_types = ComplaintType::where('active', 'Y')->select('id', 'name')->get();
+            $complaint_recieved_via = ["WhatsApp" , "Toll-Free Call" , "E-Mail"];
+
+            $data += [
+                'complaint_types' => $complaint_types->map(fn($complaint_type) => [
+                    'key' => $complaint_type->id, 
+                    'value' => $complaint_type->name
+                ])->toArray()
+            ];
+            $data += [
+                'status_option' => collect($status_option)->map(fn($item, $key) => ['key' => $key, 'value' => $item])->values()->toArray()
+            ];
+            $data += [
+                'under_warranty' => collect($under_warranty)->map(fn($item) => ['key' => $item, 'value' => $item])->toArray()
+            ];
+            $data += [
+                'branches' => $branches->map(fn($branch) => [
+                    'key' => $branch->id, 
+                    'value' => $branch->branch_name
+                ])->toArray()
+            ];
+            $data += [
+                'service_types' => collect($service_types)->map(fn($item) => ['key' => $item, 'value' => $item])->toArray()
+            ];
+            $data += [
+                'warranty_bill' => collect($under_warranty)->map(fn($item) => ['key' => $item, 'value' => $item])->toArray()
+            ];
+            $data += [
+                'register_by' => collect($complaint_register_by)->map(fn($item) => ['key' => $item, 'value' => $item])->toArray()
+            ];
+            $data += [
+                'division' => $category->map(fn($item) => [
+                    'key' => $item->category_name, 
+                    'value' => $item->category_name
+                ])->toArray()
+            ];
+            $data += [
+                'complaint_recieve_via' => collect($complaint_recieved_via)->map(fn($item) => ['key' => $item, 'value' => $item])->toArray()
+            ];
+
             return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
         }catch(\Exception $e){
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
