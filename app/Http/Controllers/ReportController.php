@@ -994,7 +994,9 @@ class ReportController extends Controller
             } else {
                 $data = State::orderBy('id', 'asc');
             }
-            $retail_ids = Customers::where('customertype', '2')->pluck('id');
+            $retail_ids = Customers::with('getemployeedetail.employee_detail')->whereHas('getemployeedetail.employee_detail', function ($q) {
+                $q->where('division_id', '10');
+            })->where(['customertype' => '2', 'active' => 'Y'])->pluck('id');
             $customerIdsByState = Address::whereIn('customer_id', $retail_ids)
                 ->get()
                 ->groupBy('state_id')
@@ -1015,12 +1017,17 @@ class ReportController extends Controller
                 })
                 ->addColumn('total_registered_retailers_under_saarthi', function ($data) use ($customerIdsByState) {
                     $customerIds = $customerIdsByState->get($data->id, collect());
-                    return count(TransactionHistory::whereIn('customer_id', $customerIds)
-                        ->groupBy('customer_id')->get());
+                    return TransactionHistory::whereIn('customer_id', $customerIds)
+                        ->select('customer_id')
+                        ->groupBy('customer_id')
+                        ->havingRaw('COUNT(*) > 1 OR SUM(CASE WHEN scheme_id IS NOT NULL THEN 1 ELSE 0 END) > 0')
+                        ->count();
                 })
                 ->addColumn('coupon_scan_nos', function ($data) use ($customerIdsByState) {
                     $customerIds = $customerIdsByState->get($data->id, collect());
                     return TransactionHistory::whereIn('customer_id', $customerIds)
+                        ->select('customer_id')
+                        ->whereNotNull('scheme_id')
                         ->count();
                 })
                 ->addColumn('mobile_app_downloads', function ($data) use ($customerIdsByState) {
@@ -1042,7 +1049,7 @@ class ReportController extends Controller
                 ->addColumn('active_point', function ($data) use ($customerIdsByState) {
                     $customerIds = $customerIdsByState->get($data->id, collect());
                     $active_point = 0;
-                    $thistorys = TransactionHistory::whereIn('customer_id', $customerIds)->get();
+                    $thistorys = TransactionHistory::whereIn('customer_id', $customerIds)->whereNotNull('scheme_id')->get();
                     foreach ($thistorys as $thistory) {
                         if ($thistory->status == '1') {
                             $active_point += $thistory->point;

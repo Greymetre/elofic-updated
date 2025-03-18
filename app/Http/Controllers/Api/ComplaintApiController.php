@@ -45,8 +45,8 @@ class ComplaintApiController extends Controller
      */
     public function index(Request $request)
     {
-        try{
-            if($request->user()->hasRole('Service Eng') || $request->user()->hasRole('superadmin')) {
+        try {
+            if ($request->user()->hasRole('Service Eng') || $request->user()->hasRole('superadmin')) {
                 $filters = $request->all();
                 if ($request->user()->hasRole('superadmin')) {
                     $query = Complaint::select('id', 'complaint_number', 'complaint_status', 'complaint_date');
@@ -56,7 +56,7 @@ class ComplaintApiController extends Controller
                         ->select('id', 'complaint_number', 'complaint_status', 'complaint_date');
                 }
 
-                if(isset($request->from_date) && isset($request->to_date)){
+                if (isset($request->from_date) && isset($request->to_date)) {
                     $complaint_from_date = Carbon::parse($request->from_date)->startOfDay()->format('Y-m-d');
                     $complaint_to_date = Carbon::parse($request->to_date)->startOfDay()->format('Y-m-d');
                     $query->whereBetween('complaint_date', [$complaint_from_date, $complaint_to_date]);
@@ -66,7 +66,7 @@ class ComplaintApiController extends Controller
                     if (isset($value)) {
                         switch ($key) {
                             case 'complaint_status':
-                            case 'complaint_type': 
+                            case 'complaint_type':
                             case 'under_warranty':
                             case 'purchased_branch':
                             case 'service_type':
@@ -76,7 +76,7 @@ class ComplaintApiController extends Controller
                             case 'complaint_recieve_via';
                                 $query->where($key, $value);
                                 break;
-                            // Add more cases if needed
+                                // Add more cases if needed
                         }
                     }
                 }
@@ -93,10 +93,10 @@ class ComplaintApiController extends Controller
                 } else {
                     return response()->json(['status' => 'success', 'data' => "No Complaints"], $this->notFound);
                 }
-            }else{  
-                return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'] , $this->notFound);
+            } else {
+                return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'], $this->notFound);
             }
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
     }
@@ -128,10 +128,10 @@ class ComplaintApiController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id , Request $request)
+    public function show($id, Request $request)
     {
-         try{
-             if($request->user()->hasRole('Service Eng') || $request->user()->hasRole('superadmin')){
+        try {
+            if ($request->user()->hasRole('Service Eng') || $request->user()->hasRole('superadmin')) {
 
                 $complaint = Complaint::with([
                     'customer:id,customer_name,customer_number,customer_email,customer_address,customer_place,customer_state,customer_district,customer_city,customer_pindcode',
@@ -150,9 +150,9 @@ class ComplaintApiController extends Controller
                     })
                     ->first();
 
-                
+
                 if (!$complaint) {
-                     return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'] , $this->notFound);
+                    return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'], $this->notFound);
                 }
 
                 $work_done = ComplaintWorkDone::where('complaint_id', $complaint->id)->latest()->first();
@@ -161,9 +161,9 @@ class ComplaintApiController extends Controller
                 $close_complaint = ComplaintTimeline::where('complaint_id', $complaint->id)->where('status', '4')->latest()->first();
 
                 // Prepare the data dynamically
-               $data = collect($complaint->only([
-                    'complaint_number', 
-                    'complaint_date', 
+                $data = collect($complaint->only([
+                    'complaint_number',
+                    'complaint_date',
                     'complaint_status',
                     'complaint_type',
                     'product_serail_number',
@@ -177,9 +177,10 @@ class ComplaintApiController extends Controller
                     'product_laying',
                     'description'
                 ]))->mapWithKeys(function ($value, $key) {
-                    return [   
+                    return [
                         match ($key) {
                             'seller' => 'bill_by_company_party_name',
+                            'under_warranty' => 'warranty_status',
                             default => $key,
                         } => ($value === "" ? null : $value)
                     ];
@@ -188,7 +189,7 @@ class ComplaintApiController extends Controller
 
                 // Append related fields
                 $data += [
-                    "service_center_name" => optional($complaint->service_center_details)->customer_code 
+                    "service_center_name" => optional($complaint->service_center_details)->customer_code
                         ? '[' . $complaint->service_center_details->customer_code . '] ' . $complaint->service_center_details->name
                         : null,
                     "created_by" => optional($complaint->createdbyname)->name,
@@ -196,16 +197,28 @@ class ComplaintApiController extends Controller
 
                 // Customer Details
                 $data += collect($complaint->customer?->only([
-                    'customer_name', 'customer_number', 'customer_email', 'customer_address', 
-                    'customer_place', 'customer_state', 'customer_district', 'customer_city'
+                    'customer_name',
+                    'customer_number',
+                    'customer_email',
+                    'customer_address',
+                    'customer_place',
+                    'customer_state',
+                    'customer_district',
+                    'customer_city'
                 ]))->map(fn($value) => $value === "" ? null : $value)->toArray();
                 $data["customer_pincode"] = optional($complaint->customer?->pincodeDetails)->pincode ?? null;
 
                 // Product Details
                 $data += collect($complaint->product_details?->only([
-                    'sap_code', 'product_name', 'specification', 'product_no', 'phase', 'product_code' , 'expiry_interval_preiod'
+                    'sap_code',
+                    'product_name',
+                    'specification',
+                    'product_no',
+                    'phase',
+                    'product_code',
+                    'expiry_interval_preiod'
                 ]))->mapWithKeys(function ($value, $key) {
-                    return [   
+                    return [
                         match ($key) {
                             'sap_code' => 'product_sap_code',
                             'specification' => 'hp',
@@ -227,15 +240,16 @@ class ComplaintApiController extends Controller
                 ]));
                 $response = $result->getData(true);
                 $data['warranty_upto'] = $response['warrenty_expire_date'] ?? null;
-                $data['service_branch'] = isset($complaint->purchased_branch_details) 
-                ? ($complaint->purchased_branch_details->branch_code . ' ' . $complaint->purchased_branch_details->branch_name) 
-                : null;
+                $data['service_branch'] = isset($complaint->purchased_branch_details)
+                    ? ($complaint->purchased_branch_details->branch_code . ' ' . $complaint->purchased_branch_details->branch_name)
+                    : null;
 
                 //Work Done Details 
                 $data += collect($work_done?->only([
-                    'done_by', 'remark', 
+                    'done_by',
+                    'remark',
                 ]))->mapWithKeys(function ($value, $key) {
-                    return [   
+                    return [
                         match ($key) {
                             'done_by' => 'action_done_by_asc',
                             'remark'  => 'service_center_remark',
@@ -245,18 +259,27 @@ class ComplaintApiController extends Controller
                 })->toArray();
                 $data['work_done_date'] = isset($work_done->created_at) ? getDateInIndFomate($work_done->created_at) : null;
 
-                // Complete & Close Details
                 $data['service_bill'] = $service_bill ? collect($service_bill->only([
-                    'id', 'replacement_tag', 'replacement_tag_number', 'category', 
-                    'complaint_type', 'complaint_reason', 'condition_of_service', 
-                    'received_product', 'nature_of_fault', 'service_location'
+                    // Complete & Close Details
+                    'id',
+                    'replacement_tag',
+                    'replacement_tag_number',
+                    'category',
+                    'complaint_type',
+                    'complaint_reason',
+                    'condition_of_service',
+                    'received_product',
+                    'nature_of_fault',
+                    'service_location',
+                    'status'
                 ]))->mapWithKeys(function ($value, $key) {
-                    return [   
+                    return [
                         match ($key) {
                             'id'              => 'service_bill_id',
                             'category'        => 'service_bill_category',
                             'complaint_type'  => 'service_bill_complaint_type',
-                            'complaint_reason'=> 'service_bill_complaint_reason',
+                            'complaint_reason' => 'service_bill_complaint_reason',
+                            'status' => 'service_bill_status',
                             default           => $key,
                         } => ($value === "" ? null : $value)
                     ];
@@ -269,6 +292,10 @@ class ComplaintApiController extends Controller
 
                 $data["serice_bill_total"] = $service_bill ? $service_bill->service_bill_products?->sum('subtotal') : null;
                 $data['service_bill_date'] = $service_bill ? getDateInIndFomate($service_bill->created_at) : null;
+                if (isset($service_bill)) {
+                    $data['service_bill']['service_bill_status_name'] =
+                        $service_bill->status == 0 ? "Draft" : ($service_bill->status == 1 ? "Claimed" : ($service_bill->status == 2 ? "Customer Payable" : ($service_bill->status == 3 ? "Approved" : "Cancel")));
+                }
 
                 // attchments
                 $warranty_activation_attach = $complaint->warranty_details?->getMedia('warranty_activation_attach');
@@ -276,8 +303,8 @@ class ComplaintApiController extends Controller
                     return [
                         'url' => $media->getFullUrl(),
                         'type' => $media->mime_type,
-                        'thumbnail' => $media->mime_type == 'application/pdf' 
-                            ? asset('assets/img/pdf-icon.jpg') 
+                        'thumbnail' => $media->mime_type == 'application/pdf'
+                            ? asset('assets/img/pdf-icon.jpg')
                             : $media->getFullUrl(),
                     ];
                 })->toArray();
@@ -287,8 +314,8 @@ class ComplaintApiController extends Controller
                     return [
                         'url' => $media->getFullUrl(),
                         'type' => $media->mime_type,
-                        'thumbnail' => $media->mime_type == 'application/pdf' 
-                            ? asset('assets/img/pdf-icon.jpg') 
+                        'thumbnail' => $media->mime_type == 'application/pdf'
+                            ? asset('assets/img/pdf-icon.jpg')
                             : $media->getFullUrl(),
                     ];
                 })->toArray();
@@ -298,21 +325,21 @@ class ComplaintApiController extends Controller
                     return [
                         'url' => $media->getFullUrl(),
                         'type' => $media->mime_type,
-                        'thumbnail' => $media->mime_type == 'application/pdf' 
-                            ? asset('assets/img/pdf-icon.jpg') 
+                        'thumbnail' => $media->mime_type == 'application/pdf'
+                            ? asset('assets/img/pdf-icon.jpg')
                             : $media->getFullUrl(),
                     ];
                 })->toArray();
 
-                if($complaint){
+                if ($complaint) {
                     return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
-                }else{
+                } else {
                     return response()->json(['status' => 'success', 'data' => "No Complaints"], $this->successStatus);
                 }
-             }else{
-                return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'] , $this->notFound);
-             }
-        }catch(\Exception $e){
+            } else {
+                return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'], $this->notFound);
+            }
+        } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
     }
@@ -351,7 +378,7 @@ class ComplaintApiController extends Controller
                 'errors' => $validator->errors()
             ], 422); // 422 Unprocessable Entity
         }
-        try{
+        try {
             if (!isset($request->complaint_status) && empty($request->assign_user) && empty($request->service_center)) {
                 return response()->json([
                     'status' => 'error',
@@ -365,61 +392,61 @@ class ComplaintApiController extends Controller
                 })
                 ->first();
             if (!$complaint) {
-                 return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'] , $this->notFound);
+                return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'], $this->notFound);
             }
-            if(isset($request->complaint_status)){
-                if($request->complaint_status != $complaint->complaint_status){
+            if (isset($request->complaint_status)) {
+                if ($request->complaint_status != $complaint->complaint_status) {
                     $data['remark'] = '';
-                    if($request->complaint_status == 3){
-                        if($complaint->complaint_status != 2){
+                    if ($request->complaint_status == 3) {
+                        if ($complaint->complaint_status != 2) {
                             return response()->json([
                                 'status' => 'error',
                                 'message' => 'The complaint status is must be work done.'
-                            ], $this->badrequest); 
+                            ], $this->badrequest);
                         }
                         $result = app(ComplaintController::class)->checkCompleteComplaint(new Request([
                             'id' => $complaint->id,
                         ]));
                         $response = $result->getData(true);
-                        if($response['status'] != 'success'){
+                        if ($response['status'] != 'success') {
                             return response()->json([
                                 'status' => 'error',
                                 'message' => 'Service bill missing!.'
-                            ], $this->badrequest); 
+                            ], $this->badrequest);
                         }
-                        if(!isset($request->remark)){
+                        if (!isset($request->remark)) {
                             return response()->json([
                                 'status' => 'error',
                                 'message' => 'Add Complete remark.'
-                            ], $this->badrequest); 
+                            ], $this->badrequest);
                         }
                         $data['remark'] = $request->remark;
                     }
-                    if($request->complaint_status == 4){
-                        if($complaint->complaint_status != 3){
+                    if ($request->complaint_status == 4) {
+                        if ($complaint->complaint_status != 3) {
                             return response()->json([
                                 'status' => 'error',
                                 'message' => 'Need to Complete the this complaint first.'
-                            ], $this->badrequest); 
+                            ], $this->badrequest);
                         }
-                        if(!isset($request->remark)){
+                        if (!isset($request->remark)) {
                             return response()->json([
                                 'status' => 'error',
                                 'message' => 'Add Close remark.'
-                            ], $this->badrequest); 
+                            ], $this->badrequest);
                         }
                         $data['remark'] = $request->remark;
                     }
-                   $data['complaint_status'] = $request->complaint_status;
-                   ComplaintTimeline::create([
+                    $data['complaint_status'] = $request->complaint_status;
+                    ComplaintTimeline::create([
                         'complaint_id' => $complaint->id,
                         'created_by' => $request->user()->id,
                         'remark'     =>  $data['remark'] ?? null,
                         'status' => $request->complaint_status,
                     ]);
-               }
+                }
             }
-            if(isset($request->assign_user)){
+            if (isset($request->assign_user)) {
                 $roleName = 'Service Eng';
                 $exists = User::where('id', $request->assign_user)
                     ->whereHas('roles', function ($query) use ($roleName) {
@@ -434,15 +461,15 @@ class ComplaintApiController extends Controller
                     ], 422);
                 }
 
-               $data['assign_user'] = $request->assign_user;
-               ComplaintTimeline::create([
+                $data['assign_user'] = $request->assign_user;
+                ComplaintTimeline::create([
                     'complaint_id' => $complaint->id,
                     'created_by' => $request->user()->id,
                     'remark' => $request->assign_user,
                     'status' => '100',
                 ]);
             }
-            if(isset($request->service_center)){
+            if (isset($request->service_center)) {
                 $exists = Customers::where([
                     'customertype' => '4',
                     'id' => $request->service_center
@@ -463,8 +490,7 @@ class ComplaintApiController extends Controller
             }
             $complaint->update($data);
             return response()->json(['status' => 'success', 'data' => $complaint], $this->successStatus);
-            
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
     }
@@ -486,20 +512,20 @@ class ComplaintApiController extends Controller
                 'errors' => $validator->errors()
             ], 422); // 422 Unprocessable Entity
         }
-        try{
+        try {
             $complaint = Complaint::where('id', $id)
                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
                     return $query->where('assign_user', $request->user()->id);
                 })
                 ->first();
             if (!$complaint) {
-                 return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'] , $this->notFound);
+                return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'], $this->notFound);
             }
-            if($complaint->complaint_status != 0){
+            if ($complaint->complaint_status != 0) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'The complaint status is must be Open.'
-                ], $this->badrequest); 
+                ], $this->badrequest);
             }
             $word_done = ComplaintWorkDone::create([
                 'complaint_id' => $complaint->id,
@@ -523,10 +549,9 @@ class ComplaintApiController extends Controller
                 'status' => '2',
             ]);
             return response()->json(['status' => 'success', 'data' => $complaint], $this->successStatus);
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
-
     }
 
     /**
@@ -541,12 +566,13 @@ class ComplaintApiController extends Controller
     }
 
     //  select-option
-    public function select_option(Request $request){
-        try{
+    public function select_option(Request $request)
+    {
+        try {
             $data = [];
-            $work_done_option = ["Repairing" , "Replacement" , "Telephonic Complaint Resolve" , "Complaint Cancelltion"];
-            $status_option    = ["Open" , "Pending" , "Work Done" , "Complete" , "Closed" , "Cancelled"];
-            $service_centers = Customers::where('customertype', '4')->select('id', 'name' , 'customer_code')->get();
+            $work_done_option = ["Repairing", "Replacement", "Telephonic Complaint Resolve", "Complaint Cancelltion"];
+            $status_option    = ["Open", "Pending", "Work Done", "Complete", "Closed", "Cancelled"];
+            $service_centers = Customers::where('customertype', '4')->select('id', 'name', 'customer_code')->get();
             $complaint_types = ComplaintType::where('active', 'Y')->select('id', 'name')->get();
             $user_ids = getUsersReportingToAuth($request->user()->id);
             $roleNames = ["Service Eng", "Service Admin"];
@@ -565,30 +591,31 @@ class ComplaintApiController extends Controller
             ];
             $data += [
                 'service_centers' => $service_centers->map(fn($center) => [
-                    'key' => $center->id, 
+                    'key' => $center->id,
                     'value' => "[{$center->customer_code}] {$center->name}"
                 ])->toArray()
             ];
             $data += [
                 'complaint_types' => $complaint_types->map(fn($complaint_type) => [
-                    'key' => $complaint_type->id, 
+                    'key' => $complaint_type->id,
                     'value' => $complaint_type->name
                 ])->toArray()
             ];
             $data += [
                 'assign_users' => $assign_users->map(fn($user) => [
-                    'key' => $user->id, 
+                    'key' => $user->id,
                     'value' => "[{$user->employee_codes}] {$user->name}"
                 ])->toArray()
             ];
             return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
     }
 
-    public function filter_option(Request $request){
-        try{
+    public function filter_option(Request $request)
+    {
+        try {
             $data = [];
             $users          = User::whereIn('id', getUsersReportingToAuth($request->user()->id))->select('id', 'name', 'employee_codes', 'branch_id')->get();
             $branchIds = $users->pluck('branch_id')->unique()->filter();
@@ -596,18 +623,18 @@ class ComplaintApiController extends Controller
             $branches = Branch::whereIn('id', $branchIds)
                 ->select('id', 'branch_name')
                 ->get();
-            $category = Category::where('active' , 'Y')->select('id' , 'category_name')->get(); 
-            $status_option    = ["Open" , "Pending" , "Work Done" , "Complete" , "Closed" , "Cancelled"];
-            $under_warranty   = ["Yes" , "No"];
-            $service_types   = ["Paid" , "Free"];
-            $complaint_register_by = ["Dealer" , " Distributor" , "Retailer" , "Marketing Team" , "ASC" , "Service Enginer" ];
+            $category = Category::where('active', 'Y')->select('id', 'category_name')->get();
+            $status_option    = ["Open", "Pending", "Work Done", "Complete", "Closed", "Cancelled"];
+            $under_warranty   = ["Yes", "No"];
+            $service_types   = ["Paid", "Free"];
+            $complaint_register_by = ["Dealer", " Distributor", "Retailer", "Marketing Team", "ASC", "Service Enginer"];
 
             $complaint_types = ComplaintType::where('active', 'Y')->select('id', 'name')->get();
-            $complaint_recieved_via = ["WhatsApp" , "Toll-Free Call" , "E-Mail"];
+            $complaint_recieved_via = ["WhatsApp", "Toll-Free Call", "E-Mail"];
 
             $data += [
                 'complaint_types' => $complaint_types->map(fn($complaint_type) => [
-                    'key' => $complaint_type->id, 
+                    'key' => $complaint_type->id,
                     'value' => $complaint_type->name
                 ])->toArray()
             ];
@@ -619,7 +646,7 @@ class ComplaintApiController extends Controller
             ];
             $data += [
                 'branches' => $branches->map(fn($branch) => [
-                    'key' => $branch->id, 
+                    'key' => $branch->id,
                     'value' => $branch->branch_name
                 ])->toArray()
             ];
@@ -634,7 +661,7 @@ class ComplaintApiController extends Controller
             ];
             $data += [
                 'division' => $category->map(fn($item) => [
-                    'key' => $item->category_name, 
+                    'key' => $item->category_name,
                     'value' => $item->category_name
                 ])->toArray()
             ];
@@ -643,7 +670,7 @@ class ComplaintApiController extends Controller
             ];
 
             return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
     }

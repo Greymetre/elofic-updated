@@ -69,4 +69,9 @@ class Address extends Model
     {
         return $this->belongsTo('App\Models\Pincode', 'pincode_id', 'id')->select('id', 'pincode');
     }
+
+    public function customer()
+    {
+        $this->belongsTo(Customers::class, 'customer_id', 'id');
+    }
 }

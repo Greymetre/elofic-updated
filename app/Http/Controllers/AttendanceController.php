@@ -403,80 +403,94 @@ class AttendanceController extends Controller
 
   public function submitAttendances(Request $request)
   {
-    // try {
-      $ipAddress = $request->server('HTTP_X_FORWARDED_FOR') ?? $request->ip();
-      $accessToken = '4060dae74e438c';
-      $location = Location::get($ipAddress); 
-      $addressP = getLatLongToAddress($location->latitude, $location->longitude);
-      $isSunday = Carbon::parse($request['punchin_date'])->isSunday();
+    try {
+    $ipAddress = $request->server('HTTP_X_FORWARDED_FOR') ?? $request->ip();
+    $accessToken = '4060dae74e438c';
+    $location = Location::get($ipAddress);
+    $addressP = getLatLongToAddress($location->latitude, $location->longitude);
+    $user = User::find($request['user_id']);
+    $branchIds = explode(',', $user->branch_id);
 
-      if ($isSunday) {
-        $expiryDate = Carbon::parse($request['punchin_date'])->addDays(60);
+    $punchinDate = Carbon::parse($request['punchin_date'])->format('Y-m-d');
+    $isSunday = Carbon::parse($request['punchin_date'])->isSunday();
+    $holidayDates = Holiday::whereIn('branch', $branchIds)
+      ->pluck('holiday_date')
+      ->map(function ($dateString) {
+        return explode(',', $dateString);
+      })
+      ->collapse()
+      ->map('trim')
+      ->toArray();
+   
+    $isHoliday = in_array($punchinDate, $holidayDates);
 
-        CompOffLeave::create([
-          'user_id' => $request['user_id'],
-          'comp_off_date' => $request['punchin_date'],
-          'expiry_date' => $expiryDate,
-          'is_used' => false,
-        ]);
-      }
+    if ($isSunday || $isHoliday) {
+      $expiryDate = Carbon::parse($request['punchin_date'])->addDays(60);
 
-      if (Attendance::updateOrCreate(['user_id' => $request['user_id'], 'punchin_date' => date('Y-m-d', strtotime($request['punchin_date']))], [
+      CompOffLeave::create([
         'user_id' => $request['user_id'],
-        'active' => 'Y',
-        'punchin_date' => date('Y-m-d', strtotime($request['punchin_date'])),
-        'punchin_time' => date('G:i', strtotime($request['punchin_date'])),
-        'punchin_summary' => !empty($request['punchin_summary']) ? $request['punchin_summary'] : '',
-        'punchin_address' => !empty($addressP) ? $addressP : '',
-        'working_type' => !empty($request['working_type']) ? $request['working_type'] : '',
-        'punchin_from' => 'Web',
-        'flag' => 'true',
-        'created_at' => getcurentDateTime(),
-        'updated_at' => getcurentDateTime(),
-      ])) {
-        if (!empty($request['tourid'])) {
-          TourProgramme::where('id', '=', $request['tourid'])->update([
-            'type' => !empty($request['type']) ? $request['type'] : ''
-          ]);
+        'comp_off_date' => $punchinDate,
+        'expiry_date' => $expiryDate,
+        'is_used' => false,
+      ]);
+    }
 
-          $cityids = Beat::whereHas('beatschedules', function ($query) use ($request) {
-            $query->where('user_id', '=', $request['user_id']);
-            $query->whereDate('beat_date', '=', date('Y-m-d', strtotime($request['punchin_date'])));
-          })
-            ->orderBy('city_id', 'asc')
-            ->pluck('city_id');
-          $cityids = $cityids->unique();
+    if (Attendance::updateOrCreate(['user_id' => $request['user_id'], 'punchin_date' => date('Y-m-d', strtotime($request['punchin_date']))], [
+      'user_id' => $request['user_id'],
+      'active' => 'Y',
+      'punchin_date' => date('Y-m-d', strtotime($request['punchin_date'])),
+      'punchin_time' => date('G:i', strtotime($request['punchin_date'])),
+      'punchin_summary' => !empty($request['punchin_summary']) ? $request['punchin_summary'] : '',
+      'punchin_address' => !empty($addressP) ? $addressP : '',
+      'working_type' => !empty($request['working_type']) ? $request['working_type'] : '',
+      'punchin_from' => 'Web',
+      'flag' => 'true',
+      'created_at' => getcurentDateTime(),
+      'updated_at' => getcurentDateTime(),
+    ])) {
+      if (!empty($request['tourid'])) {
+        TourProgramme::where('id', '=', $request['tourid'])->update([
+          'type' => !empty($request['type']) ? $request['type'] : ''
+        ]);
 
-          //start new
+        $cityids = Beat::whereHas('beatschedules', function ($query) use ($request) {
+          $query->where('user_id', '=', $request['user_id']);
+          $query->whereDate('beat_date', '=', date('Y-m-d', strtotime($request['punchin_date'])));
+        })
+          ->orderBy('city_id', 'asc')
+          ->pluck('city_id');
+        $cityids = $cityids->unique();
 
-          if (!empty($request['city'])) {
+        //start new
 
-            $city_datas = explode(",", $request['city']);
-            foreach ($city_datas as $key => $city) {
-              $updatecity = TourDetail::where('tourid', '=', $request['tourid'])->whereNull('visited_cityid')->first();
-              if (!empty($updatecity)) {
-                $updatecity->update([
-                  'visited_cityid' => $city,
-                  'visited_date' => date('Y-m-d'),
-                ]);
-              } else {
-                TourDetail::create([
-                  'tourid' => $request['tourid'],
-                  'city_id' => null,
-                  'visited_cityid' => $city,
-                  'visited_date' => date('Y-m-d'),
-                  'last_visited' => date('Y-m-d'),
-                ]);
-              }
+        if (!empty($request['city'])) {
+
+          $city_datas = explode(",", $request['city']);
+          foreach ($city_datas as $key => $city) {
+            $updatecity = TourDetail::where('tourid', '=', $request['tourid'])->whereNull('visited_cityid')->first();
+            if (!empty($updatecity)) {
+              $updatecity->update([
+                'visited_cityid' => $city,
+                'visited_date' => date('Y-m-d'),
+              ]);
+            } else {
+              TourDetail::create([
+                'tourid' => $request['tourid'],
+                'city_id' => null,
+                'visited_cityid' => $city,
+                'visited_date' => date('Y-m-d'),
+                'last_visited' => date('Y-m-d'),
+              ]);
             }
           }
         }
-        return Redirect::to('reports/attendancereport')->with('message_success', 'PunchIn Successfully');
       }
-      return redirect()->back()->with('message_danger', 'Error in Lead Stages')->withInput();
-    // } catch (\Exception $e) {
-    //   return redirect()->back()->withErrors($e->getMessage())->withInput();
-    // }
+      return Redirect::to('reports/attendancereport')->with('message_success', 'PunchIn Successfully');
+    }
+    return redirect()->back()->with('message_danger', 'Error in Lead Stages')->withInput();
+    } catch (\Exception $e) {
+      return redirect()->back()->withErrors($e->getMessage())->withInput();
+    }
   }
 
   public function removePunchout(Request $request)

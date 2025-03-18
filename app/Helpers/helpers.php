@@ -128,7 +128,7 @@ if (! function_exists('receiverNotification')) {
 }
 
 if (! function_exists('fileupload')) {
-    function fileupload($image = '', $path = '', $filename = '')
+    function fileupload($image = '', $path = 'default', $filename = '')
     {
         // $filepath =  Storage::disk('s3')->put($path, $image);
         // return $filepath;

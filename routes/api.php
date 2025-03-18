@@ -133,7 +133,6 @@ Route::group(['middleware' => ['auth:customers']], function () {
     Route::any('customer/getComplaints', [ComplaintController::class, 'getComplaints']);
     Route::post('customer/addComplaint', [ComplaintController::class, 'addComplaint']);
     Route::any('customer/getComplaintCounts', [ComplaintController::class, 'getComplaintCounts']);
-
 });
 
 Route::group(['middleware' => ['auth:users']], function () {
@@ -144,7 +143,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::any('pendingCounts', [DashboardController::class, 'pendingCounts']);
     Route::any('getUserDashboardData', [DashboardController::class, 'getUserDashboardData']);
     Route::any('getSarthiPoints', [DashboardController::class, 'getSarthiPoints']);
-    
+
     Route::any('getMarketIntelligencesField', [MarketIntelligenceController::class, 'getFields']);
     Route::any('MarketIntelligenceStore', [MarketIntelligenceController::class, 'MarketIntelligenceStore']);
 
@@ -255,19 +254,19 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::get('primary-sales', [ReportController::class, 'primarySales']);
     Route::get('monthly-sales', [ReportController::class, 'monthlySales']);
     Route::get('getDealerGrowth', [ReportController::class, 'getDealerGrowth']);
-    
+
     //Primary Scheme report
     Route::get('getprimary-scheme-filter', [PrimarySchemeReportController::class, 'getPrimarySchemeFilter']);
     Route::get('getPrimarySchemes', [PrimarySchemeReportController::class, 'getPrimarySchemes']);
     Route::get('getPrimarySchemeData', [PrimarySchemeReportController::class, 'getPrimarySchemeData']);
-    
+
     // msp activity
-    Route::apiResource('user/msp_activity', MspActivityController::class)->only(['index','store']);
-    Route::get('user/msp-activity-counts', [MspActivityController::class , 'getMspActivityCount']);
-    Route::get('user/msp-activity-filter', [MspActivityController::class , 'getMspActivityFilter']);
+    Route::apiResource('user/msp_activity', MspActivityController::class)->only(['index', 'store']);
+    Route::get('user/msp-activity-counts', [MspActivityController::class, 'getMspActivityCount']);
+    Route::get('user/msp-activity-filter', [MspActivityController::class, 'getMspActivityFilter']);
 
     // Complaint Api's routes 
-    Route::apiResource('complaints', ComplaintApiController::class)->only(['index' , 'show' , 'update']);
+    Route::apiResource('complaints', ComplaintApiController::class)->only(['index', 'show', 'update']);
     Route::post('complaint/work-done/{id}', [ComplaintApiController::class, 'work_done_submit']);
     Route::get('complaint/select-option', [ComplaintApiController::class, 'select_option']);
     Route::get('complaint/filter-option', [ComplaintApiController::class, 'filter_option']);
@@ -278,6 +277,8 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::post('complaint/{id}/service-bill/create', [ServiceBillController::class, 'store']);
     Route::get('complaint/{id}/service-bill/select-option', [ServiceBillController::class, 'select_option']);
     Route::get('service-bill/{service_id}/details', [ServiceBillController::class, 'show']);
+    Route::post('service-bill/{service_id}/update', [ServiceBillController::class, 'update']);
+    Route::post('service-bill/{service_id}/update-status', [ServiceBillController::class, 'edit']);
     Route::get('complaint/{id}/service-charge-product', [ServiceBillController::class, 'getServiceChargeProduct']);
     Route::get('service-charge-product/{id}', [ServiceBillController::class, 'getServiceProductDetails']);
 });

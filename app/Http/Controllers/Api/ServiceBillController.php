@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 use App\Http\Controllers\AjaxController;
+use Exception;
 
 class ServiceBillController extends Controller
 {
@@ -42,21 +43,18 @@ class ServiceBillController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request , $id)
-    {
-        
-    }
+    public function index(Request $request, $id) {}
 
     /**
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function create(Request $request , $id)
+    public function create(Request $request, $id)
     {
-        try{
-             $service_bill = ServiceBill::where('complaint_id' , $id)->exists();
-             $complaint = Complaint::with([
+        try {
+            $service_bill = ServiceBill::where('complaint_id', $id)->exists();
+            $complaint = Complaint::with([
                 'service_center_details:id,customer_code,name',
                 'complaint_type_details',
                 'product_details.categories',
@@ -70,7 +68,7 @@ class ServiceBillController extends Controller
                 ->first();
 
             if (!$complaint) {
-                 return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'] , $this->notFound);
+                return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'], $this->notFound);
             }
 
             $data = collect($complaint->only([
@@ -80,7 +78,7 @@ class ServiceBillController extends Controller
                 'customer_bill_date',
                 'under_warranty'
             ]))->mapWithKeys(function ($value, $key) {
-                return [   
+                return [
                     match ($key) {
                         'customer_bill_date' => 'warranty_start_date',
                         default => $key,
@@ -97,36 +95,36 @@ class ServiceBillController extends Controller
             $data["item "] = optional($complaint->product_details)->product_name ?? null;
             $data["comments "] = $complaint ? $complaint->description : null;
             $result = app(AjaxController::class)->getProductTimeInterval(new Request([
-                    'product_id' => $complaint->product_id,
-                    'sale_bill_date' => $complaint->company_sale_bill_date
-                ]));
+                'product_id' => $complaint->product_id,
+                'sale_bill_date' => $complaint->company_sale_bill_date
+            ]));
             $response = $result->getData(true);
             $data['warranty_upto'] = $response['warrenty_expire_date'] ?? null;
-            if(isset($complaint->product_details->subcategories)){
-               $categoryIds = explode(',', $complaint->product_details->subcategories->service_category_id);
-              $service_charge_products = ServiceChargeProducts::whereIn('category_id', $categoryIds)
+            if (isset($complaint->product_details->subcategories)) {
+                $categoryIds = explode(',', $complaint->product_details->subcategories->service_category_id);
+                $service_charge_products = ServiceChargeProducts::whereIn('category_id', $categoryIds)
                     ->distinct()
                     ->pluck('charge_type_id');
-                $charge_types = ServiceChargeChargeType::whereIn('id',$service_charge_products)->orWhere('id' , 4)->get();
-            }else{
+                $charge_types = ServiceChargeChargeType::whereIn('id', $service_charge_products)->orWhere('id', 4)->get();
+            } else {
                 $charge_types = ServiceChargeChargeType::all();
             }
-            if(isset($complaint->service_center)){
+            if (isset($complaint->service_center)) {
                 $data += [
                     'charge_types ' => $charge_types->map(fn($charge_type) => [
-                        'key' => $charge_type->id, 
+                        'key' => $charge_type->id,
                         'value' =>  $charge_type->charge_type
                     ])->toArray()
                 ];
             }
 
 
-            if($complaint){
+            if ($complaint) {
                 return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
-            }else{
+            } else {
                 return response()->json(['status' => 'success', 'data' => "No Complaints"], $this->successStatus);
             }
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
     }
@@ -141,14 +139,15 @@ class ServiceBillController extends Controller
         $nature_of_faults = ["Transit Damage", "Manufacturing Fault", "Customer Field Fault"];
         $service_locations = ["Site Visit", "At ASC"];
         $water_sources = ["Munciple Water Supply", "Well", "BoreWell", "Water Sump", "Hand Pump", "Pond / Dam", "RO Water Plant"];
-        $repaired_replacement = ["Replacement","Repaired"];
-        if(isset($complaint->product_details->subcategories)){
-           $categoryIds = explode(',', $complaint->product_details->subcategories->service_category_id);
+        $service_bill_statuses = ["Draft", "Claimed", "Customer payble", "Approved", "Cancel"];
+        $repaired_replacement = ["Replacement", "Repaired"];
+        if (isset($complaint->product_details->subcategories)) {
+            $categoryIds = explode(',', $complaint->product_details->subcategories->service_category_id);
             $service_charge_products = ServiceChargeProducts::whereIn('category_id', $categoryIds)
                 ->distinct()
                 ->pluck('charge_type_id');
-            $charge_type = ServiceChargeChargeType::whereIn('id',$service_charge_products)->orWhere('id' , 4)->get();
-        }else{
+            $charge_type = ServiceChargeChargeType::whereIn('id', $service_charge_products)->orWhere('id', 4)->get();
+        } else {
             $charge_type = ServiceChargeChargeType::all();
         }
 
@@ -164,6 +163,7 @@ class ServiceBillController extends Controller
             'service_locations' => collect($service_locations)->map(fn($item) => ['key' => $item, 'value' => $item])->toArray(),
             'nature_of_faults' => collect($nature_of_faults)->map(fn($item) => ['key' => $item, 'value' => $item])->toArray(),
             'water_sources' => collect($water_sources)->map(fn($item) => ['key' => $item, 'value' => $item])->toArray(),
+            'service_bill_statuses' => collect($service_bill_statuses)->map(fn($item, $index) => ['key' => $index, 'value' => $item])->toArray(),
             'repaired_replacement' => collect($repaired_replacement)->map(fn($item) => ['key' => $item, 'value' => $item])->toArray(),
             'charge_type'          => collect($charge_type)->map(fn($item) => ['key' => $item->id, 'value' => $item->charge_type])->toArray(),
         ];
@@ -176,9 +176,9 @@ class ServiceBillController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request , $id)
+    public function store(Request $request, $id)
     {
-        try{
+        try {
 
             $complaint = Complaint::with([
                 'service_center_details:id,customer_code,name',
@@ -188,13 +188,13 @@ class ServiceBillController extends Controller
                 'createdbyname:id,name',
                 'warranty_details'
             ])->where('id', $id)
-            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                return $query->where('assign_user', $request->user()->id);
-            })
-            ->first();
+                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                    return $query->where('assign_user', $request->user()->id);
+                })
+                ->first();
 
             if (!$complaint) {
-                 return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'] , $this->notFound);
+                return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'], $this->notFound);
             }
 
 
@@ -347,9 +347,9 @@ class ServiceBillController extends Controller
                     'remark' => 'Service Bill Created',
                 ]);
 
-                return response()->json(['status' => 'success' , 'message' => 'Service bill created successfully' , 'data' => $new_service_bill] , $this->created);
+                return response()->json(['status' => 'success', 'message' => 'Service bill created successfully', 'data' => $new_service_bill], $this->created);
             }
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
     }
@@ -360,14 +360,14 @@ class ServiceBillController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request , $id)
+    public function show(Request $request, $id)
     {
-        try{
-             $service_bill = ServiceBill::with('service_bill_products.service_type_details', 'service_bill_products.product')->find($id);
-             if(!$service_bill){
-                 return response()->json(['status' => 'error', 'message' => 'Service bill Not Exsits'] , $this->badrequest);
-             }
-             $complaint = Complaint::with([
+        try {
+            $service_bill = ServiceBill::with('service_bill_products.service_type_details', 'service_bill_products.product')->find($id);
+            if (!$service_bill) {
+                return response()->json(['status' => 'error', 'message' => 'Service bill Not Exsits'], $this->badrequest);
+            }
+            $complaint = Complaint::with([
                 'service_center_details:id,customer_code,name',
                 'complaint_type_details',
                 'product_details.categories',
@@ -381,7 +381,7 @@ class ServiceBillController extends Controller
                 ->first();
 
             if (!$complaint) {
-                 return response()->json(['status' => 'error', 'message' => 'Service Bill can access only Service Eng'] , $this->notFound);
+                return response()->json(['status' => 'error', 'message' => 'Service Bill can access only Service Eng'], $this->notFound);
             }
 
             $data = collect($complaint->only([
@@ -391,7 +391,7 @@ class ServiceBillController extends Controller
                 'customer_bill_date',
                 'under_warranty'
             ]))->mapWithKeys(function ($value, $key) {
-                return [   
+                return [
                     match ($key) {
                         'customer_bill_date' => 'warranty_start_date',
                         default => $key,
@@ -400,31 +400,46 @@ class ServiceBillController extends Controller
             })->toArray();
 
             $data['service_bill'] = collect($service_bill->only([
-               'complaint_type' , 'complaint_reason' , 'condition_of_service' , 'received_product' , 'nature_of_fault' , 'service_location' , 'repaired_replacement' , 'replacement_tag' , 'replacement_tag_number' , 'line_voltage' , 'load_voltage' , 'current' , 'water_source' , 'panel_rating_running' , 'panel_rating_starting' ,'status'
+                'complaint_type',
+                'complaint_reason',
+                'condition_of_service',
+                'received_product',
+                'nature_of_fault',
+                'service_location',
+                'repaired_replacement',
+                'replacement_tag',
+                'replacement_tag_number',
+                'line_voltage',
+                'load_voltage',
+                'current',
+                'water_source',
+                'panel_rating_running',
+                'panel_rating_starting',
+                'status'
             ]))->mapWithKeys(function ($value, $key) {
-                return [   
+                return [
                     match ($key) {
                         default => $key,
                     } => ($value === "" ? null : $value)
                 ];
             })->toArray();
 
-           $data['service_bill_products'] = $service_bill?->service_bill_products ? 
-            $service_bill->service_bill_products->map(function ($product) {
-                return [
-                    'id' => $product->id,
-                    'service_bill_id' => $product->service_bill_id,
-                    'service_type' => $product->service_type,
-                    'service_type_name' => $product->service_type_details?->charge_type, // Accessing related model
-                    'product_id' => $product->product_id,
-                    'product_name' => $product->product?->product_name, // Accessing related model
-                    'quantity' => $product->quantity ?? null,
-                    'distance' => $product->distance ?? null,
-                    'appreciation' => $product->appreciation ?? null,
-                    'price' => $product->price,
-                    'subtotal' => $product->subtotal
-                ];
-            })->toArray() : null;
+            $data['service_bill_products'] = $service_bill?->service_bill_products ?
+                $service_bill->service_bill_products->map(function ($product) {
+                    return [
+                        'id' => $product->id,
+                        'service_bill_id' => $product->service_bill_id,
+                        'service_type' => $product->service_type,
+                        'service_type_name' => $product->service_type_details?->charge_type, // Accessing related model
+                        'product_id' => $product->product_id,
+                        'product_name' => $product->product?->product_name, // Accessing related model
+                        'quantity' => $product->quantity ?? null,
+                        'distance' => $product->distance ?? null,
+                        'appreciation' => $product->appreciation ?? null,
+                        'price' => $product->price,
+                        'subtotal' => $product->subtotal
+                    ];
+                })->toArray() : null;
 
 
 
@@ -438,17 +453,17 @@ class ServiceBillController extends Controller
             $data["item "] = optional($complaint->product_details)->product_name ?? null;
             $data["comments "] = $complaint ? $complaint->description : null;
             $result = app(AjaxController::class)->getProductTimeInterval(new Request([
-                    'product_id' => $complaint->product_id,
-                    'sale_bill_date' => $complaint->company_sale_bill_date
-                ]));
+                'product_id' => $complaint->product_id,
+                'sale_bill_date' => $complaint->company_sale_bill_date
+            ]));
             $response = $result->getData(true);
             $data['warranty_upto'] = $response['warrenty_expire_date'] ?? null;
-            if($complaint){
+            if ($complaint) {
                 return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
-            }else{
+            } else {
                 return response()->json(['status' => 'success', 'data' => "No Complaints"], $this->successStatus);
             }
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
     }
@@ -459,9 +474,37 @@ class ServiceBillController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
-        //
+        try {
+            $validator = Validator::make($request->all(), [
+                'status' => 'nullable|in:0,1,2,3,4,5'
+            ]);
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422); // 422 Unprocessable Entity
+            }
+            $service_bill = ServiceBill::with('service_bill_products.service_type_details', 'service_bill_products.product')->find($id);
+            if (!$service_bill) {
+                return response()->json(['status' => 'error', 'message' => 'Service bill Not Exsits'], $this->badrequest);
+            }
+            if (isset($request->status)) {
+                $newStatus = $request->status ?? 0;
+                // if ($newStatus > $service_bill->status) {
+                $service_bill->status = $request->status;
+                $service_bill->save();
+                return response()->json(['status' => 'success', 'message' => 'Service Bill Status updated successfully!']);
+                // } else {
+                //     return response()->json(['status' => 'error', 'message' => 'You can\'t revert the status.']);
+                // }
+            }
+            return response()->json(['status' => 'success', 'message' => 'No changes detected !']);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
     }
 
     /**
@@ -473,7 +516,169 @@ class ServiceBillController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        try {
+            $service_bill = ServiceBill::with('service_bill_products.service_type_details', 'service_bill_products.product')->find($id);
+            if (!$service_bill) {
+                return response()->json(['status' => 'error', 'message' => 'Service bill Not Exsits'], $this->badrequest);
+            }
+            $complaint = Complaint::with([
+                'service_center_details:id,customer_code,name',
+                'complaint_type_details',
+                'product_details.categories',
+                'product_details.subcategories',
+                'createdbyname:id,name',
+                'warranty_details'
+            ])->where('id', $service_bill->complaint_id)
+                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                    return $query->where('assign_user', $request->user()->id);
+                })
+                ->first();
+
+            if (!$complaint) {
+                return response()->json(['status' => 'error', 'message' => 'Service Bill can access only Service Eng'], $this->notFound);
+            }
+            $validator = Validator::make($request->all(), [
+                'serviceBillNo' => 'required',
+                'category_of_complaint' => 'nullable|string',
+                'complaint_type' => 'nullable|exists:service_bill_complaint_types,service_bill_complaint_type_name',
+                'complaint_reason' => 'nullable|exists:service_complaint_reasons,service_complaint_reasons',
+                'condition_of_service' => 'nullable|string',
+                'received_product'     => 'nullable|string',
+                'nature_of_fault' => 'nullable|string',
+                'service_location'     => 'nullable|string',
+                'repaired_replacement' => 'nullable|in:Replacement,Repaired',
+                'line_voltage' => 'nullable|numeric|digits:3',
+                'load_voltage' => 'nullable|numeric|digits:3',
+                'current' => 'nullable|numeric|digits:2',
+                'water_source' => 'nullable|string',
+                'panel_rating_running' => 'nullable|numeric|digits:3',
+                'panel_rating_starting' => 'nullable|regex:/^\d+\/\d+$/',
+                'product_sr_no'   => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'scr_job_card'     => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'photo_3'         => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'photo_4'         => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'photo_5'         => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'voltage_image'   => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'current_image'   => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'service.*.service_type' => 'required|integer',
+                'service.*.product_id' => 'nullable|integer',
+                'service.*.quantity' => 'required|integer|min:1',
+                'service.*.distance' => 'nullable|numeric|min:0',
+                'service.*.appreciation' => 'nullable',
+                'service.*.price' => 'required|numeric|min:0',
+                'service.*.subtotal' => 'required|numeric|min:0',
+            ]);
+
+            // If validation fails, return JSON response
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422); // 422 Unprocessable Entity
+            }
+            if ($request->repaired_replacement == 'Replacement') {
+                $replacement_tag = 'Yes';
+                $replacement_tag_number = $request->replacement_tag_number;
+            } else {
+                $replacement_tag = 'No';
+                $replacement_tag_number = NULL;
+            }
+            $serviceBillNo = $service_bill->bill_no;
+
+            $new_service_bill = ServiceBill::updateOrCreate(['complaint_id' => $complaint->id, 'complaint_no' => $complaint->complaint_number], [
+                'bill_no' => $serviceBillNo ?? null,
+                'complaint_id' => $complaint->id ?? null,
+                'complaint_no' => json_decode($complaint)->complaint_number ?? null,
+                'division' => $complaint->product_details->categories->id ?? null,
+                'category' => $request->category_of_complaint ?? null,
+                'complaint_type' => $request->complaint_type ?? null,
+                'complaint_reason' => $request->complaint_reason ?? null,
+                'condition_of_service' => $request->condition_of_service ?? null,
+                'received_product' => $request->received_product ?? null,
+                'nature_of_fault' => $request->nature_of_fault ?? null,
+                'service_location' => $request->service_location ?? null,
+                'repaired_replacement' => $request->repaired_replacement ?? null,
+                'replacement_tag' => $replacement_tag ?? null,
+                'replacement_tag_number' => $replacement_tag_number ?? null,
+                'line_voltage' => $request->line_voltage ?? '',
+                'load_voltage' => $request->load_voltage ?? '',
+                'current' => $request->current ?? '',
+                'water_source' => $request->water_source ?? '',
+                'panel_rating_running' => $request->panel_rating_running ?? '',
+                'panel_rating_starting' => $request->panel_rating_starting ?? '',
+            ]);
+
+            if ($new_service_bill) {
+                if ($request->hasFile('product_sr_no')) {
+                    $file = $request->file('product_sr_no');
+                    $customname = time() . '.' . $file->getClientOriginalExtension();
+                    $new_service_bill->addMedia($file)
+                        ->usingFileName($customname)
+                        ->toMediaCollection('product_sr_no');
+                }
+                if ($request->hasFile('scr_job_card')) {
+                    $file = $request->file('scr_job_card');
+                    $customname = time() . '.' . $file->getClientOriginalExtension();
+                    $new_service_bill->addMedia($file)
+                        ->usingFileName($customname)
+                        ->toMediaCollection('scr_job_card');
+                }
+                if ($request->hasFile('photo_3')) {
+                    $file = $request->file('photo_3');
+                    $customname = time() . '.' . $file->getClientOriginalExtension();
+                    $new_service_bill->addMedia($file)
+                        ->usingFileName($customname)
+                        ->toMediaCollection('photo_3');
+                }
+                if ($request->hasFile('photo_4')) {
+                    $file = $request->file('photo_4');
+                    $customname = time() . '.' . $file->getClientOriginalExtension();
+                    $new_service_bill->addMedia($file)
+                        ->usingFileName($customname)
+                        ->toMediaCollection('photo_4');
+                }
+                if ($request->hasFile('photo_5')) {
+                    $file = $request->file('photo_5');
+                    $customname = time() . '.' . $file->getClientOriginalExtension();
+                    $new_service_bill->addMedia($file)
+                        ->usingFileName($customname)
+                        ->toMediaCollection('photo_5');
+                }
+                if ($request->hasFile('voltage_image')) {
+                    $file = $request->file('voltage_image');
+                    $customname = time() . '.' . $file->getClientOriginalExtension();
+                    $new_service_bill->addMedia($file)
+                        ->usingFileName($customname)
+                        ->toMediaCollection('voltage_image');
+                }
+                if ($request->hasFile('current_image')) {
+                    $file = $request->file('current_image');
+                    $customname = time() . '.' . $file->getClientOriginalExtension();
+                    $new_service_bill->addMedia($file)
+                        ->usingFileName($customname)
+                        ->toMediaCollection('current_image');
+                }
+                ServiceBillProductDetails::where('service_bill_id', $new_service_bill->id)->delete();
+                if (isset($complaint->service_center) && $request->service && count($request->service) > 0) {
+                    foreach ($request->service as $service) {
+                        ServiceBillProductDetails::create([
+                            'service_bill_id' => $new_service_bill->id,
+                            'service_type' => $service['service_type'],
+                            'product_id' => $service['product_id'],
+                            'quantity' => $service['quantity'] ?? '',
+                            'distance' => $service['distance'] ?? '',
+                            'appreciation' => $service['appreciation'] ?? '',
+                            'price' => $service['price'],
+                            'subtotal' => $service['subtotal']
+                        ]);
+                    }
+                }
+                return response()->json(['status' => 'success', 'message' => 'Service bill created successfully', 'data' => $new_service_bill], $this->successStatus);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
     }
 
     /**
@@ -487,82 +692,85 @@ class ServiceBillController extends Controller
         //
     }
 
-    public function serviceBillComplaintReasons(Request $request){
-        try{
+    public function serviceBillComplaintReasons(Request $request)
+    {
+        try {
             $complaintId = $request->complaintId ?? '';
             $selected = $request->selected ?? '';
-            $reasons = ServiceComplaintReason::where('service_bill_complaint_id' , $complaintId)->get();
+            $reasons = ServiceComplaintReason::where('service_bill_complaint_id', $complaintId)->get();
             $data = [
                 'complaint_reasons' => $reasons->map(fn($reason) => [
-                    'key' => $reason->service_complaint_reasons, 
+                    'key' => $reason->service_complaint_reasons,
                     'value' =>  $reason->service_complaint_reasons
                 ])->toArray()
             ];
-            if($data){
+            if ($data) {
                 return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
-            }else{
+            } else {
                 return response()->json(['status' => 'success', 'data' => "No Reason"], $this->successStatus);
             }
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
     }
 
     // get service charge product 
-    public function getServiceChargeProduct(Request $request , $id){
-        try{
+    public function getServiceChargeProduct(Request $request, $id)
+    {
+        try {
             $data = [];
             $complaint = Complaint::where('id', $id)
-            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                return $query->where('assign_user', $request->user()->id);
-            })
-            ->first();
+                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
+                    return $query->where('assign_user', $request->user()->id);
+                })
+                ->first();
 
             if (!$complaint) {
-                 return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'] , $this->notFound);
+                return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'], $this->notFound);
             }
 
             $pro_sub_cat = $complaint->product_details->subcategories->service_category_id;
             $pro_cat =  $complaint ? $complaint->product_details->category_id : '';
             $categoryIds = explode(',', $pro_sub_cat);
-            $service_charge_products = ServiceChargeProducts::where('charge_type_id', $request->charge_type_id)->whereIn('category_id' , $categoryIds)->get();
-            if(isset($service_charge_products)){
-                 $data = collect($service_charge_products)->toArray();
+            $service_charge_products = ServiceChargeProducts::where('charge_type_id', $request->charge_type_id)->whereIn('category_id', $categoryIds)->get();
+            if (isset($service_charge_products)) {
+                $data = collect($service_charge_products)->toArray();
             }
-            if($data){
+            if ($data) {
                 return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
-            }else{
+            } else {
                 return response()->json(['status' => 'success', 'data' => "No Product"], $this->successStatus);
             }
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
     }
 
-    public function getServiceProductDetails(Request $request , $id)
+    public function getServiceProductDetails(Request $request, $id)
     {
-        try{
+        try {
             $data = [];
-           
+
             $service_charge_products = ServiceChargeProducts::where('id', $request->id)->first();
-            if(isset($service_charge_products)){
-                 $data = collect($service_charge_products)->toArray();
+            if (isset($service_charge_products)) {
+                $data = collect($service_charge_products)->toArray();
             }
-            if($data){
+            if ($data) {
                 return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
-            }else{
+            } else {
                 return response()->json(['status' => 'success', 'data' => "No Product"], $this->successStatus);
             }
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
     }
 
-    public function select_option(Request $request , $id){
-         try{
-             $service_bill = ServiceBill::where('complaint_id' , $id)->exists();
+    public function select_option(Request $request, $id)
+    {
+        try {
+            $service_bill = ServiceBill::where('complaint_id', $id)->exists();
 
-             $complaint = Complaint::with([
+            $complaint = Complaint::with([
                 'service_center_details:id,customer_code,name',
                 'complaint_type_details',
                 'product_details.categories',
@@ -576,15 +784,15 @@ class ServiceBillController extends Controller
                 ->first();
 
             if (!$complaint) {
-                 return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'] , $this->notFound);
+                return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'], $this->notFound);
             }
             $data = $this->getComplaintDropdowns($complaint);
-            if($complaint){
+            if ($complaint) {
                 return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
-            }else{
+            } else {
                 return response()->json(['status' => 'success', 'data' => "No Complaints"], $this->successStatus);
             }
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
     }
