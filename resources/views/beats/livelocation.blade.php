@@ -80,7 +80,14 @@
                             </div>
                             <div class="col-md-3">
                                 <div class="form-group has-default bmd-form-group">
-                                    <input type="text" class="form-control datepicker" id="date" required name="date" value="{{$date??''}}" placeholder="Select Date" autocomplete="off" readonly>
+                                    <input type="text" class="form-control datepicker" id="date" required name="date" value="{{$date??''}}" placeholder="Date From" autocomplete="off" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group has-default bmd-form-group">
+                                    <input type="text" class="form-control datepicker" id="to_date" required name="to_date"
+                                        value="{{ \Carbon\Carbon::today()->format('Y-m-d') }}" placeholder="Select Date"
+                                        autocomplete="off" readonly>
                                 </div>
                             </div>
                             <div class="col-md-2">

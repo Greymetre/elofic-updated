@@ -36,7 +36,7 @@ class LoyaltyRetialerSummaryReportExport implements FromCollection, WithHeadings
     {
         DB::statement("SET SESSION group_concat_max_len = 100000");
 
-        $retailers_sarthi = TransactionHistory::groupBy('customer_id')->pluck('customer_id');
+        $retailers_sarthi = TransactionHistory::groupBy('customer_id')->havingRaw('COUNT(*) > 1 OR SUM(CASE WHEN scheme_id IS NOT NULL THEN 1 ELSE 0 END) > 0')->pluck('customer_id');
         $userids = getUsersReportingToAuth();
 
         $query = Customers::with([
@@ -45,14 +45,20 @@ class LoyaltyRetialerSummaryReportExport implements FromCollection, WithHeadings
             'customeraddress.cityname',
             'customeraddress.statename',
             'getparentdetail.parent_detail',
+            'getemployeedetail.employee_detail',
             'transactions' => function ($q) {
-                $q->select('customer_id', 'status', 'point', 'active_point', 'provision_point');
+                $q->select('customer_id', 'status', 'point', 'active_point', 'provision_point', 'scheme_id');
             },
             'redemptions' => function ($q) {
                 $q->select('customer_id', 'status', 'redeem_mode', 'redeem_amount')
                     ->whereNot('status', '2');
             }
-        ])->whereIn('id', $retailers_sarthi);
+        ])
+            ->whereHas('getemployeedetail.employee_detail', function ($q) {
+                $q->where('division_id', '10');
+            })
+            ->where(['customertype' => '2', 'active' => 'Y'])
+            ->whereIn('id', $retailers_sarthi);
 
         if ($this->branch_id) {
             $userIdsss = User::where('branch_id', $this->branch_id)
@@ -82,11 +88,7 @@ class LoyaltyRetialerSummaryReportExport implements FromCollection, WithHeadings
             });
         }
 
-        $pageSize = $this->pageSize ?? 1000;
-        $page = $this->page ?? 1;
-
         return $query->orderBy('id', 'asc')->get();
-        // ->paginate($pageSize, ['*'], 'page', $page);
     }
 
 
@@ -103,6 +105,7 @@ class LoyaltyRetialerSummaryReportExport implements FromCollection, WithHeadings
             'Coupon Scan Nos',
             'Provision Point',
             'Active Point',
+            'March 31 2024',
             'Total Point',
             'Redeem Gift',
             'Redeem Neft',
@@ -127,18 +130,19 @@ class LoyaltyRetialerSummaryReportExport implements FromCollection, WithHeadings
         // }
 
         // Preloaded transaction data
-        $coupon_scan_nos = $data->transactions->count() ?? 0;
+        $coupon_scan_nos = $data->transactions->whereNotNull('scheme_id')->count() ?? 0;
         $total_points = $data->transactions->sum('point') ?? 0;
-        $active_points = $data->transactions->where('status', '1')->sum('point') ?? 0;
-        $active_points += $data->transactions->where('status', '0')->sum('active_point') ?? 0;
-        $provision_points = $data->transactions->where('status', '0')->sum('provision_point') ?? 0;
+        $total_points_old = $data->transactions->whereNull('scheme_id')->sum('point') ?? 0;
+        $active_points = $data->transactions->whereNotNull('scheme_id')->where('status', '1')->sum('point') ?? 0;
+        $active_points += $data->transactions->whereNotNull('scheme_id')->where('status', '0')->sum('active_point') ?? 0;
+        $provision_points = $data->transactions->whereNotNull('scheme_id')->where('status', '0')->sum('provision_point') ?? 0;
 
 
         // Preloaded redemption data
-        $redeem_gift = $data->redemptions->where('redeem_mode', '1')->sum('redeem_amount') ?? 0;
-        $redeem_neft = $data->redemptions->where('redeem_mode', '2')->sum('redeem_amount') ?? 0;
-        $total_redemption = $redeem_gift + $redeem_neft;
-        $total_balance = (int)$active_points - (int)$total_redemption;
+        $redeem_gift = $data->redemptions->where('redeem_mode', '1')->sum('redeem_amount') ?? '0';
+        $redeem_neft = $data->redemptions->where('redeem_mode', '2')->sum('redeem_amount') ?? '0';
+        $total_redemption = $data->redemptions->sum('redeem_amount') ?? '0';
+        $total_balance = (int)$total_points - (int)$total_redemption;
 
         return [
             $data['createdbyname']['getbranch']['branch_name'] ?? '',
@@ -150,6 +154,7 @@ class LoyaltyRetialerSummaryReportExport implements FromCollection, WithHeadings
             $coupon_scan_nos,
             $provision_points,
             $active_points,
+            $total_points_old,
             $total_points,
             $redeem_gift,
             $redeem_neft,

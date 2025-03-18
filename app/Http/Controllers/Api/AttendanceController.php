@@ -17,6 +17,7 @@ use App\Models\TourProgramme;
 use App\Models\BeatSchedule;
 use App\Models\Beat;
 use App\Models\CompOffLeave;
+use App\Models\Holiday;
 use App\Models\TourDetail;
 use App\Models\User;
 use Carbon\Carbon;
@@ -97,13 +98,28 @@ class AttendanceController extends Controller
                 $request['punchin_image'] = fileupload($image, $this->path, $filename);
             }
             $punchin_date = getcurentDate();
-            $isSunday = Carbon::parse($punchin_date)->isSunday();
-            if ($isSunday) {
-                $expiryDate = Carbon::parse($punchin_date)->addDays(60);
+            $request['punchin_date'] = $punchin_date;
+            $branchIds = explode(',', $user->branch_id);
+
+            $punchinDate = Carbon::parse($request['punchin_date'])->format('Y-m-d');
+            $isSunday = Carbon::parse($request['punchin_date'])->isSunday();
+            $holidayDates = Holiday::whereIn('branch', $branchIds)
+                ->pluck('holiday_date')
+                ->map(function ($dateString) {
+                    return explode(',', $dateString);
+                })
+                ->collapse()
+                ->map('trim')
+                ->toArray();
+
+            $isHoliday = in_array($punchinDate, $holidayDates);
+
+            if ($isSunday || $isHoliday) {
+                $expiryDate = Carbon::parse($request['punchin_date'])->addDays(60);
 
                 CompOffLeave::create([
-                    'user_id' => $user->id,
-                    'comp_off_date' => $punchin_date,
+                    'user_id' => $request['user_id'],
+                    'comp_off_date' => $punchinDate,
                     'expiry_date' => $expiryDate,
                     'is_used' => false,
                 ]);

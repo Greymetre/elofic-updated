@@ -18,6 +18,7 @@ use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use DB;
 
 class LoyaltySummaryReportExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithEvents
 {
@@ -30,12 +31,11 @@ class LoyaltySummaryReportExport implements FromCollection, WithHeadings, Should
 
     public function collection()
     {
-
         $userid = !empty($userid) ? $userid : Auth::user()->id;
         $userinfo = User::where('id', '=', $userid)->first();
-        if($this->state_id && !empty($this->state_id)){
+        if ($this->state_id && !empty($this->state_id)) {
             $data = State::where('id', $this->state_id);
-        }else if (!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin') && !$userinfo->hasRole('Sub_Admin') && !$userinfo->hasRole('HR_Admin') && !$userinfo->hasRole('HO_Account')  && !$userinfo->hasRole('Sub_Support') && !$userinfo->hasRole('Accounts Order') && !$userinfo->hasRole('Service Admin') && !$userinfo->hasRole('All Customers')) {
+        } else if (!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin') && !$userinfo->hasRole('Sub_Admin') && !$userinfo->hasRole('HR_Admin') && !$userinfo->hasRole('HO_Account')  && !$userinfo->hasRole('Sub_Support') && !$userinfo->hasRole('Accounts Order') && !$userinfo->hasRole('Service Admin') && !$userinfo->hasRole('All Customers')) {
             $state_ids = City::whereIn('id', auth()->user()->cities->pluck('city_id'))->pluck('state_id');
             $data = State::whereIn('id', $state_ids)->orderBy('id', 'asc');
         } else {
@@ -47,54 +47,55 @@ class LoyaltySummaryReportExport implements FromCollection, WithHeadings, Should
     public function headings(): array
     {
 
-        return ['Branch', 'Total Retailer Registred Nos', 'Total Retailer Under Saarthi Nos', 'Coupon Scan Nos', 'Mobile App Donwload Nos', 'Provision Point', 'Active Point', 'Total Point', 'Redeem Gift', 'Redeem Neft', 'Total Redeem', 'Balance Active Point'];
+        return ['Branch', 'Total Retailer Registred Nos', 'Total Retailer Under Saarthi Nos', 'Coupon Scan Nos', 'Mobile App Donwload Nos', 'Provision Point', 'Active Point','March 31 2024', 'Total Point', 'Redeem Gift', 'Redeem Neft', 'Total Redeem', 'Balance Active Point'];
     }
 
     public function map($data): array
     {
 
-        // dd($data);
         $userids = getUsersReportingToAuth();
         $usersIds = User::where('branch_id', $data['id'])->whereIn('id', $userids)->pluck('id')->toArray();
-        $retail_ids = Customers::where('customertype', '2')->pluck('id');
-        $customerIds = Address::where('state_id', $data->id)->whereIn('customer_id', $retail_ids)->pluck('customer_id');
+        $customerIds = Customers::with('customeraddress', 'getemployeedetail.employee_detail')->whereHas('getemployeedetail.employee_detail', function ($q) {
+            $q->where('division_id', '10');
+        })->whereHas('customeraddress', function ($q) use ($data) {
+            $q->where('state_id', $data->id);
+        })->where(['customertype' => '2', 'active' => 'Y'])->pluck('id');
+        
         $total_retailers = $customerIds->count();
-        $nosOfRetailerRegistredSaarthi = TransactionHistory::whereIn('customer_id', $customerIds)->groupBy('customer_id')->count();
-        $coupon_scan_nos = TransactionHistory::whereIn('customer_id', $customerIds)->count();
+        if($total_retailers <= 0){
+            return [];
+        }
+        $nosOfRetailerRegistredSaarthi = TransactionHistory::whereIn('customer_id', $customerIds)
+            ->select('customer_id')
+            ->groupBy('customer_id')
+            ->havingRaw('COUNT(*) > 1 OR SUM(CASE WHEN scheme_id IS NOT NULL THEN 1 ELSE 0 END) > 0')
+            ->count();
+
+        $coupon_scan_nos = TransactionHistory::whereIn('customer_id', $customerIds)
+        ->select('customer_id')
+        ->whereNotNull('scheme_id')
+        ->count();
         $mobile_app_downloads = MobileUserLoginDetails::whereIn('customer_id', $customerIds)->count();
-        // $provision_point = TransactionHistory::whereIn('customer_id', $customerIds)->where('status', '0')->sum('point');
-        // $active_point = TransactionHistory::whereIn('customer_id', $customerIds)->where('status', '1')->sum('point');
+        
         $active_point = 0;
         $provision_point = 0;
-        $thistorys = TransactionHistory::whereIn('customer_id', $customerIds)->get();
-        foreach($thistorys as $thistory){
-            if($thistory->status == '1'){
+        $thistorys = TransactionHistory::whereIn('customer_id', $customerIds)->whereNotNull('scheme_id')->get();
+        foreach ($thistorys as $thistory) {
+            if ($thistory->status == '1') {
                 $active_point += $thistory->point;
-            }else{
+            } else {
                 $active_point += $thistory->active_point;
                 $provision_point += $thistory->provision_point;
             }
         }
-        $total_point = $provision_point + $active_point;
+        $total_point = TransactionHistory::whereIn('customer_id', $customerIds)->sum('point');
+        $total_point_old = TransactionHistory::whereIn('customer_id', $customerIds)->whereNull('scheme_id')->sum('point');
         $redeem_gift = Redemption::with('customer')->where('status', '!=', '2')->whereIn('customer_id', $customerIds)->where('redeem_mode', '1')->sum('redeem_amount');
         $redeem_neft = Redemption::with('customer')->where('status', '!=', '2')->whereIn('customer_id', $customerIds)->where('redeem_mode', '2')->sum('redeem_amount');
         $total_redeem = $redeem_gift + $redeem_neft;
         $balance_active_point = $total_point - $total_redeem;
 
-
-        // $data['id'];
-        // $data['total_registered_retailers'] = $total_retailers;
-        // $data['total_retailers_under_saarthi'] = $nosOfRetailerRegistredSaarthi;
-        // $data['coupon_scan_nos'] = $coupon_scan_nos;
-        // $data['mobile_app_downloads'] = $mobile_app_downloads;
-        // $data['provision_point'] = $provision_point;
-        // $data['active_point'] = $active_point;
-        // $data['total_point'] = $total_point;
-        // $data['redeem_gift'] = $redeem_gift;
-        // $data['redeem_neft'] = $redeem_neft;
-        // $data['total_redeem'] = $total_redeem;
-        // $data['balance_active_point'] = $balance_active_point;
-
+        
         return [
             $data['state_name'],
             $data['total_registered_retailers'] = $total_retailers,
@@ -103,6 +104,7 @@ class LoyaltySummaryReportExport implements FromCollection, WithHeadings, Should
             $data['mobile_app_downloads'] = $mobile_app_downloads,
             $data['provision_point'] = $provision_point,
             $data['active_point'] = $active_point,
+            $data['total_point_old'] = $total_point_old,
             $data['total_point'] = $total_point,
             $data['redeem_gift'] = $redeem_gift,
             $data['redeem_neft'] = $redeem_neft,
@@ -117,23 +119,82 @@ class LoyaltySummaryReportExport implements FromCollection, WithHeadings, Should
             AfterSheet::class => function (AfterSheet $event) {
                 $lastRow = $event->sheet->getHighestDataRow() + 2;
                 // $event->sheet->mergeCells('A' . $lastRow.':b' . $lastRow);
+                $sheet = $event->sheet->getDelegate();
 
-                $event->sheet->getStyle('A' . $lastRow . ':AK' . $lastRow)->applyFromArray([
-                    'font' => ['bold' => true],
-                    'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
+                $event->sheet->getStyle('A' . $lastRow . ':' . $sheet->getHighestDataColumn().$lastRow)->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                        'color' => ['rgb' => 'FFFFFF'],
+                    ],
+                    'alignment' => [
+                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                        'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                    ],
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => '00aadb'],
+                    ],
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['argb' => '000000'],
+                        ],
+                    ],
                 ]);
                 $event->sheet->setCellValue('A' . $lastRow, 'Total');
-                $event->sheet->setCellValue('B' . $lastRow, '=SUM(B3:B' . ($lastRow - 2) . ')');
-                $event->sheet->setCellValue('C' . $lastRow, '=SUM(C3:C' . ($lastRow - 2) . ')');
-                $event->sheet->setCellValue('D' . $lastRow, '=SUM(D3:D' . ($lastRow - 2) . ')');
-                $event->sheet->setCellValue('E' . $lastRow, '=SUM(E3:E' . ($lastRow - 2) . ')');
-                $event->sheet->setCellValue('F' . $lastRow, '=SUM(F3:F' . ($lastRow - 2) . ')');
-                $event->sheet->setCellValue('G' . $lastRow, '=SUM(G3:G' . ($lastRow - 2) . ')');
-                $event->sheet->setCellValue('H' . $lastRow, '=SUM(H3:H' . ($lastRow - 2) . ')');
-                $event->sheet->setCellValue('I' . $lastRow, '=SUM(I3:I' . ($lastRow - 2) . ')');
-                $event->sheet->setCellValue('J' . $lastRow, '=SUM(J3:J' . ($lastRow - 2) . ')');
-                $event->sheet->setCellValue('K' . $lastRow, '=SUM(K3:K' . ($lastRow - 2) . ')');
-                $event->sheet->setCellValue('L' . $lastRow, '=SUM(L3:L' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('B' . $lastRow, '=SUM(B2:B' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('C' . $lastRow, '=SUM(C2:C' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('D' . $lastRow, '=SUM(D2:D' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('E' . $lastRow, '=SUM(E2:E' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('F' . $lastRow, '=SUM(F2:F' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('G' . $lastRow, '=SUM(G2:G' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('H' . $lastRow, '=SUM(H2:H' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('I' . $lastRow, '=SUM(I2:I' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('J' . $lastRow, '=SUM(J2:J' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('K' . $lastRow, '=SUM(K2:K' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('L' . $lastRow, '=SUM(L2:L' . ($lastRow - 2) . ')');
+                $event->sheet->setCellValue('M' . $lastRow, '=SUM(M2:M' . ($lastRow - 2) . ')');
+
+                $lastRow = $sheet->getHighestDataRow();
+                $lastColumn = $sheet->getHighestDataColumn();
+
+                $firstRowRange = 'A1:' . $lastColumn . '1';
+                $sheet->getRowDimension(1)->setRowHeight(25);
+                $sheet->getStyle($firstRowRange)->getAlignment()->setWrapText(true);
+                $sheet->getStyle($firstRowRange)->getFont()->setSize(14);
+
+                $event->sheet->getStyle($firstRowRange)->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                        'color' => ['rgb' => 'FFFFFF'],
+                    ],
+                    'alignment' => [
+                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                        'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                    ],
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => '00aadb'],
+                    ],
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['argb' => '000000'],
+                        ],
+                    ],
+                ]);
+
+                $event->sheet->getStyle('A1:' . $lastColumn . '' . $lastRow-1)->applyFromArray([
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['argb' => '000000'],
+                        ],
+                    ],
+                    'alignment' => [
+                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
+                    ],
+                ]);
             },
         ];
     }

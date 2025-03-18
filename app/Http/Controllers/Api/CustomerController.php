@@ -224,7 +224,7 @@ class CustomerController extends Controller
                         if ($request->file('shopimage')) {
                             $image = $request->file('shopimage');
                             $filename = 'customer';
-                            $request['shop_image'] = fileupload($image, $this->path . '/shopimage', $filename);
+                            $request['shop_image'] = fileupload($image, $this->path, $filename);
                         }
 
                         // if($request->file('image')){
@@ -250,13 +250,13 @@ class CustomerController extends Controller
                         if ($request->file('visiting_card')) {
                             $image = $request->file('visiting_card');
                             $filename = 'customer';
-                            $request['visiting_image'] = fileupload($image, $this->path . '/visiting', $filename);
+                            $request['visiting_image'] = fileupload($image, $this->path, $filename);
                         }
 
                         if ($request->file('gstin_image')) {
                             $image = $request->file('gstin_image');
                             $filename = 'customer';
-                            $gstinimagepath = fileupload($image, $this->path . '/gstin', $filename);
+                            $gstinimagepath = fileupload($image, $this->path, $filename);
                             Attachment::updateOrCreate([
                                 'customer_id'   =>  $request['customer_id'],
                                 'document_name' =>  'gstin'
@@ -273,7 +273,7 @@ class CustomerController extends Controller
                         if ($request->file('pan_image')) {
                             $image = $request->file('pan_image');
                             $filename = 'customer';
-                            $panimagepath = fileupload($image, $this->path . '/pan', $filename);
+                            $panimagepath = fileupload($image, $this->path, $filename);
                             Attachment::updateOrCreate([
                                 'customer_id'   =>  $request['customer_id'],
                                 'document_name' =>  'pan'
@@ -290,7 +290,7 @@ class CustomerController extends Controller
                         if ($request->file('aadhar_image')) {
                             $image = $request->file('aadhar_image');
                             $filename = 'customer';
-                            $aadharimagepath = fileupload($image, $this->path . '/aadhar', $filename);
+                            $aadharimagepath = fileupload($image, $this->path, $filename);
                             Attachment::updateOrCreate([
                                 'customer_id'   =>  $request['customer_id'],
                                 'document_name' =>  'aadhar'
@@ -307,7 +307,7 @@ class CustomerController extends Controller
                         if ($request->file('other_image')) {
                             $image = $request->file('other_image');
                             $filename = 'customer';
-                            $otherimagepath = fileupload($image, $this->path . '/other', $filename);
+                            $otherimagepath = fileupload($image, $this->path, $filename);
                             Attachment::updateOrCreate([
                                 'customer_id'   =>  $request['customer_id'],
                                 'document_name' =>  'other'
@@ -986,7 +986,7 @@ class CustomerController extends Controller
                 if ($request->file('gstin_image')) {
                     $image = $request->file('gstin_image');
                     $filename = 'customer';
-                    $gstinimagepath = fileupload($image, $this->path . '/gstin', $filename);
+                    $gstinimagepath = fileupload($image, $this->path, $filename);
                     Attachment::updateOrCreate(['document_name'   =>  'gstin', 'customer_id'   =>  $request->customer_id], [
                         'active'        => 'Y',
                         'file_path'     => $gstinimagepath,
@@ -999,7 +999,7 @@ class CustomerController extends Controller
                 if ($request->file('pan_image')) {
                     $image = $request->file('pan_image');
                     $filename = 'customer';
-                    $panimagepath = fileupload($image, $this->path . '/pan', $filename);
+                    $panimagepath = fileupload($image, $this->path, $filename);
                     Attachment::updateOrCreate(['document_name'   =>  'pan', 'customer_id'   =>  $request->customer_id], [
                         'active'        => 'Y',
                         'file_path'     => $panimagepath,
@@ -1012,7 +1012,7 @@ class CustomerController extends Controller
                 if ($request->file('aadhar_image')) {
                     $image = $request->file('aadhar_image');
                     $filename = 'customer';
-                    $aadharimagepath = fileupload($image, $this->path . '/aadhar', $filename);
+                    $aadharimagepath = fileupload($image, $this->path, $filename);
                     Attachment::updateOrCreate(['document_name'   =>  'aadhar', 'customer_id'   =>  $request->customer_id], [
                         'active'        => 'Y',
                         'file_path'     => $aadharimagepath,
@@ -1025,7 +1025,7 @@ class CustomerController extends Controller
                 if ($request->file('other_image')) {
                     $image = $request->file('other_image');
                     $filename = 'customer';
-                    $otherimagepath = fileupload($image, $this->path . '/other', $filename);
+                    $otherimagepath = fileupload($image, $this->path, $filename);
                     Attachment::updateOrCreate(['document_name'   =>  'aadhar', 'customer_id'   =>  $request->customer_id], [
                         'active'        => 'Y',
                         'file_path'     => $otherimagepath,
@@ -1038,7 +1038,7 @@ class CustomerController extends Controller
                 if ($request->file('visiting_card')) {
                     $image = $request->file('visiting_card');
                     $filename = 'customer';
-                    $request['visiting_image'] = fileupload($image, $this->path . '/visiting', $filename);
+                    $request['visiting_image'] = fileupload($image, $this->path, $filename);
                     CustomerDetails::updateOrCreate(['customer_id'   =>  $request->customer_id], [
                         'visiting_card'  =>  isset($request['visiting_image']) ? $request['visiting_image'] : '',
                     ]);
@@ -1047,7 +1047,7 @@ class CustomerController extends Controller
                 if ($request->file('shop_image')) {
                     $image = $request->file('shop_image');
                     $filename = 'customer';
-                    $request['shop_image'] = fileupload($image, $this->path . '/shopimage', $filename);
+                    $request['shop_image'] = fileupload($image, $this->path, $filename);
                     CustomerDetails::updateOrCreate(['customer_id'   =>  $request->customer_id], [
                         'shop_image'  =>  isset($request['shop_image']) ? $request['shop_image'] : '',
                     ]);
