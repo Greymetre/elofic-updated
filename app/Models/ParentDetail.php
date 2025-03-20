@@ -28,4 +28,10 @@ class ParentDetail extends Model
     {
         return $this->hasMany('App\Models\Redemption', 'customer_id', 'customer_id');
     }
+
+
+    public function customer()
+    {
+        return $this->belongsTo('App\Models\Customers', 'customer_id', 'id');
+    }
 }
