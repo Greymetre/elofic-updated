@@ -91,9 +91,9 @@ class PlannedSOPController extends Controller
                     [
                         'planning_month' => $planning_month,
                         'product_id'     => $request->product_id[$key] ?? '',
+                        'branch_id'            => $request->branch_id ?? '',
                     ],
                     [
-                        'branch_id'            => $request->branch_id ?? '',
                         'order_id'             => $order_id ?? '',
                         'plan_next_month'      => $request->plan_next_month[$key] ?? '',
                         'opening_stock'        => $request->opening_stock[$key] ?? NULL,

@@ -87,7 +87,6 @@ class LoyaltyRetialerSummaryReportExport implements FromCollection, WithHeadings
                 $q->where('parent_id', $this->dealer_id);
             });
         }
-
         return $query->orderBy('id', 'asc')->get();
     }
 

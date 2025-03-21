@@ -136,11 +136,19 @@ class LeaveController extends Controller
             } else {
                 if ($request['type'] == 'First Half Leave' || $request['type'] == 'Second Half Leave') {
                     $user = User::find($request['user_id']);
-                    $user->leave_balance = $user->leave_balance - 0.5;
+                    if($user->leave_balance >= 0.5) {
+                        $user->leave_balance = $user->leave_balance - 0.5;
+                    }else{
+                        $user->leave_balance = 0;
+                    }
                     $user->save();
                 } elseif ($request['type'] == 'Full Day Leave' || $request['type'] == 'Leave') {
                     $user = User::find($request['user_id']);
-                    $user->leave_balance = $user->leave_balance - $days;
+                    if($user->leave_balance >= $days) {
+                        $user->leave_balance = $user->leave_balance - $days;
+                    }else {
+                        $user->leave_balance = 0;
+                    }
                     $user->save();
                 }
             }

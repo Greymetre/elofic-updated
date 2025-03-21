@@ -98,8 +98,8 @@
                         <thead>
                             <tr class="text-white">
                                 <th class="text-center" style="width: 50px !important;">#</th>
-                                <th class="text-center"><div style="width: 50px !important;">Actions</div></th>
-                                <th class="text-center" >{!! trans('panel.global.products') !!}</th>
+                                <th class="text-center"><div style="width: 20px !important;">-</div></th>
+                                <th class="text-center" ><div style="width: 350px !important;">Products<div></th>
                                 <th class="text-center" ><div style="width: 200px !important;">Product Group<div></th>
                                 <th class="text-center" ><div style="width: 200px !important;">Product Code</div></th>
                                 <th class="text-center"><div style="width: 200px !important;">Product Description<div></th>
@@ -394,6 +394,11 @@
               minimumResultsForSearch: 10
           });
 
+          var tableContainer = $('.table-responsive');
+            tableContainer.animate({
+                scrollTop: tableContainer[0].scrollHeight
+            }, 500);
+
           updateRowNumbers();
       });
 
@@ -483,7 +488,8 @@
                 type: "POST",
                 data: {
                     _token: "{{ csrf_token() }}",
-                    product_id: product_id
+                    product_id: product_id,
+                    branch_id : branch_id
                 },
                 success: function(res) {
                     $row.find(".product_description").val(res.product_description);
@@ -493,7 +499,7 @@
                     $row.find(".budget_for_month").val(res.budget_for_month);
                     $row.find(".top_sku").val(res.top_sku);
                     $row.find(".sku_unit_price").val(res.price).trigger('change');
-                    $row.find(".opening_stock").val(res.opening_stock.opening_stocks);
+                    $row.find(".opening_stock").val(res.opening_stock);
                     
                     // Set read-only fields
                     $row.find(".product_group_name, .product_description, .sku_unit_price, .opening_stock, .product_division, .product_code, .budget_for_month, .top_sku").prop('readonly', true);
