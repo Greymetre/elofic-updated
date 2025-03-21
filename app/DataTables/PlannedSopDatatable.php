@@ -129,7 +129,8 @@ class PlannedSopDatatable extends DataTable
                     case 'last_year_month_sale':
                     case 'sku_unit_price':
                     case 's_op_val':
-                    case  'status' : 
+                    case  'status' :
+                    case 'order_id': 
                      $data->where($key, 'like', "$value");
                      break;
                 }

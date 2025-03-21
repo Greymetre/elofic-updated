@@ -49,11 +49,11 @@ class ComplaintApiController extends Controller
             if ($request->user()->hasRole('Service Eng') || $request->user()->hasRole('superadmin')) {
                 $filters = $request->all();
                 if ($request->user()->hasRole('superadmin')) {
-                    $query = Complaint::select('id', 'complaint_number', 'complaint_status', 'complaint_date');
+                    $query = Complaint::select('id', 'complaint_number', 'complaint_status', 'complaint_date')->orderBy('id', 'desc');
                 } else {
                     $user_ids = getUsersReportingToAuth($request->user()->id);
                     $query = Complaint::whereIn('assign_user', $user_ids)
-                        ->select('id', 'complaint_number', 'complaint_status', 'complaint_date');
+                        ->select('id', 'complaint_number', 'complaint_status', 'complaint_date')->orderBy('id', 'desc');
                 }
 
                 if (isset($request->from_date) && isset($request->to_date)) {
@@ -76,6 +76,9 @@ class ComplaintApiController extends Controller
                             case 'complaint_recieve_via';
                                 $query->where($key, $value);
                                 break;
+                           case 'complaint_number':
+                                    $query->where($key, 'like', "%{$value}%");
+                                    break;
                                 // Add more cases if needed
                         }
                     }
@@ -407,6 +410,7 @@ class ComplaintApiController extends Controller
                         $result = app(ComplaintController::class)->checkCompleteComplaint(new Request([
                             'id' => $complaint->id,
                         ]));
+                        // dd($result);
                         $response = $result->getData(true);
                         if ($response['status'] != 'success') {
                             return response()->json([

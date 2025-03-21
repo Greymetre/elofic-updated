@@ -112,6 +112,7 @@
                 <tr>
                   <th></th>
                   <th><div style="width:150px"></div></th>
+                  <th><input type="text" class="form-control table-input" name="order_id" placeholder="Search..." autocomplete="off"></th>
                   <th><input type="text" class="form-control table-input datepicker" id="start_month" 
                        name="planning_month" placeholder="S&OP Month" 
                        autocomplete="off"></th>
@@ -142,6 +143,7 @@
                 <tr>
                   <th>{!! trans('panel.global.no') !!}</th>
                   <th>{!! trans('panel.global.action') !!}</th>
+                  <th>Order Id</th>
                   <th>Month</th>
                   <th>Branch Name</th>
                   <th>Division</th>
@@ -190,6 +192,7 @@
           url: "{{ route('plannedSopList') }}",
           data: function (d) {
                 d._token = token,
+                d.order_id  = $('input[name="order_id"]').val();
                 d.branch_name = $('input[name="branch_name"]').val();
                 d.category_name = $('input[name="category_name"]').val();
                 d.group_name = $('input[name="group_name"]').val();
@@ -215,9 +218,15 @@
             orderable: false,
             searchable: false
           },
-           {
+          {
             data: 'action',
             name: 'action',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+             data : 'order_id',
+             name : 'order_id',
             orderable: false,
             "defaultContent": ''
           },
