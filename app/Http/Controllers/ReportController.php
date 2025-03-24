@@ -374,6 +374,7 @@ class ReportController extends Controller
 
     public function attendancereport(Request $request)
     {
+        abort_if(Gate::denies('attendance_report'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $search_branches = $request->input('search_branches');
         $all_reporting_user_ids = getUsersReportingToAuth();
         $all_user_branches = user::whereDoesntHave('roles', function ($query) {
@@ -573,7 +574,7 @@ class ReportController extends Controller
 
     public function attendancereportSummary(Request $request)
     {
-
+        abort_if(Gate::denies('attendance_summary_report'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $search_branches = $request->input('search_branches');
         $all_reporting_user_ids = getUsersReportingToAuth();
         $all_user_branches = user::whereDoesntHave('roles', function ($query) {

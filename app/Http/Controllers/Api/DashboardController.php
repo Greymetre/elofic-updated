@@ -287,7 +287,7 @@ class DashboardController extends Controller
             $id = $request->id;
             $docimages = collect([]);
             if ($request->file('imggstin')) {
-                $path = 'customers/';
+                $path = 'customers';
                 $image = $request->file('imggstin');
                 $filename = 'gstin_' . $id;
                 unset($request['imggstin']);
@@ -299,7 +299,7 @@ class DashboardController extends Controller
                 CustomerDetails::where('customer_id', $request->id)->update(['gstin_no_status' => '0']);
             }
             if ($request->file('imgpan')) {
-                $path = 'customers/';
+                $path = 'customers';
                 $image = $request->file('imgpan');
                 $filename = 'pan_' . $id;
                 unset($request['imgpan']);
@@ -311,7 +311,7 @@ class DashboardController extends Controller
                 CustomerDetails::where('customer_id', $request->id)->update(['pan_no_status' => '0']);
             }
             if ($request->file('imgaadhar')) {
-                $path = 'customers/';
+                $path = 'customers';
                 $image = $request->file('imgaadhar');
                 $filename = 'aadhar_' . $id;
                 unset($request['image']);
@@ -323,7 +323,7 @@ class DashboardController extends Controller
                 CustomerDetails::where('customer_id', $request->id)->update(['aadhar_no_status' => '0']);
             }
             if ($request->file('imgaadharback')) {
-                $path = 'customers/';
+                $path = 'customers';
                 $image = $request->file('imgaadharback');
                 $filename = 'aadharback_' . $id;
                 unset($request['image']);
@@ -335,7 +335,7 @@ class DashboardController extends Controller
                 CustomerDetails::where('customer_id', $request->id)->update(['aadhar_no_status' => '0']);
             }
             if ($request->file('imgbankpass')) {
-                $path = 'customers/';
+                $path = 'customers';
                 $image = $request->file('imgbankpass');
                 $filename = 'bankpass_' . $id;
                 unset($request['image']);

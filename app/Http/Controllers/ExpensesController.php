@@ -477,15 +477,26 @@ class ExpensesController extends Controller
 
             $checke_by = array();
             $approved_by = array();
+            $rejected_by = array();
+            $cd_date = '-';
+            $ap_date = '-';
+            $rj_date = '-';
             if (!empty($item->get_time_history)) {
                 foreach ($item->get_time_history as $key_new => $datas) {
 
-                    if ($datas->status_type == 'checked') {
+                    if ($datas->status_type == 'checked' || $datas->status_type == 'Checked') {
                         $checke_by[0] = $datas->logusers->name ?? '';
+                        $cd_date =  date("d/m/Y", strtotime($datas->created_at));
                     }
 
-                    if ($datas->status_type == 'approved') {
+                    if ($datas->status_type == 'approved' || $datas->status_type == 'Approved') {
                         $approved_by[0] = $datas->logusers->name ?? '';
+                        $ap_date =  date("d/m/Y", strtotime($datas->created_at));
+                    }
+
+                    if ($datas->status_type == 'rejected' || $datas->status_type == 'Rejected') {
+                        $rejected_by[0] = $datas->logusers->name ?? '';
+                        $rj_date =  date("d/m/Y", strtotime($datas->created_at));
                     }
                 }
             }
@@ -494,7 +505,7 @@ class ExpensesController extends Controller
             if ($genrate) {
                 $cd_at =  date("d/m/Y", strtotime($genrate->created_at));
             } else {
-                $cd_at =  date("d/m/Y", strtotime($query->created_at));
+                $cd_at =  date("d/m/Y", strtotime($item->created_at));
             }
 
 
@@ -502,7 +513,6 @@ class ExpensesController extends Controller
             return [
 
                 $item->id ?? "",
-                // $item->date ?? "",
                 isset($item->date) ? date("d-m-Y", strtotime($item->date)) : '',
                 $item->users->employee_codes ?? "",
                 $item->users->name ?? "",
@@ -517,10 +527,13 @@ class ExpensesController extends Controller
                 $item->total_km ?? "",
                 $item->reason ?? "",
                 $status,
-                // $item->approve_reject->name??"",
                 implode(',', $checke_by),
                 implode(',', $approved_by),
                 $cd_at,
+                $cd_date,
+                $ap_date,
+                $rj_date,
+                implode(',', $rejected_by),
             ];
         })->toArray();
 
@@ -543,7 +556,11 @@ class ExpensesController extends Controller
             // 'Status BY'
             'Checked By Name',
             'Approved BY Name',
-            'Created At'
+            'Created At',
+            'Checked Date',
+            'Approved Date',
+            'Rejected Date',
+            'Rejected By Name',
         ], $data);
 
         return Excel::download($export, $filename);
