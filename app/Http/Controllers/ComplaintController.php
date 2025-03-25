@@ -14,6 +14,7 @@ use App\Models\ComplaintWorkDone;
 use App\Models\Customers;
 use App\Models\District;
 use App\Models\Division;
+use App\Models\Category;
 use App\Models\EndUser;
 use App\Models\Media;
 use App\Models\Pincode;
@@ -51,7 +52,21 @@ class ComplaintController extends Controller
     public function index(ComplaintDataTable $dataTable, Request $request)
     {
         abort_if(Gate::denies('complaint_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return view('complaint.index');
+        $assign_users_ids = Complaint::whereNotNull('assign_user')->pluck('assign_user')->toArray();
+        $roleNames = ["Service Eng", "Service Admin"];
+
+        $assign_users = User::whereIn('id', $assign_users_ids)
+            ->whereHas('roles', function ($query) use ($roleNames) {
+                $query->whereIn('name', $roleNames);
+            })
+            ->with(['roles.permissions']) // Eager load roles and permissions
+            ->select('id', 'name', 'employee_codes')
+            ->get();
+        $service_centers_id = Complaint::pluck('service_center');
+        $service_centers  = Customers::whereIn('id' , $service_centers_id)->get();
+        $complaint_types =  ComplaintType::where('active' , 'Y')->select('id' , 'name')->get();
+        $categories = Category::where('active' , 'Y')->select('id' , 'category_name')->get();
+        return view('complaint.index' , compact('service_centers' , 'assign_users' , 'complaint_types' , 'categories'));
         // return $dataTable->render('complaint.index');
     }
 
@@ -70,24 +85,31 @@ class ComplaintController extends Controller
             'product_details.categories',
             'createdbyname',
             'complaint_work_dones',
-            'warranty_details'
+            'warranty_details',
+            'assign_users'
         ])->latest()->newQuery();
 
         if (isset($request->complaint_date)) {
-            try{
-                 $complaintDate = Carbon::parse($request->complaint_date)->format('Y-m-d');
-                  $query->whereDate('complaint_date', '=', $complaintDate);
-            }catch(\Exception $e){
-                
+            $date = explode(' - ' , $request->complaint_date);
+            if(isset($date)){
+                try{
+                    $complaintDate_start = Carbon::parse($date[0])->startOfDay()->format('Y-m-d H:i:s');
+                    $complaintDate_end = Carbon::parse($date[1])->endOfDay()->format('Y-m-d H:i:s');
+                    $query->whereBetween('complaint_date', [$complaintDate_start, $complaintDate_end]);
+                }catch(\Exception $e){
+                    
+                }
             }
+
         }
         if (isset($request->complaint_number)) {
             $query->where('complaint_number', 'like', '%' . $request->complaint_number . '%');
         }
-        if (isset($request->service_center_name)) {
-            $query->whereHas('service_center_details', function($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->service_center_name . '%');
-            });
+        if (!empty($request->service_center_name) && collect($request->service_center_name)->filter()->isNotEmpty()) {
+            $query->whereIn('service_center', (array) $request->service_center_name);
+        }
+        if (!empty($request->assign_user) && collect($request->assign_user)->filter()->isNotEmpty()) {
+            $query->whereIn('assign_user', (array) $request->assign_user);
         }
         if (isset($request->service_center_code)) {
             $query->whereHas('service_center_details', function($q) use ($request) {

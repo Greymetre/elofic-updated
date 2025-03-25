@@ -1,23 +1,62 @@
 <x-app-layout>
   <style>
+
     #copyText {
       cursor: pointer;
       font-weight: 800;
       color: #000;
       text-shadow: 0 0 3px #fff;
     }
-    .table-input {
-        width: 100%;
-        padding: 5px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 14px;
-        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-        outline: none;
-        background: white;
-/*        color: black;*/
-        width: 150px;
+   .table-input {
+        width: 100% !important;
+        padding: 5px !important;
+        border: 1px solid #ddd !important;
+        border-radius: 4px !important;
+        font-size: 14px !important;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+        outline: none !important;
+        background: white !important;
+        width: 150px !important;
     }
+
+    .select2-container--default .select2-selection {
+        border: 1px solid #ddd !important;
+        border-radius: 4px !important;
+        background: white !important;
+        min-height: 35px !important;
+        width: 150px !important;
+    }
+
+   .select2-container--default .select2-selection--multiple {
+        border: 1px solid #ddd !important;
+        border-radius: 4px !important;
+        background: white !important;
+        min-height: 35px !important;
+        width: 150px !important;
+    }
+
+    .select2-container .select2-selection--multiple .select2-selection__choice {
+        background-color: #f0f0f0 !important;
+        border: 1px solid #ccc !important;
+        color: black !important;
+        padding: 3px 5px !important;
+        border-radius: 4px !important;
+        position: relative;
+    }
+
+    /* Make the remove (X) button red */
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+        color: red !important;  /* Change the X button color */
+        font-weight: bold;
+        margin-right: 5px;
+    }
+
+    /* Optional: Change color when hovering over the X button */
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+        color: darkred !important;
+    }
+
+
 
     .table-input::placeholder {
           color: rgba(0, 0, 0, 0.5); /* Light greyish-white for better visibility */
@@ -92,7 +131,7 @@
               <div class="col-sm">
                 <div class="card text-center m-1 hover-effect">
                   <div class="card-body " onclick="change_complaints_type('')">
-                    <h4 class="card-text">All Complaints</h4>
+                    <h4 class="card-text">All</h4>
                     <h5 class="card-title" id="all_complaints"></h5>
                   </div>
                 </div>
@@ -100,7 +139,7 @@
               <div class="col-sm">
                 <div class="card text-center m-1 hover-effect">
                   <div class="card-body " onclick="change_complaints_type(1)">
-                    <h4 class="card-text">Pending Complaints</h4>
+                    <h4 class="card-text">Pending</h4>
                     <h5 class="card-title" id="complaints_pending"></h5>
                   </div>
                 </div>
@@ -108,7 +147,7 @@
               <div class="col-sm">
                 <div class="card text-center m-1 hover-effect">
                   <div class="card-body " onclick="change_complaints_type(0)">
-                    <h4 class="card-text text-center">Complaints In Process</h4>
+                    <h4 class="card-text text-center">Open</h4>
                     <h5 class="card-title" id="complaints_in_process"></h5>
                   </div>
                 </div>
@@ -116,7 +155,7 @@
               <div class="col-sm">
                 <div class="card text-center m-1 hover-effect">
                   <div class="card-body hover-effect" onclick="change_complaints_type(2)">
-                    <h4 class="card-text text-center">Work Done Complaints</h4>
+                    <h4 class="card-text text-center">Work Done</h4>
                     <h5 class="card-title" id="complaints_work_done"></h5>
                   </div>
                 </div>
@@ -124,7 +163,7 @@
                <div class="col-sm">
                 <div class="card text-center m-1 hover-effect">
                   <div class="card-body " onclick="change_complaints_type(3)">
-                    <h4 class="card-text text-center">Complete Complaints</h4>
+                    <h4 class="card-text text-center">Complete </h4>
                     <h5 class="card-title" id="complaints_complete"></h5>
                   </div>
                 </div>
@@ -132,7 +171,7 @@
               <div class="col-sm">
                 <div class="card text-center m-1 hover-effect">
                   <div class="card-body" onclick="change_complaints_type(4)">
-                    <h4 class="card-text text-center">Closed Complaints</h4>
+                    <h4 class="card-text text-center">Closed </h4>
                     <h5 class="card-title" id="complaints_closed"></h5>
                   </div>
                 </div>
@@ -140,7 +179,7 @@
               <div class="col-sm">
                 <div class="card text-center m-1 hover-effect">
                   <div class="card-body " onclick="change_complaints_type(5)">
-                    <h4 class="card-text text-center">Cancelled Complaints</h4>
+                    <h4 class="card-text text-center">Cancelled </h4>
                     <h5 class="card-title" id="complaints_cancelled"></h5>
                   </div>
                 </div>
@@ -181,10 +220,30 @@
             <table id="getComplaints" class="table table-striped- table-bschemeed table-hover table-checkable  no-wrap">
               <thead class=" text-primary">
                <tr>
-                    <th></th>
-                    <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="complaint_date" id="complaint_date" autocomplete="off"></th>
+                    <th>
+                        <!-- <button type="button" class="btn btn-secondary" id="resetFilters">Reset</button> -->
+                    </th>
+                    <th><input type="text" class="form-control table-input " placeholder="Date..." name="complaint_date" id="complaint_date" autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input" name="complaint_number" placeholder="Search..." autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input" name="service_center_name" placeholder="Search..." autocomplete="off"></th>
+                    <!-- <th><input type="text" class="form-control table-input" name="service_center_name" placeholder="Search..." autocomplete="off"></th> -->
+                     <th>
+                        <select class="form-control table-input select2" name="service_center_name[]" id="service_center_name" multiple>
+                            @if(count($service_centers) > 0)
+                               @foreach($service_centers as $service_center)
+                                     <option value="{{$service_center->id}}">{{$service_center->name}}</option>
+                               @endforeach
+                            @endif
+                        </select>
+                    </th>
+                    <th>
+                        <select class="form-control table-input select2" name="assign_user[]" id="assign_user" multiple>
+                            @if(count($assign_users) > 0)
+                               @foreach($assign_users as $assign_user)
+                                     <option value="{{$assign_user->id}}">{{$assign_user->name}}</option>
+                               @endforeach
+                            @endif
+                        </select>
+                    </th>
                     <th><input type="text" class="form-control table-input" name="service_center_code" placeholder="Search..." autocomplete="off"></th>
                     <th>
                         <select class="form-control table-input" name="status" id="status">
@@ -197,6 +256,16 @@
                             <option value="5">Canceled</option>
                         </select>
                     </th>
+                    <th>
+                      <select class="form-control table-input select2" name="category_name_1" id="category_name_1">
+                          <option value="">Select Type</option>
+                          @if(count($categories) > 0)
+                             @foreach($categories as $categorie)
+                                   <option value="{{$categorie->category_name}}">{{$categorie->category_name}}</option>
+                             @endforeach
+                          @endif
+                      </select>
+                    </th>
                     <th><input type="text" class="form-control table-input" name="seller"  placeholder="Search..." autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input" name="customer_name" placeholder="Search..." autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input" name="customer_email" placeholder="Search..." autocomplete="off"></th>
@@ -207,17 +276,34 @@
                     <th><input type="text" class="form-control table-input" name="customer_country" placeholder="Search..." autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input" name="customer_state" placeholder="Search..." autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input" name="customer_city" placeholder="Search..." autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input" name="customer_complaint_type" placeholder="Search..." autocomplete="off"></th>
+                     <th>
+                        <select class="form-control table-input select2" name="customer_complaint_type" id="customer_complaint_type">
+                            <option value="">Select Type</option>
+                            @if(count($complaint_types) > 0)
+                               @foreach($complaint_types as $complaint_type)
+                                     <option value="{{$complaint_type->name}}">{{$complaint_type->name}}</option>
+                               @endforeach
+                            @endif
+                        </select>
+                    </th>
+                    <!-- <th><input type="text" class="form-control table-input" name="customer_complaint_type" placeholder="Search..." autocomplete="off"></th> -->
                     <th><input type="text" class="form-control table-input" name="category_name" placeholder="Search..." autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input" name="product_name" placeholder="Search..." autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input" name="product_code" placeholder="Search..." autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input" name="category_name_1" placeholder="Search..." autocomplete="off"></th>
+                  
                     <th><input type="text" class="form-control table-input" name="product_serail_number" placeholder="Search..." autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input" name="specification" placeholder="Search..." autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input" name="product_no" placeholder="Search..." autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input" name="phase" placeholder="Search..." autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="customer_bill_date" id="customer_bill_date" autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input" name="service_type" placeholder="Search..." autocomplete="off"></th>
+                     <th>
+                        <select class="form-control table-input" name="service_type">
+                            <option value="">Select</option>
+                            <option value="Paid">Paid</option>
+                            <option value="Free">Free</option>
+                        </select>
+                    </th>
+                    <!-- <th><input type="text" class="form-control table-input" name="service_type" placeholder="Search..." autocomplete="off"></th> -->
                     <th><div style="width:150px"></div></th>
                     <th><div style="width:150px"></div></th>
                     <th><div style="width:150px"></div></th>
@@ -246,7 +332,7 @@
                     <th><input type="text" class="form-control table-input" name="customer_bill_no" placeholder="Search..." autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="customer_bill_date_1" id="customer_bill_date_1" autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input" name="under_warranty" placeholder="Search..." autocomplete="off"></th>
-                     <th><input type="text" class="form-control table-input" name="service_type_1" placeholder="Search..." autocomplete="off"></th>
+                     <!-- <th><input type="text" class="form-control table-input" name="service_type_1" placeholder="Search..." autocomplete="off"></th> -->
                     <th><input type="text" class="form-control table-input" name="company_sale_bill_no" placeholder="Search..." autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="company_sale_bill_date" id="company_sale_bill_date" autocomplete="off"></th>
                     <th><div style="width:150px"></div></th>
@@ -264,8 +350,10 @@
                   <th>Date</th>
                   <th>Complaint Number</th>
                   <th>Service Center</th>
+                  <th>Service Eng</th>
                   <th>Service Center Code</th>
                   <th>Complaint Status</th>
+                  <th>Division</th> 
                   <th>Seller Name</th>
                   <th>Customer Name</th>
                   <th>Customer Email</th>
@@ -280,7 +368,7 @@
                   <th>Division</th> 
                   <th>Product Name</th>
                   <th>Product Code</th> 
-                  <th>Product Category</th>         
+                         
                   <th>Product Serial No</th>  
                   <th>HP</th> 
                   <th>Stage</th>
@@ -307,7 +395,7 @@
                   <th>Customer Bill No </th>
                   <th>Customer Bill Date</th>
                   <th>Under Warranty</th>
-                  <th>Service Type</th>
+                  <!-- <th>Service Type</th> -->
                   <th>Company Sale Bill No.</th>
                   <th>Company Sale Bill Date</th>
                   <th>Service Centre Remarks</th>
@@ -332,6 +420,18 @@
     </div>
   </div>
   <script src="{{ url('/').'/'.asset('assets/js/jquery.custom.js') }}"></script>
+  <!-- Load jQuery and moment.js -->
+  <script src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+
+  <!-- Load Daterangepicker -->
+  <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+  <!-- Load jQuery UI (AFTER daterangepicker) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.min.css" />
+
   <script type="text/javascript">
     $(function() {
       $.ajaxSetup({
@@ -350,7 +450,8 @@
                 d._token = "{{ csrf_token() }}"; // CSRF Token
                 d.complaint_date = $('input[name="complaint_date"]').val();
                 d.complaint_number = $('input[name="complaint_number"]').val();
-                d.service_center_name = $('input[name="service_center_name"]').val();
+                d.service_center_name = $('select[name="service_center_name[]"]').val() || [];
+                d.assign_user = $('select[name="assign_user[]"]').val() || [];
                 d.service_center_code = $('input[name="service_center_code"]').val();
                 d.seller = $('input[name="seller"]').val();
                 d.customer_name = $('input[name="customer_name"]').val();
@@ -362,7 +463,7 @@
                 d.customer_state = $('input[name="customer_state"]').val();
                 d.customer_city = $('input[name="customer_city"]').val();
                 d.pincode       = $('input[name="pincode"]').val();
-                d.customer_complaint_type = $('input[name="customer_complaint_type"]').val();
+                d.customer_complaint_type = $('select[name="customer_complaint_type"]').val();
                 d.category_name = $('input[name="category_name"]').val();
                 d.product_name = $('input[name="product_name"]').val();
                 d.product_code = $('input[name="product_code"]').val();
@@ -370,9 +471,9 @@
                 d.specification = $('input[name="specification"]').val();
                 d.product_no = $('input[name="product_no"]').val();
                 d.phase = $('input[name="phase"]').val();
-                d.category_name_1 = $('input[name="category_name_1"]').val();
+                d.category_name_1 = $('select[name="category_name_1"]').val();
                 d.customer_bill_date = $('input[name="customer_bill_date"]').val();
-                d.service_type = $('input[name="service_type"]').val();
+                d.service_type = $('select[name="service_type"]').val();
                 d.last_update_date = $('input[name="last_update_date"]').val();
                 d.service_status = $('select[name="service_status"]').val();
                 d.description    = $('input[name="description"]').val();
@@ -396,8 +497,10 @@
               {data: 'complaint_date', name: 'complaint_date', orderable: false, defaultContent: ''},
               {data: 'complaint_number', name: 'complaint_number', orderable: false, defaultContent: ''},
               {data: 'service_center_details.name', name: 'service_center_details.name', orderable: false, defaultContent: '', searchable: false},
+              {data: 'assign_users.name', name: 'assign_users.name', orderable: false, defaultContent: '', searchable: false},
               {data: 'service_center_details.customer_code', name: 'service_center_details.customer_code', orderable: false, defaultContent: '', searchable: false},
               {data: 'status', name: 'status', orderable: false, defaultContent: ''},
+              {data: 'product_details.categories.category_name', name: 'product_details.categories.category_name', orderable: false, defaultContent: '', searchable: false},  
               {data: 'seller', name: 'seller', orderable: false, defaultContent: '', searchable: false},
               {data: 'customer.customer_name', name: 'customer.customer_name', orderable: false, defaultContent: '', searchable: false},
               {data: 'customer.customer_email', name: 'customer.customer_email', orderable: false, defaultContent: '', searchable: false},
@@ -412,7 +515,7 @@
               {data: 'product_details.categories.category_name', name: 'product_details.categories.category_name', orderable: false, defaultContent: '', searchable: false},
               {data: 'product_details.product_name', name: 'product_details.product_name', orderable: false, defaultContent: '', searchable: false},
               {data: 'product_details.product_code', name: 'product_details.product_code', orderable: false, defaultContent: '', searchable: false},
-              {data: 'product_details.categories.category_name', name: 'product_details.categories.category_name', orderable: false, defaultContent: '', searchable: false},  
+              
               {data: 'product_serail_number', name: 'product_serail_number', orderable: false, defaultContent: '', searchable: false},
               {data: 'product_details.specification', name: 'product_details.specification', orderable: false, defaultContent: '', searchable: false},
               {data: 'product_details.product_no', name: 'product_details.product_no', orderable: false, defaultContent: '', searchable: false},
@@ -444,7 +547,7 @@
               {data: 'customer_bill_no', name: 'customer_bill_no', orderable: false, defaultContent: '', searchable: false},
               {data: 'customer_bill_date', name: 'customer_bill_date', orderable: false, defaultContent: '', searchable: false},
               {data: 'under_warranty', name: 'under_warranty', orderable: false, defaultContent: '', searchable: false},
-              {data: 'service_type', name: 'service_type', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'service_type', name: 'service_type', orderable: false, defaultContent: '', searchable: false},
               {data: 'company_sale_bill_no', name: 'company_sale_bill_no', orderable: false, defaultContent: '', searchable: false},
               {data: 'company_sale_bill_date', name: 'company_sale_bill_date', orderable: false, defaultContent: '', searchable: false},
               {data: 'service_center_remark', name: 'service_center_remark', orderable: false, defaultContent: '', searchable: false},
@@ -463,6 +566,8 @@
 
       $(document).ready(function () {
           // Initialize datepickers
+
+
           $('.datepicker').datepicker({
               maxDate: 0,
               dateFormat: 'dd-mm-yy',
@@ -477,6 +582,24 @@
                   $('.datepicker').datepicker('hide');
                   // $('input.table-input, select.table-input').blur();
               }
+          });
+
+           $('#service_center_name').select2({
+              placeholder: "Select Service Centers",
+              allowClear: true,
+              width: '150px' // Set width for better alignment
+          });
+
+           $('#assign_user').select2({
+              placeholder: "Service Eng",
+              allowClear: true,
+              width: '150px' // Set width for better alignment
+          });
+
+           $('#category_name_1').select2({
+              placeholder: "Select Division",
+              allowClear: true,
+              width: '150px' // Set width for better alignment
           });
 
           // Close datepicker or blur input/select on mouse wheel scroll
@@ -507,10 +630,27 @@
         table.draw();
       });
 
-      $('#complaint_date').datepicker({
-          maxDate: 0,
-          dateFormat: 'dd-mm-yy',
-       });
+      // $('#complaint_date').datepicker({
+      //     maxDate: 0,
+      //     dateFormat: 'dd-mm-yy',
+      //  });
+
+      $('#complaint_date').daterangepicker({
+          autoUpdateInput: false
+      });
+
+      // Update input field when a date is selected
+      $('#complaint_date').on('apply.daterangepicker', function(ev, picker) {
+          $(this).val(picker.startDate.format('DD-MM-YYYY') + ' - ' + picker.endDate.format('DD-MM-YYYY'));
+          table.draw();
+      });
+
+      // Clear input when canceled
+      $('#complaint_date').on('cancel.daterangepicker', function(ev, picker) {
+          $(this).val('');
+          table.draw();
+      });
+
 
       $('#customer_bill_date').datepicker({
           dateFormat: 'dd-mm-yy',

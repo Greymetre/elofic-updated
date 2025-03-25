@@ -206,7 +206,7 @@ class AttendanceController extends Controller
 
             if ($attendance_details->attendance_status == '1') {
               if ($attendance_details->working_type == 'Leave' || $attendance_details->working_type == 'Full Day Leave') {
-                if ($leaveExists->bal_type == 'Comp-off Balance') {
+                if (($leaveExists->bal_type ?? null) == 'Comp-off Balance') {
                   $label_data[] =  'Comp Off';
                   $total_co++;
                 } else {
@@ -217,7 +217,7 @@ class AttendanceController extends Controller
                 $label_data[] =  'PW';
                 $total_pw++;
               } elseif ($attendance_details->working_type == 'Second Half Leave' || $attendance_details->working_type == 'First Half Leave') {
-                if ($leaveExists->bal_type == 'Comp-off Balance') {
+                if (($leaveExists->bal_type ?? null) == 'Comp-off Balance') {
                   $label_data[] =  '1/2P+1/2Comp Off';
                   $total_co++;
                 } else {
@@ -254,7 +254,7 @@ class AttendanceController extends Controller
               }
             } else if ($attendance_details->attendance_status == '2') {
               if ($attendance_details->working_type == 'Full Day Leave' || $attendance_details->working_type == 'Leave') {
-                if ($leaveExists->bal_type == 'Comp-off Balance') {
+                if (($leaveExists->bal_type ?? null) == 'Comp-off Balance') {
                   $label_data[] =  'Comp Off N';
                   $total_con++;
                 } else {
@@ -262,7 +262,7 @@ class AttendanceController extends Controller
                   $total_lop++;
                 }
               } elseif ($attendance_details->working_type == 'Second Half Leave' || $attendance_details->working_type == 'First Half Leave') {
-                if ($leaveExists->bal_type == 'Comp-off Balance') {
+                if (($leaveExists->bal_type ?? null) == 'Comp-off Balance') {
                   $label_data[] =  '1/2P+1/2Comp Off N';
                   $total_con++;
                 } else {
@@ -276,7 +276,7 @@ class AttendanceController extends Controller
             } else {
               if ($attendance_details->working_type == 'Full Day Leave' || $attendance_details->working_type == 'Leave') {
 
-                if ($leaveExists->bal_type == 'Comp-off Balance') {
+                if (($leaveExists->bal_type ?? null) == 'Comp-off Balance') {
                   $label_data[] =  'Comp Off N';
                   $total_con++;
                 } else {

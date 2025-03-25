@@ -269,6 +269,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::apiResource('complaints', ComplaintApiController::class)->only(['index', 'show', 'update']);
     Route::post('complaint/work-done/{id}', [ComplaintApiController::class, 'work_done_submit']);
     Route::get('complaint/select-option', [ComplaintApiController::class, 'select_option']);
+    Route::get('complaint/complaint-type-count', [ComplaintApiController::class, 'complaint_type_count']);
     Route::get('complaint/filter-option', [ComplaintApiController::class, 'filter_option']);
 
     // Service bill Api's routes

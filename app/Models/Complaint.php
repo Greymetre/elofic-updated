@@ -26,6 +26,11 @@ class Complaint extends Model implements HasMedia
         return $this->belongsTo(Customers::class, 'assign_user', 'id');
     }
 
+    public function assign_users()
+    {
+        return $this->belongsTo(User::class, 'assign_user', 'id');
+    }
+
     public function service_center_details()
     {
         return $this->belongsTo(Customers::class, 'service_center', 'id');

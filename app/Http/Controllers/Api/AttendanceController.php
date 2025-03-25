@@ -118,7 +118,7 @@ class AttendanceController extends Controller
                 $expiryDate = Carbon::parse($request['punchin_date'])->addDays(60);
 
                 CompOffLeave::create([
-                    'user_id' => $request['user_id'],
+                    'user_id' => $user->id,
                     'comp_off_date' => $punchinDate,
                     'expiry_date' => $expiryDate,
                     'is_used' => false,

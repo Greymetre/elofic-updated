@@ -46,12 +46,13 @@ class ComplaintApiController extends Controller
     public function index(Request $request)
     {
         try {
-            if ($request->user()->hasRole('Service Eng') || $request->user()->hasRole('superadmin')) {
+            if ($request->user()->hasRole('Service Eng') || $request->user()->hasRole('Service Admin') || $request->user()->hasRole('superadmin')) {
                 $filters = $request->all();
-                if ($request->user()->hasRole('superadmin')) {
+                if ($request->user()->hasRole('superadmin') || $request->user()->hasRole('Service Admin')) {
                     $query = Complaint::select('id', 'complaint_number', 'complaint_status', 'complaint_date')->orderBy('id', 'desc');
                 } else {
-                    $user_ids = getUsersReportingToAuth($request->user()->id);
+                    // $user_ids = getUsersReportingToAuth($request->user()->id);
+                     $user_ids = [$request->user()->id]; 
                     $query = Complaint::whereIn('assign_user', $user_ids)
                         ->select('id', 'complaint_number', 'complaint_status', 'complaint_date')->orderBy('id', 'desc');
                 }
@@ -674,6 +675,50 @@ class ComplaintApiController extends Controller
             ];
 
             return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
+    }
+
+    // all complaints 
+     public function complaint_type_count(Request $request)
+    {
+        try {
+            if ($request->user()->hasRole('Service Eng') || $request->user()->hasRole('Service Admin') || $request->user()->hasRole('superadmin')) {
+                $filters = $request->all();
+                if ($request->user()->hasRole('superadmin') || $request->user()->hasRole('Service Admin')) {
+                    $query = Complaint::select('id', 'complaint_number', 'complaint_status', 'complaint_date')->orderBy('id', 'desc');
+                } else {
+                    // $user_ids = getUsersReportingToAuth($request->user()->id);
+                     $user_ids = [$request->user()->id]; 
+                    $query = Complaint::whereIn('assign_user', $user_ids)
+                        ->select('id', 'complaint_number', 'complaint_status', 'complaint_date')->orderBy('id', 'desc');
+                }
+
+                if (isset($request->from_date) && isset($request->to_date)) {
+                    $complaint_from_date = Carbon::parse($request->from_date)->startOfDay()->format('Y-m-d');
+                    $complaint_to_date = Carbon::parse($request->to_date)->startOfDay()->format('Y-m-d');
+                    $query->whereBetween('complaint_date', [$complaint_from_date, $complaint_to_date]);
+                }
+
+                
+                $data = [
+                    'all_complaints'    => (clone $query)->count(),
+                    'complaints_pending'    => (clone $query)->where('complaint_status', '1')->count(),
+                    'complaints_work_done'  => (clone $query)->where('complaint_status', '2')->count(),
+                    'complaints_cancelled'  => (clone $query)->where('complaint_status', '5')->count(),
+                    'complaints_in_process' => (clone $query)->where('complaint_status', '0')->count(),
+                    'complaints_complete'   => (clone $query)->where('complaint_status', '3')->count(),
+                    'complaints_closed'     => (clone $query)->where('complaint_status', '4')->count(),
+                ];
+                if (!empty($data)) {
+                    return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
+                } else {
+                    return response()->json(['status' => 'success', 'data' => "No Complaints"], $this->notFound);
+                }
+            } else {
+                return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'], $this->notFound);
+            }
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
