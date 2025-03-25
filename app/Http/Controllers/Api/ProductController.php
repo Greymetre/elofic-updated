@@ -116,6 +116,7 @@ class ProductController extends Controller
                     $query->where(function ($query) use ($search) {
                         $query->where('product_name', 'LIKE', "%{$search}%")
                             ->Orwhere('description', 'LIKE', "%{$search}%")
+                            ->Orwhere('product_code', 'LIKE', "%{$search}%")
                             ->Orwhere('specification', 'LIKE', "%{$search}%")
                             ->Orwhere('part_no', 'LIKE', "%{$search}%")
                             ->Orwhere('product_no', 'LIKE', "%{$search}%")
@@ -129,7 +130,7 @@ class ProductController extends Controller
                 }
                 $query->where('active', '=', 'Y');
             })
-                ->select('id', 'product_name', 'display_name', 'description', 'subcategory_id', 'category_id', 'brand_id', 'product_image', 'unit_id', 'specification', 'part_no', 'product_no', 'model_no', 'suc_del')->latest();
+                ->select('id', 'product_name', 'product_code', 'display_name', 'description', 'subcategory_id', 'category_id', 'brand_id', 'product_image', 'unit_id', 'specification', 'part_no', 'product_no', 'model_no', 'suc_del')->latest();
 
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
 
@@ -228,7 +229,7 @@ class ProductController extends Controller
                     //$prodcutdetails = $value['prodcutdetails']->where('isprimary',1);
                     $data->push([
                         'id' => isset($value['id']) ? $value['id'] : 0,
-                        'product_name' => isset($value['product_name']) ? $value['product_name'] : '',
+                        'product_name' => isset($value['product_name']) ? $value['product_name'].'('.$value['product_code'].')' : '',
                         'display_name' => isset($value['display_name']) ? $value['display_name'] : '',
                         'description' => isset($value['description']) ? $value['description'] : '',
                         'product_image' => isset($value['product_image']) ? $value['product_image'] : '',

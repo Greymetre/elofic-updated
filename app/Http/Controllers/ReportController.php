@@ -3485,32 +3485,74 @@ class ReportController extends Controller
     }
     public function dealer_growth(Request $request)
     {
-        $ps_branches = PrimarySales::latest()->get()->unique('final_branch');
-        $ps_divisions = PrimarySales::latest()->get()->unique('division');
-        $ps_months = PrimarySales::latest()->get()->unique('month');
-        $ps_dealers = PrimarySales::latest()->get()->unique('dealer');
-        $ps_product_models = PrimarySales::latest()->get()->unique('model_name');
-        $ps_new_group_names = PrimarySales::latest()->get()->unique('new_group');
-        $ps_sales_persons = PrimarySales::latest()->get()->unique('sales_person');
-        $users = user::whereDoesntHave('roles', function ($query) {
-            $query->where('id', 29);
-        })->where('active', 'Y')->orderBy('name', 'asc')->get();
         $currentYear = Carbon::now()->year;
         $years = range($currentYear - 1, $currentYear + 1);
-        $total_qty = PrimarySales::sum('quantity');
-        $total_sale = PrimarySales::sum('net_amount');
         $currentDate = Carbon::now();
+
+        // Fetch distinct values in a single query
+        $primarySales = PrimarySales::select([
+            'final_branch',
+            'division',
+            'month',
+            'dealer',
+            'model_name',
+            'new_group',
+            'sales_person'
+        ])
+            ->distinct()
+            ->get();
+
+        // Extract unique values
+        $ps_branches = $primarySales->pluck('final_branch')->unique();
+        $ps_divisions = $primarySales->pluck('division')->unique();
+        $ps_months = $primarySales->pluck('month')->unique();
+        $ps_dealers = $primarySales->pluck('dealer')->unique();
+        $ps_product_models = $primarySales->pluck('model_name')->unique();
+        $ps_new_group_names = $primarySales->pluck('new_group')->unique();
+        $ps_sales_persons = $primarySales->pluck('sales_person')->unique();
+
+        // Optimized sum queries
+        $totals = PrimarySales::selectRaw('SUM(quantity) as total_qty, SUM(net_amount) as total_sale')
+            ->first();
+
+        $total_qty = $totals->total_qty;
+        $total_sale = $totals->total_sale;
+
+        // Fetch users efficiently
+        $users = User::whereDoesntHave('roles', function ($query) {
+            $query->where('id', 29);
+        })
+            ->where('active', 'Y')
+            ->orderBy('name', 'asc')
+            ->get();
+
+        // Last three months
         $months = [
-            $currentDate->copy()->subMonthsNoOverflow(3)->format('M'), // Three months ago
-            $currentDate->copy()->subMonthsNoOverflow(2)->format('M'), // Two months ago
-            $currentDate->copy()->subMonthsNoOverflow(1)->format('M'), // Last month
+            $currentDate->copy()->subMonthsNoOverflow(3)->format('M'),
+            $currentDate->copy()->subMonthsNoOverflow(2)->format('M'),
+            $currentDate->copy()->subMonthsNoOverflow(1)->format('M'),
         ];
-        return view('reports.dealer_growth', compact('years', 'users', 'ps_branches', 'ps_divisions', 'ps_months', 'ps_dealers', 'ps_product_models', 'ps_new_group_names', 'ps_sales_persons', 'total_qty', 'total_sale', 'months'));
+
+        return view('reports.dealer_growth', compact(
+            'years',
+            'users',
+            'ps_branches',
+            'ps_divisions',
+            'ps_months',
+            'ps_dealers',
+            'ps_product_models',
+            'ps_new_group_names',
+            'ps_sales_persons',
+            'total_qty',
+            'total_sale',
+            'months'
+        ));
     }
+
 
     public function dealer_growth_list(Request $request)
     {
-        DB::statement("SET SESSION group_concat_max_len = 10000000");
+        DB::statement("SET SESSION group_concat_max_len = 1000000");
 
         $query = PrimarySales::select(
             'dealer',

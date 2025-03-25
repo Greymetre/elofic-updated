@@ -124,6 +124,7 @@ class LoginController extends Controller
                 $nestedData['beatUser'] = count($beatUser) > 0 ? true : false;
                 $nestedData['access_token'] = $token;
                 $nestedData['roles'] = $user->roles->pluck('id')->toArray();
+                $nestedData['user_type'] = $user->roles->pluck('name')->toArray();
                 $nestedData['leave_balance'] = $user->leave_balance;
                 if ($user->hasRole('Customer Dealer')) {
                     $user['provider'] = 'retailers';

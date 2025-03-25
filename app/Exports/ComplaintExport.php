@@ -61,6 +61,7 @@ class ComplaintExport implements FromCollection, WithHeadings, ShouldAutoSize, W
         }
 
         // Loop through filters dynamically
+
         foreach ($this->filters as $key => $value) {
              if (isset($value))  {
                 switch ($key) {
@@ -125,9 +126,25 @@ class ComplaintExport implements FromCollection, WithHeadings, ShouldAutoSize, W
                         break;
 
                     case 'service_center_name':
-                        $query->whereHas('service_center_details', function ($q) use ($value) {
-                            $q->where('name', 'like', "%$value%");
-                        });
+                         if (!empty($value)) {
+                            $serviceCenterIds = is_array($value[0]) 
+                                                ? $value 
+                                                : explode(',', $value[0]); 
+                            if (collect($serviceCenterIds)->filter()->isNotEmpty()) {
+                                $query->whereIn('service_center', $serviceCenterIds);
+                            }
+                        }
+                        break;
+
+                    case 'assign_user':
+                         if (!empty($value)) {
+                            $assign_user_ids = is_array($value[0]) 
+                                                ? $value 
+                                                : explode(',', $value[0]); 
+                            if (collect($assign_user_ids)->filter()->isNotEmpty()) {
+                                $query->whereIn('assign_user', $assign_user_ids);
+                            }
+                        }
                         break;
 
                     case 'service_center_code':
