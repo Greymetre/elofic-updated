@@ -314,6 +314,12 @@ class CustomController extends Controller
             $data = LoyaltyAppSetting::first();
             $slider_image = $data->getMedia('slider_image');
             $gift_slider_image = $data->getMedia('gift_slider_image');
+            $side_menu_image = $data->getFirstMedia('loyalty_side_menu_image');
+            if ($side_menu_image) {
+                $main_data['loyalty_side_menu_image'] = $side_menu_image->getFullUrl();
+            }else{
+                $main_data['loyalty_side_menu_image'] = null;
+            }
             if (count($slider_image) > 0) {
                 $k = 0;
                 foreach ($slider_image as $val) {

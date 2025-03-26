@@ -150,6 +150,61 @@
                         @endif
                      </div>
                   </div>
+                   @if(isset($loyalty_app_setting) && $loyalty_app_setting->getMedia('gift_slider_image')->count() > 0 && Storage::disk('s3')->exists($loyalty_app_setting->getMedia('gift_slider_image')[0]->getPath()))
+
+                  <div class="row mt-4">loyalty_side_menu_image
+                     <div class="col-md-12">
+                        <label class="bmd-label-floating mt-2">Loyalty Side Menu Image</label>
+                     </div>
+
+                     @if ($loyalty_app_setting->hasMedia('loyalty_side_menu_image'))
+                         @php
+                             $image = $loyalty_app_setting->getFirstMedia('loyalty_side_menu_image');
+                         @endphp
+                         <div class="col-md-3">
+                           <div class="img-div">
+                              <img style="box-shadow: 0 0 15px #000;" class="rounded" width="100%" src="{{ $image->getFullUrl() }}" alt=""><span title="Delete Image" class="delete-img" data-id="{{$loyalty_app_setting_image->id}}">X</span>
+                           </div>
+                        </div>
+                     @endif
+
+                  </div>
+                  @endif
+                  <div class="row mt-3">
+                     <div class="col-md-3">
+                        <div class="input_section">
+
+                           <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                              <div class="fileinput-new thumbnail">
+                                 <img src="{!! asset('assets/img/placeholder.jpg') !!}" class="imagepreview1">
+                                 <div class="selectThumbnail">
+                                    <span class="btn btn-just-icon btn-round btn-file">
+                                       <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
+                                       <span class="fileinput-exists">Change</span>
+                                       <input type="file" name="loyalty_side_menu_image" id="loyalty_side_menu_image" class="form-control" accept="image/png, image/gif, image/jpeg">
+                                    </span>
+                                    <br>
+                                    <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
+                                 </div>
+                              </div>
+                              <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
+
+                           </div>
+                           <label for="warranty_activation_attach" class="bmd-label-floating">Upload Loyalty Side Menu Image</label>
+                        </div>
+
+
+
+
+
+
+                        @if ($errors->has('loyalty_side_menu_image'))
+                        <div class="error">
+                           <p class="text-danger">{{ $errors->first('loyalty_side_menu_image') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
                   @if(isset($loyalty_app_setting) && $loyalty_app_setting->getMedia('gift_slider_image')->count() > 0 && Storage::disk('s3')->exists($loyalty_app_setting->getMedia('gift_slider_image')[0]->getPath()))
 
                   <div class="row mt-4">

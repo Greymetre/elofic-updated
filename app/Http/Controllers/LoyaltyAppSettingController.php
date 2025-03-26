@@ -75,6 +75,21 @@ class LoyaltyAppSettingController extends Controller
             }
         }
 
+        if ($request->hasFile('loyalty_side_menu_image')) {
+            $loyaltyAppSetting->clearMediaCollection('loyalty_side_menu_image');
+            $file = $request->file('loyalty_side_menu_image'); // No need for [0]
+            $customName = time() . '.' . $file->getClientOriginalExtension();
+
+            $loyaltyAppSetting->addMedia($file)
+                ->usingFileName($customName)
+                ->toMediaCollection('loyalty_side_menu_image'); // Replaces old image automatically
+        }else {
+            // If no image is provided in the request, remove existing image if exists
+            if ($loyaltyAppSetting->hasMedia('loyalty_side_menu_image')) {
+                $loyaltyAppSetting->clearMediaCollection('loyalty_side_menu_image');
+            }
+        }
+
         if ($request->hasFile('product_catalogue')) {
             $file = $request->file('product_catalogue');
             $customname = time() . '.' . $file->getClientOriginalExtension();

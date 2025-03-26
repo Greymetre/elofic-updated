@@ -506,7 +506,7 @@ class ComplaintApiController extends Controller
             'done_by' => 'required|in:Repairing,Replacement,Telephonic Complaint Resolve,Complaint Cancelltion',
             'remark'  => 'required',
             'work_done_attach' => 'nullable|array', // Must be an array
-            'work_done_attach.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048' // Each file must be an image
+            'work_done_attach.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5048' // Each file must be an image
         ]);
 
         // If validation fails, return JSON response
@@ -519,9 +519,12 @@ class ComplaintApiController extends Controller
         }
         try {
             $complaint = Complaint::where('id', $id)
-                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                    return $query->where('assign_user', $request->user()->id);
-                })
+                 ->when(
+                    !$request->user()->hasRole('superadmin') && !$request->user()->hasRole('Service Admin'),
+                    function ($query) use ($request) {
+                        return $query->where('assign_user', $request->user()->id);
+                    }
+                )
                 ->first();
             if (!$complaint) {
                 return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'], $this->notFound);
@@ -629,7 +632,14 @@ class ComplaintApiController extends Controller
                 ->select('id', 'branch_name')
                 ->get();
             $category = Category::where('active', 'Y')->select('id', 'category_name')->get();
-            $status_option    = ["Open", "Pending", "Work Done", "Complete", "Closed", "Cancelled"];
+            $status_option = [
+                1   => "Pending",
+                0      => "Open",
+                2 => "Work Done",
+                3  => "Complete",
+                4    => "Closed",
+                5 => "Cancelled",
+            ];
             $under_warranty   = ["Yes", "No"];
             $service_types   = ["Paid", "Free"];
             $complaint_register_by = ["Dealer", " Distributor", "Retailer", "Marketing Team", "ASC", "Service Enginer"];
@@ -719,6 +729,46 @@ class ComplaintApiController extends Controller
             } else {
                 return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'], $this->notFound);
             }
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
+    }
+
+    public function getNotes(Request $request , $id){
+          try {
+            $complaint = Complaint::where('id', $id)
+                ->when(
+                    !$request->user()->hasRole('superadmin') && !$request->user()->hasRole('Service Admin'),
+                    function ($query) use ($request) {
+                        return $query->where('assign_user', $request->user()->id);
+                    }
+                )
+                ->first();
+            if (!$complaint) {
+                return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'], $this->notFound);
+            }
+
+           $complaint_timeline = ComplaintTimeline::with('created_by_details')
+                    ->where(['complaint_id' => $complaint->id, 'status' => 'Note'])
+                    ->get();
+        
+            $data = $complaint_timeline->map(function ($item) use ($complaint) {
+                return [
+                    'Notes'       => $item->remark === "" ? null : $item->remark,
+                    'created_at' => Carbon::parse($item->created_at)->format('d-m-Y H:i:s'),
+                    'complaint_number' => $complaint->complaint_number,
+                    'created_by'  => optional($item->created_by_details)->name ?? null, // Safely get the name
+                    'id'          => optional($item->created_by_details)->id ?? null,   // Safely get the ID
+                ];
+            })->toArray();
+
+
+            if($data){
+                return response()->json(['status' => 'success', 'notes' => $data], $this->successStatus);
+            }else{
+                return response()->json(['status' => 'success', 'notes' => "Not Found"], $this->notFound);
+            }
+
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }

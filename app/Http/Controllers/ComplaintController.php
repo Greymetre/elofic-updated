@@ -977,7 +977,7 @@ class ComplaintController extends Controller
         try{
              $compalint_time_line = ComplaintTimeline::create([
                   'complaint_id' => $request->complaint_id ?? '',
-                  'created_by'   => Auth::user()->name,
+                  'created_by'   => Auth::user()->id,
                   'status'       => "Note" ,
                   'remark'       => $request->complaint_notes ?? NULL
             ]);  

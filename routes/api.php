@@ -271,6 +271,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::get('complaint/select-option', [ComplaintApiController::class, 'select_option']);
     Route::get('complaint/complaint-type-count', [ComplaintApiController::class, 'complaint_type_count']);
     Route::get('complaint/filter-option', [ComplaintApiController::class, 'filter_option']);
+    Route::get('complaint/{id}/get-notes', [ComplaintApiController::class, 'getNotes']);
 
     // Service bill Api's routes
     Route::get('complaint/{id}/service-bill', [ServiceBillController::class, 'create']);
