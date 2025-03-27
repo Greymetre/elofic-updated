@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
 use App\Models\Branch;
+use App\Models\EmployeeDetail;
 
 class ComplaintApiController extends Controller
 {
@@ -193,7 +194,7 @@ class ComplaintApiController extends Controller
 
                 // Append related fields
                 $data += [
-                    "service_center_name" => optional($complaint->service_center_details)->customer_code
+                    "service_center_name" => optional($complaint->service_center_details)
                         ? '[' . $complaint->service_center_details->customer_code . '] ' . $complaint->service_center_details->name
                         : null,
                     "created_by" => optional($complaint->createdbyname)->name,
@@ -578,9 +579,16 @@ class ComplaintApiController extends Controller
     {
         try {
             $data = [];
+            $service_centers = [];
+            if ($request->user()->hasRole('Service Admin') || $request->user()->hasRole('superadmin')){
+                $service_centers = Customers::where('customertype', '4')->select('name' , 'first_name' , 'last_name' , 'id' , 'mobile' , 'customer_code')->get();
+            }else{
+                $service_centers = Customers::where('customertype', '4')->whereIn('id', EmployeeDetail::where('user_id', $request->user()->id)->pluck('customer_id'))
+                    ->select('name', 'first_name', 'last_name', 'id', 'mobile' , 'customer_code')
+                    ->get();
+            }
             $work_done_option = ["Repairing", "Replacement", "Telephonic Complaint Resolve", "Complaint Cancelltion"];
             $status_option    = ["Open", "Pending", "Work Done", "Complete", "Closed", "Cancelled"];
-            $service_centers = Customers::where('customertype', '4')->select('id', 'name', 'customer_code')->get();
             $complaint_types = ComplaintType::where('active', 'Y')->select('id', 'name')->get();
             $user_ids = getUsersReportingToAuth($request->user()->id);
             $roleNames = ["Service Eng", "Service Admin"];

@@ -32,6 +32,7 @@ class SendPrimarySales extends Command
             'state',
             'final_branch',
             'sales_person',
+            'emp_code ',
             'model_name',
             'product_name',
             'quantity',

@@ -628,6 +628,7 @@
 
       $('.table-input').on('keyup change', function () {
         table.draw();
+        getCountsOfComplaints();
       });
 
       // $('#complaint_date').datepicker({
@@ -643,12 +644,14 @@
       $('#complaint_date').on('apply.daterangepicker', function(ev, picker) {
           $(this).val(picker.startDate.format('DD-MM-YYYY') + ' - ' + picker.endDate.format('DD-MM-YYYY'));
           table.draw();
+          getCountsOfComplaints();
       });
 
       // Clear input when canceled
       $('#complaint_date').on('cancel.daterangepicker', function(ev, picker) {
           $(this).val('');
           table.draw();
+          getCountsOfComplaints();
       });
 
 
@@ -794,13 +797,23 @@
     }
 
     function getCountsOfComplaints() {
+      let formData = {
+          _token: "{{ csrf_token() }}",
+          start_date: $('#start_date').val(),
+          end_date: $('#end_date').val(),
+      };
+
+      // Collect all filter inputs (both text and select fields)
+      $('.table-input, .table-select').each(function() {
+          let inputName = $(this).attr('name');
+          let inputValue = $(this).val();
+          formData[inputName] = inputValue;
+      });
        $.ajax({
          url: "{{ url('getCountsOfComplaints') }}",
          dataType: "json",
          type: "POST",
-         data: {
-           _token: "{{csrf_token()}}",
-         },
+         data: formData,
          success: function(res) {
            $('#all_complaints').html(res.all_complaints);
            $('#complaints_pending').html(res.complaints_pending);
