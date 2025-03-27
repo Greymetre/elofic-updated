@@ -2137,6 +2137,150 @@ class AjaxController extends Controller
     public function getCountsOfComplaints(Request $request)
     {
         $query = Complaint::query(); // Use query builder
+        $filters = $request->all();
+        if (isset($request->complaint_date)) {
+            $date = explode(' - ' , $request->complaint_date);
+            if(isset($date)){
+                try{
+                    $complaintDate_start = Carbon::parse($date[0])->startOfDay()->format('Y-m-d H:i:s');
+                    $complaintDate_end = Carbon::parse($date[1])->endOfDay()->format('Y-m-d H:i:s');
+                    $query->whereBetween('complaint_date', [$complaintDate_start, $complaintDate_end]);
+                }catch(\Exception $e){
+                    
+                }
+            }
+
+        }
+        foreach ($filters as $key => $value) {
+             if (isset($value))  {
+                switch ($key) {
+                    case 'complaint_number':
+                    case 'seller':
+                    case 'service_type':
+                    case 'service_type_1':
+                    case 'warranty_bill':
+                    case 'customer_bill_no':
+                    case 'under_warranty':
+                    case 'company_sale_bill_no':
+                    case 'register_by':
+                    case 'description':
+                        $query->where($key, 'like', "%$value%");
+                        break;
+
+                    case 'status':
+                        $query->where('complaint_status', $value);
+                        break;
+
+                    case 'customer_complaint_type':
+                        $query->whereHas('complaint_type_details', function ($q) use ($value) {
+                            $q->where('name', 'like', "%$value%");
+                        });
+                        break;
+
+                    case 'service_status':
+                        $query->whereHas('service_bill', function ($q) use ($value) {
+                            $q->where('status', $value);
+                        });
+                        break;
+
+                    case 'service_branch':
+                        $query->whereHas('purchased_branch_details', function ($q) use ($value) {
+                            $q->whereRaw("CONCAT(branch_code, ' ', branch_name) LIKE ?", ["%$value%"]);
+                        });
+                        break;
+
+                    case 'purchased_party_name':
+                        $query->whereHas('customer', function ($q) use ($value) {
+                            $q->whereRaw("CONCAT(customer_name, ' ', customer_number) LIKE ?", ["%$value%"]);
+                        });
+                        break;
+
+                    case 'createdbyname_name':
+                        $query->whereHas('createdbyname', function ($q) use ($value) {
+                            $q->where('name', $value);
+                        });
+                        break;
+
+                    case 'customer_bill_date':
+                    case 'customer_bill_date_1':
+                    case 'company_sale_bill_date':
+                    case 'last_update_date':
+                    case 'created_at':
+                        try {
+                            $formattedDate = Carbon::parse($value)->format('Y-m-d');
+                            $query->whereDate($key, '=', $formattedDate);
+                        } catch (\Exception $e) {
+                            // Handle invalid date formats gracefully
+                        }
+                        break;
+
+                    case 'service_center_name':
+                         if (!empty($value)) {
+                            $serviceCenterIds = is_array($value[0]) 
+                                                ? $value 
+                                                : explode(',', $value[0]); 
+                            if (collect($serviceCenterIds)->filter()->isNotEmpty()) {
+                                $query->whereIn('service_center', $serviceCenterIds);
+                            }
+                        }
+                        break;
+
+                    case 'assign_user':
+                         if (!empty($value)) {
+                            $assign_user_ids = is_array($value[0]) 
+                                                ? $value 
+                                                : explode(',', $value[0]); 
+                            if (collect($assign_user_ids)->filter()->isNotEmpty()) {
+                                $query->whereIn('assign_user', $assign_user_ids);
+                            }
+                        }
+                        break;
+
+                    case 'service_center_code':
+                        $query->whereHas('service_center_details', function ($q) use ($value) {
+                            $q->where('customer_code', 'like', "%$value%");
+                        });
+                        break;
+
+                    case 'customer_name':
+                    case 'customer_email':
+                    case 'customer_number':
+                    case 'customer_address':
+                    case 'customer_place':
+                    case 'customer_country':
+                    case 'customer_state':
+                    case 'customer_city':
+                        $query->whereHas('customer', function ($q) use ($key, $value) {
+                            $q->where($key, 'like', "%$value%");
+                        });
+                        break;
+
+                    case 'pincode':
+                        $query->whereHas('customer.pincodeDetails', function ($q) use ($value) {
+                            $q->where('pincode', 'like', "%$value%");
+                        });
+                        break;
+
+                    case 'category_name':
+                    case 'category_name_1':
+                        $query->whereHas('product_details.categories', function ($q) use ($value) {
+                            $q->where('category_name', 'like', "%$value%");
+                        });
+                        break;
+
+                    case 'product_name':
+                    case 'product_code':
+                    case 'product_serail_number':
+                    case 'specification':
+                    case 'product_no':
+                    case 'phase':
+                        $query->whereHas('product_details', function ($q) use ($key, $value) {
+                            $q->where($key, 'like', "%$value%");
+                        });
+                        break;
+                }
+            }
+        }
          return response()->json([
             'all_complaints'    => (clone $query)->count(),
             'complaints_pending'    => (clone $query)->where('complaint_status', '1')->count(),

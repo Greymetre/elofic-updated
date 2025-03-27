@@ -16,6 +16,12 @@ class LoyaltyAppSetting extends Model implements HasMedia
     public $timestamps = true;
 
     public function registerMediaCollections(): void {
+
+        $this->addMediaCollection('loyalty_side_menu_image')
+              ->singleFile() // Restricts to only one image
+              ->useFallbackUrl(asset(config('constants.NO_IMAGE_URL')))
+              ->useFallbackPath(public_path(config('constants.NO_IMAGE_URL')));
+
         $this->addMediaCollection('slider_image')
              ->useFallbackUrl(asset(config('constants.NO_IMAGE_URL')))
              ->useFallbackPath(public_path(config('constants.NO_IMAGE_URL')));
