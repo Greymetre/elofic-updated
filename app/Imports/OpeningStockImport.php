@@ -20,20 +20,29 @@ use Maatwebsite\Excel\Concerns\WithChunkReading;
 class OpeningStockImport implements ToCollection,WithValidation,WithHeadingRow, WithBatchInserts , WithChunkReading
 {
     use Importable, SkipsFailures;
+    protected $file;
+
+    public function __construct($file = null)
+    {
+        $this->file = $file;
+        // dd('File received in constructor', $file); // REMOVE THIS to allow collection() to run
+    }
+
     public function collection(Collection $rows)
     {
         foreach ($rows as $row) {
-            $product = Product::where('product_code', $row['itm_code'])->first();
-            $warehouse = WareHouse::where('warehouse_name', $row['warehouse_name'])->first();
-            if ($product && $warehouse && isset($row['branch_id'])) {
-                OpeningStock::updateOrCreate(
+            if (isset($row['itm_code']) && isset($row['branch_id'])) {
+               $stock =OpeningStock::updateOrCreate(
                     [
-                        'product_id' => $product->id,
+                        'item_code' => $row['itm_code'],
                         'branch_id'  => $row['branch_id'],
+                        'item_description'       => $row['itm_desc'] ?? null,
+                        'item_group'       => $row['itm_grp_name'] ?? null,
                     ],
                     [
-                        'ware_houses_id' => $warehouse->id,
-                        'opening_stocks' => isset($row['instock_qty']) ? $row['instock_qty'] : 0
+                        'ware_house_name' => $row['warehouse_name'] ?? null,  // Use ternary instead of isset()
+                        'opening_stocks' => $row['instock_qty'] ?? 0,             // Use null coalescing operator
+                        'open_order_qty'    => $row['opening_qty'] ?? 0
                     ]
                 );
             }
@@ -43,12 +52,13 @@ class OpeningStockImport implements ToCollection,WithValidation,WithHeadingRow, 
     public function rules(): array
     {
         return [
-            'itm_code' => 'required|string',
-            'itm_desc' => 'required|string',
-            'itm_grp_name' => 'required|string',
-            'warehouse_name' => 'required|string',
-            'branch_id' => 'required|integer',
-            'instock_qty' => 'required|numeric',
+            // 'itm_code' => 'nullable|string|sometimes',
+            'itm_desc' => 'nullable|string',
+            'itm_grp_name' => 'nullable|string',
+            'warehouse_name' => 'nullable|string',
+            'branch_id' => 'nullable|integer',
+            'instock_qty' => 'nullable|numeric',
+            'opening_qty' => 'nullable|numeric',
         ];
     }
 

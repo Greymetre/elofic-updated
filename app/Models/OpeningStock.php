@@ -10,7 +10,7 @@ class OpeningStock extends Model
     use HasFactory;
 
     protected $fillable = [
-         'product_id', 'ware_houses_id' , 'branch_id' , 'opening_stocks'
+         'item_code', 'item_description','item_group','ware_house_name' , 'branch_id' , 'opening_stocks' , 'open_order_qty'
     ];
 
     public function branch()

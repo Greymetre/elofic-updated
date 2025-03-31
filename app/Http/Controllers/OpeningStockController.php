@@ -46,12 +46,30 @@ class OpeningStockController extends Controller
     }
 
     // import 
-    public function openingStockImport(Request $request){
-        abort_if(Gate::denies('opening_stock_import'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        if (ob_get_contents()) ob_end_clean();
-        ob_start();
-        Excel::import(new OpeningStockImport,request()->file('import_file'));
-        return back();
+    public function openingStockImport(Request $request)
+    {
+        try {
+            abort_if(Gate::denies('opening_stock_import'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+            if (!$request->hasFile('import_file')) {
+                return back()->with('error', 'No file uploaded.');
+            }
+
+            if (ob_get_contents()) ob_end_clean();           
+            $file = $request->file('import_file'); // Get the uploaded file
+
+            if ($file) {
+                // Pass the file explicitly when creating an instance of OpeningStockImport
+                $import = new OpeningStockImport($file);
+                Excel::import($import, $file);
+            } else {
+                 return back()->with('message_error', 'Import successful!');
+            }
+    
+            return back()->with('message_success', 'Import successful!');
+        } catch (\Exception $e) {
+             return back()->with('message_error', 'Import failed! ' . $e->getMessage());
+        }
     }
 
      public function openingStockExport(Request $request){

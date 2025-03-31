@@ -729,6 +729,10 @@ class ServiceBillController extends Controller
                 return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'], $this->notFound);
             }
 
+            if($request->charge_type_id == 4){
+                return response()->json(['status' => 'success', 'data' => "custom"], $this->successStatus);
+            }
+
             $pro_sub_cat = $complaint->product_details->subcategories->service_category_id;
             $pro_cat =  $complaint ? $complaint->product_details->category_id : '';
             $categoryIds = explode(',', $pro_sub_cat);

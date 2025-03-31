@@ -217,20 +217,24 @@
             </div>
             <div class="col-md-6">
               <div class="input_section">
-                <label class="col-form-label">{!! trans('panel.product.fields.brand_name') !!}<span class="text-danger"> *</span></label>
+                <label class="col-form-label">Branch<span class="text-danger"> *</span></label>
                 <div class="form-group has-default bmd-form-group">
-                  <select class="form-control select2" name="brand_id" style="width: 100%;" required>
-                    <option value="">Select {!! trans('panel.product.fields.brand_name') !!}</option>
-                    @if(@isset($brands ))
-                    @foreach($brands as $brand)
-                    <option value="{!! $brand['id'] !!}" {{ old( 'brand_id' , (!empty($products->brand_id)) ? ($products->brand_id) :('') ) == $brand['id'] ? 'selected' : '' }}>{!! $brand['brand_name'] !!}</option>
-                    @endforeach
+                  <select class="form-control select2" multiple name="branch_id" style="width: 100%;" required>
+                    <option value="">Select Branch</option>
+                     @if(@isset($branches))
+                        @foreach($branches as $branch)
+                            <option value="{!! $branch['id'] !!}" 
+                                {{ old('branch_id', !empty($products->branch_id) ? explode(',', $products->branch_id) : []) 
+                                    && in_array($branch['id'], explode(',', $products->branch_id ?? '')) ? 'selected' : '' }}>
+                                {!! $branch['branch_name'] !!}
+                            </option>
+                        @endforeach
                     @endif
                   </select>
                 </div>
-                @if ($errors->has('brand_id'))
+                @if ($errors->has('branch_id'))
                 <div class="error">
-                  <p class="text-danger">{{ $errors->first('brand_id') }}</p>
+                  <p class="text-danger">{{ $errors->first('branch_id') }}</p>
                 </div>
                 @endif
               </div>

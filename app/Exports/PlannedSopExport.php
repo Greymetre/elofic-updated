@@ -13,6 +13,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Models\Product;
 
 class PlannedSopExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithEvents
 {
@@ -48,6 +49,11 @@ class PlannedSopExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                     case "category_name" : 
                         $data->whereHas('getProduct.categories', function ($q) use ($value) {
                             $q->where('category_name', 'like', "%$value%");
+                        });
+                        break;
+                    case "division_id" : 
+                        $data->whereHas('getProduct.categories', function ($q) use ($value) {
+                            $q->where('id', $value);
                         });
                         break;
                     case "group_name" : 
@@ -94,7 +100,8 @@ class PlannedSopExport implements FromCollection, WithHeadings, ShouldAutoSize, 
         $result = (int) ($data['plan_next_month'] ?? 0) - (int) ($data['dispatch_against_plan'] ?? 0);
         $current_opening_stock = 0;
         if(isset($data['product_id']) && isset($data['branch_id'])){
-            $current_opening_stock = getCurrentOpeningStk($data['product_id'] , $data['branch_id']);
+            $product = Product::find($data['product_id']);
+            $current_opening_stock = getCurrentOpeningStk($product , $data['branch_id']);
         }
         return [
             $data['order_id'] ?? '',

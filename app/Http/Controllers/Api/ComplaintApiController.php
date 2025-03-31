@@ -193,11 +193,13 @@ class ComplaintApiController extends Controller
 
 
                 // Append related fields
-                $data += [
-                    "service_center_name" => optional($complaint->service_center_details)
-                        ? '[' . $complaint->service_center_details->customer_code . '] ' . $complaint->service_center_details->name
+               $data += [
+                    "service_center_name" => optional($complaint->service_center_details)?->name 
+                        ? ($complaint->service_center_details->customer_code 
+                            ? "[{$complaint->service_center_details->customer_code}] " 
+                            : "") . $complaint->service_center_details->name
                         : null,
-                    "created_by" => optional($complaint->createdbyname)->name,
+                    "created_by" => optional($complaint->createdbyname)?->name,
                 ];
 
                 // Customer Details
@@ -608,7 +610,7 @@ class ComplaintApiController extends Controller
             $data += [
                 'service_centers' => $service_centers->map(fn($center) => [
                     'key' => $center->id,
-                    'value' => "[{$center->customer_code}] {$center->name}"
+                    'value' => ($center->customer_code ? "[{$center->customer_code}] " : "") . $center->name
                 ])->toArray()
             ];
             $data += [

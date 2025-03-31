@@ -1104,8 +1104,8 @@ if (!function_exists('sendMessageByInfisms')) {
 }
 
 if (!function_exists('getCurrentOpeningStk')) {
-     function getCurrentOpeningStk($prodect_id , $branch_id){
-        $openingStock = OpeningStock::where(['product_id' => $prodect_id , 'branch_id' => $branch_id])->first();
+     function getCurrentOpeningStk($product , $branchId){
+         $openingStock = OpeningStock::orWhere(['item_code' => $product->product_code , 'item_code' =>$product->sap_code])->where(['item_group' => $product->subcategories->subcategory_name , 'branch_id' => $branchId])->first();
         if(isset($openingStock)){
             return $openingStock->opening_stocks ?? "0";
         }

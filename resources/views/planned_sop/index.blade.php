@@ -38,10 +38,54 @@
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
+
           <h4 class="card-title ">Planned S&OP List
             <span class="">
               <div class="btn-group header-frm-btn">
                 <div class="next-btn">
+                  @if(auth()->user()->roles[0]->name == 'superadmin')
+                      <div class="btn-group multi-a-r d-none">
+                          <button class="btn btn-just-icon btn-warning mr-2" 
+                                  title="Verify SOP" 
+                                  id="verify_sop" 
+                                  data-toggle="tooltip">
+                              <i class="material-icons">check_circle</i>
+                          </button>
+                      </div>
+
+                      <div class="btn-group multi-a-r d-none">
+                          <button class="btn btn-just-icon btn-success mr-2" 
+                                  title="Approve SOP" 
+                                  id="approved_sop" 
+                                  data-toggle="tooltip">
+                              <i class="material-icons">done</i>
+                          </button>
+                      </div>
+                  @endif
+                  <div class="p-2" style="width:160px;">
+                    <select class="select2 mr-2" name="division_id" id="division_id" data-style="select-with-transition" title="Select">
+                      <option value="">Division</option>
+                      @foreach($divisions as $division)
+                            <option value="{{ $division->id }}" {{ $division->id == 1 ? 'selected' : '' }}>
+                                {{ $division->category_name ?? '' }}
+                            </option>
+                      @endforeach
+                    </select>
+                  </div>
+                  <div class="p-2" style="width:160px;">
+                    <select class="select2" name="financial_year" id="financial_year" required data-style="select-with-transition" title="Year">
+                        <option value="" disabled selected>{!! trans('panel.secondary_dashboard.year') !!}</option>
+                        @foreach($years as $year)
+                        @php
+                        $startYear = $year - 1;
+                        $endYear = $year;
+                        @endphp
+                        <option value="{!!$startYear!!}-{!!$endYear!!}">{!! $startYear!!} - {!! $endYear !!}</option>
+                        @endforeach
+                      </select>
+                  </div>
+
+
                   @if(auth()->user()->can(['sop_upload']))
                   <form action="{{ URL::to('planned-sop-import') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                   {{ csrf_field() }}
@@ -100,6 +144,16 @@
             </span>
           </div>
           @endif
+           @if(session()->has('message_error'))
+          <div class="alert alert-danger">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <i class="material-icons">close</i>
+            </button>
+            <span>
+              {{ session()->get('message_error') }}
+            </span>
+          </div>
+          @endif
           <div class="alert " style="display: none;">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
               <i class="material-icons">close</i>
@@ -111,7 +165,17 @@
               <thead class=" text-primary">
                 <tr>
                   <th></th>
+                  <th><div style="width:50px"></div></th>
                   <th><div style="width:150px"></div></th>
+                  <th>
+                        <select class="form-control table-input" name="status">
+                            <option value="">Select</option>
+                            <option value="0">Cancel</option>
+                            <option value="1">Open</option>
+                            <option value="2">Verify</option>
+                            <option value="3">Aprroved</option>
+                        </select>
+                    </th>
                   <th><input type="text" class="form-control table-input" name="order_id" placeholder="Search..." autocomplete="off"></th>
                   <th><input type="text" class="form-control table-input datepicker" id="start_month" 
                        name="planning_month" placeholder="S&OP Month" 
@@ -131,18 +195,14 @@
                   <th><input  type="text" class="form-control table-input" name="sku_unit_price" placeholder="Search..." autocomplete="off"></th>
                   <th><input  type="text" class="form-control table-input" name="s_op_val" placeholder="Search..." autocomplete="off"></th>
                   <th><input  type="text" class="form-control table-input" name="top_sku" placeholder="Search..." autocomplete="off"></th>
-                  <th>
-                        <select class="form-control table-input" name="status">
-                            <option value="">Select</option>
-                            <option value="0">Cancel</option>
-                            <option value="1">Open</option>
-                        </select>
-                    </th>
+
                   <th><input  type="text" class="form-control table-input" name="created_by" placeholder="Search..." autocomplete="off"></th>
                 </tr>
                 <tr>
                   <th>{!! trans('panel.global.no') !!}</th>
+                  <th>#</th>
                   <th>{!! trans('panel.global.action') !!}</th>
+                  <th>Status</th>
                   <th>Order Id</th>
                   <th>Month</th>
                   <th>Branch Name</th>
@@ -160,7 +220,6 @@
                   <th>SKU Unit Price</th>
                   <th>S&OP Val_L (Unit Price *Qty.)</th>
                   <th>TOP 20 SKU for the Branch (*)</th>
-                  <th>Status</th>
                   <th>Created By</th>
               </tr>
               </thead>
@@ -195,6 +254,7 @@
                 d.order_id  = $('input[name="order_id"]').val();
                 d.branch_name = $('input[name="branch_name"]').val();
                 d.category_name = $('input[name="category_name"]').val();
+                d.division_id   = $('select[name="division_id"]').val(),
                 d.group_name = $('input[name="group_name"]').val();
                 d.product_name = $('input[name="product_name"]').val();
                 d.product_code =  $('input[name="product_code"]').val();
@@ -219,8 +279,20 @@
             searchable: false
           },
           {
+             data : 'checkbox',
+             name : 'checkbox',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
             data: 'action',
             name: 'action',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'status',
+            name: 'status',
             orderable: false,
             "defaultContent": ''
           },
@@ -326,12 +398,7 @@
             orderable: false,
             "defaultContent": ''
           },
-          {
-            data: 'status',
-            name: 'status',
-            orderable: false,
-            "defaultContent": ''
-          },
+
           {
             data: 'created_by',
             name: 'created_by',
@@ -345,6 +412,10 @@
         table.draw();
       });
 
+      $('#division_id , #financial_year').on('change' , function(){
+          table.draw();
+      })
+
       $('#button_download').on('click', function() {
           let form = $('<form>', {
               method: 'GET',
@@ -352,6 +423,8 @@
           });
 
           form.append($('<input>', {type: 'hidden', name: '_token', value: $('input[name="_token"]').val()}));
+          form.append($('<input>', {type: 'hidden', name: 'division_id', value: $('select[name="division_id"]').val()}));
+          form.append($('<input>', {type: 'hidden', name: 'financial_year', value: $('select[name="financial_year"]').val()}));
 
           // Collect all filter inputs (both text and select fields)
           $('.table-input, .table-select').each(function() {
@@ -384,6 +457,74 @@
           });
       });
 
+        $(document).on('click' , '#verify_sop' , function(){
+        const selectedValues = [];
+          $('.row-checkbox:checked').each(function () {
+              selectedValues.push($(this).val());
+          });
+          var token = $("meta[name='csrf-token']").attr("content");
+          $.ajax({
+            url: "{{ route('planned-sop-multistatus-change') }}",
+            type: 'POST',
+            data: {
+              _token: token,
+              ids: selectedValues,
+              value : 2,
+            },
+            success: function(data) {
+              $('.message').empty();
+              if (data.status == true) {
+                  if(data.update == true){
+                    $('.alert').show();
+                    $('.alert').addClass("alert-success");
+                    $('.message').append(data.message);
+                  }
+                  if(data.update == false){
+                    $('.alert').show();
+                    $('.alert').addClass("alert-danger");
+                    $('.message').append("No changes found");
+                  }
+              } 
+              $(".multi-a-r").addClass('d-none');
+              table.draw();
+            },
+          });
+      })
+
+      $(document).on('click' , '#approved_sop' , function(){
+        const selectedValues = [];
+          $('.row-checkbox:checked').each(function () {
+              selectedValues.push($(this).val());
+          });
+          var token = $("meta[name='csrf-token']").attr("content");
+          $.ajax({
+            url: "{{ route('planned-sop-multistatus-change') }}",
+            type: 'POST',
+            data: {
+              _token: token,
+              ids: selectedValues,
+              value : 3,
+            },
+            success: function(data) {
+              $('.message').empty();
+              if (data.status == true) {
+                  if(data.update == true){
+                    $('.alert').show();
+                    $('.alert').addClass("alert-success");
+                    $('.message').append(data.message);
+                  }
+                  if(data.update == false){
+                    $('.alert').show();
+                    $('.alert').addClass("alert-danger");
+                    $('.message').append("No changes found");
+                  }
+              } 
+              $(".multi-a-r").addClass('d-none');
+              table.draw();
+            },
+          });
+      })
+
 
       $(document).on('click', '.update-sop', function (e) {
           e.preventDefault(); // Prevent default button action
@@ -403,6 +544,58 @@
                     $('.update-form-' + id).submit(); // Submit the correct form
                 }
           });
+      });
+
+       $(document).on('click', '.verify-sop', function (e) {
+          e.preventDefault(); // Prevent default button action
+
+          let id = $(this).data('id'); // Get SOP ID
+
+          Swal.fire({
+              title: "Are you sure?",
+              text: "To Verify this Planned S&OP.",
+              icon: "success",
+              showCancelButton: true,
+              confirmButtonColor: "#28a745",  // Green color for confirm button
+              cancelButtonColor: "#3085d6",
+              confirmButtonText: "Yes, Verify it!"
+          }).then((result) => {
+                if (result.value == true) {
+                    $('.verify-form-' + id).submit(); // Submit the correct form
+                }
+          });
+      });
+
+       $(document).on('click', '.approve-sop', function (e) {
+          e.preventDefault(); // Prevent default button action
+
+          let id = $(this).data('id'); // Get SOP ID
+
+          Swal.fire({
+              title: "Are you sure?",
+              text: "To Approve this Planned S&OP.",
+              icon: "success",
+              showCancelButton: true,
+              confirmButtonColor: "#28a745",  // Green color for confirm button
+              cancelButtonColor: "#3085d6",
+              confirmButtonText: "Yes, Approve it!"
+          }).then((result) => {
+                if (result.value == true) {
+                    $('.approve-form-' + id).submit(); // Submit the correct form
+                }
+          });
+      });
+
+      $(document).on('click', '.row-checkbox', function () {
+          const selectedValues = [];
+          $('.row-checkbox:checked').each(function () {
+              selectedValues.push($(this).val());
+          });
+          if(selectedValues.length > 0){
+            $(".multi-a-r").removeClass('d-none');
+          }else{
+            $(".multi-a-r").addClass('d-none');
+          }
       });
 
       $('#start_month').datepicker({

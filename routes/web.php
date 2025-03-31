@@ -985,6 +985,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('planned-sop-export' , [PlannedSOPController::class , 'sop_download'])->name('sop_download');
     Route::any('planned-sop-import' , [PlannedSOPController::class , 'sop_import'])->name('sop_import');
     Route::any('planned-sop-template' , [PlannedSOPController::class , 'sop_template'])->name('sop_template');
+    Route::any('planned-sop-multistatus-change' , [PlannedSOPController::class , 'planned_sop_multistatus_change'])->name('planned-sop-multistatus-change');
 
     // claim gerneration 
     Route::resource('claim-generation', ClaimGenerationController::class);
@@ -1077,6 +1078,9 @@ Route::any('getCountsOfComplaints', [AjaxController::class, 'getCountsOfComplain
 Route::any('getSaledata', [AjaxController::class, 'getSaledata']);
 Route::any('getServiceBillReason' , [AjaxController::class , 'getServiceBillReason']);
 Route::any('checkServiceBillComplaintType' , [AjaxController::class , 'checkServiceBillComplaintType']);
+Route::any('getSubCategory' , [AjaxController::class , 'getSubCategory']);
+Route::any('getProductInfoListBySubcategory' , [AjaxController::class , 'getProductInfoListBySubcategory']);
+Route::any('getFullDetailsOfProduct' , [AjaxController::class , 'getFullDetailsOfProduct']);
 
 //Clear Cache facade value:
 Route::get('/clear-cache', function () {

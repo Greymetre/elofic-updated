@@ -16,6 +16,8 @@ class PlannedSOP extends Model
         'product_id',
         'plan_next_month',
         'opening_stock',
+        'open_order_qty',
+        'production_qty',
         'budget_for_month',
         'last_month_sale',
         'last_three_month_avg',
@@ -26,6 +28,9 @@ class PlannedSOP extends Model
         'dispatch_against_plan',
         'status',
         'created_by',
+        'verify_by',
+        'view_only',
+        'division_id'
     ];
 
     public function getProduct(){
