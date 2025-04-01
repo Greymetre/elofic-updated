@@ -15,10 +15,13 @@ return new class extends Migration
     {
         Schema::create('opening_stocks', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
-            $table->foreignId('ware_houses_id')->constrained('ware_houses')->onDelete('cascade');
+            $table->string('item_code')->nullable();
+            $table->string('item_description')->nullable();
+            $table->string('item_group')->nullable();
+            $table->string('ware_house_name')->nullable();
             $table->foreignId('branch_id')->constrained('branches')->onDelete('cascade');
             $table->integer('opening_stocks')->default(0);
+            $table->integer('open_order_qty')->default(0);
             $table->timestamps();
         });
     }

@@ -8,9 +8,11 @@ use App\Models\PlannedSOP;
 use App\Models\Branch;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Division;
 
 use App\Exports\PlannedSopExport;
 use App\Exports\PlannedSopTemplate;
+use App\Exports\PlannedSopPUMExport;
 
 use App\Imports\PlannedSopImport;
 
@@ -45,7 +47,10 @@ class PlannedSOPController extends Controller
     public function index(Request $request)
     {
         // abort_if(Gate::denies('product_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return view('planned_sop.index');
+        $divisions = Category::select('category_name' , 'id')->get();
+        $currentYear = Carbon::now()->year;
+        $years = range($currentYear - 2, $currentYear + 2);
+        return view('planned_sop.index' , compact('divisions' , 'years'));
     }
 
     public function plannedSopList(PlannedSopDatatable $dataTable, Request $request)
@@ -64,7 +69,8 @@ class PlannedSOPController extends Controller
         $branches = Branch::select('branch_name' , 'id')->get();
         $divisions = Category::select('category_name' , 'id')->get();
         $products = Product::where('active' , "Y")->select('product_name' , 'id')->get();
-        return view('planned_sop.create' , compact('branches' , 'products' , 'divisions'))->with('plannedsop',$this->plannedsop);
+        $main_divisions = Division::where('active' , "Y")->select('division_name' , 'id')->get();
+        return view('planned_sop.create' , compact('branches' , 'products' , 'divisions' , 'main_divisions'))->with('plannedsop',$this->plannedsop);
     }
 
     /**
@@ -83,6 +89,11 @@ class PlannedSOPController extends Controller
                $planning_month = $formatted_date->format("Y-m-d");
             }
             $division = Category::find($request->product_division);
+            if(Auth::user()->roles[0]['name'] == "superadmin"){
+                $view_only = implode(',', $request->view_only);
+            }else{
+                $view_only = Auth::user()->division_id;
+            }
             foreach ($request->product_id as $key => $product) {
                 $total = PlannedSOP::latest('id')->value('id');
                 $formattedTotal = str_pad($total, 3, '0', STR_PAD_LEFT);
@@ -91,12 +102,15 @@ class PlannedSOPController extends Controller
                     [
                         'planning_month' => $planning_month,
                         'product_id'     => $request->product_id[$key] ?? '',
-                        'branch_id'            => $request->branch_id ?? '',
+                        'branch_id'      => $request->branch_id ?? '',
+                        'plan_next_month'=> $request->plan_next_month[$key] ?? '',
                     ],
                     [
                         'order_id'             => $order_id ?? '',
-                        'plan_next_month'      => $request->plan_next_month[$key] ?? '',
+                        'division_id'          => $request->product_division ?? Null,
                         'opening_stock'        => $request->opening_stock[$key] ?? NULL,
+                        'open_order_qty'       => $request->open_order_qty[$key] ?? Null,
+                        'production_qty'       => $request->for_production_qty[$key] ?? 0,
                         'budget_for_month'     => $request->budget_for_month[$key] ?? NULL,
                         'last_month_sale'      => $request->last_month_sale[$key] ?? NULL,
                         'last_three_month_avg' => $request->last_three_month_avg[$key] ?? NULL,
@@ -105,6 +119,7 @@ class PlannedSOPController extends Controller
                         's_op_val'             => $request->s_op_val[$key] ?? NULL,
                         'top_sku'              => $request->top_sku[$key] ?? NULL,
                         'created_by'           => Auth::user()->name ?? NULL,
+                        'view_only'            => $view_only ?? NULL
                     ]
                 );
             }
@@ -119,6 +134,12 @@ class PlannedSOPController extends Controller
         abort_if(Gate::denies('sop_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
+        if($request->division_id == 1){
+           if (!isset($request->financial_year)) {
+                return back()->with('message_error', 'Please select a financial year.');
+            }            
+            return Excel::download(new PlannedSopPUMExport($request), 'plannedsop.xlsx');
+        }
         return Excel::download(new PlannedSopExport($request), 'plannedsop.xlsx');
     }
 
@@ -193,6 +214,9 @@ class PlannedSOPController extends Controller
                $request["planning_month"] = $planning_month;
             }
             $plannedsop->update($request->all());
+            if(isset($request->status) && $request->status == 2){
+                 $plannedsop->update(['verify_by'=>Auth::user()->name]);
+            }
             return Redirect::to('planned-sop')->with('message_success', 'Planned S&OP Updated Sucessfully.');
         }
         catch(\Exception $e){
@@ -216,5 +240,33 @@ class PlannedSOPController extends Controller
         }
         $plannedsop->delete();
         return redirect()->back()->with('message_success', 'Record deleted Sucessfully.');
+    }
+
+    // multistatus changes
+    public function planned_sop_multistatus_change(Request $request){
+        $ids = $request->ids ?? [];
+        $value = $request->value ?? '';
+        $status = "";
+        if($value == 2){
+           $status = "Verified";
+        }else if($value == 3){
+           $status = "Approved";
+        }
+        $plannedsops = PlannedSOP::whereIn('id' , $ids)->get();
+        $sop_ids = [];
+        $update = False;
+        foreach ($plannedsops as $plannedsop) {
+            if($plannedsop->status != $value){
+                $plannedsop->update([
+                    'status' => $value,
+                ]);
+                $update = true;
+                if($value == 2){
+                     $plannedsop->update(['verify_by'=>Auth::user()->name]);
+                }
+            }
+        }
+        $message = $status .' '. 'Sucessfully';
+        return response()->json(['status' => true  , 'update' => $update , 'message' => $message]);
     }
 }

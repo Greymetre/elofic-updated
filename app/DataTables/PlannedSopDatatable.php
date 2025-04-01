@@ -26,13 +26,26 @@ class PlannedSopDatatable extends DataTable
                 return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
             })
             ->editColumn('status' , function($data){
-                 if($data->status == 1){
-                    return '<span class="badge badge-success">OPEN</span>';
-                 }else if(isset($data->status) && $data->status == "0"){
-                    return '<span class="badge badge-danger">CANCEL</span>';
-                 }else{
-                     return '<span class="badge badge-dager">CANCEL</span>';
-                 } 
+                 // if($data->status == 1){
+                 //    return '<span class="badge badge-success">OPEN</span>';
+                 // }else if(isset($data->status) && $data->status == "0"){
+                 //    return '<span class="badge badge-danger">CANCEL</span>';
+                 // }else{
+                 //     return '<span class="badge badge-dager">CANCEL</span>';
+                 // }
+
+                 switch ($data->status) {
+                    case 1:
+                        return '<span class="badge badge-success">OPEN</span>';
+                    case 0:
+                        return '<span class="badge badge-danger">CANCEL</span>';
+                    case 2:
+                        return '<span class="badge badge-success">Verify</span>';
+                    case 3:
+                        return '<span class="badge badge-success">Approved</span>';
+                    default:
+                        return '<span class="badge badge-danger">CANCEL</span>'; // Fix typo: badge-dager → badge-danger
+                } 
             })
             ->editColumn('planning_month' , function($data){
                  try{
@@ -44,6 +57,11 @@ class PlannedSopDatatable extends DataTable
                  }catch(\Exception $e){
                     return "Not Found";
                  }
+            })
+            ->addColumn('checkbox', function ($data) {
+                if($data->getProduct->categories->id ==1 && $data->status != 0){
+                    return '<input type="checkbox" class="row-checkbox" value="' . $data->id . '">';
+                }
             })
              ->addColumn('action', function ($query) {
                   $btn = '';
@@ -66,7 +84,7 @@ class PlannedSopDatatable extends DataTable
                     }
 
                     if (auth()->user()->can(['sop_delete'])) {
-                        $btn .= '<form action="' . route('planned-sop.destroy', encrypt($query->id)) . '" method="POST" class="delete-form-' .$query->id . '" style="display:inline;">
+                        $btn .= '<form action="' . route('planned-sop.destroy', encrypt($query->id)) . '" method="POST" class="mr-2 delete-form-' .$query->id . '" style="display:inline;">
                                 ' . csrf_field() . '
                                 ' . method_field('DELETE') . '
 
@@ -75,11 +93,33 @@ class PlannedSopDatatable extends DataTable
                                 </button>
                             </form>';
                     }
+
+                    if (auth()->user()->can(['verify_sop']) && $query->getProduct->categories->id ==1 && $query->status == 1) {
+                        $btn .= '<form action="' . route('planned-sop.update', encrypt($query->id)) . '" method="POST" class="verify-form-' .$query->id . '" style="display:inline;">
+                                    ' . csrf_field() . '
+                                    ' . method_field('PUT') . '
+                                    <input type="hidden" name="status" value="2">
+                                    <button type="button" class="btn btn-warning btn-just-icon btn-sm verify-sop mr-2" data-id="' . $query->id . '" title="Verify SOP">
+                                        <i class="material-icons">check_circle</i>
+                                    </button>
+                                </form>';
+                    }
+
+                     if (auth()->user()->can(['approved_sop'])  && $query->getProduct->categories->id == 1 && $query->status == 2) {
+                        $btn .= '<form action="' . route('planned-sop.update', encrypt($query->id)) . '" method="POST" class="approve-form-' .$query->id . '" style="display:inline;">
+                                    ' . csrf_field() . '
+                                    ' . method_field('PUT') . '
+                                    <input type="hidden" name="status" value="3">
+                                    <button type="button" class="btn btn-success btn-just-icon btn-sm approve-sop mr-2" data-id="' . $query->id . '" title="Approve SOP">
+                                       <i class="material-icons">done</i>
+                                    </button>
+                                </form>';
+                    }
                   return '<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
                                 '.$btn.'
                             </div>';
             })            
-            ->rawColumns(['action' , 'status' , 'action']);
+            ->rawColumns(['action' , 'status' , 'action' , 'checkbox']);
     }
 
     /**
@@ -93,6 +133,9 @@ class PlannedSopDatatable extends DataTable
         $filters = $request->all();
         $data = $model->with(['getProduct.subcategories' , 'getProduct.categories', 'getBranch']);
 
+        if(isset(Auth::user()->roles[0]->name) && !Auth::user()->roles[0]->name == "superadmin"){
+            $data->whereRaw("FIND_IN_SET(?, view_only)", [Auth::user()->division_id]);
+        }
         foreach ($filters as $key => $value) {
              if (isset($value))  {
                 switch ($key) {
@@ -115,6 +158,11 @@ class PlannedSopDatatable extends DataTable
                     case "category_name" : 
                         $data->whereHas('getProduct.categories', function ($q) use ($value) {
                             $q->where('category_name', 'like', "%$value%");
+                        });
+                        break;
+                    case "division_id" : 
+                        $data->whereHas('getProduct.categories', function ($q) use ($value) {
+                            $q->where('id', $value);
                         });
                         break;
                     case "group_name" : 

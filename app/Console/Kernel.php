@@ -32,7 +32,11 @@ class Kernel extends ConsoleKernel
         // $schedule->command(AddressUpdate::class)->timezone('Asia/Kolkata')->everyFourHours();
         $schedule->command('backup:run')->monthlyOn(1, '00:00');
         // $schedule->command('update:leave-balance')->monthlyOn(1, '00:00');
-        $schedule->command('sales:send-primary')->timezone('Asia/Kolkata')->twiceDaily(0, 4);
+        $schedule->command('sales:send-primary')->timezone('Asia/Kolkata')->dailyAt('00:00');
+        $schedule->command('send:all-users')->timezone('Asia/Kolkata')->dailyAt('01:00');
+        $schedule->command('send:all-users-goly')->timezone('Asia/Kolkata')->dailyAt('02:00');
+        $schedule->command('send:all-users-target')->timezone('Asia/Kolkata')->dailyAt('02:15');
+        $schedule->command('send:all-branch-goly')->timezone('Asia/Kolkata')->dailyAt('02:30');
        
     }
 

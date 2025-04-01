@@ -37,7 +37,7 @@ class OpeningStockExport implements FromCollection, WithHeadings, ShouldAutoSize
     public function headings(): array
     {
         return [
-             "Itm_Code" ,"Itm_Desc" , "Itm_Grp_Name" , "WareHouse_Name" , "Branch_Id" ,"InStock_Qty"
+             "Itm_Code" ,"Itm_Desc" , "Itm_Grp_Name" , "WareHouse_Name" , "Branch_Id" ,"InStock_Qty" ,'Opening_qty'
         ];
     }
 
@@ -45,12 +45,13 @@ class OpeningStockExport implements FromCollection, WithHeadings, ShouldAutoSize
     public function map($data): array
     {
         return [
-            $data['product']['product_code'] ?? '',
-            $data['product']['product_name'] ?? '',
-            $data['product']['subcategories']['subcategory_name'] ?? '',
-            $data['warehouse']['warehouse_name'] ?? '',
+            $data['item_code'] ?? '',
+            $data['item_description'] ?? '',
+            $data['item_group'] ?? '',
+            $data['ware_house_name'] ?? '',
             $data['branch_id'] ?? '',
             $data['opening_stocks'] ?? '',
+            $data['open_order_qty'] ?? '0'
         ];
     }
 

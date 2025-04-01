@@ -64,6 +64,7 @@ class ProductImport implements ToCollection,WithValidation,WithHeadingRow, WithB
                 'model_no'      => isset($row['model_no']) ? $row['model_no'] :null,
                 'model_no'      => isset($row['model_no']) ? $row['model_no'] :null,
                 'phase'      => isset($row['phase']) ? $row['phase'] :null,
+                'branch_id'  =>  $row['branch_id'] ?? ''
 
             ]) )
             {

@@ -53,6 +53,26 @@
             </span>
           </div>
           @endif
+          @if(session('message_success'))
+          <div class="alert alert-success">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <i class="material-icons">close</i>
+            </button>
+            <span>
+              {{ session('message_success') }}
+            </span>
+          </div>
+          @endif
+          @if(session('message_error'))
+          <div class="alert alert-danger">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <i class="material-icons">close</i>
+            </button>
+            <span>
+              {{ session('message_error') }}
+            </span>
+          </div>
+          @endif
           <div class="alert " style="display: none;">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
               <i class="material-icons">close</i>
@@ -68,7 +88,8 @@
                 <th>Item Group Name</th>
                 <th>Ware House Name</th>
                 <th>Branch</th>
-                <th>Opening Quantity</th>
+                <th>InStock Qty</th>
+                <th>Opening qty (Prod.)</th>
               </thead>
               <tbody>
               </tbody>
@@ -102,26 +123,26 @@
             searchable: false
           },
           {
-            data: 'product.product_code',
-            name: 'product.product_code',
+            data: 'item_code',
+            name: 'item_code',
             "defaultContent": '',
             orderable: false
           },
           {
-            data: 'product.product_name',
-            name: 'product.product_name',
+            data: 'item_description',
+            name: 'item_description',
             "defaultContent": '',
             orderable: false
           },
           {
-            data: 'product.subcategories.subcategory_name',
-            name: 'product.subcategories.subcategory_name',
+            data: 'item_group',
+            name: 'item_group',
             "defaultContent": '',
             orderable: false
           },
           {
-            data: 'warehouse.warehouse_name',
-            name: 'warehouse.warehouse_name',
+            data: 'ware_house_name',
+            name: 'ware_house_name',
             "defaultContent": '',
             orderable: false,
             searchable: false
@@ -136,6 +157,13 @@
           {
             data: 'opening_stocks',
             name: 'opening_stocks',
+            "defaultContent": '',
+            orderable: false,
+            searchable: false
+          },
+           {
+            data: 'open_order_qty',
+            name: 'open_order_qty',
             "defaultContent": '',
             orderable: false,
             searchable: false

@@ -64,7 +64,8 @@ class ProductController extends Controller
         $subcategories = Subcategory::where('active','=','Y')->select('id', 'subcategory_name')->get();
         $brands = Brand::where('active','=','Y')->select('id', 'brand_name')->get();
         $units = UnitMeasure::where('active','=','Y')->select('id', 'unit_name')->get();
-        return view('products.create',compact('categories','subcategories','brands','units') )->with('products',$this->products);
+        $branches = Branch::where('active','=','Y')->select('id', 'branch_name')->get();
+        return view('products.create',compact('categories','subcategories','brands','units', 'branches') )->with('products',$this->products);
     }
 
     /**
@@ -201,7 +202,8 @@ class ProductController extends Controller
         $subcategories = Subcategory::where('active','=','Y')->select('id', 'subcategory_name')->get();
         $brands = Brand::where('active','=','Y')->select('id', 'brand_name')->get();
         $units = UnitMeasure::where('active','=','Y')->select('id', 'unit_name')->get();
-        return view('products.create',compact('categories','subcategories','brands','units') )->with('products',$products);
+        $branches = Branch::where('active','=','Y')->select('id', 'branch_name')->get();
+        return view('products.create',compact('categories','subcategories','brands','units', 'branches') )->with('products',$products);
     }
 
     /**

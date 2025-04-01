@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Branch, BranchStock, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CompOffLeave, CustomerDetails, CustomerOutstanting, DealerAppointment, DealerAppointmentKyc, EmployeeDetail, EndUser, Expenses, GiftModel, GiftSubcategory, Marketing, MspActivity, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, PrimaryScheme, Redemption, SalesTargetUsers, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation,ServiceChargeChargeType,OrderDetails,ServiceComplaintReason , ServiceBillComplaintType, ServiceGroupComplaint , OpeningStock};
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Branch, BranchStock, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CompOffLeave, CustomerDetails, CustomerOutstanting, DealerAppointment, DealerAppointmentKyc, EmployeeDetail, EndUser, Expenses, GiftModel, GiftSubcategory, Marketing, MspActivity, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, PrimaryScheme, Redemption, SalesTargetUsers, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation,ServiceChargeChargeType,OrderDetails,ServiceComplaintReason , ServiceBillComplaintType, ServiceGroupComplaint , OpeningStock };
 use App\Models\UserLiveLocation;
 use App\Models\UserActivity;
 use App\Http\Controllers\SendNotifications;
@@ -236,6 +236,7 @@ class AjaxController extends Controller
     public function getProductData(Request $request)
     {
         try {
+             $branchId = $request->branch_id; 
             $sub_category = $request->sub_cat;
             $category = $request->category;
             $data = Product::where(function ($query) use ($sub_category, $category) {
@@ -255,6 +256,81 @@ class AjaxController extends Controller
             return $e;
         }
     }
+
+     public function getSubCategory(Request $request)
+    {
+        try {
+            $branchId = $request->branch_id; // Example: 2
+            $subcategory_ids = Product::whereRaw("FIND_IN_SET(?, branch_id)", [$branchId])->where('category_id', $request->category)
+                ->distinct()
+                ->pluck('subcategory_id');
+            $sub_categories = Subcategory::whereIn('id' , $subcategory_ids)->get();
+            return response()->json($sub_categories);
+        } catch (\Exception $e) {
+            return $e;
+        }
+    }
+
+    public function getProductInfoListBySubcategory(Request $request)
+    {
+        try {
+            $branchId = $request->branch_id; // Example: 2
+            $sub_category = $request->product_subcategory ?? '';
+            $product = Product::whereRaw("FIND_IN_SET(?, branch_id)", [$branchId])->where('subcategory_id' , $sub_category)
+                ->get();
+            return response()->json($product);
+        } catch (\Exception $e) {
+            return $e;
+        }
+    }
+
+    public function getFullDetailsOfProduct(Request $request)
+    {
+        try {
+            $dateParts = explode(' ', $request->date); // Example: ['April', '2025']
+            $month = $dateParts[0];
+            $year = (int) $dateParts[1];
+
+            // Determine previous financial year
+            if (in_array($month, ['January', 'February', 'March'])) {
+                $startYear = $year - 2;
+                $endYear = $year - 1;
+            } else {
+                $startYear = $year - 1;
+                $endYear = $year;
+            }
+            $product = Product::with('productdetails', 'categories' , 'subcategories')->find($request->product_id);
+           
+            $opening_stock = OpeningStock::orWhere(['item_code' => $product->product_code , 'item_code' =>$product->sap_code])->where(['item_group' => $product->subcategories->subcategory_name , 'branch_id' => $request->branch_id])->first();
+            $months = [];
+            for ($m = 4; $m <= 12; $m++) {
+                $months["$startYear-" . str_pad($m, 2, '0', STR_PAD_LEFT)] = 0;
+            }
+            for ($m = 1; $m <= 3; $m++) {
+                $months["$endYear-" . str_pad($m, 2, '0', STR_PAD_LEFT)] = 0;
+            }
+            // Get primary sales data for the previous financial year
+            $salesData = PrimarySales::where(['product_id'=> $product->id , 'branch_id' => $request->branch_id])
+                ->whereBetween('invoice_date', ["$startYear-04-01", "$endYear-03-31"])
+                ->selectRaw('DATE_FORMAT(invoice_date, "%Y-%m") as month, SUM(quantity) as total_qty')
+                ->groupBy('month')
+                ->orderBy('month')
+                ->pluck('total_qty', 'month')
+                ->toArray();
+
+            // Merge sales data into the initialized months array
+            $salesByMonth = array_merge($months, $salesData);
+            return response()->json([
+                'product' => $product,
+                'sales_by_month' => $salesByMonth,
+                'opening_stock'  => $opening_stock
+            ]);
+        } catch (\Exception $e) {
+            return $e;
+        }
+    }
+
+
     public function getUserList(Request $request)
     {
         try {
