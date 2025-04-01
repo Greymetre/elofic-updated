@@ -148,8 +148,8 @@
             searchable: false
           },
           {
-            data: 'branch.branch_name',
-            name: 'warehouse_name',
+            data: 'branch_names',
+            name: 'branch_names',
             "defaultContent": '',
             orderable: false,
             searchable: false

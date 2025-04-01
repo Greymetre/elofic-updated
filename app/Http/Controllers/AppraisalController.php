@@ -72,11 +72,8 @@ class AppraisalController extends Controller
 
 
         //fy year
-        $sale_weightage_years = salesWeightage::orderBy('financial_year', 'asc')->get()->unique('financial_year');
+        $sale_weightage_years = ['2023-24','2024-25','2025-26'];
         //fy year
-
-
-
 
         if ($search_branches && count($search_branches) > 0 && $search_branches[0] != null) {
             $all_reporting_user_ids = User::whereIn('id', $all_reporting_user_ids)->whereIn('branch_id', $search_branches)->pluck('id')->toArray();
@@ -285,7 +282,7 @@ class AppraisalController extends Controller
         $divisions = Division::all();
         $designations = Designation::all();
 
-        $sale_weightage_years = salesWeightage::orderBy('financial_year', 'asc')->get()->unique('financial_year');
+        $sale_weightage_years = ['2023-24','2024-25','2025-26'];
 
         //dd($sale_weightage_years);
 
@@ -426,7 +423,7 @@ class AppraisalController extends Controller
             ->get();
         // dd($appraisal_details);
 
-        $sale_weightage_years = salesWeightage::orderBy('financial_year', 'asc')->get()->unique('financial_year');
+        $sale_weightage_years = ['2023-24','2024-25','2025-26'];
 
         // $designation_id = $user_details->designation_id;   
 

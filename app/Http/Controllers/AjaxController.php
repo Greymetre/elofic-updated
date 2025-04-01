@@ -301,7 +301,7 @@ class AjaxController extends Controller
             }
             $product = Product::with('productdetails', 'categories' , 'subcategories')->find($request->product_id);
            
-            $opening_stock = OpeningStock::orWhere(['item_code' => $product->product_code , 'item_code' =>$product->sap_code])->where(['item_group' => $product->subcategories->subcategory_name , 'branch_id' => $request->branch_id])->first();
+            $opening_stock = OpeningStock::orWhere(['item_code' => $product->product_code , 'item_code' =>$product->sap_code])->where(['item_group' => $product->subcategories->subcategory_name])->whereRaw("FIND_IN_SET(?, branch_id)", [$request->branch_id])->first();
             $months = [];
             for ($m = 4; $m <= 12; $m++) {
                 $months["$startYear-" . str_pad($m, 2, '0', STR_PAD_LEFT)] = 0;
@@ -448,7 +448,8 @@ class AjaxController extends Controller
     {
         try {
             $product_id = $request->input('product_id');
-            $data = Product::with('productdetails', 'categories' , 'opening_stock')
+
+            $data = Product::with('productdetails', 'categories' )
                 ->where(function ($query) use ($product_id) {
                     if (isset($product_id)) {
                         $query->where('id', '=', $product_id);
@@ -457,7 +458,7 @@ class AjaxController extends Controller
                 })
                 ->orderBy('product_name', 'asc')
                 ->first();
-            $opening_stock = OpeningStock::where(['product_id' => $product_id , 'branch_id' => $request->branch_id])->first();
+            $opening_stock = OpeningStock::orWhere(['item_code' => $data->product_code , 'item_code' =>$data->sap_code])->where(['item_group' => $data->subcategories->subcategory_name])->whereRaw("FIND_IN_SET(?, branch_id)", [$request->branch_id])->first();
             $product = collect([
                 'id' => isset($data['id']) ? $data['id'] : '',
                 'product_name' => isset($data['product_name']) ? $data['product_name'] : '',

@@ -13,10 +13,10 @@ class OpeningStock extends Model
          'item_code', 'item_description','item_group','ware_house_name' , 'branch_id' , 'opening_stocks' , 'open_order_qty'
     ];
 
-    public function branch()
-    {
-        return $this->belongsTo(Branch::class, 'branch_id');
-    }
+    // public function branch()
+    // {
+    //     return $this->belongsTo(Branch::class, 'branch_id');
+    // }
 
     public function product()
     {

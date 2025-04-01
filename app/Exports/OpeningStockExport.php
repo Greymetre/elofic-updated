@@ -25,8 +25,28 @@ class OpeningStockExport implements FromCollection, WithHeadings, ShouldAutoSize
 
    public function collection()
     {
+        //  $data = OpeningStock::with([
+        //     'branch',
+        //     'product.subcategories',
+        //     'warehouse',
+        // ])->latest()->get() // Fetch all data first
+        // ->groupBy(function ($item) {
+        //     return $item->item_code . '-' . $item->item_description . '-' . $item->item_group . '-' . $item->opening_stocks . '-' . $item->open_order_qty;
+        // })
+        // ->map(function ($group) {
+        //     // Extract unique branch IDs and convert them into a comma-separated string
+        //     $branchIds = $group->pluck('branch_id')->unique()->implode(',');
+
+        //     // Take the first item and update its branch_id field
+        //     $firstItem = $group->first();
+        //     $firstItem->branch_id = $branchIds;
+
+        //     return $firstItem;
+        // })
+        // ->values(); // Reset indexes
+
+        // return $data;
         $data = OpeningStock::with([
-            'branch',
             'product.subcategories',
             'warehouse',
         ])->latest()->newQuery();
@@ -50,8 +70,8 @@ class OpeningStockExport implements FromCollection, WithHeadings, ShouldAutoSize
             $data['item_group'] ?? '',
             $data['ware_house_name'] ?? '',
             $data['branch_id'] ?? '',
-            $data['opening_stocks'] ?? '',
-            $data['open_order_qty'] ?? '0'
+            isset($data['opening_stocks']) ? (string) $data['opening_stocks'] : '0',
+            isset($data['open_order_qty']) ? (string) $data['open_order_qty'] : '0',
         ];
     }
 
