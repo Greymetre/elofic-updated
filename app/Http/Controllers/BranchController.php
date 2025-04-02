@@ -13,6 +13,7 @@ use DataTables;
 use Validator;
 use Gate;
 use App\DataTables\BranchDataTable;
+use App\Models\WareHouse;
 use Excel;
 
 
@@ -35,7 +36,8 @@ class BranchController extends Controller
     public function index(BranchDataTable $dataTable)
     {
         abort_if(Gate::denies('branch'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return $dataTable->render('branches.index');
+        $warehouses = WareHouse::all();
+        return $dataTable->render('branches.index', compact('warehouses'));
     }
 
     /**

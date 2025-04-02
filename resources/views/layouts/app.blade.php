@@ -1025,6 +1025,15 @@
                               </a>
                            </li>
                            @endif
+                            @if(auth()->user()->can('branch_opening_qty_view'))
+                           <li class="nav-link-btn {{ request()->is('opening-quantity*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('opening-quantity') }}">
+                                 <i class="material-icons icon">donut_small</i>
+                                 <span>Branch Opening Quantity</span>
+                                 <div class="d-none mobile_hide"> Branch Opening Quantity</div>
+                              </a>
+                           </li>
+                           @endif
                            @if(auth()->user()->can('ware_house_access'))
                            <li class="nav-link-btn {{ request()->is('ware_house*') ? 'active' : '' }}">
                               <a class="hoveradd2" href="{{ url('ware_house') }}">

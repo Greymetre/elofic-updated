@@ -577,55 +577,13 @@
                 <td>
                     <div class="input_section">
                         <div class="form-group has-default bmd-form-group">
+                            <input type="hidden" class="form-control for_production_value" name="for_production_value[]" required readonly>
+                            <input type="hidden" class="form-control for_production_qty" name="for_production_qty[]" required readonly>
+                            <input type="hidden" class="form-control open_order_value" name="open_order_value[]" readonly>
+                            <input type="hidden" class="form-control open_order_qty" name="open_order_qty[]" readonly>
                             <input type="hidden" class="form-control price" name="price[]" required>
-                            <input type="text" class="form-control opening_stock" name="opening_stock[]" readonly>
-                            @if ($errors->has('opening_stock'))
-                            <div class="error">
-                                <p class="text-danger">{{ $errors->first('opening_stock') }}</p>
-                            </div>
-                            @endif
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <div class="input_section">
-                        <div class="form-group has-default bmd-form-group">
-                            <input type="text" class="form-control opening_stock_value" name="opening_stock_value[]" readonly>
-                            @if ($errors->has('opening_stock_value'))
-                            <div class="error">
-                                <p class="text-danger">{{ $errors->first('opening_stock_value') }}</p>
-                            </div>
-                            @endif
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <div class="input_section">
-                        <div class="form-group has-default bmd-form-group">
-                            <input type="text" class="form-control open_order_qty" name="open_order_qty[]" readonly>
-                            @if ($errors->has('open_order_qty'))
-                            <div class="error">
-                                <p class="text-danger">{{ $errors->first('open_order_qty') }}</p>
-                            </div>
-                            @endif
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <div class="input_section">
-                        <div class="form-group has-default bmd-form-group">
-                            <input type="text" class="form-control open_order_value" name="open_order_value[]" readonly>
-                            @if ($errors->has('open_order_value'))
-                            <div class="error">
-                                <p class="text-danger">{{ $errors->first('open_order_value') }}</p>
-                            </div>
-                            @endif
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <div class="input_section">
-                        <div class="form-group has-default bmd-form-group">
+                            <input type="hidden" class="form-control opening_stock" name="opening_stock[]" readonly>
+                            <input type="hidden" class="form-control opening_stock_value" name="opening_stock_value[]" readonly>
                             <input type="text" class="form-control plan_next_month_1" name="plan_next_month[]" required>
                             @if ($errors->has('plan_next_month'))
                             <div class="error">
@@ -647,30 +605,7 @@
                         </div>
                     </div>
                 </td>
-                <td>
-                    <div class="input_section">
-                        <div class="form-group has-default bmd-form-group">
-                            <input type="text" class="form-control for_production_qty" name="for_production_qty[]" required readonly>
-                            @if ($errors->has('for_production_qty'))
-                            <div class="error">
-                                <p class="text-danger">{{ $errors->first('for_production_qty') }}</p>
-                            </div>
-                            @endif
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <div class="input_section">
-                        <div class="form-group has-default bmd-form-group">
-                            <input type="text" class="form-control for_production_value" name="for_production_value[]" required readonly>
-                            @if ($errors->has('for_production_value'))
-                            <div class="error">
-                                <p class="text-danger">{{ $errors->first('for_production_value') }}</p>
-                            </div>
-                            @endif
-                        </div>
-                    </div>
-                </td>
+              
             </tr>`;
 
             $('#sopTableBody1').append(newRow);
@@ -807,18 +742,19 @@
       changeYear: true,
       showButtonPanel: true,
       closeText: "Select", // Custom text for closing
+      minDate: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1), // Start from next month
       yearRange: new Date().getFullYear() + ":" + (new Date().getFullYear() + 1), // Limit year range to current year +1
       maxDate: new Date(new Date().getFullYear() + 1, 11, 1), // Allow till December of next year
       onClose: function(dateText, inst) {
-          var month = parseInt($("#ui-datepicker-div .ui-datepicker-month option:selected").val());
-          var year = parseInt($("#ui-datepicker-div .ui-datepicker-year option:selected").val());
+            var month = parseInt($("#ui-datepicker-div .ui-datepicker-month option:selected").val());
+            var year = parseInt($("#ui-datepicker-div .ui-datepicker-year option:selected").val());
 
-          var selectedDate = new Date(year, month, 1);
-          $(this).val($.datepicker.formatDate('MM yy', selectedDate));
-      }
-  }).focus(function () {
-      $(".ui-datepicker-calendar").hide(); // Hide date picker
-  });
+            var selectedDate = new Date(year, month, 1);
+            $(this).val($.datepicker.formatDate('MM yy', selectedDate));
+        }
+    }).focus(function () {
+        $(".ui-datepicker-calendar").hide(); // Hide date picker
+    });
 
 
    $(document).on("change", ".product_group_name , #branch_id", function() {
@@ -961,7 +897,7 @@
                     }
                     let openingStock = parseInt(res.opening_stock?.opening_stocks ?? 0);
                     let price = parseInt(res.product?.productdetails[0].price ?? 0);
-                    let open_oder_qty = parseInt(res.opening_stock?.open_order_qty ?? 0);
+                    let open_oder_qty = parseInt(res.branchOprningQuantity?.open_order_qty ?? 0);
                     let new_price = 0;
                     console.log("price",price);
                     if(price){
@@ -1050,15 +986,21 @@
               <th class="text-center"><div style="width: 200px !important;">Min</div></th>
               <th class="text-center"><div style="width: 200px !important;">Max</div></th>
             <th class="text-center"><div style="width: 200px !important;">Avg</div></th>
+             
+
+              <th class="text-center"><div style="width: 200px !important;">Forecast qty (Sales plan) </div></th>
+              <th class="text-center"><div style="width: 200px !important;">Forecast Value (Sales plan) </div></th>
+
+          `);
+
+          /*
               <th class="text-center"><div style="width: 200px !important;">Opening Stock qty (Branch)</div></th>
               <th class="text-center"><div style="width: 200px !important;">Opening Stock Value (Branch)</div></th>
               <th class="text-center"><div style="width: 200px !important;">Open Order qty (Prod.)</div></th>
               <th class="text-center"><div style="width: 200px !important;">Open Order Value (Prod.)</div></th>
-              <th class="text-center"><div style="width: 200px !important;">Forecast qty (Sales plan) </div></th>
-              <th class="text-center"><div style="width: 200px !important;">Forecast Value (Sales plan) </div></th>
               <th class="text-center"><div style="width: 200px !important;">For Prodcution qty</div></th>
               <th class="text-center"><div style="width: 200px !important;">For Prodcution Value </div></th>
-          `);
+          */
       }
 
       // Trigger generation on page load

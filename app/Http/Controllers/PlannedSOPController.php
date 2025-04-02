@@ -13,6 +13,7 @@ use App\Models\Division;
 use App\Exports\PlannedSopExport;
 use App\Exports\PlannedSopTemplate;
 use App\Exports\PlannedSopPUMExport;
+use App\Exports\PlannedSopSalePUMExport;
 
 use App\Imports\PlannedSopImport;
 
@@ -134,7 +135,7 @@ class PlannedSOPController extends Controller
 
     public function sop_download(Request $request)
     {
-        abort_if(Gate::denies('sop_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('master_sop_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         if($request->division_id == 1){
@@ -142,6 +143,20 @@ class PlannedSOPController extends Controller
                 return back()->with('message_error', 'Please select a financial year.');
             }            
             return Excel::download(new PlannedSopPUMExport($request), 'plannedsop.xlsx');
+        }
+        return Excel::download(new PlannedSopExport($request), 'plannedsop.xlsx');
+    }
+
+    public function sale_sop_download(Request $request)
+    {
+        abort_if(Gate::denies('sop_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        if($request->division_id == 1){
+           if (!isset($request->financial_year)) {
+                return back()->with('message_error', 'Please select a financial year.');
+            }            
+            return Excel::download(new PlannedSopSalePUMExport($request), 'sale_plannedsop.xlsx');
         }
         return Excel::download(new PlannedSopExport($request), 'plannedsop.xlsx');
     }

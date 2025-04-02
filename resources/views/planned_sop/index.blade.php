@@ -111,8 +111,10 @@
                         <a href="{{ route('planned-sop.create') }}" class="btn btn-just-icon btn-theme" title="Add Planned SOP"><i class="material-icons">add_circle</i></a>
                   @endif
                   @if(auth()->user()->can(['sop_download']))
-                       <button class="btn btn-just-icon btn-theme mr-2" id="button_download" type="button" title="{!!  trans('panel.global.download') !!} S&OP"><i class="material-icons">cloud_download</i></button>
-                        <!-- <a href="{{ route('sop_download') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} S&OP"><i class="material-icons">cloud_download</i></a> -->
+                       <button class="btn btn-just-icon btn-theme mr-2" id="sale_sop_download" type="button" title="Sales S&OP Export"><i class="material-icons">cloud_download</i></button>
+                  @endif
+                  @if(auth()->user()->can(['master_sop_download']))
+                       <button class="btn btn-just-icon btn-warning mr-2" id="button_download" type="button" title="Master SOP Export"><i class="material-icons">cloud_download</i></button>
                   @endif
                        <a href="{{ URL::to('planned-sop-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} Planned SOP"><i class="material-icons">text_snippet</i></a>
  
@@ -436,6 +438,29 @@
           $('body').append(form);
           form.submit();
       });
+
+       $('#sale_sop_download').on('click', function() {
+          let form = $('<form>', {
+              method: 'GET',
+              action: "{{ route('sale_sop_download') }}"
+          });
+
+          form.append($('<input>', {type: 'hidden', name: '_token', value: $('input[name="_token"]').val()}));
+          form.append($('<input>', {type: 'hidden', name: 'division_id', value: $('select[name="division_id"]').val()}));
+          form.append($('<input>', {type: 'hidden', name: 'financial_year', value: $('select[name="financial_year"]').val()}));
+
+          // Collect all filter inputs (both text and select fields)
+          $('.table-input, .table-select').each(function() {
+              let inputName = $(this).attr('name');
+              let inputValue = $(this).val();
+              form.append($('<input>', {type: 'hidden', name: inputName, value: inputValue}));
+          });
+          form.append($('<input>', {type: 'hidden', name: 'planning_month', value: $('input[id="start_month"]').val()}));
+          $('body').append(form);
+          form.submit();
+      });
+
+
 
       $(document).on('click', '.delete-sop', function (e) {
           e.preventDefault(); // Prevent default button action
