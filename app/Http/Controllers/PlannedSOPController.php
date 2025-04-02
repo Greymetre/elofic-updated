@@ -13,6 +13,7 @@ use App\Models\Division;
 use App\Exports\PlannedSopExport;
 use App\Exports\PlannedSopTemplate;
 use App\Exports\PlannedSopPUMExport;
+use App\Exports\PlannedSopSalePUMExport;
 
 use App\Imports\PlannedSopImport;
 
@@ -49,7 +50,7 @@ class PlannedSOPController extends Controller
         // abort_if(Gate::denies('product_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $divisions = Category::select('category_name' , 'id')->get();
         $currentYear = Carbon::now()->year;
-        $years = range($currentYear - 2, $currentYear + 2);
+        $years = range($currentYear , $currentYear + 2);
         return view('planned_sop.index' , compact('divisions' , 'years'));
     }
 
@@ -89,10 +90,12 @@ class PlannedSOPController extends Controller
                $planning_month = $formatted_date->format("Y-m-d");
             }
             $division = Category::find($request->product_division);
-            if(Auth::user()->roles[0]['name'] == "superadmin"){
-                $view_only = implode(',', $request->view_only);
-            }else{
-                $view_only = Auth::user()->division_id;
+            if(isset($request->view_only)){
+                if(Auth::user()->roles[0]['name'] == "superadmin"){
+                    $view_only = implode(',', $request->view_only);
+                }else{
+                    $view_only = Auth::user()->division_id;
+                }
             }
             foreach ($request->product_id as $key => $product) {
                 $total = PlannedSOP::latest('id')->value('id');
@@ -119,7 +122,8 @@ class PlannedSOPController extends Controller
                         's_op_val'             => $request->s_op_val[$key] ?? NULL,
                         'top_sku'              => $request->top_sku[$key] ?? NULL,
                         'created_by'           => Auth::user()->name ?? NULL,
-                        'view_only'            => $view_only ?? NULL
+                        'view_only'            => $view_only ?? NULL,
+                        'status'               => 1,
                     ]
                 );
             }
@@ -131,7 +135,7 @@ class PlannedSOPController extends Controller
 
     public function sop_download(Request $request)
     {
-        abort_if(Gate::denies('sop_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('master_sop_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         if($request->division_id == 1){
@@ -139,6 +143,20 @@ class PlannedSOPController extends Controller
                 return back()->with('message_error', 'Please select a financial year.');
             }            
             return Excel::download(new PlannedSopPUMExport($request), 'plannedsop.xlsx');
+        }
+        return Excel::download(new PlannedSopExport($request), 'plannedsop.xlsx');
+    }
+
+    public function sale_sop_download(Request $request)
+    {
+        abort_if(Gate::denies('sop_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        if($request->division_id == 1){
+           if (!isset($request->financial_year)) {
+                return back()->with('message_error', 'Please select a financial year.');
+            }            
+            return Excel::download(new PlannedSopSalePUMExport($request), 'sale_plannedsop.xlsx');
         }
         return Excel::download(new PlannedSopExport($request), 'plannedsop.xlsx');
     }

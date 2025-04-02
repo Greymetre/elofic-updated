@@ -6,7 +6,7 @@
         <div class="card-icon">
           <i class="material-icons">perm_identity</i>
         </div>
-        <h4 class="card-title ">{!! trans('panel.branch.title_singular') !!}{!! trans('panel.global.list') !!}
+        <h4 class="card-title ">{!! trans('panel.branch.title_singular') !!} {!! trans('panel.global.list') !!}
               <span class="">
                 <div class="btn-group header-frm-btn"> 
                   <div class="next-btn">
@@ -105,11 +105,18 @@
               </div>
             <div class="col-md-12">
                 <div class="input_sectuin">
-                  <label class="col-form-label">Branch SAP Code <span class="text-danger"> *</span></label>
+                  <label class="col-form-label">Ware House<span class="text-danger"> *</span></label>
                     <div class="form-group has-default bmd-form-group">
-                      <input type="text" id="branch_sap_code" name="branch_sap_code" class="form-control" value="{!! old( 'branch_sap_code') !!}" maxlength="200" required>
-                      @if ($errors->has('branch_sap_code'))
-                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('branch_sap_code') }}</p></div>
+                      <select name="warehouse_id" class="form-control" id="warehouse_id" required>
+                        <option value="">Select Ware House</option>
+                        @if($warehouses->count() > 0)
+                        @foreach($warehouses as $warehouse)
+                          <option value="{!! $warehouse->id !!}">{!! $warehouse->warehouse_name !!}</option>
+                        @endforeach
+                        @endif
+                      </select>
+                      @if ($errors->has('warehouse_id'))
+                        <div class="error col-lg-12"><p class="text-danger">{{ $errors->first('warehouse_id') }}</p></div>
                       @endif
                   </div>
                 </div>
@@ -119,7 +126,7 @@
         <div class="clearfix"></div>
         <div class="pull-right">
           <input type="hidden" name="id" id="branch_id" />
-          {{ Form::submit('Submit', array('class' => 'btn btn-info save')) }}
+          {{ Form::submit('Submit', array('class' => 'btn btn-info save mt-4')) }}
           {{ Form::close() }}
         </div>
       </div>
@@ -166,7 +173,7 @@ $(document).ready(function() {
          success: function (data) {
                $('#branch_name').val(data.branch_name);
                $('#branch_code').val(data.branch_code);
-               $('#branch_sap_code').val(data.branch_sap_code);
+               $('#warehouse_id').val(data.warehouse_id);
 	        $('#branch_id').val(data.id);
 	        var title = '{!! trans('panel.global.edit') !!}' ;
 	        $('.modal-title').text(title);

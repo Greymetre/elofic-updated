@@ -6,12 +6,12 @@
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
-          <h4 class="card-title ">Opening Stock {!! trans('panel.global.list') !!}
+          <h4 class="card-title ">Branch Opening Quantity {!! trans('panel.global.list') !!}
             <span class="">
               <div class="btn-group header-frm-btn">
                 <div class="next-btn">
-                  @if(auth()->user()->can(['opening_stock_import']))
-                  <form action="{{ URL::to('opening-stocks-import') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
+                  @if(auth()->user()->can(['branch_opening_qty_import']))
+                  <form action="{{ URL::to('opening-quantity-import') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
                   {{ csrf_field() }}
                   <div class="input-group">
                     <div class="fileinput fileinput-new text-center" data-provides="fileinput">
@@ -32,8 +32,8 @@
                   </form> 
                   @endif
 
-                  @if(auth()->user()->can(['opening_stock_download']))
-                  <a href="{{ URL::to('opening-stocks-export') }}" class="btn btn-just-icon btn-theme" title="{!! trans('panel.global.download') !!} Opening Stock"><i class="material-icons">cloud_download</i></a> 
+                  @if(auth()->user()->can(['branch_opening_qty_download']))
+                  <a href="{{ URL::to('opening-quantity-export') }}" class="btn btn-just-icon btn-theme" title="{!! trans('panel.global.download') !!} Opening Stock"><i class="material-icons">cloud_download</i></a> 
                   @endif
                 </div>
               </div>
@@ -86,10 +86,9 @@
                 <th>Item Code</th>
                 <th>Item Desc</th>
                 <th>Item Group Name</th>
-                <th>Ware House Name</th>
                 <th>Branch</th>
-                <th>InStock Qty</th>
-                <!-- <th>Opening qty (Prod.)</th> -->
+                <th>Month</th>
+                <th>Opening qty (Prod.)</th>
               </thead>
               <tbody>
               </tbody>
@@ -115,7 +114,7 @@
         "order": [
           [0, 'desc']
         ],
-        ajax: "{{ route('getOpeningStocks') }}",
+        ajax: "{{ route('getOpeningquantity') }}",
         columns: [{
             data: 'DT_RowIndex',
             name: 'DT_RowIndex',
@@ -141,13 +140,6 @@
             orderable: false
           },
           {
-            data: 'ware_house_name',
-            name: 'ware_house_name',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          },
-          {
             data: 'branch_names',
             name: 'branch_names',
             "defaultContent": '',
@@ -155,19 +147,19 @@
             searchable: false
           },
           {
-            data: 'opening_stocks',
-            name: 'opening_stocks',
+            data: 'qty_month',
+            name: 'qty_month',
             "defaultContent": '',
             orderable: false,
             searchable: false
+          },
+          {
+           data: 'open_order_qty',
+           name: 'open_order_qty',
+           "defaultContent": '',
+           orderable: false,
+           searchable: false
           }
-          // {
-          //  data: 'open_order_qty',
-          //  name: 'open_order_qty',
-          //  "defaultContent": '',
-          //  orderable: false,
-          //  searchable: false
-          //}
         ]
       });
 

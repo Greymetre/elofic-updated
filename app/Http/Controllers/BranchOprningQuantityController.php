@@ -2,14 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\OpeningQuantityExport;
+use App\Imports\OpeningQuantityImport;
+use App\Models\Branch;
+use App\Models\BranchOprningQuantity;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-
-use App\Models\OpeningStock;
-use App\Models\Branch;
-
-use App\Imports\OpeningStockImport;
-use App\Exports\OpeningStockExport;
 
 use Gate;
 use DB;
@@ -17,7 +15,7 @@ use Excel;
 use Validator;
 use DataTables;
 
-class OpeningStockController extends Controller
+class BranchOprningQuantityController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -26,16 +24,13 @@ class OpeningStockController extends Controller
      */
     public function index()
     {
-        abort_if(Gate::denies('opening_stock_view'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return view('opening-stocks.index');
+        abort_if(Gate::denies('branch_opening_qty_view'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        return view('opening-quantity.index');
     }
 
-    public function getOpeningStocks(Request $request){
-       abort_if(Gate::denies('opening_stock_view'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        $query = OpeningStock::with([
-            'product.subcategories',
-            'warehouse',
-        ])->latest()->newQuery();
+    public function getOpeningquantity(Request $request){
+       abort_if(Gate::denies('branch_opening_qty_view'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $query = BranchOprningQuantity::latest()->newQuery();
 
          return DataTables::of($query)
             ->addIndexColumn()
@@ -49,9 +44,12 @@ class OpeningStockController extends Controller
                     ->implode(', ');
                 return $branch_names;
             })
+            ->addColumn('qty_month', function ($data) {
+                return $data->qty_month ? date('M-y', strtotime($data->qty_month)) : '-';
+            })
             ->addIndexColumn()
            
-            ->rawColumns(['action'])
+            ->rawColumns(['qty_month'])
             ->make(true);
     }
 
@@ -59,7 +57,7 @@ class OpeningStockController extends Controller
     public function openingStockImport(Request $request)
     {
         try {
-            abort_if(Gate::denies('opening_stock_import'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+            abort_if(Gate::denies('branch_opening_qty_import'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
             if (!$request->hasFile('import_file')) {
                 return back()->with('error', 'No file uploaded.');
@@ -70,7 +68,7 @@ class OpeningStockController extends Controller
 
             if ($file) {
                 // Pass the file explicitly when creating an instance of OpeningStockImport
-                $import = new OpeningStockImport($file);
+                $import = new OpeningQuantityImport($file);
                 Excel::import($import, $file);
             } else {
                  return back()->with('message_error', 'Import successful!');
@@ -83,9 +81,9 @@ class OpeningStockController extends Controller
     }
 
      public function openingStockExport(Request $request){
-        abort_if(Gate::denies('opening_stock_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('branch_opening_qty_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        return Excel::download(new OpeningStockExport($request), 'opening-stocks.xlsx');
+        return Excel::download(new OpeningQuantityExport($request), 'opening-quantity.xlsx');
     }
 }

@@ -217,9 +217,9 @@
             </div>
             <div class="col-md-6">
               <div class="input_section">
-                <label class="col-form-label">Branch<span class="text-danger"> *</span></label>
+                <label class="col-form-label">Branch</label>
                 <div class="form-group has-default bmd-form-group">
-                  <select class="form-control select2" multiple name="branch_id" style="width: 100%;" required>
+                  <select class="form-control select2" multiple name="branch_id" style="width: 100%;>
                     <option value="">Select Branch</option>
                      @if(@isset($branches))
                         @foreach($branches as $branch)

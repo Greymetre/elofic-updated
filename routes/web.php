@@ -43,6 +43,7 @@ use App\Http\Controllers\VisitReportController;
 use App\Http\Controllers\VisitTypeController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\BranchController;
+use App\Http\Controllers\BranchOprningQuantityController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\ComplaintTypeController;
 use App\Http\Controllers\CustomerKycController;
@@ -983,6 +984,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('planned-sop', PlannedSOPController::class);
     Route::any('planned-sop-list', [PlannedSOPController::class , 'plannedSopList'])->name('plannedSopList');
     Route::any('planned-sop-export' , [PlannedSOPController::class , 'sop_download'])->name('sop_download');
+    Route::any('planned-sale-sop-export' , [PlannedSOPController::class , 'sale_sop_download'])->name('sale_sop_download');
     Route::any('planned-sop-import' , [PlannedSOPController::class , 'sop_import'])->name('sop_import');
     Route::any('planned-sop-template' , [PlannedSOPController::class , 'sop_template'])->name('sop_template');
     Route::any('planned-sop-multistatus-change' , [PlannedSOPController::class , 'planned_sop_multistatus_change'])->name('planned-sop-multistatus-change');
@@ -1004,6 +1006,12 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('opening-stocks-list', [OpeningStockController::class , 'getOpeningStocks'])->name('getOpeningStocks');
     Route::any('opening-stocks-import', [OpeningStockController::class , 'openingStockImport'])->name('openingStockImport');
     Route::any('opening-stocks-export', [OpeningStockController::class , 'openingStockExport'])->name('openingStockExport');
+
+    // Branch Opening Quantity routes
+    Route::resource('opening-quantity', BranchOprningQuantityController::class)->only('index');
+    Route::any('opening-quantity-list', [BranchOprningQuantityController::class , 'getOpeningquantity'])->name('getOpeningquantity');
+    Route::any('opening-quantity-import', [BranchOprningQuantityController::class , 'openingStockImport'])->name('openingStockImport');
+    Route::any('opening-quantity-export', [BranchOprningQuantityController::class , 'openingStockExport'])->name('openingStockExport');
 });
 
 Route::any('getState', [AjaxController::class, 'getState']);

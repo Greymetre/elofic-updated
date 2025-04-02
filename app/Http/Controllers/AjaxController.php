@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Branch, BranchStock, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CompOffLeave, CustomerDetails, CustomerOutstanting, DealerAppointment, DealerAppointmentKyc, EmployeeDetail, EndUser, Expenses, GiftModel, GiftSubcategory, Marketing, MspActivity, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, PrimaryScheme, Redemption, SalesTargetUsers, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation,ServiceChargeChargeType,OrderDetails,ServiceComplaintReason , ServiceBillComplaintType, ServiceGroupComplaint , OpeningStock };
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Branch, BranchStock, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CompOffLeave, CustomerDetails, CustomerOutstanting, DealerAppointment, DealerAppointmentKyc, EmployeeDetail, EndUser, Expenses, GiftModel, GiftSubcategory, Marketing, MspActivity, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, PrimaryScheme, Redemption, SalesTargetUsers, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation,ServiceChargeChargeType,OrderDetails,ServiceComplaintReason , ServiceBillComplaintType, ServiceGroupComplaint , OpeningStock , BranchOprningQuantity};
 use App\Models\UserLiveLocation;
 use App\Models\UserActivity;
 use App\Http\Controllers\SendNotifications;
@@ -287,6 +287,11 @@ class AjaxController extends Controller
     public function getFullDetailsOfProduct(Request $request)
     {
         try {
+            $planning_month = '';
+             if(isset($request->date)){
+               $formatted_date = Carbon::createFromFormat('F Y', $request->date)->startOfMonth();
+               $planning_month = $formatted_date->format("Y-m-d");
+            }
             $dateParts = explode(' ', $request->date); // Example: ['April', '2025']
             $month = $dateParts[0];
             $year = (int) $dateParts[1];
@@ -300,8 +305,16 @@ class AjaxController extends Controller
                 $endYear = $year;
             }
             $product = Product::with('productdetails', 'categories' , 'subcategories')->find($request->product_id);
-           
-            $opening_stock = OpeningStock::orWhere(['item_code' => $product->product_code , 'item_code' =>$product->sap_code])->where(['item_group' => $product->subcategories->subcategory_name , 'branch_id' => $request->branch_id])->first();
+            $opening_stock = OpeningStock::orWhere(['item_code' => $product->product_code , 'item_code' =>$product->sap_code])->where(['item_group' => $product->subcategories->subcategory_name])->whereRaw("FIND_IN_SET(?, branch_id)", [$request->branch_id])->first();
+
+            $branchOprningQuantity = BranchOprningQuantity::where(function ($query) use ($product) {
+                $query->where('item_code', $product->product_code)
+                      ->orWhere('item_code', $product->sap_code);
+            })
+            ->where('item_group', $product->subcategories->subcategory_name)
+            ->whereRaw("FIND_IN_SET(?, branch_id)", [$request->branch_id])
+            ->whereDate('qty_month', $planning_month)
+            ->first();
             $months = [];
             for ($m = 4; $m <= 12; $m++) {
                 $months["$startYear-" . str_pad($m, 2, '0', STR_PAD_LEFT)] = 0;
@@ -323,7 +336,8 @@ class AjaxController extends Controller
             return response()->json([
                 'product' => $product,
                 'sales_by_month' => $salesByMonth,
-                'opening_stock'  => $opening_stock
+                'opening_stock'  => $opening_stock,
+                'branchOprningQuantity' => $branchOprningQuantity ?? Null,
             ]);
         } catch (\Exception $e) {
             return $e;
@@ -448,7 +462,8 @@ class AjaxController extends Controller
     {
         try {
             $product_id = $request->input('product_id');
-            $data = Product::with('productdetails', 'categories' , 'opening_stock')
+
+            $data = Product::with('productdetails', 'categories' )
                 ->where(function ($query) use ($product_id) {
                     if (isset($product_id)) {
                         $query->where('id', '=', $product_id);
@@ -457,7 +472,7 @@ class AjaxController extends Controller
                 })
                 ->orderBy('product_name', 'asc')
                 ->first();
-            $opening_stock = OpeningStock::where(['product_id' => $product_id , 'branch_id' => $request->branch_id])->first();
+            $opening_stock = OpeningStock::orWhere(['item_code' => $data->product_code , 'item_code' =>$data->sap_code])->where(['item_group' => $data->subcategories->subcategory_name])->whereRaw("FIND_IN_SET(?, branch_id)", [$request->branch_id])->first();
             $product = collect([
                 'id' => isset($data['id']) ? $data['id'] : '',
                 'product_name' => isset($data['product_name']) ? $data['product_name'] : '',

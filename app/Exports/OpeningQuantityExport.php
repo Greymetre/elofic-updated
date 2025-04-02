@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Models\BranchOprningQuantity;
 use App\Models\OpeningStock;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
-class OpeningStockExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithEvents
+class OpeningQuantityExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithEvents
 {
     protected $filters;
 
@@ -46,10 +47,7 @@ class OpeningStockExport implements FromCollection, WithHeadings, ShouldAutoSize
         // ->values(); // Reset indexes
 
         // return $data;
-        $data = OpeningStock::with([
-            'product.subcategories',
-            'warehouse',
-        ])->latest()->newQuery();
+        $data = BranchOprningQuantity::latest()->newQuery();
 
         return $data->latest()->get();
     }
@@ -57,7 +55,7 @@ class OpeningStockExport implements FromCollection, WithHeadings, ShouldAutoSize
     public function headings(): array
     {
         return [
-             "Itm_Code" ,"Itm_Desc" , "Itm_Grp_Name" , "WareHouse_Name" , "Branch_Id" ,"InStock_Qty"
+             "Itm_Code" ,"Itm_Desc" , "Itm_Grp_Name" , "Branch_Id", "qty_month" ,"opening_qty"
         ];
     }
 
@@ -68,10 +66,9 @@ class OpeningStockExport implements FromCollection, WithHeadings, ShouldAutoSize
             $data['item_code'] ?? '',
             $data['item_description'] ?? '',
             $data['item_group'] ?? '',
-            $data['ware_house_name'] ?? '',
             $data['branch_id'] ?? '',
-            isset($data['opening_stocks']) ? (string) $data['opening_stocks'] : '0',
-            // isset($data['open_order_qty']) ? (string) $data['open_order_qty'] : '0',
+            $data['qty_month'] ? date('M-y', strtotime($data['qty_month'])) : '',
+            isset($data['open_order_qty']) ? (string) $data['open_order_qty'] : '0',
         ];
     }
 

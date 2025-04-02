@@ -11,7 +11,7 @@ class Branch extends Model
 
     protected $table = 'branches';
 
-    protected $fillable = ['active', 'branch_name', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at', 'branch_code','branch_sap_code'];
+    protected $fillable = ['active', 'branch_name', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at', 'branch_code','warehouse_id'];
 
 
     public function getuser()

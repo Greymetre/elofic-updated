@@ -50,7 +50,7 @@
                                         <select class="selectpicker" name="financial_year" id="financial_year" data-style="select-with-transition">
                                             <option value="">Select Financial Year</option>
                                             @foreach($sale_weightage_years as $sale_weightage_year)
-                                            <option value="{{$sale_weightage_year->financial_year}}">{{$sale_weightage_year->financial_year}}</option>
+                                            <option value="{{$sale_weightage_year}}">{{$sale_weightage_year}}</option>
                                             @endforeach
                                         </select>
                                     </div>
