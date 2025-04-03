@@ -43,7 +43,7 @@
             <span class="">
               <div class="btn-group header-frm-btn">
                 <div class="next-btn">
-                  @if(auth()->user()->roles[0]->name == 'superadmin')
+                  @if(auth()->user()->hasRole('Sub_Admin') || auth()->user()->hasRole('PUMPCH') || auth()->user()->hasRole('superadmin'))
                       <div class="btn-group multi-a-r d-none">
                           <button class="btn btn-just-icon btn-warning mr-2" 
                                   title="Verify SOP" 
@@ -52,7 +52,7 @@
                               <i class="material-icons">check_circle</i>
                           </button>
                       </div>
-
+                      @if(auth()->user()->hasRole('superadmin'))
                       <div class="btn-group multi-a-r d-none">
                           <button class="btn btn-just-icon btn-success mr-2" 
                                   title="Approve SOP" 
@@ -61,6 +61,7 @@
                               <i class="material-icons">done</i>
                           </button>
                       </div>
+                      @endif
                   @endif
                   <div class="p-2" style="width:160px;">
                     <select class="select2 mr-2" name="division_id" id="division_id" data-style="select-with-transition" title="Select">
@@ -80,7 +81,7 @@
                         $startYear = $year - 1;
                         $endYear = $year;
                         @endphp
-                        <option value="{!!$startYear!!}-{!!$endYear!!}">{!! $startYear!!} - {!! $endYear !!}</option>
+                        <option value="{!!$startYear!!}-{!!$endYear!!}" {{ $year-1 == date('Y') ? 'selected' : ''}}>{!! $startYear!!} - {!! $endYear !!}</option>
                         @endforeach
                       </select>
                   </div>
@@ -110,11 +111,11 @@
                   @if(auth()->user()->can(['sop_create']))
                         <a href="{{ route('planned-sop.create') }}" class="btn btn-just-icon btn-theme" title="Add Planned SOP"><i class="material-icons">add_circle</i></a>
                   @endif
-                  @if(auth()->user()->can(['sop_download']))
-                       <button class="btn btn-just-icon btn-theme mr-2" id="sale_sop_download" type="button" title="Sales S&OP Export"><i class="material-icons">cloud_download</i></button>
-                  @endif
                   @if(auth()->user()->can(['master_sop_download']))
-                       <button class="btn btn-just-icon btn-warning mr-2" id="button_download" type="button" title="Master SOP Export"><i class="material-icons">cloud_download</i></button>
+                       <button class="btn btn-just-icon btn-theme mr-2" id="sale_sop_download" type="button" title="Master  S&OP Export"><i class="material-icons">cloud_download</i></button>
+                  @endif
+                  @if(auth()->user()->can(['sop_download']))
+                       <button class="btn btn-just-icon btn-warning mr-2" id="button_download" type="button" title="Sales SOP Export"><i class="material-icons">cloud_download</i></button>
                   @endif
                        <a href="{{ URL::to('planned-sop-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} Planned SOP"><i class="material-icons">text_snippet</i></a>
  
@@ -460,28 +461,6 @@
           form.submit();
       });
 
-
-
-      $(document).on('click', '.delete-sop', function (e) {
-          e.preventDefault(); // Prevent default button action
-
-          let id = $(this).data('id'); // Get SOP ID
-
-          Swal.fire({
-              title: "Are you sure?",
-              text: "To delete this Planned S&OP.",
-              icon: "warning",
-              showCancelButton: true,
-              confirmButtonColor: "#d33",
-              cancelButtonColor: "#3085d6",
-              confirmButtonText: "Yes, delete it!"
-          }).then((result) => {
-                if (result.value == true) {
-                    $('.delete-form-' + id).submit(); // Submit the correct form
-                }
-          });
-      });
-
         $(document).on('click' , '#verify_sop' , function(){
         const selectedValues = [];
           $('.row-checkbox:checked').each(function () {
@@ -555,7 +534,7 @@
           e.preventDefault(); // Prevent default button action
 
           let id = $(this).data('id'); // Get SOP ID
-
+          var route =  $('.update-form-' + id).attr('action');
           Swal.fire({
               title: "Are you sure?",
               text: "To cancel this Planned S&OP.",
@@ -566,16 +545,19 @@
               confirmButtonText: "Yes, Cancel it!"
           }).then((result) => {
                 if (result.value == true) {
-                    $('.update-form-' + id).submit(); // Submit the correct form
+                   updateSOP(route , 'PUT' , 0);
+                    // $('.update-form-' + id).submit(); // Submit the correct form
                 }
           });
       });
+
 
        $(document).on('click', '.verify-sop', function (e) {
           e.preventDefault(); // Prevent default button action
 
           let id = $(this).data('id'); // Get SOP ID
-
+          var route =  $('.verify-form-' + id).attr('action');
+          console.log(route);
           Swal.fire({
               title: "Are you sure?",
               text: "To Verify this Planned S&OP.",
@@ -586,7 +568,8 @@
               confirmButtonText: "Yes, Verify it!"
           }).then((result) => {
                 if (result.value == true) {
-                    $('.verify-form-' + id).submit(); // Submit the correct form
+                    updateSOP(route , 'PUT' , 2);
+                    // $('.verify-form-' + id).submit(); // Submit the correct form
                 }
           });
       });
@@ -595,7 +578,7 @@
           e.preventDefault(); // Prevent default button action
 
           let id = $(this).data('id'); // Get SOP ID
-
+          var route =  $('.approve-form-' + id).attr('action');
           Swal.fire({
               title: "Are you sure?",
               text: "To Approve this Planned S&OP.",
@@ -606,10 +589,55 @@
               confirmButtonText: "Yes, Approve it!"
           }).then((result) => {
                 if (result.value == true) {
-                    $('.approve-form-' + id).submit(); // Submit the correct form
+                     updateSOP(route , 'PUT' , 3);
                 }
           });
       });
+
+
+      $(document).on('click', '.delete-sop', function (e) {
+          e.preventDefault(); // Prevent default button action
+
+          let id = $(this).data('id'); // Get SOP ID
+          var route =  $('.delete-form-' + id).attr('action');
+          Swal.fire({
+              title: "Are you sure?",
+              text: "To delete this Planned S&OP.",
+              icon: "warning",
+              showCancelButton: true,
+              confirmButtonColor: "#d33",
+              cancelButtonColor: "#3085d6",
+              confirmButtonText: "Yes, delete it!"
+          }).then((result) => {
+                if (result.value == true) {
+                  updateSOP(route , 'DELETE');
+                    // $('.delete-form-' + id).submit(); // Submit the correct form
+                }
+          });
+      });
+
+
+      function updateSOP(url , method , value=''){
+        var token = $("meta[name='csrf-token']").attr("content");
+        $.ajax({
+            url: url,
+            type: method,
+            data: {
+              _token: token,
+              status : value,
+            },
+            success: function(data) {
+              $('.message').empty();
+              if (data.status == true) {
+                  Swal.fire('success' , data.message);
+                  table.draw();
+              }else{
+                Swal.fire('success' , data.message);
+              } 
+            },
+          });
+      }
+
 
       $(document).on('click', '.row-checkbox', function () {
           const selectedValues = [];
@@ -628,7 +656,7 @@
           dateFormat: 'M yy',
       });
 
-
+     
     });
   </script>
 </x-app-layout>

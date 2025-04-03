@@ -6,6 +6,9 @@ use App\DataTables\SAPStockDataTable;
 use App\Models\SapStock;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Models\PlannedSOP;
+use App\Models\PlannedSopSaleData;
+use App\Models\PrimarySales;
 use Gate;
 
 class SapStockController extends Controller

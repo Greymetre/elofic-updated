@@ -33,19 +33,21 @@ class PlannedSopDatatable extends DataTable
                  // }else{
                  //     return '<span class="badge badge-dager">CANCEL</span>';
                  // }
+                if(isset($data->status)){
+                    switch ($data->status) {
+                        case 1:
+                            return '<span class="badge badge-success">OPEN</span>';
+                        case 0:
+                            return '<span class="badge badge-danger">CANCEL</span>';
+                        case 2:
+                            return '<span class="badge badge-success">Verify</span>';
+                        case 3:
+                            return '<span class="badge badge-success">Approved</span>';
+                        default:
+                            return '<span class="badge badge-danger">CANCEL</span>'; // Fix typo: badge-dager → badge-danger
+                    } 
+                }
 
-                 switch ($data->status) {
-                    case 1:
-                        return '<span class="badge badge-success">OPEN</span>';
-                    case 0:
-                        return '<span class="badge badge-danger">CANCEL</span>';
-                    case 2:
-                        return '<span class="badge badge-success">Verify</span>';
-                    case 3:
-                        return '<span class="badge badge-success">Approved</span>';
-                    default:
-                        return '<span class="badge badge-danger">CANCEL</span>'; // Fix typo: badge-dager → badge-danger
-                } 
             })
             ->editColumn('planning_month' , function($data){
                  try{
@@ -59,14 +61,14 @@ class PlannedSopDatatable extends DataTable
                  }
             })
             ->addColumn('checkbox', function ($data) {
-                if($data->getProduct->categories->id ==1 && $data->status != 0){
+                if($data->getProduct->categories->id ==1 && (Auth::user()->hasRole('superadmin') || Auth::user()->hasRole('Sub_Admin') || Auth::user()->hasRole('PUMPCH'))){
                     return '<input type="checkbox" class="row-checkbox" value="' . $data->id . '">';
                 }
             })
              ->addColumn('action', function ($query) {
                   $btn = '';
                   $activebtn ='';
-                  if(auth()->user()->can(['sop_edit']))
+                  if((auth()->user()->can(['sop_edit']) && $query->status == 1) || (auth()->user()->can(['sop_edit']) && Auth::user()->designation_id == "6" && $query->status == 2))
                   {
                     $btn = $btn.'<a href="'.route('planned-sop.edit', encrypt($query->id)).'" class="btn btn-info btn-just-icon btn-sm edit mr-2" id="'.encrypt($query->id).'" title="'.trans('panel.global.edit').' SOP">
                           <i class="material-icons">edit</i>
@@ -95,7 +97,7 @@ class PlannedSopDatatable extends DataTable
                     }
 
                     if (auth()->user()->can(['verify_sop']) && $query->getProduct->categories->id ==1 && $query->status == 1) {
-                        $btn .= '<form action="' . route('planned-sop.update', encrypt($query->id)) . '" method="POST" class="verify-form-' .$query->id . '" style="display:inline;">
+                        $btn .= '<form action="' . route('planned-sop.update', encrypt($query->id)) . '" method="POST" class="verify-form-' .$query->id . '"  style="display:inline;">
                                     ' . csrf_field() . '
                                     ' . method_field('PUT') . '
                                     <input type="hidden" name="status" value="2">
@@ -132,9 +134,13 @@ class PlannedSopDatatable extends DataTable
     {
         $filters = $request->all();
         $data = $model->with(['getProduct.subcategories' , 'getProduct.categories', 'getBranch']);
-
-        if(isset(Auth::user()->roles[0]->name) && !Auth::user()->roles[0]->name == "superadmin"){
+        
+        if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Sub_Admin')){
             $data->whereRaw("FIND_IN_SET(?, view_only)", [Auth::user()->division_id]);
+        }
+        if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Sub_Admin')){
+            $branch_ids = explode(',', Auth::user()->branch_id);
+            $data->whereIn('branch_id' , $branch_ids);
         }
         foreach ($filters as $key => $value) {
              if (isset($value))  {

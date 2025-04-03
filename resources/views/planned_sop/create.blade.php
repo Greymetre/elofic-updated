@@ -15,6 +15,7 @@
               </div>
             </span>
           </h4>
+          <h3 class="text-info">Total Forecast value: <span id="total_forecast">0.00</span></h3>
         </div>
         <div class="card-body">
           @if(count($errors) > 0)
@@ -41,10 +42,10 @@
               <div class="input_section">
                 <label class="col-form-label">S&OP Month<span class="text-danger"> *</span></label>
                 <div class="form-group has-default bmd-form-group">
-                <input type="text" class="form-control datepicker" id="start_month" 
-                       name="planning_month" placeholder="S&OP Month" 
-                       autocomplete="off" readonly required
-                       value="{{ old('planning_month', now()->addMonth()->format('F Y')) }}">
+                  <input type="text" class="form-control datepicker" id="start_month"
+                    name="planning_month" placeholder="S&OP Month"
+                    autocomplete="off" readonly required
+                    value="{{ old('planning_month', now()->addMonth()->format('F Y')) }}">
                   @if ($errors->has('planning_month'))
                   <div class="error">
                     <p class="text-danger">{{ $errors->first('planning_month') }}</p>
@@ -58,10 +59,10 @@
                 <label class="col-form-label">Branch Name<span class="text-danger"> *</span></label>
                 <div class="form-group has-default bmd-form-group">
                   <select class="form-select select2" name="branch_id" id="branch_id" required>
-                         <option value=''>Select Branch</option>
-                         @foreach($branches as $branch)
-                              <option value="{{ $branch->id }}" >{{ $branch->branch_name}}</option>
-                         @endforeach
+                    <option value=''>Select Branch</option>
+                    @foreach($branches as $branch)
+                    <option value="{{ $branch->id }}">{{ $branch->branch_name}}</option>
+                    @endforeach
                   </select>
                   @if ($errors->has('product_no'))
                   <div class="error">
@@ -76,10 +77,10 @@
                 <label class="col-form-label">Division<span class="text-danger"> *</span></label>
                 <div class="form-group has-default bmd-form-group">
                   <select class="form-select select2" name="product_division" id="product_division" onchange="getProductlist()" required>
-                         <option value=''>Select Division</option>
-                         @foreach($divisions as $division)
-                              <option value="{{ $division->id }}" >{{ $division->category_name}}</option>
-                         @endforeach
+                    <option value=''>Select Division</option>
+                    @foreach($divisions as $division)
+                    <option value="{{ $division->id }}">{{ $division->category_name}}</option>
+                    @endforeach
                   </select>
                   @if ($errors->has('product_division'))
                   <div class="error">
@@ -95,11 +96,11 @@
               <div class="input_section">
                 <label class="col-form-label">Show Only</label>
                 <div class="form-group has-default bmd-form-group">
-                  <select class="form-select select2" name="view_only[]" id="view_only" multiple  data-placeholder="Select an option">
-                      <option value=''></option> <!-- Empty option needed for placeholder -->
-                      @foreach($main_divisions as $division)
-                          <option value="{{ $division->id }}">{{ $division->division_name }}</option>
-                      @endforeach
+                  <select class="form-select select2" name="view_only[]" id="view_only" multiple data-placeholder="Select an option">
+                    <option value=''></option> <!-- Empty option needed for placeholder -->
+                    @foreach($main_divisions as $division)
+                    <option value="{{ $division->id }}">{{ $division->division_name }}</option>
+                    @endforeach
                   </select>
                   @if ($errors->has('view_only'))
                   <div class="error">
@@ -114,399 +115,150 @@
 
           <div class="row">
             <div class="container-fluid mt-5 d-flex justify-content-center w-100">
-                <div class="table-responsive" style="max-height: 500px; overflow-y: auto; width: 100%;">
-                    <table class="table kvcodes-dynamic-rows-example" id="tab_logic" style="min-width: 1800px;">
-                        <thead>
-                            <tr class="text-white">
-                                <th class="text-center" style="width: 50px !important;">#</th>
-                                <th class="text-center"><div style="width: 20px !important;">-</div></th>
-                                <th class="text-center" ><div style="width: 350px !important;">Products<div></th>
-                                <th class="text-center" ><div style="width: 200px !important;">Product Group<div></th>
-                                <th class="text-center" ><div style="width: 200px !important;">Product Code</div></th>
-                                <th class="text-center"><div style="width: 200px !important;">Product Description<div></th>
-                                <th class="text-center"><div style="width: 200px !important;">Opening stock as on 1st (Qty.)</div></th>
-                                <th class="text-center" ><div style="width: 200px !important;">S&OP Plan for Next running month (M+1) (Qty.)</div></th>
-                                <th class="text-center"><div style="width: 200px !important;">Budget for the month (Qty.)</div></th>
-                                <th class="text-center" ><div style="width: 200px !important;">LM Sale (Qty.)</div></th>
-                                <th class="text-center" ><div style="width: 200px !important;">L3M Avg Sale (Qty.)</div></th>
-                                <th class="text-center"><div style="width: 200px !important;">LY same month sale (Qty.)</div></th>
-                                <th class="text-center"><div style="width: 200px !important;">SKU Unit Price</div></th>
-                                <th class="text-center"><div style="width: 200px !important;">S&OP Val_L (Unit Price *Qty.)</div></th>
-                                <th class="text-center" ><div style="width: 200px !important;">TOP 20 SKU for the Branch (*)</div></th>
-                            </tr>
-                        </thead>
-                        <tbody id="sopTableBody">
-                              <!--  <tr id='addr0' value="1">
-                                <td>1</td>
-                                 <td class="td-actions text-center">
-                                    <button type="button" class="btn btn-danger btn-xs remove-row"><i class="fa fa-minus"></i></button>
-                                </td>
-                                <td>
-                                    <div class="input_section">
-                                        <div class="form-group has-default bmd-form-group">
-                                            <select class="form-select select2 product" name="product_id[]" required>
-                                                <option value=''>Select Product</option>
-                                            </select>
-                                            @if ($errors->has('product_id'))
-                                            <div class="error">
-                                                <p class="text-danger">{{ $errors->first('product_id') }}</p>
-                                            </div>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="input_section">
-                                      <div class="form-group has-default bmd-form-group">
-                                      <input type="text" class="form-control product_group_name" name="product_group_name[]"  readonly >
-                                        @if ($errors->has('product_group_name'))
-                                        <div class="error">
-                                          <p class="text-danger">{{ $errors->first('product_group_name') }}</p>
-                                        </div>
-                                        @endif
-                                      </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="input_section">
-                                      <div class="form-group has-default bmd-form-group">
-                                      <input type="text" class="form-control product_code" name="product_code[]"  readonly>
-                                        @if ($errors->has('product_code'))
-                                        <div class="error">
-                                          <p class="text-danger">{{ $errors->first('product_code') }}</p>
-                                        </div>
-                                        @endif
-                                      </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="input_section">
-                                      <div class="form-group has-default bmd-form-group">
-                                      <input type="text" class="form-control product_description" name="product_description[]"  readonly>
-                                        @if ($errors->has('product_description'))
-                                        <div class="error">
-                                          <p class="text-danger">{{ $errors->first('product_description') }}</p>
-                                        </div>
-                                        @endif
-                                      </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="input_section">
-                                      <div class="form-group has-default bmd-form-group">
-                                      <input type="text" class="form-control opening_stock" name="opening_stock[]"  readonly>
-                                        @if ($errors->has('opening_stock'))
-                                        <div class="error">
-                                          <p class="text-danger">{{ $errors->first('opening_stock') }}</p>
-                                        </div>
-                                        @endif
-                                      </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="input_section">
-                                      <div class="form-group has-default bmd-form-group">
-                                      <input type="text" class="form-control plan_next_month" name="plan_next_month[]" required>
-                                        @if ($errors->has('plan_next_month'))
-                                        <div class="error">
-                                          <p class="text-danger">{{ $errors->first('plan_next_month') }}</p>
-                                        </div>
-                                        @endif
-                                      </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="input_section">
-                                      <div class="form-group has-default bmd-form-group">
-                                      <input type="text" class="form-control budget_for_month" name="budget_for_month[]"  readonly>
-                                        @if ($errors->has('budget_for_month'))
-                                        <div class="error">
-                                          <p class="text-danger">{{ $errors->first('budget_for_month') }}</p>
-                                        </div>
-                                        @endif
-                                      </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="input_section">
-                                      <div class="form-group has-default bmd-form-group">
-                                      <input type="text" class="form-control last_month_sale" name="last_month_sale[]"  readonly>
-                                        @if ($errors->has('last_month_sale'))
-                                        <div class="error">
-                                          <p class="text-danger">{{ $errors->first('last_month_sale') }}</p>
-                                        </div>
-                                        @endif
-                                      </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="input_section">
-                                      <div class="form-group has-default bmd-form-group">
-                                      <input type="text" class="form-control last_three_month_avg" name="last_three_month_avg[]"  readonly>
-                                        @if ($errors->has('last_three_month_avg'))
-                                        <div class="error">
-                                          <p class="text-danger">{{ $errors->first('last_three_month_avg') }}</p>
-                                        </div>
-                                        @endif
-                                      </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="input_section">
-                                      <div class="form-group has-default bmd-form-group">
-                                      <input type="text" class="form-control last_year_month_sale" name="last_year_month_sale[]"  readonly>
-                                        @if ($errors->has('last_year_month_sale'))
-                                        <div class="error">
-                                          <p class="text-danger">{{ $errors->first('last_year_month_sale') }}</p>
-                                        </div>
-                                        @endif
-                                      </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="input_section">
-                                      <div class="form-group has-default bmd-form-group">
-                                      <input type="text" class="form-control sku_unit_price" name="sku_unit_price[]"  readonly>
-                                        @if ($errors->has('sku_unit_price'))
-                                        <div class="error">
-                                          <p class="text-danger">{{ $errors->first('sku_unit_price') }}</p>
-                                        </div>
-                                        @endif
-                                      </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="input_section">
-                                      <div class="form-group has-default bmd-form-group">
-                                      <input type="text" class="form-control s_op_val" name="s_op_val[]"  readonly>
-                                        @if ($errors->has('s_op_val'))
-                                        <div class="error">
-                                          <p class="text-danger">{{ $errors->first('s_op_val') }}</p>
-                                        </div>
-                                        @endif
-                                      </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="input_section">
-                                      <div class="form-group has-default bmd-form-group">
-                                      <input type="text" class="form-control top_sku" name="top_sku[]"  readonly>
-                                        @if ($errors->has('top_sku'))
-                                        <div class="error">
-                                          <p class="text-danger">{{ $errors->first('top_sku') }}</p>
-                                        </div>
-                                        @endif
-                                      </div>
-                                    </div>
-                                </td>
-                               
-                            </tr> -->
-                        </tbody>
-                    </table>
+              <div class="table-responsive" style="max-height: 500px; overflow-y: auto; width: 100%;">
+                <table class="table kvcodes-dynamic-rows-example" id="tab_logic" style="min-width: 1800px;">
+                  <thead>
+                    <tr class="text-white">
+                      <th class="text-center" style="width: 50px !important;">#</th>
+                      <th class="text-center">
+                        <div style="width: 20px !important;">-</div>
+                      </th>
+                      <th class="text-center">
+                        <div style="width: 350px !important;">Products<div>
+                      </th>
+                      <th class="text-center">
+                        <div style="width: 200px !important;">Product Group<div>
+                      </th>
+                      <th class="text-center">
+                        <div style="width: 200px !important;">Product Code</div>
+                      </th>
+                      <th class="text-center">
+                        <div style="width: 200px !important;">Product Description<div>
+                      </th>
+                      <th class="text-center">
+                        <div style="width: 200px !important;">Opening stock as on 1st (Qty.)</div>
+                      </th>
+                      <th class="text-center">
+                        <div style="width: 200px !important;">S&OP Plan for Next running month (M+1) (Qty.)</div>
+                      </th>
+                      <th class="text-center">
+                        <div style="width: 200px !important;">Budget for the month (Qty.)</div>
+                      </th>
+                      <th class="text-center">
+                        <div style="width: 200px !important;">LM Sale (Qty.)</div>
+                      </th>
+                      <th class="text-center">
+                        <div style="width: 200px !important;">L3M Avg Sale (Qty.)</div>
+                      </th>
+                      <th class="text-center">
+                        <div style="width: 200px !important;">LY same month sale (Qty.)</div>
+                      </th>
+                      <th class="text-center">
+                        <div style="width: 200px !important;">SKU Unit Price</div>
+                      </th>
+                      <th class="text-center">
+                        <div style="width: 200px !important;">S&OP Val_L (Unit Price *Qty.)</div>
+                      </th>
+                      <th class="text-center">
+                        <div style="width: 200px !important;">TOP 20 SKU for the Branch (*)</div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody id="sopTableBody">
 
-                     <table class="table kvcodes-dynamic-rows-example" id="tab_logic1" style="min-width: 1800px; display: none;">
-                        <thead>
-                            <tr class="text-white" id="tableHeadings">
-                                <th class="text-center" style="width: 50px !important;">#</th>
-                                <th class="text-center"><div style="width: 20px !important;">-</div></th>
-                                <th class="text-center" ><div style="width: 350px !important;">Product Group<div></th>
-                                <th class="text-center" ><div style="width: 200px !important;">Product<div></th>
-                                
-                                <th class="text-center"><div style="width: 200px !important;">Opening stock as on 1st (Qty.)</div></th>
-                                <th class="text-center" ><div style="width: 200px !important;">S&OP Plan for Next running month (M+1) (Qty.)</div></th>
-                                <th class="text-center"><div style="width: 200px !important;">Budget for the month (Qty.)</div></th>
-                                <th class="text-center" ><div style="width: 200px !important;">LM Sale (Qty.)</div></th>
-                                <th class="text-center" ><div style="width: 200px !important;">L3M Avg Sale (Qty.)</div></th>
-                                <th class="text-center"><div style="width: 200px !important;">LY same month sale (Qty.)</div></th>
-                                <th class="text-center"><div style="width: 200px !important;">SKU Unit Price</div></th>
-                                <th class="text-center"><div style="width: 200px !important;">S&OP Val_L (Unit Price *Qty.)</div></th>
-                                <th class="text-center" ><div style="width: 200px !important;">TOP 20 SKU for the Branch (*)</div></th>
-                            </tr>
-                        </thead>
-                        <tbody id="sopTableBody1">
-                               <!-- <tr id='addr0' value="1">
-                                <td>1</td>
-                                 <td class="td-actions text-center">
-                                    <button type="button" class="btn btn-danger btn-xs remove-row"><i class="fa fa-minus"></i></button>
-                                </td>
-
-                                  <td>
-                                    <div class="input_section">
-                                        <div class="form-group has-default bmd-form-group">
-                                            <select class="form-select select2 product_group_name" name="product_group_name[]" required>
-                                                <option value=''>Select Product Group</option>
-                                            </select>
-                                            @if ($errors->has('product_group_name'))
-                                            <div class="error">
-                                                <p class="text-danger">{{ $errors->first('product_group_name') }}</p>
-                                            </div>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="input_section">
-                                        <div class="form-group has-default bmd-form-group">
-                                            <select class="form-select select2 product_1" name="product_id_1[]" required>
-                                                <option value=''>Select Product</option>
-                                            </select>
-                                            @if ($errors->has('product_id_1'))
-                                            <div class="error">
-                                                <p class="text-danger">{{ $errors->first('product_id_1') }}</p>
-                                            </div>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </td>
-                                @for ($i = 1; $i <= 12; $i++)
-                                    <td>
-                                        <div class="input_section">
-                                            <div class="form-group has-default bmd-form-group">
-                                                <input type="text" class="form-control year_month_{{ $i }}" name="year_month_{{ $i }}" readonly>
-                                            </div>
-                                        </div>
-                                    </td>
-                                @endfor
-                                <td>
-                                    <div class="input_section">
-                                        <div class="form-group has-default bmd-form-group">
-                                            <input type="text" class="form-control min" name="min" readonly>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="input_section">
-                                        <div class="form-group has-default bmd-form-group">
-                                            <input type="text" class="form-control max" name="max" readonly>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="input_section">
-                                        <div class="form-group has-default bmd-form-group">
-                                            <input type="text" class="form-control avg" name="avg" readonly>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="input_section">
-                                      <div class="form-group has-default bmd-form-group">
-                                      <input type="text" class="form-control opening_stock" name="opening_stock[]"  readonly>
-                                        @if ($errors->has('opening_stock'))
-                                        <div class="error">
-                                          <p class="text-danger">{{ $errors->first('opening_stock') }}</p>
-                                        </div>
-                                        @endif
-                                      </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="input_section">
-                                      <div class="form-group has-default bmd-form-group">
-                                      <input type="text" class="form-control opening_stock_value" name="opening_stock_value[]"  readonly>
-                                        @if ($errors->has('opening_stock_value'))
-                                        <div class="error">
-                                          <p class="text-danger">{{ $errors->first('opening_stock_value') }}</p>
-                                        </div>
-                                        @endif
-                                      </div>
-                                    </div>
-                                </td>
-                                 <td>
-                                    <div class="input_section">
-                                      <div class="form-group has-default bmd-form-group">
-                                      <input type="text" class="form-control open_order_qty" name="open_order_qty[]"  readonly>
-                                        @if ($errors->has('open_order_qty'))
-                                        <div class="error">
-                                          <p class="text-danger">{{ $errors->first('open_order_qty') }}</p>
-                                        </div>
-                                        @endif
-                                      </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="input_section">
-                                      <div class="form-group has-default bmd-form-group">
-                                      <input type="text" class="form-control open_order_value" name="open_order_value[]"  readonly>
-                                        @if ($errors->has('open_order_value'))
-                                        <div class="error">
-                                          <p class="text-danger">{{ $errors->first('open_order_value') }}</p>
-                                        </div>
-                                        @endif
-                                      </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="input_section">
-                                      <div class="form-group has-default bmd-form-group">
-                                      <input type="hidden" class="form-control price" name="price[]" required>
-                                      <input type="text" class="form-control plan_next_month_1" name="plan_next_month_1[]" required>
-                                        @if ($errors->has('plan_next_month_1'))
-                                        <div class="error">
-                                          <p class="text-danger">{{ $errors->first('plan_next_month') }}</p>
-                                        </div>
-                                        @endif
-                                      </div>
-                                    </div>
-                                </td>
-                               <td>
-                                    <div class="input_section">
-                                      <div class="form-group has-default bmd-form-group">
-                                      <input type="text" class="form-control plan_next_month_value" name="plan_next_month_value[]" required>
-                                        @if ($errors->has('plan_next_month_value'))
-                                        <div class="error">
-                                          <p class="text-danger">{{ $errors->first('plan_next_month_value') }}</p>
-                                        </div>
-                                        @endif
-                                      </div>
-                                    </div>
-                                </td>
-                            </tr> -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <div class="row clearfix">
-            <div class="col-md-12">
-               <table>
-                  <tbody>
-                     <tr>
-                        <td class="td-actions text-center">
-                           <a href="#" title="" class="btn btn-success btn-xs add-rows" onclick="getProductlist()"> <i class="fa fa-plus"></i> </a>
-                        </td>
-                     </tr>
                   </tbody>
-               </table>
+                </table>
+
+                <table class="table kvcodes-dynamic-rows-example" id="tab_logic1" style="min-width: 1800px; display: none;">
+                  <thead>
+                    <tr class="text-white" id="tableHeadings">
+                      <th class="text-center" style="width: 50px !important;">#</th>
+                      <th class="text-center">
+                        <div style="width: 20px !important;">-</div>
+                      </th>
+                      <th class="text-center">
+                        <div style="width: 350px !important;">Product Group<div>
+                      </th>
+                      <th class="text-center">
+                        <div style="width: 200px !important;">Product<div>
+                      </th>
+
+                      <th class="text-center">
+                        <div style="width: 200px !important;">Opening stock as on 1st (Qty.)</div>
+                      </th>
+                      <th class="text-center">
+                        <div style="width: 200px !important;">S&OP Plan for Next running month (M+1) (Qty.)</div>
+                      </th>
+                      <th class="text-center">
+                        <div style="width: 200px !important;">Budget for the month (Qty.)</div>
+                      </th>
+                      <th class="text-center">
+                        <div style="width: 200px !important;">LM Sale (Qty.)</div>
+                      </th>
+                      <th class="text-center">
+                        <div style="width: 200px !important;">L3M Avg Sale (Qty.)</div>
+                      </th>
+                      <th class="text-center">
+                        <div style="width: 200px !important;">LY same month sale (Qty.)</div>
+                      </th>
+                      <th class="text-center">
+                        <div style="width: 200px !important;">SKU Unit Price</div>
+                      </th>
+                      <th class="text-center">
+                        <div style="width: 200px !important;">S&OP Val_L (Unit Price *Qty.)</div>
+                      </th>
+                      <th class="text-center">
+                        <div style="width: 200px !important;">TOP 20 SKU for the Branch (*)</div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody id="sopTableBody1">
+
+                  </tbody>
+                </table>
+              </div>
             </div>
-         </div>
-         <div class="pull-right col-md-12">
+          </div>
+          <div class="row clearfix">
+            <div class="col-md-12">
+              <table>
+                <tbody>
+                  <tr>
+                    <td class="td-actions text-center">
+                      <a href="#" title="" class="btn btn-success btn-xs add-rows" onclick="getProductlist()"> <i class="fa fa-plus"></i> </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="pull-right col-md-12">
             {{ Form::submit('Submit', array('class' => 'btn btn-theme pull-right')) }}
           </div>
-        {{ Form::close() }}
+          {{ Form::close() }}
+        </div>
       </div>
     </div>
   </div>
-  </div>
-<script>
-   $(document).ready(function() {
+  <script>
+    $(document).ready(function() {
       var $table = $('table.kvcodes-dynamic-rows-example'),
-          counter = parseInt($('#tab_logic tr:last').attr('value')) || 0;
+        counter = parseInt($('#tab_logic tr:last').attr('value')) || 0;
 
       $('a.add-rows').click(function(event) {
-         var branch_id = $("#branch_id").val(); 
-         var category = $('#product_division').val();
-         if(branch_id == null || branch_id == ''){
-           alert('Select Branch First');
-           return;
-         }
-         if(category == null || category == ''){
-           alert('Select Division First');
-           return;
-         }
-         getProductlist();
-         var category = $('#product_division').val();
-         if(category ==1){
+        var branch_id = $("#branch_id").val();
+        var category = $('#product_division').val();
+        if (branch_id == null || branch_id == '') {
+          alert('Select Branch First');
+          return;
+        }
+        if (category == null || category == '') {
+          alert('Select Division First');
+          return;
+        }
+        getProductlist();
+        var category = $('#product_division').val();
+        if (category == 1) {
           event.preventDefault();
           counter++;
 
@@ -548,7 +300,7 @@
                 <td>
                     <div class="input_section">
                         <div class="form-group has-default bmd-form-group">
-                            <input type="text" class="form-control year_month_{{ $i }}" name="year_month_{{ $i }}" readonly>
+                            <input type="text" class="form-control year_month_{{ $i }}" name="year_month_{{ $i }}[]" readonly>
                         </div>
                     </div>
                 </td>
@@ -556,21 +308,21 @@
                 <td>
                     <div class="input_section">
                         <div class="form-group has-default bmd-form-group">
-                            <input type="text" class="form-control min" name="min" readonly>
+                            <input type="text" class="form-control min" name="min[]" readonly>
                         </div>
                     </div>
                 </td>
                 <td>
                     <div class="input_section">
                         <div class="form-group has-default bmd-form-group">
-                            <input type="text" class="form-control max" name="max" readonly>
+                            <input type="text" class="form-control max" name="max[]" readonly>
                         </div>
                     </div>
                 </td>
                 <td>
                     <div class="input_section">
                         <div class="form-group has-default bmd-form-group">
-                            <input type="text" class="form-control avg" name="avg" readonly>
+                            <input type="text" class="form-control avg" name="avg[]" readonly>
                         </div>
                     </div>
                 </td>
@@ -608,13 +360,13 @@
               
             </tr>`;
 
-            $('#sopTableBody1').append(newRow);
+          $('#sopTableBody1').append(newRow);
 
-            // Initialize Select2 for new row
-            $('.select2').select2({
-                  minimumResultsForSearch: 10
-            });
-         }else{
+          // Initialize Select2 for new row
+          $('.select2').select2({
+            minimumResultsForSearch: 10
+          });
+        } else {
           event.preventDefault();
           counter++;
 
@@ -685,299 +437,313 @@
                   </td>
               </tr>`;
 
-            $('#sopTableBody').append(newRow);
-             
-            // Initialize Select2 for new row
-            $('.select2').select2({
-                  minimumResultsForSearch: 10
-            });
+          $('#sopTableBody').append(newRow);
+
+          // Initialize Select2 for new row
+          $('.select2').select2({
+            minimumResultsForSearch: 10
+          });
         }
 
         var tableContainer = $('.table-responsive');
-          tableContainer.animate({
-              scrollTop: tableContainer[0].scrollHeight
-          }, 500);
+        tableContainer.animate({
+          scrollTop: tableContainer[0].scrollHeight
+        }, 500);
 
         updateRowNumbers();
       });
 
       $(document).on('click', '.remove-row', function() {
-          $(this).closest('tr').remove();
-          counter--;
+        $(this).closest('tr').remove();
+        counter--;
 
-          updateRowNumbers();
+        updateRowNumbers();
       });
 
       function updateRowNumbers() {
-          $('#sopTableBody tr').each(function(index) {
-              $(this).attr('value', index + 1);
-              $(this).find('.row-count').text(index + 1);
-          });
-          counter = $('#sopTableBody tr').length;
+        $('#sopTableBody tr').each(function(index) {
+          $(this).attr('value', index + 1);
+          $(this).find('.row-count').text(index + 1);
+        });
+        counter = $('#sopTableBody tr').length;
       }
-  });
-  $(document).ready(function (){
-    $('#product_division').change(function () {
+    });
+    $(document).ready(function() {
+      $('#product_division').change(function() {
         let selectedValue = $(this).val();
 
         if (selectedValue == 1) {
-            resetTable('#tab_logic');  // Reset tab_logic before hiding
-            $('#tab_logic').hide();
-            $('#tab_logic1').show();
+          resetTable('#tab_logic'); // Reset tab_logic before hiding
+          $('#tab_logic').hide();
+          $('#tab_logic1').show();
         } else {
-            resetTable('#tab_logic1'); // Reset tab_logic1 before hiding
-            $('#tab_logic1').hide();
-            $('#tab_logic').show();
+          resetTable('#tab_logic1'); // Reset tab_logic1 before hiding
+          $('#tab_logic1').hide();
+          $('#tab_logic').show();
         }
-    });
+      });
 
-    function resetTable(tableId) {
+      function resetTable(tableId) {
         let table = $(tableId);
         table.find('tbody').empty(); // Remove all rows inside tbody
-    }
-    getProductlist();
-    $("#start_month").datepicker({
-      dateFormat: "MM yy", // Show only month and year
-      changeMonth: true,
-      changeYear: true,
-      showButtonPanel: true,
-      closeText: "Select", // Custom text for closing
-      minDate: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1), // Start from next month
-      yearRange: new Date().getFullYear() + ":" + (new Date().getFullYear() + 1), // Limit year range to current year +1
-      maxDate: new Date(new Date().getFullYear() + 1, 11, 1), // Allow till December of next year
-      onClose: function(dateText, inst) {
-            var month = parseInt($("#ui-datepicker-div .ui-datepicker-month option:selected").val());
-            var year = parseInt($("#ui-datepicker-div .ui-datepicker-year option:selected").val());
+      }
+      getProductlist();
+      $("#start_month").datepicker({
+        dateFormat: "MM yy", // Show only month and year
+        changeMonth: true,
+        changeYear: true,
+        showButtonPanel: true,
+        closeText: "Select", // Custom text for closing
+        minDate: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1), // Start from next month
+        yearRange: new Date().getFullYear() + ":" + (new Date().getFullYear() + 1), // Limit year range to current year +1
+        maxDate: new Date(new Date().getFullYear() + 1, 11, 1), // Allow till December of next year
+        onClose: function(dateText, inst) {
+          var month = parseInt($("#ui-datepicker-div .ui-datepicker-month option:selected").val());
+          var year = parseInt($("#ui-datepicker-div .ui-datepicker-year option:selected").val());
 
-            var selectedDate = new Date(year, month, 1);
-            $(this).val($.datepicker.formatDate('MM yy', selectedDate));
+          var selectedDate = new Date(year, month, 1);
+          $(this).val($.datepicker.formatDate('MM yy', selectedDate));
         }
-    }).focus(function () {
+      }).focus(function() {
         $(".ui-datepicker-calendar").hide(); // Hide date picker
-    });
+      });
 
 
-   $(document).on("change", ".product_group_name , #branch_id", function() {
-      var $row = $(this).closest("tr"); // Get the row of the changed select box
-      var product_subcategory = $(this).val();
-      var branch_id = $("#branch_id").val(); 
-       var category = $('#product_division').val();
-       if(category != 1){
+      $(document).on("change", ".product_group_name , #branch_id", function() {
+        var $row = $(this).closest("tr"); // Get the row of the changed select box
+        var product_subcategory = $(this).val();
+        var branch_id = $("#branch_id").val();
+        var category = $('#product_division').val();
+        if (category != 1) {
           return;
-       }
+        }
         if (product_subcategory != null && product_subcategory != '' && branch_id != null && branch_id != '') {
-            $('#tab_logic1 tr:last').find(".product_1").empty();
-            $.ajax({
-                url: "{{ url('getProductInfoListBySubcategory') }}",
-                dataType: "json",
-                type: "POST",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    product_subcategory: product_subcategory,
-                    branch_id : branch_id
-                },
-                success: function(res) {
-                   var table = document.getElementById(tab_logic1),
-                      rIndex;
-                   if (res) {
+          $('#tab_logic1 tr:last').find(".product_1").empty();
+          $.ajax({
+            url: "{{ url('getProductInfoListBySubcategory') }}",
+            dataType: "json",
+            type: "POST",
+            data: {
+              _token: "{{ csrf_token() }}",
+              product_subcategory: product_subcategory,
+              branch_id: branch_id
+            },
+            success: function(res) {
+              var table = document.getElementById(tab_logic1),
+                rIndex;
+              if (res) {
 
-                      $('#tab_logic1 tr:last').find(".product_1").html('<option value="">Select Product</option>');
-                      $.each(res, function(key, value) {
+                $('#tab_logic1 tr:last').find(".product_1").html('<option value="">Select Product</option>');
+                $.each(res, function(key, value) {
 
-                         if (value.product_code) {
-                            var productcode = value.product_code
-                         } else {
-                            var productcode = '';
-                         }
+                  if (value.product_code) {
+                    var productcode = value.product_code
+                  } else {
+                    var productcode = '';
+                  }
 
-                         $('#tab_logic1 tr:last').find('.product_1').append('<option value="' + value.id + '">' + value.product_name + '</option>');
+                  $('#tab_logic1 tr:last').find('.product_1').append('<option value="' + value.id + '">' + value.product_name + '</option>');
 
-                      });
-                   } else {
-                      $('#tab_logic1 tr:last').find(".product_1").empty();
-                   }
-                }
-            });
+                });
+              } else {
+                $('#tab_logic1 tr:last').find(".product_1").empty();
+              }
+            }
+          });
         } else {
-            // Clear only the fields in this row
-            $row.find(".product_description, .product_division, .product_code, .opening_stock, .product_group_name, .budget_for_month, .top_sku, .sku_unit_price").val('').trigger('change');
-            $row.find(".product_group_name, .product_description, .sku_unit_price, .opening_stock, .product_division, .product_code, .budget_for_month, .top_sku").prop('readonly', true);
+          // Clear only the fields in this row
+          $row.find(".product_description, .product_division, .product_code, .opening_stock, .product_group_name, .budget_for_month, .top_sku, .sku_unit_price").val('').trigger('change');
+          $row.find(".product_group_name, .product_description, .sku_unit_price, .opening_stock, .product_division, .product_code, .budget_for_month, .top_sku").prop('readonly', true);
         }
-   });
-   
-    $(document).on("change", ".product , .product_1", function() {
-      var category = $('#product_division').val();
-        var branch_id = $("#branch_id").val(); 
-        if(branch_id == '' || branch_id == null ){
-            alert("Please select a Branch .");
-            $('.product').val('');
-            return ;
+      });
+
+      $(document).on("change", ".product , .product_1", function() {
+        var category = $('#product_division').val();
+        var branch_id = $("#branch_id").val();
+        if (branch_id == '' || branch_id == null) {
+          alert("Please select a Branch .");
+          $('.product').val('');
+          return;
         }
-        if(category != 1){
+        if (category != 1) {
           var $row = $(this).closest("tr"); // Get the row of the changed select box
           var product_id = $(this).val();
 
           if (product_id != null && product_id != '') {
-              $.ajax({
-                  url: "{{ url('getProductInfo') }}",
-                  dataType: "json",
-                  type: "POST",
-                  data: {
-                      _token: "{{ csrf_token() }}",
-                      product_id: product_id,
-                      branch_id : branch_id
-                  },
-                  success: function(res) {
-                      $row.find(".product_description").val(res.product_description);
-                      $row.find(".product_division").val(res.categories.category_name);
-                      $row.find(".product_code").val(res.product_code);
-                      $row.find(".product_group_name").val(res.subcategories.subcategory_name);
-                      $row.find(".budget_for_month").val(res.budget_for_month);
-                      $row.find(".top_sku").val(res.top_sku);
-                      $row.find(".sku_unit_price").val(res.price).trigger('change');
-                      $row.find(".opening_stock").val(res.opening_stock);
-                      
-                      // Set read-only fields
-                      $row.find(".product_group_name, .product_description, .sku_unit_price, .opening_stock, .product_division, .product_code, .budget_for_month, .top_sku").prop('readonly', true);
+            $.ajax({
+              url: "{{ url('getProductInfo') }}",
+              dataType: "json",
+              type: "POST",
+              data: {
+                _token: "{{ csrf_token() }}",
+                product_id: product_id,
+                branch_id: branch_id
+              },
+              success: function(res) {
+                $row.find(".product_description").val(res.product_description);
+                $row.find(".product_division").val(res.categories.category_name);
+                $row.find(".product_code").val(res.product_code);
+                $row.find(".product_group_name").val(res.subcategories.subcategory_name);
+                $row.find(".budget_for_month").val(res.budget_for_month);
+                $row.find(".top_sku").val(res.top_sku);
+                $row.find(".sku_unit_price").val(res.price).trigger('change');
+                $row.find(".opening_stock").val(res.opening_stock);
 
-                      // Fetch and update sales data only for this row
-                      getSaledata($row);
-                  }
-              });
+                // Set read-only fields
+                $row.find(".product_group_name, .product_description, .sku_unit_price, .opening_stock, .product_division, .product_code, .budget_for_month, .top_sku").prop('readonly', true);
+
+                // Fetch and update sales data only for this row
+                getSaledata($row);
+              }
+            });
           } else {
-              // Clear only the fields in this row
-              $row.find(".product_description, .product_division, .product_code, .opening_stock, .product_group_name, .budget_for_month, .top_sku, .sku_unit_price").val('').trigger('change');
-              $row.find(".product_group_name, .product_description, .sku_unit_price, .opening_stock, .product_division, .product_code, .budget_for_month, .top_sku").prop('readonly', true);
+            // Clear only the fields in this row
+            $row.find(".product_description, .product_division, .product_code, .opening_stock, .product_group_name, .budget_for_month, .top_sku, .sku_unit_price").val('').trigger('change');
+            $row.find(".product_group_name, .product_description, .sku_unit_price, .opening_stock, .product_division, .product_code, .budget_for_month, .top_sku").prop('readonly', true);
           }
-        }else{
+        } else {
           var $row = $(this).closest("tr"); // Get the row of the changed select box
           var product_id = $(this).val();
           var date = $("#start_month").val() ?? '';
           if (product_id != null && product_id != '') {
-              $.ajax({
-                  url: "{{ url('getFullDetailsOfProduct') }}",
-                  dataType: "json",
-                  type: "POST",
-                  data: {
-                      _token: "{{ csrf_token() }}",
-                      product_id: product_id,
-                      branch_id : branch_id,
-                      date      : date,
-                  },
-                  success: function(res) {
-                    if (Object.keys(res.sales_by_month).length > 0) {
-                        var sales = res.sales_by_month; // Object of month-year keys
-                        var quantities = []; // Array to store total_qty values
-                        var i = 1; // Counter for field assignment
-                        var total = 0;
+            $.ajax({
+              url: "{{ url('getFullDetailsOfProduct') }}",
+              dataType: "json",
+              type: "POST",
+              data: {
+                _token: "{{ csrf_token() }}",
+                product_id: product_id,
+                branch_id: branch_id,
+                date: date,
+              },
+              success: function(res) {
+                if (Object.keys(res.sales_by_month).length > 0) {
+                  var sales = res.sales_by_month; // Object of month-year keys
+                  var quantities = []; // Array to store total_qty values
+                  var i = 1; // Counter for field assignment
+                  var total = 0;
 
-                        $.each(sales, function(month, total_qty) {
-                            // Set the corresponding input field value
-                            $row.find(".year_month_" + i).val(total_qty);
+                  $.each(sales, function(month, total_qty) {
+                    // Set the corresponding input field value
+                    $row.find(".year_month_" + i).val(total_qty);
 
-                            // Store the total_qty for min, max, avg calculations
-                            quantities.push(total_qty);
-                             total += Number(total_qty);                                 i++;
-                        });
+                    // Store the total_qty for min, max, avg calculations
+                    quantities.push(total_qty);
+                    total += Number(total_qty);
+                    i++;
+                  });
 
-                        if (quantities.length > 0) {
-                             let nonZeroQuantities = quantities.filter(qty => qty > 0);
+                  if (quantities.length > 0) {
+                    let nonZeroQuantities = quantities.filter(qty => qty > 0);
 
-                            let minQty = nonZeroQuantities.length > 0 ? Math.min(...nonZeroQuantities) : 0;
-                            let maxQty = Math.max(...quantities);
-                            let avgQty = (total / 12).toFixed(2);
+                    let minQty = nonZeroQuantities.length > 0 ? Math.min(...nonZeroQuantities) : 0;
+                    let maxQty = Math.max(...quantities);
+                    let avgQty = (total / 12).toFixed(0);
 
-                            // Set min, max, avg values in respective fields
-                            $row.find(".min").val(minQty);
-                            $row.find(".max").val(maxQty);
-                            $row.find(".avg").val(avgQty);
-                        }                        
-                     } else {
-                        console.log("No sales data available.");
-                    }
-                    let openingStock = parseInt(res.opening_stock?.opening_stocks ?? 0);
-                    let price = parseInt(res.product?.productdetails[0].price ?? 0);
-                    let open_oder_qty = parseInt(res.branchOprningQuantity?.open_order_qty ?? 0);
-                    let new_price = 0;
-                    console.log("price",price);
-                    if(price){
-                      new_price = (price/100)*41;
-                      price     = price - new_price;
-                    }
-                    let openingStockValue = openingStock * price;
-                    let openderValue = open_oder_qty * price;
-                    $row.find(".opening_stock").val(openingStock);                    
-                    $row.find('.opening_stock_value').val(openingStockValue);
-                    $row.find('.open_order_qty').val(open_oder_qty);
-                    $row.find('.open_order_value').val(openderValue);
-                    $row.find('.price').val(price);
+                    // Set min, max, avg values in respective fields
+                    $row.find(".min").val(minQty);
+                    $row.find(".max").val(maxQty);
+                    $row.find(".avg").val(avgQty);
                   }
-              });
+                } else {
+                  console.log("No sales data available.");
+                }
+                let openingStock = parseInt(res.opening_stock?.opening_stocks ?? 0);
+                let price = parseInt(res.product?.productdetails[0].price ?? 0);
+                let open_oder_qty = parseInt(res.branchOprningQuantity?.open_order_qty ?? 0);
+                let new_price = 0;
+                console.log("price", price);
+                if (price) {
+                  new_price = (price / 100) * 41;
+                  price = price - new_price;
+                }
+                let openingStockValue = openingStock * price;
+                let openderValue = open_oder_qty * price;
+                $row.find(".opening_stock").val(openingStock);
+                $row.find('.opening_stock_value').val(openingStockValue);
+                $row.find('.open_order_qty').val(open_oder_qty);
+                $row.find('.open_order_value').val(openderValue);
+                $row.find('.price').val(price);
+              }
+            });
           }
         }
-    });
+      });
 
-    $(document).on('change', '.sku_unit_price, .plan_next_month', function () {
+      $(document).on('change', '.sku_unit_price, .plan_next_month', function() {
         var $row = $(this).closest('tr'); // Adjust selector if needed
 
         var sku_unit_price = $row.find('.sku_unit_price').val();
         var plan_next_month = $row.find('.plan_next_month').val();
 
         if (sku_unit_price !== '' && plan_next_month !== '') {
-            var total = parseFloat(sku_unit_price) * parseFloat(plan_next_month);
-            $row.find('.s_op_val').val(total);
+          var total = parseFloat(sku_unit_price) * parseFloat(plan_next_month);
+          $row.find('.s_op_val').val(total);
         } else {
-            $row.find('.s_op_val').val('');
+          $row.find('.s_op_val').val('');
         }
-    });
+      });
 
-    $(document).on('input', '.plan_next_month_1', function () {
+      $(document).on('input', '.plan_next_month_1', function() {
         this.value = this.value.replace(/[^0-9]/g, '');
         var $row = $(this).closest('tr'); // Get the parent row
 
         var planNextMonth = $row.find('.plan_next_month_1').val() || 0; // Ensure number
-        var opening_stock = $row.find('.opening_stock').val() || 0; 
-        var open_order_qty = $row.find('.open_order_qty').val() || 0; 
+        var opening_stock = $row.find('.opening_stock').val() || 0;
+        var open_order_qty = $row.find('.open_order_qty').val() || 0;
         // (Forecast_Qty - (Opening_Stock_Qty - Open_Order_Qty)
-        var forproduction_qty = planNextMonth - ( opening_stock  - open_order_qty);
+        var forproduction_qty = planNextMonth - (opening_stock - open_order_qty);
         var price = $row.find('.price').val() || 0; // Ensure number
 
         var planNextMonthValue = planNextMonth * price; // Calculate total
-        var forproduction_value = Math.abs(forproduction_qty)* price;
+        var forproduction_value = Math.abs(forproduction_qty) * price;
         // Set the computed value in the correct field
         $row.find('.plan_next_month_value').val(planNextMonthValue.toFixed(2));
         $row.find('.for_production_qty').val(forproduction_qty);
         $row.find('.for_production_value').val(forproduction_value.toFixed(2));
-    });
+      });
+
+      $(document).on('change', '.plan_next_month_value', function() {
+        //Calculate sum all plan next month value
+        var sum = 0;
+        $('.plan_next_month_value').each(function() {
+          sum += parseFloat($(this).val());
+        });
+        let formattedValue = new Intl.NumberFormat('en-IN', {
+          maximumFractionDigits: 2
+        }).format(sum / 100000);
+        $('#total_forecast').html(formattedValue + " Lakh");
+      });
 
 
 
-    function generateFinancialYearMonths(selectedMonth) {
-         let monthYear = selectedMonth.split(' '); // Example: ['April', '2025']
-          let monthName = monthYear[0]; // Extract the month name
-          let selectedYear = parseInt(monthYear[1]); // Extract the year
 
-          // Define months of the financial year (April to March)
-          let months = [
-              "April", "May", "June", "July", "August", "September", "October",
-              "November", "December", "January", "February", "March"
-          ];
+      function generateFinancialYearMonths(selectedMonth) {
+        let monthYear = selectedMonth.split(' '); // Example: ['April', '2025']
+        let monthName = monthYear[0]; // Extract the month name
+        let selectedYear = parseInt(monthYear[1]); // Extract the year
 
-          // Find the index of the selected month
-          let monthIndex = months.indexOf(monthName);
+        // Define months of the financial year (April to March)
+        let months = [
+          "April", "May", "June", "July", "August", "September", "October",
+          "November", "December", "January", "February", "March"
+        ];
 
-          // Determine the previous financial year
-          let previousStartYear = (monthIndex >= 0 && monthIndex <= 8) ? selectedYear - 1 : selectedYear - 2;
-          let previousEndYear = previousStartYear + 1;
+        // Find the index of the selected month
+        let monthIndex = months.indexOf(monthName);
 
-          // Generate table headers for the previous financial year
-          let previousYearHeadings = months.map((month, index) => {
-              let year = (index < 9) ? previousStartYear : previousEndYear; // First 9 months in previousStartYear, last 3 in previousEndYear
-              return `<th class="text-center"><div style="width: 200px !important;">${month} ${year}</div></th>`;
-          });
+        // Determine the previous financial year
+        let previousStartYear = (monthIndex >= 0 && monthIndex <= 8) ? selectedYear - 1 : selectedYear - 2;
+        let previousEndYear = previousStartYear + 1;
 
-          // Inject the table headers into the table
-          $("#tableHeadings").html(`
+        // Generate table headers for the previous financial year
+        let previousYearHeadings = months.map((month, index) => {
+          let year = (index < 9) ? previousStartYear : previousEndYear; // First 9 months in previousStartYear, last 3 in previousEndYear
+          return `<th class="text-center"><div style="width: 200px !important;">${month} ${year}</div></th>`;
+        });
+
+        // Inject the table headers into the table
+        $("#tableHeadings").html(`
               <th class="text-center"><div style="width: 20px !important;">#</div></th>
               <th class="text-center"><div style="width: 20px !important;">-</div></th>
               <th class="text-center"><div style="width: 350px !important;">Product Group</div></th>
@@ -993,14 +759,14 @@
 
           `);
 
-          /*
-              <th class="text-center"><div style="width: 200px !important;">Opening Stock qty (Branch)</div></th>
-              <th class="text-center"><div style="width: 200px !important;">Opening Stock Value (Branch)</div></th>
-              <th class="text-center"><div style="width: 200px !important;">Open Order qty (Prod.)</div></th>
-              <th class="text-center"><div style="width: 200px !important;">Open Order Value (Prod.)</div></th>
-              <th class="text-center"><div style="width: 200px !important;">For Prodcution qty</div></th>
-              <th class="text-center"><div style="width: 200px !important;">For Prodcution Value </div></th>
-          */
+        /*
+            <th class="text-center"><div style="width: 200px !important;">Opening Stock qty (Branch)</div></th>
+            <th class="text-center"><div style="width: 200px !important;">Opening Stock Value (Branch)</div></th>
+            <th class="text-center"><div style="width: 200px !important;">Open Order qty (Prod.)</div></th>
+            <th class="text-center"><div style="width: 200px !important;">Open Order Value (Prod.)</div></th>
+            <th class="text-center"><div style="width: 200px !important;">For Prodcution qty</div></th>
+            <th class="text-center"><div style="width: 200px !important;">For Prodcution Value </div></th>
+        */
       }
 
       // Trigger generation on page load
@@ -1008,116 +774,116 @@
 
       // If the datepicker changes (assuming you allow changes later)
       $("#start_month").change(function() {
-          generateFinancialYearMonths($(this).val());
+        generateFinancialYearMonths($(this).val());
       });
-  });
+    });
 
-  $(document).on('change' , '#branch_id' , function(){
-     var category = $('#product_division').val();
-     let table = $('#tab_logic1');
-      table.find('tbody tr').each(function () {
-          $(this).find('input, select, textarea').val(''); // Clear values in inputs, selects, and textareas
+    $(document).on('change', '#branch_id', function() {
+      var category = $('#product_division').val();
+      let table = $('#tab_logic1');
+      table.find('tbody tr').each(function() {
+        $(this).find('input, select, textarea').val(''); // Clear values in inputs, selects, and textareas
       });
       getProductlist();
-  })
+    })
 
-  function getProductlist() {
-     var category = $('#product_division').val();
-     var branch_id = $("#branch_id").val(); 
-     if(category ==1){
-        
-        if(branch_id == '' || branch_id == null ){
-            alert("Please select a Branch .");
-            $('.product').val('');
-            return ;
+    function getProductlist() {
+      var category = $('#product_division').val();
+      var branch_id = $("#branch_id").val();
+      if (category == 1) {
+
+        if (branch_id == '' || branch_id == null) {
+          alert("Please select a Branch .");
+          $('.product').val('');
+          return;
         }
         $.ajax({
-            url: "{{ url('getSubCategory') }}",
-            dataType: "json",
-            type: "POST",
-            data: {
-               _token: "{{csrf_token()}}",
-               category: category,
-               branch_id : branch_id
-            },
-            success: function(res) {
-               var table = document.getElementById(tab_logic1),
-                  rIndex;
-                  $('#tab_logic1 tr:last').find(".product_group_name").empty();
-                if (res) {
-                  
-                  $('#tab_logic1 tr:last').find(".product_group_name").append('<option value="">Select Product Group</option>');
-                  $.each(res, function(key, value) {
-                     $('#tab_logic1 tr:last').find('.product_group_name').append('<option value="' + value.id + '">' + value.subcategory_name  + '</option>');
-                  });
-               } else {
-                  row.find(".product_group_name").empty();
-               }
+          url: "{{ url('getSubCategory') }}",
+          dataType: "json",
+          type: "POST",
+          data: {
+            _token: "{{csrf_token()}}",
+            category: category,
+            branch_id: branch_id
+          },
+          success: function(res) {
+            var table = document.getElementById(tab_logic1),
+              rIndex;
+            $('#tab_logic1 tr:last').find(".product_group_name").empty();
+            if (res) {
+
+              $('#tab_logic1 tr:last').find(".product_group_name").append('<option value="">Select Product Group</option>');
+              $.each(res, function(key, value) {
+                $('#tab_logic1 tr:last').find('.product_group_name').append('<option value="' + value.id + '">' + value.subcategory_name + '</option>');
+              });
+            } else {
+              row.find(".product_group_name").empty();
             }
-         });
-     }else{
+          }
+        });
+      } else {
         $.ajax({
-            url: "{{ url('getProductData') }}",
-            dataType: "json",
-            type: "POST",
-            data: {
-               _token: "{{csrf_token()}}",
-               category: category,
-               branch_id : branch_id
-            },
-            success: function(res) {
-               var table = document.getElementById(tab_logic),
-                  rIndex;
-               if (res) {
-                  // row.find(".product").empty();
-                  $('#tab_logic tr:last').find(".product").empty();
-                  $('#tab_logic tr:last').find(".product").append('<option value="">Select Product</option>');
-                  $.each(res, function(key, value) {
+          url: "{{ url('getProductData') }}",
+          dataType: "json",
+          type: "POST",
+          data: {
+            _token: "{{csrf_token()}}",
+            category: category,
+            branch_id: branch_id
+          },
+          success: function(res) {
+            var table = document.getElementById(tab_logic),
+              rIndex;
+            if (res) {
+              // row.find(".product").empty();
+              $('#tab_logic tr:last').find(".product").empty();
+              $('#tab_logic tr:last').find(".product").append('<option value="">Select Product</option>');
+              $.each(res, function(key, value) {
 
-                     if (value.product_code) {
-                        var productcode = value.product_code
-                     } else {
-                        var productcode = '';
-                     }
+                if (value.product_code) {
+                  var productcode = value.product_code
+                } else {
+                  var productcode = '';
+                }
 
-                     $('#tab_logic tr:last').find('.product').append('<option value="' + value.id + '">' + value.product_name + ' ' + value.product_code + '</option>');
+                $('#tab_logic tr:last').find('.product').append('<option value="' + value.id + '">' + value.product_name + ' ' + value.product_code + '</option>');
 
-                  });
-               } else {
-                  row.find(".product").empty();
-               }
+              });
+            } else {
+              row.find(".product").empty();
             }
-         });
-     }
+          }
+        });
+      }
 
-  }
+    }
 
 
-  function getSaledata($row) {
+    function getSaledata($row) {
       var product_id = $row.find(".product").val(); // Get product ID from the row
       var date = $("#start_month").val(); // Get product ID from the row
       var branch_id = $("#branch_id").val(); // Get product ID from the row
 
-       if (product_id != null && product_id != '' && branch_id != '' && branch_id != null) {
-          $.ajax({
-              url: "{{ url('getSaledata') }}",
-              dataType: "json",
-              type: "POST",
-              data: {
-                  _token: "{{ csrf_token() }}",
-                  product_id: product_id,
-                  date      : date,
-                  branch_id  : branch_id
-              },
-              success: function(res) {
-                  $row.find(".last_month_sale").val(res.last_month_sale).prop('readonly', true);
-                  $row.find(".last_three_month_avg").val(res.last_three_month_avg).prop('readonly', true);
-                  $row.find(".last_year_month_sale").val(res.last_year_same_month).prop('readonly', true);
-              }
-          });
+      if (product_id != null && product_id != '' && branch_id != '' && branch_id != null) {
+        $.ajax({
+          url: "{{ url('getSaledata') }}",
+          dataType: "json",
+          type: "POST",
+          data: {
+            _token: "{{ csrf_token() }}",
+            product_id: product_id,
+            date: date,
+            branch_id: branch_id
+          },
+          success: function(res) {
+            $row.find(".last_month_sale").val(res.last_month_sale).prop('readonly', true);
+            $row.find(".last_three_month_avg").val(res.last_three_month_avg).prop('readonly', true);
+            $row.find(".last_year_month_sale").val(res.last_year_same_month).prop('readonly', true);
+          }
+        });
       } else {
-          $row.find(".last_month_sale, .last_three_month_avg, .last_year_month_sale").val('').prop('readonly', true);
+        $row.find(".last_month_sale, .last_three_month_avg, .last_year_month_sale").val('').prop('readonly', true);
       }
-  }
-</script>
+    }
+  </script>
 </x-app-layout>
