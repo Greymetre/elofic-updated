@@ -68,7 +68,7 @@ class PlannedSopDatatable extends DataTable
              ->addColumn('action', function ($query) {
                   $btn = '';
                   $activebtn ='';
-                  if((auth()->user()->can(['sop_edit']) && $query->status == 1) || (auth()->user()->can(['sop_edit']) && Auth::user()->designation_id == "6" && $query->status == 2))
+                  if((auth()->user()->can(['sop_edit']) && $query->status == 1) || (auth()->user()->can(['sop_edit']) && Auth::user()->designation_id == "6" && $query->status == 2) || Auth::user()->hasRole('superadmin'))
                   {
                     $btn = $btn.'<a href="'.route('planned-sop.edit', encrypt($query->id)).'" class="btn btn-info btn-just-icon btn-sm edit mr-2" id="'.encrypt($query->id).'" title="'.trans('panel.global.edit').' SOP">
                           <i class="material-icons">edit</i>

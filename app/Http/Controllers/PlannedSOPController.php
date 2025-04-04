@@ -53,7 +53,8 @@ class PlannedSOPController extends Controller
         $divisions = Category::select('category_name' , 'id')->get();
         $currentYear = Carbon::now()->year;
         $years = range($currentYear , $currentYear + 2);
-        return view('planned_sop.index' , compact('divisions' , 'years'));
+        $total_forecast = PlannedSOP::where('division_id', '1')->sum('plan_next_month_value');
+        return view('planned_sop.index' , compact('divisions' , 'years', 'total_forecast'));
     }
 
     public function plannedSopList(PlannedSopDatatable $dataTable, Request $request)
@@ -231,13 +232,16 @@ class PlannedSOPController extends Controller
     {
         abort_if(Gate::denies('sop_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $id = decrypt($id);
-        $plannedsop = PlannedSOP::find($id);
+        $plannedsop = PlannedSOP::with('primarySale')->find($id);
         if(!$plannedsop){
           return redirect()->back()->with('message_danger', 'Record not found');
         }
         $branches = Branch::select('branch_name' , 'id')->get();
         $divisions = Category::select('category_name' , 'id')->get();
         $products = Product::where('active' , "Y")->select('product_name' , 'id')->get();
+        if($plannedsop->division_id ==1){
+            return view('planned_sop.edit_pump' , compact('branches' , 'products' , 'divisions' , 'plannedsop'));
+        }
         return view('planned_sop.edit' , compact('branches' , 'products' , 'divisions' , 'plannedsop'));
     }
 
@@ -258,20 +262,24 @@ class PlannedSOPController extends Controller
             return response()->json(['status' => false , 'message' => 'Not Found']);
         }
         try{
+            $text = "Updated";
+            if(isset($request->status)){
+               $text = $request->status == 2 ? "Verified" : ($request->status == 3 ? "Approved" : "Updated");
+            }
             if(isset($request->planning_month)){
                $formatted_date = Carbon::createFromFormat('F Y', $request->planning_month)->startOfMonth();
                $planning_month = $formatted_date->format("Y-m-d");
                $request["planning_month"] = $planning_month;
             }
             $plannedsop->update($request->all());
-            if($request->plan_next_month == 0){
+            if (isset($request->plan_next_month) && $request->plan_next_month == 0) {
                 $plannedsop->update(['plan_next_month'=>$request->plan_next_month]);
             }
             if(isset($request->status) && $request->status == 2){
                  $plannedsop->update(['verify_by'=>Auth::user()->name]);
             }
            return $request->ajax()
-            ? response()->json(['status' => true, 'message' => 'Planned S&OP Updated Successfully.'])
+            ? response()->json(['status' => true, 'message' => 'Planned S&OP '. $text .' Successfully.'])
             : redirect()->route('planned-sop.index')->with('message_success', 'Planned S&OP Updated Successfully.');
         }
         catch(\Exception $e){

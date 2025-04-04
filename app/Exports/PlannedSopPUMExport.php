@@ -108,7 +108,7 @@ class PlannedSopPUMExport implements FromCollection, WithHeadings, ShouldAutoSiz
         if(isset($this->filters['financial_year'])){
             $this->year = explode('-',$this->filters['financial_year']);
         }
-        $heading1 = ["Order Id" , "Planing Month","Branch Name","Division Name", "Group Name", "Sap Code", "Product Name","Sale : Quantity","","","","","","","","","","","","","","","Forecast (Sales Plan)","" ,'Created By', 'Verify By' ,'Created At'];
+        $heading1 = ["Order Id" , "Planing Month","Branch Name","Division Name", "Group Name", "Sap Code", "Product Name","Sale : Quantity","","","","","","","","","","","","","","","Opening Stock (Branch)","","Forecast (Sales Plan)","" ,'Created By', 'Verify By' ,'Created At'];
 
         $heading2 = ["","","","","","",""];
         for ($i=4; $i <= 12 ; $i++) {
@@ -120,7 +120,7 @@ class PlannedSopPUMExport implements FromCollection, WithHeadings, ShouldAutoSiz
             array_push($heading2, $month);
         }
 
-        $heading2 = array_merge($heading2, ['Min', "Max", "Avg",
+        $heading2 = array_merge($heading2, ['Min', "Max", "Avg","Stk Qty" , "Stk Value",
            'Forecast Qty', 'Forecast Value',]);
 
 
@@ -136,7 +136,12 @@ class PlannedSopPUMExport implements FromCollection, WithHeadings, ShouldAutoSiz
     
         $plan_next_month = (int) ($data['plan_next_month'] ?? 0);
         $plan_next_month_value = $product_price * $plan_next_month;
-    
+
+        $opening_stock = isset($data['opening_stock']) && is_numeric($data['opening_stock'])
+            ? (int) $data['opening_stock']
+            : 0;
+        $opening_stock_value = $product_price * $opening_stock;
+
         return [
             $data['order_id'] ?? '',
             isset($data['planning_month']) ? \Carbon\Carbon::parse($data['planning_month'])->format('F Y') : '',
@@ -159,7 +164,9 @@ class PlannedSopPUMExport implements FromCollection, WithHeadings, ShouldAutoSiz
             $data->primarySale->month_12,
             $data->primarySale->min,
             $data->primarySale->max,
-            $data->primarySale->avg,            
+            $data->primarySale->avg,
+            (string) $opening_stock ?? 0,
+            (string) $opening_stock_value ?? 0,            
             $plan_next_month,
             $plan_next_month_value,
             $data['created_by'] ?? '',
@@ -187,9 +194,10 @@ class PlannedSopPUMExport implements FromCollection, WithHeadings, ShouldAutoSiz
                 $sheet->mergeCells('G1:G2');
                 $sheet->mergeCells('H1:V1');
                 $sheet->mergeCells('W1:X1');
-                $sheet->mergeCells('Y1:Y2');
-                $sheet->mergeCells('Z1:Z2');
+                $sheet->mergeCells('Y1:Z1');
                 $sheet->mergeCells('AA1:AA2');
+                $sheet->mergeCells('AB1:AB2');
+                $sheet->mergeCells('AC1:AC2');
                 // Style for First Row (Header)
                 $firstRowRange = 'A1:' . $lastColumn . '2';
                 $sheet->getRowDimension(1)->setRowHeight(40); // Increase Header Row Height

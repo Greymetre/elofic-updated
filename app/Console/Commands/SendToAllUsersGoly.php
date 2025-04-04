@@ -51,11 +51,16 @@ class SendToAllUsersGoly extends Command
         $lastyearstartdate = ($financialYearStart - 1) . '-04-01';
         $lastyearenddate = ($financialYearEnd - 1) . '-03-31';
 
+        $lastlastyearstartdate = ($financialYearStart - 2) . '-04-01';
+        $lastlastyearenddate = ($financialYearEnd - 2) . '-03-31';
+
         // dd($currentstartdate, $currentenddate, $lastyearstartdate, $lastyearenddate);
 
 
         $data = PrimarySales::select([
                 'primary_sales.month',
+                'primary_sales.division',
+                DB::raw('SUM(CASE WHEN invoice_date BETWEEN "' . $lastlastyearstartdate . '" AND "' . $lastlastyearenddate . '" THEN net_amount ELSE 0 END) as lastlastyearsale'),
                 DB::raw('SUM(CASE WHEN invoice_date BETWEEN "' . $lastyearstartdate . '" AND "' . $lastyearenddate . '" THEN net_amount ELSE 0 END) as lastyearsale'),
                 DB::raw('SUM(CASE WHEN invoice_date BETWEEN "' . $currentstartdate . '" AND "' . $currentenddate . '" THEN net_amount ELSE 0 END) as currentyearsale'),
                 DB::raw('
@@ -72,9 +77,24 @@ class SendToAllUsersGoly extends Command
                             ) * 100, 2
                         ) 
                 END as goly
-        '),
+                '),
+                DB::raw('
+                        CASE 
+                    WHEN SUM(CASE WHEN invoice_date BETWEEN "' . $lastlastyearstartdate . '" AND "' . $lastlastyearenddate . '" THEN net_amount ELSE 0 END) = 0 
+                    THEN "LYNS"
+                    ELSE 
+                        ROUND(
+                            (
+                                (SUM(CASE WHEN invoice_date BETWEEN "' . $lastyearstartdate . '" AND "' . $lastyearenddate . '" THEN net_amount ELSE 0 END) -
+                                SUM(CASE WHEN invoice_date BETWEEN "' . $lastlastyearstartdate . '" AND "' . $lastlastyearenddate . '" THEN net_amount ELSE 0 END))
+                                /
+                                SUM(CASE WHEN invoice_date BETWEEN "' . $lastlastyearstartdate . '" AND "' . $lastlastyearenddate . '" THEN net_amount ELSE 0 END) 
+                            ) * 100, 2
+                        ) 
+                END as golyl
+                '),
             ])
-            ->groupBy('primary_sales.month')
+            ->groupBy('primary_sales.month', 'primary_sales.division')
             ->get();
 
 

@@ -329,13 +329,25 @@
                 <td>
                     <div class="input_section">
                         <div class="form-group has-default bmd-form-group">
+                            <input type="text" class="form-control opening_stock" name="opening_stock[]" readonly>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="input_section">
+                        <div class="form-group has-default bmd-form-group">
+                              <input type="text" class="form-control opening_stock_value" name="opening_stock_value[]" readonly>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="input_section">
+                        <div class="form-group has-default bmd-form-group">
                             <input type="hidden" class="form-control for_production_value" name="for_production_value[]" required readonly>
                             <input type="hidden" class="form-control for_production_qty" name="for_production_qty[]" required readonly>
                             <input type="hidden" class="form-control open_order_value" name="open_order_value[]" readonly>
                             <input type="hidden" class="form-control open_order_qty" name="open_order_qty[]" readonly>
                             <input type="hidden" class="form-control price" name="price[]" required>
-                            <input type="hidden" class="form-control opening_stock" name="opening_stock[]" readonly>
-                            <input type="hidden" class="form-control opening_stock_value" name="opening_stock_value[]" readonly>
                             <input type="text" class="form-control plan_next_month_1" name="plan_next_month[]" required>
                             @if ($errors->has('plan_next_month'))
                             <div class="error">
@@ -529,21 +541,27 @@
               branch_id: branch_id
             },
             success: function(res) {
+              let selectedValues = [];
+
+              $('.product_1').each(function() {
+                let values = $(this).val();
+                if (values) {
+                  selectedValues = selectedValues.concat(values);
+                }
+              });
               var table = document.getElementById(tab_logic1),
                 rIndex;
               if (res) {
 
                 $('#tab_logic1 tr:last').find(".product_1").html('<option value="">Select Product</option>');
-                $.each(res, function(key, value) {
+                var data = res.map(item => ({
+                  id: item.id,
+                  text: item.product_name,
+                  disabled: selectedValues.includes(item.id.toString())
+                }));
 
-                  if (value.product_code) {
-                    var productcode = value.product_code
-                  } else {
-                    var productcode = '';
-                  }
-
-                  $('#tab_logic1 tr:last').find('.product_1').append('<option value="' + value.id + '">' + value.product_name + '</option>');
-
+                $('.product_1').select2({
+                  data: data
                 });
               } else {
                 $('#tab_logic1 tr:last').find(".product_1").empty();
@@ -751,17 +769,16 @@
               ${previousYearHeadings.join("")}
               <th class="text-center"><div style="width: 200px !important;">Min</div></th>
               <th class="text-center"><div style="width: 200px !important;">Max</div></th>
-            <th class="text-center"><div style="width: 200px !important;">Avg</div></th>
-             
-
+              <th class="text-center"><div style="width: 200px !important;">Avg</div></th>
+              <th class="text-center"><div style="width: 200px !important;">Branch Stock qty</div></th>
+              <th class="text-center"><div style="width: 200px !important;">Branch Stock Value</div></th>
               <th class="text-center"><div style="width: 200px !important;">Forecast qty (Sales plan) </div></th>
               <th class="text-center"><div style="width: 200px !important;">Forecast Value (Sales plan) </div></th>
 
           `);
 
         /*
-            <th class="text-center"><div style="width: 200px !important;">Opening Stock qty (Branch)</div></th>
-            <th class="text-center"><div style="width: 200px !important;">Opening Stock Value (Branch)</div></th>
+          
             <th class="text-center"><div style="width: 200px !important;">Open Order qty (Prod.)</div></th>
             <th class="text-center"><div style="width: 200px !important;">Open Order Value (Prod.)</div></th>
             <th class="text-center"><div style="width: 200px !important;">For Prodcution qty</div></th>
@@ -788,6 +805,7 @@
     })
 
     function getProductlist() {
+      var lastValue = $('.product_group_name').last().val();
       var category = $('#product_division').val();
       var branch_id = $("#branch_id").val();
       if (category == 1) {
@@ -811,11 +829,17 @@
               rIndex;
             $('#tab_logic1 tr:last').find(".product_group_name").empty();
             if (res) {
-
               $('#tab_logic1 tr:last').find(".product_group_name").append('<option value="">Select Product Group</option>');
               $.each(res, function(key, value) {
-                $('#tab_logic1 tr:last').find('.product_group_name').append('<option value="' + value.id + '">' + value.subcategory_name + '</option>');
+                var isSelected = (value.id == lastValue) ? 'selected' : '';
+                $('#tab_logic1 tr:last').find('.product_group_name').append(
+                    '<option value="' + value.id + '" ' + isSelected + '>' + value.subcategory_name + '</option>'
+                );
+                if(isSelected == 'selected'){
+                    $('#tab_logic1 tr:last').find('.product_group_name').trigger('change');
+                }
               });
+
             } else {
               row.find(".product_group_name").empty();
             }
@@ -839,14 +863,14 @@
               $('#tab_logic tr:last').find(".product").empty();
               $('#tab_logic tr:last').find(".product").append('<option value="">Select Product</option>');
               $.each(res, function(key, value) {
-
+                var isSelected = (value.id == lastValue) ? 'selected' : '';
                 if (value.product_code) {
                   var productcode = value.product_code
                 } else {
                   var productcode = '';
                 }
 
-                $('#tab_logic tr:last').find('.product').append('<option value="' + value.id + '">' + value.product_name + ' ' + value.product_code + '</option>');
+                $('#tab_logic tr:last').find('.product').append('<option value="' + value.id + ' '+ isSelected +'">' + value.product_name + ' ' + value.product_code + '</option>');
 
               });
             } else {

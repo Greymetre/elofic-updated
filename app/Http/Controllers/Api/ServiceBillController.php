@@ -43,7 +43,32 @@ class ServiceBillController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request, $id) {}
+    public function index(Request $request) {
+        try{
+            if($request->user()->hasRole('Service Eng') || $request->user()->hasRole('Service Admin') || $request->user()->hasRole('superadmin')) {
+                    $query = ServiceBill::select('id','bill_no','complaint_no' , 'complaint_id' , 'complaint_type' , 'complaint_reason');
+            }else{
+                $user_ids = [$request->user()->id]; 
+               $query = ServiceBill::whereHas('complaint', function ($query) use ($user_ids) {
+                    $query->whereIn('assign_user', $user_ids);
+                })->select('id','bill_no','complaint_no','complaint_id','complaint_type','complaint_reason');
+
+            }
+            $service_bills = [];
+            $query->chunk(100, function ($serviceBillsChunk) use (&$service_bills) {
+                foreach ($serviceBillsChunk as $service_bill) {
+                    $service_bills[] = $service_bill;
+                }
+            });
+            if(!empty($service_bills)) {
+                return response()->json(['status' => 'success', 'data' => $service_bills], $this->successStatus);
+            } else {
+                return response()->json(['status' => 'success', 'data' => "No Complaints"], $this->notFound);
+            }
+        }catch(\Exception $e){
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
+    }
 
     /**
      * Show the form for creating a new resource.

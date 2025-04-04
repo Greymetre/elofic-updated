@@ -9,6 +9,7 @@ use Illuminate\Http\Response;
 use App\Models\PlannedSOP;
 use App\Models\PlannedSopSaleData;
 use App\Models\PrimarySales;
+use App\Models\ProductDetails;
 use Gate;
 
 class SapStockController extends Controller
