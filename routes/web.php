@@ -989,6 +989,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('planned-sop-template' , [PlannedSOPController::class , 'sop_template'])->name('sop_template');
     Route::any('planned-sop-multistatus-change' , [PlannedSOPController::class , 'planned_sop_multistatus_change'])->name('planned-sop-multistatus-change');
 
+    Route::get('planned-sop-forecast', [PlannedSOPController::class , 'plannedForCast'])->name('plannedForCast');
+
     // claim gerneration 
     Route::resource('claim-generation', ClaimGenerationController::class);
     Route::any('claim-generation-list', [ClaimGenerationController::class , 'getClaims'])->name('getClaims');
@@ -1089,6 +1091,7 @@ Route::any('checkServiceBillComplaintType' , [AjaxController::class , 'checkServ
 Route::any('getSubCategory' , [AjaxController::class , 'getSubCategory']);
 Route::any('getProductInfoListBySubcategory' , [AjaxController::class , 'getProductInfoListBySubcategory']);
 Route::any('getFullDetailsOfProduct' , [AjaxController::class , 'getFullDetailsOfProduct']);
+Route::any('planned-sop-fore-total', [AjaxController::class , 'getplannedForCast'])->name('getplannedForCast');
 
 //Clear Cache facade value:
 Route::get('/clear-cache', function () {

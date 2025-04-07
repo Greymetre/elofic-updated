@@ -172,9 +172,11 @@
               <thead class=" text-primary">
                 <tr>
                   <th></th>
-                  <th>
-                    <div style="width:50px"></div>
-                  </th>
+                  @if(auth()->user()->hasRole('superadmin'))
+                    <th>
+                      <div style="width:50px"></div>
+                    </th>
+                  @endif
                   <th>
                     <div style="width:150px"></div>
                   </th>
@@ -187,52 +189,54 @@
                       <option value="3">Aprroved</option>
                     </select>
                   </th>
-                  <th><input type="text" class="form-control table-input" name="order_id" placeholder="Search..." autocomplete="off"></th>
+                  <th><input type="text" class="form-control table-input" name="branch_name" placeholder="Search..." autocomplete="off"></th>
                   <th><input type="text" class="form-control table-input datepicker" id="start_month"
                       name="planning_month" placeholder="S&OP Month"
                       autocomplete="off"></th>
-                  <th><input type="text" class="form-control table-input" name="branch_name" placeholder="Search..." autocomplete="off"></th>
-                  <th><input type="text" class="form-control table-input" name="category_name" placeholder="Search..." autocomplete="off"></th>
                   <th><input type="text" class="form-control table-input" name="group_name" placeholder="Search..." autocomplete="off"></th>
                   <th><input type="text" class="form-control table-input" name="product_name" placeholder="Search..." autocomplete="off"></th>
+                  <th><input type="text" class="form-control table-input" name="plan_next_month" placeholder="Search..." autocomplete="off"></th>
+                  <th><input type="text" class="form-control table-input" name="order_id" placeholder="Search..." autocomplete="off"></th>
+<!--                   <th><input type="text" class="form-control table-input" name="category_name" placeholder="Search..." autocomplete="off"></th>
                   <th><input type="text" class="form-control table-input" name="product_code" placeholder="Search..." autocomplete="off"></th>
                   <th><input type="text" class="form-control table-input" name="product_description" placeholder="Search..." autocomplete="off"></th>
                   <th>
                     <div style="width:150px"></div>
                   </th>
-                  <th><input type="text" class="form-control table-input" name="plan_next_month" placeholder="Search..." autocomplete="off"></th>
                   <th><input type="text" class="form-control table-input" name="budget_for_month" placeholder="Search..." autocomplete="off"></th>
                   <th><input type="text" class="form-control table-input" name="last_month_sale" placeholder="Search..." autocomplete="off"></th>
                   <th><input type="text" class="form-control table-input" name="last_three_month_avg" placeholder="Search..." autocomplete="off"></th>
                   <th><input type="text" class="form-control table-input" name="last_year_month_sale" placeholder="Search..." autocomplete="off"></th>
                   <th><input type="text" class="form-control table-input" name="sku_unit_price" placeholder="Search..." autocomplete="off"></th>
-                  <th><input type="text" class="form-control table-input" name="s_op_val" placeholder="Search..." autocomplete="off"></th>
-                  <th><input type="text" class="form-control table-input" name="top_sku" placeholder="Search..." autocomplete="off"></th>
+                  <th><input type="text" class="form-control table-input" name="s_op_val" placeholder="Search..." autocomplete="off"></th> -->
+                  <!-- <th><input type="text" class="form-control table-input" name="top_sku" placeholder="Search..." autocomplete="off"></th> -->
 
                   <th><input type="text" class="form-control table-input" name="created_by" placeholder="Search..." autocomplete="off"></th>
                 </tr>
                 <tr>
                   <th>{!! trans('panel.global.no') !!}</th>
-                  <th>#</th>
+                  @if(auth()->user()->hasRole('superadmin'))
+                    <th>#</th>
+                  @endif
                   <th>{!! trans('panel.global.action') !!}</th>
                   <th>Status</th>
-                  <th>Order Id</th>
-                  <th>Month</th>
                   <th>Branch Name</th>
-                  <th>Division</th>
+                  <th>Month</th>
                   <th>Group Name</th>
                   <th>Item Name</th>
+                  <th>Forecast Qty</th>
+                  <th>Order Id</th>
+               <!--    <th>Division</th>
                   <th>Product Code</th>
                   <th>Product Desc.</th>
                   <th>Opening stock as on 1st (Qty)</th>
-                  <th>S&OP Plan for Next running month (M+1) (Qty.)</th>
                   <th>Budget for the month (Qty.)</th>
                   <th>LM Sale (Qty.)</th>
                   <th>L3M Avg Sale (Qty.)</th>
                   <th>LY same month sale (Qty.)</th>
                   <th>SKU Unit Price</th>
                   <th>S&OP Val_L (Unit Price *Qty.)</th>
-                  <th>TOP 20 SKU for the Branch (*)</th>
+                  <th>TOP 20 SKU for the Branch (*)</th> -->
                   <th>Created By</th>
                 </tr>
               </thead>
@@ -247,6 +251,8 @@
   <script src="{{ url('/').'/'.asset('assets/js/jquery.custom.js') }}"></script>
   <script type="text/javascript">
     $(function() {
+      var showCheckbox = {{ auth()->user()->hasRole('superadmin') ? 'true' : 'false' }};
+      console.log(showCheckbox);
       $.ajaxSetup({
         headers: {
           'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -291,12 +297,14 @@
             orderable: false,
             searchable: false
           },
-          {
-            data: 'checkbox',
-            name: 'checkbox',
-            orderable: false,
-            "defaultContent": ''
-          },
+          @if(auth()->user()->hasRole('superadmin'))
+            {
+              data: 'checkbox',
+              name: 'checkbox',
+              orderable: false,
+              "defaultContent": ''
+            },
+          @endif
           {
             data: 'action',
             name: 'action',
@@ -310,26 +318,14 @@
             "defaultContent": ''
           },
           {
-            data: 'order_id',
-            name: 'order_id',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'planning_month',
-            name: 'planning_month',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
             data: 'get_branch.branch_name',
             name: 'get_branch.branch_name',
             orderable: false,
             "defaultContent": ''
           },
           {
-            data: 'get_product.categories.category_name',
-            name: 'get_product.categories.category_name',
+            data: 'planning_month',
+            name: 'planning_month',
             orderable: false,
             "defaultContent": ''
           },
@@ -346,71 +342,84 @@
             "defaultContent": ''
           },
           {
-            data: 'get_product.product_code',
-            name: 'get_product.product_code',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'get_product.description',
-            name: 'get_product.description',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'opening_stock',
-            name: 'opening_stock',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
             data: 'plan_next_month',
             name: 'plan_next_month',
             orderable: false,
             "defaultContent": ''
           },
           {
-            data: 'budget_for_month',
-            name: 'budget_for_month',
+            data: 'order_id',
+            name: 'order_id',
             orderable: false,
             "defaultContent": ''
           },
-          {
-            data: 'last_month_sale',
-            name: 'last_month_sale',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'last_three_month_avg',
-            name: 'last_three_month_avg',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'last_year_month_sale',
-            name: 'last_year_month_sale',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'sku_unit_price',
-            name: 'sku_unit_price',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 's_op_val',
-            name: 's_op_val',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'top_sku',
-            name: 'top_sku',
-            orderable: false,
-            "defaultContent": ''
-          },
+          // {
+          //   data: 'get_product.categories.category_name',
+          //   name: 'get_product.categories.category_name',
+          //   orderable: false,
+          //   "defaultContent": ''
+          // },
+          // {
+          //   data: 'get_product.product_code',
+          //   name: 'get_product.product_code',
+          //   orderable: false,
+          //   "defaultContent": ''
+          // },
+          // {
+          //   data: 'get_product.description',
+          //   name: 'get_product.description',
+          //   orderable: false,
+          //   "defaultContent": ''
+          // },
+          // {
+          //   data: 'opening_stock',
+          //   name: 'opening_stock',
+          //   orderable: false,
+          //   "defaultContent": ''
+          // },
+          
+          // {
+          //   data: 'budget_for_month',
+          //   name: 'budget_for_month',
+          //   orderable: false,
+          //   "defaultContent": ''
+          // },
+          // {
+          //   data: 'last_month_sale',
+          //   name: 'last_month_sale',
+          //   orderable: false,
+          //   "defaultContent": ''
+          // },
+          // {
+          //   data: 'last_three_month_avg',
+          //   name: 'last_three_month_avg',
+          //   orderable: false,
+          //   "defaultContent": ''
+          // },
+          // {
+          //   data: 'last_year_month_sale',
+          //   name: 'last_year_month_sale',
+          //   orderable: false,
+          //   "defaultContent": ''
+          // },
+          // {
+          //   data: 'sku_unit_price',
+          //   name: 'sku_unit_price',
+          //   orderable: false,
+          //   "defaultContent": ''
+          // },
+          // {
+          //   data: 's_op_val',
+          //   name: 's_op_val',
+          //   orderable: false,
+          //   "defaultContent": ''
+          // },
+          // {
+          //   data: 'top_sku',
+          //   name: 'top_sku',
+          //   orderable: false,
+          //   "defaultContent": ''
+          // },
 
           {
             data: 'created_by',
@@ -418,7 +427,7 @@
             orderable: false,
             "defaultContent": ''
           }
-        ]
+        ],      
       });
 
       $('.table-input').on('keyup change', function() {

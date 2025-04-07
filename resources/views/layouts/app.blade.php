@@ -1051,13 +1051,14 @@
                                  <div class="d-none mobile_hide"> Planned S&OP</div>
                               </a>
                            </li>
-                           @if(auth()->user()->can('stockdetails_access'))
-                           <!-- <li class="nav-item {{ request()->is('production*') ? 'active' : '' }}">
-                                 <a class="nav-link" href="{{ url('production') }}">
-                                   <i class="material-icons">donut_small</i>
-                                   <p>Production</p>
+                           @if(auth()->user()->can('planned_forecast'))
+                            <li class="nav-link-btn {{ request()->is('planned-sop-forecast*') ? 'active' : '' }}">
+                                 <a class="hoveradd2" href="{{ url('planned-sop-forecast') }}">
+                                    <i class="material-icons icon">warehouse</i>
+                                    <span>S&OP Forecast</span>
+                                    <div class="d-none mobile_hide"> S&OP Forecast</div>
                                  </a>
-                                 </li> -->
+                              </li>
                            @endif
                         </ul>
                      </div>

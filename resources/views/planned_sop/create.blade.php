@@ -329,14 +329,14 @@
                 <td>
                     <div class="input_section">
                         <div class="form-group has-default bmd-form-group">
-                            <input type="text" class="form-control opening_stock" name="opening_stock[]" readonly>
+                            <input type="text" class="form-control open_order_qty" name="open_order_qty[]" readonly>
                         </div>
                     </div>
                 </td>
                 <td>
                     <div class="input_section">
                         <div class="form-group has-default bmd-form-group">
-                              <input type="text" class="form-control opening_stock_value" name="opening_stock_value[]" readonly>
+                         <input type="text" class="form-control open_order_value" name="open_order_value[]" readonly>    
                         </div>
                     </div>
                 </td>
@@ -345,8 +345,8 @@
                         <div class="form-group has-default bmd-form-group">
                             <input type="hidden" class="form-control for_production_value" name="for_production_value[]" required readonly>
                             <input type="hidden" class="form-control for_production_qty" name="for_production_qty[]" required readonly>
-                            <input type="hidden" class="form-control open_order_value" name="open_order_value[]" readonly>
-                            <input type="hidden" class="form-control open_order_qty" name="open_order_qty[]" readonly>
+                            <input type="hidden" class="form-control opening_stock" name="opening_stock[]" readonly>
+                            <input type="hidden" class="form-control opening_stock_value" name="opening_stock_value[]" readonly>
                             <input type="hidden" class="form-control price" name="price[]" required>
                             <input type="text" class="form-control plan_next_month_1" name="plan_next_month[]" required>
                             @if ($errors->has('plan_next_month'))
@@ -757,7 +757,7 @@
         // Generate table headers for the previous financial year
         let previousYearHeadings = months.map((month, index) => {
           let year = (index < 9) ? previousStartYear : previousEndYear; // First 9 months in previousStartYear, last 3 in previousEndYear
-          return `<th class="text-center"><div style="width: 200px !important;">${month} ${year}</div></th>`;
+          return `<th class="text-center"><div style="width: 100px !important;">${month} ${year}</div></th>`;
         });
 
         // Inject the table headers into the table
@@ -767,18 +767,21 @@
               <th class="text-center"><div style="width: 350px !important;">Product Group</div></th>
               <th class="text-center"><div style="width: 200px !important;">Product</div></th>
               ${previousYearHeadings.join("")}
-              <th class="text-center"><div style="width: 200px !important;">Min</div></th>
-              <th class="text-center"><div style="width: 200px !important;">Max</div></th>
-              <th class="text-center"><div style="width: 200px !important;">Avg</div></th>
-              <th class="text-center"><div style="width: 200px !important;">Branch Stock qty</div></th>
-              <th class="text-center"><div style="width: 200px !important;">Branch Stock Value</div></th>
+              <th class="text-center"><div style="width: 100px !important;">Min</div></th>
+              <th class="text-center"><div style="width: 100px !important;">Max</div></th>
+              <th class="text-center"><div style="width: 100px !important;">Avg</div></th>
+              <th class="text-center"><div style="width: 200px !important;">Open Order qty (Last Month)</div></th>
+              <th class="text-center"><div style="width: 200px !important;">Open Order Value (Last Month)</div></th>
               <th class="text-center"><div style="width: 200px !important;">Forecast qty (Sales plan) </div></th>
               <th class="text-center"><div style="width: 200px !important;">Forecast Value (Sales plan) </div></th>
 
           `);
 
         /*
-          
+            <th class="text-center"><div style="width: 200px !important;">Forecast qty (Sales plan) </div></th>
+            <th class="text-center"><div style="width: 200px !important;">Forecast Value (Sales plan) </div></th>
+            <th class="text-center"><div style="width: 200px !important;">Branch Stock qty</div></th>
+            <th class="text-center"><div style="width: 200px !important;">Branch Stock Value</div></th>
             <th class="text-center"><div style="width: 200px !important;">Open Order qty (Prod.)</div></th>
             <th class="text-center"><div style="width: 200px !important;">Open Order Value (Prod.)</div></th>
             <th class="text-center"><div style="width: 200px !important;">For Prodcution qty</div></th>

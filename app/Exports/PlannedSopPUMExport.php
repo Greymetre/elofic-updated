@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\PrimarySales;
 use App\Models\Product;
+use App\Models\BranchOprningQuantity;
 
 class PlannedSopPUMExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithEvents
 {
@@ -108,7 +109,7 @@ class PlannedSopPUMExport implements FromCollection, WithHeadings, ShouldAutoSiz
         if(isset($this->filters['financial_year'])){
             $this->year = explode('-',$this->filters['financial_year']);
         }
-        $heading1 = ["Order Id" , "Planing Month","Branch Name","Division Name", "Group Name", "Sap Code", "Product Name","Sale : Quantity","","","","","","","","","","","","","","","Opening Stock (Branch)","","Forecast (Sales Plan)","" ,'Created By', 'Verify By' ,'Created At'];
+        $heading1 = ["Order Id" , "Planing Month","Branch Name","Division Name", "Group Name", "Sap Code", "Product Name","Sale : Quantity","","","","","","","","","","","","","","","Open Order (Prod.)","","Forecast (Sales Plan)","" ,'Created By', 'Verify By' ,'Created At'];
 
         $heading2 = ["","","","","","",""];
         for ($i=4; $i <= 12 ; $i++) {
@@ -120,7 +121,7 @@ class PlannedSopPUMExport implements FromCollection, WithHeadings, ShouldAutoSiz
             array_push($heading2, $month);
         }
 
-        $heading2 = array_merge($heading2, ['Min', "Max", "Avg","Stk Qty" , "Stk Value",
+        $heading2 = array_merge($heading2, ['Min', "Max", "Avg","Open Order Qty" , "Open Order Value",
            'Forecast Qty', 'Forecast Value',]);
 
 
@@ -137,10 +138,31 @@ class PlannedSopPUMExport implements FromCollection, WithHeadings, ShouldAutoSiz
         $plan_next_month = (int) ($data['plan_next_month'] ?? 0);
         $plan_next_month_value = $product_price * $plan_next_month;
 
+        $planning_month = isset($data['planning_month'])
+            ? \Carbon\Carbon::parse($data['planning_month'])->subMonth()->startOfMonth()->format('Y-m-d')
+            : '';
+
+        $product = $data['getProduct'] ?? '';
+        $open_order = BranchOprningQuantity::where(function ($query) use ($product) {
+            $query->where('item_code', $product->product_code)
+                ->orWhere('item_code', $product->sap_code);
+        })
+            ->where('item_group', $product->subcategories->subcategory_name)
+            ->whereRaw("FIND_IN_SET(?, branch_id)", [$data->branch_id])
+            ->whereDate('qty_month', $planning_month)
+            ->first();
+
+
+        $open_order_stock = isset($open_order->open_order_qty) && is_numeric($open_order->open_order_qty)
+            ? (int) $open_order->open_order_qty
+            : 0;
+
+        $openderValue        = round($product_price * $open_order_stock, 2);
+
         $opening_stock = isset($data['opening_stock']) && is_numeric($data['opening_stock'])
             ? (int) $data['opening_stock']
             : 0;
-        $opening_stock_value = $product_price * $opening_stock;
+        $opening_stock_value =round($product_price * $opening_stock,2);
 
         return [
             $data['order_id'] ?? '',
@@ -165,10 +187,10 @@ class PlannedSopPUMExport implements FromCollection, WithHeadings, ShouldAutoSiz
             $data->primarySale->min,
             $data->primarySale->max,
             $data->primarySale->avg,
-            (string) $opening_stock ?? 0,
-            (string) $opening_stock_value ?? 0,            
+            (string) $open_order_stock ?? 0,
+            (string) $openderValue ?? 0,            
             $plan_next_month,
-            $plan_next_month_value,
+            round($plan_next_month_value,2),
             $data['created_by'] ?? '',
             $data['verify_by']  ?? '',
             isset($data['created_at']) ? \Carbon\Carbon::parse($data['created_at'])->format('d-m-Y H:i:s') : '',

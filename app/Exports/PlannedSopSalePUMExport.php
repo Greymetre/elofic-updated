@@ -207,13 +207,13 @@ class PlannedSopSalePUMExport implements FromCollection, WithHeadings, ShouldAut
         $new_price = ($product_price * 41) / 100;
         $product_price = $product_price - $new_price;
 
-        $opening_stock_value = $product_price * $opening_stock;
-        $openderValue        = $product_price * $open_order_stock;
-        $production_value    = $product_price * abs($production_qty);
+        $opening_stock_value = round($product_price * $opening_stock,2);
+        $openderValue        = round($product_price * $open_order_stock , 2);
+        $production_value    = round($product_price * abs($production_qty) , 2);
         $plan_next_month = isset($data['plan_next_month']) && is_numeric($data['plan_next_month'])
             ? (int) $data['plan_next_month']
             : 0;
-        $plan_next_month_value = $product_price * $plan_next_month;
+        $plan_next_month_value = round($product_price * $plan_next_month , 2);
 
         $last_month_pro_qty = max(($open_order_stock - $opening_stock), 0);
         $last_month_pro_qty_value = $last_month_pro_qty > 0 ? $last_month_pro_qty * $product_price : 0;

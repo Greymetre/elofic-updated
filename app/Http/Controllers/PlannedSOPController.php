@@ -57,6 +57,13 @@ class PlannedSOPController extends Controller
         return view('planned_sop.index' , compact('divisions' , 'years', 'total_forecast'));
     }
 
+    public function plannedForCast(Request $request){
+        abort_if(Gate::denies('planned_forecast'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $divisions = Category::select('category_name' , 'id')->get();
+        $total_forecast = PlannedSOP::sum('plan_next_month_value');
+        return view('planned_forecast.index' , compact('divisions' , 'total_forecast'));
+    }
+
     public function plannedSopList(PlannedSopDatatable $dataTable, Request $request)
     {
         return $dataTable->render('planned_sop.index');

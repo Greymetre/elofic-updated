@@ -483,6 +483,29 @@ class ServiceBillController extends Controller
             ]));
             $response = $result->getData(true);
             $data['warranty_upto'] = $response['warrenty_expire_date'] ?? null;
+            $imageArray = [];
+            $collectionNames = [
+                'product_sr_no',
+                'scr_job_card',
+                'photo_3',
+                'photo_4',
+                'photo_5',
+                'voltage_image',
+                'current_image',
+            ];
+
+            $imageArray = [];
+
+            foreach ($collectionNames as $collection) {
+                $media = $service_bill->getFirstMedia($collection);
+                $imageArray[$collection] = [
+                    'name' => $media?->file_name ?? 'no-image.png',
+                    'url' => $media ? $media->getFullUrl() : asset(config('constants.NO_IMAGE_URL')),
+                ];
+            }
+
+            $data['images'] = $imageArray;
+
             if ($complaint) {
                 return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
             } else {
