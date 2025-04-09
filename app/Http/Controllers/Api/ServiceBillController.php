@@ -45,10 +45,10 @@ class ServiceBillController extends Controller
      */
     public function index(Request $request) {
         try{
-            if($request->user()->hasRole('Service Eng') || $request->user()->hasRole('Service Admin') || $request->user()->hasRole('superadmin')) {
+            if($request->user()->hasRole('Service Admin') || $request->user()->hasRole('superadmin')) {
                     $query = ServiceBill::select('id','bill_no','complaint_no' , 'complaint_id' , 'complaint_type' , 'complaint_reason');
             }else{
-                $user_ids = [$request->user()->id]; 
+               $user_ids = [$request->user()->id]; 
                $query = ServiceBill::whereHas('complaint', function ($query) use ($user_ids) {
                     $query->whereIn('assign_user', $user_ids);
                 })->select('id','bill_no','complaint_no','complaint_id','complaint_type','complaint_reason');
@@ -116,9 +116,9 @@ class ServiceBillController extends Controller
             $data["division"] = $complaint->product_details?->categories?->category_name ?? null;
             $data["group_name"] = $complaint->product_details?->subcategories?->subcategory_name ?? null;
             $data['serviceBillNo'] = $serviceBillNo ?? null;
-            $data["recived_from "] = optional($complaint->createdbyname)->name ?? null;
-            $data["item "] = optional($complaint->product_details)->product_name ?? null;
-            $data["comments "] = $complaint ? $complaint->description : null;
+            $data["recived_from"] = optional($complaint->createdbyname)->name ?? null;
+            $data["item"] = optional($complaint->product_details)->product_name ?? null;
+            $data["comments"] = $complaint ? $complaint->description : null;
             $result = app(AjaxController::class)->getProductTimeInterval(new Request([
                 'product_id' => $complaint->product_id,
                 'sale_bill_date' => $complaint->company_sale_bill_date
@@ -254,6 +254,27 @@ class ServiceBillController extends Controller
                 'service.*.price' => 'required|numeric|min:0',
                 'service.*.subtotal' => 'required|numeric|min:0',
             ]);
+
+            $serviceTypes = collect($request->input('service'))->pluck('service_type');
+            $duplicates = $serviceTypes
+                ->filter(function ($type) {
+                    return in_array($type, [1, 5]);
+                })
+                ->countBy()
+                ->filter(function ($count) {
+                    return $count > 1;
+                });
+
+            if ($duplicates->isNotEmpty()) {
+                 return response()->json([
+                    'status' => 'error',
+                    'message' => 'Validation failed',
+                    'errors' => 'Service types found duplicated'
+                ], 422); // 422 Unprocessable Entity
+                return back()->withErrors([
+                    'service' => 'Service types 1 and 5 cannot be duplicated.',
+                ])->withInput();
+            }
 
             // If validation fails, return JSON response
             if ($validator->fails()) {
@@ -424,6 +445,15 @@ class ServiceBillController extends Controller
                 ];
             })->toArray();
 
+            $data += [
+                "service_center_name" => optional($complaint->service_center_details)?->name 
+                    ? ($complaint->service_center_details->customer_code 
+                        ? "[{$complaint->service_center_details->customer_code}] " 
+                        : "") . $complaint->service_center_details->name
+                    : null,
+                "created_by" => optional($complaint->createdbyname)?->name,
+            ];
+
             $data['service_bill'] = collect($service_bill->only([
                 'complaint_type',
                 'complaint_reason',
@@ -448,6 +478,11 @@ class ServiceBillController extends Controller
                     } => ($value === "" ? null : $value)
                 ];
             })->toArray();
+
+            if (isset($service_bill)) {
+                $data['service_bill']['service_bill_status_name'] =
+                    $service_bill->status == 0 ? "Draft" : ($service_bill->status == 1 ? "Claimed" : ($service_bill->status == 2 ? "Customer Payable" : ($service_bill->status == 3 ? "Approved" : "Cancel")));
+            }
 
             $data['service_bill_products'] = $service_bill?->service_bill_products ?
                 $service_bill->service_bill_products->map(function ($product) {
@@ -474,9 +509,9 @@ class ServiceBillController extends Controller
             $data["division"] = $complaint->product_details?->categories?->category_name ?? null;
             $data["group_name"] = $complaint->product_details?->subcategories?->subcategory_name ?? null;
             $data['serviceBillNo'] = $serviceBillNo ?? null;
-            $data["recived_from "] = optional($complaint->createdbyname)->name ?? null;
-            $data["item "] = optional($complaint->product_details)->product_name ?? null;
-            $data["comments "] = $complaint ? $complaint->description : null;
+            $data["recived_from"] = optional($complaint->createdbyname)->name ?? null;
+            $data["item"] = optional($complaint->product_details)->product_name ?? null;
+            $data["comments"] = $complaint ? $complaint->description : null;
             $result = app(AjaxController::class)->getProductTimeInterval(new Request([
                 'product_id' => $complaint->product_id,
                 'sale_bill_date' => $complaint->company_sale_bill_date
@@ -497,13 +532,23 @@ class ServiceBillController extends Controller
             $imageArray = [];
 
             foreach ($collectionNames as $collection) {
-                $media = $service_bill->getFirstMedia($collection);
-                $imageArray[$collection] = [
-                    'name' => $media?->file_name ?? 'no-image.png',
-                    'url' => $media ? $media->getFullUrl() : asset(config('constants.NO_IMAGE_URL')),
-                ];
-            }
+                $medias = $service_bill->getMedia($collection);
 
+                $mediaData = $medias->isEmpty()
+                    ? [[
+                        'name' => 'no-image.png',
+                        'url' => asset(config('constants.NO_IMAGE_URL')),
+                    ]]
+                    : $medias->map(function ($media) {
+                        return [
+                            'name' => $media->file_name,
+                            'url' => $media->getFullUrl(),
+                        ];
+                    })->toArray();
+
+                // Assign directly to key
+                $imageArray[$collection] = $mediaData;
+            }
             $data['images'] = $imageArray;
 
             if ($complaint) {
@@ -617,6 +662,27 @@ class ServiceBillController extends Controller
                 'service.*.subtotal' => 'required|numeric|min:0',
             ]);
 
+           $serviceTypes = collect($request->input('service'))->pluck('service_type');
+            $duplicates = $serviceTypes
+                ->filter(function ($type) {
+                    return in_array($type, [1, 5]);
+                })
+                ->countBy()
+                ->filter(function ($count) {
+                    return $count > 1;
+                });
+
+            if ($duplicates->isNotEmpty()) {
+                 return response()->json([
+                    'status' => 'error',
+                    'message' => 'Validation failed',
+                    'errors' => 'Service types found duplicated'
+                ], 422); // 422 Unprocessable Entity
+                return back()->withErrors([
+                    'service' => 'Service types 1 and 5 cannot be duplicated.',
+                ])->withInput();
+            }
+            
             // If validation fails, return JSON response
             if ($validator->fails()) {
                 return response()->json([
@@ -845,6 +911,64 @@ class ServiceBillController extends Controller
                 return response()->json(['status' => 'success', 'data' => "No Complaints"], $this->successStatus);
             }
         } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
+    }
+
+
+    public function change_status(Request $request, $id){
+        try{
+            $validator = Validator::make($request->all(), [
+                   'status' => 'required|in:0,1,2,3,4'
+            ]);
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422); // 422 Unprocessable Entity
+            }
+            if ($request->user()->hasAnyRole(['Service Admin', 'superadmin'])) {
+                $service_bill = ServiceBill::select('id', 'complaint_no', 'bill_no', 'status')->find($id);
+            } else {
+                $userId = $request->user()->id;
+                $service_bill = ServiceBill::where('id', $id)
+                    ->whereHas('complaint', function ($q) use ($userId) {
+                        $q->where('assign_user', $userId);
+                    })
+                    ->select('id', 'complaint_no', 'bill_no', 'status')
+                    ->first();
+            }
+
+            if(!$service_bill){
+                return response()->json(['status' => 'error', 'message' => 'Loggedin uesr don\'t have a access to change the status of this service bill'], $this->notFound);
+            }
+            if(isset($request->status)){
+                 $message = "Draft";
+                 switch ($request->status) {
+                    case '1':
+                         $message = "Claimed to Company";
+                         break;
+                    case '2':
+                         $message = "Customer Payable";
+                         break;
+                    case '3':
+                         $message = "Approved";
+                         break;
+                    case '4':
+                         $message = "Canceled";
+                         break;
+                    default:
+                         $message = "Draft";
+                         break;
+                 }
+
+                 $service_bill->status = $request->status;
+                 $service_bill->save();
+                 return response()->json(['status' => true , 'message' => 'Service bill status is now ' .$message , 'data' => $service_bill],$this->successStatus);
+            }
+            return response()->json(['status' => true , 'message' => 'No changes detected', 'data' => $service_bill],$this->successStatus);            
+        }catch(\Exception $e){
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
     }

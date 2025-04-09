@@ -35,6 +35,7 @@ use App\Http\Controllers\Api\SapStockController;
 use App\Http\Controllers\Api\MspActivityController;
 use App\Http\Controllers\Api\ComplaintApiController;
 use App\Http\Controllers\Api\ServiceBillController;
+use App\Http\Controllers\Api\ComplaintAPICustomerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -133,6 +134,29 @@ Route::group(['middleware' => ['auth:customers']], function () {
     Route::any('customer/getComplaints', [ComplaintController::class, 'getComplaints']);
     Route::post('customer/addComplaint', [ComplaintController::class, 'addComplaint']);
     Route::any('customer/getComplaintCounts', [ComplaintController::class, 'getComplaintCounts']);
+
+    // complaint API for service center
+   Route::prefix('customer')->group(function () {
+        // Complaint API routes
+        Route::apiResource('complaints', ComplaintAPICustomerController::class)->only(['index', 'show', 'update']);
+        Route::post('complaint/work-done/{id}', [ComplaintAPICustomerController::class, 'work_done_submit']);
+        Route::get('complaint/select-option', [ComplaintAPICustomerController::class, 'select_option']);
+        Route::get('complaint/complaint-type-count', [ComplaintAPICustomerController::class, 'complaint_type_count']);
+        Route::get('complaint/filter-option', [ComplaintAPICustomerController::class, 'filter_option']);
+        Route::get('complaint/{id}/get-notes', [ComplaintAPICustomerController::class, 'getNotes']);
+
+        // Service Bill API routes
+        Route::get('service-bill-list', [ServiceBillController::class, 'index']);
+        Route::get('complaint/{id}/service-bill', [ServiceBillController::class, 'create']);
+        Route::get('service-bill/reasons', [ServiceBillController::class, 'serviceBillComplaintReasons']);
+        Route::post('complaint/{id}/service-bill/create', [ServiceBillController::class, 'store']);
+        Route::get('complaint/{id}/service-bill/select-option', [ServiceBillController::class, 'select_option']);
+        Route::get('service-bill/{service_id}/details', [ServiceBillController::class, 'show']);
+        Route::post('service-bill/{service_id}/update', [ServiceBillController::class, 'update']);
+        Route::post('service-bill/{service_id}/update-status', [ServiceBillController::class, 'change_status']);
+        Route::get('complaint/{id}/service-charge-product', [ServiceBillController::class, 'getServiceChargeProduct']);
+        Route::get('service-charge-product/{id}', [ServiceBillController::class, 'getServiceProductDetails']);
+    });
 });
 
 Route::group(['middleware' => ['auth:users']], function () {
@@ -284,4 +308,5 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::post('service-bill/{service_id}/update-status', [ServiceBillController::class, 'edit']);
     Route::get('complaint/{id}/service-charge-product', [ServiceBillController::class, 'getServiceChargeProduct']);
     Route::get('service-charge-product/{id}', [ServiceBillController::class, 'getServiceProductDetails']);
+    Route::post('service-bill/{service_id}/update-status', [ServiceBillController::class, 'change_status']);
 });

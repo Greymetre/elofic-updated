@@ -20,7 +20,7 @@ use Carbon\Carbon;
 use App\Models\Branch;
 use App\Models\EmployeeDetail;
 
-class ComplaintApiController extends Controller
+class ComplaintAPICustomerController extends Controller
 {
 
     public function __construct()
@@ -47,16 +47,13 @@ class ComplaintApiController extends Controller
     public function index(Request $request)
     {
         try {
-            if ($request->user()->hasRole('Service Eng') || $request->user()->hasRole('Service Admin') || $request->user()->hasRole('superadmin')) {
+            
+            if (isset($request->user()->customertype) && $request->user()->customertype ==  4){
                 $filters = $request->all();
-                if ($request->user()->hasRole('superadmin') || $request->user()->hasRole('Service Admin')) {
-                    $query = Complaint::select('id', 'complaint_number', 'complaint_status', 'complaint_date')->orderBy('id', 'desc');
-                } else {
                     // $user_ids = getUsersReportingToAuth($request->user()->id);
-                    $user_ids = [$request->user()->id]; 
-                    $query = Complaint::whereIn('assign_user', $user_ids)
-                        ->select('id', 'complaint_number', 'complaint_status', 'complaint_date')->orderBy('id', 'desc');
-                }
+                $user_id = $request->user()->id; 
+                $query = Complaint::where('service_center', $user_id)
+                    ->select('id', 'complaint_number', 'complaint_status', 'complaint_date')->orderBy('id', 'desc');
 
                 if (isset($request->from_date) && isset($request->to_date)) {
                     $complaint_from_date = Carbon::parse($request->from_date)->startOfDay()->format('Y-m-d');
@@ -104,7 +101,7 @@ class ComplaintApiController extends Controller
                     return response()->json(['status' => 'success', 'data' => "No Complaints"], $this->notFound);
                 }
             } else {
-                return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'], $this->notFound);
+                return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Center'], $this->notFound);
             }
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
@@ -141,7 +138,7 @@ class ComplaintApiController extends Controller
     public function show($id, Request $request)
     {
         try {
-            if ($request->user()->hasRole('Service Eng') || $request->user()->hasRole('superadmin')) {
+             if (isset($request->user()->customertype) && $request->user()->customertype ==  4){
 
                 $complaint = Complaint::with([
                     'customer:id,customer_name,customer_number,customer_email,customer_address,customer_place,customer_state,customer_district,customer_city,customer_pindcode',
@@ -154,15 +151,11 @@ class ComplaintApiController extends Controller
                     'party',
                     'purchased_branch_details',
                     'warranty_details'
-                ])->where('id', $id)
-                    ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                        return $query->where('assign_user', $request->user()->id);
-                    })
-                    ->first();
-
+                ])->where(['id'=> $id , 'service_center' => $request->user()->id])
+                ->first();
 
                 if (!$complaint) {
-                    return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'], $this->notFound);
+                     return response()->json(['status' => 'error', 'message' => 'This complaint is not assign to this service center'], $this->notFound);
                 }
 
                 $work_done = ComplaintWorkDone::where('complaint_id', $complaint->id)->latest()->first();
@@ -349,7 +342,7 @@ class ComplaintApiController extends Controller
                     return response()->json(['status' => 'success', 'data' => "No Complaints"], $this->successStatus);
                 }
             } else {
-                return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'], $this->notFound);
+                  return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Center'], $this->notFound);
             }
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
@@ -377,7 +370,7 @@ class ComplaintApiController extends Controller
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'complaint_status' => 'nullable|in:0,3,4,5',
+            'complaint_status' => 'nullable|in:3,4',
             'assign_user'      => 'nullable|integer',
             'service_center'   => 'nullable|integer'
         ]);
@@ -398,13 +391,10 @@ class ComplaintApiController extends Controller
                 ], $this->badrequest); // 400 Bad Request
             }
             $data = [];
-            $complaint = Complaint::where('id', $id)
-                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                    return $query->where('assign_user', $request->user()->id);
-                })
+            $complaint = Complaint::where(['id'=> $id , 'service_center' => $request->user()->id])
                 ->first();
             if (!$complaint) {
-                return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'], $this->notFound);
+                return response()->json(['status' => 'error', 'message' => 'This complaint is not assign to this service center'], $this->notFound);
             }
             if (isset($request->complaint_status)) {
                 if ($request->complaint_status != $complaint->complaint_status) {
@@ -526,16 +516,10 @@ class ComplaintApiController extends Controller
             ], 422); // 422 Unprocessable Entity
         }
         try {
-            $complaint = Complaint::where('id', $id)
-                 ->when(
-                    !$request->user()->hasRole('superadmin') && !$request->user()->hasRole('Service Admin'),
-                    function ($query) use ($request) {
-                        return $query->where('assign_user', $request->user()->id);
-                    }
-                )
+            $complaint = Complaint::where(['id'=> $id , 'service_center' => $request->user()->id])
                 ->first();
             if (!$complaint) {
-                return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'], $this->notFound);
+                return response()->json(['status' => 'error', 'message' => 'This complaint is not assign to this service center'], $this->notFound);
             }
             if ($complaint->complaint_status != 0) {
                 return response()->json([
@@ -720,16 +704,14 @@ class ComplaintApiController extends Controller
      public function complaint_type_count(Request $request)
     {
         try {
-            if ($request->user()->hasRole('Service Eng') || $request->user()->hasRole('Service Admin') || $request->user()->hasRole('superadmin')) {
+             if (isset($request->user()->customertype) && $request->user()->customertype ==  4){
                 $filters = $request->all();
-                if ($request->user()->hasRole('superadmin') || $request->user()->hasRole('Service Admin')) {
-                    $query = Complaint::select('id', 'complaint_number', 'complaint_status', 'complaint_date')->orderBy('id', 'desc');
-                } else {
-                    // $user_ids = getUsersReportingToAuth($request->user()->id);
-                     $user_ids = [$request->user()->id]; 
-                    $query = Complaint::whereIn('assign_user', $user_ids)
-                        ->select('id', 'complaint_number', 'complaint_status', 'complaint_date')->orderBy('id', 'desc');
-                }
+
+                // $user_ids = getUsersReportingToAuth($request->user()->id);
+                $user_ids = [$request->user()->id]; 
+                $query = Complaint::whereIn('service_center', $user_ids)
+                    ->select('id', 'complaint_number', 'complaint_status', 'complaint_date')->orderBy('id', 'desc');
+
 
                 if (isset($request->from_date) && isset($request->to_date)) {
                     $complaint_from_date = Carbon::parse($request->from_date)->startOfDay()->format('Y-m-d');
@@ -753,7 +735,7 @@ class ComplaintApiController extends Controller
                     return response()->json(['status' => 'success', 'data' => "No Complaints"], $this->notFound);
                 }
             } else {
-                return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'], $this->notFound);
+                return response()->json(['status' => 'error', 'message' => 'This complaint is not assign to this service center'], $this->notFound);
             }
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
@@ -762,16 +744,10 @@ class ComplaintApiController extends Controller
 
     public function getNotes(Request $request , $id){
           try {
-            $complaint = Complaint::where('id', $id)
-                ->when(
-                    !$request->user()->hasRole('superadmin') && !$request->user()->hasRole('Service Admin'),
-                    function ($query) use ($request) {
-                        return $query->where('assign_user', $request->user()->id);
-                    }
-                )
+           $complaint = Complaint::where(['id'=> $id , 'service_center' => $request->user()->id])
                 ->first();
             if (!$complaint) {
-                return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'], $this->notFound);
+                return response()->json(['status' => 'error', 'message' => 'This complaint is not assign to this service center'], $this->notFound);
             }
 
            $complaint_timeline = ComplaintTimeline::with('created_by_details')

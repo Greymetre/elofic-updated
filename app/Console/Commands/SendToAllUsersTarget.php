@@ -33,7 +33,7 @@ class SendToAllUsersTarget extends Command
 
         $url = "https://dashboard.fieldkonnect.io/power-bi/public/api/insertUsersTarget";
 
-        $users_target = SalesTargetUsers::all();
+        $users_target = SalesTargetUsers::where('type', 'primary')->get();
 
         if ($users_target->isEmpty()) {
             $this->info('No users target found.');
