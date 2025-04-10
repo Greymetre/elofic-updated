@@ -50,12 +50,18 @@ class ComplaintApiController extends Controller
             if ($request->user()->hasRole('Service Eng') || $request->user()->hasRole('Service Admin') || $request->user()->hasRole('superadmin')) {
                 $filters = $request->all();
                 if ($request->user()->hasRole('superadmin') || $request->user()->hasRole('Service Admin')) {
-                    $query = Complaint::select('id', 'complaint_number', 'complaint_status', 'complaint_date')->orderBy('id', 'desc');
+                    $query = Complaint::with(['service_bill' => function ($query) {
+                                $query->select('id', 'complaint_id' , 'status'); // Add columns you need
+                            }])->select('id', 'complaint_number', 'complaint_status', 'complaint_date'  ,'category' , 'service_type')->orderBy('id', 'desc');
                 } else {
                     // $user_ids = getUsersReportingToAuth($request->user()->id);
                     $user_ids = [$request->user()->id]; 
-                    $query = Complaint::whereIn('assign_user', $user_ids)
-                        ->select('id', 'complaint_number', 'complaint_status', 'complaint_date')->orderBy('id', 'desc');
+                    $query = Complaint::with(['service_bill' => function ($query) {
+                        $query->select('id', 'complaint_id' , 'status'); // Add columns you need
+                    }])
+                    ->whereIn('assign_user', $user_ids)
+                    ->select('id', 'complaint_number', 'complaint_status', 'complaint_date', 'category' , 'service_type')
+                    ->orderBy('id', 'desc');
                 }
 
                 if (isset($request->from_date) && isset($request->to_date)) {
@@ -248,7 +254,7 @@ class ComplaintApiController extends Controller
                 $data['warranty_customer_bill_date'] = getDateInIndFomate($complaint->customer_bill_date) ?? null;
                 $result = app(AjaxController::class)->getProductTimeInterval(new Request([
                     'product_id' => $complaint->product_id,
-                    'sale_bill_date' => $complaint->company_sale_bill_date
+                    'sale_bill_date' => $complaint->customer_bill_date
                 ]));
                 $response = $result->getData(true);
                 $data['warranty_upto'] = $response['warrenty_expire_date'] ?? null;

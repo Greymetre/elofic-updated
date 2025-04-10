@@ -675,7 +675,7 @@ class ComplaintController extends Controller
         $service_centers = Customers::where('customertype', '4')->select('id', 'name', 'customer_code')->get();
         $result = app(AjaxController::class)->getProductTimeInterval(new Request([
             'product_id' => $complaint->product_id,
-            'sale_bill_date' => $complaint->company_sale_bill_date
+            'sale_bill_date' => $complaint->customer_bill_date
         ]));
         $response = $result->getData(true);
         return view('complaint.show', compact('complaint', 'timelines', 'assign_users', 'service_centers', 'work_done', 'service_bill', 'complete_complaint', 'close_complaint' , 'response'));

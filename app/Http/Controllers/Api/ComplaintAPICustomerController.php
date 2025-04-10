@@ -52,8 +52,10 @@ class ComplaintAPICustomerController extends Controller
                 $filters = $request->all();
                     // $user_ids = getUsersReportingToAuth($request->user()->id);
                 $user_id = $request->user()->id; 
-                $query = Complaint::where('service_center', $user_id)
-                    ->select('id', 'complaint_number', 'complaint_status', 'complaint_date')->orderBy('id', 'desc');
+                $query = Complaint::with(['service_bill' => function ($query) {
+                            $query->select('id', 'complaint_id' , 'status'); // Add columns you need
+                        }])->where('service_center', $user_id)
+                        ->select('id', 'complaint_number', 'complaint_status', 'complaint_date' , 'service_type')->orderBy('id', 'desc');
 
                 if (isset($request->from_date) && isset($request->to_date)) {
                     $complaint_from_date = Carbon::parse($request->from_date)->startOfDay()->format('Y-m-d');
@@ -241,7 +243,7 @@ class ComplaintAPICustomerController extends Controller
                 $data['warranty_customer_bill_date'] = getDateInIndFomate($complaint->customer_bill_date) ?? null;
                 $result = app(AjaxController::class)->getProductTimeInterval(new Request([
                     'product_id' => $complaint->product_id,
-                    'sale_bill_date' => $complaint->company_sale_bill_date
+                    'sale_bill_date' => $complaint->customer_bill_date
                 ]));
                 $response = $result->getData(true);
                 $data['warranty_upto'] = $response['warrenty_expire_date'] ?? null;

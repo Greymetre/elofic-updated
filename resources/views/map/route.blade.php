@@ -14,6 +14,10 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAVSDwHbKULnZa93kYpYINTqX4eaWy9q18&libraries=marker"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-marker-clusterer/1.0.0/markerclusterer.js"></script>
 
+    <!-- <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAVSDwHbKULnZa93kYpYINTqX4eaWy9q18&callback=initMap">
+    </script> -->
+
 </head>
 
 <body>
@@ -130,6 +134,81 @@
 
         window.onload = initMap;
     </script>
+
+    <!-- <script>
+        const locations = @json($coordinates['2025-04-10']);
+        
+        function initMap() {
+         
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 13,
+                center: {
+                    lat: parseFloat(locations[0].latitude),
+                    lng: parseFloat(locations[0].longitude)
+                }
+            });
+
+            const directionsService = new google.maps.DirectionsService();
+            const directionsRenderer = new google.maps.DirectionsRenderer({
+                map: map,
+                suppressMarkers: true
+            });
+
+            const origin = {
+                lat: parseFloat(locations[0].latitude),
+                lng: parseFloat(locations[0].longitude)
+            };
+            const destination = {
+                lat: parseFloat(locations[locations.length - 1].latitude),
+                lng: parseFloat(locations[locations.length - 1].longitude)
+            };
+
+            const waypoints = locations.slice(1, -1).map(loc => ({
+                location: {
+                    lat: parseFloat(loc.latitude),
+                    lng: parseFloat(loc.longitude)
+                },
+                stopover: true
+            }));
+
+            directionsService.route({
+                origin: origin,
+                destination: destination,
+                waypoints: waypoints,
+                travelMode: google.maps.TravelMode.DRIVING
+            }, (response, status) => {
+                if (status === 'OK') {
+                    directionsRenderer.setDirections(response);
+
+                    // Add custom markers with tooltips
+                    const infoWindow = new google.maps.InfoWindow();
+
+                    locations.forEach((loc, index) => {
+                        const marker = new google.maps.Marker({
+                            position: {
+                                lat: parseFloat(loc.latitude),
+                                lng: parseFloat(loc.longitude)
+                            },
+                            map: map,
+                            label: `${index + 1}`,
+                            title: loc.name
+                        });
+
+                        marker.addListener('mouseover', () => {
+                            infoWindow.setContent(`<strong>${loc.name}</strong><br>${loc.time ?? ''}`);
+                            infoWindow.open(map, marker);
+                        });
+
+                        marker.addListener('mouseout', () => {
+                            infoWindow.close();
+                        });
+                    });
+                } else {
+                    alert('Directions request failed: ' + status);
+                }
+            });
+        }
+    </script> -->
 
 
 </body>

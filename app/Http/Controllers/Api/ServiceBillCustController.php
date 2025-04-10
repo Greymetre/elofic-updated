@@ -20,7 +20,7 @@ use Illuminate\Validation\ValidationException;
 use App\Http\Controllers\AjaxController;
 use Exception;
 
-class ServiceBillController extends Controller
+class ServiceBillCustController extends Controller
 {
 
     public function __construct()
@@ -45,25 +45,25 @@ class ServiceBillController extends Controller
      */
     public function index(Request $request) {
         try{
-            if($request->user()->hasRole('Service Admin') || $request->user()->hasRole('superadmin')) {
-                    $query = ServiceBill::select('id','bill_no','complaint_no' , 'complaint_id' , 'complaint_type' , 'complaint_reason');
-            }else{
-               $user_ids = [$request->user()->id]; 
-               $query = ServiceBill::whereHas('complaint', function ($query) use ($user_ids) {
-                    $query->whereIn('assign_user', $user_ids);
+            if (isset($request->user()->customertype) && $request->user()->customertype ==  4){
+               $user_id = $request->user()->id; 
+               $query = ServiceBill::whereHas('complaint', function ($query) use ($user_id) {
+                    $query->where('service_center', $user_id);
                 })->select('id','bill_no','complaint_no','complaint_id','complaint_type','complaint_reason');
 
-            }
-            $service_bills = [];
-            $query->chunk(100, function ($serviceBillsChunk) use (&$service_bills) {
-                foreach ($serviceBillsChunk as $service_bill) {
-                    $service_bills[] = $service_bill;
-                }
-            });
-            if(!empty($service_bills)) {
-                return response()->json(['status' => 'success', 'data' => $service_bills], $this->successStatus);
-            } else {
+                $service_bills = [];
+                $query->chunk(100, function ($serviceBillsChunk) use (&$service_bills) {
+                    foreach ($serviceBillsChunk as $service_bill) {
+                        $service_bills[] = $service_bill;
+                    }
+                });
+                if(!empty($service_bills)) {
+                    return response()->json(['status' => 'success', 'data' => $service_bills], $this->successStatus);
+                } else {
                 return response()->json(['status' => 'success', 'data' => "No Service Bill"], $this->notFound);
+                }
+            }else{
+                return response()->json(['status' => 'error', 'message' => 'Service Bill can access only Service Center'], $this->notFound);
             }
         }catch(\Exception $e){
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
@@ -86,14 +86,11 @@ class ServiceBillController extends Controller
                 'product_details.subcategories',
                 'createdbyname:id,name',
                 'warranty_details'
-            ])->where('id', $id)
-                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                    return $query->where('assign_user', $request->user()->id);
-                })
+            ])->where(['service_center' => $request->user()->id])
                 ->first();
 
             if (!$complaint) {
-                return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'], $this->notFound);
+                 return response()->json(['status' => 'error', 'message' => 'Service center don\'t have the access of this service bill'], $this->notFound);
             }
 
             $data = collect($complaint->only([
@@ -147,7 +144,7 @@ class ServiceBillController extends Controller
             if ($complaint) {
                 return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
             } else {
-                return response()->json(['status' => 'success', 'data' => "No Complaints"], $this->successStatus);
+                return response()->json(['status' => 'success', 'data' => "No Service Bill"], $this->successStatus);
             }
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
@@ -212,14 +209,11 @@ class ServiceBillController extends Controller
                 'product_details.subcategories',
                 'createdbyname:id,name',
                 'warranty_details'
-            ])->where('id', $id)
-                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                    return $query->where('assign_user', $request->user()->id);
-                })
+            ])->where(['id' => $id , 'service_center' => $request->user()->id])
                 ->first();
 
             if (!$complaint) {
-                return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'], $this->notFound);
+                return response()->json(['status' => 'error', 'message' => 'Loggedin uesr don\'t have access of this service'], $this->notFound);
             }
 
 
@@ -420,14 +414,12 @@ class ServiceBillController extends Controller
                 'product_details.subcategories',
                 'createdbyname:id,name',
                 'warranty_details'
-            ])->where('id', $service_bill->complaint_id)
-                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                    return $query->where('assign_user', $request->user()->id);
-                })
+            ])->where(['service_center' => $request->user()->id])
                 ->first();
 
+
             if (!$complaint) {
-                return response()->json(['status' => 'error', 'message' => 'Service Bill can access only Service Eng'], $this->notFound);
+                 return response()->json(['status' => 'error', 'message' => 'Service center don\'t have the access of this service bill'], $this->notFound);
             }
 
             $data = collect($complaint->only([
@@ -554,7 +546,7 @@ class ServiceBillController extends Controller
             if ($complaint) {
                 return response()->json(['status' => 'success', 'data' => $data], $this->successStatus);
             } else {
-                return response()->json(['status' => 'success', 'data' => "No Complaints"], $this->successStatus);
+                return response()->json(['status' => 'success', 'data' => "Service Bill Not Found"], $this->successStatus);
             }
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
@@ -621,15 +613,13 @@ class ServiceBillController extends Controller
                 'product_details.subcategories',
                 'createdbyname:id,name',
                 'warranty_details'
-            ])->where('id', $service_bill->complaint_id)
-                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                    return $query->where('assign_user', $request->user()->id);
-                })
+            ])->where(['id' => $id , 'service_center' => $request->user()->id])
                 ->first();
 
             if (!$complaint) {
-                return response()->json(['status' => 'error', 'message' => 'Service Bill can access only Service Eng'], $this->notFound);
+                return response()->json(['status' => 'error', 'message' => 'Loggedin uesr don\'t have access of this service bill'], $this->notFound);
             }
+
             $validator = Validator::make($request->all(), [
                 'serviceBillNo' => 'required',
                 'category_of_complaint' => 'nullable|string',
@@ -833,14 +823,11 @@ class ServiceBillController extends Controller
     {
         try {
             $data = [];
-            $complaint = Complaint::where('id', $id)
-                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                    return $query->where('assign_user', $request->user()->id);
-                })
+            $complaint = Complaint::where(['id'=> $id , 'service_center' => $request->user()->id])
                 ->first();
 
             if (!$complaint) {
-                return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'], $this->notFound);
+                return response()->json(['status' => 'error', 'message' => 'Service center don\'t have access of this service bill'], $this->notFound);
             }
 
             if($request->charge_type_id == 4){
@@ -895,14 +882,11 @@ class ServiceBillController extends Controller
                 'product_details.subcategories',
                 'createdbyname:id,name',
                 'warranty_details'
-            ])->where('id', $id)
-                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                    return $query->where('assign_user', $request->user()->id);
-                })
+            ])->where(['id'=> $id , 'service_center' => $request->user()->id])
                 ->first();
 
             if (!$complaint) {
-                return response()->json(['status' => 'error', 'message' => 'Complaint can access only Service Eng'], $this->notFound);
+                return response()->json(['status' => 'error', 'message' => 'Service center don\'t have access of this service bill'], $this->notFound);
             }
             $data = $this->getComplaintDropdowns($complaint);
             if ($complaint) {
@@ -919,7 +903,7 @@ class ServiceBillController extends Controller
     public function change_status(Request $request, $id){
         try{
             $validator = Validator::make($request->all(), [
-                   'status' => 'required|in:0,1,2,3,4'
+                   'status' => 'required|in:0,1,2,4'
             ]);
             if ($validator->fails()) {
                 return response()->json([
@@ -928,17 +912,14 @@ class ServiceBillController extends Controller
                     'errors' => $validator->errors()
                 ], 422); // 422 Unprocessable Entity
             }
-            if ($request->user()->hasAnyRole(['Service Admin', 'superadmin'])) {
-                $service_bill = ServiceBill::select('id', 'complaint_no', 'bill_no', 'status')->find($id);
-            } else {
-                $userId = $request->user()->id;
-                $service_bill = ServiceBill::where('id', $id)
-                    ->whereHas('complaint', function ($q) use ($userId) {
-                        $q->where('assign_user', $userId);
-                    })
-                    ->select('id', 'complaint_no', 'bill_no', 'status')
-                    ->first();
-            }
+
+            $userId = $request->user()->id;
+            $service_bill = ServiceBill::where('id', $id)
+                ->whereHas('complaint', function ($q) use ($userId) {
+                    $q->where('service_center', $userId);
+                })
+                ->select('id', 'complaint_no', 'bill_no', 'status')
+                ->first();
 
             if(!$service_bill){
                 return response()->json(['status' => 'error', 'message' => 'Loggedin uesr don\'t have a access to change the status of this service bill'], $this->notFound);

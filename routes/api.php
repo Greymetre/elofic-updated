@@ -36,6 +36,8 @@ use App\Http\Controllers\Api\MspActivityController;
 use App\Http\Controllers\Api\ComplaintApiController;
 use App\Http\Controllers\Api\ServiceBillController;
 use App\Http\Controllers\Api\ComplaintAPICustomerController;
+use App\Http\Controllers\Api\ServiceBillCustController;
+use App\Http\Controllers\Api\UserLatLongController;
 
 /*
 |--------------------------------------------------------------------------
@@ -146,16 +148,16 @@ Route::group(['middleware' => ['auth:customers']], function () {
         Route::get('complaint/{id}/get-notes', [ComplaintAPICustomerController::class, 'getNotes']);
 
         // Service Bill API routes
-        Route::get('service-bill-list', [ServiceBillController::class, 'index']);
-        Route::get('complaint/{id}/service-bill', [ServiceBillController::class, 'create']);
-        Route::get('service-bill/reasons', [ServiceBillController::class, 'serviceBillComplaintReasons']);
-        Route::post('complaint/{id}/service-bill/create', [ServiceBillController::class, 'store']);
-        Route::get('complaint/{id}/service-bill/select-option', [ServiceBillController::class, 'select_option']);
-        Route::get('service-bill/{service_id}/details', [ServiceBillController::class, 'show']);
-        Route::post('service-bill/{service_id}/update', [ServiceBillController::class, 'update']);
-        Route::post('service-bill/{service_id}/update-status', [ServiceBillController::class, 'change_status']);
-        Route::get('complaint/{id}/service-charge-product', [ServiceBillController::class, 'getServiceChargeProduct']);
-        Route::get('service-charge-product/{id}', [ServiceBillController::class, 'getServiceProductDetails']);
+        Route::get('service-bill-list', [ServiceBillCustController::class, 'index']);
+        Route::get('complaint/{id}/service-bill', [ServiceBillCustController::class, 'create']);
+        Route::get('service-bill/reasons', [ServiceBillCustController::class, 'serviceBillComplaintReasons']);
+        Route::post('complaint/{id}/service-bill/create', [ServiceBillCustController::class, 'store']);
+        Route::get('complaint/{id}/service-bill/select-option', [ServiceBillCustController::class, 'select_option']);
+        Route::get('service-bill/{service_id}/details', [ServiceBillCustController::class, 'show']);
+        Route::post('service-bill/{service_id}/update', [ServiceBillCustController::class, 'update']);
+        Route::post('service-bill/{service_id}/update-status', [ServiceBillCustController::class, 'change_status']);
+        Route::get('complaint/{id}/service-charge-product', [ServiceBillCustController::class, 'getServiceChargeProduct']);
+        Route::get('service-charge-product/{id}', [ServiceBillCustController::class, 'getServiceProductDetails']);
     });
 });
 
@@ -309,4 +311,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::get('complaint/{id}/service-charge-product', [ServiceBillController::class, 'getServiceChargeProduct']);
     Route::get('service-charge-product/{id}', [ServiceBillController::class, 'getServiceProductDetails']);
     Route::post('service-bill/{service_id}/update-status', [ServiceBillController::class, 'change_status']);
+
+    // User Latitude Longitude routes
+    Route::post('user/latitude-longitude', [UserLatLongController::class, 'store']);
 });

@@ -439,7 +439,7 @@ body table td {
                <h3 class="mt-2" style="color: black;"><b>Photos: </b></h3>
                <div class="border border-dark rounded p-4">
                   <div class="row mt-2 mb-2">
-                     <div class="col-md-3">
+                     <div class="col-md-3 file-upload-group">
                         <label for="product_sr_no">Product Sr. No.</label>
                         <div class="inp-div">
                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
@@ -447,6 +447,10 @@ body table td {
                            <input type="file" name="product_sr_no" id="product_sr_no" class="form-control file-input" accept="image/*">
                         </div>
                         <span class="file-count">0</span> files selected
+                         <div class="preview-wrapper" style="margin-top:10px;">
+                             <img class="preview-img" src="" style="display:none; max-height: 100px; border-radius: 5px;" />
+                             <!-- <p class="file-name" style="display:none; font-weight: bold; margin-top: 5px;"></p> -->
+                         </div>
                         @if($service_bill->exists && $service_bill->getMedia('product_sr_no')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('product_sr_no')[0]->getPath()))
                         <div class="imgdiv">
                            <a target="_blank" href="{{ $service_bill->getMedia('product_sr_no')[0]->getFullUrl() }}">
@@ -455,7 +459,7 @@ body table td {
                         </div>
                         @endif
                      </div>
-                     <div class="col-md-3">
+                     <div class="col-md-3 file-upload-group">
                         <label for="scr_job_card">SCR-Job Card</label>
                         <div class="inp-div">
                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
@@ -463,6 +467,10 @@ body table td {
                            <input type="file" name="scr_job_card" id="scr_job_card" class="form-control file-input" accept="image/*">
                         </div>
                         <span class="file-count">0</span> files selected
+                        <div class="preview-wrapper" style="margin-top:10px;">
+                             <img class="preview-img" src="" style="display:none; max-height: 100px; border-radius: 5px;" />
+                             <!-- <p class="file-name" style="display:none; font-weight: bold; margin-top: 5px;"></p> -->
+                         </div>
                         @if($service_bill->exists && $service_bill->getMedia('scr_job_card')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('scr_job_card')[0]->getPath()))
                         <div class="imgdiv">
                            <a target="_blank" href="{{ $service_bill->getMedia('scr_job_card')[0]->getFullUrl() }}">
@@ -471,7 +479,7 @@ body table td {
                         </div>
                         @endif
                      </div>
-                     <div class="col-md-3">
+                     <div class="col-md-3 file-upload-group">
                         <label for="photo_3">Complaint Photo 1</label>
                         <div class="inp-div">
                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
@@ -479,6 +487,10 @@ body table td {
                            <input type="file" name="photo_3" id="photo_3" class="form-control file-input" accept="image/*">
                         </div>
                         <span class="file-count">0</span> files selected
+                        <div class="preview-wrapper" style="margin-top:10px;">
+                             <img class="preview-img" src="" style="display:none; max-height: 100px; border-radius: 5px;" />
+                             <!-- <p class="file-name" style="display:none; font-weight: bold; margin-top: 5px;"></p> -->
+                         </div>
                         @if($service_bill->exists && $service_bill->getMedia('photo_3')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('photo_3')[0]->getPath()))
                         <div class="imgdiv">
                            <a target="_blank" href="{{ $service_bill->getMedia('photo_3')[0]->getFullUrl() }}">
@@ -487,7 +499,7 @@ body table td {
                         </div>
                         @endif
                      </div>
-                     <div class="col-md-3">
+                     <div class="col-md-3 file-upload-group">
                         <label for="photo_4">Complaint Photo 2</label>
                         <div class="inp-div">
                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
@@ -495,6 +507,10 @@ body table td {
                            <input type="file" name="photo_4" id="photo_4" class="form-control file-input" accept="image/*">
                         </div>
                         <span class="file-count">0</span> files selected
+                        <div class="preview-wrapper" style="margin-top:10px;">
+                             <img class="preview-img" src="" style="display:none; max-height: 100px; border-radius: 5px;" />
+                             <!-- <p class="file-name" style="display:none; font-weight: bold; margin-top: 5px;"></p> -->
+                         </div>
                         @if($service_bill->exists && $service_bill->getMedia('photo_4')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('photo_4')[0]->getPath()))
                         <div class="imgdiv">
                            <a target="_blank" href="{{ $service_bill->getMedia('photo_4')[0]->getFullUrl() }}">
@@ -503,7 +519,7 @@ body table td {
                         </div>
                         @endif
                      </div>
-                     <div class="col-md-3">
+                     <div class="col-md-3 file-upload-group">
                         <label for="photo_5">Complaint/Spare Photo </label>
                         <div class="inp-div">
                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
@@ -511,6 +527,10 @@ body table td {
                            <input type="file" name="photo_5" id="photo_5" class="form-control file-input" accept="image/*">
                         </div>
                         <span class="file-count">0</span> files selected
+                        <div class="preview-wrapper" style="margin-top:10px;">
+                             <img class="preview-img" src="" style="display:none; max-height: 100px; border-radius: 5px;" />
+                             <!-- <p class="file-name" style="display:none; font-weight: bold; margin-top: 5px;"></p> -->
+                         </div>
                         @if($service_bill->exists && $service_bill->getMedia('photo_5')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('photo_5')[0]->getPath()))
                         <div class="imgdiv">
                            <a target="_blank" href="{{ $service_bill->getMedia('photo_5')[0]->getFullUrl() }}">
@@ -519,7 +539,7 @@ body table td {
                         </div>
                         @endif
                      </div>
-                     <div class="col-md-3">
+                     <div class="col-md-3 file-upload-group">
                         <label for="photo_5">Voltage </label>
                         <div class="inp-div">
                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
@@ -527,6 +547,10 @@ body table td {
                            <input type="file" name="voltage_image" id="voltage_image" class="form-control file-input" accept="image/*">
                         </div>
                         <span class="file-count">0</span> files selected
+                        <div class="preview-wrapper" style="margin-top:10px;">
+                             <img class="preview-img" src="" style="display:none; max-height: 100px; border-radius: 5px;" />
+                             <!-- <p class="file-name" style="display:none; font-weight: bold; margin-top: 5px;"></p> -->
+                         </div>
                         @if($service_bill->exists && $service_bill->getMedia('voltage_image')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('voltage_image')[0]->getPath()))
                         <div class="imgdiv">
                            <a target="_blank" href="{{ $service_bill->getMedia('voltage_image')[0]->getFullUrl() }}">
@@ -535,7 +559,7 @@ body table td {
                         </div>
                         @endif
                      </div>
-                     <div class="col-md-3">
+                     <div class="col-md-3 file-upload-group">
                         <label for="photo_5">Current </label>
                         <div class="inp-div">
                            <i class="material-icons">upload_file</i><i class="material-icons">attach_file</i>
@@ -543,6 +567,10 @@ body table td {
                            <input type="file" name="current_image" id="current_image" class="form-control file-input" accept="image/*">
                         </div>
                         <span class="file-count">0</span> files selected
+                        <div class="preview-wrapper" style="margin-top:10px;">
+                             <img class="preview-img" src="" style="display:none; max-height: 100px; border-radius: 5px;" />
+                             <!-- <p class="file-name" style="display:none; font-weight: bold; margin-top: 5px;"></p> -->
+                         </div>
                         @if($service_bill->exists && $service_bill->getMedia('current_image')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('current_image')[0]->getPath()))
                         <div class="imgdiv">
                            <a target="_blank" href="{{ $service_bill->getMedia('current_image')[0]->getFullUrl() }}">
@@ -1091,6 +1119,37 @@ body table td {
 
          getServiceBillReason();
       })
+
+      // code for to show the preview of selected image
+      $(document).ready(function () {
+        $('.file-input').on('change', function () {
+            var fileInput = $(this)[0];
+            var file = fileInput.files[0];
+            var parent = $(this).closest('.file-upload-group');
+            var imageDiv = $(this).closest('.imgdiv');
+            var imgPreview = parent.find('.preview-img');
+            var fileNameDisplay = parent.find('.file-name');
+            var fileCountDisplay = parent.find('.file-count');
+            var existingImgDiv = parent.find('.imgdiv'); // ✅ correct selector
+
+             existingImgDiv.hide(); 
+            // Update file count
+            fileCountDisplay.text(fileInput.files.length);
+
+            // Handle preview and name
+            if (file && file.type.startsWith('image/')) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    imgPreview.attr('src', e.target.result).show();
+                    fileNameDisplay.text("Selected File: " + file.name).show();
+                };
+                reader.readAsDataURL(file);
+            } else {
+                imgPreview.hide().attr('src', '');
+                fileNameDisplay.hide().text('');
+            }
+        });
+    });
 
       function getServiceBillReason(){
          var complaint_type = $('#complaint_type').val();
