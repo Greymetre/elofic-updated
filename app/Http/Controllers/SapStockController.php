@@ -12,6 +12,9 @@ use App\Models\PrimarySales;
 use App\Models\ProductDetails;
 use Gate;
 
+use App\Models\Customers;
+use Illuminate\Support\Facades\Hash;
+
 class SapStockController extends Controller
 {
     /**
@@ -21,6 +24,12 @@ class SapStockController extends Controller
      */
     public function index(SAPStockDataTable $dataTable, Request $request)
     {
+        // $customers = Customers::where('customertype' , 4)->get();
+        // foreach ($customers as $key => $value) {
+        //     $password = Hash::make(substr($value->mobile , 2));
+        //     $value->password = $password;
+        //     $value->save();
+        // }
         abort_if(Gate::denies('sap_stock_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         return $dataTable->render('sap_stock.index');
     }

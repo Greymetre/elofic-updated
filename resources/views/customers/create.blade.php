@@ -284,6 +284,33 @@
                   </div>
             
               </div>
+            
+              @if(isset($customers['customertype']) && $customers['customertype'])
+                <div class="col-md-6">
+                  <div class="input_section">
+                    <label class="col-form-label">Change The Password</label>
+                    <div class="form-group has-default bmd-form-group">
+                      <input type="checkbox" id="change_password" name="pass_check" 
+                             style="width: 16px; height: 16px; margin-left: 12;" value="" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-6" style="display: none;" id="password_box">
+                  <div class="input_section">
+                    <label class="col-form-label">Password</label>
+                  
+                      <div class="form-group has-default bmd-form-group">
+                        <input type="password" name="password" id="password" class="form-control" autocomplete="new-password">
+                      </div>
+                      @if ($errors->has('password'))
+                      <div class="error">
+                        <p class="text-danger">{{ $errors->first('password') }}</p>
+                      </div>
+                      @endif
+                    </div>
+                </div>
+              @endif
 
 
    <div class="col-md-6" id="parentcustomer" style="display:none;">
@@ -969,7 +996,7 @@ $(document).ready(function(){
 
  // $(document).on('change','#type',function(e){
 
-    $('#type').change(function() {
+  $('#type').change(function() {
 
     var type = $('#type').val();
     if(type == '3'){
@@ -986,7 +1013,18 @@ $(document).ready(function(){
     $('#parentcustomer').prop("disabled", true) 
     }
 
- }).trigger('change');
+  }).trigger('change');
+
+   $(document).ready(function() {
+      $('#change_password').on('click', function() {
+          let isChecked = $(this).is(':checked');
+          if (isChecked) {
+              $('#password_box').show();
+          } else {
+              $('#password_box').hide();
+          }
+      });
+  });
 
 });
 </script>

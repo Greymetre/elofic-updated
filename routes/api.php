@@ -313,5 +313,5 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::post('service-bill/{service_id}/update-status', [ServiceBillController::class, 'change_status']);
 
     // User Latitude Longitude routes
-    Route::post('user/latitude-longitude', [UserLatLongController::class, 'store']);
+    Route::post('multi-latitude-longitude', [UserLatLongController::class, 'store']);
 });

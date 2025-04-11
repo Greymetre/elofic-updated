@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Passport\HasApiTokens;
 use Spatie\MediaLibrary\HasMedia;
+use Illuminate\Support\Facades\Hash;
+
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class Customers extends Authenticatable
@@ -104,6 +106,12 @@ class Customers extends Authenticatable
                 'updated_at' => $created_at
             ]) )
             {
+                 if (isset($request['customertype']) && $request['customertype'] == 4) {
+                    $mobile = substr($request['mobile'], 2); // remove country code
+                    Customers::where('id', $customer_id)->update([
+                        'password' => Hash::make($mobile)
+                    ]);
+                }
                 return $response = array('status' => 'success', 'message' => 'Customer Insert Successfully','customer_id' => $customer_id);
             }
             return $response = array('status' => 'error', 'message' => 'Error in Customer Store');
@@ -135,7 +143,7 @@ class Customers extends Authenticatable
             $customers->firmtype = !empty($request['firmtype'])? $request['firmtype']:null;
             //$customers->executive_id = !empty($request['executive_id'])? $request['executive_id']:null;
 
-            if($request['password'])
+            if(isset($request['password']))
             {
                 $customers->password = !empty($request['password'])? Hash::make($request['password']) :'';
             }

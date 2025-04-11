@@ -922,7 +922,10 @@
       });
 
       let debounceTimer; // Store the debounce timer
-      $("#product_serail_number").on("keyup", function() { 
+      $("#product_serail_number").on("keyup", function() {
+          if(!$(this).val()){
+            return ''
+          }
          clearTimeout(debounceTimer); 
          debounceTimer = setTimeout(() => {
             var product_serail_number = $('#product_serail_number').val();
@@ -940,6 +943,9 @@
             }
 
             var serial_no = $(this).val();
+            if(!serial_no){
+               return 0;
+            }
             var chekcPro = '{{($complaints && $complaints->product_id)?$complaints->product_id:""}}'
             $.ajax({
                url: "{{ url('getProductInfoBySerialNo') }}",
@@ -951,11 +957,10 @@
                },
                success: function(res) {
                   $("input, select, textarea")
-                  .not("#serail_number, #complaint_number, #complaint_date, #submit-btn , #company_sale_bill_date , #customer_bill_date , input[name='_token'] , #product_serail_number , #warrenty_time , #purchased_branch , #complaint_type , #register_by , #product_laying  , input[name='_method'] , #description , #complaint_recieve_via")
+                  .not("#serail_number, #complaint_number, #complaint_date, #submit-btn , #company_sale_bill_date , #customer_bill_date , input[name='_token'] , #product_serail_number , #warrenty_time , #purchased_branch , #complaint_type , #register_by , #product_laying  , input[name='_method'] , #description , #complaint_recieve_via , #service_center")
                   .val("")
                   .trigger('change');
                   if (res.status === true ) {
-                     console.log("inside");
                      $("#product_code").val(res.data.product_code);
                      $("#product_name").val(res.data.product_name);
                      $("#product_id").val(res.data.id);
@@ -981,7 +986,7 @@
                      
                      if (res.check_Warranty != null && res.check_Warranty.status == "1") {
                         $("input, select, textarea, button")
-                        .not("#serail_number, #complaint_number, #complaint_date, #product_serail_number, #product_group, #company_bill_date_month, #customer_bill_date_month , #warrenty_time , #purchased_branch , #complaint_type , #register_by , #product_laying , input[name='_method'] , #description , #complaint_recieve_via")
+                        .not("#serail_number, #complaint_number, #complaint_date, #product_serail_number, #product_group, #company_bill_date_month, #customer_bill_date_month , #warrenty_time , #purchased_branch , #complaint_type , #register_by , #product_laying , input[name='_method'] , #description , #complaint_recieve_via","#service_center")
                         .prop("readonly", false)
                         .prop("disabled", false);
                         $("#customer_bill_date").val(res.check_Warranty.sale_bill_date.split('-').reverse().join('-'));
@@ -1000,8 +1005,6 @@
                         warrantyDate.setHours(0, 0, 0, 0);
                         var today = new Date();
                         today.setHours(0, 0, 0, 0);
-
-                        console.log("hkjsdhfkjhkjhdkjsfj" ,warrantyDate , today);
 
                         if (res.check_Warranty.seller_details && res.check_Warranty.seller_details != null) {
                            var newOption = new Option(res.check_Warranty.seller_details.name, res.check_Warranty.seller_details.id, false, false);

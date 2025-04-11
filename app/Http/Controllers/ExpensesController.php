@@ -23,6 +23,7 @@ use App\Models\Attendance;
 use App\Models\CheckIn;
 use App\Models\Customers;
 use App\Models\TourProgramme;
+use App\Models\UserLiveLocation;
 
 class ExpensesController extends Controller
 {
@@ -848,91 +849,118 @@ class ExpensesController extends Controller
 
     public function all_map(Request $request)
     {
-        $rules = [
-            'user_id'   => 'required',
-            'date'      => 'required|date|before_or_equal:to_date',
-            'to_date'   => 'required|date|after_or_equal:date',
-        ];
+        if ($request->submit == 'Track') {
+            $rules = [
+                'user_id'   => 'required',
+            ];
 
-        $validator = Validator::make($request->all(), $rules);
+            $validator = Validator::make($request->all(), $rules);
+            if ($validator->fails()) {
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
 
-        // Additional Custom Validation
-        $validator->after(function ($validator) use ($request) {
-            $date = Carbon::parse($request->date);
+            $coordinates = [];
+
+            $all_data = UserLiveLocation::where('userid', $request->user_id)->whereDate('created_at', Carbon::today())->orderBy('id', 'asc')->get();
+
+            foreach ($all_data as $check) {
+                // Add Check-In Data
+                $coordinates[] = [
+                    'latitude' => $check->latitude,
+                    'longitude' => $check->longitude,
+                    'time' => $check->time,
+                ];
+            }
+
+            return view('map.track', compact('coordinates'));
+
+        } else {
+            $rules = [
+                'user_id'   => 'required',
+                'date'      => 'required|date|before_or_equal:to_date',
+                'to_date'   => 'required|date|after_or_equal:date',
+            ];
+
+            $validator = Validator::make($request->all(), $rules);
+
+            // Additional Custom Validation
+            $validator->after(function ($validator) use ($request) {
+                $date = Carbon::parse($request->date);
+                $toDate = Carbon::parse($request->to_date);
+
+                if ($date->diffInDays($toDate) > 30) {
+                    $validator->errors()->add('to_date', 'The date range must not exceed 30 days.');
+                }
+            });
+            if ($validator->fails()) {
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
+
+            $coordinates = [];
+            $fromDate = Carbon::parse($request->date);
             $toDate = Carbon::parse($request->to_date);
 
-            if ($date->diffInDays($toDate) > 30) {
-                $validator->errors()->add('to_date', 'The date range must not exceed 30 days.');
-            }
-        });
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
+            while ($fromDate->lte($toDate)) {
+                $date = $fromDate->format('Y-m-d');
 
-        $coordinates = [];
-        $fromDate = Carbon::parse($request->date);
-        $toDate = Carbon::parse($request->to_date);
+                $attan = Attendance::where('user_id', $request->user_id)
+                    ->where('punchin_date', $date)
+                    ->first();
 
-        while ($fromDate->lte($toDate)) {
-            $date = $fromDate->format('Y-m-d');
+                $checks = CheckIn::with('customers')
+                    ->where('user_id', $request->user_id)
+                    ->where('checkin_date', $date)
+                    ->get();
 
-            $attan = Attendance::where('user_id', $request->user_id)
-                ->where('punchin_date', $date)
-                ->first();
-
-            $checks = CheckIn::with('customers')
-                ->where('user_id', $request->user_id)
-                ->where('checkin_date', $date)
-                ->get();
-
-            if ($attan) {
-                $dayCoordinates = [];
-                $dayCoordinates[] = [
-                    'latitude' => $attan->punchin_latitude,
-                    'longitude' => $attan->punchin_longitude,
-                    'name' => 'Punch In',
-                    'date' => $date,
-                    'time' => $attan->punchin_time ? Carbon::createFromFormat('H:i:s', $attan->punchin_time)->format('g:i A') : '-',
-                ];
-
-                foreach ($checks as $check) {
-                    // Add Check-In Data
+                if ($attan) {
+                    $dayCoordinates = [];
                     $dayCoordinates[] = [
-                        'latitude' => $check->checkin_latitude,
-                        'longitude' => $check->checkin_longitude,
-                        'name' => ($check->customers ? $check->customers->name : '-') . ' : Check In (' . $date . ')',
-                        'time' => $check->checkin_time ? Carbon::createFromFormat('H:i:s', $check->checkin_time)->format('g:i A') : '-',
+                        'latitude' => $attan->punchin_latitude,
+                        'longitude' => $attan->punchin_longitude,
+                        'name' => 'Punch In',
+                        'date' => $date,
+                        'time' => $attan->punchin_time ? Carbon::createFromFormat('H:i:s', $attan->punchin_time)->format('g:i A') : '-',
                     ];
 
-                    // Add Check-Out Data if available
-                    if (!empty($check->checkout_latitude) && !empty($check->checkout_longitude)) {
+                    foreach ($checks as $check) {
+                        // Add Check-In Data
                         $dayCoordinates[] = [
-                            'latitude' => $check->checkout_latitude,
-                            'longitude' => $check->checkout_longitude,
-                            'name' => ($check->customers ? $check->customers->name : '-') . ' : Check Out (' . $date . ')',
-                            'time' => $check->checkout_time ? Carbon::createFromFormat('H:i:s', $check->checkout_time)->format('g:i A') : '-',
+                            'latitude' => $check->checkin_latitude,
+                            'longitude' => $check->checkin_longitude,
+                            'name' => ($check->customers ? $check->customers->name : '-') . ' : Check In (' . $date . ')',
+                            'time' => $check->checkin_time ? Carbon::createFromFormat('H:i:s', $check->checkin_time)->format('g:i A') : '-',
+                        ];
+
+                        // Add Check-Out Data if available
+                        if (!empty($check->checkout_latitude) && !empty($check->checkout_longitude)) {
+                            $dayCoordinates[] = [
+                                'latitude' => $check->checkout_latitude,
+                                'longitude' => $check->checkout_longitude,
+                                'name' => ($check->customers ? $check->customers->name : '-') . ' : Check Out (' . $date . ')',
+                                'time' => $check->checkout_time ? Carbon::createFromFormat('H:i:s', $check->checkout_time)->format('g:i A') : '-',
+                            ];
+                        }
+                    }
+
+
+                    if ($attan->punchout_latitude && !empty($attan->punchout_latitude)) {
+                        $dayCoordinates[] = [
+                            'latitude' => $attan->punchout_latitude,
+                            'longitude' => $attan->punchout_longitude,
+                            'name' => 'Punch Out',
+                            'date' => $date,
+                            'time' => $attan->punchout_time ? Carbon::createFromFormat('H:i:s', $attan->punchout_time)->format('g:i A') : '-',
                         ];
                     }
+
+                    $coordinates[$date] = $dayCoordinates;
                 }
 
-
-                if ($attan->punchout_latitude && !empty($attan->punchout_latitude)) {
-                    $dayCoordinates[] = [
-                        'latitude' => $attan->punchout_latitude,
-                        'longitude' => $attan->punchout_longitude,
-                        'name' => 'Punch Out',
-                        'date' => $date,
-                        'time' => $attan->punchout_time ? Carbon::createFromFormat('H:i:s', $attan->punchout_time)->format('g:i A') : '-',
-                    ];
-                }
-
-                $coordinates[$date] = $dayCoordinates;
+                $fromDate->addDay();
             }
 
-            $fromDate->addDay();
+            return view('map.route', compact('coordinates'));
         }
-
-        return view('map.route', compact('coordinates'));
     }
 
 
