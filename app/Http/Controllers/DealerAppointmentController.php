@@ -14,7 +14,12 @@ use Dompdf\Dompdf;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Gate;
-use Excel;
+use Google\Service\AdExchangeBuyerII\Deal;
+// use Excel;
+
+use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Concerns\ToCollection;
+use Illuminate\Support\Collection;
 
 class DealerAppointmentController extends Controller
 {
@@ -25,6 +30,7 @@ class DealerAppointmentController extends Controller
      */
     public function index(DealerAppointmentDataTable $dataTable)
     {
+
         abort_if(Gate::denies('dealer_appointment'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $divisions = DealerAppointment::groupBy('division')->pluck('division');
@@ -195,7 +201,7 @@ class DealerAppointmentController extends Controller
      */
     public function update(Request $request, DealerAppointment $dealerAppointment)
     {
-        DealerAppointment::where('id', $dealerAppointment->id)->update($request->except(['_token', 'profile_picture', 'service_policy', 'dealer_policy', 'mou_sheet', 'mcl_cheque_1', 'mcl_cheque_2', 'gst_certificate', 'adhar_card', 'pan_card', 'bank_statement', 'shop_image','cancel_cheque','application_form']));
+        DealerAppointment::where('id', $dealerAppointment->id)->update($request->except(['_token', 'profile_picture', 'service_policy', 'dealer_policy', 'mou_sheet', 'mcl_cheque_1', 'mcl_cheque_2', 'gst_certificate', 'adhar_card', 'pan_card', 'bank_statement', 'shop_image', 'cancel_cheque', 'application_form']));
 
         if ($request->hasFile('profile_picture')) {
             $file = $request->file('profile_picture');

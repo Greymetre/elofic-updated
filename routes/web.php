@@ -137,6 +137,9 @@ Route::post('/dealer-appointment-kyc-submit', [DealerAppointmentController::clas
 
 
 Route::group(['middleware' => ['auth']], function () {
+    Route::get('/sales_summary_dashboard', function () {
+        return view('dashboard.sales_summary_dashboard');
+   });
     //Dashboard
     Route::get('dashboard', [DashboardController::class, 'index']);
     Route::post('dashboardData', [DashboardController::class, 'dashboardData']);

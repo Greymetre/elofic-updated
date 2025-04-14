@@ -99,6 +99,8 @@ class ExpensesDataTable extends DataTable
                     $btn = $btn . "<button type='button' onclick='showExpense($query->id)' class='btn btn-dark'>Checked</span></button>";
                 } elseif ($query->checker_status == '4') {
                     $btn = $btn . "<button type='button' onclick='showExpense($query->id)' class='btn btn-info'>Checked By Reporting</span></button>";
+                }elseif ($query->checker_status == '5') {
+                    $btn = $btn . "<button type='button' onclick='showExpense($query->id)' class='btn btn-dark'>Hold</span></button>";
                 } else {
                     $btn = $btn . "<button type='button' onclick='showExpense($query->id)' class='btn btn-warning'>Pending</span></button>";
                 }

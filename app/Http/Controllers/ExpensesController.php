@@ -471,6 +471,8 @@ class ExpensesController extends Controller
                 $status = "Checked";
             } elseif ($item->checker_status == '4') {
                 $status = "Checked By Reporting";
+            } elseif ($item->checker_status == '5') {
+                $status = "Hold";
             } elseif ($item->checker_status == '0') {
                 $status = "Pending";
             }
@@ -665,6 +667,8 @@ class ExpensesController extends Controller
             $status_type = 'Checked';
         } elseif ($status == '4') {
             $status_type = 'Checked By Reporting';
+        } elseif ($status == '5') {
+            $status_type = 'Hold';
         }
 
         if ($request->id) {
