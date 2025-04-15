@@ -52,6 +52,10 @@ class ServiceBillCustController extends Controller
                 })->select('id','bill_no','complaint_no','complaint_id','complaint_type','complaint_reason');
 
                 $service_bills = [];
+                if(isset($request->status)){
+                    $query->where('status' , $request->status);
+                }
+
                 $query->chunk(100, function ($serviceBillsChunk) use (&$service_bills) {
                     foreach ($serviceBillsChunk as $service_bill) {
                         $service_bills[] = $service_bill;
@@ -86,7 +90,7 @@ class ServiceBillCustController extends Controller
                 'product_details.subcategories',
                 'createdbyname:id,name',
                 'warranty_details'
-            ])->where(['service_center' => $request->user()->id])
+            ])->where(['service_center' => $request->user()->id , 'id' => $id])
                 ->first();
 
             if (!$complaint) {

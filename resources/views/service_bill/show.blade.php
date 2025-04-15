@@ -68,28 +68,111 @@
               <div class="col-8 text-right">
 
 
-                @if(auth()->user()->can(['service_bill_change_status']))
+              @if(auth()->user()->hasRole(['superadmin']) || auth()->user()->hasRole(['Sub_Admin']))
 
-                @if($serviceBill->status=='0')
-                <button type="button" class="btn btn-sm btn-warning company_claim"><b>Claim to company</b></button>
-                <button type="button" class="btn btn-sm btn-info customer_pay"><b>Customer payble</b></button>
-                <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
-                @elseif($serviceBill->status=='1')
-                <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
-                <button type="button" class="btn btn-sm btn-success approve_status"><b>Approve</b></button>
-                <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
-                @elseif($serviceBill->status=='2')
-                <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
-                <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
-                @elseif($serviceBill->status=='3')
-                <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
-                <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
-                @elseif($serviceBill->status=='4')
-                <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
+               @if($serviceBill->status == '0')
+                    @can('claim_company')
+                        <button type="button" class="btn btn-sm btn-warning company_claim"><b>Claim to company</b></button>
+                    @endcan
+
+                    @can('customer_pay')
+                        <button type="button" class="btn btn-sm btn-info customer_pay"><b>Customer payble</b></button>
+                    @endcan
+
+                    @can('cancel_service_bill')
+                        <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
+                    @endcan
+
+                @elseif($serviceBill->status == '1')
+                    @can('draft_service_bill')
+                        <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
+                    @endcan
+
+                    @can('approve_service_bill')
+                        <button type="button" class="btn btn-sm btn-success approve_status"><b>Approve</b></button>
+                    @endcan
+
+                    @can('cancel_service_bill')
+                        <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
+                    @endcan
+
+                @elseif($serviceBill->status == '2')
+                    @can('draft_service_bill')
+                        <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
+                    @endcan
+
+                    @can('cancel_service_bill')
+                        <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
+                    @endcan
+
+                @elseif($serviceBill->status == '3')
+                    @can('draft_service_bill')
+                        <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
+                    @endcan
+
+                    @can('cancel_service_bill')
+                        <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
+                    @endcan
+
+                @elseif($serviceBill->status == '4')
+                    @can('draft_service_bill')
+                        <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
+                    @endcan
                 @endif
 
-                @endif
 
+              @else
+                 @if($serviceBill->status == '0')
+                    @can('claim_company')
+                        <button type="button" class="btn btn-sm btn-warning company_claim"><b>Claim to company</b></button>
+                    @endcan
+
+                    @can('customer_pay')
+                        <button type="button" class="btn btn-sm btn-info customer_pay"><b>Customer payble</b></button>
+                    @endcan
+
+                    @can('cancel_service_bill')
+                        <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
+                    @endcan
+
+                @elseif($serviceBill->status == '1')
+                    @can('approve_service_bill')
+                        <button type="button" class="btn btn-sm btn-success approve_status"><b>Approve</b></button>
+                    @endcan
+
+                    @can('cancel_service_bill')
+                        <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
+                    @endcan
+
+                @elseif($serviceBill->status == '2')
+                    @auth
+                        @if(auth()->user()->hasRole('CRM_Support'))
+                            @can('draft_service_bill')
+                                 <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
+                            @endcan
+                        @endif
+                    @endauth
+
+                    @can('cancel_service_bill')
+                        <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
+                    @endcan
+
+                @elseif($serviceBill->status == '3')
+                    <!-- @can('draft_service_bill')
+                        <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
+                    @endcan
+
+                    @can('cancel_service_bill')
+                        <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
+                    @endcan -->
+
+                @elseif($serviceBill->status == '4')
+                   <!--  @can('draft_service_bill')
+                        <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
+                    @endcan -->
+                @endif
+              @endif
+              
                 <?php
                 if (auth()->user()->can(['service_bill_edit'])) { ?>
 

@@ -87,7 +87,8 @@ use App\Http\Controllers\PlannedSOPController;
 use App\Http\Controllers\ClaimGenerationController;
 use App\Http\Controllers\ServiceBillComplaintType;
 use App\Http\Controllers\OpeningStockController;
-
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Gate;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -138,6 +139,7 @@ Route::post('/dealer-appointment-kyc-submit', [DealerAppointmentController::clas
 
 Route::group(['middleware' => ['auth']], function () {
     Route::get('/sales_summary_dashboard', function () {
+        abort_if(Gate::denies('sales_summary_dashboard'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         return view('dashboard.sales_summary_dashboard');
    });
     //Dashboard

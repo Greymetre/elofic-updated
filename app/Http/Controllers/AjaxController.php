@@ -1258,12 +1258,9 @@ class AjaxController extends Controller
             $serial_no = $request->input('serial_no');
             if ($serial_no != NULL && $serial_no != '') {
                 $data = Services::with('product')
-                    ->where(function ($query) use ($serial_no) {
-                        if (isset($serial_no)) {
-                            $query->where('serial_no', '=', $serial_no);
-                        }
-                    })
+                    ->where('serial_no' , $serial_no)
                     ->latest()->first();
+                // dd($data);
                 if ($data) {
                     $data->product->categories = $data->product->categories;
                     $data->product->subcategories = $data->product->subcategories;
@@ -2241,6 +2238,9 @@ class AjaxController extends Controller
                 }
             }
 
+        }
+        if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Sub_Admin') && !Auth::user()->hasRole('Service Admin') && !Auth::user()->hasRole('CRM_Support')){
+          $query->where('assign_user' , Auth::user()->id);
         }
         foreach ($filters as $key => $value) {
              if (isset($value))  {

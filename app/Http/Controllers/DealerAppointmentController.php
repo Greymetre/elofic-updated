@@ -18,8 +18,7 @@ use Google\Service\AdExchangeBuyerII\Deal;
 // use Excel;
 
 use Maatwebsite\Excel\Facades\Excel;
-use Maatwebsite\Excel\Concerns\ToCollection;
-use Illuminate\Support\Collection;
+
 
 class DealerAppointmentController extends Controller
 {
@@ -30,7 +29,6 @@ class DealerAppointmentController extends Controller
      */
     public function index(DealerAppointmentDataTable $dataTable)
     {
-
         abort_if(Gate::denies('dealer_appointment'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $divisions = DealerAppointment::groupBy('division')->pluck('division');

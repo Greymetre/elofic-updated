@@ -666,17 +666,6 @@
                         </div>
                         <div class="col-md-3">
                            <div class="input_section">
-                              <label class="col-form-label"> Customer Name </label>
-                              <input type="text" readonly name="customer_name_1" id="customer_name_1" class="form-control" value="{!! old( 'customer_name', $complaints['customer_name']) !!}">
-                              @if ($errors->has('customer_name_1'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('customer_name_1') }}</p>
-                              </div>
-                              @endif
-                           </div>
-                        </div>
-                        <div class="col-md-3">
-                           <div class="input_section">
                               <label class="col-form-label">Customer Complaint Type </label>
                               <select name="complaint_type" id="complaint_type" placeholder="Select Pincode" class="select2 form-control" required>
                                  <option value="" disabled selected>Complaint Type</option>
@@ -716,13 +705,14 @@
                            <div class="input_section">
                               <label class="col-form-label">Complaint Register By </label>
                               <select name="register_by" id="register_by" class="select2 form-control">
-                                 <option value="">Complaint Register By</option>
+                                 <option value="">Select</option>
                                  <option value="Dealer" {!! old( 'register_by' , $complaints['register_by'])=='Dealer' ?'selected':'' !!}>Dealer</option>
                                  <option value="Distributor" {!! old( 'register_by' , $complaints['register_by'])=='Distributor' ?'selected':'' !!}>Distributor</option>
                                  <option value="Retailer" {!! old( 'register_by' , $complaints['register_by'])=='Retailer' ?'selected':'' !!}>Retailer</option>
                                  <option value="Marketing Team" {!! old( 'register_by' , $complaints['register_by'])=='Marketing Team' ?'selected':'' !!}>Marketing Team</option>
                                  <option value="ASC" {!! old( 'register_by' , $complaints['register_by'])=='ASC' ?'selected':'' !!}>ASC</option>
                                  <option value="Service Enginer" {!! old( 'register_by' , $complaints['register_by'])=='Service Enginer' ?'selected':'' !!}>Service Enginer</option>
+                                  <option value="Service Enginer" {!! old( 'register_by' , $complaints['register_by'])=='Customer' ?'selected':'' !!}>Customer</option>
                               </select>
                               @if ($errors->has('register_by'))
                               <div class="error">
@@ -735,7 +725,7 @@
                            <div class="input_section">
                               <label class="col-form-label">Product Laying at </label>
                               <select name="product_laying" id="product_laying" class="select2 form-control">
-                                 <option value="">Product Laying at</option>
+                                 <option value="">Select</option>
                                  <option value="Customer" {!! old('product_laying', $complaints['product_laying'])=='Customer' ? 'selected' :'' !!}>Customer</option>
                                  <option value="Dealer" {!! old('product_laying', $complaints['product_laying'])=='Dealer' ? 'selected' :'' !!}>Dealer</option>
                                  <option value="Distributor" {!! old('product_laying', $complaints['product_laying'])=='Distributor' ? 'selected' :'' !!}>Distributor</option>
@@ -752,7 +742,7 @@
                         </div>
                          <div class="col-md-3">
                            <div class="input_section">
-                              <label class="col-form-label">Complaint Recieved Via </label>
+                              <label class="col-form-label">Select</label>
                               <select name="complaint_recieve_via" id="complaint_recieve_via" class="select2 form-control">
                                  <option value="">Complaint Recieved Via</option>
                                  <option value="WhatsApp" {!! old( 'register_by' , $complaints['complaint_recieve_via'])=='WhatsApp' ?'selected':'' !!}>WhatsApp</option>
@@ -1141,7 +1131,6 @@
             success: function(res) {
                if (res.status === true) {
                   $("#customer_name").val(res.data.customer_name);
-                  $("#customer_name_1").val(res.data.customer_name);
                   $("#end_user_id").val(res.data.id);
                   $("#customer_email").val(res.data.customer_email);
                   $("#customer_address").val(res.data.customer_address);
@@ -1159,7 +1148,7 @@
 
                } else {
                   $("#customer_name").val("");
-                  $("#customer_name_1").val("");
+
                   $("#end_user_id").val("");
                   $("#customer_email").val("");
                   $("#customer_address").val("");
@@ -1168,7 +1157,6 @@
                   $("#customer_state").val("");
                   $("#customer_district").val("");
                   $("#customer_city").val("");
-
                   $("#customer_name").prop('readonly', false);
                   $("#customer_email").prop('readonly', false);
                   $("#customer_address").prop('readonly', false);
@@ -1178,7 +1166,6 @@
                   $("#customer_district").prop('readonly', false);
                   $("#customer_city").prop('readonly', false);
                   $("#customer_name").prop('readonly', false);
-                  $("#customer_name_1").prop('readonly', false);
                   $("#customer_email").prop('readonly', false);
                }
             }
@@ -1474,7 +1461,21 @@
             }
          });
 
-
+         $('#storeComplaintData').validate({
+             rules:{
+               customer_number : {
+                  required : true,
+                  minlength : 10,
+                  maxlength: 10,
+               }
+             },
+             messages : {
+               customer_number : {
+                  minlength : "Customer mobile number must equal to 10 digits only",
+                  maxlength: "Customer mobile number must equal to 10 digits only",
+               }
+             }
+         });
       });
    </script>
 </x-app-layout>

@@ -54,6 +54,10 @@ class ServiceBillController extends Controller
                 })->select('id','bill_no','complaint_no','complaint_id','complaint_type','complaint_reason');
 
             }
+
+            if(isset($request->status)){
+                $query->where('status' , $request->status);
+            }
             $service_bills = [];
             $query->chunk(100, function ($serviceBillsChunk) use (&$service_bills) {
                 foreach ($serviceBillsChunk as $service_bill) {

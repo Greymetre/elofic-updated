@@ -60,6 +60,10 @@ class ComplaintExport implements FromCollection, WithHeadings, ShouldAutoSize, W
             $query->whereBetween('created_at', [$this->filters['start_date'], $this->filters['end_date']]);
         }
 
+        if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Sub_Admin') && !Auth::user()->hasRole('Service Admin') &&  !Auth::user()->hasRole('CRM_Support')){
+           $query->where('assign_user' , Auth::user()->id);
+        }
+
         // Loop through filters dynamically
 
         foreach ($this->filters as $key => $value) {
