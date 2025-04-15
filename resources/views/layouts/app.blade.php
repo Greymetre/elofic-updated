@@ -757,12 +757,34 @@
             <div class="menu">
                <ul class="menu-links">
                   @if(auth()->user()->can(['dashboard_access']))
-                  <li class="nav-link hide_icon {{ request()->is('dashboard') ? 'active' : '' }}">
+                  {{--<li class="nav-link hide_icon {{ request()->is('dashboard') ? 'active' : '' }}">
                      <a class="collapsed hoveradd" href="{{ url('dashboard') }}">
                         <i class="material-icons icon">dashboard</i>
                         <span>{!! trans('panel.sidemenu.dashboard') !!}</span>
                         <div class="d-none mobile_hide"> {!! trans('panel.sidemenu.dashboard') !!}</div>
                      </a>
+                  </li>--}}
+
+                  <li class="nav-link {{ request()->is('sales_summary_dashboard*') ? 'active' : '' }}">
+                     <a class="collapsed hoveradd" data-toggle="collapse" href="#dashMenu" aria-expanded="false">
+                        <i class="material-icons icon">diversity_3</i>
+                        <span> {!! trans('panel.sidemenu.dashboard') !!}
+                        </span>
+                        <div class="d-none mobile_hide">{!! trans('panel.sidemenu.dashboard') !!}</div>
+                     </a>
+                     <div class="collapse" id="dashMenu" style="">
+                        <ul class="navd">
+                           @if(auth()->user()->can(['sales_summary_dashboard']))
+                           <li class="nav-link-btn {{ request()->is('sales_summary_dashboard*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('sales_summary_dashboard') }}">
+                                 <i class="material-icons icon">transcribe</i>
+                                 <span>Sales Summary Dashboard</span>
+                                 <div class="d-none mobile_hide">Sales Summary Dashboard</div>
+                              </a>
+                           </li>
+                           @endif
+                        </ul>
+                     </div>
                   </li>
                   @endif
                   @if(auth()->user()->can(['customer_access']))
@@ -1051,13 +1073,14 @@
                                  <div class="d-none mobile_hide"> Planned S&OP</div>
                               </a>
                            </li>
-                           @if(auth()->user()->can('stockdetails_access'))
-                           <!-- <li class="nav-item {{ request()->is('production*') ? 'active' : '' }}">
-                                 <a class="nav-link" href="{{ url('production') }}">
-                                   <i class="material-icons">donut_small</i>
-                                   <p>Production</p>
+                           @if(auth()->user()->can('planned_forecast'))
+                            <li class="nav-link-btn {{ request()->is('planned-sop-forecast*') ? 'active' : '' }}">
+                                 <a class="hoveradd2" href="{{ url('planned-sop-forecast') }}">
+                                    <i class="material-icons icon">warehouse</i>
+                                    <span>S&OP Forecast</span>
+                                    <div class="d-none mobile_hide"> S&OP Forecast</div>
                                  </a>
-                                 </li> -->
+                              </li>
                            @endif
                         </ul>
                      </div>

@@ -553,13 +553,13 @@
                         @if($service_bill->status == '0')
                         <td><a href="{{route('service_bills.show', $service_bill->id)}}" title="Show Service Bill"><span class="badge badge-secondary">Draft</span></td>
                         @elseif($service_bill->status == '1')
-                        <td><span class="badge badge-warning">Claimed</span></td>
+                        <td><a href="{{route('service_bills.show', $service_bill->id)}}" title="Show Service Bill"><span class="badge badge-warning">Claimed</span></a></td>
                         @elseif($service_bill->status == '2')
-                        <td><span class="badge badge-info">Customer payble</span></td>
+                        <td><a href="{{route('service_bills.show', $service_bill->id)}}" title="Show Service Bill"><span class="badge badge-info">Customer payble</span></a></td>
                         @elseif($service_bill->status == '3')
-                        <td><span class="badge badge-success">Approve</span></td>
+                        <td><a href="{{route('service_bills.show', $service_bill->id)}}" title="Show Service Bill"><span class="badge badge-success">Approve</span></a></td>
                         @elseif($service_bill->status == '4')
-                        <td><span class="badge badge-danger">Cancel</span></td>
+                        <td><a href="{{route('service_bills.show', $service_bill->id)}}" title="Show Service Bill"><span class="badge badge-danger">Cancel</span></a></td>
                         @endif
                         @else
                         <td>-</td>
@@ -621,7 +621,7 @@
                 <div class="d-flex">
                   <i class="material-icons">double_arrow</i>
                   <p>
-                    Complaint <b> {!! $complaint['complaint_number'] !!} </b> {{$timeline->remark}} by <b>{{$timeline->created_by_details->name}}</b> on <b>{{date("d M Y, h:i a", strtotime($timeline->created_at));}}.</b>
+                    Complaint <b> {!! $complaint['complaint_number'] !!} </b> {{$timeline->remark}} by <b>{{$timeline->created_by_details->name ?? ''}}</b> on <b>{{date("d M Y, h:i a", strtotime($timeline->created_at));}}.</b>
                   </p>
                 </div>
                 @elseif($timeline->status == 'Note')
@@ -645,7 +645,7 @@
                 <div class="d-flex">
                   <i class="material-icons">double_arrow</i>
                   <p>
-                    Complaint <b> {!! $complaint['complaint_number'] !!} </b> assign to <b>{{$assign_user->name}}</b> by <b>{{$timeline->created_by_details->name}}</b> on <b>{{date("d M Y, h:i a", strtotime($timeline->created_at));}}.</b>
+                    Complaint <b> {!! $complaint['complaint_number'] !!} </b> assign to <b>{{$assign_user->name}}</b> by <b>{{$timeline->created_by_details->name ?? ''}}</b> on <b>{{date("d M Y, h:i a", strtotime($timeline->created_at));}}.</b>
                   </p>
                 </div>
                 @else
@@ -655,7 +655,7 @@
                     @if($assign_customer == NULL)
                     Complaint <b> {!! $complaint['complaint_number'] !!} </b> Unassign Service Center by <b>{{$timeline->created_by_details->name}}</b> on <b>{{date("d M Y, h:i a", strtotime($timeline->created_at));}}.</b>
                     @else
-                    Complaint <b> {!! $complaint['complaint_number'] !!} </b> assign to <b>{{$assign_customer->name}}</b> Service Center by <b>{{$timeline->created_by_details->name}}</b> on <b>{{date("d M Y, h:i a", strtotime($timeline->created_at));}}.</b>
+                    Complaint <b> {!! $complaint['complaint_number'] !!} </b> assign to <b>{{$assign_customer->name}}</b> Service Center by <b>{{$timeline->created_by_details->name ?? ''}}</b> on <b>{{date("d M Y, h:i a", strtotime($timeline->created_at));}}.</b>
                     @endif
                   </p>
                 </div>
@@ -664,7 +664,7 @@
                 <div class="d-flex">
                   <i class="material-icons">double_arrow</i>
                   <p>
-                    Complaint <b> {!! $complaint['complaint_number'] !!} </b> moved to <b>{{$status_is}}</b> by <b>{{$timeline->created_by_details->name}}</b> on <b>{{date("d M Y, h:i a", strtotime($timeline->created_at));}}.</b>
+                    Complaint <b> {!! $complaint['complaint_number'] !!} </b> moved to <b>{{$status_is}}</b> by <b>{{$timeline->created_by_details->name ?? ''}}</b> on <b>{{date("d M Y, h:i a", strtotime($timeline->created_at));}}.</b>
                   </p>
                 </div>
                 @endif

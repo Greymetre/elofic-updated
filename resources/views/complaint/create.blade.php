@@ -666,6 +666,17 @@
                         </div>
                         <div class="col-md-3">
                            <div class="input_section">
+                              <label class="col-form-label"> Customer Name </label>
+                              <input type="text" readonly name="customer_name_1" id="customer_name_1" class="form-control" value="{!! old( 'customer_name', $complaints['customer_name']) !!}">
+                              @if ($errors->has('customer_name_1'))
+                              <div class="error">
+                                 <p class="text-danger">{{ $errors->first('customer_name_1') }}</p>
+                              </div>
+                              @endif
+                           </div>
+                        </div>
+                        <div class="col-md-3">
+                           <div class="input_section">
                               <label class="col-form-label">Customer Complaint Type </label>
                               <select name="complaint_type" id="complaint_type" placeholder="Select Pincode" class="select2 form-control" required>
                                  <option value="" disabled selected>Complaint Type</option>
@@ -911,7 +922,10 @@
       });
 
       let debounceTimer; // Store the debounce timer
-      $("#product_serail_number").on("keyup", function() { 
+      $("#product_serail_number").on("keyup", function() {
+          if(!$(this).val()){
+            return ''
+          }
          clearTimeout(debounceTimer); 
          debounceTimer = setTimeout(() => {
             var product_serail_number = $('#product_serail_number').val();
@@ -929,6 +943,9 @@
             }
 
             var serial_no = $(this).val();
+            if(!serial_no){
+               return 0;
+            }
             var chekcPro = '{{($complaints && $complaints->product_id)?$complaints->product_id:""}}'
             $.ajax({
                url: "{{ url('getProductInfoBySerialNo') }}",
@@ -940,11 +957,10 @@
                },
                success: function(res) {
                   $("input, select, textarea")
-                  .not("#serail_number, #complaint_number, #complaint_date, #submit-btn , #company_sale_bill_date , #customer_bill_date , input[name='_token'] , #product_serail_number , #warrenty_time , #purchased_branch , #complaint_type , #register_by , #product_laying  , input[name='_method'] , #description , #complaint_recieve_via")
+                  .not("#serail_number, #complaint_number, #complaint_date, #submit-btn , #company_sale_bill_date , #customer_bill_date , input[name='_token'] , #product_serail_number , #warrenty_time , #purchased_branch , #complaint_type , #register_by , #product_laying  , input[name='_method'] , #description , #complaint_recieve_via , #service_center")
                   .val("")
                   .trigger('change');
                   if (res.status === true ) {
-                     console.log("inside");
                      $("#product_code").val(res.data.product_code);
                      $("#product_name").val(res.data.product_name);
                      $("#product_id").val(res.data.id);
@@ -970,7 +986,7 @@
                      
                      if (res.check_Warranty != null && res.check_Warranty.status == "1") {
                         $("input, select, textarea, button")
-                        .not("#serail_number, #complaint_number, #complaint_date, #product_serail_number, #product_group, #company_bill_date_month, #customer_bill_date_month , #warrenty_time , #purchased_branch , #complaint_type , #register_by , #product_laying , input[name='_method'] , #description , #complaint_recieve_via")
+                        .not("#serail_number, #complaint_number, #complaint_date, #product_serail_number, #product_group, #company_bill_date_month, #customer_bill_date_month , #warrenty_time , #purchased_branch , #complaint_type , #register_by , #product_laying , input[name='_method'] , #description , #complaint_recieve_via","#service_center")
                         .prop("readonly", false)
                         .prop("disabled", false);
                         $("#customer_bill_date").val(res.check_Warranty.sale_bill_date.split('-').reverse().join('-'));
@@ -978,7 +994,15 @@
                         $("#customer_number").val(res.check_Warranty.customer.customer_number);
                         $("#customer_number").keyup();
                         $("#customer_bill_date").change();
-                        var warrantyDate = new Date(res.check_Warranty.warranty_date);
+                        var rawDate = res.check_Warranty.warranty_date; // e.g., "24-10-2025"
+
+                        // Split and reformat to "YYYY-MM-DD"
+                        var parts = rawDate.split("-");
+                        var formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+
+                        // Create Date objects
+                        var warrantyDate = new Date(formattedDate);
+                        warrantyDate.setHours(0, 0, 0, 0);
                         var today = new Date();
                         today.setHours(0, 0, 0, 0);
 
@@ -1117,6 +1141,7 @@
             success: function(res) {
                if (res.status === true) {
                   $("#customer_name").val(res.data.customer_name);
+                  $("#customer_name_1").val(res.data.customer_name);
                   $("#end_user_id").val(res.data.id);
                   $("#customer_email").val(res.data.customer_email);
                   $("#customer_address").val(res.data.customer_address);
@@ -1134,6 +1159,7 @@
 
                } else {
                   $("#customer_name").val("");
+                  $("#customer_name_1").val("");
                   $("#end_user_id").val("");
                   $("#customer_email").val("");
                   $("#customer_address").val("");
@@ -1152,6 +1178,7 @@
                   $("#customer_district").prop('readonly', false);
                   $("#customer_city").prop('readonly', false);
                   $("#customer_name").prop('readonly', false);
+                  $("#customer_name_1").prop('readonly', false);
                   $("#customer_email").prop('readonly', false);
                }
             }

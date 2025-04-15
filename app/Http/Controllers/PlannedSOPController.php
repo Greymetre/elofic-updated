@@ -9,11 +9,13 @@ use App\Models\Branch;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Division;
+use App\Models\PlannedSopSaleData;
 
 use App\Exports\PlannedSopExport;
 use App\Exports\PlannedSopTemplate;
 use App\Exports\PlannedSopPUMExport;
 use App\Exports\PlannedSopSalePUMExport;
+
 
 use App\Imports\PlannedSopImport;
 
@@ -51,7 +53,15 @@ class PlannedSOPController extends Controller
         $divisions = Category::select('category_name' , 'id')->get();
         $currentYear = Carbon::now()->year;
         $years = range($currentYear , $currentYear + 2);
-        return view('planned_sop.index' , compact('divisions' , 'years'));
+        $total_forecast = PlannedSOP::where('division_id', '1')->sum('plan_next_month_value');
+        return view('planned_sop.index' , compact('divisions' , 'years', 'total_forecast'));
+    }
+
+    public function plannedForCast(Request $request){
+        abort_if(Gate::denies('planned_forecast'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $divisions = Category::select('category_name' , 'id')->get();
+        $total_forecast = PlannedSOP::sum('plan_next_month_value');
+        return view('planned_forecast.index' , compact('divisions' , 'total_forecast'));
     }
 
     public function plannedSopList(PlannedSopDatatable $dataTable, Request $request)
@@ -67,7 +77,13 @@ class PlannedSOPController extends Controller
     public function create()
     {
         abort_if(Gate::denies('sop_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        $branches = Branch::select('branch_name' , 'id')->get();
+        if(Auth::user()->hasRole('superadmin') || Auth::user()->hasRole('Admin')){
+            $branches = Branch::where('active' , "Y")->select('branch_name' , 'id')->get();
+        }else{
+            $branch_ids = Auth::user()->branch_id;
+            $branch_ids = explode(',' , $branch_ids);
+            $branches = Branch::where('active' , "Y")->whereIn('id' , $branch_ids)->select('branch_name' , 'id')->get();
+        }
         $divisions = Category::select('category_name' , 'id')->get();
         $products = Product::where('active' , "Y")->select('product_name' , 'id')->get();
         $main_divisions = Division::where('active' , "Y")->select('division_name' , 'id')->get();
@@ -90,6 +106,7 @@ class PlannedSOPController extends Controller
                $planning_month = $formatted_date->format("Y-m-d");
             }
             $division = Category::find($request->product_division);
+            $view_only = Auth::user()->division_id;
             if(isset($request->view_only)){
                 if(Auth::user()->roles[0]['name'] == "superadmin"){
                     $view_only = implode(',', $request->view_only);
@@ -101,7 +118,7 @@ class PlannedSOPController extends Controller
                 $total = PlannedSOP::latest('id')->value('id');
                 $formattedTotal = str_pad($total, 3, '0', STR_PAD_LEFT);
                 $order_id = strtoupper(substr($division->category_name, 0, 3)) . '/' . $for_oder_id . '/'. $formattedTotal;  
-                $this->plannedsop->updateOrCreate(
+                $plannedsop = $this->plannedsop->updateOrCreate(
                     [
                         'planning_month' => $planning_month,
                         'product_id'     => $request->product_id[$key] ?? '',
@@ -123,7 +140,29 @@ class PlannedSOPController extends Controller
                         'top_sku'              => $request->top_sku[$key] ?? NULL,
                         'created_by'           => Auth::user()->name ?? NULL,
                         'view_only'            => $view_only ?? NULL,
+                        'plan_next_month_value'=> $request->plan_next_month_value[$key],
                         'status'               => 1,
+                    ]
+                );
+
+                PlannedSopSaleData::updateOrCreate(
+                    ['planned_sop_id' => $plannedsop->id],
+                    [  'planned_sop_id',
+                        'month_1' => $request->year_month_1[$key],
+                        'month_2' => $request->year_month_2[$key],
+                        'month_3'  => $request->year_month_3[$key],
+                        'month_4' => $request->year_month_4[$key],
+                        'month_5' => $request->year_month_5[$key],
+                        'month_6' => $request->year_month_6[$key],
+                        'month_7' => $request->year_month_7[$key],
+                        'month_8' => $request->year_month_8[$key],
+                        'month_9' => $request->year_month_9[$key],
+                        'month_10' => $request->year_month_10[$key],
+                        'month_11' => $request->year_month_11[$key],
+                        'month_12' => $request->year_month_12[$key],
+                        'min'      => $request->min[$key],
+                        'max'      => $request->max[$key],
+                        'avg'      => $request->avg[$key],
                     ]
                 );
             }
@@ -135,20 +174,6 @@ class PlannedSOPController extends Controller
 
     public function sop_download(Request $request)
     {
-        abort_if(Gate::denies('master_sop_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        if (ob_get_contents()) ob_end_clean();
-        ob_start();
-        if($request->division_id == 1){
-           if (!isset($request->financial_year)) {
-                return back()->with('message_error', 'Please select a financial year.');
-            }            
-            return Excel::download(new PlannedSopPUMExport($request), 'plannedsop.xlsx');
-        }
-        return Excel::download(new PlannedSopExport($request), 'plannedsop.xlsx');
-    }
-
-    public function sale_sop_download(Request $request)
-    {
         abort_if(Gate::denies('sop_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
@@ -156,9 +181,23 @@ class PlannedSOPController extends Controller
            if (!isset($request->financial_year)) {
                 return back()->with('message_error', 'Please select a financial year.');
             }            
-            return Excel::download(new PlannedSopSalePUMExport($request), 'sale_plannedsop.xlsx');
+            return Excel::download(new PlannedSopPUMExport($request), 'sales_plannedsop.xlsx');
         }
         return Excel::download(new PlannedSopExport($request), 'plannedsop.xlsx');
+    }
+
+    public function sale_sop_download(Request $request)
+    {
+        abort_if(Gate::denies('master_sop_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        if($request->division_id == 1){
+           if (!isset($request->financial_year)) {
+                return back()->with('message_error', 'Please select a financial year.');
+            }            
+            return Excel::download(new PlannedSopSalePUMExport($request), 'master_plannedsop.xlsx');
+        }
+        return Excel::download(new PlannedSopExport($request), 'other_plannedsop.xlsx');
     }
 
      public function sop_template(Request $request)
@@ -200,13 +239,16 @@ class PlannedSOPController extends Controller
     {
         abort_if(Gate::denies('sop_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $id = decrypt($id);
-        $plannedsop = PlannedSOP::find($id);
+        $plannedsop = PlannedSOP::with('primarySale')->find($id);
         if(!$plannedsop){
           return redirect()->back()->with('message_danger', 'Record not found');
         }
         $branches = Branch::select('branch_name' , 'id')->get();
         $divisions = Category::select('category_name' , 'id')->get();
         $products = Product::where('active' , "Y")->select('product_name' , 'id')->get();
+        if($plannedsop->division_id ==1){
+            return view('planned_sop.edit_pump' , compact('branches' , 'products' , 'divisions' , 'plannedsop'));
+        }
         return view('planned_sop.edit' , compact('branches' , 'products' , 'divisions' , 'plannedsop'));
     }
 
@@ -219,26 +261,38 @@ class PlannedSOPController extends Controller
      */
     public function update(Request $request, $id)
     {
+        
         abort_if(Gate::denies('sop_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $id = decrypt($id);
         $plannedsop = PlannedSOP::find($id);
         if(!$plannedsop){
-          return redirect()->back()->with('message_danger', 'Record not found');
+            return response()->json(['status' => false , 'message' => 'Not Found']);
         }
         try{
+            $text = "Updated";
+            if(isset($request->status)){
+               $text = $request->status == 2 ? "Verified" : ($request->status == 3 ? "Approved" : "Updated");
+            }
             if(isset($request->planning_month)){
                $formatted_date = Carbon::createFromFormat('F Y', $request->planning_month)->startOfMonth();
                $planning_month = $formatted_date->format("Y-m-d");
                $request["planning_month"] = $planning_month;
             }
             $plannedsop->update($request->all());
+            if (isset($request->plan_next_month) && $request->plan_next_month == 0) {
+                $plannedsop->update(['plan_next_month'=>$request->plan_next_month]);
+            }
             if(isset($request->status) && $request->status == 2){
                  $plannedsop->update(['verify_by'=>Auth::user()->name]);
             }
-            return Redirect::to('planned-sop')->with('message_success', 'Planned S&OP Updated Sucessfully.');
+           return $request->ajax()
+            ? response()->json(['status' => true, 'message' => 'Planned S&OP '. $text .' Successfully.'])
+            : redirect()->route('planned-sop.index')->with('message_success', 'Planned S&OP Updated Successfully.');
         }
         catch(\Exception $e){
-            return redirect()->back()->withErrors($e->getMessage())->withInput();
+         return $request->ajax()
+            ? response()->json(['status' => false, 'message' => $e->getMessage()])
+            : redirect()->back()->withErrors($e->getMessage())->withInput();
         }
     }
 
@@ -254,11 +308,10 @@ class PlannedSOPController extends Controller
         $id = decrypt($id);
         $plannedsop = PlannedSOP::find($id);
         if(!$plannedsop){
-          return redirect()->back()->with('message_danger', 'Record not found');
+         return response()->json(['status' => false , 'message' => 'Not Found']);
         }
         $plannedsop->delete();
-        return redirect()->back()->with('message_success', 'Record deleted Sucessfully.');
-    }
+        return response()->json(['status' => true , 'message' => 'Planned S&OP Deleted Sucessfully.']);    }
 
     // multistatus changes
     public function planned_sop_multistatus_change(Request $request){

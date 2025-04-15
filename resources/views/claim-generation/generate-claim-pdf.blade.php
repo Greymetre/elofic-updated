@@ -44,6 +44,7 @@
                 <th>Claim No</th>
                 <th>Service</th>
                 <th>Prod Sr</th>
+                <th>Prod Name</th>
                 <th>Prod Code</th>
                 <th>HP</th>
                 <th>Stage</th>
@@ -85,6 +86,7 @@
                         <td>{{$claim_generation_detail->claim->claim_number ?? ''}}</td>
                         <td>{{$claim_generation_detail->complaints->service_type ?? ''}}</td>
                         <td>{{$claim_generation_detail->complaints->product_serail_number ?? ''}}</td>
+                        <td>{{$claim_generation_detail->complaints->product_name ?? ''}}</td>
                         <td>{{$claim_generation_detail->complaints->product_code ?? ''}}</td>
                         <td>{{$claim_generation_detail->complaints->specification ?? ''}}</td>
                         <td>{{$claim_generation_detail->complaints->product_no ?? ''}}</td>
@@ -103,7 +105,7 @@
                     </tr>
                 @endforeach
                     <tr style="font-weight: bold;">
-                        <td colspan="16" style="text-align: right;">Total</td>
+                        <td colspan="17" style="text-align: right;">Total</td>
                         <td>{{ number_format($service_charge_total ?? 0.0, 2, '.', '') }}</td>
                         <td>{{ number_format($site_visit_total ?? 0.0, 2, '.', '') }}</td>
                         <td>{{ number_format($rewinding_charge_total ?? 0.0, 2, '.', '') }}</td>

@@ -90,12 +90,15 @@
                                         autocomplete="off" readonly>
                                 </div>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-2 p-0 text-center">
                                 <button type="button" class="btn btn-info" onclick="getActivityData()">Activity</button>
                             </div>
-                            <div class="col-md-3 pl-0">
+                            <div class="col-md-2 p-0 text-center">
                                 <!-- <button type="button" class="btn btn-info btn-sm" onclick="getLocationData()">Location</button> -->
-                                <input type="submit" class="btn btn-primary" value="Complete Map">
+                                <input type="submit" name="submit" class="btn btn-primary" value="Complete Map">
+                            </div>
+                            <div class="col-md-2 p-0 text-center">
+                                <input type="submit" name="submit" class="btn btn-primary" value="Track">
                             </div>
                         </div>
                     </form>

@@ -707,6 +707,50 @@ $('body').on('click', '.checked_status', function () {
 
 });
 
+$('body').on('click', '.hold_status', function () {
+    var id = $('#expenseid').val();
+    var token = $("meta[name='csrf-token']").attr("content");
+    if (!confirm("Are You sure do you want to hold expense?")) {
+        return false;
+    } else {
+
+        $.ajax({
+            url: expensesActiveUrl,
+            type: 'POST',
+            data: {
+                _token: token,
+                id: id,
+                status: '5'
+            },
+            success: function (data) {
+                $('.message').empty();
+                $('.alert').show();
+                if (data.status == 'success') {
+                    $('.alert').addClass("alert-success");
+                    // setTimeout(function() {
+                    //   location.reload();
+                    // }, 3000);
+                    $('#expenseModal').modal('hide');
+                    oTable.draw();
+
+                } else {
+                    $('.alert').addClass("alert-danger");
+                    // setTimeout(function() {
+                    //   location.reload();
+                    // }, 3000);
+                    $('#expenseModal').modal('hide');
+                    oTable.draw();
+                }
+                $('.message').append(data.message);
+
+            },
+        });
+
+
+    }
+
+});
+
 $("#checkAll").on("click", function () {
     $('input:checkbox').not(this).prop('checked', this.checked);
     $(".multi-a-r").toggleClass('d-none');

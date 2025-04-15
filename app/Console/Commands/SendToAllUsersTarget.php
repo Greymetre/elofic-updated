@@ -33,7 +33,7 @@ class SendToAllUsersTarget extends Command
 
         $url = "https://dashboard.fieldkonnect.io/power-bi/public/api/insertUsersTarget";
 
-        $users_target = SalesTargetUsers::all();
+        $users_target = SalesTargetUsers::where('type', 'primary')->get();
 
         if ($users_target->isEmpty()) {
             $this->info('No users target found.');
@@ -45,29 +45,35 @@ class SendToAllUsersTarget extends Command
                 'users_target' => $chunk->map(function ($target) {
                     $month = $target->month; // Example: "Apr"
                     $year = $target->year; // Example: "2024"
-                    
+
                     // Convert month abbreviation to a valid date format
                     $carbonDate = Carbon::createFromFormat('M Y', "$month $year");
-                    
+
                     $startDate = $carbonDate->startOfMonth()->toDateString(); // e.g., "2024-04-01"
                     $endDate = $carbonDate->endOfMonth()->toDateString(); // e.g., "2024-04-30"
-                    
+
                     $primarySalesTotal = round(PrimarySales::where('emp_code', $target->user->employee_codes)->whereBetween('invoice_date', [$startDate, $endDate])
-                        ->sum('net_amount')/100000, 2);
+                        ->sum('net_amount') / 100000, 2);
                     $data = $target->toArray(); // Convert all fields to array
                     $data['emp_name'] = $target->user->name ?? null;
                     $data['division'] = $target->user->getdivision->division_name ?? null;
                     $data['branch_name'] = $target->branch->branch_name ?? null;
                     $data['achievement'] = $primarySalesTotal > 0 ? $primarySalesTotal : 0.00;
-    
+
                     // Fetch a user with the same division_id and where branch_id exists in the branch_id column
                     $manager = User::where('division_id', $target->user->division_id)
                         ->whereRaw('FIND_IN_SET(?, branch_id)', [$target->branch_id])
-                        ->where('designation_id', 6)
+                        ->whereHas('roles', function ($query) {
+                            $query->whereIn('name', [
+                                'PUMPCH',
+                                'AGRIGM/CH/ZM/RM/SH',
+                                'FAN/CH/GM/SH'
+                            ]);
+                        })
                         ->first();
-    
+
                     $data['branch_cluster'] = $manager->name ?? null;
-    
+
                     return $data;
                 })->toArray()
             ];

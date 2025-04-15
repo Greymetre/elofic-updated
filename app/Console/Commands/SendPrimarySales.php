@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\City;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use App\Models\PrimarySales;
@@ -21,7 +22,7 @@ class SendPrimarySales extends Command
 
         $url = "https://dashboard.fieldkonnect.io/power-bi/public/api/insertPrimarySales";
 
-        $salesData = PrimarySales::select(
+        $salesData = PrimarySales::with('customer:id')->select(
             'id as main_id',
             'invoiceno',
             'invoice_date',
@@ -42,6 +43,7 @@ class SendPrimarySales extends Command
             'net_amount',
             'total_amount',
             'group_name',
+            'new_group',
             'branch',
             'created_at',
             'updated_at'
@@ -50,6 +52,9 @@ class SendPrimarySales extends Command
             ->get();
 
         $salesData->chunk(200)->each(function ($chunk) use ($url) {
+            foreach ($chunk as $key => $value) {
+                $chunk[$key]['districts'] = $value?->customer?->customeraddress?->districtname?->district_name ?? null;
+            }
             $payload = ['sales' => $chunk->toArray()];
             $response = Http::timeout(240)->post($url, $payload);
 

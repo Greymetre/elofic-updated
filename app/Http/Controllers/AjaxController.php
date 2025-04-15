@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Branch, BranchStock, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CompOffLeave, CustomerDetails, CustomerOutstanting, DealerAppointment, DealerAppointmentKyc, EmployeeDetail, EndUser, Expenses, GiftModel, GiftSubcategory, Marketing, MspActivity, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, PrimaryScheme, Redemption, SalesTargetUsers, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation,ServiceChargeChargeType,OrderDetails,ServiceComplaintReason , ServiceBillComplaintType, ServiceGroupComplaint , OpeningStock , BranchOprningQuantity};
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Branch, BranchStock, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CompOffLeave, CustomerDetails, CustomerOutstanting, DealerAppointment, DealerAppointmentKyc, EmployeeDetail, EndUser, Expenses, GiftModel, GiftSubcategory, Marketing, MspActivity, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, PrimaryScheme, Redemption, SalesTargetUsers, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation,ServiceChargeChargeType,OrderDetails,ServiceComplaintReason , ServiceBillComplaintType, ServiceGroupComplaint , OpeningStock , BranchOprningQuantity , PlannedSOP};
 use App\Models\UserLiveLocation;
 use App\Models\UserActivity;
 use App\Http\Controllers\SendNotifications;
@@ -289,7 +289,7 @@ class AjaxController extends Controller
         try {
             $planning_month = '';
              if(isset($request->date)){
-               $formatted_date = Carbon::createFromFormat('F Y', $request->date)->startOfMonth();
+               $formatted_date = Carbon::createFromFormat('F Y', $request->date)->subMonth()->startOfMonth();
                $planning_month = $formatted_date->format("Y-m-d");
             }
             $dateParts = explode(' ', $request->date); // Example: ['April', '2025']
@@ -2474,5 +2474,16 @@ class AjaxController extends Controller
             }
         }
         return response()->json(['status' => false , 'url' => '']);
+    }
+
+    public function getplannedForCast(Request $request){
+        $division_id = $request->division_id ?? '';
+        $planSOP = 0;
+        if(!empty($division_id)){
+            $planSOP = PlannedSOP::where('division_id' , $division_id)->sum('plan_next_month_value');
+            return response()->json(['status' => true , 'total_value' => $planSOP]);
+        }
+        $planSOP = PlannedSOP::sum('plan_next_month_value');
+        return response()->json(['status' => false , 'total_value' => $planSOP]);
     }
 }

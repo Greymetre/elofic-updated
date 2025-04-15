@@ -131,7 +131,6 @@
         window.onload = initMap;
     </script>
 
-
 </body>
 
 </html>

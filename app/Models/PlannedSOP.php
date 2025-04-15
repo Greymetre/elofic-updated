@@ -30,6 +30,7 @@ class PlannedSOP extends Model
         'created_by',
         'verify_by',
         'view_only',
+        'plan_next_month_value',
         'division_id'
     ];
 
@@ -39,5 +40,9 @@ class PlannedSOP extends Model
 
     public function getBranch(){
         return $this->belongsTo('App\Models\Branch', 'branch_id', 'id');
+    }
+
+    public function primarySale(){
+          return $this->hasOne('App\Models\PlannedSopSaleData', 'planned_sop_id');
     }
 }

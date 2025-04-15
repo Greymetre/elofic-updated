@@ -232,6 +232,8 @@ class LoginController extends Controller
                 if ($user->active != 'Y') {
                     return response()->json(['status' => 'error', 'message' => 'Your account is deactivated don\'t hesitate to get in touch with admin.'], $this->notFound);
                 }
+                // this logic added recently beacause client want service center can loggedin by password
+               
                 CustomerDetails::updateOrCreate(['customer_id' => $user->id], [
                     // 'active'    => 'Y',
                     'customer_id'   =>  $user->id,
@@ -260,11 +262,15 @@ class LoginController extends Controller
                         'app'   =>  '1',
                     ]);
                 }
+                if((isset($user->customertype) && $user->customertype == 4) || isset($request->password)){
+                    return $this->serviceCenterLogin($request , $user ,$validator);
+                }
                 if ($username == '917788996655') {
                     $otp = 1234;
                 } else {
                     $otp = rand(1000, 9999);
                 }
+
 
                 $curl = curl_init();
 
@@ -296,6 +302,37 @@ class LoginController extends Controller
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
+    }
+
+    private function serviceCenterLogin($request , $user , $validator){
+       if(empty($request->password)) {
+            $validator->after(function ($validator) {
+                $validator->errors()->add('password', 'The password field is required for service center users.');
+            });
+        }
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $validator->errors()
+            ], $this->noContent);
+        }
+
+        if (!Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Incorrect password'
+            ], 401);
+        }
+
+        $token = $user->createToken('gSQ01LKOg1JV0O9eMsDiAN0TqkQlOpulK7vWemPF')->accessToken;
+        $profile_image = $user->shop_image;
+        $user->shop_image = $user->profile_image;
+        $user->profile_image = $profile_image;
+        $user->token = $token;
+        $user->total_point = $user->customer_transacation->sum('point');
+        $user->active_point = $user->customer_transacation->where('status', '1')->sum('point');
+        $user->provision_point = $user->customer_transacation->where('status', '0')->sum('point');
+        return response()->json(['status' => 'success', 'userinfo' => $user], $this->successStatus);
     }
 
     public function verifyotp(Request $request)
@@ -391,6 +428,7 @@ class LoginController extends Controller
                         $permissions = $user->getPermissionsViaRoles()->pluck('name');
                         $user->givePermissionTo($permissions);
                     }
+
                     $request['customer_id'] = $customer->id;
                     $pincodes = Pincode::with('cityname', 'cityname.districtname')->where('pincode', '=', $request['zipcode'])->first();
                     $request['state_id'] = !empty($pincodes['cityname']['districtname']['state_id']) ? $pincodes['cityname']['districtname']['state_id'] : $request['state_id'];
@@ -455,6 +493,10 @@ class LoginController extends Controller
 
                     curl_close($curl);
                     $customer->otp = $otp;
+                    if($request['customertype'] == '4'){
+                        $password = Hash::make($request['mobile']);
+                        $customer->password = $password;
+                    }
                     $customer->save();
                     $noti_data = [
                         'fcm_token' => $customer->customerdetails->fcm_token,

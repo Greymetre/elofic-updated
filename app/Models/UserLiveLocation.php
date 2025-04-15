@@ -9,7 +9,7 @@ class UserLiveLocation extends Model
 {
     use HasFactory;
 
-    protected $table = 'user_live_location';
+    protected $table = 'user_live_locations';
 
-    protected $fillable = [ 'active', 'userid', 'latitude', 'longitude', 'address', 'created_by', 'deleted_at', 'created_at', 'updated_at'];
+    protected $fillable = [ 'active', 'userid', 'latitude', 'longitude', 'time', 'address', 'deleted_at', 'created_at', 'updated_at'];
 }
