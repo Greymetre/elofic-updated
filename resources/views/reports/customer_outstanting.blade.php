@@ -47,6 +47,31 @@
                         @endif
                       </select>
                     </div>
+
+                    <!-- branchs filter -->
+                    <div class="p-2" style="width:180px;">
+                      <select class="select2" name="branch_id" id="branch_id" data-style="select-with-transition" title="panel.sales_users.branch">
+                        <option value="" disabled selected>Branch</option>
+                        @if(@isset($branchs ))
+                        @foreach($branchs as $branch)
+                        <option value="{!! $branch->id !!}">{!! $branch->branch_name !!}</option>
+                        @endforeach
+                        @endif
+                      </select>
+                    </div>
+
+                     <!-- divisions filter -->
+                     <div class="p-2" style="width:180px;">
+                      <select class="select2" name="division_id" id="division_id" data-style="select-with-transition" title="panel.sales_users.branch">
+                        <option value="" disabled selected>Division</option>
+                        @if(@isset($divisions ))
+                        @foreach($divisions as $division)
+                        <option value="{!! $division->id !!}">{!! $division->division_name !!}</option>
+                        @endforeach
+                        @endif
+                      </select>
+                    </div>
+
                     @if(auth()->user()->can(['customer_outstanting_download']))
                     <div class="p-2" style="width:200px;">
                       <button class="btn btn-just-icon btn-theme" name="download" value="excel" title="{!!  trans('panel.global.download') !!} Customer Outstanding">
@@ -169,7 +194,9 @@
           url: "{{ route('reports.customer_outstanting') }}",
           data: function(d) {
             d.customer_id = $('#customer_id').val(),
-              d.search = $('input[type="search"]').val()
+            d.search = $('input[type="search"]').val(),
+            d.branch_id = $('#branch_id').val(),
+            d.division_id = $('#division_id').val()
           }
         },
         columns: [{
@@ -249,6 +276,12 @@
         ]
       });
       $('#customer_id').change(function() {
+        table.draw();
+      });
+      $('#branch_id').change(function() {
+        table.draw();
+      });
+      $('#division_id').change(function() {
         table.draw();
       });
     });

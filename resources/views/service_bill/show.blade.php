@@ -68,97 +68,101 @@
               <div class="col-8 text-right">
 
 
-              @if(auth()->user()->hasRole(['superadmin']) || auth()->user()->hasRole(['Sub_Admin']))
+                @if(auth()->user()->hasRole(['superadmin']) || auth()->user()->hasRole(['Sub_Admin']))
 
-               @if($serviceBill->status == '0')
-                    @can('claim_company')
-                        <button type="button" class="btn btn-sm btn-warning company_claim"><b>Claim to company</b></button>
-                    @endcan
+                @if($serviceBill->status == '0') // Draft
+                @can('claim_company')
+                <button type="button" class="btn btn-sm btn-warning company_claim"><b>Claim to company</b></button>
+                @endcan
 
-                    @can('customer_pay')
-                        <button type="button" class="btn btn-sm btn-info customer_pay"><b>Customer payble</b></button>
-                    @endcan
+                @can('customer_pay')
+                <button type="button" class="btn btn-sm btn-info customer_pay"><b>Customer payble</b></button>
+                @endcan
 
-                    @can('cancel_service_bill')
-                        <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
-                    @endcan
+                @can('cancel_service_bill')
+                <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
+                @endcan
 
-                @elseif($serviceBill->status == '1')
-                    @can('draft_service_bill')
-                        <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
-                    @endcan
+                @elseif($serviceBill->status == '1') // Claimed
+                @can('draft_service_bill')
+                <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
+                @endcan
 
-                    @can('approve_service_bill')
-                        <button type="button" class="btn btn-sm btn-success approve_status"><b>Approve</b></button>
-                    @endcan
+                @can('approve_service_bill')
+                <button type="button" class="btn btn-sm btn-success approve_status"><b>Approve</b></button>
+                @endcan
 
-                    @can('cancel_service_bill')
-                        <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
-                    @endcan
+                @can('cancel_service_bill')
+                <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
+                @endcan
 
-                @elseif($serviceBill->status == '2')
-                    @can('draft_service_bill')
-                        <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
-                    @endcan
+                @elseif($serviceBill->status == '2') // Customer payble
+                @can('draft_service_bill')
+                <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
+                @endcan
 
-                    @can('cancel_service_bill')
-                        <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
-                    @endcan
+                @can('cancel_service_bill')
+                <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
+                @endcan
 
-                @elseif($serviceBill->status == '3')
-                    @can('draft_service_bill')
-                        <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
-                    @endcan
+                @elseif($serviceBill->status == '3') // Approved
+                @can('draft_service_bill')
+                <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
+                @endcan
 
-                    @can('cancel_service_bill')
-                        <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
-                    @endcan
+                @can('cancel_service_bill')
+                <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
+                @endcan
 
-                @elseif($serviceBill->status == '4')
-                    @can('draft_service_bill')
-                        <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
-                    @endcan
+                @elseif($serviceBill->status == '4') // Cancel
+                @can('draft_service_bill')
+                <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
+                @endcan
                 @endif
 
 
-              @else
-                 @if($serviceBill->status == '0')
-                    @can('claim_company')
-                        <button type="button" class="btn btn-sm btn-warning company_claim"><b>Claim to company</b></button>
-                    @endcan
+                @else
+                @if($serviceBill->status == '0')
+                @can('claim_company')
+                <button type="button" class="btn btn-sm btn-warning company_claim"><b>Claim to company</b></button>
+                @endcan
 
-                    @can('customer_pay')
-                        <button type="button" class="btn btn-sm btn-info customer_pay"><b>Customer payble</b></button>
-                    @endcan
+                @can('customer_pay')
+                <button type="button" class="btn btn-sm btn-info customer_pay"><b>Customer payble</b></button>
+                @endcan
 
-                    @can('cancel_service_bill')
-                        <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
-                    @endcan
+                @can('cancel_service_bill')
+                <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
+                @endcan
 
                 @elseif($serviceBill->status == '1')
-                    @can('approve_service_bill')
-                        <button type="button" class="btn btn-sm btn-success approve_status"><b>Approve</b></button>
-                    @endcan
+                @can('draft_service_bill')
+                <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
+                @endcan
 
-                    @can('cancel_service_bill')
-                        <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
-                    @endcan
+                @can('approve_service_bill')
+                <button type="button" class="btn btn-sm btn-success approve_status"><b>Approve</b></button>
+                @endcan
+
+                @can('cancel_service_bill')
+                <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
+                @endcan
 
                 @elseif($serviceBill->status == '2')
-                    @auth
-                        @if(auth()->user()->hasRole('CRM_Support'))
-                            @can('draft_service_bill')
-                                 <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
-                            @endcan
-                        @endif
-                    @endauth
+                @auth
+                @if(auth()->user()->hasRole('CRM_Support'))
+                @can('draft_service_bill')
+                <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
+                @endcan
+                @endif
+                @endauth
 
-                    @can('cancel_service_bill')
-                        <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
-                    @endcan
+                @can('cancel_service_bill')
+                <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
+                @endcan
 
                 @elseif($serviceBill->status == '3')
-                    <!-- @can('draft_service_bill')
+                <!-- @can('draft_service_bill')
                         <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
                     @endcan
 
@@ -167,12 +171,12 @@
                     @endcan -->
 
                 @elseif($serviceBill->status == '4')
-                   <!--  @can('draft_service_bill')
+                <!--  @can('draft_service_bill')
                         <button type="button" class="btn btn-sm btn-primary draft_status"><b>Draft</b></button>
                     @endcan -->
                 @endif
-              @endif
-              
+                @endif
+
                 <?php
                 if (auth()->user()->can(['service_bill_edit'])) { ?>
 
@@ -689,34 +693,34 @@
       });
 
       $(document).on("click", ".delete-img-btn", function() {
-         var id = $(this).data('mediaid');
-         Swal.fire({
-            title: "ARE YOU SURE TO DELETE ATTACHMENT ?",
-            showDenyButton: true,
-            showCancelButton: true,
-            confirmButtonText: "YES",
-            denyButtonText: `Don't`
-         }).then((result) => {
-            if (result.value) {
-               $(this).closest('.img-div').remove();
-               $.ajax({
-                  url: "{{ url('service-bill-attach-delete') }}",
-                  dataType: "json",
-                  type: "POST",
-                  data: {
-                     _token: "{{csrf_token()}}",
-                     id: id
-                  },
-                  success: function(res) {
-                     if (res.status === true) {
-                        Swal.fire("Attachment delete successfully !", res.msg, "success");
-                     } else {
-                        Swal.fire("Somthing went wrong", "", "error");
-                     }
-                  }
-               });
-            }
-         });
+        var id = $(this).data('mediaid');
+        Swal.fire({
+          title: "ARE YOU SURE TO DELETE ATTACHMENT ?",
+          showDenyButton: true,
+          showCancelButton: true,
+          confirmButtonText: "YES",
+          denyButtonText: `Don't`
+        }).then((result) => {
+          if (result.value) {
+            $(this).closest('.img-div').remove();
+            $.ajax({
+              url: "{{ url('service-bill-attach-delete') }}",
+              dataType: "json",
+              type: "POST",
+              data: {
+                _token: "{{csrf_token()}}",
+                id: id
+              },
+              success: function(res) {
+                if (res.status === true) {
+                  Swal.fire("Attachment delete successfully !", res.msg, "success");
+                } else {
+                  Swal.fire("Somthing went wrong", "", "error");
+                }
+              }
+            });
+          }
+        });
       })
     </script>
   </section>

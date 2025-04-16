@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Facades\Excel;
+use Laravel\Passport\Token;
 
 class SapStockController extends Controller
 {
@@ -30,6 +31,24 @@ class SapStockController extends Controller
      */
     public function index(SAPStockDataTable $dataTable, Request $request)
     {
+
+        // $all_customers = Customers::where('active', 'N')->get();
+
+        // foreach ($all_customers as $customer) {
+        //     // Revoke all tokens for this customer
+        //     $tokens = Token::where('user_id', $customer->id)
+        //         ->where('revoked', false)
+        //         ->get();
+
+        //     foreach ($tokens as $token) {
+        //         $token->revoke();
+        //     }
+
+        //     echo "Revoked tokens for Customer ID: " . $customer->id . '<br>';
+        // }
+
+        // dd('Testing');
+
         // $path = '/var/www/html/New dealer import AGRI.xlsx';
 
         // if (!file_exists($path)) {

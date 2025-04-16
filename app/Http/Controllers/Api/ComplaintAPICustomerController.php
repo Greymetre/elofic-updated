@@ -587,13 +587,9 @@ class ComplaintAPICustomerController extends Controller
             $work_done_option = ["Repairing", "Replacement", "Telephonic Complaint Resolve", "Complaint Cancelltion"];
             $status_option    = ["Open", "Pending", "Work Done", "Complete", "Closed", "Cancelled"];
             $complaint_types = ComplaintType::where('active', 'Y')->select('id', 'name')->get();
-            $user_ids = getUsersReportingToAuth($request->user()->id);
+            $user_ids = [$request->user()->id];
             $roleNames = ["Service Eng", "Service Admin"];
             $assign_users = User::whereIn('id', $user_ids)
-                ->whereHas('roles', function ($query) use ($roleNames) {
-                    $query->whereIn('name', $roleNames); // Check for multiple roles
-                })
-                ->with(['roles.permissions']) // Optimized eager loading
                 ->select('id', 'name', 'employee_codes')
                 ->get();
             $data = [
@@ -630,7 +626,7 @@ class ComplaintAPICustomerController extends Controller
     {
         try {
             $data = [];
-            $users          = User::whereIn('id', getUsersReportingToAuth($request->user()->id))->select('id', 'name', 'employee_codes', 'branch_id')->get();
+            $users          = User::whereIn('id', [$request->user()->id])->select('id', 'name', 'employee_codes', 'branch_id')->get();
             $branchIds = $users->pluck('branch_id')->unique()->filter();
             // Get only those branches
             $branches = Branch::whereIn('id', $branchIds)
