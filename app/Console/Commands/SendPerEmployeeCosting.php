@@ -2,10 +2,12 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Branch;
 use App\Models\Order;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Http;
 
 class SendPerEmployeeCosting extends Command
 {
@@ -30,7 +32,7 @@ class SendPerEmployeeCosting extends Command
      */
     public function handle()
     {
-        $url = "https://dashboard.fieldkonnect.io/power-bi/public/api/insertCustomerDetails";
+        $url = "https://dashboard.fieldkonnect.io/power-bi/public/api/insertEmployeeCosting";
         $today = Carbon::now('Asia/Kolkata');
 
         // Get current and previous financial years
@@ -44,27 +46,63 @@ class SendPerEmployeeCosting extends Command
             $currentFYEnd = $today;
         }
 
-        $users_previous_fy = $this->processUsersForPeriod($previousFYStart, $previousFYEnd);
-        $users_current_fy  = $this->processUsersForPeriod($currentFYStart, $currentFYEnd);
+        // Fetch users for both periods with a flag for identification
+        $users = collect();
 
+        $users_previous = $this->processUsersForPeriod($previousFYStart, $previousFYEnd)
+            ->map(function ($user) use ($previousFYStart) {
+                $user->f_year = $previousFYStart->year . '-' . ($previousFYStart->year + 1);
+                return $user;
+            });
 
-        dd($users_current_fy->count(), $users_previous_fy->count());
+        $users_current = $this->processUsersForPeriod($currentFYStart, $currentFYEnd)
+            ->map(function ($user) use ($currentFYStart) {
+                $user->f_year = $currentFYStart->year . '-' . ($currentFYStart->year + 1);
+                return $user;
+            });
 
-        // $formatteddata = $this->formatData($users_current_fy, $users_previous_fy);
+        $users = $users->merge($users_previous)->merge($users_current);
 
+        $formatteddata = $users->map(function ($user) {
+            $manager = User::where('division_id', $user->division_id)
+                        ->whereRaw('FIND_IN_SET(?, branch_id)', [$user->branch_id])
+                        ->whereHas('roles', function ($query) {
+                            $query->whereIn('name', [
+                                'PUMPCH',
+                                'AGRIGM/CH/ZM/RM/SH',
+                                'FAN/CH/GM/SH'
+                            ]);
+                        })
+                        ->first();
+            return [
+                'f_year' => $user->f_year,
+                'division' => $user->getdivision?->division_name,
+                'branch' => $user->getbranch?->branch_name ?? 'Not Applicable',
+                'branch_cluster' => $manager->name ?? null,
+                'emp_code' => $user->employee_codes,
+                'emp_name' => $user->name,
+                'designation' => $user->getdesignation->designation_name,
+                'doj' => $user->userinfo->date_of_joining,
+                'sales' => $user->sales,
+                'salary' => $user->userinfo->gross_salary_monthly,
+                'ta_da' => $user->expensesSum,
+                'incentive' => '0',
+                'total_exp' => $user->total_expe,
+                'sal_exp_per' => $user->sal_exp,
+            ];
+        });
 
-        // // Send data in chunks
-        // $formatteddata->chunk(200)->each(function ($chunk) use ($url) {
-        //     $payload = ['employee_costing' => $chunk->toArray()];
-        //     $response = Http::timeout(240)->post($url, $payload);
+        // Send data in chunks
+        $formatteddata->chunk(100)->each(function ($chunk) use ($url) {
+            $payload = ['employee_costing' => $chunk->toArray()];
+            $response = Http::timeout(240)->post($url, $payload);
 
-        //     if ($response->successful()) {
-        //         $this->info(count($chunk) . ' records sent successfully.');
-        //     } else {
-        //         $this->error('Failed to send sales data: ' . $response->body());
-        //     }
-        // });
-
+            if ($response->successful()) {
+                $this->info(count($chunk) . ' records sent successfully.');
+            } else {
+                $this->error('Failed to send sales data: ' . $response->body());
+            }
+        });
     }
 
     function processUsersForPeriod($startDate, $endDate)
@@ -75,13 +113,14 @@ class SendPerEmployeeCosting extends Command
 
         $query = User::with([
             'primarySales:id,emp_code,invoice_date,net_amount',
-            'getdesignation',
             'getbranch',
+            'getdesignation',
             'getdivision',
             'userinfo',
             'expenses'
         ])
             ->where('active', 'Y')
+            ->where('sales_type', 'Primary')
             ->whereHas('roles', function ($q) {
                 $q->whereIn('id', ['13', '6', '3', '2']);
             });
@@ -92,13 +131,13 @@ class SendPerEmployeeCosting extends Command
         foreach ($users as $user) {
             $user->userinfo->gross_salary_monthly *= count($all_months);
 
-            $expensesSum = $user->expenses
+            $user->expensesSum = $user->expenses
                 ->whereBetween('date', [$startDateFormatted, $endDateFormatted])
                 ->sum('claim_amount');
 
-            $user->total_expe = $expensesSum + $user->userinfo->gross_salary_monthly;
+            $user->total_expe = $user->expensesSum + $user->userinfo->gross_salary_monthly;
 
-            if ($user->sales_type === 'Primary') {
+            if ($user->sales_type == 'Primary') {
                 $salesSum = $user->primarySales
                     ->whereBetween('invoice_date', [$startDateFormatted, $endDateFormatted])
                     ->sum('net_amount');
@@ -107,6 +146,7 @@ class SendPerEmployeeCosting extends Command
                     ->whereBetween('order_date', [$startDateFormatted, $endDateFormatted])
                     ->sum('sub_total');
             }
+
 
             $user->sales = $salesSum > 0 ? number_format($salesSum / 100000, 2) : 0;
 

@@ -141,6 +141,8 @@
             <button type="button" class="btn btn-sm btn-warning ml-2" onclick="changeStatus('0','{{$dealerAppointment->id}}')">Pending</button>
             @if($dealerAppointment->getMedia('certificate')->count() < 1 )
               <button type="button" class="btn btn-info" data-toggle="modal" data-target="#generateCertificateModal">Generate Certificate</button>
+              @else
+              <button type="button" class="btn btn-info" data-toggle="modal" data-target="#generateCertificateModal">Regenerate Certificate</button>
               @endif
               @endif
               @if(auth()->user()->can(['dealer_appointment_edit']))

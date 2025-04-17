@@ -349,6 +349,7 @@ class DealerAppointmentController extends Controller
     {
         $appointment = DealerAppointment::find($request->id);
         $division = '';
+        $certificate_no = '';
 
         if ($appointment->division == 'PUMP&MOTORS') {
             $division = 'Pumps & Motors range';
@@ -359,6 +360,7 @@ class DealerAppointmentController extends Controller
             $logoPath = public_path('assets/img/certificate_logo_fan2.png');
             $brand = 'Bediya';
         } else if ($appointment->division == 'AGRI') {
+            $certificate_no = generateCertificateNo();
             $division = 'Agriculture Equipments range';
             $logoPath = public_path('assets/img/certificate_logo2.png');
             $brand = 'Silver';
@@ -377,6 +379,7 @@ class DealerAppointmentController extends Controller
         $signImage64 = "data:image/png;base64," . base64_encode(file_get_contents($signImage));
         $sinceImage64 = "data:image/png;base64," . base64_encode(file_get_contents($sinceImage));
         $data = [
+            'certificate_no' => $certificate_no,
             'dealerName' => $request->dealer_name,
             'region' => $request->region,
             'customer_type' => $request->customer_type,
@@ -399,7 +402,7 @@ class DealerAppointmentController extends Controller
         $dompdf->setPaper('A4', 'landscape');
         $dompdf->render();
 
-        // return $dompdf->stream('certificate.pdf', ['Attachment' => false]);
+        // return $dompdf->stream('certificate.pdf', ['Attachment' => true]);
 
         $output = $dompdf->output();
 

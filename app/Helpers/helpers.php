@@ -1112,3 +1112,25 @@ if (!function_exists('getCurrentOpeningStk')) {
         return "0";
      }
 }
+
+function generateCertificateNo() {
+    // Build year range (e.g., 2025-26)
+    $currentYear = now()->format('Y');
+    $nextYear = now()->addYear()->format('y');
+    $yearRange = "$currentYear-$nextYear";
+
+    $prefix = "SCEL/$yearRange/";
+
+    // File to store the counter for the current year
+    $filePath = "certificate_no_agri_$currentYear.txt";
+
+    // Get current counter or initialize at 0
+    $lastNo = Storage::disk('local')->exists($filePath) ? (int) Storage::disk('local')->get($filePath) : 0;
+
+    // Increment and save
+    $newNo = $lastNo + 1;
+    Storage::disk('local')->put($filePath, $newNo);
+
+    // Return formatted certificate no
+    return $prefix . str_pad($newNo, 4, '0', STR_PAD_LEFT);
+}

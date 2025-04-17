@@ -44,11 +44,12 @@ class EmployeeCostingDataTable extends DataTable
                 return $query->sales;
             })
             ->addColumn('ta_da', function ($query) {
-                if (count($query->expenses) > 0) {
-                    return $query->expenses->where('date', '>=', $this->stdate)->where('date', '<=', $this->eddate)->sum('claim_amount') > 0 ? number_format($query->expenses->where('date', '>=', $this->stdate)->where('date', '<=', $this->eddate)->sum('claim_amount'), 2, '.', '') : 0;
-                } else {
-                    return 0;
-                }
+                return $query->expensesSum ?? '0';
+                // if (count($query->expenses) > 0) {
+                //     return $query->expenses->where('date', '>=', $this->stdate)->where('date', '<=', $this->eddate)->sum('claim_amount') > 0 ? number_format($query->expenses->where('date', '>=', $this->stdate)->where('date', '<=', $this->eddate)->sum('claim_amount'), 2, '.', '') : 0;
+                // } else {
+                //     return 0;
+                // }
             })
             ->addColumn('total_exp', function ($query) {
                 return $query->total_expe;
@@ -98,7 +99,7 @@ class EmployeeCostingDataTable extends DataTable
         // Ensure end date does not exceed today
         $today = Carbon::now('Asia/Kolkata');
         if ($endDate->greaterThan($today)) {
-            $endDate = $today->subMonth()->endOfMonth();
+            $endDate = $today;
         }
 
         $startDateFormatted = $startDate->toDateString();
@@ -138,8 +139,8 @@ class EmployeeCostingDataTable extends DataTable
         foreach ($users as $user) {
             $user->userinfo->gross_salary_monthly *= count($all_months);
 
-            $expensesSum = $user->expenses->whereBetween('date', [$startDateFormatted, $endDateFormatted])->sum('claim_amount');
-            $user->total_expe = $expensesSum + $user->userinfo->gross_salary_monthly;
+            $user->expensesSum = $user->expenses->whereBetween('date', [$startDateFormatted, $endDateFormatted])->sum('claim_amount');
+            $user->total_expe = $user->expensesSum + $user->userinfo->gross_salary_monthly;
 
             if ($user->sales_type == 'Primary') {
                 $salesSum = $user->primarySales->whereBetween('invoice_date', [$startDateFormatted, $endDateFormatted])->sum('net_amount');
