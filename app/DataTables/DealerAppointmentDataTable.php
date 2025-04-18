@@ -82,7 +82,7 @@ class DealerAppointmentDataTable extends DataTable
     {
         $user_ids = getUsersReportingToAuth();
         $data = $model->with('branch_details', 'district_details', 'city_details', 'appointment_kyc_detail');
-        if(!auth()->user()->hasRole('superadmin')){
+        if(!auth()->user()->hasRole('superadmin') && !auth()->user()->hasRole('Sub_Admin') && !auth()->user()->hasRole('Sub billing') && !auth()->user()->hasRole('Head office')){
             $data->whereIn('created_by' , $user_ids);
         }
 

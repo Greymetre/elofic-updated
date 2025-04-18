@@ -64,7 +64,7 @@ class SendPerEmployeeCosting extends Command
         $users = $users->merge($users_previous)->merge($users_current);
 
         $formatteddata = $users->map(function ($user) {
-            $manager = User::where('division_id', $user->division_id)
+            $manager = User::where('division_id', $user->division_id)->where('active', 'Y')
                         ->whereRaw('FIND_IN_SET(?, branch_id)', [$user->branch_id])
                         ->whereHas('roles', function ($query) {
                             $query->whereIn('name', [
@@ -78,7 +78,7 @@ class SendPerEmployeeCosting extends Command
                 'f_year' => $user->f_year,
                 'division' => $user->getdivision?->division_name,
                 'branch' => $user->getbranch?->branch_name ?? 'Not Applicable',
-                'branch_cluster' => $manager->name ?? null,
+                'branch_cluster' => $manager->name ?? 'Anil Srivastava',
                 'emp_code' => $user->employee_codes,
                 'emp_name' => $user->name,
                 'designation' => $user->getdesignation->designation_name,

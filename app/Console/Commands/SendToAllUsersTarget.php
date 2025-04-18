@@ -61,7 +61,7 @@ class SendToAllUsersTarget extends Command
                     $data['achievement'] = $primarySalesTotal > 0 ? $primarySalesTotal : 0.00;
 
                     // Fetch a user with the same division_id and where branch_id exists in the branch_id column
-                    $manager = User::where('division_id', $target->user->division_id)
+                    $manager = User::where('division_id', $target->user->division_id)->where('active', 'Y')
                         ->whereRaw('FIND_IN_SET(?, branch_id)', [$target->branch_id])
                         ->whereHas('roles', function ($query) {
                             $query->whereIn('name', [
