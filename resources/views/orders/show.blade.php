@@ -92,9 +92,15 @@
                       @if($orders->exists && isset($orderdetails))
                       @foreach($orderdetails as $rows )
                       <tr>
-                        <td>{!! $rows['products']['product_name'] !!} {!! $rows['products']['product_code']??'' !!} <br>
-                          Detail Title : <span class="prd_title">{!! isset($rows['productdetails']['detail_title']) ? $rows['productdetails']['detail_title'] : '' !!}</span>
+                        <td>
+                          {!! isset($rows['products']['product_name']) ? $rows['products']['product_name'] : '' !!}
+                          {!! isset($rows['products']['product_code']) ? $rows['products']['product_code'] : '' !!} <br>
+                          Detail Title :
+                          <span class="prd_title">
+                            {!! isset($rows['productdetails']['detail_title']) ? $rows['productdetails']['detail_title'] : '' !!}
+                          </span>
                         </td>
+
                         <td>{!! $rows['quantity'] !!}</td>
                         <!--  <td>
                               GST Percent : <span class="gst_percent">{!! isset($rows['productdetails']['gst']) ? $rows['productdetails']['gst'] : '' !!}</span> <br>
@@ -384,7 +390,7 @@
                 title: res.status,
                 text: res.message,
               });
-              if(res.status == 'success'){
+              if (res.status == 'success') {
                 window.location.href = base_url + '/orders';
               }
             }
@@ -418,7 +424,7 @@
                 title: res.status,
                 text: res.message,
               });
-              if(res.status == 'success'){
+              if (res.status == 'success') {
                 window.location.href = base_url + '/orders';
               }
             }

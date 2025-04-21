@@ -49,7 +49,7 @@ class Product extends Model
 
     public function productpriceinfo()
     {
-        return $this->belongsTo('App\Models\ProductDetails', 'id', 'product_id')->select('id','detail_title','product_id','mrp','price','selling_price','gst','discount','budget_for_month','top_sku');
+        return $this->belongsTo('App\Models\ProductDetails', 'id', 'product_id');
     }
 
     public function serial_numbers()

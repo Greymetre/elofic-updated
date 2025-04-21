@@ -11,7 +11,7 @@ class ProductDetails extends Model
 
     protected $table = 'product_details';
 
-    protected $fillable = [ 'active', 'detail_title', 'detail_description', 'product_id', 'detail_image', 'mrp', 'price', 'discount', 'max_discount', 'selling_price', 'gst', 'isprimary', 'hsn_code', 'ean_code','stock_qty','production_qty','deleted_at', 'created_at', 'updated_at' ,'budget_for_month' , 'top_sku'];
+    protected $fillable = [ 'active', 'detail_title', 'detail_description', 'product_id', 'detail_image', 'mrp', 'price', 'discount', 'max_discount', 'selling_price', 'gst', 'rmc', 'isprimary', 'hsn_code', 'ean_code','stock_qty','production_qty','deleted_at', 'created_at', 'updated_at' ,'budget_for_month' , 'top_sku'];
 
     public function products()
     {

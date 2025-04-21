@@ -121,9 +121,10 @@ class SendPerEmployeeCosting extends Command
         ])
             ->where('active', 'Y')
             ->where('sales_type', 'Primary')
-            ->whereHas('roles', function ($q) {
-                $q->whereIn('id', ['13', '6', '3', '2']);
-            });
+            ->where('designation_id', '1');
+            // ->whereHas('roles', function ($q) {
+            //     $q->whereIn('id', ['13', '6', '3', '2']);
+            // });
 
         $users = $query->get();
 
