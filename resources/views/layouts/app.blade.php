@@ -783,6 +783,15 @@
                               </a>
                            </li>
                            @endif
+                           @if(auth()->user()->can(['employee_expense_report_dasboard']))
+                           <li class="nav-link-btn {{ request()->is('employee_expense_report*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('employee_expense_report') }}">
+                                 <i class="material-icons icon">transcribe</i>
+                                 <span>Employee Expense Dashboard</span>
+                                 <div class="d-none mobile_hide">Employee Expense Dashboard</div>
+                              </a>
+                           </li>
+                           @endif
                         </ul>
                      </div>
                   </li>
