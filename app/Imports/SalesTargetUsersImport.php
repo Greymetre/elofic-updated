@@ -26,10 +26,10 @@ use App\Models\SalesTargetUsers;
 use App\Models\User;
 use Validator;
 
-class SalesTargetUsersImport implements ToCollection,WithValidation,WithHeadingRow, WithBatchInserts , WithChunkReading
+class SalesTargetUsersImport implements ToCollection, WithValidation, WithHeadingRow, WithBatchInserts, WithChunkReading
 {
     use Importable;
-    
+
     public function model(array $row)
     {
         return new SalesTargetUsers([
@@ -39,34 +39,45 @@ class SalesTargetUsersImport implements ToCollection,WithValidation,WithHeadingR
     public function collection(Collection $rows)
     {
         foreach ($rows as $row) {
-            $excelDate = $row['month'] - 25569; // Adjust for Excel's epoch
-            $unixTimestamp = strtotime('+'.$excelDate.' days', strtotime('1970-01-01'));
-            $carbonDate = Carbon::createFromTimestamp($unixTimestamp);
-            $carbonMonth = $carbonDate->format('M');
-            $carbonYear = $carbonDate->format('Y');
-            
-            $salesTargetUsers = SalesTargetUsers::updateOrCreate([
-                'user_id' => $row['user_id'],
-                'month' => $carbonMonth,
-                'branch_id' => $row['branch_id'],
-                'year' => $carbonYear],[
-
-                'user_id' => $row['user_id'],
-                'branch_id' => $row['branch_id'],
-                'type' => $row['type'],
-                'month' => $carbonMonth,
-                'year' => $carbonYear,
-                'target' => $row['target_value']
-            ]);
+            if (!isset($row['user_id']) || empty($row['user_id'])) {
+                continue;
+            }
+            $user_id = $row['user_id'];
+            $type = $row['type'];
+            $branchId = $row['branch_id'];
+            foreach ($row as $key => $value) {
+                $key = (string) $key; 
+                if (preg_match('/^(\d{2})(\d{2})$/', $key, $matches)) {
+                    $monthNumber = $matches[1]; 
+                    $year = '20' . $matches[2]; 
+                    $carbonDate = Carbon::createFromFormat('m Y', $monthNumber . ' ' . $year);
+                    $month = $carbonDate->format('M');
+                }elseif (is_numeric($key) && $key > 40000) {
+                    $excelDate = $key - 25569; 
+                    $carbonDate = Carbon::createFromTimestamp($excelDate * 86400); 
+                    $month = $carbonDate->format('M');
+                    $year = $carbonDate->format('Y');
+                }else {
+                    continue;
+                }
+                $targetValue = is_numeric($value) ? $value : 0;
+                $salesTargetUsers = SalesTargetUsers::updateOrCreate([
+                    'user_id' => $user_id,
+                    'month' => $month,
+                    'year' => $year,
+                    'branch_id' => $branchId
+                ], [
+                    'type' => $type,
+                    'target' => $targetValue
+                ]);
+            }
         }
     }
     public function rules(): array
     {
         $rules = [
             'user_id' => 'required',
-            'month' => 'required',
             'type' => 'required|in:primary,secondary',
-            'target_value' => 'required|numeric',
         ];
         return $rules;
     }
@@ -75,11 +86,8 @@ class SalesTargetUsersImport implements ToCollection,WithValidation,WithHeadingR
     {
         return [
             'user_id.required' => 'The user id is required.',
-            'month.required' => 'The month name field is required.',
             'type.required' => 'The type name field is required.',
             'type.in' => 'The type name field either have primary or secondary value.',
-            'target_value.required' => 'The target value is required.',
-            'target_value.required' => 'The target value must be numeric.'
         ];
     }
 
