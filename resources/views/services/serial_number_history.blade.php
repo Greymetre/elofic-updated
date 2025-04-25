@@ -99,15 +99,14 @@
                 <th>Action</th>
                 <th>Serial number</th>
                 <th>Group</th>
-                <th>Sub Group</th>
-                <th>Product Code</th>
-                <th>Product Name</th>
+                <th>Naration</th>
                 <th>Product Model</th>
                 <th>Party Name</th>
                 <th>Invoice Number</th>
                 <th>Invoice Date</th>
                 <th>Expiry Date</th>
                 <th>Warranty Status</th>
+                <th>Product Code</th>
                 <!-- <th>{!! trans('panel.global.created_by') !!}</th>
               <th>{!! trans('panel.global.created_at') !!}</th> -->
               </thead>
@@ -169,22 +168,8 @@
             searchable: false
           },
           {
-            data: 'new_group',
-            name: 'new_group',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'product_code',
-            name: 'product_code',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'product_name',
-            name: 'product_name',
+            data: 'narration',
+            name: 'narration',
             "defaultContent": '',
             orderable: false,
             searchable: false
@@ -226,6 +211,13 @@
           {
             data: 'warranty_status',
             name: 'warranty_status',
+            orderable: false,
+            searchable: false
+          },
+          {
+            data: 'product_code',
+            name: 'product_code',
+            "defaultContent": '',
             orderable: false,
             searchable: false
           }

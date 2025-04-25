@@ -10,6 +10,6 @@
       </h2>
    </x-slot>
    <div class="fr-container">
-   <iframe title="dwerw (1)" width="100%" height="750" src="https://app.powerbi.com/view?r=eyJrIjoiMzRmOTk4NTQtMTQ0MC00YzUwLWIyZDktYjI4ZDJmMTZkYWFhIiwidCI6IjkyNTNmZjI5LWIxN2UtNDI1Zi1hNzg1LTg0MmRmYzAwZjQ1YyJ9" frameborder="1" allowFullScreen="true"></iframe>
+   <iframe title="dwerw (1)" width="100%" height="750" src="{{$url}}" frameborder="1" allowFullScreen="true"></iframe>
    </div>
 </x-app-layout>

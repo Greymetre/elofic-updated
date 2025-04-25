@@ -58,7 +58,7 @@ class SerialNumberTransactionImport implements ToCollection,WithValidation,WithH
                         'group' => isset($row['group'])? $row['group']:null,
                         'new_group' => isset($row['new_group'])? $row['new_group']:null,
                         'serial_no' => isset($serial_no)? $serial_no:null,
-                        
+                        'narration' => isset($row['narration'])? $row['narration']:null,
                         'created_by' => Auth::user()->id,
                         'created_at' => getcurentDateTime(),
                         'updated_at' => getcurentDateTime(),

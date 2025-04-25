@@ -102,6 +102,7 @@ class ServicesController extends Controller
             'party_name',
             'product_name',
             'qty',
+            'narration',
             'group'
         );
         if ($request->branch_id && $request->branch_id != null && $request->branch_id != '') {

@@ -87,6 +87,8 @@ use App\Http\Controllers\PlannedSOPController;
 use App\Http\Controllers\ClaimGenerationController;
 use App\Http\Controllers\ServiceBillComplaintType;
 use App\Http\Controllers\OpeningStockController;
+use App\Http\Controllers\PowerBiSettingController;
+use App\Models\PowerBiSetting;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 /*
@@ -140,11 +142,13 @@ Route::post('/dealer-appointment-kyc-submit', [DealerAppointmentController::clas
 Route::group(['middleware' => ['auth']], function () {
     Route::get('/sales_summary_dashboard', function () {
         abort_if(Gate::denies('sales_summary_dashboard'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return view('dashboard.sales_summary_dashboard');
+        $url = PowerBiSetting::where('key', 'sales')->first()->value;
+        return view('dashboard.sales_summary_dashboard', compact('url'));
     });
     Route::get('/employee_expense_report', function () {
         abort_if(Gate::denies('employee_expense_report_dasboard'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return view('dashboard.employee_expense_report');
+        $url = PowerBiSetting::where('key', 'employee_expense')->first()->value;
+        return view('dashboard.employee_expense_report', compact('url'));
     });
     //Dashboard
     Route::get('dashboard', [DashboardController::class, 'index']);
@@ -1023,6 +1027,10 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('opening-quantity-list', [BranchOprningQuantityController::class, 'getOpeningquantity'])->name('getOpeningquantity');
     Route::any('opening-quantity-import', [BranchOprningQuantityController::class, 'openingStockImport'])->name('openingStockImport');
     Route::any('opening-quantity-export', [BranchOprningQuantityController::class, 'openingStockExport'])->name('openingStockExport');
+
+    //Power BI Settings Routes
+    Route::get('power_bi_setting', [PowerBiSettingController::class, 'index']);
+    Route::post('power_bi_setting/store', [PowerBiSettingController::class, 'store'])->name('power_bi_setting.store');
 });
 
 Route::any('getState', [AjaxController::class, 'getState']);

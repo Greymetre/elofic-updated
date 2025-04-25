@@ -1297,7 +1297,7 @@
               }
             },
             error: function(xhr, status, error) {
-              console.error('Error:', error);
+              // console.error('Error:', error, status, xhr);
               alert('An error occurred while generating the certificate.');
             }
           });
