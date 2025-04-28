@@ -64,6 +64,7 @@ use App\Exports\ProductAnalysisValueExport;
 use App\Exports\TopDealerExport;
 use App\Exports\UserIncentiveExport;
 use App\Imports\CutomerOutstantingImport;
+use App\Jobs\GenerateBalanceConfirmationJob;
 use Carbon\Carbon;
 use Dompdf\Dompdf;
 use Illuminate\Support\Facades\Storage;
@@ -4068,6 +4069,8 @@ class ReportController extends Controller
         $userids = getUsersReportingToAuth();
         $customers = Customers::whereIn('id', CustomerOutstanting::pluck('customer_id')->unique())->select('id', 'name')->get();
         $dealers = Customers::where('customertype', ['1', '3'])->get();
+        $branchs = Branch::where('active', 'Y')->select('id', 'branch_name')->get();
+        $divisions = Division::where('active', 'Y')->select('id', 'division_name')->get();
 
         if ($request->ajax()) {
             $data = CustomerOutstanting::with('branch', 'customer.customerdocuments')->select(
@@ -4083,6 +4086,12 @@ class ReportController extends Controller
 
             if ($request->customer_id && !empty($request->customer_id)) {
                 $data->where('customer_id', $request->customer_id);
+            }
+            if ($request->branch_id && !empty($request->branch_id)) {
+                $data->where('branch_id', $request->branch_id);
+            }
+            if ($request->division_id && !empty($request->division_id)) {
+                $data->where('division_id', $request->division_id);
             }
 
             $data = $data->groupBy('customer_id', 'branch_id', 'year', 'quarter');
@@ -4121,7 +4130,7 @@ class ReportController extends Controller
                 ->make(true);
         }
 
-        return view('reports.customer_outstanting', compact('customers', 'dealers'));
+        return view('reports.customer_outstanting', compact('customers', 'dealers', 'branchs', 'divisions'));
     }
 
     public function customer_outstanting_upload(Request $request)
@@ -4145,63 +4154,92 @@ class ReportController extends Controller
     public function customer_outstanting_download(Request $request)
     {
         if ($request->download == 'pdf') {
-            $data = CustomerOutstanting::with('branch', 'customer')->select(
-                'customer_id',
-                'branch_id',
-                'user_id',
-                'division_id',
-                'year',
-                'quarter',
-                DB::raw('SUM(amount) as total_amounts'),
-            );
 
-            if ($request->customer_id && !empty($request->customer_id)) {
-                $data->where('customer_id', $request->customer_id);
-            }
-
-            $data = $data->groupBy('customer_id', 'branch_id', 'year', 'quarter')->get();
             $logoPath = public_path('assets/img/certificate_logo_fan2.png');
             $logoPath2 = public_path('assets/img/certificate_logo2.png');
             $footerLogoImage = public_path('assets/img/certificate_footer_logo2.png');
-            $footerLogoImage64 = "data:image/png;base64," . base64_encode(file_get_contents($footerLogoImage));
+
             $logoBase64 = "data:image/png;base64," . base64_encode(file_get_contents($logoPath));
             $logoBase642 = "data:image/png;base64," . base64_encode(file_get_contents($logoPath2));
-            if ($request->balance_date) {
-                $bal_date = date('d.m.Y', strtotime($request->balance_date));
-            } else {
-                $bal_date = date('d.m.Y');
+            $footerLogoImage64 = "data:image/png;base64," . base64_encode(file_get_contents($footerLogoImage));
+
+            $bal_date = $request->balance_date
+                ? date('d.m.Y', strtotime($request->balance_date))
+                : date('d.m.Y');
+
+            $query = CustomerOutstanting::with('branch', 'customer')
+                ->select('customer_id', 'branch_id', 'user_id', 'division_id', 'year', 'quarter', DB::raw('SUM(amount) as total_amounts'))
+                ->groupBy('customer_id', 'branch_id', 'year', 'quarter');
+
+            if ($request->customer_id && !empty($request->customer_id)) {
+                $query->where('customer_id', $request->customer_id);
             }
-            $data->chunk(50)->each(function ($batch) use ($logoBase64, $footerLogoImage64, $logoBase642, $bal_date) {
-                foreach ($batch as $key => $value) {
-                    $main_data = [
-                        'image' => $logoBase64,
-                        'image2' => $footerLogoImage64,
-                        'image3' => $logoBase642,
-                        'date' => $bal_date,
-                        'data' => $value
-                    ];
-                    $html = view('customers.BalanceConfirmationPDF', $main_data)->render();
-                    $dompdf = new Dompdf();
-                    $dompdf->loadHtml($html);
-                    $dompdf->render();
 
-                    $filename = 'balance_confirmation_' . $value->customer->id . '.pdf';
-                    $tempPath = storage_path('app/temp/' . $filename);
-                    file_put_contents($tempPath, $dompdf->output());
-                    $s3Path = 'uploads/balance_confirmations/' . $filename;
-                    $uploaded = Storage::disk('s3')->put($s3Path, fopen($tempPath, 'r+'));
-                    unlink($tempPath);
-
-                    if ($uploaded) {
-                        $filePath = Storage::disk('s3')->url($s3Path);
-                        Attachment::updateOrCreate(
-                            ['document_name' => 'balance_confirmations', 'customer_id' => $value->customer->id],
-                            ['file_path' => $filePath, 'active' => 'Y']
-                        );
-                    }
-                }
+            $query->chunk(50, function ($batch) use ($logoBase64, $footerLogoImage64, $logoBase642, $bal_date) {
+                GenerateBalanceConfirmationJob::dispatch($batch, $logoBase64, $footerLogoImage64, $logoBase642, $bal_date);
             });
-            return redirect()->back()->with('message_success', 'PDF generation successfully.');
+
+            return redirect()->back()->with('message_success', 'PDF generation started in background. You will see files once ready.');
+
+
+
+            // $data = CustomerOutstanting::with('branch', 'customer')->select(
+            //     'customer_id',
+            //     'branch_id',
+            //     'user_id',
+            //     'division_id',
+            //     'year',
+            //     'quarter',
+            //     DB::raw('SUM(amount) as total_amounts'),
+            // );
+
+            // if ($request->customer_id && !empty($request->customer_id)) {
+            //     $data->where('customer_id', $request->customer_id);
+            // }
+
+            // $data = $data->groupBy('customer_id', 'branch_id', 'year', 'quarter')->get();
+            // $logoPath = public_path('assets/img/certificate_logo_fan2.png');
+            // $logoPath2 = public_path('assets/img/certificate_logo2.png');
+            // $footerLogoImage = public_path('assets/img/certificate_footer_logo2.png');
+            // $footerLogoImage64 = "data:image/png;base64," . base64_encode(file_get_contents($footerLogoImage));
+            // $logoBase64 = "data:image/png;base64," . base64_encode(file_get_contents($logoPath));
+            // $logoBase642 = "data:image/png;base64," . base64_encode(file_get_contents($logoPath2));
+            // if ($request->balance_date) {
+            //     $bal_date = date('d.m.Y', strtotime($request->balance_date));
+            // } else {
+            //     $bal_date = date('d.m.Y');
+            // }
+            // $data->chunk(50)->each(function ($batch) use ($logoBase64, $footerLogoImage64, $logoBase642, $bal_date) {
+            //     foreach ($batch as $key => $value) {
+            //         $main_data = [
+            //             'image' => $logoBase64,
+            //             'image2' => $footerLogoImage64,
+            //             'image3' => $logoBase642,
+            //             'date' => $bal_date,
+            //             'data' => $value
+            //         ];
+            //         $html = view('customers.BalanceConfirmationPDF', $main_data)->render();
+            //         $dompdf = new Dompdf();
+            //         $dompdf->loadHtml($html);
+            //         $dompdf->render();
+
+            //         $filename = 'balance_confirmation_' . $value->customer->id . '.pdf';
+            //         $tempPath = storage_path('app/temp/' . $filename);
+            //         file_put_contents($tempPath, $dompdf->output());
+            //         $s3Path = 'uploads/balance_confirmations/' . $filename;
+            //         $uploaded = Storage::disk('s3')->put($s3Path, fopen($tempPath, 'r+'));
+            //         unlink($tempPath);
+
+            //         if ($uploaded) {
+            //             $filePath = Storage::disk('s3')->url($s3Path);
+            //             Attachment::updateOrCreate(
+            //                 ['document_name' => 'balance_confirmations', 'customer_id' => $value->customer->id],
+            //                 ['file_path' => $filePath, 'active' => 'Y']
+            //             );
+            //         }
+            //     }
+            // });
+            // return redirect()->back()->with('message_success', 'PDF generation successfully.');
         } else if ($request->download == 'excel') {
             abort_if(Gate::denies('customer_outstanting_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
             if (ob_get_contents()) ob_end_clean();

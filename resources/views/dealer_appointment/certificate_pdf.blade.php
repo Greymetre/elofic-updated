@@ -39,7 +39,11 @@
                 <div class="footer">
                     <table style="width: 100%;margin-top:20px;">
                         <tr style="text-align: center;">
-                            <td style="text-align: left;font-size: 14px;color:#0f3e55;font-weight:200;margin-bottom:0;line-height:25px;">Issued Date : {{ date('d/m/Y',strtotime($issue_date)) }} <br> Place : Rajkot </td>
+                            <td style="text-align: left;font-size: 14px;color:#0f3e55;font-weight:200;margin-bottom:0;line-height:25px;">
+                                @if($division == 'Agriculture Equipments range')
+                                Certificate No. : {{ $certificate_no }} <br>
+                                @endif
+                                Issued Date : {{ date('d/m/Y',strtotime($issue_date)) }} <br> Place : Rajkot </td>
                             <td style="text-align: left;"><img width="80" src="{{ $footerLogoImage64 }}" alt="Logo"></td>
                             <td><img width="90" src="{{ $signImage64 }}" alt="Logo">
                                 <hr style="height: 0px;">

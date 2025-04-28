@@ -28,6 +28,7 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         abort_if(Gate::denies('dashboard_access'), Response::HTTP_FORBIDDEN, 'Forbidden,' . PHP_EOL . 'You don\'t have the right permissions. Please contact to the admin.');
+        return view('dashboard.index');
         $users_ids = getUsersReportingToAuth();
         // $users= User::where('active','=','Y')->whereIn('reportingid', $users_ids)->select('id','name')->get();
         $branches = Branch::latest()->get();

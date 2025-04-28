@@ -778,8 +778,17 @@
                            <li class="nav-link-btn {{ request()->is('sales_summary_dashboard*') ? 'active' : '' }}">
                               <a class="hoveradd2" href="{{ url('sales_summary_dashboard') }}">
                                  <i class="material-icons icon">transcribe</i>
-                                 <span>Sales Summary Dashboard</span>
-                                 <div class="d-none mobile_hide">Sales Summary Dashboard</div>
+                                 <span>Sales</span>
+                                 <div class="d-none mobile_hide">Sales</div>
+                              </a>
+                           </li>
+                           @endif
+                           @if(auth()->user()->can(['employee_expense_report_dasboard']))
+                           <li class="nav-link-btn {{ request()->is('employee_expense_report*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('employee_expense_report') }}">
+                                 <i class="material-icons icon">transcribe</i>
+                                 <span>Employee Related Expenses</span>
+                                 <div class="d-none mobile_hide">Employee Related Expenses</div>
                               </a>
                            </li>
                            @endif
@@ -1487,6 +1496,7 @@
                         </a>
                      </li>
                      @endif
+                     @if(auth()->user()->can('service_bill_access'))
                      <li class="nav-link-btn {{ request()->is('service-bills-complaints-type*') ? 'active' : '' }}">
                         <a class="hoveradd2" href="{{ url('service-bills-complaints-type') }}">
                            <i class="material-icons icon">account_balance_wallet</i>
@@ -1494,6 +1504,7 @@
                            <div class="d-none mobile_hide"> Service Bills Complaints Type</div>
                         </a>
                      </li>
+                     @endif
                      @if(auth()->user()->can('claim_generation_access'))
                      <li class="nav-link-btn {{ request()->is('claim-generation*') ? 'active' : '' }}">
                         <a class="hoveradd2" href="{{ url('claim-generation') }}">
@@ -1805,7 +1816,7 @@
             </li>
             @endif
             @if(auth()->user()->can('status_access'))
-            <li class="nav-link {{request()->is('loyalty-app-setting*')  || request()->is('roles*') ? 'active' : '' }}">
+            <li class="nav-link {{request()->is('loyalty-app-setting*') || request()->is('roles*') || request()->is('power_bi_setting*') ? 'active' : '' }}">
                <a class="collapsed hoveradd" data-toggle="collapse" href="#settingMenu" aria-expanded="false">
                   <i class="material-icons icon">settings</i>
                   <span> {!! trans('panel.sidemenu.setting_master') !!}
@@ -1822,12 +1833,21 @@
                                  </a>
                                  </li> -->
                      @endif
+                     @if(auth()->user()->can('power_bi_setting_access'))
+                     <li class="nav-link-btn {{request()->is('power_bi_setting*') ? 'active' : '' }}">
+                        <a class="hoveradd2" href="{{ url('power_bi_setting') }}">
+                           <i class="material-icons icon">analytics</i>
+                           <span>Power BI {!! trans('panel.sidemenu.setting') !!}</span>
+                           <div class="d-none mobile_hide">Power BI {!! trans('panel.sidemenu.setting') !!}</div>
+                        </a>
+                     </li>
+                     @endif
                      @if(auth()->user()->can('loyalty_app_setting_access'))
                      <li class="nav-link-btn {{request()->is('loyalty-app-setting*') ? 'active' : '' }}">
                         <a class="hoveradd2" href="{{ url('loyalty-app-setting') }}">
                            <i class="material-icons icon">manage_accounts</i>
                            <span>Loyalty App {!! trans('panel.sidemenu.setting') !!}</span>
-                           <div class="d-none mobile_hide"> {!! trans('panel.sidemenu.setting') !!}</div>
+                           <div class="d-none mobile_hide">Loyalty App {!! trans('panel.sidemenu.setting') !!}</div>
                         </a>
                      </li>
                      @endif
@@ -1836,7 +1856,7 @@
                         <a class="hoveradd2" href="{{ url('field-konnect-app-setting') }}">
                            <i class="material-icons icon">admin_panel_settings</i>
                            <span>FieldKonnect App {!! trans('panel.sidemenu.setting') !!}</span>
-                           <div class="d-none mobile_hide"> {!! trans('panel.sidemenu.setting') !!}</div>
+                           <div class="d-none mobile_hide"> FieldKonnect App {!! trans('panel.sidemenu.setting') !!}</div>
                         </a>
                      </li>
                      @endif
@@ -1845,7 +1865,7 @@
                         <a class="hoveradd2" href="{{ url('delar-portal-setting') }}">
                            <i class="material-icons  icon">settings_applications</i>
                            <span>Dealer portal {!! trans('panel.sidemenu.setting') !!}</span>
-                           <div class="d-none mobile_hide"> {!! trans('panel.sidemenu.setting') !!}</div>
+                           <div class="d-none mobile_hide">Dealer portal {!! trans('panel.sidemenu.setting') !!}</div>
                         </a>
                      </li>
                      @endif

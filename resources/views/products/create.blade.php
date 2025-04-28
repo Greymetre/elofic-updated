@@ -396,6 +396,19 @@
                 </div>
               </div>
             </div>
+            <div class="col-md-6">
+              <div class="input_section">
+                <label class="col-form-label">RMC(Raw Material Cost)</label>
+                <div class="form-group has-default bmd-form-group">
+                  <input type="number" name="rmc" id="rmc" class="form-control" value="{!! old( 'rmc', !empty($products['productpriceinfo']['rmc']) ? $products['productpriceinfo']['rmc'] :'' ) !!}" step="0.01" min="0">
+                  @if ($errors->has('rmc'))
+                  <div class="error col-lg-12">
+                    <p class="text-danger">{{ $errors->first('rmc') }}</p>
+                  </div>
+                  @endif
+                </div>
+              </div>
+            </div>
             <div class="col-md-3 col-sm-3">
               <div class="fileinput fileinput-new" data-provides="fileinput">
                 <div class="fileinput-new thumbnail">

@@ -87,7 +87,10 @@ use App\Http\Controllers\PlannedSOPController;
 use App\Http\Controllers\ClaimGenerationController;
 use App\Http\Controllers\ServiceBillComplaintType;
 use App\Http\Controllers\OpeningStockController;
-
+use App\Http\Controllers\PowerBiSettingController;
+use App\Models\PowerBiSetting;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Gate;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -138,8 +141,15 @@ Route::post('/dealer-appointment-kyc-submit', [DealerAppointmentController::clas
 
 Route::group(['middleware' => ['auth']], function () {
     Route::get('/sales_summary_dashboard', function () {
-        return view('dashboard.sales_summary_dashboard');
-   });
+        abort_if(Gate::denies('sales_summary_dashboard'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $url = PowerBiSetting::where('key', 'sales')->first()->value;
+        return view('dashboard.sales_summary_dashboard', compact('url'));
+    });
+    Route::get('/employee_expense_report', function () {
+        abort_if(Gate::denies('employee_expense_report_dasboard'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $url = PowerBiSetting::where('key', 'employee_expense')->first()->value;
+        return view('dashboard.employee_expense_report', compact('url'));
+    });
     //Dashboard
     Route::get('dashboard', [DashboardController::class, 'index']);
     Route::post('dashboardData', [DashboardController::class, 'dashboardData']);
@@ -985,38 +995,42 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('service-charge/products/upload', [ServiceChargeProductsController::class, 'productupload'])->name('servicecharge.products.upload');
 
     Route::resource('planned-sop', PlannedSOPController::class);
-    Route::any('planned-sop-list', [PlannedSOPController::class , 'plannedSopList'])->name('plannedSopList');
-    Route::any('planned-sop-export' , [PlannedSOPController::class , 'sop_download'])->name('sop_download');
-    Route::any('planned-sale-sop-export' , [PlannedSOPController::class , 'sale_sop_download'])->name('sale_sop_download');
-    Route::any('planned-sop-import' , [PlannedSOPController::class , 'sop_import'])->name('sop_import');
-    Route::any('planned-sop-template' , [PlannedSOPController::class , 'sop_template'])->name('sop_template');
-    Route::any('planned-sop-multistatus-change' , [PlannedSOPController::class , 'planned_sop_multistatus_change'])->name('planned-sop-multistatus-change');
+    Route::any('planned-sop-list', [PlannedSOPController::class, 'plannedSopList'])->name('plannedSopList');
+    Route::any('planned-sop-export', [PlannedSOPController::class, 'sop_download'])->name('sop_download');
+    Route::any('planned-sale-sop-export', [PlannedSOPController::class, 'sale_sop_download'])->name('sale_sop_download');
+    Route::any('planned-sop-import', [PlannedSOPController::class, 'sop_import'])->name('sop_import');
+    Route::any('planned-sop-template', [PlannedSOPController::class, 'sop_template'])->name('sop_template');
+    Route::any('planned-sop-multistatus-change', [PlannedSOPController::class, 'planned_sop_multistatus_change'])->name('planned-sop-multistatus-change');
 
-    Route::get('planned-sop-forecast', [PlannedSOPController::class , 'plannedForCast'])->name('plannedForCast');
+    Route::get('planned-sop-forecast', [PlannedSOPController::class, 'plannedForCast'])->name('plannedForCast');
 
     // claim gerneration 
     Route::resource('claim-generation', ClaimGenerationController::class);
-    Route::any('claim-generation-list', [ClaimGenerationController::class , 'getClaims'])->name('getClaims');
-    Route::any('claim-generation-export', [ClaimGenerationController::class , 'ClaimGenerationExport'])->name('claim-generation.export');
-    Route::any('claim-generation-list-single', [ClaimGenerationController::class , 'getClaimsSingle'])->name('getClaimsSingle');
-    Route::any('claim-generation-pdf/{id}', [ClaimGenerationController::class , 'claimGenerationPdf'])->name('claim-generation.pdf');
+    Route::any('claim-generation-list', [ClaimGenerationController::class, 'getClaims'])->name('getClaims');
+    Route::any('claim-generation-export', [ClaimGenerationController::class, 'ClaimGenerationExport'])->name('claim-generation.export');
+    Route::any('claim-generation-list-single', [ClaimGenerationController::class, 'getClaimsSingle'])->name('getClaimsSingle');
+    Route::any('claim-generation-pdf/{id}', [ClaimGenerationController::class, 'claimGenerationPdf'])->name('claim-generation.pdf');
 
     // service bill complaint type  
     Route::resource('service-bills-complaints-type', ServiceBillComplaintType::class);
-    Route::any('service-bills-complaints-type-list', [ServiceBillComplaintType::class , 'getServiceComplaintType'])->name('getServiceComplaintType');
+    Route::any('service-bills-complaints-type-list', [ServiceBillComplaintType::class, 'getServiceComplaintType'])->name('getServiceComplaintType');
     Route::any('service_bill_complaint_type_download', [ServiceBillComplaintType::class, 'service_bill_complaint_type_download'])->name('service_bill_complaint_type_download');
 
     // opening stock routes
     Route::resource('opening-stocks', OpeningStockController::class)->only('index');
-    Route::any('opening-stocks-list', [OpeningStockController::class , 'getOpeningStocks'])->name('getOpeningStocks');
-    Route::any('opening-stocks-import', [OpeningStockController::class , 'openingStockImport'])->name('openingStockImport');
-    Route::any('opening-stocks-export', [OpeningStockController::class , 'openingStockExport'])->name('openingStockExport');
+    Route::any('opening-stocks-list', [OpeningStockController::class, 'getOpeningStocks'])->name('getOpeningStocks');
+    Route::any('opening-stocks-import', [OpeningStockController::class, 'openingStockImport'])->name('openingStockImport');
+    Route::any('opening-stocks-export', [OpeningStockController::class, 'openingStockExport'])->name('openingStockExport');
 
     // Branch Opening Quantity routes
     Route::resource('opening-quantity', BranchOprningQuantityController::class)->only('index');
-    Route::any('opening-quantity-list', [BranchOprningQuantityController::class , 'getOpeningquantity'])->name('getOpeningquantity');
-    Route::any('opening-quantity-import', [BranchOprningQuantityController::class , 'openingStockImport'])->name('openingStockImport');
-    Route::any('opening-quantity-export', [BranchOprningQuantityController::class , 'openingStockExport'])->name('openingStockExport');
+    Route::any('opening-quantity-list', [BranchOprningQuantityController::class, 'getOpeningquantity'])->name('getOpeningquantity');
+    Route::any('opening-quantity-import', [BranchOprningQuantityController::class, 'openingStockImport'])->name('openingStockImport');
+    Route::any('opening-quantity-export', [BranchOprningQuantityController::class, 'openingStockExport'])->name('openingStockExport');
+
+    //Power BI Settings Routes
+    Route::get('power_bi_setting', [PowerBiSettingController::class, 'index']);
+    Route::post('power_bi_setting/store', [PowerBiSettingController::class, 'store'])->name('power_bi_setting.store');
 });
 
 Route::any('getState', [AjaxController::class, 'getState']);
@@ -1089,12 +1103,12 @@ Route::any('getServiceChargeType', [AjaxController::class, 'getServiceChargeType
 Route::any('getServiceServiceEngiByDivision', [AjaxController::class, 'getServiceServiceEngiByDivision']);
 Route::any('getCountsOfComplaints', [AjaxController::class, 'getCountsOfComplaints']);
 Route::any('getSaledata', [AjaxController::class, 'getSaledata']);
-Route::any('getServiceBillReason' , [AjaxController::class , 'getServiceBillReason']);
-Route::any('checkServiceBillComplaintType' , [AjaxController::class , 'checkServiceBillComplaintType']);
-Route::any('getSubCategory' , [AjaxController::class , 'getSubCategory']);
-Route::any('getProductInfoListBySubcategory' , [AjaxController::class , 'getProductInfoListBySubcategory']);
-Route::any('getFullDetailsOfProduct' , [AjaxController::class , 'getFullDetailsOfProduct']);
-Route::any('planned-sop-fore-total', [AjaxController::class , 'getplannedForCast'])->name('getplannedForCast');
+Route::any('getServiceBillReason', [AjaxController::class, 'getServiceBillReason']);
+Route::any('checkServiceBillComplaintType', [AjaxController::class, 'checkServiceBillComplaintType']);
+Route::any('getSubCategory', [AjaxController::class, 'getSubCategory']);
+Route::any('getProductInfoListBySubcategory', [AjaxController::class, 'getProductInfoListBySubcategory']);
+Route::any('getFullDetailsOfProduct', [AjaxController::class, 'getFullDetailsOfProduct']);
+Route::any('planned-sop-fore-total', [AjaxController::class, 'getplannedForCast'])->name('getplannedForCast');
 
 //Clear Cache facade value:
 Route::get('/clear-cache', function () {
@@ -1148,7 +1162,7 @@ Route::get('/taskreminder', function () {
 });
 
 Route::get('/dashboard/silver', function () {
-     return view('dashboard_silver');
+    return view('dashboard_silver');
 });
 
 

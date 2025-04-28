@@ -78,6 +78,7 @@ class ProductImport implements ToCollection,WithValidation,WithHeadingRow, WithB
                     'price' => isset($row['price'])? $row['price']:$row['mrp'],
                     'discount' => isset($row['discount'])? $row['discount']:0.00,
                     'max_discount' => isset($row['max_discount'])? $row['max_discount']:0.00,
+                    'rmc' => isset($row['rmc'])? $row['rmc']:0.00,
                     'selling_price' => isset($row['selling_price'])? $row['selling_price']:0.00,
                     'gst' => isset($row['gst'])? $row['gst']:0.00,
                     'isprimary' => isset($row['isprimary'])? $row['isprimary']:1,

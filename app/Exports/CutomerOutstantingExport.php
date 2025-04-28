@@ -46,6 +46,12 @@ class CutomerOutstantingExport implements FromCollection, WithHeadings, ShouldAu
         if($this->request->customer_id && !empty($this->request->customer_id)){
             $data->where('customer_id', $this->request->customer_id);                
         }
+        if($this->request->branch_id && !empty($this->request->branch_id)){
+            $data->where('branch_id', $this->request->branch_id);                
+        }
+        if($this->request->division_id && !empty($this->request->division_id)){
+            $data->where('division_id', $this->request->division_id);                
+        }
         
         $data = $data->groupBy('customer_id', 'branch_id', 'year', 'quarter')->get();
 

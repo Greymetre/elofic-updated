@@ -88,6 +88,9 @@ class ComplaintController extends Controller
             'warranty_details',
             'assign_users'
         ])->latest()->newQuery();
+        if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Sub_Admin') && !Auth::user()->hasRole('Service Admin') &&  !Auth::user()->hasRole('CRM_Support')){
+           $query->where('assign_user' , Auth::user()->id);
+        }
 
         if (isset($request->complaint_date)) {
             $date = explode(' - ' , $request->complaint_date);

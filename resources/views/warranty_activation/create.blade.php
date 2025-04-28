@@ -704,9 +704,19 @@
                 }
             }).trigger('change');
 
+           const product_ser_no = "{{$request->serial_no ?? ''}}"
+              if(product_ser_no){
+               $('#select_product_id').empty();
+               getProductInfoBySerialNo();
+              }
+
             $("#product_serail_number").on("input", function() {
                $('#select_product_id').empty();
-               var serial_no = $(this).val();
+               getProductInfoBySerialNo();
+            }).trigger('change');
+
+            function getProductInfoBySerialNo(){
+               var serial_no = $('#product_serail_number').val();
                $.ajax({
                   url: "{{ url('getProductByCoupon') }}",
                   dataType: "json",
@@ -765,7 +775,7 @@
                      }
                   }
                });
-            }).trigger('change');
+            }
 
             $("#select_product_id").on("change", function() {
                $('#product_id').val($(this).val());

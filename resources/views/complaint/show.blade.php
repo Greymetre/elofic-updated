@@ -135,27 +135,116 @@
                       <div class="d-flex justify-content-between align-items-center">
                           <h4 class="card-title m-0">ViewKonnect</h4>
                           <div>
-                              @if(auth()->user()->can(['compalint_change_status']))
+                              @if(auth()->user()->hasRole(['superadmin']) || auth()->user()->hasRole(['Sub_Admin']))
                                   @if($complaint->complaint_status == '0')
-                                      <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending </b></button>
-                                      <a href="{{ route('complaint_work_done', $complaint) }}" class="btn btn-sm  done_status"><b>Work Done</b></a>
+                                      @can('pending_complaint')
+                                          <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending</b></button>
+                                      @endcan
+
+                                      @can('work_done_complaint')
+                                          <a href="{{ route('complaint_work_done', $complaint) }}" class="btn btn-sm done_status"><b>Work Done</b></a>
+                                      @endcan
+
                                   @elseif($complaint->complaint_status == '1')
-                                      <button type="button" class="btn btn-sm  open_status"><b>Open </b></button>
-                                      <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel </b></button>
+                                      @can('open_complaint')
+                                          <button type="button" class="btn btn-sm open_status"><b>Open</b></button>
+                                      @endcan
+
+                                      @can('cancel_complaint')
+                                          <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
+                                      @endcan
+
                                   @elseif($complaint->complaint_status == '2')
-                                      <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending </b></button>
-                                      <button type="button" class="btn btn-sm  open_status"><b>Open </b></button>
-                                      <button type="button" class="btn btn-sm btn-primary complete_status"><b>Complete </b></button>
+                                      @can('pending_complaint')
+                                          <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending</b></button>
+                                      @endcan
+
+                                      @can('open_complaint')
+                                          <button type="button" class="btn btn-sm open_status"><b>Open</b></button>
+                                      @endcan
+
+                                      @can('complete_complaint')
+                                          <button type="button" class="btn btn-sm btn-primary complete_status"><b>Complete</b></button>
+                                      @endcan
+
                                   @elseif($complaint->complaint_status == '3')
-                                      <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending </b></button>
-                                      <button type="button" class="btn btn-sm  open_status"><b>Open </b></button>
-                                      <button type="button" class="btn btn-sm btn-success close_status"><b>Close </b></button>
+                                      @can('pending_complaint')
+                                          <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending</b></button>
+                                      @endcan
+
+                                      @can('open_complaint')
+                                          <button type="button" class="btn btn-sm open_status"><b>Open</b></button>
+                                      @endcan
+
+                                      @can('close_complaint')
+                                          <button type="button" class="btn btn-sm btn-success close_status"><b>Close</b></button>
+                                      @endcan
+
                                   @elseif($complaint->complaint_status == '5')
-                                      <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending </b></button>
-                                      <button type="button" class="btn btn-sm  open_status"><b>Open </b></button>
+                                      @can('pending_complaint')
+                                          <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending</b></button>
+                                      @endcan
+
+                                      @can('open_complaint')
+                                          <button type="button" class="btn btn-sm open_status"><b>Open</b></button>
+                                      @endcan
+                                  @endif
+
+                              @else
+                                  @if($complaint->complaint_status == '0')
+                                     <!--  @can('pending_complaint')
+                                          <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending</b></button>
+                                      @endcan -->
+
+                                      @can('work_done_complaint')
+                                          <a href="{{ route('complaint_work_done', $complaint) }}" class="btn btn-sm done_status"><b>Work Done</b></a>
+                                      @endcan
+
+                                  @elseif($complaint->complaint_status == '1')
+                                      @can('open_complaint')
+                                          <button type="button" class="btn btn-sm open_status"><b>Open</b></button>
+                                      @endcan
+
+                                      @can('cancel_complaint')
+                                          <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
+                                      @endcan
+
+                                  @elseif($complaint->complaint_status == '2')
+                                     <!--  @can('pending_complaint')
+                                          <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending</b></button>
+                                      @endcan -->
+
+                                      @can('open_complaint')
+                                          <button type="button" class="btn btn-sm open_status"><b>Open</b></button>
+                                      @endcan
+
+                                      @can('complete_complaint')
+                                          <button type="button" class="btn btn-sm btn-primary complete_status"><b>Complete</b></button>
+                                      @endcan
+
+                                  @elseif($complaint->complaint_status == '3')
+                                     <!--  @can('pending_complaint')
+                                          <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending</b></button>
+                                      @endcan
+
+                                      @can('open_complaint')
+                                          <button type="button" class="btn btn-sm open_status"><b>Open</b></button>
+                                      @endcan -->
+
+                                      @can('close_complaint')
+                                          <button type="button" class="btn btn-sm btn-success close_status"><b>Close</b></button>
+                                      @endcan
+
+                                  @elseif($complaint->complaint_status == '5')
+                                     <!--  @can('pending_complaint')
+                                          <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending</b></button>
+                                      @endcan
+
+                                      @can('open_complaint')
+                                          <button type="button" class="btn btn-sm open_status"><b>Open</b></button>
+                                      @endcan -->
                                   @endif
                               @endif
-
                               @if(auth()->user()->can(['complaint_edit']))
                                   <a class="btn btn-warning btn-sm" href="{{ route('complaints.edit', $complaint->id) }}"><b>Edit</b></a>
                               @endif

@@ -20,7 +20,7 @@ class SalesTargetDealersTemplate implements FromCollection,WithHeadings,ShouldAu
 
     public function headings(): array
     {
-        return [['Branch Id','Customer Id','Div Id','Type','Dealer','04/24','05/24','06/24','07/24','08/24','09/24','10/24','11/24','12/24','01/25','02/25','03/25'],['','','','Add primary or secondary value only.please remove this row before upload.']];
+        return [['Branch Id','Customer Id','Div Id','Type','Dealer','04/25','05/25','06/25','07/25','08/25','09/25','10/25','11/25','12/25','01/26','02/26','03/26'],['','','','Add primary or secondary value only.please remove this row before upload.']];
     }
 
 }

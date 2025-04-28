@@ -22,6 +22,7 @@ use App\Exports\CustomersTemplate;
 use App\Http\Requests\CustomersRequest;
 use App\Models\TransactionHistory;
 use PDF;
+use Laravel\Passport\Token;
 
 use App\Models\EmployeeDetail;
 use App\Models\ParentDetail;
@@ -836,10 +837,38 @@ class CustomerController extends Controller
 
     public function active(Request $request)
     {
-        if (Customers::where('id', $request['id'])->update(['active' => ($request['active'] == 'Y') ? 'N' : 'Y'])) {
-            $message = ($request['active'] == 'Y') ? 'Inactive' : 'Active';
+        $customer = Customers::find($request['id']);
+
+        if (!$customer) {
+            return response()->json(['status' => 'error', 'message' => 'Customer not found']);
+        }
+
+        // Toggle status
+        $newStatus = ($request['active'] == 'Y') ? 'N' : 'Y';
+        $customer->active = $newStatus;
+
+        if ($customer->save()) {
+            $message = ($newStatus == 'N') ? 'Inactive' : 'Active';
+
+            // If customer is deactivated, revoke all tokens (logout)
+            if ($newStatus == 'N') {
+                // Revoke access tokens
+                Token::where('user_id', $customer->id)->update(['revoked' => true]);
+
+                // Revoke refresh tokens too (optional but safer)
+                DB::table('oauth_refresh_tokens')->whereIn(
+                    'access_token_id',
+                    function ($query) use ($customer) {
+                        $query->select('id')
+                            ->from('oauth_access_tokens')
+                            ->where('user_id', $customer->id);
+                    }
+                )->update(['revoked' => true]);
+            }
+
             return response()->json(['status' => 'success', 'message' => 'Customer ' . $message . ' Successfully!']);
         }
+
         return response()->json(['status' => 'error', 'message' => 'Error in Status Update']);
     }
 
@@ -962,7 +991,7 @@ class CustomerController extends Controller
         return Datatables::of($data)
             ->addIndexColumn()
             ->editColumn('upload_iamge', function ($item) {
-                return '<a href="'.$item->file_path.'" target="_blank"><img width="300" src="'.$item->file_path.'" alt=""></a>';
+                return '<a href="' . $item->file_path . '" target="_blank"><img width="300" src="' . $item->file_path . '" alt=""></a>';
             })
             ->rawColumns(['upload_iamge'])
             ->make(true);
