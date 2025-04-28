@@ -210,13 +210,13 @@
                                       @endcan
 
                                   @elseif($complaint->complaint_status == '2')
-                                     <!--  @can('pending_complaint')
+                                     {{--  @can('pending_complaint')
                                           <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending</b></button>
-                                      @endcan -->
+                                      @endcan 
 
                                       @can('open_complaint')
                                           <button type="button" class="btn btn-sm open_status"><b>Open</b></button>
-                                      @endcan
+                                      @endcan --}}
 
                                       @can('complete_complaint')
                                           <button type="button" class="btn btn-sm btn-primary complete_status"><b>Complete</b></button>
