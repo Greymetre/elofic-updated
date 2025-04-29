@@ -129,13 +129,14 @@ class SalesTargetUsersController extends Controller
             if ($request->year && $request->year != '' && $request->year != null) {
 
                 $f_year_array = explode('-', $request->year);
+                $months_order = ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'];
 
-                $query->where(function ($query) use ($f_year_array) {
+                $query->where(function ($query) use ($f_year_array, $months_order) {
                     $query->where('year', '=', $f_year_array[0])
-                        ->where('month', '>=', 'Apr');
-                })->orWhere(function ($query) use ($f_year_array) {
+                          ->whereIn('month', array_slice($months_order, 0, 9)); // Apr to Dec
+                })->orWhere(function ($query) use ($f_year_array, $months_order) {
                     $query->where('year', '=', $f_year_array[1])
-                        ->where('month', '<=', 'Mar');
+                          ->whereIn('month', array_slice($months_order, 9)); // Jan to Mar
                 });
             }
 

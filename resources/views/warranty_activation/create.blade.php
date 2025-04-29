@@ -765,10 +765,10 @@
                             } 
                            $("#customer_number").val(res.check_Warranty.customer.customer_number ?? '');
                            $('#sale_bill_no').val(res.check_Warranty.sale_bill_no);
-                           $('#branch_id').val(res.check_Warranty.branch_id).trigger('change');
-
+                           
                            $("#customer_number").keyup();
                         }
+                        $('#branch_id').val(res.data_all.branch.id).trigger('change');
                      } else {
                         $("#customer_id").val(" ");
                         $("#customer_id").prop('readonly', false);

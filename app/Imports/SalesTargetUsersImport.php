@@ -46,18 +46,18 @@ class SalesTargetUsersImport implements ToCollection, WithValidation, WithHeadin
             $type = $row['type'];
             $branchId = $row['branch_id'];
             foreach ($row as $key => $value) {
-                $key = (string) $key; 
+                $key = (string) $key;
                 if (preg_match('/^(\d{2})(\d{2})$/', $key, $matches)) {
-                    $monthNumber = $matches[1]; 
-                    $year = '20' . $matches[2]; 
-                    $carbonDate = Carbon::createFromFormat('m Y', $monthNumber . ' ' . $year);
+                    $monthNumber = $matches[1];
+                    $year = '20' . $matches[2];
+                    $carbonDate = Carbon::createFromFormat('Y-m-d', "$year-$monthNumber-01");
                     $month = $carbonDate->format('M');
-                }elseif (is_numeric($key) && $key > 40000) {
-                    $excelDate = $key - 25569; 
-                    $carbonDate = Carbon::createFromTimestamp($excelDate * 86400); 
+                } elseif (is_numeric($key) && $key > 40000) {
+                    $excelDate = $key - 25569;
+                    $carbonDate = Carbon::createFromTimestamp($excelDate * 86400);
                     $month = $carbonDate->format('M');
                     $year = $carbonDate->format('Y');
-                }else {
+                } else {
                     continue;
                 }
                 $targetValue = is_numeric($value) ? $value : 0;

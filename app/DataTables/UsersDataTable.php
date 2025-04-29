@@ -125,9 +125,9 @@ class UsersDataTable extends DataTable
             })
             ->whereHas('roles', function ($query) use ($request) {
                 if ($request->user_type == 'customer') {
-                    $query->where('id', ['29']);
+                    $query->whereIn('id', config('constants.customer_roles'));
                 } else {
-                    $query->whereNot('id', ['29']);
+                    $query->whereNotIn('id', config('constants.customer_roles'));
                 }
             })
             ->latest()

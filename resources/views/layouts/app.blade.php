@@ -1496,7 +1496,7 @@
                         </a>
                      </li>
                      @endif
-                     @if(auth()->user()->can('service_bill_access'))
+                     @if(auth()->user()->can('service_bill_type_access'))
                      <li class="nav-link-btn {{ request()->is('service-bills-complaints-type*') ? 'active' : '' }}">
                         <a class="hoveradd2" href="{{ url('service-bills-complaints-type') }}">
                            <i class="material-icons icon">account_balance_wallet</i>

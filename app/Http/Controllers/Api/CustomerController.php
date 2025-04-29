@@ -407,6 +407,27 @@ class CustomerController extends Controller
                             $permissions = $user->getPermissionsViaRoles()->pluck('name');
                             $user->givePermissionTo($permissions);
                         }
+                        if ($request['customertype'] == '4') {
+                            $passis = generatePassword();
+                            if (strlen($request['mobile']) > 10 && substr($request['mobile'], 0, 2) === '91') {
+                                $request['mobile'] = substr($request['mobile'], 2);
+                            }
+                            $user = User::create([
+                                'active'   =>  isset($request['active']) ? $request['active'] : 'Y',
+                                'name'   =>  isset($request['name']) ? $request['name'] : $request['first_name'] . ' ' . $request['last_name'],
+                                'first_name'   =>  isset($request['first_name']) ? $request['first_name'] : '',
+                                'last_name'   =>  isset($request['last_name']) ? $request['last_name'] : '',
+                                'mobile'   =>  isset($request['mobile']) ? $request['mobile'] : null,
+                                'email'   =>  isset($request['email']) ? $request['email'] : 'customer'.$customer->id.'@gmail.com',
+                                'password'   =>  Hash::make($passis),
+                                'reportingid' => !empty($request['created_by']) ? $request['created_by'] : null,
+                                'password_string'   =>  $passis,
+                                'customerid' => $customer->id,
+                            ]);
+                            $user->roles()->sync(['40']);
+                            $permissions = $user->getPermissionsViaRoles()->pluck('name');
+                            $user->givePermissionTo($permissions);
+                        }
                         $asmnotify = collect([
                             'title' => 'Successfully added',
                             'body' =>  'You have successfully added ' . $request['name']

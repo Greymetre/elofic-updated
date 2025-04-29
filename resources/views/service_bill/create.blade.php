@@ -837,7 +837,7 @@ body table td {
          }
       }).trigger('change');
       $(document).on("click", "#add-service", function() {
-         var pro_cat = '{{ $complaint?$complaint->product_details->category_id:"" }}';
+         var pro_cat = '{{ $complaint?$complaint->product_details?->category_id:"" }}';
          if (pro_cat == '2') {
             var chargeType = @json($charge_type->whereIn('id', ['2', '3']));
          } else {
@@ -952,8 +952,8 @@ body table td {
          var servicePrice = currentRow.find('input.sprice');
          var serviceDistance = currentRow.find('input.distance');
          var serviceQuantity = currentRow.find('input.quantity');
-         var pro_cat = '{{ $complaint?$complaint->product_details->category_id:"" }}';
-         var pro_sub_cat = '{{ $complaint ? $complaint->product_details->subcategories->service_category_id : "" }}';
+         var pro_cat = '{{ $complaint?$complaint->product_details?->category_id:"" }}';
+         var pro_sub_cat = '{{ $complaint ? $complaint->product_details?->subcategories->service_category_id : "" }}';
          var serviceProductSelect = currentRow.find('select.chargeprod');
          var serviceAppreciation = currentRow.find('input.appreciation');
          if (id == "3") {

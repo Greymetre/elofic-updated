@@ -68,7 +68,7 @@
               <div class="col-8 text-right">
 
 
-                @if(auth()->user()->hasRole(['superadmin']) || auth()->user()->hasRole(['Sub_Admin']))
+              @if(auth()->user()->hasRole(['superadmin']) || auth()->user()->hasRole(['Sub_Admin']) || auth()->user()->hasRole(['Service Admin']))
 
                 @if($serviceBill->status == '0') // Draft
                 @can('claim_company')
@@ -131,9 +131,9 @@
                 <button type="button" class="btn btn-sm btn-info customer_pay"><b>Customer payble</b></button>
                 @endcan
 
-                @can('cancel_service_bill')
+                {{--@can('cancel_service_bill')
                 <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
-                @endcan
+                @endcan--}}
 
                 @elseif($serviceBill->status == '1')
                 @can('draft_service_bill')
@@ -178,7 +178,7 @@
                 @endif
 
                 <?php
-                if (auth()->user()->can(['service_bill_edit'])) { ?>
+                if (auth()->user()->can(['service_bill_edit']) || auth()->user()->hasRole(['superadmin']) || auth()->user()->hasRole(['Sub_Admin']) || auth()->user()->hasRole(['Service Admin'])) { ?>
 
                   <a class="btn btn-warning btn-sm" href="{{route('service_bills.edit', $serviceBill->id)}}"><b>Edit</b></a>
 

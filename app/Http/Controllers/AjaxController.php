@@ -1257,7 +1257,7 @@ class AjaxController extends Controller
         try {
             $serial_no = $request->input('serial_no');
             if ($serial_no != NULL && $serial_no != '') {
-                $data = Services::with('product')
+                $data = Services::with('product', 'branch')
                     ->where('serial_no' , $serial_no)
                     ->latest()->first();
                 // dd($data);

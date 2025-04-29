@@ -26,4 +26,9 @@ class Services extends Model
         return $this->belongsTo('App\Models\WarrantyActivation', 'serial_no', 'product_serail_number');
     }
 
+    public function branch()
+    {
+        return $this->belongsTo('App\Models\Branch', 'branch_code', 'branch_code');
+    }
+
 }

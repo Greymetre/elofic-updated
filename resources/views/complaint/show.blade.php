@@ -135,7 +135,7 @@
                       <div class="d-flex justify-content-between align-items-center">
                           <h4 class="card-title m-0">ViewKonnect</h4>
                           <div>
-                              @if(auth()->user()->hasRole(['superadmin']) || auth()->user()->hasRole(['Sub_Admin']))
+                              @if(auth()->user()->hasRole(['superadmin']) || auth()->user()->hasRole(['Sub_Admin']) || auth()->user()->hasRole(['Service Admin']))
                                   @if($complaint->complaint_status == '0')
                                       @can('pending_complaint')
                                           <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending</b></button>
@@ -205,10 +205,6 @@
                                           <button type="button" class="btn btn-sm open_status"><b>Open</b></button>
                                       @endcan
 
-                                      @can('cancel_complaint')
-                                          <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
-                                      @endcan
-
                                   @elseif($complaint->complaint_status == '2')
                                      {{--  @can('pending_complaint')
                                           <button type="button" class="btn btn-sm btn-warning pending_status"><b>Pending</b></button>
@@ -231,6 +227,10 @@
                                           <button type="button" class="btn btn-sm open_status"><b>Open</b></button>
                                       @endcan -->
 
+                                      @can('cancel_complaint')
+                                          <button type="button" class="btn btn-sm btn-danger cancel_status"><b>Cancel</b></button>
+                                      @endcan
+
                                       @can('close_complaint')
                                           <button type="button" class="btn btn-sm btn-success close_status"><b>Close</b></button>
                                       @endcan
@@ -245,8 +245,10 @@
                                       @endcan -->
                                   @endif
                               @endif
-                              @if(auth()->user()->can(['complaint_edit']))
-                                  <a class="btn btn-warning btn-sm" href="{{ route('complaints.edit', $complaint->id) }}"><b>Edit</b></a>
+                              @if($complaint->complaint_status < '4' || auth()->user()->hasRole(['superadmin']) || auth()->user()->hasRole(['Sub_Admin']) || auth()->user()->hasRole(['Service Admin']))
+                                @can(['complaint_edit'])
+                                    <a class="btn btn-warning btn-sm" href="{{ route('complaints.edit', $complaint->id) }}"><b>Edit</b></a>
+                                @endcan
                               @endif
 
                               <a class="btn btn-primary btn-sm back_button" href="{{ route('complaints.index') }}"><b>Back</b></a>
@@ -275,7 +277,7 @@
                   </div>
                   <div class="col-md-3">
                       <label>Assign User</label>
-                      <select name="assign_user" id="assign_user" class="select2 form-control">
+                      <select name="assign_user" id="assign_user" {{ auth()->user()->hasRole(['Service Eng']) ? 'disabled' : ''}} class="select2 form-control">
                           <option value="">Select User</option>
                           @if($assign_users)
                               @foreach($assign_users as $assign_user)

@@ -109,7 +109,9 @@ class SendBmChZmCosting extends Command
         ])
             ->where('active', 'Y')
             ->where('sales_type', 'Primary')
-            ->whereIn('designation_id', ['6', '7', '12']);
+            ->whereHas('roles', function ($query) {
+                $query->whereIn('id', ['2','22','32','31','27','23','3','33','21','13','25','6']);
+            });
         $users = $query->get();
 
         $main_data = collect();
