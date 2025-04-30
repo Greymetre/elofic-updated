@@ -65,15 +65,15 @@ class SendPerEmployeeCosting extends Command
 
         $formatteddata = $users->map(function ($user) {
             $manager = User::where('division_id', $user->division_id)->where('active', 'Y')
-                        ->whereRaw('FIND_IN_SET(?, branch_id)', [$user->branch_id])
-                        ->whereHas('roles', function ($query) {
-                            $query->whereIn('name', [
-                                'PUMPCH',
-                                'AGRIGM/CH/ZM/RM/SH',
-                                'FAN/CH/GM/SH'
-                            ]);
-                        })
-                        ->first();
+                ->whereRaw('FIND_IN_SET(?, branch_id)', [$user->branch_id])
+                ->whereHas('roles', function ($query) {
+                    $query->whereIn('name', [
+                        'PUMPCH',
+                        'AGRIGM/CH/ZM/RM/SH',
+                        'FAN/CH/GM/SH'
+                    ]);
+                })
+                ->first();
             return [
                 'f_year' => $user->f_year,
                 'division' => $user->getdivision?->division_name,
@@ -121,10 +121,15 @@ class SendPerEmployeeCosting extends Command
         ])
             ->where('active', 'Y')
             ->where('sales_type', 'Primary')
-            ->where('designation_id', '1');
-            // ->whereHas('roles', function ($q) {
-            //     $q->whereIn('id', ['13', '6', '3', '2']);
-            // });
+            ->where(function ($q) {
+                $q->where('designation_id', '1')
+                    ->orWhereHas('roles', function ($roleQuery) {
+                        $roleQuery->whereIn('id', ['22', '32']);
+                    });
+            });
+        // ->whereHas('roles', function ($q) {
+        //     $q->whereIn('id', ['13', '6', '3', '2']);
+        // });
 
         $users = $query->get();
 
