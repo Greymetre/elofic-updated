@@ -343,6 +343,34 @@
                 <td>
                     <div class="input_section">
                         <div class="form-group has-default bmd-form-group">
+                         <input type="text" class="form-control last_three_month_avg" name="last_three_month_avg[]" readonly>    
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="input_section">
+                        <div class="form-group has-default bmd-form-group">
+                         <input type="text" class="form-control last_year_this_month" name="last_year_this_month[]" readonly>    
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="input_section">
+                        <div class="form-group has-default bmd-form-group">
+                         <input type="text" class="form-control last_twelve_month_avg" name="last_twelve_month_avg[]" readonly>    
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="input_section">
+                        <div class="form-group has-default bmd-form-group">
+                         <input type="text" class="form-control forecast_reccomendation" name="forecast_reccomendation[]" readonly>    
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="input_section">
+                        <div class="form-group has-default bmd-form-group">
                             <input type="hidden" class="form-control for_production_value" name="for_production_value[]" required readonly>
                             <input type="hidden" class="form-control for_production_qty" name="for_production_qty[]" required readonly>
                             <input type="hidden" class="form-control opening_stock" name="opening_stock[]" readonly>
@@ -666,11 +694,14 @@
                 } else {
                   console.log("No sales data available.");
                 }
+                $row.find(".last_three_month_avg").val(parseInt(res.threeMonthAvg ?? 0));
+                $row.find(".last_year_this_month").val(parseInt(res.sameMonthLastYearSales ?? 0));
+                $row.find(".last_twelve_month_avg").val(parseInt(res.twelveMonthAvg ?? 0));
+                $row.find(".forecast_reccomendation").val(parseInt(res.forecast_reccomendation ?? 0));
                 let openingStock = parseInt(res.opening_stock?.opening_stocks ?? 0);
                 let price = parseInt(res.product?.productdetails[0].price ?? 0);
-                let open_oder_qty = parseInt(res.branchOprningQuantity?.open_order_qty ?? 0);
+                let open_oder_qty = parseInt(res.branchOprningQuantity?.plan_next_month ?? 0);
                 let new_price = 0;
-                console.log("price", price);
                 if (price) {
                   new_price = (price / 100) * 41;
                   price = price - new_price;
@@ -730,6 +761,9 @@
         let formattedValue = new Intl.NumberFormat('en-IN', {
           maximumFractionDigits: 2
         }).format(sum / 100000);
+        if (formattedValue == 'NaN') {
+          formattedValue = '0.00';
+        }
         $('#total_forecast').html(formattedValue + " Lakh");
       });
 
@@ -772,6 +806,10 @@
               <th class="text-center"><div style="width: 100px !important;">Avg</div></th>
               <th class="text-center"><div style="width: 200px !important;">Open Order qty (Last Month)</div></th>
               <th class="text-center"><div style="width: 200px !important;">Open Order Value (Last Month)</div></th>
+              <th class="text-center"><div style="width: 200px !important;">Last three month avg (qty)</div></th>
+              <th class="text-center"><div style="width: 200px !important;">Last year this month (qty)</div></th>
+              <th class="text-center"><div style="width: 200px !important;">12 month avg (qty)</div></th>
+              <th class="text-center"><div style="width: 200px !important;">Forecast Reccomendation (qty)</div></th>
               <th class="text-center"><div style="width: 200px !important;">Forecast qty (Sales plan) </div></th>
               <th class="text-center"><div style="width: 200px !important;">Forecast Value (Sales plan) </div></th>
 
@@ -836,10 +874,10 @@
               $.each(res, function(key, value) {
                 var isSelected = (value.id == lastValue) ? 'selected' : '';
                 $('#tab_logic1 tr:last').find('.product_group_name').append(
-                    '<option value="' + value.id + '" ' + isSelected + '>' + value.subcategory_name + '</option>'
+                  '<option value="' + value.id + '" ' + isSelected + '>' + value.subcategory_name + '</option>'
                 );
-                if(isSelected == 'selected'){
-                    $('#tab_logic1 tr:last').find('.product_group_name').trigger('change');
+                if (isSelected == 'selected') {
+                  $('#tab_logic1 tr:last').find('.product_group_name').trigger('change');
                 }
               });
 
@@ -873,7 +911,7 @@
                   var productcode = '';
                 }
 
-                $('#tab_logic tr:last').find('.product').append('<option value="' + value.id + ' '+ isSelected +'">' + value.product_name + ' ' + value.product_code + '</option>');
+                $('#tab_logic tr:last').find('.product').append('<option value="' + value.id + ' ' + isSelected + '">' + value.product_name + ' ' + value.product_code + '</option>');
 
               });
             } else {

@@ -15,6 +15,7 @@ use Gate;
 use App\Models\Customers;
 use App\Models\DealerAppointment;
 use App\Models\DealerAppointmentKyc;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -32,9 +33,36 @@ class SapStockController extends Controller
     public function index(SAPStockDataTable $dataTable, Request $request)
     {
 
-        // $all_customers = Customers::where('active', 'N')->get();
-
+        // $all_customers = Customers::where(['active' => 'Y', 'customertype' => '4'])->get();
         // foreach ($all_customers as $customer) {
+        //     $passis = generatePassword();
+        //     if (strlen($customer['mobile']) > 10 && substr($customer['mobile'], 0, 2) === '91') {
+        //         $customer['mobile'] = substr($customer['mobile'], 2);
+        //     }
+        //     if($customer['mobile'] == '+ 9198395938' || $customer['mobile'] == '9198395938'){
+        //         dd(User::where('mobile', $customer['mobile'])->exists(), $customer['mobile']);
+        //     }
+        //     if (!User::where('mobile', $customer['mobile'])->exists()) {
+        //         $user = User::create([
+        //             'active'   =>  isset($customer['active']) ? $customer['active'] : 'Y',
+        //             'name'   =>  isset($customer['name']) ? $customer['name'] : $customer['first_name'] . ' ' . $customer['last_name'],
+        //             'first_name'   =>  isset($customer['first_name']) ? $customer['first_name'] : '',
+        //             'last_name'   =>  isset($customer['last_name']) ? $customer['last_name'] : '',
+        //             'mobile'   =>  isset($customer['mobile']) ? $customer['mobile'] : null,
+        //             'email'   =>  isset($customer['email']) ? $customer['email'] : 'customer' . $customer->id . '@gmail.com',
+        //             'password'   =>  Hash::make($passis),
+        //             'reportingid' => !empty($customer['created_by']) ? $customer['created_by'] : null,
+        //             'password_string'   =>  $passis,
+        //             'customerid' => $customer->id,
+        //         ]);
+        //         $user->roles()->sync(['40']);
+        //         $permissions = $user->getPermissionsViaRoles()->pluck('name');
+        //         $user->givePermissionTo($permissions);
+        //     }
+        // }
+
+        // dd($all_customers);
+
         //     // Revoke all tokens for this customer
         //     $tokens = Token::where('user_id', $customer->id)
         //         ->where('revoked', false)

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Branch, BranchStock, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CompOffLeave, CustomerDetails, CustomerOutstanting, DealerAppointment, DealerAppointmentKyc, EmployeeDetail, EndUser, Expenses, GiftModel, GiftSubcategory, Marketing, MspActivity, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, PrimaryScheme, Redemption, SalesTargetUsers, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation,ServiceChargeChargeType,OrderDetails,ServiceComplaintReason , ServiceBillComplaintType, ServiceGroupComplaint , OpeningStock , BranchOprningQuantity , PlannedSOP};
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Branch, BranchStock, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CompOffLeave, CustomerDetails, CustomerOutstanting, DealerAppointment, DealerAppointmentKyc, EmployeeDetail, EndUser, Expenses, GiftModel, GiftSubcategory, Marketing, MspActivity, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, PrimaryScheme, Redemption, SalesTargetUsers, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation, ServiceChargeChargeType, OrderDetails, ServiceComplaintReason, ServiceBillComplaintType, ServiceGroupComplaint, OpeningStock, BranchOprningQuantity, PlannedSOP};
 use App\Models\UserLiveLocation;
 use App\Models\UserActivity;
 use App\Http\Controllers\SendNotifications;
@@ -236,7 +236,7 @@ class AjaxController extends Controller
     public function getProductData(Request $request)
     {
         try {
-             $branchId = $request->branch_id; 
+            $branchId = $request->branch_id;
             $sub_category = $request->sub_cat;
             $category = $request->category;
             $data = Product::where(function ($query) use ($sub_category, $category) {
@@ -257,14 +257,14 @@ class AjaxController extends Controller
         }
     }
 
-     public function getSubCategory(Request $request)
+    public function getSubCategory(Request $request)
     {
         try {
             $branchId = $request->branch_id; // Example: 2
             $subcategory_ids = Product::whereRaw("FIND_IN_SET(?, branch_id)", [$branchId])->where('category_id', $request->category)
                 ->distinct()
                 ->pluck('subcategory_id');
-            $sub_categories = Subcategory::whereIn('id' , $subcategory_ids)->get();
+            $sub_categories = Subcategory::whereIn('id', $subcategory_ids)->get();
             return response()->json($sub_categories);
         } catch (\Exception $e) {
             return $e;
@@ -276,7 +276,7 @@ class AjaxController extends Controller
         try {
             $branchId = $request->branch_id; // Example: 2
             $sub_category = $request->product_subcategory ?? '';
-            $product = Product::whereRaw("FIND_IN_SET(?, branch_id)", [$branchId])->where('subcategory_id' , $sub_category)
+            $product = Product::whereRaw("FIND_IN_SET(?, branch_id)", [$branchId])->where('subcategory_id', $sub_category)
                 ->get();
             return response()->json($product);
         } catch (\Exception $e) {
@@ -288,9 +288,9 @@ class AjaxController extends Controller
     {
         try {
             $planning_month = '';
-             if(isset($request->date)){
-               $formatted_date = Carbon::createFromFormat('F Y', $request->date)->subMonth()->startOfMonth();
-               $planning_month = $formatted_date->format("Y-m-d");
+            if (isset($request->date)) {
+                $formatted_date = Carbon::createFromFormat('F Y', $request->date)->subMonth()->startOfMonth();
+                $planning_month = $formatted_date->format("Y-m-d");
             }
             $dateParts = explode(' ', $request->date); // Example: ['April', '2025']
             $month = $dateParts[0];
@@ -304,17 +304,13 @@ class AjaxController extends Controller
                 $startYear = $year - 1;
                 $endYear = $year;
             }
-            $product = Product::with('productdetails', 'categories' , 'subcategories')->find($request->product_id);
-            $opening_stock = OpeningStock::orWhere(['item_code' => $product->product_code , 'item_code' =>$product->sap_code])->where(['item_group' => $product->subcategories->subcategory_name])->whereRaw("FIND_IN_SET(?, branch_id)", [$request->branch_id])->first();
+            $product = Product::with('productdetails', 'categories', 'subcategories')->find($request->product_id);
+            $opening_stock = OpeningStock::orWhere(['item_code' => $product->product_code, 'item_code' => $product->sap_code])->where(['item_group' => $product->subcategories->subcategory_name])->whereRaw("FIND_IN_SET(?, branch_id)", [$request->branch_id])->first();
 
-            $branchOprningQuantity = BranchOprningQuantity::where(function ($query) use ($product) {
-                $query->where('item_code', $product->product_code)
-                      ->orWhere('item_code', $product->sap_code);
-            })
-            ->where('item_group', $product->subcategories->subcategory_name)
-            ->whereRaw("FIND_IN_SET(?, branch_id)", [$request->branch_id])
-            ->whereDate('qty_month', $planning_month)
-            ->first();
+            $branchOprningQuantity = PlannedSOP::where('product_id', $request->product_id)
+                ->where("branch_id", $request->branch_id)
+                ->whereDate('planning_month', $planning_month)
+                ->first();
             $months = [];
             for ($m = 4; $m <= 12; $m++) {
                 $months["$startYear-" . str_pad($m, 2, '0', STR_PAD_LEFT)] = 0;
@@ -323,7 +319,7 @@ class AjaxController extends Controller
                 $months["$endYear-" . str_pad($m, 2, '0', STR_PAD_LEFT)] = 0;
             }
             // Get primary sales data for the previous financial year
-            $salesData = PrimarySales::where(['product_id'=> $product->id , 'branch_id' => $request->branch_id])
+            $salesData = PrimarySales::where(['product_id' => $product->id, 'branch_id' => $request->branch_id])
                 ->whereBetween('invoice_date', ["$startYear-04-01", "$endYear-03-31"])
                 ->selectRaw('DATE_FORMAT(invoice_date, "%Y-%m") as month, SUM(quantity) as total_qty')
                 ->groupBy('month')
@@ -331,13 +327,40 @@ class AjaxController extends Controller
                 ->pluck('total_qty', 'month')
                 ->toArray();
 
+            $planningDate = Carbon::parse($planning_month);
+            $threeMonthsStart = $planningDate->copy()->subMonths(2)->startOfMonth();
+            $threeMonthsEnd = $planningDate->copy()->endOfMonth();
+            $twelveMonthsStart = $planningDate->copy()->subMonths(11)->startOfMonth();
+            $twelveMonthsEnd = $planningDate->copy()->endOfMonth();
+
+            $threeMonthAvg = PrimarySales::where(['product_id' => $product->id, 'branch_id' => $request->branch_id])
+                ->whereBetween('invoice_date', [$threeMonthsStart->toDateString(), $threeMonthsEnd->toDateString()])
+                ->sum('quantity');
+
+            $twelveMonthAvg = PrimarySales::where(['product_id' => $product->id, 'branch_id' => $request->branch_id])
+                ->whereBetween('invoice_date', [$twelveMonthsStart->toDateString(), $twelveMonthsEnd->toDateString()])
+                ->sum('quantity');
+
+            $threeMonthAvg = (int)$threeMonthAvg / 3;
+            $twelveMonthAvg = (int)$twelveMonthAvg / 12;
+
             // Merge sales data into the initialized months array
             $salesByMonth = array_merge($months, $salesData);
+
+            $lastYearSameMonthKey = Carbon::parse($planning_month)->subYear()->addMonth()->format('Y-m');
+            $sameMonthLastYearSales = $salesByMonth[$lastYearSameMonthKey] ?? 0;
+            $forecast_reccomendation = max($sameMonthLastYearSales, $threeMonthAvg, $twelveMonthAvg);
+
+
             return response()->json([
                 'product' => $product,
                 'sales_by_month' => $salesByMonth,
                 'opening_stock'  => $opening_stock,
                 'branchOprningQuantity' => $branchOprningQuantity ?? Null,
+                'threeMonthAvg' => $threeMonthAvg,
+                'twelveMonthAvg' => $twelveMonthAvg,
+                'forecast_reccomendation' => $forecast_reccomendation,
+                'sameMonthLastYearSales' => $sameMonthLastYearSales
             ]);
         } catch (\Exception $e) {
             return $e;
@@ -463,7 +486,7 @@ class AjaxController extends Controller
         try {
             $product_id = $request->input('product_id');
 
-            $data = Product::with('productdetails', 'categories' )
+            $data = Product::with('productdetails', 'categories')
                 ->where(function ($query) use ($product_id) {
                     if (isset($product_id)) {
                         $query->where('id', '=', $product_id);
@@ -472,7 +495,7 @@ class AjaxController extends Controller
                 })
                 ->orderBy('product_name', 'asc')
                 ->first();
-            $opening_stock = OpeningStock::orWhere(['item_code' => $data->product_code , 'item_code' =>$data->sap_code])->where(['item_group' => $data->subcategories->subcategory_name])->whereRaw("FIND_IN_SET(?, branch_id)", [$request->branch_id])->first();
+            $opening_stock = OpeningStock::orWhere(['item_code' => $data->product_code, 'item_code' => $data->sap_code])->where(['item_group' => $data->subcategories->subcategory_name])->whereRaw("FIND_IN_SET(?, branch_id)", [$request->branch_id])->first();
             $product = collect([
                 'id' => isset($data['id']) ? $data['id'] : '',
                 'product_name' => isset($data['product_name']) ? $data['product_name'] : '',
@@ -504,7 +527,7 @@ class AjaxController extends Controller
                 'productdetails' => $data['productdetails'],
                 'categories' => $data['categories'],
                 'subcategories' => $data['subcategories'],
-                'opening_stock' => $opening_stock ? $opening_stock->opening_stocks :0 ,
+                'opening_stock' => $opening_stock ? $opening_stock->opening_stocks : 0,
             ]);
 
 
@@ -559,9 +582,9 @@ class AjaxController extends Controller
             if ($data->expiry_interval == "Month") {
                 $warrenty_time = $data->expiry_interval_preiod;
             } else if ($data->expiry_interval == "Day") {
-                $warrenty_time = round($data->expiry_interval_preiod/30);
+                $warrenty_time = round($data->expiry_interval_preiod / 30);
             } else if ($data->expiry_interval == "Year") {
-                $warrenty_time = round($data->expiry_interval_preiod*12);
+                $warrenty_time = round($data->expiry_interval_preiod * 12);
             }
             $product['warrenty_time'] = $warrenty_time;
             return response()->json($product);
@@ -1257,8 +1280,8 @@ class AjaxController extends Controller
         try {
             $serial_no = $request->input('serial_no');
             if ($serial_no != NULL && $serial_no != '') {
-                $data = Services::with('product')
-                    ->where('serial_no' , $serial_no)
+                $data = Services::with('product', 'branch')
+                    ->where('serial_no', $serial_no)
                     ->latest()->first();
                 // dd($data);
                 if ($data) {
@@ -1266,11 +1289,11 @@ class AjaxController extends Controller
                     $data->product->subcategories = $data->product->subcategories;
                     $check_Warranty = WarrantyActivation::with('media', 'customer', 'seller_details')->where('status', '!=', '3')->where('product_serail_number', $serial_no)->first();
                     $encrypt_id = "";
-                   
+
                     if (isset($check_Warranty)) {
                         $encrypt_id = Crypt::encrypt($check_Warranty->id) ?? '';
                     }
-                    return response()->json(['status' => true, 'data_all' => $data, 'data' => $data->product, 'check_Warranty' => $check_Warranty, 'encrypt_id' => $encrypt_id ]);
+                    return response()->json(['status' => true, 'data_all' => $data, 'data' => $data->product, 'check_Warranty' => $check_Warranty, 'encrypt_id' => $encrypt_id]);
                 } else {
                     return response()->json(['status' => false, 'data' => null]);
                 }
@@ -1513,7 +1536,7 @@ class AjaxController extends Controller
     {
         if ($request->ajax()) {
             $categoryIds = explode(',', $request->pro_sub_cat);
-            $data = ServiceChargeProducts::where('charge_type_id', $request->charge_type_id)->where('division_id', $request->charge_cat_id)->whereIn('category_id' , $categoryIds)->get();
+            $data = ServiceChargeProducts::where('charge_type_id', $request->charge_type_id)->where('division_id', $request->charge_cat_id)->whereIn('category_id', $categoryIds)->get();
 
             return response()->json($data);
         }
@@ -1694,9 +1717,9 @@ class AjaxController extends Controller
         if ($product->expiry_interval == "Month") {
             $warrenty_time = $product->expiry_interval_preiod;
         } else if ($product->expiry_interval == "Day") {
-            $warrenty_time = round($product->expiry_interval_preiod/30);
+            $warrenty_time = round($product->expiry_interval_preiod / 30);
         } else if ($product->expiry_interval == "Year") {
-            $warrenty_time = round($product->expiry_interval_preiod*12);
+            $warrenty_time = round($product->expiry_interval_preiod * 12);
         }
         return response()->json(['status' => 'success', 'warrenty_time' => $warrenty_time]);
     }
@@ -1787,7 +1810,7 @@ class AjaxController extends Controller
         // Search functionality
         if (!empty($request->q)) {
             $query->where('name', 'LIKE', '%' . $request->q . '%')
-                 ->Orwhere('mobile', 'LIKE', '%' . $request->q . '%');
+                ->Orwhere('mobile', 'LIKE', '%' . $request->q . '%');
         }
 
         // Pagination
@@ -1806,14 +1829,14 @@ class AjaxController extends Controller
         ]);
     }
 
-     public function getAllPartyName(Request $request)
+    public function getAllPartyName(Request $request)
     {
         $query = Customers::query();
 
         // Search functionality
         if (!empty($request->q)) {
             $query->where('name', 'LIKE', '%' . $request->q . '%')
-                 ->Orwhere('mobile', 'LIKE', '%' . $request->q . '%');
+                ->Orwhere('mobile', 'LIKE', '%' . $request->q . '%');
         }
 
         // Pagination
@@ -1840,8 +1863,10 @@ class AjaxController extends Controller
         if (isset($type)) {
             $slug = strtolower(str_replace(' ', '_', $type));
             $marketing_type = MarketingActivity::updateOrCreate(
-                ['slug' => $slug,
-                'activity_division' => $activity_division],
+                [
+                    'slug' => $slug,
+                    'activity_division' => $activity_division
+                ],
                 ['type' => $type]
             );
             return response()->json(['status' => true, 'marketing_type' => $marketing_type]);
@@ -1849,7 +1874,7 @@ class AjaxController extends Controller
         return response()->json(['status' => false]);
     }
 
-   public function getMarketingType(Request $request)
+    public function getMarketingType(Request $request)
     {
         try {
             $types = MarketingActivity::with('division')->select('id', 'type', 'activity_division')->get(); // Fetching data
@@ -1872,7 +1897,6 @@ class AjaxController extends Controller
                 'message' => 'Marketing types retrieved successfully',
                 'html' => $html
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
@@ -1901,7 +1925,6 @@ class AjaxController extends Controller
                 'status' => true,
                 'message' => 'Marketing type deleted successfully'
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
@@ -1919,8 +1942,8 @@ class AjaxController extends Controller
         $customer_city = $request->customer_city ?? '';
         $roleNames = ["Service Eng", "Service Admin"];
         $assign_users = User::whereHas('roles', function ($query) use ($roleNames) {
-             $query->whereIn('name', $roleNames); // Filter users by roles
-            })
+            $query->whereIn('name', $roleNames); // Filter users by roles
+        })
             ->whereHas('cities', function ($query) use ($customer_city) {
                 $query->where('city_id', $customer_city); // Filter users assigned to the specific city
             })
@@ -1931,14 +1954,14 @@ class AjaxController extends Controller
             ->get();
 
         $html = '<option value="">Select User</option>'; // Default option
- 
+
         $id = $assign_users[0]->id ?? '';
         if ($assign_users->isNotEmpty()) {
             foreach ($assign_users as $user) {
                 $html .= '<option value="' . $user->id . '">' . $user->name . '</option>';
             }
         }
-        return response()->json(['html' => $html , 'id' => $id]);
+        return response()->json(['html' => $html, 'id' => $id]);
     }
 
 
@@ -2106,7 +2129,7 @@ class AjaxController extends Controller
             return response()->json(['status' => 'success', 'data' => $popup_data]);
         } else if (empty(array_diff($request->role_id, [3, 6, 13]))) {
 
-            
+
             $startDate = Carbon::parse($start_date);
             $endDate = Carbon::parse($end_date);
             $monthCount = $startDate->diffInMonths($endDate) + 1;
@@ -2178,7 +2201,6 @@ class AjaxController extends Controller
             $popup_data['sale_per'] = $this->getPer($achiv, $targets);
 
             return response()->json(['status' => 'success', 'data' => $popup_data]);
-
         } else {
             return response()->json(['status' => 'error', 'message' => 'Working on this role type user rating report !!']);
         }
@@ -2201,24 +2223,25 @@ class AjaxController extends Controller
     }
 
     // get srevice charge type
-    public function getServiceChargeType(Request $request){
+    public function getServiceChargeType(Request $request)
+    {
         $complaint = Complaint::with(['product_details.subcategories'])->find($request->complaint_id);
-        if(!isset($complaint->product_details->subcategories)){
-           return response()->json(['status' => false , 'html' => '']);
+        if (!isset($complaint->product_details->subcategories)) {
+            return response()->json(['status' => false, 'html' => '']);
         }
         $service_charge_products = ServiceChargeProducts::where([
             'category_id' => $complaint->product_details->subcategories->service_category_id
         ])->distinct('charge_type_id')->pluck('charge_type_id');
-        $service_charge_types = ServiceChargeChargeType::whereIn('id',$service_charge_products)->orWhere('id' , 4)->get();
+        $service_charge_types = ServiceChargeChargeType::whereIn('id', $service_charge_products)->orWhere('id', 4)->get();
         $html = '<option value="">Select Type</option>';
 
-        if(isset($service_charge_types)){
-            foreach($service_charge_types as $service_charge){
-                $html = $html . '<option value=" '.$service_charge->id.'">'.$service_charge->charge_type.'</option>';
-            } 
+        if (isset($service_charge_types)) {
+            foreach ($service_charge_types as $service_charge) {
+                $html = $html . '<option value=" ' . $service_charge->id . '">' . $service_charge->charge_type . '</option>';
+            }
         }
 
-        return response()->json(['status' => true , 'html' => $html]);
+        return response()->json(['status' => true, 'html' => $html]);
     }
 
     // get the total of complaints
@@ -2227,23 +2250,21 @@ class AjaxController extends Controller
         $query = Complaint::query(); // Use query builder
         $filters = $request->all();
         if (isset($request->complaint_date)) {
-            $date = explode(' - ' , $request->complaint_date);
-            if(isset($date)){
-                try{
+            $date = explode(' - ', $request->complaint_date);
+            if (isset($date)) {
+                try {
                     $complaintDate_start = Carbon::parse($date[0])->startOfDay()->format('Y-m-d H:i:s');
                     $complaintDate_end = Carbon::parse($date[1])->endOfDay()->format('Y-m-d H:i:s');
                     $query->whereBetween('complaint_date', [$complaintDate_start, $complaintDate_end]);
-                }catch(\Exception $e){
-                    
+                } catch (\Exception $e) {
                 }
             }
-
         }
-        if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Sub_Admin') && !Auth::user()->hasRole('Service Admin') && !Auth::user()->hasRole('CRM_Support')){
-          $query->where('assign_user' , Auth::user()->id);
+        if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Sub_Admin') && !Auth::user()->hasRole('Service Admin') && !Auth::user()->hasRole('CRM_Support')) {
+            $query->where('assign_user', Auth::user()->id);
         }
         foreach ($filters as $key => $value) {
-             if (isset($value))  {
+            if (isset($value)) {
                 switch ($key) {
                     case 'complaint_number':
                     case 'seller':
@@ -2306,10 +2327,10 @@ class AjaxController extends Controller
                         break;
 
                     case 'service_center_name':
-                         if (!empty($value)) {
-                            $serviceCenterIds = is_array($value[0]) 
-                                                ? $value 
-                                                : explode(',', $value[0]); 
+                        if (!empty($value)) {
+                            $serviceCenterIds = is_array($value[0])
+                                ? $value
+                                : explode(',', $value[0]);
                             if (collect($serviceCenterIds)->filter()->isNotEmpty()) {
                                 $query->whereIn('service_center', $serviceCenterIds);
                             }
@@ -2317,10 +2338,10 @@ class AjaxController extends Controller
                         break;
 
                     case 'assign_user':
-                         if (!empty($value)) {
-                            $assign_user_ids = is_array($value[0]) 
-                                                ? $value 
-                                                : explode(',', $value[0]); 
+                        if (!empty($value)) {
+                            $assign_user_ids = is_array($value[0])
+                                ? $value
+                                : explode(',', $value[0]);
                             if (collect($assign_user_ids)->filter()->isNotEmpty()) {
                                 $query->whereIn('assign_user', $assign_user_ids);
                             }
@@ -2372,7 +2393,7 @@ class AjaxController extends Controller
                 }
             }
         }
-         return response()->json([
+        return response()->json([
             'all_complaints'    => (clone $query)->count(),
             'complaints_pending'    => (clone $query)->where('complaint_status', '1')->count(),
             'complaints_work_done'  => (clone $query)->where('complaint_status', '2')->count(),
@@ -2384,47 +2405,48 @@ class AjaxController extends Controller
     }
 
     // function for get sale data of orders
-    public function getSaledata(Request $request){
+    public function getSaledata(Request $request)
+    {
         $product_id = $request->product_id ?? '';
         $date = $request->date ?? '';
         $branch_id = $request->branch_id ?? '';
 
-        if(isset($date)){
-              $now = Carbon::createFromFormat('F Y', $request->date)->startOfMonth()->subMonth();
-        }else{
-              $now = Carbon::now();
-        }    
+        if (isset($date)) {
+            $now = Carbon::createFromFormat('F Y', $request->date)->startOfMonth()->subMonth();
+        } else {
+            $now = Carbon::now();
+        }
         $lastMonth = $now->subMonth()->format('Y-m'); // Last month
         $threeMonthsAgo = $now->subMonths(3)->format('Y-m'); // Three months ago
         $lastYearSameMonth = Carbon::now()->subYear()->format('Y-m'); // Same month last year
 
         $last_month_sale = OrderDetails::where('product_id', $product_id)
-                ->whereYear('created_at', Carbon::now()->subMonth()->year)
-                ->whereMonth('created_at', Carbon::now()->subMonth()->month)
-                ->whereHas('orders.createdByName', function ($query) use ($branch_id) {
-                    $query->where('branch_id', $branch_id);
-                })
-                ->sum('quantity'); // Change 'quantity' based on what you sum (e.g., total_price)
+            ->whereYear('created_at', Carbon::now()->subMonth()->year)
+            ->whereMonth('created_at', Carbon::now()->subMonth()->month)
+            ->whereHas('orders.createdByName', function ($query) use ($branch_id) {
+                $query->where('branch_id', $branch_id);
+            })
+            ->sum('quantity'); // Change 'quantity' based on what you sum (e.g., total_price)
 
-         // Get last three months' average sales (excluding current month)
-         $last_three_month_avg = OrderDetails::where('product_id', $product_id)
-        ->whereBetween('created_at', [
-            Carbon::now()->subMonths(4)->startOfMonth(), // 4 months ago (excluding current month)
-            Carbon::now()->subMonth()->endOfMonth() // End of last month
-        ])
-        ->whereHas('orders.createdByName', function ($query) use ($branch_id) {
-            $query->where('branch_id', $branch_id);
-        })
-        ->sum('quantity') / 3; // Divide by 3 for average
+        // Get last three months' average sales (excluding current month)
+        $last_three_month_avg = OrderDetails::where('product_id', $product_id)
+            ->whereBetween('created_at', [
+                Carbon::now()->subMonths(4)->startOfMonth(), // 4 months ago (excluding current month)
+                Carbon::now()->subMonth()->endOfMonth() // End of last month
+            ])
+            ->whereHas('orders.createdByName', function ($query) use ($branch_id) {
+                $query->where('branch_id', $branch_id);
+            })
+            ->sum('quantity') / 3; // Divide by 3 for average
 
         // Get last year's same month sales
         $last_year_same_month = OrderDetails::where('product_id', $product_id)
-        ->whereYear('created_at', Carbon::now()->subYear()->year)
-        ->whereMonth('created_at', Carbon::now()->subYear()->month)
-        ->whereHas('orders.createdByName', function ($query) use ($branch_id) {
-            $query->where('branch_id', $branch_id);
-        })
-        ->sum('quantity');
+            ->whereYear('created_at', Carbon::now()->subYear()->year)
+            ->whereMonth('created_at', Carbon::now()->subYear()->month)
+            ->whereHas('orders.createdByName', function ($query) use ($branch_id) {
+                $query->where('branch_id', $branch_id);
+            })
+            ->sum('quantity');
 
         return response()->json([
             'last_month_sale' => $last_month_sale,
@@ -2434,56 +2456,58 @@ class AjaxController extends Controller
     }
 
     // get service bill reason
-    public function getServiceBillReason(Request $request){
+    public function getServiceBillReason(Request $request)
+    {
         $complaint_type = $request->complaint_type ?? '';
         $complaintId = $request->complaintId ?? '';
         $sub_category_id = $request->sub_category_id;
         $selected = $request->selected ?? '';
-        $reasons = ServiceComplaintReason::where('service_bill_complaint_id' , $complaintId)->get();
+        $reasons = ServiceComplaintReason::where('service_bill_complaint_id', $complaintId)->get();
         $html = '<option value="">Select Reasons</option>';
-        if(count($reasons) > 0){
-            foreach($reasons as $reason){
+        if (count($reasons) > 0) {
+            foreach ($reasons as $reason) {
                 $selected_text = $selected == $reason->service_complaint_reasons ? 'selected' : '';
-                $html .= '<option value="' . htmlspecialchars($reason->service_complaint_reasons, ENT_QUOTES, 'UTF-8') . '" ' . $selected_text . '>' . 
-                 htmlspecialchars($reason->service_complaint_reasons ?? '', ENT_QUOTES, 'UTF-8') . 
-                 '</option>';
-
+                $html .= '<option value="' . htmlspecialchars($reason->service_complaint_reasons, ENT_QUOTES, 'UTF-8') . '" ' . $selected_text . '>' .
+                    htmlspecialchars($reason->service_complaint_reasons ?? '', ENT_QUOTES, 'UTF-8') .
+                    '</option>';
             }
         }
-        return response()->json(['status' => true , 'html' => $html]);
+        return response()->json(['status' => true, 'html' => $html]);
     }
 
     // check complaint type and reason is allready exist or not 
-    public function checkServiceBillComplaintType(Request $request){
+    public function checkServiceBillComplaintType(Request $request)
+    {
         $sub_category_id = $request->sub_category_id ?? '';
         $complaint_type = $request->complaint_type ?? '';
-        
-        $serviceBillComplaintType = ServiceBillComplaintType::where('service_bill_complaint_type_name' , $complaint_type)->get() ?? '';
-        if(isset($sub_category_id) && isset($serviceBillComplaintType)){
+
+        $serviceBillComplaintType = ServiceBillComplaintType::where('service_bill_complaint_type_name', $complaint_type)->get() ?? '';
+        if (isset($sub_category_id) && isset($serviceBillComplaintType)) {
             $find = '';
-            foreach($serviceBillComplaintType as $serviceBillComplaint){
-               $find = ServiceGroupComplaint::where(['subcategory_id' => $sub_category_id , 'service_bill_complaint_id' => $serviceBillComplaint->id])->first() ?? '';
-               if(isset($find) && $find != ''){
-                break;
-               }
+            foreach ($serviceBillComplaintType as $serviceBillComplaint) {
+                $find = ServiceGroupComplaint::where(['subcategory_id' => $sub_category_id, 'service_bill_complaint_id' => $serviceBillComplaint->id])->first() ?? '';
+                if (isset($find) && $find != '') {
+                    break;
+                }
             }
-            if(isset($find) && $find != ''){
+            if (isset($find) && $find != '') {
                 $id = $find->service_bill_complaint_id ?? '';
                 $url = route('service-bills-complaints-type.edit', encrypt($id));
-                return response()->json(['status' => true , 'url' => $url]);
+                return response()->json(['status' => true, 'url' => $url]);
             }
         }
-        return response()->json(['status' => false , 'url' => '']);
+        return response()->json(['status' => false, 'url' => '']);
     }
 
-    public function getplannedForCast(Request $request){
+    public function getplannedForCast(Request $request)
+    {
         $division_id = $request->division_id ?? '';
         $planSOP = 0;
-        if(!empty($division_id)){
-            $planSOP = PlannedSOP::where('division_id' , $division_id)->sum('plan_next_month_value');
-            return response()->json(['status' => true , 'total_value' => $planSOP]);
+        if (!empty($division_id)) {
+            $planSOP = PlannedSOP::where('division_id', $division_id)->sum('plan_next_month_value');
+            return response()->json(['status' => true, 'total_value' => $planSOP]);
         }
         $planSOP = PlannedSOP::sum('plan_next_month_value');
-        return response()->json(['status' => false , 'total_value' => $planSOP]);
+        return response()->json(['status' => false, 'total_value' => $planSOP]);
     }
 }

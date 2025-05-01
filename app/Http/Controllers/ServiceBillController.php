@@ -64,7 +64,7 @@ class ServiceBillController extends Controller
             $charge_type = ServiceChargeChargeType::all();
         }
 
-        $service_bill_complaint = ServiceGroupComplaint::where('subcategory_id' , $complaint->product_details->subcategories->id)->get();
+        $service_bill_complaint = ServiceGroupComplaint::where('subcategory_id' , $complaint->product_details?->subcategories->id)->get() ?? [];
  
         $all_complaint_number = Complaint::with('product_details')->get();
         $lastServiceBillId = ServiceBill::max('bill_no');
@@ -239,7 +239,7 @@ class ServiceBillController extends Controller
         $serviceBillNo = $serviceBill->bill_no;
         $divisions = Category::where('active', 'Y')->select('id', 'category_name')->get();
         $groups = Subcategory::where('active', 'Y')->select('id', 'subcategory_name')->get();
-        $service_bill_complaint = ServiceGroupComplaint::where('subcategory_id' , $complaint->product_details->subcategories->id)->get(); 
+        $service_bill_complaint = ServiceGroupComplaint::where('subcategory_id' , $complaint->product_details?->subcategories->id)->get() ?? []; 
         return view('service_bill.create', compact('complaint', 'serviceBillNo', 'all_complaint_number', 'divisions', 'charge_type' , 'groups' , 'service_bill_complaint'))->with('service_bill', $this->service_bill);
     }
 

@@ -47,9 +47,9 @@ class UserExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMa
             })
             ->whereHas('roles', function ($query) {
                 if ($this->user_type == 'customer') {
-                    $query->where('id', ['29']);
+                    $query->whereIn('id', config('constants.customer_roles'));
                 } else {
-                    $query->whereNot('id', ['29']);
+                    $query->whereNotIn('id', config('constants.customer_roles'));
                 }
             })
             ->latest()

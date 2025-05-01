@@ -428,7 +428,7 @@ if (! function_exists('getUsersReportingToAuth')) {
         $userinfo = User::where('id', '=', $userid)->first();
 
         $all_users = User::whereDoesntHave('roles', function ($query) {
-            $query->where('id', 29);
+            $query->whereIn('id', config('constants.customer_roles'));
         })->where('active', 'Y')->get();
 
         // if(!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin'))
@@ -467,7 +467,7 @@ if (! function_exists('getUsersReportingToAuth')) {
             }
         } else {
             $all_ids_array = User::whereDoesntHave('roles', function ($query) {
-                $query->where('id', 29);
+                $query->whereIn('id', config('constants.customer_roles'));
             })->where('active', 'Y')->pluck('id')->toArray();
         }
 

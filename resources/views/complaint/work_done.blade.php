@@ -59,7 +59,7 @@
                     <input type="hidden" id="complaint_id" name="complaint_id" value="{{$complaint['id']}}">
                     <div class="form-group">
                       <h6>Action Done By ASC</h6>
-                      <select name="done_by" id="done_by" class="form-control select2">
+                      <select name="done_by" id="done_by" class="form-control select2" required>
                         <option value="" disabled selected>Action Done By ASC...</option>
                         <option value="Repairing">Repairing</option>
                         <option value="Replacement">Replacement</option>

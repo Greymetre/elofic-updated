@@ -87,7 +87,24 @@ class ServiceBillDataTable extends DataTable
      */
     public function query(ServiceBill $model)
     {
-        return $model->latest()->newQuery();
+        $userids = getUsersReportingToAuth();
+        $data = $model->with('complaint');
+        if(!auth()->user()->hasRole(['superadmin']) || !auth()->user()->hasRole(['Sub_Admin']) || !auth()->user()->hasRole(['Service Admin'])){
+            if(auth()->user()->hasRole(['Service_center_user'])){
+                $data = $data->whereHas('complaint', function ($query) use ($userids) {
+                    $query->where(function ($q) {
+                        $q->where('service_center', auth()->user()->customerid);
+                    });
+                });    
+            }else{
+                $data = $data->whereHas('complaint', function ($query) use ($userids) {
+                    $query->where(function ($q) use ($userids) {
+                        $q->whereIn('assign_user', $userids);
+                    });
+                });
+            }
+        }
+        return $data->latest()->newQuery();
     }
 
     /**
