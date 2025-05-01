@@ -10,21 +10,21 @@ use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 
-class SendBranchAllCosting extends Command
+class SendClusterHeadCosting extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'send:branch-all-costing';
+    protected $signature = 'send:cluster-head-costing';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Send Branch All Costing';
+    protected $description = 'Send Culster Head Costing';
 
     /**
      * Execute the console command.
@@ -33,7 +33,7 @@ class SendBranchAllCosting extends Command
      */
     public function handle()
     {
-        $url = "https://dashboard.fieldkonnect.io/power-bi/public/api/insertBranchAllCosting";
+        $url = "https://dashboard.fieldkonnect.io/power-bi/public/api/insertClusterHeadCosting";
         $today = Carbon::now('Asia/Kolkata');
 
         // Get current and previous financial years
@@ -72,7 +72,6 @@ class SendBranchAllCosting extends Command
                 'emp_code' => $user['emp_code'],
                 'emp_name' => $user['emp_name'],
                 'designation' => $user['designation'],
-                'type' => $user['type'],
                 'sales' => $user['sales'],
                 'salary' => $user['salary'],
                 'ta_da' => $user['ta_da'],
@@ -111,7 +110,7 @@ class SendBranchAllCosting extends Command
                 $query->whereIn('id', config('constants.customer_roles'));
             })->where('sales_type', 'Primary')
             ->whereHas('roles', function ($query) {
-                $query->whereIn('id', ['2','22','32','31','27','23','3','33','21','13','25','6','5','41','8']);
+                $query->whereIn('id', ['21','25','6']);
             });
         $users = $query->get();
 
@@ -119,7 +118,7 @@ class SendBranchAllCosting extends Command
 
         // Prepare per-user calculations
         foreach ($users as $user) {
-            $user_ids = [$user->id];
+            $user_ids = getUsersReportingToAuth($user->id);
             $emp_code = User::whereIn('id', $user_ids)->pluck('employee_codes')->toArray();
             $salary = $user->userinfo->gross_salary_monthly * count($all_months);
             $ta_da = Expenses::whereIn('user_id', $user_ids)->whereBetween('date', [$startDateFormatted, $endDateFormatted])->sum('claim_amount');
@@ -134,18 +133,6 @@ class SendBranchAllCosting extends Command
 
             $cost = $primarySales > 0 ? number_format(($total_exp / $primarySales) * 100, 2, '.', '') : '0';
 
-            $type = '-';
-            $roleIds = ['2','22','32','31','27','23','3','33','21','13','25','6'];
-            $roleIds2 = ['5','41','8'];
-
-            if ($user->roles->pluck('id')->intersect($roleIds)->isNotEmpty()) {
-                $type = 'Sales and Marketing';
-            }
-            if ($user->roles->pluck('id')->intersect($roleIds2)->isNotEmpty()) {
-                $type = 'Others';
-            }
-
-
             $main_data[] = [
                 'branch' => $branchs,
                 'division' => $user->getdivision?->division_name,
@@ -153,7 +140,6 @@ class SendBranchAllCosting extends Command
                 'emp_name' => $user->name,
                 'designation' => $user->getdesignation->designation_name,
                 'doj' => $user->userinfo->date_of_joining,
-                'type' => $type,
                 'salary' => $salary,
                 'ta_da' => $ta_da,
                 'total_exp' => $total_exp,
@@ -161,6 +147,8 @@ class SendBranchAllCosting extends Command
                 'cost' => $cost,
             ];
         }
+
         return $main_data;
     }
 }
+

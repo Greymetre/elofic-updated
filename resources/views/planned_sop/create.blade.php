@@ -700,9 +700,8 @@
                 $row.find(".forecast_reccomendation").val(parseInt(res.forecast_reccomendation ?? 0));
                 let openingStock = parseInt(res.opening_stock?.opening_stocks ?? 0);
                 let price = parseInt(res.product?.productdetails[0].price ?? 0);
-                let open_oder_qty = parseInt(res.branchOprningQuantity?.open_order_qty ?? 0);
+                let open_oder_qty = parseInt(res.branchOprningQuantity?.plan_next_month ?? 0);
                 let new_price = 0;
-                console.log("price", price);
                 if (price) {
                   new_price = (price / 100) * 41;
                   price = price - new_price;
@@ -762,6 +761,9 @@
         let formattedValue = new Intl.NumberFormat('en-IN', {
           maximumFractionDigits: 2
         }).format(sum / 100000);
+        if (formattedValue == 'NaN') {
+          formattedValue = '0.00';
+        }
         $('#total_forecast').html(formattedValue + " Lakh");
       });
 
@@ -872,10 +874,10 @@
               $.each(res, function(key, value) {
                 var isSelected = (value.id == lastValue) ? 'selected' : '';
                 $('#tab_logic1 tr:last').find('.product_group_name').append(
-                    '<option value="' + value.id + '" ' + isSelected + '>' + value.subcategory_name + '</option>'
+                  '<option value="' + value.id + '" ' + isSelected + '>' + value.subcategory_name + '</option>'
                 );
-                if(isSelected == 'selected'){
-                    $('#tab_logic1 tr:last').find('.product_group_name').trigger('change');
+                if (isSelected == 'selected') {
+                  $('#tab_logic1 tr:last').find('.product_group_name').trigger('change');
                 }
               });
 
@@ -909,7 +911,7 @@
                   var productcode = '';
                 }
 
-                $('#tab_logic tr:last').find('.product').append('<option value="' + value.id + ' '+ isSelected +'">' + value.product_name + ' ' + value.product_code + '</option>');
+                $('#tab_logic tr:last').find('.product').append('<option value="' + value.id + ' ' + isSelected + '">' + value.product_name + ' ' + value.product_code + '</option>');
 
               });
             } else {

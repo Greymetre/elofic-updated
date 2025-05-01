@@ -307,13 +307,9 @@ class AjaxController extends Controller
             $product = Product::with('productdetails', 'categories', 'subcategories')->find($request->product_id);
             $opening_stock = OpeningStock::orWhere(['item_code' => $product->product_code, 'item_code' => $product->sap_code])->where(['item_group' => $product->subcategories->subcategory_name])->whereRaw("FIND_IN_SET(?, branch_id)", [$request->branch_id])->first();
 
-            $branchOprningQuantity = BranchOprningQuantity::where(function ($query) use ($product) {
-                $query->where('item_code', $product->product_code)
-                    ->orWhere('item_code', $product->sap_code);
-            })
-                ->where('item_group', $product->subcategories->subcategory_name)
-                ->whereRaw("FIND_IN_SET(?, branch_id)", [$request->branch_id])
-                ->whereDate('qty_month', $planning_month)
+            $branchOprningQuantity = PlannedSOP::where('product_id', $request->product_id)
+                ->where("branch_id", $request->branch_id)
+                ->whereDate('planning_month', $planning_month)
                 ->first();
             $months = [];
             for ($m = 4; $m <= 12; $m++) {
