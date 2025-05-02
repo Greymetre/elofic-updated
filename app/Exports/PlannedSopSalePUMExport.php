@@ -40,6 +40,13 @@ class PlannedSopSalePUMExport implements FromCollection, WithHeadings, ShouldAut
 
 
         $data = PlannedSOP::with(['getProduct.subcategories', 'getProduct.productdetails', 'getProduct.categories', 'getBranch', 'primarySale']);
+        if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Sub_Admin')){
+            $data->whereRaw("FIND_IN_SET(?, view_only)", [Auth::user()->division_id]);
+        }
+        if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Sub_Admin')){
+            $branch_ids = explode(',', Auth::user()->branch_id);
+            $data->whereIn('branch_id' , $branch_ids);
+        }
         if (isset($start_date) && isset($end_date)) {
             $data->whereBetween('planning_month', [$start_date, $end_date]);
         }
@@ -182,17 +189,13 @@ class PlannedSopSalePUMExport implements FromCollection, WithHeadings, ShouldAut
             ? \Carbon\Carbon::parse($data['planning_month'])->subMonth()->startOfMonth()->format('Y-m-d')
             : '';
 
-        $open_order = BranchOprningQuantity::where(function ($query) use ($product) {
-            $query->where('item_code', $product->product_code)
-                ->orWhere('item_code', $product->sap_code);
-        })
-            ->where('item_group', $product->subcategories->subcategory_name)
-            ->whereRaw("FIND_IN_SET(?, branch_id)", [$data->branch_id])
-            ->whereDate('qty_month', $planning_month)
-            ->first();
+        $open_order = PlannedSOP::where('product_id', $product->id)
+        ->where("branch_id", $data->branch_id)
+        ->whereDate('planning_month', $planning_month)
+        ->first();
 
-        $open_order_stock = isset($open_order->open_order_qty) && is_numeric($open_order->open_order_qty)
-            ? (int) $open_order->open_order_qty
+        $open_order_stock = isset($open_order->plan_next_month) && is_numeric($open_order->plan_next_month)
+            ? (int) $open_order->plan_next_month
             : 0;
 
         $production_qty = isset($data['production_qty']) && is_numeric($data['production_qty'])

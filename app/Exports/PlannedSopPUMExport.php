@@ -143,18 +143,14 @@ class PlannedSopPUMExport implements FromCollection, WithHeadings, ShouldAutoSiz
             : '';
 
         $product = $data['getProduct'] ?? '';
-        $open_order = BranchOprningQuantity::where(function ($query) use ($product) {
-            $query->where('item_code', $product->product_code)
-                ->orWhere('item_code', $product->sap_code);
-        })
-            ->where('item_group', $product->subcategories->subcategory_name)
-            ->whereRaw("FIND_IN_SET(?, branch_id)", [$data->branch_id])
-            ->whereDate('qty_month', $planning_month)
-            ->first();
+        $open_order =  PlannedSOP::where('product_id', $product->id)
+        ->where("branch_id", $data->branch_id)
+        ->whereDate('planning_month', $planning_month)
+        ->first();
 
 
-        $open_order_stock = isset($open_order->open_order_qty) && is_numeric($open_order->open_order_qty)
-            ? (int) $open_order->open_order_qty
+        $open_order_stock = isset($open_order->plan_next_month) && is_numeric($open_order->plan_next_month)
+            ? (int) $open_order->plan_next_month
             : 0;
 
         $openderValue        = round($product_price * $open_order_stock, 2);
