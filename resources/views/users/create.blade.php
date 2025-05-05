@@ -1036,6 +1036,26 @@
                 </div>
                 <div class="col-md-6">
                   <div class="input_section">
+                    <label class="col-form-label">Primary {!! trans('panel.user.branch_name') !!}</label>
+                    <div class="form-group has-default bmd-form-group">
+                      <div class="form-group has-default bmd-form-group">
+                        <select class="form-control select2" name="primary_branch_id">
+                          <option value="" disabled selected>Select Branch</option>
+                            @foreach($branches as $branche)
+                            <option {{ $user->primary_branch_id == $branche->id ? 'selected' : '' }} value="{{$branche->id}}">{{$branche->branch_name}}</option>
+                            @endforeach
+                        </select>
+                      </div>
+                      @if ($errors->has('primary_branch_id'))
+                      <div class="error">
+                        <p class="text-danger">{{ $errors->first('primary_branch_id') }}</p>
+                      </div>
+                      @endif
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="input_section">
                     <label class="col-form-label">{!! trans('panel.user.division') !!}</label>
                     <div class="form-group has-default bmd-form-group">
                       <select class="form-control" name="division_id">

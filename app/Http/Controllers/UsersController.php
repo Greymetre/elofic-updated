@@ -110,6 +110,7 @@ class UsersController extends Controller
             'longitude' => isset($request['longitude']) ? $request['longitude'] : '',
             'location' => !empty($request['location']) ? $request['location'] : '',
             'branch_id' => (isset($request['branch_id']) && count($request['branch_id']) > 0) ? implode(',', $request['branch_id']) : '',
+            'primary_branch_id' => isset($request['primary_branch_id']) ? $request['primary_branch_id'] : '',
             'branch_show' => isset($request['branch_show']) ? implode(',', $request['branch_show']) : NULL,
             'department_id' => isset($request['department_id']) ? $request['department_id'] : '',
             'employee_codes' => isset($request['employee_codes']) ? $request['employee_codes'] : '',
@@ -362,6 +363,7 @@ class UsersController extends Controller
         $user->region_id = isset($request['region_id']) ? $request['region_id'] : null;
 
         $user->branch_id = (isset($request['branch_id']) && count($request['branch_id']) > 0) ? implode(',', $request['branch_id']) : NULL;
+        $user->primary_branch_id = isset($request['primary_branch_id']) ? $request['primary_branch_id'] : null;
         $user->department_id = isset($request['department_id']) ? $request['department_id'] : null;
         $user->employee_codes = isset($request['employee_codes']) ? $request['employee_codes'] : null;
         $user->designation_id = isset($request['designation_id']) ? $request['designation_id'] : null;

@@ -102,6 +102,7 @@ class UserImport implements ToCollection, WithValidation, WithHeadingRow, WithBa
                     'location' => !empty($row['location']) ? $row['location'] : '',
                     'employee_codes' => !empty($row['employees_code']) ? $row['employees_code'] : '',
                     'branch_id' => !empty($row['branch_id']) ? $row['branch_id'] : '',
+                    'primary_branch_id' => !empty($row['primary_branch_id']) ? $row['primary_branch_id'] : '',
                     'designation_id' => !empty($row['designation_id']) ? $row['designation_id'] : '',
                     'division_id' => !empty($row['division_id']) ? $row['division_id'] : '',
                     'department_id' => !empty($row['department_id']) ? $row['department_id'] : '',
@@ -250,6 +251,7 @@ class UserImport implements ToCollection, WithValidation, WithHeadingRow, WithBa
                     'location' => !empty($row['location']) ? $row['location'] : '',
                     'employee_codes' => !empty($row['employees_code']) ? $row['employees_code'] : '',
                     'branch_id' => !empty($row['branch_id']) ? $row['branch_id'] : '',
+                    'primary_branch_id' => !empty($row['primary_branch_id']) ? $row['primary_branch_id'] : '',
                     'designation_id' => !empty($row['designation_id']) ? $row['designation_id'] : '',
                     'division_id' => !empty($row['division_id']) ? $row['division_id'] : '',
                     'warehouse_id' => !empty($row['warehouse_id']) ? $row['warehouse_id'] : NULL,
@@ -393,6 +395,7 @@ class UserImport implements ToCollection, WithValidation, WithHeadingRow, WithBa
     {
         return [
             'user_name' => 'required|string|regex:/[a-zA-Z0-9\s]+/',
+            'primary_branch_id' => 'nullable|exists:branches,id',
         ];
     }
 

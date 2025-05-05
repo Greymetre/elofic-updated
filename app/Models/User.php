@@ -45,6 +45,7 @@ class User extends Authenticatable implements HasMedia
         'location',
         'reportingid',
         'branch_id',
+        'primary_branch_id',
         'branch_show',
         'designation_id',
         'employee_codes',
