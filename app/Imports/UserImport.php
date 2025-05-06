@@ -42,7 +42,7 @@ class UserImport implements ToCollection, WithValidation, WithHeadingRow, WithBa
         $userdetails = collect([]);
         $addressdetails = collect([]);
         foreach ($rows as $k=>$row) {
-            if(!is_numeric($row['last_year_increment_percent'])){
+            if(isset($row['last_year_increment_percent']) && !is_numeric($row['last_year_increment_percent'])){
                 $row['last_year_increment_percent'] = (int) str_replace('%', '', $row['last_year_increment_percent']);
             }
    
