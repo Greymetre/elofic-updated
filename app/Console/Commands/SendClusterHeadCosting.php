@@ -127,14 +127,19 @@ class SendClusterHeadCosting extends Command
                 ->whereBetween('invoice_date', [$startDateFormatted, $endDateFormatted])
                 ->groupBy('division')
                 ->sum('net_amount');
-            $branchs = Branch::whereIn('id', explode(',', $user->branch_id))
-                ->pluck('branch_name')  // get all branch names
-                ->implode(',');         // join them with commas
+
+            if(count(explode(',', $user->branch_id)) > 1) {
+                $branch = Branch::where('id', $user->primary_branch_id)->first();
+                $branchName = $branch ? $branch->branch_name : null;
+            }else {
+                $branch = Branch::where('id', $user->branch_id)->first();
+                $branchName = $branch ? $branch->branch_name : null;
+            }
 
             $cost = $primarySales > 0 ? number_format(($total_exp / $primarySales) * 100, 2, '.', '') : '0';
 
             $main_data[] = [
-                'branch' => $branchs,
+                'branch' => $branchName,
                 'division' => $user->getdivision?->division_name,
                 'emp_code' => $user->employee_codes,
                 'emp_name' => $user->name,
