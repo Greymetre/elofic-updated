@@ -1134,3 +1134,24 @@ function generateCertificateNo() {
     // Return formatted certificate no
     return $prefix . str_pad($newNo, 4, '0', STR_PAD_LEFT);
 }
+
+function getMonthQuarterPairs($startDate, $endDate)
+{
+    $months = [];
+    $current = $startDate->copy();
+
+    while ($current <= $endDate) {
+        $month = $current->format('Y-m');
+        $quarter = 'Q' . ceil($current->month / 3);
+        $months[] = [
+            'month' => $month,
+            'quarter' => $quarter,
+            'start' => $current->copy()->startOfMonth()->toDateString(),
+            'end' => $current->copy()->endOfMonth()->toDateString()
+        ];
+        $current->addMonth();
+    }
+
+    return $months;
+}
+

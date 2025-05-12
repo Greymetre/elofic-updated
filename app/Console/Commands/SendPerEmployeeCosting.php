@@ -63,7 +63,9 @@ class SendPerEmployeeCosting extends Command
 
         $users = $users->merge($users_previous)->merge($users_current);
 
-        $formatteddata = $users->map(function ($user) {
+        $formatteddata = $users->map(function ($record) {
+            $user = $record->user;
+        
             $manager = User::where('division_id', $user->division_id)->where('active', 'Y')
                 ->whereRaw('FIND_IN_SET(?, branch_id)', [$user->branch_id])
                 ->whereHas('roles', function ($query) {
@@ -74,8 +76,11 @@ class SendPerEmployeeCosting extends Command
                     ]);
                 })
                 ->first();
+        
             return [
-                'f_year' => $user->f_year,
+                'f_year' => $record->month < '04' ? ($record->month - 1) . '-' . $record->month : $record->month,
+                'month' => $record->month,
+                'quarter' => $record->quarter,
                 'division' => $user->getdivision?->division_name,
                 'branch' => $user->getbranch?->branch_name ?? 'Not Applicable',
                 'branch_cluster' => $manager->name ?? 'Anil Srivastava',
@@ -83,17 +88,19 @@ class SendPerEmployeeCosting extends Command
                 'emp_name' => $user->name,
                 'designation' => $user->getdesignation->designation_name,
                 'doj' => $user->userinfo->date_of_joining,
-                'sales' => $user->sales,
-                'salary' => $user->userinfo->gross_salary_monthly,
-                'ta_da' => $user->expensesSum,
+                'sales' => $record->sales,
+                'salary' => $record->salary,
+                'ta_da' => $record->expenses,
                 'incentive' => '0',
-                'total_exp' => $user->total_expe,
-                'sal_exp_per' => $user->sal_exp,
+                'total_exp' => $record->total_exp,
+                'sal_exp_per' => $record->sal_exp,
             ];
         });
+        
 
         // Send data in chunks
         $formatteddata->chunk(100)->each(function ($chunk) use ($url) {
+            dd($chunk, 'new changes please check first');
             $payload = ['employee_costing' => $chunk->toArray()];
             $response = Http::timeout(240)->post($url, $payload);
 
@@ -107,11 +114,10 @@ class SendPerEmployeeCosting extends Command
 
     function processUsersForPeriod($startDate, $endDate)
     {
-        $startDateFormatted = $startDate->toDateString();
-        $endDateFormatted = $endDate->toDateString();
-        $all_months = getMonthsBetween($startDate, $endDate);
+        $monthlyData = collect();
+        $monthQuarters = getMonthQuarterPairs($startDate, $endDate);
 
-        $query = User::with([
+        $users = User::with([
             'primarySales:id,emp_code,invoice_date,net_amount',
             'getbranch',
             'getdesignation',
@@ -126,41 +132,39 @@ class SendPerEmployeeCosting extends Command
                     ->orWhereHas('roles', function ($roleQuery) {
                         $roleQuery->whereIn('id', ['22', '32']);
                     });
-            });
-        // ->whereHas('roles', function ($q) {
-        //     $q->whereIn('id', ['13', '6', '3', '2']);
-        // });
+            })->get();
 
-        $users = $query->get();
+        foreach ($monthQuarters as $mq) {
+            foreach ($users as $user) {
+                $monthly_salary = $user->userinfo->gross_salary_monthly;
 
-        // Prepare per-user calculations
-        foreach ($users as $user) {
-            $user->userinfo->gross_salary_monthly *= count($all_months);
+                $expenses = $user->expenses
+                    ->whereBetween('date', [$mq['start'], $mq['end']])
+                    ->sum('claim_amount');
 
-            $user->expensesSum = $user->expenses
-                ->whereBetween('date', [$startDateFormatted, $endDateFormatted])
-                ->sum('claim_amount');
-
-            $user->total_expe = $user->expensesSum + $user->userinfo->gross_salary_monthly;
-
-            if ($user->sales_type == 'Primary') {
                 $salesSum = $user->primarySales
-                    ->whereBetween('invoice_date', [$startDateFormatted, $endDateFormatted])
+                    ->whereBetween('invoice_date', [$mq['start'], $mq['end']])
                     ->sum('net_amount');
-            } else {
-                $salesSum = Order::where('created_by', $user->id)
-                    ->whereBetween('order_date', [$startDateFormatted, $endDateFormatted])
-                    ->sum('sub_total');
+
+                $salesLakhs = $salesSum > 0 ? number_format($salesSum / 100000, 2) : 0;
+                $totalExp = $monthly_salary + $expenses;
+                $salExp = $salesLakhs > 0
+                    ? number_format(($totalExp / 100000) / $salesLakhs * 100, 2)
+                    : 0;
+
+                $monthlyData->push((object)[
+                    'user' => $user,
+                    'month' => $mq['month'],
+                    'quarter' => $mq['quarter'],
+                    'salary' => $monthly_salary,
+                    'expenses' => $expenses,
+                    'sales' => $salesLakhs,
+                    'total_exp' => $totalExp,
+                    'sal_exp' => $salExp,
+                ]);
             }
-
-
-            $user->sales = $salesSum > 0 ? number_format($salesSum / 100000, 2) : 0;
-
-            $user->sal_exp = $user->sales > 0
-                ? number_format(($user->total_expe / 100000) / $user->sales * 100, 2)
-                : 0;
         }
 
-        return $users;
+        return $monthlyData;
     }
 }

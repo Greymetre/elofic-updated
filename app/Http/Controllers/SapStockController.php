@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\DataTables\SAPStockDataTable;
+use App\Models\Category;
 use App\Models\SapStock;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -22,6 +23,7 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Facades\Excel;
 use Laravel\Passport\Token;
+use Auth;
 
 class SapStockController extends Controller
 {
@@ -32,6 +34,109 @@ class SapStockController extends Controller
      */
     public function index(SAPStockDataTable $dataTable, Request $request)
     {
+
+        // $path = '/var/www/html/new_psop.xlsx';
+
+        // if (!file_exists($path)) {
+        //     return 'File not found!';
+        // }
+
+        // Excel::import(new class implements ToCollection {
+        //     public function collection(Collection $rows)
+        //     {
+        //         foreach ($rows as $index => $row) {
+        //             if ($index == 0) continue;
+        //             $data = [
+        //                 'product_id' => $row[1],
+        //                 'branch_id'  => $row[2],
+        //                 'date'       => 'May 2025',
+        //             ];
+
+        //             // create a new Request instance with that data
+        //             $new_request = new Request($data);
+
+        //             $ajaxController = new AjaxController();
+
+        //             $other_details = $ajaxController->getFullDetailsOfProduct($new_request);
+        //             $dataObject = $other_details->getData();
+
+        //             $dataArray = json_decode(json_encode($dataObject), true);
+
+        //             $row[0] = 'May 2025';
+        //             if (isset($row[0])) {
+        //                 $formatted_date = Carbon::createFromFormat('F Y', $row[0])->startOfMonth();
+        //                 $for_oder_id = $formatted_date->format("F/Y");
+        //                 $planning_month = $formatted_date->format("Y-m-d");
+        //             }
+        //             $division = Category::find($row[3]);
+        //             $total = PlannedSOP::latest('id')->value('id');
+        //             $formattedTotal = str_pad($total, 3, '0', STR_PAD_LEFT);
+        //             $order_id = strtoupper(substr($division->category_name, 0, 3)) . '/' . $for_oder_id . '/' . $formattedTotal;
+
+        //             $openingStock = $dataArray['opening_stock']['opening_stocks'] ?? 0;
+        //             $planNextMonth = $dataArray['branchOprningQuantity']['plan_next_month'] ?? 0;
+
+        //             $pro_qty = $row[4] - ($openingStock - $planNextMonth);
+        //             $plannedsop = PlannedSOP::updateOrCreate(
+        //                 [
+        //                     'planning_month' => $planning_month,
+        //                     'product_id'     => $row[1] ?? '',
+        //                     'branch_id'      => $row[2] ?? '',
+        //                 ],
+        //                 [
+        //                     'plan_next_month' => $row[4] ?? '',
+        //                     'order_id'             => $order_id ?? '',
+        //                     'division_id'          => $row[3] ?? Null,
+        //                     'opening_stock'        => $openingStock ?? NULL,
+        //                     'open_order_qty'       => $planNextMonth ?? Null,
+        //                     'production_qty'       => $pro_qty ?? 0,
+        //                     'budget_for_month'     => NULL,
+        //                     'last_month_sale'      => NULL,
+        //                     'last_three_month_avg' => $dataArray['threeMonthAvg'] ?? NULL,
+        //                     'last_year_month_sale' => $dataArray['sameMonthLastYearSales'] ?? NULL,
+        //                     'sku_unit_price'       => $dataArray['product']['productdetails'][0]['price'] ?? NULL,
+        //                     's_op_val'             => NULL,
+        //                     'top_sku'              => NULL,
+        //                     'created_by'           => Auth::user()->name ?? NULL,
+        //                     'view_only'            => '10',
+        //                     'plan_next_month_value' => $row[4] * $dataArray['product']['productdetails'][0]['price'],
+        //                     'status'               => 1,
+        //                 ]
+        //             );
+
+        //             $collection = collect($dataArray['sales_by_month'])->map(fn($value) => (int) $value);
+
+        //             $max = $collection->max();
+        //             $min = $collection->min();
+        //             $avg = $collection->avg();
+
+        //             PlannedSopSaleData::updateOrCreate(
+        //                 ['planned_sop_id' => $plannedsop->id],
+        //                 [
+        //                     'planned_sop_id',
+        //                     'month_1' => $dataArray['sales_by_month']['2024-04'],
+        //                     'month_2' => $dataArray['sales_by_month']['2024-05'],
+        //                     'month_3'  => $dataArray['sales_by_month']['2024-06'],
+        //                     'month_4' => $dataArray['sales_by_month']['2024-07'],
+        //                     'month_5' => $dataArray['sales_by_month']['2024-08'],
+        //                     'month_6' => $dataArray['sales_by_month']['2024-09'],
+        //                     'month_7' => $dataArray['sales_by_month']['2024-10'],
+        //                     'month_8' => $dataArray['sales_by_month']['2024-11'],
+        //                     'month_9' => $dataArray['sales_by_month']['2024-12'],
+        //                     'month_10' => $dataArray['sales_by_month']['2025-01'],
+        //                     'month_11' => $dataArray['sales_by_month']['2025-02'],
+        //                     'month_12' => $dataArray['sales_by_month']['2025-03'],
+        //                     'min'      => $min,
+        //                     'max'      => $max,
+        //                     'avg'      => $avg,
+        //                 ]
+        //             );
+        //         }
+        //     }
+        // }, $path);
+        // dd('done');
+
+
 
         // $all_customers = Customers::where(['active' => 'Y', 'customertype' => '4'])->get();
         // foreach ($all_customers as $customer) {
