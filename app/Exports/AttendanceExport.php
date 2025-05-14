@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\Attendance;
+use App\Models\Leave;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -80,6 +81,9 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
         } else {
             $status = 'Rejected';
         }
+        if(in_array($data['working_type'], ['Full Day Leave', 'Second Half Leave','First Half Leave'])) {
+            $leave_details = Leave::where('user_id', $data['user_id'])->where('from_date', '<=', $data['punchin_date'])->where('to_date', '>=', $data['punchin_date'])->first();
+        }
 
         if (Auth::user()->hasRole('superadmin') || Auth::user()->hasRole('Admin')) {
             return [
@@ -94,7 +98,7 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                 $data['punchin_time'],
                 isset($data['punchout_time']) ? $data['punchout_time'] : 'misspunch',
                 $data['worked_time'],
-                isset($data['working_type']) ? $data['working_type'] : '',
+                isset($data['working_type']) ? $data['working_type'] . (isset($leave_details) && $leave_details ? ' - ' . $leave_details['bal_type'] : '') : '',
                 $status,
                 $data['remark_status'],
 

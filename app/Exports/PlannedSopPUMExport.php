@@ -95,8 +95,12 @@ class PlannedSopPUMExport implements FromCollection, WithHeadings, ShouldAutoSiz
         if(isset($this->filters['planning_month'])){
           try{
             $formatted_date = Carbon::createFromFormat('F Y', $this->filters['planning_month'])->startOfMonth();
+            $last_month = Carbon::createFromFormat('F Y', $this->filters['planning_month'])->subMonth()->startOfMonth()->format("Y-m-d");
             $planning_month = $formatted_date->format("Y-m-d");
             $data->whereDate('planning_month' , $planning_month);
+            $lat_pro_ids = $data->pluck('product_id');
+            $data->orWhereDate('planning_month', $last_month)->whereNotIn('product_id' , $lat_pro_ids);
+            // dd($data->get()->count());
           }catch(\Exception $e){
              $data->latest()->get();
           }
@@ -160,6 +164,13 @@ class PlannedSopPUMExport implements FromCollection, WithHeadings, ShouldAutoSiz
             : 0;
         $opening_stock_value =round($product_price * $opening_stock,2);
 
+        if(isset($this->filters['planning_month'])){
+            $last_month = Carbon::createFromFormat('F Y', $this->filters['planning_month'])->subMonth()->startOfMonth()->format("Y-m-d");
+            $plan_next_month = $data['planning_month'] == $last_month ? '0' : $plan_next_month;
+            $plan_next_month_value = $data['planning_month'] == $last_month ? '0' : $plan_next_month;
+            $data['planning_month'] = $data['planning_month'] == $last_month ? Carbon::createFromFormat('F Y', $this->filters['planning_month'])->startOfMonth()->format("Y-m-d") : $data['planning_month'];
+        }
+
         return [
             $data['order_id'] ?? '',
             isset($data['planning_month']) ? \Carbon\Carbon::parse($data['planning_month'])->format('F Y') : '',
@@ -184,7 +195,7 @@ class PlannedSopPUMExport implements FromCollection, WithHeadings, ShouldAutoSiz
             $data->primarySale->max,
             $data->primarySale->avg,
             (string) $open_order_stock ?? 0,
-            (string) $openderValue ?? 0,            
+            (string) $openderValue ?? 0,
             $plan_next_month,
             round($plan_next_month_value,2),
             $data['created_by'] ?? '',
