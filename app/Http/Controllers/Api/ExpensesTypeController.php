@@ -213,6 +213,7 @@ class ExpensesTypeController extends Controller
                         'stop_km' => $expense->stop_km ?? "",
                         'total_km' => $expense->total_km ?? "",
                         'claim_amount' => $expense->claim_amount ?? NULL,
+                        'approve_amount' => $expense->approve_amount ?? "",
                         'status' => $exp_status,
                         // 'claim_amount' => '$'.number_format($expense->claim_amount ?? 0,2),
                         //'expense_image' =>  $expense->getFirstMedia('expense_file')->getFullUrl(),
