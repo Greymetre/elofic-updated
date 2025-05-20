@@ -758,11 +758,11 @@
                <ul class="menu-links">
                   @if(auth()->user()->can(['dashboard_access']))
                   {{--<li class="nav-link hide_icon {{ request()->is('dashboard') ? 'active' : '' }}">
-                     <a class="collapsed hoveradd" href="{{ url('dashboard') }}">
-                        <i class="material-icons icon">dashboard</i>
-                        <span>{!! trans('panel.sidemenu.dashboard') !!}</span>
-                        <div class="d-none mobile_hide"> {!! trans('panel.sidemenu.dashboard') !!}</div>
-                     </a>
+                  <a class="collapsed hoveradd" href="{{ url('dashboard') }}">
+                     <i class="material-icons icon">dashboard</i>
+                     <span>{!! trans('panel.sidemenu.dashboard') !!}</span>
+                     <div class="d-none mobile_hide"> {!! trans('panel.sidemenu.dashboard') !!}</div>
+                  </a>
                   </li>--}}
 
                   <li class="nav-link {{ request()->is('sales_summary_dashboard*') ? 'active' : '' }}">
@@ -970,8 +970,8 @@
                   <li class="nav-link {{ request()->is('categories*') || request()->is('subcategories*') || request()->is('brands*') || request()->is('products*') || request()->is('units*') || request()->is('production*') ? 'active' : '' }}">
                      <a class="collapsed hoveradd" data-toggle="collapse" href="#productMenu" aria-expanded="false">
                         <i class="material-icons icon">conveyor_belt</i>
-                        <span> {!! trans('panel.sidemenu.product_master') !!} 
-                        </span> 
+                        <span> {!! trans('panel.sidemenu.product_master') !!}
+                        </span>
                         <div class="d-none mobile_hide">{!! trans('panel.sidemenu.product_master') !!}</div>
                      </a>
                      <div class="collapse" id="productMenu" style="">
@@ -1047,7 +1047,7 @@
                               </a>
                            </li>
                            @endif
-                            @if(auth()->user()->can('opening_stock_view'))
+                           @if(auth()->user()->can('opening_stock_view'))
                            <li class="nav-link-btn {{ request()->is('opening-stocks*') ? 'active' : '' }}">
                               <a class="hoveradd2" href="{{ url('opening-stocks') }}">
                                  <i class="material-icons icon">donut_small</i>
@@ -1056,7 +1056,7 @@
                               </a>
                            </li>
                            @endif
-                            @if(auth()->user()->can('branch_opening_qty_view'))
+                           @if(auth()->user()->can('branch_opening_qty_view'))
                            <li class="nav-link-btn {{ request()->is('opening-quantity*') ? 'active' : '' }}">
                               <a class="hoveradd2" href="{{ url('opening-quantity') }}">
                                  <i class="material-icons icon">donut_small</i>
@@ -1074,7 +1074,20 @@
                               </a>
                            </li>
                            @endif
+                        </ul>
+                     </div>
+                  </li>
+                  @endif
 
+                  @if(auth()->user()->can('forecast_access'))
+                  <li class="nav-link {{ request()->is('planned-sop-forecast*') || request()->is('planned-sop*') ? 'active' : '' }}">
+                     <a class="collapsed hoveradd" data-toggle="collapse" href="#salesUserMenu" aria-expanded="false">
+                        <i class="material-icons icon">online_prediction</i>
+                        <span> Forecast </span>
+                        <div class="d-none mobile_hide"> Forecast</div>
+                     </a>
+                     <div class="collapse" id="salesUserMenu" style="">
+                        <ul class="navd">
                            <li class="nav-link-btn {{ request()->is('planned-sop*') ? 'active' : '' }}">
                               <a class="hoveradd2" href="{{ url('planned-sop') }}">
                                  <i class="material-icons icon">warehouse</i>
@@ -1083,13 +1096,13 @@
                               </a>
                            </li>
                            @if(auth()->user()->can('planned_forecast'))
-                            <li class="nav-link-btn {{ request()->is('planned-sop-forecast*') ? 'active' : '' }}">
-                                 <a class="hoveradd2" href="{{ url('planned-sop-forecast') }}">
-                                    <i class="material-icons icon">warehouse</i>
-                                    <span>S&OP Forecast</span>
-                                    <div class="d-none mobile_hide"> S&OP Forecast</div>
-                                 </a>
-                              </li>
+                           <li class="nav-link-btn {{ request()->is('planned-sop-forecast*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('planned-sop-forecast') }}">
+                                 <i class="material-icons icon">warehouse</i>
+                                 <span>S&OP Forecast</span>
+                                 <div class="d-none mobile_hide"> S&OP Forecast</div>
+                              </a>
+                           </li>
                            @endif
                         </ul>
                      </div>
@@ -2313,7 +2326,7 @@
                         </a>
                      </li>
                      @endif
-                      <li class="nav-link-btn {{ request()->is('reports/marketIntelligence*') ? 'active' : '' }}">
+                     <li class="nav-link-btn {{ request()->is('reports/marketIntelligence*') ? 'active' : '' }}">
                         <a class="hoveradd2" href="{{ url('reports/marketIntelligence') }}">
                            <i class="material-icons icon">nature_people</i>
                            <span> Market Intelligence</span>
@@ -2389,9 +2402,9 @@
       <nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top ">
          <div class="container-fluid  p-2" style="background: transparent; !important">
             <div class="new_demo">
-            <img class="rounded ml-2 iconimg" src="{!! url('/').'/'.asset('assets/img/bediya.jpg') !!}" width="100">
-            <img class="rounded ml-2  iconimg" src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" width="100">
-         </div>
+               <img class="rounded ml-2 iconimg" src="{!! url('/').'/'.asset('assets/img/bediya.jpg') !!}" width="100">
+               <img class="rounded ml-2  iconimg" src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" width="100">
+            </div>
             <!-- <img src="{!! url('/').'/'.asset('assets/img/logo.png') !!}" width="50"> -->
             <div class="navbar-wrapper">
                <div class="navbar-minimize">
@@ -2509,7 +2522,7 @@
       $(function() {
          //Initialize Select2 Elements
          $('.select2').select2()
-         
+
          $('#toggle-one').bootstrapToggle();
          $('.datetimepicker').datetimepicker({
             format: 'YYYY-MM-DD HH:mm'
@@ -2585,14 +2598,18 @@
       // });
    </script>
    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-8D1DXGE6Z6"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+   <script async src="https://www.googletagmanager.com/gtag/js?id=G-8D1DXGE6Z6"></script>
+   <script>
+      window.dataLayer = window.dataLayer || [];
 
-  gtag('config', 'G-8D1DXGE6Z6');
-</script>
+      function gtag() {
+         dataLayer.push(arguments);
+      }
+      gtag('js', new Date());
+
+      gtag('config', 'G-8D1DXGE6Z6');
+   </script>
 </body>
 @yield('script')
+
 </html>

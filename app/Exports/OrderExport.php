@@ -23,6 +23,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
         $this->startdate = $request->input('start_date');
         $this->enddate = $request->input('end_date');
         $this->order_id = $request->input('order_id');
+        $this->user_id = $request->input('user_id');
         $this->dividion_id = $request->input('dividion_id');
         $this->customer_type_id = $request->input('customer_type_id');
 
@@ -31,6 +32,8 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
 
     public function collection()
     {
+        $final = collect(); // Final result
+
         // return OrderDetails::with('orders','orders.createdbyname')->whereHas('orders',function ($query)  {
         //                         if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
 
@@ -40,7 +43,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
         //                     })->select('id','order_id', 'product_id', 'product_detail_id', 'quantity', 'shipped_qty', 'price', 'discount', 'discount_amount', 'tax_amount', 'line_total', 'status_id', 'created_at')->latest()->get();  
 
         if ($this->pending_status != '' && $this->pending_status != NULL) {
-            return OrderDetails::with('orders', 'orders.createdbyname', 'orders.buyers')->whereHas('orders', function ($query) {
+            $query = OrderDetails::with('orders', 'orders.createdbyname', 'orders.buyers')->whereHas('orders', function ($query) {
                 if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                     $query->whereIn('created_by', $this->userids);
                 }
@@ -58,6 +61,9 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 if ($this->order_id) {
                     $query->where('id', $this->order_id);
                 }
+                 if ($this->user_id) {
+                    $query->where('created_by', $this->user_id);
+                }
                 if ($this->dividion_id) {
                     $order_ids = Order::where('product_cat_id', $this->dividion_id)->pluck('id');
                     $query->whereIn('id', $order_ids);
@@ -71,9 +77,17 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                         })->pluck('id');
                     $query->whereIn('order_id', $order_ids);
                 }
-            })->latest()->get();
+            });
+
+            $query->chunk(1000, function ($results) use (&$final) {
+                foreach ($results as $row) {
+                    $final->push($row);
+                }
+            });
+
+            return $final;
         } else {
-            return OrderDetails::with('orders', 'orders.createdbyname')->whereHas('orders', function ($query) {
+            $query =  OrderDetails::with('orders', 'orders.createdbyname')->whereHas('orders', function ($query) {
                 if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                     $query->whereIn('created_by', $this->userids);
                 }
@@ -103,7 +117,16 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                         $query->where('order_date', '<=', $this->enddate);
                     }
                 }
-            })->select('id', 'order_id', 'product_id', 'product_detail_id', 'quantity', 'shipped_qty', 'price', 'discount', 'discount_amount', 'tax_amount', 'line_total', 'status_id', 'created_at', 'scheme_name', 'scheme_discount', 'scheme_amount', 'cluster_discount', 'cluster_amount', 'deal_discount', 'deal_amount', 'distributor_discount', 'distributor_amount')->latest()->get();
+            })->select('id', 'order_id', 'product_id', 'product_detail_id', 'quantity', 'shipped_qty', 'price', 'discount', 'discount_amount', 'tax_amount', 'line_total', 'status_id', 'created_at', 'scheme_name', 'scheme_discount', 'scheme_amount', 'cluster_discount', 'cluster_amount', 'deal_discount', 'deal_amount', 'distributor_discount', 'distributor_amount');
+
+            
+            $query->chunk(1000, function ($results) use (&$final) {
+                foreach ($results as $row) {
+                    $final->push($row);
+                }
+            });
+
+            return $final;
         }
     }
 

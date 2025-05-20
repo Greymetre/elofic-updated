@@ -49,12 +49,14 @@ class OrderController extends Controller
     {
         abort_if(Gate::denies('order_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $sellers_ids = $this->orders->distinct()->pluck('seller_id');
+        $user_ids = $this->orders->distinct()->pluck('created_by');
         $buyer_ids = $this->orders->distinct()->pluck('buyer_id');
         $divisions = Category::where('active', 'Y')->get();
         $retailers = Customers::whereIn("id", $buyer_ids)->get();
         $distributors = Customers::whereIn("id", $sellers_ids)->get();
         $customer_types = CustomerType::where('active', 'Y')->get();
-        return $dataTable->render('orders.index', compact('divisions', 'retailers', 'distributors', 'customer_types'));
+        $users = User::whereIn('id' , $user_ids)->get();
+        return $dataTable->render('orders.index', compact('divisions', 'retailers', 'distributors', 'customer_types' , 'users'));
     }
 
     /**
