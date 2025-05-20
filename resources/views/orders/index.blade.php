@@ -13,6 +13,14 @@
                 @if(auth()->user()->can(['order_download']))
                 <form method="GET" action="{{ URL::to('orders-download') }}">
                   <div class="d-flex flex-wrap flex-row">
+                    <div class="p-2" style="width:190px;">
+                      <select class="select2" name="user_id" id="user_id">
+                        <option value="">Select User</option>
+                        @foreach($users as $user)
+                        <option value="{{$user->id}}">{{$user->name}}</option>
+                        @endforeach
+                      </select>
+                    </div>
                   <div class="p-2" style="width:190px;">
                       <select class="select2" name="dividion_id" id="dividion_id" required>
                         <option value="">Select Division</option>
@@ -168,6 +176,7 @@
             d.pending_status = $('#pending_status').val();
             d.startdate = $('#start_date').val();
             d.enddate = $('#end_date').val();
+            d.user_id = $('#user_id').val();
           }
         },
         columns: [{
@@ -261,6 +270,9 @@
       });
 
       $('#retailers_id').change(function() {
+        table.draw();
+      });
+       $('#user_id').change(function() {
         table.draw();
       });
       $('#end_date').change(function() {

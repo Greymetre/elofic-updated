@@ -126,7 +126,7 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                 $data['punchin_time'],
                 isset($data['punchout_time']) ? $data['punchout_time'] : 'misspunch',
                 $data['worked_time'],
-                isset($data['working_type']) ? $data['working_type'] : '',
+                isset($data['working_type']) ? $data['working_type'] . (isset($leave_details) && $leave_details ? ' - ' . $leave_details['bal_type'] : '') : '',
                 $status,
                 $data['remark_status'],
 

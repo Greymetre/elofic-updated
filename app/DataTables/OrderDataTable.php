@@ -113,6 +113,9 @@ class OrderDataTable extends DataTable
         if (request()->get('enddate')) {
             $query->where('order_date', '<=', request()->get('enddate'));
         }
+        if (request()->get('user_id')) {
+            $query->where('created_by',request()->get('user_id'));
+        }
         if (auth()->user()->hasRole('Customer Dealer')) {
             $parent_id = auth()->user()->customerid;
             $query->where('seller_id', $parent_id);

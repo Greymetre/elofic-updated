@@ -304,6 +304,7 @@
                'division': $(this).val()
             },
             success: function(data) {
+            console.log(data.data.length);
                var html = '';
                $.each(data.data, function(k, v) {
                   html += '<option value="' + v.id + '">' + v.scheme_name + '</option>';

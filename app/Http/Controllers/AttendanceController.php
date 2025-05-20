@@ -297,7 +297,7 @@ class AttendanceController extends Controller
               }
             }
           } else {
-            $date_of_joining_object = new DateTime($item->userinfo->date_of_joining);
+            $date_of_joining_object = new DateTime($item->userinfo->date_of_joining ?? '');
 
             if ($dayname == 'Sunday') {
               if ($date_of_joining_object <= $value) {
