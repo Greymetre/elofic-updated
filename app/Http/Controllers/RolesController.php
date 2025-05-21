@@ -32,10 +32,15 @@ class RolesController extends Controller
     }
     public function index(Request $request)
     {
-        //abort_if(Gate::denies('role_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('role_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         if ($request->ajax()) {
-            $data = $this->roles->latest();
+            if(auth()->user()->hasRole('superadmin')){
+                $data = $this->roles->latest();
+            }else{
+                $data = $this->roles->where('id', '>', '1')->latest();    
+            }
+            
             return Datatables::of($data)
                     ->addIndexColumn()
                     ->editColumn('created_at', function($data)
@@ -85,7 +90,7 @@ class RolesController extends Controller
 
     public function edit(Role $role)
     {
-        //abort_if(Gate::denies('role_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('role_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         // if(Auth::user()->hasRole('superadmin'))
         // {
         //     $permissions = Permission::pluck('name', 'id');

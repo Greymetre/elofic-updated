@@ -201,8 +201,8 @@
       <div class="right-container">
         <div class="login-box">
           <div class="german-logo-cont">
-            <img src="{{ url('/').'/'.asset('assets/img/bediya.jpg') }}" alt="" class="german-logo">
-            <img src="{{ url('/').'/'.asset('assets/img/silver.png') }}" alt="" class="german-logo">
+            <img src="{{ url('/').'/'.asset('assets/img/companylogo.png') }}" alt="" class="german-logo">
+            <!--<img src="{{ url('/').'/'.asset('assets/img/silver.png') }}" alt="" class="german-logo">-->
           </div>
 
           <h2>Hello!</h2>
