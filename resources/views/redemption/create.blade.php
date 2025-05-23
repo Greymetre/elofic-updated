@@ -117,7 +117,7 @@
                         @endif
                      </div>
                   </div>
-                  <div id="bank_details">
+                  <div id="bank_details" class="row">
                      <div class="col-md-4">
                         <div class="input_section">
                            <label for="account_holder" class="col-form-label">Account Holder Name</label>
@@ -166,11 +166,11 @@
                         </div>
                      </div>
                
-                     <div class="row">
+                     <div class="row mt-4">
                         <div class="col-md-2">
                            <label for="redeem_amount" class="col-form-label">Redeem Amount</label>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-6 mt-2 ml-3">
                            <input type="number" value="{!! old( 'redeem_amount' , $redemption['redeem_amount']) !!}" name="redeem_amount" id="redeem_amount" class="form-control">
                            @if ($errors->has('redeem_amount'))
                            <div class="error col-lg-12">
@@ -180,7 +180,7 @@
                         </div>
                      </div>
                   </div>
-                  <div id="gift_catalogue">
+                  <div id="gift_catalogue" class="row">
                      <div class="table-responsive">
                         <table id="getproduct" class="table table-striped- table-bordered table-hover table-checkable">
                            <thead class="text-primary">

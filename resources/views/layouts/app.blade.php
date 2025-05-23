@@ -1081,12 +1081,12 @@
 
                   @if(auth()->user()->can('forecast_access'))
                   <li class="nav-link {{ request()->is('planned-sop-forecast*') || request()->is('planned-sop*') ? 'active' : '' }}">
-                     <a class="collapsed hoveradd" data-toggle="collapse" href="#salesUserMenu" aria-expanded="false">
+                     <a class="collapsed hoveradd" data-toggle="collapse" href="#forecastMenu" aria-expanded="false">
                         <i class="material-icons icon">online_prediction</i>
                         <span> Forecast </span>
                         <div class="d-none mobile_hide"> Forecast</div>
                      </a>
-                     <div class="collapse" id="salesUserMenu" style="">
+                     <div class="collapse" id="forecastMenu" style="">
                         <ul class="navd">
                            <li class="nav-link-btn {{ request()->is('planned-sop*') ? 'active' : '' }}">
                               <a class="hoveradd2" href="{{ url('planned-sop') }}">

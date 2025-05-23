@@ -9,7 +9,7 @@ class Services extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['product_code', 'invoice_no','invoice_date' ,'branch_code','party_name','product_name', 'product_description', 'product_store','qty','group','new_group', 'serial_no', 'narration', 'created_by', 'created_at', 'updated_at'];
+    protected $fillable = ['product_code', 'invoice_no','invoice_date' ,'branch_code','party_name', 'customer_id', 'bp_code','product_name', 'product_description', 'product_store','qty','group','new_group', 'serial_no', 'narration', 'created_by', 'created_at', 'updated_at'];
 
     public function createdbyname()
     {
