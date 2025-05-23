@@ -130,7 +130,7 @@ class Order extends Model
 
     public function sellers()
     {
-        return $this->belongsTo('App\Models\Customers', 'seller_id', 'id')->select('id','name', 'first_name', 'last_name','mobile','email');
+        return $this->belongsTo('App\Models\Customers', 'seller_id', 'id')->select('id','name', 'first_name', 'last_name','mobile','email','sap_code');
     }
     public function buyers()
     {

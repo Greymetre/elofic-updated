@@ -370,6 +370,7 @@
           title: 'Transfer details and Status',
           html: '<select id="statusSelect" class="swal2-select">' +
             '<option value="0">Pendding</option>' +
+            '<option value="2">Reject</option>' +
             '<option value="3">Success</option>' +
             '<option value="4">Fail</option>' +
             '</select>' +

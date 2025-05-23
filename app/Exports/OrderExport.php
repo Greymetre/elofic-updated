@@ -49,7 +49,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 }
                 if ($this->pending_status == '0') {
                     $query->where('status_id', NULL);
-                }else{
+                } else {
                     $query->where('status_id', $this->pending_status);
                 }
                 if ($this->startdate) {
@@ -61,7 +61,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 if ($this->order_id) {
                     $query->where('id', $this->order_id);
                 }
-                 if ($this->user_id) {
+                if ($this->user_id) {
                     $query->where('created_by', $this->user_id);
                 }
                 if ($this->dividion_id) {
@@ -91,14 +91,14 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                     $query->whereIn('created_by', $this->userids);
                 }
-    
+
                 if ($this->order_id) {
                     $query->where('id', $this->order_id);
                 }
                 if ($this->dividion_id) {
-                    $order_ids = Order::where(function($query) {
+                    $order_ids = Order::where(function ($query) {
                         $query->where('product_cat_id', $this->dividion_id)
-                              ->orWhereNull('product_cat_id');
+                            ->orWhereNull('product_cat_id');
                     });
                     if ($this->startdate) {
                         $order_ids->where('order_date', '>=', $this->startdate);
@@ -108,18 +108,56 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                     }
                     $order_ids = $order_ids->pluck('id');
                     $query->whereIn('id', $order_ids);
+                    if ($this->order_id) {
+                        $query->where('id', $this->order_id);
+                    }
+                    if ($this->user_id) {
+                        $query->where('created_by', $this->user_id);
+                    }
+                    if ($this->dividion_id) {
+                        $order_ids = Order::where('product_cat_id', $this->dividion_id)->pluck('id');
+                        $query->whereIn('id', $order_ids);
+                        // $query->where('orders.product_cat_id',$this->dividion_id);
+                    }
+
+                    if ($this->customer_type_id && $this->customer_type_id != '') {
+                        $Order_ids = Order::with('buyers')
+                            ->whereHas('buyers', function ($query) {
+                                $query->where('customertype', $this->customer_type_id);
+                            })->pluck('id');
+                        $query->whereIn('order_id', $order_ids);
+                    }
                     // $query->where('orders.product_cat_id',$this->dividion_id);
-                }else{
+                } else {
                     if ($this->startdate) {
                         $query->where('order_date', '>=', $this->startdate);
                     }
                     if ($this->enddate) {
                         $query->where('order_date', '<=', $this->enddate);
                     }
+                    if ($this->order_id) {
+                        $query->where('id', $this->order_id);
+                    }
+                    if ($this->user_id) {
+                        $query->where('created_by', $this->user_id);
+                    }
+                    if ($this->dividion_id) {
+                        $order_ids = Order::where('product_cat_id', $this->dividion_id)->pluck('id');
+                        $query->whereIn('id', $order_ids);
+                        // $query->where('orders.product_cat_id',$this->dividion_id);
+                    }
+
+                    if ($this->customer_type_id && $this->customer_type_id != '') {
+                        $Order_ids = Order::with('buyers')
+                            ->whereHas('buyers', function ($query) {
+                                $query->where('customertype', $this->customer_type_id);
+                            })->pluck('id');
+                        $query->whereIn('order_id', $order_ids);
+                    }
                 }
             })->select('id', 'order_id', 'product_id', 'product_detail_id', 'quantity', 'shipped_qty', 'price', 'discount', 'discount_amount', 'tax_amount', 'line_total', 'status_id', 'created_at', 'scheme_name', 'scheme_discount', 'scheme_amount', 'cluster_discount', 'cluster_amount', 'deal_discount', 'deal_amount', 'distributor_discount', 'distributor_amount');
 
-            
+
             $query->chunk(1000, function ($results) use (&$final) {
                 foreach ($results as $row) {
                     $final->push($row);
@@ -174,7 +212,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 isset($data['orders']['buyers']['customertypes']['customertype_name']) ? $data['orders']['buyers']['customertypes']['customertype_name'] : '',
                 isset($data['orders']['buyers']['name']) ? $data['orders']['buyers']['name'] : '',
                 isset($data['orders']['seller_id']) ? $data['orders']['seller_id'] : '',
-                isset($data['orders']['sellers']['name']) ? $data['orders']['sellers']['name'] : '',
+                isset($data['orders']['sellers']['name']) ? $data['orders']['sellers']['name'] . ' (' . $data['orders']['sellers']['sap_code'] . ')' : '',
                 isset($data['orders']['orderno']) ? $data['orders']['orderno'] : '',
                 isset($data['orders']['id']) ? $data['orders']['id'] : '',
 
@@ -204,7 +242,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 isset($data['orders']['cluster_discount']) ? $data['orders']['cluster_discount'] : '',
                 isset($data['orders']['deal_discount']) ? $data['orders']['deal_discount'] : '',
                 isset($data['orders']['cash_discount']) ? $data['orders']['cash_discount'] : '',
-                $data['products'] && isset($data['products']['productpriceinfo'], $data['products']['productpriceinfo']['mrp'], $data['quantity']) && $data['products']['productpriceinfo']['mrp'] > 0 && $data['quantity'] > 0 ? number_format(((1 - ($data['line_total'] / ($data['products']['productpriceinfo']['mrp'] * $data['quantity']))) * 100), 2): '0',
+                $data['products'] && isset($data['products']['productpriceinfo'], $data['products']['productpriceinfo']['mrp'], $data['quantity']) && $data['products']['productpriceinfo']['mrp'] > 0 && $data['quantity'] > 0 ? number_format(((1 - ($data['line_total'] / ($data['products']['productpriceinfo']['mrp'] * $data['quantity']))) * 100), 2) : '0',
                 isset($data['products']['productpriceinfo']['gst']) ? $data['products']['productpriceinfo']['gst'] : '',
                 isset($data['line_total']) ? $data['line_total'] : '',
                 isset($data['orders']['grand_total'])  ? $data['orders']['grand_total'] : '',
@@ -228,7 +266,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 isset($data['orders']['buyers']['customertypes']['customertype_name']) ? $data['orders']['buyers']['customertypes']['customertype_name'] : '',
                 isset($data['orders']['buyers']['name']) ? $data['orders']['buyers']['name'] : '',
                 isset($data['orders']['seller_id']) ? $data['orders']['seller_id'] : '',
-                isset($data['orders']['sellers']['name']) ? $data['orders']['sellers']['name'] : '',
+                isset($data['orders']['sellers']['name']) ? $data['orders']['sellers']['name'] . ' (' . $data['orders']['sellers']['sap_code'] . ')' : '',
                 isset($data['orders']['orderno']) ? $data['orders']['orderno'] : '',
                 isset($data['orders']['id']) ? $data['orders']['id'] : '',
 

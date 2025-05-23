@@ -34,14 +34,14 @@ class SerialNumberHistoryExport implements FromCollection, WithHeadings, ShouldA
         if($this->start_date && $this->start_date != '' && $this->start_date != NULL && $this->end_date && $this->end_date != '' && $this->end_date != NULL){
             $query->whereBetween('created_at', [$this->start_date, $this->end_date]);
         }
-        $query = $query->latest()->limit('3000')->get();
+        $query = $query->latest()->limit('1000')->get();
 
         return $query;
     }
 
     public function headings(): array
     {
-        return ['Serial Number', 'Group', 'Sub Group', 'Product Code', 'Product Name', 'Product Model', 'Party Nmae', 'Invoice Number', 'Invoice Dtae', 'Expiry Date', 'Warranty Status'];
+        return ['Serial Number', 'Group', 'Sub Group', 'Product Code', 'Product Name', 'Product Model', 'Party Nmae', 'customer_id', 'bp_code', 'Invoice Number', 'Invoice Dtae', 'Expiry Date', 'Warranty Status'];
     }
 
     public function map($data): array
@@ -67,6 +67,8 @@ class SerialNumberHistoryExport implements FromCollection, WithHeadings, ShouldA
             $data['product_name'] ?? '',
             $data['??']['name'] ?? '',
             $data['party_name'] ?? '',
+            $data['customer_id'] ?? '',
+            $data['bp_code'] ?? '',
             $data['invoice_no'] ?? '',
             $data['invoice_date'] ?date("d/M/Y", strtotime($data->invoice_date)):'',
             $exp,
