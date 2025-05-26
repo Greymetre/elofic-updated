@@ -171,11 +171,11 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
     public function headings(): array
     {
         if ($this->dividion_id == '1') {
-            return ['id', 'Order Date', 'Employee Code', 'User Name', 'Branch', 'Division', 'Designation', 'Retailer ID', 'Customer', 'Customer Name', 'Dealer ID', 'Dealer & Distributor Name', 'Order No', 'Order ID', 'Category', 'Subcategory', 'Product Code', 'Product Name', 'Product ID', 'Product Stage', 'kW', 'HP', 'Suc x Del', 'Quantity', 'Shipped Qty', 'Pending Qty', 'Rate(LP)', 'Trade Discount%', 'Scheme Discount%', 'Scheme Name', 'EBD Discount%', 'MOU Discount%', 'Special Discount%', 'Frieght Discount%', 'Cluster Discount%', 'Deal Dicount%', 'Cash Discount%', 'Total Discount%', 'Tax%', 'Sub Total', 'Total', 'Order Remark', 'Discount Approvel Remark', 'Discount Approve By', 'Status'];
+            return ['id', 'Order Date', 'Employee Code', 'User Name', 'Branch', 'Division', 'Designation', 'Retailer ID', 'Customer', 'Customer Name', 'Dealer ID', 'Dealer & Distributor Name', 'Dealer & Distributor BP Code', 'Order No', 'Order ID', 'Category', 'Subcategory', 'Product Code', 'Product Name', 'Product ID', 'Product Stage', 'kW', 'HP', 'Suc x Del', 'Quantity', 'Shipped Qty', 'Pending Qty', 'Rate(LP)', 'Trade Discount%', 'Scheme Discount%', 'Scheme Name', 'EBD Discount%', 'MOU Discount%', 'Special Discount%', 'Frieght Discount%', 'Cluster Discount%', 'Deal Dicount%', 'Cash Discount%', 'Total Discount%', 'Tax%', 'Sub Total', 'Total', 'Order Remark', 'Discount Approvel Remark', 'Discount Approve By', 'Status'];
         } elseif ($this->dividion_id == '2') {
-            return ['id', 'Order Date', 'Employee Code', 'User Name', 'Branch', 'Division', 'Designation', 'Retailer ID', 'Customer', 'Customer Name', 'Dealer ID', 'Dealer & Distributor Name', 'Order No', 'Order ID', 'Category', 'Subcategory', 'Product Code', 'Product Name', 'Product ID', 'Quantity', 'Shipped Qty', 'Pending Qty', 'Rate(LP)', 'DOD Discount%', 'Special Distribution Discount%', 'Distribution Margin Discount%', 'Cash Discount%', 'Total Discount%', 'Total Discount', 'Tax%', 'Sub Total', 'Total', 'Order Remark', 'Discount Approvel Remark', 'Discount Approve By', 'Status'];
+            return ['id', 'Order Date', 'Employee Code', 'User Name', 'Branch', 'Division', 'Designation', 'Retailer ID', 'Customer', 'Customer Name', 'Dealer ID', 'Dealer & Distributor Name', 'Dealer & Distributor BP Code', 'Order No', 'Order ID', 'Category', 'Subcategory', 'Product Code', 'Product Name', 'Product ID', 'Quantity', 'Shipped Qty', 'Pending Qty', 'Rate(LP)', 'DOD Discount%', 'Special Distribution Discount%', 'Distribution Margin Discount%', 'Cash Discount%', 'Total Discount%', 'Total Discount', 'Tax%', 'Sub Total', 'Total', 'Order Remark', 'Discount Approvel Remark', 'Discount Approve By', 'Status'];
         } else {
-            return ['id', 'Order Date', 'Employee Code', 'User Name', 'Branch', 'Division', 'Designation', 'Retailer ID', 'Customer', 'Customer Name', 'Dealer ID', 'Dealer & Distributor Name', 'Order No', 'Order ID', 'Category', 'Subcategory', 'Product Code', 'Product Name', 'Product ID', 'Product Stage', 'kW', 'HP', 'Suc x Del', 'Quantity', 'Shipped Qty', 'Pending Qty', 'Rate(LP)', 'Tax%', 'Sub Total', 'Total', 'Order Remark', 'Discount Approvel Remark', 'Discount Approve By', 'Status'];
+            return ['id', 'Order Date', 'Employee Code', 'User Name', 'Branch', 'Division', 'Designation', 'Retailer ID', 'Customer', 'Customer Name', 'Dealer ID', 'Dealer & Distributor Name', 'Dealer & Distributor BP Code', 'Order No', 'Order ID', 'Category', 'Subcategory', 'Product Code', 'Product Name', 'Product ID', 'Product Stage', 'kW', 'HP', 'Suc x Del', 'Quantity', 'Shipped Qty', 'Pending Qty', 'Rate(LP)', 'Tax%', 'Sub Total', 'Total', 'Order Remark', 'Discount Approvel Remark', 'Discount Approve By', 'Status'];
         }
     }
 
@@ -212,7 +212,8 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 isset($data['orders']['buyers']['customertypes']['customertype_name']) ? $data['orders']['buyers']['customertypes']['customertype_name'] : '',
                 isset($data['orders']['buyers']['name']) ? $data['orders']['buyers']['name'] : '',
                 isset($data['orders']['seller_id']) ? $data['orders']['seller_id'] : '',
-                isset($data['orders']['sellers']['name']) ? $data['orders']['sellers']['name'] . ' (' . $data['orders']['sellers']['sap_code'] . ')' : '',
+                isset($data['orders']['sellers']['name']) ? $data['orders']['sellers']['name'] : '',
+                isset($data['orders']['sellers']['sap_code']) ? $data['orders']['sellers']['sap_code'] : '',
                 isset($data['orders']['orderno']) ? $data['orders']['orderno'] : '',
                 isset($data['orders']['id']) ? $data['orders']['id'] : '',
 
@@ -266,7 +267,8 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 isset($data['orders']['buyers']['customertypes']['customertype_name']) ? $data['orders']['buyers']['customertypes']['customertype_name'] : '',
                 isset($data['orders']['buyers']['name']) ? $data['orders']['buyers']['name'] : '',
                 isset($data['orders']['seller_id']) ? $data['orders']['seller_id'] : '',
-                isset($data['orders']['sellers']['name']) ? $data['orders']['sellers']['name'] . ' (' . $data['orders']['sellers']['sap_code'] . ')' : '',
+                isset($data['orders']['sellers']['name']) ? $data['orders']['sellers']['name'] : '',
+                isset($data['orders']['sellers']['sap_code']) ? $data['orders']['sellers']['sap_code'] : '',
                 isset($data['orders']['orderno']) ? $data['orders']['orderno'] : '',
                 isset($data['orders']['id']) ? $data['orders']['id'] : '',
 
@@ -312,6 +314,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 isset($data['orders']['buyers']['name']) ? $data['orders']['buyers']['name'] : '',
                 isset($data['orders']['seller_id']) ? $data['orders']['seller_id'] : '',
                 isset($data['orders']['sellers']['name']) ? $data['orders']['sellers']['name'] : '',
+                isset($data['orders']['sellers']['sap_code']) ? $data['orders']['sellers']['sap_code'] : '',
                 isset($data['orders']['orderno']) ? $data['orders']['orderno'] : '',
                 isset($data['orders']['id']) ? $data['orders']['id'] : '',
 
