@@ -24,6 +24,9 @@ class ProductDataTable extends DataTable
             {
                 return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
             })
+            ->addColumn('expiry_info', function ($row) {
+                return $row->expiry_interval_preiod . '(<small>' . $row->expiry_interval . '</small>)';
+            })
             ->addColumn('action', function ($query) {
                   $btn = '';
                   $activebtn ='';
@@ -66,7 +69,7 @@ class ProductDataTable extends DataTable
                 $product_image = !empty($query->product_image) ? url('/public/uploads').'/'.$query->product_image : asset('assets/img/placeholder.jpg') ;
                 return '<img src="'.$product_image.'" border="0" width="70" class="img-rounded imageDisplayModel" align="center" />';
             })
-            ->rawColumns(['action','image']);
+            ->rawColumns(['action','image', 'expiry_info']);
     }
 
     /**

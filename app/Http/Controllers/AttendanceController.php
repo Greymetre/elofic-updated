@@ -120,7 +120,7 @@ class AttendanceController extends Controller
 
 
     $attendancesummary = User::with(['attendance_details', 'createdbyname', 'getbranch', 'userinfo'])->where('active', 'Y')->whereDoesntHave('roles', function ($query) {
-      $query->where('id', 29);
+      $query->whereIn('id', config('constants.customer_roles'));
     })->where('show_attandance_report', '1');
     if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
       $attendancesummary = $attendancesummary->whereIn('id', getUsersReportingToAuth());
