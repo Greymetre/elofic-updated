@@ -44,6 +44,12 @@
                 <td>{{ $order->sellers->name }}</td>
             </tr>
             <tr>
+                <td>BP Code</td>
+                <td>{{ $order->buyers->sap_code ?? '-' }}</td>
+                <td>BP Code</td>
+                <td>{{ $order->sellers->sap_code ?? '-' }}</td>
+            </tr>
+            <tr>
                 <td>Mobile Number</td>
                 <td>{{ $order->buyers->mobile }}</td>
                 <td>Mobile Number</td>
