@@ -84,7 +84,7 @@ class TransactionHistoryController extends Controller
      */
     public function store(Request $request)
     {
-        try {
+        // try {
             abort_if(Gate::denies('transaction_history_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
             $validator = Validator::make($request->all(), [
                 'customer_id' => 'required',
@@ -122,7 +122,7 @@ class TransactionHistoryController extends Controller
                 // }
                 if (!$exists && $notexists) {
                     $scheme = Services::where('serial_no', $nonNullCoupenCode)->first();
-                    $scheme_details = SchemeDetails::where('product_id', $scheme->product->id)->first();
+                    $scheme_details = SchemeDetails::where('product_id', $scheme->product?->id)->first();
                     $point = 0;
                     $active_point = '0';
                     $provision_point = '0';
@@ -175,9 +175,9 @@ class TransactionHistoryController extends Controller
                 }
                 return Redirect::to('transaction_history')->with('message_success', 'Transaction History Store Successfully');
             }
-        } catch (\Exception $e) {
-            return redirect()->back()->withErrors($e->getMessage())->withInput();
-        }
+        // } catch (\Exception $e) {
+        //     return redirect()->back()->withErrors($e->getMessage())->withInput();
+        // }
     }
 
     /**

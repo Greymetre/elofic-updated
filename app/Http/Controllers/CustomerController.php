@@ -148,6 +148,13 @@ class CustomerController extends Controller
                             $q->where('city_id', $request['city_id']);
                         });
                     }
+                    if (!empty($request['division_id'])) {
+                        $division_users = User::where('division_id', $request['division_id'])->pluck('id')->toArray();
+                        $query->where(function ($query) use ($division_users) {
+                            $query->whereIn('executive_id', $division_users)
+                                ->orWhereIn('created_by', $division_users);
+                        });
+                    }
                     if (!empty($request['active'])) {
                         $query->where('active', $request['active']);
                     }

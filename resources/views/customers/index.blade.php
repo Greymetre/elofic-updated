@@ -277,6 +277,7 @@
                 d.city_id = $('#city_id').val(),
                 d.active = $('#active').val(),
                 d.customertype = $('#customertype').val(),
+                d.division_id = $('#division_id').val(),
                 d.created_by = $('#created_by').val(),
                 d.search = $('input[type="search"]').val()
             }
@@ -301,6 +302,9 @@
     });
 
     $('#executive_id').change(function(){
+        table.draw();
+    });
+    $('#division_id').change(function(){
         table.draw();
     });
     $('#end_date').change(function(){

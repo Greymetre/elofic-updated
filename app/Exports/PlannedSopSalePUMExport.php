@@ -95,8 +95,11 @@ class PlannedSopSalePUMExport implements FromCollection, WithHeadings, ShouldAut
         if (isset($this->filters['planning_month'])) {
             try {
                 $formatted_date = Carbon::createFromFormat('F Y', $this->filters['planning_month'])->startOfMonth();
+                $last_month = Carbon::createFromFormat('F Y', $this->filters['planning_month'])->subMonth()->startOfMonth()->format("Y-m-d");
                 $planning_month = $formatted_date->format("Y-m-d");
-                $data->whereDate('planning_month', $planning_month);
+                $data->whereDate('planning_month' , $planning_month);
+                $lat_pro_ids = $data->pluck('product_id');
+                $data->orWhereDate('planning_month', $last_month)->whereNotIn('product_id' , $lat_pro_ids);
             } catch (\Exception $e) {
                 $data->latest()->get();
             }
@@ -222,6 +225,13 @@ class PlannedSopSalePUMExport implements FromCollection, WithHeadings, ShouldAut
         $last_month_pro_qty_value = $last_month_pro_qty > 0 ? $last_month_pro_qty * $product_price : 0;
 
         // $current_month_pro_qty = "=IF(IF(AE{$rowNumber}+Z{$rowNumber}-W{$rowNumber}<AE{$rowNumber},AE{$rowNumber}+Z{$rowNumber}-W{$rowNumber},AE{$rowNumber})<0,0,IF(AE{$rowNumber}+Z{$rowNumber}-W{$rowNumber}<AE{$rowNumber},AE{$rowNumber}+Z{$rowNumber}-W{$rowNumber},AE{$rowNumber}))";
+
+        if(isset($this->filters['planning_month'])){
+            $last_month = Carbon::createFromFormat('F Y', $this->filters['planning_month'])->subMonth()->startOfMonth()->format("Y-m-d");
+            $plan_next_month = $data['planning_month'] == $last_month ? '0' : $plan_next_month;
+            $plan_next_month_value = $data['planning_month'] == $last_month ? '0' : $plan_next_month;
+            $data['planning_month'] = $data['planning_month'] == $last_month ? Carbon::createFromFormat('F Y', $this->filters['planning_month'])->startOfMonth()->format("Y-m-d") : $data['planning_month'];
+        }
 
         $current_month_pro_qty_value  = "=AG{$rowNumber}*{$product_price}";
 
