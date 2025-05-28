@@ -43,8 +43,7 @@
                           <option value="">Select Division</option>
                           @foreach($divisions as $division)
                           <option value="{{$division}}">{{$division}}</option>
-                          @endforeach
-                          
+                          @endforeach                          
                         </select>
                         @if ($errors->has('division_id'))
                         <div class="error col-lg-12">
@@ -53,19 +52,39 @@
                         @endif
                       </div>
                     </div>
-                    <!-- <div class="p-2" style="width:160px;">
+                    <div class="p-2" style="width:160px;">
                       <div class="form-group">
-                        <label class="bmd-label-floating">{!! trans('panel.global.city') !!} </label>
-                        <select class="form-control select2 city" id="city_id" name="city_id" style="width: 100%;">
-                          <option value="">Select {!! trans('panel.global.city') !!}</option>
+                        <!-- <label class="bmd-label-floating">Status</label> -->
+                        <select class="form-control select2" name="branch_id" id="branch_id" style="width: 100%;">
+                          <option value="">Select Branch</option>
+                          @foreach($branches as $branch)
+                          <option value="{{$branch->id}}">{{$branch->branch_name}}</option>
+                          @endforeach                          
                         </select>
-                        @if ($errors->has('city_id'))
+                        @if ($errors->has('branch_id'))
                         <div class="error col-lg-12">
-                          <p class="text-danger">{{ $errors->first('city_id') }}</p>
+                          <p class="text-danger">{{ $errors->first('branch_id') }}</p>
                         </div>
                         @endif
                       </div>
-                    </div> -->
+                    </div>
+                    <div class="p-2" style="width:160px;">
+                      <div class="form-group">
+                        <!-- <label class="bmd-label-floating">Status</label> -->
+                        <select class="form-control select2" name="created_by" id="created_by" style="width: 100%;">
+                          <option value="">Select Created By</option>
+                          @foreach($users as $user)
+                          <option value="{{$user->id}}">{{$user->name}}</option>
+                          @endforeach                          
+                        </select>
+                        @if ($errors->has('created_by'))
+                        <div class="error col-lg-12">
+                          <p class="text-danger">{{ $errors->first('created_by') }}</p>
+                        </div>
+                        @endif
+                      </div>
+                    </div>
+
                     <div class="p-2" style="width:160px;"><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
                     <div class="p-2" style="width:160px;"><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
                     <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} Dealer Appointment"><i class="material-icons">cloud_download</i></button></div>
@@ -167,6 +186,8 @@
             d.status = $('#status').val(),
               d.status_id = $('#status_id').val(),
               d.division_id = $('#division_id').val(),
+              d.branch_id = $('#branch_id').val(),
+              d.created_by = $('#created_by').val(),
               d.startdate = $('#start_date').val(),
               d.enddate = $('#end_date').val()
           }
@@ -263,6 +284,12 @@
         table.draw();
       });
       $('#division_id').change(function() {
+        table.draw();
+      });
+      $('#branch_id').change(function() {
+        table.draw();
+      });
+      $('#created_by').change(function() {
         table.draw();
       });
     });

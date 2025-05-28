@@ -179,7 +179,7 @@
                               <option value="">Select Dealer/Distributer</option>
                               @if(@isset($buyers ))
                               @foreach($buyers as $buyer)
-                              <option value="{!! $buyer['id'] !!}" {{ old( 'buyer_id' , (!empty($orders->buyer_id)) ? ($orders->buyer_id) :('') ) == $buyer['id'] ? 'selected' : '' }}>{!! $buyer['name'] !!}</option>
+                              <option value="{!! $buyer['id'] !!}" {{ old( 'buyer_id' , (!empty($orders->buyer_id)) ? ($orders->buyer_id) :('') ) == $buyer['id'] ? 'selected' : '' }}>{!! $buyer['name'] !!} - {!! $buyer['sap_code'] !!}</option>
                               @endforeach
                               @endif
                            </select>

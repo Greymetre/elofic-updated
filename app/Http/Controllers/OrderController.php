@@ -80,7 +80,8 @@ class OrderController extends Controller
                 }
             })
             ->where('active', '=', 'Y')
-            ->select('id', 'name', 'mobile')
+            ->whereNotNull('sap_code')
+            ->select('id', 'name', 'mobile', 'sap_code')
             ->get();
 
         $users = User::where(function ($query) use ($userids) {
