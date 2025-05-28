@@ -25,6 +25,8 @@ class DealerAppointmentExport implements FromCollection, WithHeadings, ShouldAut
         $this->enddate = $request->input('end_date');
         $this->designation_id = $request->input('designation_id');
         $this->division_id = $request->input('division_id');
+        $this->branch_id = $request->input('branch_id');
+        $this->created_by = $request->input('created_by');
         $this->status_id = $request->input('status_id');
         $allColumns =  \Schema::getColumnListing((new DealerAppointment())->getTable());
         $excludeColumns = ['id', 'created_at', 'updated_at', 'created_by'];
@@ -40,6 +42,12 @@ class DealerAppointmentExport implements FromCollection, WithHeadings, ShouldAut
         }
         if ($this->division_id) {
             $query->where('division', $this->division_id);
+        }
+        if ($this->branch_id) {
+            $query->where('branch', $this->branch_id);
+        }
+        if ($this->created_by) {
+            $query->where('created_by', $this->created_by);
         }
         if ($this->status_id != '' && $this->status_id != NULL) {
             $query->where('approval_status', $this->status_id);

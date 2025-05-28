@@ -107,20 +107,20 @@
                 <th>{!! trans('panel.global.no') !!}</th>
                 <th>{!! trans('panel.global.action') !!}</th>
                 <th>{!! trans('panel.product.fields.product_image') !!}</th>
-                <th>{!! trans('panel.product.fields.product_name') !!}</th>
-                <th>Product Stage</th>
-                <th>Expiry Interval Preiod</th>
-                <th>Discount %</th>
-                <th>HP</th>
-                <th>SAP Code</th>
-                <th>{!! trans('panel.product.fields.mrp') !!}</th>
                 <th>{!! trans('panel.product.fields.category_name') !!}</th>
                 <th>{!! trans('panel.product.fields.subcategory_name') !!}</th>
+                <th>{!! trans('panel.product.fields.product_name') !!}</th>
+                <th>HP</th>
+                <th>Product Stage</th>
+                <th>{!! trans('panel.product.fields.mrp') !!}</th>
+                <th>{!! trans('panel.product.fields.gst') !!}</th>
+                <th>Discount %</th>
+                <th>Expiry Interval Preiod</th>
+                <th>{!! trans('panel.product.fields.suc-del') !!}</th>
+                <th>SAP Code</th>
                 <!-- <th>{!! trans('panel.product.fields.unit_name') !!}</th> -->
                 <!-- <th>{!! trans('panel.product.fields.price') !!}</th> -->
-                <th>{!! trans('panel.product.fields.suc-del') !!}</th>
                 <!-- <th>{!! trans('panel.product.fields.selling_price') !!}</th> -->
-                <th>{!! trans('panel.product.fields.gst') !!}</th>
                 <th>{!! trans('panel.global.created_by') !!}</th>
                 <th>{!! trans('panel.global.created_at') !!}</th>
               </thead>
@@ -178,26 +178,20 @@
             searchable: false
           },
           {
+            data: 'categories.category_name',
+            name: 'categories.category_name',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'subcategories.subcategory_name',
+            name: 'subcategories.subcategory_name',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
             data: 'product_name',
             name: 'product_name',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'product_no',
-            name: 'product_no',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'expiry_info',
-            name: 'expiry_info',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'productpriceinfo.discount',
-            name: 'productpriceinfo.discount',
             orderable: false,
             "defaultContent": ''
           },
@@ -208,8 +202,8 @@
             "defaultContent": ''
           },
           {
-            data: 'sap_code',
-            name: 'sap_code',
+            data: 'product_no',
+            name: 'product_no',
             orderable: false,
             "defaultContent": ''
           },
@@ -220,14 +214,32 @@
             "defaultContent": ''
           },
           {
-            data: 'categories.category_name',
-            name: 'categories.category_name',
+            data: 'productpriceinfo.gst',
+            name: 'productpriceinfo.gst',
             orderable: false,
             "defaultContent": ''
           },
           {
-            data: 'subcategories.subcategory_name',
-            name: 'subcategories.subcategory_name',
+            data: 'productpriceinfo.discount',
+            name: 'productpriceinfo.discount',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'expiry_info',
+            name: 'expiry_info',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'suc_del',
+            name: 'suc_del',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'sap_code',
+            name: 'sap_code',
             orderable: false,
             "defaultContent": ''
           },
@@ -243,24 +255,12 @@
           //   orderable: false,
           //   "defaultContent": ''
           // },
-          {
-            data: 'suc_del',
-            name: 'suc_del',
-            orderable: false,
-            "defaultContent": ''
-          },
           // {
           //   data: 'productpriceinfo.selling_price',
           //   name: 'productpriceinfo.selling_price',
           //   orderable: false,
           //   "defaultContent": ''
           // },
-          {
-            data: 'productpriceinfo.gst',
-            name: 'productpriceinfo.gst',
-            orderable: false,
-            "defaultContent": ''
-          },
           {
             data: 'createdbyname.name',
             name: 'createdbyname.name',

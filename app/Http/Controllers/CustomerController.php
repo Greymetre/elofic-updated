@@ -191,6 +191,9 @@ class CustomerController extends Controller
                 ->editColumn('created_at', function ($data) {
                     return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
                 })
+                ->editColumn('contact_person', function ($data) {
+                    return $data->first_name . ' ' . $data->last_name;
+                })
                 ->editColumn('beat_name', function ($data) {
                     $beat_names = array();
                     $beat_details = BeatCustomer::with('beats')
@@ -259,7 +262,7 @@ class CustomerController extends Controller
                                 ' . $query->mobile . '
                             </a> ';
                 })
-                ->rawColumns(['action', 'beat_name', 'image', 'checkbox', 'createdbyname.name', 'profileimage', 'mobile'])
+                ->rawColumns(['action', 'beat_name', 'image', 'checkbox', 'createdbyname.name', 'profileimage', 'mobile', 'contact_person'])
                 ->make(true);
         }
         $divisions = Division::where('active', 'Y')->get();

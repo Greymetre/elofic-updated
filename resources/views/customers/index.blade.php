@@ -226,19 +226,21 @@
             <table id="getcustomers" class="table table-striped- table-bordered table-hover table-checkable no-wrap">
             <thead class=" text-primary">
               <!-- <th>{!! trans('panel.global.no') !!}</th> -->
-              <th><input type="checkbox" class="allCustomerschecked"/></th>
+              <!-- <th><input type="checkbox" class="allCustomerschecked"/></th> -->
               <th>{!! trans('panel.global.action') !!}</th>
-              <th>Firm Name</th>
               <th>BP Code</th>
-              <th>{!! trans('panel.customers.fields.first_name') !!}</th>
-              <th>{!! trans('panel.customers.fields.last_name') !!}</th>
+              <th>Firm Name</th>
+              <th>Contact Person</th>
               <th>{!! trans('panel.customers.fields.mobile') !!}</th>
-              <th>{!! trans('panel.customers.fields.shop_image') !!}</th>
-              <th>{!! trans('panel.customers.fields.profile_image') !!}</th>
               <th>{!! trans('panel.customers.fields.customertype') !!}</th>
               <th>{!! trans('panel.global.created_by') !!}</th>
+              <th>City Name</th>
+              <th>Address</th>
+              <th>{!! trans('panel.customers.fields.shop_image') !!}</th>
+              <th>{!! trans('panel.customers.fields.profile_image') !!}</th>
               <th>{!! trans('panel.global.created_at') !!}</th>
-              <th>Beat Name</th>
+              <!-- <th>Beat Name</th> -->
+               <th>ID</th>
             </thead>
             <tbody>
             </tbody>
@@ -284,19 +286,21 @@
         },
         columns: [
             // { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-            { data: 'checkbox', name: 'checkbox', orderable: false, searchable: false },
+            // { data: 'checkbox', name: 'checkbox', orderable: false, searchable: false },
             { data: 'action', name: 'action',"defaultContent": '', orderable: false, searchable: false},
-            {data: 'name', name: 'name',"defaultContent": '',orderable: false,},
             {data: 'sap_code', name: 'sap_code',"defaultContent": '',orderable: false,},
-            {data: 'first_name', name: 'first_name',"defaultContent": '',orderable: false,},
-            {data: 'last_name', name: 'last_name',"defaultContent": '',orderable: false,},
+            {data: 'name', name: 'name',"defaultContent": '',orderable: false,},
+            {data: 'contact_person', name: 'contact_person',"defaultContent": '',orderable: false,},
             {data: 'mobile', name: 'mobile',"defaultContent": '',orderable: false,},
-            {data: 'image', name: 'image',"defaultContent": '',orderable: false, searchable: false},
-            {data: 'profileimage', name: 'profileimage',"defaultContent": '',orderable: false, searchable: false},
             {data: 'customertypes.customertype_name', name: 'customertypes.customertype_name',"defaultContent": '', orderable: false},
             {data: 'createdbyname.name', name: 'createdbyname.name',"defaultContent": '', orderable: false},
+            {data: 'customeraddress.cityname.city_name', name: 'customeraddress.cityname.city_name',"defaultContent": '', orderable: false},
+            {data: 'full_address', name: 'full_address',"defaultContent": '', orderable: false},
+            {data: 'image', name: 'image',"defaultContent": '',orderable: false, searchable: false},
+            {data: 'profileimage', name: 'profileimage',"defaultContent": '',orderable: false, searchable: false},
             {data: 'created_at', name: 'created_at',"defaultContent": ''},
-            {data: 'beat_name', name: 'beat_name',"defaultContent": ''},
+            // {data: 'beat_name', name: 'beat_name',"defaultContent": ''},
+            {data: 'id', name: 'id',"defaultContent": ''},
            
         ]
     });

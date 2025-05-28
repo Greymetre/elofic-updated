@@ -32,8 +32,12 @@ class DealerAppointmentController extends Controller
         abort_if(Gate::denies('dealer_appointment'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $divisions = DealerAppointment::groupBy('division')->pluck('division');
+        $branches = Branch::where('active', 'Y')->get();
+        $users = User::where('active', 'Y')->whereDoesntHave('roles', function ($query) {
+            $query->whereIn('id', config('constants.customer_roles'));
+        })->get();
 
-        return $dataTable->render('dealer_appointment.index', compact('divisions'));
+        return $dataTable->render('dealer_appointment.index', compact('divisions', 'branches', 'users'));
     }
 
     /**

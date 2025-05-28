@@ -102,6 +102,14 @@ class DealerAppointmentDataTable extends DataTable
             $data->where('division', $request->division_id);
         }
 
+        if($request->branch_id != '' && $request->branch_id != NULL){
+            $data->where('branch', $request->branch_id);
+        }
+
+        if($request->created_by != '' && $request->created_by != NULL){
+            $data->where('created_by', $request->created_by);
+        }
+
         $data = $data->latest()->newQuery();
         return $data;
     }

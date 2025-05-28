@@ -10,8 +10,8 @@
             <span class="">
               <div class="btn-group header-frm-btn">
                 @if(auth()->user()->can(['transaction_history_download']))
-                <form method="GET" action="{{ route('transaction_history.download') }}" class="form-horizontal">
-                  <div class="d-flex flex-row align-items-end">
+                <form method="GET" action="{{ route('transaction_history.download') }}">
+                  <div class="d-flex flex-wrap flex-row" style="align-items: end;">
                     <div class="p-2" style="width:160px;">
                       <label for="branch_id">Branch</label>
                       <select class="select2" placeholder="Select Branch" multiple name="branch_id[]" id="branch_id" data-style="select-with-transition" title="Select Branch">
@@ -56,6 +56,17 @@
                         @endif
                       </select>
                     </div>
+                    <div class="p-2" style="width:160px;">
+                    <select class="select2" name="customer_id" id="customer_id" data-style="select-with-transition" title="Select">
+                      <option value="">Firm Name</option>
+                      @if(@isset($customers))
+                      @foreach($customers as $customer)
+                      <!-- <option value="{!! $customer->id !!}">{!! $customer->_name !!}</option> -->
+                      <option value="{!! $customer['id'] !!}" {{ old( 'executive_id') == $customer->id ? 'selected' : '' }}>{!! $customer['name'] !!}</option>
+                      @endforeach
+                      @endif
+                    </select>
+                  </div>
                     <div class="p-2" style="width:160px;"><label for="start_date">Start Date</label><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
                     <div class="p-2" style="width:160px;"><label for="end_date">End Date</label><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
                     <div class="p-2">
@@ -77,17 +88,6 @@
                      text-align: center;
                      width: 198px;
                      font-size: initial;">
-                  </div>
-                  <div class="p-2" style="width:160px;">
-                    <select class="select2" name="customer_id" id="customer_id" data-style="select-with-transition" title="Select">
-                      <option value="">First Name</option>
-                      @if(@isset($customers))
-                      @foreach($customers as $customer)
-                      <!-- <option value="{!! $customer->id !!}">{!! $customer->_name !!}</option> -->
-                      <option value="{!! $customer['id'] !!}" {{ old( 'executive_id') == $customer->id ? 'selected' : '' }}>{!! $customer['name'] !!}</option>
-                      @endforeach
-                      @endif
-                    </select>
                   </div>
                   @if(auth()->user()->can(['transaction_history_upload']))
                   <form action="{{ URL::to('transaction_history_upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">

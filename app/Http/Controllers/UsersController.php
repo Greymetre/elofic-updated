@@ -65,7 +65,9 @@ class UsersController extends Controller
     {
         abort_if(Gate::denies('user_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $divisions = Division::where('active', 'Y')->get();
-        return $dataTable->render('users.index', compact('divisions'));
+        $branches = Branch::where('active', 'Y')->get();
+        $departments = Department::where('active', 'Y')->get();
+        return $dataTable->render('users.index', compact('divisions', 'branches', 'departments'));
     }
 
     public function create()
