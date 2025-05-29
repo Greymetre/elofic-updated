@@ -859,6 +859,11 @@ class CustomerController extends Controller
         $customer->active = $newStatus;
 
         if ($customer->save()) {
+            $cUser = User::where('customerid', $customer->id)->first();
+            if ($cUser) {
+                $cUser->active = $newStatus;
+                $cUser->save();
+            }
             $message = ($newStatus == 'N') ? 'Inactive' : 'Active';
 
             // If customer is deactivated, revoke all tokens (logout)

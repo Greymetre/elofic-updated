@@ -757,7 +757,7 @@
             <div class="menu">
                <ul class="menu-links">
                   @if(auth()->user()->can(['dashboard_access']))
-                  {{--<li class="nav-link hide_icon {{ request()->is('dashboard') ? 'active' : '' }}">
+                  {{--<li class="nav-link hide_icon {{ request()->is('dealer_dashboard') ? 'active' : '' }}">
                   <a class="collapsed hoveradd" href="{{ url('dashboard') }}">
                      <i class="material-icons icon">dashboard</i>
                      <span>{!! trans('panel.sidemenu.dashboard') !!}</span>
@@ -765,7 +765,7 @@
                   </a>
                   </li>--}}
 
-                  <li class="nav-link {{ request()->is('sales_summary_dashboard*') ? 'active' : '' }}">
+                  <li class="nav-link {{ request()->is('sales_summary_dashboard*') || request()->is('dealer_dashboard') ? 'active' : '' }}">
                      <a class="collapsed hoveradd" data-toggle="collapse" href="#dashMenu" aria-expanded="false">
                         <i class="material-icons icon">diversity_3</i>
                         <span> {!! trans('panel.sidemenu.dashboard') !!}
@@ -774,6 +774,15 @@
                      </a>
                      <div class="collapse" id="dashMenu" style="">
                         <ul class="navd">
+                           @if(auth()->user()->can(['dealer_dashboard']))
+                           <li class="nav-link-btn {{ request()->is('dealer_dashboard*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('dealer_dashboard') }}">
+                                 <i class="material-icons icon">transcribe</i>
+                                 <span>Dealer Dashboard</span>
+                                 <div class="d-none mobile_hide">Dealer Dashboard</div>
+                              </a>
+                           </li>
+                           @endif
                            @if(auth()->user()->can(['sales_summary_dashboard']))
                            <li class="nav-link-btn {{ request()->is('sales_summary_dashboard*') ? 'active' : '' }}">
                               <a class="hoveradd2" href="{{ url('sales_summary_dashboard') }}">

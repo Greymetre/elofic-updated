@@ -22,6 +22,7 @@ class CheckinExport implements FromCollection, WithHeadings, ShouldAutoSize, Wit
         $this->enddate = $request->input('end_date');
         $this->user_id = $request->input('user_id');
         $this->division_id = $request->input('division_id');
+        $this->branch_id = $request->input('branch_id');
         $this->userids = getUsersReportingToAuth();
     }
     public function collection()
@@ -35,6 +36,11 @@ class CheckinExport implements FromCollection, WithHeadings, ShouldAutoSize, Wit
             if ($this->division_id && $this->division_id != null && $this->division_id != '') {
                 $query->whereHas('users', function ($query) {
                     $query->where('division_id', $this->division_id);
+                });
+            }
+            if ($this->branch_id && $this->branch_id != null && $this->branch_id != '') {
+                $query->whereHas('users', function ($query) {
+                    $query->where('branch_id', $this->branch_id);
                 });
             }
             if ($this->startdate) {

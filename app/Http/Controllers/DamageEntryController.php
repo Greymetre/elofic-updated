@@ -90,8 +90,8 @@ class DamageEntryController extends Controller
                     ]);
                 }
                 $scheme = Services::where('serial_no', $request->coupen_code)->first();
-                if ($scheme) {
-                    $scheme_details = SchemeDetails::where('product_id', $scheme->product->id)->first();
+                $scheme_details = SchemeDetails::where('product_id', $scheme->product?->id)->first();
+                if ($scheme && $scheme_details) {
                     $scheme_id = $scheme_details->scheme_id;
                     $start_date = Carbon::createFromFormat('Y-m-d', $scheme_details->scheme->start_date);
                     $end_date = Carbon::createFromFormat('Y-m-d', $scheme_details->scheme->end_date);

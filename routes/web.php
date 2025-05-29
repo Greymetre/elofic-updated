@@ -88,6 +88,7 @@ use App\Http\Controllers\ClaimGenerationController;
 use App\Http\Controllers\ServiceBillComplaintType;
 use App\Http\Controllers\OpeningStockController;
 use App\Http\Controllers\PowerBiSettingController;
+use App\Models\DealerPortalSettings;
 use App\Models\PowerBiSetting;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
@@ -140,6 +141,11 @@ Route::post('/dealer-appointment-kyc-submit', [DealerAppointmentController::clas
 
 
 Route::group(['middleware' => ['auth']], function () {
+    Route::get('/dealer_dashboard', function () {
+        abort_if(Gate::denies('dealer_dashboard'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $dealer_poster_setting = DealerPortalSettings::first();
+        return view('dashboard.dealer_dashboard', compact('dealer_poster_setting'));
+    });
     Route::get('/sales_summary_dashboard', function () {
         abort_if(Gate::denies('sales_summary_dashboard'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $url = PowerBiSetting::where('key', 'sales')->first()->value;
