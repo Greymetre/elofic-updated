@@ -12,7 +12,7 @@
               @if(auth()->user()->can(['customer_download']))
               <form method="GET" action="{{ URL::to('customers-download') }}">
                   <div class="d-flex flex-wrap flex-row">
-
+                  @if(!isCustomerUser())
                   <div class="p-2" style="width:200px;">
                     <select class="selectpicker" name="division_id" id="division_id" data-style="select-with-transition" title="Select Division">
                        <option value="">Select Division</option>
@@ -43,6 +43,7 @@
                     @endif
                    </select>
                   </div>
+                  @endif
                   <div class="p-2" style="width:200px;">
                     <select class="selectpicker" name="state_id" id="state_id" data-style="select-with-transition" title="Select State">
                        <option value="">Select State</option>
@@ -63,9 +64,11 @@
                       @endif
                     </select>
                   </div>
+                  @if(!isCustomerUser())
                   <div class="p-2" style="width:200px;">
                     <select name="parent_id" id="parent_id" class="select2 form-control"></select>
                   </div>
+                  @endif
                    <div class="p-2" style="width:200px;">
                     <select class="selectpicker" name="customertype" id="customertype" data-style="select-with-transition" title="Customer Type">
                        <option value="">Select Customer Type</option>

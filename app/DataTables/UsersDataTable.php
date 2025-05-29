@@ -24,6 +24,9 @@ class UsersDataTable extends DataTable
             ->editColumn('created_at', function ($data) {
                 return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
             })
+            ->editColumn('name', function ($data) {
+                return $data->name . ($data->user_customer ? ' (' . $data->user_customer->sap_code . ')' : '');
+            })
             ->editColumn('getBranchNames', function ($data) {
                 $branchIds = array_filter(explode(',', $data->branch_id)); // Remove empty values
                 if (!empty($branchIds)) {
