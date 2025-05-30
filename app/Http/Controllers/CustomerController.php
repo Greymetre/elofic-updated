@@ -106,7 +106,8 @@ class CustomerController extends Controller
                         });
                     }
                     if (!empty($request['parent_id'])) {
-                        $customer_idss = ParentDetail::where('parent_id', $request['parent_id'])->pluck('customer_id');
+                        $customer_idss = ParentDetail::where('parent_id', $request['parent_id'])->pluck('customer_id')->toArray();
+                        $customer_idss[] = auth()->user()->customerid;
                         if (!empty($customer_idss)) {
                             $query->whereIn('id', $customer_idss);
                         }

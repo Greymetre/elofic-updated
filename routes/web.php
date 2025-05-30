@@ -141,6 +141,10 @@ Route::post('/dealer-appointment-kyc-submit', [DealerAppointmentController::clas
 
 
 Route::group(['middleware' => ['auth']], function () {
+    Route::get('/dealer_account_statement', function () {
+        abort_if(Gate::denies('dealer_account_statement'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        return view('work_in_progress');
+    });
     Route::get('/dealer_dashboard', function () {
         abort_if(Gate::denies('dealer_dashboard'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $dealer_poster_setting = DealerPortalSettings::first();
