@@ -1428,6 +1428,24 @@
                               </a>
                            </li>
                            @endif
+                           @if(auth()->user()->can('customer_outstanting'))
+                           <li class="nav-link-btn {{ request()->is('reports/customer_outstanting*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('reports/customer_outstanting') }}">
+                                 <i class="material-icons icon">nature_people</i>
+                                 <span>Dealer Outstanding</span>
+                                 <div class="d-none mobile_hide"> Dealer Outstanding</div>
+                              </a>
+                           </li>
+                           @endif
+                           @if(auth()->user()->can('dealer_account_statement'))
+                           <li class="nav-link-btn {{ request()->is('dealer_account_statement*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('dealer_account_statement') }}">
+                                 <i class="material-icons icon">request_page</i>
+                                 <span>Dealer Account Statement</span>
+                                 <div class="d-none mobile_hide"> Dealer Account Statement</div>
+                              </a>
+                           </li>
+                           @endif
                            @if(auth()->user()->can('payments_access'))
                            <li class="nav-link-btn add_icon">
                               <a class="hoveradd" data-toggle="collapse" href="#paymentManu" aria-expanded="false">
@@ -2323,15 +2341,6 @@
                            <i class="material-icons icon">dialpad</i>
                            <span>Calling Report</span>
                            <div class="d-none mobile_hide"> Calling Report</div>
-                        </a>
-                     </li>
-                     @endif
-                     @if(auth()->user()->can('customer_outstanting'))
-                     <li class="nav-link-btn {{ request()->is('reports/customer_outstanting*') ? 'active' : '' }}">
-                        <a class="hoveradd2" href="{{ url('reports/customer_outstanting') }}">
-                           <i class="material-icons icon">nature_people</i>
-                           <span>Cutomer Outstanding</span>
-                           <div class="d-none mobile_hide"> Cutomer Outstanding</div>
                         </a>
                      </li>
                      @endif

@@ -4091,6 +4091,11 @@ class ReportController extends Controller
             if ($request->customer_id && !empty($request->customer_id)) {
                 $data->where('customer_id', $request->customer_id);
             }
+            if (auth()->user()->hasRole('Customer Dealer')) {
+                $customer_idss = ParentDetail::where('parent_id', auth()->user()->customerid)->pluck('customer_id')->toArray();
+                $customer_idss[] = auth()->user()->customerid;
+                $data->whereIn('customer_id', $customer_idss);
+            }
             if ($request->branch_id && !empty($request->branch_id)) {
                 $data->where('branch_id', $request->branch_id);
             }
