@@ -226,7 +226,7 @@ class DamageEntryController extends Controller
                     return response()->json(['status' => 'error', 'message' => $mmssgg]);
                 }
                 $scheme = Services::where('serial_no', $request->coupon_code)->first();
-                $scheme_details = SchemeDetails::where('product_id', $scheme->product->id)->first();
+                $scheme_details = SchemeDetails::where('product_id', $scheme?->product?->id)->first();
                 $point = 0;
                 if ($scheme_details) {
                     $scheme_id = $scheme_details->scheme_id;
@@ -236,7 +236,7 @@ class DamageEntryController extends Controller
                     if ($current_date->isSameDay($start_date) || ($current_date->gte($start_date) && $current_date->lte($end_date))) {
                         $point = ($scheme_details) ? $scheme_details->points : NULL;
                     } else {
-                        array_push($expire_schemes, $request->coupon_code);
+                        // array_push($expire_schemes, $request->coupon_code);
                         $point = '0';
                     }
                 } else {
@@ -246,25 +246,27 @@ class DamageEntryController extends Controller
                 $created_at = Carbon::now();
                 $created_at = $created_at->setTimezone('Asia/Kolkata');
                 if (!empty($request->coupon_code)) {
-                    $scheme = Services::where('serial_no', $request->coupon_code)->first();
-                    $scheme_details = SchemeDetails::where('product_id', $scheme->product->id)->first();
-                    $start_date = Carbon::createFromFormat('Y-m-d', $scheme_details->scheme->start_date);
-                    $end_date = Carbon::createFromFormat('Y-m-d', $scheme_details->scheme->end_date);
-                    $current_date = Carbon::today();
-                    if ($current_date->isSameDay($start_date) || ($current_date->gte($start_date) && $current_date->lte($end_date))) {
-                        $active_point = ($scheme_details) ? $scheme_details->active_point : NULL;
-                        $provision_point = ($scheme_details) ? $scheme_details->provision_point : NULL;
-                        $point = ($scheme_details) ? $scheme_details->points : NULL;
+                    if ($scheme_details) {
+                        $start_date = Carbon::createFromFormat('Y-m-d', $scheme_details->scheme->start_date);
+                        $end_date = Carbon::createFromFormat('Y-m-d', $scheme_details->scheme->end_date);
+                        $current_date = Carbon::today();
+                        if ($current_date->isSameDay($start_date) || ($current_date->gte($start_date) && $current_date->lte($end_date))) {
+                            $active_point = ($scheme_details) ? $scheme_details->active_point : NULL;
+                            $provision_point = ($scheme_details) ? $scheme_details->provision_point : NULL;
+                            $point = ($scheme_details) ? $scheme_details->points : NULL;
+                            $scheme_id = $scheme_details?->scheme_id;
+                        }
                     } else {
-                        array_push($expire_schemes, $request->coupon_code);
+                        // array_push($expire_schemes, $request->coupon_code);
                         $active_point = '0';
                         $provision_point = '0';
                         $point = '0';
+                        $scheme_id = null;
                     }
                     $tHistory = TransactionHistory::create([
                         'customer_id' => $damageEntry->customer_id,
                         'coupon_code' => $request->coupon_code,
-                        'scheme_id' => $scheme_details->scheme_id,
+                        'scheme_id' => $scheme_id,
                         'active_point' => $active_point,
                         'provision_point' => $provision_point,
                         'point' => $point,
