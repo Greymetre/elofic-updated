@@ -47,7 +47,6 @@ class OpeningStockExport implements FromCollection, WithHeadings, ShouldAutoSize
 
         // return $data;
         $data = OpeningStock::with([
-            'product.subcategories',
             'warehouse',
         ])->latest()->newQuery();
 
