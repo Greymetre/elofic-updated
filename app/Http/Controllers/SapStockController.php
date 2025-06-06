@@ -46,7 +46,7 @@ class SapStockController extends Controller
 
         // dd("Done");
 
-        // $path = '/var/www/html/New dealer importnn.xlsx';
+        // $path = '/var/www/html/Dealer Appointment Tag EMP Details.xlsx';
 
         // if (!file_exists($path)) {
         //     return 'File not found!';
@@ -57,30 +57,14 @@ class SapStockController extends Controller
         //     {
         //         foreach ($rows as $index => $row) {
         //             if ($index > 0) {
-        //                 if (isset($row[0]) && is_numeric($row[0])) {
-        //                     $excelDate = $row[0] - 25569; // Adjust for Excel's epoch
-        //                     $unixTimestamp = strtotime('+' . $excelDate . ' days', strtotime('1970-01-01'));
-        //                     $row[0] = !empty($row[0]) ? Carbon::createFromTimestamp($unixTimestamp)->toDateString() : '';
-        //                 }
-        //                 if (!empty($row[1]) && $row[1] != '=#N/A') {
-        //                     $new_app = DealerAppointment::create([
-        //                         'appointment_date' => isset($row[0]) ? $row[0] : '',
-        //                         'division' => isset($row[2]) ? $row[2] : '',
-        //                         'branch' => isset($row[3]) ? $row[3] : '',
-        //                         'customertype' => isset($row[4]) ? $row[4] : '',
-        //                         'firm_name' => isset($row[5]) ? $row[5] : '',
-        //                         'district' => isset($row[6]) ? $row[6] : '',
-        //                         'city' => isset($row[7]) ? $row[7] : '',
-        //                         'approval_status' => 3,    
-        //                     ]);
-
-        //                     if ($new_app) {
-        //                         $new_app->save();
-        //                         DealerAppointmentKyc::create([
-        //                             'appointment_id' => $new_app->id,
-        //                             'dealer_code' => isset($row[1]) ? $row[1] : '',
-        //                         ]);
-        //                     }
+        //                 $dealerCode = $row[87];
+        //                 $created_by = $row[88]; 
+        //                 // dd($dealerCode, $created_by);
+        //                 $kycD = DealerAppointmentKyc::where('dealer_code', $dealerCode)->first();
+        //                 $appointment = DealerAppointment::where('id', $kycD->appointment_id)->first();
+        //                 if($appointment){
+        //                     $appointment->created_by = $created_by;
+        //                     $appointment->save();
         //                 }
         //             }
         //         }
