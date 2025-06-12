@@ -266,7 +266,7 @@ class SalesTargetUsersExport implements FromCollection, WithHeadings, ShouldAuto
                 } else {
                     $response[15] = $data['achievements'][$key] ?? '';
                 }
-                if (isset($response[14]) && isset($response[15]) && !empty($response[15]) && !empty($response[14])) {
+                if (isset($response[14]) && $response[14] > 0 && isset($response[15]) && !empty($response[15]) && !empty($response[14])) {
                     $achievementPercent = number_format(($response[15] == 0) ? 0 : ($response[15] * 100 / $response[14]), 2, '.', '');
                 } else {
                     $achievementPercent = '';

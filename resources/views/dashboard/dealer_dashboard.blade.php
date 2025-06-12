@@ -13,8 +13,8 @@
             </a>
          </li>
          <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#test1" role="tablist">
-               <i class="material-icons">check_box_outline_blank</i> Test
+            <a class="nav-link" data-toggle="tab" href="#salesTab" role="tablist">
+               <i class="material-icons">check_box_outline_blank</i> Sales
             </a>
          </li>
       </ul>
@@ -50,7 +50,66 @@
          </div>
          @endif
       </div>
-      <div class="tab-pane active show" id="test1">Second menu</div>
+      <div class="tab-pane" id="salesTab">
+         <div class="row">
+            <!-- Current Month Sales -->
+            <div class="col-md-4 mb-4">
+               <div class="card shadow-sm border-left-primary h-100 py-2">
+                  <div class="card-body d-flex justify-content-between align-items-center">
+                     <div>
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                           Current Month Sales
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                           ₹ {{ number_format($salesSummary['month'], 2) }} Lakh
+                        </div>
+                     </div>
+                     <div class="icon text-primary">
+                        <i class="fas fa-calendar fa-2x"></i>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+            <!-- Current Quarter Sales -->
+            <div class="col-md-4 mb-4">
+               <div class="card shadow-sm border-left-success h-100 py-2">
+                  <div class="card-body d-flex justify-content-between align-items-center">
+                     <div>
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                           Current Quarter Sales
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                           ₹ {{ number_format($salesSummary['quarter'], 2) }} Lakh
+                        </div>
+                     </div>
+                     <div class="icon text-success">
+                        <i class="fas fa-chart-line fa-2x"></i>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+            <!-- Current Financial Year Sales -->
+            <div class="col-md-4 mb-4">
+               <div class="card shadow-sm border-left-warning h-100 py-2">
+                  <div class="card-body d-flex justify-content-between align-items-center">
+                     <div>
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                           Financial Year Sales
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                           ₹ {{ number_format($salesSummary['financial_year'], 2) }} Lakh
+                        </div>
+                     </div>
+                     <div class="icon text-warning">
+                        <i class="fas fa-rupee-sign fa-2x"></i>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
    </div>
    @endif
 </x-app-layout>

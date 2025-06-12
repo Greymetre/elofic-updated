@@ -145,11 +145,6 @@ Route::group(['middleware' => ['auth']], function () {
         abort_if(Gate::denies('dealer_account_statement'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         return view('work_in_progress');
     });
-    Route::get('/dealer_dashboard', function () {
-        abort_if(Gate::denies('dealer_dashboard'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        $dealer_poster_setting = DealerPortalSettings::first();
-        return view('dashboard.dealer_dashboard', compact('dealer_poster_setting'));
-    });
     Route::get('/sales_summary_dashboard', function () {
         abort_if(Gate::denies('sales_summary_dashboard'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $url = PowerBiSetting::where('key', 'sales')->first()->value;
@@ -162,6 +157,7 @@ Route::group(['middleware' => ['auth']], function () {
     });
     //Dashboard
     Route::get('dashboard', [DashboardController::class, 'index']);
+    Route::get('/dealer_dashboard', [DashboardController::class, 'dealer_dashboard']);
     Route::post('dashboardData', [DashboardController::class, 'dashboardData']);
     Route::post('travelSummaryData', [DashboardController::class, 'travelSummaryData']);
     Route::post('visitSummaryData', [DashboardController::class, 'visitSummaryData']);
