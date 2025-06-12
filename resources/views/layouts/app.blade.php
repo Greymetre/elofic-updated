@@ -805,6 +805,29 @@
                      </div>
                   </li>
                   @endif
+                  @if(auth()->user()->can(['lead_management_access']))
+                  <li class="nav-link {{ request()->is('leads*') || request()->is('contacts*') ? 'active' : '' }}">
+                     <a class="collapsed hoveradd" data-toggle="collapse" href="#leadManagementMenu" aria-expanded="false">
+                        <i class="material-icons icon">leaderboard</i>
+                        <span> Lead Management
+                        </span>
+                        <div class="d-none mobile_hide">Lead Management</div>
+                     </a>
+                     <div class="collapse" id="leadManagementMenu" style="">
+                        <ul class="navd">
+                           @if(auth()->user()->can(['lead_access']))
+                           <li class="nav-link-btn {{ request()->is('leads*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('leads') }}">
+                                 <i class="material-icons icon">diamond</i>
+                                 <span>Leads</span>
+                                 <div class="d-none mobile_hide">Leads</div>
+                              </a>
+                           </li>
+                           @endif
+                        </ul>
+                     </div>
+                  </li>
+                  @endif
                   @if(auth()->user()->can(['customer_access']))
                   <li class="nav-link {{ request()->is('customers*') || request()->is('customertype*') || request()->is('firmtype*') || request()->is('customersLogin*') || request()->is('customers-survey*') || request()->is('fields*') ? 'active' : '' }}">
                      <a class="collapsed hoveradd" data-toggle="collapse" href="#customerMenu" aria-expanded="false">
