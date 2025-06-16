@@ -17,9 +17,10 @@ return new class extends Migration
             $table->id();
             $table->string('company_name');
             $table->string('company_url')->nullable();
-            $table->string('industry')->nullable();
-            $table->string('status')->default('open'); // e.g., open, converted, lost
-            $table->text('notes')->nullable();
+            $table->string('address_id')->nullable();
+            $table->string('status');
+            $table->foreignId('assign_to')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
         });
     }

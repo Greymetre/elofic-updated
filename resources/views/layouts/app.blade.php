@@ -26,7 +26,7 @@
    <style>
       .iconimg {
          background: #fff;
-         padding: 10px 10px;
+         padding: 0px;
          height: 100%;
          min-height: 50px;
          object-fit: contain;
@@ -34,8 +34,8 @@
       }
 
       .main-panel>.navbar {
-         background: linear-gradient(45deg, #3694cc 0%, #3860a4 100%);
-         padding-top: 7px;
+         background: #FFFFFF;
+         padding: 0 !important;
       }
 
       /* Google Font Import - Poppins */
@@ -114,7 +114,7 @@
          left: 0;
          height: 100%;
          width: 250px;
-         padding: 10px 14px;
+         padding: 0;
          background: var(--sidebar-color);
          transition: var(--tran-05);
          z-index: 100;
@@ -227,8 +227,8 @@
 
       .sidebar header .toggle {
          position: absolute;
-         top: 88%;
-         right: -25px;
+         top: 150%;
+         right: -10px;
          transform: translateY(-50%) rotate(180deg);
          height: 25px;
          width: 25px;
@@ -468,8 +468,12 @@
          color: var(--text-color);
       }
 
-      .logo-main img {
-         width: 100%;
+      .logo-main.desktop img {
+         width: 75%;
+         padding: 10px 5px;
+      }
+      .logo-main.mobile img {
+         width: 68%;
       }
 
 
@@ -730,18 +734,18 @@
    <div class="wrapper">
       <nav class="sidebar">
          <header>
-            <div class="logo rounded">
+            <div class="logo">
                <a href="{{ url('customers') }}" class="simple-text logo-normal">
                   <!-- GAJRA GEARS -->
                   <div class="logo-main desktop">
-                     <img src="{{ url('/').'/'.asset('assets/img/brand_logo.png') }}" class="rounded" alt="...">
+                     <img src="{{ url('/').'/'.asset('assets/img/brand_logo_new.png') }}" class="rounded" alt="...">
                   </div>
                   <div class="logo-main mobile">
                      <img src="{{ url('/').'/'.asset('assets/img/mobillogo.svg') }}" class="rounded" alt="...">
                   </div>
                </a>
             </div>
-            <div class="image-text mt-2">
+            {{--<div class="image-text mt-2">
                <span class="image">
                   <img
                      src="{!! (count(Auth::user()->getMedia('profile_image')) > 0 ? Auth::user()->getMedia('profile_image')[0]->getFullUrl() : asset('assets/img/profileuser.png?')) !!}"
@@ -750,7 +754,7 @@
                <div class="text logo-text">
                   <span class="name"> {!! Auth::user()->name !!}</span>
                </div>
-            </div>
+            </div>--}}
             <i class='bx bx-chevron-right toggle'></i>
          </header>
          <div class="menu-bar">
@@ -2441,10 +2445,10 @@
    <div class="main-panel">
       <!-- Navbar -->
       <nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top ">
-         <div class="container-fluid  p-2" style="background: transparent; !important">
+         <div class="container-fluid" style="background: transparent; !important">
             <div class="new_demo">
-               <img class="rounded ml-2 iconimg" src="{!! url('/').'/'.asset('assets/img/bediya.jpg') !!}" width="100">
-               <img class="rounded ml-2  iconimg" src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" width="100">
+               <img class="rounded ml-2 iconimg" src="{!! url('/').'/'.asset('assets/img/bediya.jpg') !!}" width="80">
+               <img class="rounded ml-2  iconimg" src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" width="80">
             </div>
             <!-- <img src="{!! url('/').'/'.asset('assets/img/logo.png') !!}" width="50"> -->
             <div class="navbar-wrapper">
@@ -2483,17 +2487,22 @@
                              <a class="dropdown-item" href="#">Another One</a>
                            </div>
                            </li> -->
-                  <li class="nav-item dropdown">
+                  <li class="nav-item dropdown d-flex" style="align-items: center;">
+                     <p class="m-0" style="font-weight: bold;">{{ auth()->user()->name }}</p>
                      <a class="nav-link" href="javascript:;" id="navbarDropdownProfile" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        @if (auth()->user()->getMedia('profile_image')->count() > 0 && Storage::disk('s3')->exists(auth()->user()->getMedia('profile_image')[0]->getPath()))
+                        <img src="{{ auth()->user()->getMedia('profile_image')[0]->getFullUrl() }}" border="0" width="40" class="rounded-circle" />
+                        @else
                         <i class="material-icons">person</i>
+                        @endif
                         <p class="d-lg-none d-md-block">
                            Account
                         </p>
                      </a>
                      @auth
                      <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownProfile">
-                        <a class="dropdown-item" href="{{ url('change-password') }}">Change Password</a>
-                        <div class="dropdown-divider"></div>
+                        <!-- <a class="dropdown-item" href="{{ url('change-password') }}">Change Password</a> -->
+                        <!-- <div class="dropdown-divider"></div> -->
                         <a class="dropdown-item" href="{{ url('logout') }}">Log out</a>
                      </div>
                      @endauth

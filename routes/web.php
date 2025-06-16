@@ -85,6 +85,9 @@ use App\Http\Controllers\SapStockController;
 use App\Http\Controllers\WareHouseController;
 use App\Http\Controllers\PlannedSOPController;
 use App\Http\Controllers\ClaimGenerationController;
+use App\Http\Controllers\LeadController;
+use App\Http\Controllers\LeadContactsController;
+use App\Http\Controllers\LeadNotesController;
 use App\Http\Controllers\ServiceBillComplaintType;
 use App\Http\Controllers\OpeningStockController;
 use App\Http\Controllers\PowerBiSettingController;
@@ -155,6 +158,20 @@ Route::group(['middleware' => ['auth']], function () {
         $url = PowerBiSetting::where('key', 'employee_expense')->first()->value;
         return view('dashboard.employee_expense_report', compact('url'));
     });
+    
+    //Lead Management
+    Route::resource('leads', LeadController::class);
+    Route::post('leads/getLeads', [LeadController::class, 'getLeads'])->name('leads.getLeads');
+    Route::post('leads/searchExistsLead', [LeadController::class, 'searchExistsLead'])->name('leads.searchExistsLead');
+
+    //Contacts Management
+    Route::resource('lead-contacts', LeadContactsController::class);
+    Route::post('lead-contacts/getLeadContacts', [LeadContactsController::class, 'getLeadContacts'])->name('lead-contacts.getLeadContacts');
+
+
+    // LeadNotesController Management
+    Route::resource('lead-notes', LeadNotesController::class);
+
     //Dashboard
     Route::get('dashboard', [DashboardController::class, 'index']);
     Route::get('/dealer_dashboard', [DashboardController::class, 'dealer_dashboard']);
