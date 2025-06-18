@@ -333,8 +333,7 @@ class CustomerController extends Controller
     {
 
         try {
-
-            ////abort_if(Gate::denies('customer_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+            abort_if(Gate::denies('customer_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
             $request['active'] = 'Y';
             $request['created_by'] = Auth::user()->id;
             $docimages = collect([]);
@@ -393,9 +392,7 @@ class CustomerController extends Controller
             }
             // echo '<pre>';
             // print_r($request->all());
-            //  die('correct');
             $response = $this->customers->save_data($request);
-
             if ($response['status'] == 'success') {
                 $request['customer_id'] = $response['customer_id'];
                 $this->customerdetails->save_data($request);
