@@ -36,8 +36,16 @@ class LeadNotesController extends Controller
         $request->validate($rules);
         $data = $request->all();
         $created_by = Auth::id(); 
-        $lead_note = LeadNote::create(['note'=>$request->note,'lead_id'=>$request->lead_id,'created_by'=>$created_by]);
-        $request->session()->flash('message_success',__('Lead Note Added successfully.'));
+        $note_id = $request->note_id;
+        $lead_note = LeadNote::where(['id'=>$note_id])->first();
+        if($lead_note){
+            $lead_note->update(['note'=>$request->note,'lead_id'=>$request->lead_id,'created_by'=>$created_by]);
+            $request->session()->flash('message_success',__('Lead Note Updated successfully.'));
+        }else{
+            $lead_note = LeadNote::create(['note'=>$request->note,'lead_id'=>$request->lead_id,'created_by'=>$created_by]);
+            $request->session()->flash('message_success',__('Lead Note Added successfully.'));
+        }
+        
 
         return redirect()->back();
     }
@@ -52,28 +60,28 @@ class LeadNotesController extends Controller
      * @param  \App\Models\Lead  $lead
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, LeadNote $leadNote)
-    {
-         $rules = [
-            'lead_id'=>'required',
-            'note'=>'required',
+    // public function update(Request $request, LeadNote $leadNote)
+    // {
+    //      $rules = [
+    //         'lead_id'=>'required',
+    //         'note'=>'required',
             
-        ];
+    //     ];
 
-        $request->validate($rules);
-        $data = $request->all();
-        $created_by = Auth::id(); 
-        $lead_note = LeadNote::where(['id'=>$leadNote->id])->first();
-        if($lead_note){
-             $lead_note->update(['note'=>$request->note,'lead_id'=>$request->lead_id,'created_by'=>$created_by]);
-             $request->session()->flash('message_success',__('Lead Note Added successfully.'));
-        }else{
-             $request->session()->flash('message_info',__('something went wrong.'));
+    //     $request->validate($rules);
+    //     $data = $request->all();
+    //     $created_by = Auth::id(); 
+    //     $lead_note = LeadNote::where(['id'=>$leadNote->id])->first();
+    //     if($lead_note){
+    //          $lead_note->update(['note'=>$request->note,'lead_id'=>$request->lead_id,'created_by'=>$created_by]);
+    //          $request->session()->flash('message_success',__('Lead Note Added successfully.'));
+    //     }else{
+    //          $request->session()->flash('message_info',__('something went wrong.'));
 
-        }
+    //     }
        
-        return redirect()->back();
-    }
+    //     return redirect()->back();
+    // }
 
     /**
      * Remove the specified resource from storage.

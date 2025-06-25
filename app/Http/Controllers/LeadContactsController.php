@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\Gate;
 use DataTables;
 use Auth;
 
+use App\Exports\ExcelExport;
+use Excel;
+
+
 use App\Models\Lead;
 use App\Models\LeadContact;
 use App\Models\LeadNote;
@@ -42,8 +46,49 @@ class LeadContactsController extends Controller
             ->addColumn('action', function ($lead_contact) {
                 return "action";
             })
-            ->rawColumns(['action','name'])
+            ->addColumn('checkbox', function ($lead_contact) {
+                $lead_contact_id = "'".$lead_contact->id."'";
+                return '<input type="checkbox" class="lead_task-checkbox checkbox_cls" value="'.$lead_contact->id.'" name="lead_contacts_ids[]" onclick="checkboxDelete('.$lead_contact_id.')">';
+            })
+            ->rawColumns(['action','name','checkbox'])
             ->make(true);
+    }
+
+    function exportContacts(Request $request){
+        $filename = 'contacts.xlsx';
+
+        $results_per_page = 8000;
+        $page_number = intval($request->input('page_number'));
+        $page_result = ($page_number-1) * $results_per_page;
+
+        $lead_contacts = LeadContact::with(['lead']); 
+        $lead_contacts = $lead_contacts->get();
+        $data = $lead_contacts->map(function ($item, $key) {
+
+            return [
+                $item->id,
+                $item->name,
+                $item->title,
+                $item->phone_number,
+                $item->email,
+                $item->url,
+                $item->lead->company_name??'',
+               
+
+            ];
+        })->toArray();
+
+        $export = new ExcelExport([
+            'Id',
+            'Name',
+            'Title',
+            'Phone Number',
+            'Email',
+            'Url',
+            'Lead',
+        ], $data);
+
+        return Excel::download($export, $filename);
     }
 
 
@@ -73,15 +118,23 @@ class LeadContactsController extends Controller
             'name'=>'required',
             'title'=>'required',
             'phone_number'=>'required',
-            'contact_email'=>'required',
-            'url'=>'required',
+            //'contact_email'=>'required',
+            //'url'=>'required',
         ];
 
         $request->validate($rules);
         $data = $request->all();
         $created_by = Auth::id(); 
-        $LeadContact = LeadContact::create(['name'=>$request->name,'lead_id'=>$request->lead_id,'created_by'=>$created_by,'title'=>$request->title,'phone_number'=>$request->phone_number,'email'=>$request->contact_email,'url'=>$request->url]);
-        $request->session()->flash('message_success',__('Lead contact Added successfully.'));
+        $contact_id = $request->contact_id;
+        $lead_contact = LeadContact::where(['id'=>$contact_id])->first();
+        if($lead_contact){
+            $lead_contact->update(['name'=>$request->name,'lead_id'=>$request->lead_id,'created_by'=>$created_by,'title'=>$request->title,'phone_number'=>$request->phone_number,'email'=>$request->contact_email,'url'=>$request->url]);
+            $request->session()->flash('message_success',__('Lead contact Updated successfully.'));
+        }else{
+            $LeadContact = LeadContact::create(['name'=>$request->name,'lead_id'=>$request->lead_id,'created_by'=>$created_by,'title'=>$request->title,'phone_number'=>$request->phone_number,'email'=>$request->contact_email,'url'=>$request->url]);
+            $request->session()->flash('message_success',__('Lead contact Added successfully.'));
+        }
+        
 
         return redirect()->back();
     }
@@ -127,8 +180,21 @@ class LeadContactsController extends Controller
      * @param  \App\Models\Lead  $lead
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Lead $lead)
+    public function destroy(Request $request, LeadContact $leadContact)
     {
-        //
+        $leadContact->delete();
+        $request->session()->flash('message_success',__('Lead Contact deleted successfully.'));
+        return redirect()->back();
+    }
+
+    public function checkboxAction(Request $request){
+         $lead_ids = $request->lead_ids;
+        $lead_id_arr = explode(",", $lead_ids);
+        if(count($lead_id_arr)>0){
+            LeadContact::whereIn('id',$lead_id_arr)->delete(); 
+            $request->session()->flash('message_success',__('Lead Task deleted successfully.'));
+            return redirect()->back();
+        }
+        
     }
 }

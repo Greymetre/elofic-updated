@@ -88,6 +88,8 @@ use App\Http\Controllers\ClaimGenerationController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\LeadContactsController;
 use App\Http\Controllers\LeadNotesController;
+use App\Http\Controllers\LeadTasksController;
+use App\Http\Controllers\LeadOpportunitiesController;
 use App\Http\Controllers\ServiceBillComplaintType;
 use App\Http\Controllers\OpeningStockController;
 use App\Http\Controllers\PowerBiSettingController;
@@ -163,14 +165,35 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('leads', LeadController::class);
     Route::post('leads/getLeads', [LeadController::class, 'getLeads'])->name('leads.getLeads');
     Route::post('leads/searchExistsLead', [LeadController::class, 'searchExistsLead'])->name('leads.searchExistsLead');
+    Route::post('leads/storeAddress', [LeadController::class, 'storeAddress'])->name('leads.storeAddress');
+
+    Route::post('leads/uploadleadFiles', [LeadController::class, 'uploadleadFiles'])->name('leads.uploadleadFiles');
+    Route::get('leads-deleteMedia', [LeadController::class, 'deleteMedia'])->name('leads-deleteMedia');
+    Route::get('leads-exportLeads', [LeadController::class, 'exportLeads'])->name('leads-exportLeads');
 
     //Contacts Management
     Route::resource('lead-contacts', LeadContactsController::class);
     Route::post('lead-contacts/getLeadContacts', [LeadContactsController::class, 'getLeadContacts'])->name('lead-contacts.getLeadContacts');
+    Route::get('contacts-exportContacts', [LeadContactsController::class, 'exportContacts'])->name('contacts-exportContacts');
+     Route::post('lead-contacts/checkboxAction', [LeadContactsController::class, 'checkboxAction'])->name('lead-contacts.checkboxAction');
 
 
     // LeadNotesController Management
     Route::resource('lead-notes', LeadNotesController::class);
+
+
+    Route::resource('lead-tasks', LeadTasksController::class);
+    Route::get('tasks-exportTasks', [LeadTasksController::class, 'exportTasks'])->name('tasks-exportTasks');
+    Route::post('lead-tasks/checkboxAction', [LeadTasksController::class, 'checkboxAction'])->name('lead-tasks.checkboxAction');
+
+    
+    Route::post('lead-tasks/getLeadTasks', [LeadTasksController::class, 'getLeadTasks'])->name('lead-tasks.getLeadTasks');
+    
+    Route::resource('lead-opportunities', LeadOpportunitiesController::class);
+    Route::post('lead-opportunitiess/getLeadContacts', [LeadOpportunitiesController::class, 'getCardData'])->name('lead-opportunities.getCardData');
+    Route::post('lead-opportunitiess/updateCardStatus', [LeadOpportunitiesController::class, 'updateCardStatus'])->name('lead-opportunities.updateCardStatus');
+    
+    Route::post('lead-opportunitiess/getsingleData', [LeadOpportunitiesController::class, 'getsingleData'])->name('lead-opportunities.getsingleData');
 
     //Dashboard
     Route::get('dashboard', [DashboardController::class, 'index']);

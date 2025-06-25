@@ -827,6 +827,28 @@
                                  <div class="d-none mobile_hide">Leads</div>
                               </a>
                            </li>
+
+                            <li class="nav-link-btn {{ request()->is('lead-contacts*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('lead-contacts') }}">
+                                 <i class="material-icons icon">diamond</i>
+                                 <span>Contacts</span>
+                                 <div class="d-none mobile_hide">Contacts</div>
+                              </a>
+                           </li>
+                           <li class="nav-link-btn {{ request()->is('lead-opportunities*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('lead-opportunities') }}">
+                                 <i class="material-icons icon">diamond</i>
+                                 <span>Opportunities</span>
+                                 <div class="d-none mobile_hide">Opportunities</div>
+                              </a>
+                           </li>
+                           <li class="nav-link-btn {{ request()->is('lead-tasks*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('lead-tasks') }}">
+                                 <i class="material-icons icon">diamond</i>
+                                 <span>Tasks</span>
+                                 <div class="d-none mobile_hide">Tasks</div>
+                              </a>
+                           </li>
                            @endif
                         </ul>
                      </div>

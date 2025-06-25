@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Lead extends Model
+class Lead extends Model implements HasMedia
 {
-    use HasFactory;
+    use HasFactory,InteractsWithMedia;
 
     protected $fillable = [
         'company_name',
@@ -25,5 +27,12 @@ class Lead extends Model
 
     public function notes(){
         return $this->hasMany(LeadNote::class);
+    }
+
+        public function registerMediaCollections(): void {
+        $this->addMediaCollection('lead_file')
+             ->useFallbackUrl(asset(config('constants.NO_IMAGE_URL')))
+             ->useFallbackPath(public_path(config('constants.NO_IMAGE_URL')))
+             ->singleFile();
     }
 }

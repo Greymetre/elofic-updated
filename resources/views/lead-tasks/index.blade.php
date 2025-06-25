@@ -1,8 +1,6 @@
+
 <x-app-layout>
-    <style>
- @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-
-
+  <style>
     .pream_entry .btn {
       border-radius: 50px;
       margin-right: 12px;
@@ -29,96 +27,33 @@
       color: #787575!important;
   }
 
-  .pream_entry{
-    margin-top: 20px;
-  }
-
-   .table{
+  .table{
       background-color: #fff !important;
       border: 1px solid #E8E8E8 !important;
       border-radius: 5px !important;
   }
 
-  .table thead tr th {
-    font-size: 14px;
-    font-weight: 500 !important;
-    color: #262A2A;
-    letter-spacing: 0px;
-    font-family: 'Poppins', sans-serif !important;
+  body .table thead tr th:last-child {
+    width: 0px!important;
 }
 
-.table > tbody > tr > td a {
-    font-size: 14px !important;
-    font-weight: 400 !important;
-    color: #262A2A !important;
-    letter-spacing: 0px;
-    text-transform: capitalize;
-    font-family: 'Poppins', sans-serif !important;
-}
-.table > tbody > tr > td {
-    font-size: 14px !important;
-    font-weight: 400 !important;
-    color: #262A2A !important;
-    letter-spacing: 0px;
-    text-transform: capitalize;
-    border-color: #E8E8E8 !important;
-    font-family: 'Poppins', sans-serif !important;
-}
-
-.table thead tr th:last-child {
-    width: 170px!important;
-}
-
-  table.dataTable thead .sorting:after{
-    display: none;
+ .pream_entry{
+    margin-top: 20px;
   }
 
-  table.dataTable thead .sorting:before{
-    display: none;
-  }
-
-  table.dataTable thead .sorting_desc:before{
-    display: none;
-  }
-
-  body .main-panel > .content {
-    margin-top: 25px;
-  }
-
-  nav.navbar.navbar-expand-lg.navbar-transparent.navbar-absolute.fixed-top {
-    position: sticky;
-}
-
-  .table thead {
-    background-color: #fff!important;
-    box-shadow: 0px 4px 4px 0px #DBDBDB40;
-}
-
-.table tbody tr {
-    box-shadow: 0px 4px 4px 0px #DBDBDB40!important;
-  }
-
-  .pream_entry {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-}
-
-input.searchbox::placeholder {
+  input.searchbox::placeholder {
     color: #6F6F6F;
     font-size: 13px;
     font-weight: 500;
     font-family: 'Poppins', sans-serif !important;
 }
 
- .search_inner {
+.search_inner {
     box-shadow: 0px 4px 4px 0px #DBDBDB40;
     border: 1px solid #E8E8E8;
     height: 42px;
     border-radius: 5px;
     padding: 4px 11px;
-   
 }
 
 .search{
@@ -132,6 +67,17 @@ input.searchbox::placeholder {
     background: transparent;
 }
 
+nav.navbar.navbar-expand-lg.navbar-transparent.navbar-absolute.fixed-top {
+    position: sticky;
+}
+
+select.custom-select {
+    border-radius: 5px !important;
+    box-shadow: 0px 4px 4px 0px #DBDBDB40;
+    border: 1px solid #E8E8E8;
+    background: #fff;
+}
+
 .search_inner input.searchbox {
     border: 0px;
     outline: 0px;
@@ -141,50 +87,15 @@ input.searchbox::placeholder {
     width: 95%;
 }
 
-.well {
+.pream_entry {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    width: 100%;
 }
 
-.bmd-form-group {
-    box-shadow: 0px 4px 4px 0px #DBDBDB40;
-    border-radius: 5px;
-}
-
-div#getLeads_info {
-    display: none;
-}
-
-button#dropdownMenuButton {
-    color: #000;
-}
-
-button.sort_btns {
-    background: transparent !important;
-    color: #495057;
-    box-shadow: 0px 4px 4px 0px #DBDBDB40;
-    border: 1px solid #E8E8E8;
-    border-radius: 5px;
-    padding: 11px 10px;
-}
-
-.dd {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-}
-
-.sort_btns.filter_btn {
-    background: #F2F2F4 !important;
-    border: 1px solid #919191;
-}
-
-div#getLeadContacts_info {
-    display: none;
+#getLeadTasks_info{
+  display:none;
 }
 
 .dataTables_length label {
@@ -193,17 +104,13 @@ div#getLeadContacts_info {
     font-family: 'Poppins', sans-serif !important;
 }
 
-#getLeadContacts_wrapper .bottom {
+#getLeadTasks_wrapper .bottom {
     display: flex;
     justify-content: space-between;
     margin-top: 30px;
 }
 
-#getLeadContacts_wrapper .bottom {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 30px;
-}
+
 
 
 @media (max-width: 991px){
@@ -211,12 +118,7 @@ div#getLeadContacts_info {
       flex-direction: column;
   }
 
-  .well {
-    width: 100%;
-}
-
-    body .main-panel > .content {
-        
+   body .main-panel > .content {
         padding-top:25px!important;
   }
 
@@ -224,7 +126,6 @@ div#getLeadContacts_info {
     width: auto!important;
   }
 }
-
 
   </style>
   <div class="row">
@@ -234,50 +135,44 @@ div#getLeadContacts_info {
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
-          <h4 class="card-title ">Lead Contacts
+          <h4 class="card-title ">Lead Tasks
             <span class="">
+
               <div class="pream_entry">
 
-                 <div class="search">
+                <div class="search">
                    <div class="search_inner">
                      <button type="button"> <img src="https://expertfromindia.in/bediya/public/assets/img/search.svg"></button>
                      <input type="search" class="searchbox" placeholder="Search Lead">
                    </div>
                 </div>
-
                 <div class="both_btn">
 
                 <div class="well mb-3 float-right" id="checkbox_option" style="display: none;" >
-                {!! Form::open(['method' => 'POST','route' => ['lead-contacts.checkboxAction'], 'class' => 'form-inline', 'id' => 'frmAction']) !!}
+                {!! Form::open(['method' => 'POST','route' => ['lead-tasks.checkboxAction'], 'class' => 'form-inline', 'id' => 'frmAction']) !!}
                 <div class="form-group mr-sm-2 mb-2">
                         <input type="hidden" name="lead_ids"  id="lead_ids">                
                 </div>   
-                  <button type="submit" onclick="return confirm('Are you sure delete?')" class="btn btn-responsive btn-primary mr-sm-2 mb-2">Delete</button>
+                  <button type="submit" onclick="return confirm('Are you sure delete?')" class="btn  btn-responsive btn-primary mr-sm-2 mb-2">Delete</button>
                 {!! Form::close() !!}
               </div>
               <button type="button" data-toggle="modal" data-target="#addLeadModel" class="btn btn-primary btn-sm btn-icon-split float-right">
                     <span class="icon text-white-50">
                       <i class="material-icons">add_circle</i>
                     </span>
-                    <span class="text">Add Contacts</span>
-                </button>
-                <a  href="{{route('contacts-exportContacts')}}" class="btn exportbtn btn-primary btn-sm btn-icon-split float-right" id="export_button">
-                    <span class="icon text-white-50">
-                      <i class="material-icons">cloud_download</i>
-                    </span>
-                    <span class="text">Export</span>
-                </a>
-                 <a  href="{{route('contacts-exportContacts')}}" class="btn exportbtn btn-primary btn-sm btn-icon-split float-right" id="export_button">
-                    <span class="icon text-white-50">
-                      <i class="material-icons">cloud_download</i>
-                    </span>
-                    <span class="text">Export</span>
-                </a>
+                    <span class="text">Add Contact</span>
+                <div class="ripple-container"></div></button>
 
-                
+                <a  href="{{route('tasks-exportTasks')}}" class="btn exportbtn btn-primary btn-sm btn-icon-split float-right" id="export_button">
+                    <span class="icon text-white-50">
+                      <i class="material-icons">cloud_download</i>
+                    </span>
+                    <span class="text">Export</span>
+                </a>
               </div>
               </div>
             </span>
+
           </h4>
         </div>
         <div class="card-body">
@@ -303,52 +198,6 @@ div#getLeadContacts_info {
             </span>
           </div>
           @endif
-
-          <!--new div--->
-
-            <div class="well">
-            <div class="dd">
-            <div class="sort_btn">
-              <div class="btn-group">
-                <button class="btn sort_btns  dropdown-toggle" 
-                        type="button" 
-                        id="dropdownMenuButton" 
-                        data-toggle="dropdown" 
-                        aria-haspopup="true" 
-                        aria-expanded="false">
-                 <img src="https://expertfromindia.in/bediya/public/assets/img/sort.png">  Sort
-                </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                  <a class="dropdown-item" href="#"> Range</a>
-                  <a class="dropdown-item" href="#"> limit</a>
-                 
-                </div>
-              </div>
-            </div>
-           
-          </div>
-
-            <div class="sort_btn">
-              <div class="btn-group">
-                <button class="btn sort_btns filter_btn  dropdown-toggle" 
-                        type="button" 
-                        id="dropdownMenuButton" 
-                        data-toggle="dropdown" 
-                        aria-haspopup="true" 
-                        aria-expanded="false">
-                 <img src="https://expertfromindia.in/bediya/public/assets/img/filter_ss.png">  Filter
-                </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                  <a class="dropdown-item" href="#"> id</a>
-                  <a class="dropdown-item" href="#">range </a>
-                  <a class="dropdown-item" href="#">class </a>
-                </div>
-              </div>
-            </div>
-            </div>
-
-          <!--end div--->
-
           <div class="alert " style="display: none;">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
               <i class="material-icons">close</i>
@@ -356,15 +205,15 @@ div#getLeadContacts_info {
             <span class="message"></span>
           </div>
           <div class="table-responsive">
-            <table id="getLeadContacts" class="table ">
+            <table id="getLeadTasks" class="table">
               <thead class=" text-primary">
                 <tr>
                   <th></th>
                   <th>Name</th>
-                  <th>Title</th>
-                  <th>Phone</th>
-                  <th>Email</th>
-                  <th>Lead</th>
+                  <th>Description</th>
+                  <th>Date</th>
+                  <th>Assign To</th>
+                  <!-- <th>Action</th> -->
                 </tr>
               </thead>
               <tbody>
@@ -436,7 +285,9 @@ div#getLeadContacts_info {
 
 
 jQuery(document).ready(function(){
-    getLeadContacts();
+    getLeadTasks();
+
+
 
     jQuery('#frmLeadsCreate').validate({
         rules: {
@@ -467,29 +318,31 @@ $('#company_name, #contact_name').on('keyup', function () {
  
 
 
-function getLeadContacts(){
-    jQuery('#getLeadContacts').dataTable().fnDestroy();
-    jQuery('#getLeadContacts tbody').empty();
-    jQuery('#getLeadContacts').DataTable({
+function getLeadTasks(){
+    jQuery('#getLeadTasks').dataTable().fnDestroy();
+    jQuery('#getLeadTasks tbody').empty();
+    jQuery('#getLeadTasks').DataTable({
         processing: false,
         serverSide: true,
         searching: false,
         ajax: {
-            url: "{{ route('lead-contacts.getLeadContacts') }}",
+            url: "{{ route('lead-tasks.getLeadTasks') }}",
             method: 'POST'
         },
         columns: [
             {data: 'checkbox', name: 'checkbox'},
-            {data: 'name', name: 'name'},
-            {data: 'title', name: 'title'},
-            {data: 'phone_number', name: 'phone_number'},
-            {data: 'email', name: 'email'},
-            {data: 'lead.company_name', name: 'lead.company_name'}
+            {data: 'lead.company_name', name: 'lead.company_name'},
+            {data: 'description', name: 'description'},
+            {data: 'date', name: 'date'},
+            {data: 'assignUser.name', name: 'assignUser.name'},
+            // {data: 'action', name: 'action'},
         ],
-        order: [[0, 'desc']],
+        order: [[3, 'desc']],
         dom: 't<"bottom"lip>',
     });
 }
+
+
 
 function checkboxDelete(lead_id){
    var checkboxes = document.querySelectorAll('.checkbox_cls');

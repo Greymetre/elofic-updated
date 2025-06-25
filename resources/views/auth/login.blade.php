@@ -23,7 +23,7 @@
     }
 
     .left-side {
-      background: url("{{ asset('assets/img/login_side.png') }}") no-repeat center center;
+      background: url("{{ asset('assets/img/login.png') }}") no-repeat center center;
       background-size: cover;
       height: 100%;
     }
@@ -86,7 +86,7 @@
 
 <body>
 
-  <div class="container-fluid">
+  <div class="container-fluid p-0">
     <div class="row h-100 no-gutters">
       <div class="col-md-6 left-side d-none d-md-block">
         <!-- <img src="{{ url('/').'/'.asset('assets/img/login_side.png') }}" alt="" class="side-img" width="100%"> -->
@@ -136,7 +136,7 @@
             <button type="submit" class="btn btn-primary btn-block btn-lg">Login</button>
           </form>
         </div>
-        <div class="footer text-primary">&copy; 2025 Field Connect. All rights reserved</div>
+        <div class="footer text-primary">&copy; 2025 Field Konnect. All rights reserved</div>
       </div>
     </div>
   </div>

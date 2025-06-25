@@ -1,3 +1,101 @@
+/*jd design table*/
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+body .table thead tr th {
+   font-size: 14px;
+   font-weight: 500 !important;
+   color: #262A2A;
+   letter-spacing: 0px;
+   font-family: 'Poppins', sans-serif !important;
+}
+
+.sidebar{
+  background:#334C8B!important;
+}
+
+.sidebar li.nav-link.active .text, .sidebar li.nav-link.active .icon {
+    color: #34B1E2;
+}
+
+body .sidebar li.nav-link a[aria-expanded="true"]{
+     background: #ffffff00!important;
+}
+
+body .sidebar li.nav-link a[aria-expanded="true"] i.material-icons.icon {
+    color: #34B1E2;
+}
+
+body .sidebar li.nav-link.active ul.navd li.nav-link-btn.active a i{
+    color: #34B1E2!important;
+}
+
+body .sidebar li.nav-link.active ul.navd li.nav-link-btn.active a{
+     background: #ffffff00!important;
+}
+
+body .sidebar li.nav-link.active ul li.nav-link-btn.active .icon{
+    color: #34B1E2;
+}
+
+.sidebar li.nav-link a.collapsed:hover, .sidebar li.nav-link.active a.collapsed {
+    background: #ffffff00 !important;
+    color: #ffff;
+    font-weight: 500;
+}
+
+body .table > tbody > tr > td a {
+   font-size: 14px !important;
+   font-weight: 400 !important;
+   color: #262A2A !important;
+   letter-spacing: 0px;
+   text-transform: capitalize;
+   font-family: 'Poppins', sans-serif !important;
+}
+body .table > tbody > tr > td {
+   font-size: 14px !important;
+   font-weight: 400 !important;
+   color: #262A2A !important;
+   letter-spacing: 0px;
+   text-transform: capitalize;
+   border-color: #E8E8E8 !important;
+   font-family: 'Poppins', sans-serif !important;
+}
+
+body .table thead tr th:last-child {
+   width: 170px!important;
+}
+
+ body table.dataTable thead .sorting:after{
+   display: none;
+ }
+
+ body table.dataTable thead .sorting:before{
+   display: none;
+ }
+
+ body table.dataTable thead .sorting_desc:before{
+   display: none;
+ }
+
+ body .main-panel > .content {
+   margin-top: 25px;
+ }
+
+ body nav.navbar.navbar-expand-lg.navbar-transparent.navbar-absolute.fixed-top {
+   position: sticky;
+}
+
+ body .table thead {
+   background-color: #fff!important;
+   box-shadow: 0px 4px 4px 0px #DBDBDB40;
+}
+
+body .table tbody tr {
+   box-shadow: 0px 4px 4px 0px #DBDBDB40!important;
+ }
+
+/*JD end*/
+
 body {
     overflow-x: hidden;
 }
