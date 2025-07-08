@@ -1,6 +1,56 @@
 <x-app-layout>
     <style>
 
+        .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+            border: transparent!important;
+            background: transparent!important;
+            font-weight: normal!important;
+            color: #000!important;
+        }
+
+        .ui-widget-header{
+            background: transparent!important;
+            border: transparent!important;
+        }
+
+        .image-profile img {
+            border-radius: 50px;
+        }
+
+        .fileinput .thumbnail {
+           max-width:300px!important;
+           box-shadow: unset!important;
+        }
+
+        .sdm{
+            width: 77px;
+            justify-content: space-between;
+            opacity: 0;
+        }
+
+        .contact-person .gh:hover .sdm {
+            opacity: 1;
+        }
+
+        .wer {
+            width: 250px;
+        }
+
+        .deletebox {
+            width: 30px;
+            height: 30px;
+            background: #cff2fb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50px;
+        }
+
+        .listdata h5 p {
+            color: #262A2A;
+            font-weight: 500;
+        }
+
         .activity-icon {
             width: 36px;
             height: 36px;
@@ -74,6 +124,12 @@
             cursor: pointer;
         }
 
+        .per {
+            justify-content: space-between;
+            width: 75px;
+            opacity: 0;
+        }
+
         button.deletebtn:focus{
             outline: 0px;
         }
@@ -106,7 +162,7 @@
         }
 
         ul.list-task li p {
-            color: #414141;
+            color: #000;
             font-weight: 500;
             font-size: 14px;
             line-height: 21px;
@@ -188,7 +244,7 @@
             line-height: 17px;
             margin-bottom: 0px;
             font-family: 'Poppins', sans-serif;
-            color: #414141;
+            color: #000;
         }
 
         .contact-person p {
@@ -201,12 +257,17 @@
             margin-bottom: 0px !important;
         }
 
+        .editdelte {
+            justify-content: space-around;
+            width: 84px;
+        }
+
         .contac-link {
             display: flex;
             flex-direction: row;
             justify-content: space-between;
             align-items: center;
-            width: 30%;
+            width: 23%;
         }
 
         .image-profile img {
@@ -467,7 +528,7 @@
         }
 
         .editbox img {
-            width: 100%;
+            /*width: 100%;*/
         }
 
         .editbox {
@@ -476,7 +537,13 @@
         }
 
         .editbox {
-            opacity: 0;
+            width: 30px;
+            height: 30px;
+            background: #cff2fb;
+            display: flex;
+            align-items: center;
+            border-radius: 50px;
+            justify-content: center;
         }
 
         ul.list-task li:hover .editbox {
@@ -490,11 +557,24 @@
 
         .contact_edit {
             opacity: 0;
+            width: 30px;
+            height: 30px;
+            background: #d1f5fe;
+            border-radius: 50px;
+            text-align: center;
+            align-items: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         ul.cn-list li:hover .contact_edit {
             opacity: 1;
             cursor: pointer;
+        }
+
+        ul.list-task li:hover .per {
+            opacity: 1;
         }
 
 
@@ -522,7 +602,13 @@
         }
 
         .editsource {
-            opacity: 0;
+            width: 30px;
+            height: 30px;
+            background: #cff2fb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50px;
         }
 
 
@@ -577,7 +663,7 @@
                     <div class="nav-tabs-navigation">
                         <div class="nav-tabs-wrapper new_id">
                             <h4 class="card-title ">
-                            {!! trans('panel.complaint.new_title') !!} </h4>
+                            Company Overview </h4>
 
                         </div>
                     </div>
@@ -634,7 +720,7 @@
         <div class="inermain">
             <div class="image-profile">
 
-                <img src="{{url('/').'/'.asset('assets/img')}}/silver.png">
+                <img src="https://dummyimage.com/68/#eee/fff.jpg">
             </div>
             <div class="infomation-data">
                 <h3>{{$lead->company_name??''}}</h3>
@@ -751,13 +837,13 @@ action="{{ route('lead-tasks.store') }}" class="form-horizontal taskform" id="fr
     @foreach($lead_tasks as $lead_task)
     <li> 
         <div class="d-flex flex-row justify-content-between">
-            <div class="">
+            <div class="wer">
                 <p>{{$lead_task->description??''}}</p>
                 <p><img src="{{ url('/').'/'.asset('assets/img/leaddate.svg') }}"> <span class="date">{{date("d F Y",strtotime($lead_task->date))}}</span>
                 </p>
             </div>
 
-            <div class="d-flex flex-row">
+            <div class="d-flex flex-row per">
                 <div class="editbox" onclick="editTask('{{$lead_task}}')"> <img src="{{ url('/').'/'.asset('assets/img/ph_note-pencil-fill.svg') }}">
                 </div>
 
@@ -918,6 +1004,17 @@ action="{{ route('lead-contacts.store') }}" class="form-horizontal contact-task-
 action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform" id="frmLeadOpportunitiesCreate" enctype="multipart/form-data" style="display:none;" >
 @csrf
 <div class="row">
+<div class="col-md-12 pr-1 pl-1">
+        <div class="col-md-12 form-group">
+            <label for="amount">Amount</label>
+            <input type="number" step="0.01" min="0"  name="amount" id="o_amount" value="{{ old('amount','0.00') }}"  class="form-control" placeholder="Amount">
+            @if($errors->has('amount'))
+            <p class="help-block">
+                <strong>{{ $errors->first('amount') }}</strong>
+            </p>
+            @endif
+        </div>
+    </div>
     <div class="col-md-12 pr-1 pl-1">
         <div class="col-md-12 form-group">
             <label for="users">User<span style="color:red">*</span></label>
@@ -1030,12 +1127,12 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
     @foreach($lead_opportunities  as $lead_opportunity)
     <li>
         <div class="contact-person">
-            <div class="d-flex flex-row justify-content-between">
+            <div class="d-flex flex-row justify-content-between gh">
                 <div class="">
                     <h5>{{$lead_opportunity->note}}</h5>
                     <p>{{$lead_opportunity->amount}}</p>
                 </div>
-                <div class="d-flex flex-row">
+                <div class="d-flex flex-row sdm">
                     <div class="editsource" onclick="editOpportunity('{{$lead_opportunity}}')"><img src="{{ url('/').'/'.asset ('assets/img/ph_note-pencil-fill.svg') }}">
                     </div>
                     <div class="deletebox">
@@ -1305,7 +1402,7 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
                         @endif
 
                         <div class="fileinput-new thumbnail">
-                            <img src="{!! url('/').'/'.asset('assets/img/placeholder.jpg') !!}" class="imagepreview7">
+                            <img src="{!! url('/').'/'.asset('assets/img/up.png') !!}" class="imagepreview7">
                             <div class="selectThumbnail">
                                 <span class="btn btn-just-icon btn-round btn-file">
                                     <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
@@ -1661,10 +1758,10 @@ action="{{ route('leads.storeAddress') }}" class="form-horizontal" id="frmLeadsA
                 note: {
                     required: true
                 },
-// amount: {
-//     required: true,
-//     number:true
-// },
+amount: {
+    required: true,
+    number:true
+},
 // type: {
 //     required: true
 // },
@@ -1778,6 +1875,7 @@ action="{{ route('leads.storeAddress') }}" class="form-horizontal" id="frmLeadsA
     function createOpportunity(){
         $('#opportunity_id').val('');
         $('#frmLeadOpportunitiesCreate :input:not(:button, [type="hidden"])').val('');
+        $('#frmLeadOpportunitiesCreate #o_amount').val(0);
         $('#frmLeadOpportunitiesCreate').show();
         $('#frmLeadOpportunitiesCreate #o_assigned_to').change();
         $('#frmLeadOpportunitiesCreate #lead_contact_id').change();
@@ -1801,7 +1899,7 @@ action="{{ route('leads.storeAddress') }}" class="form-horizontal" id="frmLeadsA
         $('#frmLeadOpportunitiesCreate #o_assigned_to').change();
         $('#frmLeadOpportunitiesCreate #lead_contact_id').change();
         $('#frmLeadOpportunitiesCreate #o_note').val(opportunity_data.note);
-//$('#frmLeadOpportunitiesCreate #o_amount').val(opportunity_data.amount);
+$('#frmLeadOpportunitiesCreate #o_amount').val(opportunity_data.amount);
         $('#frmLeadOpportunitiesCreate #confidence').val(opportunity_data.confidence);
         $('#frmLeadOpportunitiesCreate #confidenceValue').html(opportunity_data.confidence+"%");
         $('#frmLeadOpportunitiesCreate #estimated_close_date').val(opportunity_data.estimated_close_date);

@@ -35,4 +35,8 @@ class Lead extends Model implements HasMedia
              ->useFallbackPath(public_path(config('constants.NO_IMAGE_URL')))
              ->singleFile();
     }
+
+    public function assign_user(){
+        return $this->belongsTo(User::class,'assign_to');
+    }
 }

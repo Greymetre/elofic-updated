@@ -32,160 +32,174 @@ class LeadController extends Controller
      */
     public function index(Request $request)
     {
-       // abort_if(Gate::denies('lead_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        
-        return view('leads.index');
+        abort_if(Gate::denies('lead_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $users = User::where('active', '=', 'Y')->whereDoesntHave('roles', function ($query) {
+            $query->whereIn('id', config('constants.customer_roles'));
+        })->select('id', 'name')->orderBy('id')->get();
+        return view('leads.index', compact('users'));
     }
 
-    public function getLeads(Request $request){
-        $leads = Lead::with(['contacts']); 
-        
-        $datetime = $request->input('datetime');
-        if($datetime!=""){
-            $datetimes = array_map('trim', explode('-', $datetime));
-            $start_time = $datetimes[0]??'';
-            $end_time = $datetimes[1]??'';
+    public function getLeads(Request $request)
+    {
+        $leads = Lead::with(['contacts', 'assign_user']);
 
-            if (isset($start_time) && $start_time!=''){
+        $datetime = $request->input('datetime');
+        if ($datetime != "") {
+            $datetimes = array_map('trim', explode('-', $datetime));
+            $start_time = $datetimes[0] ?? '';
+            $end_time = $datetimes[1] ?? '';
+
+            if (isset($start_time) && $start_time != '') {
                 $start_time = str_replace('/', '-', $start_time);
                 $start_time = \Carbon\Carbon::parse($start_time)->format('Y-m-d');
             }
 
-            if (isset($end_time) && $end_time!=''){
+            if (isset($end_time) && $end_time != '') {
                 $end_time = str_replace('/', '-', $end_time);
                 $end_time = \Carbon\Carbon::parse($end_time)->format('Y-m-d');
             }
 
-            if($start_time!="" && $end_time!=""){
+            if ($start_time != "" && $end_time != "") {
                 $leads->whereBetween(\DB::raw('DATE(created_at)'), [$start_time, $end_time]);
-            }else if($start_time!=""){
+            } else if ($start_time != "") {
                 $leads->where(\DB::raw('DATE(created_at)'), '>=', $start_time);
-            }else if($end_time!=""){
+            } else if ($end_time != "") {
                 $leads->where(\DB::raw('DATE(created_at)'), '<=', $end_time);
             }
         }
 
-        $leads = $leads->select(\DB::raw(with(new Lead)->getTable().'.*'))->groupBy('id');
+        if ($request->input('search') != "") {
+            $search = $request->input('search');
+            $leads->where(function ($query) use ($search) {
+                $query->where('company_name', 'like', "%{$search}%")
+                    ->orWhereHas('contacts', function ($subQuery) use ($search) {
+                        $subQuery->where('name', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $leads = $leads->select(\DB::raw(with(new Lead)->getTable() . '.*'))->groupBy('id');
         return DataTables::of($leads)
             ->editColumn('company_name', function ($lead) {
-                $url = route('leads.show',$lead);
-                return '<a href="'.$url.'">'.ucwords(strtolower($lead->company_name)).'</a>';
+                $url = route('leads.show', $lead);
+                return '<a href="' . $url . '">' . ucwords(strtolower($lead->company_name)) . '</a>';
             })
             ->editColumn('status', function ($lead) {
-                    return $lead->status;
+                return $lead->status;
+            })
+            ->editColumn('assign_to', function ($lead) {
+                return $lead->assign_user ? $lead->assign_user->name : '-';
             })
             ->editColumn('contacts', function ($lead) {
-                if(count($lead->contacts)>0){
-                    if(count($lead->contacts)>1){
-                        $contacts_name = $lead->contacts[0]->name??'';
-                        return $contacts_name." +".count($lead->contacts)-1;
-                    }else{
-                       return $contacts_name = $lead->contacts[0]->name??'';
+                if (count($lead->contacts) > 0) {
+                    if (count($lead->contacts) > 1) {
+                        $contacts_name = $lead->contacts[0]->name ?? '';
+                        return $contacts_name . " +" . count($lead->contacts) - 1;
+                    } else {
+                        return $contacts_name = $lead->contacts[0]->name ?? '';
                     }
                     return "";
-                  
                 }
             })
             ->editColumn('phone', function ($lead) {
-                
-                    if(count($lead->contacts)>0){
-                     return $contacts_name = $lead->contacts[0]->phone_number??'';
-                    }  
-                    return "";
-                  
-                
+
+                if (count($lead->contacts) > 0) {
+                    return $contacts_name = $lead->contacts[0]->phone_number ?? '';
+                }
+                return "";
             })
             ->editColumn('email', function ($lead) {
-                    if(count($lead->contacts)>0){
-                     return $contacts_name = $lead->contacts[0]->email??'';
-                    }  
-                    return "";
+                if (count($lead->contacts) > 0) {
+                    return $contacts_name = $lead->contacts[0]->email ?? '';
+                }
+                return "";
             })
             ->editColumn('created_at', function ($lead) {
-                     return \Carbon\Carbon::parse($lead->created_at)->format('M j, Y \a\t g:i a');
+                return \Carbon\Carbon::parse($lead->created_at)->format('M j, Y \a\t g:i a');
             })
 
             ->addColumn('checkbox', function ($lead) {
-                $lead_id = "'".$lead->id."'";
+                $lead_id = "'" . $lead->id . "'";
 
-                return '<input type="checkbox" class="lead-checkbox checkbox_cls" value="'.$lead->id.'" name="lead_ids[]"  onclick="checkboxDelete('.$lead_id.')">';
+                return '<input type="checkbox" class="lead-checkbox checkbox_cls" value="' . $lead->id . '" name="lead_ids[]">';
             })
 
             ->editColumn('status', function ($lead) {
-                if($lead->status== '0'){
+                if ($lead->status == '0') {
                     return "<span class='badge badge-warning'>Not Interested</span>";
-                }else if($lead->status== '1'){
+                } else if ($lead->status == '1') {
                     return "<span class='badge badge-success'>Interested</span>";
-                }else if($lead->status== '2'){
+                } else if ($lead->status == '2') {
                     return "<span class='badge badge-info'>Customer</span>";
                 }
             })
-            ->rawColumns(['action','company_name','checkbox','status'])
+            ->rawColumns(['action', 'company_name', 'checkbox', 'status'])
             ->make(true);
     }
 
 
 
 
-    function exportLeads(Request $request){
+    function exportLeads(Request $request)
+    {
         $filename = 'leads.xlsx';
 
         $results_per_page = 8000;
         $page_number = intval($request->input('page_number'));
-        $page_result = ($page_number-1) * $results_per_page;
+        $page_result = ($page_number - 1) * $results_per_page;
 
-        $leads = Lead::with(['contacts']); 
-        
+        $leads = Lead::with(['contacts']);
+
         $datetime = $request->input('datetime');
-        if($datetime!=""){
+        if ($datetime != "") {
             $datetimes = array_map('trim', explode('-', $datetime));
-            $start_time = $datetimes[0]??'';
-            $end_time = $datetimes[1]??'';
+            $start_time = $datetimes[0] ?? '';
+            $end_time = $datetimes[1] ?? '';
 
-            if (isset($start_time) && $start_time!=''){
+            if (isset($start_time) && $start_time != '') {
                 $start_time = str_replace('/', '-', $start_time);
                 $start_time = \Carbon\Carbon::parse($start_time)->format('Y-m-d');
             }
 
-            if (isset($end_time) && $end_time!=''){
+            if (isset($end_time) && $end_time != '') {
                 $end_time = str_replace('/', '-', $end_time);
                 $end_time = \Carbon\Carbon::parse($end_time)->format('Y-m-d');
             }
 
-            if($start_time!="" && $end_time!=""){
+            if ($start_time != "" && $end_time != "") {
                 $leads->whereBetween(\DB::raw('DATE(created_at)'), [$start_time, $end_time]);
-            }else if($start_time!=""){
+            } else if ($start_time != "") {
                 $leads->where(\DB::raw('DATE(created_at)'), '>=', $start_time);
-            }else if($end_time!=""){
+            } else if ($end_time != "") {
                 $leads->where(\DB::raw('DATE(created_at)'), '<=', $end_time);
             }
         }
 
         $leads = $leads->get();
         $data = $leads->map(function ($item, $key) {
-            if(count($item->contacts)>0){
-                if(count($item->contacts)>1){
-                    $contacts_name = $item->contacts[0]->name??'';
-                     $contacts_name." +".count($item->contacts)-1;
-                }else{
-                    $contacts_name = $item->contacts[0]->name??'';
+            if (count($item->contacts) > 0) {
+                if (count($item->contacts) > 1) {
+                    $contacts_name = $item->contacts[0]->name ?? '';
+                    $contacts_name . " +" . count($item->contacts) - 1;
+                } else {
+                    $contacts_name = $item->contacts[0]->name ?? '';
                 }
 
-                $contacts_phone_number = $item->contacts[0]->phone_number??'';
-                $contacts_email = $item->contacts[0]->email??'';
+                $contacts_phone_number = $item->contacts[0]->phone_number ?? '';
+                $contacts_email = $item->contacts[0]->email ?? '';
             }
 
-           
-                    
+
+
 
             return [
                 $item->id,
                 $item->company_name,
                 $item->company_url,
                 $item->status,
-                $contacts_name??'',
-                $contacts_phone_number??'',
-                $contacts_email??'',
+                $contacts_name ?? '',
+                $contacts_phone_number ?? '',
+                $contacts_email ?? '',
 
             ];
         })->toArray();
@@ -204,62 +218,63 @@ class LeadController extends Controller
     }
 
 
-    public function uploadleadFiles(Request $request){
+    public function uploadleadFiles(Request $request)
+    {
 
         $rules = [
-            'lead_id'=>'required',
-            'lead_file'=>[
-                    'file',
-                    'image',
-                    'max:'.(config('media-library.max_file_size') / 1024),
-                ]
+            'lead_id' => 'required',
+            'lead_file' => [
+                'file',
+                'image',
+                'max:' . (config('media-library.max_file_size') / 1024),
+            ]
         ];
 
         $request->validate($rules);
         $data = $request->all();
         $created_by = Auth::id();
-        $lead_id = $request->lead_id; 
-        $lead = Lead::where(['id'=>$lead_id])->first();
-        if($lead){
-           
-            if ($request->hasFile('lead_file')){
+        $lead_id = $request->lead_id;
+        $lead = Lead::where(['id' => $lead_id])->first();
+        if ($lead) {
+
+            if ($request->hasFile('lead_file')) {
                 $file = $request->file('lead_file');
                 $customname = time() . '.' . $file->getClientOriginalExtension();
                 $lead->addMedia($file)
-                        ->usingFileName($customname)
-                        ->toMediaCollection('lead_file');
+                    ->usingFileName($customname)
+                    ->toMediaCollection('lead_file');
             }
 
-             $request->session()->flash('message_success',__('Lead file upload successfully.'));
-             return redirect()->route('leads.show',$lead);
-        }else{
+            $request->session()->flash('message_success', __('Lead file upload successfully.'));
+            return redirect()->route('leads.show', $lead);
+        } else {
             //$request->session()->flash('message_success',__('Lead file upload successfully.'));
-            return redirect()->route('leads.show',$lead);
+            return redirect()->route('leads.show', $lead);
         }
     }
 
-    public function deleteMedia(Request $request){
+    public function deleteMedia(Request $request)
+    {
 
         $rules = [
             //'lead_id'=>'required',
-            'media_id'=>'required',
+            'media_id' => 'required',
         ];
 
         $request->validate($rules);
         $data = $request->all();
         $created_by = Auth::id();
-        $lead_id = $request->lead_id; 
-        $media_id = $request->media_id; 
+        $lead_id = $request->lead_id;
+        $media_id = $request->media_id;
         $media = Media::find($media_id);
 
-        if($media && $media->model_type === Lead::class) {
+        if ($media && $media->model_type === Lead::class) {
             $media->delete();
-            $request->session()->flash('message_success',__('Lead file upload successfully.'));
-             return redirect()->back(); 
-        }else{
-            return redirect()->back(); 
+            $request->session()->flash('message_success', __('Lead file upload successfully.'));
+            return redirect()->back();
+        } else {
+            return redirect()->back();
         }
-    
     }
 
 
@@ -267,14 +282,14 @@ class LeadController extends Controller
 
     public function searchExistsLead(Request $request)
     {
-        $company_name = $request->company_name??'-';
-        $contact_name = $request->contact_name??'-';
-        $user_id =Auth::id()??'';
-        $leads = Lead::where(['created_by'=>$user_id])->where(function ($query) use ($company_name,$contact_name) {
+        $company_name = $request->company_name ?? '-';
+        $contact_name = $request->contact_name ?? '-';
+        $user_id = Auth::id() ?? '';
+        $leads = Lead::where(['created_by' => $user_id])->where(function ($query) use ($company_name, $contact_name) {
             $query->where('company_name', 'like', "%{$company_name}%")
-                  ->orWhereHas('contacts', function ($subQuery) use ($contact_name) {
-                      $subQuery->where('name', 'like', "%{$contact_name}%");
-                  });
+                ->orWhereHas('contacts', function ($subQuery) use ($contact_name) {
+                    $subQuery->where('name', 'like', "%{$contact_name}%");
+                });
         })->get();
 
         if ($leads->count() > 0) {
@@ -294,17 +309,17 @@ class LeadController extends Controller
                 $firstContact = $lead->contacts->first();
                 $contactName = $firstContact ? $firstContact->name : '—';
                 $contactCount = $lead->contacts->count();
-                if($contactCount<2){
+                if ($contactCount < 2) {
                     $contactname_html  = htmlspecialchars($contactName);
-                }else{
-                   $contactname_html = htmlspecialchars($contactName) . ' +' . ($contactCount - 1);
+                } else {
+                    $contactname_html = htmlspecialchars($contactName) . ' +' . ($contactCount - 1);
                 }
 
                 $text .= '<tr>
                     <td>
                       <a href="' . route('leads.show', $lead->id) . '" class="text-primary text-decoration-underline">'
-                        . htmlspecialchars($lead->company_name) . '</a><br>
-                      <small class="text-muted">'.$contactname_html.'</small>
+                    . htmlspecialchars($lead->company_name) . '</a><br>
+                      <small class="text-muted">' . $contactname_html . '</small>
                     </td>
                     <td>' . htmlspecialchars($lead->status ?? '—') . '</td>
                     <td>' . $lead->created_at->diffForHumans() . '</td>
@@ -326,10 +341,7 @@ class LeadController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create(Request $request)
-    {
-        
-    }
+    public function create(Request $request) {}
 
     /**
      * Store a newly created resource in storage.
@@ -338,51 +350,49 @@ class LeadController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {   
+    {
         $rules = [
-            'company_name'=>'required',
-            'contact_name'=>'required',
+            'company_name' => 'required',
+            'contact_name' => 'required',
         ];
 
         $request->validate($rules);
         $data = $request->all();
-        $created_by = Auth::id(); 
-        $lead = Lead::create(['company_name'=>$request->company_name,'created_by'=>$created_by]);
-        $category = LeadContact::create(['name'=>$request->contact_name,'lead_id'=>$lead->id,'created_by'=>$created_by]);
-        $request->session()->flash('message_success',__('Lead Added successfully.'));
-        return redirect()->route('leads.show',$lead);
+        $created_by = Auth::id();
+        $lead = Lead::create(['company_name' => $request->company_name, 'created_by' => $created_by]);
+        $category = LeadContact::create(['name' => $request->contact_name, 'lead_id' => $lead->id, 'created_by' => $created_by]);
+        $request->session()->flash('message_success', __('Lead Added successfully.'));
+        return redirect()->route('leads.show', $lead);
     }
 
     public function storeAddress(Request $request)
-    {   
+    {
         $rules = [
-            'lead_id'=>'required',
-            'address1'=>'required',
-            'address2'=>'required',
-            'country_id'=>'required',
-            'state_id'=>'required',
+            'lead_id' => 'required',
+            'address1' => 'required',
+            'address2' => 'required',
+            'country_id' => 'required',
+            'state_id' => 'required',
             //'district_id'=>'required',
-            'city_id'=>'required',
-            'pincode_id'=>'required',
-            
+            'city_id' => 'required',
+            'pincode_id' => 'required',
+
         ];
 
         $address_id = $request->address_id;
-        $address = Address::where(['id'=>$address_id])->first();
-        if($address){
-             $address->update(['model_type'=>'App\Models\Lead','model_id'=>$request->lead_id,'address1'=>$request->address1,'address2'=>$request->address2,'country_id'=>$request->country_id,'state_id'=>$request->state_id,'district_id'=>$request->district_id,'city_id'=>$request->city_id,'pincode_id'=>$request->pincode_id]);
-            $request->session()->flash('message_success',__('Lead Address Update successfully.'));
-        }else{
-             Address::create(['model_type'=>'App\Models\Lead','model_id'=>$request->lead_id,'address1'=>$request->address1,'address2'=>$request->address2,'country_id'=>$request->country_id,'state_id'=>$request->state_id,'district_id'=>$request->district_id,'city_id'=>$request->city_id,'pincode_id'=>$request->pincode_id]);
-            $request->session()->flash('message_success',__('Lead Address Added successfully.'));
+        $address = Address::where(['id' => $address_id])->first();
+        if ($address) {
+            $address->update(['model_type' => 'App\Models\Lead', 'model_id' => $request->lead_id, 'address1' => $request->address1, 'address2' => $request->address2, 'country_id' => $request->country_id, 'state_id' => $request->state_id, 'district_id' => $request->district_id, 'city_id' => $request->city_id, 'pincode_id' => $request->pincode_id]);
+            $request->session()->flash('message_success', __('Lead Address Update successfully.'));
+        } else {
+            Address::create(['model_type' => 'App\Models\Lead', 'model_id' => $request->lead_id, 'address1' => $request->address1, 'address2' => $request->address2, 'country_id' => $request->country_id, 'state_id' => $request->state_id, 'district_id' => $request->district_id, 'city_id' => $request->city_id, 'pincode_id' => $request->pincode_id]);
+            $request->session()->flash('message_success', __('Lead Address Added successfully.'));
         }
-       
-        return redirect()->back();
-       
 
+        return redirect()->back();
     }
 
-    
+
 
     /**
      * Display the specified resource.
@@ -391,7 +401,7 @@ class LeadController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show(Request $request, Lead $lead)
-    {   
+    {
         $userids = getUsersReportingToAuth();
         $users = User::whereDoesntHave('roles', function ($query) {
             $query->whereIn('id', config('constants.customer_roles'));
@@ -401,10 +411,10 @@ class LeadController extends Controller
             }
         })->select('id', 'name')->orderBy('name')->get();
 
-        $lead_contacts = LeadContact::where(['lead_id'=>$lead->id])->get();
-        $lead_notes = LeadNote::where(['lead_id'=>$lead->id])->get();
-        $lead_tasks = LeadTask::where(['lead_id'=>$lead->id])->get();
-        $lead_opportunities = LeadOpportunity::where(['lead_id'=>$lead->id])->get();
+        $lead_contacts = LeadContact::where(['lead_id' => $lead->id])->get();
+        $lead_notes = LeadNote::where(['lead_id' => $lead->id])->get();
+        $lead_tasks = LeadTask::where(['lead_id' => $lead->id])->get();
+        $lead_opportunities = LeadOpportunity::where(['lead_id' => $lead->id])->get();
 
         $pincodes = Pincode::where('active', '=', 'Y')
             ->whereHas('assigncitiesusers', function ($query) use ($userids) {
@@ -424,20 +434,20 @@ class LeadController extends Controller
                 }
             })
             ->select('id', 'country_name')->orderBy('id', 'desc')->get();
-            $address = Address::where(['model_type'=>'App\Models\Lead','model_id'=>$lead->id])->first();
-            if(isset($address)){
-                $address1 = $address->address1;
-                $address2 = $address->address2;
-                $city_name = $address->cityname->city_name??'';
-                $state_name = $address->statename->state_name??'';
-                $pincodename = $address->pincodename->pincode??'';
-                $address_data = $address1.",".$address2.",".$city_name.",".$state_name.",".$pincodename;
-            }else{
-                $address_data = "";
-            }
+        $address = Address::where(['model_type' => 'App\Models\Lead', 'model_id' => $lead->id])->first();
+        if (isset($address)) {
+            $address1 = $address->address1;
+            $address2 = $address->address2;
+            $city_name = $address->cityname->city_name ?? '';
+            $state_name = $address->statename->state_name ?? '';
+            $pincodename = $address->pincodename->pincode ?? '';
+            $address_data = $address1 . "," . $address2 . "," . $city_name . "," . $state_name . "," . $pincodename;
+        } else {
+            $address_data = "";
+        }
 
-            $media_items = $lead->getMedia('lead_file');
-        return view('leads.show',compact('lead','lead_contacts','lead_notes','users','lead_tasks','lead_opportunities','countries','pincodes','address','address_data','media_items'));
+        $media_items = $lead->getMedia('lead_file');
+        return view('leads.show', compact('lead', 'lead_contacts', 'lead_notes', 'users', 'lead_tasks', 'lead_opportunities', 'countries', 'pincodes', 'address', 'address_data', 'media_items'));
     }
 
     /**
@@ -446,10 +456,7 @@ class LeadController extends Controller
      * @param  \App\Models\Lead  $lead
      * @return \Illuminate\Http\Response
      */
-    public function edit(Request $request,Lead $lead)
-    {   
-
-    }
+    public function edit(Request $request, Lead $lead) {}
 
     /**
      * Update the specified resource in storage.
@@ -461,15 +468,15 @@ class LeadController extends Controller
     public function update(Request $request, Lead $lead)
     {
         $rules = [
-            'company_name'=>'required',
+            'company_name' => 'required',
         ];
 
         $request->validate($rules);
         $data = $request->all();
-        $created_by = Auth::id(); 
-        $lead->update(['company_name'=>$request->company_name]);
-        $request->session()->flash('message_success',__('Lead Updated successfully.'));
-        return redirect()->route('leads.show',$lead);
+        $created_by = Auth::id();
+        $lead->update(['company_name' => $request->company_name]);
+        $request->session()->flash('message_success', __('Lead Updated successfully.'));
+        return redirect()->route('leads.show', $lead);
     }
 
     /**
@@ -483,5 +490,24 @@ class LeadController extends Controller
         //
     }
 
-    
+    public function assignLead(Request $request)
+    {
+        $update = Lead::whereIn('id', $request->lead_id)->update(['assign_to' => $request->user_id]);
+        if ($update) {
+            return response()->json(['status' => 'success', 'message' => 'Lead assigned successfully.']);
+        }else{
+            return response()->json(['status' => 'error', 'message' => 'Something went wrong.']);
+        }
+    }
+
+    //Multiple delete
+    public function deleteLead(Request $request)
+    {
+        $lead = Lead::whereIn('id', $request->lead_id)->delete();
+        if ($lead) {
+            return response()->json(['status' => 'success', 'message' => 'Lead deleted successfully.']);
+        }else{
+            return response()->json(['status' => 'error', 'message' => 'Something went wrong.']);
+        }
+    }
 }

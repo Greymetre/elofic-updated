@@ -2469,8 +2469,8 @@
       <nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top ">
          <div class="container-fluid" style="background: transparent; !important">
             <div class="new_demo">
-               <img class="rounded ml-2 iconimg" src="{!! url('/').'/'.asset('assets/img/bediya.jpg') !!}" width="80">
-               <img class="rounded ml-2  iconimg" src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" width="80">
+               <!-- <img class="rounded ml-2 iconimg" src="{!! url('/').'/'.asset('assets/img/bediya.jpg') !!}" width="80">
+               <img class="rounded ml-2  iconimg" src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" width="80"> -->
             </div>
             <!-- <img src="{!! url('/').'/'.asset('assets/img/logo.png') !!}" width="50"> -->
             <div class="navbar-wrapper">

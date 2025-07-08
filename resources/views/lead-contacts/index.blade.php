@@ -261,12 +261,12 @@ div#getLeadContacts_info {
                     </span>
                     <span class="text">Add Contacts</span>
                 </button>
-                <a  href="{{route('contacts-exportContacts')}}" class="btn exportbtn btn-primary btn-sm btn-icon-split float-right" id="export_button">
+               <!--  <a  href="{{route('contacts-exportContacts')}}" class="btn exportbtn btn-primary btn-sm btn-icon-split float-right" id="export_button">
                     <span class="icon text-white-50">
                       <i class="material-icons">cloud_download</i>
                     </span>
                     <span class="text">Export</span>
-                </a>
+                </a> -->
                  <a  href="{{route('contacts-exportContacts')}}" class="btn exportbtn btn-primary btn-sm btn-icon-split float-right" id="export_button">
                     <span class="icon text-white-50">
                       <i class="material-icons">cloud_download</i>

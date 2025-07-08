@@ -5,10 +5,12 @@
         padding: 20px;
         background: #f5f5f5;
         overflow-x: auto;
+        flex-wrap: wrap;
     }
 
     .column {
-        flex: 1;
+        box-sizing: border-box;
+        width: calc(25% - 15px);
         background: #fff;
         padding: 15px;
         /*min-height: 300px;*/
@@ -41,7 +43,7 @@
         margin: 0px;
         border: 1px solid #2C3D67;
         background: #2C3D67;
-        font-size: 12px;
+        font-size: 14px;
         font-weight: 600;
         line-height: 12px;
         text-transform: uppercase;
@@ -65,25 +67,25 @@
     }
 
     p.same {
-    color: #242424;
-    font-size: 12px;
-    font-weight: 400;
+    color: #5E5E5E;
+    font-size: 13px;
+    font-weight: 600;
     line-height: 14px;
     letter-spacing: 0.5px;
     margin-top: 8px;
-    width: 90px;
+    width: 135px;
 }
 
 p.dam {
     background: #E5F3FF;
     border-radius: 50px;
     color: #2E2E2E;
-    font-size: 11px !important;
+    font-size: 15px !important;
     font-weight: 500 !important;
     line-height: 14px;
     padding: 5px 5px;
-    width: 40px !important;
-    height: 40px;
+    width: 87px !important;
+    height: 36px;
     text-align: center;
     display: flex;
     justify-content: center;
@@ -94,7 +96,7 @@ p.dam {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
-        align-items: flex-end;
+        align-items: center;
     }
 
     .card_drag .card-header {
@@ -103,7 +105,7 @@ p.dam {
 
     .card_drag .card-header p {
         color: #4B4B4B;
-        font-size: 10px;
+        font-size: 14px;
         font-weight: 600;
         line-height: 12px;
         margin-bottom: 0px;
@@ -134,7 +136,7 @@ p.dam {
     .card_drag .data-ss p {
         margin: 0px;
         color: #5E5E5E;
-        font-size: 10px;
+        font-size: 12px;
         font-weight: 400;
         line-height: 12px;
         letter-spacing: 0px;
@@ -150,7 +152,7 @@ p.dam {
     }
 
     .card_drag .data-ss h5 {
-        font-size: 10px;
+        font-size: 14px;
         color: #2E2E2E;
         line-height: 14px;
         margin-bottom: 2px;

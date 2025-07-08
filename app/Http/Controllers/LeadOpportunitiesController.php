@@ -127,7 +127,7 @@ class LeadOpportunitiesController extends Controller
             'lead_id'=>'required',
             'assigned_to'=>'required',
             'lead_contact_id'=>'required',
-            //'amount'=>'required',
+            'amount'=>'required',
             //'type'=>'required',
             'estimated_close_date'=>'required',
             'confidence'=>'required',
@@ -142,7 +142,7 @@ class LeadOpportunitiesController extends Controller
         $opportunity_id = $request->opportunity_id;
         $lead_opportunity = LeadOpportunity::where(['id'=>$opportunity_id])->first();
         if($lead_opportunity){
-            $lead_opportunity->update(['note'=>$request->note,'lead_id'=>$request->lead_id,'created_by'=>$created_by,'assigned_to'=>$request->assigned_to,'lead_contact_id'=>$request->lead_contact_id,'estimated_close_date'=>$request->estimated_close_date,'confidence'=>$request->confidence,'status'=>$request->status]);
+            $lead_opportunity->update(['note'=>$request->note,'created_by'=>$created_by,'assigned_to'=>$request->assigned_to,'lead_contact_id'=>$request->lead_contact_id,'estimated_close_date'=>$request->estimated_close_date,'confidence'=>$request->confidence,'status'=>$request->status, 'amount'=>$request->amount]);
             $request->session()->flash('message_success',__('Lead Opportunity update successfully.'));
 
         }else{

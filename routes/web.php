@@ -166,6 +166,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('leads/getLeads', [LeadController::class, 'getLeads'])->name('leads.getLeads');
     Route::post('leads/searchExistsLead', [LeadController::class, 'searchExistsLead'])->name('leads.searchExistsLead');
     Route::post('leads/storeAddress', [LeadController::class, 'storeAddress'])->name('leads.storeAddress');
+    Route::post('leads/assignLead', [LeadController::class, 'assignLead'])->name('leads.assignLead');
+    Route::post('leads/deleteLead', [LeadController::class, 'deleteLead'])->name('leads.deleteLead');
 
     Route::post('leads/uploadleadFiles', [LeadController::class, 'uploadleadFiles'])->name('leads.uploadleadFiles');
     Route::get('leads-deleteMedia', [LeadController::class, 'deleteMedia'])->name('leads-deleteMedia');

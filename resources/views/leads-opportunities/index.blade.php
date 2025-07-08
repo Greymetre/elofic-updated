@@ -7,6 +7,18 @@
             position: relative;
         }
 
+         .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+            border: transparent!important;
+            background: transparent!important;
+            font-weight: normal!important;
+            color: #000!important;
+        }
+
+        .ui-widget-header{
+            background: transparent!important;
+            border: transparent!important;
+        }
+
         select.ese {
             border-radius: 50px;
             padding: 4px 10px;
@@ -85,6 +97,36 @@
         .bell {
             width: 30%;
             text-align: right;
+        }
+
+        .bmd-form-group label,label{
+            color: #000;
+            font-weight: 500;
+        }
+
+        html body .modal .form-control {
+            color: #000;
+            font-weight: 500;
+        }
+
+        html body .modal .form-control::placeholder {
+            color: #000 !important;
+            font-weight: 500 !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #000 !important;
+            font-weight: 500 !important;
+        }
+
+        span#confidenceValue {
+            color: #000 !important;
+            font-weight: 500;
+        }
+
+        h4.modal-title {
+            color: #000;
+            font-weight: bold;
         }
 
         @media only screen and (min-width: 992px) and (max-width: 1024px){
@@ -259,14 +301,14 @@
                   <div class="form-group col-md-12">
 
 
-                    <!-- <div class="input-group">
-                      <input type="text" name="amount" id="o_amount" class="form-control" aria-label="Text input with dropdown button">
+                    <div class="input-group">
+                      <input type="number" step="0.01" min="0" name="amount" id="o_amount" class="form-control" aria-label="Text input with dropdown button">
                        <span class="doller"> &#8377;</span>
                        &nbsp;&nbsp;
-                      <div class="input-group-append">
+                      {{-- <div class="input-group-append">
                          {!! Form::select('type', config('constants.OPPORTUNITY_TYPES'),old('type',''), array('class' => 'ese','id'=>'type')) !!}
-                      </div>
-                    </div> -->
+                      </div> --}}
+                    </div>
 
                    
                   </div>
@@ -409,10 +451,10 @@
             note: {
                 required: true
             },
-            // amount: {
-            //     required: true,
-            //     number:true
-            // },
+            amount: {
+                required: true,
+                number:true
+            },
             // type: {
             //     required: true
             // },
@@ -454,7 +496,7 @@
           $('#frmLeadOpportunitiesCreate #o_assigned_to').change();
           $('#frmLeadOpportunitiesCreate #lead_contact_id').change();
           $('#frmLeadOpportunitiesCreate #o_note').val(response.data.note);
-          //$('#frmLeadOpportunitiesCreate #o_amount').val(response.data.amount);
+          $('#frmLeadOpportunitiesCreate #o_amount').val(response.data.amount);
           $('#frmLeadOpportunitiesCreate #confidence').val(response.data.confidence);
           $('#frmLeadOpportunitiesCreate #confidenceValue').html(response.data.confidence+'%');
           $('#frmLeadOpportunitiesCreate #estimated_close_date').val(response.data.estimated_close_date);
