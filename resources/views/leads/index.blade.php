@@ -236,15 +236,56 @@
       background: #f2f2f4 !important;
       color: #000 !important;
     }
+
+    span.brig {
+    font-size: 12px;
+    color: #3777B5;
+    font-weight: 600;
+    background: #D7F4FF;
+    border-radius: 5px;
+    width: 40px;
+    height: 27px;
+    display: inline-flex;
+    text-align: center;
+    padding: 0px 9px;
+}
+
+    .btn-group.kim button {
+        border-radius: 50px;
+        padding: 5px 20px;
+        text-transform: capitalize;
+        background: linear-gradient(45deg, #3860a4 0%, #3694cc 100%) !important;
+        color: #fff !important;
+        border-color: transparent;
+    }
   </style>
   <div class="row">
     <div class="col-md-12">
       <div class="card">
         <div class="card-header card-header-icon card-header-theme">
-          <div class="card-icon">
-            <i class="material-icons">perm_identity</i>
-          </div>
-          <h4 class="card-title ">Leads
+          <!-- <div class="card-icon">
+             <i class="material-icons">perm_identity</i> 
+          </div> -->
+          <h4 class="card-title ">Leads<br><!--<span class="brig">123</span><br>-->
+              <div class="btn-group kim">
+                <button class="btn sort_btns filter_btn  dropdown-toggle"
+                  type="button"
+                  id="dropdownMenuButton"
+                  data-toggle="dropdown"
+                  aria-haspopup="true"
+                  aria-expanded="false"> Poteintial
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                  <a class="dropdown-item" href="#"> Qualified</a>
+                  <a class="dropdown-item" href="#">Trial </a>
+                  <a class="dropdown-item" href="#">Customer </a>
+                  <a class="dropdown-item" href="#">Bad fit </a>
+                  <a class="dropdown-item" href="#">Not Intrsted </a>
+                  <a class="dropdown-item" href="#">Canceled</a>
+                  <a class="dropdown-item" href="#">Dnc</a>
+                  <a class="dropdown-item" href="#">Custmize</a>
+                </div>
+              </div> 
             <span class="">
               <div class="pream_entry">
 

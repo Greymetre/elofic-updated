@@ -655,10 +655,38 @@
             }
         }
 
+        .shdnone {
+            box-shadow: unset !important;
+            background: #e3e9f6;
+        }
+
+        .forus {
+            margin: 0px !important;
+            box-shadow: unset !important;
+            border-radius: 0px !important;
+        }
+
+        .new-task {
+            background: #fff;
+            box-shadow: 0 1px 4px 0 rgba(0, 0, 0, .14)!important;
+            padding: 0!important;
+            margin-top: 21px!important;
+            border-radius: 6px!important;
+            overflow: hidden;
+        }
+
+        button.btn.btn-primary.btn-sm.btn-icon-split.float-right.btnsmall {
+            margin-bottom: 20px;
+        }
+
+        .forus .card-header {
+            border-top: 1px solid #E8E8E8 !important;
+        }
+
     </style>
     <div class="row">
         <div class="col-md-12">
-            <div class="card mt-0 p-0">
+            <div class="card shdnone mt-0 p-0">
                 <div class="card-header m-0 card-header-tabs card-header-warning">
                     <div class="nav-tabs-navigation">
                         <div class="nav-tabs-wrapper new_id">
@@ -668,7 +696,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="card-body">
+                <div class="card-body shdnone">
                     @if(count($errors) > 0)
                     <div class="alert alert-danger">
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -751,9 +779,10 @@
 <!-- Main Content -->
 <div class="row">
 <!-- Left Column: Tasks and Contacts -->
-<div class="col-md-4 new-task">
+<div class="col-md-4 ">
+    <div class="new-task">
 <!-- Tasks -->
-<div class="card mb-4">
+<div class="card forus mb-4">
     <div class="card-header d-flex justify-content-between">
         <strong onclick="toggleCardBody()">Tasks</strong>
         <a class="text-decoration-none" onclick="createTask()">+ Add</a>
@@ -868,7 +897,7 @@ action="{{ route('lead-tasks.store') }}" class="form-horizontal taskform" id="fr
 </div>
 
 <!-- Contacts -->
-<div class="card">
+<div class="card forus">
     <div class="card-header d-flex justify-content-between" >
         <strong onclick="toggleCardBody1()">Contacts</strong>
         <a  class="text-decoration-none" onclick="createContact()">+ Add</a>
@@ -992,7 +1021,7 @@ action="{{ route('lead-contacts.store') }}" class="form-horizontal contact-task-
 </div>
 
 <!--opportunities  -->
-<div class="card">
+<div class="card forus">
     <div class="card-header d-flex justify-content-between" >
         <strong onclick="toggleCardBody2()">Opportunities</strong>
         <a onclick="createOpportunity()" class="text-decoration-none">+ Add</a>
@@ -1157,6 +1186,7 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
 </div>
 
 <!-- opportunities end -->
+</div>
 
 </div>
 

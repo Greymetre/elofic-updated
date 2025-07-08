@@ -3,9 +3,13 @@
         display: flex;
         gap: 20px;
         padding: 20px;
-        background: #f5f5f5;
-        overflow-x: auto;
-        flex-wrap: wrap;
+        background: #fff;
+        flex-wrap: no-wrap;
+        width: 151%;
+    }
+
+    .skolling{
+        overflow-x: scroll;
     }
 
     .column {
@@ -208,7 +212,7 @@ p.dam {
           <!-- <h5>Total Annualised Value: ₹ <strong>{{$no_show_sum+$demo_book_sum+$demo_completed_sum+$negotiating_sum}}  </strong></h5> -->
         </div>
     </div>
-    <div class="">
+    <div class="skolling">
           <div class="board">
               <div class="column p-0" >
                  <div class="card p-0 m-0">

@@ -127,6 +127,17 @@ select.custom-select {
   }
 }
 
+ span.brig {
+    font-size: 12px;
+    color: #3777B5;
+    font-weight: 600;
+    background: #D7F4FF;
+    border-radius: 5px;
+    height: 27px;
+    display: inline-flex;
+    text-align: center;
+    padding: 0px 9px;
+}
   </style>
   <div class="row">
     <div class="col-md-12">
@@ -135,7 +146,7 @@ select.custom-select {
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
-          <h4 class="card-title ">Lead Tasks
+          <h4 class="card-title ">Lead Tasks <span class="brig">20 Contacts</span>
             <span class="">
 
               <div class="pream_entry">

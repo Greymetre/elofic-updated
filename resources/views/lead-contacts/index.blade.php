@@ -225,6 +225,18 @@ div#getLeadContacts_info {
   }
 }
 
+   span.brig {
+    font-size: 12px;
+    color: #3777B5;
+    font-weight: 600;
+    background: #D7F4FF;
+    border-radius: 5px;
+    height: 27px;
+    display: inline-flex;
+    text-align: center;
+    padding: 0px 9px;
+}
+
 
   </style>
   <div class="row">
@@ -234,7 +246,7 @@ div#getLeadContacts_info {
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
-          <h4 class="card-title ">Lead Contacts
+          <h4 class="card-title ">Lead Contacts <span class="brig">20 Contacts</span>
             <span class="">
               <div class="pream_entry">
 

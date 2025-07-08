@@ -9,6 +9,15 @@ body .table thead tr th {
    font-family: 'Poppins', sans-serif !important;
 }
 
+nav.sidebar.close li.nav-link a:after {
+    right: 27px!important;
+    top: 16px!important;
+}
+
+nav.sidebar.close li.nav-link .d-none.mobile_hide{
+    right: -183%!important;
+}
+
 .sidebar{
   background:#334C8B!important;
 }
