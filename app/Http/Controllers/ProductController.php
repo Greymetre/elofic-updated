@@ -44,7 +44,11 @@ class ProductController extends Controller
         abort_if(Gate::denies('product_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $categories = Category::where('active', 'Y')->get();
         $subCategories = Subcategory::where('active', 'Y')->get();
-        return view('products.index', compact('categories', 'subCategories'));
+        if(!isCustomerUser()){
+            return view('products.index', compact('categories', 'subCategories'));
+        }else{
+            return view('products.dealer_product', compact('categories', 'subCategories'));
+        }
     }
 
     public function productList(ProductDataTable $dataTable, Request $request)

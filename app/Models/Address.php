@@ -10,7 +10,7 @@ class Address extends Model
     use HasFactory;
     protected $table = 'addresses';
 
-    protected $fillable = [ 'active', 'address1', 'address2', 'landmark', 'locality', 'customer_id', 'user_id', 'country_id', 'state_id', 'district_id', 'city_id', 'pincode_id', 'zipcode', 'created_by', 'deleted_at', 'created_at', 'updated_at'];
+    protected $fillable = [ 'active', 'address1', 'address2', 'landmark', 'locality', 'customer_id', 'user_id', 'country_id', 'state_id', 'district_id', 'city_id', 'pincode_id', 'zipcode', 'created_by', 'deleted_at', 'created_at', 'updated_at','model_type','model_id'];
 
     public function save_data($request)
     {

@@ -304,6 +304,9 @@ class ReportController extends Controller
                     if ($request->division_id && $request->division_id != null && $request->division_id != '') {
                         $query->where('division_id', $request->division_id);
                     }
+                    if ($request->branch_id && $request->branch_id != null && $request->branch_id != '') {
+                        $query->where('branch_id', $request->branch_id);
+                    }
                     if ($request->start_date && $request->start_date != null && $request->start_date != '' && $request->end_date && $request->end_date != null && $request->end_date != '') {
                         $startDate = date('Y-m-d', strtotime($request->start_date));
                         $endDate = date('Y-m-d', strtotime($request->end_date));
@@ -370,7 +373,8 @@ class ReportController extends Controller
             $query->whereIn('id', config('constants.customer_roles'));
         })->whereIn('id', $userids)->select('id', 'name')->orderBy('name', 'asc')->get();
         $divisions = Division::where('active', 'Y')->get();
-        return view('reports.customervisit', compact('users', 'divisions'));
+        $branches = Branch::where('active', 'Y')->get();
+        return view('reports.customervisit', compact('users', 'divisions', 'branches'));
     }
 
     public function attendancereport(Request $request)
@@ -4086,6 +4090,11 @@ class ReportController extends Controller
 
             if ($request->customer_id && !empty($request->customer_id)) {
                 $data->where('customer_id', $request->customer_id);
+            }
+            if (auth()->user()->hasRole('Customer Dealer')) {
+                $customer_idss = ParentDetail::where('parent_id', auth()->user()->customerid)->pluck('customer_id')->toArray();
+                $customer_idss[] = auth()->user()->customerid;
+                $data->whereIn('customer_id', $customer_idss);
             }
             if ($request->branch_id && !empty($request->branch_id)) {
                 $data->where('branch_id', $request->branch_id);

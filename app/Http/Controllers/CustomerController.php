@@ -106,7 +106,8 @@ class CustomerController extends Controller
                         });
                     }
                     if (!empty($request['parent_id'])) {
-                        $customer_idss = ParentDetail::where('parent_id', $request['parent_id'])->pluck('customer_id');
+                        $customer_idss = ParentDetail::where('parent_id', $request['parent_id'])->pluck('customer_id')->toArray();
+                        $customer_idss[] = auth()->user()->customerid;
                         if (!empty($customer_idss)) {
                             $query->whereIn('id', $customer_idss);
                         }
@@ -148,6 +149,13 @@ class CustomerController extends Controller
                             $q->where('city_id', $request['city_id']);
                         });
                     }
+                    if (!empty($request['division_id'])) {
+                        $division_users = User::where('division_id', $request['division_id'])->pluck('id')->toArray();
+                        $query->where(function ($query) use ($division_users) {
+                            $query->whereIn('executive_id', $division_users)
+                                ->orWhereIn('created_by', $division_users);
+                        });
+                    }
                     if (!empty($request['active'])) {
                         $query->where('active', $request['active']);
                     }
@@ -183,6 +191,9 @@ class CustomerController extends Controller
                 })
                 ->editColumn('created_at', function ($data) {
                     return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
+                })
+                ->editColumn('contact_person', function ($data) {
+                    return $data->first_name . ' ' . $data->last_name;
                 })
                 ->editColumn('beat_name', function ($data) {
                     $beat_names = array();
@@ -252,7 +263,7 @@ class CustomerController extends Controller
                                 ' . $query->mobile . '
                             </a> ';
                 })
-                ->rawColumns(['action', 'beat_name', 'image', 'checkbox', 'createdbyname.name', 'profileimage', 'mobile'])
+                ->rawColumns(['action', 'beat_name', 'image', 'checkbox', 'createdbyname.name', 'profileimage', 'mobile', 'contact_person'])
                 ->make(true);
         }
         $divisions = Division::where('active', 'Y')->get();
@@ -846,6 +857,11 @@ class CustomerController extends Controller
         $customer->active = $newStatus;
 
         if ($customer->save()) {
+            $cUser = User::where('customerid', $customer->id)->first();
+            if ($cUser) {
+                $cUser->active = $newStatus;
+                $cUser->save();
+            }
             $message = ($newStatus == 'N') ? 'Inactive' : 'Active';
 
             // If customer is deactivated, revoke all tokens (logout)

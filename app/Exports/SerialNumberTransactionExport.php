@@ -33,6 +33,8 @@ class SerialNumberTransactionExport implements FromCollection,WithHeadings,Shoul
             'invoice_date',
             'branch_code',
             'party_name',
+            'customer_id',
+            'bp_code',
             'product_name',
             'product_description',
             'product_store',
@@ -54,13 +56,13 @@ class SerialNumberTransactionExport implements FromCollection,WithHeadings,Shoul
         if($this->startdate && $this->startdate != null && $this->startdate != '' && $this->enddate && $this->enddate != null && $this->enddate != ''){
             $data = $data->whereBetween('invoice_date', [$this->startdate, $this->enddate]);
         }
-        $data = $data->groupBy('product_code', 'invoice_no','invoice_date' ,'branch_code','party_name', 'product_description', 'product_store','product_name','group','new_group','qty')->get();
+        $data = $data->groupBy('product_code', 'invoice_no','invoice_date' ,'branch_code','party_name', 'customer_id', 'bp_code', 'product_description', 'product_store','product_name','group','new_group','qty')->limit(1000)->get();
         return $data;
     }
 
     public function headings(): array
     {
-        return ['Invoice No','Invoice Date','Party Name','Product Code','Product Name','Qty','Group','Branch Code','Serial No.','Narration','Product Description','Store','New Group'];
+        return ['Invoice No','Invoice Date','Party Name', 'customer_id', 'bp_code','Product Code','Product Name','Qty','Group','Branch Code','Serial No.','Narration','Product Description','Store','New Group'];
     }
 
     public function map($data): array
@@ -69,6 +71,8 @@ class SerialNumberTransactionExport implements FromCollection,WithHeadings,Shoul
             $data['invoice_no'],
             isset($data['invoice_date']) ? date("d-m-Y", strtotime($data['invoice_date'])) :'',
             $data['party_name'],
+            $data['customer_id'],
+            $data['bp_code'],
             $data['product_code'],
             $data['product_name'],
             $data['serial_no_count'],

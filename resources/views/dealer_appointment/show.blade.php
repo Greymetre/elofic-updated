@@ -138,7 +138,9 @@
             @endif
             @elseif($dealerAppointment->approval_status == '3')
             <span class="btn btn-sm btn-success">Approved</span>
+            @if(!auth()->user()->hasRole('Customer Dealer'))
             <button type="button" class="btn btn-sm btn-warning ml-2" onclick="changeStatus('0','{{$dealerAppointment->id}}')">Pending</button>
+            @endif
             @if($dealerAppointment->getMedia('certificate')->count() < 1 )
               <button type="button" class="btn btn-info" data-toggle="modal" data-target="#generateCertificateModal">Generate Certificate</button>
               @else

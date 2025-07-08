@@ -26,7 +26,7 @@
    <style>
       .iconimg {
          background: #fff;
-         padding: 10px 10px;
+         padding: 0px;
          height: 100%;
          min-height: 50px;
          object-fit: contain;
@@ -34,8 +34,8 @@
       }
 
       .main-panel>.navbar {
-         background: linear-gradient(45deg, #3694cc 0%, #3860a4 100%);
-         padding-top: 7px;
+         background: #FFFFFF;
+         padding: 0 !important;
       }
 
       /* Google Font Import - Poppins */
@@ -114,7 +114,7 @@
          left: 0;
          height: 100%;
          width: 250px;
-         padding: 10px 14px;
+         padding: 0;
          background: var(--sidebar-color);
          transition: var(--tran-05);
          z-index: 100;
@@ -227,8 +227,8 @@
 
       .sidebar header .toggle {
          position: absolute;
-         top: 88%;
-         right: -25px;
+         top: 150%;
+         right: -10px;
          transform: translateY(-50%) rotate(180deg);
          height: 25px;
          width: 25px;
@@ -468,8 +468,12 @@
          color: var(--text-color);
       }
 
-      .logo-main img {
-         width: 100%;
+      .logo-main.desktop img {
+         width: 75%;
+         padding: 10px 5px;
+      }
+      .logo-main.mobile img {
+         width: 68%;
       }
 
 
@@ -730,18 +734,18 @@
    <div class="wrapper">
       <nav class="sidebar">
          <header>
-            <div class="logo rounded">
+            <div class="logo">
                <a href="{{ url('customers') }}" class="simple-text logo-normal">
                   <!-- GAJRA GEARS -->
                   <div class="logo-main desktop">
-                     <img src="{{ url('/').'/'.asset('assets/img/brand_logo.png') }}" class="rounded" alt="...">
+                     <img src="{{ url('/').'/'.asset('assets/img/brand_logo_new.png') }}" class="rounded" alt="...">
                   </div>
                   <div class="logo-main mobile">
                      <img src="{{ url('/').'/'.asset('assets/img/mobillogo.svg') }}" class="rounded" alt="...">
                   </div>
                </a>
             </div>
-            <div class="image-text mt-2">
+            {{--<div class="image-text mt-2">
                <span class="image">
                   <img
                      src="{!! (count(Auth::user()->getMedia('profile_image')) > 0 ? Auth::user()->getMedia('profile_image')[0]->getFullUrl() : asset('assets/img/profileuser.png?')) !!}"
@@ -750,22 +754,22 @@
                <div class="text logo-text">
                   <span class="name"> {!! Auth::user()->name !!}</span>
                </div>
-            </div>
+            </div>--}}
             <i class='bx bx-chevron-right toggle'></i>
          </header>
          <div class="menu-bar">
             <div class="menu">
                <ul class="menu-links">
                   @if(auth()->user()->can(['dashboard_access']))
-                  {{--<li class="nav-link hide_icon {{ request()->is('dashboard') ? 'active' : '' }}">
-                     <a class="collapsed hoveradd" href="{{ url('dashboard') }}">
-                        <i class="material-icons icon">dashboard</i>
-                        <span>{!! trans('panel.sidemenu.dashboard') !!}</span>
-                        <div class="d-none mobile_hide"> {!! trans('panel.sidemenu.dashboard') !!}</div>
-                     </a>
+                  {{--<li class="nav-link hide_icon {{ request()->is('dealer_dashboard') ? 'active' : '' }}">
+                  <a class="collapsed hoveradd" href="{{ url('dashboard') }}">
+                     <i class="material-icons icon">dashboard</i>
+                     <span>{!! trans('panel.sidemenu.dashboard') !!}</span>
+                     <div class="d-none mobile_hide"> {!! trans('panel.sidemenu.dashboard') !!}</div>
+                  </a>
                   </li>--}}
 
-                  <li class="nav-link {{ request()->is('sales_summary_dashboard*') ? 'active' : '' }}">
+                  <li class="nav-link {{ request()->is('sales_summary_dashboard*') || request()->is('dealer_dashboard') ? 'active' : '' }}">
                      <a class="collapsed hoveradd" data-toggle="collapse" href="#dashMenu" aria-expanded="false">
                         <i class="material-icons icon">diversity_3</i>
                         <span> {!! trans('panel.sidemenu.dashboard') !!}
@@ -774,6 +778,15 @@
                      </a>
                      <div class="collapse" id="dashMenu" style="">
                         <ul class="navd">
+                           @if(auth()->user()->can(['dealer_dashboard']))
+                           <li class="nav-link-btn {{ request()->is('dealer_dashboard*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('dealer_dashboard') }}">
+                                 <i class="material-icons icon">transcribe</i>
+                                 <span>Dealer Dashboard</span>
+                                 <div class="d-none mobile_hide">Dealer Dashboard</div>
+                              </a>
+                           </li>
+                           @endif
                            @if(auth()->user()->can(['sales_summary_dashboard']))
                            <li class="nav-link-btn {{ request()->is('sales_summary_dashboard*') ? 'active' : '' }}">
                               <a class="hoveradd2" href="{{ url('sales_summary_dashboard') }}">
@@ -789,6 +802,51 @@
                                  <i class="material-icons icon">transcribe</i>
                                  <span>Employee Related Expenses</span>
                                  <div class="d-none mobile_hide">Employee Related Expenses</div>
+                              </a>
+                           </li>
+                           @endif
+                        </ul>
+                     </div>
+                  </li>
+                  @endif
+                  @if(auth()->user()->can(['lead_management_access']))
+                  <li class="nav-link {{ request()->is('leads*') || request()->is('contacts*') ? 'active' : '' }}">
+                     <a class="collapsed hoveradd" data-toggle="collapse" href="#leadManagementMenu" aria-expanded="false">
+                        <i class="material-icons icon">leaderboard</i>
+                        <span> Lead Management
+                        </span>
+                        <div class="d-none mobile_hide">Lead Management</div>
+                     </a>
+                     <div class="collapse" id="leadManagementMenu" style="">
+                        <ul class="navd">
+                           @if(auth()->user()->can(['lead_access']))
+                           <li class="nav-link-btn {{ request()->is('leads*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('leads') }}">
+                                 <i class="material-icons icon">diamond</i>
+                                 <span>Leads</span>
+                                 <div class="d-none mobile_hide">Leads</div>
+                              </a>
+                           </li>
+
+                            <li class="nav-link-btn {{ request()->is('lead-contacts*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('lead-contacts') }}">
+                                 <i class="material-icons icon">diamond</i>
+                                 <span>Contacts</span>
+                                 <div class="d-none mobile_hide">Contacts</div>
+                              </a>
+                           </li>
+                           <li class="nav-link-btn {{ request()->is('lead-opportunities*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('lead-opportunities') }}">
+                                 <i class="material-icons icon">diamond</i>
+                                 <span>Opportunities</span>
+                                 <div class="d-none mobile_hide">Opportunities</div>
+                              </a>
+                           </li>
+                           <li class="nav-link-btn {{ request()->is('lead-tasks*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('lead-tasks') }}">
+                                 <i class="material-icons icon">diamond</i>
+                                 <span>Tasks</span>
+                                 <div class="d-none mobile_hide">Tasks</div>
                               </a>
                            </li>
                            @endif
@@ -970,8 +1028,8 @@
                   <li class="nav-link {{ request()->is('categories*') || request()->is('subcategories*') || request()->is('brands*') || request()->is('products*') || request()->is('units*') || request()->is('production*') ? 'active' : '' }}">
                      <a class="collapsed hoveradd" data-toggle="collapse" href="#productMenu" aria-expanded="false">
                         <i class="material-icons icon">conveyor_belt</i>
-                        <span> {!! trans('panel.sidemenu.product_master') !!} 
-                        </span> 
+                        <span> {!! trans('panel.sidemenu.product_master') !!}
+                        </span>
                         <div class="d-none mobile_hide">{!! trans('panel.sidemenu.product_master') !!}</div>
                      </a>
                      <div class="collapse" id="productMenu" style="">
@@ -1047,7 +1105,7 @@
                               </a>
                            </li>
                            @endif
-                            @if(auth()->user()->can('opening_stock_view'))
+                           @if(auth()->user()->can('opening_stock_view'))
                            <li class="nav-link-btn {{ request()->is('opening-stocks*') ? 'active' : '' }}">
                               <a class="hoveradd2" href="{{ url('opening-stocks') }}">
                                  <i class="material-icons icon">donut_small</i>
@@ -1056,7 +1114,7 @@
                               </a>
                            </li>
                            @endif
-                            @if(auth()->user()->can('branch_opening_qty_view'))
+                           @if(auth()->user()->can('branch_opening_qty_view'))
                            <li class="nav-link-btn {{ request()->is('opening-quantity*') ? 'active' : '' }}">
                               <a class="hoveradd2" href="{{ url('opening-quantity') }}">
                                  <i class="material-icons icon">donut_small</i>
@@ -1074,7 +1132,20 @@
                               </a>
                            </li>
                            @endif
+                        </ul>
+                     </div>
+                  </li>
+                  @endif
 
+                  @if(auth()->user()->can('forecast_access'))
+                  <li class="nav-link {{ request()->is('planned-sop-forecast*') || request()->is('planned-sop*') ? 'active' : '' }}">
+                     <a class="collapsed hoveradd" data-toggle="collapse" href="#forecastMenu" aria-expanded="false">
+                        <i class="material-icons icon">online_prediction</i>
+                        <span> Forecast </span>
+                        <div class="d-none mobile_hide"> Forecast</div>
+                     </a>
+                     <div class="collapse" id="forecastMenu" style="">
+                        <ul class="navd">
                            <li class="nav-link-btn {{ request()->is('planned-sop*') ? 'active' : '' }}">
                               <a class="hoveradd2" href="{{ url('planned-sop') }}">
                                  <i class="material-icons icon">warehouse</i>
@@ -1083,13 +1154,13 @@
                               </a>
                            </li>
                            @if(auth()->user()->can('planned_forecast'))
-                            <li class="nav-link-btn {{ request()->is('planned-sop-forecast*') ? 'active' : '' }}">
-                                 <a class="hoveradd2" href="{{ url('planned-sop-forecast') }}">
-                                    <i class="material-icons icon">warehouse</i>
-                                    <span>S&OP Forecast</span>
-                                    <div class="d-none mobile_hide"> S&OP Forecast</div>
-                                 </a>
-                              </li>
+                           <li class="nav-link-btn {{ request()->is('planned-sop-forecast*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('planned-sop-forecast') }}">
+                                 <i class="material-icons icon">warehouse</i>
+                                 <span>S&OP Forecast</span>
+                                 <div class="d-none mobile_hide"> S&OP Forecast</div>
+                              </a>
+                           </li>
                            @endif
                         </ul>
                      </div>
@@ -1403,6 +1474,24 @@
                                  <i class="material-icons icon">outlet</i>
                                  <span>Expense</span>
                                  <div class="d-none mobile_hide"> Expense</div>
+                              </a>
+                           </li>
+                           @endif
+                           @if(auth()->user()->can('customer_outstanting'))
+                           <li class="nav-link-btn {{ request()->is('reports/customer_outstanting*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('reports/customer_outstanting') }}">
+                                 <i class="material-icons icon">nature_people</i>
+                                 <span>Dealer Outstanding</span>
+                                 <div class="d-none mobile_hide"> Dealer Outstanding</div>
+                              </a>
+                           </li>
+                           @endif
+                           @if(auth()->user()->can('dealer_account_statement'))
+                           <li class="nav-link-btn {{ request()->is('dealer_account_statement*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('dealer_account_statement') }}">
+                                 <i class="material-icons icon">request_page</i>
+                                 <span>Dealer Account Statement</span>
+                                 <div class="d-none mobile_hide"> Dealer Account Statement</div>
                               </a>
                            </li>
                            @endif
@@ -2304,16 +2393,7 @@
                         </a>
                      </li>
                      @endif
-                     @if(auth()->user()->can('customer_outstanting'))
-                     <li class="nav-link-btn {{ request()->is('reports/customer_outstanting*') ? 'active' : '' }}">
-                        <a class="hoveradd2" href="{{ url('reports/customer_outstanting') }}">
-                           <i class="material-icons icon">nature_people</i>
-                           <span>Cutomer Outstanding</span>
-                           <div class="d-none mobile_hide"> Cutomer Outstanding</div>
-                        </a>
-                     </li>
-                     @endif
-                      <li class="nav-link-btn {{ request()->is('reports/marketIntelligence*') ? 'active' : '' }}">
+                     <li class="nav-link-btn {{ request()->is('reports/marketIntelligence*') ? 'active' : '' }}">
                         <a class="hoveradd2" href="{{ url('reports/marketIntelligence') }}">
                            <i class="material-icons icon">nature_people</i>
                            <span> Market Intelligence</span>
@@ -2387,7 +2467,7 @@
    <div class="main-panel">
       <!-- Navbar -->
       <nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top ">
-         <div class="container-fluid  p-2" style="background: transparent; !important">
+         <div class="container-fluid" style="background: transparent; !important">
             <div class="new_demo">
             <img class="rounded ml-2 iconimg" src="{!! url('/').'/'.asset('assets/img/companylogo.png') !!}" width="120">
             <!-- <img class="rounded ml-2  iconimg" src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" width="100"> -->
@@ -2429,17 +2509,22 @@
                              <a class="dropdown-item" href="#">Another One</a>
                            </div>
                            </li> -->
-                  <li class="nav-item dropdown">
+                  <li class="nav-item dropdown d-flex" style="align-items: center;">
+                     <p class="m-0" style="font-weight: bold;">{{ auth()->user()->name }}</p>
                      <a class="nav-link" href="javascript:;" id="navbarDropdownProfile" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        @if (auth()->user()->getMedia('profile_image')->count() > 0 && Storage::disk('s3')->exists(auth()->user()->getMedia('profile_image')[0]->getPath()))
+                        <img src="{{ auth()->user()->getMedia('profile_image')[0]->getFullUrl() }}" border="0" width="40" class="rounded-circle" />
+                        @else
                         <i class="material-icons">person</i>
+                        @endif
                         <p class="d-lg-none d-md-block">
                            Account
                         </p>
                      </a>
                      @auth
                      <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownProfile">
-                        <a class="dropdown-item" href="{{ url('change-password') }}">Change Password</a>
-                        <div class="dropdown-divider"></div>
+                        <!-- <a class="dropdown-item" href="{{ url('change-password') }}">Change Password</a> -->
+                        <!-- <div class="dropdown-divider"></div> -->
                         <a class="dropdown-item" href="{{ url('logout') }}">Log out</a>
                      </div>
                      @endauth
@@ -2509,7 +2594,7 @@
       $(function() {
          //Initialize Select2 Elements
          $('.select2').select2()
-         
+
          $('#toggle-one').bootstrapToggle();
          $('.datetimepicker').datetimepicker({
             format: 'YYYY-MM-DD HH:mm'
@@ -2585,14 +2670,18 @@
       // });
    </script>
    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-8D1DXGE6Z6"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+   <script async src="https://www.googletagmanager.com/gtag/js?id=G-8D1DXGE6Z6"></script>
+   <script>
+      window.dataLayer = window.dataLayer || [];
 
-  gtag('config', 'G-8D1DXGE6Z6');
-</script>
+      function gtag() {
+         dataLayer.push(arguments);
+      }
+      gtag('js', new Date());
+
+      gtag('config', 'G-8D1DXGE6Z6');
+   </script>
 </body>
 @yield('script')
+
 </html>

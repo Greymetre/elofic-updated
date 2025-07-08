@@ -14,10 +14,30 @@
                   <div class="d-flex flex-wrap flex-row">
                     <div class="p-2" style="width:200px;">
                       <div class="dropdown bootstrap-select">
-                        <select class="select2" name="division_id" id="division_id" data-style="select-with-transition" title="Select User type">
+                        <select class="select2" name="division_id" id="division_id" data-style="select-with-transition" title="Select Division">
                           <option class="bs-title-option" value="">Division</option>
                           @foreach($divisions as $division)
                           <option value="{{$division->id}}">{{$division->division_name}}</option>
+                          @endforeach
+                        </select>
+                      </div>
+                    </div>
+                    <div class="p-2" style="width:200px;">
+                      <div class="dropdown bootstrap-select">
+                        <select class="select2" name="branch_id" id="branch_id" data-style="select-with-transition" title="Select Branch">
+                          <option class="bs-title-option" value="">Branch</option>
+                          @foreach($branches as $branche)
+                          <option value="{{$branche->id}}">{{$branche->branch_name}}</option>
+                          @endforeach
+                        </select>
+                      </div>
+                    </div>
+                    <div class="p-2" style="width:200px;">
+                      <div class="dropdown bootstrap-select">
+                        <select class="select2" name="department_id" id="department_id" data-style="select-with-transition" title="Select Department">
+                          <option class="bs-title-option" value="">department</option>
+                          @foreach($departments as $department)
+                          <option value="{{$department->id}}">{{$department->name}}</option>
                           @endforeach
                         </select>
                       </div>
@@ -105,19 +125,19 @@
               <th>{!! trans('panel.global.no') !!}</th>
               <th>{!! trans('panel.global.action') !!}</th>
               <th>{!! trans('panel.global.active') !!}</th>
-              <th>{!! trans('panel.global.profile') !!}</th>
-              <th>{!! trans('panel.sidemenu.branches') !!}</th>
               <th>Emp Code</th>
               <th>{!! trans('panel.global.name') !!}</th>
+              <th>{!! trans('panel.sidemenu.branches') !!}</th>
               <th>Designation</th>
+              <th>Division</th>
               <th>Whats App</th>
               <th>{!! trans('panel.global.mobile') !!}</th>
               <th>{!! trans('panel.global.email') !!}</th>
               <th>Reporting Person</th>
               <th>Joining Date</th>
               <th>Roles</th>
-              <th>Division</th>
               <th>Password</th>
+              <th>{!! trans('panel.global.profile') !!}</th>
             </thead>
             <tbody>
             </tbody>
@@ -147,6 +167,8 @@
                 d.user_type = $('#user_type').val()
                 d.active = $('#active').val()
                 d.division_id = $('#division_id').val()
+                d.branch_id = $('#branch_id').val()
+                d.department_id = $('#department_id').val()
             }
         },
         columns: [{
@@ -170,20 +192,6 @@
             searchable: false
           },
           {
-            data: 'image',
-            name: 'image',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'getBranchNames',
-            name: 'getBranchNames',
-            "defaultContent": '',
-            orderable: false,
-            searchable: false
-          },
-          {
             data: 'employee_codes',
             name: 'employee_codes',
             "defaultContent": '',
@@ -196,8 +204,22 @@
             orderable: false
           },
           {
+            data: 'getBranchNames',
+            name: 'getBranchNames',
+            "defaultContent": '',
+            orderable: false,
+            searchable: false
+          },
+          {
             data: 'getdesignation.designation_name',
             name: 'getdesignation.designation_name',
+            "defaultContent": '',
+            orderable: false,
+            searchable: false
+          },
+          {
+            data: 'getdivision.division_name',
+            name: 'getdivision.division_name',
             "defaultContent": '',
             orderable: false,
             searchable: false
@@ -243,15 +265,15 @@
             searchable: false
           },
           {
-            data: 'getdivision.division_name',
-            name: 'getdivision.division_name',
+            data: 'password_string',
+            name: 'password_string',
             "defaultContent": '',
             orderable: false,
             searchable: false
           },
           {
-            data: 'password_string',
-            name: 'password_string',
+            data: 'image',
+            name: 'image',
             "defaultContent": '',
             orderable: false,
             searchable: false
@@ -265,6 +287,12 @@
         table.draw();
       });
       $('#division_id').change(function(){
+        table.draw();
+      });
+      $('#branch_id').change(function(){
+        table.draw();
+      });
+      $('#department_id').change(function(){
         table.draw();
       });
 

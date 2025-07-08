@@ -85,9 +85,15 @@ use App\Http\Controllers\SapStockController;
 use App\Http\Controllers\WareHouseController;
 use App\Http\Controllers\PlannedSOPController;
 use App\Http\Controllers\ClaimGenerationController;
+use App\Http\Controllers\LeadController;
+use App\Http\Controllers\LeadContactsController;
+use App\Http\Controllers\LeadNotesController;
+use App\Http\Controllers\LeadTasksController;
+use App\Http\Controllers\LeadOpportunitiesController;
 use App\Http\Controllers\ServiceBillComplaintType;
 use App\Http\Controllers\OpeningStockController;
 use App\Http\Controllers\PowerBiSettingController;
+use App\Models\DealerPortalSettings;
 use App\Models\PowerBiSetting;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
@@ -140,6 +146,10 @@ Route::post('/dealer-appointment-kyc-submit', [DealerAppointmentController::clas
 
 
 Route::group(['middleware' => ['auth']], function () {
+    Route::get('/dealer_account_statement', function () {
+        abort_if(Gate::denies('dealer_account_statement'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        return view('work_in_progress');
+    });
     Route::get('/sales_summary_dashboard', function () {
         abort_if(Gate::denies('sales_summary_dashboard'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $url = PowerBiSetting::where('key', 'sales')->first()->value;
@@ -150,8 +160,46 @@ Route::group(['middleware' => ['auth']], function () {
         $url = PowerBiSetting::where('key', 'employee_expense')->first()->value;
         return view('dashboard.employee_expense_report', compact('url'));
     });
+    
+    //Lead Management
+    Route::resource('leads', LeadController::class);
+    Route::post('leads/getLeads', [LeadController::class, 'getLeads'])->name('leads.getLeads');
+    Route::post('leads/searchExistsLead', [LeadController::class, 'searchExistsLead'])->name('leads.searchExistsLead');
+    Route::post('leads/storeAddress', [LeadController::class, 'storeAddress'])->name('leads.storeAddress');
+    Route::post('leads/assignLead', [LeadController::class, 'assignLead'])->name('leads.assignLead');
+    Route::post('leads/deleteLead', [LeadController::class, 'deleteLead'])->name('leads.deleteLead');
+
+    Route::post('leads/uploadleadFiles', [LeadController::class, 'uploadleadFiles'])->name('leads.uploadleadFiles');
+    Route::get('leads-deleteMedia', [LeadController::class, 'deleteMedia'])->name('leads-deleteMedia');
+    Route::get('leads-exportLeads', [LeadController::class, 'exportLeads'])->name('leads-exportLeads');
+
+    //Contacts Management
+    Route::resource('lead-contacts', LeadContactsController::class);
+    Route::post('lead-contacts/getLeadContacts', [LeadContactsController::class, 'getLeadContacts'])->name('lead-contacts.getLeadContacts');
+    Route::get('contacts-exportContacts', [LeadContactsController::class, 'exportContacts'])->name('contacts-exportContacts');
+     Route::post('lead-contacts/checkboxAction', [LeadContactsController::class, 'checkboxAction'])->name('lead-contacts.checkboxAction');
+
+
+    // LeadNotesController Management
+    Route::resource('lead-notes', LeadNotesController::class);
+
+
+    Route::resource('lead-tasks', LeadTasksController::class);
+    Route::get('tasks-exportTasks', [LeadTasksController::class, 'exportTasks'])->name('tasks-exportTasks');
+    Route::post('lead-tasks/checkboxAction', [LeadTasksController::class, 'checkboxAction'])->name('lead-tasks.checkboxAction');
+
+    
+    Route::post('lead-tasks/getLeadTasks', [LeadTasksController::class, 'getLeadTasks'])->name('lead-tasks.getLeadTasks');
+    
+    Route::resource('lead-opportunities', LeadOpportunitiesController::class);
+    Route::post('lead-opportunitiess/getLeadContacts', [LeadOpportunitiesController::class, 'getCardData'])->name('lead-opportunities.getCardData');
+    Route::post('lead-opportunitiess/updateCardStatus', [LeadOpportunitiesController::class, 'updateCardStatus'])->name('lead-opportunities.updateCardStatus');
+    
+    Route::post('lead-opportunitiess/getsingleData', [LeadOpportunitiesController::class, 'getsingleData'])->name('lead-opportunities.getsingleData');
+
     //Dashboard
     Route::get('dashboard', [DashboardController::class, 'index']);
+    Route::get('/dealer_dashboard', [DashboardController::class, 'dealer_dashboard']);
     Route::post('dashboardData', [DashboardController::class, 'dashboardData']);
     Route::post('travelSummaryData', [DashboardController::class, 'travelSummaryData']);
     Route::post('visitSummaryData', [DashboardController::class, 'visitSummaryData']);

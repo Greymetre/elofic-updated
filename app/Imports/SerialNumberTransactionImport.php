@@ -24,10 +24,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Validator;
 
-class SerialNumberTransactionImport implements ToCollection,WithValidation,WithHeadingRow, WithBatchInserts , WithChunkReading
+class SerialNumberTransactionImport implements ToCollection, WithValidation, WithHeadingRow, WithBatchInserts, WithChunkReading
 {
     use Importable;
-    
+
     public function model(array $row)
     {
         return new Product([
@@ -38,27 +38,31 @@ class SerialNumberTransactionImport implements ToCollection,WithValidation,WithH
     {
         foreach ($rows as $row) {
             $excelDate = $row['invoice_date'] - 25569; // Adjust for Excel's epoch
-            $unixTimestamp = strtotime('+'.$excelDate.' days', strtotime('1970-01-01'));
+            $unixTimestamp = strtotime('+' . $excelDate . ' days', strtotime('1970-01-01'));
             $carbonDate = Carbon::createFromTimestamp($unixTimestamp);
             $all_serial_no = explode(',', $row['serial_no']);
             $product = Product::where('product_code', $row['product_code'])->first();
             foreach ($all_serial_no as $serial_no) {
-                if($serial_no != '' && $serial_no != NULL){
-                    $product = Services::create([
-                        'product_name' => isset($product->product_name)? ucfirst($product->product_name):'',
-                        'product_code' => isset($row['product_code'])? $row['product_code']:'',
-                        'product_description' => isset($product->description)? ucfirst($product->description):'',
-                        'product_store' => isset($row['store'])? $row['store']:'',
-                        'invoice_no' => isset($row['invoice_no'])? $row['invoice_no']:'',
-                        'invoice_date' => isset($row['invoice_date'])? date('Y-m-d', strtotime($carbonDate)):'',
-                        'branch_code' => isset($row['branch_code'])? $row['branch_code']:'',
-                        'party_name' => isset($row['party_name'])? ucfirst($row['party_name']):'',
-                        'qty' => isset($row['qty'])? $row['qty']:0,
-                        'description' => isset($row['description'])? ucfirst($row['description']):'',
-                        'group' => isset($row['group'])? $row['group']:null,
-                        'new_group' => isset($row['new_group'])? $row['new_group']:null,
-                        'serial_no' => isset($serial_no)? $serial_no:null,
-                        'narration' => isset($row['narration'])? $row['narration']:null,
+                if ($serial_no != '' && $serial_no != NULL) {
+                    $product = Services::updateOrCreate([
+                        'serial_no' => isset($serial_no) ? $serial_no : null,
+                        'invoice_no' => isset($row['invoice_no']) ? $row['invoice_no'] : '',
+
+                    ], [
+                        'product_name' => isset($product->product_name) ? ucfirst($product->product_name) : '',
+                        'product_code' => isset($row['product_code']) ? $row['product_code'] : '',
+                        'product_description' => isset($product->description) ? ucfirst($product->description) : '',
+                        'product_store' => isset($row['store']) ? $row['store'] : '',
+                        'invoice_date' => isset($row['invoice_date']) ? date('Y-m-d', strtotime($carbonDate)) : '',
+                        'branch_code' => isset($row['branch_code']) ? $row['branch_code'] : '',
+                        'party_name' => isset($row['party_name']) ? ucfirst($row['party_name']) : '',
+                        'customer_id' => isset($row['customer_id']) ? $row['customer_id'] : '',
+                        'bp_code' => isset($row['bp_code']) ? $row['bp_code'] : '',
+                        'qty' => isset($row['qty']) ? $row['qty'] : 0,
+                        'description' => isset($row['description']) ? ucfirst($row['description']) : '',
+                        'group' => isset($row['group']) ? $row['group'] : null,
+                        'new_group' => isset($row['new_group']) ? $row['new_group'] : null,
+                        'narration' => isset($row['narration']) ? $row['narration'] : null,
                         'created_by' => Auth::user()->id,
                         'created_at' => getcurentDateTime(),
                         'updated_at' => getcurentDateTime(),

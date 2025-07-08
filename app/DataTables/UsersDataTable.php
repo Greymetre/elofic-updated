@@ -24,6 +24,9 @@ class UsersDataTable extends DataTable
             ->editColumn('created_at', function ($data) {
                 return isset($data->created_at) ? showdatetimeformat($data->created_at) : '';
             })
+            ->editColumn('name', function ($data) {
+                return $data->name . ($data->user_customer ? ' (' . $data->user_customer->sap_code . ')' : '');
+            })
             ->editColumn('getBranchNames', function ($data) {
                 $branchIds = array_filter(explode(',', $data->branch_id)); // Remove empty values
                 if (!empty($branchIds)) {
@@ -121,6 +124,12 @@ class UsersDataTable extends DataTable
                 }
                 if($request->division_id && !empty($request->division_id)){
                     $query->where('division_id', $request->division_id);
+                }
+                if($request->branch_id && !empty($request->branch_id)){
+                    $query->where('branch_id', $request->branch_id);
+                }
+                if($request->department_id && !empty($request->department_id)){
+                    $query->where('department_id', $request->department_id);
                 }
             })
             ->whereHas('roles', function ($query) use ($request) {

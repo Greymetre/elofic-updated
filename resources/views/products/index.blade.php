@@ -6,7 +6,7 @@
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
-          <h4 class="card-title ">{!! trans('panel.product.title_singular') !!}{!! trans('panel.global.list') !!}
+          <h4 class="card-title ">{!! trans('panel.product.title_singular') !!} {!! trans('panel.global.list') !!}
             <span class="">
               <div class="btn-group header-frm-btn">
                 @if(auth()->user()->can(['product_download']))
@@ -18,7 +18,6 @@
                         <option value="">Select Status</option>
                         <option value="Y">Active</option>
                         <option value="N">Inactive</option>
-                        
                       </select>
                     </div>
 
@@ -108,20 +107,20 @@
                 <th>{!! trans('panel.global.no') !!}</th>
                 <th>{!! trans('panel.global.action') !!}</th>
                 <th>{!! trans('panel.product.fields.product_image') !!}</th>
-                <th>{!! trans('panel.product.fields.product_name') !!}</th>
-                <th>Product Stage</th>
-                <th>kW</th>
-                <th>Description</th>
-                <th>HP</th>
-                <th>{!! trans('panel.product.fields.brand_name') !!}</th>
-                <th>{!! trans('panel.product.fields.mrp') !!}</th>
                 <th>{!! trans('panel.product.fields.category_name') !!}</th>
                 <th>{!! trans('panel.product.fields.subcategory_name') !!}</th>
-                <th>{!! trans('panel.product.fields.unit_name') !!}</th>
-                <th>{!! trans('panel.product.fields.price') !!}</th>
-                <th>{!! trans('panel.product.fields.suc-del') !!}</th>
-                <th>{!! trans('panel.product.fields.selling_price') !!}</th>
+                <th>{!! trans('panel.product.fields.product_name') !!}</th>
+                <th>HP</th>
+                <th>Product Stage</th>
+                <th>{!! trans('panel.product.fields.mrp') !!}</th>
                 <th>{!! trans('panel.product.fields.gst') !!}</th>
+                <th>Discount %</th>
+                <th>Expiry Interval Preiod</th>
+                <th>{!! trans('panel.product.fields.suc-del') !!}</th>
+                <th>SAP Code</th>
+                <!-- <th>{!! trans('panel.product.fields.unit_name') !!}</th> -->
+                <!-- <th>{!! trans('panel.product.fields.price') !!}</th> -->
+                <!-- <th>{!! trans('panel.product.fields.selling_price') !!}</th> -->
                 <th>{!! trans('panel.global.created_by') !!}</th>
                 <th>{!! trans('panel.global.created_at') !!}</th>
               </thead>
@@ -179,48 +178,6 @@
             searchable: false
           },
           {
-            data: 'product_name',
-            name: 'product_name',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'product_no',
-            name: 'product_no',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'part_no',
-            name: 'part_no',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'description',
-            name: 'description',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'specification',
-            name: 'specification',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'brands.brand_name',
-            name: 'brands.brand_name',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'productpriceinfo.mrp',
-            name: 'productpriceinfo.mrp',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
             data: 'categories.category_name',
             name: 'categories.category_name',
             orderable: false,
@@ -233,14 +190,44 @@
             "defaultContent": ''
           },
           {
-            data: 'unitmeasures.unit_code',
-            name: 'unitmeasures.unit_code',
+            data: 'product_name',
+            name: 'product_name',
             orderable: false,
             "defaultContent": ''
           },
           {
-            data: 'productpriceinfo.price',
-            name: 'productpriceinfo.price',
+            data: 'specification',
+            name: 'specification',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'product_no',
+            name: 'product_no',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'productpriceinfo.mrp',
+            name: 'productpriceinfo.mrp',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'productpriceinfo.gst',
+            name: 'productpriceinfo.gst',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'productpriceinfo.discount',
+            name: 'productpriceinfo.discount',
+            orderable: false,
+            "defaultContent": ''
+          },
+          {
+            data: 'expiry_info',
+            name: 'expiry_info',
             orderable: false,
             "defaultContent": ''
           },
@@ -251,17 +238,29 @@
             "defaultContent": ''
           },
           {
-            data: 'productpriceinfo.selling_price',
-            name: 'productpriceinfo.selling_price',
+            data: 'sap_code',
+            name: 'sap_code',
             orderable: false,
             "defaultContent": ''
           },
-          {
-            data: 'productpriceinfo.gst',
-            name: 'productpriceinfo.gst',
-            orderable: false,
-            "defaultContent": ''
-          },
+          // {
+          //   data: 'unitmeasures.unit_code',
+          //   name: 'unitmeasures.unit_code',
+          //   orderable: false,
+          //   "defaultContent": ''
+          // },
+          // {
+          //   data: 'productpriceinfo.price',
+          //   name: 'productpriceinfo.price',
+          //   orderable: false,
+          //   "defaultContent": ''
+          // },
+          // {
+          //   data: 'productpriceinfo.selling_price',
+          //   name: 'productpriceinfo.selling_price',
+          //   orderable: false,
+          //   "defaultContent": ''
+          // },
           {
             data: 'createdbyname.name',
             name: 'createdbyname.name',

@@ -13,6 +13,16 @@
                 @if(auth()->user()->can(['order_download']))
                 <form method="GET" action="{{ URL::to('orders-download') }}">
                   <div class="d-flex flex-wrap flex-row">
+                  @if(!isCustomerUser())
+                    <div class="p-2" style="width:190px;">
+                      <select class="select2" name="user_id" id="user_id">
+                        <option value="">Select User</option>
+                        @foreach($users as $user)
+                        <option value="{{$user->id}}">{{$user->name}}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                  @endif
                   <div class="p-2" style="width:190px;">
                       <select class="select2" name="dividion_id" id="dividion_id" required>
                         <option value="">Select Division</option>
@@ -37,6 +47,7 @@
                         @endforeach
                       </select>
                     </div>
+                    @if(!isCustomerUser())
                     <div class="p-2" style="width:190px;">
                       <select class="select2" name="distributor_id" id="distributor_id" title="Select Distributor">
                         <option value="">Select Distributor</option>
@@ -45,7 +56,7 @@
                         @endforeach
                       </select>
                     </div>
-
+                    @endif
                     <div class="p-2" style="width:190px;">
                       <select class="selectpicker" name="pending_status" id="pending_status" data-style="select-with-transition">
                         <option value="">Select Status</option>
@@ -168,6 +179,7 @@
             d.pending_status = $('#pending_status').val();
             d.startdate = $('#start_date').val();
             d.enddate = $('#end_date').val();
+            d.user_id = $('#user_id').val();
           }
         },
         columns: [{
@@ -261,6 +273,9 @@
       });
 
       $('#retailers_id').change(function() {
+        table.draw();
+      });
+       $('#user_id').change(function() {
         table.draw();
       });
       $('#end_date').change(function() {

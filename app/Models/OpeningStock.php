@@ -20,7 +20,12 @@ class OpeningStock extends Model
 
     public function product()
     {
-        return $this->belongsTo(Product::class, 'product_id');
+        return Product::where(function($query) {
+            $query->where('product_code', $this->item_code)
+                  ->orWhere('sap_code', $this->item_code);
+        })->whereHas('subcategories', function($query) {
+            $query->where('subcategory_name', $this->item_group);
+        })->first();
     }
 
     public function warehouse()

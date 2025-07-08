@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Models\Branch;
 use App\Models\PlannedSOP;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -17,6 +18,8 @@ use App\Models\PrimarySales;
 use App\Models\Product;
 use App\Models\WareHouse;
 use App\Models\BranchOprningQuantity;
+use App\Models\OpeningStock;
+use Illuminate\Support\Facades\DB;
 
 class PlannedSopSalePUMExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithEvents
 {
@@ -40,12 +43,12 @@ class PlannedSopSalePUMExport implements FromCollection, WithHeadings, ShouldAut
 
 
         $data = PlannedSOP::with(['getProduct.subcategories', 'getProduct.productdetails', 'getProduct.categories', 'getBranch', 'primarySale']);
-        if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Sub_Admin')){
+        if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Sub_Admin')) {
             $data->whereRaw("FIND_IN_SET(?, view_only)", [Auth::user()->division_id]);
         }
-        if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Sub_Admin')){
+        if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Sub_Admin')) {
             $branch_ids = explode(',', Auth::user()->branch_id);
-            $data->whereIn('branch_id' , $branch_ids);
+            $data->whereIn('branch_id', $branch_ids);
         }
         if (isset($start_date) && isset($end_date)) {
             $data->whereBetween('planning_month', [$start_date, $end_date]);
@@ -95,12 +98,91 @@ class PlannedSopSalePUMExport implements FromCollection, WithHeadings, ShouldAut
         if (isset($this->filters['planning_month'])) {
             try {
                 $formatted_date = Carbon::createFromFormat('F Y', $this->filters['planning_month'])->startOfMonth();
+                $last_month = Carbon::createFromFormat('F Y', $this->filters['planning_month'])->subMonth()->startOfMonth()->format("Y-m-d");
                 $planning_month = $formatted_date->format("Y-m-d");
-                $data->whereDate('planning_month', $planning_month);
+
+                // Get main month data
+                $data = $data->whereDate('planning_month', $planning_month);
+
+                // Get existing product+branch combinations from planning month
+                $currentMonthCombinations = clone $data;
+                $currentCombinations = $currentMonthCombinations->get(['product_id', 'branch_id'])->map(function ($item) {
+                    return $item->product_id . '-' . $item->branch_id;
+                });
+
+                // Add data from last month where product_id+branch_id is NOT in current combinations
+                $data = $data->orWhere(function ($sub) use ($last_month, $currentCombinations) {
+                    $sub->whereDate('planning_month', $last_month)
+                        ->whereNotIn(DB::raw("CONCAT(product_id, '-', branch_id)"), $currentCombinations->all());
+                });
+                $product_ids = Product::whereNotNull('branch_id')
+                    ->where('branch_id', '!=', '')
+                    ->pluck('id')
+                    ->toArray();
+
+                $openingStocks = OpeningStock::all();
+                $all_product_ids = $data->pluck('product_id', 'branch_id'); // [branch_id => product_id]
+
+                $others = $openingStocks->filter(function ($stock) use ($all_product_ids, $product_ids) {
+                    $product = $stock->product();
+                    if (!$product) return false;
+
+                    $stockBranchIds = array_map('trim', explode(',', $stock->branch_id)); // e.g. [8, 44]
+                    $filteredBranchIds = [];
+
+                    foreach ($stockBranchIds as $branchId) {
+                        // If this branchId-productId pair exists in $all_product_ids
+                        if (
+                            isset($all_product_ids[$branchId]) &&
+                            $all_product_ids[$branchId] == $product->id
+                        ) {
+                            // skip this branchId (i.e., remove it)
+                            continue;
+                        }
+
+                        $filteredBranchIds[] = $branchId;
+                    }
+
+                    // If any filtered branch IDs left, update the branch_id
+                    if (count($filteredBranchIds)) {
+                        $stock->branch_id = implode(',', $filteredBranchIds);
+                        return in_array($product->id, $product_ids); // only return if product is allowed
+                    }
+
+                    // No branches left → skip this stock
+                    return false;
+                });
             } catch (\Exception $e) {
                 $data->latest()->get();
             }
         }
+        // dd($data->pluck('product_id'));
+        if (isset($others) && !empty($others)) {
+            $data = $data->latest()->get();
+
+            $transformedOthers = $others->flatMap(function ($stock) {
+                $product = $stock->product();
+                $results = [];
+
+                foreach (explode(',', $stock->branch_id) as $branch_id) {
+                    $nBranch = Branch::find($branch_id);
+
+                    $results[] = (object)[
+                        'order_id'        => '-',
+                        'getBranch'       => $nBranch ?? null,
+                        'branch_id'       => $nBranch->id ?? null,
+                        'getProduct'      => $product,
+                        'opening_stock'   => $stock->opening_stocks,
+                        'planning_month'  => $this->filters['planning_month'],
+                    ];
+                }
+
+                return $results;
+            });
+
+            return $data->concat($transformedOthers)->values();
+        }
+
         return $data->latest()->get();
     }
 
@@ -147,8 +229,11 @@ class PlannedSopSalePUMExport implements FromCollection, WithHeadings, ShouldAut
 
     public function map($data): array
     {
+        if (!isset($data->getBranch) ||  !$data->getBranch || $data->getBranch == null) {
+            dd($data);
+        }
         static $rowNumber = 3;
-        $ware_house = WareHouse::find($data['getBranch']['warehouse_id']);
+        $ware_house = WareHouse::find($data->getBranch->warehouse_id);
         if (isset($this->filters['financial_year'])) {
             $this->year = explode('-', $this->filters['financial_year']);
         }
@@ -178,45 +263,52 @@ class PlannedSopSalePUMExport implements FromCollection, WithHeadings, ShouldAut
         // $min = count($salesValues) > 0 ? min($salesValues) : 0;
         // $max = count($salesValues) > 0 ? max($salesValues) : 0;
         // $avg = count($salesValues) > 0 ? round(array_sum($salesValues) / count($salesByMonth), 0) : 0;
-        // $result = (int) ($data['plan_next_month'] ?? 0) - (int) ($data['dispatch_against_plan'] ?? 0);
+        // $result = (int) ($data->plan_next_month ?? 0) - (int) ($data['dispatch_against_plan'] ?? 0);
 
-        $opening_stock = isset($data['opening_stock']) && is_numeric($data['opening_stock'])
-            ? (int) $data['opening_stock']
+        if (isset($this->filters['planning_month'])) {
+            $last_month = Carbon::createFromFormat('F Y', $this->filters['planning_month'])->subMonth()->startOfMonth()->format("Y-m-d");
+            $plan_next_month = $data->planning_month == $last_month ? '0' : $this->filters['planning_month'];
+            $plan_next_month_value = $data->planning_month == $last_month ? '0' : $plan_next_month;
+            $data->planning_month = $data->planning_month == $last_month ? Carbon::createFromFormat('F Y', $this->filters['planning_month'])->startOfMonth()->format("Y-m-d") : $data->planning_month;
+        }
+
+        $opening_stock = isset($data->opening_stock) && is_numeric($data->opening_stock)
+            ? (int) $data->opening_stock
             : 0;
 
-        $product = $data['getProduct'] ?? '';
-        $planning_month = isset($data['planning_month'])
-            ? \Carbon\Carbon::parse($data['planning_month'])->subMonth()->startOfMonth()->format('Y-m-d')
+        $product = $data->getProduct ?? '';
+        $planning_month = isset($data->planning_month)
+            ? \Carbon\Carbon::parse($data->planning_month)->subMonth()->startOfMonth()->format('Y-m-d')
             : '';
 
         $open_order = PlannedSOP::where('product_id', $product->id)
-        ->where("branch_id", $data->branch_id)
-        ->whereDate('planning_month', $planning_month)
-        ->first();
+            ->where("branch_id", $data->branch_id)
+            ->whereDate('planning_month', $planning_month)
+            ->first();
 
         $open_order_stock = isset($open_order->plan_next_month) && is_numeric($open_order->plan_next_month)
             ? (int) $open_order->plan_next_month
             : 0;
 
-        $production_qty = isset($data['production_qty']) && is_numeric($data['production_qty'])
-            ? (int) $data['production_qty']
+        $production_qty = isset($data->production_qty) && is_numeric($data->production_qty)
+            ? (int) $data->production_qty
             : 0;
 
 
-        $product_price = isset($data['getProduct']['productdetails'][0]['price']) && is_numeric($data['getProduct']['productdetails'][0]['price'])
-            ? (float) $data['getProduct']['productdetails'][0]['price']
+        $product_price = isset($data->getProduct->productpriceinfo->price) && is_numeric($data->getProduct->productpriceinfo->price)
+            ? (float) $data->getProduct->productpriceinfo->price
             : 0;
 
         $new_price = ($product_price * 41) / 100;
         $product_price = $product_price - $new_price;
 
-        $opening_stock_value = round($product_price * $opening_stock,2);
-        $openderValue        = round($product_price * $open_order_stock , 2);
-        $production_value    = round($product_price * abs($production_qty) , 2);
-        $plan_next_month = isset($data['plan_next_month']) && is_numeric($data['plan_next_month'])
-            ? (int) $data['plan_next_month']
+        $opening_stock_value = round($product_price * $opening_stock, 2);
+        $openderValue        = round($product_price * $open_order_stock, 2);
+        $production_value    = round($product_price * abs($production_qty), 2);
+        $plan_next_month = isset($data->plan_next_month) && is_numeric($data->plan_next_month)
+            ? (int) $data->plan_next_month
             : 0;
-        $plan_next_month_value = round($product_price * $plan_next_month , 2);
+        $plan_next_month_value = round($product_price * $plan_next_month, 2);
 
         $last_month_pro_qty = max(($open_order_stock - $opening_stock), 0);
         $last_month_pro_qty_value = $last_month_pro_qty > 0 ? $last_month_pro_qty * $product_price : 0;
@@ -226,46 +318,46 @@ class PlannedSopSalePUMExport implements FromCollection, WithHeadings, ShouldAut
         $current_month_pro_qty_value  = "=AG{$rowNumber}*{$product_price}";
 
         $row = [
-            $data['order_id'] ?? '',
-            $data['getBranch']['branch_name'] ?? '',
+            $data->order_id ?? '',
+            $data->getBranch->branch_name ?? '',
             isset($ware_house) ? $ware_house->warehouse_name : '',
-            $data['getProduct']['categories']['category_name'] ?? '',
-            $data['getProduct']['subcategories']['subcategory_name'] ?? '',
-            $data['getProduct']['sap_code'] ?? '',
-            $data['getProduct']['product_name'] ?? '',
-            $data->primarySale->month_1,
-            $data->primarySale->month_2,
-            $data->primarySale->month_3,
-            $data->primarySale->month_4,
-            $data->primarySale->month_5,
-            $data->primarySale->month_6,
-            $data->primarySale->month_7,
-            $data->primarySale->month_8,
-            $data->primarySale->month_9,
-            $data->primarySale->month_10,
-            $data->primarySale->month_11,
-            $data->primarySale->month_12,
-            $data->primarySale->min,
-            $data->primarySale->max,
-            $data->primarySale->avg,
+            $data->getProduct->categories->category_name ?? '',
+            $data->getProduct->subcategories->subcategory_name ?? '',
+            $data->getProduct->sap_code ?? '',
+            $data->getProduct->product_name ?? '',
+            isset($data->primarySale) ? $data->primarySale->month_1 : '-',
+            isset($data->primarySale) ? $data->primarySale->month_2 : '-',
+            isset($data->primarySale) ? $data->primarySale->month_3 : '-',
+            isset($data->primarySale) ? $data->primarySale->month_4 : '-',
+            isset($data->primarySale) ? $data->primarySale->month_5 : '-',
+            isset($data->primarySale) ? $data->primarySale->month_6 : '-',
+            isset($data->primarySale) ? $data->primarySale->month_7 : '-',
+            isset($data->primarySale) ? $data->primarySale->month_8 : '-',
+            isset($data->primarySale) ? $data->primarySale->month_9 : '-',
+            isset($data->primarySale) ? $data->primarySale->month_10 : '-',
+            isset($data->primarySale) ? $data->primarySale->month_11 : '-',
+            isset($data->primarySale) ? $data->primarySale->month_12 : '-',
+            isset($data->primarySale) ? $data->primarySale->min : '-',
+            isset($data->primarySale) ? $data->primarySale->max : '-',
+            isset($data->primarySale) ? $data->primarySale->avg : '-',
             $opening_stock ?? "0",
             $opening_stock_value ?? "0",
-            isset($data['planning_month'])
-                ? \Carbon\Carbon::parse($data['planning_month'])->subMonth()->format('F Y')
+            isset($data->planning_month)
+                ? \Carbon\Carbon::parse($data->planning_month)->subMonth()->format('F Y')
                 : '',
             (string) $open_order_stock, // Convert to string to ensure Excel displays it
             (string) $openderValue,
             (string) $last_month_pro_qty,
             (string) $last_month_pro_qty_value,
-            isset($data['planning_month']) ? \Carbon\Carbon::parse($data['planning_month'])->format('F Y') : '',
+            isset($data->planning_month) ? \Carbon\Carbon::parse($data->planning_month)->format('F Y') : '',
             (string)  $plan_next_month,
             (string)  $plan_next_month_value,
             ($plan_next_month + $open_order_stock) - ($last_month_pro_qty + $opening_stock) > 0 ? ($plan_next_month + $open_order_stock) - ($last_month_pro_qty + $opening_stock) : '0',
             // $current_month_pro_qty,
             $current_month_pro_qty_value,
-            $data['created_by'] ?? '',
-            $data['verify_by']  ?? '',
-            isset($data['created_at']) ? \Carbon\Carbon::parse($data['created_at'])->format('d-m-Y') : '',
+            $data->created_by ?? '',
+            $data->verify_by  ?? '',
+            isset($data->created_at) ? \Carbon\Carbon::parse($data['created_at'])->format('d-m-Y') : '',
         ];
 
         $rowNumber++;

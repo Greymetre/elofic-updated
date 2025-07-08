@@ -51,11 +51,11 @@ class DamageEntryDataTable extends DataTable
             })
             ->editColumn('subcategory_name', function ($data) {
 
-                return $data->scheme ? $data->scheme->product->subcategories->subcategory_name : '';
+                return $data->scheme ? $data->scheme->product?->subcategories?->subcategory_name : '';
             })
             ->editColumn('product_name', function ($data) {
 
-                return $data->scheme ? $data->scheme->product->product_name : '';
+                return $data->scheme ? $data->scheme->product?->product_name : '';
             })
             ->editColumn('attach', function ($data) {
                 $html = '';

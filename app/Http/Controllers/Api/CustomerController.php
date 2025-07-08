@@ -583,6 +583,7 @@ class CustomerController extends Controller
                 ->whereHas('customertypes', function ($query) {
                     $query->where('type_name', '=', 'distributor')->orWhere('type_name', '=', 'Dealer');
                 })
+                ->whereNotNull('sap_code')
                 ->whereIn('customertype', ['1', '3']);
                 if(!$user->hasRole('superadmin') && !$user->hasRole('Admin') && !$user->hasRole('Sub_Admin')){
                     $query = $query->whereIn('id', $customer_ids_assign);

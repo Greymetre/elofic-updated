@@ -16112,7 +16112,7 @@ a .material-icons {
     left: 0;
     z-index: 2;
     width: 260px;
-    box-shadow: 0 16px 38px -12px rgba(0,0,0,.56),0 4px 25px 0 rgba(0,0,0,.12),0 8px 10px -5px rgba(0,0,0,.2)
+    /* box-shadow: 0 16px 38px -12px rgba(0,0,0,.56),0 4px 25px 0 rgba(0,0,0,.12),0 8px 10px -5px rgba(0,0,0,.2) */
 }
 
 .sidebar .caret {
@@ -16306,8 +16306,8 @@ a .material-icons {
     display: block;
     position: relative;
     z-index: 4;
-    background-color: #fff!important;
-    border-radius: 6px
+    background: #EBEDF5;
+    border-radius: 0px
 }
 
 .sidebar .logo a.logo-mini {
@@ -16350,7 +16350,7 @@ a .material-icons {
 }
 
 .sidebar .logo .simple-text {
-    padding: 5px 0;
+    padding: 0;
     display: inline-block;
     font-size: 18px;
     color: #3c4858;
@@ -26955,12 +26955,18 @@ th.lenth_text {
     min-width: 200px;
 }
 .dropdown.bootstrap-select.show .dropdown-menu.show {
+<<<<<<< HEAD
+    z-index: 99999;
+=======
     z-index: 9999999 !important;
+>>>>>>> b68dd0aad605bc4dc638f53450281ed2f5f342c8
 }
 
 
 form#storeLoyaltyAppSetting .img-div {
     margin-bottom: 15px;
+<<<<<<< HEAD
+=======
 }
 
 
@@ -26990,4 +26996,5 @@ body .table thead tr th {
     width: 100%;
     /* text-align: center; */
     max-width: 102px;
+>>>>>>> b68dd0aad605bc4dc638f53450281ed2f5f342c8
 }

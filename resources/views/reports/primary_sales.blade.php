@@ -31,6 +31,7 @@
                         @endif
                       </select>
                     </div>
+                    @if(!isCustomerUser())
                     <!-- branch filter -->
                     <div class="p-2" style="width:180px;">
                       <select class="select2" name="branch_id" id="ps_branch_id" data-style="select-with-transition" title="panel.sales_users.branch">
@@ -42,6 +43,7 @@
                         @endif
                       </select>
                     </div>
+                    @endif
                     <!-- financial year filter -->
                     <div class="p-2" style="width:200px;">
                       <select class="select2" name="financial_year" id="ps_financial_year" required data-style="select-with-transition" title="Year">
@@ -64,6 +66,7 @@
                           @endfor
                       </select>
                     </div>
+                    @if(!isCustomerUser())
                     <!-- dealer/distributors filter -->
                     <div class="p-2" style="width:200px;">
                       <select class="select2" name="dealer" id="ps_dealer_id" data-style="select-with-transition" title="{!! trans('panel.sales_users.user_name') !!}">
@@ -86,6 +89,7 @@
                         @endif
                       </select>
                     </div>
+                    @endif
                     <!-- product models filter -->
                     <div class="p-2" style="width:200px;">
                       <select class="select2" name="product_model" id="ps_product_model" data-style="select-with-transition" title="{!! trans('panel.secondary_dashboard.product_model') !!}">

@@ -1526,4 +1526,38 @@ class DashboardController extends Controller
         abort_if(Gate::denies('visitor_log_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         return $dataTable->render('visitor.index');
     }
+
+    public function dealer_dashboard(Request $request)
+    {
+        abort_if(Gate::denies('dealer_dashboard'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $dealer_poster_setting = DealerPortalSettings::first();
+        $all_customer_ids = ParentDetail::where('parent_id', Auth::user()->customerid)->pluck('customer_id')->toArray();
+        $all_customer_ids[] = Auth::user()->customerid;
+        $today = now();
+        $startOfQuarter = $today->copy()->startOfQuarter();
+        $endOfQuarter = $today->copy()->endOfQuarter();
+        $startOfFinancialYear = $today->month >= 4
+            ? Carbon::create($today->year, 4, 1)
+            : Carbon::create($today->year - 1, 4, 1);
+
+        $salesSummary = [
+            'month' => DB::table('primary_sales')
+                ->whereMonth('invoice_date', $today->month)
+                ->whereYear('invoice_date', $today->year)
+                ->whereIn('customer_id', $all_customer_ids)
+                ->sum('net_amount') / 100000,
+
+            'quarter' => DB::table('primary_sales')
+                ->whereBetween('invoice_date', [$startOfQuarter, $endOfQuarter])
+                ->whereIn('customer_id', $all_customer_ids)
+                ->sum('net_amount') / 100000,
+
+            'financial_year' => DB::table('primary_sales')
+                ->whereBetween('invoice_date', [$startOfFinancialYear, $today])
+                ->whereIn('customer_id', $all_customer_ids)
+                ->sum('net_amount') / 100000,
+        ];
+
+        return view('dashboard.dealer_dashboard', compact('dealer_poster_setting', 'salesSummary'));
+    }
 }

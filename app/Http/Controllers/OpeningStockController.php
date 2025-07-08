@@ -33,7 +33,6 @@ class OpeningStockController extends Controller
     public function getOpeningStocks(Request $request){
        abort_if(Gate::denies('opening_stock_view'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $query = OpeningStock::with([
-            'product.subcategories',
             'warehouse',
         ])->latest()->newQuery();
 

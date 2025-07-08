@@ -1155,3 +1155,18 @@ function getMonthQuarterPairs($startDate, $endDate)
     return $months;
 }
 
+if (!function_exists('isCustomerUser')) {
+    function isCustomerUser(): bool
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return false;
+        }
+
+        $customerRoleIds = config('constants.customer_roles');
+
+        return $user->roles->pluck('id')->intersect($customerRoleIds)->isNotEmpty();
+    }
+}
+

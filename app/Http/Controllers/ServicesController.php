@@ -159,7 +159,7 @@ class ServicesController extends Controller
             ->addIndexColumn()
             ->addColumn('expiry_date', function ($data) {
                 $product = Product::where('product_code', $data->product_code)->first();
-                if ($product->expiry_interval && $product->expiry_interval != null && $product->expiry_interval != '' && $product->expiry_interval_preiod && $product->expiry_interval_preiod > 0 && $product->expiry_interval_preiod != null) {
+                if ($product && $product->expiry_interval && $product->expiry_interval != null && $product->expiry_interval != '' && $product->expiry_interval_preiod && $product->expiry_interval_preiod > 0 && $product->expiry_interval_preiod != null) {
                     $initialDate = Carbon::parse($data->invoice_date);
 
                     $expiryDate = $initialDate->add($product->expiry_interval_preiod, strtolower($product->expiry_interval));

@@ -1,0 +1,42 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+
+class Lead extends Model implements HasMedia
+{
+    use HasFactory,InteractsWithMedia;
+
+    protected $fillable = [
+        'company_name',
+        'company_url',
+        'address_id',
+        'status',
+        'assign_to',
+        'created_by',
+    ];
+
+    
+    public function contacts(){
+        return $this->hasMany(LeadContact::class);
+    }
+
+    public function notes(){
+        return $this->hasMany(LeadNote::class);
+    }
+
+        public function registerMediaCollections(): void {
+        $this->addMediaCollection('lead_file')
+             ->useFallbackUrl(asset(config('constants.NO_IMAGE_URL')))
+             ->useFallbackPath(public_path(config('constants.NO_IMAGE_URL')))
+             ->singleFile();
+    }
+
+    public function assign_user(){
+        return $this->belongsTo(User::class,'assign_to');
+    }
+}

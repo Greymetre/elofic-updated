@@ -82,7 +82,9 @@ class DealerAppointmentDataTable extends DataTable
     {
         $user_ids = getUsersReportingToAuth();
         $data = $model->with('branch_details', 'district_details', 'city_details', 'appointment_kyc_detail');
-        if(!auth()->user()->hasRole('superadmin') && !auth()->user()->hasRole('Sub_Admin') && !auth()->user()->hasRole('Sub billing') && !auth()->user()->hasRole('Head office')){
+        if(auth()->user()->hasRole('Customer Dealer')){
+            $data->where('parent_id' , auth()->user()->customerid);
+        }elseif(!auth()->user()->hasRole('superadmin') && !auth()->user()->hasRole('Sub_Admin') && !auth()->user()->hasRole('Sub billing') && !auth()->user()->hasRole('Head office')){
             $data->whereIn('created_by' , $user_ids);
         }
 
@@ -100,6 +102,14 @@ class DealerAppointmentDataTable extends DataTable
 
         if($request->division_id != '' && $request->division_id != NULL){
             $data->where('division', $request->division_id);
+        }
+
+        if($request->branch_id != '' && $request->branch_id != NULL){
+            $data->where('branch', $request->branch_id);
+        }
+
+        if($request->created_by != '' && $request->created_by != NULL){
+            $data->where('created_by', $request->created_by);
         }
 
         $data = $data->latest()->newQuery();

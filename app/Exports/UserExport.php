@@ -28,6 +28,8 @@ class UserExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMa
         $this->user_type = $request->user_type;
         $this->active = $request->active;
         $this->division_id = $request->division_id;
+        $this->branch_id = $request->branch_id;
+        $this->department_id = $request->department_id;
         $this->userids = getUsersReportingToAuth();
     }
 
@@ -43,6 +45,12 @@ class UserExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMa
                 }
                 if ($this->division_id && !empty($this->division_id)) {
                     $query->where('division_id', $this->division_id);
+                }
+                if ($this->branch_id && !empty($this->branch_id)) {
+                    $query->where('branch_id', $this->branch_id);
+                }
+                if ($this->department_id && !empty($this->department_id)) {
+                    $query->where('department_id', $this->department_id);
                 }
             })
             ->whereHas('roles', function ($query) {

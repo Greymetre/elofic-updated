@@ -120,7 +120,7 @@ class AttendanceController extends Controller
 
 
     $attendancesummary = User::with(['attendance_details', 'createdbyname', 'getbranch', 'userinfo'])->where('active', 'Y')->whereDoesntHave('roles', function ($query) {
-      $query->where('id', 29);
+      $query->whereIn('id', config('constants.customer_roles'));
     })->where('show_attandance_report', '1');
     if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
       $attendancesummary = $attendancesummary->whereIn('id', getUsersReportingToAuth());
@@ -297,7 +297,7 @@ class AttendanceController extends Controller
               }
             }
           } else {
-            $date_of_joining_object = new DateTime($item->userinfo->date_of_joining);
+            $date_of_joining_object = new DateTime($item->userinfo->date_of_joining ?? '');
 
             if ($dayname == 'Sunday') {
               if ($date_of_joining_object <= $value) {

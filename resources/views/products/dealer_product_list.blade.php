@@ -144,7 +144,7 @@
           url: "{{ url('products-list') }}",
           data: function (d) {
                 d._token = token,
-                d.category_id = $('#category_id').val()
+                d.category_id = '{{$category_id}}'
             }
         },
         columns: [{
