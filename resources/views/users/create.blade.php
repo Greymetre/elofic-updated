@@ -911,6 +911,32 @@
                     </div>
                   </div>
                 </div>
+                <div class="col-md-6">
+                  <div class="input_section">
+                    <label class="col-form-label">Blood Group</label>
+                    <div class="form-group has-default bmd-form-group">
+                      <input type="text" name="blood_group" class="form-control" value="{!! old( 'blood_group', $user->blood_group?$user->blood_group:'') !!}">
+                      @if ($errors->has('blood_group'))
+                      <div class="error">
+                        <p class="text-danger">{{ $errors->first('blood_group') }}</p>
+                      </div>
+                      @endif
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="input_section">
+                    <label class="col-form-label">Personal Number</label>
+                    <div class="form-group has-default bmd-form-group">
+                      <input type="number" name="personal_number" class="form-control" value="{!! old( 'personal_number', $user->personal_number?$user->personal_number:'') !!}">
+                      @if ($errors->has('personal_number'))
+                      <div class="error">
+                        <p class="text-danger">{{ $errors->first('personal_number') }}</p>
+                      </div>
+                      @endif
+                    </div>
+                  </div>
+                </div>
                 <!-- user sales type -->
                 <div class="col-md-6">
                   <div class="input_section">

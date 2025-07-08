@@ -118,9 +118,9 @@
         @endif
         <div class="logo mb-3"><img src="{{asset('assets/img/brand_logo.png') }}" alt="" width="100%"></div>
         <div class="login-box">
-          <div class="company-logos mb-3">
-            <img src="{{ url('/').'/'.asset('assets/img/bediya.jpg') }}" alt="" class="german-logo" width="80">
-            <img src="{{ url('/').'/'.asset('assets/img/silver.png') }}" alt="" class="german-logo" width="80">
+          <div class="german-logo-cont">
+            <img src="{{ url('/').'/'.asset('assets/img/companylogo.png') }}" alt="" class="german-logo">
+            <!--<img src="{{ url('/').'/'.asset('assets/img/silver.png') }}" alt="" class="german-logo">-->
           </div>
           <p class="mb-3 font-weight-bold text-primary">Please log in to your account</p>
           <form method="POST" action="{{ route('login') }}">

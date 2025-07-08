@@ -103,6 +103,8 @@ class UsersController extends Controller
             'email'   =>  isset($request['email']) ? $request['email'] : '',
             'leave_balance'   =>  isset($request['leave_balance']) ? $request['leave_balance'] : '0.00',
             'grade'   =>  isset($request['grade']) ? $request['grade'] : NULL,
+            'blood_group'   =>  isset($request['blood_group']) ? $request['blood_group'] : NULL,
+            'personal_number'   =>  isset($request['personal_number']) ? $request['personal_number'] : NULL,
             'password'   =>  isset($request['password']) ? Hash::make($request['password']) : '',
             'notification_id'   =>  isset($request['notification_id']) ? $request['notification_id'] : '',
             'device_type'   =>  isset($request['device_type']) ? $request['device_type'] : '',
@@ -351,6 +353,8 @@ class UsersController extends Controller
         $user->email = isset($request['email']) ? $request['email'] : '';
         $user->leave_balance = isset($request['leave_balance']) ? $request['leave_balance'] : '0.00';
         $user->grade = isset($request['grade']) ? $request['grade'] : NULL;
+        $user->blood_group = isset($request['blood_group']) ? $request['blood_group'] : NULL;
+        $user->personal_number = isset($request['personal_number']) ? $request['personal_number'] : NULL;
         $user->show_attandance_report = isset($request['show_attandance_report']) ? $request['show_attandance_report'] : '';
         if ($request['password'] && !empty($request['password'])) {
             $user->password = isset($request['password']) ? Hash::make($request['password']) : '';
