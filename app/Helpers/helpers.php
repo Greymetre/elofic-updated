@@ -130,16 +130,17 @@ if (! function_exists('receiverNotification')) {
 if (! function_exists('fileupload')) {
     function fileupload($image = '', $path = 'default', $filename = '')
     {
-        // $filepath =  Storage::disk('s3')->put($path, $image);
-        // return $filepath;
         $filename = $filename . date('ymdHis') . '.' . $image->getClientOriginalExtension();
-        // $image->move(public_path('uploads/' . $path), $filename);
-        $s3Path = 'uploads/' . $path . '/' . $filename;
-        $uploaded = Storage::disk('s3')->put($s3Path, file_get_contents($image));
-        if ($uploaded) {
-            return Storage::disk('s3')->url($s3Path); // Return the full S3 URL
+        $destinationPath = public_path('uploads/' . $path);
+
+        // Ensure the directory exists
+        if (!file_exists($destinationPath)) {
+            mkdir($destinationPath, 0755, true);
         }
-        // return $path . '/' . $filename;
+        $image->move($destinationPath, $filename);
+
+        // Return the relative URL to access the uploaded file
+        return url('/public/uploads/' . $path . '/' . $filename);
     }
 }
 if (! function_exists('base64tofile')) {
@@ -1104,16 +1105,18 @@ if (!function_exists('sendMessageByInfisms')) {
 }
 
 if (!function_exists('getCurrentOpeningStk')) {
-     function getCurrentOpeningStk($product , $branchId){
-         $openingStock = OpeningStock::orWhere(['item_code' => $product->product_code , 'item_code' =>$product->sap_code])->where(['item_group' => $product->subcategories->subcategory_name , 'branch_id' => $branchId])->first();
-        if(isset($openingStock)){
+    function getCurrentOpeningStk($product, $branchId)
+    {
+        $openingStock = OpeningStock::orWhere(['item_code' => $product->product_code, 'item_code' => $product->sap_code])->where(['item_group' => $product->subcategories->subcategory_name, 'branch_id' => $branchId])->first();
+        if (isset($openingStock)) {
             return $openingStock->opening_stocks ?? "0";
         }
         return "0";
-     }
+    }
 }
 
-function generateCertificateNo() {
+function generateCertificateNo()
+{
     // Build year range (e.g., 2025-26)
     $currentYear = now()->format('Y');
     $nextYear = now()->addYear()->format('y');
@@ -1169,4 +1172,3 @@ if (!function_exists('isCustomerUser')) {
         return $user->roles->pluck('id')->intersect($customerRoleIds)->isNotEmpty();
     }
 }
-

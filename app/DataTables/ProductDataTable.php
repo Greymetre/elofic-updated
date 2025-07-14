@@ -66,7 +66,7 @@ class ProductDataTable extends DataTable
                             </div>'.$activebtn;
             })
             ->addColumn('image', function ($query) {
-                $product_image = !empty($query->product_image) ? url('/public/uploads').'/'.$query->product_image : asset('assets/img/placeholder.jpg') ;
+                $product_image = !empty($query->product_image) ? $query->product_image : asset('assets/img/placeholder.jpg') ;
                 return '<img src="'.$product_image.'" border="0" width="70" class="img-rounded imageDisplayModel" align="center" />';
             })
             ->rawColumns(['action','image', 'expiry_info']);
