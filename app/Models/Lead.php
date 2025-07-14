@@ -32,8 +32,8 @@ class Lead extends Model implements HasMedia
         public function registerMediaCollections(): void {
         $this->addMediaCollection('lead_file')
              ->useFallbackUrl(asset(config('constants.NO_IMAGE_URL')))
-             ->useFallbackPath(public_path(config('constants.NO_IMAGE_URL')))
-             ->singleFile();
+             ->useFallbackPath(public_path(config('constants.NO_IMAGE_URL')));
+            //  ->singleFile();
     }
 
     public function assign_user(){

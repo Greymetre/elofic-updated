@@ -9,6 +9,10 @@ body .table thead tr th {
    font-family: 'Poppins', sans-serif !important;
 }
 
+img.german-logo {
+    width: 100%!important;
+}
+
 nav.sidebar.close li.nav-link a:after {
     right: 27px!important;
     top: 16px!important;

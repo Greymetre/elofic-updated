@@ -224,11 +224,12 @@ class LeadController extends Controller
         $rules = [
             'lead_id' => 'required',
             'lead_file' => [
+                'required',
                 'file',
-                'image',
-                'max:' . (config('media-library.max_file_size') / 1024),
-            ]
-        ];
+                'mimes:jpg,jpeg,png,gif,pdf,xls,xlsx',
+                'max:' . (config('media-library.max_file_size') / 1024), // max in KB
+            ],
+        ];        
 
         $request->validate($rules);
         $data = $request->all();
@@ -446,8 +447,17 @@ class LeadController extends Controller
             $address_data = "";
         }
 
+        $lead_notes->each(function ($item) {
+            $item->type = 'note';
+        });
+        $lead_tasks->each(function ($item) {
+            $item->type = 'task';
+        });
+
+        $combined = $lead_notes->merge($lead_tasks)->sortByDesc('created_at')->values();
+
         $media_items = $lead->getMedia('lead_file');
-        return view('leads.show', compact('lead', 'lead_contacts', 'lead_notes', 'users', 'lead_tasks', 'lead_opportunities', 'countries', 'pincodes', 'address', 'address_data', 'media_items'));
+        return view('leads.show', compact('lead', 'lead_contacts', 'lead_notes', 'users', 'lead_tasks', 'lead_opportunities', 'countries', 'pincodes', 'address', 'address_data', 'media_items', 'combined'));
     }
 
     /**

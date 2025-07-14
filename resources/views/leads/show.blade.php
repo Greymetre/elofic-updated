@@ -1097,10 +1097,10 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
     </div>
     <div class="col-md-12 pr-1 pl-1">
         <div class="col-md-12 form-group">
-            <label for="confidence">Confidence<span style="color:red">*</span></label>
+            <label for="confidence" class="d-block mb-0">Confidence<span style="color:red">*</span></label>
 
-            <div class="boxing">
-                <span id="confidenceValue">0%</span>
+            <div class="boxing mt-0">
+                <span id="confidenceValue">50%</span>
             </div>
             <div class="border-s">
                 <input type="range" class="form-control-range" name="confidence" id="confidence" value="50" min="0" max="100">
@@ -1241,7 +1241,7 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
         @php
         $previousDate = null;
         @endphp
-        @foreach($lead_notes as $lead_note)
+        @foreach($combined as $lead_note)
         @php
         $noteDate = \Carbon\Carbon::parse($lead_note->created_at)->format('d M Y'); // e.g., 28 Feb 2024
         $noteTime = \Carbon\Carbon::parse($lead_note->created_at)->format('h:i a'); // e.g., 10:25 pm
@@ -1261,17 +1261,26 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
         <div class="list-one">
             <div class="image_box">
                 <div class="greenbox">
+                    @if($lead_note->type == 'note')
                     <img src="{{url('/').'/'.asset('assets/img')}}/cup.svg">
+                    @else
+                    <img src="{{url('/').'/'.asset('assets/img')}}/task_logo.png" width="35">
+                    @endif
                 </div>
             </div>
             <div class="listdata">
+                @if($lead_note->type == 'note')
                 <h5>{!! $lead_note->note??''!!}</h5>
+                @else
+                <h5>{!! $lead_note->description??''!!}({{date('d M Y', strtotime($lead_note->date))}}, {{date('h:i A', strtotime($lead_note->time))}})</h5>
+                @endif
 
                 <p></p>
 
                 <p class="date-list">{{$noteTime}}</p>
             </div>
         </div>
+        @if($lead_note->type == 'note')
         <div class="list-two">
             <div class="dropdown">
                 <button class="dropdown-toggle" type="button" id="dropdownMenuButton"
@@ -1300,6 +1309,7 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
         </div>
 
     </div>
+    @endif
 </div>
 
 </div>
@@ -1388,34 +1398,45 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
         <p class="hed m-0">Files</p>
     </div>
     <div class="card-body">
-        @if(count($media_items)>0)
+    @if(count($media_items) > 0)
         <ul class="">
             @foreach($media_items as $media)
             <li class="d-flex flex-row justify-content-between align-items-center mb-3">
-                <div class="imagebox">
-                    <div class="d-flex flex-row align-items-center">
-                        @if(str_contains($media->mime_type, 'image'))
-                        <img src="{{ $media->getFullUrl() }}" alt="{{ $media->name }}" width="50" height="50">
-                        @elseif(str_contains($media->mime_type, 'pdf'))
-                        <img src="{{ asset('images/pdf-icon.png') }}" alt="PDF" width="40"> 
-                        @else
-                        <img src="{{ asset('images/file-icon.png') }}" alt="File" width="40"> 
-                        @endif
-                        <div class="imagedata">
-                            <p>{{ $media->file_name }}</p>
-                            <p>{{ strtoupper($media->mime_type) }} • {{ number_format($media->size / 1024, 1) }} KB</p>
+                <a href="{{ $media->getFullUrl() }}" target="_blank">
+                    <div class="imagebox">
+                        <div class="d-flex flex-row align-items-center">
+                            @php
+                                $mime = $media->mime_type;
+                            @endphp
+
+                            @if(str_contains($mime, 'image'))
+                                <img src="{{ $media->getFullUrl() }}" alt="{{ $media->name }}" width="50" height="50">
+                            @elseif(str_contains($mime, 'pdf'))
+                                <img src="{{ url('/').'/'.asset('assets/img/pdf-icon.jpg') }}" alt="PDF" width="40"> 
+                            @elseif(str_contains($mime, 'spreadsheet') || str_contains($mime, 'excel'))
+                                <img src="{{ url('/').'/'.asset('assets/img/excel-icon.png') }}" alt="Excel" width="40"> 
+                            @else
+                                <img src="{{ url('/').'/'.asset('images/file-icon.png') }}" alt="File" width="40"> 
+                            @endif
+
+                            <div class="imagedata">
+                                <p>{{ $media->file_name }}</p>
+                                <p>{{ strtoupper($media->mime_type) }} • {{ number_format($media->size / 1024, 1) }} KB</p>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </a>
                 <div class="buttonbox">
-                    <a href="{{route('leads-deleteMedia')}}?media_id={{$media->id}}" class="" type="submit" class="" onclick="return confirm('Do you really want to delete?')">
-                        <img src="{{ url('/').'/'.asset('assets/img/deletbox.svg') }}">
+                    <a href="{{ route('leads-deleteMedia') }}?media_id={{ $media->id }}"
+                    onclick="return confirm('Do you really want to delete?')">
+                    <img src="{{ url('/').'/'.asset('assets/img/deletbox.svg') }}">
                     </a>
                 </div>
             </li>
             @endforeach 
         </ul>
-        @else
+        @endif
+
         <div>
 
             <form method="POST" 
@@ -1437,7 +1458,7 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
                                 <span class="btn btn-just-icon btn-round btn-file">
                                     <span class="fileinput-new"><i class="fa fa-pencil"></i></span>
                                     <span class="fileinput-exists">Change</span>
-                                    <input type="file" name="lead_file" class="getimage7" accept="image/*" required>
+                                    <input type="file" name="lead_file" class="getimage7" accept="image/*,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
                                 </span>
                                 <br>
                                 <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
@@ -1459,7 +1480,6 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
             </div>
         </form>
     </div>
-    @endif
 </div>
 </div>
 <div class="tab-pane fade" id="tasks" role="tabpanel">
