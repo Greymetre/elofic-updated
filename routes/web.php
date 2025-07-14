@@ -172,6 +172,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('leads/uploadleadFiles', [LeadController::class, 'uploadleadFiles'])->name('leads.uploadleadFiles');
     Route::get('leads-deleteMedia', [LeadController::class, 'deleteMedia'])->name('leads-deleteMedia');
     Route::get('leads-exportLeads', [LeadController::class, 'exportLeads'])->name('leads-exportLeads');
+    Route::post('leads/changeStatus', [LeadController::class, 'changeStatus'])->name('leads.changeStatus');
 
     //Contacts Management
     Route::resource('lead-contacts', LeadContactsController::class);

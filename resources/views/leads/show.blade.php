@@ -682,6 +682,14 @@
         .forus .card-header {
             border-top: 1px solid #E8E8E8 !important;
         }
+        .btn-group.kim button {
+        border-radius: 50px;
+        padding: 5px 10px;
+        text-transform: capitalize;
+        background: linear-gradient(45deg, #3860a4 0%, #3694cc 100%) !important;
+        color: #fff !important;
+        border-color: transparent;
+    }
 
     </style>
     <div class="row">
@@ -752,6 +760,16 @@
             </div>
             <div class="infomation-data">
                 <h3>{{$lead->company_name??''}}</h3>
+                <div class="btn-group kim" style="width: 120px;">
+                    <select name="status" id="status" class="form-control selectpicker">
+                        <option value="0" {{$lead->status == 0 ? 'selected' : ''}}>Pending</option>
+                        @if($status->count() > 0)
+                        @foreach($status as $stat)
+                        <option value="{{$stat['id']}}" {{$lead->status == $stat['id'] ? 'selected' : ''}}> {{$stat['display_name']}} </option>
+                        @endforeach
+                        @endif
+                    </select>
+                </div> 
                 <p>{{$address_data??''}}</p>
                 <ul>
                     <li>
@@ -1999,6 +2017,40 @@ $('#frmLeadOpportunitiesCreate #o_amount').val(opportunity_data.amount);
         });
     }
 
+    $('#status').on('change', function () {
+    var status = this.value;
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, change it!'
+    }).then((result) => {
+        if (result.value) {
+            $.ajax({
+                url: "{{ route('leads.changeStatus') }}",
+                method: 'POST',
+                data: {
+                    lead_id: '{{$lead->id}}',
+                    status: status,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function (res) {
+                    if (res.status == 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: res.message,
+                            showConfirmButton: true,
+                            timer: 2000
+                        })
+                    }
+                }
+            });
+        }
+    });
+});
 
 
 </script>

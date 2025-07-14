@@ -21,6 +21,7 @@ use App\Models\LeadOpportunity;
 use App\Models\Pincode;
 use App\Models\Country;
 use App\Models\Address;
+use App\Models\Status;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class LeadController extends Controller
@@ -36,12 +37,13 @@ class LeadController extends Controller
         $users = User::where('active', '=', 'Y')->whereDoesntHave('roles', function ($query) {
             $query->whereIn('id', config('constants.customer_roles'));
         })->select('id', 'name')->orderBy('id')->get();
-        return view('leads.index', compact('users'));
+        $status = Status::where('module', 'LeadStatus')->where('active', 'Y')->get();
+        return view('leads.index', compact('users', 'status'));
     }
 
     public function getLeads(Request $request)
     {
-        $leads = Lead::with(['contacts', 'assign_user']);
+        $leads = Lead::with(['contacts', 'assign_user', 'status_is']);
 
         $datetime = $request->input('datetime');
         if ($datetime != "") {
@@ -78,14 +80,16 @@ class LeadController extends Controller
             });
         }
 
+        if ($request->input('status') != "") {
+            $status = $request->input('status');
+            $leads->where('status', $status);
+        }
+
         $leads = $leads->select(\DB::raw(with(new Lead)->getTable() . '.*'))->groupBy('id');
         return DataTables::of($leads)
             ->editColumn('company_name', function ($lead) {
                 $url = route('leads.show', $lead);
                 return '<a href="' . $url . '">' . ucwords(strtolower($lead->company_name)) . '</a>';
-            })
-            ->editColumn('status', function ($lead) {
-                return $lead->status;
             })
             ->editColumn('assign_to', function ($lead) {
                 return $lead->assign_user ? $lead->assign_user->name : '-';
@@ -126,11 +130,13 @@ class LeadController extends Controller
 
             ->editColumn('status', function ($lead) {
                 if ($lead->status == '0') {
-                    return "<span class='badge badge-warning'>Not Interested</span>";
-                } else if ($lead->status == '1') {
-                    return "<span class='badge badge-success'>Interested</span>";
-                } else if ($lead->status == '2') {
-                    return "<span class='badge badge-info'>Customer</span>";
+                    return "<span class='badge badge-warning'>Pending</span>";
+                } else {
+                    if($lead->status_is){
+                        return "<span class='badge badge-success'>".$lead->status_is->status_name."</span>";
+                    }else{
+                        return "-";
+                    }
                 }
             })
             ->rawColumns(['action', 'company_name', 'checkbox', 'status'])
@@ -457,7 +463,8 @@ class LeadController extends Controller
         $combined = $lead_notes->merge($lead_tasks)->sortByDesc('created_at')->values();
 
         $media_items = $lead->getMedia('lead_file');
-        return view('leads.show', compact('lead', 'lead_contacts', 'lead_notes', 'users', 'lead_tasks', 'lead_opportunities', 'countries', 'pincodes', 'address', 'address_data', 'media_items', 'combined'));
+        $status = Status::where('module', 'LeadStatus')->where('active', 'Y')->get();
+        return view('leads.show', compact('lead', 'lead_contacts', 'lead_notes', 'users', 'lead_tasks', 'lead_opportunities', 'countries', 'pincodes', 'address', 'address_data', 'media_items', 'combined', 'status'));
     }
 
     /**
@@ -516,6 +523,15 @@ class LeadController extends Controller
         $lead = Lead::whereIn('id', $request->lead_id)->delete();
         if ($lead) {
             return response()->json(['status' => 'success', 'message' => 'Lead deleted successfully.']);
+        }else{
+            return response()->json(['status' => 'error', 'message' => 'Something went wrong.']);
+        }
+    }
+
+    public function changeStatus(Request $request) {
+        $update = Lead::where('id', $request->lead_id)->update(['status' => $request->status]);
+        if ($update) {
+            return response()->json(['status' => 'success', 'message' => 'Status updated successfully.']);
         }else{
             return response()->json(['status' => 'error', 'message' => 'Something went wrong.']);
         }

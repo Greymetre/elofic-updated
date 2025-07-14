@@ -267,24 +267,16 @@
              <i class="material-icons">perm_identity</i> 
           </div> -->
           <h4 class="card-title ">Leads<br><!--<span class="brig">123</span><br>-->
-              <div class="btn-group kim">
-                <button class="btn sort_btns filter_btn  dropdown-toggle"
-                  type="button"
-                  id="dropdownMenuButton"
-                  data-toggle="dropdown"
-                  aria-haspopup="true"
-                  aria-expanded="false"> Poteintial
-                </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                  <a class="dropdown-item" href="#"> Qualified</a>
-                  <a class="dropdown-item" href="#">Trial </a>
-                  <a class="dropdown-item" href="#">Customer </a>
-                  <a class="dropdown-item" href="#">Bad fit </a>
-                  <a class="dropdown-item" href="#">Not Intrsted </a>
-                  <a class="dropdown-item" href="#">Canceled</a>
-                  <a class="dropdown-item" href="#">Dnc</a>
-                  <a class="dropdown-item" href="#">Custmize</a>
-                </div>
+              <div class="btn-group kim" style="width: 120px;">
+                <select name="status" id="status" class="form-control selectpicker">
+                  <option value="">All</option>
+                  <option value="0">Pending</option>
+                  @if($status->count() > 0)
+                  @foreach($status as $stat)
+                  <option value="{{$stat['id']}}"> {{$stat['display_name']}} </option>
+                  @endforeach
+                  @endif
+                  </select>
               </div> 
             <span class="">
               <div class="pream_entry">
@@ -342,7 +334,7 @@
           <!--  -->
           <div class="well">
             <div class="dd">
-              <div class="sort_btn">
+              {{--<div class="sort_btn">
                 <div class="btn-group">
                   <button class="btn sort_btns  dropdown-toggle"
                     type="button"
@@ -358,7 +350,7 @@
 
                   </div>
                 </div>
-              </div>
+              </div>--}}
               <div class="date_sarch">
                 {!! Form::open(['method' => 'POST', 'class' => 'form-inline', 'id' => 'frmFilter']) !!}
 
@@ -578,7 +570,7 @@
       jQuery('#getLeads tbody').empty();
       var datetime = jQuery('#frmFilter [name=datetime]').val();
       var search = jQuery('#search_lead').val();
-      console.log(search);
+      var status = jQuery('#status').val();
       var table = jQuery('#getLeads').DataTable({
         processing: false,
         serverSide: true,
@@ -589,6 +581,7 @@
           data: {
             datetime: datetime,
             search: jQuery('#search_lead').val(),
+            status: status
           }
         },
         columns: [{
@@ -643,6 +636,9 @@
     }
 
     $('#search_lead').on('keyup', function() {
+      getLeads();
+    });
+    $('#status').on('change', function() {
       getLeads();
     });
 

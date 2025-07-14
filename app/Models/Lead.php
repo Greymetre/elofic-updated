@@ -39,4 +39,8 @@ class Lead extends Model implements HasMedia
     public function assign_user(){
         return $this->belongsTo(User::class,'assign_to');
     }
+
+    public function status_is(){
+        return $this->belongsTo(Status::class,'status')->where('module', 'LeadStatus');
+    }
 }
