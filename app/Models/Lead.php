@@ -17,6 +17,8 @@ class Lead extends Model implements HasMedia
         'address_id',
         'status',
         'assign_to',
+        'lead_generation_date',
+        'others',
         'created_by',
     ];
 
@@ -42,5 +44,14 @@ class Lead extends Model implements HasMedia
 
     public function status_is(){
         return $this->belongsTo(Status::class,'status')->where('module', 'LeadStatus');
+    }
+
+    public function address()
+    {
+        return $this->morphOne(Address::class, 'model');
+    }
+
+    public function createdby(){
+        return $this->belongsTo(User::class,'created_by');
     }
 }

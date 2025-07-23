@@ -7,6 +7,8 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 
 use App\Exports\ExcelExport;
+use App\Exports\LeadsTemplate;
+use App\Imports\LeadsImport;
 use Excel;
 
 use DataTables;
@@ -84,8 +86,12 @@ class LeadController extends Controller
             $status = $request->input('status');
             $leads->where('status', $status);
         }
+        // dd(auth()->user()->hasRole('superadmin'));
+        if (!auth()->user()->hasRole('superadmin')) {
+            $leads->where('assign_to', auth()->user()->id);
+        }
 
-        $leads = $leads->select(\DB::raw(with(new Lead)->getTable() . '.*'))->groupBy('id');
+        $leads = $leads->orderBy('created_at', 'desc')->select(\DB::raw(with(new Lead)->getTable() . '.*'))->groupBy('id');
         return DataTables::of($leads)
             ->editColumn('company_name', function ($lead) {
                 $url = route('leads.show', $lead);
@@ -132,9 +138,9 @@ class LeadController extends Controller
                 if ($lead->status == '0') {
                     return "<span class='badge badge-warning'>Pending</span>";
                 } else {
-                    if($lead->status_is){
-                        return "<span class='badge badge-success'>".$lead->status_is->status_name."</span>";
-                    }else{
+                    if ($lead->status_is) {
+                        return "<span class='badge badge-success'>" . $lead->status_is->status_name . "</span>";
+                    } else {
                         return "-";
                     }
                 }
@@ -181,45 +187,84 @@ class LeadController extends Controller
             }
         }
 
-        $leads = $leads->get();
-        $data = $leads->map(function ($item, $key) {
-            if (count($item->contacts) > 0) {
-                if (count($item->contacts) > 1) {
-                    $contacts_name = $item->contacts[0]->name ?? '';
-                    $contacts_name . " +" . count($item->contacts) - 1;
-                } else {
-                    $contacts_name = $item->contacts[0]->name ?? '';
-                }
+        $leads = $leads->orderBy('created_at', 'desc')->groupBy('id')->get();
 
-                $contacts_phone_number = $item->contacts[0]->phone_number ?? '';
-                $contacts_email = $item->contacts[0]->email ?? '';
-            }
+        $allOtherKeys = [];
 
+        $data = $leads->map(function ($item) use (&$allOtherKeys) {
+            $contact = $item->contacts->first();
 
+            $contacts_name = $contact?->name ?? '';
+            $contacts_number = $contact?->phone_number ?? '';
+            $contacts_email = $contact?->email ?? '';
+            $contacts_lead_source = $contact?->lead_source ?? '';
 
+            $address = $item->address;
 
-            return [
-                $item->id,
+            // ✅ Safely decode 'others' field
+            $othersData = is_array($item->others)
+                ? $item->others
+                : (is_string($item->others) ? json_decode($item->others, true) : []);
+
+            $othersData = is_array($othersData) ? $othersData : [];
+
+            // ✅ Collect all unique keys
+            $allOtherKeys = array_unique(array_merge($allOtherKeys, array_keys($othersData)));
+
+            // ✅ Base export row
+            $baseRow = [
+                $item->lead_generation_date,
                 $item->company_name,
-                $item->company_url,
-                $item->status,
-                $contacts_name ?? '',
-                $contacts_phone_number ?? '',
-                $contacts_email ?? '',
-
+                $contacts_name,
+                $contacts_number,
+                $contacts_email,
+                $contacts_lead_source,
+                $address->pincodename?->pincode ?? '',
+                $address->cityname?->city_name ?? '',
+                $address->districtname?->district_name ?? '',
+                $item->status_is?->status_name ?? 'Pending',
+                $address->address1 ?? '',
+                $item->assign_user?->name ?? '',
+                '', // Lead Status (custom field?)
+                $item->close_duration ?? '',
+                $item->createdby->name ?? '',
+                '',
+                '', // Capacity (KW), Lead time, Sales Value
             ];
+
+            // ✅ Add 'others' values in consistent order
+            $orderedOthers = collect($allOtherKeys)->mapWithKeys(function ($key) use ($othersData) {
+                return [$key => $othersData[$key] ?? ''];
+            })->toArray();
+
+            return array_merge($baseRow, $orderedOthers);
         })->toArray();
 
-        $export = new ExcelExport([
-            'Id',
-            'Company Name',
-            'Company Url',
-            'Status',
-            'Contact',
-            'Phone',
+        // ✅ Header
+        $baseHeaders = [
+            'Lead Generation Date',
+            'Firm Name',
+            'Customer Name',
+            'Customer Number',
             'Email',
-        ], $data);
+            'Lead Source',
+            'Pincode',
+            'City',
+            'District',
+            'Lead Type',
+            'Address',
+            'Assignee',
+            'Lead Status',
+            'Close Duration',
+            'Created By',
+            'Lead Time',
+            'Sales Value',
+        ];
 
+        $finalHeaders = array_merge($baseHeaders, $allOtherKeys);
+
+        // ✅ Export
+        $export = new ExcelExport($finalHeaders, $data);
         return Excel::download($export, $filename);
     }
 
@@ -235,7 +280,7 @@ class LeadController extends Controller
                 'mimes:jpg,jpeg,png,gif,pdf,xls,xlsx',
                 'max:' . (config('media-library.max_file_size') / 1024), // max in KB
             ],
-        ];        
+        ];
 
         $request->validate($rules);
         $data = $request->all();
@@ -512,7 +557,7 @@ class LeadController extends Controller
         $update = Lead::whereIn('id', $request->lead_id)->update(['assign_to' => $request->user_id]);
         if ($update) {
             return response()->json(['status' => 'success', 'message' => 'Lead assigned successfully.']);
-        }else{
+        } else {
             return response()->json(['status' => 'error', 'message' => 'Something went wrong.']);
         }
     }
@@ -523,17 +568,35 @@ class LeadController extends Controller
         $lead = Lead::whereIn('id', $request->lead_id)->delete();
         if ($lead) {
             return response()->json(['status' => 'success', 'message' => 'Lead deleted successfully.']);
-        }else{
+        } else {
             return response()->json(['status' => 'error', 'message' => 'Something went wrong.']);
         }
     }
 
-    public function changeStatus(Request $request) {
+    public function changeStatus(Request $request)
+    {
         $update = Lead::where('id', $request->lead_id)->update(['status' => $request->status]);
         if ($update) {
             return response()->json(['status' => 'success', 'message' => 'Status updated successfully.']);
-        }else{
+        } else {
             return response()->json(['status' => 'error', 'message' => 'Something went wrong.']);
         }
+    }
+
+    public function upload(Request $request)
+    {
+        abort_if(Gate::denies('lead_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        Excel::import(new LeadsImport, request()->file('import_file'));
+        return back();
+    }
+
+    public function template()
+    {
+        abort_if(Gate::denies('lead_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new LeadsTemplate, 'LeadTemplate.xlsx');
     }
 }

@@ -10,6 +10,8 @@ use DataTables;
 use Auth;
 
 use App\Exports\ExcelExport;
+use App\Exports\LeadsContactsTemplate;
+use App\Imports\LeadsContactsImport;
 use Excel;
 
 
@@ -196,5 +198,22 @@ class LeadContactsController extends Controller
             return redirect()->back();
         }
         
+    }
+
+    public function upload(Request $request)
+    {
+        abort_if(Gate::denies('lead_contacts_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        Excel::import(new LeadsContactsImport, request()->file('import_file'));
+        return back();
+    }
+
+    public function template()
+    {
+        abort_if(Gate::denies('lead_contacts_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new LeadsContactsTemplate, 'LeadContactsTemplate.xlsx');
     }
 }

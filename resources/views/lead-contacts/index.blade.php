@@ -285,7 +285,30 @@ div#getLeadContacts_info {
                     </span>
                     <span class="text">Export</span>
                 </a>
-
+                @if(auth()->user()->can(['lead_contacts_template']))
+                <a href="{{ URL::to('lead-contacts-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} Lead Contacts"><i class="material-icons">text_snippet</i></a>
+                @endif
+                @if(auth()->user()->can(['lead_contacts_upload']))
+                <form action="{{ URL::to('lead-contacts-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
+                  {{ csrf_field() }}
+                  <div class="input-group">
+                    <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                      <span class="btn btn-just-icon btn-theme btn-file">
+                        <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
+                        <span class="fileinput-exists">Change</span>
+                        <input type="hidden">
+                        <input type="file" title="Select File" name="import_file" required accept=".xls,.xlsx" />
+                      </span>
+                    </div>
+                    <div class="input-group-append">
+                      <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.upload') !!} Lead Contacts">
+                        <i class="material-icons">cloud_upload</i>
+                        <div class="ripple-container"></div>
+                      </button>
+                    </div>
+                  </div>
+                </form>
+                @endif
                 
               </div>
               </div>

@@ -163,7 +163,7 @@
     .pream_entry {
       display: flex;
       flex-direction: row;
-      justify-content: space-between;
+      justify-content: flex-end;
       align-items: center;
     }
 
@@ -266,27 +266,16 @@
           <!-- <div class="card-icon">
              <i class="material-icons">perm_identity</i> 
           </div> -->
-          <h4 class="card-title ">Leads<br><!--<span class="brig">123</span><br>-->
-              <div class="btn-group kim" style="width: 120px;">
-                <select name="status" id="status" class="form-control selectpicker">
-                  <option value="">All</option>
-                  <option value="0">Pending</option>
-                  @if($status->count() > 0)
-                  @foreach($status as $stat)
-                  <option value="{{$stat['id']}}"> {{$stat['display_name']}} </option>
-                  @endforeach
-                  @endif
-                  </select>
-              </div> 
+          <h4 class="card-title ">Opportunities Status<br><!--<span class="brig">123</span><br>-->
             <span class="">
               <div class="pream_entry">
 
-                <div class="search">
+                <!-- <div class="search">
                   <div class="search_inner">
                     <button type="button"> <img src="https://expertfromindia.in/bediya/public/assets/img/search.svg"></button>
                     <input type="search" class="searchbox" id="search_lead" placeholder="Search Lead">
                   </div>
-                </div>
+                </div> -->
 
 
                 <div class="both_btn">
@@ -294,39 +283,9 @@
                     <span class="icon text-white-50">
                       <i class="material-icons">add_circle</i>
                     </span>
-                    <span class="text">Add Leads</span>
+                    <span class="text">Add New Status</span>
                   </button>
 
-                  <a href="{{route('leads-exportLeads')}}" class="btn exportbtn btn-primary btn-sm btn-icon-split float-right" id="export_button">
-                    <span class="icon text-white-50">
-                      <i class="material-icons">cloud_download</i>
-                    </span>
-                    <span class="text">Export</span>
-                  </a>
-                  @if(auth()->user()->can(['lead_template']))
-                  <a href="{{ URL::to('lead-template') }}" class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.template') !!} Leads"><i class="material-icons">text_snippet</i></a>
-                  @endif
-                  @if(auth()->user()->can(['lead_upload']))
-                  <form action="{{ URL::to('lead-upload') }}" class="form-horizontal" method="post" enctype="multipart/form-data">
-                    {{ csrf_field() }}
-                    <div class="input-group">
-                      <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                        <span class="btn btn-just-icon btn-theme btn-file">
-                          <span class="fileinput-new"><i class="material-icons">attach_file</i></span>
-                          <span class="fileinput-exists">Change</span>
-                          <input type="hidden">
-                          <input type="file" title="Select File" name="import_file" required accept=".xls,.xlsx" />
-                        </span>
-                      </div>
-                      <div class="input-group-append">
-                        <button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.upload') !!} Leads">
-                          <i class="material-icons">cloud_upload</i>
-                          <div class="ripple-container"></div>
-                        </button>
-                      </div>
-                    </div>
-                  </form>
-                  @endif
                 </div>
               </div>
             </span>
@@ -374,7 +333,7 @@
 
                   </div>
                 </div>
-              </div>--}}
+              </div>
               <div class="date_sarch">
                 {!! Form::open(['method' => 'POST', 'class' => 'form-inline', 'id' => 'frmFilter']) !!}
 
@@ -386,7 +345,7 @@
                 <a href="javascript:;" onclick="resetFilter();" class="btn btn-responsive btn-danger mb-2">{{ __('Reset') }}</a> -->
                 {!! Form::close() !!}
               </div>
-            </div>
+            </div>--}}
 
             <div class="sort_btn d-flex">
               <div class="ass_del d-none">
@@ -427,16 +386,12 @@
             <span class="message"></span>
           </div>
           <div class="table-responsive">
-            <table id="getLeads" class="table">
+            <table id="getStatus" class="table">
               <thead class=" text-primary">
                 <tr>
-                  <th><input type="checkbox" id="checkAll"></th>
-                  <th>Company Name</th>
-                  <th>Contact</th>
-                  <th>Phone</th>
-                  <th>Email</th>
-                  <th>Lead Status</th>
-                  <th>Assigned To</th>
+                  <th>Status</th>
+                  <th>Display Name</th>
+                  <th>Created By</th>
                   <th>Created Date</th>
                 </tr>
               </thead>
@@ -454,12 +409,12 @@
 
       <!-- Modal content-->
       <form method="POST"
-        action="{{ route('leads.store') }}" class="form-horizontal" id="frmLeadsCreate" enctype="multipart/form-data">
+        action="{{ route('lead-opportunities-status.store') }}" class="form-horizontal" id="frmLeadsCreate" enctype="multipart/form-data">
         @csrf
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal">&times;</button>
-            <h4 class="modal-title">New Lead</h4>
+            <h4 class="modal-title">New Status</h4>
           </div>
 
 
@@ -467,22 +422,22 @@
             <div class="row">
               <div class="col-md-6 pr-1 pl-1">
                 <div class="col-md-12 form-group">
-                  <label for="company_name">Company Name <span style="color:red">*</span></label>
-                  <input type="text" name="company_name" id="company_name" value="{{ old('company_name','') }}" class="form-control" placeholder="Company Name">
-                  @if($errors->has('company_name'))
+                  <label for="status_name">Status Name <span style="color:red">*</span></label>
+                  <input type="text" name="status_name" id="status_name" value="{{ old('status_name','') }}" class="form-control" placeholder="Status Name">
+                  @if($errors->has('status_name'))
                   <p class="help-block">
-                    <strong>{{ $errors->first('company_name') }}</strong>
+                    <strong>{{ $errors->first('status_name') }}</strong>
                   </p>
                   @endif
                 </div>
               </div>
               <div class="col-md-6 pr-1 pl-1">
                 <div class="col-md-12 form-group">
-                  <label for="contact_name">Contact Name <span style="color:red">*</span></label>
-                  <input type="text" name="contact_name" id="contact_name" value="{{ old('contact_name','') }}" class="form-control" placeholder="Contact Name">
-                  @if($errors->has('contact_name'))
+                  <label for="display_name">Display Name <span style="color:red">*</span></label>
+                  <input type="text" name="display_name" id="display_name" value="{{ old('display_name','') }}" class="form-control" placeholder="Display Name">
+                  @if($errors->has('display_name'))
                   <p class="help-block">
-                    <strong>{{ $errors->first('contact_name') }}</strong>
+                    <strong>{{ $errors->first('display_name') }}</strong>
                   </p>
                   @endif
                 </div>
@@ -507,282 +462,71 @@
   <script src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 
-  <script src="{{ url('/').'/'.asset('vendor/bootstrap-daterange/daterangepicker.min.js') }}"></script>
-
-  <script>
-    jQuery(document).ready(function() {
-      getLeads();
-
-      jQuery('#frmFilter').submit(function() {
-        getLeads();
-        return false;
-      });
-
-      jQuery('#frmLeadsCreate').validate({
-        rules: {
-          company_name: {
-            required: true
-          },
-          contact_name: {
-            required: true
-          },
+  <script type="text/javascript">
+    $(function() {
+      $.ajaxSetup({
+        headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
-
       });
-
-
-      $(document).on('change', '#checkAll', function() {
-        console.log('checkAll', this.checked);
-        $('.lead-checkbox').prop('checked', this.checked);
-        let selectedIds = [];
-
-          $('.checkbox_cls:checked').each(function() {
-              selectedIds.push($(this).val());
-          });
-
-          if (selectedIds.length > 0) {
-              $('.ass_del').removeClass('d-none');
-          } else {
-              $('.ass_del').addClass('d-none');
-          }
-      });
-
-
-      jQuery('#frmFilter [name="datetime"]').daterangepicker({
-        autoUpdateInput: false,
-        locale: {
-          cancelLabel: 'Clear'
-        }
-      }).val("{{ old('datetime') }}");
-      jQuery('#frmFilter [name="datetime"]').on('apply.daterangepicker', function(ev, picker) {
-        jQuery(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
-        var this_val = jQuery(this).val();
-        var export_button_url = "{{route('leads-exportLeads')}}?datetime=" + this_val;
-        $('#export_button').attr('href', export_button_url);
-        //console.log(jQuery(this).val());
-        getLeads();
-      }).on('cancel.daterangepicker', function(ev, picker) {
-        jQuery(this).val('');
-      });
-
-
-    });
-
-
-
-    $.ajaxSetup({
-      headers: {
-        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-      }
-    });
-
-    $('#company_name, #contact_name').on('keyup', function() {
-      var company_name = $('#company_name').val();
-      var contact_name = $('#contact_name').val();
-      $.post("{{route('leads.searchExistsLead')}}", {
-        company_name: company_name,
-        contact_name: contact_name
-      }, function(response) {
-        $('#lead_exist_data').html(response);
-      });
-    });
-
-
-
-    function getLeads() {
-      jQuery('#getLeads').dataTable().fnDestroy();
-      jQuery('#getLeads tbody').empty();
-      var datetime = jQuery('#frmFilter [name=datetime]').val();
-      var search = jQuery('#search_lead').val();
-      var status = jQuery('#status').val();
-      var table = jQuery('#getLeads').DataTable({
-        processing: false,
+      var table = $('#getStatus').DataTable({
+        processing: true,
         serverSide: true,
         searching: false,
+        columnDefs: [{
+          className: 'control',
+          orderable: false,
+          targets: -1
+        }],
+        "order": [
+          [0, 'desc']
+        ],
+        "retrieve": true,
         ajax: {
-          url: '{{ route('leads.getLeads') }}',
-          method: 'POST',
-          data: {
-            datetime: datetime,
-            search: jQuery('#search_lead').val(),
-            status: status
+          url: "{{ route('lead-opportunities-status.index') }}",
+          data: function(d) {
+            d.executive_id = $('#executive_id').val(),
+              d.start_date = $('#start_date').val()
           }
         },
-        columns: [{
-            data: 'checkbox',
-            name: 'checkbox',
+        columns: [
+          {
+            data: 'status_name',
+            name: 'status_name',
+            "defaultContent": '',
             orderable: false,
-            searchable: false
           },
           {
-            data: 'company_name',
-            name: 'company_name'
-          },
-          {
-            data: 'contacts',
-            name: 'contacts',
+            data: 'display_name',
+            name: 'display_name',
+            "defaultContent": '',
             orderable: false,
-            searchable: false
           },
           {
-            data: 'phone',
-            name: 'phone',
+            data: 'createbyname.name',
+            name: 'createbyname.name',
+            "defaultContent": '',
             orderable: false,
-            searchable: false
-          },
-          {
-            data: 'email',
-            name: 'email',
-            orderable: false,
-            searchable: false
-          },
-          {
-            data: 'status',
-            name: 'status',
-            searchable: false
-          },
-          {
-            data: 'assign_to',
-            name: 'assign_to',
-            searchable: false
           },
           {
             data: 'created_at',
-            name: 'created_at'
+            name: 'created_at',
+            "defaultContent": '',
+            orderable: false,
           },
-        ],
-        order: [
-          [6, 'desc']
+
         ],
         dom: 't<"bottom"lip>',
-
       });
-    }
 
-    $('#search_lead').on('keyup', function() {
-      getLeads();
+      $('#end_date').change(function() {
+        table.draw();
+      });
+      $('#start_date').change(function() {
+        var selectedStartDate = $('#start_date').datepicker('getDate');
+        $('#end_date').datepicker("option", "minDate", selectedStartDate);
+        table.draw();
+      });
     });
-    $('#status').on('change', function() {
-      getLeads();
-    });
-
-    function resetFilter() {
-      jQuery('#frmFilter :input:not(:button, [type="hidden"])').val('');
-      getLeads();
-    }
-
-    $(document).on('change', '.checkbox_cls', function() {
-          let selectedIds = [];
-
-          $('.checkbox_cls:checked').each(function() {
-              selectedIds.push($(this).val());
-          });
-
-          if (selectedIds.length > 0) {
-              $('.ass_del').removeClass('d-none');
-          } else {
-              $('.ass_del').addClass('d-none');
-          }
-      });
-
-      $('#user_id').on('change', function() {
-        var user_id = $(this).val();
-        let selectedIds = [];
-        $('.checkbox_cls:checked').each(function() {
-          selectedIds.push($(this).val()); // or $(this).data('id')
-        });
-        if (selectedIds.length > 0) {
-          Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't assign this leads!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes'
-          }).then((result) => {
-            if (result.value) {
-              $.ajax({
-                url: "{{ route('leads.assignLead') }}",
-                method: 'POST',
-                data: {
-                  lead_id: selectedIds,
-                  user_id: user_id,
-                  _token: '{{ csrf_token() }}'
-                },
-                success: function(res) {
-                  if (res.status == 'success') {
-                    getLeads();
-                    $('.ass_del').addClass('d-none');
-                    Swal.fire({
-                      icon: 'success',
-                      title: res.message
-                    });
-                  }else {
-                    Swal.fire({
-                      icon: 'error',
-                      title: res.message
-                    });
-                  }
-                }
-          })
-          }
-        })
-        } else {
-          // None selected
-          $('.ass_del').addClass('d-none');
-          // $('#deleteButton').prop('disabled', true);
-        }
-      });
-
-      $('#del_btn').on('click', function() {
-        let selectedIds = [];
-        $('.checkbox_cls:checked').each(function() {
-          selectedIds.push($(this).val()); // or $(this).data('id')
-        });
-        if (selectedIds.length > 0) {
-          Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't delete this leads!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, delete it!'
-          }).then((result) => {
-            if (result.value) {
-              $.ajax({
-                url: "{{ route('leads.deleteLead') }}",
-                method: 'POST',
-                data: {
-                  lead_id: selectedIds,
-                  _token: '{{ csrf_token() }}'
-                },
-                success: function(res) {
-                  if (res.status == 'success') {
-                    getLeads();
-                    $('.ass_del').addClass('d-none');
-                    Swal.fire({
-                      icon: 'success',
-                      title: res.message
-                    });
-                  }else {
-                    Swal.fire({
-                      icon: 'error',
-                      title: res.message
-                    });
-                  }
-                }
-          })
-          }
-        })
-        } else {
-          // None selected
-          $('.ass_del').addClass('d-none');
-          // $('#deleteButton').prop('disabled', true);
-        }
-      });
-
   </script>
-
 </x-app-layout>

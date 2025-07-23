@@ -90,6 +90,7 @@ use App\Http\Controllers\LeadContactsController;
 use App\Http\Controllers\LeadNotesController;
 use App\Http\Controllers\LeadTasksController;
 use App\Http\Controllers\LeadOpportunitiesController;
+use App\Http\Controllers\LeadOpportunitiesStatusController;
 use App\Http\Controllers\ServiceBillComplaintType;
 use App\Http\Controllers\OpeningStockController;
 use App\Http\Controllers\PowerBiSettingController;
@@ -164,6 +165,8 @@ Route::group(['middleware' => ['auth']], function () {
     //Lead Management
     Route::resource('leads', LeadController::class);
     Route::post('leads/getLeads', [LeadController::class, 'getLeads'])->name('leads.getLeads');
+    Route::post('lead-upload', [LeadController::class, 'upload'])->name('leads.upload');
+    Route::any('lead-template', [LeadController::class, 'template'])->name('leads.template');
     Route::post('leads/searchExistsLead', [LeadController::class, 'searchExistsLead'])->name('leads.searchExistsLead');
     Route::post('leads/storeAddress', [LeadController::class, 'storeAddress'])->name('leads.storeAddress');
     Route::post('leads/assignLead', [LeadController::class, 'assignLead'])->name('leads.assignLead');
@@ -179,10 +182,15 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('lead-contacts/getLeadContacts', [LeadContactsController::class, 'getLeadContacts'])->name('lead-contacts.getLeadContacts');
     Route::get('contacts-exportContacts', [LeadContactsController::class, 'exportContacts'])->name('contacts-exportContacts');
      Route::post('lead-contacts/checkboxAction', [LeadContactsController::class, 'checkboxAction'])->name('lead-contacts.checkboxAction');
+     Route::post('lead-contacts-upload', [LeadContactsController::class, 'upload'])->name('lead.contacts.upload');
+    Route::any('lead-contacts-template', [LeadContactsController::class, 'template'])->name('lead.contacts.template');
 
 
     // LeadNotesController Management
     Route::resource('lead-notes', LeadNotesController::class);
+
+    //OPPORTUNITIES STATUS
+    Route::resource('lead-opportunities-status', LeadOpportunitiesStatusController::class);
 
 
     Route::resource('lead-tasks', LeadTasksController::class);

@@ -16,6 +16,7 @@ class LeadContact extends Model
         'phone_number',
         'email',
         'url',
+        'lead_source',
         'created_by',
     ];
 

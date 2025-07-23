@@ -227,7 +227,7 @@
 
       .sidebar header .toggle {
          position: absolute;
-         top: 150%;
+         top: 135%;
          right: -10px;
          transform: translateY(-50%) rotate(180deg);
          height: 25px;
@@ -842,6 +842,15 @@
                                  <div class="d-none mobile_hide">Opportunities</div>
                               </a>
                            </li>
+                           @if(auth()->user()->can(['opportunities_status_access']))
+                           <li class="nav-link-btn {{ request()->is('lead-opportunities-status*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('lead-opportunities-status') }}">
+                                 <i class="material-icons icon">diamond</i>
+                                 <span>Opportunities Status</span>
+                                 <div class="d-none mobile_hide">Opportunities Status</div>
+                              </a>
+                           </li>
+                           @endif
                            <li class="nav-link-btn {{ request()->is('lead-tasks*') ? 'active' : '' }}">
                               <a class="hoveradd2" href="{{ url('lead-tasks') }}">
                                  <i class="material-icons icon">diamond</i>

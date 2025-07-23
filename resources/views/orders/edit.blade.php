@@ -38,8 +38,8 @@
                <div class="row">
                   <div class="col-md-12">
                      <div class="input_section">
-                     <img src="{!! url('/').'/'.asset('assets/img/bediya.jpg') !!}" width="70">
-                     <img src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" width="70">
+                     <!-- <img src="{!! url('/').'/'.asset('assets/img/bediya.jpg') !!}" width="70">
+                     <img src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" width="70"> -->
                      <!-- <img src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" class="brand-image" width="70px" alt="Logo"> <span> {!! config('app.name') !!}</span> -->
 </div>
                   </div>

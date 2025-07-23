@@ -1238,9 +1238,6 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
     <li class="nav-item">
         <a class="nav-link" id="tasks-tab" data-toggle="tab" href="#tasks" role="tab">Tasks</a>
     </li>
-    <li class="nav-item">
-        <a class="nav-link" id="others-tab" data-toggle="tab" href="#others" role="tab">Others</a>
-    </li>
 </ul>
 </div>
 
@@ -1545,18 +1542,6 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
             @endforeach
         </ul>
     </div>
-</div>
-<div class="tab-pane fade" id="others" role="tabpanel">
-    @if($lead->others)
-    @foreach(json_decode($lead->others) as $key => $value)
-    <div class="card-header">
-        <p class="hed m-0">{{ucwords(str_replace('_', ' ', $key))}}</p>
-    </div>
-    <div class="card-body">
-        <p>{{$value}}</p>
-    </div>
-    @endforeach
-    @endif
 </div>
 </div>
 </div>
