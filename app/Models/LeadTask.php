@@ -16,6 +16,12 @@ class LeadTask extends Model
         'description',
         'date',
         'time',
+        'priority',
+        'status',
+        'open_date',
+        'due_date',
+        'close_date',
+        'remark'
     ];
 
     
@@ -25,5 +31,10 @@ class LeadTask extends Model
 
     public function assignUser(){
         return $this->belongsTo(User::class,'assigned_to');
+    }
+
+
+    public function createdby(){
+        return $this->belongsTo(User::class,'created_by');
     }
 }

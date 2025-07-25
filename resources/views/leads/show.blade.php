@@ -795,7 +795,7 @@
             </div>
         </div>
         <div class="button-box">
-            <button class="btn btn-primary me-2" onclick="$('#frmLeadNotesAdd').show()"><img src="{{url('/').'/'.asset('assets/img')}}/paper.svg"> Note</button>
+            <button class="btn btn-primary me-2" onclick="activateNotesTab()"><img src="{{url('/').'/'.asset('assets/img')}}/paper.svg"> Note</button>
             @if($lead_contacts[0]->email??'')
             <a  href="mailto:{{$lead_contacts[0]->email??''}}" class="btn btn-outline-primary text-white email_s"><img src="{{url('/').'/'.asset('assets/img')}}/btnmail.svg">Email</a>
             @endif
@@ -853,6 +853,39 @@ action="{{ route('lead-tasks.store') }}" class="form-horizontal taskform" id="fr
             @endif
         </div>
     </div>
+    <div class="col-md-12 pr-1 pl-1">
+        <div class="col-md-12 form-group">
+            <label for="priority">Priority<span style="color:red">*</span></label>
+            <select name="priority" id="priority" class="select2" required>
+            <option value="">Select Priority</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+            </select>
+            @if($errors->has('priority'))
+            <p class="help-block">
+                <strong>{{ $errors->first('priority') }}</strong>
+            </p>
+            @endif
+        </div>
+    </div>
+    <div class="col-md-12 pr-1 pl-1">
+        <div class="col-md-12 form-group">
+            <label for="status">Status<span style="color:red">*</span></label>
+            <select name="status" id="status" class="select2" required>
+                <option value="">Select Status</option>
+                <option value="open">Open</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+            </select>
+            @if($errors->has('status'))
+            <p class="help-block">
+                <strong>{{ $errors->first('status') }}</strong>
+            </p>
+            @endif
+        </div>
+    </div>
+            
     <div class="col-md-6 pr-1 pl-1">
         <div class="col-md-12 form-group">
             <label for="date">Date <span style="color:red">*</span></label>
@@ -1157,7 +1190,7 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
 </div>
 <div class="col-md-12 pr-1 pl-1">
     <div class="col-md-12 ">
-        {!! Form::select('status', config('constants.OPPORTUNITY_STATUS'),old('status',''), array('class' => 'form-control','id'=>'status')) !!}
+        {!! Form::select('status', $opportunity_status,old('status',''), array('class' => 'form-control','id'=>'status')) !!}
 
         @if($errors->has('status'))
         <p class="help-block">
@@ -1254,7 +1287,7 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
         </div>
         <div class="card-body">
 
-            <div class="mb-3">
+            {{--<div class="mb-3">
                 <form method="POST" 
                 action="{{ route('lead-notes.store') }}" class="form-horizontal" id="frmLeadNotesAdd" enctype="multipart/form-data" style="display:none;">
                 @method('POST')
@@ -1266,7 +1299,7 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
                     <button class="btn btn-sm btn-primary donebtn" type="submit">Done</button>
                 </div>
             </form>
-        </div>
+        </div>--}}
 
         @php
         $previousDate = null;
@@ -1302,6 +1335,7 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
                 @if($lead_note->type == 'note')
                 <h5>{!! $lead_note->note??''!!}</h5>
                 @else
+                <h5>Task <span class="badge badge-info" style="font-family: 'Poppins', sans-serif;font-size: 10px;font-weight:700;padding: 4px,6px"> {{$lead_task->priority??''}}</span></h5>
                 <h5>{!! $lead_note->description??''!!}({{date('d M Y', strtotime($lead_note->date))}}, {{date('h:i A', strtotime($lead_note->time))}})</h5>
                 @endif
 
@@ -1352,6 +1386,20 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
         <p class="hed m-0">Notes</p>
     </div>
     <div class="card-body">
+
+    <div class="mb-3">
+                <form method="POST" 
+                action="{{ route('lead-notes.store') }}" class="form-horizontal" id="frmLeadNotesAdd" enctype="multipart/form-data" style="display:none;">
+                @method('POST')
+                @csrf
+                <input type="hidden" name="lead_id" value="{{$lead->id??''}}">
+                <input type="hidden" name="note_id" id="note_id" >
+                {!! Form::textarea('note', old('note',''), ['class' => 'form-control rounded border ckeditor-init', 'placeholder' => 'Add a note...','rows'=>8,'id'=>'note_text']) !!}
+                <div class="text-end mt-2">
+                    <button class="btn btn-sm btn-primary donebtn" type="submit">Done</button>
+                </div>
+            </form>
+        </div>
 
         @php
         $previousDate1 = null;
@@ -1922,6 +1970,8 @@ amount: {
         $('#task_id').val('');
         $('#frmLeadTaskCreate :input:not(:button, [type="hidden"])').val('');
         $('#frmLeadTaskCreate #assigned_to').change();
+        $('#frmLeadTaskCreate #priority').change();
+        $('#frmLeadTaskCreate #status').change();
         $('#frmLeadTaskCreate').show();
     }
     function editTask(task_data){
@@ -1931,10 +1981,14 @@ amount: {
         }
 
         $('#frmLeadTaskCreate').show();
-//console.log(task_data);
+console.log(task_data);
         $('#frmLeadTaskCreate #assigned_to').val(task_data.assigned_to);
         $('#frmLeadTaskCreate #assigned_to').change();
         $('#frmLeadTaskCreate #description').val(task_data.description);
+        $('#frmLeadTaskCreate #priority').val(task_data.priority);
+        $('#frmLeadTaskCreate #priority').change();
+        $('#frmLeadTaskCreate #status').val(task_data.status);
+        $('#frmLeadTaskCreate #status').change();
         $('#frmLeadTaskCreate #task_date').val(task_data.date);
         $('#frmLeadTaskCreate #time').val(task_data.time);
         $('#frmLeadTaskCreate #task_id').val(task_data.id);
@@ -2083,6 +2137,14 @@ $('#frmLeadOpportunitiesCreate #o_amount').val(opportunity_data.amount);
 //         }
 //     });
 // });
+
+function activateNotesTab() {
+        // Show the form
+        $('#frmLeadNotesAdd').show();
+
+        // Activate the Notes tab using Bootstrap's tab API
+        $('#notes-tab').tab('show');
+    }
 
 
 </script>

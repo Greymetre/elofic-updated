@@ -13,6 +13,7 @@ use App\Models\Lead;
 use App\Models\User;
 use App\Models\LeadOpportunity;
 use App\Models\LeadContact;
+use App\Models\OpportunitieStatus;
 
 class LeadOpportunitiesController extends Controller
 {
@@ -32,60 +33,28 @@ class LeadOpportunitiesController extends Controller
         })->select('id', 'name')->orderBy('name')->get();
 
         $lead_contacts = LeadContact::get();
-        return view('leads-opportunities.index',compact('users','lead_contacts'));
+        $opportunity_status = OpportunitieStatus::orderBy('ordering', 'asc')->pluck('status_name', 'id')->toArray();
+        return view('leads-opportunities.index',compact('users','lead_contacts', 'opportunity_status'));
     }
 
 
     public function getCardData(Request $request){
 
         $assigned_to = $request->assigned_to;
-        $no_show_opportunities = LeadOpportunity::where(['status'=>'no_show']);
+        $all_opportunities = LeadOpportunity::with('lead','assignUser');
         if($assigned_to){
-            $no_show_opportunities->where('assigned_to',$assigned_to);
+            $all_opportunities->where('assigned_to',$assigned_to);
         }
-        $no_show_opportunities = $no_show_opportunities->get();
+        $all_opportunities = $all_opportunities->get();
 
-        $demo_book_opportunities = LeadOpportunity::where(['status'=>'demo_book']);
-        if($assigned_to){
-            $demo_book_opportunities->where('assigned_to',$assigned_to);
-        }
-        $demo_book_opportunities = $demo_book_opportunities->get();
-
-        $demo_completed_opportunities = LeadOpportunity::where(['status'=>'demo_completed']);
-        if($assigned_to){
-            $demo_completed_opportunities->where('assigned_to',$assigned_to);
-        }
-        $demo_completed_opportunities = $demo_completed_opportunities->get();
-
-        $negotiating_opportunities = LeadOpportunity::where(['status'=>'negotiating']);
-        if($assigned_to){
-            $negotiating_opportunities->where('assigned_to',$assigned_to);
-        }
-        $negotiating_opportunities = $negotiating_opportunities->get();
-
-        $interested_opportunities = LeadOpportunity::where(['status'=>'interested']);
-        if($assigned_to){
-            $interested_opportunities->where('assigned_to',$assigned_to);
-        }
-        $interested_opportunities = $interested_opportunities->get();
-
-        $not_interested_opportunities = LeadOpportunity::where(['status'=>'not_interested']);
-        if($assigned_to){
-            $not_interested_opportunities->where('assigned_to',$assigned_to);
-        }
-        $not_interested_opportunities = $not_interested_opportunities->get();
-
+        $opportunity_status = OpportunitieStatus::orderBy('ordering', 'asc')->get();
 
         $view = view('leads-opportunities.inc_card_data', compact(
-            'no_show_opportunities',
-            'demo_book_opportunities',
-            'demo_completed_opportunities',
-            'negotiating_opportunities',
-            'interested_opportunities',
-            'not_interested_opportunities'
+            'all_opportunities',
+            'opportunity_status'
         ))->render();
 
-        $total_annualised_value = ($no_show_opportunities->sum('amount')+$demo_book_opportunities->sum('amount')+$demo_completed_opportunities->sum('amount')+$negotiating_opportunities->sum('amount')+$interested_opportunities->sum('amount')+$not_interested_opportunities->sum('amount'));
+        $total_annualised_value = ($all_opportunities->sum('amount')??0);
         return response()->json([
             'status' => true,
             'view' => $view,

@@ -36,6 +36,7 @@ use App\Http\Controllers\Api\MspActivityController;
 use App\Http\Controllers\Api\ComplaintApiController;
 use App\Http\Controllers\Api\ServiceBillController;
 use App\Http\Controllers\Api\ComplaintAPICustomerController;
+use App\Http\Controllers\Api\LeadController;
 use App\Http\Controllers\Api\ServiceBillCustController;
 use App\Http\Controllers\Api\UserLatLongController;
 
@@ -314,4 +315,7 @@ Route::group(['middleware' => ['auth:users']], function () {
 
     // User Latitude Longitude routes
     Route::post('multi-latitude-longitude', [UserLatLongController::class, 'store']);
+
+    //Lead Management
+    Route::get('leads', [LeadController::class, 'getLeads']);
 });

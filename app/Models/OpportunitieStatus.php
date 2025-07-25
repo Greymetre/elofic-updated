@@ -15,7 +15,7 @@ class OpportunitieStatus extends Model
 
     protected $fillable = [
         'status_name',
-        'display_name',
+        'ordering',
         'created_by',
     ];
 

@@ -15,8 +15,8 @@ class LeadOpportunitiesStatusController extends Controller
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('action', function($data){
-                    $btn = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$data->id.'" data-original-title="Edit" class="edit btn btn-primary btn-sm editProduct">Edit</a>';
-                    $btn = $btn.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$data->id.'" data-original-title="Delete" class="btn btn-danger btn-sm deleteProduct">Delete</a>';
+                    $btn = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$data->id.'" data-original-title="Edit" class="edit btn btn-primary btn-sm editStatus"><i class="fa fa-edit fa-sm text-white"></i></a>';
+                    //$btn = $btn.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$data->id.'" data-original-title="Delete" class="btn btn-danger btn-sm deleteProduct">Delete</a>';
                     return $btn;
                 })
                 ->editColumn('created_at', function($data){
@@ -32,9 +32,19 @@ class LeadOpportunitiesStatusController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->all();
-        $data['created_by'] = auth()->user()->id;
-        $lead_opportunities_status = OpportunitieStatus::create($data);
+        $data = $request->except(['_token', '_method', 'submit', 'lead_id']);
+        // dd($data);
+        if($request->lead_id == null){
+            $data['created_by'] = auth()->user()->id;
+            $lead_opportunities_status = OpportunitieStatus::create($data);            
+        }else{
+            OpportunitieStatus::where('id', $request->lead_id)->update($data);
+        }
         return redirect()->back();
+    }
+
+    public function edit(OpportunitieStatus $lead_opportunities_status)
+    {
+        return response()->json($lead_opportunities_status);
     }
 }

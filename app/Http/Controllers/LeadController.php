@@ -23,6 +23,7 @@ use App\Models\LeadOpportunity;
 use App\Models\Pincode;
 use App\Models\Country;
 use App\Models\Address;
+use App\Models\OpportunitieStatus;
 use App\Models\Status;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
@@ -213,6 +214,7 @@ class LeadController extends Controller
 
             // ✅ Base export row
             $baseRow = [
+                $item->id,
                 $item->lead_generation_date,
                 $item->company_name,
                 $contacts_name,
@@ -242,6 +244,7 @@ class LeadController extends Controller
 
         // ✅ Header
         $baseHeaders = [
+            'ID',
             'Lead Generation Date',
             'Firm Name',
             'Customer Name',
@@ -509,7 +512,8 @@ class LeadController extends Controller
 
         $media_items = $lead->getMedia('lead_file');
         $status = Status::where('module', 'LeadStatus')->where('active', 'Y')->get();
-        return view('leads.show', compact('lead', 'lead_contacts', 'lead_notes', 'users', 'lead_tasks', 'lead_opportunities', 'countries', 'pincodes', 'address', 'address_data', 'media_items', 'combined', 'status'));
+        $opportunity_status = OpportunitieStatus::orderBy('ordering', 'asc')->pluck('status_name', 'id')->toArray();
+        return view('leads.show', compact('lead', 'lead_contacts', 'lead_notes', 'users', 'lead_tasks', 'lead_opportunities', 'countries', 'pincodes', 'address', 'address_data', 'media_items', 'combined', 'status', 'opportunity_status'));
     }
 
     /**

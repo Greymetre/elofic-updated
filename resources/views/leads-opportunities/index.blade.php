@@ -389,7 +389,7 @@
                      <div class="col-md-12 ">
                          <label for="status">Status<span style="color:red">*</span></label>
                          
-                           {!! Form::select('status', config('constants.OPPORTUNITY_STATUS'),old('status',''), array('class' => 'form-control','id'=>'status')) !!}
+                           {!! Form::select('status', $opportunity_status,old('status',''), array('class' => 'form-control','id'=>'status')) !!}
 
                          @if($errors->has('status'))
                          <p class="help-block">

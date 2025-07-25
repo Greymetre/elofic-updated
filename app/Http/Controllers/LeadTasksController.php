@@ -29,7 +29,7 @@ class LeadTasksController extends Controller
 
     public function getLeadTasks(Request $request){
         $lead_tasks = LeadTask::with(['lead','assignUser']); 
-        $lead_tasks = $lead_tasks->select(\DB::raw(with(new LeadTask)->getTable().'.*'))->groupBy('id');
+        $lead_tasks = $lead_tasks->orderBy('id','desc')->select(\DB::raw(with(new LeadTask)->getTable().'.*'))->groupBy('id');
         return DataTables::of($lead_tasks)
             ->editColumn('lead.company_name', function ($lead_task) {
                     return $lead_task->lead->company_name??'';
@@ -50,8 +50,17 @@ class LeadTasksController extends Controller
                  $lead_task_id = "'".$lead_task->id."'";
                 return '<input type="checkbox" class="lead_task-checkbox checkbox_cls" value="'.$lead_task->id.'" name="lead_task_ids[]" onclick="checkboxDelete('.$lead_task_id.')">';
             })
+            ->editColumn('status', function ($lead_task) {
+                if($lead_task->status == 'open'){
+                    return '<button title="Change Status" class="btn btn-sm btn-info change_status" data-status="open" data-id="'.$lead_task->id.'">Open</button>'; //<span class="badge badge-info">Open</span>';
+                }else if($lead_task->status == 'completed'){
+                    return '<span class="badge badge-success">Completed</span>';
+                }else if($lead_task->status == 'in_progress'){
+                    return '<button title="Change Status" class="btn btn-sm btn-warning change_status" data-status="in_progress" data-id="'.$lead_task->id.'">In Progress</button>';
+                }
+            })
            
-            ->rawColumns(['action','checkbox'])
+            ->rawColumns(['action','checkbox', 'status'])
             ->make(true);
     }
 
@@ -70,7 +79,13 @@ class LeadTasksController extends Controller
                 $item->id,
                 $item->lead->company_name??'',
                 $item->description,
+                $item->priority,
+                ucwords(str_replace('_', ' ', $item->status)),
+                date("M d,Y",strtotime($item->created_at)),
                 date("M d,Y",strtotime($item->date)),
+                $item->close_date ? date("M d,Y",strtotime($item->close_date)) : '',
+                $item->remark,
+                $item->createdby->name??'',
                 $item->assignUser->name??'',
                 
                
@@ -82,7 +97,13 @@ class LeadTasksController extends Controller
             'Id',
             'Name',
             'Description',
-            'Date',
+            'Priority',
+            'Task Status',
+            'Open Date',
+            'Due Date',
+            'Close Date',
+            'Remarks',
+            'Created By',
             'Assign to',
         ], $data);
 
@@ -103,7 +124,8 @@ class LeadTasksController extends Controller
             'assigned_to'=>'required',
             'description'=>'required',
             'date'=>'required',
-            //'time'=>'required',
+            'priority'=>'required',
+            'status'=>'required',
             
         ];
 
@@ -112,14 +134,22 @@ class LeadTasksController extends Controller
         $created_by = Auth::id(); 
         $task_id = $request->task_id;
         $lead_task = LeadTask::where(['id'=>$task_id])->first();
+        if(!$request->status && empty($request->status)){
+            $request->status = 'open';
+        }
         if($lead_task){
-             $lead_task->update(['assigned_to'=>$request->assigned_to,'lead_id'=>$request->lead_id,'created_by'=>$created_by,'description'=>$request->description,'date'=>$request->date,'time'=>$request->time]);
+             $lead_task->update(['assigned_to'=>$request->assigned_to,'lead_id'=>$request->lead_id,'created_by'=>$created_by,'description'=>$request->description,'date'=>$request->date,'time'=>$request->time, 'priority'=>$request->priority,'status'=>$request->status]);
             $request->session()->flash('message_success',__('Lead Task Update successfully.'));
         }else{
-            $lead_note = LeadTask::create(['assigned_to'=>$request->assigned_to,'lead_id'=>$request->lead_id,'created_by'=>$created_by,'description'=>$request->description,'date'=>$request->date,'time'=>$request->time]);
+            $lead_note = LeadTask::create(['assigned_to'=>$request->assigned_to,'lead_id'=>$request->lead_id,'created_by'=>$created_by,'description'=>$request->description,'date'=>$request->date,'time'=>$request->time, 'priority'=>$request->priority,'status'=>$request->status]);
             $request->session()->flash('message_success',__('Lead Task Added successfully.'));
         }
-       
+        if($request->status == 'open'){
+            $lead_task->update(['open_date'=>date('Y-m-d')]);
+        }
+        if($request->status == 'completed'){
+            $lead_task->update(['close_date'=>date('Y-m-d')]);
+        }
 
         return redirect()->back();
     }
@@ -180,7 +210,24 @@ class LeadTasksController extends Controller
             LeadTask::whereIn('id',$lead_id_arr)->delete(); 
             $request->session()->flash('message_success',__('Lead Task deleted successfully.'));
             return redirect()->back();
+        }   
+    }
+
+    public function change_status(Request $request){
+        $lead_id = $request->lead_id;
+        $lead_task = LeadTask::where(['id'=>$lead_id])->first();
+        if($lead_task){
+            $lead_task->update(['status'=>$request->status, 'remark'=>$request->remark]);
+            $request->session()->flash('message_success',__('Lead Task status changed successfully.'));
+            if($request->status == 'open'){
+                $lead_task->update(['open_date'=>date('Y-m-d')]);
+            }
+            if($request->status == 'completed'){
+                $lead_task->update(['close_date'=>date('Y-m-d')]);
+            }
+            return response()->json(['status'=>'success']);
+        }else{
+            return response()->json(['status'=>'error']);
         }
-        
     }
 }

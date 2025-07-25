@@ -54,4 +54,12 @@ class Lead extends Model implements HasMedia
     public function createdby(){
         return $this->belongsTo(User::class,'created_by');
     }
+
+    public function tasks(){
+        return $this->hasMany(LeadTask::class);
+    }
+
+    public function opportunities(){
+        return $this->hasMany(LeadOpportunity::class);
+    }
 }

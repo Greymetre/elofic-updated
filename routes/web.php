@@ -196,6 +196,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('lead-tasks', LeadTasksController::class);
     Route::get('tasks-exportTasks', [LeadTasksController::class, 'exportTasks'])->name('tasks-exportTasks');
     Route::post('lead-tasks/checkboxAction', [LeadTasksController::class, 'checkboxAction'])->name('lead-tasks.checkboxAction');
+    Route::post('lead-tasks-change-status', [LeadTasksController::class, 'change_status'])->name('lead-tasks.change_status');
 
     
     Route::post('lead-tasks/getLeadTasks', [LeadTasksController::class, 'getLeadTasks'])->name('lead-tasks.getLeadTasks');

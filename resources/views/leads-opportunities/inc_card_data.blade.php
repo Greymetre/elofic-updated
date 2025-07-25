@@ -201,42 +201,37 @@ p.dam {
 <div>
     <div class="row text-end mb-3">
         <div class="col">
-          <?php
-            $no_show_sum = $no_show_opportunities->sum('amount')??0;
-            $demo_book_sum = $demo_book_opportunities->sum('amount')??0;
-            $demo_completed_sum = $demo_completed_opportunities->sum('amount')??0;
-            $negotiating_sum = $negotiating_opportunities->sum('amount')??0;
-            $interested_sum = $interested_opportunities->sum('amount')??0;
-            $not_interested_sum = $not_interested_opportunities->sum('amount')??0;
-          ?>
-          <!-- <h5>Total Annualised Value: ₹ <strong>{{$no_show_sum+$demo_book_sum+$demo_completed_sum+$negotiating_sum}}  </strong></h5> -->
         </div>
     </div>
     <div class="skolling">
           <div class="board">
+            @foreach($opportunity_status as $status)
               <div class="column p-0" >
                  <div class="card p-0 m-0">
                      <div class="card-header bg-white drag-header">
-                        <h3>No Show</h3>
-                        <div class="apprtunity-price"> {{count($no_show_opportunities)}} OPPORTUNITY</div>
+                        <h3>{{$status->status_name}}</h3>
+                        <div class="apprtunity-price"> {{$all_opportunities->where('status', $status->id)->count()}} OPPORTUNITY</div>
                         <div class="flex anulprice">
                          <p class="same"> Annualized Value</p>
-                         <p class="dam">₹ {{$no_show_sum}}</p>
+                         <!-- <p class="dam">₹ {{$all_opportunities->where('status', $status->id)->sum('amount')}}</p> -->
+                         <p class="dam">₹ {{$all_opportunities->where('status', $status->id)->sum('amount')}}</p>
                        </div>
                      </div>
-                     <div class="card-body bgrid column_drag" data-status="no_show">
-                         @foreach($no_show_opportunities  as $no_show_opportunity)
-                          <div class="card_drag card bg-white p-0" draggable="true" data-id="{{$no_show_opportunity->id}}">
+                     <div class="card-body bgrid column_drag" data-status="{{$status->id}}">
+                         @foreach($all_opportunities  as $all_opportunity)
+                            @if($all_opportunity->status == $status->id)
+                          <div class="card_drag card bg-white p-0" draggable="true" data-id="{{$all_opportunity->id}}">
                             <div class="card-header p-2">
                                 <div class="d-flex flex-row justify-content-start align-items-center">
                                      <div class="header_image">
                                         <img src="{{ url('/').'/'.asset('assets/img')}}/circaldrag.svg">
                                      </div>
                                      <div class="text">
-                                        <p>{{$no_show_opportunity->note}}</p>
+                                        <h5 class="mb-0">{{$all_opportunity->lead->company_name}}</h5>
+                                        <p>({{$all_opportunity->note}})</p>
                                      </div>
                                 </div>
-                                 <button type="button" class="hoverbtn btn" onclick="getOpportunitydata('{{$no_show_opportunity->id}}')"> <img src="{{ url('/').'/'.asset('assets/img')}}/ph_note-pencil-fill.svg"></button>
+                                 <button type="button" class="hoverbtn btn" onclick="getOpportunitydata('{{$all_opportunity->id}}')"> <img src="{{ url('/').'/'.asset('assets/img')}}/ph_note-pencil-fill.svg"></button>
                             </div>
                             <div class="card-body">
                                 <div class="d-flex flex-row align-items-center">
@@ -244,8 +239,9 @@ p.dam {
                                          <img src="{{ url('/').'/'.asset('assets/img')}}/circaldrag.svg">
                                      </div>
                                      <div class="data-ss">
-                                         <h5>₹{{$no_show_opportunity->amount}}</h5>
-                                         <p>{{$no_show_opportunity->confidence}}% on {{date("d/m/Y",strtotime($no_show_opportunity->estimated_close_date))}}</p>
+                                         <h5>₹{{$all_opportunity->amount}}</h5>
+                                         <p>{{$all_opportunity->confidence}}% on {{date("d/m/Y",strtotime($all_opportunity->estimated_close_date))}}</p>
+                                         <p class="mt-1">Assigned to: <b>{{$all_opportunity->assignUser->name}}</b></p>
                                          
                                      </div>
 
@@ -254,11 +250,13 @@ p.dam {
                            
                            
                           </div>
+                          @endif
                          @endforeach
                      </div>
                  </div>
               </div>
-
+              @endforeach
+{{--
               <div class="column p-0" >
                  <div class="card p-0 m-0">
                      <div class="card-header bg-white drag-header">
@@ -471,7 +469,7 @@ p.dam {
                      </div>
                  </div>
               </div>
-             
+             --}}
 
                
           </div>
@@ -509,10 +507,46 @@ p.dam {
 
                 $.post("{{ route('lead-opportunities.updateCardStatus') }}", {card_id:card_id,new_status:new_status }, function(response){
                     getCardData();
+                    setTimeout(() => {
+                        smoothCounter('dam', 700);
+                    }, 500);
                 }); 
 
                
             }
         });
     });
+    
+    function smoothCounter(className, duration) {
+        const elements = document.getElementsByClassName(className);
+
+        Array.from(elements).forEach((el) => {
+            const fullText = el.textContent.trim(); // e.g., "42 OPPORTUNITY"
+            const match = fullText.replace('₹ ', '').match(/(\d+)/);
+            if (!match) return;
+
+            const endValue = parseInt(match[1]);
+            const startValue = 0;
+            const startTime = performance.now();
+
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const value = Math.floor(startValue + progress * (endValue - startValue));
+                el.textContent = `₹ ${value}`;
+
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                }
+            }
+
+            requestAnimationFrame(update);
+        });
+    }
+
+    // Run it after the page loads
+    window.addEventListener('DOMContentLoaded', () => {
+        smoothCounter('dam', 1000); // 1000 ms = 1 second
+    });
+
 </script>

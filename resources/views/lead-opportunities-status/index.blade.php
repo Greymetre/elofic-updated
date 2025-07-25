@@ -279,7 +279,7 @@
 
 
                 <div class="both_btn">
-                  <button type="button" data-toggle="modal" data-target="#addLeadModel" class="btn btn-primary btn-sm btn-icon-split float-right">
+                  <button type="button" data-toggle="modal" data-target="#addLeadModel" class="btn btn-primary btn-sm btn-icon-split float-right" id="add_lead">
                     <span class="icon text-white-50">
                       <i class="material-icons">add_circle</i>
                     </span>
@@ -389,8 +389,9 @@
             <table id="getStatus" class="table">
               <thead class=" text-primary">
                 <tr>
+                  <th>Action</th>
                   <th>Status</th>
-                  <th>Display Name</th>
+                  <th>Ordering</th>
                   <th>Created By</th>
                   <th>Created Date</th>
                 </tr>
@@ -423,7 +424,7 @@
               <div class="col-md-6 pr-1 pl-1">
                 <div class="col-md-12 form-group">
                   <label for="status_name">Status Name <span style="color:red">*</span></label>
-                  <input type="text" name="status_name" id="status_name" value="{{ old('status_name','') }}" class="form-control" placeholder="Status Name">
+                  <input type="text" name="status_name" id="status_name" value="{{ old('status_name','') }}" class="form-control" placeholder="Status Name" required>
                   @if($errors->has('status_name'))
                   <p class="help-block">
                     <strong>{{ $errors->first('status_name') }}</strong>
@@ -433,11 +434,11 @@
               </div>
               <div class="col-md-6 pr-1 pl-1">
                 <div class="col-md-12 form-group">
-                  <label for="display_name">Display Name <span style="color:red">*</span></label>
-                  <input type="text" name="display_name" id="display_name" value="{{ old('display_name','') }}" class="form-control" placeholder="Display Name">
-                  @if($errors->has('display_name'))
+                  <label for="ordering">Ordering <span style="color:red">*</span></label>
+                  <input type="number" name="ordering" id="ordering" value="{{ old('ordering','') }}" class="form-control" placeholder="Ordering" required>
+                  @if($errors->has('ordering'))
                   <p class="help-block">
-                    <strong>{{ $errors->first('display_name') }}</strong>
+                    <strong>{{ $errors->first('ordering') }}</strong>
                   </p>
                   @endif
                 </div>
@@ -448,8 +449,9 @@
 
           </div>
           <div class="modal-footer">
+            <input type="hidden" name="lead_id" id="id">
             <button type="button" class="btn btn-danger mr-2" data-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-default">Create Lead</button>
+            <button type="submit" class="btn btn-default" id="model_submit_btn">Create Status</button>
           </div>
         </div>
       </form>
@@ -491,14 +493,20 @@
         },
         columns: [
           {
+            data: 'action',
+            name: 'action',
+            "defaultContent": '',
+            orderable: false,
+          },
+          {
             data: 'status_name',
             name: 'status_name',
             "defaultContent": '',
             orderable: false,
           },
           {
-            data: 'display_name',
-            name: 'display_name',
+            data: 'ordering',
+            name: 'ordering',
             "defaultContent": '',
             orderable: false,
           },
@@ -526,6 +534,35 @@
         var selectedStartDate = $('#start_date').datepicker('getDate');
         $('#end_date').datepicker("option", "minDate", selectedStartDate);
         table.draw();
+      });
+
+      $(document).on('click', '.editStatus', function() {
+        var id = $(this).attr('data-id');
+        var url = "{{ route('lead-opportunities-status.edit', ':id') }}";
+        url = url.replace(':id', id);
+        $.ajax({
+          url: url,
+          type: 'GET',
+          dataType: 'json',
+          success: function(data) {
+            $('.modal-title').html('Edit Status');
+            $('#model_submit_btn').html('Update');
+
+            $('#id').val(data.id);
+            $('#status_name').val(data.status_name);
+            $('#ordering').val(data.ordering);
+            $('#addLeadModel').modal('show');
+          }
+        });
+      });
+
+      $(document).on('click', '#add_lead', function() {
+        $('#frmLeadsCreate')
+          .find('input[type="text"], input[type="number"], input[type="hidden"]')
+          .not('[name="_token"]')
+          .val('');
+        $('.modal-title').html('Add Status');
+        $('#model_submit_btn').html('Create');
       });
     });
   </script>

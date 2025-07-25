@@ -219,7 +219,9 @@ select.custom-select {
             <table id="getLeadTasks" class="table">
               <thead class=" text-primary">
                 <tr>
-                  <th></th>
+                  <th>#</th>
+                  <th>Priority</th>
+                  <th>Status</th>
                   <th>Name</th>
                   <th>Description</th>
                   <th>Date</th>
@@ -332,7 +334,7 @@ $('#company_name, #contact_name').on('keyup', function () {
 function getLeadTasks(){
     jQuery('#getLeadTasks').dataTable().fnDestroy();
     jQuery('#getLeadTasks tbody').empty();
-    jQuery('#getLeadTasks').DataTable({
+    var table = jQuery('#getLeadTasks').DataTable({
         processing: false,
         serverSide: true,
         searching: false,
@@ -342,6 +344,8 @@ function getLeadTasks(){
         },
         columns: [
             {data: 'checkbox', name: 'checkbox'},
+            {data: 'priority', name: 'priority'},
+            {data: 'status', name: 'status'},
             {data: 'lead.company_name', name: 'lead.company_name'},
             {data: 'description', name: 'description'},
             {data: 'date', name: 'date'},
@@ -388,6 +392,57 @@ function checkboxDelete(lead_id){
 
  
 }
+
+$(document).on('click', '.change_status', function () {
+    var lead_id = $(this).attr('data-id');
+    var current_status = $(this).attr('data-status');
+
+    Swal.fire({
+        title: "ARE YOU SURE TO CHANGE THE STATUS?",
+        html: `
+            <select id="swal-status" class="swal2-input" required>
+                <option value="">Select Status</option>
+                <option value="open" ${current_status == 'open' ? 'selected' : ''}>Open</option>
+                <option value="in_progress" ${current_status == 'in_progress' ? 'selected' : ''}>In Progress</option>
+                <option value="completed" ${current_status == 'completed' ? 'selected' : ''}>Completed</option>
+            </select>
+            <textarea id="swal-remark" class="swal2-textarea" placeholder="Enter Remark" required></textarea>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Change It',
+        closeOnConfirm: false
+    }).then(function (result) {
+        if (result.value || result.isConfirmed) {
+            var status = $('#swal-status').val();
+            var remark = $('#swal-remark').val().trim();
+
+            if (!status || !remark) {
+                Swal.fire('Required', 'Please select a status and enter a remark.', 'warning');
+                return;
+            }
+
+            $.ajax({
+                url: "{{ route('lead-tasks.change_status') }}",
+                dataType: "json",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    lead_id: lead_id,
+                    status: status,
+                    remark: remark
+                },
+                success: function (response) {
+                    if (response.status == 'success') {
+                        getLeadTasks();
+                        Swal.fire('Success', 'Status changed successfully!', 'success');
+                    } else {
+                        Swal.fire('Error', 'Something went wrong.', 'error');
+                    }
+                }
+            });
+        }
+    });
+});
 
 </script>
 

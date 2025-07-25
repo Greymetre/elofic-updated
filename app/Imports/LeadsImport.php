@@ -60,9 +60,9 @@ class LeadsImport implements ToCollection, WithValidation, WithHeadingRow, WithB
                 'note'
             ];
 
-            // Step 1: Collect other (unexpected) keys
+            // Step 1: Collect other (unexpected) keys without null/empty key or value
             $otherData = collect($row)->filter(function ($value, $key) use ($expectedKeys) {
-                return !in_array($key, $expectedKeys);
+                return !in_array($key, $expectedKeys) && !is_null($key) && $key !== '' && !is_null($value) && $value !== '';
             })->toArray();
             $lead = Lead::create([
                 'company_name' => $row['firm_name'],
