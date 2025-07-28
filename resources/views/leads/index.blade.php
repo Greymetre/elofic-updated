@@ -435,6 +435,7 @@
                   <th>Contact</th>
                   <th>Phone</th>
                   <th>Email</th>
+                  <th>Others</th>
                   <th>Lead Status</th>
                   <th>Assigned To</th>
                   <th>Created Date</th>
@@ -633,6 +634,12 @@
           {
             data: 'email',
             name: 'email',
+            orderable: false,
+            searchable: false
+          },
+          {
+            data: 'others',
+            name: 'others',
             orderable: false,
             searchable: false
           },

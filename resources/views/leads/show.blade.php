@@ -14,7 +14,7 @@
         }
 
         .image-profile {
-            background: #9ff3f3;
+            background: #294d88;
             width: 80px;
             height: 80px;
             font-size: 45px;
@@ -23,8 +23,9 @@
             justify-content: center;
             align-items: center;
             border-radius: 50%;
-            text-shadow: 0px 0px 10px #fff;
+            text-shadow: 0px 0px 5px #625d5d;
             border: 6px double #FFF;
+            color: #ffffff;
         }
 
         .fileinput .thumbnail {
@@ -1596,7 +1597,7 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
 </div>
 <div class="tab-pane fade" id="others" role="tabpanel">
     @if($lead->others)
-    @foreach(json_decode($lead->others) as $key => $value)
+    @foreach($lead->others as $key => $value)
     <div class="card-header">
         <p class="hed m-0">{{ucwords(str_replace('_', ' ', $key))}}</p>
     </div>

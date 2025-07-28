@@ -222,7 +222,7 @@ select.custom-select {
                   <th>#</th>
                   <th>Priority</th>
                   <th>Status</th>
-                  <th>Name</th>
+                  <th>Firm Name</th>
                   <th>Description</th>
                   <th>Date</th>
                   <th>Assign To</th>

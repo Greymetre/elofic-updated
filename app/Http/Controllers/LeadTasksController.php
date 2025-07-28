@@ -29,6 +29,11 @@ class LeadTasksController extends Controller
 
     public function getLeadTasks(Request $request){
         $lead_tasks = LeadTask::with(['lead','assignUser']); 
+        if (!auth()->user()->hasRole('superadmin')) {
+            $user_ids = getUsersReportingToAuth();
+            $lead_ids = Lead::where('assign_to', $user_ids)->pluck('id');
+            $lead_tasks->where('assigned_to', $user_ids);
+        }
         $lead_tasks = $lead_tasks->orderBy('id','desc')->select(\DB::raw(with(new LeadTask)->getTable().'.*'))->groupBy('id');
         return DataTables::of($lead_tasks)
             ->editColumn('lead.company_name', function ($lead_task) {
@@ -59,8 +64,17 @@ class LeadTasksController extends Controller
                     return '<button title="Change Status" class="btn btn-sm btn-warning change_status" data-status="in_progress" data-id="'.$lead_task->id.'">In Progress</button>';
                 }
             })
+            ->editColumn('priority', function ($lead_task) {
+                if($lead_task->priority == 'high'){
+                    return '<span class="badge badge-danger">High</span>';
+                }else if($lead_task->priority == 'medium'){
+                    return '<span class="badge badge-warning">Medium</span>';
+                }else if($lead_task->priority == 'low'){
+                    return '<span class="badge badge-info">Low</span>';
+                }
+            })
            
-            ->rawColumns(['action','checkbox', 'status'])
+            ->rawColumns(['action','checkbox', 'status', 'priority'])
             ->make(true);
     }
 
@@ -72,6 +86,11 @@ class LeadTasksController extends Controller
         $page_result = ($page_number-1) * $results_per_page;
 
         $lead_tasks = LeadTask::with(['lead']); 
+        if (!auth()->user()->hasRole('superadmin')) {
+            $user_ids = getUsersReportingToAuth();
+            $lead_ids = Lead::where('assign_to', $user_ids)->pluck('id');
+            $lead_tasks->where('assigned_to', $user_ids);
+        }
         $lead_tasks = $lead_tasks->get();
         $data = $lead_tasks->map(function ($item, $key) {
 

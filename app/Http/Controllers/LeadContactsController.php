@@ -28,13 +28,18 @@ class LeadContactsController extends Controller
      */
     public function index(Request $request)
     {
-        abort_if(Gate::denies('lead_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        // abort_if(Gate::denies('lead_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         
         return view('lead-contacts.index');
     }
 
     public function getLeadContacts(Request $request){
         $lead_contacts = LeadContact::with(['lead']); 
+        if (!auth()->user()->hasRole('superadmin')) {
+            $user_ids = getUsersReportingToAuth();
+            $lead_ids = Lead::where('assign_to', $user_ids)->pluck('id');
+            $lead_contacts->where('lead_id', $lead_ids);
+        }
         $lead_contacts = $lead_contacts->select(\DB::raw(with(new LeadContact)->getTable().'.*'))->groupBy('id');
         return DataTables::of($lead_contacts)
             ->editColumn('lead.company_name', function ($lead_contact) {

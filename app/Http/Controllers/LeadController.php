@@ -89,7 +89,8 @@ class LeadController extends Controller
         }
         // dd(auth()->user()->hasRole('superadmin'));
         if (!auth()->user()->hasRole('superadmin')) {
-            $leads->where('assign_to', auth()->user()->id);
+            $user_ids = getUsersReportingToAuth();
+            $leads->where('assign_to', $user_ids);
         }
 
         $leads = $leads->orderBy('created_at', 'desc')->select(\DB::raw(with(new Lead)->getTable() . '.*'))->groupBy('id');
@@ -146,7 +147,16 @@ class LeadController extends Controller
                     }
                 }
             })
-            ->rawColumns(['action', 'company_name', 'checkbox', 'status'])
+            ->editColumn('others', function ($lead) {
+                $jsonData = '';
+                if(!empty($lead->others) && count($lead->others) > 0){
+                    foreach ($lead->others as $key => $value) {
+                        $jsonData .= "<strong>" . ucwords(str_replace('_', ' ', $key)) . ":</strong> " . $value . "<br>";
+                    }
+                }
+                return $jsonData;
+            })
+            ->rawColumns(['action', 'company_name', 'checkbox', 'status', 'others'])
             ->make(true);
     }
 
@@ -161,7 +171,11 @@ class LeadController extends Controller
         $page_number = intval($request->input('page_number'));
         $page_result = ($page_number - 1) * $results_per_page;
 
-        $leads = Lead::with(['contacts']);
+        $leads = Lead::with(['contacts', 'opportunities']);
+        if (!auth()->user()->hasRole('superadmin')) {
+            $user_ids = getUsersReportingToAuth();
+            $leads->where('assign_to', $user_ids);
+        }
 
         $datetime = $request->input('datetime');
         if ($datetime != "") {
@@ -231,7 +245,7 @@ class LeadController extends Controller
                 $item->close_duration ?? '',
                 $item->createdby->name ?? '',
                 '',
-                '', // Capacity (KW), Lead time, Sales Value
+                $item->opportunities->sum('amount') ?? '0',
             ];
 
             // ✅ Add 'others' values in consistent order
