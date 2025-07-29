@@ -12,6 +12,8 @@ class Address extends Model
 
     protected $fillable = [ 'active', 'address1', 'address2', 'landmark', 'locality', 'customer_id', 'user_id', 'country_id', 'state_id', 'district_id', 'city_id', 'pincode_id', 'zipcode', 'created_by', 'deleted_at', 'created_at', 'updated_at','model_type','model_id'];
 
+    protected $appends = ['full_address'];
+
     public function save_data($request)
     {
         try
@@ -74,4 +76,22 @@ class Address extends Model
     {
         $this->belongsTo(Customers::class, 'customer_id', 'id');
     }
+
+    public function getFullAddressAttribute()
+{
+    $parts = [
+        $this->address1,
+        $this->address2,
+        $this->landmark,
+        $this->locality,
+        optional($this->cityname)->city_name,
+        optional($this->districtname)->district_name,
+        optional($this->statename)->state_name,
+        optional($this->countryname)->country_name,
+        $this->zipcode ?: optional($this->pincodename)->pincode,
+    ];
+
+    // Filter empty parts and join with commas
+    return implode(', ', array_filter($parts));
+}
 }

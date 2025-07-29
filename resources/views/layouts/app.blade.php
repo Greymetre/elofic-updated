@@ -5,7 +5,7 @@
    <meta charset="utf-8">
    <meta name="viewport" content="width=device-width, initial-scale=1">
    <meta name="csrf-token" content="{{ csrf_token() }}">
-   <title>{{ config('app.name', 'Bediya Silver') }}</title>
+   <title>{{ config('app.name', 'Blueneba') }}</title>
    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
    <!-- CSS Files -->
@@ -939,8 +939,8 @@
                            <li class="nav-link-btn {{ request()->is('fields*') ? 'active' : '' }}">
                               <a class="hoveradd2" href="{{ url('fields') }}">
                                  <i class="material-icons icon">text_rotation_angleup</i>
-                                 <span>Servey Field</span>
-                                 <div class="d-none mobile_hide"> Servey Field</div>
+                                 <span>Survey Field</span>
+                                 <div class="d-none mobile_hide"> Survey Field</div>
                               </a>
                            </li>
                            @endif
@@ -2478,7 +2478,7 @@
       <nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top ">
          <div class="container-fluid" style="background: transparent; !important">
             <div class="new_demo">
-            <!-- <img class="rounded ml-2 iconimg" src="{!! url('/').'/'.asset('assets/img/companylogo.png') !!}" width="120"> -->
+            <img class="rounded ml-2 iconimg" alt="Blueneba" src="{!! url('/').'/'.asset('assets/img/bnt_logo.png') !!}?" width="120">
             <!-- <img class="rounded ml-2  iconimg" src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" width="100"> -->
          </div>
             <!-- <img src="{!! url('/').'/'.asset('assets/img/logo.png') !!}" width="50"> -->
