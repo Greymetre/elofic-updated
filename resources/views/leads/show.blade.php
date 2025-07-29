@@ -702,6 +702,11 @@
         border-color: transparent;
     }
 
+    button.btn.dropdown-toggle.btn-light {
+        padding: 5px !important;
+        width: 80px;
+    }
+
     </style>
     <div class="row">
         <div class="col-md-12">
@@ -769,8 +774,8 @@
                 {{strtoupper(substr($lead->company_name, 0, 1));}}
             </div>
             <div class="infomation-data">
-                <h3>{{$lead->company_name??''}} <span class="badge badge-pill badge-info">{{$lead->status_is?$lead->status_is->display_name:'Pending'}}</span> </h3>
-                <!-- <div class="btn-group kim" style="width: 120px;">
+                <!-- <h3>{{$lead->company_name??''}} <span class="badge badge-pill badge-info">{{$lead->status_is?$lead->status_is->display_name:'Pending'}}</span> </h3> -->
+                <h3 style="display: flex;align-items: baseline">{{$lead->company_name??''}}
                     <select name="status" id="status" class="form-control selectpicker">
                         <option value="0" {{$lead->status == 0 ? 'selected' : ''}}>Pending</option>
                         @if($status->count() > 0)
@@ -779,7 +784,7 @@
                         @endforeach
                         @endif
                     </select>
-                </div>  -->
+                </h3>
                 <p>{{$address_data??''}}</p>
                 <ul>
                     <li>
@@ -2096,48 +2101,48 @@ $('#frmLeadOpportunitiesCreate #o_amount').val(opportunity_data.amount);
         });
     }
 
-//     $('#status').on('change', function () {
-//     alert(this.value);
-//     var status = this.value;
-//     Swal.fire({
-//         title: 'Are you sure?',
-//         text: "You won't be able to revert this!",
-//         icon: 'warning',
-//         showCancelButton: true,
-//         confirmButtonColor: '#3085d6',
-//         cancelButtonColor: '#d33',
-//         confirmButtonText: 'Yes, change it!'
-//     }).then((result) => {
-//         if (result.value) {
-//             $.ajax({
-//                 url: "{{ route('leads.changeStatus') }}",
-//                 method: 'POST',
-//                 data: {
-//                     lead_id: '{{$lead->id}}',
-//                     status: status,
-//                     _token: '{{ csrf_token() }}'
-//                 },
-//                 success: function (res) {
-//                     if (res.status == 'success') {
-//                         Swal.fire({
-//                             icon: 'success',
-//                             title: res.message,
-//                             showConfirmButton: true,
-//                             timer: 2000
-//                         })
-//                     }else{
-//                         Swal.fire({
-//                             icon: 'error',
-//                             title: res.message,
-//                             showConfirmButton: true,
-//                             timer: 2000
-//                         })
-//                     }
-//                 }
-//             });
-//         }
-//     });
-// });
+    $('#status').on('change', function () {
+    // alert(this.value);
+    var status = this.value;
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, change it!'
+    }).then((result) => {
+        if (result.value) {
+            $.ajax({
+                url: "{{ route('leads.changeStatus') }}",
+                method: 'POST',
+                data: {
+                    lead_id: '{{$lead->id}}',
+                    status: status,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function (res) {
+                    if (res.status == 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: res.message,
+                            showConfirmButton: true,
+                            timer: 2000
+                        })
+                    }else{
+                        Swal.fire({
+                            icon: 'error',
+                            title: res.message,
+                            showConfirmButton: true,
+                            timer: 2000
+                        })
+                    }
+                }
+            });
+        }
+    });
+});
 
 function activateNotesTab() {
         // Show the form
