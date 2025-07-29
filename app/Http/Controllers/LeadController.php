@@ -149,6 +149,9 @@ class LeadController extends Controller
             })
             ->editColumn('others', function ($lead) {
                 $jsonData = '';
+                if(!is_array($lead->others)){
+                    $lead->others = json_decode($lead->others, true); 
+                }
                 if(!empty($lead->others) && count($lead->others) > 0){
                     foreach ($lead->others as $key => $value) {
                         $jsonData .= "<strong>" . ucwords(str_replace('_', ' ', $key)) . ":</strong> " . $value . "<br>";

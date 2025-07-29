@@ -1597,7 +1597,7 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
 </div>
 <div class="tab-pane fade" id="others" role="tabpanel">
     @if($lead->others)
-    @foreach($lead->others as $key => $value)
+    @foreach(json_decode($lead->others, true) as $key => $value)
     <div class="card-header">
         <p class="hed m-0">{{ucwords(str_replace('_', ' ', $key))}}</p>
     </div>

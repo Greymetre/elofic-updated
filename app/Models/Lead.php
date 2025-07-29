@@ -21,11 +21,6 @@ class Lead extends Model implements HasMedia
         'others',
         'created_by',
     ];
-
-    protected $casts = [
-        'others' => 'array',
-    ];
-
     
     public function contacts(){
         return $this->hasMany(LeadContact::class);

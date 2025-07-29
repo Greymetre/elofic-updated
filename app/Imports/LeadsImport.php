@@ -35,7 +35,7 @@ class LeadsImport implements ToCollection, WithValidation, WithHeadingRow, WithB
     public function collection(Collection $rows)
     {
         foreach ($rows as $row) {
-
+            
             if (isset($row['lead_generation_date']) && is_numeric($row['lead_generation_date'])) {
                 $excelDate = $row['lead_generation_date'] - 25569; // Adjust for Excel's epoch
                 $unixTimestamp = strtotime('+' . $excelDate . ' days', strtotime('1970-01-01'));
@@ -64,6 +64,7 @@ class LeadsImport implements ToCollection, WithValidation, WithHeadingRow, WithB
             $otherData = collect($row)->filter(function ($value, $key) use ($expectedKeys) {
                 return !in_array($key, $expectedKeys) && !is_null($key) && $key !== '' && !is_null($value) && $value !== '';
             })->toArray();
+            $otherData = json_encode($otherData, JSON_UNESCAPED_UNICODE);
             $lead = Lead::create([
                 'company_name' => $row['firm_name'],
                 'status' => $status,
@@ -71,7 +72,7 @@ class LeadsImport implements ToCollection, WithValidation, WithHeadingRow, WithB
                 'lead_generation_date' => $row['lead_generation_date'] ?? now(),
                 'lead_type' => $row['lead_type'] ?? '',
                 'assign_to' => User::where('name', $row['assignee'])->first()->id ?? null,
-                'others' => json_encode($otherData),
+                'others' => $otherData,
             ]);
             if ($lead->id) {
                 Address::create([
