@@ -138,9 +138,16 @@ class LeadController extends Controller
 
             ->editColumn('status', function ($lead) {
                 if ($lead->status == '0') {
-                    return "<span class='badge badge-warning'>Pending</span>";
+                    return "<span class='badge badge-warning' style='background-color: orange'>Pending</span>";
                 } else {
                     if ($lead->status_is) {
+                        if($lead->status_is->status_name == 'Hot'){
+                            return "<span class='badge badge-danger'>" . $lead->status_is->status_name . "</span>";
+                        }else if($lead->status_is->status_name == 'Warm'){
+                            return "<span class='badge badge-warning' style='background-color: yellow;color: black'>" . $lead->status_is->status_name . "</span>";
+                        }else if($lead->status_is->status_name == 'Cold'){
+                            return "<span class='badge badge-success'>" . $lead->status_is->status_name . "</span>";
+                        }
                         return "<span class='badge badge-success'>" . $lead->status_is->status_name . "</span>";
                     } else {
                         return "-";
@@ -148,8 +155,8 @@ class LeadController extends Controller
                 }
             })
             ->editColumn('others', function ($lead) {
-                $jsonData = '';
                 if(!is_array($lead->others)){
+                    $jsonData = '';
                     $lead->others = json_decode($lead->others, true); 
                 }
                 if(!empty($lead->others) && count($lead->others) > 0){
