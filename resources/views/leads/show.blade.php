@@ -704,7 +704,10 @@
 
     button.btn.dropdown-toggle.btn-light {
         padding: 5px !important;
-        width: 80px;
+        width: 95%;
+    }
+    .dropdown.bootstrap-select.form-control {
+        width: 30% !important;
     }
 
     </style>
@@ -775,7 +778,7 @@
             </div>
             <div class="infomation-data">
                 <!-- <h3>{{$lead->company_name??''}} <span class="badge badge-pill badge-info">{{$lead->status_is?$lead->status_is->display_name:'Pending'}}</span> </h3> -->
-                <h3 style="display: flex;align-items: baseline">{{$lead->company_name??''}}
+                <h3 style="display: flex;align-items: center;justify-content: space-between">{{$lead->company_name??''}}
                     <select name="status" id="status" class="form-control selectpicker">
                         <option value="0" {{$lead->status == 0 ? 'selected' : ''}}>Pending</option>
                         @if($status->count() > 0)
@@ -785,6 +788,7 @@
                         @endif
                     </select>
                 </h3>
+                <a href="{{$lead->company_url??''}}" target="_blank">{{$lead->company_url??''}}</a>
                 <p>{{$address_data??''}}</p>
                 <ul>
                     <li>

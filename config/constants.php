@@ -21,6 +21,14 @@ return [
         '1' => 'Gift',
         '2' => 'Neft'
     ],
+    'LEAD_SOURCES' => [
+        'Google' => 'Google',
+        'Indiamart' => 'Indiamart',
+        'Justdial' => 'Justdial',
+        'Instagram' => 'Instagram',
+        'Facebook' => 'Facebook',
+        'Self' => 'Self',
+    ],
     'customer_roles' => [
         29,
         40,

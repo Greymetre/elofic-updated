@@ -238,25 +238,25 @@
     }
 
     span.brig {
-    font-size: 12px;
-    color: #3777B5;
-    font-weight: 600;
-    background: #D7F4FF;
-    border-radius: 5px;
-    width: 40px;
-    height: 27px;
-    display: inline-flex;
-    text-align: center;
-    padding: 0px 9px;
-}
+      font-size: 12px;
+      color: #3777B5;
+      font-weight: 600;
+      background: #D7F4FF;
+      border-radius: 5px;
+      width: 40px;
+      height: 27px;
+      display: inline-flex;
+      text-align: center;
+      padding: 0px 9px;
+    }
 
     .btn-group.kim button {
-        border-radius: 50px;
-        padding: 5px 20px;
-        text-transform: capitalize;
-        background: linear-gradient(45deg, #3860a4 0%, #3694cc 100%) !important;
-        color: #fff !important;
-        border-color: transparent;
+      border-radius: 50px;
+      padding: 5px 20px;
+      text-transform: capitalize;
+      background: linear-gradient(45deg, #3860a4 0%, #3694cc 100%) !important;
+      color: #fff !important;
+      border-color: transparent;
     }
   </style>
   <div class="row">
@@ -267,17 +267,17 @@
              <i class="material-icons">perm_identity</i> 
           </div> -->
           <h4 class="card-title ">Leads<br><!--<span class="brig">123</span><br>-->
-              <div class="btn-group kim" style="width: 120px;">
-                <select name="status" id="status" class="form-control selectpicker">
-                  <option value="">All</option>
-                  <option value="0">Pending</option>
-                  @if($status->count() > 0)
-                  @foreach($status as $stat)
-                  <option value="{{$stat['id']}}"> {{$stat['display_name']}} </option>
-                  @endforeach
-                  @endif
-                  </select>
-              </div> 
+            <div class="btn-group kim" style="width: 120px;">
+              <select name="status" id="status" class="form-control selectpicker">
+                <option value="">All</option>
+                <option value="0">Pending</option>
+                @if($status->count() > 0)
+                @foreach($status as $stat)
+                <option value="{{$stat['id']}}"> {{$stat['display_name']}} </option>
+                @endforeach
+                @endif
+              </select>
+            </div>
             <span class="">
               <div class="pream_entry">
 
@@ -290,12 +290,12 @@
 
 
                 <div class="both_btn">
-                  <button type="button" data-toggle="modal" data-target="#addLeadModel" class="btn btn-primary btn-sm btn-icon-split float-right">
+                <a href="{{route('leads.create')}}"><button type="button" class="btn btn-primary btn-sm btn-icon-split float-right">
                     <span class="icon text-white-50">
                       <i class="material-icons">add_circle</i>
                     </span>
-                    <span class="text">Add Leads</span>
-                  </button>
+                    <span class="text">Add Lead</span>
+                  </button></a>
 
                   <a href="{{route('leads-exportLeads')}}" class="btn exportbtn btn-primary btn-sm btn-icon-split float-right" id="export_button">
                     <span class="icon text-white-50">
@@ -450,63 +450,170 @@
     </div>
   </div>
   <!--  -->
-  <div class="modal fade" id="addLeadModel" role="dialog">
-    <div class="modal-dialog">
-
-      <!-- Modal content-->
-      <form method="POST"
-        action="{{ route('leads.store') }}" class="form-horizontal" id="frmLeadsCreate" enctype="multipart/form-data">
+  {{-- Add New Lead Modal --}}
+  <div class="modal fade" id="addLeadModel" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <form method="POST" action="{{ route('leads.store') }}" id="frmLeadsCreate" enctype="multipart/form-data" class="w-100">
         @csrf
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal">&times;</button>
-            <h4 class="modal-title">New Lead</h4>
+
+        <div class="modal-content lead-modal">
+          {{-- Header --}}
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title font-weight-bold text-uppercase mb-0">ADD NEW LEAD</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
           </div>
 
+          {{-- Body --}}
+          <div class="modal-body pt-3">
 
-          <div class="modal-body">
-            <div class="row">
-              <div class="col-md-6 pr-1 pl-1">
-                <div class="col-md-12 form-group">
-                  <label for="company_name">Company Name <span style="color:red">*</span></label>
-                  <input type="text" name="company_name" id="company_name" value="{{ old('company_name','') }}" class="form-control" placeholder="Company Name">
-                  @if($errors->has('company_name'))
-                  <p class="help-block">
-                    <strong>{{ $errors->first('company_name') }}</strong>
-                  </p>
+            {{-- Lead Type --}}
+            <div class="form-group mb-2">
+              <select name="status" id="status" class="custom-select" required>
+                <option value="" disabled selected>Lead Type</option>
+                @foreach($status as $opt)
+                <option value="{{ $opt->id }}" {{ old('status')==$opt->id ? 'selected' : '' }}>{{ $opt->display_name }}</option>
+                @endforeach
+              </select>
+              @error('status') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
+            </div>
+
+            {{-- Firm Name --}}
+            <div class="form-group mb-2">
+              <input type="text" name="company_name" id="company_name" value="{{ old('company_name') }}"
+                class="form-control form-control-lg" placeholder="Firm Name" required>
+              @error('company_name') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
+            </div>
+
+            {{-- Customer Name --}}
+            <div class="form-group mb-2">
+              <input type="text" name="contact_name" id="contact_name" value="{{ old('contact_name') }}"
+                class="form-control form-control-lg" placeholder="Customer Name" required>
+              @error('contact_name') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
+            </div>
+
+            {{-- Mobile --}}
+            <div class="form-group mb-2">
+              <input type="tel" name="phone_number" id="phone_number" value="{{ old('phone_number') }}"
+                class="form-control form-control-lg" placeholder="Mobile Number" maxlength="15" required>
+              @error('phone_number') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
+            </div>
+
+            {{-- Email --}}
+            <div class="form-group mb-2">
+              <input type="email" name="email" id="email" value="{{ old('email') }}"
+                class="form-control form-control-lg" placeholder="Email Id">
+              @error('email') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
+            </div>
+
+            {{-- Address --}}
+            <div class="form-group mb-2">
+              <input type="text" name="address" id="address" value="{{ old('address') }}"
+                class="form-control form-control-lg" placeholder="Address">
+              @error('address') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
+            </div>
+
+            {{-- Pin / City --}}
+            <div class="form-row">
+              <div class="form-group col-6 mb-2">
+                <select class="form-control pincode select2" name="pincode_id" id="pincode_id" onchange="getAddressData()" style="width: 100%;">
+                  <option value="">Select {!! trans('panel.global.pincode') !!}</option>
+                  @if(@isset($pincodes ))
+                  @foreach($pincodes as $pincode)
+                  <option value="{!! $pincode['id'] !!}" @if(isset($address) && $address->pincode_id==$pincode['id']) selected @endif >{!! $pincode['pincode'] !!}</option>
+                  @endforeach
                   @endif
-                </div>
+                </select>
+                @error('pin_code') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
               </div>
-              <div class="col-md-6 pr-1 pl-1">
-                <div class="col-md-12 form-group">
-                  <label for="contact_name">Contact Name <span style="color:red">*</span></label>
-                  <input type="text" name="contact_name" id="contact_name" value="{{ old('contact_name','') }}" class="form-control" placeholder="Contact Name">
-                  @if($errors->has('contact_name'))
-                  <p class="help-block">
-                    <strong>{{ $errors->first('contact_name') }}</strong>
-                  </p>
+              <div class="form-group col-6 mb-2">
+                <select class="form-control select2 city" name="city_id" id="city_id" onchange="getPincodeList()" style="width: 100%;">
+                  @if(isset($address) && $address->city_id)
+                  <option value="{!!  $address->city_id !!}">{!! $address->cityname->city_name??'' !!}</option>
+                  @else
+                  <option value="">Select {!! trans('panel.global.city') !!}</option>
                   @endif
-                </div>
-              </div>
-              <div class="col-md-12" id="lead_exist_data">
+                </select>
+                @error('city') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
               </div>
             </div>
 
+            {{-- State / State --}}
+            <div class="form-row">
+              <div class="form-group col-6 mb-2">
+                <select class="form-control select2 district" name="district_id" id="district_id" onchange="getCityList()" style="width: 100%;">
+                  @if(isset($address) && $address->district_id)
+                  <option value="{!!  $address->district_id !!}">{!! $address->cityname->city_name??'' !!}</option>
+                  @else
+                  <option value="">Select {!! trans('panel.global.district') !!}</option>
+                  @endif
+                </select>
+                @error('state') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
+              </div>
+              <div class="form-group col-6 mb-2">
+                <select class="form-control select2 state" name="state_id" id="state_id" onchange="getDistrictList()" style="width: 100%;">
+                  @if(isset($address) && $address->state_id)
+                  <option value="{!!  $address->state_id !!}">{!! $address->statename->state_name??'' !!}</option>
+                  @else
+                  <option value="">Select {!! trans('panel.global.state') !!}</option>
+                  @endif
+                </select>
+                @error('state_alt') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
+              </div>
+            </div>
+
+            {{-- Other / Lead Source --}}
+            <div class="form-row">
+              <div class="form-group col-6 mb-2">
+                <input type="text" name="other" id="other" value="{{ old('other') }}"
+                  class="form-control form-control-lg" placeholder="Other">
+                @error('other') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
+              </div>
+              <div class="form-group col-6 mb-2">
+                <select name="lead_source" id="lead_source" class="custom-select" required>
+                  <option value="" disabled selected>Lead Source</option>
+                  @foreach($lead_sources as $src)
+                  <option value="{{ $src }}" {{ old('lead_source')==$src ? 'selected' : '' }}>{{ $src }}</option>
+                  @endforeach
+                </select>
+                @error('lead_source') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
+              </div>
+            </div>
+
+            {{-- Assigned To --}}
+            <div class="form-group mb-2">
+              <select name="assign_to" id="assign_to" class="custom-select" required>
+                <option value="" disabled selected>Assigned To</option>
+                @foreach($users as $user)
+                <option value="{{ $user->id }}" {{ old('assign_to')==$user->id ? 'selected' : '' }}>{{ $user->name }}</option>
+                @endforeach
+              </select>
+              @error('assign_to') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
+            </div>
+
+            {{-- Note --}}
+            <div class="form-group mb-2">
+              <textarea name="note" id="note" rows="3" class="form-control" placeholder="Note">{{ old('note') }}</textarea>
+              @error('note') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
+            </div>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-danger mr-2" data-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-default">Create Lead</button>
+
+          {{-- Footer --}}
+          <div class="modal-footer border-0">
+            <button type="submit" class="btn btn-info btn-block lead-submit">SUBMIT</button>
           </div>
         </div>
       </form>
     </div>
   </div>
+
   <!--  -->
   <link href="{{ url('/').'/'.asset('vendor/bootstrap-daterange/daterangepicker.css') }}" rel="stylesheet">
   <script src="{{ url('/').'/'.asset('assets/js/jquery.custom.js') }}"></script>
   <!-- Load jQuery and moment.js -->
-  <script src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script> -->
 
   <script src="{{ url('/').'/'.asset('vendor/bootstrap-daterange/daterangepicker.min.js') }}"></script>
 
@@ -537,15 +644,15 @@
         $('.lead-checkbox').prop('checked', this.checked);
         let selectedIds = [];
 
-          $('.checkbox_cls:checked').each(function() {
-              selectedIds.push($(this).val());
-          });
+        $('.checkbox_cls:checked').each(function() {
+          selectedIds.push($(this).val());
+        });
 
-          if (selectedIds.length > 0) {
-              $('.ass_del').removeClass('d-none');
-          } else {
-              $('.ass_del').addClass('d-none');
-          }
+        if (selectedIds.length > 0) {
+          $('.ass_del').removeClass('d-none');
+        } else {
+          $('.ass_del').addClass('d-none');
+        }
       });
 
 
@@ -679,117 +786,116 @@
     }
 
     $(document).on('change', '.checkbox_cls', function() {
-          let selectedIds = [];
+      let selectedIds = [];
 
-          $('.checkbox_cls:checked').each(function() {
-              selectedIds.push($(this).val());
-          });
-
-          if (selectedIds.length > 0) {
-              $('.ass_del').removeClass('d-none');
-          } else {
-              $('.ass_del').addClass('d-none');
-          }
+      $('.checkbox_cls:checked').each(function() {
+        selectedIds.push($(this).val());
       });
 
-      $('#user_id').on('change', function() {
-        var user_id = $(this).val();
-        let selectedIds = [];
-        $('.checkbox_cls:checked').each(function() {
-          selectedIds.push($(this).val()); // or $(this).data('id')
-        });
-        if (selectedIds.length > 0) {
-          Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't assign this leads!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes'
-          }).then((result) => {
-            if (result.value) {
-              $.ajax({
-                url: "{{ route('leads.assignLead') }}",
-                method: 'POST',
-                data: {
-                  lead_id: selectedIds,
-                  user_id: user_id,
-                  _token: '{{ csrf_token() }}'
-                },
-                success: function(res) {
-                  if (res.status == 'success') {
-                    getLeads();
-                    $('.ass_del').addClass('d-none');
-                    Swal.fire({
-                      icon: 'success',
-                      title: res.message
-                    });
-                  }else {
-                    Swal.fire({
-                      icon: 'error',
-                      title: res.message
-                    });
-                  }
+      if (selectedIds.length > 0) {
+        $('.ass_del').removeClass('d-none');
+      } else {
+        $('.ass_del').addClass('d-none');
+      }
+    });
+
+    $('#user_id').on('change', function() {
+      var user_id = $(this).val();
+      let selectedIds = [];
+      $('.checkbox_cls:checked').each(function() {
+        selectedIds.push($(this).val()); // or $(this).data('id')
+      });
+      if (selectedIds.length > 0) {
+        Swal.fire({
+          title: 'Are you sure?',
+          text: "You won't assign this leads!",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes'
+        }).then((result) => {
+          if (result.value) {
+            $.ajax({
+              url: "{{ route('leads.assignLead') }}",
+              method: 'POST',
+              data: {
+                lead_id: selectedIds,
+                user_id: user_id,
+                _token: '{{ csrf_token() }}'
+              },
+              success: function(res) {
+                if (res.status == 'success') {
+                  getLeads();
+                  $('.ass_del').addClass('d-none');
+                  Swal.fire({
+                    icon: 'success',
+                    title: res.message
+                  });
+                } else {
+                  Swal.fire({
+                    icon: 'error',
+                    title: res.message
+                  });
                 }
-          })
+              }
+            })
           }
         })
-        } else {
-          // None selected
-          $('.ass_del').addClass('d-none');
-          // $('#deleteButton').prop('disabled', true);
-        }
-      });
+      } else {
+        // None selected
+        $('.ass_del').addClass('d-none');
+        // $('#deleteButton').prop('disabled', true);
+      }
+    });
 
-      $('#del_btn').on('click', function() {
-        let selectedIds = [];
-        $('.checkbox_cls:checked').each(function() {
-          selectedIds.push($(this).val()); // or $(this).data('id')
-        });
-        if (selectedIds.length > 0) {
-          Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't delete this leads!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, delete it!'
-          }).then((result) => {
-            if (result.value) {
-              $.ajax({
-                url: "{{ route('leads.deleteLead') }}",
-                method: 'POST',
-                data: {
-                  lead_id: selectedIds,
-                  _token: '{{ csrf_token() }}'
-                },
-                success: function(res) {
-                  if (res.status == 'success') {
-                    getLeads();
-                    $('.ass_del').addClass('d-none');
-                    Swal.fire({
-                      icon: 'success',
-                      title: res.message
-                    });
-                  }else {
-                    Swal.fire({
-                      icon: 'error',
-                      title: res.message
-                    });
-                  }
+    $('#del_btn').on('click', function() {
+      let selectedIds = [];
+      $('.checkbox_cls:checked').each(function() {
+        selectedIds.push($(this).val()); // or $(this).data('id')
+      });
+      if (selectedIds.length > 0) {
+        Swal.fire({
+          title: 'Are you sure?',
+          text: "You won't delete this leads!",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+          if (result.value) {
+            $.ajax({
+              url: "{{ route('leads.deleteLead') }}",
+              method: 'POST',
+              data: {
+                lead_id: selectedIds,
+                _token: '{{ csrf_token() }}'
+              },
+              success: function(res) {
+                if (res.status == 'success') {
+                  getLeads();
+                  $('.ass_del').addClass('d-none');
+                  Swal.fire({
+                    icon: 'success',
+                    title: res.message
+                  });
+                } else {
+                  Swal.fire({
+                    icon: 'error',
+                    title: res.message
+                  });
                 }
-          })
+              }
+            })
           }
         })
-        } else {
-          // None selected
-          $('.ass_del').addClass('d-none');
-          // $('#deleteButton').prop('disabled', true);
-        }
-      });
-
+      } else {
+        // None selected
+        $('.ass_del').addClass('d-none');
+        // $('#deleteButton').prop('disabled', true);
+      }
+    });
   </script>
 
 </x-app-layout>

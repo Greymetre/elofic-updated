@@ -57,7 +57,8 @@ class LeadsImport implements ToCollection, WithValidation, WithHeadingRow, WithB
                 'address',
                 'lead_type',
                 'assignee',
-                'note'
+                'note',
+                'website'
             ];
 
             // Step 1: Collect other (unexpected) keys without null/empty key or value
@@ -67,10 +68,11 @@ class LeadsImport implements ToCollection, WithValidation, WithHeadingRow, WithB
             $otherData = json_encode($otherData, JSON_UNESCAPED_UNICODE);
             $lead = Lead::create([
                 'company_name' => $row['firm_name'],
+                'company_url' => $row['website'],
                 'status' => $status,
                 'created_by' => Auth::id(),
                 'lead_generation_date' => $row['lead_generation_date'] ?? now(),
-                'lead_type' => $row['lead_type'] ?? '',
+                'lead_source' => $row['lead_source'],
                 'assign_to' => User::where('name', $row['assignee'])->first()->id ?? null,
                 'others' => $otherData,
             ]);
@@ -111,7 +113,6 @@ class LeadsImport implements ToCollection, WithValidation, WithHeadingRow, WithB
         return [
             'firm_name' => 'required',
             'customer_name' => 'required',
-            'customer_number' => 'required',
             'pincode' => 'nullable|exists:pincodes,pincode',
             'city' => 'nullable|exists:cities,city_name',
             'district' => 'nullable|exists:districts,district_name',

@@ -24,6 +24,7 @@ use App\Models\Pincode;
 use App\Models\Country;
 use App\Models\Address;
 use App\Models\OpportunitieStatus;
+use App\Models\State;
 use App\Models\Status;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
@@ -37,11 +38,20 @@ class LeadController extends Controller
     public function index(Request $request)
     {
         abort_if(Gate::denies('lead_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $userids = getUsersReportingToAuth();
         $users = User::where('active', '=', 'Y')->whereDoesntHave('roles', function ($query) {
             $query->whereIn('id', config('constants.customer_roles'));
-        })->select('id', 'name')->orderBy('id')->get();
+        })->where(function ($query) use ($userids) { if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) { $query->whereIn('id', $userids); } })->select('id', 'name')->orderBy('id')->get();
         $status = Status::where('module', 'LeadStatus')->where('active', 'Y')->get();
-        return view('leads.index', compact('users', 'status'));
+        $lead_sources = config('constants.LEAD_SOURCES');
+        $pincodes = Pincode::where('active', '=', 'Y')
+            ->whereHas('assigncitiesusers', function ($query) use ($userids) {
+                if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                    $query->whereIn('userid', $userids);
+                }
+            })
+            ->select('id', 'pincode')->orderBy('id', 'desc')->get();
+        return view('leads.index', compact('users', 'status', 'lead_sources', 'pincodes'));
     }
 
     public function getLeads(Request $request)
@@ -420,7 +430,16 @@ class LeadController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create(Request $request) {}
+    public function create(Request $request) {
+        $userids = getUsersReportingToAuth();
+        $users = User::where('active', '=', 'Y')->whereDoesntHave('roles', function ($query) {
+            $query->whereIn('id', config('constants.customer_roles'));
+        })->where(function ($query) use ($userids) { if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) { $query->whereIn('id', $userids); } })->select('id', 'name')->orderBy('id')->get();
+        $status = Status::where('module', 'LeadStatus')->where('active', 'Y')->get();
+        $lead_sources = config('constants.LEAD_SOURCES');
+        $pincodes = Pincode::where('active', '=', 'Y')->select('id', 'pincode')->orderBy('id', 'desc')->get();
+        return view('leads.create', compact('users', 'status', 'lead_sources', 'pincodes'));
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -433,14 +452,56 @@ class LeadController extends Controller
         $rules = [
             'company_name' => 'required',
             'contact_name' => 'required',
+            'phone_number' => 'required',
         ];
 
         $request->validate($rules);
-        $data = $request->all();
-        $created_by = Auth::id();
-        $lead = Lead::create(['company_name' => $request->company_name, 'created_by' => $created_by]);
-        $category = LeadContact::create(['name' => $request->contact_name, 'lead_id' => $lead->id, 'created_by' => $created_by]);
-        $request->session()->flash('message_success', __('Lead Added successfully.'));
+        if($request->other){
+            $otherData = [
+                'others' => $request->other,
+            ];
+            $otherData = json_encode($otherData, JSON_UNESCAPED_UNICODE);
+        }else{
+            $otherData = null;
+        }
+            $lead = Lead::create([
+                'company_name' => $request->company_name,
+                'company_url' => $request->company_url,
+                'status' => $request->status ?? 0,
+                'created_by' => Auth::id(),
+                'lead_generation_date' => date('Y-m-d'),
+                'lead_source' => $request->lead_source,
+                'assign_to' => $request->assign_to ?? null,
+                'others' => $otherData,
+            ]);
+            if ($lead->id) {
+                Address::create([
+                    'model_type' => 'App\Models\Lead',
+                    'model_id' => $lead->id,
+                    'address1' => $request->address ?? 'N/A',
+                    'country_id' => 1,
+                    'pincode_id' => $request->pincode_id ?? null,
+                    'state_id' => $request->state_id ?? null,
+                    'city_id' => $request->city_id ?? null,
+                    'district_id' => $request->district_id ?? null,
+                    'created_by' => Auth::id()
+                ]);
+                $category = LeadContact::create([
+                    'name' => $request->contact_name,
+                    'phone_number' => $request->phone_number,
+                    'email' => $request->email,
+                    'lead_source' => $request->lead_source,
+                    'lead_id' => $lead->id,
+                    'created_by' => Auth::id()
+                ]);
+                if (isset($request->note) && !empty($request->note)) {
+                    $note = LeadNote::create([
+                        'note' => $request->note,
+                        'lead_id' => $lead->id,
+                        'created_by' => Auth::id()
+                    ]);
+                }
+            }
         return redirect()->route('leads.show', $lead);
     }
 

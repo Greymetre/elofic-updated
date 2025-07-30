@@ -17,6 +17,7 @@ class Lead extends Model implements HasMedia
         'address_id',
         'status',
         'assign_to',
+        'lead_source',
         'lead_generation_date',
         'others',
         'created_by',
